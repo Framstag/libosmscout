@@ -87,83 +87,12 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_service"]=30.0;
 }
 
-static bool ParametrizeProfileForFoot(const osmscout::TypeConfig& typeConfig,
-                                      osmscout::AbstractRoutingProfile& routingProfile)
-{
-  routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleFoot);
-  routingProfile.SetVehicleMaxSpeed(5.0);
-
-  for (osmscout::TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-    if (!typeConfig.GetTypeInfo(typeId).CanRouteFoot()) {
-      continue;
-    }
-
-    //std::cout << "Adding type " << typeConfig.GetTypeInfo(typeId).GetName() << " to foot routing profile " << std::endl;
-
-    routingProfile.AddType(typeId,5.0);
-  }
-
-  return true;
-}
-
-static bool ParametrizeProfileForBicycle(const osmscout::TypeConfig& typeConfig,
-                                         osmscout::AbstractRoutingProfile& routingProfile)
-{
-  routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleBicylce);
-  routingProfile.SetVehicleMaxSpeed(20.0);
-
-  for (osmscout::TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-    if (!typeConfig.GetTypeInfo(typeId).CanRouteBicycle()) {
-      continue;
-    }
-
-    //std::cout << "Adding type " << typeConfig.GetTypeInfo(typeId).GetName() << " to bicycle routing profile " << std::endl;
-
-    routingProfile.AddType(typeId,20.0);
-  }
-
-  return true;
-}
-
-static bool ParametrizeProfileForCar(const osmscout::TypeConfig& typeConfig,
-                                     osmscout::AbstractRoutingProfile& routingProfile)
-{
-  routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleCar);
-  routingProfile.SetVehicleMaxSpeed(160.0);
-
-  bool                         everythingResolved=true;
-  std::map<std::string,double> speedMap;
-
-  GetCarSpeedTable(speedMap);
-
-  for (osmscout::TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-    if (!typeConfig.GetTypeInfo(typeId).CanRouteCar()) {
-      continue;
-    }
-
-    std::map<std::string,double>::const_iterator speed=speedMap.find(typeConfig.GetTypeInfo(typeId).GetName());
-
-    if (speed==speedMap.end()) {
-      std::cerr << "No speed for type '" << typeConfig.GetTypeInfo(typeId).GetName() << "' defined!" << std::endl;
-      everythingResolved=false;
-
-      continue;
-    }
-
-    //std::cout << "Adding type " << typeConfig.GetTypeInfo(typeId).GetName() << " to car routing profile " << std::endl;
-
-    routingProfile.AddType(typeId,speed->second);
-  }
-
-  return everythingResolved;
-}
-
 static bool LookupClosedNodeAtLocation(osmscout::Database& database,
                                        const std::string& location,
                                        const std::string& area,
                                        double lat,
                                        double lon,
-                                       osmscout::AbstractRoutingProfile::Vehicle vehicle,
+                                       osmscout::AbstractRoutingProfile& profile,
                                        std::string& locationDesc,
                                        osmscout::ObjectFileRef& object,
                                        size_t& nodeIndex)
@@ -179,13 +108,13 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
                                         RESULT_SET_MAX_SIZE,
                                         limitReached,
                                         false)) {
-    std::cerr << "Error while accessing database, quitting..." << std::endl;
-    return 1;
+    std::cerr << "Error while accessing database!" << std::endl;
+    return false;
   }
 
   if (limitReached) {
-    std::cerr << "To many hits for area, quitting..." << std::endl;
-    return 1;
+    std::cerr << "To many hits for area!." << std::endl;
+    return false;
   }
 
   for (std::list<osmscout::AdminRegion>::const_iterator area=areas.begin();
@@ -200,15 +129,13 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
                                          RESULT_SET_MAX_SIZE,
                                          limitReached,
                                          false)) {
-        std::cerr << "Error while accessing database, quitting..." << std::endl;
-        database.Close();
-        return 1;
+        std::cerr << "Error while accessing database!" << std::endl;
+        return false;
       }
 
       if (limitReached) {
-        std::cerr << "To many hits for area, quitting..." << std::endl;
-        database.Close();
-        return 1;
+        std::cerr << "To many hits for area!" << std::endl;
+        return false;
       }
     }
 
@@ -223,23 +150,25 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
           osmscout::AreaRef tmpArea;
 
           if (database.GetAreaByOffset(reference->GetFileOffset(),tmpArea)) {
-            if (tmpArea->rings.size()==1) {
-              for (size_t i=0; i<tmpArea->rings[0].nodes.size(); i++) {
-                double distance=sqrt((tmpArea->rings[0].nodes[i].GetLat()-lat)*(tmpArea->rings[0].nodes[i].GetLat()-lat)+
-                                     (tmpArea->rings[0].nodes[i].GetLon()-lon)*(tmpArea->rings[0].nodes[i].GetLon()-lon));
+            if (!profile.CanUse(tmpArea)) {
+              continue;
+            }
 
-                if (distance<minDistance) {
-                  minDistance=distance;
+            for (size_t i=0; i<tmpArea->rings[0].nodes.size(); i++) {
+              double distance=sqrt((tmpArea->rings[0].nodes[i].GetLat()-lat)*(tmpArea->rings[0].nodes[i].GetLat()-lat)+
+                                   (tmpArea->rings[0].nodes[i].GetLon()-lon)*(tmpArea->rings[0].nodes[i].GetLon()-lon));
 
-                  locationDesc=location->name;
+              if (distance<minDistance) {
+                minDistance=distance;
 
-                  if (!location->path.empty()) {
-                    locationDesc+=" ("+osmscout::StringListToString(location->path)+")";
-                  }
+                locationDesc=location->name;
 
-                  object.Set(tmpArea->GetFileOffset(),osmscout::refArea);
-                  nodeIndex=i;
+                if (!location->path.empty()) {
+                  locationDesc+=" ("+osmscout::StringListToString(location->path)+")";
                 }
+
+                object.Set(tmpArea->GetFileOffset(),osmscout::refArea);
+                nodeIndex=i;
               }
             }
           }
@@ -248,29 +177,13 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
           osmscout::WayRef tmpWay;
 
           if (database.GetWayByOffset(reference->GetFileOffset(),tmpWay)) {
-
-            switch (vehicle) {
-            case osmscout::AbstractRoutingProfile::vehicleFoot:
-              if (!tmpWay->GetAttributes().GetAccess().CanRouteFoot()) {
-                continue;
-              }
-              break;
-            case osmscout::AbstractRoutingProfile::vehicleBicylce:
-              if (!tmpWay->GetAttributes().GetAccess().CanRouteBicycle()) {
-                continue;
-              }
-              break;
-            case osmscout::AbstractRoutingProfile::vehicleCar:
-              if (!tmpWay->GetAttributes().GetAccess().CanRouteCar()) {
-                continue;
-              }
-              break;
+            if (!profile.CanUse(tmpWay)) {
+              continue;
             }
 
             for (size_t i=0;  i<tmpWay->nodes.size(); i++) {
               double distance=sqrt((tmpWay->nodes[i].GetLat()-lat)*(tmpWay->nodes[i].GetLat()-lat)+
                                    (tmpWay->nodes[i].GetLon()-lon)*(tmpWay->nodes[i].GetLon()-lon));
-
               if (distance<minDistance) {
                 minDistance=distance;
 
@@ -632,7 +545,7 @@ int main(int argc, char* argv[])
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--bicycle")==0) {
-      vehicle=osmscout::AbstractRoutingProfile::vehicleBicylce;
+      vehicle=osmscout::AbstractRoutingProfile::vehicleBicycle;
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--car")==0) {
@@ -701,32 +614,6 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (!LookupClosedNodeAtLocation(database,
-                                  startLocation,
-                                  startArea,
-                                  startLat,
-                                  startLon,
-                                  vehicle,
-                                  startLocationDesc,
-                                  startObject,
-                                  startNodeIndex)) {
-    std::cerr << "Cannot find start node for start location '" << startLocation << ", " << startArea << "'" << std::endl;
-    return 1;
-  }
-
-  if (!LookupClosedNodeAtLocation(database,
-                                  targetLocation,
-                                  targetArea,
-                                  targetLat,
-                                  targetLon,
-                                  vehicle,
-                                  targetLocationDesc,
-                                  targetObject,
-                                  targetNodeIndex)) {
-    std::cerr << "Cannot find target node for target location '" << targetLocation << ", " << targetArea << "'" << std::endl;
-    return 1;
-  }
-
   osmscout::RouterParameter routerParameter;
   osmscout::Router          router(routerParameter);
 
@@ -741,21 +628,53 @@ int main(int argc, char* argv[])
   //osmscout::ShortestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
+  std::map<std::string,double>        carSpeedTable;
 
   switch (vehicle) {
   case osmscout::AbstractRoutingProfile::vehicleFoot:
-    ParametrizeProfileForFoot(*typeConfig,
-                              routingProfile);
+    routingProfile.ParametrizeForFoot(*typeConfig,
+                                      5.0);
     break;
-  case osmscout::AbstractRoutingProfile::vehicleBicylce:
-    ParametrizeProfileForBicycle(*typeConfig,
-                                 routingProfile);
+  case osmscout::AbstractRoutingProfile::vehicleBicycle:
+    routingProfile.ParametrizeForBicycle(*typeConfig,
+                                         20.0);
     break;
   case osmscout::AbstractRoutingProfile::vehicleCar:
-    ParametrizeProfileForCar(*typeConfig,
-                             routingProfile);
+    GetCarSpeedTable(carSpeedTable);
+    routingProfile.ParametrizeForCar(*typeConfig,
+                                     carSpeedTable,
+                                     160.0);
     break;
   }
+
+  std::cout << "Searching for routing node for start location '" << startLocation << ", " << startArea << "'..." << std::endl;
+  if (!LookupClosedNodeAtLocation(database,
+                                  startLocation,
+                                  startArea,
+                                  startLat,
+                                  startLon,
+                                  routingProfile,
+                                  startLocationDesc,
+                                  startObject,
+                                  startNodeIndex)) {
+    std::cerr << "Cannot find start node for start location '" << startLocation << ", " << startArea << "'" << std::endl;
+    return 1;
+  }
+
+  std::cout << "Searching for routing node for target location '" << targetLocation << ", " << targetArea << "'..." << std::endl;
+  if (!LookupClosedNodeAtLocation(database,
+                                  targetLocation,
+                                  targetArea,
+                                  targetLat,
+                                  targetLon,
+                                  routingProfile,
+                                  targetLocationDesc,
+                                  targetObject,
+                                  targetNodeIndex)) {
+    std::cerr << "Cannot find target node for target location '" << targetLocation << ", " << targetArea << "'" << std::endl;
+    return 1;
+  }
+
 
   if (!router.CalculateRoute(routingProfile,
                              startObject,

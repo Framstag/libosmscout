@@ -44,6 +44,9 @@ namespace osmscout {
 
     virtual bool CanUse(const RouteNode& currentNode,
                         size_t pathIndex) const = 0;
+    virtual bool CanUse(const Area& area) const = 0;
+    virtual bool CanUse(const Way& way) const = 0;
+
     virtual double GetCosts(const RouteNode& currentNode,
                             size_t pathIndex) const = 0;
     virtual double GetCosts(const Area& area,
@@ -51,6 +54,7 @@ namespace osmscout {
     virtual double GetCosts(const Way& way,
                             double distance) const = 0;
     virtual double GetCosts(double distance) const = 0;
+
     virtual double GetTime(const Area& area,
                            double distance) const = 0;
     virtual double GetTime(const Way& way,
@@ -66,7 +70,7 @@ namespace osmscout {
     enum Vehicle
     {
       vehicleFoot,
-      vehicleBicylce,
+      vehicleBicycle,
       vehicleCar
     };
 
@@ -83,6 +87,14 @@ namespace osmscout {
 
     void SetVehicle(Vehicle vehicle);
     void SetVehicleMaxSpeed(double maxSpeed);
+
+    void ParametrizeForFoot(const TypeConfig& typeConfig,
+                            double maxSpeed);
+    void ParametrizeForBicycle(const TypeConfig& typeConfig,
+                               double maxSpeed);
+    bool ParametrizeForCar(const TypeConfig& typeConfig,
+                           const std::map<std::string,double>& speedMap,
+                           double maxSpeed);
 
     inline Vehicle GetVehicle() const
     {
@@ -101,6 +113,40 @@ namespace osmscout {
       TypeId type=currentNode.paths[pathIndex].type;
 
       return type<speeds.size() && speeds[type]>0.0;
+    }
+
+    inline bool CanUse(const Area& area) const
+    {
+      if (area.rings.size()!=1) {
+        return false;
+      }
+
+      TypeId type=area.rings[0].GetType();
+
+      return type<speeds.size() && speeds[type]>0.0;
+    }
+
+    inline bool CanUse(const Way& way) const
+    {
+      TypeId type=way.GetType();
+
+      if (type>=speeds.size() || speeds[type]<=0.0) {
+        return false;
+      }
+
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetAttributes().GetAccess().CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetAttributes().GetAccess().CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetAttributes().GetAccess().CanRouteCar();
+        break;
+      }
+
+      return false;
     }
 
     inline double GetTime(const Area& area,

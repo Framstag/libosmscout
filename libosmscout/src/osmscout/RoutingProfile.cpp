@@ -20,6 +20,7 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <limits>
+#include <iostream>
 
 #include <osmscout/system/Assert.h>
 
@@ -48,7 +49,7 @@ namespace osmscout {
     case vehicleFoot:
       vehicleRouteNodeBit=RouteNode::usableByFoot;
       break;
-    case vehicleBicylce:
+    case vehicleBicycle:
       vehicleRouteNodeBit=RouteNode::usableByBicycle;
       break;
     case vehicleCar:
@@ -60,6 +61,71 @@ namespace osmscout {
   void AbstractRoutingProfile::SetVehicleMaxSpeed(double maxSpeed)
   {
     vehicleMaxSpeed=maxSpeed;
+  }
+
+  void AbstractRoutingProfile::ParametrizeForFoot(const TypeConfig& typeConfig,
+                                                  double maxSpeed)
+  {
+    speeds.clear();
+
+    SetVehicle(vehicleFoot);
+    SetVehicleMaxSpeed(maxSpeed);
+
+    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
+      if (!typeConfig.GetTypeInfo(typeId).CanRouteFoot()) {
+        continue;
+      }
+
+      AddType(typeId,maxSpeed);
+    }
+  }
+
+  void AbstractRoutingProfile::ParametrizeForBicycle(const TypeConfig& typeConfig,
+                                                     double maxSpeed)
+  {
+    speeds.clear();
+
+    SetVehicle(vehicleBicycle);
+    SetVehicleMaxSpeed(maxSpeed);
+
+    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
+      if (!typeConfig.GetTypeInfo(typeId).CanRouteBicycle()) {
+        continue;
+      }
+
+      AddType(typeId,maxSpeed);
+    }
+  }
+
+  bool AbstractRoutingProfile::ParametrizeForCar(const osmscout::TypeConfig& typeConfig,
+                                                 const std::map<std::string,double>& speedMap,
+                                                 double maxSpeed)
+  {
+    bool everythingResolved=true;
+
+    speeds.clear();
+
+    SetVehicle(vehicleCar);
+    SetVehicleMaxSpeed(maxSpeed);
+
+    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
+      if (!typeConfig.GetTypeInfo(typeId).CanRouteCar()) {
+        continue;
+      }
+
+      std::map<std::string,double>::const_iterator speed=speedMap.find(typeConfig.GetTypeInfo(typeId).GetName());
+
+      if (speed==speedMap.end()) {
+        std::cerr << "No speed for type '" << typeConfig.GetTypeInfo(typeId).GetName() << "' defined!" << std::endl;
+        everythingResolved=false;
+
+        continue;
+      }
+
+      AddType(typeId,speed->second);
+    }
+
+    return everythingResolved;
   }
 
   void AbstractRoutingProfile::AddType(TypeId type, double speed)
