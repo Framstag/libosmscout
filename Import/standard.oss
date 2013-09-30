@@ -1,6 +1,10 @@
 OSS
  ORDER WAYS
-  GROUP highway_motorway, waterway_river, waterway_canal, waterway_drain, _route
+  GROUP _route
+  GROUP highway_motorway
+  GROUP waterway_river, waterway_canal, waterway_drain
+  GROUP highway_motorway_trunk
+  GROUP highway_motorway_primary
   GROUP highway_trunk
   GROUP highway_primary
   GROUP highway_secondary
@@ -14,7 +18,7 @@ OSS
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
         highway_footway, highway_bridleway, highway_byway, highway_construction,
         leisure_track,
-	      waterway_stream, route_ferry
+	    waterway_stream, route_ferry
   GROUP highway_steps, barrier_fence
 
 CONST
@@ -138,7 +142,7 @@ SYMBOL christian_church_cross
   ICON { name: target;} */
 
  [MAG world-] {
-   [TYPE _route] WAY {color: #ff000088; displayWidth: 1.5mm; }
+   [TYPE _route] WAY {color: #ff000088; displayWidth: 1.5mm; priority: 100; }
 
    [TYPE _tile_sea] AREA {color: @waterColor;}
    [TYPE _tile_coast] AREA {color: @waterColor;}
@@ -417,7 +421,7 @@ SYMBOL christian_church_cross
      }
    }
 
-   [TYPE highway_trunk, highway_trunk_link SIZE 18m 0.4mm:3px<] {
+   [TYPE highway_trunk, highway_trunk_link, highway_motorway_trunk SIZE 18m 0.4mm:3px<] {
      [TUNNEL] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@trunkColor,0.3);}
@@ -429,7 +433,7 @@ SYMBOL christian_church_cross
      }
    }
 
-   [TYPE highway_primary, highway_primary_link SIZE 14m 0.4mm:3px<] {
+   [TYPE highway_primary, highway_primary_link, highway_motorway_primary SIZE 14m 0.4mm:3px<] {
      [TUNNEL] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@primaryColor,0.3);}
