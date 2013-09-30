@@ -1050,6 +1050,7 @@ namespace osmscout {
     way=tmp;
 
     way.SetType(routeType);
+    way.SetLayerToMax();
     way.nodes.reserve(data.Entries().size());
 
     if (data.Entries().empty()) {
