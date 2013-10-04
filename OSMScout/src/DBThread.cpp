@@ -141,7 +141,8 @@ void DBThread::Initialize()
   emit InitialisationFinished(response);
 }
 
-void DBThread::Finalize(){
+void DBThread::Finalize()
+{
   FreeMaps();
 
   if (router.IsOpen()) {
