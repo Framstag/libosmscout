@@ -181,7 +181,7 @@ namespace osmscout {
   template<class P>
   CoordBufferImpl<P>::~CoordBufferImpl()
   {
-    delete buffer;
+    delete [] buffer;
   }
 
   template<class P>
