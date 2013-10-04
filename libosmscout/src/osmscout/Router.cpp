@@ -125,8 +125,8 @@ namespace osmscout {
     }
 
     if (!routeNodeDataFile.Open(path,
-                                FileScanner::LowMemRandom,true,
-                                FileScanner::LowMemRandom,true)) {
+                                FileScanner::FastRandom,true,
+                                FileScanner::FastRandom,true)) {
       std::cerr << "Cannot open 'route.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
