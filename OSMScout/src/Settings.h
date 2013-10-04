@@ -22,7 +22,9 @@
 
 #include <QSettings>
 
-class Settings
+#include <osmscout/RoutingProfile.h>
+
+class Settings : public osmscout::Referencable
 {
 private:
   QSettings settings;
@@ -33,6 +35,11 @@ public:
 
   void SetDPI(size_t dpi);
   size_t GetDPI() const;
+
+  osmscout::AbstractRoutingProfile::Vehicle GetRoutingVehicle() const;
+  void SetRoutingVehicle(const osmscout::AbstractRoutingProfile::Vehicle& vehicle);
 };
+
+typedef osmscout::Ref<Settings> SettingsRef;
 
 #endif

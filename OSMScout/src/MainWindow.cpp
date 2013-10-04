@@ -25,7 +25,7 @@
 #include "RoutingDialog.h"
 #include "SettingsDialog.h"
 
-MainWindow::MainWindow(Settings* settings,
+MainWindow::MainWindow(const SettingsRef& settings,
                        DBThread *dbThread)
  : settings(settings),
    dbThread(dbThread),
@@ -95,7 +95,8 @@ void MainWindow::OpenSearchLocationDialog()
 void MainWindow::OpenRoutingDialog()
 {
   RoutingDialog dialog(this,
-                       dbThread);
+                       dbThread,
+                       settings);
 
   dialog.exec();
 }

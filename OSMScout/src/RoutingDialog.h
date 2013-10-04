@@ -60,6 +60,7 @@ class RoutingDialog : public QDialog
   Q_OBJECT
 
 private:
+  SettingsRef settings;
   DBThread   *dbThread;
 
   QLineEdit   *from;
@@ -74,8 +75,11 @@ public slots:
   void SelectFrom();
   void SelectTo();
   void Route();
+  void OnVehicle(int id);
 
 private:
+  void GetCarSpeedTable(std::map<std::string,double>& map);
+
   void DumpStartDescription(const osmscout::RouteDescription::StartDescriptionRef& startDescription,
                             const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
   void DumpTargetDescription(const osmscout::RouteDescription::TargetDescriptionRef& targetDescription);
@@ -97,7 +101,8 @@ private:
 
 public:
   RoutingDialog(QWidget* parentWindow,
-                DBThread* dbThread);
+                DBThread* dbThread,
+                const SettingsRef& settings);
   ~RoutingDialog();
 };
 

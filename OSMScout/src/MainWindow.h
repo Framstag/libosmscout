@@ -37,16 +37,16 @@ public slots:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
 
 private:
-  Settings  *settings;
-  DBThread  *dbThread;
+  SettingsRef settings;
+  DBThread    *dbThread;
 
-  MapWidget *map;
-  QAction   *searchLocationAction;
-  QAction   *routingAction;
-  QAction   *settingsAction;
+  MapWidget   *map;
+  QAction     *searchLocationAction;
+  QAction     *routingAction;
+  QAction     *settingsAction;
 
 public:
-  MainWindow(Settings* settings,
+  MainWindow(const SettingsRef& settings,
              DBThread *dbThread);
   ~MainWindow();
 

@@ -234,8 +234,10 @@ void RouteModel::refresh()
 }
 
 RoutingDialog::RoutingDialog(QWidget* parentWindow,
-                             DBThread* dbThread)
+                             DBThread* dbThread,
+                             const SettingsRef& settings)
  : QDialog(parentWindow,Qt::Dialog),
+   settings(settings),
    dbThread(dbThread),
    from(new QLineEdit()),
    hasStart(false),
@@ -245,12 +247,17 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow,
    routeModel(new RouteModel()),
    routeButton(new QPushButton("&Route"))
 {
-  QVBoxLayout *mainLayout=new QVBoxLayout();
-  QFormLayout *formLayout=new QFormLayout();
-  QHBoxLayout *fromBoxLayout=new QHBoxLayout();
-  QHBoxLayout *toBoxLayout=new QHBoxLayout();
-  QPushButton *selectFromButton=new QPushButton("...");
-  QPushButton *selectToButton=new QPushButton("...");
+  QVBoxLayout  *mainLayout=new QVBoxLayout();
+  QFormLayout  *formLayout=new QFormLayout();
+  QHBoxLayout  *fromBoxLayout=new QHBoxLayout();
+  QHBoxLayout  *toBoxLayout=new QHBoxLayout();
+  QHBoxLayout  *asBoxLayout=new QHBoxLayout();
+  QPushButton  *selectFromButton=new QPushButton("...");
+  QPushButton  *selectToButton=new QPushButton("...");
+  QButtonGroup *routeTypes = new QButtonGroup();
+  QPushButton  *routeTypeFoot = new QPushButton("Foot");
+  QPushButton  *routeTypeBicycle = new QPushButton("Bicycle");
+  QPushButton  *routeTypeCar = new QPushButton("Car");
 
   from->setReadOnly(true);
   from->setEnabled(false);
@@ -264,15 +271,40 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow,
   selectFromButton->setSizePolicy(QSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed));
   selectToButton->setSizePolicy(QSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed));
 
-  fromBoxLayout->addWidget(from,0);
-  fromBoxLayout->addWidget(selectFromButton,0);
+  fromBoxLayout->addWidget(from);
+  fromBoxLayout->addWidget(selectFromButton);
 
   formLayout->addRow("From:",fromBoxLayout);
 
-  toBoxLayout->addWidget(to,0);
-  toBoxLayout->addWidget(selectToButton,0);
+  toBoxLayout->addWidget(to);
+  toBoxLayout->addWidget(selectToButton);
 
   formLayout->addRow("To:",toBoxLayout);
+
+  osmscout::AbstractRoutingProfile::Vehicle vehicle=settings->GetRoutingVehicle();
+
+  routeTypeFoot->setCheckable(true);
+  routeTypeFoot->setChecked(vehicle==osmscout::AbstractRoutingProfile::vehicleFoot);
+
+  routeTypeBicycle->setCheckable(true);
+  routeTypeBicycle->setChecked(vehicle==osmscout::AbstractRoutingProfile::vehicleBicycle);
+
+  routeTypeCar->setCheckable(true);
+  routeTypeCar->setChecked(vehicle==osmscout::AbstractRoutingProfile::vehicleCar);
+
+  routeTypes->addButton(routeTypeFoot,
+                        osmscout::AbstractRoutingProfile::vehicleFoot);
+  routeTypes->addButton(routeTypeBicycle,
+                        osmscout::AbstractRoutingProfile::vehicleBicycle);
+  routeTypes->addButton(routeTypeCar,
+                        osmscout::AbstractRoutingProfile::vehicleCar);
+
+
+  asBoxLayout->addWidget(routeTypeFoot);
+  asBoxLayout->addWidget(routeTypeBicycle);
+  asBoxLayout->addWidget(routeTypeCar);
+
+  formLayout->addRow("As: ",asBoxLayout);
 
   mainLayout->addLayout(formLayout);
 
@@ -307,6 +339,7 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow,
   connect(selectToButton,SIGNAL(clicked()),this,SLOT(SelectTo()));
   connect(routeButton,SIGNAL(clicked()),this,SLOT(Route()));
   connect(buttonBox->button(QDialogButtonBox::Close),SIGNAL(clicked()),this,SLOT(reject()));
+  connect(routeTypes,SIGNAL(buttonClicked(int)),this,SLOT(OnVehicle(int)));
 
   if (!route.start.isEmpty()) {
     from->setText(route.start);
@@ -634,15 +667,63 @@ void RoutingDialog::DumpNameChangedDescription(const osmscout::RouteDescription:
   route.routeSteps.push_back(changed);
 }
 
+void RoutingDialog::GetCarSpeedTable(std::map<std::string,double>& map)
+{
+  map["highway_motorway"]=130.0;
+  map["highway_motorway_trunk"]=100.0;
+  map["highway_motorway_primary"]=70.0;
+  map["highway_motorway_link"]=60.0;
+  map["highway_motorway_junction"]=60.0;
+  map["highway_trunk"]=100.0;
+  map["highway_trunk_link"]=60.0;
+  map["highway_primary"]=70.0;
+  map["highway_primary_link"]=60.0;
+  map["highway_secondary"]=60.0;
+  map["highway_secondary_link"]=50.0;
+  map["highway_tertiary"]=55.0;
+  map["highway_unclassified"]=50.0;
+  map["highway_road"]=50.0;
+  map["highway_residential"]=40.0;
+  map["highway_roundabout"]=40.0;
+  map["highway_living_street"]=10.0;
+  map["highway_service"]=30.0;
+}
+
 void RoutingDialog::Route()
 {
-  osmscout::RouteData routeData;
-  osmscout::Way       routeWay;
+  osmscout::FastestPathRoutingProfile       routingProfile;
+  osmscout::RouteData                       routeData;
+  osmscout::Way                             routeWay;
+  osmscout::AbstractRoutingProfile::Vehicle vehicle=settings->GetRoutingVehicle();
+
+  if (vehicle==osmscout::AbstractRoutingProfile::vehicleFoot) {
+    std::cout << "Foot" << std::endl;
+    routingProfile.ParametrizeForFoot(*dbThread->GetTypeConfig(),
+                                      5.0);
+  }
+  else if (vehicle==osmscout::AbstractRoutingProfile::vehicleBicycle) {
+    std::cout << "Bicycle" << std::endl;
+    routingProfile.ParametrizeForBicycle(*dbThread->GetTypeConfig(),
+                                         20.0);
+  }
+  else /* car */ {
+    std::cout << "Car" << std::endl;
+    std::map<std::string,double> speedMap;
+
+    GetCarSpeedTable(speedMap);
+
+    routingProfile.ParametrizeForCar(*dbThread->GetTypeConfig(),
+                                     speedMap,
+                                     160.0);
+  }
 
   route.routeSteps.clear();
   routeModel->refresh();
 
-  if (!dbThread->CalculateRoute(route.startObject,
+  std::cout << "Calculate route" << std::endl;
+
+  if (!dbThread->CalculateRoute(routingProfile,
+                                route.startObject,
                                 route.startNodeIndex,
                                 route.endObject,
                                 route.endNodeIndex,
@@ -651,7 +732,10 @@ void RoutingDialog::Route()
     return;
   }
 
-  dbThread->TransformRouteDataToRouteDescription(routeData,
+  std::cout << "Calculate route done" << std::endl;
+
+  dbThread->TransformRouteDataToRouteDescription(routingProfile,
+                                                 routeData,
                                                  route.routeDescription,
                                                  route.start.toUtf8().constData(),
                                                  route.end.toUtf8().constData());
@@ -827,6 +911,11 @@ void RoutingDialog::Route()
   else {
     std::cerr << "Error while transforming route" << std::endl;
   }
+}
+
+void RoutingDialog::OnVehicle(int id)
+{
+  settings->SetRoutingVehicle((osmscout::AbstractRoutingProfile::Vehicle)id);
 }
 
 #include "moc_RoutingDialog.cpp"

@@ -29,7 +29,7 @@
 #include <iostream>
 
 SettingsDialog::SettingsDialog(QWidget* parentWindow,
-                               Settings* settings)
+                               const SettingsRef& settings)
  : QDialog(parentWindow,Qt::Dialog),
    settings(settings),
    dpi(new QSpinBox())

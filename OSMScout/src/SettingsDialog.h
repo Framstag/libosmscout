@@ -34,7 +34,7 @@ class SettingsDialog : public QDialog
   Q_OBJECT
 
 private:
-  Settings    *settings;
+  SettingsRef settings;
   QSpinBox    *dpi;
   QPushButton *okButton;
 
@@ -43,7 +43,7 @@ public slots:
 
 public:
   SettingsDialog(QWidget* parentWindow,
-                 Settings* settings);
+                 const SettingsRef& settings);
   ~SettingsDialog();
 };
 

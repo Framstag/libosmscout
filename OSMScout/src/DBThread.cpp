@@ -53,7 +53,7 @@ void QBreaker::Reset()
 }
 
 
-DBThread::DBThread(Settings* settings)
+DBThread::DBThread(const SettingsRef& settings)
  : settings(settings),
    database(databaseParameter),
    styleConfig(NULL),
@@ -118,73 +118,6 @@ void DBThread::Initialize()
     else {
       styleConfig=NULL;
     }
-
-    osmscout::TypeId     type;
-    osmscout::TypeConfig *typeConfig=router.GetTypeConfig();
-
-    type=typeConfig->GetWayTypeId("highway_motorway");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,110.0);
-
-    type=typeConfig->GetWayTypeId("highway_motorway_link");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,60.0);
-
-    type=typeConfig->GetWayTypeId("highway_motorway_trunk");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,100.0);
-
-    type=typeConfig->GetWayTypeId("highway_motorway_primary");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,70.0);
-
-    type=typeConfig->GetWayTypeId("highway_trunk");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,100.0);
-
-    type=typeConfig->GetWayTypeId("highway_trunk_link");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,60.0);
-
-    type=typeConfig->GetWayTypeId("highway_primary");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,70.0);
-
-    type=typeConfig->GetWayTypeId("highway_primary_link");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,60.0);
-
-    type=typeConfig->GetWayTypeId("highway_secondary");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,60.0);
-
-    type=typeConfig->GetWayTypeId("highway_secondary_link");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,50.0);
-
-    type=typeConfig->GetWayTypeId("highway_tertiary");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,55.0);
-
-    type=typeConfig->GetWayTypeId("highway_unclassified");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,50.0);
-
-    type=typeConfig->GetWayTypeId("highway_road");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,50.0);
-
-    type=typeConfig->GetWayTypeId("highway_residential");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,40.0);
-
-    type=typeConfig->GetWayTypeId("highway_living_street");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,10.0);
-
-    type=typeConfig->GetWayTypeId("highway_service");
-    assert(type!=osmscout::typeIgnore);
-    routingProfile.AddType(type,30.0);
   }
   else {
     std::cerr << "Cannot open database!" << std::endl;
@@ -566,6 +499,11 @@ bool DBThread::RenderMap(QPainter& painter,
 #endif
 }
 
+osmscout::TypeConfig* DBThread::GetTypeConfig() const
+{
+  return database.GetTypeConfig();
+}
+
 bool DBThread::GetNodeByOffset(osmscout::FileOffset offset,
                                osmscout::NodeRef& node) const
 {
@@ -618,7 +556,8 @@ bool DBThread::GetMatchingLocations(const osmscout::AdminRegion& region,
                                        false);
 }
 
-bool DBThread::CalculateRoute(const osmscout::ObjectFileRef& startObject,
+bool DBThread::CalculateRoute(const osmscout::RoutingProfile& routingProfile,
+                              const osmscout::ObjectFileRef& startObject,
                               size_t startNodeIndex,
                               const osmscout::ObjectFileRef targetObject,
                               size_t targetNodeIndex,
@@ -634,7 +573,8 @@ bool DBThread::CalculateRoute(const osmscout::ObjectFileRef& startObject,
                                route);
 }
 
-bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
+bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
+                                                    const osmscout::RouteData& data,
                                                     osmscout::RouteDescription& description,
                                                     const std::string& start,
                                                     const std::string& target)

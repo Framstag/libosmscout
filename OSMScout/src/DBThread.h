@@ -91,7 +91,7 @@ public slots:
   void Finalize();
 
 private:
-  Settings                     *settings;
+  SettingsRef                  settings;
   mutable QMutex               mutex;
   osmscout::DatabaseParameter  databaseParameter;
   osmscout::Database           database;
@@ -100,7 +100,6 @@ private:
   osmscout::MapPainterQt       painter;
   osmscout::RouterParameter    routerParameter;
   osmscout::Router             router;
-  osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RoutePostprocessor routePostprocessor;
   QString                      iconDirectory;
 
@@ -131,13 +130,14 @@ private:
   void FreeMaps();
 
 public:
-  DBThread(Settings* settings);
+  DBThread(const SettingsRef& settings);
 
   void UpdateRenderRequest(const RenderMapRequest& request);
 
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);
 
+  osmscout::TypeConfig* GetTypeConfig() const;
 
   bool GetNodeByOffset(osmscout::FileOffset offset, osmscout::NodeRef& node) const;
   bool GetAreaByOffset(osmscout::FileOffset offset, osmscout::AreaRef& relation) const;
@@ -154,13 +154,15 @@ public:
                             size_t limit,
                             bool& limitReached) const;
 
-  bool CalculateRoute(const osmscout::ObjectFileRef& startObject,
+  bool CalculateRoute(const osmscout::RoutingProfile& routingProfile,
+                      const osmscout::ObjectFileRef& startObject,
                       size_t startNodeIndex,
                       const osmscout::ObjectFileRef targetObject,
                       size_t targetNodeIndex,
                       osmscout::RouteData& route);
 
-  bool TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
+  bool TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
+                                            const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,
                                             const std::string& start,
                                             const std::string& target);

@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 #endif
 
   QApplication app(argc,argv);
-  Settings     *settings;
+  SettingsRef  settings;
   MainWindow   *window;
   int          result;
 
