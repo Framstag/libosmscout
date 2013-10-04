@@ -33,7 +33,8 @@ namespace osmscout {
 
   MapPainterQt::MapPainterQt()
   : MapPainter(new CoordBufferImpl<Vertex2D>()),
-    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
+    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
+    painter(NULL)
   {
     sin.resize(360*10);
 
