@@ -65,7 +65,6 @@ int main(int argc, char* argv[])
   thread.wait();
 
   delete window;
-  delete settings;
 
   delete dbThread;
 
