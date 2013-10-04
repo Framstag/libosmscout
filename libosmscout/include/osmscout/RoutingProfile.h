@@ -69,9 +69,9 @@ namespace osmscout {
   public:
     enum Vehicle
     {
-      vehicleFoot,
-      vehicleBicycle,
-      vehicleCar
+      vehicleFoot     = 1,
+      vehicleBicycle  = 2,
+      vehicleCar      = 3
     };
 
   protected:
