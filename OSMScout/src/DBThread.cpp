@@ -80,9 +80,22 @@ DBThread::DBThread(const SettingsRef& settings)
 {
 }
 
+bool DBThread::OpenGLSupported() const
+{
+#if defined(HAVE_LIB_QTOPENGL)
+  return QGLFormat::hasOpenGL() &&
+      QGLPixelBuffer::hasOpenGLPbuffers();
+#else
+    return false;
+#endif
+}
+
 void DBThread::FreeMaps()
 {
 #if defined(HAVE_LIB_QTOPENGL)
+  std::cout << currentGLPixmap << " " << finishedGLPixmap << std::endl;
+
+
   delete currentGLPixmap;
   currentGLPixmap=NULL;
 
@@ -181,7 +194,7 @@ void DBThread::TriggerMapRendering()
   }
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (QGLFormat::hasOpenGL()) {
+  if (OpenGLSupported()) {
     if (currentGLPixmap==NULL ||
         currentGLPixmapSize.width()!=(int)request.width ||
         currentGLPixmapSize.height()!=(int)request.height) {
@@ -231,7 +244,7 @@ void DBThread::TriggerMapRendering()
 
     searchParameter.SetBreaker(renderBreakerRef);
 
-   searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
+    searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
 
     std::list<std::string>        paths;
 
@@ -365,7 +378,10 @@ void DBThread::TriggerMapRendering()
   }
 
   QMutexLocker locker(&mutex);
-  if (renderBreaker->IsAborted()) return;
+
+  if (renderBreaker->IsAborted()) {
+    return;
+  }
 
   std::swap(currentImage,finishedImage);
 #if defined(HAVE_LIB_QTOPENGL)
@@ -407,7 +423,8 @@ bool DBThread::RenderMap(QPainter& painter,
   osmscout::MercatorProjection projection;
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (finishedGLPixmap!=NULL) {
+  if (finishedGLPixmap!=NULL&&
+      finishedGLPixmap->isValid()) {
     projection.Set(finishedLon,finishedLat,
                    finishedMagnification,
                    finishedGLPixmapSize.width(),
@@ -464,7 +481,8 @@ bool DBThread::RenderMap(QPainter& painter,
   }
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (finishedGLPixmap!=NULL && finishedGLPixmap->isValid()) {
+  if (finishedGLPixmap!=NULL &&
+      finishedGLPixmap->isValid()) {
     QImage image=finishedGLPixmap->toImage();
     painter.drawImage(dx,dy,image);
   }

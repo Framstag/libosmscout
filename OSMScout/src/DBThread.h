@@ -127,6 +127,7 @@ private:
   osmscout::BreakerRef         renderBreakerRef;
 
 private:
+  bool OpenGLSupported() const;
   void FreeMaps();
 
 public:

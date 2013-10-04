@@ -61,10 +61,10 @@ int main(int argc, char* argv[])
 
   result=app.exec();
 
+  delete window;
+
   thread.quit();
   thread.wait();
-
-  delete window;
 
   delete dbThread;
 
