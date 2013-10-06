@@ -614,6 +614,20 @@ namespace osmscout {
     lon=nodes[nodeIndex].GetLon();
   }
 
+  bool Way::GetNodeIndexByNodeId(Id id,
+                                 size_t& index) const
+  {
+    for (size_t i=0; i<ids.size(); i++) {
+      if (ids[i]==id) {
+        index=i;
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool Way::Read(FileScanner& scanner)
   {
     uint32_t nodeCount;

@@ -296,6 +296,9 @@ namespace osmscout {
                         double& lat,
                         double& lon) const;
 
+    bool GetNodeIndexByNodeId(Id id,
+                              size_t& index) const;
+
     void SetType(TypeId type);
 
     bool SetTags(Progress& progress,
