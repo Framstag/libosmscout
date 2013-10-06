@@ -188,17 +188,17 @@ namespace osmscout {
                        size_t nodeIndex,
                        double& targetLon,
                        double& targetLat,
-                       RNodeRef& forwardNode,
-                       RNodeRef& backwardNode);
+                       RouteNodeRef& forwardRouteNode,
+                       RouteNodeRef& backwardRouteNode,
+                       RNodeRef& forwardRNode,
+                       RNodeRef& backwardRNode);
 
     bool GetTargetNodes(const ObjectFileRef& object,
                         size_t nodeIndex,
                         double& targetLon,
                         double& targetLat,
                         RouteNodeRef& forwardNode,
-                        FileOffset& forwardOffset,
-                        RouteNodeRef& backwardNode,
-                        FileOffset& backwardOffset);
+                        RouteNodeRef& backwardNode);
 
     bool ResolveRNodesToList(const RNodeRef& end,
                              const CloseMap& closeMap,

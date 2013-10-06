@@ -581,8 +581,10 @@ namespace osmscout {
                              size_t nodeIndex,
                              double& targetLon,
                              double& targetLat,
-                             RNodeRef& forwardNode,
-                             RNodeRef& backwardNode)
+                             RouteNodeRef& forwardRouteNode,
+                             RouteNodeRef& backwardRouteNode,
+                             RNodeRef& forwardRNode,
+                             RNodeRef& backwardRNode)
   {
     if (object.GetType()==refArea) {
       // TODO:
@@ -592,10 +594,8 @@ namespace osmscout {
       WayRef        way;
       double        startLon=0.0L;
       double        startLat=0.0L;
-      RouteNodeRef  forwardRouteNode;
       size_t        forwardNodePos;
       FileOffset    forwardOffset;
-      RouteNodeRef  backwardRouteNode;
       size_t        backwardNodePos;
       FileOffset    backwardOffset;
 
@@ -650,7 +650,7 @@ namespace osmscout {
 
         node->overallCost=node->currentCost+node->estimateCost;
 
-        forwardNode=node;
+        forwardRNode=node;
       }
 
       if (backwardRouteNode.Valid()) {
@@ -674,7 +674,7 @@ namespace osmscout {
 
         node->overallCost=node->currentCost+node->estimateCost;
 
-        backwardNode=node;
+        backwardRNode=node;
       }
 
       return true;
@@ -689,9 +689,7 @@ namespace osmscout {
                               double& targetLon,
                               double& targetLat,
                               RouteNodeRef& forwardNode,
-                              FileOffset& forwardOffset,
-                              RouteNodeRef& backwardNode,
-                              FileOffset& backwardOffset)
+                              RouteNodeRef& backwardNode)
   {
     if (object.GetType()==refArea) {
       // TODO:
@@ -732,15 +730,19 @@ namespace osmscout {
       }
 
       if (forwardNode.Valid()) {
+        FileOffset forwardRouteNodeOffset;
+
         if (!routeNodeDataFile.GetOffset(forwardNode->id,
-                                         forwardOffset)) {
+                                         forwardRouteNodeOffset)) {
           std::cerr << "Cannot get offset of targetForwardRouteNode" << std::endl;
         }
       }
 
       if (backwardNode.Valid()) {
+        FileOffset backwardRouteNodeOffset;
+
         if (!routeNodeDataFile.GetOffset(backwardNode->id,
-                                         backwardOffset)) {
+                                         backwardRouteNodeOffset)) {
           std::cerr << "Cannot get offset of targetBackwardRouteNode" << std::endl;
         }
       }
@@ -760,18 +762,15 @@ namespace osmscout {
                               size_t targetNodeIndex,
                               RouteData& route)
   {
+    RouteNodeRef             startForwardRouteNode;
+    RouteNodeRef             startBackwardRouteNode;
     RNodeRef                 startForwardNode;
     RNodeRef                 startBackwardNode;
 
-    WayRef                   targetWay;
     double                   targetLon=0.0L,targetLat=0.0L;
 
     RouteNodeRef             targetForwardRouteNode;
-    FileOffset               targetForwardOffset;
     RouteNodeRef             targetBackwardRouteNode;
-    FileOffset               targetBackwardOffset;
-
-    WayRef                   currentWay;
 
     // Sorted list (smallest cost first) of ways to check (we are using a std::set)
     OpenList                 openList;
@@ -784,13 +783,11 @@ namespace osmscout {
     size_t                   maxOpenList=0;
     size_t                   maxCloseMap=0;
 
-    StopClock clock;
-
     route.Clear();
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     openMap.reserve(10000);
-    closeMap.reserve(250000);
+    closeMap.reserve(300000);
 #endif
 
     if (!GetTargetNodes(targetObject,
@@ -798,9 +795,7 @@ namespace osmscout {
                         targetLon,
                         targetLat,
                         targetForwardRouteNode,
-                        targetForwardOffset,
-                        targetBackwardRouteNode,
-                        targetBackwardOffset)) {
+                        targetBackwardRouteNode)) {
       return false;
     }
 
@@ -809,6 +804,8 @@ namespace osmscout {
                        startNodeIndex,
                        targetLon,
                        targetLat,
+                       startForwardRouteNode,
+                       startBackwardRouteNode,
                        startForwardNode,
                        startBackwardNode)) {
       return false;
@@ -824,8 +821,7 @@ namespace osmscout {
       openMap[startBackwardNode->nodeOffset]=result.first;
     }
 
-    currentWay=NULL;
-
+    StopClock    clock;
     RNodeRef     current;
     RouteNodeRef currentRouteNode;
 
@@ -928,8 +924,6 @@ namespace osmscout {
         double currentCost=current->currentCost+
                            profile.GetCosts(*currentRouteNode,i);
 
-        // TODO: Turn costs
-
         OpenMap::iterator openEntry=openMap.find(path->offset);
 
         // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
@@ -1006,12 +1000,21 @@ namespace osmscout {
       maxCloseMap=std::max(maxCloseMap,closeMap.size());
 
     } while (!openList.empty() &&
-             (targetForwardRouteNode.Invalid() || current->nodeOffset!=targetForwardOffset) &&
-             (targetBackwardRouteNode.Invalid() || current->nodeOffset!=targetBackwardOffset));
+             (targetForwardRouteNode.Invalid() || current->nodeOffset!=targetForwardRouteNode->fileOffset) &&
+             (targetBackwardRouteNode.Invalid() || current->nodeOffset!=targetBackwardRouteNode->fileOffset));
 
     clock.Stop();
 
-    std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset() << "[" << startNodeIndex << "]" << std::endl;
+    std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset();
+    std::cout << "[";
+    if (startForwardRouteNode.Valid()) {
+      std::cout << startForwardRouteNode->GetId() << " - ";
+    }
+    std::cout << startNodeIndex;
+    if (startBackwardRouteNode.Valid()) {
+      std::cout << " - " << startBackwardRouteNode->GetId();
+    }
+    std::cout << "]" << std::endl;
 
     std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
     std::cout << "[";
@@ -1020,7 +1023,7 @@ namespace osmscout {
     }
     std::cout << targetNodeIndex;
     if (targetBackwardRouteNode.Valid()) {
-      std::cout << " - " <<targetBackwardRouteNode->GetId();
+      std::cout << " - " << targetBackwardRouteNode->GetId();
     }
     std::cout << "]" << std::endl;
 
