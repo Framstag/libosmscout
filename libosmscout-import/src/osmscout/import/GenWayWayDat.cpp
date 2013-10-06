@@ -301,13 +301,12 @@ namespace osmscout {
                                       std::list<RawWayRef>& ways,
                                       std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
-    WaysByNodeMap  waysByNode;
-    SilentProgress silentProgress;
-    size_t         currentWay;
-    size_t         wayCount=ways.size();
+    WaysByNodeMap waysByNode;
 
+    // Sort by decreasing node count to assure that we merge longest ways first
     ways.sort(WayByNodeCountSorter);
 
+    // Index by first and last node id (if way is not circular)
     for (WayListPtr w=ways.begin();
         w!=ways.end();
         ++w) {
@@ -317,9 +316,13 @@ namespace osmscout {
 
       if (firstNodeId!=lastNodeId) {
         waysByNode[firstNodeId].push_back(w);
-        waysByNode[lastNodeId].push_back(w);
       }
     }
+
+    // Variables for monitoring progress
+    SilentProgress silentProgress;
+    size_t         currentWay;
+    size_t         wayCount=ways.size();
 
     currentWay=1;
     for (WayListPtr w=ways.begin();
@@ -334,42 +337,29 @@ namespace osmscout {
 
       WaysByNodeMap::iterator lastNodeCandidate=waysByNode.find(lastNodeId);
 
-      // Way is circular and already closed
+      // Way is circular (see above) and/or already closed
       if (lastNodeCandidate==waysByNode.end()) {
         continue;
       }
 
-      // Nothing to merge at all, since there is only us
-      if (lastNodeCandidate->second.size()==1) {
-        continue;
-      }
-
-      WayAttributes     origAttributes;
-      std::vector<Tag>  origTags(way->GetTags());
-      bool              origReverseNodes;
+      WayAttributes    origAttributes;
+      std::vector<Tag> origTags(way->GetTags());
 
       origAttributes.type=way->GetType();
       if (!origAttributes.SetTags(silentProgress,
                                   typeConfig,
                                   way->GetId(),
-                                  origTags,
-                                  origReverseNodes)) {
+                                  origTags)) {
         continue;
       }
 
-      // If we are a oneway that could be merge with one than
+      // If we are a oneway that could be merged with more than
       // one alternative, we skip since we cannot be sure
       // that the merge is correct
-      if (lastNodeCandidate!=waysByNode.end() &&
-          origAttributes.GetAccess().IsOneway() &&
+      if (origAttributes.GetAccess().IsOneway() &&
           lastNodeCandidate->second.size()>2) {
         continue;
       }
-
-      //
-      // Remove lastNodeId entry from the WaysByNode map
-      //
-      lastNodeCandidate->second.remove(w);
 
       while (lastNodeCandidate!=waysByNode.end()) {
         bool hasMerged=false;
@@ -384,40 +374,25 @@ namespace osmscout {
             continue;
           }
 
-          assert(candidate->GetId()!=way->GetId());
-
           WayAttributes     candidateAttributes;
           std::vector<Tag>  candidateTags(candidate->GetTags());
-          bool              candidateReverseNodes;
 
           candidateAttributes.type=candidate->GetType();
           if (!candidateAttributes.SetTags(silentProgress,
                                            typeConfig,
                                            candidate->GetId(),
-                                           candidateTags,
-                                           candidateReverseNodes)) {
+                                           candidateTags)) {
             continue;
           }
 
-          // Wrong direction
-          if (origReverseNodes!=candidateReverseNodes) {
-            continue;
-          }
-
-          //Attributes do not match
+          //Attributes do not match => No candidate
           if (origAttributes!=candidateAttributes) {
             continue;
           }
 
-          // Merging ways in the wrong way
-
-          // We should not merge oneways if there is more than one alternative
-          /* if (lastNodeId==candidate->GetLastNodeId() &&
-              origAttributes.GetAccess().IsOnewayForward()) {
-            continue;
-          }*/
-
           bool restricted=false;
+          // Critical section, because this code could be run in multiple thread for
+          // different ways of different way types
 #pragma omp critical
           {
             restricted=IsRestricted(restrictions,
@@ -442,29 +417,10 @@ namespace osmscout {
               nodes.push_back(candidate->GetNodeId(i));
             }
           }
-          else {
-            // Prepend candidate nodes
-             for (size_t i=1; i<candidate->GetNodeCount(); i++) {
-               nodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
-             }
-          }
 
           way->SetNodes(nodes);
 
           WaysByNodeMap::iterator otherEntry;
-
-          // Erase the matched way from the map of ways (entry via the not matched node))
-          if (lastNodeId==candidate->GetFirstNodeId()) {
-            otherEntry=waysByNode.find(candidate->GetLastNodeId());
-          }
-          else {
-            otherEntry=waysByNode.find(candidate->GetFirstNodeId());
-          }
-
-          assert(otherEntry!=waysByNode.end());
-
-          // Erase the matched way from the map of ways (entry via the node at the other end of the way)
-          otherEntry->second.remove(*c);
 
           // Erase the matched way from the list of ways to process
           ways.erase(*c);
@@ -472,14 +428,9 @@ namespace osmscout {
           // Erase the matched way from the map of ways (entry via the matched node)
           lastNodeCandidate->second.erase(c);
 
-          // If the resulting entry is empty, delete it, too
+          // If the resulting entry is empty, delete it, too, for performance reasons
           if (lastNodeCandidate->second.empty()) {
             waysByNode.erase(lastNodeCandidate);
-          }
-
-          // If the resulting entry is empty, delete it, too
-          if (otherEntry->second.empty()) {
-            waysByNode.erase(otherEntry);
           }
 
           // We found a merge
@@ -496,15 +447,6 @@ namespace osmscout {
           lastNodeCandidate=waysByNode.end();
         }
       }
-
-
-      lastNodeId=way->GetLastNodeId();
-
-      // Add the (possibly new) lastNodeId to the wayByNode map (again)
-      // if the way is not now closed
-      if (way->GetFirstNodeId()!=lastNodeId) {
-        waysByNode[lastNodeId].push_back(w);
-      }
     }
 
     return true;
@@ -520,7 +462,6 @@ namespace osmscout {
   {
     std::vector<Tag> tags(rawWay.GetTags());
     Way              way;
-    bool             reverseNodes=false;
     OSMId            wayId=rawWay.GetId();
 
     way.SetType(rawWay.GetType());
@@ -528,8 +469,7 @@ namespace osmscout {
     if (!way.SetTags(progress,
                      typeConfig,
                      wayId,
-                     tags,
-                     reverseNodes)) {
+                     tags)) {
       return true;
     }
 
@@ -556,11 +496,6 @@ namespace osmscout {
 
     if (!success) {
       return true;
-    }
-
-    if (reverseNodes) {
-      std::reverse(way.ids.begin(),way.ids.end());
-      std::reverse(way.nodes.begin(),way.nodes.end());
     }
 
     if (!writer.Write(wayId)) {

@@ -168,8 +168,7 @@ namespace osmscout {
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
                  Id id,
-                 std::vector<Tag>& tags,
-                 bool& reverseNodes);
+                 std::vector<Tag>& tags);
 
     void SetLayer(int8_t layer);
 
@@ -302,8 +301,7 @@ namespace osmscout {
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
                  Id id,
-                 std::vector<Tag>& tags,
-                 bool& reverseNodes);
+                 std::vector<Tag>& tags);
 
     void SetLayerToMax();
 

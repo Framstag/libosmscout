@@ -31,8 +31,7 @@ namespace osmscout {
   bool WayAttributes::SetTags(Progress& progress,
                               const TypeConfig& typeConfig,
                               Id id,
-                              std::vector<Tag>& tags,
-                              bool& reverseNodes)
+                              std::vector<Tag>& tags)
   {
     uint32_t namePriority=0;
     uint32_t nameAltPriority=0;
@@ -50,8 +49,6 @@ namespace osmscout {
     grade=1;
 
     this->tags.clear();
-
-    reverseNodes=false;
 
     flags|=hasAccess;
 
@@ -574,14 +571,12 @@ namespace osmscout {
   bool Way::SetTags(Progress& progress,
                     const TypeConfig& typeConfig,
                     Id id,
-                    std::vector<Tag>& tags,
-                    bool& reverseNodes)
+                    std::vector<Tag>& tags)
   {
     return attributes.SetTags(progress,
                               typeConfig,
                               id,
-                              tags,
-                              reverseNodes);
+                              tags);
   }
 
   void Way::SetLayerToMax()
