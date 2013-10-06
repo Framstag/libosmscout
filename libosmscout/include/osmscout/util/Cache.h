@@ -182,6 +182,14 @@ namespace osmscout {
     }
 
     /**
+     * Returns if the cache is active (maxSize > 0)
+     */
+    bool IsActive() const
+    {
+      return maxSize>0;
+    }
+
+    /**
       Getting the value with the given key from cache.
 
       If there is no valued stored with the given key, false will be
@@ -194,7 +202,7 @@ namespace osmscout {
     bool GetEntry(const K& key,
                   CacheRef& reference)
     {
-      if (map.size()==0) {
+      if (!IsActive()) {
         return false;
       }
 
@@ -246,7 +254,7 @@ namespace osmscout {
       */
     typename Cache::CacheRef SetEntry(const CacheEntry& entry)
     {
-      if (maxSize==0) {
+      if (!IsActive()) {
         order.clear();
 
         order.push_front(entry);
