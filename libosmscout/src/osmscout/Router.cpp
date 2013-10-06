@@ -359,6 +359,7 @@ namespace osmscout {
     std::vector<Id>                           *ids=NULL;
     bool                                      oneway=false;
 
+
     for (std::list<RNodeRef>::const_iterator n=nodes.begin();
         n!=nodes.end();
         n++) {
@@ -381,6 +382,18 @@ namespace osmscout {
       }
     }
 
+    switch (targetObject.GetType()) {
+    case refArea:
+      areaOffsets.insert(targetObject.GetFileOffset());
+      break;
+    case refWay:
+      wayOffsets.insert(targetObject.GetFileOffset());
+      break;
+    default:
+      assert(false);
+      break;
+    }
+
     if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,routeNodeMap)) {
       std::cerr << "Cannot load route nodes" << std::endl;
       return false;
@@ -395,8 +408,6 @@ namespace osmscout {
       std::cerr << "Cannot load ways" << std::endl;
       return false;
     }
-
-
 
     if (startObject.GetType()==refArea) {
       OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(startObject.GetFileOffset());
@@ -473,17 +484,16 @@ namespace osmscout {
       // target node itself
       //
       if (nn==nodes.end()) {
-
-        if ((*n)->object.GetType()==refArea) {
-          OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*n)->object.GetFileOffset());
+        if (targetObject.GetType()==refArea) {
+          OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(targetObject.GetFileOffset());
 
           assert(entry!=areaMap.end());
 
           ids=&entry->second->rings.front().ids;
           oneway=false;
         }
-        else if ((*n)->object.GetType()==refWay) {
-          OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find((*n)->object.GetFileOffset());
+        else if (targetObject.GetType()==refWay) {
+          OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(targetObject.GetFileOffset());
 
           assert(entry!=wayMap.end());
 
@@ -1002,7 +1012,18 @@ namespace osmscout {
     clock.Stop();
 
     std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset() << "[" << startNodeIndex << "]" << std::endl;
-    std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset() << "[" << targetNodeIndex << "]" << std::endl;
+
+    std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
+    std::cout << "[";
+    if (targetForwardRouteNode.Valid()) {
+      std::cout << targetForwardRouteNode->GetId() << " - ";
+    }
+    std::cout << targetNodeIndex;
+    if (targetBackwardRouteNode.Valid()) {
+      std::cout << " - " <<targetBackwardRouteNode->GetId();
+    }
+    std::cout << "]" << std::endl;
+
     std::cout << "Time:                " << clock << std::endl;
 #if defined(DEBUG_ROUTING)
     std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
