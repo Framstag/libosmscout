@@ -116,6 +116,8 @@ namespace osmscout {
                                 unsigned long cacheSize)
    : filepart(filename),
      cacheSize(cacheSize),
+     memoryMaped(false),
+     mode(FileScanner::Normal),
      pageSize(0),
      levels(0),
      buffer(NULL)
@@ -264,6 +266,7 @@ namespace osmscout {
 
     unsigned long currentCacheSize=cacheSize;
     unsigned long requiredCacheSize=0;
+
     for (size_t i=1; i<pageCounts.size(); i++) {
       unsigned long resultingCacheSize;
 

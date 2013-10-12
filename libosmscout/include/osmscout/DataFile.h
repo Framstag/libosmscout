@@ -154,19 +154,15 @@ namespace osmscout {
 
     data.reserve(data.size()+offsets.size());
 
-    typename DataCache::CacheRef cacheRef;
-
-    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      if (!cache.GetEntry(*offset,cacheRef)) {
-        typename DataCache::CacheEntry cacheEntry(*offset);
-
-        cacheRef=cache.SetEntry(cacheEntry);
+    if (!cache.IsActive()) {
+      for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+           offset!=offsets.end();
+           ++offset) {
+        N *value=new N();
 
         scanner.SetPos(*offset);
-        cacheRef->value=new N();
-        cacheRef->value->Read(scanner);
+
+        value->Read(scanner);
 
         if (scanner.HasError()) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -174,9 +170,35 @@ namespace osmscout {
           scanner.Close();
           return false;
         }
-      }
 
-      data.push_back(cacheRef->value);
+        data.push_back(value);
+      }
+    }
+    else {
+      typename DataCache::CacheRef cacheRef;
+
+      for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+           offset!=offsets.end();
+           ++offset) {
+        if (!cache.GetEntry(*offset,cacheRef)) {
+          typename DataCache::CacheEntry cacheEntry(*offset);
+
+          cacheRef=cache.SetEntry(cacheEntry);
+
+          scanner.SetPos(*offset);
+          cacheRef->value=new N();
+          cacheRef->value->Read(scanner);
+
+          if (scanner.HasError()) {
+            std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+            // TODO: Remove broken entry from cache
+            scanner.Close();
+            return false;
+          }
+        }
+
+        data.push_back(cacheRef->value);
+      }
     }
 
     return true;
@@ -197,19 +219,14 @@ namespace osmscout {
 
     data.reserve(data.size()+offsets.size());
 
-    typename DataCache::CacheRef cacheRef;
-
-    for (std::list<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      if (!cache.GetEntry(*offset,cacheRef)) {
-        typename DataCache::CacheEntry cacheEntry(*offset);
-
-        cacheRef=cache.SetEntry(cacheEntry);
+    if (!cache.IsActive()) {
+      for (std::list<FileOffset>::const_iterator offset=offsets.begin();
+           offset!=offsets.end();
+           ++offset) {
+        N *value=new N();
 
         scanner.SetPos(*offset);
-        cacheRef->value=new N();
-        cacheRef->value->Read(scanner);
+        value->Read(scanner);
 
         if (scanner.HasError()) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -217,9 +234,35 @@ namespace osmscout {
           scanner.Close();
           return false;
         }
-      }
 
-      data.push_back(cacheRef->value);
+        data.push_back(value);
+      }
+    }
+    else {
+      typename DataCache::CacheRef cacheRef;
+
+      for (std::list<FileOffset>::const_iterator offset=offsets.begin();
+           offset!=offsets.end();
+           ++offset) {
+        if (!cache.GetEntry(*offset,cacheRef)) {
+          typename DataCache::CacheEntry cacheEntry(*offset);
+
+          cacheRef=cache.SetEntry(cacheEntry);
+
+          scanner.SetPos(*offset);
+          cacheRef->value=new N();
+          cacheRef->value->Read(scanner);
+
+          if (scanner.HasError()) {
+            std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+            // TODO: Remove broken entry from cache
+            scanner.Close();
+            return false;
+          }
+        }
+
+        data.push_back(cacheRef->value);
+      }
     }
 
     return true;
@@ -240,19 +283,14 @@ namespace osmscout {
 
     data.reserve(data.size()+offsets.size());
 
-    typename DataCache::CacheRef cacheRef;
-
-    for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      if (!cache.GetEntry(*offset,cacheRef)) {
-        typename DataCache::CacheEntry cacheEntry(*offset);
-
-        cacheRef=cache.SetEntry(cacheEntry);
+    if (!cache.IsActive()) {
+      for (std::set<FileOffset>::const_iterator offset=offsets.begin();
+           offset!=offsets.end();
+           ++offset) {
+        N *value=new N();
 
         scanner.SetPos(*offset);
-        cacheRef->value=new N();
-        cacheRef->value->Read(scanner);
+        value->Read(scanner);
 
         if (scanner.HasError()) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -260,9 +298,35 @@ namespace osmscout {
           scanner.Close();
           return false;
         }
-      }
 
-      data.push_back(cacheRef->value);
+        data.push_back(value);
+      }
+    }
+    else {
+      typename DataCache::CacheRef cacheRef;
+
+      for (std::set<FileOffset>::const_iterator offset=offsets.begin();
+           offset!=offsets.end();
+           ++offset) {
+        if (!cache.GetEntry(*offset,cacheRef)) {
+          typename DataCache::CacheEntry cacheEntry(*offset);
+
+          cacheRef=cache.SetEntry(cacheEntry);
+
+          scanner.SetPos(*offset);
+          cacheRef->value=new N();
+          cacheRef->value->Read(scanner);
+
+          if (scanner.HasError()) {
+            std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+            // TODO: Remove broken entry from cache
+            scanner.Close();
+            return false;
+          }
+        }
+
+        data.push_back(cacheRef->value);
+      }
     }
 
     return true;
@@ -300,16 +364,11 @@ namespace osmscout {
       }
     }
 
-    typename DataCache::CacheRef cacheRef;
-
-    if (!cache.GetEntry(offset,cacheRef)) {
-      typename DataCache::CacheEntry cacheEntry(offset);
-
-      cacheRef=cache.SetEntry(cacheEntry);
+    if (!cache.IsActive()) {
+      N *value=new N();
 
       scanner.SetPos(offset);
-      cacheRef->value=new N();
-      cacheRef->value->Read(scanner);
+      value->Read(scanner);
 
       if (scanner.HasError()) {
         std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
@@ -317,9 +376,31 @@ namespace osmscout {
         scanner.Close();
         return false;
       }
-    }
 
-    entry=cacheRef->value;
+      entry=value;
+    }
+    else {
+      typename DataCache::CacheRef cacheRef;
+
+      if (!cache.GetEntry(offset,cacheRef)) {
+        typename DataCache::CacheEntry cacheEntry(offset);
+
+        cacheRef=cache.SetEntry(cacheEntry);
+
+        scanner.SetPos(offset);
+        cacheRef->value=new N();
+        cacheRef->value->Read(scanner);
+
+        if (scanner.HasError()) {
+          std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
+          // TODO: Remove broken entry from cache
+          scanner.Close();
+          return false;
+        }
+      }
+
+      entry=cacheRef->value;
+    }
 
     return true;
   }
