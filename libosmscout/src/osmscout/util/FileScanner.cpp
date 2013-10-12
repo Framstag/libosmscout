@@ -55,6 +55,7 @@ namespace osmscout {
    : file(NULL),
      hasError(true),
      buffer(NULL),
+     size(0),
      offset(0)
 #if defined(__WIN32__) || defined(WIN32)
      ,mmfHandle((HANDLE)0)
