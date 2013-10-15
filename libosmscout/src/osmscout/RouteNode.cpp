@@ -50,7 +50,6 @@ namespace osmscout {
       return false;
     }
 
-    //FileOffset lastOffset=0;
     objects.resize(wayCount);
     for (size_t i=0; i<wayCount; i++) {
       FileOffset fileOffset;
@@ -118,16 +117,9 @@ namespace osmscout {
     writer.Write(minLat);
     writer.Write(minLon);
 
-    //FileOffset lastOffset=0;
     for (size_t i=0; i<objects.size(); i++) {
-      //assert(objects[i]>=lastOffset);
-
-      //writer.WriteNumber(objects[i]-lastOffset);
-
       writer.Write((uint8_t)objects[i].GetType());
       writer.WriteFileOffset(objects[i].GetFileOffset());
-
-      //lastOffset=objects[i];
     }
 
     for (size_t i=0; i<paths.size(); i++) {
