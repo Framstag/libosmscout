@@ -44,7 +44,7 @@ namespace osmscout {
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "types.dat"))) {
-      progress.Error("Canot create 'types.dat'");
+      progress.Error("Cannot create 'types.dat'");
       return false;
     }
 
