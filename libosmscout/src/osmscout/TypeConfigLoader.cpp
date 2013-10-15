@@ -27,7 +27,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 
-#include <iostream>
 namespace osmscout {
 
   bool LoadTypeConfig(const char* typeFile,
