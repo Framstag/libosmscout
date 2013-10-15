@@ -806,7 +806,7 @@ namespace osmscout {
     return bearing;
   }*/
 
-  void RouteDataGenerator::CalculateAreaPaths(const TypeConfig& typeConfig,
+  bool RouteDataGenerator::CalculateAreaPaths(const TypeConfig& typeConfig,
                                               RouteNode& routeNode,
                                               const Area& area,
                                               FileOffset routeNodeOffset,
@@ -817,6 +817,7 @@ namespace osmscout {
     int               currentNode=0;
     double            distance;
     const Area::Ring& ring=area.rings.front();
+    bool              pathsAdded=false;
 
     // Find current route node in area
     while (currentNode<(int)ring.nodes.size() &&
@@ -875,7 +876,7 @@ namespace osmscout {
         pendingOffsetsMap[ring.ids[nextNode]].push_back(pendingOffset);
       }
 
-      path.objectIndex=(uint32_t)routeNode.objects.size()-1;
+      path.objectIndex=(uint32_t)routeNode.objects.size();
       path.type=area.GetType();
       path.maxSpeed=0;
       path.grade=1;
@@ -887,6 +888,8 @@ namespace osmscout {
       path.distance=distance;
 
       routeNode.paths.push_back(path);
+
+      pathsAdded=true;
     }
 
     // Find next routing node against order
@@ -939,7 +942,7 @@ namespace osmscout {
         pendingOffsetsMap[ring.ids[prevNode]].push_back(pendingOffset);
       }
 
-      path.objectIndex=(uint32_t)routeNode.objects.size()-1;
+      path.objectIndex=(uint32_t)routeNode.objects.size();
       path.type=ring.GetType();
       path.maxSpeed=0;
       path.grade=1;
@@ -951,10 +954,14 @@ namespace osmscout {
       path.distance=distance;
 
       routeNode.paths.push_back(path);
+
+      pathsAdded=true;
     }
+
+    return pathsAdded;
   }
 
-  void RouteDataGenerator::CalculateCircularWayPaths(RouteNode& routeNode,
+  bool RouteDataGenerator::CalculateCircularWayPaths(RouteNode& routeNode,
                                                      const Way& way,
                                                      FileOffset routeNodeOffset,
                                                      const NodeIdObjectsMap& nodeObjectsMap,
@@ -963,6 +970,7 @@ namespace osmscout {
   {
     int    currentNode=0;
     double distance;
+    bool   pathsAdded=false;
 
     // Search for current route node
 
@@ -1021,7 +1029,7 @@ namespace osmscout {
           pendingOffsetsMap[way.ids[nextNode]].push_back(pendingOffset);
         }
 
-        path.objectIndex=(uint32_t)routeNode.objects.size()-1;
+        path.objectIndex=(uint32_t)routeNode.objects.size();
         path.type=way.GetType();
         path.maxSpeed=way.GetMaxSpeed();
         path.grade=way.GetGrade();
@@ -1032,6 +1040,8 @@ namespace osmscout {
         path.distance=distance;
 
         routeNode.paths.push_back(path);
+
+        pathsAdded=true;
       }
     }
 
@@ -1084,7 +1094,7 @@ namespace osmscout {
           pendingOffsetsMap[way.ids[prevNode]].push_back(pendingOffset);
         }
 
-        path.objectIndex=(uint32_t)routeNode.objects.size()-1;
+        path.objectIndex=(uint32_t)routeNode.objects.size();
         path.type=way.GetType();
         path.maxSpeed=way.GetMaxSpeed();
         path.grade=way.GetGrade();
@@ -1095,17 +1105,23 @@ namespace osmscout {
         path.distance=distance;
 
         routeNode.paths.push_back(path);
+
+        pathsAdded=true;
       }
     }
+
+    return pathsAdded;
   }
 
-  void RouteDataGenerator::CalculateWayPaths(RouteNode& routeNode,
+  bool RouteDataGenerator::CalculateWayPaths(RouteNode& routeNode,
                                              const Way& way,
                                              FileOffset routeNodeOffset,
                                              const NodeIdObjectsMap& nodeObjectsMap,
                                              const NodeIdOffsetMap& nodeIdOffsetMap,
                                              PendingRouteNodeOffsetsMap& pendingOffsetsMap)
   {
+    bool pathsAdded=false;
+
     for (size_t i=0; i<way.nodes.size(); i++) {
       if (way.ids[i]==routeNode.id) {
         // Route backward
@@ -1139,7 +1155,7 @@ namespace osmscout {
               pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
             }
 
-            path.objectIndex=(uint32_t)routeNode.objects.size()-1;
+            path.objectIndex=(uint32_t)routeNode.objects.size();
             path.type=way.GetType();
             path.maxSpeed=way.GetMaxSpeed();
             path.grade=way.GetGrade();
@@ -1157,6 +1173,8 @@ namespace osmscout {
             }
 
             routeNode.paths.push_back(path);
+
+            pathsAdded=true;
           }
         }
 
@@ -1191,7 +1209,7 @@ namespace osmscout {
               pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
             }
 
-            path.objectIndex=(uint32_t)routeNode.objects.size()-1;
+            path.objectIndex=(uint32_t)routeNode.objects.size();
             path.type=way.GetType();
             path.maxSpeed=way.GetMaxSpeed();
             path.grade=way.GetGrade();
@@ -1209,10 +1227,14 @@ namespace osmscout {
             }
 
             routeNode.paths.push_back(path);
+
+            pathsAdded=true;
           }
         }
       }
     }
+
+    return pathsAdded;
   }
 
   void RouteDataGenerator::FillRoutePathExcludes(RouteNode& routeNode,
@@ -1377,6 +1399,7 @@ namespace osmscout {
     uint32_t                               handledRouteNodeCount=0;
     uint32_t                               writtenRouteNodeCount=0;
     uint32_t                               writtenRoutePathCount=0;
+    uint32_t                               simpleNodesCount=0;
 
     NodeUseMap                             nodeUseMap;
     NodeIdObjectsMap                       nodeObjectsMap;
@@ -1562,25 +1585,27 @@ namespace osmscout {
               continue;
             }
 
-            routeNode.objects.push_back(*ref);
-
             // Circular way routing (similar to current area routing, but respecting isOneway())
             if (way->ids.front()==way->ids.back()) {
-              CalculateCircularWayPaths(routeNode,
-                                        *way,
-                                        routeNodeOffset,
-                                        nodeObjectsMap,
-                                        routeNodeIdOffsetMap,
-                                        pendingOffsetsMap);
+              if (CalculateCircularWayPaths(routeNode,
+                                            *way,
+                                            routeNodeOffset,
+                                            nodeObjectsMap,
+                                            routeNodeIdOffsetMap,
+                                           pendingOffsetsMap)) {
+                routeNode.objects.push_back(*ref);
+              }
             }
             // Normal way routing
             else {
-              CalculateWayPaths(routeNode,
-                                *way,
-                                routeNodeOffset,
-                                nodeObjectsMap,
-                                routeNodeIdOffsetMap,
-                                pendingOffsetsMap);
+              if (CalculateWayPaths(routeNode,
+                                    *way,
+                                    routeNodeOffset,
+                                    nodeObjectsMap,
+                                    routeNodeIdOffsetMap,
+                                    pendingOffsetsMap)) {
+                routeNode.objects.push_back(*ref);
+              }
             }
           }
           else if (ref->GetType()==refArea) {
@@ -1595,13 +1620,15 @@ namespace osmscout {
 
             routeNode.objects.push_back(*ref);
 
-            CalculateAreaPaths(typeConfig,
-                               routeNode,
-                               *area,
-                               routeNodeOffset,
-                               nodeObjectsMap,
-                               routeNodeIdOffsetMap,
-                               pendingOffsetsMap);
+            if (CalculateAreaPaths(typeConfig,
+                                   routeNode,
+                                   *area,
+                                   routeNodeOffset,
+                                   nodeObjectsMap,
+                                   routeNodeIdOffsetMap,
+                                   pendingOffsetsMap)) {
+              routeNode.objects.push_back(*ref);
+            }
           }
         }
 
@@ -1652,6 +1679,7 @@ namespace osmscout {
     writer.Write(writtenRouteNodeCount);
 
     progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) and " + NumberToString(writtenRoutePathCount)+ " paths written");
+    progress.Info(NumberToString(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
 
     progress.SetAction("Setting path offsets in route nodes");
 
