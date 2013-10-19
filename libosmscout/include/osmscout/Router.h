@@ -81,20 +81,20 @@ namespace osmscout {
   {
   private:
     /**
-     * A node in the routing graph, normally a node as part of a way
+     * A path in the routing graph from one node to the next (expressed via the target object)
+     * with additional information as required by the A* algorithm.
      */
     struct RNode : public Referencable
     {
-      FileOffset    nodeOffset;
-      ObjectFileRef object;
+      FileOffset    nodeOffset;    //! The file offset of the current route node
+      FileOffset    prev;          //! The file offset of the previous route node
+      ObjectFileRef object;        //! The object (way/area) visited from the current route node
 
-      double        currentCost;
-      double        estimateCost;
-      double        overallCost;
+      double        currentCost;   //! The cost of the current up to the current node
+      double        estimateCost;  //! The estimated cost from here to the target
+      double        overallCost;   //! The overall costs (currentCost+estimateCost)
 
-      FileOffset    prev;
-
-      bool          access;
+      bool          access;        //! Flags to signal, if we had access ("access restrictions") to this node
 
       RNode()
       : nodeOffset(0)
@@ -105,11 +105,11 @@ namespace osmscout {
       RNode(FileOffset nodeOffset,
             const ObjectFileRef& object)
       : nodeOffset(nodeOffset),
+        prev(0),
         object(object),
         currentCost(0),
         estimateCost(0),
         overallCost(0),
-        prev(0),
         access(true)
       {
         // no code
@@ -119,11 +119,11 @@ namespace osmscout {
             const ObjectFileRef& object,
             FileOffset prev)
       : nodeOffset(nodeOffset),
+        prev(prev),
         object(object),
         currentCost(0),
         estimateCost(0),
         overallCost(0),
-        prev(prev),
         access(true)
       {
         // no code
@@ -214,9 +214,9 @@ namespace osmscout {
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
 
-    bool ResolveRNodesToList(const RNodeRef& end,
-                             const CloseMap& closeMap,
-                             std::list<RNodeRef>& nodes);
+    void ResolveRNodeChainToList(const RNodeRef& end,
+                                 const CloseMap& closeMap,
+                                 std::list<RNodeRef>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
                                   const std::list<RNodeRef>& nodes,
                                   const ObjectFileRef& startObject,

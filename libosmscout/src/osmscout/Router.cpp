@@ -259,9 +259,9 @@ namespace osmscout {
     }
   }
 
-  bool Router::ResolveRNodesToList(const RNodeRef& end,
-                                   const CloseMap& closeMap,
-                                   std::list<RNodeRef>& nodes)
+  void Router::ResolveRNodeChainToList(const RNodeRef& end,
+                                       const CloseMap& closeMap,
+                                       std::list<RNodeRef>& nodes)
   {
     CloseMap::const_iterator current=closeMap.find(end->nodeOffset);
 
@@ -276,8 +276,6 @@ namespace osmscout {
     nodes.push_back(current->second);
 
     std::reverse(nodes.begin(),nodes.end());
-
-    return true;
   }
 
   void Router::AddNodes(RouteData& route,
@@ -1096,12 +1094,9 @@ namespace osmscout {
 
     std::list<RNodeRef> nodes;
 
-    if (!ResolveRNodesToList(current,
-                             closeMap,
-                             nodes)) {
-      std::cerr << "Cannot resolve route nodes from routed path" << std::endl;
-      return false;
-    }
+    ResolveRNodeChainToList(current,
+                            closeMap,
+                            nodes);
 
     if (!ResolveRNodesToRouteData(profile,
                                   nodes,

@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <osmscout/Router.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -100,17 +102,14 @@ namespace osmscout {
     return flags;
   }
 
-  RouteDataGenerator::RouteDataGenerator(Vehicle vehicle,
-                                         const std::string& filename)
-  : vehicle(vehicle),
-    filename(filename)
+  RouteDataGenerator::RouteDataGenerator()
   {
     // no code
   }
 
   std::string RouteDataGenerator::GetDescription() const
   {
-    return "Generate '"+filename+"'";
+    return "Generate routing graphs";
   }
 
   bool RouteDataGenerator::ReadTurnRestrictionWayIds(const ImportParameter& parameter,
@@ -520,11 +519,11 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::ReadWayObjectsAtJunctions(const ImportParameter& parameter,
-                                                     Progress& progress,
-                                                     const TypeConfig& typeConfig,
-                                                     const NodeUseMap& nodeUseMap,
-                                                     NodeIdObjectsMap& nodeObjectsMap)
+  bool RouteDataGenerator::ReadObjectsAtJunctions(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  const TypeConfig& typeConfig,
+                                                  const NodeUseMap& nodeUseMap,
+                                                  NodeIdObjectsMap& nodeObjectsMap)
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
@@ -1300,14 +1299,13 @@ namespace osmscout {
                                                 const NodeIdOffsetMap& routeNodeIdOffsetMap,
                                                 PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                                                 FileWriter& routeNodeWriter,
-                                                std::vector<NodeIdObjectsMap::iterator>& block,
+                                                std::vector<NodeIdObjectsMap::const_iterator>& block,
                                                 size_t blockCount)
   {
     std::map<FileOffset,RouteNodeRef> routeNodeOffsetMap;
     FileScanner                       routeScanner;
 
-    if (!routeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                           filename),
+    if (!routeScanner.Open(routeNodeWriter.GetFilename(),
                            FileScanner::LowMemRandom,
                            false)) {
       progress.Error("Cannot open '"+routeScanner.GetFilename()+"'");
@@ -1389,77 +1387,29 @@ namespace osmscout {
     return routeScanner.Close();
   }
 
-  bool RouteDataGenerator::Import(const ImportParameter& parameter,
-                                  Progress& progress,
-                                  const TypeConfig& typeConfig)
+  bool RouteDataGenerator::WriteRouteGraph(const ImportParameter& parameter,
+                                           Progress& progress,
+                                           const TypeConfig& typeConfig,
+                                           const NodeIdObjectsMap& nodeObjectsMap,
+                                           const ViaTurnRestrictionMap& restrictions,
+                                           Vehicle vehicle,
+                                           const std::string& filename)
   {
-    progress.SetAction("Generate '"+filename+"'");
-
     FileScanner                            wayScanner;
     FileScanner                            areaScanner;
     FileWriter                             writer;
-
-    // List of restrictions for a way
-    ViaTurnRestrictionMap                  restrictions;
 
     uint32_t                               handledRouteNodeCount=0;
     uint32_t                               writtenRouteNodeCount=0;
     uint32_t                               writtenRoutePathCount=0;
     uint32_t                               simpleNodesCount=0;
 
-    NodeUseMap                             nodeUseMap;
-    NodeIdObjectsMap                       nodeObjectsMap;
     NodeIdOffsetMap                        routeNodeIdOffsetMap;
     PendingRouteNodeOffsetsMap             pendingOffsetsMap;
 
     //
-    // Handling of restriction relations
-    //
-
-    progress.SetAction("Scanning for restriction relations");
-
-    if (!ReadTurnRestrictions(parameter,
-                              progress,
-                              restrictions)) {
-      return false;
-    }
-
-    //
-    // Building a map of nodes and the number of ways that contain this way
-    //
-
-    progress.SetAction("Scanning for junctions");
-
-    if (!ReadJunctions(parameter,
-                       progress,
-                       typeConfig,
-                       nodeUseMap)) {
-      return false;
-    }
-
-    //
-    // Building a map of way endpoint ids and list of ways (way offsets) having this point as endpoint
-    //
-
-    progress.SetAction("Collecting ways intersecting junctions");
-
-    if (!ReadWayObjectsAtJunctions(parameter,
-                                   progress,
-                                   typeConfig,
-                                   nodeUseMap,
-                                   nodeObjectsMap)) {
-      return false;
-    }
-
-    nodeUseMap.Clear();
-
-    progress.Info(NumberToString(nodeObjectsMap.size())+ " route nodes collected");
-
-    //
     // Writing route nodes
     //
-
-    progress.SetAction("Writing route nodes");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      filename))) {
@@ -1485,16 +1435,16 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<NodeIdObjectsMap::iterator> block(parameter.GetRouteNodeBlockSize());
+    std::vector<NodeIdObjectsMap::const_iterator> block(parameter.GetRouteNodeBlockSize());
 
-    NodeIdObjectsMap::iterator node=nodeObjectsMap.begin();
+    NodeIdObjectsMap::const_iterator node=nodeObjectsMap.begin();
     while (node!=nodeObjectsMap.end()) {
 
       // Fill the current block of nodes to be processed
 
       size_t blockCount=0;
 
-      progress.SetAction("Loading up to " + NumberToString(block.size()) + " route nodes");
+      progress.Info("Loading up to " + NumberToString(block.size()) + " route nodes");
       while (blockCount<block.size() &&
              node!=nodeObjectsMap.end()) {
         progress.SetProgress(writtenRouteNodeCount,nodeObjectsMap.size());
@@ -1505,7 +1455,7 @@ namespace osmscout {
         node++;
       }
 
-      progress.SetAction("Loading intersecting ways");
+      progress.Info("Loading intersecting ways");
 
       // Collect way ids of all ways in current block and load them
 
@@ -1554,12 +1504,12 @@ namespace osmscout {
 
       areaOffsets.clear();
 
-      progress.SetAction("Storing route nodes");
+      progress.Info("Storing route nodes");
 
       for (size_t b=0; b<blockCount; b++) {
-        NodeIdObjectsMap::iterator node=block[b];
-        RouteNode                  routeNode;
-        FileOffset                 routeNodeOffset;
+        NodeIdObjectsMap::const_iterator node=block[b];
+        RouteNode                        routeNode;
+        FileOffset                       routeNodeOffset;
 
         if (!writer.GetPos(routeNodeOffset)) {
           return false;
@@ -1571,12 +1521,6 @@ namespace osmscout {
 
         handledRouteNodeCount++;
         progress.SetProgress(handledRouteNodeCount,nodeObjectsMap.size());
-
-        // We sort objects by increasing id, for more efficient storage
-        // in route node
-        // TODO: Does this really make sense in case of mixed areas/ways?
-        //       We need a custom sorter!
-        node->second.sort();
 
         for (std::list<ObjectFileRef>::const_iterator ref=node->second.begin();
             ref!=node->second.end();
@@ -1647,8 +1591,6 @@ namespace osmscout {
                               node->second,
                               restrictions);
 
-        node->second.clear();
-
         if (routeNode.paths.empty()) {
           continue;
         }
@@ -1684,11 +1626,6 @@ namespace osmscout {
 
     assert(pendingOffsetsMap.empty());
 
-    // Cleaning up...
-
-    nodeObjectsMap.clear();
-    restrictions.clear();
-
     if (!wayScanner.Close()) {
       progress.Error("Cannot close file '"+wayScanner.GetFilename()+"'");
       return false;
@@ -1700,11 +1637,113 @@ namespace osmscout {
     progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) and " + NumberToString(writtenRoutePathCount)+ " paths written");
     progress.Info(NumberToString(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
 
-    progress.SetAction("Setting path offsets in route nodes");
-
     if (!writer.Close()) {
       return false;
     }
+
+    return true;
+  }
+
+  bool RouteDataGenerator::Import(const ImportParameter& parameter,
+                                  Progress& progress,
+                                  const TypeConfig& typeConfig)
+  {
+    // List of restrictions for a way
+    ViaTurnRestrictionMap                  restrictions;
+
+    NodeUseMap                             nodeUseMap;
+    NodeIdObjectsMap                       nodeObjectsMap;
+
+    //
+    // Handling of restriction relations
+    //
+
+    progress.SetAction("Scanning for restriction relations");
+
+    if (!ReadTurnRestrictions(parameter,
+                              progress,
+                              restrictions)) {
+      return false;
+    }
+
+    //
+    // Building a map of nodes and the number of ways that contain this way
+    //
+
+    progress.SetAction("Scanning for junctions");
+
+    if (!ReadJunctions(parameter,
+                       progress,
+                       typeConfig,
+                       nodeUseMap)) {
+      return false;
+    }
+
+    //
+    // Building a map of way endpoint ids and list of ways (way offsets) having this point as endpoint
+    //
+
+    progress.SetAction("Collecting ways intersecting junctions");
+
+    if (!ReadObjectsAtJunctions(parameter,
+                                progress,
+                                typeConfig,
+                                nodeUseMap,
+                                nodeObjectsMap)) {
+      return false;
+    }
+
+    nodeUseMap.Clear();
+
+    progress.Info(NumberToString(nodeObjectsMap.size())+ " route nodes collected");
+
+    // We sort objects by increasing id, for more efficient storage
+    // in route node
+    // TODO: Does this really make sense in case of mixed areas/ways?
+    //       We need a custom sorter!
+    for (NodeIdObjectsMap::iterator entry=nodeObjectsMap.begin();
+        entry!=nodeObjectsMap.end();
+        ++entry) {
+      entry->second.sort();
+    }
+
+    progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_FOOT_DAT+"'");
+
+
+    WriteRouteGraph(parameter,
+                    progress,
+                    typeConfig,
+                    nodeObjectsMap,
+                    restrictions,
+                    vehicleFoot,
+                    Router::FILENAME_FOOT_DAT);
+
+    progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_BICYCLE_DAT+"'");
+
+
+    WriteRouteGraph(parameter,
+                    progress,
+                    typeConfig,
+                    nodeObjectsMap,
+                    restrictions,
+                    vehicleBicycle,
+                    Router::FILENAME_BICYCLE_DAT);
+
+    progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_CAR_DAT+"'");
+
+
+    WriteRouteGraph(parameter,
+                    progress,
+                    typeConfig,
+                    nodeObjectsMap,
+                    restrictions,
+                    vehicleCar,
+                    Router::FILENAME_CAR_DAT);
+
+    // Cleaning up...
+
+    nodeObjectsMap.clear();
+    restrictions.clear();
 
     return true;
   }

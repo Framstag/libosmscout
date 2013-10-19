@@ -68,10 +68,6 @@ namespace osmscout {
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
   private:
-    Vehicle     vehicle;
-    std::string filename;
-
-  private:
     /**
      * Read turn restrictions and return a map of way ids together with their (set to 0) file offset
      */
@@ -121,11 +117,11 @@ namespace osmscout {
     /**
      * Builds up a list of ObjectFileRefs for every junction node.
      */
-    bool ReadWayObjectsAtJunctions(const ImportParameter& parameter,
-                                   Progress& progress,
-                                   const TypeConfig& typeConfig,
-                                   const NodeUseMap& nodeUseMap,
-                                   NodeIdObjectsMap& nodeObjectsMap);
+    bool ReadObjectsAtJunctions(const ImportParameter& parameter,
+                                Progress& progress,
+                                const TypeConfig& typeConfig,
+                                const NodeUseMap& nodeUseMap,
+                                NodeIdObjectsMap& nodeObjectsMap);
 
     /**
      * Loads ways based on their file offset.
@@ -196,12 +192,19 @@ namespace osmscout {
                               const NodeIdOffsetMap& routeNodeIdOffsetMap,
                               PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                               FileWriter& routeNodeWriter,
-                              std::vector<NodeIdObjectsMap::iterator>& block,
+                              std::vector<NodeIdObjectsMap::const_iterator>& block,
                               size_t blockCount);
 
+    bool WriteRouteGraph(const ImportParameter& parameter,
+                         Progress& progress,
+                         const TypeConfig& typeConfig,
+                         const NodeIdObjectsMap& nodeObjectsMap,
+                         const ViaTurnRestrictionMap& restrictions,
+                         Vehicle vehicle,
+                         const std::string& filename);
+
   public:
-    RouteDataGenerator(Vehicle vehicle,
-                       const std::string& filename);
+    RouteDataGenerator();
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
                 Progress& progress,

@@ -70,7 +70,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=27;
+  static const size_t defaultEndStep=25;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -669,8 +669,7 @@ namespace osmscout {
     modules.push_back(new CityStreetIndexGenerator());
 
     /* 22 */
-    modules.push_back(new RouteDataGenerator(vehicleFoot,
-                                             Router::FILENAME_FOOT_DAT));
+    modules.push_back(new RouteDataGenerator());
 
     /* 23 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_FOOT_IDX+"'",
@@ -680,21 +679,13 @@ namespace osmscout {
                                                                               Router::FILENAME_FOOT_IDX)));
 
     /* 24 */
-    modules.push_back(new RouteDataGenerator(vehicleBicycle,
-                                             Router::FILENAME_BICYCLE_DAT));
-
-    /* 25 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_BICYCLE_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_BICYCLE_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_BICYCLE_IDX)));
 
-    /* 26 */
-    modules.push_back(new RouteDataGenerator(vehicleCar,
-                                             Router::FILENAME_CAR_DAT));
-
-    /* 27 */
+    /* 25 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_CAR_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_CAR_DAT),
