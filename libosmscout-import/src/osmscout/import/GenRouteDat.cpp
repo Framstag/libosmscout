@@ -1587,25 +1587,23 @@ namespace osmscout {
 
             // Circular way routing (similar to current area routing, but respecting isOneway())
             if (way->ids.front()==way->ids.back()) {
-              if (CalculateCircularWayPaths(routeNode,
-                                            *way,
-                                            routeNodeOffset,
-                                            nodeObjectsMap,
-                                            routeNodeIdOffsetMap,
-                                           pendingOffsetsMap)) {
-                routeNode.objects.push_back(*ref);
-              }
+              CalculateCircularWayPaths(routeNode,
+                                        *way,
+                                        routeNodeOffset,
+                                        nodeObjectsMap,
+                                        routeNodeIdOffsetMap,
+                                        pendingOffsetsMap);
+              routeNode.objects.push_back(*ref);
             }
             // Normal way routing
             else {
-              if (CalculateWayPaths(routeNode,
-                                    *way,
-                                    routeNodeOffset,
-                                    nodeObjectsMap,
-                                    routeNodeIdOffsetMap,
-                                    pendingOffsetsMap)) {
-                routeNode.objects.push_back(*ref);
-              }
+              CalculateWayPaths(routeNode,
+                                *way,
+                                routeNodeOffset,
+                                nodeObjectsMap,
+                                routeNodeIdOffsetMap,
+                                pendingOffsetsMap);
+              routeNode.objects.push_back(*ref);
             }
           }
           else if (ref->GetType()==refArea) {
@@ -1620,15 +1618,14 @@ namespace osmscout {
 
             routeNode.objects.push_back(*ref);
 
-            if (CalculateAreaPaths(typeConfig,
-                                   routeNode,
-                                   *area,
-                                   routeNodeOffset,
-                                   nodeObjectsMap,
-                                   routeNodeIdOffsetMap,
-                                   pendingOffsetsMap)) {
-              routeNode.objects.push_back(*ref);
-            }
+            CalculateAreaPaths(typeConfig,
+                               routeNode,
+                               *area,
+                               routeNodeOffset,
+                               nodeObjectsMap,
+                               routeNodeIdOffsetMap,
+                               pendingOffsetsMap);
+            routeNode.objects.push_back(*ref);
           }
         }
 
