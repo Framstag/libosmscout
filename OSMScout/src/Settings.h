@@ -36,8 +36,8 @@ public:
   void SetDPI(size_t dpi);
   size_t GetDPI() const;
 
-  osmscout::AbstractRoutingProfile::Vehicle GetRoutingVehicle() const;
-  void SetRoutingVehicle(const osmscout::AbstractRoutingProfile::Vehicle& vehicle);
+  osmscout::Vehicle GetRoutingVehicle() const;
+  void SetRoutingVehicle(const osmscout::Vehicle& vehicle);
 };
 
 typedef osmscout::Ref<Settings> SettingsRef;

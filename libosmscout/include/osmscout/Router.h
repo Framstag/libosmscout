@@ -77,7 +77,7 @@ namespace osmscout {
     bool IsDebugPerformance() const;
   };
 
-  class OSMSCOUT_API Router
+  class OSMSCOUT_API Router : public Referencable
   {
   private:
     /**
@@ -161,7 +161,18 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<FileOffset,Router::OpenListRef> OpenMap;
     typedef OSMSCOUT_HASHMAP<FileOffset,Router::RNodeRef>    CloseMap;
 
+  public:
+    static const char* const FILENAME_FOOT_DAT;
+    static const char* const FILENAME_FOOT_IDX;
+
+    static const char* const FILENAME_BICYCLE_DAT;
+    static const char* const FILENAME_BICYCLE_IDX;
+
+    static const char* const FILENAME_CAR_DAT;
+    static const char* const FILENAME_CAR_IDX;
+
   private:
+    Vehicle                       vehicle;           //! We are a router for this vehicle
     bool                          isOpen;            //! true, if opened
     bool                          debugPerformance;
 
@@ -174,6 +185,9 @@ namespace osmscout {
     TypeConfig                    *typeConfig;       //! Type config for the currently opened map
 
   private:
+    std::string GetDataFilename(Vehicle vehicle) const;
+    std::string GetIndexFilename(Vehicle vehicle) const;
+
     void GetClosestForwardRouteNode(const WayRef& way,
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode,
@@ -223,8 +237,11 @@ namespace osmscout {
                                      size_t nextNodeIndex);
 
   public:
-    Router(const RouterParameter& parameter);
+    Router(const RouterParameter& parameter,
+           Vehicle vehicle);
     virtual ~Router();
+
+    Vehicle GetVehicle() const;
 
     bool Open(const std::string& path);
     bool IsOpen() const;
@@ -252,6 +269,8 @@ namespace osmscout {
 
     void DumpStatistics();
   };
+
+  typedef Ref<Router> RouterRef;
 }
 
 #endif

@@ -66,14 +66,6 @@ namespace osmscout {
    */
   class OSMSCOUT_API AbstractRoutingProfile : public RoutingProfile
   {
-  public:
-    enum Vehicle
-    {
-      vehicleFoot     = 1,
-      vehicleBicycle  = 2,
-      vehicleCar      = 3
-    };
-
   protected:
     Vehicle             vehicle;
     uint8_t             vehicleRouteNodeBit;

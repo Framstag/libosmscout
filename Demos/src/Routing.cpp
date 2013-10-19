@@ -67,7 +67,7 @@ static std::string TimeToString(double time)
 
 static void GetCarSpeedTable(std::map<std::string,double>& map)
 {
-  map["highway_motorway"]=130.0;
+  map["highway_motorway"]=110.0;
   map["highway_motorway_trunk"]=100.0;
   map["highway_motorway_primary"]=70.0;
   map["highway_motorway_link"]=60.0;
@@ -515,7 +515,7 @@ static void DumpNameChangedDescription(size_t& lineCount,
 
 int main(int argc, char* argv[])
 {
-  osmscout::AbstractRoutingProfile::Vehicle vehicle=osmscout::AbstractRoutingProfile::vehicleCar;
+  osmscout::Vehicle                         vehicle=osmscout::vehicleCar;
   osmscout::FastestPathRoutingProfile       routingProfile;
   std::string                               map;
 
@@ -540,16 +540,16 @@ int main(int argc, char* argv[])
   int currentArg=1;
   while (currentArg<argc) {
     if (strcmp(argv[currentArg],"--foot")==0) {
-      vehicle=osmscout::AbstractRoutingProfile::vehicleFoot;
+      vehicle=osmscout::vehicleFoot;
 
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--bicycle")==0) {
-      vehicle=osmscout::AbstractRoutingProfile::vehicleBicycle;
+      vehicle=osmscout::vehicleBicycle;
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--car")==0) {
-      vehicle=osmscout::AbstractRoutingProfile::vehicleCar;
+      vehicle=osmscout::vehicleCar;
       currentArg++;
     }
     else {
@@ -615,7 +615,8 @@ int main(int argc, char* argv[])
   }
 
   osmscout::RouterParameter routerParameter;
-  osmscout::Router          router(routerParameter);
+  osmscout::Router          router(routerParameter,
+                                   vehicle);
 
   if (!router.Open(map.c_str())) {
     std::cerr << "Cannot open routing database" << std::endl;
@@ -631,15 +632,15 @@ int main(int argc, char* argv[])
   std::map<std::string,double>        carSpeedTable;
 
   switch (vehicle) {
-  case osmscout::AbstractRoutingProfile::vehicleFoot:
+  case osmscout::vehicleFoot:
     routingProfile.ParametrizeForFoot(*typeConfig,
                                       5.0);
     break;
-  case osmscout::AbstractRoutingProfile::vehicleBicycle:
+  case osmscout::vehicleBicycle:
     routingProfile.ParametrizeForBicycle(*typeConfig,
                                          20.0);
     break;
-  case osmscout::AbstractRoutingProfile::vehicleCar:
+  case osmscout::vehicleCar:
     GetCarSpeedTable(carSpeedTable);
     routingProfile.ParametrizeForCar(*typeConfig,
                                      carSpeedTable,

@@ -56,7 +56,7 @@
 #include "Configuration.h"
 
 DatabaseTask::DatabaseTask(osmscout::Database* database,
-                           osmscout::Router* router,
+                           const osmscout::RouterRef& router,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
    styleConfig(NULL),
@@ -75,6 +75,29 @@ DatabaseTask::DatabaseTask(osmscout::Database* database,
 {
   // no code
 }
+
+void DatabaseTask::GetCarSpeedTable(std::map<std::string,double>& map)
+{
+  map["highway_motorway"]=110.0;
+  map["highway_motorway_trunk"]=100.0;
+  map["highway_motorway_primary"]=70.0;
+  map["highway_motorway_link"]=60.0;
+  map["highway_motorway_junction"]=60.0;
+  map["highway_trunk"]=100.0;
+  map["highway_trunk_link"]=60.0;
+  map["highway_primary"]=70.0;
+  map["highway_primary_link"]=60.0;
+  map["highway_secondary"]=60.0;
+  map["highway_secondary_link"]=50.0;
+  map["highway_tertiary"]=55.0;
+  map["highway_unclassified"]=50.0;
+  map["highway_road"]=50.0;
+  map["highway_residential"]=40.0;
+  map["highway_roundabout"]=40.0;
+  map["highway_living_street"]=10.0;
+  map["highway_service"]=30.0;
+}
+
 
 void DatabaseTask::Run()
 {
@@ -302,72 +325,13 @@ bool DatabaseTask::Open(const std::wstring& path)
     return false;
   }
 
-  osmscout::TypeId     type;
-  osmscout::TypeConfig *typeConfig=router->GetTypeConfig();
+  std::map<std::string,double> speedMap;
 
-  type=typeConfig->GetWayTypeId("highway_motorway");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,110.0);
+  GetCarSpeedTable(speedMap);
 
-  type=typeConfig->GetWayTypeId("highway_motorway_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_motorway_trunk");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,100.0);
-
-  type=typeConfig->GetWayTypeId("highway_motorway_primary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,70.0);
-
-  type=typeConfig->GetWayTypeId("highway_trunk");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,100.0);
-
-  type=typeConfig->GetWayTypeId("highway_trunk_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_primary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,70.0);
-
-  type=typeConfig->GetWayTypeId("highway_primary_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_secondary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_secondary_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,50.0);
-
-  type=typeConfig->GetWayTypeId("highway_tertiary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,55.0);
-
-  type=typeConfig->GetWayTypeId("highway_unclassified");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,50.0);
-
-  type=typeConfig->GetWayTypeId("highway_road");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,50.0);
-
-  type=typeConfig->GetWayTypeId("highway_residential");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,40.0);
-
-  type=typeConfig->GetWayTypeId("highway_living_street");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,10.0);
-
-  type=typeConfig->GetWayTypeId("highway_service");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,30.0);
+  routingProfile.ParametrizeForCar(*router->GetTypeConfig(),
+                                   speedMap,
+                                   160.0);
 
   return true;
 }

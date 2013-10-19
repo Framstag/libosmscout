@@ -53,7 +53,7 @@ private:
   osmscout::Database        *database;
   osmscout::StyleConfig     *styleConfig;
   osmscout::MapData         data;
-  osmscout::Router          *router;
+  osmscout::RouterRef       router;
   osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RoutePostprocessor postprocessor;
   Lum::OS::Condition        condition;
@@ -78,10 +78,12 @@ private:
 
 private:
   void SignalRedraw();
+  void GetCarSpeedTable(std::map<std::string,double>& map);
+
 
 public:
   DatabaseTask(osmscout::Database* database,
-               osmscout::Router* router,
+               const osmscout::RouterRef& router,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();

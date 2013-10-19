@@ -42,6 +42,13 @@ namespace osmscout {
 
   typedef uint16_t TypeId;
 
+  enum Vehicle
+  {
+    vehicleFoot     = 1,
+    vehicleBicycle  = 2,
+    vehicleCar      = 3
+  };
+
   /**
     Coordinates will be stored as unsigned long values in file.
     For the conversion the float value is shifted to positive

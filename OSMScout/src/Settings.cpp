@@ -39,12 +39,12 @@ size_t Settings::GetDPI() const
   return (size_t)settings.value("settings/dpi",92).toUInt();
 }
 
-osmscout::AbstractRoutingProfile::Vehicle Settings::GetRoutingVehicle() const
+osmscout::Vehicle Settings::GetRoutingVehicle() const
 {
-  return (osmscout::AbstractRoutingProfile::Vehicle)settings.value("routing/vehicle",osmscout::AbstractRoutingProfile::vehicleCar).toUInt();
+  return (osmscout::Vehicle)settings.value("routing/vehicle",osmscout::vehicleCar).toUInt();
 }
 
-void Settings::SetRoutingVehicle(const osmscout::AbstractRoutingProfile::Vehicle& vehicle)
+void Settings::SetRoutingVehicle(const osmscout::Vehicle& vehicle)
 {
   settings.setValue("routing/vehicle", (unsigned int)vehicle);
 }

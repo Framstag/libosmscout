@@ -99,7 +99,7 @@ private:
   osmscout::MapData            data;
   osmscout::MapPainterQt       painter;
   osmscout::RouterParameter    routerParameter;
-  osmscout::Router             router;
+  osmscout::RouterRef          router;
   osmscout::RoutePostprocessor routePostprocessor;
   QString                      iconDirectory;
 
@@ -129,6 +129,7 @@ private:
 private:
   bool OpenGLSupported() const;
   void FreeMaps();
+  bool AssureRouter(osmscout::Vehicle vehicle);
 
 public:
   DBThread(const SettingsRef& settings);
@@ -155,19 +156,22 @@ public:
                             size_t limit,
                             bool& limitReached) const;
 
-  bool CalculateRoute(const osmscout::RoutingProfile& routingProfile,
+  bool CalculateRoute(osmscout::Vehicle vehicle,
+                      const osmscout::RoutingProfile& routingProfile,
                       const osmscout::ObjectFileRef& startObject,
                       size_t startNodeIndex,
                       const osmscout::ObjectFileRef targetObject,
                       size_t targetNodeIndex,
                       osmscout::RouteData& route);
 
-  bool TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
+  bool TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
+                                            const osmscout::RoutingProfile& routingProfile,
                                             const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,
                                             const std::string& start,
                                             const std::string& target);
-  bool TransformRouteDataToWay(const osmscout::RouteData& data,
+  bool TransformRouteDataToWay(osmscout::Vehicle vehicle,
+                               const osmscout::RouteData& data,
                                osmscout::Way& way);
 
   void ClearRoute();

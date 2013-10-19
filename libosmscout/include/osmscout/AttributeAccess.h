@@ -71,14 +71,59 @@ namespace osmscout {
       return access & (footForward|footBackward|bicycleForward|bicycleBackward|carForward|carBackward);
     }
 
+    inline bool CanRoute(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return access & (footForward|footBackward);
+      case vehicleBicycle:
+        return access & (bicycleForward|bicycleBackward);
+      case vehicleCar:
+        return access & (carForward|carBackward);
+      }
+
+      return false;
+    }
+
     inline bool CanRouteForward() const
     {
       return access & (footForward|bicycleForward|carForward);
     }
 
+    inline bool CanRouteForward(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return access & footForward;
+      case vehicleBicycle:
+        return access & bicycleForward;
+      case vehicleCar:
+        return access & carForward;
+      }
+
+      return false;
+    }
+
     inline bool CanRouteBackward() const
     {
       return access & (footBackward|bicycleBackward|carBackward);
+    }
+
+    inline bool CanRouteBackward(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return access & footBackward;
+      case vehicleBicycle:
+        return access & bicycleBackward;
+      case vehicleCar:
+        return access & carBackward;
+      }
+
+      return false;
     }
 
     inline bool CanRouteFoot() const

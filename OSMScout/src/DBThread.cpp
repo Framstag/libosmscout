@@ -57,7 +57,6 @@ DBThread::DBThread(const SettingsRef& settings)
  : settings(settings),
    database(databaseParameter),
    styleConfig(NULL),
-   router(routerParameter),
    iconDirectory(),
    currentImage(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
@@ -93,9 +92,6 @@ bool DBThread::OpenGLSupported() const
 void DBThread::FreeMaps()
 {
 #if defined(HAVE_LIB_QTOPENGL)
-  std::cout << currentGLPixmap << " " << finishedGLPixmap << std::endl;
-
-
   delete currentGLPixmap;
   currentGLPixmap=NULL;
 
@@ -110,6 +106,34 @@ void DBThread::FreeMaps()
   finishedImage=NULL;
 }
 
+bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
+{
+  if (!database.IsOpen()) {
+    return false;
+  }
+
+  if (router.Invalid() ||
+      (router.Valid() && router->GetVehicle()!=vehicle)) {
+    if (router.Valid()) {
+      if (router->IsOpen()) {
+        router->Close();
+      }
+      router=NULL;
+    }
+
+    router=new osmscout::Router(routerParameter,
+                                vehicle);
+
+    std::cout << "Opening routing database..." << std::endl;
+    if (!router->Open(database.GetPath())) {
+      return false;
+    }
+    std::cout << "done." << std::endl;
+  }
+
+  return true;
+}
+
 void DBThread::Initialize()
 {
   QStringList cmdLineArgs = QApplication::arguments();
@@ -117,8 +141,7 @@ void DBThread::Initialize()
   QString stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
 
-  if (database.Open(databaseDirectory.toLocal8Bit().data()) &&
-      router.Open(databaseDirectory.toLocal8Bit().data())) {
+  if (database.Open(databaseDirectory.toLocal8Bit().data())) {
     if (database.GetTypeConfig()!=NULL) {
       styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
 
@@ -158,8 +181,8 @@ void DBThread::Finalize()
 {
   FreeMaps();
 
-  if (router.IsOpen()) {
-    router.Close();
+  if (router.Valid() && router->IsOpen()) {
+    router->Close();
   }
 
   if (database.IsOpen()) {
@@ -575,7 +598,8 @@ bool DBThread::GetMatchingLocations(const osmscout::AdminRegion& region,
                                        false);
 }
 
-bool DBThread::CalculateRoute(const osmscout::RoutingProfile& routingProfile,
+bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
+                              const osmscout::RoutingProfile& routingProfile,
                               const osmscout::ObjectFileRef& startObject,
                               size_t startNodeIndex,
                               const osmscout::ObjectFileRef targetObject,
@@ -584,15 +608,20 @@ bool DBThread::CalculateRoute(const osmscout::RoutingProfile& routingProfile,
 {
   QMutexLocker locker(&mutex);
 
-  return router.CalculateRoute(routingProfile,
-                               startObject,
-                               startNodeIndex,
-                               targetObject,
-                               targetNodeIndex,
-                               route);
+  if (!AssureRouter(vehicle)) {
+    return false;
+  }
+
+  return router->CalculateRoute(routingProfile,
+                                startObject,
+                                startNodeIndex,
+                                targetObject,
+                                targetNodeIndex,
+                                route);
 }
 
-bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
+bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
+                                                    const osmscout::RoutingProfile& routingProfile,
                                                     const osmscout::RouteData& data,
                                                     osmscout::RouteDescription& description,
                                                     const std::string& start,
@@ -600,11 +629,15 @@ bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RoutingProfi
 {
   QMutexLocker locker(&mutex);
 
-  if (!router.TransformRouteDataToRouteDescription(data,description)) {
+  if (!AssureRouter(vehicle)) {
     return false;
   }
 
-  osmscout::TypeConfig *typeConfig=router.GetTypeConfig();
+  if (!router->TransformRouteDataToRouteDescription(data,description)) {
+    return false;
+  }
+
+  osmscout::TypeConfig *typeConfig=router->GetTypeConfig();
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
@@ -635,12 +668,17 @@ bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RoutingProfi
   return true;
 }
 
-bool DBThread::TransformRouteDataToWay(const osmscout::RouteData& data,
+bool DBThread::TransformRouteDataToWay(osmscout::Vehicle vehicle,
+                                       const osmscout::RouteData& data,
                                        osmscout::Way& way)
 {
   QMutexLocker locker(&mutex);
 
-  return router.TransformRouteDataToWay(data,way);
+  if (!AssureRouter(vehicle)) {
+    return false;
+  }
+
+  return router->TransformRouteDataToWay(data,way);
 }
 
 

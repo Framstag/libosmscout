@@ -23,6 +23,7 @@
 #include <osmscout/NumericIndex.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/TurnRestriction.h>
+#include <osmscout/Types.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
@@ -65,6 +66,10 @@ namespace osmscout {
     typedef std::map<Id,std::list<ObjectFileRef> >         NodeIdObjectsMap;
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
+
+  private:
+    Vehicle     vehicle;
+    std::string filename;
 
   private:
     /**
@@ -195,6 +200,8 @@ namespace osmscout {
                               size_t blockCount);
 
   public:
+    RouteDataGenerator(Vehicle vehicle,
+                       const std::string& filename);
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
                 Progress& progress,

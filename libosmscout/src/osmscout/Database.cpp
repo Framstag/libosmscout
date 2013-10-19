@@ -363,6 +363,11 @@ namespace osmscout {
     wayDataFile.FlushCache();
   }
 
+  std::string Database::GetPath() const
+  {
+    return path;
+  }
+
   TypeConfig* Database::GetTypeConfig() const
   {
     return typeConfig;

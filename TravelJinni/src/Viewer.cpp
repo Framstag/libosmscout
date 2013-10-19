@@ -66,7 +66,7 @@ static Lum::Def::AppInfo info;
 
 static osmscout::StyleConfig *styleConfig;
 static osmscout::Database    *database=NULL;
-static osmscout::Router      *router=NULL;
+static osmscout::RouterRef   router;
 static Lum::Model::ActionRef jobFinishedAction;
 static DatabaseTask          *databaseTask=NULL;
 
@@ -697,7 +697,8 @@ public:
     databaseParameter.SetDebugPerformance(true);
 
     database=new osmscout::Database(databaseParameter);
-    router=new osmscout::Router(routerParameter);
+    router=new osmscout::Router(routerParameter,
+                                osmscout::vehicleCar);
 
     jobFinishedAction=new Lum::Model::Action();
 
@@ -737,8 +738,6 @@ public:
     if (router->IsOpen()) {
       router->Close();
     }
-    delete router;
-    router=NULL;
 
     if (database->IsOpen()) {
       database->Close();

@@ -100,9 +100,17 @@ namespace osmscout {
     return flags;
   }
 
+  RouteDataGenerator::RouteDataGenerator(Vehicle vehicle,
+                                         const std::string& filename)
+  : vehicle(vehicle),
+    filename(filename)
+  {
+    // no code
+  }
+
   std::string RouteDataGenerator::GetDescription() const
   {
-    return "Generate 'route.dat'";
+    return "Generate '"+filename+"'";
   }
 
   bool RouteDataGenerator::ReadTurnRestrictionWayIds(const ImportParameter& parameter,
@@ -478,9 +486,7 @@ namespace osmscout {
         continue;
       }
 
-      if (!(typeConfig.GetTypeInfo(area.GetType()).CanRouteFoot() ||
-            typeConfig.GetTypeInfo(area.GetType()).CanRouteBicycle() ||
-            typeConfig.GetTypeInfo(area.GetType()).CanRouteCar())) {
+      if (!typeConfig.GetTypeInfo(area.GetType()).CanRoute()) {
         continue;
       }
 
@@ -1301,7 +1307,7 @@ namespace osmscout {
     FileScanner                       routeScanner;
 
     if (!routeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                           "route.dat"),
+                                           filename),
                            FileScanner::LowMemRandom,
                            false)) {
       progress.Error("Cannot open '"+routeScanner.GetFilename()+"'");
@@ -1387,7 +1393,7 @@ namespace osmscout {
                                   Progress& progress,
                                   const TypeConfig& typeConfig)
   {
-    progress.SetAction("Generate route.dat");
+    progress.SetAction("Generate '"+filename+"'");
 
     FileScanner                            wayScanner;
     FileScanner                            areaScanner;
@@ -1456,8 +1462,8 @@ namespace osmscout {
     progress.SetAction("Writing route nodes");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "route.dat"))) {
-      progress.Error("Cannot create 'route.dat'");
+                                     filename))) {
+      progress.Error("Cannot create '"+filename+"'");
       return false;
     }
 
@@ -1585,6 +1591,10 @@ namespace osmscout {
               continue;
             }
 
+            if (!way->GetAttributes().GetAccess().CanRoute(vehicle)) {
+              continue;
+            }
+
             // Circular way routing (similar to current area routing, but respecting isOneway())
             if (way->ids.front()==way->ids.back()) {
               CalculateCircularWayPaths(routeNode,
@@ -1616,6 +1626,10 @@ namespace osmscout {
               continue;
             }
 
+            if (!typeConfig.GetTypeInfo(area->GetType()).CanRoute()) {
+              continue;
+            }
+
             routeNode.objects.push_back(*ref);
 
             CalculateAreaPaths(typeConfig,
@@ -1634,6 +1648,10 @@ namespace osmscout {
                               restrictions);
 
         node->second.clear();
+
+        if (routeNode.paths.empty()) {
+          continue;
+        }
 
         if (!routeNode.Write(writer)) {
           progress.Error(std::string("Error while writing route node to file '")+

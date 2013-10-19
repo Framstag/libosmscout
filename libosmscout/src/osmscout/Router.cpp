@@ -72,15 +72,26 @@ namespace osmscout {
     return debugPerformance;
   }
 
-  Router::Router(const RouterParameter& parameter)
-   : isOpen(false),
+  const char* const Router::FILENAME_FOOT_DAT    = "routefoot.dat";
+  const char* const Router::FILENAME_FOOT_IDX    = "routefoot.idx";
+
+  const char* const Router::FILENAME_BICYCLE_DAT = "routebicycle.dat";
+  const char* const Router::FILENAME_BICYCLE_IDX = "routebicycle.idx";
+
+  const char* const Router::FILENAME_CAR_DAT     = "routecar.dat";
+  const char* const Router::FILENAME_CAR_IDX     = "routecar.idx";
+
+  Router::Router(const RouterParameter& parameter,
+                 Vehicle vehicle)
+   : vehicle(vehicle),
+     isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
      areaDataFile("areas.dat",
                   parameter.GetWayCacheSize()),
      wayDataFile("ways.dat",
                   parameter.GetWayCacheSize()),
-     routeNodeDataFile("route.dat",
-                       "route.idx",
+     routeNodeDataFile(GetDataFilename(vehicle),
+                       GetIndexFilename(vehicle),
                        0,
                        6000),
      typeConfig(NULL)
@@ -90,7 +101,48 @@ namespace osmscout {
 
   Router::~Router()
   {
+    if (isOpen) {
+      Close();
+    }
+
     delete typeConfig;
+  }
+
+  std::string Router::GetDataFilename(Vehicle vehicle) const
+  {
+    switch (vehicle) {
+    case vehicleFoot:
+      return FILENAME_FOOT_DAT;
+    case vehicleBicycle:
+      return FILENAME_BICYCLE_DAT;
+    case vehicleCar:
+      return FILENAME_CAR_DAT;
+    default:
+      assert(false);
+    }
+
+    return ""; // make the compiler happy
+  }
+
+  std::string Router::GetIndexFilename(Vehicle vehicle) const
+  {
+    switch (vehicle) {
+    case vehicleFoot:
+      return FILENAME_FOOT_IDX;
+    case vehicleBicycle:
+      return FILENAME_BICYCLE_IDX;
+    case vehicleCar:
+      return FILENAME_CAR_IDX;
+    default:
+      assert(false);
+    }
+
+    return ""; // make the compiler happy
+  }
+
+  Vehicle Router::GetVehicle() const
+  {
+    return vehicle;
   }
 
   bool Router::Open(const std::string& path)

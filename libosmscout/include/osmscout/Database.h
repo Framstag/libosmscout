@@ -215,6 +215,7 @@ namespace osmscout {
 
     void FlushCache();
 
+    std::string GetPath() const;
     TypeConfig* GetTypeConfig() const;
 
     bool GetBoundingBox(double& minLat,double& minLon,

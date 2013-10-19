@@ -288,6 +288,26 @@ namespace osmscout {
       return *this;
     }
 
+    inline bool CanRoute() const
+    {
+      return canRouteFoot || canRouteBicycle || canRouteCar;
+    }
+
+    inline bool CanRoute(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return canRouteFoot;
+      case vehicleBicycle:
+        return canRouteBicycle;
+      case vehicleCar:
+        return canRouteCar;
+      }
+
+      return false;
+    }
+
     inline bool CanRouteFoot() const
     {
       return canRouteFoot;
