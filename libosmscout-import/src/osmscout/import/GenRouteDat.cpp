@@ -1653,6 +1653,10 @@ namespace osmscout {
           continue;
         }
 
+        if (routeNode.paths.size()==1) {
+          simpleNodesCount++;
+        }
+
         if (!routeNode.Write(writer)) {
           progress.Error(std::string("Error while writing route node to file '")+
                          writer.GetFilename()+"'");
