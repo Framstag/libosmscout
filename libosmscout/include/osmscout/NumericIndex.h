@@ -310,7 +310,7 @@ namespace osmscout {
     size_t r=GetPageIndex(root,id);
 
     if (!root->IndexIsValid(r)) {
-      //std::cerr << "Id " << id << " not found in root index!" << std::endl;
+      //std::cerr << "Id " << id << " not found in root index, " << root->entries.front().startId << "-" << root->entries.back().startId << std::endl;
       return false;
     }
 
