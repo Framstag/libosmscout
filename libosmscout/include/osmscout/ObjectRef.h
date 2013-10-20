@@ -32,14 +32,10 @@ namespace osmscout {
     osmRefRelation = 3
   };
 
-  enum RefType
-  {
-    refNone     = 0,
-    refNode     = 1,
-    refArea     = 2,
-    refWay      = 3
-  };
-
+  /**
+   * Reference to an OSM object by its type (Node, Way, Relation) and its
+   * OSM object id.
+   */
   class OSMSCOUT_API ObjectOSMRef
   {
   public:
@@ -113,6 +109,18 @@ namespace osmscout {
     const char* GetTypeName() const;
   };
 
+  enum RefType
+  {
+    refNone     = 0,
+    refNode     = 1,
+    refArea     = 2,
+    refWay      = 3
+  };
+
+  /**
+   * Reference to an libosmscout internal object by its type (area, way, node)
+   * and by its file offset within its data file.
+   */
   class OSMSCOUT_API ObjectFileRef
   {
   public:
@@ -184,6 +192,20 @@ namespace osmscout {
     }
 
     const char* GetTypeName() const;
+  };
+
+
+  /**
+   * Comparator to sort ObjectFileRefs strictly by increasing file offset
+   */
+  class OSMSCOUT_API ObjectFileRefByFileOffsetComparator
+  {
+    public:
+    inline bool operator()(const ObjectFileRef& a,
+                           const ObjectFileRef& b) const
+    {
+      return a.GetFileOffset()<b.GetFileOffset();
+    }
   };
 }
 
