@@ -556,18 +556,9 @@ namespace osmscout {
   {
     assert(DataFile<N>::isOpen);
 
-    std::vector<I> i;
-
-    i.reserve(ids.size());
-    for (typename std::set<I>::const_iterator id=ids.begin();
-         id!=ids.end();
-         ++id) {
-      i.push_back(*id);
-    }
-
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(i,offsets)) {
+    if (!index.GetOffsets(ids,offsets)) {
       return false;
     }
 
