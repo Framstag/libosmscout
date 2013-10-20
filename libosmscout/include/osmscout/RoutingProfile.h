@@ -46,6 +46,8 @@ namespace osmscout {
                         size_t pathIndex) const = 0;
     virtual bool CanUse(const Area& area) const = 0;
     virtual bool CanUse(const Way& way) const = 0;
+    virtual bool CanUseForward(const Way& way) const = 0;
+    virtual bool CanUseBackward(const Way& way) const = 0;
 
     virtual double GetCosts(const RouteNode& currentNode,
                             size_t pathIndex) const = 0;
@@ -135,6 +137,52 @@ namespace osmscout {
         break;
       case vehicleCar:
         return way.GetAttributes().GetAccess().CanRouteCar();
+        break;
+      }
+
+      return false;
+    }
+
+    inline bool CanUseForward(const Way& way) const
+    {
+      TypeId type=way.GetType();
+
+      if (type>=speeds.size() || speeds[type]<=0.0) {
+        return false;
+      }
+
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetAttributes().GetAccess().CanRouteFootForward();
+        break;
+      case vehicleBicycle:
+        return way.GetAttributes().GetAccess().CanRouteBicycleForward();
+        break;
+      case vehicleCar:
+        return way.GetAttributes().GetAccess().CanRouteCarForward();
+        break;
+      }
+
+      return false;
+    }
+
+    inline bool CanUseBackward(const Way& way) const
+    {
+      TypeId type=way.GetType();
+
+      if (type>=speeds.size() || speeds[type]<=0.0) {
+        return false;
+      }
+
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetAttributes().GetAccess().CanRouteFootBackward();
+        break;
+      case vehicleBicycle:
+        return way.GetAttributes().GetAccess().CanRouteBicycleBackward();
+        break;
+      case vehicleCar:
+        return way.GetAttributes().GetAccess().CanRouteCarBackward();
         break;
       }
 
