@@ -19,19 +19,16 @@
 		F51E3F06161A5FEC00D51926 /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBA161A5FEC00D51926 /* Node.cpp */; };
 		F51E3F07161A5FEC00D51926 /* NumericIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBB161A5FEC00D51926 /* NumericIndex.cpp */; };
 		F51E3F08161A5FEC00D51926 /* ObjectRef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBC161A5FEC00D51926 /* ObjectRef.cpp */; };
-		F51E3F09161A5FEC00D51926 /* OptimizeLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBD161A5FEC00D51926 /* OptimizeLowZoom.cpp */; };
 		F51E3F0A161A5FEC00D51926 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC2161A5FEC00D51926 /* Parser.cpp */; };
 		F51E3F0B161A5FEC00D51926 /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC3161A5FEC00D51926 /* Scanner.cpp */; };
 		F51E3F0C161A5FEC00D51926 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC4161A5FEC00D51926 /* Path.cpp */; };
 		F51E3F0D161A5FEC00D51926 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC5161A5FEC00D51926 /* Point.cpp */; };
-		F51E3F0E161A5FEC00D51926 /* Relation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC6161A5FEC00D51926 /* Relation.cpp */; };
 		F51E3F0F161A5FEC00D51926 /* Route.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC7161A5FEC00D51926 /* Route.cpp */; };
 		F51E3F10161A5FEC00D51926 /* RouteData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC8161A5FEC00D51926 /* RouteData.cpp */; };
 		F51E3F11161A5FEC00D51926 /* RouteNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC9161A5FEC00D51926 /* RouteNode.cpp */; };
 		F51E3F12161A5FEC00D51926 /* RoutePostprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECA161A5FEC00D51926 /* RoutePostprocessor.cpp */; };
 		F51E3F13161A5FEC00D51926 /* Router.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECB161A5FEC00D51926 /* Router.cpp */; };
 		F51E3F14161A5FEC00D51926 /* RoutingProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECC161A5FEC00D51926 /* RoutingProfile.cpp */; };
-		F51E3F15161A5FEC00D51926 /* SegmentAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECD161A5FEC00D51926 /* SegmentAttributes.cpp */; };
 		F51E3F16161A5FEC00D51926 /* SSEMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED1161A5FEC00D51926 /* SSEMath.cpp */; };
 		F51E3F17161A5FEC00D51926 /* Tag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED2161A5FEC00D51926 /* Tag.cpp */; };
 		F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */; };
@@ -70,17 +67,14 @@
 		F53BD1AD1638866B006C7AE1 /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBA161A5FEC00D51926 /* Node.cpp */; };
 		F53BD1AE1638866B006C7AE1 /* NumericIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBB161A5FEC00D51926 /* NumericIndex.cpp */; };
 		F53BD1AF1638866B006C7AE1 /* ObjectRef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBC161A5FEC00D51926 /* ObjectRef.cpp */; };
-		F53BD1B01638866B006C7AE1 /* OptimizeLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EBD161A5FEC00D51926 /* OptimizeLowZoom.cpp */; };
 		F53BD1B116388673006C7AE1 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC4161A5FEC00D51926 /* Path.cpp */; };
 		F53BD1B216388673006C7AE1 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC5161A5FEC00D51926 /* Point.cpp */; };
-		F53BD1B316388673006C7AE1 /* Relation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC6161A5FEC00D51926 /* Relation.cpp */; };
 		F53BD1B416388673006C7AE1 /* Route.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC7161A5FEC00D51926 /* Route.cpp */; };
 		F53BD1B516388673006C7AE1 /* RouteData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC8161A5FEC00D51926 /* RouteData.cpp */; };
 		F53BD1B616388673006C7AE1 /* RouteNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC9161A5FEC00D51926 /* RouteNode.cpp */; };
 		F53BD1B716388673006C7AE1 /* RoutePostprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECA161A5FEC00D51926 /* RoutePostprocessor.cpp */; };
 		F53BD1B816388673006C7AE1 /* Router.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECB161A5FEC00D51926 /* Router.cpp */; };
 		F53BD1B916388673006C7AE1 /* RoutingProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECC161A5FEC00D51926 /* RoutingProfile.cpp */; };
-		F53BD1BA16388673006C7AE1 /* SegmentAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ECD161A5FEC00D51926 /* SegmentAttributes.cpp */; };
 		F53BD1BB1638867D006C7AE1 /* Tag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED2161A5FEC00D51926 /* Tag.cpp */; };
 		F53BD1BC1638867D006C7AE1 /* TurnRestriction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */; };
 		F53BD1BD1638867D006C7AE1 /* TypeConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED4161A5FEC00D51926 /* TypeConfig.cpp */; };
@@ -109,6 +103,43 @@
 		F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF9161A5FEC00D51926 /* StopClock.cpp */; };
 		F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFA161A5FEC00D51926 /* String.cpp */; };
 		F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFB161A5FEC00D51926 /* Transformation.cpp */; };
+		F54DAA491815DA6500625DDA /* Area.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA3F1815DA6500625DDA /* Area.cpp */; };
+		F54DAA4A1815DA6500625DDA /* AttributeAccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA401815DA6500625DDA /* AttributeAccess.cpp */; };
+		F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA411815DA6500625DDA /* Coord.cpp */; };
+		F54DAA4C1815DA6500625DDA /* CoordDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA421815DA6500625DDA /* CoordDataFile.cpp */; };
+		F54DAA4D1815DA6500625DDA /* DebugDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA431815DA6500625DDA /* DebugDatabase.cpp */; };
+		F54DAA4E1815DA6500625DDA /* GeoCoord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA441815DA6500625DDA /* GeoCoord.cpp */; };
+		F54DAA4F1815DA6500625DDA /* OptimizeAreasLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA451815DA6500625DDA /* OptimizeAreasLowZoom.cpp */; };
+		F54DAA501815DA6500625DDA /* OptimizeWaysLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA461815DA6500625DDA /* OptimizeWaysLowZoom.cpp */; };
+		F54DAA511815DA6500625DDA /* Pixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA471815DA6500625DDA /* Pixel.cpp */; };
+		F54DAA521815DA6500625DDA /* SRTM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA481815DA6500625DDA /* SRTM.cpp */; };
+		F54DAA531815DA7800625DDA /* Area.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA3F1815DA6500625DDA /* Area.cpp */; };
+		F54DAA541815DA7C00625DDA /* AttributeAccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA401815DA6500625DDA /* AttributeAccess.cpp */; };
+		F54DAA551815DA8000625DDA /* Coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA411815DA6500625DDA /* Coord.cpp */; };
+		F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA421815DA6500625DDA /* CoordDataFile.cpp */; };
+		F54DAA571815DA8900625DDA /* DebugDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA431815DA6500625DDA /* DebugDatabase.cpp */; };
+		F54DAA581815DA8D00625DDA /* GeoCoord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA441815DA6500625DDA /* GeoCoord.cpp */; };
+		F54DAA591815DA9000625DDA /* OptimizeAreasLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA451815DA6500625DDA /* OptimizeAreasLowZoom.cpp */; };
+		F54DAA5A1815DA9400625DDA /* OptimizeWaysLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA461815DA6500625DDA /* OptimizeWaysLowZoom.cpp */; };
+		F54DAA5B1815DA9700625DDA /* Pixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA471815DA6500625DDA /* Pixel.cpp */; };
+		F54DAA5C1815DA9A00625DDA /* SRTM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA481815DA6500625DDA /* SRTM.cpp */; };
+		F54DAA5F1815DAFB00625DDA /* NodeUseMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */; };
+		F54DAA601815DAFB00625DDA /* NodeUseMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */; };
+		F54DAA611815DAFB00625DDA /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5E1815DAFB00625DDA /* Parser.cpp */; };
+		F54DAA621815DAFB00625DDA /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5E1815DAFB00625DDA /* Parser.cpp */; };
+		F54DAA6E1815DB3F00625DDA /* Area.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA631815DB3F00625DDA /* Area.h */; };
+		F54DAA6F1815DB3F00625DDA /* AreaDataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA641815DB3F00625DDA /* AreaDataFile.h */; };
+		F54DAA701815DB3F00625DDA /* AttributeAccess.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA651815DB3F00625DDA /* AttributeAccess.h */; };
+		F54DAA711815DB3F00625DDA /* Coord.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA661815DB3F00625DDA /* Coord.h */; };
+		F54DAA721815DB3F00625DDA /* CoordDataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA671815DB3F00625DDA /* CoordDataFile.h */; };
+		F54DAA731815DB3F00625DDA /* DebugDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA681815DB3F00625DDA /* DebugDatabase.h */; };
+		F54DAA741815DB3F00625DDA /* GeoCoord.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA691815DB3F00625DDA /* GeoCoord.h */; };
+		F54DAA751815DB3F00625DDA /* OptimizeAreasLowZoom.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6A1815DB3F00625DDA /* OptimizeAreasLowZoom.h */; };
+		F54DAA761815DB3F00625DDA /* OptimizeWaysLowZoom.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6B1815DB3F00625DDA /* OptimizeWaysLowZoom.h */; };
+		F54DAA771815DB3F00625DDA /* Pixel.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6C1815DB3F00625DDA /* Pixel.h */; };
+		F54DAA781815DB3F00625DDA /* SRTM.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6D1815DB3F00625DDA /* SRTM.h */; };
+		F54DAA7B1815DB7D00625DDA /* NodeUseMap.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA791815DB7D00625DDA /* NodeUseMap.h */; };
+		F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA7A1815DB7D00625DDA /* Parser.h */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 /* End PBXBuildFile section */
@@ -139,19 +170,16 @@
 		F51E3EBA161A5FEC00D51926 /* Node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Node.cpp; path = ../../../../libosmscout/src/osmscout/Node.cpp; sourceTree = "<group>"; };
 		F51E3EBB161A5FEC00D51926 /* NumericIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NumericIndex.cpp; path = ../../../../libosmscout/src/osmscout/NumericIndex.cpp; sourceTree = "<group>"; };
 		F51E3EBC161A5FEC00D51926 /* ObjectRef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectRef.cpp; path = ../../../../libosmscout/src/osmscout/ObjectRef.cpp; sourceTree = "<group>"; };
-		F51E3EBD161A5FEC00D51926 /* OptimizeLowZoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptimizeLowZoom.cpp; path = ../../../../libosmscout/src/osmscout/OptimizeLowZoom.cpp; sourceTree = "<group>"; };
 		F51E3EC2161A5FEC00D51926 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
 		F51E3EC3161A5FEC00D51926 /* Scanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scanner.cpp; sourceTree = "<group>"; };
 		F51E3EC4161A5FEC00D51926 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Path.cpp; path = ../../../../libosmscout/src/osmscout/Path.cpp; sourceTree = "<group>"; };
 		F51E3EC5161A5FEC00D51926 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point.cpp; path = ../../../../libosmscout/src/osmscout/Point.cpp; sourceTree = "<group>"; };
-		F51E3EC6161A5FEC00D51926 /* Relation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Relation.cpp; path = ../../../../libosmscout/src/osmscout/Relation.cpp; sourceTree = "<group>"; };
 		F51E3EC7161A5FEC00D51926 /* Route.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Route.cpp; path = ../../../../libosmscout/src/osmscout/Route.cpp; sourceTree = "<group>"; };
 		F51E3EC8161A5FEC00D51926 /* RouteData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RouteData.cpp; path = ../../../../libosmscout/src/osmscout/RouteData.cpp; sourceTree = "<group>"; };
 		F51E3EC9161A5FEC00D51926 /* RouteNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RouteNode.cpp; path = ../../../../libosmscout/src/osmscout/RouteNode.cpp; sourceTree = "<group>"; };
 		F51E3ECA161A5FEC00D51926 /* RoutePostprocessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RoutePostprocessor.cpp; path = ../../../../libosmscout/src/osmscout/RoutePostprocessor.cpp; sourceTree = "<group>"; };
 		F51E3ECB161A5FEC00D51926 /* Router.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Router.cpp; path = ../../../../libosmscout/src/osmscout/Router.cpp; sourceTree = "<group>"; };
 		F51E3ECC161A5FEC00D51926 /* RoutingProfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RoutingProfile.cpp; path = ../../../../libosmscout/src/osmscout/RoutingProfile.cpp; sourceTree = "<group>"; };
-		F51E3ECD161A5FEC00D51926 /* SegmentAttributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SegmentAttributes.cpp; path = ../../../../libosmscout/src/osmscout/SegmentAttributes.cpp; sourceTree = "<group>"; };
 		F51E3ED1161A5FEC00D51926 /* SSEMath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SSEMath.cpp; sourceTree = "<group>"; };
 		F51E3ED2161A5FEC00D51926 /* Tag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tag.cpp; path = ../../../../libosmscout/src/osmscout/Tag.cpp; sourceTree = "<group>"; };
 		F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TurnRestriction.cpp; path = ../../../../libosmscout/src/osmscout/TurnRestriction.cpp; sourceTree = "<group>"; };
@@ -193,7 +221,6 @@
 		F51E3F3D161A604300D51926 /* NodeDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeDataFile.h; sourceTree = "<group>"; };
 		F51E3F3E161A604300D51926 /* NumericIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NumericIndex.h; sourceTree = "<group>"; };
 		F51E3F3F161A604300D51926 /* ObjectRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectRef.h; sourceTree = "<group>"; };
-		F51E3F40161A604300D51926 /* OptimizeLowZoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OptimizeLowZoom.h; sourceTree = "<group>"; };
 		F51E3F42161A604300D51926 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
 		F51E3F43161A604300D51926 /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scanner.h; sourceTree = "<group>"; };
 		F51E3F44161A604300D51926 /* Path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Path.h; sourceTree = "<group>"; };
@@ -201,16 +228,12 @@
 		F51E3F48161A604300D51926 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		F51E3F49161A604300D51926 /* Config.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Config.h.in; sourceTree = "<group>"; };
 		F51E3F4A161A604300D51926 /* CoreImportExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreImportExport.h; sourceTree = "<group>"; };
-		F51E3F4B161A604300D51926 /* Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Math.h; sourceTree = "<group>"; };
-		F51E3F4D161A604300D51926 /* Relation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Relation.h; sourceTree = "<group>"; };
-		F51E3F4E161A604300D51926 /* RelationDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RelationDataFile.h; sourceTree = "<group>"; };
 		F51E3F4F161A604300D51926 /* Route.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Route.h; sourceTree = "<group>"; };
 		F51E3F50161A604300D51926 /* RouteData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RouteData.h; sourceTree = "<group>"; };
 		F51E3F51161A604300D51926 /* RouteNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RouteNode.h; sourceTree = "<group>"; };
 		F51E3F52161A604300D51926 /* RoutePostprocessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoutePostprocessor.h; sourceTree = "<group>"; };
 		F51E3F53161A604300D51926 /* Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Router.h; sourceTree = "<group>"; };
 		F51E3F54161A604300D51926 /* RoutingProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoutingProfile.h; sourceTree = "<group>"; };
-		F51E3F55161A604300D51926 /* SegmentAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SegmentAttributes.h; sourceTree = "<group>"; };
 		F51E3F58161A604300D51926 /* SSEMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSEMath.h; sourceTree = "<group>"; };
 		F51E3F59161A604300D51926 /* SSEMathPublic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSEMathPublic.h; sourceTree = "<group>"; };
 		F51E3F5A161A604300D51926 /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
@@ -245,6 +268,31 @@
 		F53BD15C16388375006C7AE1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		F53BD15D16388375006C7AE1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F53BD15E16388375006C7AE1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F54DAA3F1815DA6500625DDA /* Area.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Area.cpp; path = ../../../../libosmscout/src/osmscout/Area.cpp; sourceTree = "<group>"; };
+		F54DAA401815DA6500625DDA /* AttributeAccess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AttributeAccess.cpp; path = ../../../../libosmscout/src/osmscout/AttributeAccess.cpp; sourceTree = "<group>"; };
+		F54DAA411815DA6500625DDA /* Coord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Coord.cpp; path = ../../../../libosmscout/src/osmscout/Coord.cpp; sourceTree = "<group>"; };
+		F54DAA421815DA6500625DDA /* CoordDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CoordDataFile.cpp; path = ../../../../libosmscout/src/osmscout/CoordDataFile.cpp; sourceTree = "<group>"; };
+		F54DAA431815DA6500625DDA /* DebugDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugDatabase.cpp; path = ../../../../libosmscout/src/osmscout/DebugDatabase.cpp; sourceTree = "<group>"; };
+		F54DAA441815DA6500625DDA /* GeoCoord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GeoCoord.cpp; path = ../../../../libosmscout/src/osmscout/GeoCoord.cpp; sourceTree = "<group>"; };
+		F54DAA451815DA6500625DDA /* OptimizeAreasLowZoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptimizeAreasLowZoom.cpp; path = ../../../../libosmscout/src/osmscout/OptimizeAreasLowZoom.cpp; sourceTree = "<group>"; };
+		F54DAA461815DA6500625DDA /* OptimizeWaysLowZoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptimizeWaysLowZoom.cpp; path = ../../../../libosmscout/src/osmscout/OptimizeWaysLowZoom.cpp; sourceTree = "<group>"; };
+		F54DAA471815DA6500625DDA /* Pixel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Pixel.cpp; path = ../../../../libosmscout/src/osmscout/Pixel.cpp; sourceTree = "<group>"; };
+		F54DAA481815DA6500625DDA /* SRTM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SRTM.cpp; path = ../../../../libosmscout/src/osmscout/SRTM.cpp; sourceTree = "<group>"; };
+		F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NodeUseMap.cpp; sourceTree = "<group>"; };
+		F54DAA5E1815DAFB00625DDA /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		F54DAA631815DB3F00625DDA /* Area.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Area.h; sourceTree = "<group>"; };
+		F54DAA641815DB3F00625DDA /* AreaDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaDataFile.h; sourceTree = "<group>"; };
+		F54DAA651815DB3F00625DDA /* AttributeAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AttributeAccess.h; sourceTree = "<group>"; };
+		F54DAA661815DB3F00625DDA /* Coord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Coord.h; sourceTree = "<group>"; };
+		F54DAA671815DB3F00625DDA /* CoordDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoordDataFile.h; sourceTree = "<group>"; };
+		F54DAA681815DB3F00625DDA /* DebugDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugDatabase.h; sourceTree = "<group>"; };
+		F54DAA691815DB3F00625DDA /* GeoCoord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeoCoord.h; sourceTree = "<group>"; };
+		F54DAA6A1815DB3F00625DDA /* OptimizeAreasLowZoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OptimizeAreasLowZoom.h; sourceTree = "<group>"; };
+		F54DAA6B1815DB3F00625DDA /* OptimizeWaysLowZoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OptimizeWaysLowZoom.h; sourceTree = "<group>"; };
+		F54DAA6C1815DB3F00625DDA /* Pixel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pixel.h; sourceTree = "<group>"; };
+		F54DAA6D1815DB3F00625DDA /* SRTM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRTM.h; sourceTree = "<group>"; };
+		F54DAA791815DB7D00625DDA /* NodeUseMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeUseMap.h; sourceTree = "<group>"; };
+		F54DAA7A1815DB7D00625DDA /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -309,6 +357,16 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F54DAA3F1815DA6500625DDA /* Area.cpp */,
+				F54DAA401815DA6500625DDA /* AttributeAccess.cpp */,
+				F54DAA411815DA6500625DDA /* Coord.cpp */,
+				F54DAA421815DA6500625DDA /* CoordDataFile.cpp */,
+				F54DAA431815DA6500625DDA /* DebugDatabase.cpp */,
+				F54DAA441815DA6500625DDA /* GeoCoord.cpp */,
+				F54DAA451815DA6500625DDA /* OptimizeAreasLowZoom.cpp */,
+				F54DAA461815DA6500625DDA /* OptimizeWaysLowZoom.cpp */,
+				F54DAA471815DA6500625DDA /* Pixel.cpp */,
+				F54DAA481815DA6500625DDA /* SRTM.cpp */,
 				F51E3EB2161A5FEC00D51926 /* AdminRegion.cpp */,
 				F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */,
 				F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */,
@@ -320,18 +378,15 @@
 				F51E3EBA161A5FEC00D51926 /* Node.cpp */,
 				F51E3EBB161A5FEC00D51926 /* NumericIndex.cpp */,
 				F51E3EBC161A5FEC00D51926 /* ObjectRef.cpp */,
-				F51E3EBD161A5FEC00D51926 /* OptimizeLowZoom.cpp */,
 				F51E3EBE161A5FEC00D51926 /* ost */,
 				F51E3EC4161A5FEC00D51926 /* Path.cpp */,
 				F51E3EC5161A5FEC00D51926 /* Point.cpp */,
-				F51E3EC6161A5FEC00D51926 /* Relation.cpp */,
 				F51E3EC7161A5FEC00D51926 /* Route.cpp */,
 				F51E3EC8161A5FEC00D51926 /* RouteData.cpp */,
 				F51E3EC9161A5FEC00D51926 /* RouteNode.cpp */,
 				F51E3ECA161A5FEC00D51926 /* RoutePostprocessor.cpp */,
 				F51E3ECB161A5FEC00D51926 /* Router.cpp */,
 				F51E3ECC161A5FEC00D51926 /* RoutingProfile.cpp */,
-				F51E3ECD161A5FEC00D51926 /* SegmentAttributes.cpp */,
 				F51E3ECE161A5FEC00D51926 /* system */,
 				F51E3ED2161A5FEC00D51926 /* Tag.cpp */,
 				F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */,
@@ -376,6 +431,8 @@
 		F51E3ED8161A5FEC00D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */,
+				F54DAA5E1815DAFB00625DDA /* Parser.cpp */,
 				F57B4945169341C7008E1B2C /* Magnification.cpp */,
 				F51E3EEB161A5FEC00D51926 /* Breaker.cpp */,
 				F51E3EEC161A5FEC00D51926 /* Cache.cpp */,
@@ -402,6 +459,17 @@
 		F51E3F30161A604300D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				F54DAA631815DB3F00625DDA /* Area.h */,
+				F54DAA641815DB3F00625DDA /* AreaDataFile.h */,
+				F54DAA651815DB3F00625DDA /* AttributeAccess.h */,
+				F54DAA661815DB3F00625DDA /* Coord.h */,
+				F54DAA671815DB3F00625DDA /* CoordDataFile.h */,
+				F54DAA681815DB3F00625DDA /* DebugDatabase.h */,
+				F54DAA691815DB3F00625DDA /* GeoCoord.h */,
+				F54DAA6A1815DB3F00625DDA /* OptimizeAreasLowZoom.h */,
+				F54DAA6B1815DB3F00625DDA /* OptimizeWaysLowZoom.h */,
+				F54DAA6C1815DB3F00625DDA /* Pixel.h */,
+				F54DAA6D1815DB3F00625DDA /* SRTM.h */,
 				F51E3F31161A604300D51926 /* AdminRegion.h */,
 				F51E3F32161A604300D51926 /* AreaAreaIndex.h */,
 				F51E3F33161A604300D51926 /* AreaNodeIndex.h */,
@@ -417,20 +485,16 @@
 				F51E3F3D161A604300D51926 /* NodeDataFile.h */,
 				F51E3F3E161A604300D51926 /* NumericIndex.h */,
 				F51E3F3F161A604300D51926 /* ObjectRef.h */,
-				F51E3F40161A604300D51926 /* OptimizeLowZoom.h */,
 				F51E3F41161A604300D51926 /* ost */,
 				F51E3F44161A604300D51926 /* Path.h */,
 				F51E3F45161A604300D51926 /* Point.h */,
 				F51E3F46161A604300D51926 /* private */,
-				F51E3F4D161A604300D51926 /* Relation.h */,
-				F51E3F4E161A604300D51926 /* RelationDataFile.h */,
 				F51E3F4F161A604300D51926 /* Route.h */,
 				F51E3F50161A604300D51926 /* RouteData.h */,
 				F51E3F51161A604300D51926 /* RouteNode.h */,
 				F51E3F52161A604300D51926 /* RoutePostprocessor.h */,
 				F51E3F53161A604300D51926 /* Router.h */,
 				F51E3F54161A604300D51926 /* RoutingProfile.h */,
-				F51E3F55161A604300D51926 /* SegmentAttributes.h */,
 				F51E3F57161A604300D51926 /* system */,
 				F51E3F5B161A604300D51926 /* Tag.h */,
 				F51E3F5C161A604300D51926 /* TurnRestriction.h */,
@@ -462,7 +526,6 @@
 				F51E3F48161A604300D51926 /* Config.h */,
 				F51E3F49161A604300D51926 /* Config.h.in */,
 				F51E3F4A161A604300D51926 /* CoreImportExport.h */,
-				F51E3F4B161A604300D51926 /* Math.h */,
 			);
 			path = private;
 			sourceTree = "<group>";
@@ -480,6 +543,8 @@
 		F51E3F61161A604300D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F54DAA791815DB7D00625DDA /* NodeUseMap.h */,
+				F54DAA7A1815DB7D00625DDA /* Parser.h */,
 				F57B4943169341A3008E1B2C /* Magnification.h */,
 				F51E3F62161A604300D51926 /* Breaker.h */,
 				F51E3F63161A604300D51926 /* Cache.h */,
@@ -519,6 +584,19 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F54DAA751815DB3F00625DDA /* OptimizeAreasLowZoom.h in Headers */,
+				F54DAA761815DB3F00625DDA /* OptimizeWaysLowZoom.h in Headers */,
+				F54DAA711815DB3F00625DDA /* Coord.h in Headers */,
+				F54DAA731815DB3F00625DDA /* DebugDatabase.h in Headers */,
+				F54DAA721815DB3F00625DDA /* CoordDataFile.h in Headers */,
+				F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */,
+				F54DAA741815DB3F00625DDA /* GeoCoord.h in Headers */,
+				F54DAA701815DB3F00625DDA /* AttributeAccess.h in Headers */,
+				F54DAA7B1815DB7D00625DDA /* NodeUseMap.h in Headers */,
+				F54DAA6E1815DB3F00625DDA /* Area.h in Headers */,
+				F54DAA6F1815DB3F00625DDA /* AreaDataFile.h in Headers */,
+				F54DAA771815DB3F00625DDA /* Pixel.h in Headers */,
+				F54DAA781815DB3F00625DDA /* SRTM.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -597,30 +675,34 @@
 				F51E3F01161A5FEC00D51926 /* AreaWayIndex.cpp in Sources */,
 				F51E3F02161A5FEC00D51926 /* CityStreetIndex.cpp in Sources */,
 				F51E3F03161A5FEC00D51926 /* Database.cpp in Sources */,
+				F54DAA4D1815DA6500625DDA /* DebugDatabase.cpp in Sources */,
 				F51E3F04161A5FEC00D51926 /* GroundTile.cpp in Sources */,
 				F51E3F05161A5FEC00D51926 /* Location.cpp in Sources */,
 				F51E3F06161A5FEC00D51926 /* Node.cpp in Sources */,
 				F51E3F07161A5FEC00D51926 /* NumericIndex.cpp in Sources */,
 				F51E3F08161A5FEC00D51926 /* ObjectRef.cpp in Sources */,
-				F51E3F09161A5FEC00D51926 /* OptimizeLowZoom.cpp in Sources */,
 				F51E3F0A161A5FEC00D51926 /* Parser.cpp in Sources */,
+				F54DAA4A1815DA6500625DDA /* AttributeAccess.cpp in Sources */,
+				F54DAA5F1815DAFB00625DDA /* NodeUseMap.cpp in Sources */,
 				F51E3F0B161A5FEC00D51926 /* Scanner.cpp in Sources */,
 				F51E3F0C161A5FEC00D51926 /* Path.cpp in Sources */,
 				F51E3F0D161A5FEC00D51926 /* Point.cpp in Sources */,
-				F51E3F0E161A5FEC00D51926 /* Relation.cpp in Sources */,
+				F54DAA4E1815DA6500625DDA /* GeoCoord.cpp in Sources */,
 				F51E3F0F161A5FEC00D51926 /* Route.cpp in Sources */,
 				F51E3F10161A5FEC00D51926 /* RouteData.cpp in Sources */,
 				F51E3F11161A5FEC00D51926 /* RouteNode.cpp in Sources */,
+				F54DAA511815DA6500625DDA /* Pixel.cpp in Sources */,
 				F51E3F12161A5FEC00D51926 /* RoutePostprocessor.cpp in Sources */,
 				F51E3F13161A5FEC00D51926 /* Router.cpp in Sources */,
 				F51E3F14161A5FEC00D51926 /* RoutingProfile.cpp in Sources */,
-				F51E3F15161A5FEC00D51926 /* SegmentAttributes.cpp in Sources */,
 				F51E3F16161A5FEC00D51926 /* SSEMath.cpp in Sources */,
 				F51E3F17161A5FEC00D51926 /* Tag.cpp in Sources */,
+				F54DAA611815DAFB00625DDA /* Parser.cpp in Sources */,
 				F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */,
 				F51E3F19161A5FEC00D51926 /* TypeConfig.cpp in Sources */,
 				F51E3F1A161A5FEC00D51926 /* TypeConfigLoader.cpp in Sources */,
 				F51E3F1B161A5FEC00D51926 /* Types.cpp in Sources */,
+				F54DAA521815DA6500625DDA /* SRTM.cpp in Sources */,
 				F51E3F1C161A5FEC00D51926 /* TypeSet.cpp in Sources */,
 				F51E3F1D161A5FEC00D51926 /* Breaker.cpp in Sources */,
 				F51E3F1E161A5FEC00D51926 /* Cache.cpp in Sources */,
@@ -628,16 +710,21 @@
 				F51E3F20161A5FEC00D51926 /* File.cpp in Sources */,
 				F51E3F21161A5FEC00D51926 /* FileScanner.cpp in Sources */,
 				F51E3F22161A5FEC00D51926 /* FileWriter.cpp in Sources */,
+				F54DAA4F1815DA6500625DDA /* OptimizeAreasLowZoom.cpp in Sources */,
 				F51E3F23161A5FEC00D51926 /* Geometry.cpp in Sources */,
 				F51E3F24161A5FEC00D51926 /* HashMap.cpp in Sources */,
 				F51E3F25161A5FEC00D51926 /* HashSet.cpp in Sources */,
 				F51E3F26161A5FEC00D51926 /* Number.cpp in Sources */,
 				F51E3F27161A5FEC00D51926 /* NumberSet.cpp in Sources */,
 				F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */,
+				F54DAA501815DA6500625DDA /* OptimizeWaysLowZoom.cpp in Sources */,
 				F51E3F29161A5FEC00D51926 /* Projection.cpp in Sources */,
 				F51E3F2A161A5FEC00D51926 /* Reference.cpp in Sources */,
+				F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */,
+				F54DAA491815DA6500625DDA /* Area.cpp in Sources */,
 				F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */,
 				F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */,
+				F54DAA4C1815DA6500625DDA /* CoordDataFile.cpp in Sources */,
 				F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */,
 				F51E3F2E161A5FEC00D51926 /* WaterIndex.cpp in Sources */,
 				F51E3F2F161A5FEC00D51926 /* Way.cpp in Sources */,
@@ -655,30 +742,34 @@
 				F53BD1A81638866B006C7AE1 /* AreaWayIndex.cpp in Sources */,
 				F53BD1A91638866B006C7AE1 /* CityStreetIndex.cpp in Sources */,
 				F53BD1AA1638866B006C7AE1 /* Database.cpp in Sources */,
+				F54DAA571815DA8900625DDA /* DebugDatabase.cpp in Sources */,
 				F53BD1AB1638866B006C7AE1 /* GroundTile.cpp in Sources */,
 				F53BD1AC1638866B006C7AE1 /* Location.cpp in Sources */,
 				F53BD1AD1638866B006C7AE1 /* Node.cpp in Sources */,
 				F53BD1AE1638866B006C7AE1 /* NumericIndex.cpp in Sources */,
 				F53BD1AF1638866B006C7AE1 /* ObjectRef.cpp in Sources */,
-				F53BD1B01638866B006C7AE1 /* OptimizeLowZoom.cpp in Sources */,
 				F53BD1B116388673006C7AE1 /* Path.cpp in Sources */,
+				F54DAA541815DA7C00625DDA /* AttributeAccess.cpp in Sources */,
+				F54DAA601815DAFB00625DDA /* NodeUseMap.cpp in Sources */,
 				F53BD1B216388673006C7AE1 /* Point.cpp in Sources */,
-				F53BD1B316388673006C7AE1 /* Relation.cpp in Sources */,
 				F53BD1B416388673006C7AE1 /* Route.cpp in Sources */,
 				F53BD1B516388673006C7AE1 /* RouteData.cpp in Sources */,
+				F54DAA581815DA8D00625DDA /* GeoCoord.cpp in Sources */,
 				F53BD1B616388673006C7AE1 /* RouteNode.cpp in Sources */,
 				F53BD1B716388673006C7AE1 /* RoutePostprocessor.cpp in Sources */,
 				F53BD1B816388673006C7AE1 /* Router.cpp in Sources */,
+				F54DAA5B1815DA9700625DDA /* Pixel.cpp in Sources */,
 				F53BD1B916388673006C7AE1 /* RoutingProfile.cpp in Sources */,
-				F53BD1BA16388673006C7AE1 /* SegmentAttributes.cpp in Sources */,
 				F53BD1BB1638867D006C7AE1 /* Tag.cpp in Sources */,
 				F53BD1BC1638867D006C7AE1 /* TurnRestriction.cpp in Sources */,
 				F53BD1BD1638867D006C7AE1 /* TypeConfig.cpp in Sources */,
 				F53BD1BE1638867D006C7AE1 /* TypeConfigLoader.cpp in Sources */,
+				F54DAA621815DAFB00625DDA /* Parser.cpp in Sources */,
 				F53BD1BF1638867D006C7AE1 /* Types.cpp in Sources */,
 				F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */,
 				F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */,
 				F53BD1C216388682006C7AE1 /* Way.cpp in Sources */,
+				F54DAA5C1815DA9A00625DDA /* SRTM.cpp in Sources */,
 				F53BD1C31638868B006C7AE1 /* Parser.cpp in Sources */,
 				F53BD1C41638868B006C7AE1 /* Scanner.cpp in Sources */,
 				F53BD1C51638869A006C7AE1 /* SSEMath.cpp in Sources */,
@@ -686,16 +777,21 @@
 				F53BD1C7163886B2006C7AE1 /* Cache.cpp in Sources */,
 				F53BD1C8163886B2006C7AE1 /* Color.cpp in Sources */,
 				F53BD1C9163886B2006C7AE1 /* File.cpp in Sources */,
+				F54DAA591815DA9000625DDA /* OptimizeAreasLowZoom.cpp in Sources */,
 				F53BD1CA163886B2006C7AE1 /* FileScanner.cpp in Sources */,
 				F53BD1CB163886B2006C7AE1 /* FileWriter.cpp in Sources */,
 				F53BD1CC163886B2006C7AE1 /* Geometry.cpp in Sources */,
 				F53BD1CD163886B2006C7AE1 /* HashMap.cpp in Sources */,
 				F53BD1CE163886B2006C7AE1 /* HashSet.cpp in Sources */,
 				F53BD1CF163886B2006C7AE1 /* Number.cpp in Sources */,
+				F54DAA5A1815DA9400625DDA /* OptimizeWaysLowZoom.cpp in Sources */,
 				F53BD1D0163886B2006C7AE1 /* NumberSet.cpp in Sources */,
 				F53BD1D1163886B2006C7AE1 /* Progress.cpp in Sources */,
+				F54DAA551815DA8000625DDA /* Coord.cpp in Sources */,
+				F54DAA531815DA7800625DDA /* Area.cpp in Sources */,
 				F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */,
 				F53BD1D3163886B2006C7AE1 /* Reference.cpp in Sources */,
+				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
 				F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */,
 				F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */,
 				F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */,

@@ -29,7 +29,10 @@
 
 namespace osmscout {
         
-    MapPainterIOS::MapPainterIOS(){
+    MapPainterIOS::MapPainterIOS()
+    : MapPainter(new CoordBufferImpl<Vertex2D>()),
+    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
+    {
     }
         
     MapPainterIOS::~MapPainterIOS(){
@@ -83,7 +86,6 @@ namespace osmscout {
              projection,
              parameter,
              data);
-
         return true;
     }
 
@@ -369,8 +371,8 @@ namespace osmscout {
         double len = 0.0;
         double deltaX, deltaY;
         for(size_t j=transStart; j<transEnd; j++) {
-            deltaX = transBuffer.buffer[j].x - transBuffer.buffer[j+1].x;
-            deltaY = transBuffer.buffer[j].y - transBuffer.buffer[j+1].y;
+            deltaX = coordBuffer->buffer[j].GetX() - coordBuffer->buffer[j+1].GetX();
+            deltaY = coordBuffer->buffer[j].GetY() - coordBuffer->buffer[j+1].GetX();
             len += sqrt(deltaX*deltaX + deltaY*deltaY);
         }
         return len;
@@ -391,8 +393,8 @@ namespace osmscout {
                 return pos;
             }
             
-            CGFloat nextX = transBuffer.buffer[transStart+(i+1)*direction].x;
-            CGFloat nextY = transBuffer.buffer[transStart+(i+1)*direction].y;
+            CGFloat nextX = coordBuffer->buffer[transStart+(i+1)*direction].GetX();
+            CGFloat nextY = coordBuffer->buffer[transStart+(i+1)*direction].GetY();;
             
             CGFloat xDiff = (nextX - posX)*direction;
             CGFloat yDiff = (nextY - posY)*direction;
@@ -454,8 +456,8 @@ namespace osmscout {
                           *fillStyle);
             
             CGFloat lenUpToNow = space/2;
-            CGFloat posX = transBuffer.buffer[transStart].x;
-            CGFloat posY = transBuffer.buffer[transStart].y;
+            CGFloat posX = coordBuffer->buffer[transStart].GetX();
+            CGFloat posY = coordBuffer->buffer[transStart].GetY();
             size_t segment = 0;
             CGFloat currentL = 0;
             while (lenUpToNow+width<lineLength) {
@@ -492,7 +494,7 @@ namespace osmscout {
                           size_t transStart, size_t transEnd){
         Font *font = GetFont(parameter,style.GetSize());
         size_t tStart, tEnd;
-        if(transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x){
+        if(coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
             tStart = transStart;
             tEnd = transEnd;
         } else {
@@ -520,21 +522,21 @@ namespace osmscout {
         NSColor *color = [NSColor colorWithSRGBRed:style.GetTextColor().GetR() green:style.GetTextColor().GetG() blue:style.GetTextColor().GetB() alpha:style.GetTextColor().GetA()];
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #endif
-        CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, -6.0);
+        CGAffineTransform ct;
         CGFloat lenUpToNow = MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN;
         
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-        CGFloat posX = transBuffer.buffer[transStart].x;
-        CGFloat posY = transBuffer.buffer[transStart].y;
+        CGFloat posX = coordBuffer->buffer[transStart].GetX();
+        CGFloat posY = coordBuffer->buffer[transStart].GetY();
         int charIndex = 0;
         size_t segment = 0;
         CGFloat currentL = 0.0;
+        double nww,nhh,xOff,yOff;
         for(int i=0;i<[nsText length];i++) {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
-            double nww = textLength(parameter,style.GetSize(),[str cStringUsingEncoding:NSUTF8StringEncoding]);
-            
+            GetTextDimension(parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);            
             XYSlope charOrigin = originAndSlopeAlongPath(lenUpToNow, nww, tStart, tEnd, posX, posY, segment, currentL);
             if(charOrigin.x == -1 && charOrigin.y == -1){
                 CGContextRestoreGState(cg);
@@ -545,13 +547,13 @@ namespace osmscout {
             CGContextSaveGState(cg);
             
             CGContextTranslateCTM(cg, charOrigin.x, charOrigin.y);
-            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(charOrigin.slope));
+            ct = CGAffineTransformMakeRotation(charOrigin.slope);
             CGContextConcatCTM(cg, ct);
             
 #if TARGET_OS_IPHONE
-            [str drawAtPoint:CGPointMake(-nww/2,0) withFont:font];
+            [str drawAtPoint:CGPointMake(-nww/2,-nhh/2) withFont:font];
 #else
-            [str drawAtPoint:CGPointMake(-nww/2,0) withAttributes:attrsDictionary];
+            [str drawAtPoint:CGPointMake(-nww/2,-nhh/2) withAttributes:attrsDictionary];
 #endif
             CGContextRestoreGState(cg);
             lenUpToNow += nww;
@@ -560,7 +562,7 @@ namespace osmscout {
         }
         CGContextRestoreGState(cg);
     }
-    
+
     /*
      *
      * DrawIcon(const IconStyle* style,
@@ -580,6 +582,10 @@ namespace osmscout {
         CGContextRestoreGState(cg);
     }
     
+    /*
+     * DrawPrimitivePath()
+     */
+    //#define DEBUG_DRAW_POLYGON_IOSX 1
     void MapPainterIOS::DrawPrimitivePath(const Projection& projection,
                                             const MapParameter& parameter,
                                             const DrawPrimitiveRef& p,
@@ -657,7 +663,7 @@ namespace osmscout {
         double minY;
         double maxX;
         double maxY;
-        
+
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
         
         CGContextSaveGState(cg);
@@ -719,21 +725,21 @@ namespace osmscout {
             CGContextSetLineCap(cg, kCGLineCapButt);
         }
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+        CGContextMoveToPoint(cg,coordBuffer->buffer[transStart].GetX(),coordBuffer->buffer[transStart].GetY());
         for (size_t i=transStart+1; i<=transEnd; i++) {
-            CGContextAddLineToPoint (cg,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+            CGContextAddLineToPoint (cg,coordBuffer->buffer[i].GetX(),coordBuffer->buffer[i].GetY());
         }
         CGContextStrokePath(cg);
         if (startCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transStart].x-width/2,
-                                                     transBuffer.buffer[transStart].y-width/2,
+            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer->buffer[transStart].GetX()-width/2,
+                                                     coordBuffer->buffer[transStart].GetY()-width/2,
                                                      width,width));
         }
         if (endCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transEnd].x-width/2,
-                                                     transBuffer.buffer[transEnd].y-width/2,
+            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer->buffer[transEnd].GetX()-width/2,
+                                                     coordBuffer->buffer[transEnd].GetY()-width/2,
                                                      width,width));
         }
         CGContextRestoreGState(cg);
@@ -748,8 +754,7 @@ namespace osmscout {
     void MapPainterIOS::DrawFillStyle(const Projection& projection,
                                         const MapParameter& parameter,
                                         const FillStyle& fillStyle) {
-        double borderWidth=ConvertWidthToPixel(parameter,
-                                               fillStyle.GetBorderWidth());
+        double borderWidth=ConvertWidthToPixel(parameter,fillStyle.GetBorderWidth());
 
         if (fillStyle.HasPattern() &&
             projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
@@ -810,9 +815,9 @@ namespace osmscout {
                                    area.fillStyle->GetFillColor().GetB(), area.fillStyle->GetFillColor().GetA());
         CGPathDrawingMode drawingMode = kCGPathFillStroke;
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+        CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),coordBuffer->buffer[area.transStart].GetY());
         for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
-            CGContextAddLineToPoint(cg,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+            CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),coordBuffer->buffer[i].GetY());
         }
         CGContextClosePath(cg);
         
@@ -821,16 +826,15 @@ namespace osmscout {
                  c!=area.clippings.end();
                  c++) {
                 const MapPainter::PolyData& data=*c;
-                CGContextMoveToPoint(cg,transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+                CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),coordBuffer->buffer[area.transStart].GetY());
                 for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-                    CGContextAddLineToPoint(cg,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+                    CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),coordBuffer->buffer[i].GetY());
                 }
                 CGContextClosePath(cg);
             }
         }
         
-        double borderWidth=MapPainter::ConvertWidthToPixel(parameter,
-                                                           area.fillStyle->GetBorderWidth());
+        double borderWidth=MapPainter::ConvertWidthToPixel(parameter,area.fillStyle->GetBorderWidth());
         if (borderWidth>=parameter.GetLineMinWidthPixel()) {
             CGContextSetRGBStrokeColor(cg, area.fillStyle->GetBorderColor().GetR(), area.fillStyle->GetBorderColor().GetG(),
                                        area.fillStyle->GetBorderColor().GetB(), area.fillStyle->GetBorderColor().GetA());
@@ -856,27 +860,22 @@ namespace osmscout {
     }
     
     /*
-     * DrawArea(const FillStyle& style,
-     *          const MapParameter& parameter,
-     *          double x,
-     *          double y,
-     *          double width,
-     *          double height)
+     * DrawGround(const Projection& projection,
+     *            const MapParameter& parameter,
+     *            const FillStyle& style)
      */
-    void MapPainterIOS::DrawArea(const FillStyle& style,
-                  const MapParameter& parameter,
-                  double x,
-                  double y,
-                  double width,
-                  double height){
+    void MapPainterIOS::DrawGround(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const FillStyle& style){
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);
         const Color &borderColor = style.GetBorderColor();
         CGContextSetRGBStrokeColor(cg, borderColor.GetR(), borderColor.GetG(), borderColor.GetB(), borderColor.GetA());
         const Color &fillColor = style.GetFillColor();
         CGContextSetRGBFillColor(cg, fillColor.GetR(), fillColor.GetG(), fillColor.GetB(), fillColor.GetA());
-        CGContextAddRect(cg, CGRectMake(x, y, width, height));
+        CGContextAddRect(cg, CGRectMake(0,0,projection.GetWidth(),projection.GetHeight()));
         CGContextDrawPath(cg, kCGPathFillStroke);
         CGContextRestoreGState(cg);
     }
+    
 }
