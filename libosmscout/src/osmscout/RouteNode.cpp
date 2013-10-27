@@ -25,6 +25,24 @@
 
 namespace osmscout {
 
+  uint32_t RouteNode::AddObject(const ObjectFileRef& object)
+  {
+    uint32_t index=0;
+
+    while (index<objects.size() && objects[index]!=object) {
+      index++;
+    }
+
+    if (index<objects.size()) {
+      return index;
+    }
+
+    objects.push_back(object);
+
+    return index;
+  }
+
+
   bool RouteNode::Read(FileScanner& scanner)
   {
     uint32_t wayCount;

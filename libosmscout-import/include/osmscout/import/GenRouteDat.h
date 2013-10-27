@@ -152,7 +152,7 @@ namespace osmscout {
     /**
      * Calculate all possible route from the given route node for the given area
      */
-    bool CalculateAreaPaths(const TypeConfig& typeConfig,
+    void CalculateAreaPaths(const TypeConfig& typeConfig,
                             RouteNode& routeNode,
                             const Area& area,
                             FileOffset routeNodeOffset,
@@ -163,7 +163,7 @@ namespace osmscout {
     /**
      * Calculate all possible route from the given route node for the given circular way
      */
-    bool CalculateCircularWayPaths(RouteNode& routeNode,
+    void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
                                    FileOffset routeNodeOffset,
                                    const NodeIdObjectsMap& nodeObjectsMap,
@@ -173,7 +173,7 @@ namespace osmscout {
     /**
      * Calculate all possible route from the given route node for the given non-circular way
      */
-    bool CalculateWayPaths(RouteNode& routeNode,
+    void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
                            FileOffset routeNodeOffset,
                            const NodeIdObjectsMap& nodeObjectsMap,

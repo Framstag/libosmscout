@@ -93,6 +93,8 @@ namespace osmscout {
       return fileOffset;
     }
 
+    uint32_t AddObject(const ObjectFileRef& object);
+
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };
