@@ -45,7 +45,7 @@ namespace osmscout {
 
   bool RouteNode::Read(FileScanner& scanner)
   {
-    uint32_t wayCount;
+    uint32_t objectCount;
     uint32_t pathCount;
     uint32_t excludesCount;
     uint32_t minLat;
@@ -57,7 +57,7 @@ namespace osmscout {
 
     scanner.ReadNumber(id);
 
-    scanner.ReadNumber(wayCount);
+    scanner.ReadNumber(objectCount);
     scanner.ReadNumber(pathCount);
     scanner.ReadNumber(excludesCount);
 
@@ -68,15 +68,27 @@ namespace osmscout {
       return false;
     }
 
-    objects.resize(wayCount);
-    for (size_t i=0; i<wayCount; i++) {
+    objects.resize(objectCount);
+
+    Id previousFileOffset=0;
+
+    for (size_t i=0; i<objectCount; i++) {
+      uint8_t    type;
       FileOffset fileOffset;
-      uint8_t    typeByte;
 
-      scanner.Read(typeByte);
-      scanner.ReadFileOffset(fileOffset);
+      if (!scanner.Read(type)) {
+        return false;
+      }
 
-      objects[i].Set(fileOffset,(RefType)typeByte);
+      if (!scanner.ReadNumber(fileOffset)) {
+        return false;
+      }
+
+      fileOffset+=previousFileOffset;
+
+      objects[i].Set(fileOffset,(RefType)type);
+
+      previousFileOffset=fileOffset;
     }
 
     paths.resize(pathCount);
@@ -135,9 +147,15 @@ namespace osmscout {
     writer.Write(minLat);
     writer.Write(minLon);
 
-    for (size_t i=0; i<objects.size(); i++) {
-      writer.Write((uint8_t)objects[i].GetType());
-      writer.WriteFileOffset(objects[i].GetFileOffset());
+    Id lastFileOffset=0;
+
+    for (std::vector<ObjectFileRef>::const_iterator object=objects.begin();
+        object!=objects.end();
+        ++object) {
+      writer.Write((uint8_t)object->GetType());
+      writer.WriteNumber(object->GetFileOffset()-lastFileOffset);
+
+      lastFileOffset=object->GetFileOffset();
     }
 
     for (size_t i=0; i<paths.size(); i++) {

@@ -706,17 +706,15 @@ namespace osmscout {
       writer.WriteNumber(junction->first);
       writer.WriteNumber(junction->second.size());
 
-      //std::cout << junction->first << " " << junction->second.size() << std::endl;
-
-      Id lastId=0;
+      Id lastFileOffset=0;
 
       for (std::list<ObjectFileRef>::const_iterator object=junction->second.begin();
           object!=junction->second.end();
           ++object) {
         writer.Write((uint8_t)object->GetType());
-        writer.WriteNumber(object->GetFileOffset()-lastId);
+        writer.WriteNumber(object->GetFileOffset()-lastFileOffset);
 
-        lastId=object->GetFileOffset();
+        lastFileOffset=object->GetFileOffset();
       }
     }
 
