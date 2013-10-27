@@ -61,6 +61,36 @@ namespace osmscout {
                     const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
                     const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
 
+      Id GetNodeId(const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                   const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                   const ObjectFileRef& object,
+                   size_t nodeIndex);
+
+      size_t GetNodeIndex(const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                          const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                          const ObjectFileRef& object,
+                          Id nodeId);
+
+      bool CanUseBackward(const RoutingProfile& profile,
+                          const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                          const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                          Id fromNodeId,
+                          const ObjectFileRef& object);
+
+      bool CanUseForward(const RoutingProfile& profile,
+                         const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                         const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                         Id fromNodeId,
+                         const ObjectFileRef& object);
+
+      bool IsBackwardPath(const ObjectFileRef& object,
+                          size_t fromNodeIndex,
+                          size_t toNodeIndex);
+
+      bool IsForwardPath(const ObjectFileRef& object,
+                         size_t fromNodeIndex,
+                         size_t toNodeIndex);
+
       bool IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
                                     size_t nodeIndex,
                                     const ObjectFileRef& object,

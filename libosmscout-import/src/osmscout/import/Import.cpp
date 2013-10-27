@@ -31,6 +31,7 @@
 
 #include <osmscout/Router.h>
 #include <osmscout/RouteNode.h>
+#include <osmscout/Intersection.h>
 
 #include <osmscout/import/GenTypeDat.h>
 
@@ -70,7 +71,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=25;
+  static const size_t defaultEndStep=26;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -672,20 +673,27 @@ namespace osmscout {
     modules.push_back(new RouteDataGenerator());
 
     /* 23 */
+    modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+Router::FILENAME_INTERSECTIONS_IDX+"'",
+                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                                 Router::FILENAME_INTERSECTIONS_DAT),
+                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                                 Router::FILENAME_INTERSECTIONS_IDX)));
+
+    /* 24 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_FOOT_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_FOOT_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_FOOT_IDX)));
 
-    /* 24 */
+    /* 25 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_BICYCLE_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_BICYCLE_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_BICYCLE_IDX)));
 
-    /* 25 */
+    /* 26 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_CAR_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_CAR_DAT),

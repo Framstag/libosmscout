@@ -286,6 +286,11 @@ namespace osmscout {
       return attributes.GetTags()[idx].value;
     }
 
+    inline bool IsCircular() const
+    {
+      return ids[0]!=0 && ids[0]==ids[ids.size()-1];
+    }
+
     bool GetCenter(double& lat,
                    double& lon) const;
     void GetBoundingBox(double& minLon,

@@ -34,20 +34,24 @@ namespace osmscout {
     class RouteEntry
     {
     private:
-      size_t            currentNodeIndex;
-      std::vector<Path> paths;
-      ObjectFileRef     pathObject;
-      size_t            targetNodeIndex;
+      Id                         currentNodeId;
+      size_t                     currentNodeIndex;
+      std::vector<ObjectFileRef> objects;
+      ObjectFileRef              pathObject;
+      size_t                     targetNodeIndex;
 
     public:
-      RouteEntry(size_t currentNodeIndex,
+      RouteEntry(Id currentNodeId,
+                 size_t currentNodeIndex,
                  const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 
-      RouteEntry(size_t currentNodeIndex,
-                 const std::vector<Path>& paths,
-                 const ObjectFileRef& pathObject,
-                 size_t targetNodeIndex);
+      void SetObjects(const std::vector<ObjectFileRef> objects);
+
+      inline Id GetCurrentNodeId() const
+      {
+        return currentNodeId;
+      }
 
       inline size_t GetCurrentNodeIndex() const
       {
@@ -64,9 +68,9 @@ namespace osmscout {
         return targetNodeIndex;
       }
 
-      inline const std::vector<Path>& GetPaths() const
+      inline const std::vector<ObjectFileRef>& GetObjects() const
       {
-        return paths;
+        return objects;
       }
     };
 
@@ -78,14 +82,15 @@ namespace osmscout {
 
     void Clear();
 
-    void AddEntry(size_t currentNodeIndex,
+    void AddEntry(Id currentNodeId,
+                  size_t currentNodeIndex,
                   const ObjectFileRef& pathObject,
                   size_t targetNodeIndex);
 
-    void AddEntry(size_t currentNodeIndex,
-                  const std::vector<Path>& paths,
-                  const ObjectFileRef& pathObject,
-                  size_t targetNodeIndex);
+    inline std::list<RouteEntry>& Entries()
+    {
+      return entries;
+    }
 
     inline const std::list<RouteEntry>& Entries() const
     {

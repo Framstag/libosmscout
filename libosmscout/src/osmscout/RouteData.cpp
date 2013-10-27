@@ -21,26 +21,21 @@
 
 namespace osmscout {
 
-  RouteData::RouteEntry::RouteEntry(size_t currentNodeIndex,
+  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
+                                    size_t currentNodeIndex,
                                     const ObjectFileRef& pathObject,
                                     size_t targetNodeIndex)
-   : currentNodeIndex(currentNodeIndex),
+   : currentNodeId(currentNodeId),
+     currentNodeIndex(currentNodeIndex),
      pathObject(pathObject),
      targetNodeIndex(targetNodeIndex)
   {
     // no code
   }
 
-  RouteData::RouteEntry::RouteEntry(size_t currentNodeIndex,
-                                    const std::vector<Path>& paths,
-                                    const ObjectFileRef& pathObject,
-                                    size_t targetNodeIndex)
-   : currentNodeIndex(currentNodeIndex),
-     paths(paths),
-     pathObject(pathObject),
-     targetNodeIndex(targetNodeIndex)
+  void RouteData::RouteEntry::SetObjects(const std::vector<ObjectFileRef> objects)
   {
-    // no code
+    this->objects=objects;
   }
 
   RouteData::RouteData()
@@ -53,22 +48,13 @@ namespace osmscout {
     entries.clear();
   }
 
-  void RouteData::AddEntry(size_t currentNodeIndex,
+  void RouteData::AddEntry(Id currentNodeId,
+                           size_t currentNodeIndex,
                            const ObjectFileRef& pathObject,
                            size_t targetNodeIndex)
   {
-    entries.push_back(RouteEntry(currentNodeIndex,
-                                 pathObject,
-                                 targetNodeIndex));
-  }
-
-  void RouteData::AddEntry(size_t currentNodeIndex,
-                           const std::vector<Path>& paths,
-                           const ObjectFileRef& pathObject,
-                           size_t targetNodeIndex)
-  {
-    entries.push_back(RouteEntry(currentNodeIndex,
-                                 paths,
+    entries.push_back(RouteEntry(currentNodeId,
+                                 currentNodeIndex,
                                  pathObject,
                                  targetNodeIndex));
   }

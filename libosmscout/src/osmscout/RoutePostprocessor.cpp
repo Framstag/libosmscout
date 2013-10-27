@@ -61,19 +61,20 @@ namespace osmscout {
         }
       }
 
-      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
-          path!=node->GetPaths().end();
-          ++path) {
-        switch (path->GetObject().GetType()) {
+      for (std::vector<ObjectFileRef>::const_iterator object=node->GetObjects().begin();
+          object!=node->GetObjects().end();
+          ++object) {
+
+        switch (object->GetType()) {
         case refNone:
         case refNode:
           assert(false);
           break;
         case refArea:
-          areaOffsets.insert(path->GetObject().GetFileOffset());
+          areaOffsets.insert(object->GetFileOffset());
         break;
         case refWay:
-          wayOffsets.insert(path->GetObject().GetFileOffset());
+          wayOffsets.insert(object->GetFileOffset());
           break;
         }
       }
@@ -181,6 +182,178 @@ namespace osmscout {
       assert(entry!=wayMap.end());
 
       return types.find(entry->second->GetType())!=types.end();
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  Id RoutePostprocessor::Postprocessor::GetNodeId(const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                  const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                                                  const ObjectFileRef& object,
+                                                  size_t nodeIndex)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      return entry->second->rings.front().ids[nodeIndex];
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      return entry->second->ids[nodeIndex];
+    }
+    else {
+      assert(false);
+
+      return 0;
+    }
+  }
+
+  size_t RoutePostprocessor::Postprocessor::GetNodeIndex(const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                         const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                                                         const ObjectFileRef& object,
+                                                         Id nodeId)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      for (size_t i=0; i<entry->second->rings.front().ids.size(); i++) {
+        if (entry->second->rings.front().ids[i]==nodeId) {
+          return i;
+        }
+
+      }
+
+      assert(false);
+
+      return 0;
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      size_t index;
+
+      if (!entry->second->GetNodeIndexByNodeId(nodeId,
+                                               index)) {
+        assert(false);
+      }
+
+      return index;
+    }
+    else {
+      assert(false);
+
+      return 0;
+    }
+  }
+
+  bool RoutePostprocessor::Postprocessor::CanUseBackward(const RoutingProfile& profile,
+                                                         const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                         const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                                                         Id fromNodeId,
+                                                         const ObjectFileRef& object)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      return profile.CanUse(entry->second);
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      size_t fromNodeIndex;
+
+      if (!entry->second->GetNodeIndexByNodeId(fromNodeId,
+                                               fromNodeIndex)) {
+        assert(false);
+      }
+
+      return fromNodeIndex>0 &&
+             profile.CanUseBackward(*entry->second);
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  bool RoutePostprocessor::Postprocessor::CanUseForward(const RoutingProfile& profile,
+                                                        const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                        const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                                                        Id fromNodeId,
+                                                        const ObjectFileRef& object)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      return profile.CanUse(entry->second);
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      size_t fromNodeIndex;
+
+      if (!entry->second->GetNodeIndexByNodeId(fromNodeId,
+                                               fromNodeIndex)) {
+        assert(false);
+      }
+
+      return fromNodeIndex!=entry->second->nodes.size()-1 &&
+             profile.CanUseForward(*entry->second);
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  bool RoutePostprocessor::Postprocessor::IsBackwardPath(const ObjectFileRef& object,
+                                                         size_t fromNodeIndex,
+                                                         size_t toNodeIndex)
+  {
+    if (object.GetType()==refArea) {
+      return true;
+    }
+    else if (object.GetType()==refWay) {
+      return toNodeIndex<fromNodeIndex;
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  bool RoutePostprocessor::Postprocessor::IsForwardPath(const ObjectFileRef& object,
+                                                        size_t fromNodeIndex,
+                                                        size_t toNodeIndex)
+  {
+    if (object.GetType()==refArea) {
+      return true;
+    }
+    else if (object.GetType()==refWay) {
+      return toNodeIndex>fromNodeIndex;
     }
     else {
       assert(false);
@@ -457,44 +630,42 @@ namespace osmscout {
                                                                                   const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
                                                                                   const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
   {
-    for (std::vector<Path>::const_iterator path=node.GetPaths().begin();
-        path!=node.GetPaths().end();
-        ++path) {
-      if (path->GetObject().Valid()) {
-        // Way is origin way and starts or ends here so it is not an additional crossing way
-        if (originObject.Valid() &&
-            path->GetObject()==originObject &&
-            IsNodeStartOrEndOfObject(node.GetPathObject(),
-                                     node.GetCurrentNodeIndex(),
-                                     originObject,
-                                     areaMap,
-                                     wayMap)) {
-          continue;
-        }
-
-        // Way is target way and starts or ends here so it is not an additional crossing way
-        if (targetObject.Valid() &&
-            path->GetObject()==targetObject &&
-            IsNodeStartOrEndOfObject(node.GetPathObject(),
-                                     node.GetCurrentNodeIndex(),
-                                     targetObject,
-                                     areaMap,
-                                     wayMap)) {
-          continue;
-        }
-
-        // ways is origin way and target way so it is not an additional crossing way
-        if (originObject.Valid() &&
-            targetObject.Valid() &&
-            path->GetObject()==originObject &&
-            path->GetObject()==targetObject) {
-          continue;
-        }
-
-        description->AddDescription(GetNameDescription(path->GetObject(),
-                                                       areaMap,
-                                                       wayMap));
+    for (std::vector<ObjectFileRef>::const_iterator object=node.GetObjects().begin();
+        object!=node.GetObjects().end();
+        ++object) {
+      // Way is origin way and starts or ends here so it is not an additional crossing way
+      if (originObject.Valid() &&
+          *object==originObject &&
+          IsNodeStartOrEndOfObject(node.GetPathObject(),
+                                   node.GetCurrentNodeIndex(),
+                                   originObject,
+                                   areaMap,
+                                   wayMap)) {
+        continue;
       }
+
+      // Way is target way and starts or ends here so it is not an additional crossing way
+      if (targetObject.Valid() &&
+          *object==targetObject &&
+          IsNodeStartOrEndOfObject(node.GetPathObject(),
+                                   node.GetCurrentNodeIndex(),
+                                   targetObject,
+                                   areaMap,
+                                   wayMap)) {
+        continue;
+      }
+
+      // ways is origin way and target way so it is not an additional crossing way
+      if (originObject.Valid() &&
+          targetObject.Valid() &&
+          *object==originObject &&
+          *object==targetObject) {
+        continue;
+      }
+
+      description->AddDescription(GetNameDescription(*object,
+                                                     areaMap,
+                                                     wayMap));
     }
   }
 
@@ -516,18 +687,20 @@ namespace osmscout {
     // Analyze crossing
     //
 
-    std::list<RouteDescription::Node>::iterator lastCrossing=description.Nodes().end();
+    std::list<RouteDescription::Node>::iterator lastJunction=description.Nodes().end();
     std::list<RouteDescription::Node>::iterator lastNode=description.Nodes().end();
     std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
 
     while (node!=description.Nodes().end()) {
-      if (node->GetPaths().empty()) {
+      // We only analyze junctions, that means nodes that cross other objects
+      if (node->GetObjects().empty()) {
         lastNode=node;
         node++;
 
         continue;
       }
 
+      // We ignore the first and the last node
       if (lastNode==description.Nodes().end() ||
           !node->HasPathObject()) {
         lastNode=node;
@@ -536,22 +709,53 @@ namespace osmscout {
         continue;
       }
 
-      // Count existing exits
+      // Count existing exits, that means, the number of objects that can be used to leave the current
+      // node
       size_t exitCount=0;
 
-      for (size_t i=0; i<node->GetPaths().size(); i++) {
-        // Leave out the path back to the last crossing (if it exists)
-        if (lastCrossing!=description.Nodes().end() &&
-            node->GetPaths()[i].GetObject()==lastCrossing->GetPathObject() &&
-            node->GetPaths()[i].GetTargetNodeIndex()==lastCrossing->GetCurrentNodeIndex()) {
-          continue;
+      Id nodeId=GetNodeId(areaMap,
+                          wayMap,
+                          node->GetPathObject(),
+                          node->GetCurrentNodeIndex());
+
+      size_t currentNodeIndexOnLastPath=GetNodeIndex(areaMap,
+                                                     wayMap,
+                                                     lastNode->GetPathObject(),
+                                                     nodeId);
+
+      for (std::vector<ObjectFileRef>::const_iterator object=node->GetObjects().begin();
+          object!=node->GetObjects().end();
+          ++object) {
+
+        // We can travel this way in the forward direction
+        if (CanUseForward(profile,
+                          areaMap,
+                          wayMap,
+                          nodeId,
+                          *object)) {
+          // And it is not the way back to the last routing node
+          if (lastNode->GetPathObject()!=*object ||
+              !IsForwardPath(lastNode->GetPathObject(),
+                             currentNodeIndexOnLastPath,
+                             lastNode->GetCurrentNodeIndex())) {
+            exitCount++;
+          }
         }
 
-        if (!node->GetPaths()[i].IsTraversable()) {
-          continue;
+        // We can travel this way in the backward direction
+        if (CanUseBackward(profile,
+                           areaMap,
+                           wayMap,
+                           nodeId,
+                           *object)) {
+          // And it is not the way to back the last routing node
+          if (lastNode->GetPathObject()!=*object ||
+              !IsBackwardPath(lastNode->GetPathObject(),
+                              currentNodeIndexOnLastPath,
+                              lastNode->GetCurrentNodeIndex())) {
+            exitCount++;
+          }
         }
-
-        exitCount++;
       }
 
       RouteDescription::CrossingWaysDescriptionRef desc=new RouteDescription::CrossingWaysDescription(exitCount,
@@ -572,7 +776,7 @@ namespace osmscout {
                            desc);
 
       lastNode=node;
-      lastCrossing=node;
+      lastJunction=node;
 
       node++;
     }
@@ -861,7 +1065,7 @@ namespace osmscout {
   bool RoutePostprocessor::InstructionPostprocessor::HandleDirectionChange(const std::list<RouteDescription::Node>& path,
                                                                            std::list<RouteDescription::Node>::iterator& node)
   {
-    if (node->GetPaths().size()<=1){
+    if (node->GetObjects().size()<=1){
       return false;
     }
 

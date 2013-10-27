@@ -109,19 +109,23 @@ namespace osmscout {
     /**
      * Reads all relevant ways and areas and returns all nodes where these intersect.
      */
-    bool ReadJunctions(const ImportParameter& parameter,
-                       Progress& progress,
-                       const TypeConfig& typeConfig,
-                       NodeUseMap& nodeUseMap);
+    bool ReadIntersections(const ImportParameter& parameter,
+                           Progress& progress,
+                           const TypeConfig& typeConfig,
+                           NodeUseMap& nodeUseMap);
 
     /**
      * Builds up a list of ObjectFileRefs for every junction node.
      */
-    bool ReadObjectsAtJunctions(const ImportParameter& parameter,
-                                Progress& progress,
-                                const TypeConfig& typeConfig,
-                                const NodeUseMap& nodeUseMap,
-                                NodeIdObjectsMap& nodeObjectsMap);
+    bool ReadObjectsAtIntersections(const ImportParameter& parameter,
+                                    Progress& progress,
+                                    const TypeConfig& typeConfig,
+                                    const NodeUseMap& nodeUseMap,
+                                    NodeIdObjectsMap& nodeObjectsMap);
+
+    bool WriteIntersections(const ImportParameter& parameter,
+                            Progress& progress,
+                            NodeIdObjectsMap& nodeIdObjectsMap);
 
     /**
      * Loads ways based on their file offset.

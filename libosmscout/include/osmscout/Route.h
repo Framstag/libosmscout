@@ -410,7 +410,7 @@ namespace osmscout {
     {
     private:
       size_t                                       currentNodeIndex;
-      std::vector<Path>                            paths;
+      std::vector<ObjectFileRef>                   objects;
       ObjectFileRef                                pathObject;
       size_t                                       targetNodeIndex;
       double                                       distance;
@@ -420,7 +420,7 @@ namespace osmscout {
 
     public:
       Node(size_t currentNodeIndex,
-           const std::vector<Path>& paths,
+           const std::vector<ObjectFileRef>& objects,
            const ObjectFileRef& pathObject,
            size_t targetNodeIndex);
 
@@ -429,9 +429,9 @@ namespace osmscout {
         return currentNodeIndex;
       }
 
-      inline const std::vector<Path>& GetPaths() const
+      inline const std::vector<ObjectFileRef>& GetObjects() const
       {
-        return paths;
+        return objects;
       }
 
       inline const std::list<DescriptionRef>& GetDescriptions() const
@@ -489,7 +489,7 @@ namespace osmscout {
     void Clear();
 
     void AddNode(size_t currentNodeIndex,
-                 const std::vector<Path>& paths,
+                 const std::vector<ObjectFileRef>& objects,
                  const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 

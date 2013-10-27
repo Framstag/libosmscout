@@ -35,6 +35,7 @@
 #include <osmscout/WayDataFile.h>
 
 // Routing
+#include <osmscout/Intersection.h>
 #include <osmscout/Route.h>
 #include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
@@ -162,6 +163,9 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<FileOffset,Router::RNodeRef>    CloseMap;
 
   public:
+    static const char* const FILENAME_INTERSECTIONS_DAT;
+    static const char* const FILENAME_INTERSECTIONS_IDX;
+
     static const char* const FILENAME_FOOT_DAT;
     static const char* const FILENAME_FOOT_IDX;
 
@@ -172,17 +176,18 @@ namespace osmscout {
     static const char* const FILENAME_CAR_IDX;
 
   private:
-    Vehicle                       vehicle;           //! We are a router for this vehicle
-    bool                          isOpen;            //! true, if opened
-    bool                          debugPerformance;
+    Vehicle                              vehicle;           //! We are a router for this vehicle
+    bool                                 isOpen;            //! true, if opened
+    bool                                 debugPerformance;
 
-    std::string                   path;              //! Path to the directory containing all files
+    std::string                          path;              //! Path to the directory containing all files
 
-    DataFile<Area>                areaDataFile;       //! Cached access to the 'areas.dat' file
-    DataFile<Way>                 wayDataFile;       //! Cached access to the 'ways.dat' file
-    IndexedDataFile<Id,RouteNode> routeNodeDataFile; //! Cached access to the 'route.dat' file
+    DataFile<Area>                       areaDataFile;      //! Cached access to the 'areas.dat' file
+    DataFile<Way>                        wayDataFile;       //! Cached access to the 'ways.dat' file
+    IndexedDataFile<Id,RouteNode>        routeNodeDataFile; //! Cached access to the 'route.dat' file
+    IndexedDataFile<Id,Intersection>         junctionDataFile;  //! Cached access to the 'junctions.dat' file
 
-    TypeConfig                    *typeConfig;       //! Type config for the currently opened map
+    TypeConfig                           *typeConfig;       //! Type config for the currently opened map
 
   private:
     std::string GetDataFilename(Vehicle vehicle) const;
@@ -224,17 +229,17 @@ namespace osmscout {
                                   const ObjectFileRef& targetObject,
                                   size_t targetNodeIndex,
                                   RouteData& route);
+
+    bool ResolveRouteDataJunctions(const std::list<RNodeRef>& nodes,
+                                   RouteData& route);
+
     void AddNodes(RouteData& route,
-                  const std::vector<Path>& startPaths,
+                  Id startNodeId,
                   size_t startNodeIndex,
                   const ObjectFileRef& object,
                   size_t idCount,
                   bool oneway,
                   size_t targetNodeIndex);
-
-    std::vector<Path> TransformPaths(const RoutingProfile& profile,
-                                     const RouteNode& node,
-                                     size_t nextNodeIndex);
 
   public:
     Router(const RouterParameter& parameter,

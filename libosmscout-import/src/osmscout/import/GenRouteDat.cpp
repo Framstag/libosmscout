@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Router.h>
 
 #include <osmscout/system/Assert.h>
@@ -379,10 +380,10 @@ namespace osmscout {
     return defaultReturn;
   }
 
-  bool RouteDataGenerator::ReadJunctions(const ImportParameter& parameter,
-                                         Progress& progress,
-                                         const TypeConfig& typeConfig,
-                                         NodeUseMap& nodeUseMap)
+  bool RouteDataGenerator::ReadIntersections(const ImportParameter& parameter,
+                                             Progress& progress,
+                                             const TypeConfig& typeConfig,
+                                             NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
@@ -519,11 +520,11 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::ReadObjectsAtJunctions(const ImportParameter& parameter,
-                                                  Progress& progress,
-                                                  const TypeConfig& typeConfig,
-                                                  const NodeUseMap& nodeUseMap,
-                                                  NodeIdObjectsMap& nodeObjectsMap)
+  bool RouteDataGenerator::ReadObjectsAtIntersections(const ImportParameter& parameter,
+                                                      Progress& progress,
+                                                      const TypeConfig& typeConfig,
+                                                      const NodeUseMap& nodeUseMap,
+                                                      NodeIdObjectsMap& nodeObjectsMap)
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
@@ -648,9 +649,7 @@ namespace osmscout {
         continue;
       }
 
-      if (!(typeConfig.GetTypeInfo(area.GetType()).CanRouteFoot() ||
-            typeConfig.GetTypeInfo(area.GetType()).CanRouteBicycle() ||
-            typeConfig.GetTypeInfo(area.GetType()).CanRouteCar())) {
+      if (!(typeConfig.GetTypeInfo(area.GetType()).CanRoute())) {
         continue;
       }
 
@@ -684,6 +683,44 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  bool RouteDataGenerator::WriteIntersections(const ImportParameter& parameter,
+                                              Progress& progress,
+                                              NodeIdObjectsMap& nodeIdObjectsMap)
+  {
+    FileWriter writer;
+
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     Router::FILENAME_INTERSECTIONS_DAT))) {
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
+      return false;
+    }
+
+    writer.Write((uint32_t)nodeIdObjectsMap.size());
+
+    for (NodeIdObjectsMap::const_iterator junction=nodeIdObjectsMap.begin();
+        junction!=nodeIdObjectsMap.end();
+        ++junction) {
+
+      writer.WriteNumber(junction->first);
+      writer.WriteNumber(junction->second.size());
+
+      //std::cout << junction->first << " " << junction->second.size() << std::endl;
+
+      Id lastId=0;
+
+      for (std::list<ObjectFileRef>::const_iterator object=junction->second.begin();
+          object!=junction->second.end();
+          ++object) {
+        writer.Write((uint8_t)object->GetType());
+        writer.WriteNumber(object->GetFileOffset()-lastId);
+
+        lastId=object->GetFileOffset();
+      }
+    }
+
+    return writer.Close();
   }
 
   bool RouteDataGenerator::LoadWays(Progress& progress,
@@ -1540,24 +1577,26 @@ namespace osmscout {
             }
 
             // Circular way routing (similar to current area routing, but respecting isOneway())
-            if (way->ids.front()==way->ids.back()) {
-              CalculateCircularWayPaths(routeNode,
-                                        *way,
-                                        routeNodeOffset,
-                                        nodeObjectsMap,
-                                        routeNodeIdOffsetMap,
-                                        pendingOffsetsMap);
-              routeNode.objects.push_back(*ref);
+            if (way->IsCircular()) {
+              if (CalculateCircularWayPaths(routeNode,
+                                            *way,
+                                            routeNodeOffset,
+                                            nodeObjectsMap,
+                                            routeNodeIdOffsetMap,
+                                            pendingOffsetsMap)) {
+                routeNode.objects.push_back(*ref);
+              }
             }
             // Normal way routing
             else {
-              CalculateWayPaths(routeNode,
-                                *way,
-                                routeNodeOffset,
-                                nodeObjectsMap,
-                                routeNodeIdOffsetMap,
-                                pendingOffsetsMap);
-              routeNode.objects.push_back(*ref);
+              if (CalculateWayPaths(routeNode,
+                                    *way,
+                                    routeNodeOffset,
+                                    nodeObjectsMap,
+                                    routeNodeIdOffsetMap,
+                                    pendingOffsetsMap)) {
+                routeNode.objects.push_back(*ref);
+              }
             }
           }
           else if (ref->GetType()==refArea) {
@@ -1576,14 +1615,15 @@ namespace osmscout {
 
             routeNode.objects.push_back(*ref);
 
-            CalculateAreaPaths(typeConfig,
-                               routeNode,
-                               *area,
-                               routeNodeOffset,
-                               nodeObjectsMap,
-                               routeNodeIdOffsetMap,
-                               pendingOffsetsMap);
-            routeNode.objects.push_back(*ref);
+            if (CalculateAreaPaths(typeConfig,
+                                   routeNode,
+                                   *area,
+                                   routeNodeOffset,
+                                   nodeObjectsMap,
+                                   routeNodeIdOffsetMap,
+                                   pendingOffsetsMap)) {
+              routeNode.objects.push_back(*ref);
+            }
           }
         }
 
@@ -1670,9 +1710,9 @@ namespace osmscout {
     // Building a map of nodes and the number of ways that contain this way
     //
 
-    progress.SetAction("Scanning for junctions");
+    progress.SetAction("Scanning for intersections");
 
-    if (!ReadJunctions(parameter,
+    if (!ReadIntersections(parameter,
                        progress,
                        typeConfig,
                        nodeUseMap)) {
@@ -1683,9 +1723,9 @@ namespace osmscout {
     // Building a map of way endpoint ids and list of ways (way offsets) having this point as endpoint
     //
 
-    progress.SetAction("Collecting ways intersecting junctions");
+    progress.SetAction("Collecting objects at intersections");
 
-    if (!ReadObjectsAtJunctions(parameter,
+    if (!ReadObjectsAtIntersections(parameter,
                                 progress,
                                 typeConfig,
                                 nodeUseMap,
@@ -1697,15 +1737,25 @@ namespace osmscout {
 
     progress.Info(NumberToString(nodeObjectsMap.size())+ " route nodes collected");
 
-    // We sort objects by increasing id, for more efficient storage
+    progress.SetAction("Postprocessing intersections");
+
+
+    // We sort objects by increasing file offset, for more efficient storage
     // in route node
-    // TODO: Does this really make sense in case of mixed areas/ways?
-    //       We need a custom sorter!
     for (NodeIdObjectsMap::iterator entry=nodeObjectsMap.begin();
         entry!=nodeObjectsMap.end();
         ++entry) {
-      entry->second.sort();
+      entry->second.sort(ObjectFileRefByFileOffsetComparator());
     }
+
+    progress.SetAction(std::string("Writing intersection file '")+Router::FILENAME_INTERSECTIONS_DAT+"'");
+
+    if (!WriteIntersections(parameter,
+                        progress,
+                        nodeObjectsMap)) {
+      return false;
+    }
+
 
     progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_FOOT_DAT+"'");
 

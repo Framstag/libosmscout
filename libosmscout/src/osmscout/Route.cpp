@@ -373,11 +373,11 @@ namespace osmscout {
   }
 
   RouteDescription::Node::Node(size_t currentNodeIndex,
-                               const std::vector<Path>& paths,
+                               const std::vector<ObjectFileRef>& objects,
                                const ObjectFileRef& pathObject,
                                size_t targetNodeIndex)
   : currentNodeIndex(currentNodeIndex),
-    paths(paths),
+    objects(objects),
     pathObject(pathObject),
     targetNodeIndex(targetNodeIndex),
     distance(0.0),
@@ -442,12 +442,12 @@ namespace osmscout {
   }
 
   void RouteDescription::AddNode(size_t currentNodeIndex,
-                                 const std::vector<Path>& paths,
+                                 const std::vector<ObjectFileRef>& objects,
                                  const ObjectFileRef& pathObject,
                                  size_t targetNodeIndex)
   {
     nodes.push_back(Node(currentNodeIndex,
-                         paths,
+                         objects,
                          pathObject,
                          targetNodeIndex));
   }

@@ -72,14 +72,17 @@ namespace osmscout {
     return debugPerformance;
   }
 
-  const char* const Router::FILENAME_FOOT_DAT    = "routefoot.dat";
-  const char* const Router::FILENAME_FOOT_IDX    = "routefoot.idx";
+  const char* const Router::FILENAME_INTERSECTIONS_DAT = "intersections.dat";
+  const char* const Router::FILENAME_INTERSECTIONS_IDX = "intersections.idx";
 
-  const char* const Router::FILENAME_BICYCLE_DAT = "routebicycle.dat";
-  const char* const Router::FILENAME_BICYCLE_IDX = "routebicycle.idx";
+  const char* const Router::FILENAME_FOOT_DAT          = "routefoot.dat";
+  const char* const Router::FILENAME_FOOT_IDX          = "routefoot.idx";
 
-  const char* const Router::FILENAME_CAR_DAT     = "routecar.dat";
-  const char* const Router::FILENAME_CAR_IDX     = "routecar.idx";
+  const char* const Router::FILENAME_BICYCLE_DAT       = "routebicycle.dat";
+  const char* const Router::FILENAME_BICYCLE_IDX       = "routebicycle.idx";
+
+  const char* const Router::FILENAME_CAR_DAT           = "routecar.dat";
+  const char* const Router::FILENAME_CAR_IDX           = "routecar.idx";
 
   Router::Router(const RouterParameter& parameter,
                  Vehicle vehicle)
@@ -94,6 +97,10 @@ namespace osmscout {
                        GetIndexFilename(vehicle),
                        0,
                        6000),
+     junctionDataFile(Router::FILENAME_INTERSECTIONS_DAT,
+                      Router::FILENAME_INTERSECTIONS_IDX,
+                      0,
+                      6000),
      typeConfig(NULL)
   {
     // no code
@@ -279,7 +286,7 @@ namespace osmscout {
   }
 
   void Router::AddNodes(RouteData& route,
-                        const std::vector<Path>& startPaths,
+                        Id startNodeId,
                         size_t startNodeIndex,
                         const ObjectFileRef& object,
                         size_t idCount,
@@ -291,25 +298,27 @@ namespace osmscout {
 
     if (std::max(startNodeIndex,targetNodeIndex)-std::min(startNodeIndex,targetNodeIndex)==1) {
       // From one node to the neighbour node (+1 or -1)
-      route.AddEntry(startNodeIndex,
-                     startPaths,
+      route.AddEntry(startNodeId,
+                     startNodeIndex,
                      object,
                      targetNodeIndex);
     }
     else if (startNodeIndex<targetNodeIndex) {
       // Following the way
-      route.AddEntry(startNodeIndex,
-                     startPaths,
+      route.AddEntry(startNodeId,
+                     startNodeIndex,
                      object,
                      startNodeIndex+1);
 
       for (size_t i=startNodeIndex+1; i<targetNodeIndex-1; i++) {
-        route.AddEntry(i,
+        route.AddEntry(0,
+                       i,
                        object,
                        i+1);
       }
 
-      route.AddEntry(targetNodeIndex-1,
+      route.AddEntry(0,
+                     targetNodeIndex-1,
                      object,
                      targetNodeIndex);
     }
@@ -329,13 +338,14 @@ namespace osmscout {
         next=0;
       }
 
-      route.AddEntry(startNodeIndex,
-                     startPaths,
+      route.AddEntry(startNodeId,
+                     startNodeIndex,
                      object,
                      pos);
 
       while (next!=targetNodeIndex) {
-        route.AddEntry(pos,
+        route.AddEntry(0,
+                       pos,
                        object,
                        next);
 
@@ -350,44 +360,30 @@ namespace osmscout {
         }
       }
 
-      route.AddEntry(pos,
+      route.AddEntry(0,
+                     pos,
                      object,
                      targetNodeIndex);
     }
     else {
       // We follow the way in the opposite direction
-      route.AddEntry(startNodeIndex,
-                     startPaths,
+      route.AddEntry(startNodeId,
+                     startNodeIndex,
                      object,
                      startNodeIndex-1);
 
       for (long i=startNodeIndex-1; i>(long)targetNodeIndex+1; i--) {
-        route.AddEntry(i,
+        route.AddEntry(0,
+                       i,
                        object,
                        i-1);
       }
 
-      route.AddEntry(targetNodeIndex+1,
+      route.AddEntry(0,
+                     targetNodeIndex+1,
                      object,
                      targetNodeIndex);
     }
-  }
-
- std::vector<Path> Router::TransformPaths(const RoutingProfile& profile,
-                                          const RouteNode& node,
-                                          size_t nextNodeIndex)
- {
-    std::vector<osmscout::Path> result;
-
-    for (size_t i=0; i<node.paths.size(); i++) {
-      bool traversable=profile.CanUse(node,i);
-
-      result.push_back(osmscout::Path(node.objects[node.paths[i].objectIndex],
-                                      nextNodeIndex,
-                                      traversable));
-    }
-
-    return result;
   }
 
   bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
@@ -484,14 +480,15 @@ namespace osmscout {
       assert(startObject==targetObject);
 
       AddNodes(route,
-               std::vector<Path>(),
+               (*ids)[startNodeIndex],
                startNodeIndex,
                startObject,
                ids->size(),
                oneway,
                targetNodeIndex);
 
-      route.AddEntry(targetNodeIndex,
+      route.AddEntry(0,
+                     targetNodeIndex,
                      ObjectFileRef(),
                      0);
       return true;
@@ -512,7 +509,7 @@ namespace osmscout {
 
       // Start node to initial route node
       AddNodes(route,
-               std::vector<Path>(),
+               (*ids)[startNodeIndex],
                startNodeIndex,
                startObject,
                ids->size(),
@@ -563,7 +560,7 @@ namespace osmscout {
 
         if (currentNodeIndex!=targetNodeIndex) {
           AddNodes(route,
-                   TransformPaths(profile,node,targetNodeIndex),
+                   (*ids)[currentNodeIndex],
                    currentNodeIndex,
                    targetObject,
                    ids->size(),
@@ -571,7 +568,8 @@ namespace osmscout {
                    targetNodeIndex);
         }
 
-        route.AddEntry(targetNodeIndex,
+        route.AddEntry(0,
+                       targetNodeIndex,
                        ObjectFileRef(),
                        0);
 
@@ -615,7 +613,7 @@ namespace osmscout {
       assert(nextNodeIndex<ids->size());
 
       AddNodes(route,
-               TransformPaths(profile,node,nextNodeIndex),
+               (*ids)[currentNodeIndex],
                currentNodeIndex,
                (*nn)->object,
                ids->size(),
@@ -624,6 +622,63 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  bool Router::ResolveRouteDataJunctions(const std::list<RNodeRef>& nodes,
+                                         RouteData& route)
+  {
+    std::set<Id> nodeIds;
+
+    for (std::list<RouteData::RouteEntry>::const_iterator routeEntry=route.Entries().begin();
+         routeEntry!=route.Entries().end();
+         ++routeEntry) {
+      if (routeEntry->GetCurrentNodeId()!=0) {
+        nodeIds.insert(routeEntry->GetCurrentNodeId());
+      }
+    }
+
+    if (!junctionDataFile.Open(path,
+                               FileScanner::FastRandom,
+                               false,
+                               FileScanner::FastRandom,
+                               false)) {
+      return false;
+    }
+
+    std::vector<JunctionRef> junctions;
+
+    if (!junctionDataFile.Get(nodeIds,
+                              junctions)) {
+      std::cerr << "Error while resolving junction ids to junctions" << std::endl;
+    }
+
+    nodeIds.clear();
+
+    OSMSCOUT_HASHMAP<Id,JunctionRef> junctionMap;
+
+    for (std::vector<JunctionRef>::const_iterator j=junctions.begin();
+        j!=junctions.end();
+        ++j) {
+      JunctionRef junction(*j);
+
+      junctionMap.insert(std::make_pair(junction->GetId(),junction));
+    }
+
+    junctions.clear();
+
+    for (std::list<RouteData::RouteEntry>::iterator routeEntry=route.Entries().begin();
+         routeEntry!=route.Entries().end();
+         ++routeEntry) {
+      if (routeEntry->GetCurrentNodeId()!=0) {
+        OSMSCOUT_HASHMAP<Id,JunctionRef>::const_iterator junction=junctionMap.find(routeEntry->GetCurrentNodeId());
+        if (junction!=junctionMap.end()) {
+          routeEntry->SetObjects(junction->second->GetObjects());
+        }
+      }
+
+    }
+
+    return junctionDataFile.Close();
   }
 
   bool Router::GetStartNodes(const RoutingProfile& profile,
@@ -1109,6 +1164,8 @@ namespace osmscout {
       return false;
     }
 
+    ResolveRouteDataJunctions(nodes,route);
+
     return true;
   }
 
@@ -1267,7 +1324,7 @@ namespace osmscout {
          iter!=data.Entries().end();
          ++iter) {
       description.AddNode(iter->GetCurrentNodeIndex(),
-                          iter->GetPaths(),
+                          iter->GetObjects(),
                           iter->GetPathObject(),
                           iter->GetTargetNodeIndex());
     }
