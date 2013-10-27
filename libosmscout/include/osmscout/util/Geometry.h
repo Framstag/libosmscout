@@ -26,6 +26,7 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/system/Math.h>
 #include <osmscout/system/Types.h>
 
 #include <osmscout/GeoCoord.h>
