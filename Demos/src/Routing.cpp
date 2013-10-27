@@ -559,10 +559,9 @@ int main(int argc, char* argv[])
   }
 
   if (argc-currentArg!=9) {
-    std::cout << "Routing [-r] <map directory>" <<std::endl;
-    std::cout << "             <start location> <start area> <start lat> <start lon>" << std::endl;
-    std::cout << "             <target location> <target area> <target lat> <target lon>" << std::endl;
-    std::cout << " -r  allow using oneways the wrong direction" << std::endl;
+    std::cout << "Routing <map directory>" <<std::endl;
+    std::cout << "        <start location> <start area> <start lat> <start lon>" << std::endl;
+    std::cout << "        <target location> <target area> <target lat> <target lon>" << std::endl;
     return 1;
   }
 
