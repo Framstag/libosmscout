@@ -889,7 +889,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			Get();
 			Expect(35 /* ":" */);
 			UINT(priority);
-			if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+			if (priority<std::numeric_limits<uint8_t>::max()) {
 			   style.style->SetPriority((uint8_t)priority);
 			   style.attributes.insert(TextStyle::attrPriority);
 			}
@@ -1252,7 +1252,7 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			Get();
 			Expect(35 /* ":" */);
 			UINT(priority);
-			if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+			if (priority<std::numeric_limits<uint8_t>::max()) {
 			   style.style->SetPriority((uint8_t)priority);
 			   style.attributes.insert(PathShieldStyle::attrPriority);
 			}
