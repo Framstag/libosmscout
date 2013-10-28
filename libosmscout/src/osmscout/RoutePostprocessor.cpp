@@ -471,6 +471,11 @@ namespace osmscout {
     return true;
   }
 
+  RoutePostprocessor::DistanceAndTimePostprocessor::DistanceAndTimePostprocessor()
+  {
+    // no code
+  }
+
   bool RoutePostprocessor::DistanceAndTimePostprocessor::Process(const RoutingProfile& profile,
                                                                  RouteDescription& description,
                                                                  Database& database)
@@ -561,6 +566,11 @@ namespace osmscout {
     return true;
   }
 
+  RoutePostprocessor::WayNamePostprocessor::WayNamePostprocessor()
+  {
+    // no code
+  }
+
   bool RoutePostprocessor::WayNamePostprocessor::Process(const RoutingProfile& profile,
                                                          RouteDescription& description,
                                                          Database& database)
@@ -621,6 +631,11 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  RoutePostprocessor::CrossingWaysPostprocessor::CrossingWaysPostprocessor()
+  {
+    // no code
   }
 
   void RoutePostprocessor::CrossingWaysPostprocessor::AddCrossingWaysDescriptions(RouteDescription::CrossingWaysDescription* description,
@@ -789,6 +804,11 @@ namespace osmscout {
   const double RoutePostprocessor::DirectionPostprocessor::curveMaxNodeDistance=0.020;
   const double RoutePostprocessor::DirectionPostprocessor::curveMaxDistance=0.300;
   const double RoutePostprocessor::DirectionPostprocessor::curveMinAngle=5.0;
+
+  RoutePostprocessor::DirectionPostprocessor::DirectionPostprocessor()
+  {
+    // no code
+  }
 
   bool RoutePostprocessor::DirectionPostprocessor::Process(const RoutingProfile& profile,
                                                            RouteDescription& description,

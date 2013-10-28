@@ -152,6 +152,8 @@ namespace osmscout {
     class OSMSCOUT_API DistanceAndTimePostprocessor : public Postprocessor
     {
     public:
+      DistanceAndTimePostprocessor();
+
       bool Process(const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
@@ -163,6 +165,8 @@ namespace osmscout {
     class OSMSCOUT_API WayNamePostprocessor : public Postprocessor
     {
     public:
+      WayNamePostprocessor();
+
       bool Process(const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
@@ -182,6 +186,8 @@ namespace osmscout {
                                        const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
 
     public:
+      CrossingWaysPostprocessor();
+
       bool Process(const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
@@ -200,6 +206,8 @@ namespace osmscout {
       static const double curveMinAngle;
 
     public:
+      DirectionPostprocessor();
+
       bool Process(const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
