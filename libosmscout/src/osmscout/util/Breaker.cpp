@@ -41,12 +41,12 @@ namespace osmscout {
     return false;
   }
 
-  bool DummyBreaker::IsAborted()
+  bool DummyBreaker::IsAborted() const
   {
     return false;
   }
 
-  #if defined(OSMSCOUT_HAVE_THREAD)
+#if defined(OSMSCOUT_HAVE_THREAD)
   ThreadedBreaker::ThreadedBreaker()
   : aborted(false)
   {
@@ -60,7 +60,7 @@ namespace osmscout {
     return true;
   }
 
-  bool ThreadedBreaker::IsAborted()
+  bool ThreadedBreaker::IsAborted() const
   {
     return aborted;
   }

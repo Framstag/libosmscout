@@ -51,7 +51,7 @@ namespace osmscout {
     DummyBreaker();
 
     virtual bool Break();
-    virtual bool IsAborted();
+    virtual bool IsAborted() const;
   };
 
 #if defined(OSMSCOUT_HAVE_THREAD)
@@ -63,7 +63,7 @@ namespace osmscout {
     ThreadedBreaker();
 
     virtual bool Break();
-    virtual bool IsAborted();
+    virtual bool IsAborted() const;
   };
 #endif
 }
