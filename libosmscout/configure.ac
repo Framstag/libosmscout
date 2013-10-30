@@ -26,6 +26,10 @@ AC_ARG_ENABLE(thread-support,
               [AS_HELP_STRING([--disable-thread-support],
                               [do not make use of C++0x thread support])])
 
+AC_ARG_ENABLE(openmp-support,
+              [AS_HELP_STRING([--disable-openmp-support],
+                              [do not make use of OpenMP support])])
+
 if test "$enable_cpp0x_support" != "no"; then
  AX_CHECK_COMPILE_FLAG([-std=c++0x],
                        [CPP0XFLAGS="-std=c++0x"
@@ -100,11 +104,14 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 dnl Check for SSE2 & Co.
+
 if test "$enable_see2_support" != "no"; then
   AX_EXT
 fi
 
-AX_OPENMP([AC_SUBST(OPENMP_CXXFLAGS)])
+if test "$enable_openmp_support" != "no"; then
+  AX_OPENMP([AC_SUBST(OPENMP_CXXFLAGS)])
+fi  
 
 if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
@@ -121,6 +128,7 @@ if test "x$ac_cv_type_std__wstring" = xyes; then
 fi
 
 dnl Support for XintXX_T constants
+
 if test "x$ac_cv_type_int8_t" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_INT8_T],[1],[int8_t is available])
 fi
@@ -154,6 +162,7 @@ if test "x$ac_cv_type_uint64_t" = xyes; then
 fi
 
 dnl c++ 11 extensions
+
 if test "x$ac_cv_header_unordered_map" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_MAP],[1],[system header <unordered_map> is available])
 fi
@@ -167,6 +176,7 @@ if test "x$ac_cv_header_thread" = xyes; then
 fi
 
 dnl SSE support
+
 if test "x$ax_cv_have_sse2_ext" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_SSE2],[1],[SSE2 processor extension available])
 fi
