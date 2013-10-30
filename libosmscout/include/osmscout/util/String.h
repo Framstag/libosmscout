@@ -33,15 +33,23 @@
 
 namespace osmscout {
 
-  extern OSMSCOUT_API bool GetDigitValue(char digit, size_t& result);
+  /**
+   * Returns the numerical value of the given character, if the character
+   * is a digit in a numerical value. The current code allows digits
+   * in the range from 0-9 and a-f and A-F. And thus supports
+   * numerical bases from 1-16.
+   */
+  extern OSMSCOUT_API bool GetDigitValue(char digit,
+                                         size_t& result);
 
-  template<typename A>
-  size_t NumberDigits(const A& a,size_t base=10)
+  template<typename N>
+  size_t NumberDigits(const N& number,
+                      size_t base=10)
   {
-    A      value(a);
+    N      value(number);
     size_t res=0;
 
-    if (std::numeric_limits<A>::is_signed) {
+    if (std::numeric_limits<N>::is_signed) {
       if (value<0) {
         res++;
       }
@@ -55,18 +63,16 @@ namespace osmscout {
     return res;
   }
 
-  template<typename A>
-  std::string NumberToString(const A& a)
+  template<typename N>
+  std::string NumberToStringSigned(const N& number)
   {
     std::string res;
-    A           value(a);
+    N           value(number);
     bool        negative=false;
 
-    if (std::numeric_limits<A>::is_signed) {
-      if (value<0) {
-        negative=true;
-        value=-value;
-      }
+    if (value<0) {
+      negative=true;
+      value=-value;
     }
 
     res.reserve(20);
@@ -79,32 +85,82 @@ namespace osmscout {
     if (res.empty()) {
       res.insert(0,1,'0');
     }
-
-    if (negative) {
+    else if (negative) {
       res.insert(0,1,'-');
     }
 
     return res;
   }
 
+  template<typename N>
+  std::string NumberToStringUnsigned(const N& number)
+  {
+    std::string res;
+    N           value(number);
+
+    res.reserve(20);
+
+    while (value!=0) {
+      res.insert(0,1,(char)('0'+value%10));
+      value=value/10;
+    }
+
+    if (res.empty()) {
+      res.insert(0,1,'0');
+    }
+
+    return res;
+  }
+
+  template<bool is_signed, typename N>
+  struct NumberToStringTemplated
+  {
+  };
+
+  template<typename N>
+  struct NumberToStringTemplated<true, N>
+  {
+    static inline std::string f(const N& number)
+    {
+      return NumberToStringSigned<N>(number);
+    }
+  };
+
+  template<typename N>
+  struct NumberToStringTemplated<false, N>
+  {
+    static inline std::string f(const N& number)
+    {
+      return NumberToStringUnsigned<N>(number);
+    }
+  };
+
+  /**
+   * Converts the given (possibly negative) decimal number to a std::string.
+   */
+  template<typename N>
+  inline std::string NumberToString(const N& number)
+  {
+    return NumberToStringTemplated<std::numeric_limits<N>::is_signed, N>
+      ::f(number);
+  }
+
   extern OSMSCOUT_API bool StringToNumber(const char* string, double& value);
   extern OSMSCOUT_API bool StringToNumber(const std::string& string, double& value);
 
-  template<typename A>
-  bool StringToNumber(const std::string& string, A& a, size_t base=10)
+  template<typename N>
+  bool StringToNumberSigned(const std::string& string,
+                            N& number,
+                            size_t base=10)
   {
     assert(base<=16);
 
     std::string::size_type pos=0;
     bool                   minus=false;
 
-    a=0;
+    number=0;
 
     if (string.empty()) {
-      return false;
-    }
-
-    if (!std::numeric_limits<A>::is_signed && string[0]=='-') {
       return false;
     }
 
@@ -130,13 +186,12 @@ namespace osmscout {
         For signed values with base!=10 we assume a negative value
       */
       if (digitValue==base-1 &&
-          std::numeric_limits<A>::is_signed &&
-          string.length()==NumberDigits(std::numeric_limits<A>::max())) {
+          string.length()==NumberDigits(std::numeric_limits<N>::max())) {
         minus=true;
-        a=base/2;
+        number=base/2;
       }
       else {
-        a=digitValue;
+        number=digitValue;
       }
 
       pos=1;
@@ -153,20 +208,122 @@ namespace osmscout {
         return false;
       }
 
-      if (std::numeric_limits<A>::max()/(A)base-(A)digitValue<a) {
+      if (std::numeric_limits<N>::max()/(N)base-(N)digitValue<number) {
         return false;
       }
 
-      a=a*base+digitValue;
+      number=number*base+digitValue;
 
       pos++;
     }
 
     if (minus) {
-      a=-a;
+      number=-number;
     }
 
     return true;
+  }
+
+  template<typename N>
+  bool StringToNumberUnsigned(const std::string& string,
+                              N& number,
+                              size_t base=10)
+  {
+    assert(base<=16);
+
+    std::string::size_type pos=0;
+
+    number=0;
+
+    if (string.empty()) {
+      return false;
+    }
+
+    if (string[0]=='-') {
+      return false;
+    }
+
+    /*
+      Special handling for the first symbol/digit (could be negative)
+      */
+    size_t digitValue;
+
+    if (!GetDigitValue(string[pos],digitValue)) {
+      return false;
+    }
+
+    if (digitValue>=base) {
+      return false;
+    }
+
+    number=digitValue;
+
+    pos=1;
+
+    while (pos<string.length()) {
+      size_t digitValue;
+
+      if (!GetDigitValue(string[pos],digitValue)) {
+        return false;
+      }
+
+      if (digitValue>=base) {
+        return false;
+      }
+
+      if (std::numeric_limits<N>::max()/(N)base-(N)digitValue<number) {
+        return false;
+      }
+
+      number=number*base+digitValue;
+
+      pos++;
+    }
+
+    return true;
+  }
+
+  template<bool is_signed, typename N>
+  struct StringToNumberTemplated
+  {
+  };
+
+  template<typename N>
+  struct StringToNumberTemplated<true, N>
+  {
+    static inline unsigned int f(const std::string& string,
+                                 N& number,
+                                 size_t base=10)
+    {
+      return StringToNumberSigned<N>(string,number,base);
+    }
+  };
+
+  template<typename N>
+  struct StringToNumberTemplated<false, N>
+  {
+    static inline unsigned int f(const std::string& string,
+                                 N& number,
+                                 size_t base=10)
+    {
+      return StringToNumberUnsigned<N>(string,number,base);
+    }
+  };
+
+  /**
+   * Converts a string holding a (possibly negative) numerical
+   * value of the given base to the numerical value itself.
+   *
+   * Example:
+   *  "-13" => -13
+   */
+  template<typename N>
+  inline unsigned int StringToNumber(const std::string& string,
+                                     N& number,
+                                     size_t base=10)
+  {
+    return StringToNumberTemplated<std::numeric_limits<N>::is_signed, N>
+      ::f(string,number,base);
   }
 
   extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
