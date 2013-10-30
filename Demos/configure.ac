@@ -17,8 +17,10 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
+AX_CXXFLAGS_WARN_ALL
+
 if test "$GXX" = yes; then
-  CPPFLAGS="$CPPFLAGS -Wall -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls"
+  CXXFLAGS="$CXXFLAGS -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls"
 fi
 
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout])

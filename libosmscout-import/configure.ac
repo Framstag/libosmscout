@@ -14,9 +14,11 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
-AC_ARG_WITH(protoc,
-            AC_HELP_STRING([--with-protoc=PATH],
-                           [Specify a specific path to protoc]),
+AX_CXXFLAGS_WARN_ALL
+
+AC_ARG_WITH([protoc],
+            [AC_HELP_STRING([--with-protoc=PATH],
+                            [Specify a specific path to protoc])],
             [protoc=$with_protoc])
 
 AC_SUBST(protoc)
@@ -32,7 +34,7 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 if test "x$GXX" = xyes; then
-  CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
+  CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
 dnl Selfmade tests
@@ -99,7 +101,7 @@ PKG_CHECK_MODULES(ZLIB,
 AM_CONDITIONAL(HAVE_LIB_ZLIB,[test "$LIB_ZLIB_FOUND" = true])
 
 dnl Checking for protoc
-AC_PATH_PROG(protoc,protoc)
+AC_PATH_PROG(protoc,protoc,)
 AM_CONDITIONAL(HAVE_PROG_PROTOC,[test -n "$protoc"])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"

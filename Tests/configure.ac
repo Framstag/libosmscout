@@ -16,8 +16,10 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+AX_CXXFLAGS_WARN_ALL
+
 if test "$GXX" = yes; then
-  CPPFLAGS="$CPPFLAGS -Wall -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls"
+  CXXFLAGS="$CXXFLAGS -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls"
 fi
 
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout])

@@ -17,12 +17,14 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
+AX_CXXFLAGS_WARN_ALL
+
 AC_TYPE_SIZE_T
 
 AC_SEARCH_LIBS([sqrt],[m])
 
 if test "$GXX" = yes; then
-  CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
+  CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
 dnl Selfmade tests

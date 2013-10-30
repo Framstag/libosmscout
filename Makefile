@@ -1,3 +1,5 @@
+# export CXX = clang++
+
 programs = libosmscout \
            libosmscout-import \
            libosmscout-map \
