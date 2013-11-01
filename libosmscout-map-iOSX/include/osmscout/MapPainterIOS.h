@@ -46,6 +46,8 @@ namespace osmscout {
     
     class MapPainterIOS : public MapPainter {
     private:
+        CoordBufferImpl<Vertex2D>   *coordBuffer;
+
         CGContextRef                cg;
         std::vector<Image>          images;         // Cached CGImage for icons
         std::vector<Image>          patternImages;  // Cached CGImage for patterns
@@ -122,13 +124,10 @@ namespace osmscout {
         void DrawArea(const Projection& projection,
                       const MapParameter& parameter,
                       const AreaData& area);
-        
-        void DrawArea(const FillStyle& style,
-                      const MapParameter& parameter,
-                      double x,
-                      double y,
-                      double width,
-                      double height);
+                
+        void DrawGround(const Projection& projection,
+                        const MapParameter& parameter,
+                        const FillStyle& style);
         
         void DrawFillStyle(const Projection& projection,
                      const MapParameter& parameter,
