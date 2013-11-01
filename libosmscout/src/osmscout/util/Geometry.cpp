@@ -17,10 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/system/Math.h>
-
 #include <osmscout/util/Geometry.h>
 
+#include <cstdlib>
+
+#include <osmscout/system/Math.h>
 #include <osmscout/system/SSEMathPublic.h>
 
 #ifdef OSMSCOUT_HAVE_SSE2
