@@ -704,7 +704,7 @@ namespace osmscout {
         ++junction) {
 
       writer.WriteNumber(junction->first);
-      writer.WriteNumber(junction->second.size());
+      writer.WriteNumber((uint32_t)junction->second.size());
 
       Id lastFileOffset=0;
 
