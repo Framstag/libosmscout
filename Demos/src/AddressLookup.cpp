@@ -24,6 +24,29 @@
 
 const static size_t RESULT_SET_MAX_SIZE = 1000;
 
+std::string GetName(const osmscout::ObjectFileRef& object,
+                    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::NodeRef> nodesMap,
+                    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::AreaRef> areasMap,
+                    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::WayRef>  waysMap)
+{
+  switch (object.GetType())
+  {
+  case osmscout::refNode:
+    return nodesMap[object.GetFileOffset()]->GetName();
+    break;
+  case osmscout::refArea:
+    return areasMap[object.GetFileOffset()]->rings.front().GetName();
+    break;
+  case osmscout::refWay:
+    return waysMap[object.GetFileOffset()]->GetName();
+    break;
+  default:
+    return "";
+  }
+
+  return "";
+}
+
 int main(int argc, char* argv[])
 {
   std::string                      map;
@@ -79,7 +102,12 @@ int main(int argc, char* argv[])
   for (std::list<osmscout::AdminRegion>::const_iterator area=areas.begin();
       area!=areas.end();
       ++area) {
-    std::list<osmscout::Location> locations;
+    std::list<osmscout::Location>                             locations;
+
+    std::set<osmscout::ObjectFileRef>                         objects;
+    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::NodeRef> nodesMap;
+    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::AreaRef> areasMap;
+    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::WayRef>  waysMap;
 
     if (!location.empty()) {
       if (!database.GetMatchingLocations(*area,location,locations,RESULT_SET_MAX_SIZE,limitReached,false)) {
@@ -95,18 +123,41 @@ int main(int argc, char* argv[])
       }
     }
 
+    objects.insert(area->reference);
+
+    for (std::list<osmscout::Location>::const_iterator location=locations.begin();
+        location!=locations.end();
+        ++location) {
+      for (std::list<osmscout::ObjectFileRef>::const_iterator reference=location->references.begin();
+          reference!=location->references.end();
+          ++reference) {
+
+        objects.insert(*reference);
+      }
+    }
+
+    if (!database.GetObjects(objects,
+                             nodesMap,
+                             areasMap,
+                             waysMap)) {
+      std::cerr << "Error while resolving locations" << std::endl;
+      continue;
+    }
+
     std::cout << "+ " << area->name;
 
     if (!area->path.empty()) {
       std::cout << " (" << osmscout::StringListToString(area->path) << ")";
     }
 
-    std::cout << " ~ " << area->reference.GetTypeName() << " offset " << area->reference.GetFileOffset() << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  = " << GetName(area->reference,nodesMap,areasMap,waysMap) << " " << area->reference.GetTypeName() << " " << area->reference.GetFileOffset() << std::endl;
 
     for (std::list<osmscout::Location>::const_iterator location=locations.begin();
         location!=locations.end();
         ++location) {
-      std::cout <<"  => " << location->name;
+      std::cout <<"  - " << location->name;
 
       if (!location->path.empty()) {
         std::cout << " (" << osmscout::StringListToString(location->path) << ")";
@@ -117,7 +168,7 @@ int main(int argc, char* argv[])
       for (std::list<osmscout::ObjectFileRef>::const_iterator reference=location->references.begin();
           reference!=location->references.end();
           ++reference) {
-        std::cout << "     ~ " << reference->GetTypeName() << " offset " << reference->GetFileOffset() << std::endl;
+        std::cout << "    = " << GetName(*reference,nodesMap,areasMap,waysMap) << " " << reference->GetTypeName() << " " << reference->GetFileOffset() << std::endl;
       }
     }
   }
