@@ -74,11 +74,11 @@ wayway.dat (import only):
  * New version of *.tmp after nodes ids have been reduce to
    only those nodes that are referenced at least twice. 
 
-turnrestr.dat:
+turnrestr.dat (import only):
  * Converted version of turn restrictions. Used during creation
    of routing specific export files.
  
-wayareablack.dat:
+wayareablack.dat (import only):
  * List of areas ids that get blacklisted during relation
    parsing.
 
@@ -137,6 +137,9 @@ nameregion.idx (export):
    areas (e.g. cities) and indexed objects within these areas
    (e.g. streets).
 
+citystreet.txt (debug only)
+ * Dump of the internal city/street index
+
 Is tile water or land index:
 ============================
 
@@ -146,7 +149,7 @@ water.idx (export):
    'coast'. Tiles of type coast also hold information about
    coastline within the tile and land regions within the tile.
 
-Optimized data for fatser rendering in low zoom:
+Optimized data for faster rendering in low zoom:
 ================================================
 
 areasopt.dat (export)
@@ -168,3 +171,8 @@ route.dat (export)
 route.idx (export)
  * Contains the index over the route graph to load individual
    routing nodes by id.
+
+intersections.dat (export)
+ * Contains information about which objects (areas and ways) 
+   are part of a routing relevant (route node at intersection point)
+   intersections.
