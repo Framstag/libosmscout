@@ -609,7 +609,7 @@ namespace osmscout {
 
   /**
     Add the given object (currently only a way) to
-    the hierachical area index.
+    the hierarchical area index.
 
     If the method returns true, the objects was completely contained
     by the passed area (or one of its sub areas), else it returns false.
@@ -1091,48 +1091,10 @@ namespace osmscout {
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
-    // We do not yet know if we handle borders as ways or areas
-    boundaryId=typeConfig.GetWayTypeId("boundary_administrative");
-    if (boundaryId==typeIgnore) {
-      boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
-    }
+    boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
 
     typeConfig.GetIndexables(indexables);
-
-    progress.SetAction("Scanning for cities of type 'node'");
-
-    //
-    // Getting all nodes of type place=*. We later need an area for these cities.
-    //
-
-    // Get nodes of one of the types in cityIds
-    if (!GetCityNodes(parameter,
-                      typeConfig,
-                      cityIds,
-                      cityNodes,
-                      progress)) {
-      return false;
-    }
-
-    progress.Info(std::string("Found ")+NumberToString(cityNodes.size())+" cities of type 'node'");
-
-    //
-    // Getting all areas of type place=*.
-    //
-
-    progress.SetAction("Scanning for cities of type 'area'");
-
-    // Get areas of one of the types in cityIds
-    if (!GetCityAreas(parameter,
-                      typeConfig,
-                      cityIds,
-                      cityAreas,
-                      progress)) {
-      return false;
-    }
-
-    progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
 
     //
     // Getting all areas of type 'administrative boundary'.
@@ -1149,6 +1111,38 @@ namespace osmscout {
     }
 
     progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
+
+    //
+    // Getting all areas of type place=*.
+    //
+
+    progress.SetAction("Scanning for cities of type 'area'");
+
+    if (!GetCityAreas(parameter,
+                      typeConfig,
+                      cityIds,
+                      cityAreas,
+                      progress)) {
+      return false;
+    }
+
+    progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
+
+    //
+    // Getting all nodes of type place=*. We later need an area for these cities.
+    //
+
+    progress.SetAction("Scanning for cities of type 'node'");
+
+    if (!GetCityNodes(parameter,
+                      typeConfig,
+                      cityIds,
+                      cityNodes,
+                      progress)) {
+      return false;
+    }
+
+    progress.Info(std::string("Found ")+NumberToString(cityNodes.size())+" cities of type 'node'");
 
     progress.SetAction("Merging city areas and city nodes");
 
@@ -1205,6 +1199,16 @@ namespace osmscout {
       return false;
     }
 
+    progress.SetAction("Index nodes");
+
+    if (!IndexNodes(parameter,
+                    progress,
+                    typeConfig,
+                    indexables,
+                    rootRegion)) {
+      return false;
+    }
+
     for (size_t i=0; i<regionTree.size(); i++) {
       unsigned long count=0;
 
@@ -1214,16 +1218,6 @@ namespace osmscout {
         count+=(*iter)->locations.size();
       }
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
-    }
-
-    progress.SetAction("Index nodes");
-
-    if (!IndexNodes(parameter,
-                    progress,
-                    typeConfig,
-                    indexables,
-                    rootRegion)) {
-      return false;
     }
 
     FileWriter writer;
