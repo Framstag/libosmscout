@@ -11,7 +11,7 @@
 #undef OSMSCOUT_HAVE_UNORDERED_SET
 
 /* std::wstring is available */
-#undef OSMSCOUT_HAVE_STD__WSTRING
+#undef OSMSCOUT_HAVE_STD_WSTRING
 
 /* int8_t is available */
 #undef OSMSCOUT_HAVE_INT8_T

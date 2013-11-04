@@ -158,7 +158,7 @@ std::string ByteSizeToString(double value)
 
       return buffer.str();
     }
-#if defined(OSMSCOUT_HAVE_STD__WSTRING)
+#if defined(OSMSCOUT_HAVE_STD_WSTRING)
 
   /**
     The following string conversion code is a modified version of code copied

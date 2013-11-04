@@ -55,6 +55,11 @@ AC_CHECK_TYPES([uint32_t],[AC_DEFINE([OSMSCOUT_HAVE_UINT32_T],[1],[uint32_t is a
 AC_CHECK_TYPES([int64_t],[AC_DEFINE([OSMSCOUT_HAVE_INT64_T],[1],[int64_t is available])],,[#include <stdint.h>])
 AC_CHECK_TYPES([uint64_t],[AC_DEFINE([OSMSCOUT_HAVE_UINT64_T],[1],[uint64_t is available])],,[#include <stdint.h>])
 
+dnl the agg backend needs wstring support
+
+AC_CHECK_TYPES([std::wstring],[AC_DEFINE([OSMSCOUT_HAVE_STD_WSTRING],[1],[std::wstring is available])],,[#include <string>])
+AC_CHECK_SIZEOF([wchar_t])
+
 AC_CHECK_HEADERS([fcntl.h sys/time.h])
 
 AS_IF([test "$enable_cpp0x_support" != "no"],

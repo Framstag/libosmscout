@@ -331,7 +331,7 @@ namespace osmscout {
 
   extern OSMSCOUT_API std::string ByteSizeToString(double size);
 
-#if defined(OSMSCOUT_HAVE_STD__WSTRING)
+#if defined(OSMSCOUT_HAVE_STD_WSTRING)
   extern OSMSCOUT_API std::wstring UTF8StringToWString(const std::string& text);
 #endif
 }
