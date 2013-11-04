@@ -88,11 +88,9 @@ namespace osmscout {
     double                               maxlon;
     double                               maxlat;
 
-    std::map<std::string,std::list<FileOffset> > nodes;     //! list of indexed nodes in this region
-    std::map<std::string,std::list<FileOffset> > areas;     //! list of indexed areas in this region
-    std::map<std::string,std::list<FileOffset> > ways;      //! list of indexed ways in this region
+    std::map<std::string,std::list<ObjectFileRef> > locations; //! list of indexed objects in this region
 
-    std::list<Region>                            regions;   //! A list of sub regions
+    std::list<Region>                               regions;   //! A list of sub regions
 
     void CalculateMinMax()
     {
@@ -543,7 +541,7 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.areas[name].push_back(area.GetFileOffset());
+    region.locations[name].push_back(ObjectFileRef(area.GetFileOffset(),refArea));
 
     bool completeMatch=IsAreaCompletelyInArea(nodes,region.area);
 
@@ -649,7 +647,7 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.ways[way.GetName()].push_back(way.GetFileOffset());
+    region.locations[way.GetName()].push_back(ObjectFileRef(way.GetFileOffset(),refWay));
 
     bool completeMatch=IsAreaCompletelyInArea(way.nodes,region.area);
 
@@ -775,7 +773,7 @@ namespace osmscout {
       }
     }
 
-    area.nodes[name].push_back(offset);
+    area.locations[name].push_back(ObjectFileRef(offset,refNode));
   }
 
   static bool IndexNodes(const ImportParameter& parameter,
@@ -858,60 +856,22 @@ namespace osmscout {
         out << " = " << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetFileOffset() << std::endl;
       }
 
-      for (std::map<std::string,std::list<FileOffset> >::const_iterator nodeEntry=r->nodes.begin();
-          nodeEntry!=r->nodes.end();
+      for (std::map<std::string,std::list<ObjectFileRef> >::const_iterator nodeEntry=r->locations.begin();
+          nodeEntry!=r->locations.end();
           ++nodeEntry) {
         for (size_t i=0; i<indent; i++) {
           out << " ";
         }
         out << " - " << nodeEntry->first << std::endl;
 
-        for (std::list<FileOffset>::const_iterator offset=nodeEntry->second.begin();
-            offset!=nodeEntry->second.end();
-            ++offset) {
+        for (std::list<ObjectFileRef>::const_iterator object=nodeEntry->second.begin();
+            object!=nodeEntry->second.end();
+            ++object) {
           for (size_t i=0; i<indent+2; i++) {
             out << " ";
           }
 
-          out << " = " << "Node " << *offset << std::endl;
-        }
-      }
-
-      for (std::map<std::string,std::list<FileOffset> >::const_iterator areaEntry=r->areas.begin();
-          areaEntry!=r->areas.end();
-          ++areaEntry) {
-        for (size_t i=0; i<indent; i++) {
-          out << " ";
-        }
-        out << " - " << areaEntry->first << std::endl;
-
-        for (std::list<FileOffset>::const_iterator offset=areaEntry->second.begin();
-            offset!=areaEntry->second.end();
-            ++offset) {
-          for (size_t i=0; i<indent+2; i++) {
-            out << " ";
-          }
-
-          out << " = " << "Area " << *offset << std::endl;
-        }
-      }
-
-      for (std::map<std::string,std::list<FileOffset> >::const_iterator wayEntry=r->ways.begin();
-          wayEntry!=r->ways.end();
-          ++wayEntry) {
-        for (size_t i=0; i<indent; i++) {
-          out << " ";
-        }
-        out << " - " << wayEntry->first << std::endl;
-
-        for (std::list<FileOffset>::const_iterator offset=wayEntry->second.begin();
-            offset!=wayEntry->second.end();
-            ++offset) {
-          for (size_t i=0; i<indent+2; i++) {
-            out << " ";
-          }
-
-          out << " = " << "Way " << *offset << std::endl;
+          out << " = " << object->GetTypeName() << " " << object->GetFileOffset() << std::endl;
         }
       }
 
@@ -965,45 +925,25 @@ namespace osmscout {
       }
     }
 
-    writer.WriteNumber((uint32_t)region.nodes.size());
-    for (std::map<std::string,std::list<FileOffset> >::const_iterator node=region.nodes.begin();
-         node!=region.nodes.end();
-         ++node) {
-      writer.Write(node->first);                         // Node name
-      writer.WriteNumber((uint32_t)node->second.size()); // Number of ids
+    writer.WriteNumber((uint32_t)region.locations.size()); // Number of objects
 
-      for (std::list<FileOffset>::const_iterator offset=node->second.begin();
-             offset!=node->second.end();
-             ++offset) {
-        writer.WriteFileOffset(*offset); // File offset of node
-      }
-    }
+    for (std::map<std::string,std::list<ObjectFileRef> >::iterator location=region.locations.begin();
+         location!=region.locations.end();
+         ++location) {
+      location->second.sort(ObjectFileRefByFileOffsetComparator());
 
-    writer.WriteNumber((uint32_t)region.areas.size());
-    for (std::map<std::string,std::list<FileOffset> >::const_iterator area=region.areas.begin();
-         area!=region.areas.end();
-         ++area) {
-      writer.Write(area->first);                         // Area name
-      writer.WriteNumber((uint32_t)area->second.size()); // Number of ids
+      writer.Write(location->first);
+      writer.WriteNumber((uint32_t)location->second.size()); // Number of objects
 
-      for (std::list<FileOffset>::const_iterator offset=area->second.begin();
-           offset!=area->second.end();
-           ++offset) {
-        writer.WriteNumber(*offset); // File offset of area
-      }
-    }
+      FileOffset lastOffset=0;
 
-    writer.WriteNumber((uint32_t)region.ways.size());
-    for (std::map<std::string,std::list<FileOffset> >::const_iterator way=region.ways.begin();
-         way!=region.ways.end();
-         ++way) {
-      writer.Write(way->first);                         // Way name
-      writer.WriteNumber((uint32_t)way->second.size()); // Number of ids
+      for (std::list<ObjectFileRef>::const_iterator object=location->second.begin();
+             object!=location->second.end();
+             ++object) {
+        writer.Write((uint8_t)object->GetType());
+        writer.WriteNumber(object->GetFileOffset()-lastOffset);
 
-      for (std::list<FileOffset>::const_iterator offset=way->second.begin();
-           offset!=way->second.end();
-           ++offset) {
-        writer.WriteNumber(*offset); // File offset of way
+        lastOffset=object->GetFileOffset();
       }
     }
 
@@ -1260,9 +1200,9 @@ namespace osmscout {
       for (std::list<Region*>::const_iterator iter=regionTree[i].begin();
            iter!=regionTree[i].end();
            ++iter) {
-        count+=(*iter)->ways.size();
+        count+=(*iter)->locations.size();
       }
-      progress.Info(std::string("Area tree index ")+NumberToString(i)+" way count size: "+NumberToString(count));
+      progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
     }
 
     progress.SetAction("Index nodes");

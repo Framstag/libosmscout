@@ -45,17 +45,15 @@ namespace osmscout {
   private:
     struct Region
     {
-      ObjectFileRef reference;      //! Reference to the object defining the region
-      FileOffset    offset;         //! Offset into the region datafile
-      std::string   name;           //! name of the region
+      ObjectFileRef reference;       //! Reference to the object defining the region
+      FileOffset    offset;          //! Offset into the region datafile
+      std::string   name;            //! name of the region
     };
 
     struct Loc
     {
-      FileOffset            offset; //! Offset of the admin region this location is in
-      std::list<FileOffset> nodes;  //! List of node ids that belong to this location
-      std::list<FileOffset> areas;  //! List of area ids that belong to this location
-      std::list<FileOffset> ways;   //! List of way ids that belong to this location
+      FileOffset               offset;  //! Offset of the admin region this location is in
+      std::list<ObjectFileRef> objects; //! List of objects that belong to this location
     };
 
     struct LocationVisitor

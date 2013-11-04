@@ -82,22 +82,10 @@ namespace osmscout {
 
     location.name=locationName;
 
-    for (std::list<FileOffset>::const_iterator offset=loc.nodes.begin();
-         offset!=loc.nodes.end();
-         ++offset) {
-      location.references.push_back(ObjectFileRef(*offset,refNode));
-    }
-
-    for (std::list<FileOffset>::const_iterator offset=loc.areas.begin();
-         offset!=loc.areas.end();
-         ++offset) {
-      location.references.push_back(ObjectFileRef(*offset,refArea));
-    }
-
-    for (std::list<FileOffset>::const_iterator offset=loc.ways.begin();
-         offset!=loc.ways.end();
-         ++offset) {
-      location.references.push_back(ObjectFileRef(*offset,refWay));
+    for (std::list<ObjectFileRef>::const_iterator object=loc.objects.begin();
+         object!=loc.objects.end();
+         ++object) {
+      location.references.push_back(*object);
     }
 
     // Build up path for each hit by following
@@ -148,13 +136,11 @@ namespace osmscout {
   bool CityStreetIndex::LoadRegion(FileScanner& scanner,
                                    LocationVisitor& visitor) const
   {
-    std::string               name;
     FileOffset                offset;
+    std::string               name;
     FileOffset                parentOffset;
     uint32_t                  childrenCount;
-    uint32_t                  nodeCount;
-    uint32_t                  areaCount;
-    uint32_t                  wayCount;
+    uint32_t                  locationCount;
     std::map<std::string,Loc> locations;
 
     if (!scanner.GetPos(offset) ||
@@ -173,81 +159,43 @@ namespace osmscout {
       }
     }
 
-    if (!scanner.ReadNumber(nodeCount)) {
+    if (!scanner.ReadNumber(locationCount)) {
       return false;
     }
 
-    for (size_t i=0; i<nodeCount; i++) {
+    for (size_t i=0; i<locationCount; i++) {
       std::string name;
-      uint32_t    fileOffsetCount;
+      uint32_t    objectCount;
 
-      if (!scanner.Read(name) ||
-          !scanner.ReadNumber(fileOffsetCount)) {
+      if (!scanner.Read(name)) {
         return false;
       }
 
       locations[name].offset=offset;
 
-      for (size_t j=0; j<fileOffsetCount; j++) {
+      if (!scanner.ReadNumber(objectCount)) {
+        return false;
+      }
+
+      FileOffset lastOffset=0;
+
+      for (size_t j=0; j<objectCount; j++) {
+        uint8_t    type;
         FileOffset offset;
 
-        if (!scanner.ReadFileOffset(offset)) {
+        if (!scanner.Read(type)) {
           return false;
         }
-
-        locations[name].nodes.push_back(offset);
-      }
-    }
-
-    if (!scanner.ReadNumber(areaCount)) {
-      return false;
-    }
-
-    for (size_t i=0; i<areaCount; i++) {
-      std::string name;
-      uint32_t    fileOffsetCount;
-
-      if (!scanner.Read(name) ||
-          !scanner.ReadNumber(fileOffsetCount)) {
-        return false;
-      }
-
-      locations[name].offset=offset;
-
-      for (size_t j=0; j<fileOffsetCount; j++) {
-        FileOffset offset;
 
         if (!scanner.ReadNumber(offset)) {
           return false;
         }
 
-        locations[name].areas.push_back(offset);
-      }
-    }
+        offset+=lastOffset;
 
-    if (!scanner.ReadNumber(wayCount)) {
-      return false;
-    }
+        locations[name].objects.push_back(ObjectFileRef(offset,(RefType)type));
 
-    for (size_t i=0; i<wayCount; i++) {
-      std::string name;
-      uint32_t    fileOffsetCount;
-
-      if (!scanner.Read(name) ||
-          !scanner.ReadNumber(fileOffsetCount)) {
-        return false;
-      }
-
-      locations[name].offset=offset;
-
-      for (size_t j=0; j<fileOffsetCount; j++) {
-        FileOffset offset;
-
-        if (!scanner.ReadNumber(offset)) {
-          return false;
-        }
-
-        locations[name].ways.push_back(offset);
+        lastOffset=offset;
       }
     }
 
