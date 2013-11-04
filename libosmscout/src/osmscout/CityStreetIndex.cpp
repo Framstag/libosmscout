@@ -28,8 +28,15 @@
 
 namespace osmscout {
 
+  const char* const CityStreetIndex::FILENAME_REGION_DAT     = "region.dat";
+  const char* const CityStreetIndex::FILENAME_NAMEREGION_IDX = "nameregion.idx";
+
   CityStreetIndex::LocationVisitor::LocationVisitor(FileScanner& scanner)
-  : scanner(scanner)
+  : startWith(false),
+    limit(50),
+    limitReached(false),
+    hashFunction(NULL),
+    scanner(scanner)
   {
     // no code
   }
@@ -291,7 +298,8 @@ namespace osmscout {
     }
 
     FileScanner   scanner;
-    std::string   indexFile=AppendFileToDir(path,"nameregion.idx");
+    std::string   indexFile=AppendFileToDir(path,
+                                            FILENAME_NAMEREGION_IDX);
 
     if (!scanner.Open(indexFile,FileScanner::LowMemRandom,true)) {
       std::cerr << "Cannot open file '" << indexFile << "'!" << std::endl;
@@ -392,7 +400,7 @@ namespace osmscout {
 
     if (!regions.empty()) {
       if (!scanner.Open(AppendFileToDir(path,
-                                        "region.dat"),
+                                        FILENAME_REGION_DAT),
                         FileScanner::LowMemRandom,
                         true)) {
         std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
@@ -441,7 +449,7 @@ namespace osmscout {
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(path,
-                                      "region.dat"),
+                                      FILENAME_REGION_DAT),
                       FileScanner::LowMemRandom,
                       true)) {
       std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;

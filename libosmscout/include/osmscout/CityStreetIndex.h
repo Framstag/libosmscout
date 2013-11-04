@@ -78,6 +78,10 @@ namespace osmscout {
                  const Loc &location);
     };
 
+  public:
+    static const char* const FILENAME_REGION_DAT;
+    static const char* const FILENAME_NAMEREGION_IDX;
+
   private:
     std::string path;
     std::string (*hashFunction)(std::string);

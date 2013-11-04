@@ -30,6 +30,8 @@
 #include <osmscout/Way.h>
 #include <osmscout/ObjectRef.h>
 
+#include <osmscout/CityStreetIndex.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -1217,11 +1219,11 @@ namespace osmscout {
     // Generate file with all areas, where areas reference parent and children by offset
     //
 
-    progress.SetAction("Write 'region.dat'");
+    progress.SetAction(std::string("Write '")+CityStreetIndex::FILENAME_REGION_DAT+"'");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "region.dat"))) {
-      progress.Error("Cannot open 'region.dat'");
+                                     CityStreetIndex::FILENAME_REGION_DAT))) {
+      progress.Error("Cannot open '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -1243,13 +1245,13 @@ namespace osmscout {
 
     std::map<std::string,std::list<RegionRef> > locationRefs;
 
-    progress.SetAction("Write 'nameregion.idx'");
+    progress.SetAction(std::string("Write '")+CityStreetIndex::FILENAME_NAMEREGION_IDX+"'");
 
     GetLocationRefs(rootRegion,locationRefs);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "nameregion.idx"))) {
-      progress.Error("Cannot open 'nameregion.idx'");
+                                     CityStreetIndex::FILENAME_NAMEREGION_IDX))) {
+      progress.Error("Cannot open '"+writer.GetFilename()+"'");
       return false;
     }
 
