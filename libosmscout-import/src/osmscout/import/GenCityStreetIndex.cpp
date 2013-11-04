@@ -20,6 +20,7 @@
 #include <osmscout/import/GenCityStreetIndex.h>
 
 #include <iostream>
+#include <fstream>
 #include <limits>
 #include <list>
 #include <map>
@@ -836,26 +837,87 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  static void DumpRegion(const Region& parent, size_t indent)
+  static void DumpRegion(const Region& parent,
+                         size_t indent,
+                         std::ostream& out)
   {
     for (std::list<Region>::const_iterator r=parent.regions.begin();
          r!=parent.regions.end();
          r++) {
       for (size_t i=0; i<indent; i++) {
-        std::cout << " ";
+        out << " ";
       }
-      std::cout << r->name << " " << r->reference.GetFileOffset() << " " << r->areas.size() << " " << r->nodes.size() << " " << r->ways.size() << " " << r->aliases.size() << std::endl;
+      out << " + " << r->name << " " << r->reference.GetTypeName() << " " << r->reference.GetFileOffset() << std::endl;
 
       for (std::list<RegionAlias>::const_iterator l=r->aliases.begin();
            l!=r->aliases.end();
            l++) {
         for (size_t i=0; i<indent; i++) {
-          std::cout << " ";
+          out << " ";
         }
-        std::cout << " = " << l->name << " " << l->reference.GetFileOffset() << std::endl;
+        out << " = " << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetFileOffset() << std::endl;
       }
 
-      DumpRegion(*r,indent+2);
+      for (std::map<std::string,std::list<FileOffset> >::const_iterator nodeEntry=r->nodes.begin();
+          nodeEntry!=r->nodes.end();
+          ++nodeEntry) {
+        for (size_t i=0; i<indent; i++) {
+          out << " ";
+        }
+        out << " - " << nodeEntry->first << std::endl;
+
+        for (std::list<FileOffset>::const_iterator offset=nodeEntry->second.begin();
+            offset!=nodeEntry->second.end();
+            ++offset) {
+          for (size_t i=0; i<indent+2; i++) {
+            out << " ";
+          }
+
+          out << " = " << "Node " << *offset << std::endl;
+        }
+      }
+
+      for (std::map<std::string,std::list<FileOffset> >::const_iterator areaEntry=r->areas.begin();
+          areaEntry!=r->areas.end();
+          ++areaEntry) {
+        for (size_t i=0; i<indent; i++) {
+          out << " ";
+        }
+        out << " - " << areaEntry->first << std::endl;
+
+        for (std::list<FileOffset>::const_iterator offset=areaEntry->second.begin();
+            offset!=areaEntry->second.end();
+            ++offset) {
+          for (size_t i=0; i<indent+2; i++) {
+            out << " ";
+          }
+
+          out << " = " << "Area " << *offset << std::endl;
+        }
+      }
+
+      for (std::map<std::string,std::list<FileOffset> >::const_iterator wayEntry=r->ways.begin();
+          wayEntry!=r->ways.end();
+          ++wayEntry) {
+        for (size_t i=0; i<indent; i++) {
+          out << " ";
+        }
+        out << " - " << wayEntry->first << std::endl;
+
+        for (std::list<FileOffset>::const_iterator offset=wayEntry->second.begin();
+            offset!=wayEntry->second.end();
+            ++offset) {
+          for (size_t i=0; i<indent+2; i++) {
+            out << " ";
+          }
+
+          out << " = " << "Way " << *offset << std::endl;
+        }
+      }
+
+      DumpRegion(*r,
+                 indent+2,
+                 out  );
     }
   }
 
@@ -1237,7 +1299,23 @@ namespace osmscout {
 
     progress.SetAction("Dumping areas");
 
-    DumpRegion(rootRegion,0);
+    std::string   debugFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                "citystreet.txt");
+    std::ofstream debugStream;
+
+    debugStream.open(debugFilename.c_str(),
+                     std::ios::out|std::ios::trunc);
+
+    if (debugStream.is_open()) {
+      DumpRegion(rootRegion,
+                 0,
+                 debugStream);
+      debugStream.close();
+    }
+    else {
+      progress.Error("Cannot open '"+debugFilename+"'");
+    }
+
 
     //
     // Generate file with all area names, each referencing the areas where it is contained
