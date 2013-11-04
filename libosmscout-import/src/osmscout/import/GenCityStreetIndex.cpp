@@ -52,9 +52,8 @@ namespace osmscout {
    */
   struct RegionAlias
   {
-    ObjectFileRef          reference; //! Reference of the object that
-                                      //! is the alias
-    std::string            name;      //! The alias itsef
+    FileOffset             reference; //! Reference to the node that is the alias
+    std::string            name;      //! The alias itself
   };
 
   /**
@@ -65,6 +64,11 @@ namespace osmscout {
     ObjectFileRef          reference; //! Reference of the object that
                                       //! is the alias
     FileOffset             offset;    //! Fileoffset of the area
+
+    inline bool operator<(const RegionRef& other) const
+    {
+      return reference<other.reference;
+    }
   };
 
   /**
@@ -122,16 +126,16 @@ namespace osmscout {
 
   struct CityArea
   {
-    ObjectFileRef         reference;
+    FileOffset            reference;
     std::string           name;
     std::vector<GeoCoord> nodes;
   };
 
   struct CityNode
   {
-    ObjectFileRef reference;
-    std::string   name;
-    GeoCoord      node;
+    FileOffset  reference;
+    std::string name;
+    GeoCoord    node;
   };
 
 
@@ -184,7 +188,7 @@ namespace osmscout {
 
         CityNode cityNode;
 
-        cityNode.reference.Set(node.GetFileOffset(),refNode);
+        cityNode.reference=node.GetFileOffset();
         cityNode.name=name;
         cityNode.node.Set(node.GetLat(),node.GetLon());
 
@@ -246,7 +250,7 @@ namespace osmscout {
 
           CityArea cityArea;
 
-          cityArea.reference.Set(area.GetFileOffset(),refArea);
+          cityArea.reference=area.GetFileOffset();
           cityArea.name=name;
           cityArea.nodes=ring->nodes;
 
@@ -285,7 +289,7 @@ namespace osmscout {
         }
 
         if (hits==0) {
-          progress.Warning(std::string("Could not resolve name of ")+area->reference.GetTypeName()+" "+NumberToString(area->reference.GetFileOffset())+", skipping");
+          progress.Warning(std::string("Could not resolve name of area ")+NumberToString(area->reference)+", skipping");
           area=cityAreas.erase(area);
         }
         else if (hits==1) {
@@ -296,7 +300,7 @@ namespace osmscout {
           area++;
         }
         else {
-          progress.Warning(area->reference.GetTypeName()+NumberToString(area->reference.GetFileOffset())+" contains multiple city nodes, skipping");
+          progress.Warning("Area "+NumberToString(area->reference)+" contains multiple city nodes, skipping");
           area=cityAreas.erase(area);
         }
       }
@@ -419,10 +423,10 @@ namespace osmscout {
     parent.regions.push_back(region);
   }
 
-  static void AddLocationToRegion(Region& area,
-                                  const RegionAlias& location,
-                                  const GeoCoord& node)
-                                {
+  static void AddAliasToRegion(Region& area,
+                               const RegionAlias& location,
+                               const GeoCoord& node)
+  {
     if (area.name==location.name) {
       return;
     }
@@ -431,7 +435,7 @@ namespace osmscout {
          a!=area.regions.end();
          a++) {
       if (IsCoordInArea(node,a->area)) {
-        AddLocationToRegion(*a,location,node);
+        AddAliasToRegion(*a,location,node);
         return;
       }
     }
@@ -481,7 +485,7 @@ namespace osmscout {
 
       Region region;
 
-      region.reference=city->reference;
+      region.reference.Set(city->reference,refArea);
       region.name=city->name;
       region.area=city->nodes;
 
@@ -502,7 +506,7 @@ namespace osmscout {
       alias.reference=city->reference;
       alias.name=city->name;
 
-      AddLocationToRegion(rootRegion,alias,city->node);
+      AddAliasToRegion(rootRegion,alias,city->node);
 
       currentCount++;
     }
@@ -853,7 +857,7 @@ namespace osmscout {
         for (size_t i=0; i<indent; i++) {
           out << " ";
         }
-        out << " = " << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetFileOffset() << std::endl;
+        out << " = " << l->name << " Node " << l->reference << std::endl;
       }
 
       for (std::map<std::string,std::list<ObjectFileRef> >::const_iterator nodeEntry=r->locations.begin();
@@ -909,7 +913,8 @@ namespace osmscout {
   }
 
   static bool WriteRegion(FileWriter& writer,
-                          Region& region, FileOffset parentOffset)
+                          Region& region,
+                          FileOffset parentOffset)
   {
     writer.GetPos(region.offset);
 
@@ -964,38 +969,38 @@ namespace osmscout {
     return true;
   }
 
-  static void GetLocationRefs(const Region& regions,
-                              std::map<std::string,std::list<RegionRef> >& locationRefs)
+  static void GetRegionRefs(const Region& region,
+                            std::map<std::string,std::list<RegionRef> >& locationRefs)
   {
-    RegionRef locRef;
+    RegionRef regionRef;
 
-    locRef.reference=regions.reference;
-    locRef.offset=regions.offset;
+    regionRef.reference=region.reference;
+    regionRef.offset=region.offset;
 
-    locationRefs[regions.name].push_back(locRef);
+    locationRefs[region.name].push_back(regionRef);
 
-    for (std::list<RegionAlias>::const_iterator l=regions.aliases.begin();
-         l!=regions.aliases.end();
-         ++l) {
-      locRef.reference=l->reference;
-      locRef.offset=regions.offset;
+    for (std::list<RegionAlias>::const_iterator alias=region.aliases.begin();
+         alias!=region.aliases.end();
+         ++alias) {
+      regionRef.reference.Set(alias->reference,refNode);
+      regionRef.offset=region.offset;
 
-      locationRefs[l->name].push_back(locRef);
+      locationRefs[alias->name].push_back(regionRef);
     }
 
-    for (std::list<Region>::const_iterator r=regions.regions.begin();
-         r!=regions.regions.end();
+    for (std::list<Region>::const_iterator r=region.regions.begin();
+         r!=region.regions.end();
          r++) {
-      GetLocationRefs(*r,locationRefs);
+      GetRegionRefs(*r,locationRefs);
     }
   }
 
-  static bool WriteLocationRefs(FileWriter& writer,
-                                const std::map<std::string,std::list<RegionRef> >& locationRefs)
+  static bool WriteRegionRefs(FileWriter& writer,
+                              std::map<std::string,std::list<RegionRef> >& locationRefs)
   {
     writer.WriteNumber((uint32_t)locationRefs.size());
 
-    for (std::map<std::string,std::list<RegionRef> >::const_iterator n=locationRefs.begin();
+    for (std::map<std::string,std::list<RegionRef> >::iterator n=locationRefs.begin();
          n!=locationRefs.end();
          ++n) {
       if (!writer.Write(n->first)) {
@@ -1006,20 +1011,26 @@ namespace osmscout {
         return false;
       }
 
+      n->second.sort();
+
+      FileOffset lastOffset=0;
+
       for (std::list<RegionRef>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
-        if (!writer.WriteNumber((uint32_t)o->reference.GetType())) {
+        if (!writer.Write((uint8_t)o->reference.GetType())) {
           return false;
         }
 
-        if (!writer.WriteFileOffset(o->reference.GetFileOffset())) {
+        if (!writer.WriteNumber(o->reference.GetFileOffset()-lastOffset)) {
           return false;
         }
 
-        if (!writer.WriteNumber(o->offset)) {
+        if (!writer.WriteFileOffset(o->offset)) {
           return false;
         }
+
+        lastOffset=o->reference.GetFileOffset();
       }
     }
 
@@ -1265,7 +1276,7 @@ namespace osmscout {
 
     progress.SetAction(std::string("Write '")+CityStreetIndex::FILENAME_NAMEREGION_IDX+"'");
 
-    GetLocationRefs(rootRegion,locationRefs);
+    GetRegionRefs(rootRegion,locationRefs);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      CityStreetIndex::FILENAME_NAMEREGION_IDX))) {
@@ -1273,7 +1284,7 @@ namespace osmscout {
       return false;
     }
 
-    WriteLocationRefs(writer,locationRefs);
+    WriteRegionRefs(writer,locationRefs);
 
     return !writer.HasError() && writer.Close();
   }

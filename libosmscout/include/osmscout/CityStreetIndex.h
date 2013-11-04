@@ -34,15 +34,19 @@ namespace osmscout {
   /**
    * City street index returns objects by names (the name should be changed). You
    * can currently either search for regions like 'cities' or for named locations in
-   * areas like 'streets in city'.
+   * areas like 'street in city'.
    *
-   * Currently everything that has 'index="true"' in the map.ost.xml is indexed as
+   * Currently every type that has option 'INDEX' set in the map.ost file is indexed as
    * location. Areas are currently build by scanning administrative boundaries and the
    * various sized city typed locations and areas.
    */
   class OSMSCOUT_API CityStreetIndex
   {
   private:
+    /**
+     * A region is an administrative area that has a name.
+     * Regions are structured in a tree. A region could be a country, a county or a city.
+     */
     struct Region
     {
       ObjectFileRef reference;       //! Reference to the object defining the region
@@ -50,12 +54,19 @@ namespace osmscout {
       std::string   name;            //! name of the region
     };
 
+    /**
+     * A location is an object within an area. The location has been index by its name.
+     */
     struct Loc
     {
-      FileOffset               offset;  //! Offset of the admin region this location is in
-      std::list<ObjectFileRef> objects; //! List of objects that belong to this location
+      FileOffset                 offset;  //! Offset of the admin region this location is in
+      std::vector<ObjectFileRef> objects; //! List of objects that belong to this location
     };
 
+    /**
+     * Visitor that gets called for every location found in the given area.
+     * It is the task of the visitor to decide if a locations matches the given criteria.
+     */
     struct LocationVisitor
     {
       std::string               name;
@@ -98,12 +109,19 @@ namespace osmscout {
     bool Load(const std::string& path,
               std::string (*hashFunction) (std::string) = NULL);
 
+    /**
+     * Get a list of AdminRegions that match the given name.
+     */
     bool GetMatchingAdminRegions(const std::string& name,
                                  std::list<AdminRegion>& regions,
                                  size_t limit,
                                  bool& limitReached,
                                  bool startWith) const;
 
+    /**
+     * Get a list of locations matching the given name within the given
+     * AdminRegion or its child regions.
+     */
     bool GetMatchingLocations(const AdminRegion& region,
                               const std::string& name,
                               std::list<Location>& locations,
