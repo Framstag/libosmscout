@@ -86,10 +86,10 @@ namespace osmscout {
     double                               maxlat;
 
     std::map<std::string,std::list<FileOffset> > nodes;     //! list of indexed nodes in this region
-    std::map<std::string,std::list<FileOffset> > areas;      //! list of indexed areas in this region
+    std::map<std::string,std::list<FileOffset> > areas;     //! list of indexed areas in this region
     std::map<std::string,std::list<FileOffset> > ways;      //! list of indexed ways in this region
 
-    std::list<Region>                            regions;     //! A list of sub regions
+    std::list<Region>                            regions;   //! A list of sub regions
 
     void CalculateMinMax()
     {
@@ -509,7 +509,8 @@ namespace osmscout {
 
   static bool AddAreaToRegion(Region& region,
                               const Area& area,
-                              const Area::Ring& ring,
+                              const std::vector<GeoCoord>& nodes,
+                              const std::string& name,
                               double minlon,
                               double minlat,
                               double maxlon,
@@ -524,10 +525,10 @@ namespace osmscout {
           !(maxlat<r->minlat) &&
           !(minlat>r->maxlat)) {
         // Check if one point is in the area
-        bool match=IsCoordInArea(ring.nodes[0],r->area);
+        bool match=IsCoordInArea(nodes[0],r->area);
 
         if (match) {
-          bool completeMatch=AddAreaToRegion(*r,area,ring,minlon,minlat,maxlon,maxlat);
+          bool completeMatch=AddAreaToRegion(*r,area,nodes,name,minlon,minlat,maxlon,maxlat);
 
           if (completeMatch) {
             // We are done, the object is completely enclosed by one of our sub areas
@@ -539,9 +540,9 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.areas[area.rings.front().GetName()].push_back(area.GetFileOffset());
+    region.areas[name].push_back(area.GetFileOffset());
 
-    bool completeMatch=IsAreaCompletelyInArea(ring.nodes,region.area);
+    bool completeMatch=IsAreaCompletelyInArea(nodes,region.area);
 
     return completeMatch;
   }
@@ -561,21 +562,39 @@ namespace osmscout {
     */
   static void AddAreaToRegion(Region& region,
                               const Area& area,
-                              double minlon,
-                              double minlat,
-                              double maxlon,
-                              double maxlat)
+                              const Area::Ring& ring)
   {
-    for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-         ring!=area.rings.end();
-         ++ring) {
-      if (ring->ring!=Area::outerRingId) {
-        continue;
+    double minlon;
+    double maxlon;
+    double minlat;
+    double maxlat;
+
+    if (ring.ring==Area::masterRingId &&
+        ring.nodes.empty()) {
+      for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
+          r!=area.rings.end();
+          ++r) {
+        if (r->ring==Area::outerRingId) {
+          r->GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+          AddAreaToRegion(region,
+                          area,
+                          r->nodes,
+                          ring.GetName(),
+                          minlon,
+                          minlat,
+                          maxlon,
+                          maxlat);
+        }
       }
+    }
+    else {
+      ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
 
       AddAreaToRegion(region,
                       area,
-                      *ring,
+                      ring.nodes,
+                      ring.GetName(),
                       minlon,
                       minlat,
                       maxlon,
@@ -670,16 +689,16 @@ namespace osmscout {
         return false;
       }
 
-      if (indexables.find(area.GetType())!=indexables.end() &&
-          !area.rings.front().GetName().empty()) {
-        double minlon;
-        double maxlon;
-        double minlat;
-        double maxlat;
+      for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+          ring!=area.rings.end();
+          ++ring) {
+        if (ring->GetType()!=typeIgnore &&
+            !ring->GetName().empty()) {
+          if (indexables.find(ring->GetType())!=indexables.end()) {
+            AddAreaToRegion(rootArea,area,*ring);
+          }
+        }
 
-        area.GetBoundingBox(minlon,maxlon,minlat,maxlat);
-
-        AddAreaToRegion(rootArea,area,minlon,minlat,maxlon,maxlat);
       }
     }
 
