@@ -451,7 +451,7 @@ namespace osmscout {
             FillStyleRef fillStyle=(*p)->GetFillStyle();
             
             CGContextBeginPath(cg);
-            DrawFillStyle(projection,
+            SetFill(projection,
                           parameter,
                           *fillStyle);
             
@@ -673,7 +673,7 @@ namespace osmscout {
              ++p) {
             FillStyleRef fillStyle=(*p)->GetFillStyle();
             
-            DrawFillStyle(projection,
+            SetFill(projection,
                           parameter,
                           *fillStyle);
 
@@ -746,12 +746,11 @@ namespace osmscout {
     }
         
     /*
-     * SetBrush(const Projection& projection,
+     * SetFill(const Projection& projection,
      *          const MapParameter& parameter,
      *          const FillStyle& fillStyle)
      */
-    
-    void MapPainterIOS::DrawFillStyle(const Projection& projection,
+    void MapPainterIOS::SetFill(const Projection& projection,
                                         const MapParameter& parameter,
                                         const FillStyle& fillStyle) {
         double borderWidth=ConvertWidthToPixel(parameter,fillStyle.GetBorderWidth());
@@ -798,6 +797,34 @@ namespace osmscout {
             CGContextSetRGBStrokeColor(cg,0,0,0,0);
         }
     }
+    
+    /*
+     * SetPen(const LineStyle& style,
+     *        double lineWidth)
+     */
+    void MapPainterIOS::SetPen(const LineStyle& style,
+                              double lineWidth) {
+        CGContextSetRGBStrokeColor(cg,style.GetLineColor().GetR(),
+                                      style.GetLineColor().GetG(),
+                                      style.GetLineColor().GetB(),
+                                      style.GetLineColor().GetA());
+        CGContextSetLineWidth(cg,lineWidth);
+        
+        if (style.GetDash().empty()) {
+            CGContextSetLineDash(cg, 0.0, NULL, 0);
+            CGContextSetLineCap(cg, kCGLineCapRound);
+        }
+        else {
+            CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*style.GetDash().size());
+            for (size_t i=0; i<style.GetDash().size(); i++) {
+                dashes[i] = style.GetDash()[i];
+            }
+            CGContextSetLineDash(cg, 0.0, dashes, style.GetDash().size());
+            free(dashes); dashes = NULL;
+            CGContextSetLineCap(cg, kCGLineCapButt);
+        }
+
+    }
 
     
     /*
@@ -806,58 +833,45 @@ namespace osmscout {
      *          const AreaData& area)
      */
     void MapPainterIOS::DrawArea(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const AreaData& area){
-
+                                const MapParameter& parameter,
+                                const MapPainter::AreaData& area)
+    {
         CGContextSaveGState(cg);
-        CGContextSetLineWidth(cg, 2);
-        CGContextSetRGBStrokeColor(cg, area.fillStyle->GetFillColor().GetR(), area.fillStyle->GetFillColor().GetG(),
-                                   area.fillStyle->GetFillColor().GetB(), area.fillStyle->GetFillColor().GetA());
-        CGPathDrawingMode drawingMode = kCGPathFillStroke;
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),coordBuffer->buffer[area.transStart].GetY());
+        CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),
+                    coordBuffer->buffer[area.transStart].GetY());
         for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
-            CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),coordBuffer->buffer[i].GetY());
+            CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),
+                        coordBuffer->buffer[i].GetY());
         }
-        CGContextClosePath(cg);
+        CGContextAddLineToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),
+                                coordBuffer->buffer[area.transStart].GetY());
         
         if (!area.clippings.empty()) {
-            for (std::list<MapPainter::PolyData>::const_iterator c=area.clippings.begin();
+            for (std::list<PolyData>::const_iterator c=area.clippings.begin();
                  c!=area.clippings.end();
                  c++) {
-                const MapPainter::PolyData& data=*c;
-                CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),coordBuffer->buffer[area.transStart].GetY());
+                const PolyData& data=*c;
+                
+                CGContextMoveToPoint(cg,coordBuffer->buffer[data.transStart].GetX(),
+                            coordBuffer->buffer[data.transStart].GetY());
                 for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-                    CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),coordBuffer->buffer[i].GetY());
+                    CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),
+                                coordBuffer->buffer[i].GetY());
                 }
-                CGContextClosePath(cg);
+                CGContextAddLineToPoint(cg,coordBuffer->buffer[data.transStart].GetX(),
+                                        coordBuffer->buffer[data.transStart].GetY());
             }
         }
         
-        double borderWidth=MapPainter::ConvertWidthToPixel(parameter,area.fillStyle->GetBorderWidth());
-        if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-            CGContextSetRGBStrokeColor(cg, area.fillStyle->GetBorderColor().GetR(), area.fillStyle->GetBorderColor().GetG(),
-                                       area.fillStyle->GetBorderColor().GetB(), area.fillStyle->GetBorderColor().GetA());
-            CGContextSetLineWidth(cg, borderWidth);
-            
-            if (area.fillStyle->GetBorderDash().empty()) {
-                CGContextSetLineDash(cg, 0.0, NULL, 0);     // SolidLine
-            } else {
-                CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*area.fillStyle->GetBorderDash().size());
-                for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i++) {
-                    dashes[i] = area.fillStyle->GetBorderDash()[i];
-                }
-                CGContextSetLineDash(cg, 0.0, dashes, area.fillStyle->GetBorderDash().size());
-                free(dashes); dashes = NULL;
-                CGContextSetLineCap(cg, kCGLineCapButt);   // CapButt
-            }
-            drawingMode = kCGPathFillStroke;
-        } 
-        //
-        DrawFillStyle(projection, parameter,*area.fillStyle);
-        CGContextDrawPath(cg, drawingMode);
+        SetFill(projection,
+                parameter,
+                *area.fillStyle);
+        
+        CGContextDrawPath(cg,  kCGPathEOFillStroke);
         CGContextRestoreGState(cg);
     }
+
     
     /*
      * DrawGround(const Projection& projection,
