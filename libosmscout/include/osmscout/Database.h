@@ -49,6 +49,7 @@
 #include <osmscout/Route.h>
 
 #include <osmscout/util/Breaker.h>
+#include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {
@@ -239,6 +240,11 @@ namespace osmscout {
                     std::vector<WayRef>& ways,
                     std::vector<AreaRef>& areas) const;
 
+    bool GetObjects(const std::set<ObjectFileRef>& objects,
+                    OSMSCOUT_HASHMAP<FileOffset,NodeRef>& nodesMap,
+                    OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap,
+                    OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap) const;
+
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,
                         const Magnification& magnification,
@@ -252,6 +258,8 @@ namespace osmscout {
                           std::vector<NodeRef>& nodes) const;
     bool GetNodesByOffset(const std::list<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
+    bool GetNodesByOffset(const std::set<FileOffset>& offsets,
+                          OSMSCOUT_HASHMAP<FileOffset,NodeRef>& dataMap) const;
 
     bool GetAreaByOffset(const FileOffset& offset,
                          AreaRef& area) const;
@@ -261,6 +269,8 @@ namespace osmscout {
                           std::vector<AreaRef>& areas) const;
     bool GetAreasByOffset(const std::list<FileOffset>& offsets,
                           std::vector<AreaRef>& areas) const;
+    bool GetAreasByOffset(const std::set<FileOffset>& offsets,
+                          OSMSCOUT_HASHMAP<FileOffset,AreaRef>& dataMap) const;
 
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
@@ -270,6 +280,8 @@ namespace osmscout {
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
+    bool GetWaysByOffset(const std::set<FileOffset>& offsets,
+                         OSMSCOUT_HASHMAP<FileOffset,WayRef>& dataMap) const;
 
     bool GetMatchingAdminRegions(const std::string& name,
                                  std::list<AdminRegion>& regions,

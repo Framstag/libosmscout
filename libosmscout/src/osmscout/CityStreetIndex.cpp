@@ -28,8 +28,15 @@
 
 namespace osmscout {
 
+  const char* const CityStreetIndex::FILENAME_REGION_DAT     = "region.dat";
+  const char* const CityStreetIndex::FILENAME_NAMEREGION_IDX = "nameregion.idx";
+
   CityStreetIndex::LocationVisitor::LocationVisitor(FileScanner& scanner)
-  : scanner(scanner)
+  : startWith(false),
+    limit(50),
+    limitReached(false),
+    hashFunction(NULL),
+    scanner(scanner)
   {
     // no code
   }
@@ -75,22 +82,10 @@ namespace osmscout {
 
     location.name=locationName;
 
-    for (std::list<FileOffset>::const_iterator offset=loc.nodes.begin();
-         offset!=loc.nodes.end();
-         ++offset) {
-      location.references.push_back(ObjectFileRef(*offset,refNode));
-    }
-
-    for (std::list<FileOffset>::const_iterator offset=loc.areas.begin();
-         offset!=loc.areas.end();
-         ++offset) {
-      location.references.push_back(ObjectFileRef(*offset,refArea));
-    }
-
-    for (std::list<FileOffset>::const_iterator offset=loc.ways.begin();
-         offset!=loc.ways.end();
-         ++offset) {
-      location.references.push_back(ObjectFileRef(*offset,refWay));
+    for (std::vector<ObjectFileRef>::const_iterator object=loc.objects.begin();
+         object!=loc.objects.end();
+         ++object) {
+      location.references.push_back(*object);
     }
 
     // Build up path for each hit by following
@@ -141,13 +136,11 @@ namespace osmscout {
   bool CityStreetIndex::LoadRegion(FileScanner& scanner,
                                    LocationVisitor& visitor) const
   {
-    std::string               name;
     FileOffset                offset;
+    std::string               name;
     FileOffset                parentOffset;
     uint32_t                  childrenCount;
-    uint32_t                  nodeCount;
-    uint32_t                  areaCount;
-    uint32_t                  wayCount;
+    uint32_t                  locationCount;
     std::map<std::string,Loc> locations;
 
     if (!scanner.GetPos(offset) ||
@@ -161,86 +154,51 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<childrenCount; i++) {
-      if (!LoadRegion(scanner,visitor)) {
+      if (!LoadRegion(scanner,
+                      visitor)) {
         return false;
       }
     }
 
-    if (!scanner.ReadNumber(nodeCount)) {
+    if (!scanner.ReadNumber(locationCount)) {
       return false;
     }
 
-    for (size_t i=0; i<nodeCount; i++) {
+    for (size_t i=0; i<locationCount; i++) {
       std::string name;
-      uint32_t    fileOffsetCount;
+      uint32_t    objectCount;
 
-      if (!scanner.Read(name) ||
-          !scanner.ReadNumber(fileOffsetCount)) {
+      if (!scanner.Read(name)) {
         return false;
       }
 
       locations[name].offset=offset;
 
-      for (size_t j=0; j<fileOffsetCount; j++) {
+      if (!scanner.ReadNumber(objectCount)) {
+        return false;
+      }
+
+      locations[name].objects.reserve(objectCount);
+
+      FileOffset lastOffset=0;
+
+      for (size_t j=0; j<objectCount; j++) {
+        uint8_t    type;
         FileOffset offset;
 
-        if (!scanner.ReadFileOffset(offset)) {
+        if (!scanner.Read(type)) {
           return false;
         }
-
-        locations[name].nodes.push_back(offset);
-      }
-    }
-
-    if (!scanner.ReadNumber(areaCount)) {
-      return false;
-    }
-
-    for (size_t i=0; i<areaCount; i++) {
-      std::string name;
-      uint32_t    fileOffsetCount;
-
-      if (!scanner.Read(name) ||
-          !scanner.ReadNumber(fileOffsetCount)) {
-        return false;
-      }
-
-      locations[name].offset=offset;
-
-      for (size_t j=0; j<fileOffsetCount; j++) {
-        FileOffset offset;
 
         if (!scanner.ReadNumber(offset)) {
           return false;
         }
 
-        locations[name].areas.push_back(offset);
-      }
-    }
+        offset+=lastOffset;
 
-    if (!scanner.ReadNumber(wayCount)) {
-      return false;
-    }
+        locations[name].objects.push_back(ObjectFileRef(offset,(RefType)type));
 
-    for (size_t i=0; i<wayCount; i++) {
-      std::string name;
-      uint32_t    fileOffsetCount;
-
-      if (!scanner.Read(name) ||
-          !scanner.ReadNumber(fileOffsetCount)) {
-        return false;
-      }
-
-      locations[name].offset=offset;
-
-      for (size_t j=0; j<fileOffsetCount; j++) {
-        FileOffset offset;
-
-        if (!scanner.ReadNumber(offset)) {
-          return false;
-        }
-
-        locations[name].ways.push_back(offset);
+        lastOffset=offset;
       }
     }
 
@@ -291,20 +249,22 @@ namespace osmscout {
     }
 
     FileScanner   scanner;
-    std::string   indexFile=AppendFileToDir(path,"nameregion.idx");
 
-    if (!scanner.Open(indexFile,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open file '" << indexFile << "'!" << std::endl;
+    if (!scanner.Open(AppendFileToDir(path,
+                                      FILENAME_NAMEREGION_IDX),
+                      FileScanner::LowMemRandom,
+                      false)) {
+      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
       return false;
     }
 
-    uint32_t areaRefs;
+    uint32_t regionCount;
 
-    if (!scanner.ReadNumber(areaRefs)) {
+    if (!scanner.ReadNumber(regionCount)) {
       return false;
     }
 
-    for (size_t i=0; i<areaRefs; i++) {
+    for (size_t i=0; i<regionCount; i++) {
       std::string regionName;
       uint32_t    entries;
 
@@ -316,29 +276,35 @@ namespace osmscout {
         return false;
       }
 
+      FileOffset lastOffset=0;
+
       for (size_t j=0; j<entries; j++) {
-        Region   region;
-        uint32_t type;
+        Region     region;
+        uint8_t    type;
+        FileOffset offset;
 
         region.name=regionName;
 
-        if (!scanner.ReadNumber(type)) {
+        if (!scanner.Read(type)) {
           return false;
         }
 
-        region.reference.type=(RefType)type;
-
-        if (!scanner.ReadFileOffset(region.reference.offset)) {
+        if (!scanner.ReadNumber(offset)) {
           return false;
         }
 
-        if (!scanner.ReadNumber(region.offset)) {
+        offset+=lastOffset;
+
+        lastOffset=offset;
+
+        region.reference.Set(offset,(RefType)type);
+
+        if (!scanner.ReadFileOffset(region.offset)) {
           return false;
         }
-
 
         bool                   found=false;
-        std::string::size_type loc;
+        std::string::size_type matchPosition;
 
         // Calculate match
 
@@ -346,21 +312,21 @@ namespace osmscout {
           std::string hash=(*hashFunction)(region.name);
 
           if (!hash.empty()) {
-            loc=hash.find(nameHash);
+            matchPosition=hash.find(nameHash);
           }
           else {
-            loc=region.name.find(name);
+            matchPosition=region.name.find(name);
           }
         }
         else {
-          loc=region.name.find(name);
+          matchPosition=region.name.find(name);
         }
 
         if (startWith) {
-          found=loc==0;
+          found=matchPosition==0;
         }
         else {
-          found=loc!=std::string::npos;
+          found=matchPosition!=std::string::npos;
         }
 
         // If match, Add to result
@@ -392,14 +358,14 @@ namespace osmscout {
 
     if (!regions.empty()) {
       if (!scanner.Open(AppendFileToDir(path,
-                                        "region.dat"),
+                                        FILENAME_REGION_DAT),
                         FileScanner::LowMemRandom,
                         true)) {
         std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
         return false;
       }
 
-      // If there are results, build up path for each hit by following
+      // If there are results, build up a path for each hit by following
       // the parent relation up to the top of the tree.
 
       for (std::list<AdminRegion>::iterator area=regions.begin();
@@ -441,7 +407,7 @@ namespace osmscout {
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(path,
-                                      "region.dat"),
+                                      FILENAME_REGION_DAT),
                       FileScanner::LowMemRandom,
                       true)) {
       std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;

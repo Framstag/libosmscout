@@ -208,7 +208,7 @@ static bool ParseArguments(int argc,
         return false;
       }
 
-      jobs.push_back(Job(osmscout::refWay,fileOffset));
+      jobs.push_back(Job(osmscout::refArea,fileOffset));
 
       arg++;
     }

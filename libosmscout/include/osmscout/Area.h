@@ -167,6 +167,11 @@ namespace osmscout {
 
       bool GetCenter(double& lat,
                      double& lon) const;
+
+      void GetBoundingBox(double& minLon,
+                          double& maxLon,
+                          double& minLat,
+                          double& maxLat) const;
     };
 
   private:

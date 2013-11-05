@@ -280,6 +280,26 @@ namespace osmscout {
     return true;
   }
 
+  void Area::Ring::GetBoundingBox(double& minLon,
+                                  double& maxLon,
+                                  double& minLat,
+                                  double& maxLat) const
+  {
+    assert(!nodes.empty());
+
+    minLon=nodes[0].GetLon();
+    maxLon=minLon;
+    minLat=nodes[0].GetLat();
+    maxLat=minLat;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLon=std::min(minLon,nodes[i].GetLon());
+      maxLon=std::max(maxLon,nodes[i].GetLon());
+      minLat=std::min(minLat,nodes[i].GetLat());
+      maxLat=std::max(maxLat,nodes[i].GetLat());
+    }
+  }
+
   bool Area::GetCenter(double& lat, double& lon) const
   {
     assert(!rings.empty());
@@ -325,38 +345,22 @@ namespace osmscout {
   }
 
   void Area::GetBoundingBox(double& minLon,
-                                double& maxLon,
-                                double& minLat,
-                                double& maxLat) const
+                            double& maxLon,
+                            double& minLat,
+                            double& maxLat) const
   {
     assert(!rings.empty());
-
-    bool start=true;
 
     for (std::vector<Area::Ring>::const_iterator role=rings.begin();
          role!=rings.end();
          ++role) {
       if (role->ring==Area::outerRingId) {
-        for (size_t i=0; i<role->nodes.size(); i++) {
-          if (start) {
-            minLon=role->nodes[i].GetLon();
-            maxLon=minLon;
-            minLat=role->nodes[i].GetLat();
-            maxLat=minLat;
-
-            start=false;
-          }
-          else {
-            minLon=std::min(minLon,role->nodes[i].GetLon());
-            maxLon=std::max(maxLon,role->nodes[i].GetLon());
-            minLat=std::min(minLat,role->nodes[i].GetLat());
-            maxLat=std::max(maxLat,role->nodes[i].GetLat());
-          }
-        }
+        role->GetBoundingBox(minLon,
+                             maxLon,
+                             minLat,
+                             maxLat);
       }
     }
-
-    assert(!start);
   }
 
   bool Area::ReadIds(FileScanner& scanner,

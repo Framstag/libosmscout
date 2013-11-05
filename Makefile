@@ -1,4 +1,4 @@
-export CXX = clang++
+#export CXX = clang++
 
 programs = libosmscout \
            libosmscout-import \

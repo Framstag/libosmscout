@@ -76,6 +76,8 @@ namespace osmscout {
       return false;
     default:
       assert(false);
+
+      return false;
     }
   }
 
@@ -119,6 +121,8 @@ namespace osmscout {
       return t->second!=tagValue;
     default:
       assert(false);
+
+      return false;
     }
   }
 
@@ -147,7 +151,8 @@ namespace osmscout {
   }
 
   TagInfo::TagInfo()
-   : id(0)
+   : id(0),
+     internalOnly(true)
   {
   }
 

@@ -841,6 +841,49 @@ namespace osmscout {
     return true;
   }
 
+  bool Database::GetObjects(const std::set<ObjectFileRef>& objects,
+                            OSMSCOUT_HASHMAP<FileOffset,NodeRef>& nodesMap,
+                            OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap,
+                            OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    std::set<FileOffset> nodeOffsets;
+    std::set<FileOffset> areaOffsets;
+    std::set<FileOffset> wayOffsets;
+
+    for (std::set<ObjectFileRef>::const_iterator o=objects.begin();
+        o!=objects.end();
+        ++o) {
+      ObjectFileRef object(*o);
+
+      switch (object.GetType()) {
+      case osmscout::refNode:
+        nodeOffsets.insert(object.GetFileOffset());
+        break;
+      case osmscout::refArea:
+        areaOffsets.insert(object.GetFileOffset());
+        break;
+      case osmscout::refWay:
+        wayOffsets.insert(object.GetFileOffset());
+        break;
+      default:
+        break;
+      }
+    }
+
+    if (!GetNodesByOffset(nodeOffsets,nodesMap) ||
+        !GetAreasByOffset(areaOffsets,areasMap) ||
+        !GetWaysByOffset(wayOffsets,waysMap)) {
+      std::cerr << "Error while resolving locations" << std::endl;
+      return false;
+    }
+
+    return true;
+  }
+
   bool Database::GetGroundTiles(double lonMin, double latMin,
                                 double lonMax, double latMax,
                                 const Magnification& magnification,
@@ -919,6 +962,16 @@ namespace osmscout {
     return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
+  bool Database::GetNodesByOffset(const std::set<FileOffset>& offsets,
+                                  OSMSCOUT_HASHMAP<FileOffset,NodeRef>& dataMap) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return nodeDataFile.GetByOffset(offsets,dataMap);
+  }
+
   bool Database::GetAreaByOffset(const FileOffset& offset,
                                  AreaRef& area) const
   {
@@ -971,6 +1024,16 @@ namespace osmscout {
     return areaDataFile.GetByOffset(offsets,areas);
   }
 
+  bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
+                                  OSMSCOUT_HASHMAP<FileOffset,AreaRef>& dataMap) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return areaDataFile.GetByOffset(offsets,dataMap);
+  }
+
   bool Database::GetWayByOffset(const FileOffset& offset,
                                 WayRef& way) const
   {
@@ -1021,6 +1084,16 @@ namespace osmscout {
     }
 
     return wayDataFile.GetByOffset(offsets,ways);
+  }
+
+  bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
+                                 OSMSCOUT_HASHMAP<FileOffset,WayRef>& dataMap) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return wayDataFile.GetByOffset(offsets,dataMap);
   }
 
   bool Database::GetMatchingAdminRegions(const std::string& name,

@@ -126,7 +126,7 @@ TYPES
 
   TYPE route_ferry = WAY ("route"=="ferry") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
 
-  TYPE aeroway_aerodrome = NODE AREA ("aeroway"=="aerodrome")
+  TYPE aeroway_aerodrome = NODE AREA ("aeroway"=="aerodrome") OPTIONS INDEX
   TYPE aeroway_terminal = NODE AREA ("aeroway"=="terminal")
   TYPE aeroway_helipad = NODE AREA ("aeroway"=="helipad")
   TYPE aeroway_runway = WAY AREA ("aeroway"=="runway") // Officially not AREA!
@@ -197,10 +197,10 @@ TYPES
   TYPE man_made_wastewater_plant = NODE AREA ("man_made"=="wastewater_plant")
   TYPE man_made_pier = WAY AREA ("man_made"=="pier")
 
-  TYPE leisure_building = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE leisure_building = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
   TYPE leisure_sports_centre = NODE AREA ("leisure"=="sports_centre")
   TYPE leisure_golf_course = NODE AREA ("leisure"=="golf_course")
-  TYPE leisure_stadium = NODE AREA ("leisure"=="stadium")
+  TYPE leisure_stadium = NODE AREA ("leisure"=="stadium") OPTIONS INDEX
   TYPE leisure_track = NODE WAY AREA ("leisure"=="track") OPTIONS PIN_WAY
   TYPE leisure_pitch = NODE AREA ("leisure"=="pitch")
   TYPE leisure_water_park = NODE AREA ("leisure"=="water_park")
@@ -215,38 +215,38 @@ TYPES
   TYPE leisure_ice_rink = NODE AREA ("leisure"=="ice_rink")
 
   // These are currently special-cased in the style file
-  TYPE amenity_hospital_building = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity_hospital = NODE AREA ("amenity"=="hospital")
+  TYPE amenity_hospital_building = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE amenity_hospital = NODE AREA ("amenity"=="hospital") OPTIONS INDEX
 
-  TYPE amenity_parking_building = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity_parking = NODE AREA ("amenity"=="parking")
+  TYPE amenity_parking_building = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE amenity_parking = NODE AREA ("amenity"=="parking") OPTIONS INDEX
 
   TYPE amenity_bicycle_parking_building = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE amenity_bicycle_parking = NODE WAY AREA ("amenity"=="bicycle_parking")
 
   TYPE amenity_bus_station = NODE AREA ("amenity"=="bus_station")
 
-  TYPE amenity_kindergarten_building = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity_kindergarten = NODE ("amenity"=="kindergarten")
+  TYPE amenity_kindergarten_building = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE amenity_kindergarten = NODE ("amenity"=="kindergarten") OPTIONS INDEX
 
   TYPE amenity_bench = NODE WAY ("amenity"=="bench")
-  TYPE amenity_grave_yard = NODE AREA ("amenity"=="grave_yard")
-  TYPE amenity_pharmacy = NODE AREA ("amenity"=="pharmacy")
-  TYPE amenity_post_office_building = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity_post_office = NODE ("amenity"=="post_office")
+  TYPE amenity_grave_yard = NODE AREA ("amenity"=="grave_yard") OPTIONS INDEX
+  TYPE amenity_pharmacy = NODE AREA ("amenity"=="pharmacy") OPTIONS INDEX
+  TYPE amenity_post_office_building = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE amenity_post_office = NODE ("amenity"=="post_office") OPTIONS INDEX
   TYPE amenity_post_box = NODE ("amenity"=="post_box")
-  TYPE amenity_school_building = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity_school = NODE AREA ("amenity"=="school")
+  TYPE amenity_school_building = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE amenity_school = NODE AREA ("amenity"=="school") OPTIONS INDEX
   TYPE amenity_taxi = NODE AREA ("amenity"=="taxi")
   TYPE amenity_toilets = NODE ("amenity"=="toilets")
 
   // Churches
   TYPE christian_church_building = AREA ("amenity"=="place_of_worship" AND
                                            "religion"=="christian" AND
-                                           EXISTS "building" AND !("building" IN ["no","false","0"]))
+                                           EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
 
   TYPE christian_church = NODE ("amenity"=="place_of_worship" AND
-                                  "religion"=="christian")
+                                  "religion"=="christian") OPTIONS INDEX
 
   // Everything else is just an 'amenity' for now
   TYPE amenity_building = AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -255,33 +255,33 @@ TYPES
   // Currently all shops are the same...
   TYPE shop = NODE AREA (EXISTS "shop")
 
-  TYPE tourism_aquarium = NODE AREA ("tourism"=="aquarium")
-  TYPE tourism_attraction = NODE AREA ("tourism"=="attraction")
-  TYPE tourism_artwork = NODE WAY AREA ("tourism"=="artwork")
+  TYPE tourism_aquarium = NODE AREA ("tourism"=="aquarium") OPTIONS INDEX
+  TYPE tourism_attraction = NODE AREA ("tourism"=="attraction") OPTIONS INDEX
+  TYPE tourism_artwork = NODE WAY AREA ("tourism"=="artwork") OPTIONS INDEX
   TYPE tourism_camp_site = NODE AREA ("tourism"=="camp_site")
   TYPE tourism_caravan_site = NODE AREA ("tourism"=="caravan_site")
   TYPE tourism_picnic_site = NODE AREA ("tourism"=="picnic_site")
-  TYPE tourism_theme_park = NODE AREA ("tourism"=="theme_park")
+  TYPE tourism_theme_park = NODE AREA ("tourism"=="theme_park") OPTIONS INDEX
   TYPE tourism_viewpoint = NODE ("tourism"=="viewpoint")
-  TYPE tourism_zoo = NODE AREA ("tourism"=="zoo")
+  TYPE tourism_zoo = NODE AREA ("tourism"=="zoo") OPTIONS INDEX
 
   TYPE tourism_alpine_hut_building = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE tourism_chalet_building = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE tourism_guest_house_building = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE tourism_hostel_building = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_hotel_building = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE tourism_hotel_building = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
   TYPE tourism_information_building = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE tourism_motel_building = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_museum_building = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE tourism_museum_building = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
 
   TYPE tourism_alpine_hut = NODE AREA ("tourism"=="alpine_hut")
   TYPE tourism_chalet = NODE AREA ("tourism"=="chalet")
   TYPE tourism_guest_house = NODE AREA ("tourism"=="guest_house")
   TYPE tourism_hostel = NODE AREA ("tourism"=="hostel")
-  TYPE tourism_hotel = NODE AREA ("tourism"=="hotel")
+  TYPE tourism_hotel = NODE AREA ("tourism"=="hotel") OPTIONS INDEX
   TYPE tourism_information = NODE AREA ("tourism"=="information")
   TYPE tourism_motel = NODE AREA ("tourism"=="motel")
-  TYPE tourism_museum = NODE AREA ("tourism"=="museum")
+  TYPE tourism_museum = NODE AREA ("tourism"=="museum") OPTIONS INDEX
 
   // Do not delete the following type, they are required by the GenCityStreet import step
   TYPE boundary_administrative = WAY AREA ("boundary"=="administrative") OR
@@ -300,21 +300,21 @@ TYPES
   TYPE place_hamlet = NODE AREA ("place"=="hamlet")
   TYPE place_suburb = NODE AREA ("place"=="suburb")
 
-  TYPE place_locality = NODE AREA ("place"=="locality")
+  TYPE place_locality = NODE AREA ("place"=="locality") OPTIONS INDEX
   TYPE place_island = NODE AREA ("place"=="island")
 
-  TYPE historic_castle_building = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE historic_monument_building = NODE WAY AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE historic_memorial_building = NODE WAY AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE historic_ruins_building = NODE WAY AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE historic_castle_building = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE historic_monument_building = NODE WAY AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE historic_memorial_building = NODE WAY AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
+  TYPE historic_ruins_building = NODE WAY AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX
 
-  TYPE historic_castle = NODE AREA ("historic"=="castle")
-  TYPE historic_ruins = NODE WAY AREA ("historic"=="ruins")
-  TYPE historic_manor = NODE AREA ("historic"=="manor")
-  TYPE historic_monument = NODE AREA ("historic"=="monument")
-  TYPE historic_memorial = NODE AREA ("historic"=="memorial")
-  TYPE historic_archaeological_site = NODE WAY AREA ("historic"=="archaeological_site")
-  TYPE historic_battlefield = NODE AREA ("historic"=="battlefield")
+  TYPE historic_castle = NODE AREA ("historic"=="castle") OPTIONS INDEX
+  TYPE historic_ruins = NODE WAY AREA ("historic"=="ruins") OPTIONS INDEX
+  TYPE historic_manor = NODE AREA ("historic"=="manor") OPTIONS INDEX
+  TYPE historic_monument = NODE AREA ("historic"=="monument") OPTIONS INDEX
+  TYPE historic_memorial = NODE AREA ("historic"=="memorial") OPTIONS INDEX
+  TYPE historic_archaeological_site = NODE WAY AREA ("historic"=="archaeological_site") OPTIONS INDEX
+  TYPE historic_battlefield = NODE AREA ("historic"=="battlefield") OPTIONS INDEX
   TYPE historic_wreck = NODE AREA ("historic"=="wreck")
 
   TYPE military_airfield = NODE AREA ("military"=="airfield")
