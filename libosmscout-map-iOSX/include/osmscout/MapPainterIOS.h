@@ -129,9 +129,12 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const FillStyle& style);
         
-        void DrawFillStyle(const Projection& projection,
+        void SetFill(const Projection& projection,
                      const MapParameter& parameter,
                      const FillStyle& fillStyle);
+        
+        void SetPen(const LineStyle& style,
+                    double lineWidth);
 
         double textLength(const MapParameter& parameter, double fontSize, std::string text);
         double textHeight(const MapParameter& parameter, double fontSize, std::string text);

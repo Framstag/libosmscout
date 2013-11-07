@@ -55,6 +55,9 @@
 		F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFB161A5FEC00D51926 /* Transformation.cpp */; };
 		F51E3F2E161A5FEC00D51926 /* WaterIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFC161A5FEC00D51926 /* WaterIndex.cpp */; };
 		F51E3F2F161A5FEC00D51926 /* Way.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFD161A5FEC00D51926 /* Way.cpp */; };
+		F534FB9B1823E8BD0039CEE4 /* Intersection.h in Headers */ = {isa = PBXBuildFile; fileRef = F534FB9A1823E8BD0039CEE4 /* Intersection.h */; };
+		F534FB9D18242F660039CEE4 /* Intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534FB9C18242F660039CEE4 /* Intersection.cpp */; };
+		F534FB9E18242F660039CEE4 /* Intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534FB9C18242F660039CEE4 /* Intersection.cpp */; };
 		F53BD15A16388375006C7AE1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD15916388375006C7AE1 /* Cocoa.framework */; };
 		F53BD1A51638866B006C7AE1 /* AdminRegion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB2161A5FEC00D51926 /* AdminRegion.cpp */; };
 		F53BD1A61638866B006C7AE1 /* AreaAreaIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */; };
@@ -263,6 +266,8 @@
 		F51E3F73161A604300D51926 /* WaterIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WaterIndex.h; sourceTree = "<group>"; };
 		F51E3F74161A604300D51926 /* Way.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Way.h; sourceTree = "<group>"; };
 		F51E3F75161A604300D51926 /* WayDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WayDataFile.h; sourceTree = "<group>"; };
+		F534FB9A1823E8BD0039CEE4 /* Intersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Intersection.h; sourceTree = "<group>"; };
+		F534FB9C18242F660039CEE4 /* Intersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Intersection.cpp; path = ../../../../libosmscout/src/osmscout/Intersection.cpp; sourceTree = "<group>"; };
 		F53BD15816388375006C7AE1 /* libosmscout-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libosmscout-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F53BD15916388375006C7AE1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		F53BD15C16388375006C7AE1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -358,6 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				F54DAA3F1815DA6500625DDA /* Area.cpp */,
+				F534FB9C18242F660039CEE4 /* Intersection.cpp */,
 				F54DAA401815DA6500625DDA /* AttributeAccess.cpp */,
 				F54DAA411815DA6500625DDA /* Coord.cpp */,
 				F54DAA421815DA6500625DDA /* CoordDataFile.cpp */,
@@ -459,6 +465,7 @@
 		F51E3F30161A604300D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				F534FB9A1823E8BD0039CEE4 /* Intersection.h */,
 				F54DAA631815DB3F00625DDA /* Area.h */,
 				F54DAA641815DB3F00625DDA /* AreaDataFile.h */,
 				F54DAA651815DB3F00625DDA /* AttributeAccess.h */,
@@ -589,6 +596,7 @@
 				F54DAA711815DB3F00625DDA /* Coord.h in Headers */,
 				F54DAA731815DB3F00625DDA /* DebugDatabase.h in Headers */,
 				F54DAA721815DB3F00625DDA /* CoordDataFile.h in Headers */,
+				F534FB9B1823E8BD0039CEE4 /* Intersection.h in Headers */,
 				F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */,
 				F54DAA741815DB3F00625DDA /* GeoCoord.h in Headers */,
 				F54DAA701815DB3F00625DDA /* AttributeAccess.h in Headers */,
@@ -686,6 +694,7 @@
 				F54DAA5F1815DAFB00625DDA /* NodeUseMap.cpp in Sources */,
 				F51E3F0B161A5FEC00D51926 /* Scanner.cpp in Sources */,
 				F51E3F0C161A5FEC00D51926 /* Path.cpp in Sources */,
+				F534FB9D18242F660039CEE4 /* Intersection.cpp in Sources */,
 				F51E3F0D161A5FEC00D51926 /* Point.cpp in Sources */,
 				F54DAA4E1815DA6500625DDA /* GeoCoord.cpp in Sources */,
 				F51E3F0F161A5FEC00D51926 /* Route.cpp in Sources */,
@@ -753,6 +762,7 @@
 				F54DAA601815DAFB00625DDA /* NodeUseMap.cpp in Sources */,
 				F53BD1B216388673006C7AE1 /* Point.cpp in Sources */,
 				F53BD1B416388673006C7AE1 /* Route.cpp in Sources */,
+				F534FB9E18242F660039CEE4 /* Intersection.cpp in Sources */,
 				F53BD1B516388673006C7AE1 /* RouteData.cpp in Sources */,
 				F54DAA581815DA8D00625DDA /* GeoCoord.cpp in Sources */,
 				F53BD1B616388673006C7AE1 /* RouteNode.cpp in Sources */,
