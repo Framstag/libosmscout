@@ -542,16 +542,6 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
     std::cout << "  }" << std::endl;
   }
 
-  if (!area->rings.front().attributes.GetTags().empty()) {
-    std::cout << std::endl;
-
-    for (std::vector<osmscout::Tag>::const_iterator tag=area->rings.front().attributes.GetTags().begin();
-        tag!=area->rings.front().attributes.GetTags().end();
-        ++tag) {
-      std::cout << "  " << typeConfig->GetTagInfo(tag->key).GetName() << ": " << tag->value << std::endl;
-    }
-  }
-
   std::cout << "}" << std::endl;
 }
 
