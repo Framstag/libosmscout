@@ -1,6 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
-AC_INIT([libosmscout],[0.1],[tim@teulings.org],[libosmscout])
+AC_INIT([libosmscout],
+         [0.1],
+         [tim@teulings.org],
+         [libosmscout])
 
 AC_CONFIG_SRCDIR(src/osmscout/Database.cpp)
 AC_CONFIG_MACRO_DIR([m4])
@@ -162,6 +165,13 @@ AM_CONDITIONAL(HAVE_LIB_PROTOBUF,[test "$LIB_PROTOBUF_FOUND" = true])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile libosmscout.pc libosmscout-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [],
+                         [-losmscout],
+                         [libosmscout base library],
+                         [$CPP0XFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile])
 AC_OUTPUT
 

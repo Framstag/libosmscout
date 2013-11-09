@@ -21,7 +21,7 @@ AX_CXXFLAGS_WARN_ALL
 
 AC_TYPE_SIZE_T
 
-AC_SEARCH_LIBS([sqrt],[m])
+AC_SEARCH_LIBS([sqrt],[m],[])
 
 if test "$GXX" = yes; then
   CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
@@ -81,6 +81,13 @@ fi
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-opengl.pc libosmscout-map-opengl-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [libosmscout-map libosmscout],
+                         [-losmscoutmapopengl $LIBOPENGL_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout map rendering OpenGL backend library],
+                         [$LIBOPENGL_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT
 

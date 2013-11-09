@@ -26,7 +26,7 @@ AC_SUBST(protoc)
 AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_SEARCH_LIBS([sqrt],[m])
+AC_SEARCH_LIBS([sqrt],[m],[])
 
 AC_CHECK_FUNCS([mmap])
 
@@ -106,6 +106,13 @@ AM_CONDITIONAL(HAVE_PROG_PROTOC,[test -n "$protoc"])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile src/protobuf/Makefile include/Makefile libosmscout-import.pc libosmscout-import-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [libosmscout],
+                         [-losmscoutimport $PROTOBUF_LIBS $ZLIB_LIBS $XML2_LIBS $LIBOSMSCOUT_LIBS],
+                         [libosmscout import library],
+                         [$PROTOBUF_CFLAGS $ZLIB_CFLAGS $XML2_CFLAGS $LIBOSMSCOUT_CFLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile src/protobuf/Makefile include/Makefile])
 AC_OUTPUT
 

@@ -1,6 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
-AC_INIT([libosmscout-map],[0.1],[tim@teulings.org],[libosmscout-map])
+AC_INIT([libosmscout-map],
+        [0.1],
+        [tim@teulings.org],
+        [libosmscout-map])
 
 AC_CONFIG_SRCDIR(src/osmscout/MapPainter.cpp)
 AC_CONFIG_MACRO_DIR([m4])
@@ -18,7 +21,9 @@ AX_CXXFLAGS_WARN_ALL
 
 AC_TYPE_SIZE_T
 
-AC_SEARCH_LIBS([sqrt],[m])
+AC_SEARCH_LIBS([sqrt],
+                [m],
+                [])
 
 if test "$GXX" = yes; then
   CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
@@ -54,6 +59,13 @@ PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map.pc libosmscout-map-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [libosmscout],
+                         [-losmscoutmap $LIBOSMSCOUT_LIBS],
+                         [libosmscout map rendering base library],
+                         [$LIBOSMSCOUT_CFLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT
 

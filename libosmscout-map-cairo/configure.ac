@@ -79,6 +79,13 @@ AM_CONDITIONAL(HAVE_LIB_PNG,[test "$HASPNG" = "true"])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-cairo.pc libosmscout-map-cairo-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [libosmscout-map libosmscout],
+                         [-losmscoutmapcairo $LIBCAIRO_LIBS $LIBPANGO_LIBS $LIBPNG_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout map rendering cairo backend library],
+                         [$LIBCAIRO_CFLAGS $LIBPANGO_CFLAGS $LIBPNG_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT
 

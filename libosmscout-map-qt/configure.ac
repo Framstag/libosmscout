@@ -62,5 +62,12 @@ PKG_CHECK_MODULES(LIBQTGUI, [QtGui > 4.6.0],
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-qt.pc libosmscout-map-qt-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [libosmscout-map libosmscout],
+                         [-losmscoutmapqt $LIBQTGUI_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout map rendering Qt backend library],
+                         [$LIBQTGUI_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT

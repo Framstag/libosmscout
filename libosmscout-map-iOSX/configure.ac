@@ -52,5 +52,12 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-iOSX.pc libosmscout-map-iOSX-uninstalled.pc])
+AX_CREATE_PKGCONFIG_INFO([],
+                         [libosmscout-map libosmscout],
+                         [-losmscoutmapiOSX $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout map rendering iOS/Mac OS X backend library],
+                         [$LIBOSMSCOUTMAP_CFLAGS],
+                         [])
+
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT
