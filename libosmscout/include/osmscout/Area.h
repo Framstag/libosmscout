@@ -35,10 +35,11 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    const static uint8_t isSimple        = 1 << 3; //1 We are a simple area, only one Ring, no roles
-    const static uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
-    const static uint8_t hasName         = 1 << 5; //! We have a name
-    const static uint8_t hasHouseNr      = 1 << 6; //! We have a house number
+    const static uint8_t isSimple        = 1 << 2; //1 We are a simple area, only one Ring, no roles
+    const static uint8_t hasNameAlt      = 1 << 3; //! We have an alternative name (mainly in a second language)
+    const static uint8_t hasName         = 1 << 4; //! We have a name
+    const static uint8_t hasStreet       = 1 << 5; //! Street and..
+    const static uint8_t hasHouseNr      = 1 << 6; //! ...house number
     const static uint8_t hasTags         = 1 << 7; //! We have additional tags
 
     const static uint8_t hasAccess       = 1 << 0; //! We do have (general) access rights to this way/area
@@ -49,7 +50,8 @@ namespace osmscout {
   private:
     mutable uint8_t  flags;
     std::string      nameAlt;  //! alternative name
-    std::string      houseNr;  //! house number
+    std::string      street;   //! Street and...
+    std::string      houseNr;  //! ...house number
     std::vector<Tag> tags;     //! list of preparsed tags
 
   private:
@@ -83,6 +85,11 @@ namespace osmscout {
     inline std::string GetNameAlt() const
     {
       return nameAlt;
+    }
+
+    inline std::string GetStreet() const
+    {
+      return street;
     }
 
     inline std::string GetHouseNr() const

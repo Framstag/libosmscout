@@ -37,9 +37,10 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    const static uint16_t hasNameAlt      = 1 <<  7; //! We have an alternative name (mainly in a second language)
-    const static uint16_t hasName         = 1 <<  8; //! We have a name
-    const static uint16_t hasRef          = 1 <<  9; //! We have reference name
+    const static uint16_t hasNameAlt      = 1 <<  6; //! We have an alternative name (mainly in a second language)
+    const static uint16_t hasName         = 1 <<  7; //! We have a name
+    const static uint16_t hasRef          = 1 <<  8; //! We have reference name
+    const static uint16_t hasStreet       = 1 <<  9; //! Street for house nr
     const static uint16_t hasHouseNr      = 1 << 10; //! We have a house number
     const static uint16_t hasLayer        = 1 << 11; //! We have optional layer information
     const static uint16_t hasWidth        = 1 << 12; //! We have width
@@ -61,7 +62,8 @@ namespace osmscout {
     AttributeAccess  access;   //! Information regarding which vehicle can access this way
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
-    std::string      houseNr;  //! house number
+    std::string      street;   //! street and...
+    std::string      houseNr;  //! ...house number
     int8_t           layer;    //! layer to draw on
     uint8_t          width;    //! width of way
     uint8_t          maxSpeed; //! speed from 1..255km/h (0 means, not set)
@@ -108,6 +110,11 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return ref;
+    }
+
+    inline std::string GetStreet() const
+    {
+      return street;
     }
 
     inline std::string GetHouseNr() const
@@ -219,6 +226,11 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return attributes.GetRefName();
+    }
+
+    inline std::string GetStreet() const
+    {
+      return attributes.GetStreet();
     }
 
     inline std::string GetHouseNr() const

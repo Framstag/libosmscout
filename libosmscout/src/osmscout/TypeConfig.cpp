@@ -264,6 +264,7 @@ namespace osmscout {
     RegisterTagForExternalUse("width");
     RegisterTagForExternalUse("oneway");
     RegisterTagForExternalUse("addr:housenumber");
+    RegisterTagForExternalUse("addr:street");
     RegisterTagForExternalUse("junction");
     RegisterTagForExternalUse("maxspeed");
     RegisterTagForExternalUse("restriction");
@@ -348,6 +349,7 @@ namespace osmscout {
     tagWidth=GetTagId("width");
     tagOneway=GetTagId("oneway");
     tagHouseNr=GetTagId("addr:housenumber");
+    tagStreet=GetTagId("addr:street");
     tagJunction=GetTagId("junction");
     tagMaxSpeed=GetTagId("maxspeed");
     tagRestriction=GetTagId("restriction");
@@ -388,6 +390,7 @@ namespace osmscout {
     assert(tagWidth!=tagIgnore);
     assert(tagOneway!=tagIgnore);
     assert(tagHouseNr!=tagIgnore);
+    assert(tagStreet!=tagIgnore);
     assert(tagJunction!=tagIgnore);
     assert(tagMaxSpeed!=tagIgnore);
     assert(tagRestriction!=tagIgnore);

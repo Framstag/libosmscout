@@ -81,7 +81,7 @@ TYPES
   TYPE highway_bus_guideway = WAY ("highway"=="bus_guideway")
   TYPE highway_path = WAY ("highway"=="path") OPTIONS ROUTE[FOOT BICYCLE] IGNORESEALAND
   TYPE highway_cycleway = WAY ("highway"=="cycleway") OPTIONS ROUTE[BICYCLE]
-  TYPE highway_footway = WAY AREA ("highway"=="footway") OPTIONS ROUTE[FOOT] PIN_WAY
+  TYPE highway_footway = WAY AREA ("highway"=="footway") OPTIONS ROUTE[FOOT] INDEX PIN_WAY
   TYPE highway_bridleway = WAY ("highway"=="bridleway")
   TYPE highway_byway = WAY ("highway"=="byway") OPTIONS ROUTE[FOOT] // Obsolete in OSM
   TYPE highway_steps = WAY ("highway"=="steps") OPTIONS ROUTE[FOOT]

@@ -441,6 +441,7 @@ namespace osmscout {
     TagId                                  tagWidth;
     TagId                                  tagOneway;
     TagId                                  tagHouseNr;
+    TagId                                  tagStreet;
     TagId                                  tagJunction;
     TagId                                  tagMaxSpeed;
     TagId                                  tagRestriction;

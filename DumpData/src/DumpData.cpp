@@ -272,11 +272,15 @@ static void DumpNodeAttributes(const osmscout::TypeId& type,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
+  if (!attributes.GetStreet().empty()) {
+    DumpIndent(indent);
+    std::cout << "street: " << attributes.GetStreet() << std::endl;
+  }
+
   if (!attributes.GetHouseNr().empty()) {
     DumpIndent(indent);
     std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
   }
-
   if (attributes.HasTags()) {
     std::cout << std::endl;
 
@@ -326,7 +330,12 @@ static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
-    if (!attributes.GetHouseNr().empty()) {
+  if (!attributes.GetStreet().empty()) {
+    DumpIndent(indent);
+    std::cout << "street: " << attributes.GetStreet() << std::endl;
+  }
+
+  if (!attributes.GetHouseNr().empty()) {
     DumpIndent(indent);
     std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
   }
@@ -362,6 +371,16 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
   if (!attributes.GetNameAlt().empty()) {
     DumpIndent(indent);
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
+  }
+
+  if (!attributes.GetStreet().empty()) {
+    DumpIndent(indent);
+    std::cout << "street: " << attributes.GetStreet() << std::endl;
+  }
+
+  if (!attributes.GetHouseNr().empty()) {
+    DumpIndent(indent);
+    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
   }
 
   if (!attributes.GetRefName().empty()) {
