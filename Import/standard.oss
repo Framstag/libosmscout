@@ -47,7 +47,6 @@ CONST
   COLOR fellColor             = #f9f9f9;
   COLOR forestColor           = #8dc56c;
   COLOR glacierColor          = #ddecec;
-  COLOR grassColor            = #cfeca8;
   COLOR greenFieldColor       = #dcdcc8;
   COLOR heathColor            = #ffffc0;
   COLOR industrialColor       = #dfd1d6;
@@ -160,6 +159,7 @@ SYMBOL christian_church_cross
 
  [MAG state-] {
    [TYPE natural_glacier] AREA { color: @glacierColor; }
+   [TYPE natural_grassland] AREA { color: @grassColor; }
    [TYPE natural_fell] AREA { color: @fellColor; }
    [TYPE natural_heath] AREA { color: @heathColor; }
    [TYPE natural_wood] AREA { color: @woodColor; }
@@ -174,6 +174,7 @@ SYMBOL christian_church_cross
  [MAG detail-] {
    [TYPE natural_glacier,
          natural_fell,
+         natural_grassland,
          natural_heath,
          natural_wood,
          natural_scrub,

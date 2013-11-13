@@ -177,6 +177,7 @@ TYPES
 
   TYPE natural_fell = NODE AREA ("natural"=="fell")
   TYPE natural_glacier = NODE AREA ("natural"=="glacier")
+  TYPE natural_grassland = AREA ("natural"=="grassland")
   TYPE natural_heath = NODE AREA ("natural"=="heath")
   TYPE natural_land = NODE AREA ("natural"=="land")
   TYPE natural_marsh = NODE AREA ("natural"=="marsh")
