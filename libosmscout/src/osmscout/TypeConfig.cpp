@@ -189,6 +189,8 @@ namespace osmscout {
      canRouteBicycle(false),
      canRouteCar(false),
      canBeIndexed(false),
+     indexAsRegion(false),
+     indexAsPOI(false),
      consumeChildren(false),
      optimizeLowZoom(false),
      multipolygon(false),
@@ -872,6 +874,32 @@ namespace osmscout {
          type!=this->types.end();
          ++type) {
       if (type->CanBeIndexed()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
+
+  void TypeConfig::GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const
+  {
+    types.clear();
+
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
+         type!=this->types.end();
+         ++type) {
+      if (type->GetIndexAsRegion()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
+
+  void TypeConfig::GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const
+  {
+    types.clear();
+
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
+         type!=this->types.end();
+         ++type) {
+      if (type->GetIndexAsPOI()) {
         types.insert(type->GetId());
       }
     }

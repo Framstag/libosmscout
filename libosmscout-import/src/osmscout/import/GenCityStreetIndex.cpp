@@ -26,10 +26,7 @@
 #include <map>
 #include <set>
 
-#include <osmscout/Node.h>
-#include <osmscout/Area.h>
-#include <osmscout/Way.h>
-#include <osmscout/ObjectRef.h>
+#include <osmscout/Pixel.h>
 
 #include <osmscout/CityStreetIndex.h>
 
@@ -45,182 +42,47 @@
 
 namespace osmscout {
 
-  /**
-   * An area can contain an number of location nodes. Since they do not have
-   * their own area we define the nod ename as an alias for the containing
-   * area, since this is the best aproximation.
-   */
-  struct RegionAlias
+  CityStreetIndexGenerator::RegionRef CityStreetIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
+                                                                                              const GeoCoord& coord) const
   {
-    FileOffset             reference; //! Reference to the node that is the alias
-    std::string            name;      //! The alias itself
-  };
+    size_t minX=(coord.GetLon()+180.0)/cellWidth;
+    size_t minY=(coord.GetLat()+90.0)/cellHeight;
 
-  struct RegionAddress
-  {
-    ObjectFileRef          object;
-    std::string            houseNr;
-  };
+    std::map<Pixel,std::list<RegionRef> >::const_iterator indexCell=index.find(Pixel(minX,minY));
 
-  struct RegionLocation
-  {
-    std::list<ObjectFileRef> objects;   //! Objects that represent this location
-    std::list<RegionAddress> addresses; //! Addresses at this location
-  };
+    if (indexCell!=index.end()) {
+      for (std::list<RegionRef>::const_iterator r=indexCell->second.begin();
+          r!=indexCell->second.end();
+          ++r) {
+        RegionRef region(*r);
 
-  /**
-   * Reference to an area
-   */
-  struct RegionRef
-  {
-    ObjectFileRef          reference; //! Reference of the object that
-                                      //! is the alias
-    FileOffset             offset;    //! Fileoffset of the area
-
-    inline bool operator<(const RegionRef& other) const
-    {
-      return reference<other.reference;
-    }
-  };
-
-  /**
-    An area. An area is a administrative region, a city, a country, ...
-    An area can have child areas (suburbs, ...).
-    An area has a name and also a number of locations, which are possibly
-    within the area but area currently also represented by this area.
-    */
-  struct Region
-  {
-    FileOffset                          offset;    //! Offset into the index file
-
-    ObjectFileRef                       reference; //! Reference to the object this area is based on
-    std::string                         name;      //! The name of this area
-
-    std::list<RegionAlias>              aliases;   //! Location that are represented by this region
-    std::vector<std::vector<GeoCoord> > areas;     //! the geometric area of this region
-
-    double                              minlon;
-    double                              minlat;
-    double                              maxlon;
-    double                              maxlat;
-
-    std::map<std::string,RegionLocation> locations; //! list of indexed objects in this region
-
-    std::list<Region>                   regions;   //! A list of sub regions
-
-    void CalculateMinMax()
-    {
-      bool isStart=true;
-
-      for (size_t i=0; i<areas.size(); i++) {
-        for (size_t j=0; j<areas[i].size(); j++) {
-          if (isStart) {
-            minlon=areas[i][j].GetLon();
-            maxlon=areas[i][j].GetLon();
-
-            minlat=areas[i][j].GetLat();
-            maxlat=areas[i][j].GetLat();
-
-            isStart=false;
-          }
-          else {
-            minlon=std::min(minlon,areas[i][j].GetLon());
-            maxlon=std::max(maxlon,areas[i][j].GetLon());
-
-            minlat=std::min(minlat,areas[i][j].GetLat());
-            maxlat=std::max(maxlat,areas[i][j].GetLat());
-          }
-        }
-      }
-    }
-  };
-
-  struct Boundary
-  {
-    ObjectFileRef                       reference;
-    std::string                         name;
-    size_t                              level;
-    std::vector<std::vector<GeoCoord> > areas;
-  };
-
-  struct CityArea
-  {
-    FileOffset                          reference;
-    std::string                         name;
-    std::vector<std::vector<GeoCoord> > areas;
-  };
-
-  struct CityNode
-  {
-    FileOffset  reference;
-    std::string name;
-    GeoCoord    node;
-  };
-
-  static void AddRegion(Region& parent,
-                        const Region& region)
-  {
-    for (std::list<Region>::iterator r=parent.regions.begin();
-         r!=parent.regions.end();
-         r++) {
-      if (!(region.maxlon<r->minlon) &&
-          !(region.minlon>r->maxlon) &&
-          !(region.maxlat<r->minlat) &&
-          !(region.minlat>r->maxlat)) {
-        for (size_t i=0; i<region.areas.size(); i++) {
-          for (size_t j=0; j<r->areas.size(); j++) {
-            if (IsAreaSubOfArea(region.areas[i],r->areas[j])) {
-              // If we already have the same name and are a "minor" reference, we skip...
-              if (!(region.name==r->name &&
-                    region.reference.type<r->reference.type)) {
-                AddRegion(*r,region);
-              }
-              return;
-            }
+        for (size_t i=0; i<region->areas.size(); i++) {
+          if (IsCoordInArea(coord,region->areas[i])) {
+            return region;
           }
         }
       }
     }
 
-    parent.regions.push_back(region);
+    return rootRegion;
   }
 
-  static void AddAliasToRegion(Region& area,
-                               const RegionAlias& location,
-                               const GeoCoord& node)
+  void CityStreetIndexGenerator::DumpRegion(const Region& parent,
+                                            size_t indent,
+                                            std::ostream& out)
   {
-    for (std::list<Region>::iterator a=area.regions.begin();
-         a!=area.regions.end();
-         a++) {
-      for (size_t i=0; i<a->areas.size(); i++) {
-        if (IsCoordInArea(node,a->areas[i])) {
-          AddAliasToRegion(*a,location,node);
-          return;
-        }
-      }
-    }
-
-    if (area.name==location.name) {
-      return;
-    }
-
-    area.aliases.push_back(location);
-  }
-
-  static void DumpRegion(const Region& parent,
-                         size_t indent,
-                         std::ostream& out)
-  {
-    for (std::list<Region>::const_iterator r=parent.regions.begin();
+    for (std::list<RegionRef>::const_iterator r=parent.regions.begin();
          r!=parent.regions.end();
          r++) {
+      RegionRef childRegion(*r);
+
       for (size_t i=0; i<indent; i++) {
         out << " ";
       }
-      out << " + " << r->name << " " << r->reference.GetTypeName() << " " << r->reference.GetFileOffset() << std::endl;
+      out << " + " << childRegion->name << " " << childRegion->reference.GetTypeName() << " " << childRegion->reference.GetFileOffset() << std::endl;
 
-      for (std::list<RegionAlias>::const_iterator l=r->aliases.begin();
-           l!=r->aliases.end();
+      for (std::list<RegionAlias>::const_iterator l=childRegion->aliases.begin();
+           l!=childRegion->aliases.end();
            l++) {
         for (size_t i=0; i<indent; i++) {
           out << " ";
@@ -228,8 +90,18 @@ namespace osmscout {
         out << " = " << l->name << " Node " << l->reference << std::endl;
       }
 
-      for (std::map<std::string,RegionLocation>::const_iterator nodeEntry=r->locations.begin();
-          nodeEntry!=r->locations.end();
+      for (std::list<RegionPOI>::const_iterator poi=childRegion->pois.begin();
+          poi!=childRegion->pois.end();
+          ++poi) {
+        for (size_t i=0; i<indent; i++) {
+          out << " ";
+        }
+
+        out << " * " << poi->name << " " << poi->object.GetTypeName() << " " << poi->object.GetFileOffset() << std::endl;
+      }
+
+      for (std::map<std::string,RegionLocation>::const_iterator nodeEntry=childRegion->locations.begin();
+          nodeEntry!=childRegion->locations.end();
           ++nodeEntry) {
         for (size_t i=0; i<indent; i++) {
           out << " ";
@@ -253,19 +125,19 @@ namespace osmscout {
             out << " ";
           }
 
-          out << " * " << address->houseNr << " " << address->object.GetTypeName() << " " << address->object.GetFileOffset() << std::endl;
+          out << " @ " << address->houseNr << " " << address->object.GetTypeName() << " " << address->object.GetFileOffset() << std::endl;
         }
       }
 
-      DumpRegion(*r,
+      DumpRegion(*childRegion,
                  indent+2,
                  out  );
     }
   }
 
-  static bool DumpRegionTree(Progress& progress,
-                             Region& rootRegion,
-                             const std::string& filename)
+  bool CityStreetIndexGenerator::DumpRegionTree(Progress& progress,
+                                                const Region& rootRegion,
+                                                const std::string& filename)
   {
     std::ofstream debugStream;
 
@@ -286,14 +158,44 @@ namespace osmscout {
     return true;
   }
 
+  void CityStreetIndexGenerator::AddRegion(Region& parent,
+                                           const RegionRef& region)
+  {
+    for (std::list<RegionRef>::iterator r=parent.regions.begin();
+         r!=parent.regions.end();
+         r++) {
+      RegionRef childRegion(*r);
+
+      if (!(region->maxlon<childRegion->minlon) &&
+          !(region->minlon>childRegion->maxlon) &&
+          !(region->maxlat<childRegion->minlat) &&
+          !(region->minlat>childRegion->maxlat)) {
+        for (size_t i=0; i<region->areas.size(); i++) {
+          for (size_t j=0; j<childRegion->areas.size(); j++) {
+            if (IsAreaSubOfArea(region->areas[i],childRegion->areas[j])) {
+              // If we already have the same name and are a "minor" reference, we skip...
+              if (!(region->name==childRegion->name &&
+                    region->reference.type<childRegion->reference.type)) {
+                AddRegion(*r,region);
+              }
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    parent.regions.push_back(region);
+  }
+
   /**
     Return the list of ways of type administrative boundary.
     */
-  static bool GetBoundaryAreas(const ImportParameter& parameter,
-                               Progress& progress,
-                               const TypeConfig& typeConfig,
-                               TypeId boundaryId,
-                               std::list<Boundary>& boundaryAreas)
+  bool CityStreetIndexGenerator::GetBoundaryAreas(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  const TypeConfig& typeConfig,
+                                                  TypeId boundaryId,
+                                                  std::list<Boundary>& boundaryAreas)
   {
     FileScanner scanner;
     uint32_t    areaCount;
@@ -379,46 +281,53 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  static void SortInBoundaries(Progress& progress,
-                               Region& rootRegion,
-                               const std::list<Boundary>& boundaryAreas,
-                               size_t level)
+  void CityStreetIndexGenerator::SortInBoundaries(Progress& progress,
+                                                  Region& rootRegion,
+                                                  const std::list<Boundary>& boundaryAreas,
+                                                  size_t level)
   {
-    size_t currentCount=0;
+    size_t currentBoundary=0;
+    size_t maxBoundary=boundaryAreas.size();
 
     for (std::list<Boundary>::const_iterator boundary=boundaryAreas.begin();
          boundary!=boundaryAreas.end();
          ++boundary) {
-      progress.SetProgress(currentCount,boundaryAreas.size());
+      currentBoundary++;
 
-      if (boundary->level==level) {
-        Region region;
+      progress.SetProgress(currentBoundary,
+                           maxBoundary);
 
-        region.reference=boundary->reference;
-        region.name=boundary->name;
-
-        region.areas=boundary->areas;
-
-        region.CalculateMinMax();
-
-        AddRegion(rootRegion,region);
-
-        currentCount++;
+      if (boundary->level!=level) {
+        continue;
       }
+
+      RegionRef region(new Region());
+
+      region->reference=boundary->reference;
+      region->name=boundary->name;
+
+      region->areas=boundary->areas;
+
+      region->CalculateMinMax();
+
+      AddRegion(rootRegion,
+                region);
     }
   }
 
   /**
     Return the list of nodes ids with the given type.
     */
-  static bool GetCityAreas(const ImportParameter& parameter,
-                           const TypeConfig& typeConfig,
-                           const OSMSCOUT_HASHSET<TypeId>& cityIds,
-                           std::list<CityArea>& cityAreas,
-                           Progress& progress)
+  bool CityStreetIndexGenerator::IndexRegionAreas(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  const TypeConfig& typeConfig,
+                                                  const OSMSCOUT_HASHSET<TypeId>& regionTypes,
+                                                  Region& rootRegion,
+                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
     uint32_t    areaCount;
+    size_t      areasFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -447,7 +356,7 @@ namespace osmscout {
         return false;
       }
 
-      if (cityIds.find(area.GetType())==cityIds.end()) {
+      if (regionTypes.find(area.GetType())==regionTypes.end()) {
         continue;
       }
 
@@ -458,60 +367,129 @@ namespace osmscout {
         continue;
       }
 
-      CityArea cityArea;
+      RegionRef region=new Region();
 
-      cityArea.reference=area.GetFileOffset();
-      cityArea.name=area.rings.front().GetName();
+      region->reference.Set(area.GetFileOffset(),refArea);
+      region->name=area.rings.front().GetName();
 
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
            ring!=area.rings.end();
            ++ring) {
         if (ring->ring==Area::outerRingId) {
-          cityArea.areas.push_back(ring->nodes);
+          region->areas.push_back(ring->nodes);
         }
       }
 
-      cityAreas.push_back(cityArea);
+      region->CalculateMinMax();
+
+      AddRegion(rootRegion,
+                region);
+
+      areasFound++;
     }
+
+    progress.Info(std::string("Found ")+NumberToString(areasFound)+" cities of type 'area'");
 
     return scanner.Close();
   }
 
-  static void SortInCityAreas(Progress& progress,
-                              Region& rootRegion,
-                              const std::list<CityArea>& cityAreas)
+  unsigned long CityStreetIndexGenerator::GetRegionTreeDepth(const Region& rootRegion)
   {
-    size_t currentCount=0;
+    unsigned long depth=0;
 
-    for (std::list<CityArea>::const_iterator area=cityAreas.begin();
-         area!=cityAreas.end();
-         ++area) {
-      progress.SetProgress(currentCount,cityAreas.size());
+    for (std::list<RegionRef>::const_iterator a=rootRegion.regions.begin();
+         a!=rootRegion.regions.end();
+         a++) {
+      RegionRef childRegion(*a);
 
-      Region region;
-
-      region.reference.Set(area->reference,refArea);
-      region.name=area->name;
-
-      region.areas=area->areas;
-
-      region.CalculateMinMax();
-
-      AddRegion(rootRegion,region);
+      depth=std::max(depth,GetRegionTreeDepth(*childRegion));
     }
+
+    return depth+1;
+  }
+
+
+  void CityStreetIndexGenerator::SortInRegion(RegionRef& area,
+                                              std::vector<std::list<RegionRef> >& regionTree,
+                                              unsigned long level)
+  {
+    regionTree[level].push_back(area);
+
+    for (std::list<RegionRef>::iterator r=area->regions.begin();
+         r!=area->regions.end();
+         r++) {
+      RegionRef childRegion(*r);
+
+      SortInRegion(childRegion,
+                   regionTree,
+                   level+1);
+    }
+  }
+
+  void CityStreetIndexGenerator::IndexRegions(const std::vector<std::list<RegionRef> >& regionTree,
+                                              RegionIndex& regionIndex)
+  {
+    for (size_t level=regionTree.size()-1; level>=1; level--) {
+      for (std::list<RegionRef>::const_iterator r=regionTree[level].begin();
+           r!=regionTree[level].end();
+           ++r) {
+        RegionRef region(*r);
+
+        size_t cellMinX=(region->minlon+180.0)/regionIndex.cellWidth;
+        size_t cellMaxX=(region->maxlon+180.0)/regionIndex.cellWidth;
+        size_t cellMinY=(region->minlat+90.0)/regionIndex.cellHeight;
+        size_t cellMaxY=(region->maxlat+90.0)/regionIndex.cellHeight;
+
+        for (size_t y=cellMinY; y<=cellMaxY; y++) {
+          for (size_t x=cellMinX; x<=cellMaxX; x++) {
+            Pixel pixel(x,y);
+
+            regionIndex.index[pixel].push_back(region);
+          }
+        }
+      }
+    }
+  }
+
+  void CityStreetIndexGenerator::AddAliasToRegion(Region& region,
+                                                  const RegionAlias& location,
+                                                  const GeoCoord& node)
+  {
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
+      RegionRef childRegion(*r);
+
+      for (size_t i=0; i<childRegion->areas.size(); i++) {
+        if (IsCoordInArea(node,childRegion->areas[i])) {
+          AddAliasToRegion(*childRegion,
+                           location,
+                           node);
+          return;
+        }
+      }
+    }
+
+    if (region.name==location.name) {
+      return;
+    }
+
+    region.aliases.push_back(location);
   }
 
   /**
     Return the list of nodes ids with the given type.
     */
-  static bool GetCityNodes(const ImportParameter& parameter,
-                           const TypeConfig& typeConfig,
-                           const OSMSCOUT_HASHSET<TypeId>& cityIds,
-                           std::list<CityNode>& cityNodes,
-                           Progress& progress)
+  bool CityStreetIndexGenerator::IndexRegionNodes(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  const TypeConfig& typeConfig,
+                                                  const OSMSCOUT_HASHSET<TypeId>& regionTypes,
+                                                  RegionRef& rootRegion,
+                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
     uint32_t    nodeCount;
+    size_t      citiesFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "nodes.dat"),
@@ -540,7 +518,7 @@ namespace osmscout {
         return false;
       }
 
-      if (cityIds.find(node.GetType())!=cityIds.end()) {
+      if (regionTypes.find(node.GetType())!=regionTypes.end()) {
         std::string name=node.GetName();
 
         if (name.empty()) {
@@ -548,64 +526,54 @@ namespace osmscout {
           continue;
         }
 
-        CityNode cityNode;
+        RegionAlias alias;
 
-        cityNode.reference=node.GetFileOffset();
-        cityNode.name=name;
-        cityNode.node.Set(node.GetLat(),node.GetLon());
+        alias.reference=node.GetFileOffset();
+        alias.name=name;
 
-        cityNodes.push_back(cityNode);
+        GeoCoord coord(node.GetLat(),node.GetLon());
+
+        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                      coord);
+
+        AddAliasToRegion(region,
+                         alias,
+                         coord);
+
+        citiesFound++;
       }
     }
+
+    progress.Info(std::string("Found ")+NumberToString(citiesFound)+" cities of type 'node'");
 
     return scanner.Close();
   }
 
-  static void SortInCityNodes(Progress& progress,
-                              Region& rootRegion,
-                              std::list<CityNode>& cityNodes)
+  bool CityStreetIndexGenerator::AddLocationAreaToRegion(Region& region,
+                                                         const Area& area,
+                                                         const std::vector<GeoCoord>& nodes,
+                                                         const std::string& name,
+                                                         double minlon,
+                                                         double minlat,
+                                                         double maxlon,
+                                                         double maxlat)
   {
-    size_t currentCount=0;
-
-    for (std::list<CityNode>::const_iterator city=cityNodes.begin();
-         city!=cityNodes.end();
-         ++city) {
-      progress.SetProgress(currentCount,cityNodes.size());
-
-      RegionAlias alias;
-
-      alias.reference=city->reference;
-      alias.name=city->name;
-
-      AddAliasToRegion(rootRegion,alias,city->node);
-
-      currentCount++;
-    }
-  }
-
-  static bool AddAreaToRegion(Region& region,
-                              const Area& area,
-                              const std::vector<GeoCoord>& nodes,
-                              const std::string& name,
-                              double minlon,
-                              double minlat,
-                              double maxlon,
-                              double maxlat)
-  {
-    for (std::list<Region>::iterator r=region.regions.begin();
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
+      RegionRef childRegion(*r);
+
       // Fast check, if the object is in the bounds of the area
-      if (!(maxlon<r->minlon) &&
-          !(minlon>r->maxlon) &&
-          !(maxlat<r->minlat) &&
-          !(minlat>r->maxlat)) {
-        for (size_t i=0; i<r->areas.size(); i++) {
+      if (!(maxlon<childRegion->minlon) &&
+          !(minlon>childRegion->maxlon) &&
+          !(maxlat<childRegion->minlat) &&
+          !(minlat>childRegion->maxlat)) {
+        for (size_t i=0; i<childRegion->areas.size(); i++) {
           // Check if one point is in the area
-          bool match=IsCoordInArea(nodes[0],r->areas[i]);
+          bool match=IsCoordInArea(nodes[0],childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddAreaToRegion(*r,area,nodes,name,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddLocationAreaToRegion(*r,area,nodes,name,minlon,minlat,maxlon,maxlat);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -642,9 +610,10 @@ namespace osmscout {
     if one point of an object is in a area it is very likely that all points of the object
     are in the area.
     */
-  static void AddLocationAreaToRegion(Region& region,
-                                      const Area& area,
-                                      const Area::Ring& ring)
+  void CityStreetIndexGenerator::AddLocationAreaToRegion(RegionRef& rootRegion,
+                                                         const Area& area,
+                                                         const Area::Ring& ring,
+                                                         const RegionIndex& regionIndex)
   {
     double minlon;
     double maxlon;
@@ -659,38 +628,46 @@ namespace osmscout {
         if (r->ring==Area::outerRingId) {
           r->GetBoundingBox(minlon,maxlon,minlat,maxlat);
 
-          AddAreaToRegion(region,
-                          area,
-                          r->nodes,
-                          ring.GetName(),
-                          minlon,
-                          minlat,
-                          maxlon,
-                          maxlat);
+          RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                        GeoCoord(minlat,minlon));
+
+          AddLocationAreaToRegion(region,
+                                  area,
+                                  r->nodes,
+                                  ring.GetName(),
+                                  minlon,
+                                  minlat,
+                                  maxlon,
+                                  maxlat);
         }
       }
     }
     else {
       ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
 
-      AddAreaToRegion(region,
-                      area,
-                      ring.nodes,
-                      ring.GetName(),
-                      minlon,
-                      minlat,
-                      maxlon,
-                      maxlat);
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(minlat,minlon));
+
+      AddLocationAreaToRegion(region,
+                              area,
+                              ring.nodes,
+                              ring.GetName(),
+                              minlon,
+                              minlat,
+                              maxlon,
+                              maxlat);
     }
   }
 
-  static bool IndexLocationAreas(const ImportParameter& parameter,
-                                 Progress& progress,
-                                 const OSMSCOUT_HASHSET<TypeId>& indexables,
-                                 Region& rootArea)
+  bool CityStreetIndexGenerator::IndexLocationAreas(const ImportParameter& parameter,
+                                                    Progress& progress,
+                                                    const OSMSCOUT_HASHSET<TypeId>& indexables,
+                                                    RegionRef& rootRegion,
+                                                    const RegionIndex& regionIndex)
   {
     FileScanner scanner;
     uint32_t    areaCount;
+    size_t      areasFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -725,12 +702,19 @@ namespace osmscout {
         if (ring->GetType()!=typeIgnore &&
             !ring->GetName().empty()) {
           if (indexables.find(ring->GetType())!=indexables.end()) {
-            AddLocationAreaToRegion(rootArea,area,*ring);
+            AddLocationAreaToRegion(rootRegion,
+                                    area,
+                                    *ring,
+                                    regionIndex);
+
+            areasFound++;
           }
         }
 
       }
     }
+
+    progress.Info(std::string("Found ")+NumberToString(areasFound)+" locations of type 'area'");
 
     return scanner.Close();
   }
@@ -748,24 +732,26 @@ namespace osmscout {
     if one point of an object is in a area it is very likely that all points of the object
     are in the area.
     */
-  static bool AddLocationWayToRegion(Region& region,
-                                     const Way& way,
-                                     double minlon,
-                                     double minlat,
-                                     double maxlon,
-                                     double maxlat)
+  bool CityStreetIndexGenerator::AddLocationWayToRegion(Region& region,
+                                                        const Way& way,
+                                                        double minlon,
+                                                        double minlat,
+                                                        double maxlon,
+                                                        double maxlat)
   {
-    for (std::list<Region>::iterator r=region.regions.begin();
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
+      RegionRef childRegion(*r);
+
       // Fast check, if the object is in the bounds of the area
-      if (!(maxlon<r->minlon) &&
-          !(minlon>r->maxlon) &&
-          !(maxlat<r->minlat) &&
-          !(minlat>r->maxlat)) {
+      if (!(maxlon<childRegion->minlon) &&
+          !(minlon>childRegion->maxlon) &&
+          !(maxlat<childRegion->minlat) &&
+          !(minlat>childRegion->maxlat)) {
         // Check if one point is in the area
-        for (size_t i=0; i<r->areas.size(); i++) {
-          bool match=IsAreaAtLeastPartlyInArea(way.nodes,r->areas[i]);
+        for (size_t i=0; i<childRegion->areas.size(); i++) {
+          bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
             bool completeMatch=AddLocationWayToRegion(*r,way,minlon,minlat,maxlon,maxlat);
@@ -792,13 +778,15 @@ namespace osmscout {
     return false;
   }
 
-  static bool IndexLocationWays(const ImportParameter& parameter,
-                                Progress& progress,
-                                const OSMSCOUT_HASHSET<TypeId>& indexables,
-                                Region& rootArea)
+  bool CityStreetIndexGenerator::IndexLocationWays(const ImportParameter& parameter,
+                                                   Progress& progress,
+                                                   const OSMSCOUT_HASHSET<TypeId>& indexables,
+                                                   RegionRef& rootRegion,
+                                                   const RegionIndex& regionIndex)
   {
     FileScanner scanner;
     uint32_t    wayCount;
+    size_t      waysFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
@@ -828,126 +816,64 @@ namespace osmscout {
         return false;
       }
 
-      if (indexables.find(way.GetType())!=indexables.end() &&
-          !way.GetName().empty()) {
-        double minlon;
-        double maxlon;
-        double minlat;
-        double maxlat;
-
-        way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
-
-        AddLocationWayToRegion(rootArea,way,minlon,minlat,maxlon,maxlat);
+      if (indexables.find(way.GetType())==indexables.end()) {
+        continue;
       }
+
+      if (way.GetName().empty()) {
+        continue;
+      }
+
+      double minlon;
+      double maxlon;
+      double minlat;
+      double maxlat;
+
+      way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(minlat,minlon));
+
+      AddLocationWayToRegion(region,
+                             way,
+                             minlon,
+                             minlat,
+                             maxlon,
+                             maxlat);
+
+      waysFound++;
     }
+
+    progress.Info(std::string("Found ")+NumberToString(waysFound)+" locations of type 'way'");
 
     return scanner.Close();
   }
 
-  static void AddLocationNodeToRegion(Region& region,
-                                      const Node& node,
-                                      const std::string& name,
-                                      FileOffset offset)
+  void CityStreetIndexGenerator::AddAddressAreaToRegion(Progress& progress,
+                                                        Region& region,
+                                                        const Area& area,
+                                                        const std::vector<GeoCoord>& nodes,
+                                                        const Area::Ring& ring,
+                                                        double minlon,
+                                                        double minlat,
+                                                        double maxlon,
+                                                        double maxlat,
+                                                        bool& added)
   {
-    for (std::list<Region>::iterator r=region.regions.begin();
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
-      for (size_t i=0; i<r->areas.size(); i++) {
-        if (IsCoordInArea(node,r->areas[i])) {
-          AddLocationNodeToRegion(*r,node,name,offset);
-          return;
-        }
-      }
-    }
+      RegionRef childRegion(*r);
 
-    region.locations[name].objects.push_back(ObjectFileRef(offset,refNode));
-  }
-
-  static bool IndexLocationNodes(const ImportParameter& parameter,
-                                 Progress& progress,
-                                 const OSMSCOUT_HASHSET<TypeId>& indexables,
-                                 Region& rootRegion)
-  {
-    FileScanner scanner;
-    uint32_t    nodeCount;
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "nodes.dat"),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open 'nodes.dat'");
-      return false;
-    }
-
-    if (!scanner.Read(nodeCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t n=1; n<=nodeCount; n++) {
-      progress.SetProgress(n,nodeCount);
-
-      Node       node;
-      FileOffset offset;
-
-      if (!scanner.GetPos(offset)) {
-        progress.Error(std::string("Cannot get file offset of data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(nodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
-
-      if (!node.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(nodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (indexables.find(node.GetType())!=indexables.end()) {
-        std::string name=node.GetName();
-
-        if (!name.empty()) {
-          AddLocationNodeToRegion(rootRegion,
-                                  node,
-                                  name,
-                                  offset);
-        }
-      }
-    }
-
-    return scanner.Close();
-  }
-
-
-  static void AddAddressAreaToRegion(Progress& progress,
-                                     Region& region,
-                                     const Area& area,
-                                     const std::vector<GeoCoord>& nodes,
-                                     const Area::Ring& ring,
-                                     double minlon,
-                                     double minlat,
-                                     double maxlon,
-                                     double maxlat,
-                                     bool& added)
-  {
-    for (std::list<Region>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
       // Fast check, if the object is in the bounds of the area
-      if (!(maxlon<r->minlon) &&
-          !(minlon>r->maxlon) &&
-          !(maxlat<r->minlat) &&
-          !(minlat>r->maxlat)) {
-        for (size_t i=0; i<r->areas.size(); i++) {
-          if (IsAreaCompletelyInArea(nodes,r->areas[i])) {
+      if (!(maxlon<childRegion->minlon) &&
+          !(minlon>childRegion->maxlon) &&
+          !(maxlat<childRegion->minlat) &&
+          !(minlat>childRegion->maxlat)) {
+        for (size_t i=0; i<childRegion->areas.size(); i++) {
+          if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
             AddAddressAreaToRegion(progress,
-                                   *r,
+                                   childRegion,
                                    area,
                                    nodes,
                                    ring,
@@ -985,24 +911,28 @@ namespace osmscout {
     added=true;
   }
 
-  static void AddAddressAreaToRegion(Progress& progress,
-                                     Region& region,
-                                     const Area& area,
-                                     const Area::Ring& ring,
-                                     bool& added)
+  void CityStreetIndexGenerator::AddAddressAreaToRegion(Progress& progress,
+                                                        RegionRef& rootRegion,
+                                                        const Area& area,
+                                                        const Area::Ring& ring,
+                                                        const RegionIndex& regionIndex,
+                                                        bool& added)
   {
-    double minlon;
-    double maxlon;
-    double minlat;
-    double maxlat;
-
     if (ring.ring==Area::masterRingId &&
         ring.nodes.empty()) {
       for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
           r!=area.rings.end();
           ++r) {
         if (r->ring==Area::outerRingId) {
+          double minlon;
+          double maxlon;
+          double minlat;
+          double maxlat;
+
           r->GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+          RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                        GeoCoord(minlat,minlon));
 
           AddAddressAreaToRegion(progress,
                                  region,
@@ -1018,7 +948,15 @@ namespace osmscout {
       }
     }
     else {
+      double minlon;
+      double maxlon;
+      double minlat;
+      double maxlat;
+
       ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(minlat,minlon));
 
       AddAddressAreaToRegion(progress,
                              region,
@@ -1033,14 +971,123 @@ namespace osmscout {
     }
   }
 
-  static bool IndexAddressAreas(const ImportParameter& parameter,
-                                Progress& progress,
-                                Region& rootRegion)
+  void CityStreetIndexGenerator::AddPOIAreaToRegion(Progress& progress,
+                                                    Region& region,
+                                                    const Area& area,
+                                                    const std::vector<GeoCoord>& nodes,
+                                                    const Area::Ring& ring,
+                                                    double minlon,
+                                                    double minlat,
+                                                    double maxlon,
+                                                    double maxlat,
+                                                    bool& added)
+  {
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
+      RegionRef childRegion(*r);
+
+      // Fast check, if the object is in the bounds of the area
+      if (!(maxlon<childRegion->minlon) &&
+          !(minlon>childRegion->maxlon) &&
+          !(maxlat<childRegion->minlat) &&
+          !(minlat>childRegion->maxlat)) {
+        for (size_t i=0; i<childRegion->areas.size(); i++) {
+          if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
+            AddPOIAreaToRegion(progress,
+                               childRegion,
+                               area,
+                               nodes,
+                               ring,
+                               minlon,minlat,maxlon,maxlat,
+                               added);
+            return;
+          }
+        }
+      }
+    }
+
+    /*
+    RegionAddress address;
+
+    address.houseNr=ring.GetAttributes().GetHouseNr();
+    address.object.Set(area.GetFileOffset(),refArea);
+
+    location->second.addresses.push_back(address);*/
+
+    added=true;
+  }
+
+  void CityStreetIndexGenerator::AddPOIAreaToRegion(Progress& progress,
+                                                    RegionRef& rootRegion,
+                                                    const Area& area,
+                                                    const Area::Ring& ring,
+                                                    const RegionIndex& regionIndex,
+                                                    bool& added)
+  {
+    if (ring.ring==Area::masterRingId &&
+        ring.nodes.empty()) {
+      for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
+          r!=area.rings.end();
+          ++r) {
+        if (r->ring==Area::outerRingId) {
+          double minlon;
+          double maxlon;
+          double minlat;
+          double maxlat;
+
+          r->GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+          RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                        GeoCoord(minlat,minlon));
+
+          AddPOIAreaToRegion(progress,
+                             region,
+                             area,
+                             r->nodes,
+                             ring,
+                             minlon,
+                             minlat,
+                             maxlon,
+                             maxlat,
+                             added);
+        }
+      }
+    }
+    else {
+      double minlon;
+      double maxlon;
+      double minlat;
+      double maxlat;
+
+      ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(minlat,minlon));
+
+      AddPOIAreaToRegion(progress,
+                         region,
+                         area,
+                         ring.nodes,
+                         ring,
+                         minlon,
+                         minlat,
+                         maxlon,
+                         maxlat,
+                         added);
+    }
+  }
+
+  bool CityStreetIndexGenerator::IndexAddressAreas(const ImportParameter& parameter,
+                                                   Progress& progress,
+                                                   RegionRef& rootRegion,
+                                                   const OSMSCOUT_HASHSET<TypeId>& poiTypes,
+                                                   const RegionIndex& regionIndex)
   {
     FileScanner scanner;
     uint32_t    areaCount;
-    size_t      areasFound=0;
-    size_t      areasInserted=0;
+    size_t      addressFound=0;
+    size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -1072,54 +1119,86 @@ namespace osmscout {
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
           ring!=area.rings.end();
           ++ring) {
-        if (ring->GetType()!=typeIgnore &&
-            !ring->GetAttributes().GetStreet().empty() &&
-            !ring->GetAttributes().GetHouseNr().empty()) {
-          bool added=false;
+        bool isAddress=ring->GetType()!=typeIgnore &&
+                       !ring->GetAttributes().GetStreet().empty() &&
+                       !ring->GetAttributes().GetHouseNr().empty();
+        bool isPOI=ring->GetType()!=typeIgnore &&
+                   !ring->GetAttributes().GetName().empty() &&
+                   poiTypes.find(ring->GetType())!=poiTypes.end();
 
-          areasFound++;
+        if (!isAddress && !isPOI) {
+          continue;
+        }
+
+        if (isAddress) {
+          bool added=false;
 
           AddAddressAreaToRegion(progress,
                                  rootRegion,
                                  area,
                                  *ring,
+                                 regionIndex,
                                  added);
 
           if (added) {
-            areasInserted++;
+            addressFound++;
+          }
+        }
+
+        if (isPOI) {
+          bool added=false;
+
+          AddPOIAreaToRegion(progress,
+                             rootRegion,
+                             area,
+                             *ring,
+                             regionIndex,
+                             added);
+
+          if (added) {
+            poiFound++;
           }
         }
       }
     }
 
-    progress.Info(NumberToString(areasFound)+" address areas found, "+NumberToString(areasInserted)+" inserted");
+    progress.Info(NumberToString(areaCount)+" areas analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
 
     return scanner.Close();
   }
 
-  static bool AddAddressWayToRegion(Progress& progress,
-                                    Region& region,
-                                    const Way& way,
-                                    double minlon,
-                                    double minlat,
-                                    double maxlon,
-                                    double maxlat,
-                                    bool& added)
+  bool CityStreetIndexGenerator::AddAddressWayToRegion(Progress& progress,
+                                                       Region& region,
+                                                       const Way& way,
+                                                       double minlon,
+                                                       double minlat,
+                                                       double maxlon,
+                                                       double maxlat,
+                                                       bool& added)
   {
-    for (std::list<Region>::iterator r=region.regions.begin();
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
+      RegionRef childRegion(*r);
+
       // Fast check, if the object is in the bounds of the area
-      if (!(maxlon<r->minlon) &&
-          !(minlon>r->maxlon) &&
-          !(maxlat<r->minlat) &&
-          !(minlat>r->maxlat)) {
+      if (!(maxlon<childRegion->minlon) &&
+          !(minlon>childRegion->maxlon) &&
+          !(maxlat<childRegion->minlat) &&
+          !(minlat>childRegion->maxlat)) {
         // Check if one point is in the area
-        for (size_t i=0; i<r->areas.size(); i++) {
-          bool match=IsAreaAtLeastPartlyInArea(way.nodes,r->areas[i]);
+        for (size_t i=0; i<childRegion->areas.size(); i++) {
+          bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationWayToRegion(*r,way,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddAddressWayToRegion(progress,
+                                                     *r,
+                                                     way,
+                                                     minlon,
+                                                     minlat,
+                                                     maxlon,
+                                                     maxlat,
+                                                     added);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -1163,14 +1242,76 @@ namespace osmscout {
     return false;
   }
 
-  static bool IndexAddressWays(const ImportParameter& parameter,
-                               Progress& progress,
-                               Region& rootRegion)
+  bool CityStreetIndexGenerator::AddPOIWayToRegion(Progress& progress,
+                                                   Region& region,
+                                                   const Way& way,
+                                                   double minlon,
+                                                   double minlat,
+                                                   double maxlon,
+                                                   double maxlat,
+                                                   bool& added)
+  {
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
+      RegionRef childRegion(*r);
+
+      // Fast check, if the object is in the bounds of the area
+      if (!(maxlon<childRegion->minlon) &&
+          !(minlon>childRegion->maxlon) &&
+          !(maxlat<childRegion->minlat) &&
+          !(minlat>childRegion->maxlat)) {
+        // Check if one point is in the area
+        for (size_t i=0; i<childRegion->areas.size(); i++) {
+          bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
+
+          if (match) {
+            bool completeMatch=AddAddressWayToRegion(progress,
+                                                     *r,
+                                                     way,
+                                                     minlon,
+                                                     minlat,
+                                                     maxlon,
+                                                     maxlat,
+                                                     added);
+
+            if (completeMatch) {
+              // We are done, the object is completely enclosed by one of our sub areas
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    RegionPOI poi;
+
+    poi.name=way.GetName();
+    poi.object.Set(way.GetFileOffset(),refWay);
+
+    region.pois.push_back(poi);
+
+    added=true;
+
+    for (size_t i=0; i<region.areas.size(); i++) {
+      if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool CityStreetIndexGenerator::IndexAddressWays(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  RegionRef& rootRegion,
+                                                  const OSMSCOUT_HASHSET<TypeId>& poiTypes,
+                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
     uint32_t    wayCount;
-    size_t      waysFound=0;
-    size_t      waysInserted=0;
+    size_t      addressFound=0;
+    size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
@@ -1200,20 +1341,30 @@ namespace osmscout {
         return false;
       }
 
-      if (!way.GetStreet().empty() &&
-          !way.GetHouseNr().empty()) {
-        double minlon;
-        double maxlon;
-        double minlat;
-        double maxlat;
-        bool   added=false;
+      bool isAddress=!way.GetStreet().empty() &&
+                     !way.GetHouseNr().empty();
+      bool isPOI=!way.GetName().empty() &&
+                 poiTypes.find(way.GetType())!=poiTypes.end();
 
-        waysFound++;
+      if (!isAddress && !isPOI) {
+        continue;
+      }
 
-        way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+      double minlon;
+      double maxlon;
+      double minlat;
+      double maxlat;
+
+      way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(minlat,minlon));
+
+      if (isAddress) {
+        bool added=false;
 
         AddAddressWayToRegion(progress,
-                              rootRegion,
+                              region,
                               way,
                               minlon,
                               minlat,
@@ -1222,36 +1373,38 @@ namespace osmscout {
                               added);
 
       if (added) {
-          waysInserted++;
+        addressFound++;
+        }
+      }
+
+      if (isPOI) {
+        bool added=false;
+
+        AddPOIWayToRegion(progress,
+                          region,
+                          way,
+                          minlon,
+                          minlat,
+                          maxlon,
+                          maxlat,
+                          added);
+
+      if (added) {
+          poiFound++;
         }
       }
     }
 
-    progress.Info(NumberToString(waysFound)+" address ways found, "+NumberToString(waysInserted)+" inserted");
+    progress.Info(NumberToString(wayCount)+" ways analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
 
     return scanner.Close();
   }
 
-  static void AddAddressNodeToRegion(Progress& progress,
-                                     Region& region,
-                                     const Node& node,
-                                     bool& added)
+  void CityStreetIndexGenerator::AddAddressNodeToRegion(Progress& progress,
+                                                        Region& region,
+                                                        const Node& node,
+                                                        bool& added)
   {
-    for (std::list<Region>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      for (size_t i=0; i<r->areas.size(); i++) {
-        if (IsCoordInArea(node,r->areas[i])) {
-          AddAddressNodeToRegion(progress,
-                                 *r,
-                                 node,
-                                 added);
-
-          return;
-        }
-      }
-    }
-
     std::map<std::string,RegionLocation>::iterator location=region.locations.find(node.GetStreet());
 
     if (location==region.locations.end()) {
@@ -1277,14 +1430,31 @@ namespace osmscout {
     added=true;
   }
 
-  static bool IndexAddressNodes(const ImportParameter& parameter,
-                                Progress& progress,
-                                Region& rootRegion)
+  void CityStreetIndexGenerator::AddPOINodeToRegion(Progress& progress,
+                                                    Region& region,
+                                                    const Node& node,
+                                                    bool& added)
+  {
+    RegionPOI poi;
+
+    poi.name=node.GetName();
+    poi.object.Set(node.GetFileOffset(),refNode);
+
+    region.pois.push_back(poi);
+
+    added=true;
+  }
+
+  bool CityStreetIndexGenerator::IndexAddressNodes(const ImportParameter& parameter,
+                                                   Progress& progress,
+                                                   RegionRef& rootRegion,
+                                                   const OSMSCOUT_HASHSET<TypeId>& poiTypes,
+                                                   const RegionIndex& regionIndex)
   {
     FileScanner scanner;
-    size_t      nodesFound=0;
-    size_t      nodesInserted=0;
     uint32_t    nodeCount;
+    size_t      addressFound=0;
+    size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "nodes.dat"),
@@ -1324,57 +1494,56 @@ namespace osmscout {
         return false;
       }
 
-      if (!node.GetStreet().empty() &&
-          !node.GetHouseNr().empty()) {
-        bool added=false;
+      bool isAddress=!node.GetStreet().empty() &&
+                     !node.GetHouseNr().empty();
+      bool isPOI=!node.GetName().empty() &&
+                 poiTypes.find(node.GetType())!=poiTypes.end();
 
-        nodesFound++;
+      if (!isAddress && !isPOI) {
+        continue;
+      }
+
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(node.GetLat(),
+                                                             node.GetLon()));
+
+      if (!region.Valid()) {
+        continue;
+      }
+
+      if (isAddress) {
+        bool added=false;
 
         AddAddressNodeToRegion(progress,
                                rootRegion,
                                node,
                                added);
         if (added) {
-          nodesInserted++;
+          addressFound++;
+        }
+      }
+
+      if (isPOI) {
+        bool added=false;
+
+        AddPOINodeToRegion(progress,
+                           rootRegion,
+                           node,
+                           added);
+        if (added) {
+          poiFound++;
         }
       }
     }
 
-    progress.Info(NumberToString(nodesFound)+" address nodes found, "+NumberToString(nodesInserted)+" inserted");
+    progress.Info(NumberToString(nodeCount)+" nodes analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
 
     return scanner.Close();
   }
 
-  static unsigned long GetRegionTreeDepth(const Region& area)
-  {
-    unsigned long depth=0;
-
-    for (std::list<Region>::const_iterator a=area.regions.begin();
-         a!=area.regions.end();
-         a++) {
-      depth=std::max(depth,GetRegionTreeDepth(*a));
-    }
-
-    return depth+1;
-  }
-
-
-  static void SortInRegion(Region& area,
-                           std::vector<std::list<Region*> >& areaTree,
-                           unsigned long level)
-  {
-    areaTree[level].push_back(&area);
-
-    for (std::list<Region>::iterator a=area.regions.begin();
-         a!=area.regions.end();
-         a++) {
-      SortInRegion(*a,areaTree,level+1);
-    }
-  }
-
-  static bool WriteRegion(FileWriter& writer,
-                          Region& region,
-                          FileOffset parentOffset)
+  bool CityStreetIndexGenerator::WriteRegion(FileWriter& writer,
+                                             Region& region,
+                                             FileOffset parentOffset)
   {
     writer.GetPos(region.offset);
 
@@ -1382,10 +1551,12 @@ namespace osmscout {
     writer.WriteNumber(parentOffset);
 
     writer.WriteNumber((uint32_t)region.regions.size());
-    for (std::list<Region>::iterator r=region.regions.begin();
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
-      if (!WriteRegion(writer,*r,region.offset)) {
+      RegionRef childRegion(*r);
+
+      if (!WriteRegion(writer,*childRegion,region.offset)) {
         return false;
       }
     }
@@ -1415,13 +1586,17 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  static bool WriteRegions(FileWriter& writer,
-                           Region& root)
+  bool CityStreetIndexGenerator::WriteRegions(FileWriter& writer,
+                                              Region& root)
   {
-    for (std::list<Region>::iterator r=root.regions.begin();
+    for (std::list<RegionRef>::iterator r=root.regions.begin();
          r!=root.regions.end();
          ++r) {
-      if (!WriteRegion(writer,*r,0)) {
+      RegionRef childRegion(*r);
+
+      if (!WriteRegion(writer,
+                       *childRegion,
+                       0)) {
         return false;
       }
     }
@@ -1429,10 +1604,10 @@ namespace osmscout {
     return true;
   }
 
-  static void GetRegionRefs(const Region& region,
-                            std::map<std::string,std::list<RegionRef> >& locationRefs)
+  void CityStreetIndexGenerator::GetRegionRefs(const Region& region,
+                                               std::map<std::string,std::list<RegionReference> >& locationRefs)
   {
-    RegionRef regionRef;
+    RegionReference regionRef;
 
     regionRef.reference=region.reference;
     regionRef.offset=region.offset;
@@ -1448,19 +1623,21 @@ namespace osmscout {
       locationRefs[alias->name].push_back(regionRef);
     }
 
-    for (std::list<Region>::const_iterator r=region.regions.begin();
+    for (std::list<RegionRef>::const_iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
-      GetRegionRefs(*r,locationRefs);
+      RegionRef childRegion(*r);
+
+      GetRegionRefs(*childRegion,locationRefs);
     }
   }
 
-  static bool WriteRegionRefs(FileWriter& writer,
-                              std::map<std::string,std::list<RegionRef> >& locationRefs)
+  bool CityStreetIndexGenerator::WriteRegionRefs(FileWriter& writer,
+                                                 std::map<std::string,std::list<RegionReference> >& locationRefs)
   {
     writer.WriteNumber((uint32_t)locationRefs.size());
 
-    for (std::map<std::string,std::list<RegionRef> >::iterator n=locationRefs.begin();
+    for (std::map<std::string,std::list<RegionReference> >::iterator n=locationRefs.begin();
          n!=locationRefs.end();
          ++n) {
       if (!writer.Write(n->first)) {
@@ -1475,7 +1652,7 @@ namespace osmscout {
 
       FileOffset lastOffset=0;
 
-      for (std::list<RegionRef>::const_iterator o=n->second.begin();
+      for (std::list<RegionReference>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
         if (!writer.Write((uint8_t)o->reference.GetType())) {
@@ -1506,55 +1683,29 @@ namespace osmscout {
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
-    OSMSCOUT_HASHSET<TypeId>         cityIds;
-    OSMSCOUT_HASHSET<TypeId>         indexables;
-    TypeId                           boundaryId;
-    TypeId                           typeId;
-    Region                           rootRegion;
-    std::list<CityNode>              cityNodes;
-    std::list<CityArea>              cityAreas;
-    std::list<Boundary>              boundaryAreas;
-    std::vector<std::list<Region*> > regionTree;
+    OSMSCOUT_HASHSET<TypeId>           regionTypes;
+    OSMSCOUT_HASHSET<TypeId>           poiTypes;
+    OSMSCOUT_HASHSET<TypeId>           indexables;
+    TypeId                             boundaryId;
+    RegionRef                          rootRegion;
+    std::list<Boundary>                boundaryAreas;
+    std::vector<std::list<RegionRef> > regionTree;
+    RegionIndex                        regionIndex;
+
 
     progress.SetAction("Setup");
 
-    rootRegion.name="<root>";
-    rootRegion.offset=0;
-
-    // We ignore (besides strange ones ;-)):
-    // continent
-    // country
-    // county
-    // island
-    // quarter
-    // region
-    // square
-    // state
-
-    typeId=typeConfig.GetNodeTypeId("place_city");
-    assert(typeId!=typeIgnore);
-    cityIds.insert(typeId);
-
-    typeId=typeConfig.GetNodeTypeId("place_town");
-    assert(typeId!=typeIgnore);
-    cityIds.insert(typeId);
-
-    typeId=typeConfig.GetNodeTypeId("place_village");
-    assert(typeId!=typeIgnore);
-    cityIds.insert(typeId);
-
-    typeId=typeConfig.GetNodeTypeId("place_hamlet");
-    assert(typeId!=typeIgnore);
-    cityIds.insert(typeId);
-
-    typeId=typeConfig.GetNodeTypeId("place_suburb");
-    assert(typeId!=typeIgnore);
-    cityIds.insert(typeId);
+    rootRegion=new Region();
+    rootRegion->name="<root>";
+    rootRegion->offset=0;
 
     boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
 
     typeConfig.GetIndexables(indexables);
+
+    typeConfig.GetIndexAsRegionTypes(regionTypes);
+    typeConfig.GetIndexAsPOITypes(poiTypes);
 
     //
     // Getting all areas of type 'administrative boundary'.
@@ -1576,7 +1727,7 @@ namespace osmscout {
       progress.SetAction("Sorting in administrative boundaries of level "+NumberToString(level));
 
       SortInBoundaries(progress,
-                       rootRegion,
+                       *rootRegion,
                        boundaryAreas,
                        level);
     }
@@ -1587,62 +1738,54 @@ namespace osmscout {
     // Getting all areas of type place=*.
     //
 
-    progress.SetAction("Scanning for cities of type 'area'");
+    progress.SetAction("Indexing cities of type 'area'");
 
-    if (!GetCityAreas(parameter,
-                      typeConfig,
-                      cityIds,
-                      cityAreas,
-                      progress)) {
+    if (!IndexRegionAreas(parameter,
+                          progress,
+                          typeConfig,
+                          regionTypes,
+                          *rootRegion,
+                          regionIndex)) {
       return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
-
-    progress.SetAction("Sorting in city areas");
-
-    SortInCityAreas(progress,
-                    rootRegion,
-                    cityAreas);
-
-    cityAreas.clear();
-
-    //
-    // Getting all nodes of type place=*. We later need an area for these cities.
-    //
-
-    progress.SetAction("Scanning for cities of type 'node'");
-
-    if (!GetCityNodes(parameter,
-                      typeConfig,
-                      cityIds,
-                      cityNodes,
-                      progress)) {
-      return false;
-    }
-
-    progress.Info(std::string("Found ")+NumberToString(cityNodes.size())+" cities of type 'node'");
-
-    progress.SetAction("Sort in city nodes");
-
-    SortInCityNodes(progress,
-                     rootRegion,
-                     cityNodes);
-
-    cityNodes.clear();
-
-    progress.SetAction("Calculating bounds of areas");
+    progress.SetAction("Calculating region tree depth");
 
     regionTree.resize(GetRegionTreeDepth(rootRegion));
 
     progress.Info(std::string("Area tree depth: ")+NumberToString(regionTree.size()));
 
-    progress.SetAction("Sorting areas in levels");
+    progress.SetAction("Sorting regions by levels");
 
-    SortInRegion(rootRegion,regionTree,0);
+    SortInRegion(rootRegion,
+                 regionTree,
+                 0);
 
     for (size_t i=0; i<regionTree.size(); i++) {
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(regionTree[i].size()));
+    }
+
+    progress.SetAction("Index regions");
+
+    regionIndex.cellWidth=360.0/pow(2.0,16);
+    regionIndex.cellHeight=180.0/pow(2.0,16);
+
+    IndexRegions(regionTree,
+                 regionIndex);
+
+    //
+    // Getting all nodes of type place=*. We later need an area for these cities.
+    //
+
+    progress.SetAction("Indexing cities of type 'node' as area aliases");
+
+    if (!IndexRegionNodes(parameter,
+                          progress,
+                          typeConfig,
+                          regionTypes,
+                          rootRegion,
+                          regionIndex)) {
+      return false;
     }
 
     progress.SetAction("Index location areas");
@@ -1650,7 +1793,8 @@ namespace osmscout {
     if (!IndexLocationAreas(parameter,
                             progress,
                             indexables,
-                            rootRegion)) {
+                            rootRegion,
+                            regionIndex)) {
       return false;
     }
 
@@ -1659,27 +1803,20 @@ namespace osmscout {
     if (!IndexLocationWays(parameter,
                            progress,
                            indexables,
-                           rootRegion)) {
-      return false;
-    }
-
-    progress.SetAction("Index location nodes");
-
-    if (!IndexLocationNodes(parameter,
-                            progress,
-                            indexables,
-                            rootRegion)) {
+                           rootRegion,
+                           regionIndex)) {
       return false;
     }
 
     for (size_t i=0; i<regionTree.size(); i++) {
       unsigned long count=0;
 
-      for (std::list<Region*>::const_iterator iter=regionTree[i].begin();
+      for (std::list<RegionRef>::const_iterator iter=regionTree[i].begin();
            iter!=regionTree[i].end();
            ++iter) {
         count+=(*iter)->locations.size();
       }
+
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
     }
 
@@ -1687,7 +1824,9 @@ namespace osmscout {
 
     if (!IndexAddressAreas(parameter,
                            progress,
-                           rootRegion)) {
+                           rootRegion,
+                           poiTypes,
+                           regionIndex)) {
       return false;
     }
 
@@ -1695,7 +1834,9 @@ namespace osmscout {
 
     if (!IndexAddressWays(parameter,
                           progress,
-                          rootRegion)) {
+                          rootRegion,
+                          poiTypes,
+                          regionIndex)) {
       return false;
     }
 
@@ -1703,14 +1844,16 @@ namespace osmscout {
 
     if (!IndexAddressNodes(parameter,
                            progress,
-                           rootRegion)) {
+                           rootRegion,
+                           poiTypes,
+                           regionIndex)) {
       return false;
     }
 
     progress.SetAction("Dumping areas");
 
     DumpRegionTree(progress,
-                   rootRegion,
+                   *rootRegion,
                    AppendFileToDir(parameter.GetDestinationDirectory(),
                                    "citystreet.txt"));
 
@@ -1728,7 +1871,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!WriteRegions(writer,rootRegion)) {
+    if (!WriteRegions(writer,
+                      *rootRegion)) {
       return false;
     }
 
@@ -1740,11 +1884,12 @@ namespace osmscout {
     // Generate file with all area names, each referencing the areas where it is contained
     //
 
-    std::map<std::string,std::list<RegionRef> > locationRefs;
+    std::map<std::string,std::list<RegionReference> > locationRefs;
 
     progress.SetAction(std::string("Write '")+CityStreetIndex::FILENAME_NAMEREGION_IDX+"'");
 
-    GetRegionRefs(rootRegion,locationRefs);
+    GetRegionRefs(*rootRegion,
+                  locationRefs);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      CityStreetIndex::FILENAME_NAMEREGION_IDX))) {
@@ -1752,7 +1897,8 @@ namespace osmscout {
       return false;
     }
 
-    WriteRegionRefs(writer,locationRefs);
+    WriteRegionRefs(writer,
+                    locationRefs);
 
     return !writer.HasError() && writer.Close();
   }

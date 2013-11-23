@@ -166,6 +166,8 @@ namespace osmscout {
       bool        canRouteBicycle;
       bool        canRouteCar;
       bool        canBeIndexed;
+      bool        indexAsRegion;
+      bool        indexAsPOI;
       bool        consumeChildren;
       bool        optimizeLowZoom;
       bool        multipolygon;
@@ -183,6 +185,8 @@ namespace osmscout {
             scanner.Read(canRouteBicycle) &&
             scanner.Read(canRouteCar) &&
             scanner.Read(canBeIndexed) &&
+            scanner.Read(indexAsRegion) &&
+            scanner.Read(indexAsPOI) &&
             scanner.Read(consumeChildren) &&
             scanner.Read(optimizeLowZoom) &&
             scanner.Read(multipolygon) &&
@@ -208,6 +212,8 @@ namespace osmscout {
       typeInfo.CanRouteBicycle(canRouteBicycle);
       typeInfo.CanRouteCar(canRouteCar);
       typeInfo.CanBeIndexed(canBeIndexed);
+      typeInfo.SetIndexAsRegion(indexAsRegion);
+      typeInfo.SetIndexAsPOI(indexAsPOI);
       typeInfo.SetConsumeChildren(consumeChildren);
       typeInfo.SetIgnore(optimizeLowZoom);
       typeInfo.SetIgnore(multipolygon);

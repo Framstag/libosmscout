@@ -181,6 +181,8 @@ namespace osmscout {
     bool         canRouteBicycle;
     bool         canRouteCar;
     bool         canBeIndexed;
+    bool         indexAsRegion;
+    bool         indexAsPOI;
     bool         consumeChildren;
     bool         optimizeLowZoom;
     bool         multipolygon;
@@ -333,6 +335,30 @@ namespace osmscout {
     inline bool CanBeIndexed() const
     {
       return canBeIndexed;
+    }
+
+    inline TypeInfo& SetIndexAsRegion(bool indexAsRegion)
+    {
+      this->indexAsRegion=indexAsRegion;
+
+      return *this;
+    }
+
+    inline bool GetIndexAsRegion() const
+    {
+      return indexAsRegion;
+    }
+
+    inline TypeInfo& SetIndexAsPOI(bool indexAsPOI)
+    {
+      this->indexAsPOI=indexAsPOI;
+
+      return *this;
+    }
+
+    inline bool GetIndexAsPOI() const
+    {
+      return indexAsPOI;
     }
 
     inline TypeInfo& SetConsumeChildren(bool consumeChildren)
@@ -523,6 +549,8 @@ namespace osmscout {
 
     void GetRoutables(std::set<TypeId>& types) const;
     void GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const;
+    void GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
+    void GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const;
 
     void RegisterSurfaceToGradeMapping(const std::string& surface,
                                        size_t grade);
