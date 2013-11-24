@@ -110,7 +110,12 @@ int main(int argc, char* argv[])
     OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::WayRef>  waysMap;
 
     if (!location.empty()) {
-      if (!database.GetMatchingLocations(*area,location,locations,RESULT_SET_MAX_SIZE,limitReached,false)) {
+      if (!database.GetMatchingLocations(*area,
+                                         location,
+                                         locations,
+                                         RESULT_SET_MAX_SIZE,
+                                         limitReached,
+                                         false)) {
         std::cerr << "Error while accessing database, quitting..." << std::endl;
         database.Close();
         return 1;

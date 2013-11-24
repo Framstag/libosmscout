@@ -44,18 +44,7 @@ namespace osmscout {
   {
   private:
     /**
-     * A region is an administrative area that has a name.
-     * Regions are structured in a tree. A region could be a country, a county or a city.
-     */
-    struct Region
-    {
-      ObjectFileRef reference;       //! Reference to the object defining the region
-      FileOffset    offset;          //! Offset into the region datafile
-      std::string   name;            //! name of the region
-    };
-
-    /**
-     * A location is an object within an area. The location has been index by its name.
+     * A location is an object within an area. The location has been indexed by its name.
      */
     struct Loc
     {
@@ -74,9 +63,6 @@ namespace osmscout {
       size_t                    limit;
       bool                      limitReached;
 
-      std::string               nameHash;
-      std::string               (*hashFunction)(std::string);
-
       std::list<Location>       locations;
 
       FileScanner&              scanner;
@@ -89,25 +75,83 @@ namespace osmscout {
 
   public:
     static const char* const FILENAME_REGION_DAT;
-    static const char* const FILENAME_NAMEREGION_IDX;
+
+  public:
+    struct RegionAlias
+    {
+      std::string name;
+      FileOffset  offset;
+    };
+
+    /**
+     * A region is an administrative area that has a name.
+     * Regions are structured in a tree. A region could be a country, a county or a city.
+     */
+    struct RegionEntry
+    {
+      FileOffset               indexOffset;       //! Offset of this entry
+      FileOffset               dataOffset;        //! Offset of the data
+      FileOffset               parentIndexOffset; //! Offset of the parent region index entry
+      std::string              name;              //! name of the region
+      ObjectFileRef            reference;         //! The object that represents this region
+      std::vector<RegionAlias> aliases;           //! The list of alias for this region
+    };
+
+    class RegionVisitor
+    {
+    public:
+      virtual ~RegionVisitor();
+
+      virtual void Initialize();
+      virtual bool Visit(const RegionEntry& region) = 0;
+    };
+
+    class RegionMatchVisitor : public RegionVisitor
+    {
+    private:
+      std::string pattern;
+      size_t      limit;
+
+    public:
+      std::list<AdminRegion> matches;
+      std::list<AdminRegion> candidates;
+      bool                   limitReached;
+
+    private:
+      void Match(const std::string& name,
+                 bool& match,
+                 bool& candidate) const;
+
+    public:
+      RegionMatchVisitor(const std::string& pattern,
+                         size_t limit);
+
+      virtual void Initialize();
+      virtual bool Visit(const RegionEntry& region);
+    };
 
   private:
     std::string path;
-    std::string (*hashFunction)(std::string);
 
   private:
-    bool LoadRegion(FileScanner& scanner,
-                    LocationVisitor& visitor) const;
-    bool LoadRegion(FileScanner& scanner,
-                    FileOffset offset,
-                    LocationVisitor& visitor) const;
+    bool LoadRegionEntry(FileScanner& scanner,
+                         RegionEntry& region) const;
+
+    bool VisitRegionEntries(FileScanner& scanner,
+                            RegionVisitor& visitor) const;
+
+    bool VisitRegionDataEntries(FileScanner& scanner,
+                                LocationVisitor& visitor) const;
+
+    bool LoadRegionDataEntry(FileScanner& scanner,
+                             const RegionEntry& region,
+                             LocationVisitor& visitor) const;
 
   public:
     CityStreetIndex();
     virtual ~CityStreetIndex();
 
-    bool Load(const std::string& path,
-              std::string (*hashFunction) (std::string) = NULL);
+    bool Load(const std::string& path);
 
     /**
      * Get a list of AdminRegions that match the given name.

@@ -77,23 +77,24 @@ namespace osmscout {
       */
     struct Region : public Referencable
     {
-      FileOffset                          offset;    //! Offset into the index file
+      FileOffset                           indexOffset; //! Offset into the index file
+      FileOffset                           dataOffset;  //! Offset into the index file
 
-      ObjectFileRef                       reference; //! Reference to the object this area is based on
-      std::string                         name;      //! The name of this area
+      ObjectFileRef                        reference;   //! Reference to the object this area is based on
+      std::string                          name;        //! The name of this area
 
-      std::list<RegionAlias>              aliases;   //! Location that are represented by this region
-      std::vector<std::vector<GeoCoord> > areas;     //! the geometric area of this region
+      std::list<RegionAlias>               aliases;     //! Location that are represented by this region
+      std::vector<std::vector<GeoCoord> >  areas;       //! the geometric area of this region
 
-      double                              minlon;
-      double                              minlat;
-      double                              maxlon;
-      double                              maxlat;
+      double                               minlon;
+      double                               minlat;
+      double                               maxlon;
+      double                               maxlat;
 
-      std::list<RegionPOI>                pois;      //! A list of POIs in this region
-      std::map<std::string,RegionLocation> locations; //! list of indexed objects in this region
+      std::list<RegionPOI>                 pois;        //! A list of POIs in this region
+      std::map<std::string,RegionLocation> locations;   //! list of indexed objects in this region
 
-      std::list<RegionRef>                regions;   //! A list of sub regions
+      std::list<RegionRef>                 regions;     //! A list of sub regions
 
       void CalculateMinMax()
       {
@@ -322,18 +323,19 @@ namespace osmscout {
                            const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                            const RegionIndex& regionIndex);
 
-    bool WriteRegion(FileWriter& writer,
-                     Region& region,
-                     FileOffset parentOffset);
+    bool WriteRegionIndexEntry(FileWriter& writer,
+                               const Region& parentRegion,
+                               Region& region);
 
-    bool WriteRegions(FileWriter& writer,
-                      Region& root);
+    bool WriteRegionIndex(FileWriter& writer,
+                          Region& root);
 
-    void GetRegionRefs(const Region& region,
-                       std::map<std::string,std::list<RegionReference> >& locationRefs);
+    bool WriteRegionDataEntry(FileWriter& writer,
+                              const Region& parentRegion,
+                              Region& region);
 
-    bool WriteRegionRefs(FileWriter& writer,
-                         std::map<std::string,std::list<RegionReference> >& locationRefs);
+    bool WriteRegionData(FileWriter& writer,
+                         Region& root);
 
   public:
     std::string GetDescription() const;

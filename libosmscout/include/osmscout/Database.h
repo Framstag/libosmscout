@@ -209,8 +209,7 @@ namespace osmscout {
     Database(const DatabaseParameter& parameter);
     virtual ~Database();
 
-    bool Open(const std::string& path,
-              std::string (*hashFunction) (std::string) = NULL);
+    bool Open(const std::string& path);
     bool IsOpen() const;
     void Close();
 

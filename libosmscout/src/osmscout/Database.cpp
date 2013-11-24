@@ -217,8 +217,7 @@ namespace osmscout {
     delete typeConfig;
   }
 
-  bool Database::Open(const std::string& path,
-                      std::string (*hashFunction) (std::string))
+  bool Database::Open(const std::string& path)
   {
     assert(!path.empty());
 
@@ -330,7 +329,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!cityStreetIndex.Load(path, hashFunction)) {
+    if (!cityStreetIndex.Load(path)) {
       std::cerr << "Cannot load city street index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;

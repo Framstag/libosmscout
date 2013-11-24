@@ -32,6 +32,7 @@ namespace osmscout {
   class OSMSCOUT_API Location
   {
   public:
+    FileOffset               regionOffset;
     std::string              name;
     std::list<std::string>   path;
     std::list<ObjectFileRef> references;

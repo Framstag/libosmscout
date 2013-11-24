@@ -28,14 +28,104 @@
 
 namespace osmscout {
 
-  const char* const CityStreetIndex::FILENAME_REGION_DAT     = "region.dat";
-  const char* const CityStreetIndex::FILENAME_NAMEREGION_IDX = "nameregion.idx";
+  const char* const CityStreetIndex::FILENAME_REGION_DAT = "region.dat";
+
+  CityStreetIndex::RegionVisitor::~RegionVisitor()
+  {
+    // no code
+  }
+
+  void CityStreetIndex::RegionVisitor::Initialize()
+  {
+    // no code
+  }
+
+  CityStreetIndex::RegionMatchVisitor::RegionMatchVisitor(const std::string& pattern,
+                                                          size_t limit)
+  : pattern(pattern),
+    limit(limit),
+    limitReached(false)
+  {
+    // no code
+  }
+
+  void CityStreetIndex::RegionMatchVisitor::Initialize()
+  {
+    limitReached=false;
+    matches.clear();
+    candidates.clear();
+  }
+
+  void CityStreetIndex::RegionMatchVisitor::Match(const std::string& name,
+                                                  bool& match,
+                                                  bool& candidate) const
+  {
+    std::string::size_type matchPosition;
+
+    matchPosition=name.find(pattern);
+
+    match=matchPosition==0 && name.length()==pattern.length();
+    candidate=matchPosition!=std::string::npos;
+  }
+
+  bool CityStreetIndex::RegionMatchVisitor::Visit(const RegionEntry& region)
+  {
+    bool                   match;
+    bool                   candidate;
+
+    Match(region.name,
+          match,
+          candidate);
+
+    if (match || candidate) {
+      AdminRegion adminRegion;
+
+      adminRegion.indexOffset=region.indexOffset;
+      adminRegion.dataOffset=region.dataOffset;
+      adminRegion.parentIndexOffset=region.parentIndexOffset;
+      adminRegion.name=region.name;
+      adminRegion.reference=region.reference;
+
+      if (match) {
+        matches.push_back(adminRegion);
+      }
+      else {
+        candidates.push_back(adminRegion);
+      }
+    }
+
+    for (size_t i=0; i<region.aliases.size(); i++) {
+      Match(region.aliases[i].name,
+            match,
+            candidate);
+
+      if (match || candidate) {
+        AdminRegion adminRegion;
+
+        adminRegion.indexOffset=region.indexOffset;
+        adminRegion.dataOffset=region.dataOffset;
+        adminRegion.parentIndexOffset=region.parentIndexOffset;
+        adminRegion.name=region.aliases[i].name;
+        adminRegion.reference=region.reference;
+
+        if (match) {
+          matches.push_back(adminRegion);
+        }
+        else {
+          candidates.push_back(adminRegion);
+        }
+      }
+    }
+
+    limitReached=matches.size()+candidates.size()>=limit;
+
+    return !limitReached;
+  }
 
   CityStreetIndex::LocationVisitor::LocationVisitor(FileScanner& scanner)
   : startWith(false),
     limit(50),
     limitReached(false),
-    hashFunction(NULL),
     scanner(scanner)
   {
     // no code
@@ -47,19 +137,7 @@ namespace osmscout {
     std::string::size_type pos;
     bool                   found;
 
-    if (hashFunction!=NULL) {
-      std::string hash=(*hashFunction)(locationName);
-
-      if (!hash.empty()) {
-        pos=hash.find(nameHash);
-      }
-      else {
-        pos=locationName.find(name);
-      }
-    }
-    else {
-      pos=locationName.find(name);
-    }
+    pos=locationName.find(name);
 
     if (startWith) {
       found=pos==0;
@@ -72,14 +150,9 @@ namespace osmscout {
       return true;
     }
 
-    if (locations.size()>=limit) {
-      limitReached=true;
-
-      return false;
-    }
-
     Location location;
 
+    location.regionOffset=loc.offset;
     location.name=locationName;
 
     for (std::vector<ObjectFileRef>::const_iterator object=loc.objects.begin();
@@ -88,42 +161,14 @@ namespace osmscout {
       location.references.push_back(*object);
     }
 
-    // Build up path for each hit by following
-    // the parent relation up to the top of the tree.
-
-    FileOffset currentOffset;
-    FileOffset regionOffset=loc.offset;
-
-    if (!scanner.GetPos(currentOffset)) {
-      return false;
-    }
-
-    while (!scanner.HasError() &&
-           regionOffset!=0) {
-      std::string name;
-
-      scanner.SetPos(regionOffset);
-      scanner.Read(name);
-      scanner.ReadNumber(regionOffset);
-
-      if (location.path.empty()) {
-        // We do not want something like "'Dortmund' in 'Dortmund'"!
-        if (name!=locationName) {
-          location.path.push_back(name);
-        }
-      }
-      else {
-        location.path.push_back(name);
-      }
-    }
-
     locations.push_back(location);
 
-    return scanner.SetPos(currentOffset);
+    limitReached=locations.size()>=limit;
+
+    return !limitReached;
   }
 
   CityStreetIndex::CityStreetIndex()
-   : hashFunction(NULL)
   {
     // no code
   }
@@ -133,32 +178,101 @@ namespace osmscout {
     // no code
   }
 
-  bool CityStreetIndex::LoadRegion(FileScanner& scanner,
-                                   LocationVisitor& visitor) const
+  bool CityStreetIndex::Load(const std::string& path)
   {
-    FileOffset                offset;
-    std::string               name;
-    FileOffset                parentOffset;
-    uint32_t                  childrenCount;
-    uint32_t                  locationCount;
-    std::map<std::string,Loc> locations;
+    this->path=path;
 
-    if (!scanner.GetPos(offset) ||
-      !scanner.Read(name) ||
-      !scanner.ReadNumber(parentOffset)) {
+    return true;
+  }
+
+  bool CityStreetIndex::LoadRegionEntry(FileScanner& scanner,
+                                        RegionEntry& region) const
+  {
+    uint8_t          regionReferenceType;
+    FileOffset       regionReferenceOffset;
+    uint32_t         aliasCount;
+
+    if (!scanner.GetPos(region.indexOffset)) {
       return false;
     }
 
-    if (!scanner.ReadNumber(childrenCount)) {
+    if (!scanner.ReadFileOffset(region.dataOffset)) {
       return false;
     }
 
-    for (size_t i=0; i<childrenCount; i++) {
-      if (!LoadRegion(scanner,
-                      visitor)) {
+    if (!scanner.ReadFileOffset(region.parentIndexOffset)) {
+      return false;
+    }
+
+    if (!scanner.Read(region.name)) {
+      return false;
+    }
+
+    if (!scanner.Read(regionReferenceType)) {
+      return false;
+    }
+
+    if (!scanner.ReadFileOffset(regionReferenceOffset)) {
+      return false;
+    }
+
+    region.reference.Set(regionReferenceOffset,
+                         (RefType)regionReferenceType);
+
+    if (!scanner.ReadNumber(aliasCount)) {
+      return false;
+    }
+
+    region.aliases.clear();
+    region.aliases.resize(aliasCount);
+
+    for (size_t i=0; i<aliasCount; i++) {
+      if (!scanner.Read(region.aliases[i].name)) {
+        return false;
+      }
+
+      if (!scanner.ReadFileOffset(region.aliases[i].offset)) {
         return false;
       }
     }
+
+    return !scanner.HasError();
+  }
+
+  bool CityStreetIndex::VisitRegionEntries(FileScanner& scanner,
+                                           RegionVisitor& visitor) const
+  {
+    RegionEntry region;
+    uint32_t         childCount;
+
+    if (!LoadRegionEntry(scanner,
+                              region)) {
+      return false;
+    }
+
+    if (!visitor.Visit(region)) {
+      return true;
+    }
+
+    if (!scanner.ReadNumber(childCount)) {
+      return false;
+    }
+
+    for (size_t i=0; i<childCount; i++) {
+      if (!VisitRegionEntries(scanner,
+                                   visitor)) {
+        return false;
+      }
+    }
+
+    return !scanner.HasError();
+  }
+
+  bool CityStreetIndex::LoadRegionDataEntry(FileScanner& scanner,
+                                            const RegionEntry& region,
+                                            LocationVisitor& visitor) const
+  {
+    uint32_t locationCount;
 
     if (!scanner.ReadNumber(locationCount)) {
       return false;
@@ -167,18 +281,19 @@ namespace osmscout {
     for (size_t i=0; i<locationCount; i++) {
       std::string name;
       uint32_t    objectCount;
+      Loc         loc;
 
       if (!scanner.Read(name)) {
         return false;
       }
 
-      locations[name].offset=offset;
+      loc.offset=region.indexOffset;
 
       if (!scanner.ReadNumber(objectCount)) {
         return false;
       }
 
-      locations[name].objects.reserve(objectCount);
+      loc.objects.reserve(objectCount);
 
       FileOffset lastOffset=0;
 
@@ -196,16 +311,12 @@ namespace osmscout {
 
         offset+=lastOffset;
 
-        locations[name].objects.push_back(ObjectFileRef(offset,(RefType)type));
+        loc.objects.push_back(ObjectFileRef(offset,(RefType)type));
 
         lastOffset=offset;
       }
-    }
 
-    for (std::map<std::string,Loc>::const_iterator l=locations.begin();
-         l!=locations.end();
-         ++l) {
-      if (!visitor.Visit(l->first,l->second)) {
+      if (!visitor.Visit(name,loc)) {
         return true;
       }
     }
@@ -213,24 +324,49 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool CityStreetIndex::LoadRegion(FileScanner& scanner,
-                                   FileOffset offset,
-                                   LocationVisitor& visitor) const
+  bool CityStreetIndex::VisitRegionDataEntries(FileScanner& scanner,
+                                               LocationVisitor& visitor) const
   {
-    scanner.SetPos(offset);
+    RegionEntry region;
+    FileOffset       childrenOffset;
+    uint32_t         childCount;
 
-    return LoadRegion(scanner,visitor);
+    if (!LoadRegionEntry(scanner,
+                              region)) {
+      return false;
+    }
+
+    if (!scanner.GetPos(childrenOffset)) {
+      return false;
+    }
+
+    if (!scanner.SetPos(region.dataOffset)) {
+      return false;
+    }
+
+    if (!LoadRegionDataEntry(scanner,
+                             region,
+                             visitor)) {
+      return false;
+    }
+
+    if (!scanner.SetPos(childrenOffset)) {
+      return false;
+    }
+
+    if (!scanner.ReadNumber(childCount)) {
+      return false;
+    }
+
+    for (size_t i=0; i<childCount; i++) {
+      if (!VisitRegionDataEntries(scanner,
+                                  visitor)) {
+        return false;
+      }
+    }
+
+    return !scanner.HasError();
   }
-
-  bool CityStreetIndex::Load(const std::string& path,
-                             std::string (*hashFunction) (std::string))
-  {
-    this->path=path;
-    this->hashFunction=hashFunction;
-
-    return true;
-  }
-
 
   bool CityStreetIndex::GetMatchingAdminRegions(const std::string& name,
                                                 std::list<AdminRegion>& regions,
@@ -238,20 +374,15 @@ namespace osmscout {
                                                 bool& limitReached,
                                                 bool startWith) const
   {
-    std::string nameHash;
+    RegionMatchVisitor visitor(name,
+                               limit);
+    FileScanner        scanner;
 
-    limitReached=false;
+    visitor.Initialize();
     regions.clear();
 
-    // if the user supplied a special hash function call it and use the result
-    if (hashFunction!=NULL) {
-      nameHash=(*hashFunction)(name);
-    }
-
-    FileScanner   scanner;
-
     if (!scanner.Open(AppendFileToDir(path,
-                                      FILENAME_NAMEREGION_IDX),
+                                      FILENAME_REGION_DAT),
                       FileScanner::LowMemRandom,
                       false)) {
       std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
@@ -265,136 +396,67 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<regionCount; i++) {
-      std::string regionName;
-      uint32_t    entries;
-
-      if (!scanner.Read(regionName)) {
+      if (!VisitRegionEntries(scanner,
+                                   visitor)) {
         return false;
-      }
-
-      if (!scanner.ReadNumber(entries)) {
-        return false;
-      }
-
-      FileOffset lastOffset=0;
-
-      for (size_t j=0; j<entries; j++) {
-        Region     region;
-        uint8_t    type;
-        FileOffset offset;
-
-        region.name=regionName;
-
-        if (!scanner.Read(type)) {
-          return false;
-        }
-
-        if (!scanner.ReadNumber(offset)) {
-          return false;
-        }
-
-        offset+=lastOffset;
-
-        lastOffset=offset;
-
-        region.reference.Set(offset,(RefType)type);
-
-        if (!scanner.ReadFileOffset(region.offset)) {
-          return false;
-        }
-
-        bool                   found=false;
-        std::string::size_type matchPosition;
-
-        // Calculate match
-
-        if (hashFunction!=NULL) {
-          std::string hash=(*hashFunction)(region.name);
-
-          if (!hash.empty()) {
-            matchPosition=hash.find(nameHash);
-          }
-          else {
-            matchPosition=region.name.find(name);
-          }
-        }
-        else {
-          matchPosition=region.name.find(name);
-        }
-
-        if (startWith) {
-          found=matchPosition==0;
-        }
-        else {
-          found=matchPosition!=std::string::npos;
-        }
-
-        // If match, Add to result
-
-        if (found) {
-          if (regions.size()>=limit) {
-            limitReached=true;
-          }
-          else {
-            AdminRegion adminRegion;
-
-            adminRegion.reference=region.reference;
-            adminRegion.offset=region.offset;
-            adminRegion.name=region.name;
-
-            regions.push_back(adminRegion);
-          }
-        }
       }
     }
 
-    if (!scanner.Close()) {
-      return false;
+    for (std::list<AdminRegion>::const_iterator region=visitor.matches.begin();
+        region!=visitor.matches.end();
+        ++region) {
+      regions.push_back(*region);
+    }
+
+    for (std::list<AdminRegion>::const_iterator region=visitor.candidates.begin();
+        region!=visitor.candidates.end();
+        ++region) {
+      regions.push_back(*region);
     }
 
     if (regions.empty()) {
-      return true;
+      return scanner.Close();
     }
 
-    if (!regions.empty()) {
-      if (!scanner.Open(AppendFileToDir(path,
-                                        FILENAME_REGION_DAT),
-                        FileScanner::LowMemRandom,
-                        true)) {
-        std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
-        return false;
-      }
+    // If there are results, build up a path for each hit by following
+    // the parent relation up to the top of the tree.
 
-      // If there are results, build up a path for each hit by following
-      // the parent relation up to the top of the tree.
+    for (std::list<AdminRegion>::iterator area=regions.begin();
+         area!=regions.end();
+         ++area) {
+      FileOffset       offset=area->indexOffset;
+      RegionEntry region;
 
-      for (std::list<AdminRegion>::iterator area=regions.begin();
-           area!=regions.end();
-           ++area) {
-        FileOffset offset=area->offset;
+      // Resolve all parent to build up the complete region path
+      while (offset!=0) {
+        RegionEntry region;
 
-        while (offset!=0) {
-          std::string name;
+        if (!scanner.SetPos(offset)) {
+          return false;
+        }
 
-          scanner.SetPos(offset);
-          scanner.Read(name);
-          scanner.ReadNumber(offset);
+        if (!LoadRegionEntry(scanner,
+                                  region)) {
+          return false;
+        }
 
-          if (area->path.empty()) {
-            if (name!=area->name) {
-              area->path.push_back(name);
-            }
-          }
-          else {
-            area->path.push_back(name);
+        if (area->path.empty()) {
+          // if the found name is an alias of the region,
+          // we add the real name of the region also,
+          // else we skip it
+          if (region.name!=area->name) {
+            area->path.push_back(region.name);
           }
         }
-      }
+        else {
+          area->path.push_back(region.name);
+        }
 
-      return !scanner.HasError() && scanner.Close();
+        offset=region.parentIndexOffset;
+      }
     }
 
-    return true;
+    return !scanner.HasError() && scanner.Close();
   }
 
   bool CityStreetIndex::GetMatchingLocations(const AdminRegion& region,
@@ -421,21 +483,56 @@ namespace osmscout {
     locVisitor.limit=limit;
     locVisitor.limitReached=false;
 
-    locVisitor.hashFunction=hashFunction;
-
-    if (hashFunction!=NULL) {
-      locVisitor.nameHash=(*hashFunction)(name);
+    if (!scanner.SetPos(region.indexOffset)) {
+      return false;
     }
 
-
-    if (!LoadRegion(locVisitor.scanner,
-                    region.offset,
-                    locVisitor)) {
+    if (!VisitRegionDataEntries(scanner,
+                                locVisitor)) {
       return false;
     }
 
     locations=locVisitor.locations;
     limitReached=locVisitor.limitReached;
+
+    // If there are results, build up a path for each hit by following
+    // the parent relation up to the top of the tree.
+
+    for (std::list<Location>::iterator location=locations.begin();
+         location!=locations.end();
+         ++location) {
+      FileOffset       offset=location->regionOffset;
+      RegionEntry region;
+
+      // Resolve all parent to build up the complete region path
+      while (offset!=0) {
+        RegionEntry region;
+
+        if (!scanner.SetPos(offset)) {
+          return false;
+        }
+
+        if (!LoadRegionEntry(scanner,
+                                  region)) {
+          return false;
+        }
+
+        if (location->path.empty()) {
+          // if the found name is an alias of the region,
+          // we add the real name of the region also,
+          // else we skip it
+          if (region.name!=location->name) {
+            location->path.push_back(region.name);
+          }
+        }
+        else {
+          location->path.push_back(region.name);
+        }
+
+        offset=region.parentIndexOffset;
+      }
+    }
+
 
     return true;
   }

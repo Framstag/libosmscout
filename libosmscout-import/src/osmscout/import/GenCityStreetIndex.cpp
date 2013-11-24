@@ -1541,14 +1541,29 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  bool CityStreetIndexGenerator::WriteRegion(FileWriter& writer,
-                                             Region& region,
-                                             FileOffset parentOffset)
+  bool CityStreetIndexGenerator::WriteRegionIndexEntry(FileWriter& writer,
+                                                       const Region& parentRegion,
+                                                       Region& region)
   {
-    writer.GetPos(region.offset);
+    if (!writer.GetPos(region.indexOffset)) {
+      return false;
+    }
+
+    writer.WriteFileOffset(region.dataOffset);
+    writer.WriteFileOffset(parentRegion.indexOffset);
 
     writer.Write(region.name);
-    writer.WriteNumber(parentOffset);
+
+    writer.Write((uint8_t)region.reference.GetType());
+    writer.WriteFileOffset(region.reference.GetFileOffset());
+
+    writer.WriteNumber((uint32_t)region.aliases.size());
+    for (std::list<RegionAlias>::const_iterator alias=region.aliases.begin();
+        alias!=region.aliases.end();
+        ++alias) {
+      writer.Write(alias->name);
+      writer.WriteFileOffset(alias->reference);
+    }
 
     writer.WriteNumber((uint32_t)region.regions.size());
     for (std::list<RegionRef>::iterator r=region.regions.begin();
@@ -1556,13 +1571,56 @@ namespace osmscout {
          r++) {
       RegionRef childRegion(*r);
 
-      if (!WriteRegion(writer,*childRegion,region.offset)) {
+      if (!WriteRegionIndexEntry(writer,
+                                 region,
+                                 *childRegion)) {
         return false;
       }
     }
 
-    writer.WriteNumber((uint32_t)region.locations.size()); // Number of objects
+    return !writer.HasError();
+  }
 
+  bool CityStreetIndexGenerator::WriteRegionIndex(FileWriter& writer,
+                                                  Region& rootRegion)
+  {
+    writer.WriteNumber(rootRegion.regions.size());
+    for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
+         r!=rootRegion.regions.end();
+         ++r) {
+      RegionRef childRegion(*r);
+
+      if (!WriteRegionIndexEntry(writer,
+                                 rootRegion,
+                                 *childRegion)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool CityStreetIndexGenerator::WriteRegionDataEntry(FileWriter& writer,
+                                                      const Region& parentRegion,
+                                                      Region& region)
+  {
+    if (!writer.GetPos(region.dataOffset)) {
+      return false;
+    }
+
+    if (!writer.SetPos(region.indexOffset)) {
+      return false;
+    }
+
+    if (!writer.WriteFileOffset(region.dataOffset)) {
+      return false;
+    }
+
+    if (!writer.SetPos(region.dataOffset)) {
+      return false;
+    }
+
+    writer.WriteNumber((uint32_t)region.locations.size());
     for (std::map<std::string,RegionLocation>::iterator location=region.locations.begin();
          location!=region.locations.end();
          ++location) {
@@ -1583,91 +1641,34 @@ namespace osmscout {
       }
     }
 
-    return !writer.HasError();
-  }
-
-  bool CityStreetIndexGenerator::WriteRegions(FileWriter& writer,
-                                              Region& root)
-  {
-    for (std::list<RegionRef>::iterator r=root.regions.begin();
-         r!=root.regions.end();
-         ++r) {
-      RegionRef childRegion(*r);
-
-      if (!WriteRegion(writer,
-                       *childRegion,
-                       0)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  void CityStreetIndexGenerator::GetRegionRefs(const Region& region,
-                                               std::map<std::string,std::list<RegionReference> >& locationRefs)
-  {
-    RegionReference regionRef;
-
-    regionRef.reference=region.reference;
-    regionRef.offset=region.offset;
-
-    locationRefs[region.name].push_back(regionRef);
-
-    for (std::list<RegionAlias>::const_iterator alias=region.aliases.begin();
-         alias!=region.aliases.end();
-         ++alias) {
-      regionRef.reference.Set(alias->reference,refNode);
-      regionRef.offset=region.offset;
-
-      locationRefs[alias->name].push_back(regionRef);
-    }
-
-    for (std::list<RegionRef>::const_iterator r=region.regions.begin();
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
       RegionRef childRegion(*r);
 
-      GetRegionRefs(*childRegion,locationRefs);
+      if (!WriteRegionDataEntry(writer,
+                                region,
+                                *childRegion)) {
+        return false;
+      }
     }
+
+    return !writer.HasError();
   }
 
-  bool CityStreetIndexGenerator::WriteRegionRefs(FileWriter& writer,
-                                                 std::map<std::string,std::list<RegionReference> >& locationRefs)
+  bool CityStreetIndexGenerator::WriteRegionData(FileWriter& writer,
+                                                 Region& rootRegion)
   {
-    writer.WriteNumber((uint32_t)locationRefs.size());
+    writer.WriteNumber(rootRegion.regions.size());
+    for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
+         r!=rootRegion.regions.end();
+         ++r) {
+      RegionRef childRegion(*r);
 
-    for (std::map<std::string,std::list<RegionReference> >::iterator n=locationRefs.begin();
-         n!=locationRefs.end();
-         ++n) {
-      if (!writer.Write(n->first)) {
+      if (!WriteRegionDataEntry(writer,
+                                rootRegion,
+                                *childRegion)) {
         return false;
-      }
-
-      if (!writer.WriteNumber((uint32_t)n->second.size())) {
-        return false;
-      }
-
-      n->second.sort();
-
-      FileOffset lastOffset=0;
-
-      for (std::list<RegionReference>::const_iterator o=n->second.begin();
-           o!=n->second.end();
-           ++o) {
-        if (!writer.Write((uint8_t)o->reference.GetType())) {
-          return false;
-        }
-
-        if (!writer.WriteNumber(o->reference.GetFileOffset()-lastOffset)) {
-          return false;
-        }
-
-        if (!writer.WriteFileOffset(o->offset)) {
-          return false;
-        }
-
-        lastOffset=o->reference.GetFileOffset();
       }
     }
 
@@ -1676,7 +1677,7 @@ namespace osmscout {
 
   std::string CityStreetIndexGenerator::GetDescription() const
   {
-    return "Generate 'region.dat' and 'nameregion.idx'";
+    return "Generate 'region.dat'";
   }
 
   bool CityStreetIndexGenerator::Import(const ImportParameter& parameter,
@@ -1697,7 +1698,8 @@ namespace osmscout {
 
     rootRegion=new Region();
     rootRegion->name="<root>";
-    rootRegion->offset=0;
+    rootRegion->indexOffset=0;
+    rootRegion->dataOffset=0;
 
     boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
@@ -1871,8 +1873,13 @@ namespace osmscout {
       return false;
     }
 
-    if (!WriteRegions(writer,
-                      *rootRegion)) {
+    if (!WriteRegionIndex(writer,
+                          *rootRegion)) {
+      return false;
+    }
+
+    if (!WriteRegionData(writer,
+                         *rootRegion)) {
       return false;
     }
 
@@ -1880,26 +1887,6 @@ namespace osmscout {
       return false;
     }
 
-    //
-    // Generate file with all area names, each referencing the areas where it is contained
-    //
-
-    std::map<std::string,std::list<RegionReference> > locationRefs;
-
-    progress.SetAction(std::string("Write '")+CityStreetIndex::FILENAME_NAMEREGION_IDX+"'");
-
-    GetRegionRefs(*rootRegion,
-                  locationRefs);
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     CityStreetIndex::FILENAME_NAMEREGION_IDX))) {
-      progress.Error("Cannot open '"+writer.GetFilename()+"'");
-      return false;
-    }
-
-    WriteRegionRefs(writer,
-                    locationRefs);
-
-    return !writer.HasError() && writer.Close();
+    return true;
   }
 }

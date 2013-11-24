@@ -35,10 +35,12 @@ namespace osmscout {
    */
   struct OSMSCOUT_API AdminRegion
   {
-    ObjectFileRef          reference; //! Reference to the object defining the region
-    FileOffset             offset;    //! Offset into the region datafile
-    std::string            name;      //! name of the region
-    std::list<std::string> path;      //! Admin region names higher up in the hierarchy
+    ObjectFileRef          reference;         //! Reference to the object defining the region
+    FileOffset             indexOffset;       //! Offset of the index entry
+    FileOffset             parentIndexOffset; //! Offset of the index entry
+    FileOffset             dataOffset;        //! Offset of the data entry
+    std::string            name;              //! name of the region
+    std::list<std::string> path;              //! Admin region names higher up in the hierarchy
   };
 }
 
