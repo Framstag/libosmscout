@@ -47,6 +47,7 @@ CONST
   COLOR fellColor             = #f9f9f9;
   COLOR forestColor           = #8dc56c;
   COLOR glacierColor          = #ddecec;
+  COLOR grassColor            = #00ff00;
   COLOR greenFieldColor       = #dcdcc8;
   COLOR heathColor            = #ffffc0;
   COLOR industrialColor       = #dfd1d6;
