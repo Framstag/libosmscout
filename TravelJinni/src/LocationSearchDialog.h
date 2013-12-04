@@ -43,38 +43,39 @@
  */
 class LocationSearchDialog : public Lum::Dlg::ActionDialog
 {
+public:
+  struct Location
+  {
+    osmscout::ObjectFileRef object;
+    std::wstring            label;
+  };
+
 private:
-  typedef Lum::Model::StdRefTable<osmscout::Location,
-                                  std::list<osmscout::Location> >    LocationsModel;
-  typedef Lum::Base::Reference<LocationsModel>                       LocationsModelRef;
+  typedef Lum::Model::StdRefTable<Location,
+                                  std::list<Location> > LocationsModel;
+  typedef Lum::Base::Reference<LocationsModel>          LocationsModelRef;
 
   class LocationsModelPainter : public Lum::StringCellPainter
   {
   public:
     std::wstring GetCellData() const
     {
-      const osmscout::Location location=dynamic_cast<const LocationsModel*>(GetModel())->GetEntry(GetRow());
+      const Location location=dynamic_cast<const LocationsModel*>(GetModel())->GetEntry(GetRow());
 
-      if (location.path.empty()) {
-        return Lum::Base::UTF8ToWString(location.name);
-      }
-      else {
-        return Lum::Base::UTF8ToWString(location.name)+
-        L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(location.path))+L")";
-      }
+      return location.label;
     }
   };
 
 private:
-  DatabaseTask*                      databaseTask;
-  Lum::Model::ActionRef              okAction;
-  Lum::Model::StringRef              locationName;
-  Lum::Model::ActionRef              searchTimerAction;
-  std::list<osmscout::Location>      locations;
-  LocationsModelRef                  locationsModel;
-  Lum::Model::SingleLineSelectionRef locationSelection;
-  bool                               hasResult;
-  osmscout::Location                 resultLocation;
+  DatabaseTask*                         databaseTask;
+  Lum::Model::ActionRef                 okAction;
+  Lum::Model::StringRef                 locationName;
+  Lum::Model::ActionRef                 searchTimerAction;
+  std::list<Location>                   locations;
+  LocationsModelRef                     locationsModel;
+  Lum::Model::SingleLineSelectionRef    locationSelection;
+  bool                                  hasResult;
+  Location                              result;
 
 private:
   void Search();
@@ -87,7 +88,7 @@ public:
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
 
   bool HasResult() const;
-  const osmscout::Location& GetResult() const;
+  Location GetResult() const;
 };
 
 #endif

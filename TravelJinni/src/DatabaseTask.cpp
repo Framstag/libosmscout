@@ -419,10 +419,8 @@ bool DatabaseTask::GetWayByOffset(osmscout::FileOffset offset,
   return database->GetWayByOffset(offset,way);
 }
 
-bool DatabaseTask::GetMatchingAdminRegions(const std::wstring& name,
-                                           std::list<osmscout::AdminRegion>& regions,
-                                           size_t limit,
-                                           bool& limitReached) const
+bool DatabaseTask::SearchForLocations(const osmscout::LocationSearch& search,
+                                      osmscout::LocationSearchResult& result) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -430,29 +428,8 @@ bool DatabaseTask::GetMatchingAdminRegions(const std::wstring& name,
     return false;
   }
 
-  return database->GetMatchingAdminRegions(Lum::Base::WStringToUTF8(name),
-                                           regions,
-                                           limit,limitReached, false);
-}
-
-bool DatabaseTask::GetMatchingLocations(const osmscout::AdminRegion& region,
-                                        const std::wstring& name,
-                                        std::list<osmscout::Location>& locations,
-                                        size_t limit,
-                                        bool& limitReached) const
-{
-  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
-
-  if (!database->IsOpen()) {
-    return false;
-  }
-
-  return database->GetMatchingLocations(region,
-                                        Lum::Base::WStringToUTF8(name),
-                                        locations,
-                                        limit,
-                                        limitReached,
-                                        false);
+  return database->SearchForLocations(search,
+                                      result);
 }
 
 bool DatabaseTask::CalculateRoute(const osmscout::ObjectFileRef& startObject,

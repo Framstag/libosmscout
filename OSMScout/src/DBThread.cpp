@@ -570,32 +570,13 @@ bool DBThread::GetWayByOffset(osmscout::FileOffset offset,
   return database.GetWayByOffset(offset,way);
 }
 
-bool DBThread::GetMatchingAdminRegions(const QString& name,
-                                       std::list<osmscout::AdminRegion>& regions,
-                                       size_t limit,
-                                       bool& limitReached) const
+bool DBThread::SearchForLocations(const osmscout::LocationSearch& search,
+                                  osmscout::LocationSearchResult& result) const
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetMatchingAdminRegions(name.toUtf8().data(),
-                                          regions,
-                                          limit,limitReached, false);
-}
-
-bool DBThread::GetMatchingLocations(const osmscout::AdminRegion& region,
-                                    const QString& name,
-                                    std::list<osmscout::Location>& locations,
-                                    size_t limit,
-                                    bool& limitReached) const
-{
-  QMutexLocker locker(&mutex);
-
-  return database.GetMatchingLocations(region,
-                                       name.toUtf8().data(),
-                                       locations,
-                                       limit,
-                                       limitReached,
-                                       false);
+  return database.SearchForLocations(search,
+                                     result);
 }
 
 bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,

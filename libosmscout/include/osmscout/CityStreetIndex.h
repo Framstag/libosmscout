@@ -23,7 +23,6 @@
 #include <list>
 #include <set>
 
-#include <osmscout/AdminRegion.h>
 #include <osmscout/Location.h>
 #include <osmscout/TypeConfig.h>
 
@@ -42,110 +41,29 @@ namespace osmscout {
    */
   class OSMSCOUT_API CityStreetIndex
   {
-  private:
-    /**
-     * A location is an object within an area. The location has been indexed by its name.
-     */
-    struct Loc
-    {
-      FileOffset                 offset;  //! Offset of the admin region this location is in
-      std::vector<ObjectFileRef> objects; //! List of objects that belong to this location
-    };
-
-    /**
-     * Visitor that gets called for every location found in the given area.
-     * It is the task of the visitor to decide if a locations matches the given criteria.
-     */
-    struct LocationVisitor
-    {
-      std::string               name;
-      bool                      startWith;
-      size_t                    limit;
-      bool                      limitReached;
-
-      std::list<Location>       locations;
-
-      FileScanner&              scanner;
-
-      LocationVisitor(FileScanner& scanner);
-
-      bool Visit(const std::string& locationName,
-                 const Loc &location);
-    };
-
   public:
     static const char* const FILENAME_REGION_DAT;
-
-  public:
-    struct RegionAlias
-    {
-      std::string name;
-      FileOffset  offset;
-    };
-
-    /**
-     * A region is an administrative area that has a name.
-     * Regions are structured in a tree. A region could be a country, a county or a city.
-     */
-    struct RegionEntry
-    {
-      FileOffset               indexOffset;       //! Offset of this entry
-      FileOffset               dataOffset;        //! Offset of the data
-      FileOffset               parentIndexOffset; //! Offset of the parent region index entry
-      std::string              name;              //! name of the region
-      ObjectFileRef            reference;         //! The object that represents this region
-      std::vector<RegionAlias> aliases;           //! The list of alias for this region
-    };
-
-    class RegionVisitor
-    {
-    public:
-      virtual ~RegionVisitor();
-
-      virtual void Initialize();
-      virtual bool Visit(const RegionEntry& region) = 0;
-    };
-
-    class RegionMatchVisitor : public RegionVisitor
-    {
-    private:
-      std::string pattern;
-      size_t      limit;
-
-    public:
-      std::list<AdminRegion> matches;
-      std::list<AdminRegion> candidates;
-      bool                   limitReached;
-
-    private:
-      void Match(const std::string& name,
-                 bool& match,
-                 bool& candidate) const;
-
-    public:
-      RegionMatchVisitor(const std::string& pattern,
-                         size_t limit);
-
-      virtual void Initialize();
-      virtual bool Visit(const RegionEntry& region);
-    };
 
   private:
     std::string path;
 
   private:
-    bool LoadRegionEntry(FileScanner& scanner,
-                         RegionEntry& region) const;
+    bool LoadAdminRegion(FileScanner& scanner,
+                         AdminRegion& region) const;
 
     bool VisitRegionEntries(FileScanner& scanner,
-                            RegionVisitor& visitor) const;
+                            AdminRegionVisitor& visitor) const;
 
-    bool VisitRegionDataEntries(FileScanner& scanner,
-                                LocationVisitor& visitor) const;
+    bool VisitRegionLocationEntries(FileScanner& scanner,
+                                    LocationVisitor& visitor) const;
 
     bool LoadRegionDataEntry(FileScanner& scanner,
-                             const RegionEntry& region,
+                             const AdminRegion& region,
                              LocationVisitor& visitor) const;
+
+    bool VisitLocationAddressEntries(FileScanner& scanner,
+                                     const Location& location,
+                                     AddressVisitor& visitor) const;
 
   public:
     CityStreetIndex();
@@ -154,24 +72,24 @@ namespace osmscout {
     bool Load(const std::string& path);
 
     /**
-     * Get a list of AdminRegions that match the given name.
+     * Visit all admin regions
      */
-    bool GetMatchingAdminRegions(const std::string& name,
-                                 std::list<AdminRegion>& regions,
-                                 size_t limit,
-                                 bool& limitReached,
-                                 bool startWith) const;
+    bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
     /**
-     * Get a list of locations matching the given name within the given
-     * AdminRegion or its child regions.
+     * Visit all locations within the given admin region
      */
-    bool GetMatchingLocations(const AdminRegion& region,
-                              const std::string& name,
-                              std::list<Location>& locations,
-                              size_t limit,
-                              bool& limitReached,
-                              bool startWith) const;
+    bool VisitAdminRegionLocations(const AdminRegion& region,
+                                   LocationVisitor& visitor) const;
+
+    /**
+     * Visit all addresses for a given location (in a given AdminRegion)
+     */
+    bool VisitLocationAddresses(const Location& location,
+                                AddressVisitor& visitor) const;
+
+    bool ResolveAdminRegionHierachie(const AdminRegionRef& region,
+                                     std::map<FileOffset,AdminRegionRef>& refs) const;
 
     void DumpStatistics();
   };

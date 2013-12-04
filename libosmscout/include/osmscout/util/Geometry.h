@@ -568,6 +568,10 @@ namespace osmscout {
   extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
                                                    double bLon, double bLat);
 
+  extern OSMSCOUT_API void GetEllipsoidalDistance(double lat1, double lon1,
+                                                  double bearing, double distance,
+                                                  double& lat2, double& lon2);
+
   extern OSMSCOUT_API double GetSphericalBearingInitial(double aLon, double aLat,
                                                         double bLon, double bLat);
 

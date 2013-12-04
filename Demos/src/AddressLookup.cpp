@@ -22,52 +22,116 @@
 
 #include <osmscout/Database.h>
 
-const static size_t RESULT_SET_MAX_SIZE = 1000;
-
-std::string GetName(const osmscout::ObjectFileRef& object,
-                    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::NodeRef> nodesMap,
-                    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::AreaRef> areasMap,
-                    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::WayRef>  waysMap)
+bool GetAdminRegionHierachie(const osmscout::Database &database,
+                             const osmscout::AdminRegionRef& adminRegion,
+                             std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
+                             std::string& path)
 {
-  switch (object.GetType())
-  {
-  case osmscout::refNode:
-    return nodesMap[object.GetFileOffset()]->GetName();
-    break;
-  case osmscout::refArea:
-    return areasMap[object.GetFileOffset()]->rings.front().GetName();
-    break;
-  case osmscout::refWay:
-    return waysMap[object.GetFileOffset()]->GetName();
-    break;
-  default:
-    return "";
+  if (!database.ResolveAdminRegionHierachie(adminRegion,
+                                            adminRegionMap)) {
+    return false;
   }
 
-  return "";
+  if (!adminRegion->aliasName.empty()) {
+    if (!path.empty()) {
+      path.append("/");
+    }
+
+    path.append(adminRegion->aliasName);
+  }
+
+  if (!path.empty()) {
+    path.append("/");
+  }
+
+  path.append(adminRegion->name);
+
+  osmscout::FileOffset parentRegionOffset=adminRegion->parentRegionOffset;
+
+  while (parentRegionOffset!=0) {
+    std::map<osmscout::FileOffset,osmscout::AdminRegionRef>::const_iterator entry=adminRegionMap.find(parentRegionOffset);
+
+    if (entry==adminRegionMap.end()) {
+      break;
+    }
+
+    osmscout::AdminRegionRef parentRegion=entry->second;
+
+    if (!path.empty()) {
+      path.append("/");
+    }
+
+    path.append(parentRegion->name);
+
+    parentRegionOffset=parentRegion->parentRegionOffset;
+  }
+
+  return true;
+}
+
+std::string GetAdminRegionLabel(const osmscout::Database &database,
+                                std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
+                                const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string label;
+  std::string path;
+
+
+  if (entry.adminRegionMatchQuality==osmscout::LocationSearchResult::match) {
+    label.append("= ");
+  }
+  else {
+    label.append("~ ");
+  }
+
+  if (!entry.adminRegion->aliasName.empty()) {
+    label.append(entry.adminRegion->aliasName);
+  }
+  else {
+    label.append(entry.adminRegion->name);
+  }
+
+  if (!GetAdminRegionHierachie(database,
+                               entry.adminRegion,
+                               adminRegionMap,
+                               path)) {
+    return false;
+  }
+
+  if (!path.empty()) {
+    label.append(" (");
+    label.append(path);
+    label.append(")");
+  }
+
+  return label;
 }
 
 int main(int argc, char* argv[])
 {
-  std::string                      map;
-  std::string                      area;
-  std::string                      location;
-  std::list<osmscout::AdminRegion> areas;
-  bool                             limitReached;
+  std::string map;
+  std::string areaPattern;
+  std::string locationPattern;
+  std::string addressPattern;
 
-  if (argc!=3 && argc!=4) {
-    std::cerr << "AddressLookup <map directory> [location] <area>" << std::endl;
+  if (argc!=3 && argc!=4 && argc!=5) {
+    std::cerr << "AddressLookup <map directory> [location [address]] <area>" << std::endl;
     return 1;
   }
 
   map=argv[1];
 
-  if (argc==4) {
-    location=argv[2];
-    area=argv[3];
+  if (argc==5) {
+    locationPattern=argv[2];
+    addressPattern=argv[3];
+    areaPattern=argv[4];
+  }
+  else if (argc==4) {
+    locationPattern=argv[2];
+    areaPattern=argv[3];
   }
   else {
-    area=argv[2];
+    areaPattern=argv[2];
   }
 
 
@@ -80,102 +144,114 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (location.empty()) {
-    std::cout << "Looking for area '" << area << "'..." << std::endl;
-  }
-  else {
-    std::cout << "Looking for location '" << location << "' in area '" << area << "'..." << std::endl;
-  }
+  osmscout::LocationSearch                                search;
+  osmscout::LocationSearchResult                          searchResult;
+  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
+  std::string                                             path;
 
-  if (!database.GetMatchingAdminRegions(area,areas,RESULT_SET_MAX_SIZE,limitReached,false)) {
-    std::cerr << "Error while accessing database, quitting..." << std::endl;
-    database.Close();
-    return 1;
-  }
+  search.regionPattern=areaPattern;
+  search.locationPattern=locationPattern;
+  search.addressPattern=addressPattern;
+  search.limit=50;
 
-  if (limitReached) {
-    std::cerr << "To many hits for area, quitting..." << std::endl;
-    database.Close();
-    return 1;
+  if (!database.SearchForLocations(search,
+                                   searchResult)) {
+    std::cerr << "Error while searching for location" << std::endl;
+    return false;
   }
 
-  for (std::list<osmscout::AdminRegion>::const_iterator area=areas.begin();
-      area!=areas.end();
-      ++area) {
-    std::list<osmscout::Location>                             locations;
-
-    std::set<osmscout::ObjectFileRef>                         objects;
-    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::NodeRef> nodesMap;
-    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::AreaRef> areasMap;
-    OSMSCOUT_HASHMAP<osmscout::FileOffset, osmscout::WayRef>  waysMap;
-
-    if (!location.empty()) {
-      if (!database.GetMatchingLocations(*area,
-                                         location,
-                                         locations,
-                                         RESULT_SET_MAX_SIZE,
-                                         limitReached,
-                                         false)) {
-        std::cerr << "Error while accessing database, quitting..." << std::endl;
-        database.Close();
-        return 1;
+  for (std::list<osmscout::LocationSearchResult::Entry>::const_iterator entry=searchResult.results.begin();
+      entry!=searchResult.results.end();
+      ++entry) {
+    if (entry->adminRegion.Valid() &&
+        entry->location.Valid() &&
+        entry->address.Valid()) {
+      if (entry->locationMatchQuality==osmscout::LocationSearchResult::match) {
+        std::cout << " = ";
+      }
+      else {
+        std::cout << " ~ ";
       }
 
-      if (limitReached) {
-        std::cerr << "To many hits for area, quitting..." << std::endl;
-        database.Close();
-        return 1;
+      std::cout << entry->location->name;
+
+      if (entry->addressMatchQuality==osmscout::LocationSearchResult::match) {
+        std::cout << " = ";
       }
-    }
-
-    objects.insert(area->reference);
-
-    for (std::list<osmscout::Location>::const_iterator location=locations.begin();
-        location!=locations.end();
-        ++location) {
-      for (std::list<osmscout::ObjectFileRef>::const_iterator reference=location->references.begin();
-          reference!=location->references.end();
-          ++reference) {
-
-        objects.insert(*reference);
+      else {
+        std::cout << " ~ ";
       }
+
+      std::cout << entry->address->name;
+
+      std::cout << " " << GetAdminRegionLabel(database,
+                                              adminRegionMap,
+                                              *entry);
+
+      std::cout << " " << entry->address->object.GetTypeName() << " " << entry->address->object.GetFileOffset();
+
+      std::cout << std::endl;
     }
-
-    if (!database.GetObjects(objects,
-                             nodesMap,
-                             areasMap,
-                             waysMap)) {
-      std::cerr << "Error while resolving locations" << std::endl;
-      continue;
-    }
-
-    std::cout << "+ " << area->name;
-
-    if (!area->path.empty()) {
-      std::cout << " (" << osmscout::StringListToString(area->path) << ")";
-    }
-
-    std::cout << std::endl;
-
-    std::cout << "  = " << GetName(area->reference,nodesMap,areasMap,waysMap) << " " << area->reference.GetTypeName() << " " << area->reference.GetFileOffset() << std::endl;
-
-    for (std::list<osmscout::Location>::const_iterator location=locations.begin();
-        location!=locations.end();
-        ++location) {
-      std::cout <<"  - " << location->name;
-
-      if (!location->path.empty()) {
-        std::cout << " (" << osmscout::StringListToString(location->path) << ")";
+    else if (entry->adminRegion.Valid() &&
+             entry->location.Valid()) {
+      if (entry->locationMatchQuality==osmscout::LocationSearchResult::match) {
+        std::cout << " = ";
       }
+      else {
+        std::cout << " ~ ";
+      }
+
+      std::cout << entry->location->name;
+
+      std::cout << " " << GetAdminRegionLabel(database,
+                                              adminRegionMap,
+                                              *entry);
 
       std::cout << std::endl;
 
-      for (std::list<osmscout::ObjectFileRef>::const_iterator reference=location->references.begin();
-          reference!=location->references.end();
-          ++reference) {
-        std::cout << "    = " << GetName(*reference,nodesMap,areasMap,waysMap) << " " << reference->GetTypeName() << " " << reference->GetFileOffset() << std::endl;
+      for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry->location->objects.begin();
+          object!=entry->location->objects.end();
+          ++object) {
+        std::cout << "   - " << object->GetTypeName() << " " << object->GetFileOffset() << std::endl;
       }
     }
+    else if (entry->adminRegion.Valid() &&
+             entry->poi.Valid()) {
+      if (entry->poiMatchQuality==osmscout::LocationSearchResult::match) {
+        std::cout << " = ";
+      }
+      else {
+        std::cout << " ~ ";
+      }
+
+      std::cout << entry->poi->name;
+
+      std::cout << " " << GetAdminRegionLabel(database,
+                                              adminRegionMap,
+                                              *entry);
+
+      std::cout << " " << entry->poi->object.GetTypeName() << " " << entry->poi->object.GetFileOffset();
+
+      std::cout << std::endl;
+    }
+    else if (entry->adminRegion.Valid()) {
+      std::cout << " " << GetAdminRegionLabel(database,
+                                              adminRegionMap,
+                                              *entry);
+
+      if (entry->adminRegion->aliasReference.Valid()) {
+        std::cout << " " << entry->adminRegion->aliasReference.GetTypeName() << " " << entry->adminRegion->aliasReference.GetFileOffset();
+      }
+      else {
+        std::cout << " " << entry->adminRegion->object.GetTypeName() << " " << entry->adminRegion->object.GetFileOffset();
+      }
+
+      std::cout << std::endl;
+    }
+  }
+
+  if (searchResult.limitReached) {
+    std::cout << "<limit reached!>" << std::endl;
   }
 
   database.Close();

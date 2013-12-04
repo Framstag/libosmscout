@@ -84,7 +84,7 @@ namespace osmscout {
       for (std::list<RegionAlias>::const_iterator l=childRegion->aliases.begin();
            l!=childRegion->aliases.end();
            l++) {
-        for (size_t i=0; i<indent; i++) {
+        for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
         out << " = " << l->name << " Node " << l->reference << std::endl;
@@ -93,7 +93,7 @@ namespace osmscout {
       for (std::list<RegionPOI>::const_iterator poi=childRegion->pois.begin();
           poi!=childRegion->pois.end();
           ++poi) {
-        for (size_t i=0; i<indent; i++) {
+        for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
 
@@ -103,7 +103,7 @@ namespace osmscout {
       for (std::map<std::string,RegionLocation>::const_iterator nodeEntry=childRegion->locations.begin();
           nodeEntry!=childRegion->locations.end();
           ++nodeEntry) {
-        for (size_t i=0; i<indent; i++) {
+        for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
         out << " - " << nodeEntry->first << std::endl;
@@ -111,7 +111,7 @@ namespace osmscout {
         for (std::list<ObjectFileRef>::const_iterator object=nodeEntry->second.objects.begin();
             object!=nodeEntry->second.objects.end();
             ++object) {
-          for (size_t i=0; i<indent+2; i++) {
+          for (size_t i=0; i<indent+4; i++) {
             out << " ";
           }
 
@@ -121,11 +121,11 @@ namespace osmscout {
         for (std::list<RegionAddress>::const_iterator address=nodeEntry->second.addresses.begin();
             address!=nodeEntry->second.addresses.end();
             ++address) {
-          for (size_t i=0; i<indent+4; i++) {
+          for (size_t i=0; i<indent+6; i++) {
             out << " ";
           }
 
-          out << " @ " << address->houseNr << " " << address->object.GetTypeName() << " " << address->object.GetFileOffset() << std::endl;
+          out << " @ " << address->name << " " << address->object.GetTypeName() << " " << address->object.GetFileOffset() << std::endl;
         }
       }
 
@@ -896,14 +896,14 @@ namespace osmscout {
     for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
         address!=location->second.addresses.end();
         ++address) {
-      if (address->houseNr==ring.GetAttributes().GetHouseNr()) {
+      if (address->name==ring.GetAttributes().GetHouseNr()) {
         return;
       }
     }
 
     RegionAddress address;
 
-    address.houseNr=ring.GetAttributes().GetHouseNr();
+    address.name=ring.GetAttributes().GetHouseNr();
     address.object.Set(area.GetFileOffset(),refArea);
 
     location->second.addresses.push_back(address);
@@ -1007,13 +1007,12 @@ namespace osmscout {
       }
     }
 
-    /*
-    RegionAddress address;
+    RegionPOI poi;
 
-    address.houseNr=ring.GetAttributes().GetHouseNr();
-    address.object.Set(area.GetFileOffset(),refArea);
+    poi.name=ring.GetAttributes().GetName();
+    poi.object.Set(area.GetFileOffset(),refArea);
 
-    location->second.addresses.push_back(address);*/
+    region.pois.push_back(poi);
 
     added=true;
   }
@@ -1218,14 +1217,14 @@ namespace osmscout {
       for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
           address!=location->second.addresses.end();
           ++address) {
-        if (address->houseNr==way.GetHouseNr()) {
+        if (address->name==way.GetHouseNr()) {
           return false;
         }
       }
 
       RegionAddress address;
 
-      address.houseNr=way.GetHouseNr();
+      address.name=way.GetHouseNr();
       address.object.Set(way.GetFileOffset(),refWay);
 
       location->second.addresses.push_back(address);
@@ -1415,14 +1414,14 @@ namespace osmscout {
     for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
         address!=location->second.addresses.end();
         ++address) {
-      if (address->houseNr==node.GetHouseNr()) {
+      if (address->name==node.GetHouseNr()) {
         return;
       }
     }
 
     RegionAddress address;
 
-    address.houseNr=node.GetHouseNr();
+    address.name=node.GetHouseNr();
     address.object.Set(node.GetFileOffset(),refNode);
 
     location->second.addresses.push_back(address);
@@ -1620,6 +1619,15 @@ namespace osmscout {
       return false;
     }
 
+    writer.WriteNumber((uint32_t)region.pois.size());
+    for (std::list<RegionPOI>::iterator poi=region.pois.begin();
+         poi!=region.pois.end();
+         ++poi) {
+      writer.Write(poi->name);
+      writer.Write((uint8_t)poi->object.GetType());
+      writer.WriteNumber(poi->object.GetFileOffset());
+    }
+
     writer.WriteNumber((uint32_t)region.locations.size());
     for (std::map<std::string,RegionLocation>::iterator location=region.locations.begin();
          location!=region.locations.end();
@@ -1628,6 +1636,15 @@ namespace osmscout {
 
       writer.Write(location->first);
       writer.WriteNumber((uint32_t)location->second.objects.size()); // Number of objects
+
+      if (!location->second.addresses.empty()) {
+        writer.Write(true);
+        writer.GetPos(location->second.addressOffset);
+        writer.WriteFileOffset(0);
+      }
+      else {
+        writer.Write(false);
+      }
 
       FileOffset lastOffset=0;
 
@@ -1668,6 +1685,69 @@ namespace osmscout {
       if (!WriteRegionDataEntry(writer,
                                 rootRegion,
                                 *childRegion)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool CityStreetIndexGenerator::WriteAddressDataEntry(FileWriter& writer,
+                                                       const Region& parentRegion,
+                                                       Region& region)
+  {
+    for (std::map<std::string,RegionLocation>::iterator location=region.locations.begin();
+         location!=region.locations.end();
+         ++location) {
+
+      if (!location->second.addresses.empty()) {
+        FileOffset offset;
+
+        writer.GetPos(offset);
+
+        writer.SetPos(location->second.addressOffset);
+        writer.WriteFileOffset(offset);
+        writer.SetPos(offset);
+
+        writer.WriteNumber((uint32_t)location->second.addresses.size());
+
+        for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
+            address!=location->second.addresses.end();
+            ++address) {
+          writer.Write(address->name);
+          writer.Write((uint8_t)address->object.GetType());
+          writer.WriteFileOffset(address->object.GetFileOffset());
+        }
+      }
+    }
+
+    for (std::list<RegionRef>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
+      RegionRef childRegion(*r);
+
+      if (!WriteAddressDataEntry(writer,
+                                 region,
+                                 *childRegion)) {
+        return false;
+      }
+    }
+
+    return !writer.HasError();
+  }
+
+  bool CityStreetIndexGenerator::WriteAddressData(FileWriter& writer,
+                                                  Region& rootRegion)
+  {
+    writer.WriteNumber(rootRegion.regions.size());
+    for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
+         r!=rootRegion.regions.end();
+         ++r) {
+      RegionRef childRegion(*r);
+
+      if (!WriteAddressDataEntry(writer,
+                                 rootRegion,
+                                 *childRegion)) {
         return false;
       }
     }
@@ -1880,6 +1960,11 @@ namespace osmscout {
 
     if (!WriteRegionData(writer,
                          *rootRegion)) {
+      return false;
+    }
+
+    if (!WriteAddressData(writer,
+                          *rootRegion)) {
       return false;
     }
 

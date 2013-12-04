@@ -49,20 +49,21 @@ namespace osmscout {
      */
     struct RegionPOI
     {
-      ObjectFileRef object; // Object
-      std::string   name;   // Name of the POI
+      ObjectFileRef object; //! Object
+      std::string   name;   //! Name of the POI
     };
 
     struct RegionAddress
     {
-      ObjectFileRef          object;
-      std::string            houseNr;
+      ObjectFileRef object; //! Object with the given address
+      std::string   name;   //! The house number
     };
 
     struct RegionLocation
     {
-      std::list<ObjectFileRef> objects;   //! Objects that represent this location
-      std::list<RegionAddress> addresses; //! Addresses at this location
+      FileOffset               addressOffset; //! Offset of place where the address list offset is stored
+      std::list<ObjectFileRef> objects;       //! Objects that represent this location
+      std::list<RegionAddress> addresses;     //! Addresses at this location
     };
 
     struct Region;
@@ -336,6 +337,13 @@ namespace osmscout {
 
     bool WriteRegionData(FileWriter& writer,
                          Region& root);
+
+    bool WriteAddressDataEntry(FileWriter& writer,
+                               const Region& parentRegion,
+                               Region& region);
+
+    bool WriteAddressData(FileWriter& writer,
+                          Region& root);
 
   public:
     std::string GetDescription() const;

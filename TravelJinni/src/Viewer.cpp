@@ -582,8 +582,8 @@ public:
     }
     else if (model==locationSearchAction &&
              locationSearchAction->IsFinished()) {
-      osmscout::Location location;
-      bool               hasResult=false;
+      LocationSearchDialog::Location location;
+      bool                           hasResult=false;
 
       LocationSearchDialog *dialog;
 
@@ -602,7 +602,7 @@ public:
       delete dialog;
 
       if (hasResult) {
-        map->ShowReference(location.references.front(),
+        map->ShowReference(location.object,
                            osmscout::Magnification::magVeryClose);
       }
     }

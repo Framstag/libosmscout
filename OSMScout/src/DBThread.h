@@ -141,20 +141,15 @@ public:
 
   osmscout::TypeConfig* GetTypeConfig() const;
 
-  bool GetNodeByOffset(osmscout::FileOffset offset, osmscout::NodeRef& node) const;
-  bool GetAreaByOffset(osmscout::FileOffset offset, osmscout::AreaRef& relation) const;
-  bool GetWayByOffset(osmscout::FileOffset offset, osmscout::WayRef& way) const;
+  bool GetNodeByOffset(osmscout::FileOffset offset,
+                       osmscout::NodeRef& node) const;
+  bool GetAreaByOffset(osmscout::FileOffset offset,
+                       osmscout::AreaRef& relation) const;
+  bool GetWayByOffset(osmscout::FileOffset offset,
+                      osmscout::WayRef& way) const;
 
-  bool GetMatchingAdminRegions(const QString& name,
-                               std::list<osmscout::AdminRegion>& regions,
-                               size_t limit,
-                               bool& limitReached) const;
-
-  bool GetMatchingLocations(const osmscout::AdminRegion& region,
-                            const QString& name,
-                            std::list<osmscout::Location>& locations,
-                            size_t limit,
-                            bool& limitReached) const;
+  bool SearchForLocations(const osmscout::LocationSearch& search,
+                          osmscout::LocationSearchResult& result) const;
 
   bool CalculateRoute(osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,

@@ -83,11 +83,11 @@ void MainWindow::OpenSearchLocationDialog()
   dialog.exec();
 
   if (dialog.result()==QDialog::Accepted) {
-    osmscout::Location location;
+    osmscout::ObjectFileRef location;
 
     location=dialog.GetLocationResult();
 
-    map->ShowReference(location.references.front(),
+    map->ShowReference(location,
                        osmscout::Magnification::magVeryClose);
   }
 }

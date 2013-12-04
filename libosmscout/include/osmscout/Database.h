@@ -42,6 +42,7 @@
 
 // Location index
 #include <osmscout/CityStreetIndex.h>
+#include <osmscout/Location.h>
 
 // Water index
 #include <osmscout/WaterIndex.h>
@@ -205,6 +206,26 @@ namespace osmscout {
                                std::string& areasTime,
                                std::vector<AreaRef>& areas) const;
 
+    bool HandleAdminRegion(const LocationSearch& search,
+                           const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                           LocationSearchResult& result) const;
+
+    bool HandleAdminRegionLocation(const LocationSearch& search,
+                                   const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                   const osmscout::LocationMatchVisitor::LocationResult& locationResult,
+                                   LocationSearchResult& result) const;
+
+    bool HandleAdminRegionPOI(const LocationSearch& search,
+                              const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                              const osmscout::LocationMatchVisitor::POIResult& poiResult,
+                              LocationSearchResult& result) const;
+
+    bool HandleAdminRegionLocationAddress(const LocationSearch& search,
+                                          const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                          const osmscout::LocationMatchVisitor::LocationResult& locationResult,
+                                          const osmscout::AddressMatchVisitor::AddressResult& addressResult,
+                                          LocationSearchResult& result) const;
+
   public:
     Database(const DatabaseParameter& parameter);
     virtual ~Database();
@@ -282,18 +303,19 @@ namespace osmscout {
     bool GetWaysByOffset(const std::set<FileOffset>& offsets,
                          OSMSCOUT_HASHMAP<FileOffset,WayRef>& dataMap) const;
 
-    bool GetMatchingAdminRegions(const std::string& name,
-                                 std::list<AdminRegion>& regions,
-                                 size_t limit,
-                                 bool& limitReached,
-                                 bool startWith) const;
+    bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
-    bool GetMatchingLocations(const AdminRegion& region,
-                              const std::string& name,
-                              std::list<Location>& locations,
-                              size_t limit,
-                              bool& limitReached,
-                              bool startWith) const;
+    bool VisitAdminRegionLocations(const AdminRegion& region,
+                                   LocationVisitor& visitor) const;
+
+    bool VisitLocationAddresses(const Location& location,
+                                AddressVisitor& visitor) const;
+
+    bool ResolveAdminRegionHierachie(const AdminRegionRef& adminRegion,
+                                     std::map<FileOffset,AdminRegionRef >& refs) const;
+
+    bool SearchForLocations(const LocationSearch& search,
+                            LocationSearchResult& result) const;
 
     void DumpStatistics();
   };

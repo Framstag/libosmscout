@@ -26,18 +26,43 @@
 class LocationItem : public QStandardItem
 {
 public:
-  osmscout::Location location;
+  osmscout::LocationSearchResult::Entry entry;
+  osmscout::ObjectFileRef               object;
 
-  LocationItem(const osmscout::Location& location)
-  : location(location)
+  LocationItem(osmscout::LocationSearchResult::Entry entry)
+  : entry(entry)
   {
     std::string label;
 
-    if (location.path.empty()) {
-      label=location.name;
+    if (entry.adminRegion.Valid() &&
+        entry.location.Valid() &&
+        entry.address.Valid()) {
+      label=entry.location->name+" "+entry.address->name+" "+entry.adminRegion->name;
+      object=entry.address->object;
+      /*
+      std::cout << " " << GetAdminRegionLabel(database,
+                                              adminRegionMap,
+                                              *entry);*/
     }
-    else {
-      label=location.name+" ("+osmscout::StringListToString(location.path)+")";
+    else if (entry.adminRegion.Valid() &&
+             entry.location.Valid()) {
+      label=entry.location->name+" "+entry.adminRegion->name;
+      object=entry.location->objects.front();
+    }
+    else if (entry.adminRegion.Valid() &&
+             entry.poi.Valid()) {
+      label=entry.poi->name+" "+entry.adminRegion->name;
+      object=entry.poi->object;
+    }
+    else if (entry.adminRegion.Valid()) {
+      if (entry.adminRegion->aliasReference.Valid()) {
+        label=entry.adminRegion->aliasName;
+        object=entry.adminRegion->aliasReference;
+      }
+      else {
+        label=entry.adminRegion->name;
+        object=entry.adminRegion->object;
+      }
     }
 
     setText(QString::fromUtf8(label.c_str()));
@@ -116,7 +141,8 @@ void SearchLocationDialog::OnSelectionChanged(const QItemSelection& selected,
     QModelIndex  index=results->selectionModel()->selection().indexes().front();
     LocationItem *item=dynamic_cast<LocationItem*>(locations->itemFromIndex(index));
 
-    locationResult=item->location;
+    resultLocation=item->object;
+    resultLocationName=item->text();
   }
   else {
     okButton->setEnabled(false);
@@ -133,7 +159,6 @@ void SearchLocationDialog::OnDoubleClick(const QModelIndex& index)
 
 void SearchLocationDialog::Search()
 {
-  bool    limitReached=true;
   int     dividerPos;
   QString location(locationName->text());
   QString city;
@@ -158,120 +183,43 @@ void SearchLocationDialog::Search()
     std::cout << "Searching for city '" << city.toUtf8().data() << "'..." << std::endl;
   }
 
-  std::list<osmscout::AdminRegion> regions;
+  osmscout::LocationSearch       search;
+  osmscout::LocationSearchResult result;
+
+  search.regionPattern=city.toUtf8().constData();
+  search.locationPattern=street.toUtf8().constData();
+  search.limit=50;
+
+  dbThread->SearchForLocations(search,
+                               result);
+
+  if (result.limitReached) {
+    // TODO: Set info text or simply show what we have found?
+    okButton->setEnabled(false);
+    return;
+  }
+  else if (result.results.empty()) {
+    okButton->setEnabled(false);
+    return;
+  }
 
   locations->clear();
 
-  if (!locationName->text().isEmpty()) {
-    dbThread->GetMatchingAdminRegions(city,regions,50,limitReached);
-
-    std::cout << "Result of search for region " << city.toUtf8().data() << ": " << regions.size() << std::endl;
-
-    if (limitReached) {
-      //locationsModel->SetEmptyText(L"- too many hits -");
-      okButton->setEnabled(false);
-      return;
-    }
-    else if (regions.size()==0) {
-      //locationsModel->SetEmptyText(L"- no matches -");
-      okButton->setEnabled(false);
-      return;
-    }
-    else if (street.isEmpty()) {
-      //locationsModel->SetEmptyText(L"");
-    }
-  }
-  else {
-    //locationsModel->SetEmptyText(L"- no search criteria -");
-    okButton->setEnabled(false);
-    return;
-  }
-
-  if (street.isEmpty()) {
-    for (std::list<osmscout::AdminRegion>::const_iterator region=regions.begin();
-         region!=regions.end();
-         ++region) {
-      osmscout::Location location;
-
-      location.name=region->name;
-      location.references.push_back(region->reference);
-      location.path=region->path;
-
-      locations->appendRow(new LocationItem(location));
-    }
-
-    return;
-  }
-
-
-  for (std::list<osmscout::AdminRegion>::const_iterator region=regions.begin();
-       region!=regions.end();
-       ++region) {
-    std::list<osmscout::Location> locs;
-
-    dbThread->GetMatchingLocations(*region,
-                                   street,
-                                   locs,
-                                   50,
-                                   limitReached);
-
-    std::cout << "Result of search for street " << street.toUtf8().data() << " in region " << region->name << ": " << locs.size() << std::endl;
-
-    if (limitReached) {
-      std::cout << "Limit reached." << std::endl;
-      locations->clear();
-      //locationsModel->SetEmptyText(L"- too many hits -");
-      okButton->setEnabled(false);
-
-      return;
-    }
-
-    for (std::list<osmscout::Location>::const_iterator l=locs.begin();
-         l!=locs.end();
-         ++l) {
-      bool found=false;
-
-      for (int l2=0; l2<locations->rowCount(); l2++) {
-        LocationItem* item=dynamic_cast<LocationItem*>(locations->item(l2));
-
-        if (item->location.references.front()==l->references.front()) {
-          found=true;
-          break;
-        }
-      }
-
-      if (found) {
-        continue;
-      }
-
-      locations->appendRow(new LocationItem(*l));
-
-      if (locations->rowCount()>50) {
-        std::cout << "Limit reached." << std::endl;
-        locations->clear();
-        //locationsModel->SetEmptyText(L"- too many hits -");
-        okButton->setEnabled(false);
-
-        return;
-      }
-    }
-
-  }
-
-  if (locations->rowCount()==0) {
-    std::cout << "No matches." << std::endl;
-    //locationsModel->SetEmptyText(L"- no matches -");
-    okButton->setEnabled(false);
-
-    return;
-  }
-  else {
-    //locationsModel->SetEmptyText(L"");
+  for (std::list<osmscout::LocationSearchResult::Entry>::const_iterator entry=result.results.begin();
+      entry!=result.results.end();
+      ++entry) {
+    locations->appendRow(new LocationItem(*entry));
   }
 }
 
-osmscout::Location SearchLocationDialog::GetLocationResult() const
+osmscout::ObjectFileRef SearchLocationDialog::GetLocationResult() const
 {
-  return locationResult;
+  return resultLocation;
 }
+
+QString SearchLocationDialog::GetLocationResultName() const
+{
+  return resultLocationName;
+}
+
 #include "moc_SearchLocationDialog.cpp"

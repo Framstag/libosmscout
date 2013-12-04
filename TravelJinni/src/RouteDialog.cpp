@@ -497,21 +497,14 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->Close();
 
       if (dialog->HasResult()) {
-        osmscout::Location  location=dialog->GetResult();
+        LocationSearchDialog::Location location=dialog->GetResult();
 
-        switch (location.references.front().GetType()) {
+        switch (location.object.GetType()) {
         case osmscout::refArea:
         case osmscout::refWay:
-          result.startObject=location.references.front();
+          result.startObject=location.object;
           result.startNodeIndex=0;
-
-          if (location.path.empty()) {
-            result.start=Lum::Base::UTF8ToWString(location.name);
-          }
-          else {
-            result.start=Lum::Base::UTF8ToWString(location.name)+
-                         L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(location.path))+L")";
-          }
+          result.start=location.label;
 
           start->Set(result.start);
 
@@ -550,22 +543,15 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       // TODO: Check that this is a way!
 
       if (dialog->HasResult()) {
-        osmscout::Location    location=dialog->GetResult();
-        osmscout::WayRef      way;
+        LocationSearchDialog::Location location=dialog->GetResult();
+        osmscout::WayRef               way;
 
-        switch (location.references.front().GetType()) {
+        switch (location.object.GetType()) {
         case osmscout::refArea:
         case osmscout::refWay:
-          result.endObject=location.references.front();
+          result.endObject=location.object;
           result.endNodeIndex=0;
-
-          if (location.path.empty()) {
-            result.end=Lum::Base::UTF8ToWString(location.name);
-          }
-          else {
-            result.end=Lum::Base::UTF8ToWString(location.name)+
-                       L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(location.path))+L")";
-          }
+          result.end=location.label;
 
           end->Set(result.end);
 

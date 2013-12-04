@@ -371,25 +371,18 @@ void RoutingDialog::SelectFrom()
   dialog.exec();
 
   if (dialog.result()==QDialog::Accepted) {
-    osmscout::Location location;
-    std::string        label;
-    osmscout::WayRef   way;
+    osmscout::ObjectFileRef location;
+    std::string             label;
+    osmscout::WayRef        way;
 
     location=dialog.GetLocationResult();
 
-    switch (location.references.front().GetType()) {
+    switch (location.GetType()) {
     case osmscout::refArea:
     case osmscout::refWay:
-      route.startObject=location.references.front();
+      route.startObject=location;
       route.startNodeIndex=0;
-
-      if (location.path.empty()) {
-        route.start=QString::fromUtf8(location.name.c_str());
-      }
-      else {
-        route.start=QString::fromUtf8(location.name.c_str())+
-                     " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
-      }
+      route.start=dialog.GetLocationResultName();
 
       from->setText(route.start);
        // Make sure, start of text is visible
@@ -420,25 +413,18 @@ void RoutingDialog::SelectTo()
   dialog.exec();
 
   if (dialog.result()==QDialog::Accepted) {
-    osmscout::Location   location;
-    std::string          label;
-    osmscout::WayRef     way;
+    osmscout::ObjectFileRef location;
+    std::string             label;
+    osmscout::WayRef        way;
 
     location=dialog.GetLocationResult();
 
-    switch (location.references.front().GetType()) {
+    switch (location.GetType()) {
     case osmscout::refArea:
     case osmscout::refWay:
-      route.endObject=location.references.front();
+      route.endObject=location;
       route.endNodeIndex=0;
-
-      if (location.path.empty()) {
-        route.end=QString::fromUtf8(location.name.c_str());
-      }
-      else {
-        route.end=QString::fromUtf8(location.name.c_str())+
-                     " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
-      }
+      route.end=dialog.GetLocationResultName();
 
       to->setText(route.end);
        // Make sure, start of text is visible

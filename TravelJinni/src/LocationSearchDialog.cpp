@@ -90,7 +90,6 @@ void LocationSearchDialog::GetActions(std::vector<Lum::Dlg::ActionInfo>& actions
 
 void LocationSearchDialog::Search()
 {
-  bool         limitReached=true;
   size_t       dividerPos;
   std::wstring location(locationName->Get());
   std::wstring city;
@@ -120,131 +119,75 @@ void LocationSearchDialog::Search()
     std::cout << "Searching for city '" << Lum::Base::WStringToString(city) << "'..." << std::endl;
   }
 
-  std::list<osmscout::AdminRegion> regions;
+  osmscout::LocationSearch       search;
+  osmscout::LocationSearchResult result;
+
+  search.regionPattern=Lum::Base::WStringToUTF8(city);
+  search.locationPattern=Lum::Base::WStringToUTF8(street);
+  search.limit=50;
 
   locationsModel->Off();
 
   locations.clear();
 
-  if (!locationName->Empty()) {
-    osmscout::StopClock stopClock;
+  databaseTask->SearchForLocations(search,
+                                   result);
 
-    databaseTask->GetMatchingAdminRegions(city,regions,50,limitReached);
-
-    stopClock.Stop();
-
-    std::cout << "Number of hits for region '" << Lum::Base::WStringToString(city) << "': " << regions.size() << ", time: " << stopClock << std::endl;
-
-    if (limitReached) {
-      locationsModel->SetEmptyText(L"- too many hits -");
-      locationsModel->On();
-
-      return;
-    }
-    else if (regions.size()==0) {
-      locationsModel->SetEmptyText(L"- no matches -");
-      locationsModel->On();
-
-      return;
-    }
-    else if (street.empty()) {
-      locationsModel->SetEmptyText(L"");
-    }
-  }
-  else {
-    locationsModel->SetEmptyText(L"- no search criteria -");
-    locationsModel->On();
-    return;
-  }
-
-  if (street.empty()) {
-    for (std::list<osmscout::AdminRegion>::const_iterator region=regions.begin();
-         region!=regions.end();
-         ++region) {
-      osmscout::Location location;
-
-      location.name=region->name;
-      location.references.push_back(region->reference);
-      location.path=region->path;
-
-      locations.push_back(location);
-    }
-
+  if (result.limitReached) {
+    locationsModel->SetEmptyText(L"- too many hits -");
     locationsModel->On();
 
     return;
   }
-
-
-  for (std::list<osmscout::AdminRegion>::const_iterator region=regions.begin();
-       region!=regions.end();
-       ++region) {
-    std::list<osmscout::Location> locs;
-    osmscout::StopClock           stopClock;
-
-    databaseTask->GetMatchingLocations(*region,
-                                       street,
-                                       locs,
-                                       50,
-                                       limitReached);
-
-    stopClock.Stop();
-
-    std::cout << "Number of hits for location '" << Lum::Base::WStringToString(street) << "' in region '" << region->name << "': " << locs.size() << ", time: " << stopClock << std::endl;
-
-    if (limitReached) {
-      std::cout << "Limit reached." << std::endl;
-      locations.clear();
-      locationsModel->SetEmptyText(L"- too many hits -");
-      locationsModel->On();
-
-      return;
-    }
-
-    for (std::list<osmscout::Location>::const_iterator l=locs.begin();
-         l!=locs.end();
-         ++l) {
-      bool found=false;
-
-      for (std::list<osmscout::Location>::const_iterator l2=locations.begin();
-           l2!=locations.end();
-           ++l2) {
-        if (l2->references.front()==l->references.front()) {
-          found=true;
-          break;
-        }
-      }
-
-      if (found) {
-        continue;
-      }
-
-      locations.push_back(*l);
-
-      if (locations.size()>50) {
-        std::cout << "Limit reached." << std::endl;
-        locations.clear();
-        locationsModel->SetEmptyText(L"- too many hits -");
-        locationsModel->On();
-
-        return;
-      }
-    }
-
-  }
-
-  if (locations.size()==0) {
-    std::cout << "No matches." << std::endl;
+  else if (result.results.empty()) {
     locationsModel->SetEmptyText(L"- no matches -");
     locationsModel->On();
 
     return;
   }
-  else {
-    locationsModel->SetEmptyText(L"");
+
+  for (std::list<osmscout::LocationSearchResult::Entry>::const_iterator entry=result.results.begin();
+      entry!=result.results.end();
+      ++entry) {
+    Location location;
+
+    if (entry->adminRegion.Valid() &&
+        entry->location.Valid() &&
+        entry->address.Valid()) {
+      location.label=Lum::Base::UTF8ToWString(entry->location->name+" "+entry->address->name+" "+entry->adminRegion->name);
+      location.object=entry->address->object;
+      /*
+      std::cout << " " << GetAdminRegionLabel(database,
+                                              adminRegionMap,
+                                              *entry);*/
+    }
+    else if (entry->adminRegion.Valid() &&
+             entry->location.Valid()) {
+      location.label=Lum::Base::UTF8ToWString(entry->location->name+" "+entry->adminRegion->name);
+      location.object=entry->location->objects.front();
+    }
+    else if (entry->adminRegion.Valid() &&
+             entry->poi.Valid()) {
+      location.label=Lum::Base::UTF8ToWString(entry->poi->name+" "+entry->adminRegion->name);
+      location.object=entry->poi->object;
+    }
+    else if (entry->adminRegion.Valid()) {
+      if (entry->adminRegion->aliasReference.Valid()) {
+        location.label=Lum::Base::UTF8ToWString(entry->adminRegion->aliasName);
+        location.object=entry->adminRegion->aliasReference;
+      }
+      else {
+        location.label=Lum::Base::UTF8ToWString(entry->adminRegion->name);
+        location.object=entry->adminRegion->object;
+      }
+    }
+
+    locations.push_back(location);
   }
 
   locationsModel->On();
+
+  return;
 }
 
 void LocationSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
@@ -278,7 +221,7 @@ void LocationSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::Resy
            okAction->IsFinished()) {
     assert(locationSelection->HasSelection());
 
-    resultLocation=locationsModel->GetEntry(locationSelection->GetLine());
+    result=locationsModel->GetEntry(locationSelection->GetLine());
     hasResult=true;
     Exit();
   }
@@ -292,9 +235,9 @@ bool LocationSearchDialog::HasResult() const
   return hasResult;
 }
 
-const osmscout::Location& LocationSearchDialog::GetResult() const
+LocationSearchDialog::Location LocationSearchDialog::GetResult() const
 {
-  return resultLocation;
+  return result;
 }
 
 

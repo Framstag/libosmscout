@@ -36,15 +36,16 @@ class SearchLocationDialog : public QDialog
   Q_OBJECT
 
 private:
-  DBThread           *dbThread;
+  DBThread                *dbThread;
 
-  QLineEdit          *locationName;
-  QListView          *results;
-  QStandardItemModel *locations;
-  QPushButton        *okButton;
-  QTimer             requestResultTimer;
+  QLineEdit               *locationName;
+  QListView               *results;
+  QStandardItemModel      *locations;
+  QPushButton             *okButton;
+  QTimer                  requestResultTimer;
 
-  osmscout::Location locationResult;
+  osmscout::ObjectFileRef resultLocation;
+  QString                 resultLocationName;
 
 public slots:
   void OnLocationNameChange(const QString& text);
@@ -58,7 +59,8 @@ public:
                        DBThread* dbThread);
   ~SearchLocationDialog();
 
-  osmscout::Location GetLocationResult() const;
+  osmscout::ObjectFileRef GetLocationResult() const;
+  QString GetLocationResultName() const;
 };
 
 #endif

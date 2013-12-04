@@ -1095,40 +1095,318 @@ namespace osmscout {
     return wayDataFile.GetByOffset(offsets,dataMap);
   }
 
-  bool Database::GetMatchingAdminRegions(const std::string& name,
-                                         std::list<AdminRegion>& regions,
-                                         size_t limit,
-                                         bool& limitReached,
-                                         bool startWith) const
+  bool Database::VisitAdminRegions(AdminRegionVisitor& visitor) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return cityStreetIndex.GetMatchingAdminRegions(name,
-                                                   regions,
-                                                   limit,
-                                                   limitReached,
-                                                   startWith);
+    return cityStreetIndex.VisitAdminRegions(visitor);
   }
 
-  bool Database::GetMatchingLocations(const AdminRegion& region,
-                                      const std::string& name,
-                                      std::list<Location>& locations,
-                                      size_t limit,
-                                      bool& limitReached,
-                                      bool startWith) const
+  bool Database::VisitAdminRegionLocations(const AdminRegion& region,
+                                           LocationVisitor& visitor) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return cityStreetIndex.GetMatchingLocations(region,
-                                                name,
-                                                locations,
-                                                limit,
-                                                limitReached,
-                                                startWith);
+    return cityStreetIndex.VisitAdminRegionLocations(region,
+                                                     visitor);
+  }
+
+  bool Database::VisitLocationAddresses(const Location& location,
+                                        AddressVisitor& visitor) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return cityStreetIndex.VisitLocationAddresses(location,
+                                                  visitor);
+  }
+
+  bool Database::ResolveAdminRegionHierachie(const AdminRegionRef& adminRegion,
+                                             std::map<FileOffset,AdminRegionRef >& refs) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return cityStreetIndex.ResolveAdminRegionHierachie(adminRegion,
+                                                       refs);
+  }
+
+  bool Database::HandleAdminRegion(const LocationSearch& search,
+                                   const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                   LocationSearchResult& result) const
+  {
+    if (search.locationPattern.empty()) {
+      LocationSearchResult::Entry entry;
+
+      entry.adminRegion=adminRegionResult.adminRegion;
+
+      if (adminRegionResult.isMatch) {
+        entry.adminRegionMatchQuality=LocationSearchResult::match;
+      }
+      else {
+        entry.adminRegionMatchQuality=LocationSearchResult::candidate;
+      }
+
+      entry.locationMatchQuality=LocationSearchResult::none;
+      entry.poiMatchQuality=LocationSearchResult::none;
+      entry.addressMatchQuality=LocationSearchResult::none;
+
+      result.results.push_back(entry);
+
+      return true;
+    }
+
+    osmscout::LocationMatchVisitor visitor(search.locationPattern,
+                                           search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
+
+
+    if (!VisitAdminRegionLocations(adminRegionResult.adminRegion,
+                                   visitor)) {
+      return false;
+    }
+
+    if (visitor.poiResults.empty() &&
+        visitor.locationResults.empty()) {
+      LocationSearchResult::Entry entry;
+
+      entry.adminRegion=adminRegionResult.adminRegion;
+
+      if (adminRegionResult.isMatch) {
+        entry.adminRegionMatchQuality=LocationSearchResult::match;
+      }
+      else {
+        entry.adminRegionMatchQuality=LocationSearchResult::candidate;
+      }
+
+      entry.locationMatchQuality=LocationSearchResult::none;
+      entry.poiMatchQuality=LocationSearchResult::none;
+      entry.addressMatchQuality=LocationSearchResult::none;
+
+      result.results.push_back(entry);
+
+      return true;
+    }
+
+    for (std::list<osmscout::LocationMatchVisitor::POIResult>::const_iterator poiResult=visitor.poiResults.begin();
+        poiResult!=visitor.poiResults.end();
+        ++poiResult) {
+      HandleAdminRegionPOI(search,
+                           adminRegionResult,
+                           *poiResult,
+                           result);
+    }
+
+    for (std::list<osmscout::LocationMatchVisitor::LocationResult>::const_iterator locationResult=visitor.locationResults.begin();
+        locationResult!=visitor.locationResults.end();
+        ++locationResult) {
+      if (!HandleAdminRegionLocation(search,
+                                     adminRegionResult,
+                                     *locationResult,
+                                     result)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool Database::HandleAdminRegionLocation(const LocationSearch& search,
+                                           const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                           const osmscout::LocationMatchVisitor::LocationResult& locationResult,
+                                           LocationSearchResult& result) const
+  {
+    if (search.addressPattern.empty()) {
+      LocationSearchResult::Entry entry;
+
+      entry.adminRegion=locationResult.adminRegion;
+      entry.location=locationResult.location;
+
+      if (adminRegionResult.isMatch) {
+        entry.adminRegionMatchQuality=LocationSearchResult::match;
+      }
+      else {
+        entry.adminRegionMatchQuality=LocationSearchResult::candidate;
+      }
+
+      if (locationResult.isMatch) {
+        entry.locationMatchQuality=LocationSearchResult::match;
+      }
+      else {
+        entry.locationMatchQuality=LocationSearchResult::candidate;
+      }
+
+      entry.poiMatchQuality=LocationSearchResult::none;
+      entry.addressMatchQuality=LocationSearchResult::none;
+
+      result.results.push_back(entry);
+
+      return true;
+    }
+
+    osmscout::AddressMatchVisitor visitor(search.addressPattern,
+                                          search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
+
+
+    if (!VisitLocationAddresses(locationResult.location,
+                                visitor)) {
+      return false;
+    }
+
+    if (visitor.results.empty()) {
+      LocationSearchResult::Entry entry;
+
+      entry.adminRegion=locationResult.adminRegion;
+      entry.location=locationResult.location;
+
+      if (adminRegionResult.isMatch) {
+        entry.adminRegionMatchQuality=LocationSearchResult::match;
+      }
+      else {
+        entry.adminRegionMatchQuality=LocationSearchResult::candidate;
+      }
+
+      if (locationResult.isMatch) {
+        entry.locationMatchQuality=LocationSearchResult::match;
+      }
+      else {
+        entry.locationMatchQuality=LocationSearchResult::candidate;
+      }
+
+      entry.poiMatchQuality=LocationSearchResult::none;
+      entry.addressMatchQuality=LocationSearchResult::none;
+
+      result.results.push_back(entry);
+
+      return true;
+    }
+
+    for (std::list<osmscout::AddressMatchVisitor::AddressResult>::const_iterator addressResult=visitor.results.begin();
+        addressResult!=visitor.results.end();
+        ++addressResult) {
+      if (!HandleAdminRegionLocationAddress(search,
+                                            adminRegionResult,
+                                            locationResult,
+                                            *addressResult,
+                                            result)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool Database::HandleAdminRegionPOI(const LocationSearch& search,
+                                      const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                      const osmscout::LocationMatchVisitor::POIResult& poiResult,
+                                      LocationSearchResult& result) const
+  {
+    LocationSearchResult::Entry entry;
+
+    entry.adminRegion=adminRegionResult.adminRegion;
+    entry.poi=poiResult.poi;
+
+    if (adminRegionResult.isMatch) {
+      entry.adminRegionMatchQuality=LocationSearchResult::match;
+    }
+    else {
+      entry.adminRegionMatchQuality=LocationSearchResult::candidate;
+    }
+
+    if (poiResult.isMatch) {
+      entry.poiMatchQuality=LocationSearchResult::match;
+    }
+    else {
+      entry.poiMatchQuality=LocationSearchResult::candidate;
+    }
+
+    entry.locationMatchQuality=LocationSearchResult::none;
+    entry.addressMatchQuality=LocationSearchResult::none;
+
+    result.results.push_back(entry);
+
+    return true;
+  }
+
+  bool Database::HandleAdminRegionLocationAddress(const LocationSearch& search,
+                                                  const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                                  const osmscout::LocationMatchVisitor::LocationResult& locationResult,
+                                                  const osmscout::AddressMatchVisitor::AddressResult& addressResult,
+                                                  LocationSearchResult& result) const
+  {
+    LocationSearchResult::Entry entry;
+
+    entry.adminRegion=locationResult.adminRegion;
+    entry.location=addressResult.location;
+    entry.address=addressResult.address;
+
+    if (adminRegionResult.isMatch) {
+      entry.adminRegionMatchQuality=LocationSearchResult::match;
+    }
+    else {
+      entry.adminRegionMatchQuality=LocationSearchResult::candidate;
+    }
+
+    if (locationResult.isMatch) {
+      entry.locationMatchQuality=LocationSearchResult::match;
+    }
+    else {
+      entry.locationMatchQuality=LocationSearchResult::candidate;
+    }
+
+    entry.poiMatchQuality=LocationSearchResult::none;
+
+    if (addressResult.isMatch) {
+      entry.addressMatchQuality=LocationSearchResult::match;
+    }
+    else {
+      entry.addressMatchQuality=LocationSearchResult::candidate;
+    }
+
+    result.results.push_back(entry);
+
+    return true;
+  }
+
+  bool Database::SearchForLocations(const LocationSearch& search,
+                                    LocationSearchResult& result) const
+  {
+    result.limitReached=false;
+    result.results.clear();
+
+    if (search.regionPattern.empty()) {
+      return true;
+    }
+
+    osmscout::AdminRegionMatchVisitor adminRegionVisitor(search.regionPattern,
+                                                         search.limit);
+
+    if (!VisitAdminRegions(adminRegionVisitor)) {
+      return false;
+    }
+
+    if (adminRegionVisitor.limitReached) {
+      result.limitReached=true;
+    }
+
+    for (std::list<osmscout::AdminRegionMatchVisitor::AdminRegionResult>::const_iterator regionResult=adminRegionVisitor.results.begin();
+        regionResult!=adminRegionVisitor.results.end();
+        ++regionResult) {
+      if (!HandleAdminRegion(search,
+                             *regionResult,
+                             result)) {
+        return false;
+      }
+    }
+
+    result.results.sort();
+
+    return true;
   }
 
   void Database::DumpStatistics()

@@ -106,16 +106,8 @@ public:
   bool GetWayByOffset(osmscout::FileOffset offset,
                       osmscout::WayRef& way) const;
 
-  bool GetMatchingAdminRegions(const std::wstring& name,
-                               std::list<osmscout::AdminRegion>& regions,
-                               size_t limit,
-                               bool& limitReached) const;
-
-  bool GetMatchingLocations(const osmscout::AdminRegion& region,
-                            const std::wstring& name,
-                            std::list<osmscout::Location>& locations,
-                            size_t limit,
-                            bool& limitReached) const;
+  bool SearchForLocations(const osmscout::LocationSearch& search,
+                          osmscout::LocationSearchResult& result) const;
 
   bool CalculateRoute(const osmscout::ObjectFileRef& startObject,
                       size_t startNodeIndex,
