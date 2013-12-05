@@ -371,6 +371,46 @@ namespace osmscout {
     return this<&other;
   }
 
+  bool LocationSearchResult::Entry::operator==(const Entry& other) const
+  {
+    if ((adminRegion.Valid() && !other.adminRegion.Valid()) ||
+        (!adminRegion.Valid() && other.adminRegion.Valid())) {
+      return false;
+    }
 
+    if (adminRegion.Valid() && other.adminRegion.Valid()) {
+      if (adminRegion->aliasReference!=other.adminRegion->aliasReference) {
+        return false;
+      }
+
+      if (adminRegion->object!=other.adminRegion->object) {
+        return false;
+      }
+    }
+
+    if ((location.Valid() && !other.location.Valid()) ||
+        (!location.Valid() && other.location.Valid())) {
+      return false;
+    }
+
+    if (location.Valid() && other.location.Valid()) {
+      if (location->locationOffset!=other.location->locationOffset) {
+        return false;
+      }
+    }
+
+    if ((address.Valid() && !other.address.Valid()) ||
+        (!address.Valid() && other.address.Valid())) {
+      return false;
+    }
+
+    if (address.Valid() && other.address.Valid()) {
+      if (address->addressOffset!=other.address->addressOffset) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 

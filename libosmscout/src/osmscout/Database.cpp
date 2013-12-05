@@ -1413,6 +1413,7 @@ namespace osmscout {
     }
 
     result.results.sort();
+    result.results.unique();
 
     return true;
   }

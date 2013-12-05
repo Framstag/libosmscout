@@ -325,6 +325,7 @@ namespace osmscout {
       MatchQuality   addressMatchQuality;
 
       bool operator<(const Entry& other) const;
+      bool operator==(const Entry& other) const;
     };
 
   public:
