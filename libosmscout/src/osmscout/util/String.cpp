@@ -192,6 +192,26 @@ namespace osmscout {
     }
   }
 
+  void SimplifyTokenList(std::list<std::string>& tokens)
+  {
+    std::list<std::string>::iterator current=tokens.begin();
+    std::list<std::string>::iterator next=current;
+
+    next++;
+    while (next!=tokens.end()) {
+      if (std::isupper(current->at(0)) &&
+          std::islower(next->at(0))) {
+        current->append(" ");
+        current->append(*next);
+        next=tokens.erase(next);
+      }
+      else {
+        current=next;
+        ++next;
+      }
+    }
+  }
+
   void GroupStringListToStrings(std::list<std::string>::const_iterator token,
                                 size_t listSize,
                                 size_t parts,

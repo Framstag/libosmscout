@@ -1174,23 +1174,9 @@ namespace osmscout {
 
     if (visitor.poiResults.empty() &&
         visitor.locationResults.empty()) {
-      LocationSearchResult::Entry entry;
-
-      entry.adminRegion=adminRegionResult.adminRegion;
-
-      if (adminRegionResult.isMatch) {
-        entry.adminRegionMatchQuality=LocationSearchResult::match;
-      }
-      else {
-        entry.adminRegionMatchQuality=LocationSearchResult::candidate;
-      }
-
-      entry.locationMatchQuality=LocationSearchResult::none;
-      entry.poiMatchQuality=LocationSearchResult::none;
-      entry.addressMatchQuality=LocationSearchResult::none;
-
-      result.results.push_back(entry);
-
+      // If we search for a location within an area,
+      // we do not return the found area as hit, if we
+      // did not find the location in it.
       return true;
     }
 

@@ -336,6 +336,13 @@ namespace osmscout {
                                           std::list<std::string>& tokens);
 
   /**
+   * Simplifying a token list by merging tokens that start with an
+   * upper case letter followed by a token starting with a lower
+   * case letter.
+   */
+  extern OSMSCOUT_API void SimplifyTokenList(std::list<std::string>& tokens);
+
+  /**
    * Given a list of strings, individual strings will be combined into a given
    * number of sub groups (individual string concatenated and separated by a space).
    *

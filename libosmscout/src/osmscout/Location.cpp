@@ -243,8 +243,18 @@ namespace osmscout {
   {
     std::list<std::string> tokens;
 
+    if (searchPattern.empty()) {
+      return;
+    }
+
     TokenizeString(searchPattern,
                    tokens);
+
+    if (tokens.empty()) {
+      return;
+    }
+
+    SimplifyTokenList(tokens);
 
     if (tokens.size()>=3) {
       std::list<std::list<std::string> > slices;
