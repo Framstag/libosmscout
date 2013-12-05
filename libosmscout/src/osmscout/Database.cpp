@@ -1138,10 +1138,11 @@ namespace osmscout {
   }
 
   bool Database::HandleAdminRegion(const LocationSearch& search,
+                                   const LocationSearch::Entry& searchEntry,
                                    const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
                                    LocationSearchResult& result) const
   {
-    if (search.locationPattern.empty()) {
+    if (searchEntry.locationPattern.empty()) {
       LocationSearchResult::Entry entry;
 
       entry.adminRegion=adminRegionResult.adminRegion;
@@ -1162,7 +1163,7 @@ namespace osmscout {
       return true;
     }
 
-    osmscout::LocationMatchVisitor visitor(search.locationPattern,
+    osmscout::LocationMatchVisitor visitor(searchEntry.locationPattern,
                                            search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
 
@@ -1206,6 +1207,7 @@ namespace osmscout {
         locationResult!=visitor.locationResults.end();
         ++locationResult) {
       if (!HandleAdminRegionLocation(search,
+                                     searchEntry,
                                      adminRegionResult,
                                      *locationResult,
                                      result)) {
@@ -1217,11 +1219,12 @@ namespace osmscout {
   }
 
   bool Database::HandleAdminRegionLocation(const LocationSearch& search,
+                                           const LocationSearch::Entry& searchEntry,
                                            const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
                                            const osmscout::LocationMatchVisitor::LocationResult& locationResult,
                                            LocationSearchResult& result) const
   {
-    if (search.addressPattern.empty()) {
+    if (searchEntry.addressPattern.empty()) {
       LocationSearchResult::Entry entry;
 
       entry.adminRegion=locationResult.adminRegion;
@@ -1249,7 +1252,7 @@ namespace osmscout {
       return true;
     }
 
-    osmscout::AddressMatchVisitor visitor(search.addressPattern,
+    osmscout::AddressMatchVisitor visitor(searchEntry.addressPattern,
                                           search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
 
@@ -1379,28 +1382,33 @@ namespace osmscout {
     result.limitReached=false;
     result.results.clear();
 
-    if (search.regionPattern.empty()) {
-      return true;
-    }
+    for (std::list<LocationSearch::Entry>::const_iterator searchEntry=search.searches.begin();
+        searchEntry!=search.searches.end();
+        ++searchEntry) {
+      if (searchEntry->adminRegionPattern.empty()) {
+        return true;
+      }
 
-    osmscout::AdminRegionMatchVisitor adminRegionVisitor(search.regionPattern,
-                                                         search.limit);
+      osmscout::AdminRegionMatchVisitor adminRegionVisitor(searchEntry->adminRegionPattern,
+                                                           search.limit);
 
-    if (!VisitAdminRegions(adminRegionVisitor)) {
-      return false;
-    }
-
-    if (adminRegionVisitor.limitReached) {
-      result.limitReached=true;
-    }
-
-    for (std::list<osmscout::AdminRegionMatchVisitor::AdminRegionResult>::const_iterator regionResult=adminRegionVisitor.results.begin();
-        regionResult!=adminRegionVisitor.results.end();
-        ++regionResult) {
-      if (!HandleAdminRegion(search,
-                             *regionResult,
-                             result)) {
+      if (!VisitAdminRegions(adminRegionVisitor)) {
         return false;
+      }
+
+      if (adminRegionVisitor.limitReached) {
+        result.limitReached=true;
+      }
+
+      for (std::list<osmscout::AdminRegionMatchVisitor::AdminRegionResult>::const_iterator regionResult=adminRegionVisitor.results.begin();
+          regionResult!=adminRegionVisitor.results.end();
+          ++regionResult) {
+        if (!HandleAdminRegion(search,
+                               *searchEntry,
+                               *regionResult,
+                               result)) {
+          return false;
+        }
       }
     }
 

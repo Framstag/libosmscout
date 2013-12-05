@@ -17,10 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cctype>
 #include <iostream>
 #include <iomanip>
 
 #include <osmscout/Database.h>
+
+#include <osmscout/util/String.h>
 
 bool GetAdminRegionHierachie(const osmscout::Database &database,
                              const osmscout::AdminRegionRef& adminRegion,
@@ -114,26 +117,22 @@ int main(int argc, char* argv[])
   std::string locationPattern;
   std::string addressPattern;
 
-  if (argc!=3 && argc!=4 && argc!=5) {
+  if (argc<3) {
     std::cerr << "AddressLookup <map directory> [location [address]] <area>" << std::endl;
     return 1;
   }
 
   map=argv[1];
 
-  if (argc==5) {
-    locationPattern=argv[2];
-    addressPattern=argv[3];
-    areaPattern=argv[4];
-  }
-  else if (argc==4) {
-    locationPattern=argv[2];
-    areaPattern=argv[3];
-  }
-  else {
-    areaPattern=argv[2];
-  }
+  std::string searchPattern;
 
+  for (int i=2; i<argc; i++) {
+    if (!searchPattern.empty()) {
+      searchPattern.append(" ");
+    }
+
+    searchPattern.append(argv[i]);
+  }
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::Database          database(databaseParameter);
@@ -149,16 +148,16 @@ int main(int argc, char* argv[])
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
   std::string                                             path;
 
-  search.regionPattern=areaPattern;
-  search.locationPattern=locationPattern;
-  search.addressPattern=addressPattern;
   search.limit=50;
+
+  search.InitializeSearchEntries(searchPattern);
 
   if (!database.SearchForLocations(search,
                                    searchResult)) {
     std::cerr << "Error while searching for location" << std::endl;
     return false;
   }
+
 
   for (std::list<osmscout::LocationSearchResult::Entry>::const_iterator entry=searchResult.results.begin();
       entry!=searchResult.results.end();

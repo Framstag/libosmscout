@@ -207,10 +207,12 @@ namespace osmscout {
                                std::vector<AreaRef>& areas) const;
 
     bool HandleAdminRegion(const LocationSearch& search,
+                           const LocationSearch::Entry& searchEntry,
                            const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
                            LocationSearchResult& result) const;
 
     bool HandleAdminRegionLocation(const LocationSearch& search,
+                                   const LocationSearch::Entry& searchEntry,
                                    const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
                                    const osmscout::LocationMatchVisitor::LocationResult& locationResult,
                                    LocationSearchResult& result) const;

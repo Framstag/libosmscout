@@ -277,10 +277,29 @@ namespace osmscout {
   class OSMSCOUT_API LocationSearch
   {
   public:
-    std::string regionPattern;
-    std::string locationPattern;
-    std::string addressPattern;
-    size_t      limit;
+    class OSMSCOUT_API Entry
+    {
+    public:
+      std::string adminRegionPattern;
+      std::string locationPattern;
+      std::string addressPattern;
+    };
+
+  public:
+    std::list<Entry> searches;
+    size_t           limit;
+
+    /**
+     * This takes the given pattern, splits it into tokens,
+     * and generates a number of search entries based on the idea
+     * that the input follows one of the following patterns:
+     * * AdminRegion Location Address
+     * * Location Address AdminRegion
+     * * AdminRegion Location
+     * * Location AdminRegion
+     * * AdminRegion
+     */
+    void InitializeSearchEntries(const std::string& searchPattern);
   };
 
   class OSMSCOUT_API LocationSearchResult

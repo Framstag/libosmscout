@@ -159,35 +159,10 @@ void SearchLocationDialog::OnDoubleClick(const QModelIndex& index)
 
 void SearchLocationDialog::Search()
 {
-  int     dividerPos;
-  QString location(locationName->text());
-  QString city;
-  QString street;
-
-  dividerPos=location.indexOf(',');
-  if (dividerPos>=0) {
-    city=location.mid(dividerPos+1);
-    street=location.mid(0,dividerPos);
-  }
-  else {
-    city=location;
-  }
-
-  street=street.trimmed();
-  city=city.trimmed();
-
-  if (!street.isEmpty()) {
-    std::cout << "Searching for street '" << street.toUtf8().data() << "' in city '" << city.toUtf8().data() << "'..." << std::endl;
-  }
-  else {
-    std::cout << "Searching for city '" << city.toUtf8().data() << "'..." << std::endl;
-  }
-
   osmscout::LocationSearch       search;
   osmscout::LocationSearchResult result;
 
-  search.regionPattern=city.toUtf8().constData();
-  search.locationPattern=street.toUtf8().constData();
+  search.InitializeSearchEntries(locationName->text().toUtf8().constData());
   search.limit=50;
 
   dbThread->SearchForLocations(search,

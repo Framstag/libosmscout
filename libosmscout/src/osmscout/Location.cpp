@@ -19,6 +19,8 @@
 
 #include <osmscout/Location.h>
 
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   AdminRegionVisitor::~AdminRegionVisitor()
@@ -136,7 +138,6 @@ namespace osmscout {
       limitReached=poiResults.size()+locationResults.size()>=limit;
     }
 
-
     return !limitReached;
   }
 
@@ -236,6 +237,104 @@ namespace osmscout {
     }
 
     return !limitReached;
+  }
+
+  void LocationSearch::InitializeSearchEntries(const std::string& searchPattern)
+  {
+    std::list<std::string> tokens;
+
+    TokenizeString(searchPattern,
+                   tokens);
+
+    if (tokens.size()>=3) {
+      std::list<std::list<std::string> > slices;
+
+      GroupStringListToStrings(tokens.begin(),
+                               tokens.size(),
+                               3,
+                               slices);
+
+      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
+          slice!=slices.end();
+          ++slice) {
+        std::list<std::string>::const_iterator text1;
+        std::list<std::string>::const_iterator text2;
+        std::list<std::string>::const_iterator text3;
+
+        text1=slice->begin();
+        text2=text1;
+        text2++;
+        text3=text2;
+        text3++;
+
+        osmscout::LocationSearch::Entry search;
+
+        search.locationPattern=*text1;
+        search.addressPattern=*text2;
+        search.adminRegionPattern=*text3;
+
+        searches.push_back(search);
+
+        search.locationPattern=*text2;
+        search.addressPattern=*text3;
+        search.adminRegionPattern=*text1;
+
+        searches.push_back(search);
+      }
+    }
+
+    if (tokens.size()>=2) {
+      std::list<std::list<std::string> > slices;
+
+      GroupStringListToStrings(tokens.begin(),
+                               tokens.size(),
+                               2,
+                               slices);
+
+      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
+          slice!=slices.end();
+          ++slice) {
+        std::list<std::string>::const_iterator text1;
+        std::list<std::string>::const_iterator text2;
+
+        text1=slice->begin();
+        text2=text1;
+        text2++;
+
+        osmscout::LocationSearch::Entry search;
+
+        search.locationPattern=*text1;
+        search.adminRegionPattern=*text2;
+
+        searches.push_back(search);
+
+        search.locationPattern=*text2;
+        search.adminRegionPattern=*text1;
+
+        searches.push_back(search);
+      }
+    }
+
+    if (tokens.size()>=1) {
+      std::list<std::list<std::string> > slices;
+
+      GroupStringListToStrings(tokens.begin(),
+                               tokens.size(),
+                               1,
+                               slices);
+
+      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
+          slice!=slices.end();
+          ++slice) {
+        std::list<std::string>::const_iterator text1=slice->begin();
+
+        osmscout::LocationSearch::Entry search;
+
+        search.adminRegionPattern=*text1;
+
+        searches.push_back(search);
+      }
+    }
   }
 
   bool LocationSearchResult::Entry::operator<(const Entry& other) const

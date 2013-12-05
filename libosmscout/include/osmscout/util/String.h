@@ -329,6 +329,25 @@ namespace osmscout {
   extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
                                                      const std::string& separator="/");
 
+  /**
+   * Converts the given string into a list of whitespace or colon-separated strings.
+   */
+  extern OSMSCOUT_API void TokenizeString(const std::string& input,
+                                          std::list<std::string>& tokens);
+
+  /**
+   * Given a list of strings, individual strings will be combined into a given
+   * number of sub groups (individual string concatenated and separated by a space).
+   *
+   * If you pass a list of 5 strings to be divided into 3 parts, a list of string-list will
+   * be returned, where each list contains exactly 3 strings.
+   */
+  extern OSMSCOUT_API void GroupStringListToStrings(std::list<std::string>::const_iterator token,
+                                                    size_t listSize,
+                                                    size_t parts,
+                                                    std::list<std::list<std::string> >& lists);
+
+
   extern OSMSCOUT_API std::string ByteSizeToString(double size);
 
 #if defined(OSMSCOUT_HAVE_STD_WSTRING)

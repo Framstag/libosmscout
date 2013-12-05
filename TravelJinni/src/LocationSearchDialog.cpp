@@ -90,40 +90,10 @@ void LocationSearchDialog::GetActions(std::vector<Lum::Dlg::ActionInfo>& actions
 
 void LocationSearchDialog::Search()
 {
-  size_t       dividerPos;
-  std::wstring location(locationName->Get());
-  std::wstring city;
-  std::wstring street;
-
-  dividerPos=location.find(',');
-  if (dividerPos!=std::string::npos) {
-    city=location.substr(dividerPos+1);
-    street=location.substr(0,dividerPos);
-  }
-  else {
-    city=location;
-  }
-
-  while (!street.empty() && street[0]==L' ') {
-    street=street.substr(1);
-  }
-
-  while (!city.empty() && city[0]==L' ') {
-    city=city.substr(1);
-  }
-
-  if (!street.empty()) {
-    std::cout << "Searching for street '" << Lum::Base::WStringToString(street) << "' in city '" << Lum::Base::WStringToString(city) << "'..." << std::endl;
-  }
-  else {
-    std::cout << "Searching for city '" << Lum::Base::WStringToString(city) << "'..." << std::endl;
-  }
-
   osmscout::LocationSearch       search;
   osmscout::LocationSearchResult result;
 
-  search.regionPattern=Lum::Base::WStringToUTF8(city);
-  search.locationPattern=Lum::Base::WStringToUTF8(street);
+  search.InitializeSearchEntries(Lum::Base::WStringToString(locationName->Get()));
   search.limit=50;
 
   locationsModel->Off();
@@ -192,7 +162,7 @@ void LocationSearchDialog::Search()
 
 void LocationSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
 {
-  if (model==GetClosedAction() &&  GetClosedAction()->IsFinished()) {
+  if (model==GetClosedAction() && GetClosedAction()->IsFinished()) {
     Exit();
   }
   else if (model==searchTimerAction &&
