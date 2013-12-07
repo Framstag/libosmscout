@@ -41,8 +41,7 @@
 #include <osmscout/AreaWayIndex.h>
 
 // Location index
-#include <osmscout/CityStreetIndex.h>
-#include <osmscout/Location.h>
+#include <osmscout/LocationIndex.h>
 
 // Water index
 #include <osmscout/WaterIndex.h>
@@ -160,7 +159,7 @@ namespace osmscout {
     AreaWayIndex          areaWayIndex;
     AreaAreaIndex         areaAreaIndex;
 
-    CityStreetIndex       cityStreetIndex;
+    LocationIndex       cityStreetIndex;
 
     WaterIndex            waterIndex;
 

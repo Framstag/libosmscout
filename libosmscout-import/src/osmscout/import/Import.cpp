@@ -55,8 +55,8 @@
 #include <osmscout/import/GenAreaNodeIndex.h>
 #include <osmscout/import/GenAreaWayIndex.h>
 
+#include <osmscout/import/GenLocationIndex.h>
 #include <osmscout/import/GenOptimizeAreaWayIds.h>
-#include <osmscout/import/GenCityStreetIndex.h>
 #include <osmscout/import/GenWaterIndex.h>
 
 #include <osmscout/import/GenOptimizeAreasLowZoom.h>
@@ -667,7 +667,7 @@ namespace osmscout {
     modules.push_back(new OptimizeWaysLowZoomGenerator());
 
     /* 21 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new LocationIndexGenerator());
 
     /* 22 */
     modules.push_back(new RouteDataGenerator());

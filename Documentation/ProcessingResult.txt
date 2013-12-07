@@ -128,17 +128,11 @@ areaway.idx (export):
 Find object by name index:
 ==========================
 
-region.dat (export):
-* Holds the tree of areas that build up the hierachical
-   administrative regions.
+location.idx (export):
+* Holds the location index.
 
-nameregion.idx (export):
- * Index on top of region.dat to look up administrative
-   areas (e.g. cities) and indexed objects within these areas
-   (e.g. streets).
-
-citystreet.txt (debug only)
- * Dump of the internal city/street index
+location.txt (debug only)
+ * Dump of the internal location index
 
 Is tile water or land index:
 ============================
