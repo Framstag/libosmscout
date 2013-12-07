@@ -79,7 +79,7 @@ namespace osmscout {
         result.isMatch=match;
 
         result.adminRegion->aliasName=region.aliases[i].name;
-        result.adminRegion->aliasReference.Set(region.aliases[i].objectOffset,refNode);
+        result.adminRegion->aliasObject.Set(region.aliases[i].objectOffset,refNode);
 
         results.push_back(result);
 
@@ -389,7 +389,7 @@ namespace osmscout {
     }
 
     if (adminRegion.Valid() && other.adminRegion.Valid()) {
-      if (adminRegion->aliasReference!=other.adminRegion->aliasReference) {
+      if (adminRegion->aliasObject!=other.adminRegion->aliasObject) {
         return false;
       }
 

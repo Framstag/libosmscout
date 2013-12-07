@@ -142,9 +142,9 @@ void LocationSearchDialog::Search()
       location.object=entry->poi->object;
     }
     else if (entry->adminRegion.Valid()) {
-      if (entry->adminRegion->aliasReference.Valid()) {
+      if (entry->adminRegion->aliasObject.Valid()) {
         location.label=Lum::Base::UTF8ToWString(entry->adminRegion->aliasName);
-        location.object=entry->adminRegion->aliasReference;
+        location.object=entry->adminRegion->aliasObject;
       }
       else {
         location.label=Lum::Base::UTF8ToWString(entry->adminRegion->name);

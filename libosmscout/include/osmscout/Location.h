@@ -51,7 +51,7 @@ namespace osmscout {
     std::string              name;               //! name of the region
     ObjectFileRef            object;             //! The object that represents this region
     std::string              aliasName;          //! Additional optional alias name
-    ObjectFileRef            aliasReference;     //! Additional optional alias reference
+    ObjectFileRef            aliasObject;        //! Additional optional alias reference
     std::vector<RegionAlias> aliases;            //! The list of alias for this region
   };
 

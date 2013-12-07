@@ -238,8 +238,8 @@ int main(int argc, char* argv[])
                                               adminRegionMap,
                                               *entry);
 
-      if (entry->adminRegion->aliasReference.Valid()) {
-        std::cout << " " << entry->adminRegion->aliasReference.GetTypeName() << " " << entry->adminRegion->aliasReference.GetFileOffset();
+      if (entry->adminRegion->aliasObject.Valid()) {
+        std::cout << " " << entry->adminRegion->aliasObject.GetTypeName() << " " << entry->adminRegion->aliasObject.GetFileOffset();
       }
       else {
         std::cout << " " << entry->adminRegion->object.GetTypeName() << " " << entry->adminRegion->object.GetFileOffset();

@@ -55,9 +55,9 @@ public:
       object=entry.poi->object;
     }
     else if (entry.adminRegion.Valid()) {
-      if (entry.adminRegion->aliasReference.Valid()) {
+      if (entry.adminRegion->aliasObject.Valid()) {
         label=entry.adminRegion->aliasName;
-        object=entry.adminRegion->aliasReference;
+        object=entry.adminRegion->aliasObject;
       }
       else {
         label=entry.adminRegion->name;
