@@ -318,6 +318,13 @@ namespace osmscout {
     bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;
 
+    bool GetClosestRoutableNode(double lat,
+                                double lon,
+                                const osmscout::Vehicle& vehicle,
+                                double radius,
+                                osmscout::ObjectFileRef& object,
+                                size_t& nodeIndex) const;
+
     void DumpStatistics();
   };
 }

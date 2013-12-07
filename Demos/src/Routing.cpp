@@ -52,8 +52,6 @@
      51.5130296, 7.4681888  51.5146904, 7.4725241
 */
 
-const static size_t RESULT_SET_MAX_SIZE = 1000;
-
 static std::string TimeToString(double time)
 {
   std::ostringstream stream;
@@ -87,98 +85,6 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_roundabout"]=40.0;
   map["highway_living_street"]=10.0;
   map["highway_service"]=30.0;
-}
-
-static bool LookupClosedNodeAtLocation(osmscout::Database& database,
-                                       double lat,
-                                       double lon,
-                                       osmscout::Vehicle& vehicle,
-                                       osmscout::ObjectFileRef& object,
-                                       size_t& nodeIndex)
-{
-  object.Invalidate();
-
-  double                         topLat;
-  double                         botLat;
-  double                         leftLon;
-  double                         rightLon;
-  std::vector<osmscout::NodeRef> nodes;
-  std::vector<osmscout::AreaRef> areas;
-  std::vector<osmscout::WayRef>  ways;
-  double                         minDistance=std::numeric_limits<double>::max();
-
-  osmscout::GetEllipsoidalDistance(lat,
-                                   lon,
-                                   315.0,
-                                   1000,
-                                   topLat,
-                                   leftLon);
-
-  osmscout::GetEllipsoidalDistance(lat,
-                                   lon,
-                                   135.0,
-                                   1000,
-                                   botLat,
-                                   rightLon);
-
-  osmscout::TypeConfig* typeConfig=database.GetTypeConfig();
-  osmscout::TypeSet      routableTypes;
-
-  for (size_t typeId=0; typeId<=typeConfig->GetMaxTypeId(); typeId++) {
-    if (typeConfig->GetTypeInfo(typeId).CanRoute(vehicle)) {
-      routableTypes.SetType(typeId);
-    }
-  }
-
-  if (!database.GetObjects(leftLon,
-                           botLat,
-                           rightLon,
-                           topLat,
-                           routableTypes,
-                           nodes,
-                           ways,
-                           areas)) {
-    return false;
-  }
-
-  // We ignore nodes, we do not assume that they are routable at all
-
-  for (std::vector<osmscout::AreaRef>::const_iterator a=areas.begin();
-      a!=areas.end();
-      ++a) {
-    osmscout::AreaRef area(*a);
-
-    for (size_t i=0; i<area->rings[0].nodes.size(); i++) {
-      double distance=sqrt((area->rings[0].nodes[i].GetLat()-lat)*(area->rings[0].nodes[i].GetLat()-lat)+
-                           (area->rings[0].nodes[i].GetLon()-lon)*(area->rings[0].nodes[i].GetLon()-lon));
-
-      if (distance<minDistance) {
-        minDistance=distance;
-
-        object.Set(area->GetFileOffset(),osmscout::refArea);
-        nodeIndex=i;
-      }
-    }
-  }
-
-  for (std::vector<osmscout::WayRef>::const_iterator w=ways.begin();
-      w!=ways.end();
-      ++w) {
-    osmscout::WayRef way(*w);
-
-    for (size_t i=0;  i<way->nodes.size(); i++) {
-      double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
-                           (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));
-      if (distance<minDistance) {
-        minDistance=distance;
-
-        object.Set(way->GetFileOffset(),osmscout::refWay);
-        nodeIndex=i;
-      }
-    }
-  }
-
-  return object.Valid();
 }
 
 static std::string MoveToTurnCommand(osmscout::RouteDescription::DirectionDescription::Move move)
@@ -617,27 +523,34 @@ int main(int argc, char* argv[])
   }
 
   std::cout << "Searching for routing node for start location..." << std::endl;
-  if (!LookupClosedNodeAtLocation(database,
-                                  startLat,
-                                  startLon,
-                                  vehicle,
-                                  startObject,
-                                  startNodeIndex)) {
-    std::cerr << "Cannot find start node for start location!" << std::endl;
+  if (!database.GetClosestRoutableNode(startLat,
+                                       startLon,
+                                       vehicle,
+                                       1000,
+                                       startObject,
+                                       startNodeIndex)) {
+    std::cerr << "Error while searching for routing node near start location!" << std::endl;
     return 1;
+  }
+
+  if (startObject.Invalid() || startObject.GetType()==osmscout::refNode) {
+    std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
   std::cout << "Searching for routing node for target location..." << std::endl;
-  if (!LookupClosedNodeAtLocation(database,
-                                  targetLat,
-                                  targetLon,
-                                  vehicle,
-                                  targetObject,
-                                  targetNodeIndex)) {
-    std::cerr << "Cannot find target node for target location!" << std::endl;
+  if (!database.GetClosestRoutableNode(targetLat,
+                                       targetLon,
+                                       vehicle,
+                                       1000,
+                                       targetObject,
+                                       targetNodeIndex)) {
+    std::cerr << "Error while searching for routing node near target location!" << std::endl;
     return 1;
   }
 
+  if (targetObject.Invalid() || targetObject.GetType()==osmscout::refNode) {
+    std::cerr << "Cannot find start node for target location!" << std::endl;
+  }
 
   if (!router.CalculateRoute(routingProfile,
                              startObject,

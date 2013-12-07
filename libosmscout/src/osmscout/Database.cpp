@@ -31,6 +31,8 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
+#include <osmscout/util/Geometry.h>
+
 namespace osmscout {
 
   DatabaseParameter::DatabaseParameter()
@@ -1400,6 +1402,97 @@ namespace osmscout {
 
     result.results.sort();
     result.results.unique();
+
+    return true;
+  }
+
+  bool Database::GetClosestRoutableNode(double lat,
+                                        double lon,
+                                        const osmscout::Vehicle& vehicle,
+                                        double radius,
+                                        osmscout::ObjectFileRef& object,
+                                        size_t& nodeIndex) const
+  {
+    object.Invalidate();
+
+    double                         topLat;
+    double                         botLat;
+    double                         leftLon;
+    double                         rightLon;
+    std::vector<osmscout::NodeRef> nodes;
+    std::vector<osmscout::AreaRef> areas;
+    std::vector<osmscout::WayRef>  ways;
+    double                         minDistance=std::numeric_limits<double>::max();
+
+    osmscout::GetEllipsoidalDistance(lat,
+                                     lon,
+                                     315.0,
+                                     radius,
+                                     topLat,
+                                     leftLon);
+
+    osmscout::GetEllipsoidalDistance(lat,
+                                     lon,
+                                     135.0,
+                                     radius,
+                                     botLat,
+                                     rightLon);
+
+    osmscout::TypeSet      routableTypes;
+
+    for (size_t typeId=0; typeId<=typeConfig->GetMaxTypeId(); typeId++) {
+      if (typeConfig->GetTypeInfo(typeId).CanRoute(vehicle)) {
+        routableTypes.SetType(typeId);
+      }
+    }
+
+    if (!GetObjects(leftLon,
+                    botLat,
+                    rightLon,
+                    topLat,
+                    routableTypes,
+                    nodes,
+                    ways,
+                    areas)) {
+      return false;
+    }
+
+    // We ignore nodes, we do not assume that they are routable at all
+
+    for (std::vector<osmscout::AreaRef>::const_iterator a=areas.begin();
+        a!=areas.end();
+        ++a) {
+      osmscout::AreaRef area(*a);
+
+      for (size_t i=0; i<area->rings[0].nodes.size(); i++) {
+        double distance=sqrt((area->rings[0].nodes[i].GetLat()-lat)*(area->rings[0].nodes[i].GetLat()-lat)+
+                             (area->rings[0].nodes[i].GetLon()-lon)*(area->rings[0].nodes[i].GetLon()-lon));
+
+        if (distance<minDistance) {
+          minDistance=distance;
+
+          object.Set(area->GetFileOffset(),osmscout::refArea);
+          nodeIndex=i;
+        }
+      }
+    }
+
+    for (std::vector<osmscout::WayRef>::const_iterator w=ways.begin();
+        w!=ways.end();
+        ++w) {
+      osmscout::WayRef way(*w);
+
+      for (size_t i=0;  i<way->nodes.size(); i++) {
+        double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
+                             (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));
+        if (distance<minDistance) {
+          minDistance=distance;
+
+          object.Set(way->GetFileOffset(),osmscout::refWay);
+          nodeIndex=i;
+        }
+      }
+    }
 
     return true;
   }
