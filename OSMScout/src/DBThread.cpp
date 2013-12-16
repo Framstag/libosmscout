@@ -685,4 +685,69 @@ void DBThread::AddRoute(const osmscout::Way& way)
   emit Redraw();
 }
 
+bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+                                      const osmscout::Vehicle& vehicle,
+                                      double radius,
+                                      osmscout::ObjectFileRef& object,
+                                      size_t& nodeIndex)
+{
+  QMutexLocker locker(&mutex);
+
+  object.Invalidate();
+
+  if (refObject.GetType()==osmscout::refNode) {
+    osmscout::NodeRef node;
+
+    if (!database.GetNodeByOffset(refObject.GetFileOffset(),
+                                  node)) {
+      return false;
+    }
+
+    return database.GetClosestRoutableNode(node->GetLat(),
+                                           node->GetLon(),
+                                           vehicle,
+                                           radius,
+                                           object,
+                                           nodeIndex);
+  }
+  else if (refObject.GetType()==osmscout::refArea) {
+    osmscout::AreaRef area;
+
+    if (!database.GetAreaByOffset(refObject.GetFileOffset(),
+                                  area)) {
+      return false;
+    }
+
+    double lat;
+    double lon;
+
+    area->GetCenter(lat,lon);
+
+    return database.GetClosestRoutableNode(lat,
+                                           lon,
+                                           vehicle,
+                                           radius,
+                                           object,
+                                           nodeIndex);
+  }
+  else if (refObject.GetType()==osmscout::refWay) {
+    osmscout::WayRef way;
+
+    if (!database.GetWayByOffset(refObject.GetFileOffset(),
+                                 way)) {
+      return false;
+    }
+
+    return database.GetClosestRoutableNode(way->nodes[0].GetLat(),
+                                           way->nodes[0].GetLon(),
+                                           vehicle,
+                                           radius,
+                                           object,
+                                           nodeIndex);
+  }
+  else {
+    return true;
+  }
+}
+
 #include "moc_DBThread.cpp"

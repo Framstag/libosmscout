@@ -135,10 +135,8 @@ struct RouteSelection
 {
   QString                    start;
   osmscout::ObjectFileRef    startObject;
-  size_t                     startNodeIndex;
   QString                    end;
   osmscout::ObjectFileRef    endObject;
-  size_t                     endNodeIndex;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
   std::list<RouteStep>       routeSteps;
@@ -370,37 +368,24 @@ void RoutingDialog::SelectFrom()
 
   dialog.exec();
 
-  if (dialog.result()==QDialog::Accepted) {
-    osmscout::ObjectFileRef location;
-    std::string             label;
-    osmscout::WayRef        way;
-
-    location=dialog.GetLocationResult();
-
-    switch (location.GetType()) {
-    case osmscout::refArea:
-    case osmscout::refWay:
-      route.startObject=location;
-      route.startNodeIndex=0;
-      route.start=dialog.GetLocationResultName();
-
-      from->setText(route.start);
-       // Make sure, start of text is visible
-      from->setCursorPosition(0);
-
-      hasStart=true;
-
-      break;
-    default:
-      // TODO: Open some error dialog
-      hasStart=false;
-      route.start.clear();
-      from->setText("");
-      break;
-    }
-
-    routeButton->setEnabled(hasStart && hasEnd);
+  if (dialog.result()!=QDialog::Accepted) {
+    return;
   }
+
+  osmscout::ObjectFileRef location;
+
+  location=dialog.GetLocationResult();
+
+  route.startObject=location;
+  route.start=dialog.GetLocationResultName();
+
+  from->setText(route.start);
+   // Make sure, start of text is visible
+  from->setCursorPosition(0);
+
+  hasStart=true;
+
+  routeButton->setEnabled(hasStart && hasEnd);
 }
 
 void RoutingDialog::SelectTo()
@@ -412,36 +397,24 @@ void RoutingDialog::SelectTo()
 
   dialog.exec();
 
-  if (dialog.result()==QDialog::Accepted) {
-    osmscout::ObjectFileRef location;
-    std::string             label;
-    osmscout::WayRef        way;
-
-    location=dialog.GetLocationResult();
-
-    switch (location.GetType()) {
-    case osmscout::refArea:
-    case osmscout::refWay:
-      route.endObject=location;
-      route.endNodeIndex=0;
-      route.end=dialog.GetLocationResultName();
-
-      to->setText(route.end);
-       // Make sure, start of text is visible
-      to->setCursorPosition(0);
-
-      hasEnd=true;
-      break;
-    default:
-      // TODO: Open some error dialog
-      hasEnd=false;
-      route.end.clear();
-      to->setText("");
-      break;
-    }
-
-    routeButton->setEnabled(hasStart && hasEnd);
+  if (dialog.result()!=QDialog::Accepted) {
+    return;
   }
+
+  osmscout::ObjectFileRef location;
+
+  location=dialog.GetLocationResult();
+
+  route.endObject=location;
+  route.end=dialog.GetLocationResultName();
+
+  to->setText(route.end);
+   // Make sure, start of text is visible
+  to->setCursorPosition(0);
+
+  hasEnd=true;
+
+  routeButton->setEnabled(hasStart && hasEnd);
 }
 
 void RoutingDialog::DumpStartDescription(const osmscout::RouteDescription::StartDescriptionRef& startDescription,
@@ -700,15 +673,45 @@ void RoutingDialog::Route()
                                      160.0);
   }
 
+  osmscout::ObjectFileRef startObject;
+  size_t                  startNodeIndex;
+
+  osmscout::ObjectFileRef targetObject;
+  size_t                  targetNodeIndex;
+
+  if (!dbThread->GetClosestRoutableNode(route.startObject,
+                                        vehicle,
+                                        1000,
+                                        startObject,
+                                        startNodeIndex)) {
+    std::cerr << "There was an error while routing!" << std::endl;
+  }
+
+  if (!startObject.Valid()) {
+    std::cerr << "Cannot find a routing node close to the start location" << std::endl;
+  }
+
+  if (!dbThread->GetClosestRoutableNode(route.endObject,
+                                        vehicle,
+                                        1000,
+                                        targetObject,
+                                        targetNodeIndex)) {
+    std::cerr << "There was an error while routing!" << std::endl;
+  }
+
+  if (!targetObject.Valid()) {
+    std::cerr << "Cannot find a routing node close to the target location" << std::endl;
+  }
+
   route.routeSteps.clear();
   routeModel->refresh();
 
   if (!dbThread->CalculateRoute(vehicle,
                                 routingProfile,
-                                route.startObject,
-                                route.startNodeIndex,
-                                route.endObject,
-                                route.endNodeIndex,
+                                startObject,
+                                startNodeIndex,
+                                targetObject,
+                                targetNodeIndex,
                                 routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

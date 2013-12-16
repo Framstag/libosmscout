@@ -169,6 +169,12 @@ public:
                                const osmscout::RouteData& data,
                                osmscout::Way& way);
 
+  bool GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+                              const osmscout::Vehicle& vehicle,
+                              double radius,
+                              osmscout::ObjectFileRef& object,
+                              size_t& nodeIndex);
+
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);
 };
