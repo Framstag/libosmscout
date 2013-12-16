@@ -1709,6 +1709,10 @@ namespace osmscout {
         writer.WriteFileOffset(offset);
         writer.SetPos(offset);
 
+        location->second.addresses.sort();
+
+        FileOffset lastOffset=0;
+
         writer.WriteNumber((uint32_t)location->second.addresses.size());
 
         for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
@@ -1716,7 +1720,9 @@ namespace osmscout {
             ++address) {
           writer.Write(address->name);
           writer.Write((uint8_t)address->object.GetType());
-          writer.WriteFileOffset(address->object.GetFileOffset());
+          writer.WriteNumber(address->object.GetFileOffset()-lastOffset);
+
+          lastOffset=address->object.GetFileOffset();
         }
       }
     }

@@ -295,6 +295,8 @@ namespace osmscout {
       return false;
     }
 
+    FileOffset lastOffset=0;
+
     for (size_t i=0; i<addressCount; i++) {
       Address     address;
       uint8_t     type;
@@ -316,11 +318,15 @@ namespace osmscout {
       }
 
 
-      if (!scanner.ReadFileOffset(offset)) {
+      if (!scanner.ReadNumber(offset)) {
         return false;
       }
 
-      address.object.Set(offset,(RefType)type);
+      offset+=lastOffset;
+
+      address.object.Set(offset+lastOffset,(RefType)type);
+
+      lastOffset=offset;
 
       visitor.Visit(location,
                     address);

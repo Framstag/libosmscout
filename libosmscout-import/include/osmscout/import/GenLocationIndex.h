@@ -57,6 +57,11 @@ namespace osmscout {
     {
       ObjectFileRef object; //! Object with the given address
       std::string   name;   //! The house number
+
+      bool operator<(const RegionAddress& other) const
+      {
+        return object.GetFileOffset()<other.object.GetFileOffset();
+      }
     };
 
     struct RegionLocation
