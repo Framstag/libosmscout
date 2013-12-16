@@ -174,8 +174,6 @@ namespace osmscout {
 
     TypeConfig            *typeConfig;          //! Type config for the currently opened map
 
-    std::string           (*hashFunction) (std::string);
-
   private:
     bool GetObjectsNodes(const AreaSearchParameter& parameter,
                          const TypeSet &nodeTypes,

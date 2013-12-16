@@ -208,8 +208,7 @@ namespace osmscout {
                   parameter.GetAreaCacheSize()),
      wayDataFile("ways.dat",
                   parameter.GetWayCacheSize()),
-     typeConfig(NULL),
-     hashFunction(NULL)
+     typeConfig(NULL)
   {
     // no code
   }
@@ -224,7 +223,6 @@ namespace osmscout {
     assert(!path.empty());
 
     this->path=path;
-    this->hashFunction=hashFunction;
 
     typeConfig=new TypeConfig();
 

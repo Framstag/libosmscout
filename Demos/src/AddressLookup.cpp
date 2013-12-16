@@ -98,7 +98,7 @@ std::string GetAdminRegionLabel(const osmscout::Database &database,
                                entry.adminRegion,
                                adminRegionMap,
                                path)) {
-    return false;
+    return "";
   }
 
   if (!path.empty()) {
