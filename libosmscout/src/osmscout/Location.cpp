@@ -398,6 +398,17 @@ namespace osmscout {
       }
     }
 
+    if ((poi.Valid() && !other.poi.Valid()) ||
+        (!poi.Valid() && other.poi.Valid())) {
+      return false;
+    }
+
+    if (poi.Valid() && other.poi.Valid()) {
+      if (poi->object!=other.poi->object) {
+        return false;
+      }
+    }
+
     if ((location.Valid() && !other.location.Valid()) ||
         (!location.Valid() && other.location.Valid())) {
       return false;
