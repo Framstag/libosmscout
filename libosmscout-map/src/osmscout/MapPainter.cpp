@@ -1012,8 +1012,8 @@ namespace osmscout {
       if (!attributes.GetName().empty()) {
         label=attributes.GetName();
       }
-      else if (!attributes.GetHouseNr().empty()) {
-        label=attributes.GetHouseNr();
+      else if (!attributes.GetAddress().empty()) {
+        label=attributes.GetAddress();
       }
 
       hasLabel=!label.empty();
@@ -1137,8 +1137,8 @@ namespace osmscout {
       if (!node->GetName().empty()) {
         label=node->GetName();
       }
-      else if (!node->GetHouseNr().empty()) {
-        label=node->GetHouseNr();
+      else if (!node->GetAddress().empty()) {
+        label=node->GetAddress();
       }
 
       hasLabel=!label.empty();

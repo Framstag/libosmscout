@@ -42,8 +42,8 @@ namespace osmscout {
     name.clear();
     nameAlt.clear();
     ref.clear();
-    street.clear();
-    houseNr.clear();
+    location.clear();
+    address.clear();
     layer=0;
     width=0;
     maxSpeed=0;
@@ -93,11 +93,11 @@ namespace osmscout {
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagStreet) {
-        street=tag->value;
+        location=tag->value;
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagHouseNr) {
-        houseNr=tag->value;
+        address=tag->value;
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagLayer) {
@@ -330,12 +330,12 @@ namespace osmscout {
       scanner.Read(ref);
     }
 
-    if (flags & hasStreet) {
-      scanner.Read(street);
+    if (flags & hasLocation) {
+      scanner.Read(location);
     }
 
-    if (flags & hasHouseNr) {
-      scanner.Read(houseNr);
+    if (flags & hasAddress) {
+      scanner.Read(address);
     }
 
     if (flags & hasLayer) {
@@ -409,18 +409,18 @@ namespace osmscout {
       flags&=~hasRef;
     }
 
-    if (!street.empty()) {
-      flags|=hasStreet;
+    if (!location.empty()) {
+      flags|=hasLocation;
     }
     else {
-      flags&=~hasStreet;
+      flags&=~hasLocation;
     }
 
-    if (!houseNr.empty()) {
-      flags|=hasHouseNr;
+    if (!address.empty()) {
+      flags|=hasAddress;
     }
     else {
-      flags&=~hasHouseNr;
+      flags&=~hasAddress;
     }
 
     if (layer!=0) {
@@ -474,12 +474,12 @@ namespace osmscout {
       writer.Write(ref);
     }
 
-    if (flags & hasStreet) {
-      writer.Write(street);
+    if (flags & hasLocation) {
+      writer.Write(location);
     }
 
-    if (flags & hasHouseNr) {
-      writer.Write(houseNr);
+    if (flags & hasAddress) {
+      writer.Write(address);
     }
 
     if (flags & hasLayer) {
@@ -525,8 +525,8 @@ namespace osmscout {
         name!=other.name ||
         nameAlt!=other.nameAlt ||
         ref!=other.ref ||
-        street!=other.street ||
-        houseNr!=other.houseNr ||
+        location!=other.location ||
+        address!=other.address ||
         layer!=other.layer ||
         width!=other.width ||
         maxSpeed!=other.maxSpeed ||

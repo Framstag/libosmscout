@@ -184,7 +184,7 @@ void Scanner::Init() {
 	keywords.set("WAY", 30);
 	keywords.set("AREA", 31);
 	keywords.set("RELATION", 32);
-	keywords.set("INDEX", 33);
+	keywords.set("INDEX_LOC", 33);
 	keywords.set("INDEX_REGION", 34);
 	keywords.set("INDEX_POI", 35);
 	keywords.set("CONSUME_CHILDREN", 36);

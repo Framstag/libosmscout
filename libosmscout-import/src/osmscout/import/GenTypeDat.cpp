@@ -113,7 +113,7 @@ namespace osmscout {
       writer.Write(type->CanRouteFoot());
       writer.Write(type->CanRouteBicycle());
       writer.Write(type->CanRouteCar());
-      writer.Write(type->CanBeIndexed());
+      writer.Write(type->GetIndexAsLocation());
       writer.Write(type->GetIndexAsRegion());
       writer.Write(type->GetIndexAsPOI());
       writer.Write(type->GetConsumeChildren());

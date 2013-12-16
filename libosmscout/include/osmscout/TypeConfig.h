@@ -180,7 +180,7 @@ namespace osmscout {
     bool         canRouteFoot;
     bool         canRouteBicycle;
     bool         canRouteCar;
-    bool         canBeIndexed;
+    bool         indexAsLocation;
     bool         indexAsRegion;
     bool         indexAsPOI;
     bool         consumeChildren;
@@ -325,16 +325,16 @@ namespace osmscout {
       return canRouteCar;
     }
 
-    inline TypeInfo& CanBeIndexed(bool canBeIndexed)
+    inline TypeInfo& SetIndexAsLocation(bool indexAsLocation)
     {
-      this->canBeIndexed=canBeIndexed;
+      this->indexAsLocation=indexAsLocation;
 
       return *this;
     }
 
-    inline bool CanBeIndexed() const
+    inline bool GetIndexAsLocation() const
     {
-      return canBeIndexed;
+      return indexAsLocation;
     }
 
     inline TypeInfo& SetIndexAsRegion(bool indexAsRegion)

@@ -40,8 +40,8 @@ namespace osmscout {
     const static uint16_t hasNameAlt      = 1 <<  6; //! We have an alternative name (mainly in a second language)
     const static uint16_t hasName         = 1 <<  7; //! We have a name
     const static uint16_t hasRef          = 1 <<  8; //! We have reference name
-    const static uint16_t hasStreet       = 1 <<  9; //! Street for house nr
-    const static uint16_t hasHouseNr      = 1 << 10; //! We have a house number
+    const static uint16_t hasLocation     = 1 <<  9; //! Name of street or place
+    const static uint16_t hasAddress      = 1 << 10; //! House number
     const static uint16_t hasLayer        = 1 << 11; //! We have optional layer information
     const static uint16_t hasWidth        = 1 << 12; //! We have width
     const static uint16_t hasMaxSpeed     = 1 << 13; //! We have maximum speed information
@@ -62,8 +62,8 @@ namespace osmscout {
     AttributeAccess  access;   //! Information regarding which vehicle can access this way
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
-    std::string      street;   //! street and...
-    std::string      houseNr;  //! ...house number
+    std::string      location; //! location name like a street name and...
+    std::string      address;  //! an address like a house number
     int8_t           layer;    //! layer to draw on
     uint8_t          width;    //! width of way
     uint8_t          maxSpeed; //! speed from 1..255km/h (0 means, not set)
@@ -112,14 +112,14 @@ namespace osmscout {
       return ref;
     }
 
-    inline std::string GetStreet() const
+    inline std::string GetLocation() const
     {
-      return street;
+      return location;
     }
 
-    inline std::string GetHouseNr() const
+    inline std::string GetAddress() const
     {
-      return houseNr;
+      return address;
     }
 
     inline int8_t GetLayer() const
@@ -228,14 +228,14 @@ namespace osmscout {
       return attributes.GetRefName();
     }
 
-    inline std::string GetStreet() const
+    inline std::string GetLocation() const
     {
-      return attributes.GetStreet();
+      return attributes.GetLocation();
     }
 
-    inline std::string GetHouseNr() const
+    inline std::string GetAddress() const
     {
-      return attributes.GetHouseNr();
+      return attributes.GetAddress();
     }
 
     inline int8_t GetLayer() const

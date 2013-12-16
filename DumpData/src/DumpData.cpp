@@ -272,14 +272,14 @@ static void DumpNodeAttributes(const osmscout::TypeId& type,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
-  if (!attributes.GetStreet().empty()) {
+  if (!attributes.GetLocation().empty()) {
     DumpIndent(indent);
-    std::cout << "street: " << attributes.GetStreet() << std::endl;
+    std::cout << "street: " << attributes.GetLocation() << std::endl;
   }
 
-  if (!attributes.GetHouseNr().empty()) {
+  if (!attributes.GetAddress().empty()) {
     DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
   }
   if (attributes.HasTags()) {
     std::cout << std::endl;
@@ -330,14 +330,14 @@ static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
-  if (!attributes.GetStreet().empty()) {
+  if (!attributes.GetLocation().empty()) {
     DumpIndent(indent);
-    std::cout << "street: " << attributes.GetStreet() << std::endl;
+    std::cout << "street: " << attributes.GetLocation() << std::endl;
   }
 
-  if (!attributes.GetHouseNr().empty()) {
+  if (!attributes.GetAddress().empty()) {
     DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
   }
 
   if (!attributes.HasAccess()) {
@@ -373,14 +373,14 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
-  if (!attributes.GetStreet().empty()) {
+  if (!attributes.GetLocation().empty()) {
     DumpIndent(indent);
-    std::cout << "street: " << attributes.GetStreet() << std::endl;
+    std::cout << "street: " << attributes.GetLocation() << std::endl;
   }
 
-  if (!attributes.GetHouseNr().empty()) {
+  if (!attributes.GetAddress().empty()) {
     DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
   }
 
   if (!attributes.GetRefName().empty()) {

@@ -188,7 +188,7 @@ namespace osmscout {
      canRouteFoot(false),
      canRouteBicycle(false),
      canRouteCar(false),
-     canBeIndexed(false),
+     indexAsLocation(false),
      indexAsRegion(false),
      indexAsPOI(false),
      consumeChildren(false),
@@ -873,7 +873,7 @@ namespace osmscout {
     for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
          type!=this->types.end();
          ++type) {
-      if (type->CanBeIndexed()) {
+      if (type->GetIndexAsLocation()) {
         types.insert(type->GetId());
       }
     }

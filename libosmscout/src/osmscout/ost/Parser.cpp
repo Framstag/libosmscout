@@ -457,9 +457,9 @@ void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 			ROUTE(typeInfo);
 			break;
 		}
-		case 33 /* "INDEX" */: {
+		case 33 /* "INDEX_LOC" */: {
 			Get();
-			typeInfo.CanBeIndexed(true); 
+			typeInfo.SetIndexAsLocation(true); 
 			break;
 		}
 		case 34 /* "INDEX_REGION" */: {
@@ -617,7 +617,7 @@ void Errors::SynErr(int line, int col, int n)
 			case 30: s = coco_string_create("\"WAY\" expected"); break;
 			case 31: s = coco_string_create("\"AREA\" expected"); break;
 			case 32: s = coco_string_create("\"RELATION\" expected"); break;
-			case 33: s = coco_string_create("\"INDEX\" expected"); break;
+			case 33: s = coco_string_create("\"INDEX_LOC\" expected"); break;
 			case 34: s = coco_string_create("\"INDEX_REGION\" expected"); break;
 			case 35: s = coco_string_create("\"INDEX_POI\" expected"); break;
 			case 36: s = coco_string_create("\"CONSUME_CHILDREN\" expected"); break;

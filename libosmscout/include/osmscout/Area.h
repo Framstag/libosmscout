@@ -38,8 +38,8 @@ namespace osmscout {
     const static uint8_t isSimple        = 1 << 2; //1 We are a simple area, only one Ring, no roles
     const static uint8_t hasNameAlt      = 1 << 3; //! We have an alternative name (mainly in a second language)
     const static uint8_t hasName         = 1 << 4; //! We have a name
-    const static uint8_t hasStreet       = 1 << 5; //! Street and..
-    const static uint8_t hasHouseNr      = 1 << 6; //! ...house number
+    const static uint8_t hasLocation     = 1 << 5; //! A location like a Street or place name and..
+    const static uint8_t hasAddress      = 1 << 6; //! an address like a house number
     const static uint8_t hasTags         = 1 << 7; //! We have additional tags
 
     const static uint8_t hasAccess       = 1 << 0; //! We do have (general) access rights to this way/area
@@ -50,8 +50,8 @@ namespace osmscout {
   private:
     mutable uint8_t  flags;
     std::string      nameAlt;  //! alternative name
-    std::string      street;   //! Street and...
-    std::string      houseNr;  //! ...house number
+    std::string      location; //! Street and...
+    std::string      address;  //! ...house number
     std::vector<Tag> tags;     //! list of preparsed tags
 
   private:
@@ -87,14 +87,14 @@ namespace osmscout {
       return nameAlt;
     }
 
-    inline std::string GetStreet() const
+    inline std::string GetLocation() const
     {
-      return street;
+      return location;
     }
 
-    inline std::string GetHouseNr() const
+    inline std::string GetAddress() const
     {
-      return houseNr;
+      return address;
     }
 
     inline bool HasAccess() const

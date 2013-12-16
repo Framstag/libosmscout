@@ -290,12 +290,9 @@ PRODUCTIONS
 
   TYPEOPTION<TypeInfo& typeInfo>
               =  ROUTE<typeInfo>
-               | "INDEX"             (. typeInfo.CanBeIndexed(true); .)
+               | "INDEX_LOC"         (. typeInfo.SetIndexAsLocation(true); .)
                | "INDEX_REGION"      (. typeInfo.SetIndexAsRegion(true); .)
                | "INDEX_POI"         (. typeInfo.SetIndexAsPOI(true); .)
-               /*
-               | "INDEX_STREET"      (. typeInfo.SetIndexStreet(true); .)*/
-               
                | "CONSUME_CHILDREN"  (. typeInfo.SetConsumeChildren(true); .)
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .)
                | "IGNORE"            (. typeInfo.SetIgnore(true); .)

@@ -885,10 +885,10 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator location=region.locations.find(ring.GetAttributes().GetStreet());
+    std::map<std::string,RegionLocation>::iterator location=region.locations.find(ring.GetAttributes().GetLocation());
 
     if (location==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+ring.GetAttributes().GetStreet() +"' '"+ring.GetAttributes().GetHouseNr()+"' of Area "+NumberToString(area.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
+      progress.Debug(std::string("Street of address '")+ring.GetAttributes().GetLocation() +"' '"+ring.GetAttributes().GetAddress()+"' of Area "+NumberToString(area.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
 
       return;
     }
@@ -896,14 +896,14 @@ namespace osmscout {
     for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
         address!=location->second.addresses.end();
         ++address) {
-      if (address->name==ring.GetAttributes().GetHouseNr()) {
+      if (address->name==ring.GetAttributes().GetAddress()) {
         return;
       }
     }
 
     RegionAddress address;
 
-    address.name=ring.GetAttributes().GetHouseNr();
+    address.name=ring.GetAttributes().GetAddress();
     address.object.Set(area.GetFileOffset(),refArea);
 
     location->second.addresses.push_back(address);
@@ -1119,8 +1119,8 @@ namespace osmscout {
           ring!=area.rings.end();
           ++ring) {
         bool isAddress=ring->GetType()!=typeIgnore &&
-                       !ring->GetAttributes().GetStreet().empty() &&
-                       !ring->GetAttributes().GetHouseNr().empty();
+                       !ring->GetAttributes().GetLocation().empty() &&
+                       !ring->GetAttributes().GetAddress().empty();
         bool isPOI=ring->GetType()!=typeIgnore &&
                    !ring->GetAttributes().GetName().empty() &&
                    poiTypes.find(ring->GetType())!=poiTypes.end();
@@ -1208,23 +1208,23 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator location=region.locations.find(way.GetStreet());
+    std::map<std::string,RegionLocation>::iterator location=region.locations.find(way.GetLocation());
 
     if (location==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+way.GetStreet() +"' '"+way.GetHouseNr()+"' of Way "+NumberToString(way.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
+      progress.Debug(std::string("Street of address '")+way.GetLocation() +"' '"+way.GetAddress()+"' of Way "+NumberToString(way.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
     }
     else {
       for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
           address!=location->second.addresses.end();
           ++address) {
-        if (address->name==way.GetHouseNr()) {
+        if (address->name==way.GetAddress()) {
           return false;
         }
       }
 
       RegionAddress address;
 
-      address.name=way.GetHouseNr();
+      address.name=way.GetAddress();
       address.object.Set(way.GetFileOffset(),refWay);
 
       location->second.addresses.push_back(address);
@@ -1340,8 +1340,8 @@ namespace osmscout {
         return false;
       }
 
-      bool isAddress=!way.GetStreet().empty() &&
-                     !way.GetHouseNr().empty();
+      bool isAddress=!way.GetLocation().empty() &&
+                     !way.GetAddress().empty();
       bool isPOI=!way.GetName().empty() &&
                  poiTypes.find(way.GetType())!=poiTypes.end();
 
@@ -1404,24 +1404,24 @@ namespace osmscout {
                                                       const Node& node,
                                                       bool& added)
   {
-    std::map<std::string,RegionLocation>::iterator location=region.locations.find(node.GetStreet());
+    std::map<std::string,RegionLocation>::iterator location=region.locations.find(node.GetLocation());
 
     if (location==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+node.GetStreet() +"' '"+node.GetHouseNr()+"' of Node "+NumberToString(node.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
+      progress.Debug(std::string("Street of address '")+node.GetLocation() +"' '"+node.GetAddress()+"' of Node "+NumberToString(node.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
       return;
     }
 
     for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
         address!=location->second.addresses.end();
         ++address) {
-      if (address->name==node.GetHouseNr()) {
+      if (address->name==node.GetAddress()) {
         return;
       }
     }
 
     RegionAddress address;
 
-    address.name=node.GetHouseNr();
+    address.name=node.GetAddress();
     address.object.Set(node.GetFileOffset(),refNode);
 
     location->second.addresses.push_back(address);
@@ -1493,8 +1493,8 @@ namespace osmscout {
         return false;
       }
 
-      bool isAddress=!node.GetStreet().empty() &&
-                     !node.GetHouseNr().empty();
+      bool isAddress=!node.GetLocation().empty() &&
+                     !node.GetAddress().empty();
       bool isPOI=!node.GetName().empty() &&
                  poiTypes.find(node.GetType())!=poiTypes.end();
 

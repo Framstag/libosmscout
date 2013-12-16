@@ -39,8 +39,8 @@ namespace osmscout {
     // Attribute availability flags (for optimized attribute storage)
     const static uint8_t hasNameAlt      = 1 << 3; //! We have an alternative name (mainly in a second language)
     const static uint8_t hasName         = 1 << 4; //! We have a name
-    const static uint8_t hasStreet       = 1 << 5; //! Street and...
-    const static uint8_t hasHouseNr      = 1 << 6; //! ...house number
+    const static uint8_t hasLocation     = 1 << 5; //! Street and...
+    const static uint8_t hasAddress      = 1 << 6; //! ...house number
     const static uint8_t hasTags         = 1 << 7; //! We have additional tags
 
   private:
@@ -48,8 +48,8 @@ namespace osmscout {
 
     std::string      name;     //! name
     std::string      nameAlt;  //! alternative name
-    std::string      street ;  //! street and...
-    std::string      houseNr;  //! ...house number
+    std::string      location; //! street and...
+    std::string      address;  //! ...house number
     std::vector<Tag> tags;     //! list of preparsed tags
 
   private:
@@ -81,14 +81,14 @@ namespace osmscout {
       return nameAlt;
     }
 
-    inline std::string GetStreet() const
+    inline std::string GetLocation() const
     {
-      return street;
+      return location;
     }
 
-    inline std::string GetHouseNr() const
+    inline std::string GetAddress() const
     {
-      return houseNr;
+      return address;
     }
 
     inline bool HasTags() const
@@ -162,14 +162,14 @@ namespace osmscout {
       return attributes.GetName();
     }
 
-    inline std::string GetStreet() const
+    inline std::string GetLocation() const
     {
-      return attributes.GetStreet();
+      return attributes.GetLocation();
     }
 
-    inline std::string GetHouseNr() const
+    inline std::string GetAddress() const
     {
-      return attributes.GetHouseNr();
+      return attributes.GetAddress();
     }
 
     inline bool HasTags() const

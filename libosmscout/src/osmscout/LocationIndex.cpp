@@ -324,7 +324,7 @@ namespace osmscout {
 
       offset+=lastOffset;
 
-      address.object.Set(offset+lastOffset,(RefType)type);
+      address.object.Set(offset,(RefType)type);
 
       lastOffset=offset;
 
