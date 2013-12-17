@@ -20,8 +20,8 @@
 #include <iostream>
 #include <iomanip>
 
-#include <qt4/QtGui/QPixmap>
-#include <qt4/QtGui/QApplication>
+#include <QPixmap>
+#include <QApplication>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterQt.h>

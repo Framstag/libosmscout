@@ -50,7 +50,8 @@ DrawMapCairo_LDADD = $(LIBOSMSCOUTMAPCAIRO_LIBS) \
                      $(LIBOSMSCOUT_LIBS)
 
 DrawMapQt_SOURCES = DrawMapQt.cpp
-DrawMapQt_CXXFLAGS = $(LIBOSMSCOUTMAPQT_CFLAGS) \
+DrawMapQt_CXXFLAGS = -fPIC \
+                     $(LIBOSMSCOUTMAPQT_CFLAGS) \
                      $(LIBOSMSCOUTMAP_CFLAGS) \
                      $(LIBOSMSCOUT_CFLAGS)
 DrawMapQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
@@ -95,7 +96,8 @@ ResourceConsumption_LDADD = $(LIBOSMSCOUTMAP_LIBS) \
                             $(LIBOSMSCOUT_LIBS)
 
 ResourceConsumptionQt_SOURCES = ResourceConsumptionQt.cpp
-ResourceConsumptionQt_CXXFLAGS = $(LIBOSMSCOUTMAPQT_CFLAGS) \
+ResourceConsumptionQt_CXXFLAGS = -fPIC \
+                                 $(LIBOSMSCOUTMAPQT_CFLAGS) \
                                  $(LIBOSMSCOUTMAP_CFLAGS) \
                                  $(LIBOSMSCOUT_CFLAGS)
 ResourceConsumptionQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
