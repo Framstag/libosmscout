@@ -38,8 +38,3 @@ OSMScout_LDADD= \
                $(LIBOSMSCOUT_LIBS) \
                $(LIBQTGUI_LIBS)
 
-if HAVE_LIB_QTOPENGL
-OSMScout_CXXFLAGS += $(LIBQTOPENGL_CFLAGS)
-OSMScout_LDADD += $(LIBQTOPENGL_LIBS)
-endif
-

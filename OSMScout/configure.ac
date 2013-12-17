@@ -13,27 +13,20 @@ AM_INIT_AUTOMAKE([nostdinc subdir-objects dist-bzip2 no-dist-gzip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PROG_CXX
-AC_PROG_LIBTOOL
+AC_LANG(C++)
+LT_INIT([pic-only])
+
 AC_PROG_INSTALL
 
 AX_CXXFLAGS_WARN_ALL
 
 if test "$GXX" = yes; then
-  CXXFLAGS="$CXXFLAGS -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
+  CXXFLAGS="$CXXFLAGS -fPIC -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
-PKG_CHECK_MODULES(LIBQTGUI,[QtGui > 4.6.0])
+PKG_CHECK_MODULES(LIBQTGUI,[Qt5Gui >= 5.0.0 Qt5Widgets >= 5.0.0])
 AC_SUBST(LIBQTGUI_CFLAGS)
 AC_SUBST(LIBQTGUI_LIBS)
-
-PKG_CHECK_MODULES(LIBQTOPENGL,[QtOpenGL > 4.6.0],
-                  [HAS_LIB_QTOPENGL=true
-                   AC_SUBST(LIBQTOPENGL_CFLAGS)
-                   AC_SUBST(LIBQTOPENGL_LIBS)
-                   AC_DEFINE(HAVE_LIB_QTOPENGL,1,[OpenGL support for Qt found])],
-                   [HAS_LIB_QTOPENGL=false])
-
-AM_CONDITIONAL(HAVE_LIB_QTOPENGL,[test "$HAS_LIB_QTOPENGL" = "true"])
 
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout])
 AC_SUBST(LIBOSMSCOUT_CFLAGS)

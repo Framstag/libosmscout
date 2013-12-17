@@ -19,6 +19,8 @@
 
 #include "SearchLocationDialog.h"
 
+#include <QApplication>
+#include <QButtonGroup>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QVBoxLayout>

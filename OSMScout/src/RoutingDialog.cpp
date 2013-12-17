@@ -19,7 +19,10 @@
 
 #include "RoutingDialog.h"
 
+#include <QApplication>
+#include <QButtonGroup>
 #include <QDialogButtonBox>
+#include <QHeaderView>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

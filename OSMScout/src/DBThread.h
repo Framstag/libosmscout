@@ -27,10 +27,6 @@
 
 #include "config.h"
 
-#if defined(HAVE_LIB_QTOPENGL)
- #include <QGLPixelBuffer>
-#endif
-
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
 #include <osmscout/RoutePostprocessor.h>
@@ -104,19 +100,11 @@ private:
   QString                      iconDirectory;
 
   QImage                       *currentImage;
-#if defined(HAVE_LIB_QTOPENGL)
-  QGLPixelBuffer               *currentGLPixmap;
-  QSize                        currentGLPixmapSize;
-#endif
   double                       currentLat;
   double                       currentLon;
   osmscout::Magnification      currentMagnification;
 
   QImage                       *finishedImage;
-#if defined(HAVE_LIB_QTOPENGL)
-  QGLPixelBuffer               *finishedGLPixmap;
-  QSize                        finishedGLPixmapSize;
-#endif
   double                       finishedLat;
   double                       finishedLon;
   osmscout::Magnification      finishedMagnification;
@@ -127,7 +115,6 @@ private:
   osmscout::BreakerRef         renderBreakerRef;
 
 private:
-  bool OpenGLSupported() const;
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
 

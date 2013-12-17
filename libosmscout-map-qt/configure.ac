@@ -11,7 +11,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PROG_CXX
 AC_LANG(C++)
-LT_INIT([win32-dll])
+LT_INIT([pic-only disable-static win32-dll])
 AC_PROG_INSTALL
 
 AX_CXXFLAGS_WARN_ALL
@@ -56,7 +56,7 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
                    AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
-PKG_CHECK_MODULES(LIBQTGUI, [QtGui > 4.6.0],
+PKG_CHECK_MODULES(LIBQTGUI, [Qt5Gui >= 5.0.0],
                   [AC_SUBST(LIBQTGUI_CFLAGS)
                    AC_SUBST(LIBQTGUI_LIBS)])
 
