@@ -1471,18 +1471,7 @@ namespace osmscout {
     for (uint32_t n=1; n<=nodeCount; n++) {
       progress.SetProgress(n,nodeCount);
 
-      Node       node;
-      FileOffset offset;
-
-      if (!scanner.GetPos(offset)) {
-        progress.Error(std::string("Cannot get file offset of data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(nodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      Node node;
 
       if (!node.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -1514,7 +1503,7 @@ namespace osmscout {
         bool added=false;
 
         AddAddressNodeToRegion(progress,
-                               rootRegion,
+                               region,
                                node,
                                added);
         if (added) {
@@ -1526,7 +1515,7 @@ namespace osmscout {
         bool added=false;
 
         AddPOINodeToRegion(progress,
-                           rootRegion,
+                           region,
                            node,
                            added);
         if (added) {
@@ -1763,7 +1752,7 @@ namespace osmscout {
 
   std::string LocationIndexGenerator::GetDescription() const
   {
-    return "Generate 'region.dat'";
+    return "Generate 'location.idx'";
   }
 
   bool LocationIndexGenerator::Import(const ImportParameter& parameter,
