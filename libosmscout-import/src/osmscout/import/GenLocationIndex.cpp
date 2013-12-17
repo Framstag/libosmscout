@@ -1572,7 +1572,7 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteRegionIndex(FileWriter& writer,
                                                 Region& rootRegion)
   {
-    writer.WriteNumber(rootRegion.regions.size());
+    writer.WriteNumber((uint32_t)rootRegion.regions.size());
     for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
          r!=rootRegion.regions.end();
          ++r) {
@@ -1665,7 +1665,6 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteRegionData(FileWriter& writer,
                                                  Region& rootRegion)
   {
-    writer.WriteNumber(rootRegion.regions.size());
     for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
          r!=rootRegion.regions.end();
          ++r) {
@@ -1734,7 +1733,6 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteAddressData(FileWriter& writer,
                                                 Region& rootRegion)
   {
-    writer.WriteNumber(rootRegion.regions.size());
     for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
          r!=rootRegion.regions.end();
          ++r) {
