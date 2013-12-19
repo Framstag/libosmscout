@@ -61,9 +61,9 @@ CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [libosmscout],
-                         [-losmscoutmap $LIBOSMSCOUT_LIBS],
+                         [-losmscoutmap],
                          [libosmscout map rendering base library],
-                         [$LIBOSMSCOUT_CFLAGS],
+                         [],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])

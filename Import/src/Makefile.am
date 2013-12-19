@@ -2,11 +2,9 @@ bin_PROGRAMS = Import
 
 Import_SOURCES = Import.cpp
 
-Import_CXXFLAGS=-I. $(LIBOSMSCOUTIMPORT_CFLAGS) \
-                    $(LIBOSMSCOUT_CFLAGS)
+Import_CXXFLAGS=-I. $(LIBOSMSCOUT_CFLAGS)
                     
-Import_LDADD= $(LIBOSMSCOUTIMPORT_LIBS) \
-              $(LIBOSMSCOUT_LIBS)
+Import_LDADD= $(LIBOSMSCOUT_LIBS)
 
 
 

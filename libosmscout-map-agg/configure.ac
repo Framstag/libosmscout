@@ -47,14 +47,9 @@ AC_MSG_CHECKING([for WIN32])
     [AC_MSG_RESULT(no)])
 
 dnl Check for libosmscout
-PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
+PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
-
-dnl Check for libosmscout-map
-PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
-                  [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
-                   AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
 PKG_CHECK_MODULES(LIBFREETYPE, [freetype2],
                   HASLIBFREETYPE=true
@@ -67,7 +62,7 @@ AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
 
 PKG_CHECK_MODULES(LIBAGG, [libagg],
                   [if test "$HASLIBFREETYPE" = "true"; then
-                     LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
+                     LIBAGG_LIBS="-laggfontfreetype $LIBAGG_LIBS"
                    fi
                    AC_SUBST(LIBAGG_CFLAGS)
                    AC_SUBST(LIBAGG_LIBS)])
@@ -75,10 +70,10 @@ PKG_CHECK_MODULES(LIBAGG, [libagg],
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
-                         [libosmscout-map libosmscout],
-                         [-losmscoutmapagg $LIBAGG_LIBS $LIBFREETYPE_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout libosmscout-map],
+                         [-losmscoutmapagg $LIBAGG_LIBS $LIBFREETYPE_LIBS],
                          [libosmscout map rendering agg backend library],
-                         [$LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [$LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])

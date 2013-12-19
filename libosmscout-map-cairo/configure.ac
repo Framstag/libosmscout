@@ -18,7 +18,7 @@ AX_CXXFLAGS_WARN_ALL
 
 AC_TYPE_SIZE_T
 
-AC_SEARCH_LIBS([sqrt],[m])
+AC_SEARCH_LIBS([sqrt],[m],[])
 
 if test "$GXX" = yes; then
   CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
@@ -47,14 +47,9 @@ AC_MSG_CHECKING([for WIN32])
     [AC_MSG_RESULT(no)])
 
 dnl Check for libosmscout
-PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
+PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
-
-dnl Check for libosmscout-map
-PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
-                  [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
-                   AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
 PKG_CHECK_MODULES(LIBCAIRO, cairo,
                   [AC_SUBST(LIBCAIRO_CFLAGS)
@@ -80,10 +75,10 @@ AM_CONDITIONAL(HAVE_LIB_PNG,[test "$HASPNG" = "true"])
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
-                         [libosmscout-map libosmscout],
-                         [-losmscoutmapcairo $LIBCAIRO_LIBS $LIBPANGO_LIBS $LIBPNG_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout libosmscout-map],
+                         [-losmscoutmapcairo $LIBCAIRO_LIBS $LIBPANGO_LIBS $LIBPNG_LIBS],
                          [libosmscout map rendering cairo backend library],
-                         [$LIBCAIRO_CFLAGS $LIBPANGO_CFLAGS $LIBPNG_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [$LIBCAIRO_CFLAGS $LIBPANGO_CFLAGS $LIBPNG_CFLAGS],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])

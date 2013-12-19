@@ -23,13 +23,9 @@ if test "$GXX" = yes; then
   CXXFLAGS="$CXXFLAGS -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
-PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout])
+PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-import])
 AC_SUBST(LIBOSMSCOUT_CFLAGS)
 AC_SUBST(LIBOSMSCOUT_LIBS)
-
-PKG_CHECK_MODULES(LIBOSMSCOUTIMPORT,[libosmscout-import])
-AC_SUBST(LIBOSMSCOUTIMPORT_CFLAGS)
-AC_SUBST(LIBOSMSCOUTIMPORT_LIBS)
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

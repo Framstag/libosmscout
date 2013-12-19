@@ -26,15 +26,11 @@ $(OSMScout_OBJECTS) : moc_DBThread.cpp \
                       moc_MainWindow.cpp
 
 OSMScout_CXXFLAGS=-I. \
-                  $(LIBOSMSCOUTMAPQT_CFLAGS) \
-                  $(LIBOSMSCOUTMAP_CFLAGS) \
                   $(LIBOSMSCOUT_CFLAGS) \
                   $(LIBQTGUI_CFLAGS)
 
 
 OSMScout_LDADD= \
-               $(LIBOSMSCOUTMAPQT_LIBS) \
-               $(LIBOSMSCOUTMAP_LIBS) \
                $(LIBOSMSCOUT_LIBS) \
                $(LIBQTGUI_LIBS)
 

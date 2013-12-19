@@ -108,9 +108,9 @@ CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [libosmscout],
-                         [-losmscoutimport $PROTOBUF_LIBS $ZLIB_LIBS $XML2_LIBS $LIBOSMSCOUT_LIBS],
+                         [-losmscoutimport $PROTOBUF_LIBS $ZLIB_LIBS $XML2_LIBS],
                          [libosmscout import library],
-                         [$PROTOBUF_CFLAGS $ZLIB_CFLAGS $XML2_CFLAGS $LIBOSMSCOUT_CFLAGS],
+                         [$PROTOBUF_CFLAGS $ZLIB_CFLAGS $XML2_CFLAGS],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile src/protobuf/Makefile include/Makefile])

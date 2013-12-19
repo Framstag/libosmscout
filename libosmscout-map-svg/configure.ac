@@ -47,14 +47,9 @@ AC_MSG_CHECKING([for WIN32])
     [AC_MSG_RESULT(no)])
 
 dnl Check for libosmscout
-PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
+PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
-
-dnl Check for libosmscout-map
-PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
-                  [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
-                   AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
 PKG_CHECK_MODULES(LIBPANGO, pangoft2,
                   [AC_SUBST(LIBPANGO_CFLAGS)
@@ -65,10 +60,10 @@ PKG_CHECK_MODULES(LIBPANGO, pangoft2,
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
-                         [libosmscout-map libosmscout],
-                         [-losmscoutmapsvg $LIBPANGO_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout libosmscout-map],
+                         [-losmscoutmapsvg $LIBPANGO_LIBS],
                          [libosmscout map rendering SVG backend library],
-                         [$LIBPANGO_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [$LIBPANGO_CFLAGS],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
