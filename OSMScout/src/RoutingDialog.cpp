@@ -237,7 +237,7 @@ void RouteModel::refresh()
 RoutingDialog::RoutingDialog(QWidget* parentWindow,
                              DBThread* dbThread,
                              const SettingsRef& settings)
- : QDialog(parentWindow,Qt::Dialog),
+ : QDialog(parentWindow),
    settings(settings),
    dbThread(dbThread),
    from(new QLineEdit()),
@@ -245,8 +245,7 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow,
    to(new QLineEdit()),
    hasEnd(false),
    routeView(new QTableView()),
-   routeModel(new RouteModel()),
-   routeButton(new QPushButton("&Route"))
+   routeModel(new RouteModel())
 {
   QVBoxLayout  *mainLayout=new QVBoxLayout();
   QFormLayout  *formLayout=new QFormLayout();
@@ -327,7 +326,7 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow,
 
   QDialogButtonBox *buttonBox=new QDialogButtonBox();
 
-  buttonBox->addButton(routeButton,QDialogButtonBox::ApplyRole);
+  routeButton=buttonBox->addButton("&Route",QDialogButtonBox::ApplyRole);
   buttonBox->addButton(QDialogButtonBox::Close);
 
   routeButton->setEnabled(false);
@@ -338,8 +337,8 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow,
 
   connect(selectFromButton,SIGNAL(clicked()),this,SLOT(SelectFrom()));
   connect(selectToButton,SIGNAL(clicked()),this,SLOT(SelectTo()));
-  connect(routeButton,SIGNAL(clicked()),this,SLOT(Route()));
-  connect(buttonBox->button(QDialogButtonBox::Close),SIGNAL(clicked()),this,SLOT(reject()));
+  connect(routeButton,SIGNAL(clicked()),this,SLOT(CalculateRoute()));
+  connect(buttonBox->button(QDialogButtonBox::Close),SIGNAL(clicked()),this,SLOT(close()));
   connect(routeTypes,SIGNAL(buttonClicked(int)),this,SLOT(OnVehicle(int)));
 
   if (!route.start.isEmpty()) {
@@ -651,7 +650,7 @@ void RoutingDialog::GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_service"]=30.0;
 }
 
-void RoutingDialog::Route()
+void RoutingDialog::CalculateRoute()
 {
   osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RouteData                 routeData;

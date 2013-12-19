@@ -73,7 +73,7 @@ public:
 
 SearchLocationDialog::SearchLocationDialog(QWidget* parentWindow,
                                            DBThread* dbThread)
- : QDialog(parentWindow,Qt::Dialog),
+ : QDialog(parentWindow),
    dbThread(dbThread),
    locationName(new QLineEdit()),
    results(new QListView()),

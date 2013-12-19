@@ -74,7 +74,7 @@ private:
 public slots:
   void SelectFrom();
   void SelectTo();
-  void Route();
+  void CalculateRoute();
   void OnVehicle(int id);
 
 private:

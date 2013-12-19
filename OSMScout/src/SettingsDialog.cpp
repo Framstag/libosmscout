@@ -30,7 +30,7 @@
 
 SettingsDialog::SettingsDialog(QWidget* parentWindow,
                                const SettingsRef& settings)
- : QDialog(parentWindow,Qt::Dialog),
+ : QDialog(parentWindow),
    settings(settings),
    dpi(new QSpinBox())
 {
@@ -51,8 +51,6 @@ SettingsDialog::SettingsDialog(QWidget* parentWindow,
   QDialogButtonBox *buttonBox=new QDialogButtonBox(QDialogButtonBox::Ok |
                                                    QDialogButtonBox::Cancel);
 
-  okButton=buttonBox->button(QDialogButtonBox::Ok);
-
   mainLayout->addWidget(buttonBox);
 
   setLayout(mainLayout);
@@ -60,7 +58,7 @@ SettingsDialog::SettingsDialog(QWidget* parentWindow,
   connect(buttonBox,SIGNAL(accepted()),this,SLOT(accept()));
   connect(buttonBox,SIGNAL(rejected()),this,SLOT(reject()));
 
-  connect(okButton,SIGNAL(clicked()),this,SLOT(Save()));
+  connect(this,SIGNAL(accepted()),this,SLOT(Save()));
 }
 
 SettingsDialog::~SettingsDialog()

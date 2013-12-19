@@ -36,7 +36,6 @@ class SettingsDialog : public QDialog
 private:
   SettingsRef settings;
   QSpinBox    *dpi;
-  QPushButton *okButton;
 
 public slots:
   void Save();
