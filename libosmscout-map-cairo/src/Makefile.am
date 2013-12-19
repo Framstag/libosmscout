@@ -1,6 +1,5 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -DOSMSCOUTMAPCAIRODLL -I$(top_srcdir)/include \
-              $(LIBOSMSCOUTMAP_CFLAGS) \
               $(LIBOSMSCOUT_CFLAGS) \
               $(LIBPANGO_CFLAGS) \
               $(LIBCAIRO_CFLAGS) \
@@ -8,7 +7,6 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
 
 lib_LTLIBRARIES = libosmscoutmapcairo.la
 libosmscoutmapcairo_la_LDFLAGS  = -no-undefined \
-                                  $(LIBOSMSCOUTMAP_LIBS) \
                                   $(LIBOSMSCOUT_LIBS) \
                                   $(LIBPANGO_LIBS) \
                                   $(LIBCAIRO_LIBS) \

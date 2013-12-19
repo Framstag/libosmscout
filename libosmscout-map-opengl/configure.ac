@@ -50,14 +50,9 @@ AC_MSG_CHECKING([for WIN32])
     [AC_MSG_RESULT(no)])
 
 dnl Check for libosmscout
-PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
+PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
-
-dnl Check for libosmscout-map
-PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
-                  [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
-                   AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
 dnl Check for -lgl
 PKG_CHECK_MODULES(LIBOPENGL,[gl],
@@ -82,10 +77,10 @@ fi
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
-                         [libosmscout-map libosmscout],
-                         [-losmscoutmapopengl $LIBOPENGL_LIBS $LIBOSMSCOUTMAP_LIBS],
+                         [libosmscout libosmscout-map],
+                         [-losmscoutmapopengl $LIBOPENGL_LIBS],
                          [libosmscout map rendering OpenGL backend library],
-                         [$LIBOPENGL_CFLAGS $LIBOSMSCOUTMAP_CFLAGS],
+                         [$LIBOPENGL_CFLAGS],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
