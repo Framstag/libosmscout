@@ -1233,7 +1233,7 @@ namespace osmscout {
     return true;
   }
 
-  bool StyleCriteria::Matches(const AreaAttributes& attributes,
+  bool StyleCriteria::Matches(const AreaAttributes& /*attributes*/,
                               double meterInPixel,
                               double meterInMM) const
   {
@@ -1926,7 +1926,7 @@ namespace osmscout {
 
   template <class S, class A>
   void GetNodeStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                    const Node& node,
+                    const Node& /*node*/,
                     const Projection& projection,
                     double dpi,
                     Ref<S>& style)

@@ -398,7 +398,7 @@ namespace osmscout {
   }
 
   void MapPainter::Transform(const Projection& projection,
-                             const MapParameter& parameter,
+                             const MapParameter& /*parameter*/,
                              double lon,
                              double lat,
                              double& x,
@@ -466,26 +466,26 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::AfterPreprocessing(const StyleConfig& styleConfig,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& data)
+  void MapPainter::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
+                                      const Projection& /*projection*/,
+                                      const MapParameter& /*parameter*/,
+                                      const MapData& /*data*/)
   {
     // No code
   }
 
-  void MapPainter::BeforeDrawing(const StyleConfig& styleConfig,
-                                 const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const MapData& data)
+  void MapPainter::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                 const Projection& /*projection*/,
+                                 const MapParameter& /*parameter*/,
+                                 const MapData& /*data*/)
   {
 
   }
 
-  void MapPainter::AfterDrawing(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                const MapParameter& parameter,
-                                const MapData& data)
+  void MapPainter::AfterDrawing(const StyleConfig& /*styleConfig*/,
+                                const Projection& /*projection*/,
+                                const MapParameter& /*parameter*/,
+                                const MapData& /*data*/)
   {
 
   }
@@ -954,10 +954,10 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawAreas(const StyleConfig& styleConfig,
+  void MapPainter::DrawAreas(const StyleConfig& /*styleConfig*/,
                              const Projection& projection,
                              const MapParameter& parameter,
-                             const MapData& data)
+                             const MapData& /*data*/)
   {
     for (std::list<AreaData>::const_iterator area=areaData.begin();
         area!=areaData.end();
@@ -1201,7 +1201,7 @@ namespace osmscout {
     nodesDrawn++;
   }
 
-  void MapPainter::DrawWay(const StyleConfig& styleConfig,
+  void MapPainter::DrawWay(const StyleConfig& /*styleConfig*/,
                            const Projection& projection,
                            const MapParameter& parameter,
                            const WayData& data)
@@ -1235,7 +1235,7 @@ namespace osmscout {
   void MapPainter::DrawWays(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data)
+                            const MapData& /*data*/)
   {
     for (std::list<WayData>::const_iterator way=wayData.begin();
          way!=wayData.end();
@@ -1250,7 +1250,7 @@ namespace osmscout {
   void MapPainter::DrawWayDecorations(const StyleConfig& styleConfig,
                                       const Projection& projection,
                                       const MapParameter& parameter,
-                                      const MapData& data)
+                                      const MapData& /*data*/)
   {
     for (std::list<WayPathData>::const_iterator way=wayPathData.begin();
         way!=wayPathData.end();
@@ -1360,7 +1360,7 @@ namespace osmscout {
   void MapPainter::DrawWayLabels(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
-                                 const MapData& data)
+                                 const MapData& /*data*/)
   {
     for (std::list<WayPathData>::const_iterator way=wayPathData.begin();
         way!=wayPathData.end();
@@ -1389,7 +1389,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawLabels(const StyleConfig& styleConfig,
+  void MapPainter::DrawLabels(const StyleConfig& /*styleConfig*/,
                               const Projection& projection,
                               const MapParameter& parameter)
   {

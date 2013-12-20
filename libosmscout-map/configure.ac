@@ -21,13 +21,10 @@ AX_CXXFLAGS_WARN_ALL
 
 AC_TYPE_SIZE_T
 
-AC_SEARCH_LIBS([sqrt],
-                [m],
-                [])
+AC_SEARCH_LIBS([sqrt],[m],[])
 
-if test "$GXX" = yes; then
-  CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
-fi
+AS_IF([test "x$GXX" = xyes],
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
 
 dnl Selfmade tests
 
