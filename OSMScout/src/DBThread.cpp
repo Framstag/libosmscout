@@ -621,5 +621,3 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
     return true;
   }
 }
-
-#include "moc_DBThread.cpp"

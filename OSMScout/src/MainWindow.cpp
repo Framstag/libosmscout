@@ -68,7 +68,7 @@ MainWindow::~MainWindow()
   // no code
 }
 
-void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& response)
+void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& /*response*/)
 {
   searchLocationAction->setEnabled(true);
   routingAction->setEnabled(true);
@@ -108,5 +108,3 @@ void MainWindow::OpenSettingsDialog()
 
   dialog.exec();
 }
-
-#include "moc_MainWindow.cpp"

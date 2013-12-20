@@ -127,14 +127,14 @@ SearchLocationDialog::~SearchLocationDialog()
   // no code
 }
 
-void SearchLocationDialog::OnLocationNameChange(const QString& text)
+void SearchLocationDialog::OnLocationNameChange(const QString& /*text*/)
 {
   requestResultTimer.stop();
   requestResultTimer.start(2000);
 }
 
-void SearchLocationDialog::OnSelectionChanged(const QItemSelection& selected,
-                                              const QItemSelection& deselected)
+void SearchLocationDialog::OnSelectionChanged(const QItemSelection& /*selected*/,
+                                              const QItemSelection& /*deselected*/)
 {
   if (results->selectionModel()->hasSelection() &&
       results->selectionModel()->selection().indexes().size()==1) {
@@ -152,7 +152,7 @@ void SearchLocationDialog::OnSelectionChanged(const QItemSelection& selected,
 
 }
 
-void SearchLocationDialog::OnDoubleClick(const QModelIndex& index)
+void SearchLocationDialog::OnDoubleClick(const QModelIndex& /*index*/)
 {
   if (okButton->isEnabled()) {
     accept();
@@ -198,5 +198,3 @@ QString SearchLocationDialog::GetLocationResultName() const
 {
   return resultLocationName;
 }
-
-#include "moc_SearchLocationDialog.cpp"

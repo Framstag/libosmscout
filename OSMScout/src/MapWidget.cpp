@@ -230,7 +230,7 @@ void MapWidget::wheelEvent(QWheelEvent* event)
   event->accept();
 }
 
-void MapWidget::paintEvent(QPaintEvent* event)
+void MapWidget::paintEvent(QPaintEvent* /*event*/)
 {
   RenderMapRequest request;
 
@@ -250,7 +250,7 @@ void MapWidget::paintEvent(QPaintEvent* event)
   requestNewMap=true;
 }
 
-void MapWidget::resizeEvent(QResizeEvent* event)
+void MapWidget::resizeEvent(QResizeEvent* /*event*/)
 {
   // no code
 }
@@ -319,5 +319,3 @@ void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
     assert(false);
   }
 }
-
-#include "moc_MapWidget.cpp"

@@ -25,8 +25,6 @@
 #include <QMetaType>
 #include <QMutex>
 
-#include "config.h"
-
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
 #include <osmscout/RoutePostprocessor.h>

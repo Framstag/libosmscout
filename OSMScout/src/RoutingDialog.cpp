@@ -153,12 +153,12 @@ RouteModel::RouteModel(QObject *parent)
   // no code
 }
 
-int RouteModel::rowCount(const QModelIndex &parent) const
+int RouteModel::rowCount(const QModelIndex &/*parent*/) const
 {
   return route.routeSteps.size();
 }
 
-int RouteModel::columnCount(const QModelIndex &parent) const
+int RouteModel::columnCount(const QModelIndex &/*parent*/) const
 {
   return 5;
 }
@@ -444,7 +444,7 @@ void RoutingDialog::DumpTargetDescription(const osmscout::RouteDescription::Targ
   route.routeSteps.push_back(targetReached);
 }
 
-void RoutingDialog::DumpTurnDescription(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+void RoutingDialog::DumpTurnDescription(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
                                         const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
                                         const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                                         const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
@@ -479,7 +479,7 @@ void RoutingDialog::DumpTurnDescription(const osmscout::RouteDescription::TurnDe
   route.routeSteps.push_back(turn);
 }
 
-void RoutingDialog::DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+void RoutingDialog::DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
                                                  const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
   std::string crossingWaysString;
@@ -905,5 +905,3 @@ void RoutingDialog::OnVehicle(int id)
 {
   settings->SetRoutingVehicle((osmscout::Vehicle)id);
 }
-
-#include "moc_RoutingDialog.cpp"

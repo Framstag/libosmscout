@@ -76,5 +76,3 @@ void SettingsDialog::Save()
     settings->SetDPI((size_t)dpi->value());
   }
 }
-
-#include "moc_SettingsDialog.cpp"
