@@ -71,7 +71,7 @@ namespace osmscout {
     return fonts.insert(std::pair<size_t,QFont>(fontSize,font)).first->second;
   }
 
-  bool MapPainterQt::HasIcon(const StyleConfig& styleConfig,
+  bool MapPainterQt::HasIcon(const StyleConfig& /*styleConfig*/,
                              const MapParameter& parameter,
                              IconStyle& style)
   {
@@ -181,7 +181,7 @@ namespace osmscout {
     height=extents.height();
   }
 
-  void MapPainterQt::DrawLabel(const Projection& projection,
+  void MapPainterQt::DrawLabel(const Projection& /*projection*/,
                                const MapParameter& parameter,
                                const LabelData& label)
   {
@@ -259,7 +259,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawContourLabel(const Projection& projection,
+  void MapPainterQt::DrawContourLabel(const Projection& /*projection*/,
                                       const MapParameter& parameter,
                                       const PathTextStyle& style,
                                       const std::string& text,
@@ -355,11 +355,12 @@ namespace osmscout {
     painter->resetTransform();
   }
 
-  void MapPainterQt::DrawContourSymbol(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const Symbol& symbol,
-                                       double space,
-                                       size_t transStart, size_t transEnd)
+  void MapPainterQt::DrawContourSymbol(const Projection& /*projection*/,
+                                       const MapParameter& /*parameter*/,
+                                       const Symbol& /*symbol*/,
+                                       double /*space*/,
+                                       size_t /*transStart*/,
+                                       size_t /*transEnd*/)
   {
     // Not implemented
   }
@@ -461,8 +462,8 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawPath(const Projection& projection,
-                              const MapParameter& parameter,
+  void MapPainterQt::DrawPath(const Projection& /*projection*/,
+                              const MapParameter& /*parameter*/,
                               const Color& color,
                               double width,
                               const std::vector<double>& dash,
@@ -607,7 +608,7 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawGround(const Projection& projection,
-                                const MapParameter& parameter,
+                                const MapParameter& /*parameter*/,
                                 const FillStyle& style)
   {
     painter->fillRect(QRectF(0,0,projection.GetWidth(),projection.GetHeight()),
