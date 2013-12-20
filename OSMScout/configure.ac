@@ -9,12 +9,12 @@ AC_CONFIG_SRCDIR(src/OSMScout.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_HEADERS(src/config.h)
-AM_INIT_AUTOMAKE([nostdinc subdir-objects dist-bzip2 no-dist-gzip])
+AM_INIT_AUTOMAKE([nostdinc subdir-objects dist-bzip2 no-dist-gzip -Wall -Werror])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PROG_CXX
 AC_LANG(C++)
-LT_INIT([pic-only])
+LT_INIT()
 
 AC_PROG_INSTALL
 
@@ -24,9 +24,9 @@ if test "$GXX" = yes; then
   CXXFLAGS="$CXXFLAGS -fPIC -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
-PKG_CHECK_MODULES(LIBQTGUI,[Qt5Gui >= 5.0.0 Qt5Widgets >= 5.0.0])
-AC_SUBST(LIBQTGUI_CFLAGS)
-AC_SUBST(LIBQTGUI_LIBS)
+PKG_CHECK_MODULES(LIBQT,[Qt5Gui >= 5.0.0 Qt5Widgets >= 5.0.0])
+AC_SUBST(LIBQT_CFLAGS)
+AC_SUBST(LIBQT_LIBS)
 
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map libosmscout-map-qt])
 AC_SUBST(LIBOSMSCOUT_CFLAGS)

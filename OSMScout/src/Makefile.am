@@ -27,10 +27,10 @@ $(OSMScout_OBJECTS) : moc_DBThread.cpp \
 
 OSMScout_CXXFLAGS=-I. \
                   $(LIBOSMSCOUT_CFLAGS) \
-                  $(LIBQTGUI_CFLAGS)
+                  $(LIBQT_CFLAGS)
 
 
 OSMScout_LDADD= \
                $(LIBOSMSCOUT_LIBS) \
-               $(LIBQTGUI_LIBS)
+               $(LIBQT_LIBS)
 
