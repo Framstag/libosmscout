@@ -1,11 +1,10 @@
-AM_CPPFLAGS = $(LIB_CXXFLAGS) \
-              -DOSMSCOUTMAPQTDLL -I$(top_srcdir)/include \
+AM_CPPFLAGS = -DOSMSCOUTMAPQTDLL -I$(top_srcdir)/include \
               $(LIBOSMSCOUT_CFLAGS) \
-              $(LIBQTGUI_CFLAGS)
+              $(LIBQT_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutmapqt.la
 libosmscoutmapqt_la_LDFLAGS  = -no-undefined \
                                $(LIBOSMSCOUT_LIBS) \
-                               $(LIBQTGUI_LIBS)
+                               $(LIBQT_LIBS)
 
 libosmscoutmapqt_la_SOURCES = osmscout/MapPainterQt.cpp

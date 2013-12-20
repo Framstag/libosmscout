@@ -1,4 +1,4 @@
-dnl Process this file with autoconf to produce a configure script.
+fddnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
 AC_INIT([libosmscout-map-qt],[0.1],[tim@teulings.org],[libosmscout-map-qt])
 
@@ -26,17 +26,15 @@ fi
 
 dnl Selfmade tests
 
-dnl AC_MSG_CHECKING([for gcc symbol visibility support])
-dnl OLDCXXFLAGS="$CXXFLAGS"
-dnl CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-dnl AC_TRY_COMPILE([],
-dnl                [],
-dnl                [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
-dnl                 AC_SUBST(LIB_CXXFLAGS)
-dnl                 AC_MSG_RESULT(yes)
-dnl                 AC_DEFINE(OSMSCOUT_MAP_QT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
-dnl                [AC_MSG_RESULT(no)])
-dnl CXXFLAGS="$OLDCXXFLAGS"
+AC_MSG_CHECKING([for gcc symbol visibility support])
+OLDCXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
+AC_TRY_COMPILE([],
+               [],
+               [AC_DEFINE(OSMSCOUT_MAP_QT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])
+                AC_MSG_RESULT(yes)],
+               [CXXFLAGS="$OLDCXXFLAGS"
+                AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([
@@ -51,17 +49,17 @@ PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
 
-PKG_CHECK_MODULES(LIBQTGUI, [Qt5Gui >= 5.0.0],
-                  [AC_SUBST(LIBQTGUI_CFLAGS)
-                   AC_SUBST(LIBQTGUI_LIBS)])
+PKG_CHECK_MODULES(LIBQT, [Qt5Gui >= 5.0.0],
+                  [AC_SUBST(LIBQT_CFLAGS)
+                   AC_SUBST(LIBQT_LIBS)])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [libosmscout libosmscout-map],
-                         [-losmscoutmapqt $LIBQTGUI_LIBS],
+                         [-losmscoutmapqt $LIBQT_LIBS],
                          [libosmscout map rendering Qt backend library],
-                         [$LIBQTGUI_CFLAGS],
+                         [$LIBQT_CFLAGS],
                          [])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
