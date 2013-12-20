@@ -80,7 +80,7 @@ namespace osmscout {
   template <class N,class T>
   bool NumericIndexGenerator<N,T>::Import(const ImportParameter& parameter,
                                           Progress& progress,
-                                          const TypeConfig& typeConfig)
+                                          const TypeConfig& /*typeConfig*/)
   {
     FileScanner             scanner;
     FileWriter              writer;

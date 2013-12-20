@@ -306,7 +306,7 @@ namespace osmscout {
     parser->EndElement(name);
   }
 
-  static void StructuredErrorHandler(void *data, xmlErrorPtr error)
+  static void StructuredErrorHandler(void */*data*/, xmlErrorPtr error)
   {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
   }
@@ -336,8 +336,7 @@ namespace osmscout {
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-    return Cleanup(parameter,
-                   progress);
+    return Cleanup(progress);
   }
 }
 

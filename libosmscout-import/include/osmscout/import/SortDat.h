@@ -485,7 +485,7 @@ namespace osmscout {
   template <class N>
   bool SortDataGenerator<N>::Import(const ImportParameter& parameter,
                                     Progress& progress,
-                                    const TypeConfig& typeConfig)
+                                    const TypeConfig& /*typeConfig*/)
   {
     if (parameter.GetSortObjects()) {
       if (!Renumber(parameter,

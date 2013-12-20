@@ -191,7 +191,6 @@ namespace osmscout {
 
     bool LoadCoastlines(const ImportParameter& parameter,
                         Progress& progress,
-                        const TypeConfig& typeConfig,
                         std::list<CoastRef>& coastlines);
 
     void MergeCoastlines(Progress& progress,
@@ -242,9 +241,7 @@ namespace osmscout {
                          FileWriter& writer,
                          std::vector<Level>&  levels);
 
-    void HandleAreaCoastlinesCompletelyInACell(const ImportParameter& parameter,
-                                               Progress& progress,
-                                               Projection& projection,
+    void HandleAreaCoastlinesCompletelyInACell(Progress& progress,
                                                const Level& level,
                                                Data& data,
                                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
@@ -272,9 +269,7 @@ namespace osmscout {
                       const std::vector<GeoCoord>& points,
                       bool isArea);
 
-    void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
-                                          Progress& progress,
-                                          Projection& projection,
+    void HandleCoastlinesPartiallyInACell(Progress& progress,
                                           const std::list<CoastRef>& coastlines,
                                           const Level& level,
                                           std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,

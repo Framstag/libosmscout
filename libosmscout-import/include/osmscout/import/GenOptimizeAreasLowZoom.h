@@ -89,18 +89,15 @@ namespace osmscout {
                             std::vector<std::list<AreaRef> >& areas);
 
     void GetAreaIndexLevel(const ImportParameter& parameter,
-                           Progress& progress,
                            const std::list<AreaRef>& areas,
                            TypeData& typeData);
 
-    bool WriteAreas(Progress& progress,
-                    FileWriter& writer,
+    bool WriteAreas(FileWriter& writer,
                     const std::list<AreaRef>& areas,
                     FileOffsetFileOffsetMap& offsets);
 
     bool WriteAreaBitmap(Progress& progress,
                          FileWriter& writer,
-                         const TypeInfo& type,
                          const std::list<AreaRef>& areas,
                          const FileOffsetFileOffsetMap& offsets,
                          TypeData& data);
@@ -112,10 +109,7 @@ namespace osmscout {
                      const std::set<TypeId>& types,
                      std::list<TypeData>& typesData);
 
-    void OptimizeAreas(Progress& progress,
-                       const TypeConfig& typeConfig,
-                       TypeId type,
-                       const std::list<AreaRef>& areas,
+    void OptimizeAreas(const std::list<AreaRef>& areas,
                        std::list<AreaRef>& optimizedAreas,
                        size_t width,
                        size_t height,

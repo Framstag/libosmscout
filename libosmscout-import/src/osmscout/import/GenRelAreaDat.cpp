@@ -144,7 +144,6 @@ namespace osmscout {
                                         Progress& progress,
                                         Id id,
                                         const std::string& name,
-                                        const Area& relation,
                                         std::list<MultipolygonPart>& parts)
   {
     std::list<MultipolygonPart>                 rings;
@@ -329,7 +328,6 @@ namespace osmscout {
                                                  Progress& progress,
                                                  Id id,
                                                  const std::string& name,
-                                                 const Area& relation,
                                                  std::list<MultipolygonPart>& parts)
   {
     std::list<MultipolygonPart> groups;
@@ -342,7 +340,6 @@ namespace osmscout {
                     progress,
                     id,
                     name,
-                    relation,
                     parts)) {
       return false;
     }
@@ -420,11 +417,8 @@ namespace osmscout {
                                                 const TypeConfig& typeConfig,
                                                 const CoordDataFile::CoordResultMap& coordMap,
                                                 const IdRawWayMap& wayMap,
-                                                const std::map<OSMId,RawRelationRef>& relationMap,
-                                                const Area& relation,
                                                 const std::string& name,
                                                 const RawRelation& rawRelation,
-                                                IdSet& resolvedRelations,
                                                 std::list<MultipolygonPart>& parts)
   {
     for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
@@ -791,11 +785,8 @@ namespace osmscout {
                                 typeConfig,
                                 coordMap,
                                 wayMap,
-                                relationMap,
-                                relation,
                                 name,
                                 rawRelation,
-                                resolvedRelations,
                                 parts);
     }
   }
@@ -835,7 +826,6 @@ namespace osmscout {
                              progress,
                              rawRelation.GetId(),
                              name,
-                             relation,
                              parts)) {
       return false;
     }

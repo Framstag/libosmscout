@@ -363,7 +363,6 @@ namespace osmscout
   }
 
   void OptimizeWaysLowZoomGenerator::GetWayIndexLevel(const ImportParameter& parameter,
-                                                      Progress& progress,
                                                       const std::list<WayRef>& ways,
                                                       TypeData& typeData)
   {
@@ -452,8 +451,7 @@ namespace osmscout
     }
   }
 
-  void OptimizeWaysLowZoomGenerator::OptimizeWays(Progress& progress,
-                                                  const std::list<WayRef>& ways,
+  void OptimizeWaysLowZoomGenerator::OptimizeWays(const std::list<WayRef>& ways,
                                                   std::list<WayRef>& optimizedWays,
                                                   size_t width,
                                                   size_t height,
@@ -505,8 +503,7 @@ namespace osmscout
     }
   }
 
-  bool OptimizeWaysLowZoomGenerator::WriteWays(Progress& progress,
-                                               FileWriter& writer,
+  bool OptimizeWaysLowZoomGenerator::WriteWays(FileWriter& writer,
                                                const std::list<WayRef>& ways,
                                                FileOffsetFileOffsetMap& offsets)
   {
@@ -530,7 +527,6 @@ namespace osmscout
 
   bool OptimizeWaysLowZoomGenerator::WriteWayBitmap(Progress& progress,
                                                     FileWriter& writer,
-                                                    const TypeInfo& type,
                                                     const std::list<WayRef>& ways,
                                                     const FileOffsetFileOffsetMap& offsets,
                                                     TypeData& data)
@@ -757,8 +753,7 @@ namespace osmscout
           magnification.SetLevel(level);
 
           // TODO: Wee need to make import parameters for the width and the height
-          OptimizeWays(progress,
-                       newWays,
+          OptimizeWays(newWays,
                        optimizedWays,
                        800,640,
                        magnification,
@@ -798,15 +793,13 @@ namespace osmscout
           typeData.optLevel=level;
 
           GetWayIndexLevel(parameter,
-                           progress,
                            optimizedWays,
                            typeData);
 
 
           FileOffsetFileOffsetMap offsets;
 
-          if (!WriteWays(progress,
-                         writer,
+          if (!WriteWays(writer,
                          optimizedWays,
                          offsets)) {
             return false;
@@ -814,7 +807,6 @@ namespace osmscout
 
           if (!WriteWayBitmap(progress,
                               writer,
-                              typeConfig.GetTypeInfo(type),
                               optimizedWays,
                               offsets,
                               typeData)) {

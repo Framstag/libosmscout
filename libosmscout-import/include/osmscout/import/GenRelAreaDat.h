@@ -153,25 +153,20 @@ namespace osmscout {
                     Progress& progress,
                     Id id,
                     const std::string& name,
-                    const Area& relation,
                     std::list<MultipolygonPart>& parts);
 
     bool ResolveMultipolygon(const ImportParameter& parameter,
                              Progress& progress,
                              Id id,
                              const std::string& name,
-                             const Area& relation,
                              std::list<MultipolygonPart>& parts);
 
     bool ComposeAreaMembers(Progress& progress,
                             const TypeConfig& typeConfig,
                             const CoordDataFile::CoordResultMap& coordMap,
                             const IdRawWayMap& wayMap,
-                            const std::map<OSMId,RawRelationRef>& relationMap,
-                            const Area& relation,
                             const std::string& name,
                             const RawRelation& rawRelation,
-                            IdSet& resolvedRelations,
                             std::list<MultipolygonPart>& parts);
 
     bool ComposeBoundaryMembers(Progress& progress,

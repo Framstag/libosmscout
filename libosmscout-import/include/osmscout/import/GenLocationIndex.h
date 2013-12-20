@@ -189,10 +189,8 @@ namespace osmscout {
 
     bool IndexRegionAreas(const ImportParameter& parameter,
                           Progress& progress,
-                          const TypeConfig& typeConfig,
                           const OSMSCOUT_HASHSET<TypeId>& regionTypes,
-                          Region& rootRegion,
-                          const RegionIndex& regionIndex);
+                          Region& rootRegion);
 
     void SortInRegion(RegionRef& area,
                       std::vector<std::list<RegionRef> >& regionTree,
@@ -209,7 +207,6 @@ namespace osmscout {
 
     bool IndexRegionNodes(const ImportParameter& parameter,
                           Progress& progress,
-                          const TypeConfig& typeConfig,
                           const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                           RegionRef& rootRegion,
                           const RegionIndex& regionIndex);
@@ -318,8 +315,7 @@ namespace osmscout {
                                 const Node& node,
                                 bool& added);
 
-    void AddPOINodeToRegion(Progress& progress,
-                            Region& region,
+    void AddPOINodeToRegion(Region& region,
                             const Node& node,
                             bool& added);
 
@@ -337,14 +333,12 @@ namespace osmscout {
                           Region& root);
 
     bool WriteRegionDataEntry(FileWriter& writer,
-                              const Region& parentRegion,
                               Region& region);
 
     bool WriteRegionData(FileWriter& writer,
                          Region& root);
 
     bool WriteAddressDataEntry(FileWriter& writer,
-                               const Region& parentRegion,
                                Region& region);
 
     bool WriteAddressData(FileWriter& writer,

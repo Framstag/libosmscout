@@ -94,26 +94,22 @@ namespace osmscout {
                    std::list<WayRef>& newWays);
 
     void GetWayIndexLevel(const ImportParameter& parameter,
-                          Progress& progress,
                           const std::list<WayRef>& ways,
                           TypeData& typeData);
 
-    void OptimizeWays(Progress& progress,
-                      const std::list<WayRef>& ways,
+    void OptimizeWays(const std::list<WayRef>& ways,
                       std::list<WayRef>& optimizedWays,
                       size_t width,
                       size_t height,
                       const Magnification& magnification,
                       TransPolygon::OptimizeMethod optimizeWayMethod);
 
-    bool WriteWays(Progress& progress,
-                   FileWriter& writer,
+    bool WriteWays(FileWriter& writer,
                    const std::list<WayRef>& ways,
                    FileOffsetFileOffsetMap& offsets);
 
     bool WriteWayBitmap(Progress& progress,
                         FileWriter& writer,
-                        const TypeInfo& type,
                         const std::list<WayRef>& ways,
                         const FileOffsetFileOffsetMap& offsets,
                         TypeData& data);

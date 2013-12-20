@@ -183,10 +183,7 @@ namespace osmscout
     return true;
   }
 
-  void OptimizeAreasLowZoomGenerator::OptimizeAreas(Progress& progress,
-                                                    const TypeConfig& typeConfig,
-                                                    TypeId type,
-                                                    const std::list<AreaRef>& areas,
+  void OptimizeAreasLowZoomGenerator::OptimizeAreas(const std::list<AreaRef>& areas,
                                                     std::list<AreaRef>& optimizedAreas,
                                                     size_t width,
                                                     size_t height,
@@ -266,7 +263,6 @@ namespace osmscout
 
 
   void OptimizeAreasLowZoomGenerator::GetAreaIndexLevel(const ImportParameter& parameter,
-                                                        Progress& progress,
                                                         const std::list<AreaRef>& areas,
                                                         TypeData& typeData)
   {
@@ -355,8 +351,7 @@ namespace osmscout
     }
   }
 
-  bool OptimizeAreasLowZoomGenerator::WriteAreas(Progress& progress,
-                                                 FileWriter& writer,
+  bool OptimizeAreasLowZoomGenerator::WriteAreas(FileWriter& writer,
                                                  const std::list<AreaRef>& areas,
                                                  FileOffsetFileOffsetMap& offsets)
   {
@@ -380,7 +375,6 @@ namespace osmscout
 
   bool OptimizeAreasLowZoomGenerator::WriteAreaBitmap(Progress& progress,
                                                       FileWriter& writer,
-                                                      const TypeInfo& type,
                                                       const std::list<AreaRef>& areas,
                                                       const FileOffsetFileOffsetMap& offsets,
                                                       TypeData& data)
@@ -588,10 +582,7 @@ namespace osmscout
 
           magnification.SetLevel(level);
 
-          OptimizeAreas(progress,
-                        typeConfig,
-                        type,
-                        allAreas[type],
+          OptimizeAreas(allAreas[type],
                         optimizedAreas,
                         800,640,
                         magnification,
@@ -638,7 +629,6 @@ namespace osmscout
           typeData.optLevel=level;
 
           GetAreaIndexLevel(parameter,
-                            progress,
                             optimizedAreas,
                             typeData);
 
@@ -646,8 +636,7 @@ namespace osmscout
 
           FileOffsetFileOffsetMap offsets;
 
-          if (!WriteAreas(progress,
-                          writer,
+          if (!WriteAreas(writer,
                           optimizedAreas,
                           offsets)) {
             return false;
@@ -655,7 +644,6 @@ namespace osmscout
 
           if (!WriteAreaBitmap(progress,
                                writer,
-                               typeConfig.GetTypeInfo(type),
                                optimizedAreas,
                                offsets,
                                typeData)) {

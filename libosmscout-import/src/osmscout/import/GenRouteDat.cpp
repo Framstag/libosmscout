@@ -1307,8 +1307,7 @@ namespace osmscout {
     }
   }
 
-  bool RouteDataGenerator::HandlePendingOffsets(const ImportParameter& parameter,
-                                                Progress& progress,
+  bool RouteDataGenerator::HandlePendingOffsets(Progress& progress,
                                                 const NodeIdOffsetMap& routeNodeIdOffsetMap,
                                                 PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                                                 FileWriter& routeNodeWriter,
@@ -1623,8 +1622,7 @@ namespace osmscout {
 
       writer.Flush();
 
-      if (!HandlePendingOffsets(parameter,
-                                progress,
+      if (!HandlePendingOffsets(progress,
                                 routeNodeIdOffsetMap,
                                 pendingOffsetsMap,
                                 writer,

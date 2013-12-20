@@ -123,7 +123,6 @@ namespace osmscout {
 
   bool WaterIndexGenerator::LoadCoastlines(const ImportParameter& parameter,
                                            Progress& progress,
-                                           const TypeConfig& typeConfig,
                                            std::list<CoastRef>& coastlines)
   {
     // We must have coastline type defined
@@ -820,9 +819,7 @@ namespace osmscout {
     }
   }
 
-  void WaterIndexGenerator::HandleAreaCoastlinesCompletelyInACell(const ImportParameter& parameter,
-                                                                  Progress& progress,
-                                                                  Projection& projection,
+  void WaterIndexGenerator::HandleAreaCoastlinesCompletelyInACell(Progress& progress,
                                                                   const Level& level,
                                                                   Data& data,
                                                                   std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
@@ -1385,9 +1382,7 @@ namespace osmscout {
    * The algorithm is as following:
    * TODO
    */
-  void WaterIndexGenerator::HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
-                                                             Progress& progress,
-                                                             Projection& projection,
+  void WaterIndexGenerator::HandleCoastlinesPartiallyInACell(Progress& progress,
                                                              const std::list<CoastRef>& coastlines,
                                                              const Level& level,
                                                              std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
@@ -1713,7 +1708,6 @@ namespace osmscout {
 
     LoadCoastlines(parameter,
                    progress,
-                   typeConfig,
                    coastlines);
 
     MergeCoastlines(progress,
@@ -1764,16 +1758,12 @@ namespace osmscout {
                          coastlines,
                          data);
 
-        HandleAreaCoastlinesCompletelyInACell(parameter,
-                                              progress,
-                                              projection,
+        HandleAreaCoastlinesCompletelyInACell(progress,
                                               levels[level],
                                               data,
                                               cellGroundTileMap);
 
-        HandleCoastlinesPartiallyInACell(parameter,
-                                         progress,
-                                         projection,
+        HandleCoastlinesPartiallyInACell(progress,
                                          coastlines,
                                          levels[level],
                                          cellGroundTileMap,

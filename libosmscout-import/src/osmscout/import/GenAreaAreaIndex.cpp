@@ -122,7 +122,7 @@ namespace osmscout {
 
   bool AreaAreaIndexGenerator::Import(const ImportParameter& parameter,
                                       Progress& progress,
-                                      const TypeConfig& typeConfig)
+                                      const TypeConfig& /*typeConfig*/)
   {
     FileScanner               wayScanner;
     size_t                    ways=0;         // Number of ways found

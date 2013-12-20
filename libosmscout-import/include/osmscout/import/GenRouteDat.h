@@ -191,8 +191,7 @@ namespace osmscout {
      * Adds missing file offsets to route nodes that were not written at the time the referencing route node
      * was stored.
      */
-    bool HandlePendingOffsets(const ImportParameter& parameter,
-                              Progress& progress,
+    bool HandlePendingOffsets(Progress& progress,
                               const NodeIdOffsetMap& routeNodeIdOffsetMap,
                               PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                               FileWriter& routeNodeWriter,

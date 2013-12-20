@@ -72,8 +72,7 @@ namespace osmscout {
 
   bool Preprocess::StoreCoord(OSMId id,
                               double lat,
-                              double lon,
-                              FileOffset nodeOffset)
+                              double lon)
   {
     PageId relatedId=id-std::numeric_limits<Id>::min();
     PageId pageId=relatedId/coordPageSize;
@@ -255,8 +254,7 @@ namespace osmscout {
 
     StoreCoord(id,
                lat,
-               lon,
-               nodeOffset);
+               lon);
 
     lastNodeId=id;
   }
@@ -417,8 +415,7 @@ namespace osmscout {
     lastRelationId=id;
   }
 
-  bool Preprocess::Cleanup(const ImportParameter& parameter,
-                           Progress& progress)
+  bool Preprocess::Cleanup(Progress& progress)
   {
     if (currentPageId!=0) {
       StoreCurrentPage();

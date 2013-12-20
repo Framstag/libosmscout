@@ -59,7 +59,6 @@ namespace osmscout {
 
     bool GetWays(const ImportParameter& parameter,
                  Progress& progress,
-                 const TypeConfig& typeConfig,
                  std::set<TypeId>& types,
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& ways);
@@ -77,8 +76,7 @@ namespace osmscout {
                    std::list<RawWayRef>& ways,
                    std::multimap<OSMId,TurnRestrictionRef>& restrictions);
 
-    bool WriteWay(const ImportParameter& parameter,
-                  Progress& progress,
+    bool WriteWay(Progress& progress,
                   const TypeConfig& typeConfig,
                   FileWriter& writer,
                   uint32_t& writtenWayCount,

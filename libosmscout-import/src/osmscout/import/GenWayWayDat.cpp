@@ -156,7 +156,6 @@ namespace osmscout {
 
   bool WayWayDataGenerator::GetWays(const ImportParameter& parameter,
                                      Progress& progress,
-                                     const TypeConfig& typeConfig,
                                      std::set<TypeId>& types,
                                      FileScanner& scanner,
                                      std::vector<std::list<RawWayRef> >& ways)
@@ -452,8 +451,7 @@ namespace osmscout {
     return true;
   }
 
-  bool WayWayDataGenerator::WriteWay(const ImportParameter& parameter,
-                                     Progress& progress,
+  bool WayWayDataGenerator::WriteWay(Progress& progress,
                                      const TypeConfig& typeConfig,
                                      FileWriter& writer,
                                      uint32_t& writtenWayCount,
@@ -587,7 +585,6 @@ namespace osmscout {
 
       if (!GetWays(parameter,
                    progress,
-                   typeConfig,
                    wayTypes,
                    scanner,
                    waysByType)) {
@@ -649,8 +646,7 @@ namespace osmscout {
              ++w) {
           RawWayRef rawWay(*w);
 
-          WriteWay(parameter,
-                   progress,
+          WriteWay(progress,
                    typeConfig,
                    wayWriter,
                    writtenWayCount,

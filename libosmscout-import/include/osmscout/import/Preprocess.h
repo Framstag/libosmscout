@@ -67,8 +67,7 @@ namespace osmscout {
     bool StoreCurrentPage();
     bool StoreCoord(OSMId id,
                     double lat,
-                    double lon,
-                    FileOffset nodeOffset);
+                    double lon);
 
   public:
     std::string GetDescription() const;
@@ -91,8 +90,7 @@ namespace osmscout {
                          const std::vector<RawRelation::Member>& members,
                          const std::map<TagId,std::string>& tags);
 
-    bool Cleanup(const ImportParameter& parameter,
-                 Progress& progress);
+    bool Cleanup(Progress& progress);
   };
 }
 

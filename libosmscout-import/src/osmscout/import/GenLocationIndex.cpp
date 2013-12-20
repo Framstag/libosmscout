@@ -320,10 +320,8 @@ namespace osmscout {
     */
   bool LocationIndexGenerator::IndexRegionAreas(const ImportParameter& parameter,
                                                 Progress& progress,
-                                                const TypeConfig& typeConfig,
                                                 const OSMSCOUT_HASHSET<TypeId>& regionTypes,
-                                                Region& rootRegion,
-                                                const RegionIndex& regionIndex)
+                                                Region& rootRegion)
   {
     FileScanner scanner;
     uint32_t    areaCount;
@@ -482,7 +480,6 @@ namespace osmscout {
     */
   bool LocationIndexGenerator::IndexRegionNodes(const ImportParameter& parameter,
                                                 Progress& progress,
-                                                const TypeConfig& typeConfig,
                                                 const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                                                 RegionRef& rootRegion,
                                                 const RegionIndex& regionIndex)
@@ -1429,8 +1426,7 @@ namespace osmscout {
     added=true;
   }
 
-  void LocationIndexGenerator::AddPOINodeToRegion(Progress& progress,
-                                                  Region& region,
+  void LocationIndexGenerator::AddPOINodeToRegion(Region& region,
                                                   const Node& node,
                                                   bool& added)
   {
@@ -1514,8 +1510,7 @@ namespace osmscout {
       if (isPOI) {
         bool added=false;
 
-        AddPOINodeToRegion(progress,
-                           region,
+        AddPOINodeToRegion(region,
                            node,
                            added);
         if (added) {
@@ -1589,7 +1584,6 @@ namespace osmscout {
   }
 
   bool LocationIndexGenerator::WriteRegionDataEntry(FileWriter& writer,
-                                                    const Region& parentRegion,
                                                     Region& region)
   {
     if (!writer.GetPos(region.dataOffset)) {
@@ -1653,7 +1647,6 @@ namespace osmscout {
       RegionRef childRegion(*r);
 
       if (!WriteRegionDataEntry(writer,
-                                region,
                                 *childRegion)) {
         return false;
       }
@@ -1671,7 +1664,6 @@ namespace osmscout {
       RegionRef childRegion(*r);
 
       if (!WriteRegionDataEntry(writer,
-                                rootRegion,
                                 *childRegion)) {
         return false;
       }
@@ -1681,7 +1673,6 @@ namespace osmscout {
   }
 
   bool LocationIndexGenerator::WriteAddressDataEntry(FileWriter& writer,
-                                                     const Region& parentRegion,
                                                      Region& region)
   {
     for (std::map<std::string,RegionLocation>::iterator location=region.locations.begin();
@@ -1721,7 +1712,6 @@ namespace osmscout {
       RegionRef childRegion(*r);
 
       if (!WriteAddressDataEntry(writer,
-                                 region,
                                  *childRegion)) {
         return false;
       }
@@ -1739,7 +1729,6 @@ namespace osmscout {
       RegionRef childRegion(*r);
 
       if (!WriteAddressDataEntry(writer,
-                                 rootRegion,
                                  *childRegion)) {
         return false;
       }
@@ -1817,10 +1806,8 @@ namespace osmscout {
 
     if (!IndexRegionAreas(parameter,
                           progress,
-                          typeConfig,
                           regionTypes,
-                          *rootRegion,
-                          regionIndex)) {
+                          *rootRegion)) {
       return false;
     }
 
@@ -1856,7 +1843,6 @@ namespace osmscout {
 
     if (!IndexRegionNodes(parameter,
                           progress,
-                          typeConfig,
                           regionTypes,
                           rootRegion,
                           regionIndex)) {

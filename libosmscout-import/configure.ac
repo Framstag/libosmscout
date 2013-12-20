@@ -33,9 +33,8 @@ AC_CHECK_FUNCS([mmap])
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-if test "x$GXX" = xyes; then
-  CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
-fi
+AS_IF([test "x$GXX" = xyes],
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
 
 dnl Selfmade tests
 
