@@ -386,7 +386,7 @@ namespace osmscout {
     }
   }
 
-  bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
+  bool Router::ResolveRNodesToRouteData(const RoutingProfile& /*profile*/,
                                         const std::list<RNodeRef>& nodes,
                                         const ObjectFileRef& startObject,
                                         size_t startNodeIndex,
@@ -624,8 +624,7 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::ResolveRouteDataJunctions(const std::list<RNodeRef>& nodes,
-                                         RouteData& route)
+  bool Router::ResolveRouteDataJunctions(RouteData& route)
   {
     std::set<Id> nodeIds;
 
@@ -1164,7 +1163,7 @@ namespace osmscout {
       return false;
     }
 
-    ResolveRouteDataJunctions(nodes,route);
+    ResolveRouteDataJunctions(route);
 
     return true;
   }
@@ -1329,13 +1328,6 @@ namespace osmscout {
                           iter->GetTargetNodeIndex());
     }
 
-    return true;
-  }
-
-  bool PostprocessRouteDescription(RouteDescription& description,
-                                   const std::string& startDescription,
-                                   const std::string& targetDescription)
-  {
     return true;
   }
 

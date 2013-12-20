@@ -21,7 +21,7 @@
 
 namespace osmscout {
 
-  bool NodeAttributes::SetTags(Progress& progress,
+  bool NodeAttributes::SetTags(Progress& /*progress*/,
                                const TypeConfig& typeConfig,
                                std::vector<Tag>& tags)
   {

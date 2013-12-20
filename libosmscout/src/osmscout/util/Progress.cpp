@@ -45,37 +45,38 @@ namespace osmscout {
     return outputDebug;
   }
 
-  void Progress::SetStep(const std::string& step)
+  void Progress::SetStep(const std::string& /*step*/)
   {
     // no code
   }
 
-  void Progress::SetAction(const std::string& action)
+  void Progress::SetAction(const std::string& /*action*/)
   {
     // no code
   }
 
-  void Progress::SetProgress(double current, double total)
+  void Progress::SetProgress(double /*current*/,
+                             double /*total*/)
   {
     // no code
   }
 
-  void Progress::Debug(const std::string& text)
+  void Progress::Debug(const std::string& /*text*/)
   {
     // no code
   }
 
-  void Progress::Info(const std::string& text)
+  void Progress::Info(const std::string& /*text*/)
   {
     // no code
   }
 
-  void Progress::Warning(const std::string& text)
+  void Progress::Warning(const std::string& /*text*/)
   {
     // no code
   }
 
-  void Progress::Error(const std::string& text)
+  void Progress::Error(const std::string& /*text*/)
   {
     // no code
   }

@@ -229,13 +229,13 @@ namespace osmscout {
       return currentNode.paths[pathIndex].distance;
     }
 
-    inline double GetCosts(const Area& area,
+    inline double GetCosts(const Area& /*area*/,
                            double distance) const
     {
       return distance;
     }
 
-    inline double GetCosts(const Way& way,
+    inline double GetCosts(const Way& /*way*/,
                            double distance) const
     {
       return distance;

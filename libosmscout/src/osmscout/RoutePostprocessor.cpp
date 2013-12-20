@@ -441,9 +441,9 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::StartPostprocessor::Process(const RoutingProfile& profile,
+  bool RoutePostprocessor::StartPostprocessor::Process(const RoutingProfile& /*profile*/,
                                                        RouteDescription& description,
-                                                       Database& database)
+                                                       Database& /*database*/)
   {
     if (!description.Nodes().empty()) {
       description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
@@ -459,9 +459,9 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::TargetPostprocessor::Process(const RoutingProfile& profile,
+  bool RoutePostprocessor::TargetPostprocessor::Process(const RoutingProfile& /*profile*/,
                                                         RouteDescription& description,
-                                                        Database& database)
+                                                        Database& /*database*/)
   {
     if (!description.Nodes().empty()) {
       description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
@@ -571,7 +571,7 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::WayNamePostprocessor::Process(const RoutingProfile& profile,
+  bool RoutePostprocessor::WayNamePostprocessor::Process(const RoutingProfile& /*profile*/,
                                                          RouteDescription& description,
                                                          Database& database)
   {
@@ -810,7 +810,7 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::DirectionPostprocessor::Process(const RoutingProfile& profile,
+  bool RoutePostprocessor::DirectionPostprocessor::Process(const RoutingProfile& /*profile*/,
                                                            RouteDescription& description,
                                                            Database& database)
   {
@@ -1142,7 +1142,7 @@ namespace osmscout {
     motorwayLinkTypes.insert(type);
   }
 
-  bool RoutePostprocessor::InstructionPostprocessor::Process(const RoutingProfile& profile,
+  bool RoutePostprocessor::InstructionPostprocessor::Process(const RoutingProfile& /*profile*/,
                                                              RouteDescription& description,
                                                              Database& database)
   {

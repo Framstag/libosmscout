@@ -135,7 +135,7 @@ AS_IF([test "$enable_openmp_support" != "no"],
       [AX_OPENMP([AC_SUBST(OPENMP_CXXFLAGS)])])
 
 AS_IF([test "x$GXX" = xyes],
-      [CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"])
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
 
 dnl Selfmade tests
 
@@ -170,7 +170,7 @@ AX_CREATE_PKGCONFIG_INFO([],
                          [-losmscout],
                          [libosmscout base library],
                          [$CPP0XFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS],
-                         [])
+                         [$OPENMP_CXXFLAGS])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile])
 AC_OUTPUT

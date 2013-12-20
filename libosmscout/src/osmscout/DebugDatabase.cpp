@@ -41,7 +41,7 @@ namespace osmscout {
     // no code
   }
 
-  DebugDatabase::DebugDatabase(const DebugDatabaseParameter& parameter)
+  DebugDatabase::DebugDatabase(const DebugDatabaseParameter& /*parameter*/)
    : isOpen(false),
      typeConfig(NULL)
   {

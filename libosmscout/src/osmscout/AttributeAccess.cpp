@@ -21,10 +21,10 @@
 
 namespace osmscout {
 
-  void AttributeAccess::Parse(Progress& progress,
+  void AttributeAccess::Parse(Progress& /*progress*/,
                               const TypeConfig& typeConfig,
                               TypeId type,
-                              Id id,
+                              Id /*id*/,
                               std::vector<Tag>& tags)
   {
     access=0;

@@ -263,7 +263,7 @@ namespace osmscout
   bool OptimizeWaysLowZoom::GetWays(double lonMin, double latMin,
                                     double lonMax, double latMax,
                                     const Magnification& magnification,
-                                    size_t maxWayCount,
+                                    size_t /*maxWayCount*/,
                                     std::vector<TypeSet>& wayTypes,
                                     std::vector<WayRef>& ways) const
   {

@@ -1290,7 +1290,7 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::HandleAdminRegionPOI(const LocationSearch& search,
+  bool Database::HandleAdminRegionPOI(const LocationSearch& /*search*/,
                                       const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
                                       const osmscout::LocationMatchVisitor::POIResult& poiResult,
                                       LocationSearchResult& result) const
@@ -1322,7 +1322,7 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::HandleAdminRegionLocationAddress(const LocationSearch& search,
+  bool Database::HandleAdminRegionLocationAddress(const LocationSearch& /*search*/,
                                                   const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
                                                   const osmscout::LocationMatchVisitor::LocationResult& locationResult,
                                                   const osmscout::AddressMatchVisitor::AddressResult& addressResult,

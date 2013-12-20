@@ -25,7 +25,7 @@
 #include <iostream>
 namespace osmscout {
 
-  bool AreaAttributes::SetTags(Progress& progress,
+  bool AreaAttributes::SetTags(Progress& /*progress*/,
                                const TypeConfig& typeConfig,
                                std::vector<Tag>& tags)
   {

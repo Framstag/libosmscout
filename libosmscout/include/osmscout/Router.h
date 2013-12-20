@@ -230,8 +230,7 @@ namespace osmscout {
                                   size_t targetNodeIndex,
                                   RouteData& route);
 
-    bool ResolveRouteDataJunctions(const std::list<RNodeRef>& nodes,
-                                   RouteData& route);
+    bool ResolveRouteDataJunctions(RouteData& route);
 
     void AddNodes(RouteData& route,
                   Id startNodeId,
