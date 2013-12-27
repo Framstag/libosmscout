@@ -135,6 +135,7 @@ namespace osmscout {
     }
 
     isOpen=false;
+    cache.Flush();
 
     return success;
   }
