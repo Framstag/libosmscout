@@ -674,7 +674,6 @@ namespace osmscout {
           routeEntry->SetObjects(junction->second->GetObjects());
         }
       }
-
     }
 
     return junctionDataFile.Close();
