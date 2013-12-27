@@ -47,6 +47,12 @@ namespace osmscout {
     * The cache is not threadsafe.
     * It uses a std::vector<std::list>> as a hash table for data lookup
     * It uses an std::list for implementing FIFO characteristics.
+
+    Implementation details: If std::unordered_map ist available we use this
+    for fast detection (O(1)) if an object is already in the cast. If it is not
+    available, we use a vector as a hashtable via the key value with list
+    as entry type for hash code conflict handling.
+
    */
   template <class K, class V, class IK = PageId>
   class Cache
