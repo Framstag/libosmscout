@@ -116,6 +116,7 @@ namespace osmscout {
   public:
     AreaAreaIndex(size_t cacheSize);
 
+    void Close();
     bool Load(const std::string& path);
 
     bool GetOffsets(double minlon,

@@ -27,9 +27,18 @@ namespace osmscout {
 
   AreaAreaIndex::AreaAreaIndex(size_t cacheSize)
   : filepart("areaarea.idx"),
+    maxLevel(0),
+    topLevelOffset(0),
     indexCache(cacheSize)
   {
     // no code
+  }
+
+  void AreaAreaIndex::Close()
+  {
+    if (scanner.IsOpen()) {
+      scanner.Close();
+    }
   }
 
   bool AreaAreaIndex::GetIndexCell(uint32_t level,

@@ -85,6 +85,7 @@ namespace osmscout {
   public:
     AreaWayIndex();
 
+    void Close();
     bool Load(const std::string& path);
 
     bool GetOffsets(double minlon,

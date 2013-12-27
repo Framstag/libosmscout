@@ -351,6 +351,13 @@ namespace osmscout {
   {
     nodeDataFile.Close();
     wayDataFile.Close();
+    areaDataFile.Close();
+
+    optimizeWaysLowZoom.Close();
+    optimizeAreasLowZoom.Close();
+    areaAreaIndex.Close();
+    areaNodeIndex.Close();
+    areaWayIndex.Close();
 
     isOpen=false;
   }

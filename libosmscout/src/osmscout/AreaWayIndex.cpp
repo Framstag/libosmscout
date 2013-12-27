@@ -50,6 +50,13 @@ namespace osmscout {
     // no code
   }
 
+  void AreaWayIndex::Close()
+  {
+    if (scanner.IsOpen()) {
+      scanner.Close();
+    }
+  }
+
   bool AreaWayIndex::Load(const std::string& path)
   {
     datafilename=path+"/"+filepart;

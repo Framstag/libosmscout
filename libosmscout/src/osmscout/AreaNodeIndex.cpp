@@ -50,6 +50,13 @@ namespace osmscout {
     // no code
   }
 
+  void AreaNodeIndex::Close()
+  {
+    if (scanner.IsOpen()) {
+      scanner.Close();
+    }
+  }
+
   bool AreaNodeIndex::Load(const std::string& path)
   {
     datafilename=path+"/"+filepart;
