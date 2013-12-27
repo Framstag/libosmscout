@@ -226,7 +226,8 @@ namespace osmscout {
         }
 
         ++tag;
-        //tag=tags.erase(tag);
+        // We do not remove this tag here, because it is relevant for access
+        // calculation
       }
       else if (tag->key==typeConfig.tagJunction) {
         if (tag->value=="roundabout") {
@@ -234,7 +235,9 @@ namespace osmscout {
           // If it is a roundabout is cannot be a area
         }
 
-        tag=tags.erase(tag);
+        ++tag;
+        // We do not remove this tag here, because it is relevant for access
+        // calculation
       }
       else if (tag->key==typeConfig.tagWidth) {
         double w;

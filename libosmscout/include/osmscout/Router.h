@@ -185,7 +185,7 @@ namespace osmscout {
     DataFile<Area>                       areaDataFile;      //! Cached access to the 'areas.dat' file
     DataFile<Way>                        wayDataFile;       //! Cached access to the 'ways.dat' file
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile; //! Cached access to the 'route.dat' file
-    IndexedDataFile<Id,Intersection>         junctionDataFile;  //! Cached access to the 'junctions.dat' file
+    IndexedDataFile<Id,Intersection>     junctionDataFile;  //! Cached access to the 'junctions.dat' file
 
     TypeConfig                           *typeConfig;       //! Type config for the currently opened map
 
