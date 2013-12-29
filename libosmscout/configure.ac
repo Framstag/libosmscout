@@ -78,6 +78,20 @@ AS_IF([test "$enable_thread_support" != "no"],
       [AC_CHECK_HEADERS([thread],
                         [AC_DEFINE([OSMSCOUT_HAVE_THREAD],[1],[system header <thread> is available])])])
 
+AC_MSG_CHECKING([if C++ include <atomic> is usable])
+AC_TRY_COMPILE([#include <atomic>],
+               [std::atomic_bool atomBoolValue;],
+               [AC_MSG_RESULT(yes)],
+               [AC_DEFINE([OSMSCOUT_HAVE_ATOMIC],[1],[standard library has support for atomic])
+                AC_MSG_RESULT(no)])
+
+AC_MSG_CHECKING([if C++ include <mutex> is usable])
+AC_TRY_COMPILE([#include <mutex>],
+               [std::mutex mutexValue;],
+               [AC_MSG_RESULT(yes)],
+               [AC_DEFINE([OSMSCOUT_HAVE_MUTEX],[1],[standard library has support for mutex])
+                AC_MSG_RESULT(no)])
+
 AC_SEARCH_LIBS([sqrt],[m],[])
 
 AC_MSG_CHECKING([if C++ include <cassert> defines assert() without namespace])
