@@ -406,6 +406,8 @@ namespace osmscout {
     bool                                      oneway=false;
 
 
+    // Collect all route node file offsets on the path and also
+    // all area/way file offsets on the path
     for (std::list<RNodeRef>::const_iterator n=nodes.begin();
         n!=nodes.end();
         n++) {
@@ -428,6 +430,8 @@ namespace osmscout {
       }
     }
 
+    // Collect area/way file offset for the
+    // target object (not traversed by above loop)
     switch (targetObject.GetType()) {
     case refArea:
       areaOffsets.insert(targetObject.GetFileOffset());
@@ -439,6 +443,10 @@ namespace osmscout {
       assert(false);
       break;
     }
+
+    //
+    // Load data
+    //
 
     if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,routeNodeMap)) {
       std::cerr << "Cannot load route nodes" << std::endl;
@@ -476,7 +484,7 @@ namespace osmscout {
     }
 
     if (nodes.empty()) {
-      // We assume that startNode and targetNode are on the same way (with no routing node in between)
+      // We assume that startNode and targetNode are on the same area/way (with no routing node in between)
       assert(startObject==targetObject);
 
       AddNodes(route,
@@ -502,7 +510,8 @@ namespace osmscout {
     if ((*ids)[startNodeIndex]!=initialNode->GetId()) {
       size_t routeNodeIndex=0;
 
-      while ((*ids)[routeNodeIndex]!=initialNode->GetId()) {
+      while ((*ids)[routeNodeIndex]!=initialNode->GetId() &&
+          routeNodeIndex<ids->size()) {
         routeNodeIndex++;
       }
       assert(routeNodeIndex<ids->size());
@@ -517,6 +526,10 @@ namespace osmscout {
                routeNodeIndex);
     }
 
+    //
+    // Walk the routing path from route node to the next route node
+    // and build entries.
+    //
     for (std::list<RNodeRef>::const_iterator n=nodes.begin();
         n!=nodes.end();
         n++) {
@@ -553,7 +566,8 @@ namespace osmscout {
 
         size_t currentNodeIndex=0;
 
-        while ((*ids)[currentNodeIndex]!=node->GetId()) {
+        while ((*ids)[currentNodeIndex]!=node->GetId() &&
+            currentNodeIndex<ids->size()) {
           currentNodeIndex++;
         }
         assert(currentNodeIndex<ids->size());
@@ -600,14 +614,16 @@ namespace osmscout {
 
       size_t currentNodeIndex=0;
 
-      while ((*ids)[currentNodeIndex]!=node->id) {
+      while ((*ids)[currentNodeIndex]!=node->id &&
+          currentNodeIndex<ids->size()) {
         currentNodeIndex++;
       }
       assert(currentNodeIndex<ids->size());
 
       size_t nextNodeIndex=0;
 
-      while ((*ids)[nextNodeIndex]!=nextNode->id) {
+      while ((*ids)[nextNodeIndex]!=nextNode->id &&
+          nextNodeIndex<ids->size()) {
         nextNodeIndex++;
       }
       assert(nextNodeIndex<ids->size());
