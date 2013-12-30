@@ -82,6 +82,11 @@ namespace osmscout {
 
     void Clear();
 
+    inline bool IsEmpty()
+    {
+      return entries.empty();
+    }
+
     void AddEntry(Id currentNodeId,
                   size_t currentNodeIndex,
                   const ObjectFileRef& pathObject,
