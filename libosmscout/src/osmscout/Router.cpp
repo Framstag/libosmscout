@@ -448,17 +448,20 @@ namespace osmscout {
     // Load data
     //
 
-    if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,routeNodeMap)) {
+    if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,
+                                       routeNodeMap)) {
       std::cerr << "Cannot load route nodes" << std::endl;
       return false;
     }
 
-    if (!areaDataFile.GetByOffset(areaOffsets,areaMap)) {
+    if (!areaDataFile.GetByOffset(areaOffsets,
+                                  areaMap)) {
       std::cerr << "Cannot load areas" << std::endl;
       return false;
     }
 
-    if (!wayDataFile.GetByOffset(wayOffsets,wayMap)) {
+    if (!wayDataFile.GetByOffset(wayOffsets,
+                                 wayMap)) {
       std::cerr << "Cannot load ways" << std::endl;
       return false;
     }
@@ -1118,6 +1121,19 @@ namespace osmscout {
       maxOpenList=std::max(maxOpenList,openMap.size());
       maxCloseMap=std::max(maxCloseMap,closeMap.size());
 
+#if defined(DEBUG_ROUTING)
+      if (openList.empty()) {
+        std::cout << "No more alternatives, stopping" << std::endl;
+      }
+
+      if ((targetForwardRouteNode.Valid() && current->nodeOffset==targetForwardRouteNode->fileOffset)) {
+        std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->fileOffset << " (forward)" << std::endl;
+      }
+
+      if (targetBackwardRouteNode.Valid() && current->nodeOffset==targetBackwardRouteNode->fileOffset) {
+        std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->fileOffset << " (backward)" << std::endl;
+      }
+#endif
     } while (!openList.empty() &&
              (targetForwardRouteNode.Invalid() || current->nodeOffset!=targetForwardRouteNode->fileOffset) &&
              (targetBackwardRouteNode.Invalid() || current->nodeOffset!=targetBackwardRouteNode->fileOffset));
@@ -1155,10 +1171,12 @@ namespace osmscout {
     std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;
     std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
 
-    if (!((targetForwardRouteNode.Invalid() || currentRouteNode->GetId()==targetForwardRouteNode->id) ||
-          (targetBackwardRouteNode.Invalid() || currentRouteNode->GetId()==targetBackwardRouteNode->id))) {
+    if (!((targetForwardRouteNode.Valid() && currentRouteNode->GetId()==targetForwardRouteNode->id) ||
+          (targetBackwardRouteNode.Valid() && currentRouteNode->GetId()==targetBackwardRouteNode->id))) {
       std::cout << "No route found!" << std::endl;
-      return false;
+      route.Clear();
+
+      return true;
     }
 
     std::list<RNodeRef> nodes;
