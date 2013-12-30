@@ -207,15 +207,11 @@ namespace osmscout {
     tag=tags.begin();
     while (tag!=tags.end()) {
       if (tag->key==typeConfig.tagOneway) {
-        access&=~(bicycleForward|bicycleBackward|carForward|carBackward|onewayBackward|onewayForward);
-
         if (tag->value=="-1") {
           access&=~(bicycleForward|carForward|onewayForward);
-          access|=(carBackward|bicycleBackward|onewayBackward);
         }
         else if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           access&=~(bicycleBackward|carBackward|onewayBackward);
-          access|=(bicycleForward|carForward|onewayForward);
         }
 
         tag=tags.erase(tag);
