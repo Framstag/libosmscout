@@ -1177,6 +1177,8 @@ namespace osmscout {
               pendingOffset.index=routeNode.paths.size();
 
               pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
+
+              path.offset=0;
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
@@ -1223,12 +1225,15 @@ namespace osmscout {
               path.offset=pathNodeOffset->second;
             }
             else {
+
               PendingOffset pendingOffset;
 
               pendingOffset.routeNodeOffset=routeNodeOffset;
               pendingOffset.index=routeNode.paths.size();
 
               pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
+
+              path.offset=0;
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
@@ -1316,19 +1321,18 @@ namespace osmscout {
   {
     std::map<FileOffset,RouteNodeRef> routeNodeOffsetMap;
     FileScanner                       routeScanner;
+    FileOffset                        currentOffset;
+
+    if (!routeNodeWriter.GetPos(currentOffset)) {
+      progress.Error(std::string("Error while reading current file offset in file '")+
+                     routeNodeWriter.GetFilename()+"'");
+      return false;
+    }
 
     if (!routeScanner.Open(routeNodeWriter.GetFilename(),
                            FileScanner::LowMemRandom,
                            false)) {
       progress.Error("Cannot open '"+routeScanner.GetFilename()+"'");
-      return false;
-    }
-
-    FileOffset currentOffset;
-
-    if (!routeNodeWriter.GetPos(currentOffset)) {
-      progress.Error(std::string("Error while reading current file offset in file '")+
-                     routeNodeWriter.GetFilename()+"'");
       return false;
     }
 
@@ -1374,6 +1378,10 @@ namespace osmscout {
       pendingOffsetsMap.erase(pendingRouteNodeEntry);
     }
 
+    if (!routeScanner.Close()) {
+      return false;
+    }
+
     for (std::map<FileOffset,RouteNodeRef>::const_iterator routeNodeEntry=routeNodeOffsetMap.begin();
          routeNodeEntry!=routeNodeOffsetMap.end();
          ++routeNodeEntry) {
@@ -1396,7 +1404,7 @@ namespace osmscout {
       return false;
     }
 
-    return routeScanner.Close();
+    return !routeNodeWriter.HasError();
   }
 
   bool RouteDataGenerator::WriteRouteGraph(const ImportParameter& parameter,
@@ -1407,17 +1415,17 @@ namespace osmscout {
                                            Vehicle vehicle,
                                            const std::string& filename)
   {
-    FileScanner                            wayScanner;
-    FileScanner                            areaScanner;
-    FileWriter                             writer;
+    FileScanner                wayScanner;
+    FileScanner                areaScanner;
+    FileWriter                 writer;
 
-    uint32_t                               handledRouteNodeCount=0;
-    uint32_t                               writtenRouteNodeCount=0;
-    uint32_t                               writtenRoutePathCount=0;
-    uint32_t                               simpleNodesCount=0;
+    uint32_t                   handledRouteNodeCount=0;
+    uint32_t                   writtenRouteNodeCount=0;
+    uint32_t                   writtenRoutePathCount=0;
+    uint32_t                   simpleNodesCount=0;
 
-    NodeIdOffsetMap                        routeNodeIdOffsetMap;
-    PendingRouteNodeOffsetsMap             pendingOffsetsMap;
+    NodeIdOffsetMap            routeNodeIdOffsetMap;
+    PendingRouteNodeOffsetsMap pendingOffsetsMap;
 
     //
     // Writing route nodes
@@ -1496,7 +1504,6 @@ namespace osmscout {
       }
 
       OSMSCOUT_HASHMAP<FileOffset,WayRef>  waysMap;
-      OSMSCOUT_HASHMAP<FileOffset,AreaRef> areasMap;
 
       if (!LoadWays(progress,
                     wayScanner,
@@ -1506,6 +1513,8 @@ namespace osmscout {
       }
 
       wayOffsets.clear();
+
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef> areasMap;
 
       if (!LoadAreas(progress,
                      areaScanner,
@@ -1529,14 +1538,13 @@ namespace osmscout {
 
         routeNode.id=node->first;
 
-        routeNodeIdOffsetMap.insert(std::make_pair(node->first,routeNodeOffset));
-
         handledRouteNodeCount++;
         progress.SetProgress(handledRouteNodeCount,nodeObjectsMap.size());
 
         for (std::list<ObjectFileRef>::const_iterator ref=node->second.begin();
             ref!=node->second.end();
             ref++) {
+
           if (ref->GetType()==refWay) {
             const WayRef& way=waysMap[ref->GetFileOffset()];
 
@@ -1600,9 +1608,12 @@ namespace osmscout {
                               node->second,
                               restrictions);
 
+        /*
         if (routeNode.paths.empty()) {
           continue;
-        }
+        }*/
+
+        routeNodeIdOffsetMap.insert(std::make_pair(node->first,routeNodeOffset));
 
         if (routeNode.paths.size()==1) {
           simpleNodesCount++;
@@ -1616,8 +1627,6 @@ namespace osmscout {
 
         writtenRouteNodeCount++;
         writtenRoutePathCount+=(uint32_t)routeNode.paths.size();
-
-        node++;
       }
 
       writer.Flush();
@@ -1657,10 +1666,10 @@ namespace osmscout {
                                   const TypeConfig& typeConfig)
   {
     // List of restrictions for a way
-    ViaTurnRestrictionMap                  restrictions;
+    ViaTurnRestrictionMap restrictions;
 
-    NodeUseMap                             nodeUseMap;
-    NodeIdObjectsMap                       nodeObjectsMap;
+    NodeUseMap            nodeUseMap;
+    NodeIdObjectsMap      nodeObjectsMap;
 
     //
     // Handling of restriction relations
@@ -1681,9 +1690,9 @@ namespace osmscout {
     progress.SetAction("Scanning for intersections");
 
     if (!ReadIntersections(parameter,
-                       progress,
-                       typeConfig,
-                       nodeUseMap)) {
+                           progress,
+                           typeConfig,
+                           nodeUseMap)) {
       return false;
     }
 
@@ -1694,10 +1703,10 @@ namespace osmscout {
     progress.SetAction("Collecting objects at intersections");
 
     if (!ReadObjectsAtIntersections(parameter,
-                                progress,
-                                typeConfig,
-                                nodeUseMap,
-                                nodeObjectsMap)) {
+                                    progress,
+                                    typeConfig,
+                                    nodeUseMap,
+                                    nodeObjectsMap)) {
       return false;
     }
 
@@ -1719,8 +1728,8 @@ namespace osmscout {
     progress.SetAction(std::string("Writing intersection file '")+Router::FILENAME_INTERSECTIONS_DAT+"'");
 
     if (!WriteIntersections(parameter,
-                        progress,
-                        nodeObjectsMap)) {
+                            progress,
+                            nodeObjectsMap)) {
       return false;
     }
 
