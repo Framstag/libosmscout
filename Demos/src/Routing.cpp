@@ -563,6 +563,14 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  if (data.IsEmpty()) {
+    std::cout << "No Route found!" << std::endl;
+
+    router.Close();
+
+    return 0;
+  }
+
   router.TransformRouteDataToRouteDescription(data,description);
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
