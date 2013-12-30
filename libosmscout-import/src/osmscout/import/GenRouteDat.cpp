@@ -1541,6 +1541,55 @@ namespace osmscout {
         handledRouteNodeCount++;
         progress.SetProgress(handledRouteNodeCount,nodeObjectsMap.size());
 
+        //
+        // Find out if any of the areas/ways at the intersection is in principle
+        // routable for us. If not, we can saftly drop this node from the routing graph.
+        //
+
+        bool isRoutable=false;
+
+        for (std::list<ObjectFileRef>::const_iterator ref=node->second.begin();
+            ref!=node->second.end();
+            ref++) {
+          if (ref->GetType()==refWay) {
+            const WayRef& way=waysMap[ref->GetFileOffset()];
+
+            if (!way.Valid()) {
+              progress.Error("Error while loading way at offset "+
+                             NumberToString(ref->GetFileOffset()) +
+                             " (Internal error?)");
+              continue;
+            }
+
+            if (way->GetAttributes().GetAccess().CanRoute(vehicle)) {
+              isRoutable=true;
+            }
+
+          }
+          else if (ref->GetType()==refArea) {
+            const AreaRef& area=areasMap[ref->GetFileOffset()];
+
+            if (!area.Valid()) {
+              progress.Error("Error while loading area at offset "+
+                             NumberToString(ref->GetFileOffset()) +
+                             " (Internal error?)");
+              continue;
+            }
+
+            if (typeConfig.GetTypeInfo(area->GetType()).CanRoute()) {
+              isRoutable=true;
+            }
+          }
+        }
+
+        if (!isRoutable) {
+          continue;
+        }
+
+        //
+        // Calculate all outgoing paths
+        //
+
         for (std::list<ObjectFileRef>::const_iterator ref=node->second.begin();
             ref!=node->second.end();
             ref++) {
@@ -1607,11 +1656,6 @@ namespace osmscout {
         FillRoutePathExcludes(routeNode,
                               node->second,
                               restrictions);
-
-        /*
-        if (routeNode.paths.empty()) {
-          continue;
-        }*/
 
         routeNodeIdOffsetMap.insert(std::make_pair(node->first,routeNodeOffset));
 
