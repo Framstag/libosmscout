@@ -359,6 +359,7 @@ namespace osmscout {
           }
         }
 
+        // "+1" because we add +1 to every offset, to generate offset > 0
         uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
 
         progress.Info("Writing map for "+
@@ -426,7 +427,7 @@ namespace osmscout {
             return false;
           }
 
-          writer.WriteFileOffset(cellOffset-dataStartOffset,
+          writer.WriteFileOffset(cellOffset-dataStartOffset+1,
                                  dataOffsetBytes);
 
           if (!writer.SetPos(cellOffset)) {

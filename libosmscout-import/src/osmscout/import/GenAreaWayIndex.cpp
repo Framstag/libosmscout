@@ -152,7 +152,7 @@ namespace osmscout {
            ++offset) {
         FileOffset data=*offset-previousOffset;
 
-        dataSize+=EncodeNumber(data+1,buffer);
+        dataSize+=EncodeNumber(data,buffer);
 
         previousOffset=*offset;
       }

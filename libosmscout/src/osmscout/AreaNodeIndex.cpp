@@ -171,6 +171,9 @@ namespace osmscout {
           continue;
         }
 
+        // We added +1 during import and now substract it again
+        cellDataOffset--;
+
         if (initialCellDataOffset==0) {
           initialCellDataOffset=dataOffset+cellDataOffset;
         }
@@ -201,7 +204,6 @@ namespace osmscout {
         }
 
         if (currentSize+newOffsets.size()+dataCount>maxNodeCount) {
-          //std::cout << currentSize<< "+" << newOffsets.size() << "+" << dataCount << ">" << maxWayCount << std::endl;
           sizeExceeded=true;
           return true;
         }
