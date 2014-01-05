@@ -741,15 +741,24 @@ namespace osmscout {
       for (std::vector<ObjectFileRef>::const_iterator object=node->GetObjects().begin();
           object!=node->GetObjects().end();
           ++object) {
+        bool canUseForward=CanUseForward(profile,
+                                         areaMap,
+                                         wayMap,
+                                         nodeId,
+                                         *object);
+        bool canUseBackward=CanUseBackward(profile,
+                                           areaMap,
+                                           wayMap,
+                                           nodeId,
+                                           *object);
 
         // We can travel this way in the forward direction
-        if (CanUseForward(profile,
-                          areaMap,
-                          wayMap,
-                          nodeId,
-                          *object)) {
+        if (canUseForward) {
           // And it is not the way back to the last routing node
           if (lastNode->GetPathObject()!=*object ||
+              IsRoundabout(*object,
+                           areaMap,
+                           wayMap) ||
               !IsForwardPath(lastNode->GetPathObject(),
                              currentNodeIndexOnLastPath,
                              lastNode->GetCurrentNodeIndex())) {
@@ -758,11 +767,7 @@ namespace osmscout {
         }
 
         // We can travel this way in the backward direction
-        if (CanUseBackward(profile,
-                           areaMap,
-                           wayMap,
-                           nodeId,
-                           *object)) {
+        if (canUseBackward) {
           // And it is not the way to back the last routing node
           if (lastNode->GetPathObject()!=*object ||
               !IsBackwardPath(lastNode->GetPathObject(),
@@ -1000,9 +1005,6 @@ namespace osmscout {
   {
     if (node.HasDescription(RouteDescription::CROSSING_WAYS_DESC)) {
       RouteDescription::CrossingWaysDescriptionRef crossing=dynamic_cast<RouteDescription::CrossingWaysDescription*>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
-#ifdef DEBUG
-      std::cout << "Exits at node: " << node.GetCurrentNodeIndex() << " " << crossing->GetExitCount() << std::endl;
-#endif
       if (crossing->GetExitCount()>1) {
         roundaboutCrossingCounter+=crossing->GetExitCount()-1;
       }
@@ -1178,9 +1180,6 @@ namespace osmscout {
     std::list<RouteDescription::Node>::iterator       node=description.Nodes().begin();
     std::list<RouteDescription::Node>::const_iterator lastNode=description.Nodes().end();
     while (node!=description.Nodes().end()) {
-/*
-      WayRef                               originWay;
-      WayRef                               targetWay;*/
       RouteDescription::NameDescriptionRef originName;
       RouteDescription::NameDescriptionRef targetName;
 
@@ -1193,12 +1192,9 @@ namespace osmscout {
       }
 
       originName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-      //originWay=wayMap[lastNode->GetPathObject()];
 
       if (node->HasPathObject()) {
         targetName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
-
-        //targetWay=wayMap[node->GetPathObject()];
       }
 
       if (!IsRoundabout(lastNode->GetPathObject(),
@@ -1207,10 +1203,13 @@ namespace osmscout {
           IsRoundabout(node->GetPathObject(),
                        areaMap,
                        wayMap)) {
-        HandleRoundaboutEnter(*node);
         inRoundabout=true;
         roundaboutCrossingCounter=0;
+
+        HandleRoundaboutEnter(*node);
+
         lastNode=node++;
+
         continue;
       }
 
@@ -1221,10 +1220,13 @@ namespace osmscout {
                         areaMap,
                         wayMap)) {
         HandleRoundaboutNode(*node);
+
         HandleRoundaboutLeave(*node);
+
         inRoundabout=false;
 
         lastNode=node++;
+
         continue;
       }
 
@@ -1245,6 +1247,7 @@ namespace osmscout {
                                   targetName);
 
         lastNode=node++;
+
         continue;
       }
 
@@ -1265,6 +1268,7 @@ namespace osmscout {
                                   originName);
 
         lastNode=node++;
+
         continue;
       }
 
@@ -1316,6 +1320,7 @@ namespace osmscout {
 
           node=next;
           lastNode=node++;
+
           continue;
 
         }
@@ -1348,6 +1353,7 @@ namespace osmscout {
         }
 
         lastNode=node++;
+
         continue;
       }
 
@@ -1357,6 +1363,7 @@ namespace osmscout {
       else if (HandleDirectionChange(description.Nodes(),
                                      node)) {
         lastNode=node++;
+
         continue;
       }
 
@@ -1364,6 +1371,7 @@ namespace osmscout {
                            lastNode,
                            node)) {
         lastNode=node++;
+
         continue;
       }
 

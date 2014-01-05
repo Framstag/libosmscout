@@ -29,6 +29,7 @@
 
 #include <osmscout/util/Geometry.h>
 
+//#define POINTS_DEBUG
 //#define ROUTE_DEBUG
 //#define NODE_DEBUG
 
