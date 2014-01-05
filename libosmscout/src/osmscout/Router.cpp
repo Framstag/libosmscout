@@ -1140,36 +1140,36 @@ namespace osmscout {
 
     clock.Stop();
 
-    std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset();
-    std::cout << "[";
-    if (startForwardRouteNode.Valid()) {
-      std::cout << startForwardRouteNode->GetId() << " - ";
-    }
-    std::cout << startNodeIndex;
-    if (startBackwardRouteNode.Valid()) {
-      std::cout << " - " << startBackwardRouteNode->GetId();
-    }
-    std::cout << "]" << std::endl;
+    if (debugPerformance) {
+      std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset();
+      std::cout << "[";
+      if (startForwardRouteNode.Valid()) {
+        std::cout << startForwardRouteNode->GetId() << " - ";
+      }
+      std::cout << startNodeIndex;
+      if (startBackwardRouteNode.Valid()) {
+        std::cout << " - " << startBackwardRouteNode->GetId();
+      }
+      std::cout << "]" << std::endl;
 
-    std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
-    std::cout << "[";
-    if (targetForwardRouteNode.Valid()) {
-      std::cout << targetForwardRouteNode->GetId() << " - ";
-    }
-    std::cout << targetNodeIndex;
-    if (targetBackwardRouteNode.Valid()) {
-      std::cout << " - " << targetBackwardRouteNode->GetId();
-    }
-    std::cout << "]" << std::endl;
+      std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
+      std::cout << "[";
+      if (targetForwardRouteNode.Valid()) {
+        std::cout << targetForwardRouteNode->GetId() << " - ";
+      }
+      std::cout << targetNodeIndex;
+      if (targetBackwardRouteNode.Valid()) {
+        std::cout << " - " << targetBackwardRouteNode->GetId();
+      }
+      std::cout << "]" << std::endl;
 
-    std::cout << "Time:                " << clock << std::endl;
-#if defined(DEBUG_ROUTING)
-    std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
-#endif
-    std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
-    std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
-    std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;
-    std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
+      std::cout << "Time:                " << clock << std::endl;
+
+      std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
+      std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
+      std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;
+      std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
+    }
 
     if (!((targetForwardRouteNode.Valid() && currentRouteNode->GetId()==targetForwardRouteNode->id) ||
           (targetBackwardRouteNode.Valid() && currentRouteNode->GetId()==targetBackwardRouteNode->id))) {

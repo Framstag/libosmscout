@@ -412,6 +412,8 @@ int main(int argc, char* argv[])
   osmscout::ObjectFileRef                   targetObject;
   size_t                                    targetNodeIndex;
 
+  bool                                      outputGPX = false;
+
   int currentArg=1;
   while (currentArg<argc) {
     if (strcmp(argv[currentArg],"--foot")==0) {
@@ -425,6 +427,10 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(argv[currentArg],"--car")==0) {
       vehicle=osmscout::vehicleCar;
+      currentArg++;
+    }
+    else if (strcmp(argv[currentArg],"--gpx")==0) {
+      outputGPX=true;
       currentArg++;
     }
     else {
@@ -477,7 +483,9 @@ int main(int argc, char* argv[])
                                    tlat,
                                    tlon);
 
-  std::cout << "[" << startLat << "," << startLon << "] => [" << tlat << "," << tlon << "]" << std::endl;
+  if (!outputGPX) {
+    std::cout << "[" << startLat << "," << startLon << "] => [" << tlat << "," << tlon << "]" << std::endl;
+  }
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::Database          database(databaseParameter);
@@ -489,6 +497,11 @@ int main(int argc, char* argv[])
   }
 
   osmscout::RouterParameter routerParameter;
+
+  if (!outputGPX) {
+    routerParameter.SetDebugPerformance(true);
+  }
+
   osmscout::Router          router(routerParameter,
                                    vehicle);
 
@@ -522,7 +535,10 @@ int main(int argc, char* argv[])
     break;
   }
 
-  std::cout << "Searching for routing node for start location..." << std::endl;
+  if (!outputGPX) {
+    std::cout << "Searching for routing node for start location..." << std::endl;
+  }
+
   if (!database.GetClosestRoutableNode(startLat,
                                        startLon,
                                        vehicle,
@@ -537,7 +553,10 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  std::cout << "Searching for routing node for target location..." << std::endl;
+  if (!outputGPX) {
+    std::cout << "Searching for routing node for target location..." << std::endl;
+  }
+
   if (!database.GetClosestRoutableNode(targetLat,
                                        targetLon,
                                        vehicle,
@@ -609,6 +628,27 @@ int main(int argc, char* argv[])
     std::cout << "Point " << point->GetId() << " " << point->GetLat() << "," << point->GetLon() << std::endl;
   }
 #endif
+
+  std::list<osmscout::Point> points;
+
+  if(outputGPX) {
+    if (!router.TransformRouteDataToPoints(data,points)) {
+      std::cerr << "Error during route conversion" << std::endl;
+    }
+    std::cout.precision(8);
+    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"bin2gpx\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n\t<trk>" << std::endl;
+    std::cout << "\t\t<trkseg>" << std::endl;
+    for (std::list<osmscout::Point>::const_iterator point=points.begin();
+	 point!=points.end();
+	 ++point) {
+      std::cout << "\t\t\t<trkpt lat=\""<< point->GetLat() << "\" lon=\""<< point->GetLon() <<"\">\n\t\t\t\t</trkpt><fix>2d</fix>" << std::endl;
+    }
+    std::cout << "\t\t</trkseg>" << std::endl;
+    std::cout << "\t</trk>" << std::endl;
+    std::cout << "</gpx>" << std::endl;
+
+    return 0;
+  }
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  routingProfile,
