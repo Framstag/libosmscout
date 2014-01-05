@@ -386,7 +386,7 @@ namespace osmscout {
     }
   }
 
-  bool Router::ResolveRNodesToRouteData(const RoutingProfile& /*profile*/,
+  bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
                                         const std::list<RNodeRef>& nodes,
                                         const ObjectFileRef& startObject,
                                         size_t startNodeIndex,
@@ -480,7 +480,7 @@ namespace osmscout {
       assert(entry!=wayMap.end());
 
       ids=&entry->second->ids;
-      oneway=!entry->second->GetAttributes().GetAccess().CanRouteBackward();
+      oneway=!profile.CanUseBackward(entry->second);
     }
     else {
       assert(false);
@@ -561,7 +561,7 @@ namespace osmscout {
           assert(entry!=wayMap.end());
 
           ids=&entry->second->ids;
-          oneway=!entry->second->GetAttributes().GetAccess().CanRouteBackward();
+          oneway=!profile.CanUseBackward(entry->second);
         }
         else {
           assert(false);
@@ -609,7 +609,7 @@ namespace osmscout {
         assert(entry!=wayMap.end());
 
         ids=&entry->second->ids;
-        oneway=!entry->second->GetAttributes().GetAccess().CanRouteBackward();
+        oneway=!profile.CanUseBackward(entry->second);
       }
       else {
         assert(false);
