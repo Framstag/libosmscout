@@ -257,9 +257,9 @@ namespace osmscout {
       std::list<std::list<std::string> > restTokens;
 
       GroupStringListToStrings(t,
-                    listSize-i,
-                    parts-1,
-                    restTokens);
+                               listSize-i,
+                               parts-1,
+                               restTokens);
 
       for (std::list<std::list<std::string> >::const_iterator rest=restTokens.begin();
           rest!=restTokens.end();
