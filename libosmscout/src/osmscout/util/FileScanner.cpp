@@ -422,7 +422,7 @@ namespace osmscout {
       value.assign(&buffer[start],offset-start);
 
       if (offset>=(FileOffset)size) {
-        std::cerr << "String has no terminating '\0' before file end!" << std::endl;
+        std::cerr << "String has no terminating '\\0' before file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -448,7 +448,7 @@ namespace osmscout {
       hasError=fread(&character,1,1,file)!=1;
 
       if (hasError) {
-        std::cerr << "String has no terminating '\0' before file end!" << std::endl;
+        std::cerr << "String has no terminating '\\0' before file end!" << std::endl;
         return false;
       }
     }
