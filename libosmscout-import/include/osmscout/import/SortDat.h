@@ -237,8 +237,8 @@ namespace osmscout {
 
           GetTopLeftCoordinate(data,maxLat,minLon);
 
-          size_t cellY=(size_t)(maxLat+90.0/zoomLevel);
-          size_t cellX=(size_t)(minLon+180.0/zoomLevel);
+          size_t cellY=(size_t)((maxLat+90.0)/zoomLevel);
+          size_t cellX=(size_t)((minLon+180.0)/zoomLevel);
           size_t cellIndex=cellY*zoomLevel+cellX;
 
           if (cellIndex>=minIndex &&
