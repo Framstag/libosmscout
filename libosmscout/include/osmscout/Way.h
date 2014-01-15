@@ -300,7 +300,8 @@ namespace osmscout {
 
     inline bool IsCircular() const
     {
-      return ids[0]!=0 && ids[0]==ids[ids.size()-1];
+      return attributes.IsRoundabout() ||
+          (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
     bool GetCenter(double& lat,
