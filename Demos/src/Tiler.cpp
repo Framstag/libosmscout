@@ -155,8 +155,15 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
 
+  // Change this, to match your system
   drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
+  drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
+  drawParameter.SetFontSize(6.0);
+  // Fadings make problems with tile approach, we disable it
   drawParameter.SetDrawFadings(false);
+  // To get accurate label drawing at tile borders, we take into account labels
+  // of other than the current tile, too.
+  drawParameter.SetDropNotVisiblePointLabels(false);
 
   searchParameter.SetUseLowZoomOptimization(false);
   searchParameter.SetMaximumAreaLevel(3);
@@ -210,15 +217,25 @@ int main(int argc, char* argv[])
 
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
       for (size_t x=xTileStart; x<=xTileEnd; x++) {
-        double              lat,lon;
+        double              minLat2,minLat,lat,maxLat,maxLat2;
+        double              minLon2,minLon,lon,maxLon,maxLon2;
         agg::pixfmt_rgb24   pf(rbuf);
         osmscout::StopClock timer;
 
+        minLat2=tiley2lat(y+2,zoom);
+        minLat=tiley2lat(y+1,zoom);
+        maxLat=tiley2lat(y,zoom);
+        maxLat2=tiley2lat(y-1,zoom);
 
-        lat=(tiley2lat(y,zoom)+tiley2lat(y+1,zoom))/2;
-        lon=(tilex2long(x,zoom)+tilex2long(x+1,zoom))/2;
+        minLon2=tilex2long(x-1,zoom);
+        minLon=tilex2long(x,zoom);
+        maxLon=tilex2long(x+1,zoom);
+        maxLon2=tilex2long(x+2,zoom);
 
-        //std::cout << "Drawing tile at " << lat << "," << lon << "/";
+        lat=(minLat+maxLat)/2;
+        lon=(minLon+maxLon)/2;
+
+        std::cout << "Drawing tile [" << minLat << "," << lat << "," << maxLat << "]x[" << minLon << "," << lon << "," << maxLon << "]" << std::endl;
         //std::cout << x << "," << y << "/";
         //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
 
@@ -228,17 +245,25 @@ int main(int argc, char* argv[])
                        tileHeight);
 
 
-        database.GetObjects(nodeTypes,
-                            wayTypes,
-                            areaTypes,
-                            projection.GetLonMin(),
-                            projection.GetLatMin(),
-                            projection.GetLonMax(),
-                            projection.GetLatMax(),
+        database.GetObjects(searchParameter,
                             projection.GetMagnification(),
-                            searchParameter,
+                            nodeTypes,
+                            minLon2,
+                            minLat2,
+                            maxLon2,
+                            maxLat2,
                             data.nodes,
+                            wayTypes,
+                            minLon,
+                            minLat,
+                            maxLon,
+                            maxLat,
                             data.ways,
+                            areaTypes,
+                            minLon2,
+                            minLat2,
+                            maxLon2,
+                            maxLat2,
                             data.areas);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+

@@ -252,6 +252,21 @@ namespace osmscout {
                     std::vector<WayRef>& ways,
                     std::vector<AreaRef>& areas) const;
 
+    bool GetObjects(const AreaSearchParameter& parameter,
+                    const Magnification& magnification,
+                    const TypeSet &nodeTypes,
+                    double nodeLonMin, double nodeLatMin,
+                    double nodeLonMax, double nodeLatMax,
+                    std::vector<NodeRef>& nodes,
+                    const std::vector<TypeSet>& wayTypes,
+                    double wayLonMin, double wayLatMin,
+                    double wayLonMax, double wayLatMax,
+                    std::vector<WayRef>& ways,
+                    const TypeSet& areaTypes,
+                    double areaLonMin, double areaLatMin,
+                    double areaLonMax, double areaLatMax,
+                    std::vector<AreaRef>& areas) const;
+
     bool GetObjects(double lonMin, double latMin,
                     double lonMax, double latMax,
                     const TypeSet& types,

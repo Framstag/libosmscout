@@ -639,6 +639,34 @@ namespace osmscout {
                             std::vector<WayRef>& ways,
                             std::vector<AreaRef>& areas) const
   {
+    return GetObjects(parameter,
+                      magnification,
+                      nodeTypes,
+                      lonMin,latMin,lonMax,latMax,
+                      nodes,
+                      wayTypes,
+                      lonMin,latMin,lonMax,latMax,
+                      ways,
+                      areaTypes,
+                      lonMin,latMin,lonMax,latMax,
+                      areas);
+  }
+
+  bool Database::GetObjects(const AreaSearchParameter& parameter,
+                            const Magnification& magnification,
+                            const TypeSet &nodeTypes,
+                            double nodeLonMin, double nodeLatMin,
+                            double nodeLonMax, double nodeLatMax,
+                            std::vector<NodeRef>& nodes,
+                            const std::vector<TypeSet>& wayTypes,
+                            double wayLonMin, double wayLatMin,
+                            double wayLonMax, double wayLatMax,
+                            std::vector<WayRef>& ways,
+                            const TypeSet& areaTypes,
+                            double areaLonMin, double areaLatMin,
+                            double areaLonMax, double areaLatMax,
+                            std::vector<AreaRef>& areas) const
+  {
     std::string nodeIndexTime;
     std::string nodesTime;
 
@@ -672,10 +700,10 @@ namespace osmscout {
 #pragma omp section
       nodesSuccess=GetObjectsNodes(parameter,
                                    nodeTypes,
-                                   lonMin,
-                                   latMin,
-                                   lonMax,
-                                   latMax,
+                                   nodeLonMin,
+                                   nodeLatMin,
+                                   nodeLonMax,
+                                   nodeLatMax,
                                    nodeIndexTime,
                                    nodesTime,
                                    nodes);
@@ -684,10 +712,10 @@ namespace osmscout {
       waysSuccess=GetObjectsWays(parameter,
                                  wayTypes,
                                  magnification,
-                                 lonMin,
-                                 latMin,
-                                 lonMax,
-                                 latMax,
+                                 wayLonMin,
+                                 wayLatMin,
+                                 wayLonMax,
+                                 wayLatMax,
                                  wayOptimizedTime,
                                  wayIndexTime,
                                  waysTime,
@@ -697,10 +725,10 @@ namespace osmscout {
       areasSuccess=GetObjectsAreas(parameter,
                                    areaTypes,
                                    magnification,
-                                   lonMin,
-                                   latMin,
-                                   lonMax,
-                                   latMax,
+                                   areaLonMin,
+                                   areaLatMin,
+                                   areaLonMax,
+                                   areaLatMax,
                                    areaOptimizedTime,
                                    areaIndexTime,
                                    areasTime,

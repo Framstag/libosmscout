@@ -75,6 +75,7 @@ namespace osmscout {
     labelSpace(3.0),
     plateLabelSpace(5.0),
     sameLabelSpace(40.0),
+    dropNotVisiblePointLabels(true),
     renderSeaLand(false),
     debugPerformance(false)
   {
@@ -155,6 +156,12 @@ namespace osmscout {
   {
     this->sameLabelSpace=sameLabelSpace;
   }
+
+  void MapParameter::SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels)
+  {
+    this->dropNotVisiblePointLabels=dropNotVisiblePointLabels;
+  }
+
 
   void MapParameter::SetRenderSeaLand(bool render)
   {
@@ -853,11 +860,13 @@ namespace osmscout {
     by2=y+height/2+frameVert;
 
     // is box visible?
-    if (bx1>=projection.GetWidth() ||
-        bx2<0 ||
-        by1>=projection.GetHeight() ||
-        by2<0) {
-      return false;
+    if (parameter.GetDropNotVisiblePointLabels()) {
+      if (bx1>=projection.GetWidth() ||
+          bx2<0 ||
+          by1>=projection.GetHeight() ||
+          by2<0) {
+        return false;
+      }
     }
 
     if (overlay) {

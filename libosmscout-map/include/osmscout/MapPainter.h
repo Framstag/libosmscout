@@ -66,6 +66,7 @@ namespace osmscout {
     double                       labelSpace;         //! Space between point labels in mm (default 3).
     double                       plateLabelSpace;    //! Space between plates in mm (default 5).
     double                       sameLabelSpace;     //! Space between labels with the same value in mm (default 40)
+    bool                         dropNotVisiblePointLabels; //! Point labels that are not visbile, are clips during label positioning phase
 
     bool                         renderSeaLand;      //! Rendering of sea/land tiles
 
@@ -97,6 +98,7 @@ namespace osmscout {
     void SetLabelSpace(double labelSpace);
     void SetPlateLabelSpace(double plateLabelSpace);
     void SetSameLabelSpace(double sameLabelSpace);
+    void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
 
     void SetRenderSeaLand(bool render);
 
@@ -177,6 +179,11 @@ namespace osmscout {
     inline double GetSameLabelSpace() const
     {
       return sameLabelSpace;
+    }
+
+    inline bool GetDropNotVisiblePointLabels() const
+    {
+      return dropNotVisiblePointLabels;
     }
 
     inline double GetRenderSeaLand() const
