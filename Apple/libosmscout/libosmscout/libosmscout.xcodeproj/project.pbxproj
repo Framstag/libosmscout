@@ -8,11 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		F51E3EA3161A5F4000D51926 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F51E3EA2161A5F4000D51926 /* Foundation.framework */; };
-		F51E3EFE161A5FEC00D51926 /* AdminRegion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB2161A5FEC00D51926 /* AdminRegion.cpp */; };
 		F51E3EFF161A5FEC00D51926 /* AreaAreaIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */; };
 		F51E3F00161A5FEC00D51926 /* AreaNodeIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */; };
 		F51E3F01161A5FEC00D51926 /* AreaWayIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB5161A5FEC00D51926 /* AreaWayIndex.cpp */; };
-		F51E3F02161A5FEC00D51926 /* CityStreetIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB6161A5FEC00D51926 /* CityStreetIndex.cpp */; };
 		F51E3F03161A5FEC00D51926 /* Database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB7161A5FEC00D51926 /* Database.cpp */; };
 		F51E3F04161A5FEC00D51926 /* GroundTile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB8161A5FEC00D51926 /* GroundTile.cpp */; };
 		F51E3F05161A5FEC00D51926 /* Location.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB9161A5FEC00D51926 /* Location.cpp */; };
@@ -59,11 +57,9 @@
 		F534FB9D18242F660039CEE4 /* Intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534FB9C18242F660039CEE4 /* Intersection.cpp */; };
 		F534FB9E18242F660039CEE4 /* Intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534FB9C18242F660039CEE4 /* Intersection.cpp */; };
 		F53BD15A16388375006C7AE1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD15916388375006C7AE1 /* Cocoa.framework */; };
-		F53BD1A51638866B006C7AE1 /* AdminRegion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB2161A5FEC00D51926 /* AdminRegion.cpp */; };
 		F53BD1A61638866B006C7AE1 /* AreaAreaIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */; };
 		F53BD1A71638866B006C7AE1 /* AreaNodeIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */; };
 		F53BD1A81638866B006C7AE1 /* AreaWayIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB5161A5FEC00D51926 /* AreaWayIndex.cpp */; };
-		F53BD1A91638866B006C7AE1 /* CityStreetIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB6161A5FEC00D51926 /* CityStreetIndex.cpp */; };
 		F53BD1AA1638866B006C7AE1 /* Database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB7161A5FEC00D51926 /* Database.cpp */; };
 		F53BD1AB1638866B006C7AE1 /* GroundTile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB8161A5FEC00D51926 /* GroundTile.cpp */; };
 		F53BD1AC1638866B006C7AE1 /* Location.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB9161A5FEC00D51926 /* Location.cpp */; };
@@ -143,6 +139,8 @@
 		F54DAA781815DB3F00625DDA /* SRTM.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6D1815DB3F00625DDA /* SRTM.h */; };
 		F54DAA7B1815DB7D00625DDA /* NodeUseMap.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA791815DB7D00625DDA /* NodeUseMap.h */; };
 		F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA7A1815DB7D00625DDA /* Parser.h */; };
+		F54FD00C186596AD000E8579 /* LocationIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54FD00B186596AD000E8579 /* LocationIndex.cpp */; };
+		F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54FD00B186596AD000E8579 /* LocationIndex.cpp */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 /* End PBXBuildFile section */
@@ -162,11 +160,9 @@
 /* Begin PBXFileReference section */
 		F51E3E9F161A5F4000D51926 /* libosmscout.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscout.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51E3EA2161A5F4000D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		F51E3EB2161A5FEC00D51926 /* AdminRegion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AdminRegion.cpp; path = ../../../../libosmscout/src/osmscout/AdminRegion.cpp; sourceTree = "<group>"; };
 		F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaAreaIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaAreaIndex.cpp; sourceTree = "<group>"; };
 		F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaNodeIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaNodeIndex.cpp; sourceTree = "<group>"; };
 		F51E3EB5161A5FEC00D51926 /* AreaWayIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaWayIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaWayIndex.cpp; sourceTree = "<group>"; };
-		F51E3EB6161A5FEC00D51926 /* CityStreetIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CityStreetIndex.cpp; path = ../../../../libosmscout/src/osmscout/CityStreetIndex.cpp; sourceTree = "<group>"; };
 		F51E3EB7161A5FEC00D51926 /* Database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Database.cpp; path = ../../../../libosmscout/src/osmscout/Database.cpp; sourceTree = "<group>"; };
 		F51E3EB8161A5FEC00D51926 /* GroundTile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GroundTile.cpp; path = ../../../../libosmscout/src/osmscout/GroundTile.cpp; sourceTree = "<group>"; };
 		F51E3EB9161A5FEC00D51926 /* Location.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Location.cpp; path = ../../../../libosmscout/src/osmscout/Location.cpp; sourceTree = "<group>"; };
@@ -209,11 +205,9 @@
 		F51E3EFB161A5FEC00D51926 /* Transformation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Transformation.cpp; sourceTree = "<group>"; };
 		F51E3EFC161A5FEC00D51926 /* WaterIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaterIndex.cpp; path = ../../../../libosmscout/src/osmscout/WaterIndex.cpp; sourceTree = "<group>"; };
 		F51E3EFD161A5FEC00D51926 /* Way.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Way.cpp; path = ../../../../libosmscout/src/osmscout/Way.cpp; sourceTree = "<group>"; };
-		F51E3F31161A604300D51926 /* AdminRegion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdminRegion.h; sourceTree = "<group>"; };
 		F51E3F32161A604300D51926 /* AreaAreaIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaAreaIndex.h; sourceTree = "<group>"; };
 		F51E3F33161A604300D51926 /* AreaNodeIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaNodeIndex.h; sourceTree = "<group>"; };
 		F51E3F34161A604300D51926 /* AreaWayIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaWayIndex.h; sourceTree = "<group>"; };
-		F51E3F35161A604300D51926 /* CityStreetIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CityStreetIndex.h; sourceTree = "<group>"; };
 		F51E3F36161A604300D51926 /* CoreFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreFeatures.h; sourceTree = "<group>"; };
 		F51E3F37161A604300D51926 /* CoreFeatures.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CoreFeatures.h.in; sourceTree = "<group>"; };
 		F51E3F38161A604300D51926 /* Database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Database.h; sourceTree = "<group>"; };
@@ -298,6 +292,7 @@
 		F54DAA6D1815DB3F00625DDA /* SRTM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRTM.h; sourceTree = "<group>"; };
 		F54DAA791815DB7D00625DDA /* NodeUseMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeUseMap.h; sourceTree = "<group>"; };
 		F54DAA7A1815DB7D00625DDA /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
+		F54FD00B186596AD000E8579 /* LocationIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocationIndex.cpp; path = ../../../../libosmscout/src/osmscout/LocationIndex.cpp; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -362,6 +357,7 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F54FD00B186596AD000E8579 /* LocationIndex.cpp */,
 				F54DAA3F1815DA6500625DDA /* Area.cpp */,
 				F534FB9C18242F660039CEE4 /* Intersection.cpp */,
 				F54DAA401815DA6500625DDA /* AttributeAccess.cpp */,
@@ -373,11 +369,9 @@
 				F54DAA461815DA6500625DDA /* OptimizeWaysLowZoom.cpp */,
 				F54DAA471815DA6500625DDA /* Pixel.cpp */,
 				F54DAA481815DA6500625DDA /* SRTM.cpp */,
-				F51E3EB2161A5FEC00D51926 /* AdminRegion.cpp */,
 				F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */,
 				F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */,
 				F51E3EB5161A5FEC00D51926 /* AreaWayIndex.cpp */,
-				F51E3EB6161A5FEC00D51926 /* CityStreetIndex.cpp */,
 				F51E3EB7161A5FEC00D51926 /* Database.cpp */,
 				F51E3EB8161A5FEC00D51926 /* GroundTile.cpp */,
 				F51E3EB9161A5FEC00D51926 /* Location.cpp */,
@@ -477,11 +471,9 @@
 				F54DAA6B1815DB3F00625DDA /* OptimizeWaysLowZoom.h */,
 				F54DAA6C1815DB3F00625DDA /* Pixel.h */,
 				F54DAA6D1815DB3F00625DDA /* SRTM.h */,
-				F51E3F31161A604300D51926 /* AdminRegion.h */,
 				F51E3F32161A604300D51926 /* AreaAreaIndex.h */,
 				F51E3F33161A604300D51926 /* AreaNodeIndex.h */,
 				F51E3F34161A604300D51926 /* AreaWayIndex.h */,
-				F51E3F35161A604300D51926 /* CityStreetIndex.h */,
 				F51E3F36161A604300D51926 /* CoreFeatures.h */,
 				F51E3F37161A604300D51926 /* CoreFeatures.h.in */,
 				F51E3F38161A604300D51926 /* Database.h */,
@@ -651,7 +643,7 @@
 		F51E3E96161A5F4000D51926 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Vladimir Vyskocil";
 			};
 			buildConfigurationList = F51E3E99161A5F4000D51926 /* Build configuration list for PBXProject "libosmscout" */;
@@ -677,11 +669,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F51E3EFE161A5FEC00D51926 /* AdminRegion.cpp in Sources */,
 				F51E3EFF161A5FEC00D51926 /* AreaAreaIndex.cpp in Sources */,
 				F51E3F00161A5FEC00D51926 /* AreaNodeIndex.cpp in Sources */,
 				F51E3F01161A5FEC00D51926 /* AreaWayIndex.cpp in Sources */,
-				F51E3F02161A5FEC00D51926 /* CityStreetIndex.cpp in Sources */,
 				F51E3F03161A5FEC00D51926 /* Database.cpp in Sources */,
 				F54DAA4D1815DA6500625DDA /* DebugDatabase.cpp in Sources */,
 				F51E3F04161A5FEC00D51926 /* GroundTile.cpp in Sources */,
@@ -732,6 +722,7 @@
 				F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */,
 				F54DAA491815DA6500625DDA /* Area.cpp in Sources */,
 				F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */,
+				F54FD00C186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */,
 				F54DAA4C1815DA6500625DDA /* CoordDataFile.cpp in Sources */,
 				F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */,
@@ -745,11 +736,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F53BD1A51638866B006C7AE1 /* AdminRegion.cpp in Sources */,
 				F53BD1A61638866B006C7AE1 /* AreaAreaIndex.cpp in Sources */,
 				F53BD1A71638866B006C7AE1 /* AreaNodeIndex.cpp in Sources */,
 				F53BD1A81638866B006C7AE1 /* AreaWayIndex.cpp in Sources */,
-				F53BD1A91638866B006C7AE1 /* CityStreetIndex.cpp in Sources */,
 				F53BD1AA1638866B006C7AE1 /* Database.cpp in Sources */,
 				F54DAA571815DA8900625DDA /* DebugDatabase.cpp in Sources */,
 				F53BD1AB1638866B006C7AE1 /* GroundTile.cpp in Sources */,
@@ -800,6 +789,7 @@
 				F54DAA551815DA8000625DDA /* Coord.cpp in Sources */,
 				F54DAA531815DA7800625DDA /* Area.cpp in Sources */,
 				F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */,
+				F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F53BD1D3163886B2006C7AE1 /* Reference.cpp in Sources */,
 				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
 				F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */,
@@ -834,6 +824,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -861,10 +852,11 @@
 		F51E3EAE161A5F4000D51926 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/libosmscout.dst;
 				EXECUTABLE_PREFIX = "";
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
@@ -878,10 +870,11 @@
 		F51E3EAF161A5F4000D51926 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/libosmscout.dst;
 				EXECUTABLE_PREFIX = "";
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
@@ -895,7 +888,6 @@
 		F53BD16516388375006C7AE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				EXECUTABLE_PREFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -904,7 +896,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
@@ -916,7 +908,6 @@
 		F53BD16616388375006C7AE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				EXECUTABLE_PREFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -926,7 +917,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";

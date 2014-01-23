@@ -8,15 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <MapKit/MapKit.h>
 #import "OSMScout.h"
 
-@interface OSMScoutIOSView : UIView {
-    CLLocationCoordinate2D  _location;
-    double                  _zoom;
-    OSMScout                *osmScout;
+@interface OSMScoutIOSView : MKMapView <MKMapViewDelegate> {
+    MKTileOverlay           *tileOverlay;
 }
-
-@property (nonatomic) CLLocationCoordinate2D location;
-@property double zoom;
 
 @end

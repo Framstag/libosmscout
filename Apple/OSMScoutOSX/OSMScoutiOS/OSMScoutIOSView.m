@@ -7,11 +7,13 @@
 //
 
 #import "OSMScoutIOSView.h"
+#import "OSMScoutMKTileOverlay.h"
 
 @implementation OSMScoutIOSView
 
-// This should point to OSM data generated with the OSMScout Import tool
-#define OSMSCOUTDATA @"/Users/vlad/osmscout-map/OSMScout"
+// This should reference OSM data generated with the OSMScout Import tool
+// used when targeting the iPhone simulator 
+#define OSMSCOUTDATA @"/Users/vlad/Desktop/France"
 // The center of the displayed map
 #define LATITUDE 43.694417
 #define LONGITUDE 7.279332
@@ -19,10 +21,24 @@
 #define ZOOM 16
 
 -(void)defaults {
-    osmScout=[[OSMScout alloc] initWithPath:OSMSCOUTDATA];
-    _location.latitude = LATITUDE;
-    _location.longitude = LONGITUDE;
-    _zoom = 1<<ZOOM;
+    [self setCenterCoordinate:CLLocationCoordinate2DMake(LATITUDE, LONGITUDE)];
+    [self setRegion:MKCoordinateRegionMakeWithDistance(self.centerCoordinate, 2000, 2000)];
+    self.delegate = self;
+    OSMScoutMKTileOverlay *overlay = [[OSMScoutMKTileOverlay alloc] initWithURLTemplate: nil];
+#if TARGET_IPHONE_SIMULATOR
+    overlay.path = OSMSCOUTDATA;
+#else
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    overlay.path = [paths objectAtIndex:0];
+#endif
+    overlay.canReplaceMapContent = YES;
+    overlay.minimumZ = 1;
+    overlay.maximumZ = 21;
+    overlay.geometryFlipped = YES;
+    [self insertOverlay:overlay atIndex:0 level:MKOverlayLevelAboveLabels];
+    tileOverlay = overlay;
+    
+    [self insertOverlay:tileOverlay atIndex:0 level:MKOverlayLevelAboveLabels];
 }
 
 - (void)awakeFromNib {
@@ -38,33 +54,14 @@
     return self;
 }
 
+#pragma mark - MKMapViewDelegate
 
-- (void)drawRect:(CGRect)rect {
-    CGContextRef cg=UIGraphicsGetCurrentContext();
-    [osmScout drawMapTo:cg location:_location zoom:_zoom size:rect.size];
-}
-
--(CLLocationCoordinate2D)location {
-    return _location;
-}
-
--(void)setLocation:(CLLocationCoordinate2D)location {
-    if(_location.latitude != location.latitude && _location.longitude != location.longitude){
-        _location = location;
-        [self setNeedsDisplay];
+- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay {
+    if ([overlay isKindOfClass:[MKTileOverlay class]]) {
+        return [[MKTileOverlayRenderer alloc] initWithTileOverlay:overlay];
+    } else {
+        return nil;
     }
 }
-
-- (double)zoom {
-    return _zoom;
-}
-
--(void)setZoom:(double)zoom {
-    if(_zoom != zoom){
-        _zoom = zoom;
-        [self setNeedsDisplay];
-    }
-}
-
 
 @end
