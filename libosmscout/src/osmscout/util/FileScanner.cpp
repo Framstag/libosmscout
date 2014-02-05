@@ -66,8 +66,8 @@ namespace osmscout {
 
   FileScanner::~FileScanner()
   {
-    if (file!=NULL) {
-      fclose(file);
+    if (IsOpen()) {
+      Close();
     }
   }
 
