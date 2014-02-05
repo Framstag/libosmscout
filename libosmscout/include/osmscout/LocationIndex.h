@@ -52,18 +52,22 @@ namespace osmscout {
                          AdminRegion& region) const;
 
     bool VisitRegionEntries(FileScanner& scanner,
-                            AdminRegionVisitor& visitor) const;
+                            AdminRegionVisitor& visitor,
+                            bool& stopped) const;
 
     bool VisitRegionLocationEntries(FileScanner& scanner,
-                                    LocationVisitor& visitor) const;
+                                    LocationVisitor& visitor,
+                                    bool& stopped) const;
 
     bool LoadRegionDataEntry(FileScanner& scanner,
                              const AdminRegion& region,
-                             LocationVisitor& visitor) const;
+                             LocationVisitor& visitor,
+                             bool& stopped) const;
 
     bool VisitLocationAddressEntries(FileScanner& scanner,
                                      const Location& location,
-                                     AddressVisitor& visitor) const;
+                                     AddressVisitor& visitor,
+                                     bool& stopped) const;
 
   public:
     LocationIndex();

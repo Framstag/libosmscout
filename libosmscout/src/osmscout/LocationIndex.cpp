@@ -86,15 +86,18 @@ namespace osmscout {
     }
 
     region.aliases.clear();
-    region.aliases.resize(aliasCount);
 
-    for (size_t i=0; i<aliasCount; i++) {
-      if (!scanner.Read(region.aliases[i].name)) {
-        return false;
-      }
+    if (aliasCount>0) {
+      region.aliases.resize(aliasCount);
 
-      if (!scanner.ReadFileOffset(region.aliases[i].objectOffset)) {
-        return false;
+      for (size_t i=0; i<aliasCount; i++) {
+        if (!scanner.Read(region.aliases[i].name)) {
+          return false;
+        }
+
+        if (!scanner.ReadFileOffset(region.aliases[i].objectOffset)) {
+          return false;
+        }
       }
     }
 
@@ -102,17 +105,20 @@ namespace osmscout {
   }
 
   bool LocationIndex::VisitRegionEntries(FileScanner& scanner,
-                                         AdminRegionVisitor& visitor) const
+                                         AdminRegionVisitor& visitor,
+                                         bool& stopped) const
   {
     AdminRegion region;
-    uint32_t         childCount;
+    uint32_t    childCount;
 
     if (!LoadAdminRegion(scanner,
-                              region)) {
+                         region)) {
       return false;
     }
 
     if (!visitor.Visit(region)) {
+      stopped=true;
+
       return true;
     }
 
@@ -122,17 +128,24 @@ namespace osmscout {
 
     for (size_t i=0; i<childCount; i++) {
       if (!VisitRegionEntries(scanner,
-                                   visitor)) {
+                              visitor,
+                              stopped)) {
         return false;
       }
+
+      if (stopped) {
+        break;
+      }
     }
+
 
     return !scanner.HasError();
   }
 
   bool LocationIndex::LoadRegionDataEntry(FileScanner& scanner,
                                           const AdminRegion& adminRegion,
-                                          LocationVisitor& visitor) const
+                                          LocationVisitor& visitor,
+                                          bool& stopped) const
   {
     uint32_t poiCount;
     uint32_t locationCount;
@@ -164,6 +177,8 @@ namespace osmscout {
 
       if (!visitor.Visit(adminRegion,
                          poi)) {
+        stopped=true;
+
         return true;
       }
     }
@@ -230,6 +245,8 @@ namespace osmscout {
 
       if (!visitor.Visit(adminRegion,
                          location)) {
+        stopped=true;
+
         return true;
       }
     }
@@ -238,7 +255,8 @@ namespace osmscout {
   }
 
   bool LocationIndex::VisitRegionLocationEntries(FileScanner& scanner,
-                                                 LocationVisitor& visitor) const
+                                                 LocationVisitor& visitor,
+                                                 bool& stopped) const
   {
     AdminRegion region;
     FileOffset       childrenOffset;
@@ -259,7 +277,8 @@ namespace osmscout {
 
     if (!LoadRegionDataEntry(scanner,
                              region,
-                             visitor)) {
+                             visitor,
+                             stopped)) {
       return false;
     }
 
@@ -273,8 +292,13 @@ namespace osmscout {
 
     for (size_t i=0; i<childCount; i++) {
       if (!VisitRegionLocationEntries(scanner,
-                                      visitor)) {
+                                      visitor,
+                                      stopped)) {
         return false;
+      }
+
+      if (stopped) {
+        break;
       }
     }
 
@@ -283,7 +307,8 @@ namespace osmscout {
 
   bool LocationIndex::VisitLocationAddressEntries(FileScanner& scanner,
                                                   const Location& location,
-                                                  AddressVisitor& visitor) const
+                                                  AddressVisitor& visitor,
+                                                  bool& stopped) const
   {
     uint32_t addressCount;
 
@@ -328,8 +353,12 @@ namespace osmscout {
 
       lastOffset=offset;
 
-      visitor.Visit(location,
-                    address);
+      if (!visitor.Visit(location,
+                         address)) {
+        stopped=true;
+
+        break;
+      }
     }
 
     return !scanner.HasError();
@@ -348,6 +377,7 @@ namespace osmscout {
     }
 
     uint32_t regionCount;
+    bool     stopped=false;
 
     if (!scanner.ReadNumber(regionCount)) {
       return false;
@@ -355,8 +385,13 @@ namespace osmscout {
 
     for (size_t i=0; i<regionCount; i++) {
       if (!VisitRegionEntries(scanner,
-                              visitor)) {
+                              visitor,
+                              stopped)) {
         return false;
+      }
+
+      if (stopped) {
+        break;
       }
     }
 
@@ -367,6 +402,7 @@ namespace osmscout {
                                                 LocationVisitor& visitor) const
   {
     FileScanner scanner;
+    bool        stopped=false;
 
     if (!scanner.Open(AppendFileToDir(path,
                                       FILENAME_LOCATION_IDX),
@@ -381,7 +417,8 @@ namespace osmscout {
     }
 
     if (!VisitRegionLocationEntries(scanner,
-                                    visitor)) {
+                                    visitor,
+                                    stopped)) {
       return false;
     }
 
@@ -392,6 +429,7 @@ namespace osmscout {
                                              AddressVisitor& visitor) const
   {
     FileScanner scanner;
+    bool        stopped=false;
 
     if (!scanner.Open(AppendFileToDir(path,
                                       FILENAME_LOCATION_IDX),
@@ -403,7 +441,8 @@ namespace osmscout {
 
     if (!VisitLocationAddressEntries(scanner,
                                      location,
-                                     visitor)) {
+                                     visitor,
+                                     stopped)) {
       return false;
     }
 
