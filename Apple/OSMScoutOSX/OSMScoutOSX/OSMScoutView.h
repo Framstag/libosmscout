@@ -8,15 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 #import <CoreLocation/CoreLocation.h>
+#import <MapKit/MapKit.h>
 #import "OSMScout.h"
 
-@interface OSMScoutView : NSView {
-    CLLocationCoordinate2D  _location;
-    double                  _zoom;
-    OSMScout                *osmScout;
-    NSTrackingArea          *trackingArea;
+@interface OSMScoutView : MKMapView <MKMapViewDelegate> {
+    MKTileOverlay           *tileOverlay;
 }
 
-@property (nonatomic) CLLocationCoordinate2D location;
-@property double zoom;
 @end

@@ -22,23 +22,55 @@
 #include <osmscout/MapPainterIOS.h>
 
 namespace osmscout {
+    class MyBreaker : public Breaker {
+    public:
+        MyBreaker() : osmscout::Breaker(), aborted(false){}
+        bool Break(){
+            aborted = true;
+            return true;
+        }
+        bool IsAborted() const {
+            return aborted;
+        }
+        void Reset() {
+            aborted = false;
+        }
+    private:
+        bool aborted;
+    };
+    
     class OSMScoutCPP {
     private:
-        std::string                 map;
-        osmscout::TypeSet           types;
-        osmscout::RoutingProfile    *routingProfile;
-        osmscout::DatabaseParameter databaseParameter;
-        osmscout::Database          database;
-        bool                        isDatabaseOpened;
-        osmscout::RouterParameter   routerParameter;
-        osmscout::Router            router;
-        osmscout::RouteDescription  *description;
-        osmscout::StyleConfig       *styleConfig;
-        osmscout::MapPainterIOS     *mapPainter;
+        std::string         map;
+        TypeSet             types;
+        RoutingProfile      *routingProfile;
+        DatabaseParameter   databaseParameter;
+        Database            database;
+        bool                isDatabaseOpened;
+        RouterParameter     routerParameter;
+        Router              router;
+        Vehicle             vehicle;
+        RouteDescription    *description;
+        StyleConfig         *styleConfig;
+        MapPainterIOS       *mapPainter;
+        MercatorProjection  projection;
+        MapParameter        drawParameter;
+        MyBreaker           *drawBreaker;
+        double              loadedLatMin;
+        double              loadedLonMin;
+        double              loadedLatMax;
+        double              loadedLonMax;
+        Magnification       loadedMagnification;
+        AreaSearchParameter searchParameter;
+        MapData             data;
+        bool                isMapPainterConfigured;
         
     public:
         OSMScoutCPP(const char *cDir);
         virtual ~OSMScoutCPP();
+        void abortDrawing();
+        void drawingBreakerReset();
+        bool initDraw(size_t dpi);
         void drawMap(CGContextRef paintCG, double lat, double lon, double zoom, size_t width, size_t height);
     };
 }
@@ -47,8 +79,9 @@ namespace osmscout {
 #import <CoreLocation/CLLocation.h>
 @interface OSMScout : NSObject {
 }
--(id)initWithPath:(NSString *)path;
--(void)drawMapTo: (CGContextRef) cg location:(CLLocationCoordinate2D)loc zoom: (double) zoom size: (CGSize) size;
++(OSMScout *)OSMScoutWithPath:(NSString *)path dpi:(size_t)dpi;
+-(id)initWithPath:(NSString *)path dpi:(size_t)dpi;
+-(void)drawMapTo: (CGContextRef) cg lat:(CLLocationDegrees)lat lon:(CLLocationDegrees)lon zoom: (double) zoom width: (CGFloat) width height: (CGFloat) height;
 
 @end
 

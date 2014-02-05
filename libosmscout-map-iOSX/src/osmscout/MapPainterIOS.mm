@@ -112,7 +112,7 @@ namespace osmscout {
              ++path) {
             
             std::string filename=*path+style.GetIconName()+".png";
-            std::cout << "Trying to Load image " << filename << std::endl;
+            //std::cout << "Trying to Load image " << filename << std::endl;
             
 #if TARGET_OS_IPHONE
             UIImage *image = [[UIImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
@@ -126,13 +126,13 @@ namespace osmscout {
                 CGImageRef imgRef= [image CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
-                
+                [image release];
                 if (idx>=images.size()) {
                     images.resize(idx+1, NULL);
                 }
                 
                 images[idx]=imgRef;                
-                std::cout << "Loaded image '" << filename << "'" << std::endl;
+                //std::cout << "Loaded image '" << filename << "'" << std::endl;
 
                 return true;
             }
@@ -203,12 +203,13 @@ namespace osmscout {
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
+                [image release];
                 patternImages.resize(patternImages.size()+1,imgRef);
                 style.SetPatternId(patternImages.size());
                 CGPatternRef pattern = CGPatternCreate(imgRef, CGRectMake(0,0, imgWidth, imgHeight), CGAffineTransformIdentity, imgWidth, imgHeight, kCGPatternTilingNoDistortion, true, &patternCallbacks);
                 patterns.resize(patternImages.size(),pattern);
                 
-                std::cout << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId() << std::endl;
+                //std::cout << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId() << std::endl;
                 
                 return true;
             }
