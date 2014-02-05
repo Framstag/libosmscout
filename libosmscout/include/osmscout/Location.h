@@ -76,8 +76,8 @@ namespace osmscout {
     };
 
   private:
-    std::string                 pattern;
-    size_t                      limit;
+    std::string                  pattern;
+    size_t                       limit;
 
   public:
     std::list<AdminRegionResult> results;
