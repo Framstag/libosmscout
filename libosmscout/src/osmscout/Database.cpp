@@ -1407,7 +1407,7 @@ namespace osmscout {
         searchEntry!=search.searches.end();
         ++searchEntry) {
       if (searchEntry->adminRegionPattern.empty()) {
-        return true;
+        continue;
       }
 
       osmscout::AdminRegionMatchVisitor adminRegionVisitor(searchEntry->adminRegionPattern,
