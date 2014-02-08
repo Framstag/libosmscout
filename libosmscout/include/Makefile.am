@@ -72,3 +72,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
 #ifdef OSMSCOUT_HAVE_SSE2
 nobase_include_HEADERS+=osmscout/system/SSEMath.h
 #endif
+
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+#endif

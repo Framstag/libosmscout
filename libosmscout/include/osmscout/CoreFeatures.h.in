@@ -57,3 +57,6 @@
 
 /* system header <thread> is available */
 #undef OSMSCOUT_HAVE_THREAD
+
+/* libmarisa is available */
+#undef OSMSCOUT_HAVE_LIB_MARISA

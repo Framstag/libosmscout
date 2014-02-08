@@ -1,11 +1,14 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(OPENMP_CXXFLAGS) \
               $(SIMD_FLAGS) \
+              $(MARISA_CFLAGS) \
               -DOSMSCOUTDLL -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libosmscout.la
 
-libosmscout_la_LDFLAGS = -no-undefined $(OPENMP_CXXFLAGS)
+libosmscout_la_LDFLAGS = -no-undefined \
+                         $(OPENMP_CXXFLAGS) \
+                         $(MARISA_LIBS)
 
 libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Cache.cpp \
@@ -69,4 +72,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
 
 #ifdef OSMSCOUT_HAVE_SSE2
 libosmscout_la_SOURCES+=osmscout/system/SSEMath.cpp
+#endif
+
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
 #endif

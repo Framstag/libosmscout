@@ -39,6 +39,11 @@ AC_ARG_ENABLE([openmp-support],
                               [disable OpenMP support])],
               [])
 
+AC_ARG_ENABLE([marisa-support],
+              [AS_HELP_STRING([--disable-marisa-support],
+                              [disable usage of libmarisa])],
+              [])
+
 AS_IF([test "$enable_cpp0x_support" != "no"],
       [AX_CHECK_COMPILE_FLAG([-std=c++0x],
                              [CPP0XFLAGS="-std=c++0x"
@@ -174,16 +179,24 @@ AS_IF([test "$build_os" != "mingw32"],
                       [AC_MSG_RESULT(no)])
        CXXFLAGS="$OLDCXXFLAGS"])
 
+AS_IF([test "$enable_marisa_support" != "no"],
+      [PKG_CHECK_MODULES(MARISA,
+                         [marisa],
+                         [AC_SUBST(MARISA_CFLAGS)
+                          AC_SUBST(MARISA_LIBS)
+                          AC_DEFINE(OSMSCOUT_HAVE_LIB_MARISA,1,[libmarisa detected])
+                          LIB_MARISA_FOUND=true],
+                         [LIB_MARISA_FOUND=false])])
 
-AM_CONDITIONAL(HAVE_LIB_PROTOBUF,[test "$LIB_PROTOBUF_FOUND" = true])
+AM_CONDITIONAL(OSMSCOUT_HAVE_LIB_MARISA,[test "$LIB_MARISA_FOUND" = true])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [],
-                         [-losmscout],
+                         [-losmscout $MARISA_LIBS],
                          [libosmscout base library],
-                         [$CPP0XFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS],
+                         [$CPP0XFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS $MARISA_CFLAGS],
                          [$OPENMP_CXXFLAGS])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile])
