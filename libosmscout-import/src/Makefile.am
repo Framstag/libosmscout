@@ -6,14 +6,16 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTIMPORTDLL \
               $(LIBOSMSCOUT_CFLAGS) \
               $(XML2_CFLAGS) \
               $(PROTOBUF_CFLAGS) \
-              $(ZLIB_CFLAGS)
+              $(ZLIB_CFLAGS) \
+              $(MARISA_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutimport.la
 libosmscoutimport_la_LDFLAGS  = -no-undefined \
                                 $(LIBOSMSCOUT_LIBS) \
                                 $(XML2_LIBS) \
                                 $(PROTOBUF_LIBS) \
-                                $(ZLIB_LIBS)
+                                $(ZLIB_LIBS) \
+                                $(MARISA_LIBS)
 
 libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/RawNode.cpp \

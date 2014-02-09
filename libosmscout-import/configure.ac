@@ -103,6 +103,17 @@ dnl Checking for protoc
 AC_PATH_PROG(protoc,protoc,)
 AM_CONDITIONAL(HAVE_PROG_PROTOC,[test -n "$protoc"])
 
+AS_IF([test "$enable_marisa_support" != "no"],
+      [PKG_CHECK_MODULES(MARISA,
+                         [marisa],
+                         [AC_SUBST(MARISA_CFLAGS)
+                          AC_SUBST(MARISA_LIBS)
+                          AC_DEFINE(OSMSCOUT_IMPORT_HAVE_LIB_MARISA,1,[libmarisa detected])
+                          LIB_MARISA_FOUND=true],
+                         [LIB_MARISA_FOUND=false])])
+
+AM_CONDITIONAL(OSMSCOUT_HAVE_LIB_MARISA,[test "$LIB_MARISA_FOUND" = true])
+
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
