@@ -1,4 +1,4 @@
-bin_PROGRAMS = AddressLookup \
+bin_PROGRAMS = LocationLookup \
                PerformanceTest \
                ResourceConsumption \
                Routing \
@@ -29,9 +29,9 @@ bin_PROGRAMS += DrawMapOpenGL
 endif
 endif
 
-AddressLookup_SOURCES = AddressLookup.cpp
-AddressLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
-AddressLookup_LDADD = $(LIBOSMSCOUT_LIBS)
+LocationLookup_SOURCES = LocationLookup.cpp
+LocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+LocationLookup_LDADD = $(LIBOSMSCOUT_LIBS)
 
 DrawMapAgg_SOURCES = DrawMapAgg.cpp
 DrawMapAgg_CXXFLAGS = $(LIBOSMSCOUTMAPAGG_CFLAGS) \
