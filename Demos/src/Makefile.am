@@ -29,6 +29,10 @@ bin_PROGRAMS += DrawMapOpenGL
 endif
 endif
 
+if OSMSCOUT_HAVE_LIB_MARISA
+bin_PROGRAMS += LookupText
+endif
+
 LocationLookup_SOURCES = LocationLookup.cpp
 LocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 LocationLookup_LDADD = $(LIBOSMSCOUT_LIBS)
@@ -120,3 +124,6 @@ Srtm_SOURCES = Srtm.cpp
 Srtm_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 Srtm_LDADD = $(LIBOSMSCOUT_LIBS)
 
+LookupText_SOURCES = LookupText.cpp
+LookupText_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(MARISA_CFLAGS)
+LookupText_LDADD = $(LIBOSMSCOUT_LIBS) $(MARISA_LIBS)

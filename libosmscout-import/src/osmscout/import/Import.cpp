@@ -65,13 +65,21 @@
 // Routing
 #include <osmscout/import/GenRouteDat.h>
 
+#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
+#include <osmscout/import/GenTextIndex.h>
+#endif
+
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
+#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
+  static const size_t defaultEndStep=27;
+#else
   static const size_t defaultEndStep=26;
+#endif
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -699,6 +707,11 @@ namespace osmscout {
                                                                               Router::FILENAME_CAR_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               Router::FILENAME_CAR_IDX)));
+
+#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
+    /* 27 */
+    modules.push_back(new TextIndexGenerator());
+#endif
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
 

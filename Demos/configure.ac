@@ -79,5 +79,15 @@ AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPOPENGL,[test "$HASLIBOSMSCOUTMAPOPENGL" = "tr
 AX_CHECK_GLUT
 AM_CONDITIONAL(HAVE_LIB_GLUT,[test "$no_glut" != "yes"])
 
+PKG_CHECK_MODULES(MARISA,
+                  [marisa],
+                  [AC_SUBST(MARISA_CFLAGS)
+                  AC_SUBST(MARISA_LIBS)
+                  AC_DEFINE(OSMSCOUT_HAVE_LIB_MARISA,1,[libmarisa detected])
+                  LIB_MARISA_FOUND=true],
+                  [LIB_MARISA_FOUND=false])
+
+AM_CONDITIONAL(OSMSCOUT_HAVE_LIB_MARISA,[test "$LIB_MARISA_FOUND" = true])
+
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include <osmscout/ImportFeatures.h>
+
 #include <osmscout/private/ImportImportExport.h>
 
 #include <osmscout/TypeConfig.h>

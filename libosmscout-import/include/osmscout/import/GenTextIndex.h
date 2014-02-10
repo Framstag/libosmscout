@@ -1,0 +1,77 @@
+#ifndef OSMSCOUT_IMPORT_GENTEXTINDEX_H
+#define OSMSCOUT_IMPORT_GENTEXTINDEX_H
+
+/*
+ This source is part of the libosmscout library
+ Copyright (C) 2013 Preet Desai
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+ */
+
+#include <osmscout/Types.h>
+#include <osmscout/ObjectRef.h>
+
+#include <osmscout/import/Import.h>
+
+#include <marisa.h>
+
+namespace osmscout
+{
+  class TextIndexGenerator : public ImportModule
+  {
+  public:
+    TextIndexGenerator();
+
+    std::string GetDescription() const;
+
+    bool Import(const ImportParameter &parameter,
+                Progress &progress,
+                const TypeConfig &typeConfig);
+
+  private:
+    bool setFileOffsetSize(const ImportParameter &parameter,
+                           Progress &progress);
+
+    bool addNodeTextToKeysets(const ImportParameter &parameter,
+                              Progress &progress,
+                              const TypeConfig &typeConfig);
+
+    bool addWayTextToKeysets(const ImportParameter &parameter,
+                             Progress &progress,
+                             const TypeConfig &typeConfig);
+
+    bool addAreaTextToKeysets(const ImportParameter &parameter,
+                              Progress &progress,
+                              const TypeConfig &typeConfig);
+
+    bool buildKeyStr(const std::string &text,
+                     const FileOffset offset,
+                     const RefType reftype,
+                     std::string &keyString) const;
+
+    uint8_t getMinBytesForValue(uint64_t val) const;
+
+    // keysets used to store text data and generate tries
+    marisa::Keyset  keysetPoi;
+    marisa::Keyset  keysetLocation;
+    marisa::Keyset  keysetRegion;
+    marisa::Keyset  keysetOther;
+
+    uint8_t         offsetSizeBytes;  //! size in bytes of FileOffsets stored in the tries
+  };
+}
+
+
+#endif // OSMSCOUT_IMPORT_GENTEXTINDEX_H

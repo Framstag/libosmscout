@@ -55,3 +55,7 @@ libosmscoutimport_la_SOURCES += osmscout/import/pbf/fileformat.pb.cc \
                                 osmscout/import/PreprocessPBF.cpp
 endif
 endif
+
+if OSMSCOUT_HAVE_LIB_MARISA
+libosmscoutimport_la_SOURCES +=  += osmscout/import/GenTextIndex.cpp
+endif

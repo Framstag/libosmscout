@@ -37,3 +37,7 @@ nobase_include_HEADERS += osmscout/import/pbf/fileformat.pb.h \
                           osmscout/import/pbf/osmformat.pb.h \
                           osmscout/import/PreprocessPBF.h
 endif
+
+if OSMSCOUT_HAVE_LIB_MARISA
+nobase_include_HEADERS += osmscout/import/GenTextIndex.h
+endif

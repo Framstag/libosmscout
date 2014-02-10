@@ -75,4 +75,5 @@ libosmscout_la_SOURCES+=osmscout/system/SSEMath.cpp
 #endif
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
+libosmscout_la_SOURCES+=osmscout/TextSearchIndex.cpp
 #endif
