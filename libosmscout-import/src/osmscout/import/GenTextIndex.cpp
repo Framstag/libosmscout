@@ -21,10 +21,12 @@
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
 #include <osmscout/ObjectRef.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/String.h>
+
 #include <osmscout/import/GenTextIndex.h>
 
 #include <marisa.h>
@@ -141,13 +143,6 @@ namespace osmscout
 
     FileScanner scanner;
 
-    // The dat files use a 4 byte number to
-    // indicate data count at the beginning
-    // of the file
-    uint32_t nodeCount=0;
-    uint32_t wayCount=0;
-    uint32_t areaCount=0;
-
     FileOffset nodesFileSize=0;
     FileOffset waysFileSize=0;
     FileOffset areasFileSize=0;
@@ -157,84 +152,38 @@ namespace osmscout
         AppendFileToDir(parameter.GetDestinationDirectory(),
                         "nodes.dat");
 
-    if(!scanner.Open(nodesDataFile,
-                     FileScanner::Sequential,
-                     false)) {
-      progress.Error("Cannot open 'nodes.dat'");
+    if (!GetFileSize(nodesDataFile,
+                     nodesFileSize)) {
+      progress.Error("Cannot get file size of file 'nodes.dat'");
       return false;
     }
-    if(!scanner.Read(nodeCount)) {
-      progress.Error("Error reading node count in 'nodes.dat'");
-      return false;
-    }
-    // seek to end of file (better way to do this?)
-    for(uint32_t i=0; i < nodeCount; i++) {
-      Node node;
-      if(!node.Read(scanner)) {
-        progress.Error("Error seeking to end of 'nodes'.dat!");
-        return false;
-      }
-    }
-    scanner.GetPos(nodesFileSize);
-    scanner.Close();
-
 
     // way count
     std::string waysDataFile=
         AppendFileToDir(parameter.GetDestinationDirectory(),
                         "ways.dat");
 
-    if(!scanner.Open(waysDataFile,
-                     FileScanner::Sequential,
-                     false)) {
-      progress.Error("Cannot open 'ways.dat'");
+    if (!GetFileSize(waysDataFile,
+                     waysFileSize)) {
+      progress.Error("Cannot get file size of file 'ways.dat'");
       return false;
     }
-    if(!scanner.Read(wayCount)) {
-      progress.Error("Error reading way count in 'ways.dat'");
-      return false;
-    }
-    // seek to end of file
-    for(uint32_t i=0; i < wayCount; i++) {
-      Way way;
-      if(!way.Read(scanner)) {
-        progress.Error("Error seeking to end of 'ways'.dat!");
-        return false;
-      }
-    }
-    scanner.GetPos(waysFileSize);
-    scanner.Close();
 
     // area count
     std::string areasDataFile=
         AppendFileToDir(parameter.GetDestinationDirectory(),
                         "areas.dat");
 
-    if(!scanner.Open(areasDataFile,
-                     FileScanner::Sequential,
-                     false)) {
-      progress.Error("Cannot open 'areas.dat'");
+    if (!GetFileSize(areasDataFile,
+                     areasFileSize)) {
+      progress.Error("Cannot get file size of file 'areas.dat'");
       return false;
     }
-    if(!scanner.Read(areaCount)) {
-      progress.Error("Error reading area count in 'areas.dat'");
-      return false;
-    }
-    // seek to end of file
-    for(uint32_t i=0; i < areaCount; i++) {
-      Area area;
-      if(!area.Read(scanner)) {
-        progress.Error("Error seeking to end of 'areas'.dat!");
-        return false;
-      }
-    }
-    scanner.GetPos(areasFileSize);
-    scanner.Close();
 
     // Determine the number of bytes needed to store offsets
-    uint8_t minNodeOffsetSizeBytes = getMinBytesForValue(nodesFileSize);
-    uint8_t minWayOffsetSizeBytes  = getMinBytesForValue(waysFileSize);
-    uint8_t minAreaOffsetSizeBytes = getMinBytesForValue(areasFileSize);
+    uint8_t minNodeOffsetSizeBytes = BytesNeeededToAddressFileData(nodesFileSize);
+    uint8_t minWayOffsetSizeBytes  = BytesNeeededToAddressFileData(waysFileSize);
+    uint8_t minAreaOffsetSizeBytes = BytesNeeededToAddressFileData(areasFileSize);
 
     progress.Info("Node filesize is " + NumberToString(nodesFileSize) + " bytes, "+
                   "req. " + NumberToString(minNodeOffsetSizeBytes) +" bytes");
@@ -598,15 +547,5 @@ namespace osmscout
     }
 
     return true;
-  }
-
-  uint8_t TextIndexGenerator::getMinBytesForValue(uint64_t val) const
-  {
-    uint8_t n=0;
-    while(val != 0) {
-      val >>= 8;
-      n++;
-    }
-    return n;
   }
 }

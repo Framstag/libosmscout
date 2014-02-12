@@ -61,8 +61,6 @@ namespace osmscout
                      const RefType reftype,
                      std::string &keyString) const;
 
-    uint8_t getMinBytesForValue(uint64_t val) const;
-
     // keysets used to store text data and generate tries
     marisa::Keyset  keysetPoi;
     marisa::Keyset  keysetLocation;
