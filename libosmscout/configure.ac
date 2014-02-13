@@ -166,6 +166,8 @@ dnl SSE support
 AS_IF([test "x$ax_cv_have_sse2_ext" = xyes],
       [AC_DEFINE([OSMSCOUT_HAVE_SSE2],[1],[SSE2 processor extension available])])
 
+AM_CONDITIONAL(OSMSCOUT_HAVE_SSE2,[test "x$ax_cv_have_sse2_ext" = xyes])
+
 AS_IF([test "$build_os" != "mingw32"],
       [AC_MSG_CHECKING([for gcc symbol visibility support])
        OLDCXXFLAGS="$CXXFLAGS"

@@ -70,10 +70,10 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Router.cpp \
                         osmscout/SRTM.cpp
 
-#ifdef OSMSCOUT_HAVE_SSE2
+if OSMSCOUT_HAVE_SSE2
 libosmscout_la_SOURCES+=osmscout/system/SSEMath.cpp
-#endif
+endif
 
-#ifdef OSMSCOUT_HAVE_LIB_MARISA
+if OSMSCOUT_HAVE_LIB_MARISA
 libosmscout_la_SOURCES+=osmscout/TextSearchIndex.cpp
-#endif
+endif

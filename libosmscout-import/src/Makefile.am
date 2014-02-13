@@ -57,5 +57,5 @@ endif
 endif
 
 if OSMSCOUT_HAVE_LIB_MARISA
-libosmscoutimport_la_SOURCES +=  += osmscout/import/GenTextIndex.cpp
+libosmscoutimport_la_SOURCES += osmscout/import/GenTextIndex.cpp
 endif

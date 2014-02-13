@@ -69,10 +69,10 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Router.h \
                         osmscout/SRTM.h
 
-#ifdef OSMSCOUT_HAVE_SSE2
+if OSMSCOUT_HAVE_SSE2
 nobase_include_HEADERS+=osmscout/system/SSEMath.h
-#endif
+endif
 
-#ifdef OSMSCOUT_HAVE_LIB_MARISA
+if OSMSCOUT_HAVE_LIB_MARISA
 nobase_include_HEADERS+=osmscout/TextSearchIndex.h
-#endif
+endif
