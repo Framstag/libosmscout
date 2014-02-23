@@ -59,8 +59,8 @@ namespace osmscout {
   /**
    * Number of bytes needed to address the complete content of the given file.
    */
-  extern OSMSCOUT_API bool BytesNeeededToAddressFileData(const std::string& filename,
-                                                         uint8_t& bytes);
+  extern OSMSCOUT_API bool BytesNeededToAddressFileData(const std::string& filename,
+                                                        uint8_t& bytes);
 }
 
 #endif
