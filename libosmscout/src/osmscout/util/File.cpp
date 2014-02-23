@@ -144,6 +144,6 @@ namespace osmscout {
 
     bytes=BytesNeededToAddressFileData(fileSize);
 
-    return false;
+    return true;
   }
 }
