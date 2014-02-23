@@ -1,4 +1,5 @@
 bin_PROGRAMS = LocationLookup \
+               ReverseLocationLookup \
                PerformanceTest \
                ResourceConsumption \
                Routing \
@@ -36,6 +37,10 @@ endif
 LocationLookup_SOURCES = LocationLookup.cpp
 LocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 LocationLookup_LDADD = $(LIBOSMSCOUT_LIBS)
+
+ReverseLocationLookup_SOURCES = ReverseLocationLookup.cpp
+ReverseLocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+ReverseLocationLookup_LDADD = $(LIBOSMSCOUT_LIBS)
 
 DrawMapAgg_SOURCES = DrawMapAgg.cpp
 DrawMapAgg_CXXFLAGS = $(LIBOSMSCOUTMAPAGG_CFLAGS) \

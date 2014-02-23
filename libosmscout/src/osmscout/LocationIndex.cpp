@@ -104,42 +104,67 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool LocationIndex::VisitRegionEntries(FileScanner& scanner,
-                                         AdminRegionVisitor& visitor,
-                                         bool& stopped) const
+  AdminRegionVisitor::Action LocationIndex::VisitRegionEntries(FileScanner& scanner,
+                                                               AdminRegionVisitor& visitor) const
   {
     AdminRegion region;
     uint32_t    childCount;
 
     if (!LoadAdminRegion(scanner,
                          region)) {
-      return false;
+      return AdminRegionVisitor::error;
     }
 
-    if (!visitor.Visit(region)) {
-      stopped=true;
+    AdminRegionVisitor::Action action=visitor.Visit(region);
 
-      return true;
+    switch (action) {
+    case AdminRegionVisitor::stop:
+      return action;
+    case AdminRegionVisitor::error:
+      return action;
+    case AdminRegionVisitor::skipChildren:
+      return AdminRegionVisitor::skipChildren;
+    case AdminRegionVisitor::visitChildren:
+      // just continue...
+      break;
     }
 
     if (!scanner.ReadNumber(childCount)) {
-      return false;
+      return AdminRegionVisitor::error;
     }
 
     for (size_t i=0; i<childCount; i++) {
-      if (!VisitRegionEntries(scanner,
-                              visitor,
-                              stopped)) {
-        return false;
+      FileOffset nextChildOffset;
+
+      if (!scanner.ReadFileOffset(nextChildOffset)) {
+        return AdminRegionVisitor::error;
       }
 
-      if (stopped) {
-        break;
+      action=VisitRegionEntries(scanner,
+                                visitor);
+
+      if (action==AdminRegionVisitor::stop ||
+          action==AdminRegionVisitor::error) {
+        return action;
+      }
+      else if (action==AdminRegionVisitor::skipChildren) {
+        if (i+1<childCount) {
+          if (!scanner.SetPos(nextChildOffset)) {
+            return AdminRegionVisitor::error;
+          }
+        }
+        else {
+          return AdminRegionVisitor::skipChildren;
+        }
       }
     }
 
-
-    return !scanner.HasError();
+    if (scanner.HasError()) {
+      return AdminRegionVisitor::error;
+    }
+    else {
+      return AdminRegionVisitor::visitChildren;
+    }
   }
 
   bool LocationIndex::LoadRegionDataEntry(FileScanner& scanner,
@@ -256,6 +281,7 @@ namespace osmscout {
 
   bool LocationIndex::VisitRegionLocationEntries(FileScanner& scanner,
                                                  LocationVisitor& visitor,
+                                                 bool recursive,
                                                  bool& stopped) const
   {
     AdminRegion region;
@@ -282,6 +308,10 @@ namespace osmscout {
       return false;
     }
 
+    if (stopped || !recursive) {
+      return !scanner.HasError();
+    }
+
     if (!scanner.SetPos(childrenOffset)) {
       return false;
     }
@@ -293,6 +323,7 @@ namespace osmscout {
     for (size_t i=0; i<childCount; i++) {
       if (!VisitRegionLocationEntries(scanner,
                                       visitor,
+                                      recursive,
                                       stopped)) {
         return false;
       }
@@ -306,6 +337,7 @@ namespace osmscout {
   }
 
   bool LocationIndex::VisitLocationAddressEntries(FileScanner& scanner,
+                                                  const AdminRegion& region,
                                                   const Location& location,
                                                   AddressVisitor& visitor,
                                                   bool& stopped) const
@@ -353,7 +385,8 @@ namespace osmscout {
 
       lastOffset=offset;
 
-      if (!visitor.Visit(location,
+      if (!visitor.Visit(region,
+                         location,
                          address)) {
         stopped=true;
 
@@ -377,21 +410,34 @@ namespace osmscout {
     }
 
     uint32_t regionCount;
-    bool     stopped=false;
 
     if (!scanner.ReadNumber(regionCount)) {
       return false;
     }
 
     for (size_t i=0; i<regionCount; i++) {
-      if (!VisitRegionEntries(scanner,
-                              visitor,
-                              stopped)) {
+      AdminRegionVisitor::Action action;
+      FileOffset                 nextChildOffset;
+
+      if (!scanner.ReadFileOffset(nextChildOffset)) {
         return false;
       }
 
-      if (stopped) {
-        break;
+      action=VisitRegionEntries(scanner,
+                                visitor);
+
+      if (action==AdminRegionVisitor::error) {
+        return false;
+      }
+      else if (action==AdminRegionVisitor::stop) {
+        return true;
+      }
+      else if (action==AdminRegionVisitor::skipChildren) {
+        if (i+1<regionCount) {
+          if (!scanner.SetPos(nextChildOffset)) {
+            return false;
+          }
+        }
       }
     }
 
@@ -399,7 +445,8 @@ namespace osmscout {
   }
 
   bool LocationIndex::VisitAdminRegionLocations(const AdminRegion& region,
-                                                LocationVisitor& visitor) const
+                                                LocationVisitor& visitor,
+                                                bool recursive) const
   {
     FileScanner scanner;
     bool        stopped=false;
@@ -418,6 +465,7 @@ namespace osmscout {
 
     if (!VisitRegionLocationEntries(scanner,
                                     visitor,
+                                    recursive,
                                     stopped)) {
       return false;
     }
@@ -425,7 +473,8 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool LocationIndex::VisitLocationAddresses(const Location& location,
+  bool LocationIndex::VisitLocationAddresses(const AdminRegion& region,
+                                             const Location& location,
                                              AddressVisitor& visitor) const
   {
     FileScanner scanner;
@@ -440,6 +489,7 @@ namespace osmscout {
     }
 
     if (!VisitLocationAddressEntries(scanner,
+                                     region,
                                      location,
                                      visitor,
                                      stopped)) {

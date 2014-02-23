@@ -53,6 +53,9 @@ namespace osmscout {
     std::string              aliasName;          //! Additional optional alias name
     ObjectFileRef            aliasObject;        //! Additional optional alias reference
     std::vector<RegionAlias> aliases;            //! The list of alias for this region
+
+  public:
+    bool Match(const ObjectFileRef& object) const;
   };
 
   typedef Ref<AdminRegion> AdminRegionRef;
@@ -60,9 +63,17 @@ namespace osmscout {
   class OSMSCOUT_API AdminRegionVisitor
   {
   public:
+    enum Action {
+      skipChildren,
+      visitChildren,
+      stop,
+      error
+    };
+
+  public:
     virtual ~AdminRegionVisitor();
 
-    virtual bool Visit(const AdminRegion& region) = 0;
+    virtual Action Visit(const AdminRegion& region) = 0;
   };
 
   class OSMSCOUT_API AdminRegionMatchVisitor : public AdminRegionVisitor
@@ -92,7 +103,7 @@ namespace osmscout {
     AdminRegionMatchVisitor(const std::string& pattern,
                             size_t limit);
 
-    bool Visit(const AdminRegion& region);
+    Action Visit(const AdminRegion& region);
   };
 
   /**
@@ -214,7 +225,8 @@ namespace osmscout {
   public:
     virtual ~AddressVisitor();
 
-    virtual bool Visit(const Location& location,
+    virtual bool Visit(const AdminRegion& adminRegion,
+                       const Location& location,
                        const Address& address) = 0;
   };
 
@@ -270,7 +282,8 @@ namespace osmscout {
     AddressMatchVisitor(const std::string& pattern,
                         size_t limit);
 
-    bool Visit(const Location& location,
+    bool Visit(const AdminRegion& adminRegion,
+               const Location& location,
                const Address& address);
   };
 

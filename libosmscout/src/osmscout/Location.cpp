@@ -23,6 +23,29 @@
 
 namespace osmscout {
 
+  bool AdminRegion::Match(const ObjectFileRef& object) const
+  {
+    if (this->object==object) {
+      return true;
+    }
+
+    if (aliasObject==object) {
+      return true;
+    }
+
+    if (object.GetType()==refNode) {
+      for (std::vector<AdminRegion::RegionAlias>::const_iterator alias=aliases.begin();
+          alias!=aliases.end();
+          ++alias) {
+        if (alias->objectOffset==object.GetFileOffset()) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   AdminRegionVisitor::~AdminRegionVisitor()
   {
     // no code
@@ -49,7 +72,7 @@ namespace osmscout {
     candidate=matchPosition!=std::string::npos;
   }
 
-  bool AdminRegionMatchVisitor::Visit(const AdminRegion& region)
+  AdminRegionVisitor::Action AdminRegionMatchVisitor::Visit(const AdminRegion& region)
   {
     bool match;
     bool candidate;
@@ -87,7 +110,12 @@ namespace osmscout {
       }
     }
 
-    return !limitReached;
+    if (limitReached) {
+      return stop;
+    }
+    else {
+      return visitChildren;
+    }
   }
 
   LocationVisitor::~LocationVisitor()
@@ -214,7 +242,8 @@ namespace osmscout {
     candidate=matchPosition!=std::string::npos;
   }
 
-  bool AddressMatchVisitor::Visit(const Location& location,
+  bool AddressMatchVisitor::Visit(const AdminRegion& adminRegion,
+                                  const Location& location,
                                   const Address& address)
   {
     bool match;

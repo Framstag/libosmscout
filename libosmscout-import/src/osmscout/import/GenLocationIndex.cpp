@@ -1549,14 +1549,30 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)region.regions.size());
+
     for (std::list<RegionRef>::iterator r=region.regions.begin();
          r!=region.regions.end();
          r++) {
-      RegionRef childRegion(*r);
+      RegionRef  childRegion(*r);
+      FileOffset nextChildOffsetOffset;
+
+      if (!writer.GetPos(nextChildOffsetOffset) ||
+          !writer.WriteFileOffset(0)) {
+        return false;
+      }
 
       if (!WriteRegionIndexEntry(writer,
                                  region,
                                  *childRegion)) {
+        return false;
+      }
+
+      FileOffset nextChildOffset;
+
+      if (!writer.GetPos(nextChildOffset) ||
+          !writer.SetPos(nextChildOffsetOffset) ||
+          !writer.WriteFileOffset(nextChildOffset) ||
+          !writer.SetPos(nextChildOffset)) {
         return false;
       }
     }
@@ -1568,14 +1584,30 @@ namespace osmscout {
                                                 Region& rootRegion)
   {
     writer.WriteNumber((uint32_t)rootRegion.regions.size());
+
     for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
          r!=rootRegion.regions.end();
          ++r) {
-      RegionRef childRegion(*r);
+      RegionRef  childRegion(*r);
+      FileOffset nextChildOffsetOffset;
+
+      if (!writer.GetPos(nextChildOffsetOffset) ||
+          !writer.WriteFileOffset(0)) {
+        return false;
+      }
 
       if (!WriteRegionIndexEntry(writer,
                                  rootRegion,
                                  *childRegion)) {
+        return false;
+      }
+
+      FileOffset nextChildOffset=0;
+
+      if (!writer.GetPos(nextChildOffset) ||
+          !writer.SetPos(nextChildOffsetOffset) ||
+          !writer.WriteFileOffset(nextChildOffset) ||
+          !writer.SetPos(nextChildOffset)) {
         return false;
       }
     }

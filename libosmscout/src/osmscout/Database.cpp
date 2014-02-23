@@ -1150,14 +1150,16 @@ namespace osmscout {
                                                      visitor);
   }
 
-  bool Database::VisitLocationAddresses(const Location& location,
+  bool Database::VisitLocationAddresses(const AdminRegion& region,
+                                        const Location& location,
                                         AddressVisitor& visitor) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return cityStreetIndex.VisitLocationAddresses(location,
+    return cityStreetIndex.VisitLocationAddresses(region,
+                                                  location,
                                                   visitor);
   }
 
@@ -1198,6 +1200,8 @@ namespace osmscout {
       return true;
     }
 
+    //std::cout << "  Search for location '" << searchEntry.locationPattern << "'" << std::endl;
+
     osmscout::LocationMatchVisitor visitor(searchEntry.locationPattern,
                                            search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
@@ -1218,15 +1222,18 @@ namespace osmscout {
     for (std::list<osmscout::LocationMatchVisitor::POIResult>::const_iterator poiResult=visitor.poiResults.begin();
         poiResult!=visitor.poiResults.end();
         ++poiResult) {
-      HandleAdminRegionPOI(search,
-                           adminRegionResult,
-                           *poiResult,
-                           result);
+      if (!HandleAdminRegionPOI(search,
+                                adminRegionResult,
+                                *poiResult,
+                                result)) {
+        return false;
+      }
     }
 
     for (std::list<osmscout::LocationMatchVisitor::LocationResult>::const_iterator locationResult=visitor.locationResults.begin();
         locationResult!=visitor.locationResults.end();
         ++locationResult) {
+      //std::cout << "  - '" << locationResult->location->name << "'" << std::endl;
       if (!HandleAdminRegionLocation(search,
                                      searchEntry,
                                      adminRegionResult,
@@ -1273,11 +1280,14 @@ namespace osmscout {
       return true;
     }
 
+    //std::cout << "    Search for address '" << searchEntry.addressPattern << "'" << std::endl;
+
     osmscout::AddressMatchVisitor visitor(searchEntry.addressPattern,
                                           search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
 
-    if (!VisitLocationAddresses(locationResult.location,
+    if (!VisitLocationAddresses(locationResult.adminRegion,
+                                locationResult.location,
                                 visitor)) {
       return false;
     }
@@ -1313,6 +1323,7 @@ namespace osmscout {
     for (std::list<osmscout::AddressMatchVisitor::AddressResult>::const_iterator addressResult=visitor.results.begin();
         addressResult!=visitor.results.end();
         ++addressResult) {
+      //std::cout << "    - '" << addressResult->address->name << "'" << std::endl;
       if (!HandleAdminRegionLocationAddress(search,
                                             adminRegionResult,
                                             locationResult,
@@ -1410,6 +1421,8 @@ namespace osmscout {
         continue;
       }
 
+      //std::cout << "Search for region '" << searchEntry->adminRegionPattern << "'..." << std::endl;
+
       osmscout::AdminRegionMatchVisitor adminRegionVisitor(searchEntry->adminRegionPattern,
                                                            search.limit);
 
@@ -1424,6 +1437,8 @@ namespace osmscout {
       for (std::list<osmscout::AdminRegionMatchVisitor::AdminRegionResult>::const_iterator regionResult=adminRegionVisitor.results.begin();
           regionResult!=adminRegionVisitor.results.end();
           ++regionResult) {
+        //std::cout << "- '" << regionResult->adminRegion->name << "', '" << regionResult->adminRegion->aliasName << "'..." << std::endl;
+
         if (!HandleAdminRegion(search,
                                *searchEntry,
                                *regionResult,
@@ -1437,6 +1452,372 @@ namespace osmscout {
     result.results.unique();
 
     return true;
+  }
+
+  class AdminRegionReverseLookupVisitor : public AdminRegionVisitor
+  {
+  public:
+    struct SearchEntry
+    {
+      ObjectFileRef         object;
+      std::vector<GeoCoord> coords;
+    };
+
+  private:
+    const Database&                           database;
+    std::list<Database::ReverseLookupResult>& results;
+
+    std::list<SearchEntry>                    searchEntries;
+
+  public:
+    std::map<FileOffset,AdminRegionRef>       adminRegions;
+
+  public:
+    AdminRegionReverseLookupVisitor(const Database& database,
+                                    std::list<Database::ReverseLookupResult>& results);
+
+    void AddSearchEntry(const SearchEntry& searchEntry);
+
+    Action Visit(const AdminRegion& region);
+  };
+
+  AdminRegionReverseLookupVisitor::AdminRegionReverseLookupVisitor(const Database& database,
+                                                                   std::list<Database::ReverseLookupResult>& results)
+  : database(database),
+    results(results)
+  {
+    // no code
+  }
+
+  void AdminRegionReverseLookupVisitor::AddSearchEntry(const SearchEntry& searchEntry)
+  {
+    searchEntries.push_back(searchEntry);
+  }
+
+  AdminRegionVisitor::Action AdminRegionReverseLookupVisitor::Visit(const AdminRegion& region)
+  {
+    AreaRef area;
+    bool    atLeastOneCandidate=false;
+
+    if (!database.GetAreaByOffset(region.object.GetFileOffset(),
+                                  area)) {
+      return error;
+    }
+
+    for (std::list<SearchEntry>::const_iterator entry=searchEntries.begin();
+        entry!=searchEntries.end();
+        ++entry) {
+      if (region.Match(entry->object)) {
+        Database::ReverseLookupResult result;
+
+        result.object=entry->object;
+        result.adminRegion=new AdminRegion(region);
+
+        results.push_back(result);
+      }
+
+      bool candidate=false;
+
+      for (size_t r=0; r<area->rings.size(); r++) {
+        if (area->rings[r].ring!=Area::outerRingId) {
+          continue;
+        }
+
+        for (std::list<SearchEntry>::const_iterator entry=searchEntries.begin();
+            entry!=searchEntries.end();
+            ++entry) {
+          if (entry->coords.size()==1) {
+            if (!IsCoordInArea(entry->coords.front(),
+                               area->rings[r].nodes)) {
+              continue;
+            }
+          }
+          else {
+            if (!IsAreaAtLeastPartlyInArea(entry->coords,
+                                           area->rings[r].nodes)) {
+              continue;
+            }
+          }
+
+          // candidate
+          candidate=true;
+          break;
+        }
+
+        if (candidate) {
+          break;
+        }
+      }
+
+      if (candidate) {
+        atLeastOneCandidate = true;
+        adminRegions.insert(std::make_pair(region.regionOffset,
+                                           new AdminRegion(region)));
+      }
+    }
+
+    if (atLeastOneCandidate) {
+      return visitChildren;
+    }
+    else {
+      return skipChildren;
+    }
+  }
+
+  class LocationReverseLookupVisitor : public LocationVisitor
+  {
+  public:
+    struct Loc
+    {
+      AdminRegionRef adminRegion;
+      LocationRef    location;
+    };
+
+  private:
+    std::set<ObjectFileRef>                   objects;
+    std::list<Database::ReverseLookupResult>& results;
+
+  public:
+    std::list<Loc>                            locations;
+
+  public:
+    LocationReverseLookupVisitor(std::list<Database::ReverseLookupResult>& results);
+
+    void AddObject(const ObjectFileRef& object);
+
+    bool Visit(const AdminRegion& adminRegion,
+               const POI &poi);
+    bool Visit(const AdminRegion& adminRegion,
+               const Location &location);
+  };
+
+  LocationReverseLookupVisitor::LocationReverseLookupVisitor(std::list<Database::ReverseLookupResult>& results)
+  : results(results)
+  {
+    // no code
+  }
+
+  void LocationReverseLookupVisitor::AddObject(const ObjectFileRef& object)
+  {
+    objects.insert(object);
+  }
+
+  bool LocationReverseLookupVisitor::Visit(const AdminRegion& adminRegion,
+                                           const POI &poi)
+  {
+    if (objects.find(poi.object)!=objects.end()) {
+      Database::ReverseLookupResult result;
+
+      result.object=poi.object;
+      result.adminRegion=new AdminRegion(adminRegion);
+      result.poi=new POI(poi);
+
+      results.push_back(result);
+    }
+
+    return true;
+  }
+
+  bool LocationReverseLookupVisitor::Visit(const AdminRegion& adminRegion,
+                                           const Location &location)
+  {
+    Loc l;
+
+    l.adminRegion=new AdminRegion(adminRegion);
+    l.location=new Location(location);
+
+    locations.push_back(l);
+
+    for (std::vector<ObjectFileRef>::const_iterator object=location.objects.begin();
+        object!=location.objects.end();
+        ++object) {
+      if (objects.find(*object)!=objects.end()) {
+        Database::ReverseLookupResult result;
+
+        result.object=*object;
+        result.adminRegion=l.adminRegion;
+        result.location=l.location;
+
+        results.push_back(result);
+      }
+    }
+
+    return true;
+  }
+
+  class AddressReverseLookupVisitor : public AddressVisitor
+  {
+  private:
+    std::list<Database::ReverseLookupResult>& results;
+
+    std::set<ObjectFileRef>                   objects;
+
+  public:
+    AddressReverseLookupVisitor(std::list<Database::ReverseLookupResult>& results);
+    void AddObject(const ObjectFileRef& object);
+
+    bool Visit(const AdminRegion& adminRegion,
+               const Location &location,
+               const Address& address);
+  };
+
+  AddressReverseLookupVisitor::AddressReverseLookupVisitor(std::list<Database::ReverseLookupResult>& results)
+  : results(results)
+  {
+    // no code
+  }
+
+  void AddressReverseLookupVisitor::AddObject(const ObjectFileRef& object)
+  {
+    objects.insert(object);
+  }
+
+  bool AddressReverseLookupVisitor::Visit(const AdminRegion& adminRegion,
+                                          const Location &location,
+                                          const Address& address)
+  {
+    if (objects.find(address.object)!=objects.end()) {
+      Database::ReverseLookupResult result;
+
+      result.object=address.object;
+      result.adminRegion=new AdminRegion(adminRegion);
+      result.location=new Location(location);
+      result.address=new Address(address);
+
+      results.push_back(result);
+    }
+
+    return true;
+  }
+
+  bool Database::ReverseLookupObjects(const std::list<ObjectFileRef>& objects,
+                                      std::list<ReverseLookupResult>& result) const
+  {
+    result.clear();
+
+    if (!IsOpen()) {
+      return false;
+    }
+
+    AdminRegionReverseLookupVisitor adminRegionVisitor(*this,
+                                                       result);
+
+    for (std::list<ObjectFileRef>::const_iterator object=objects.begin();
+        object!=objects.end();
+        ++object) {
+      std::vector<GeoCoord> coords;
+
+      if (object->GetType()==refNode) {
+        NodeRef node;
+
+        if (!GetNodeByOffset(object->GetFileOffset(),
+                             node)) {
+          return false;
+        }
+
+        AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
+
+        searchEntry.object=*object;
+        searchEntry.coords.push_back(node->GetCoords());
+
+        adminRegionVisitor.AddSearchEntry(searchEntry);
+      }
+      else if (object->GetType()==refArea) {
+        AreaRef area;
+
+        if (!GetAreaByOffset(object->GetFileOffset(),
+                             area)) {
+          return false;
+        }
+
+        for (size_t r=0; r<area->rings.size(); r++) {
+          if (area->rings[r].ring==Area::outerRingId) {
+            AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
+
+            searchEntry.object=*object;
+            searchEntry.coords=area->rings[r].nodes;
+
+            adminRegionVisitor.AddSearchEntry(searchEntry);
+          }
+        }
+      }
+      else if (object->GetType()==refWay) {
+        WayRef way;
+
+        if (!GetWayByOffset(object->GetFileOffset(),
+                            way)) {
+          return false;
+        }
+
+        AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
+
+        searchEntry.object=*object;
+        searchEntry.coords=way->nodes;
+
+        adminRegionVisitor.AddSearchEntry(searchEntry);
+      }
+      else {
+        return false;
+      }
+    }
+
+    if (!VisitAdminRegions(adminRegionVisitor)) {
+      return false;
+    }
+
+    if (adminRegionVisitor.adminRegions.empty()) {
+      return true;
+    }
+
+    LocationReverseLookupVisitor locationVisitor(result);
+
+    for (std::list<ObjectFileRef>::const_iterator object=objects.begin();
+        object!=objects.end();
+        ++object) {
+      locationVisitor.AddObject(*object);
+    }
+
+    for (std::map<FileOffset,AdminRegionRef>::const_iterator regionEntry=adminRegionVisitor.adminRegions.begin();
+        regionEntry!=adminRegionVisitor.adminRegions.end();
+        ++regionEntry) {
+      if (!cityStreetIndex.VisitAdminRegionLocations(*regionEntry->second,
+                                                     locationVisitor,
+                                                     false)) {
+        return false;
+      }
+    }
+
+    AddressReverseLookupVisitor addressVisitor(result);
+
+    for (std::list<ObjectFileRef>::const_iterator object=objects.begin();
+        object!=objects.end();
+        ++object) {
+      addressVisitor.AddObject(*object);
+    }
+
+    for (std::list<LocationReverseLookupVisitor::Loc>::const_iterator location=locationVisitor.locations.begin();
+        location!=locationVisitor.locations.end();
+        ++location) {
+
+      if (!cityStreetIndex.VisitLocationAddresses(location->adminRegion,
+                                                  location->location,
+                                                  addressVisitor)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool Database::ReverseLookupObject(const ObjectFileRef& object,
+                                     std::list<ReverseLookupResult>& result) const
+  {
+    std::list<ObjectFileRef> objects;
+
+    objects.push_back(object);
+
+    return ReverseLookupObjects(objects,
+                                result);
   }
 
   bool Database::GetClosestRoutableNode(double lat,

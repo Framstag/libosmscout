@@ -51,12 +51,12 @@ namespace osmscout {
     bool LoadAdminRegion(FileScanner& scanner,
                          AdminRegion& region) const;
 
-    bool VisitRegionEntries(FileScanner& scanner,
-                            AdminRegionVisitor& visitor,
-                            bool& stopped) const;
+    AdminRegionVisitor::Action VisitRegionEntries(FileScanner& scanner,
+                                                  AdminRegionVisitor& visitor) const;
 
     bool VisitRegionLocationEntries(FileScanner& scanner,
                                     LocationVisitor& visitor,
+                                    bool recursive,
                                     bool& stopped) const;
 
     bool LoadRegionDataEntry(FileScanner& scanner,
@@ -65,6 +65,7 @@ namespace osmscout {
                              bool& stopped) const;
 
     bool VisitLocationAddressEntries(FileScanner& scanner,
+                                     const AdminRegion& region,
                                      const Location& location,
                                      AddressVisitor& visitor,
                                      bool& stopped) const;
@@ -84,12 +85,14 @@ namespace osmscout {
      * Visit all locations within the given admin region
      */
     bool VisitAdminRegionLocations(const AdminRegion& region,
-                                   LocationVisitor& visitor) const;
+                                   LocationVisitor& visitor,
+                                   bool recursive=true) const;
 
     /**
      * Visit all addresses for a given location (in a given AdminRegion)
      */
-    bool VisitLocationAddresses(const Location& location,
+    bool VisitLocationAddresses(const AdminRegion& region,
+                                const Location& location,
                                 AddressVisitor& visitor) const;
 
     bool ResolveAdminRegionHierachie(const AdminRegionRef& region,

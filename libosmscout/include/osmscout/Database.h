@@ -174,6 +174,16 @@ namespace osmscout {
 
     TypeConfig            *typeConfig;          //! Type config for the currently opened map
 
+  public:
+    struct OSMSCOUT_API ReverseLookupResult
+    {
+      ObjectFileRef  object;
+      AdminRegionRef adminRegion;
+      POIRef         poi;
+      LocationRef    location;
+      AddressRef     address;
+    };
+
   private:
     bool GetObjectsNodes(const AreaSearchParameter& parameter,
                          const TypeSet &nodeTypes,
@@ -322,7 +332,8 @@ namespace osmscout {
     bool VisitAdminRegionLocations(const AdminRegion& region,
                                    LocationVisitor& visitor) const;
 
-    bool VisitLocationAddresses(const Location& location,
+    bool VisitLocationAddresses(const AdminRegion& region,
+                                const Location& location,
                                 AddressVisitor& visitor) const;
 
     bool ResolveAdminRegionHierachie(const AdminRegionRef& adminRegion,
@@ -330,6 +341,11 @@ namespace osmscout {
 
     bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;
+
+    bool ReverseLookupObjects(const std::list<ObjectFileRef>& objects,
+                              std::list<ReverseLookupResult>& result) const;
+    bool ReverseLookupObject(const ObjectFileRef& object,
+                              std::list<ReverseLookupResult>& result) const;
 
     bool GetClosestRoutableNode(double lat,
                                 double lon,
