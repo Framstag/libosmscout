@@ -159,7 +159,7 @@ namespace osmscout {
     }
 
     // "+1" because we add +1 to every offset, to generate offset > 0
-    uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize+1);
+    uint8_t dataOffsetBytes=BytesNeededToAddressFileData(dataSize+1);
 
     progress.Info("Writing map for "+
                   typeInfo.GetName()+" , "+

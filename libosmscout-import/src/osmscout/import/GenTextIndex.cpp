@@ -181,9 +181,9 @@ namespace osmscout
     }
 
     // Determine the number of bytes needed to store offsets
-    uint8_t minNodeOffsetSizeBytes = BytesNeeededToAddressFileData(nodesFileSize);
-    uint8_t minWayOffsetSizeBytes  = BytesNeeededToAddressFileData(waysFileSize);
-    uint8_t minAreaOffsetSizeBytes = BytesNeeededToAddressFileData(areasFileSize);
+    uint8_t minNodeOffsetSizeBytes = BytesNeededToAddressFileData(nodesFileSize);
+    uint8_t minWayOffsetSizeBytes  = BytesNeededToAddressFileData(waysFileSize);
+    uint8_t minAreaOffsetSizeBytes = BytesNeededToAddressFileData(areasFileSize);
 
     progress.Info("Node filesize is " + NumberToString(nodesFileSize) + " bytes, "+
                   "req. " + NumberToString(minNodeOffsetSizeBytes) +" bytes");

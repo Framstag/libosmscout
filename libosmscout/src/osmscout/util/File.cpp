@@ -116,7 +116,7 @@ namespace osmscout {
 #endif
   }
 
-  uint8_t BytesNeeededToAddressFileData(FileOffset size)
+  uint8_t BytesNeededToAddressFileData(FileOffset size)
   {
     uint8_t bytes=0;
 
@@ -130,5 +130,20 @@ namespace osmscout {
     }
 
     return bytes;
+  }
+
+  bool BytesNeeededToAddressFileData(const std::string& filename,
+                                     uint8_t& bytes)
+  {
+    FileOffset fileSize;
+
+    if (!GetFileSize(filename,
+                     fileSize)) {
+      return false;
+    }
+
+    bytes=BytesNeededToAddressFileData(fileSize);
+
+    return false;
   }
 }
