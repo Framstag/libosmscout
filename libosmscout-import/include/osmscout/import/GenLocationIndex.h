@@ -51,6 +51,11 @@ namespace osmscout {
     {
       ObjectFileRef object; //! Object
       std::string   name;   //! Name of the POI
+
+      bool operator<(const RegionPOI& other) const
+      {
+        return object.GetFileOffset()<other.object.GetFileOffset();
+      }
     };
 
     struct RegionAddress
@@ -165,6 +170,14 @@ namespace osmscout {
     };
 
   private:
+    uint8_t bytesForNodeFileOffset;
+    uint8_t bytesForAreaFileOffset;
+    uint8_t bytesForWayFileOffset;
+
+  private:
+    bool Write(FileWriter& writer,
+               const ObjectFileRef& object);
+
     void DumpRegion(const Region& parent,
                     size_t indent,
                     std::ostream& out);

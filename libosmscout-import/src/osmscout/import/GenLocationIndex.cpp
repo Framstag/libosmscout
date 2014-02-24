@@ -67,6 +67,26 @@ namespace osmscout {
     return rootRegion;
   }
 
+  bool LocationIndexGenerator::Write(FileWriter& writer,
+                                     const ObjectFileRef& object)
+  {
+    writer.Write((uint8_t)object.GetType());
+
+    switch (object.GetType()) {
+    case refNode:
+      return writer.WriteFileOffset(object.GetFileOffset(),
+                                    bytesForNodeFileOffset);
+    case refArea:
+      return writer.WriteFileOffset(object.GetFileOffset(),
+                                    bytesForAreaFileOffset);
+    case refWay:
+      return writer.WriteFileOffset(object.GetFileOffset(),
+                                    bytesForWayFileOffset);
+    default:
+      return false;
+    }
+  }
+
   void LocationIndexGenerator::DumpRegion(const Region& parent,
                                           size_t indent,
                                           std::ostream& out)
@@ -1537,15 +1557,16 @@ namespace osmscout {
 
     writer.Write(region.name);
 
-    writer.Write((uint8_t)region.reference.GetType());
-    writer.WriteFileOffset(region.reference.GetFileOffset());
+    Write(writer,
+          region.reference);
 
     writer.WriteNumber((uint32_t)region.aliases.size());
     for (std::list<RegionAlias>::const_iterator alias=region.aliases.begin();
         alias!=region.aliases.end();
         ++alias) {
       writer.Write(alias->name);
-      writer.WriteFileOffset(alias->reference);
+      writer.WriteFileOffset(alias->reference,
+                             bytesForNodeFileOffset);
     }
 
     writer.WriteNumber((uint32_t)region.regions.size());
@@ -1634,13 +1655,20 @@ namespace osmscout {
       return false;
     }
 
+    region.pois.sort();
+
+    FileOffset lastOffset=0;
+
     writer.WriteNumber((uint32_t)region.pois.size());
+
     for (std::list<RegionPOI>::iterator poi=region.pois.begin();
          poi!=region.pois.end();
          ++poi) {
       writer.Write(poi->name);
       writer.Write((uint8_t)poi->object.GetType());
-      writer.WriteNumber(poi->object.GetFileOffset());
+      writer.WriteNumber(poi->object.GetFileOffset()-lastOffset);
+
+      lastOffset=poi->object.GetFileOffset();
     }
 
     writer.WriteNumber((uint32_t)region.locations.size());
@@ -1730,6 +1758,7 @@ namespace osmscout {
             address!=location->second.addresses.end();
             ++address) {
           writer.Write(address->name);
+
           writer.Write((uint8_t)address->object.GetType());
           writer.WriteNumber(address->object.GetFileOffset()-lastOffset);
 
@@ -1787,8 +1816,28 @@ namespace osmscout {
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
 
-
     progress.SetAction("Setup");
+
+    if (!BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                      "nodes.dat"),
+                                      bytesForNodeFileOffset)) {
+      progress.Error("Cannot get file size of 'nodes.dat'");
+      return false;
+    }
+
+    if (!BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                      "areas.dat"),
+                                      bytesForAreaFileOffset)) {
+      progress.Error("Cannot get file size of 'areas.dat'");
+      return false;
+    }
+
+    if (!BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                      "ways.dat"),
+                                      bytesForWayFileOffset)) {
+      progress.Error("Cannot get file size of 'ways.dat'");
+      return false;
+    }
 
     rootRegion=new Region();
     rootRegion->name="<root>";
@@ -1961,6 +2010,12 @@ namespace osmscout {
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      LocationIndex::FILENAME_LOCATION_IDX))) {
       progress.Error("Cannot open '"+writer.GetFilename()+"'");
+      return false;
+    }
+
+    if (!writer.Write(bytesForNodeFileOffset) ||
+        !writer.Write(bytesForAreaFileOffset) ||
+        !writer.Write(bytesForWayFileOffset)) {
       return false;
     }
 

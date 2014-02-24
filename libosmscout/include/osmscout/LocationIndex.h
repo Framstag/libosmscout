@@ -45,9 +45,16 @@ namespace osmscout {
     static const char* const FILENAME_LOCATION_IDX;
 
   private:
-    std::string path;
+    std::string      path;
+    mutable uint8_t  bytesForNodeFileOffset;
+    mutable uint8_t  bytesForAreaFileOffset;
+    mutable uint8_t  bytesForWayFileOffset;
 
   private:
+    bool ReadObjectFileOffsetBytes(FileScanner& scanner) const;
+    bool Read(FileScanner& scanner,
+              ObjectFileRef& object) const;
+
     bool LoadAdminRegion(FileScanner& scanner,
                          AdminRegion& region) const;
 
