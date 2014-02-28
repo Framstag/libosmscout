@@ -159,7 +159,7 @@ QString DBThread::stylesheetFilename(){
     return m_stylesheetFilename;
 }
 
-void DBThread::ReloadStyle(){
+void DBThread::ReloadStyle(const QString &suffix){
     if(m_stylesheetFilename.isNull()){
         return;
     }
@@ -167,7 +167,7 @@ void DBThread::ReloadStyle(){
         delete styleConfig;
     }
     styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
-    if (!osmscout::LoadStyleConfig(m_stylesheetFilename.toLocal8Bit().data(),
+    if (!osmscout::LoadStyleConfig((m_stylesheetFilename+suffix).toLocal8Bit().data(),
                                    *styleConfig)) {
         delete styleConfig;
         styleConfig=NULL;

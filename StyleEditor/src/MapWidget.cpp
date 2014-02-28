@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#define TMP_SUFFIX ".tmp"
+
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
       requestNewMap(true)
@@ -159,14 +161,27 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void MapWidget::wheelEvent(QWheelEvent* event)
 {
-    int numDegrees=event->delta()/8;
-    int numSteps=numDegrees/15;
 
-    if (numSteps>=0) {
-        zoomIn(numSteps*1.35);
+    QPoint numPixels = event->pixelDelta();
+    QPoint numDegrees = event->angleDelta() / 8;
+    int steps = 0;
+
+   if (!numPixels.isNull()) {
+        steps = numPixels.y()>0 ? numPixels.manhattanLength() : -numPixels.manhattanLength();
+
+    } else if (!numDegrees.isNull()) {
+        QPoint numSteps = numDegrees / 15;
+        steps = numSteps.y()>0 ? numSteps.manhattanLength() : -numSteps.manhattanLength();
+    }
+
+    if(steps==0){
+        return;
+    }
+    if (steps>=0) {
+        zoomIn(steps*1.1);
     }
     else {
-        zoomOut(-numSteps*1.35);
+        zoomOut(-steps*1.1);
     }
 
     event->accept();
@@ -344,5 +359,11 @@ void MapWidget::showLocation(Location* location)
 void MapWidget::reloadStyle() {
     DBThread* dbThread=DBThread::GetInstance();
     dbThread->ReloadStyle();
+    TriggerMapRendering();
+}
+
+void MapWidget::reloadTmpStyle() {
+    DBThread* dbThread=DBThread::GetInstance();
+    dbThread->ReloadStyle(TMP_SUFFIX);
     TriggerMapRendering();
 }

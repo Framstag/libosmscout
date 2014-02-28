@@ -62,6 +62,7 @@ public slots:
   void showCoordinates(double lat, double lon);
   void showLocation(Location* location);
   void reloadStyle();
+  void reloadTmpStyle();
 
 private:
   void TriggerMapRendering();

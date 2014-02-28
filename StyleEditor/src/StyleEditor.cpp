@@ -85,6 +85,11 @@ int main(int argc, char* argv[])
 
   delete window;
 
+  QString tmpStylesheet(dbThread->stylesheetFilename()+TMP_SUFFIX);
+  if(QFile::exists(tmpStylesheet)){
+      QFile::remove(tmpStylesheet);
+  }
+
   thread.quit();
   thread.wait();
 

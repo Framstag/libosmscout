@@ -12,6 +12,9 @@ Item {
     property alias validator: input.validator
     property alias text: input.text
     property alias horizontalAlignment: input.horizontalAlignment
+    property alias radius: background.radius
+
+    signal editingFinished
 
     height: input.implicitHeight+4
 
@@ -34,6 +37,10 @@ Item {
 
         onFocusChanged: {
             background.border.color = focus ? selectedFocusColor : focusColor
+        }
+
+        onEditingFinished: {
+            lineEdit.editingFinished()
         }
     }
 }

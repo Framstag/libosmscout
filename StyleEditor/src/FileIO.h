@@ -26,6 +26,8 @@
 
 #include "Highlighter.h"
 
+#define TMP_SUFFIX ".tmp"
+
 class FileIO : public QObject
 {
     Q_OBJECT
@@ -36,17 +38,18 @@ public:
 
     Q_INVOKABLE bool write();
     Q_INVOKABLE void read();
+    Q_INVOKABLE bool writeTmp();
 
     QQuickItem *target() { return m_target; }
     void setTarget(QQuickItem *target);
 
-    QString source() { return m_source; };
+    QString source() { return m_source; }
     void setSource(const QString& source) {
         if(m_source != source){
             m_source = source;
             emit sourceChanged(m_source);
         }
-    };
+    }
 
 public slots:
 
@@ -56,6 +59,8 @@ signals:
     void error(const QString& msg);
 
 private:
+    bool write(const QString &filename);
+
     QString m_source;
     QQuickItem *m_target;
     QTextDocument *m_doc;

@@ -20,12 +20,17 @@ Rectangle {
         mapView.reloadStyle()
     }
 
+    function reloadTmpStyle() {
+        mapView.reloadTmpStyle()
+    }
+
+
     Map {
         id: mapView
         anchors.fill: parent
 
         focus: true
-
+/*
         Keys.onPressed: {
             if (event.key === Qt.Key_Plus) {
                 mapView.zoomIn(2.0)
@@ -46,7 +51,7 @@ Rectangle {
                 mapView.right()
             }
         }
-
+*/
         // Use PinchArea for multipoint zoom in/out?
     }
 
