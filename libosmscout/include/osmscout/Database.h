@@ -55,10 +55,10 @@
 namespace osmscout {
 
   /**
-    Database instance initialisation parameter to influence the behaviour of the database
+    Database instance initialization parameter to influence the behavior of the database
     instance.
 
-    The following groups attributes are currently available:
+    The following attributes are currently available:
     * cache sizes.
     */
   class OSMSCOUT_API DatabaseParameter
@@ -159,7 +159,7 @@ namespace osmscout {
     AreaWayIndex          areaWayIndex;
     AreaAreaIndex         areaAreaIndex;
 
-    LocationIndex       cityStreetIndex;
+    LocationIndex         cityStreetIndex;
 
     WaterIndex            waterIndex;
 

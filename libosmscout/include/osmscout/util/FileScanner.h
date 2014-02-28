@@ -36,7 +36,7 @@
 
 namespace osmscout {
   /**
-    FileScanner implements platform independend sequential
+    FileScanner implements platform independent sequential
     scanning-like access to data in files. File access is buffered.
 
     FileScanner will use mmap in read-only mode if available (and will

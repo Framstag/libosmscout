@@ -30,6 +30,11 @@
 
 namespace osmscout {
 
+  /**
+    FileScanner implements platform independent writing to data in files.
+    It uses C standard library FILE internally and wraps it to offer
+    a number of convenience methods.
+    */
   class OSMSCOUT_API FileWriter
   {
   private:

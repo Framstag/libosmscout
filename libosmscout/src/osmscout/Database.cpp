@@ -265,21 +265,27 @@ namespace osmscout {
     maxLon=maxLonDat/conversionFactor-180.0;
     maxLat=maxLatDat/conversionFactor-90.0;
 
-    if (!nodeDataFile.Open(path,FileScanner::LowMemRandom,true)) {
+    if (!nodeDataFile.Open(path,
+                           FileScanner::LowMemRandom,
+                           true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!areaDataFile.Open(path,FileScanner::LowMemRandom,true)) {
+    if (!areaDataFile.Open(path,
+                           FileScanner::LowMemRandom,
+                           true)) {
       std::cerr << "Cannot open 'areas.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!wayDataFile.Open(path,FileScanner::LowMemRandom,true)) {
+    if (!wayDataFile.Open(path,
+                          FileScanner::LowMemRandom,
+                          true)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
