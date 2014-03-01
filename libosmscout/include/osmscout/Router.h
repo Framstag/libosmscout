@@ -32,6 +32,7 @@
 #include <osmscout/RouteNode.h>
 
 // Datafiles
+#include <osmscout/AreaDataFile.h>
 #include <osmscout/WayDataFile.h>
 
 // Routing
@@ -182,8 +183,8 @@ namespace osmscout {
 
     std::string                          path;              //! Path to the directory containing all files
 
-    DataFile<Area>                       areaDataFile;      //! Cached access to the 'areas.dat' file
-    DataFile<Way>                        wayDataFile;       //! Cached access to the 'ways.dat' file
+    AreaDataFile                         areaDataFile;      //! Cached access to the 'areas.dat' file
+    WayDataFile                          wayDataFile;       //! Cached access to the 'ways.dat' file
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile; //! Cached access to the 'route.dat' file
     IndexedDataFile<Id,Intersection>     junctionDataFile;  //! Cached access to the 'junctions.dat' file
 
