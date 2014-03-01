@@ -27,7 +27,8 @@ namespace osmscout {
   /**
     Abstraction for getting cached access to the 'ways.dat' file.
     */
-  typedef DataFile<Way> WayDataFile;
+  typedef DataFile<Way>    WayDataFile;
+  typedef Ref<WayDataFile> WayDataFileRef;
 }
 
 #endif

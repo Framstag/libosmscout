@@ -32,7 +32,7 @@
 namespace osmscout {
 
   template <class N>
-  class DataFile
+  class DataFile : public Referencable
   {
   public:
     typedef Ref<N> ValueType;

@@ -25,6 +25,7 @@
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -34,7 +35,7 @@ namespace osmscout {
 
     Ways can be limited by type and result count.
     */
-  class OSMSCOUT_API AreaNodeIndex
+  class OSMSCOUT_API AreaNodeIndex : public Referencable
   {
   private:
     struct TypeData
@@ -96,6 +97,8 @@ namespace osmscout {
 
     void DumpStatistics();
   };
+
+  typedef Ref<AreaNodeIndex> AreaNodeIndexRef;
 }
 
 #endif

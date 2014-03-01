@@ -51,6 +51,7 @@
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -144,7 +145,7 @@ namespace osmscout {
     bool IsAborted() const;
   };
 
-  class OSMSCOUT_API Database
+  class OSMSCOUT_API Database : public Referencable
   {
   private:
     bool                  isOpen;              //! true, if opened

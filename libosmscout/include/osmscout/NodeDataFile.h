@@ -27,7 +27,8 @@ namespace osmscout {
   /**
     Abstraction for getting cached access to the 'nodes.dat' file.
     */
-  typedef DataFile<Node> NodeDataFile;
+  typedef DataFile<Node>    NodeDataFile;
+  typedef Ref<NodeDataFile> NodeDataFileRef;
 }
 
 #endif

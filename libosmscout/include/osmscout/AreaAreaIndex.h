@@ -26,6 +26,7 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -41,7 +42,7 @@ namespace osmscout {
     Internally the index is implemented as quadtree. As a result each index entry
     has 4 children (besides entries in the lowest level).
     */
-  class OSMSCOUT_API AreaAreaIndex
+  class OSMSCOUT_API AreaAreaIndex : public Referencable
   {
   private:
     /**
@@ -130,6 +131,8 @@ namespace osmscout {
 
     void DumpStatistics();
   };
+
+  typedef Ref<AreaAreaIndex> AreaAreaIndexRef;
 }
 
 #endif
