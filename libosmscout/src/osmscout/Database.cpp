@@ -408,11 +408,6 @@ namespace osmscout {
                                  std::string& nodesTime,
                                  std::vector<NodeRef>& nodes) const
   {
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
     nodes.clear();
 
     if (parameter.IsAborted()) {
@@ -473,14 +468,25 @@ namespace osmscout {
                                  std::string& areasTime,
                                  std::vector<AreaRef>& areas) const
   {
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef> cachedAreas;
+
+    for (std::vector<AreaRef>::const_iterator area=areas.begin();
+        area!=areas.end();
+        ++area) {
+      if ((*area)->GetFileOffset()!=0) {
+        cachedAreas[(*area)->GetFileOffset()]=*area;
+      }
+    }
+
+    areas.clear();
+
     TypeSet internalAreaTypes(areaTypes);
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    std::vector<FileOffset> areaOffsets;
-    StopClock               areaOptimizedTimer;
+    StopClock areaOptimizedTimer;
 
     if (internalAreaTypes.HasTypes()) {
       if (parameter.GetUseLowZoomOptimization() &&
@@ -528,7 +534,26 @@ namespace osmscout {
       return false;
     }
 
-    std::sort(offsets.begin(),offsets.end());
+    areas.reserve(offsets.size());
+
+    std::vector<FileOffset> restOffsets;
+
+    restOffsets.reserve(offsets.size());
+
+    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+        offset!=offsets.end();
+        ++offset) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=cachedAreas.find(*offset);
+
+      if (entry!=cachedAreas.end()) {
+        areas.push_back(entry->second);
+      }
+      else {
+        restOffsets.push_back(*offset);
+      }
+    }
+
+    std::sort(restOffsets.begin(),restOffsets.end());
 
     if (parameter.IsAborted()) {
       return false;
@@ -536,8 +561,8 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!offsets.empty()) {
-      if (!GetAreasByOffset(offsets,
+    if (!restOffsets.empty()) {
+      if (!GetAreasByOffset(restOffsets,
                             areas)) {
         std::cout << "Error reading areas in area!" << std::endl;
         return false;
@@ -560,14 +585,25 @@ namespace osmscout {
                                 std::string& waysTime,
                                 std::vector<WayRef>& ways) const
   {
+    OSMSCOUT_HASHMAP<FileOffset,WayRef> cachedWays;
+
+    for (std::vector<WayRef>::const_iterator way=ways.begin();
+        way!=ways.end();
+        ++way) {
+      if ((*way)->GetFileOffset()!=0) {
+        cachedWays[(*way)->GetFileOffset()]=*way;
+      }
+    }
+
+    ways.clear();
+
     std::vector<TypeSet> internalWayTypes(wayTypes);
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    std::vector<FileOffset> offsets;
-    StopClock               wayOptimizedTimer;
+    StopClock wayOptimizedTimer;
 
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
@@ -590,7 +626,8 @@ namespace osmscout {
       return false;
     }
 
-    StopClock wayIndexTimer;
+    std::vector<FileOffset> offsets;
+    StopClock               wayIndexTimer;
 
     if (!internalWayTypes.empty()) {
       if (!areaWayIndex.GetOffsets(lonMin,
@@ -612,7 +649,26 @@ namespace osmscout {
       return false;
     }
 
-    std::sort(offsets.begin(),offsets.end());
+    ways.reserve(offsets.size());
+
+    std::vector<FileOffset> restOffsets;
+
+    restOffsets.reserve(offsets.size());
+
+    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+        offset!=offsets.end();
+        ++offset) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=cachedWays.find(*offset);
+
+      if (entry!=cachedWays.end()) {
+        ways.push_back(entry->second);
+      }
+      else {
+        restOffsets.push_back(*offset);
+      }
+    }
+
+    std::sort(restOffsets.begin(),restOffsets.end());
 
     if (parameter.IsAborted()) {
       return false;
@@ -620,8 +676,8 @@ namespace osmscout {
 
     StopClock waysTimer;
 
-    if (!offsets.empty()) {
-      if (!GetWaysByOffset(offsets,
+    if (!restOffsets.empty()) {
+      if (!GetWaysByOffset(restOffsets,
                            ways)) {
         std::cout << "Error reading ways in area!" << std::endl;
         return false;
@@ -688,14 +744,6 @@ namespace osmscout {
       return false;
     }
 
-    nodes.clear();
-    ways.clear();
-    areas.clear();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
     bool nodesSuccess;
     bool waysSuccess;
     bool areasSuccess;
@@ -744,6 +792,10 @@ namespace osmscout {
     if (!nodesSuccess ||
         !waysSuccess ||
         !areasSuccess) {
+      nodes.clear();
+      areas.clear();
+      ways.clear();
+
       return false;
     }
 
