@@ -1148,7 +1148,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API StyleConfig
   {
   private:
-    TypeConfig                                 *typeConfig;
+    TypeConfigRef                              typeConfig;
 
     // Symbol
     OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
@@ -1207,7 +1207,7 @@ namespace osmscout {
     void PostprocessPatternId();
 
   public:
-    StyleConfig(TypeConfig* typeConfig);
+    StyleConfig(const TypeConfigRef& typeConfig);
     virtual ~StyleConfig();
 
     StyleVariableRef GetVariableByName(const std::string& name) const;
@@ -1219,7 +1219,7 @@ namespace osmscout {
 
     void Postprocess();
 
-    TypeConfig* GetTypeConfig() const;
+    TypeConfigRef GetTypeConfig() const;
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
 

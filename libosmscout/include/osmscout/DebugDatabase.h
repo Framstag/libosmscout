@@ -52,11 +52,11 @@ namespace osmscout {
   class OSMSCOUT_API DebugDatabase
   {
   private:
-    bool                      isOpen;          //! true, if opened
+    bool                      isOpen;     //! true, if opened
 
-    std::string               path;             //! Path to the directory containing all files
+    std::string               path;       //! Path to the directory containing all files
 
-    TypeConfig                *typeConfig;      //! Type config for the currently opened map
+    TypeConfigRef             typeConfig; //! Type config for the currently opened map
 
   private:
     bool ResolveReferences(const std::string& mapName,
@@ -74,7 +74,7 @@ namespace osmscout {
     bool IsOpen() const;
     void Close();
 
-    TypeConfig* GetTypeConfig() const;
+    TypeConfigRef GetTypeConfig() const;
 
     bool GetCoords(std::set<OSMId>& ids,
                    CoordDataFile::CoordResultMap& coordsMap) const;

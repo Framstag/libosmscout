@@ -42,15 +42,14 @@ namespace osmscout {
   }
 
   DebugDatabase::DebugDatabase(const DebugDatabaseParameter& /*parameter*/)
-   : isOpen(false),
-     typeConfig(NULL)
+   : isOpen(false)
   {
     // no code
   }
 
   DebugDatabase::~DebugDatabase()
   {
-    delete typeConfig;
+    // no code
   }
 
   bool DebugDatabase::Open(const std::string& path)
@@ -63,8 +62,6 @@ namespace osmscout {
 
     if (!LoadTypeData(path,*typeConfig)) {
       std::cerr << "Cannot load 'types.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -84,7 +81,7 @@ namespace osmscout {
     isOpen=false;
   }
 
-  TypeConfig* DebugDatabase::GetTypeConfig() const
+  TypeConfigRef DebugDatabase::GetTypeConfig() const
   {
     return typeConfig;
   }

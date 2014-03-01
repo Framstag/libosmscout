@@ -511,7 +511,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::TypeConfig                *typeConfig=router.GetTypeConfig();
+  osmscout::TypeConfigRef             typeConfig=router.GetTypeConfig();
 
   //osmscout::ShortestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;

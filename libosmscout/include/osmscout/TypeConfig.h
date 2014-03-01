@@ -434,7 +434,7 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_API TypeConfig
+  class OSMSCOUT_API TypeConfig : public Referencable
   {
   private:
     std::vector<TagInfo>                   tags;
@@ -557,6 +557,8 @@ namespace osmscout {
     bool GetGradeForSurface(const std::string& surface,
                             size_t& grade) const;
   };
+
+  typedef Ref<TypeConfig> TypeConfigRef;
 }
 
 #endif

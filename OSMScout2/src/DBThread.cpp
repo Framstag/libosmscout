@@ -119,8 +119,10 @@ void DBThread::Initialize()
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
 
   if (database.Open(databaseDirectory.toLocal8Bit().data())) {
-    if (database.GetTypeConfig()!=NULL) {
-      styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
+    osmscout::TypeConfigRef typeConfig=database.GetTypeConfig();
+
+    if (typeConfig.Valid()) {
+      styleConfig=new osmscout::StyleConfig(typeConfig);
 
 	  if (!osmscout::LoadStyleConfig(stylesheetFilename.toLocal8Bit().data(),
                                    *styleConfig)) {
@@ -432,7 +434,7 @@ bool DBThread::RenderMap(QPainter& painter,
          finishedMagnification==request.magnification;
 }
 
-osmscout::TypeConfig* DBThread::GetTypeConfig() const
+osmscout::TypeConfigRef DBThread::GetTypeConfig() const
 {
   return database.GetTypeConfig();
 }
@@ -518,7 +520,7 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
     return false;
   }
 
-  osmscout::TypeConfig *typeConfig=router->GetTypeConfig();
+  osmscout::TypeConfigRef typeConfig=router->GetTypeConfig();
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 

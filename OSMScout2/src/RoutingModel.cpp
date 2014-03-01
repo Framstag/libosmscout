@@ -408,13 +408,14 @@ void RoutingListModel::setStartAndTarget(Location* start,
   osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::Way                       routeWay;
   osmscout::Vehicle                   vehicle=osmscout::vehicleCar;//settings->GetRoutingVehicle();
+  osmscout::TypeConfigRef             typeConfig=DBThread::GetInstance()->GetTypeConfig();
 
   if (vehicle==osmscout::vehicleFoot) {
-    routingProfile.ParametrizeForFoot(*DBThread::GetInstance()->GetTypeConfig(),
+    routingProfile.ParametrizeForFoot(*typeConfig,
                                       5.0);
   }
   else if (vehicle==osmscout::vehicleBicycle) {
-    routingProfile.ParametrizeForBicycle(*DBThread::GetInstance()->GetTypeConfig(),
+    routingProfile.ParametrizeForBicycle(*typeConfig,
                                          20.0);
   }
   else /* car */ {
@@ -422,7 +423,7 @@ void RoutingListModel::setStartAndTarget(Location* start,
 
     GetCarSpeedTable(speedMap);
 
-    routingProfile.ParametrizeForCar(*DBThread::GetInstance()->GetTypeConfig(),
+    routingProfile.ParametrizeForCar(*typeConfig,
                                      speedMap,
                                      160.0);
   }

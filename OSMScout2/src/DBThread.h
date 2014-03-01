@@ -123,7 +123,7 @@ public:
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);
 
-  osmscout::TypeConfig* GetTypeConfig() const;
+  osmscout::TypeConfigRef GetTypeConfig() const;
 
   bool GetNodeByOffset(osmscout::FileOffset offset,
                        osmscout::NodeRef& node) const;

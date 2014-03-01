@@ -100,8 +100,7 @@ namespace osmscout {
      junctionDataFile(Router::FILENAME_INTERSECTIONS_DAT,
                       Router::FILENAME_INTERSECTIONS_IDX,
                       0,
-                      6000),
-     typeConfig(NULL)
+                      6000)
   {
     // no code
   }
@@ -111,8 +110,6 @@ namespace osmscout {
     if (isOpen) {
       Close();
     }
-
-    delete typeConfig;
   }
 
   std::string Router::GetDataFilename(Vehicle vehicle) const
@@ -162,24 +159,18 @@ namespace osmscout {
 
     if (!LoadTypeData(path,*typeConfig)) {
       std::cerr << "Cannot load 'types.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!areaDataFile.Open(path,
                            FileScanner::LowMemRandom,false)) {
       std::cerr << "Cannot open 'areas.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!wayDataFile.Open(path,
                           FileScanner::LowMemRandom,false)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -187,8 +178,6 @@ namespace osmscout {
                                 FileScanner::FastRandom,true,
                                 FileScanner::FastRandom,true)) {
       std::cerr << "Cannot open 'route.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -218,7 +207,7 @@ namespace osmscout {
     wayDataFile.FlushCache();
   }
 
-  TypeConfig* Router::GetTypeConfig() const
+  TypeConfigRef Router::GetTypeConfig() const
   {
     return typeConfig;
   }

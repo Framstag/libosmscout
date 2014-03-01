@@ -187,7 +187,7 @@ namespace osmscout {
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile; //! Cached access to the 'route.dat' file
     IndexedDataFile<Id,Intersection>     junctionDataFile;  //! Cached access to the 'junctions.dat' file
 
-    TypeConfig                           *typeConfig;       //! Type config for the currently opened map
+    TypeConfigRef                        typeConfig;       //! Type config for the currently opened map
 
   private:
     std::string GetDataFilename(Vehicle vehicle) const;
@@ -253,7 +253,7 @@ namespace osmscout {
 
     void FlushCache();
 
-    TypeConfig* GetTypeConfig() const;
+    TypeConfigRef GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,
                         const ObjectFileRef& startObject,

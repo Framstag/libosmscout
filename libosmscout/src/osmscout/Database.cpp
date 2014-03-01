@@ -207,15 +207,14 @@ namespace osmscout {
      areaDataFile("areas.dat",
                   parameter.GetAreaCacheSize()),
      wayDataFile("ways.dat",
-                  parameter.GetWayCacheSize()),
-     typeConfig(NULL)
+                  parameter.GetWayCacheSize())
   {
     // no code
   }
 
   Database::~Database()
   {
-    delete typeConfig;
+    // no code
   }
 
   bool Database::Open(const std::string& path)
@@ -228,8 +227,6 @@ namespace osmscout {
 
     if (!LoadTypeData(path,*typeConfig)) {
       std::cerr << "Cannot load 'types.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -238,8 +235,6 @@ namespace osmscout {
 
     if (!scanner.Open(file,FileScanner::Normal,true)) {
       std::cerr << "Cannot open 'bounding.dat'" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -255,8 +250,6 @@ namespace osmscout {
 
     if (scanner.HasError() || !scanner.Close()) {
       std::cerr << "Error while reading/closing '" << file << "'" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -269,8 +262,6 @@ namespace osmscout {
                            FileScanner::LowMemRandom,
                            true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -278,8 +269,6 @@ namespace osmscout {
                            FileScanner::LowMemRandom,
                            true)) {
       std::cerr << "Cannot open 'areas.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -287,58 +276,42 @@ namespace osmscout {
                           FileScanner::LowMemRandom,
                           true)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!optimizeAreasLowZoom.Open(path)) {
       std::cerr << "Cannot load area low zoom optimizations!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
 
     if (!optimizeWaysLowZoom.Open(path)) {
       std::cerr << "Cannot load ways low zoom optimizations!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!areaAreaIndex.Load(path)) {
       std::cerr << "Cannot load area area index!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!areaNodeIndex.Load(path)) {
       std::cerr << "Cannot load area node index!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!areaWayIndex.Load(path)) {
       std::cerr << "Cannot load area way index!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!waterIndex.Load(path)) {
       std::cerr << "Cannot load water index!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
     if (!cityStreetIndex.Load(path)) {
       std::cerr << "Cannot load city street index!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
       return false;
     }
 
@@ -380,7 +353,7 @@ namespace osmscout {
     return path;
   }
 
-  TypeConfig* Database::GetTypeConfig() const
+  TypeConfigRef Database::GetTypeConfig() const
   {
     return typeConfig;
   }

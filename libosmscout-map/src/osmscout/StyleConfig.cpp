@@ -1274,7 +1274,7 @@ namespace osmscout {
     return true;
   }
 
-  StyleConfig::StyleConfig(TypeConfig* typeConfig)
+  StyleConfig::StyleConfig(const TypeConfigRef& typeConfig)
    : typeConfig(typeConfig)
   {
     wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
@@ -1768,7 +1768,7 @@ namespace osmscout {
     PostprocessPatternId();
   }
 
-  TypeConfig* StyleConfig::GetTypeConfig() const
+  TypeConfigRef StyleConfig::GetTypeConfig() const
   {
     return typeConfig;
   }

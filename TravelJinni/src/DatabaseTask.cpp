@@ -368,8 +368,10 @@ bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
 
   f.SetNativePath(filename);
 
-  if (database->GetTypeConfig()!=NULL) {
-    styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
+  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+
+  if (typeConfig.Valid()) {
+    styleConfig=new osmscout::StyleConfig(typeConfig);
 
     if (osmscout::LoadStyleConfig(Lum::Base::WStringToString(f.GetPath()).c_str(),
                                   *styleConfig)) {

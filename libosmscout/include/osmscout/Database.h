@@ -172,7 +172,7 @@ namespace osmscout {
     OptimizeAreasLowZoom  optimizeAreasLowZoom; //! Optimized data for low zoom situations
     OptimizeWaysLowZoom   optimizeWaysLowZoom;  //! Optimized data for low zoom situations
 
-    TypeConfig            *typeConfig;          //! Type config for the currently opened map
+    TypeConfigRef         typeConfig;           //! Type config for the currently opened map
 
   public:
     struct OSMSCOUT_API ReverseLookupResult
@@ -246,7 +246,7 @@ namespace osmscout {
     void FlushCache();
 
     std::string GetPath() const;
-    TypeConfig* GetTypeConfig() const;
+    TypeConfigRef GetTypeConfig() const;
 
     bool GetBoundingBox(double& minLat,double& minLon,
                         double& maxLat,double& maxLon) const;

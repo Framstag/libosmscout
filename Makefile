@@ -14,6 +14,7 @@ programs = libosmscout \
            Demos \
            TravelJinni \
            OSMScout \
+           OSMScout2 \
            Tests
 
 all:

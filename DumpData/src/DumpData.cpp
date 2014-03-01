@@ -255,7 +255,7 @@ static void DumpTags(const osmscout::TypeConfig* typeConfig,
 
 static void DumpNodeAttributes(const osmscout::TypeId& type,
                                const osmscout::NodeAttributes& attributes,
-                               const osmscout::TypeConfig* typeConfig,
+                               const osmscout::TypeConfigRef& typeConfig,
                                size_t indent)
 {
   if (type!=osmscout::typeIgnore) {
@@ -290,7 +290,7 @@ static void DumpNodeAttributes(const osmscout::TypeId& type,
   }
 }
 
-static void DumpNode(const osmscout::TypeConfig* typeConfig,
+static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
                      const osmscout::NodeRef node,
                      osmscout::Id id)
 {
@@ -312,7 +312,7 @@ static void DumpNode(const osmscout::TypeConfig* typeConfig,
 
 static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
                                       const osmscout::AreaAttributes& attributes,
-                                      const osmscout::TypeConfig* typeConfig,
+                                      const osmscout::TypeConfigRef& typeConfig,
                                       size_t indent)
 {
   if (type!=osmscout::typeIgnore) {
@@ -355,7 +355,7 @@ static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
 }
 
 static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
-                              const osmscout::TypeConfig* typeConfig,
+                              const osmscout::TypeConfigRef& typeConfig,
                               size_t indent)
 {
   if (attributes.GetType()!=osmscout::typeIgnore) {
@@ -483,7 +483,7 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
   }
 }
 
-static void DumpWay(const osmscout::TypeConfig* typeConfig,
+static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
                     const osmscout::WayRef way,
                     osmscout::Id id)
 {
@@ -513,7 +513,7 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-static void DumpArea(const osmscout::TypeConfig* typeConfig,
+static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
                      const osmscout::AreaRef area,
                      osmscout::Id id)
 {
