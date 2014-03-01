@@ -236,8 +236,9 @@ namespace osmscout {
     class OSMSCOUT_API AddressResult
     {
     public:
-      LocationRef location;
-      AddressRef  address;
+      AdminRegionRef adminRegion;
+      LocationRef    location;
+      AddressRef     address;
     };
 
   private:
@@ -250,7 +251,8 @@ namespace osmscout {
   public:
     AddressListVisitor(size_t limit);
 
-    bool Visit(const Location& location,
+    bool Visit(const AdminRegion& adminRegion,
+               const Location& location,
                const Address& address);
   };
 
@@ -260,9 +262,10 @@ namespace osmscout {
     class OSMSCOUT_API AddressResult
     {
     public:
-      LocationRef location;
-      AddressRef  address;
-      bool        isMatch;
+      AdminRegionRef adminRegion;
+      LocationRef    location;
+      AddressRef     address;
+      bool           isMatch;
     };
 
   private:

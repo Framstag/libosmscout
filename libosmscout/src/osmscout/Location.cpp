@@ -206,11 +206,13 @@ namespace osmscout {
     // no code
   }
 
-  bool AddressListVisitor::Visit(const Location& location,
+  bool AddressListVisitor::Visit(const AdminRegion& adminRegion,
+                                 const Location& location,
                                  const Address& address)
   {
     AddressResult result;
 
+    result.adminRegion=new AdminRegion(adminRegion);
     result.location=new Location(location);
     result.address=new Address(address);
 
@@ -256,6 +258,7 @@ namespace osmscout {
     if (match || candidate) {
       AddressResult result;
 
+      result.adminRegion=new AdminRegion(adminRegion);
       result.location=new Location(location);
       result.address=new Address(address);
       result.isMatch=match;
