@@ -116,4 +116,22 @@ Rectangle {
             }
         }
     }
+
+    Row {
+        id: statusBar
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 30
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        spacing: 10
+
+        Rectangle {
+            color: "#ffffff"
+            opacity: 0.5
+            Text {
+                id: zoomLevelLabel
+                text: qsTr("Zoom level: ")+mapView.zoomLevelName+" ["+mapView.zoomLevel+"]"
+            }
+        }
+    }
 }
