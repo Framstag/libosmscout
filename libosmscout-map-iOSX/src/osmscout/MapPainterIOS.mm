@@ -433,6 +433,7 @@ namespace osmscout {
                                             const Symbol& symbol,
                                             double space,
                                             size_t transStart, size_t transEnd){
+        
         double lineLength=pathLength(transStart, transEnd);
         CGContextSaveGState(cg);
         
@@ -586,7 +587,6 @@ namespace osmscout {
     /*
      * DrawPrimitivePath()
      */
-    //#define DEBUG_DRAW_POLYGON_IOSX 1
     void MapPainterIOS::DrawPrimitivePath(const Projection& projection,
                                             const MapParameter& parameter,
                                             const DrawPrimitiveRef& p,
@@ -602,18 +602,6 @@ namespace osmscout {
         
         if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
             PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-#ifdef DEBUG_DRAW_POLYGON_IOSX
-            CGContextSaveGState(cg);
-            CGContextSetLineWidth(cg, 1.0);
-            CGContextSetRGBStrokeColor(cg, 1.0, 0, 0, 1);
-            CGContextBeginPath(cg);
-            CGContextMoveToPoint(cg, x, y-10);
-            CGContextAddLineToPoint(cg, x, y+10);
-            CGContextMoveToPoint(cg, x-10, y);
-            CGContextAddLineToPoint(cg, x+10,y);
-            CGContextDrawPath(cg, kCGPathStroke);
-            CGContextRestoreGState(cg);
-#endif
             CGContextBeginPath(cg);
             for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
                  pixel!=polygon->GetCoords().end();
@@ -659,7 +647,6 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const Symbol& symbol,
                     double x, double y){
-        
         double minX;
         double minY;
         double maxX;
@@ -719,7 +706,7 @@ namespace osmscout {
         } else {
             CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*dash.size());
             for (size_t i=0; i<dash.size(); i++) {
-                dashes[i] = dash[i];
+                dashes[i] = dash[i]*width;
             }
             CGContextSetLineDash(cg, 0.0, dashes, dash.size());
             free(dashes); dashes = NULL;
@@ -787,7 +774,7 @@ namespace osmscout {
             else {
                 CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*fillStyle.GetBorderDash().size());
                 for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
-                    dashes[i] = fillStyle.GetBorderDash()[i];
+                    dashes[i] = fillStyle.GetBorderDash()[i]*borderWidth;
                 }
                 CGContextSetLineDash(cg, 0.0, dashes, fillStyle.GetBorderDash().size());
                 free(dashes); dashes = NULL;
@@ -818,7 +805,7 @@ namespace osmscout {
         else {
             CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*style.GetDash().size());
             for (size_t i=0; i<style.GetDash().size(); i++) {
-                dashes[i] = style.GetDash()[i];
+                dashes[i] = style.GetDash()[i]*lineWidth;
             }
             CGContextSetLineDash(cg, 0.0, dashes, style.GetDash().size());
             free(dashes); dashes = NULL;
