@@ -267,6 +267,7 @@ namespace osmscout {
     TypeId                                      areaType=typeIgnore;
     TypeId                                      wayType=typeIgnore;
     int                                         isArea=0; // 0==unknown, 1==true, -1==false
+    bool                                        isCoastlineArea=false;
     std::map<TagId,std::string>::const_iterator areaTag;
     std::map<TagId,std::string>::const_iterator naturalTag;
     RawWay                                      way;
@@ -297,6 +298,12 @@ namespace osmscout {
     if (naturalTag!=tagMap.end() &&
         naturalTag->second=="coastline") {
       isCoastline=true;
+    }
+
+    if (isCoastline) {
+      isCoastlineArea=nodes.size()>3 &&
+                      (nodes.front()==nodes.back() ||
+                       isArea==1);
     }
 
     typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
@@ -380,7 +387,7 @@ namespace osmscout {
       RawCoastline coastline;
 
       coastline.SetId(way.GetId());
-      coastline.SetType(way.IsArea());
+      coastline.SetType(isCoastlineArea);
       coastline.SetNodes(way.GetNodes());
 
       coastline.Write(coastlineWriter);
