@@ -30,6 +30,8 @@ class MapWidget : public QQuickPaintedItem
   Q_OBJECT
   Q_PROPERTY(double lat READ GetLat)
   Q_PROPERTY(double lon READ GetLon)
+  Q_PROPERTY(int zoomLevel READ zoomLevel NOTIFY zoomLevelChanged)
+  Q_PROPERTY(QString zoomLevelName READ zoomLevelName NOTIFY zoomLevelNameChanged)
   Q_PROPERTY(QString stylesheetFilename READ stylesheetFilename NOTIFY stylesheetFilenameChanged)
 
 private:
@@ -48,6 +50,8 @@ signals:
   void TriggerMapRenderingSignal();
   void latChanged();
   void lonChanged();
+  void zoomLevelChanged();
+  void zoomLevelNameChanged();
   void stylesheetFilenameChanged();
 
 public slots:
@@ -62,6 +66,7 @@ public slots:
   void showCoordinates(double lat, double lon);
   void showLocation(Location* location);
   void reloadStyle();
+  void reloadTmpStyle();
 
 private:
   void TriggerMapRendering();
@@ -81,6 +86,13 @@ public:
   {
       return lon;
   }
+
+  inline double zoomLevel() const
+  {
+      return magnification.GetLevel();
+  }
+
+  QString zoomLevelName();
 
   QString stylesheetFilename();
 

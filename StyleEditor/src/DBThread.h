@@ -84,7 +84,7 @@ public slots:
   void TriggerMapRendering();
   void Initialize();
   void Finalize();
-  void ReloadStyle();
+  void ReloadStyle(const QString &suffix="");
 
 private:
   SettingsRef                  settings;

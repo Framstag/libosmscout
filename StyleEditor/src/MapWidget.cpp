@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#define TMP_SUFFIX ".tmp"
+
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
       requestNewMap(true)
@@ -159,14 +161,27 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void MapWidget::wheelEvent(QWheelEvent* event)
 {
-    int numDegrees=event->delta()/8;
-    int numSteps=numDegrees/15;
 
-    if (numSteps>=0) {
-        zoomIn(numSteps*1.35);
+    QPoint numPixels = event->pixelDelta();
+    QPoint numDegrees = event->angleDelta() / 8;
+    int steps = 0;
+
+   if (!numPixels.isNull()) {
+        steps = numPixels.y()>0 ? numPixels.manhattanLength() : -numPixels.manhattanLength();
+
+    } else if (!numDegrees.isNull()) {
+        QPoint numSteps = numDegrees / 15;
+        steps = numSteps.y()>0 ? numSteps.manhattanLength() : -numSteps.manhattanLength();
+    }
+
+    if(steps==0){
+        return;
+    }
+    if (steps>=0) {
+        zoomIn(steps*1.1);
     }
     else {
-        zoomOut(-numSteps*1.35);
+        zoomOut(-steps*1.1);
     }
 
     event->accept();
@@ -202,6 +217,8 @@ void MapWidget::zoomIn(double zoomFactor)
     }
 
     TriggerMapRendering();
+    emit zoomLevelChanged();
+    emit zoomLevelNameChanged();
 }
 
 void MapWidget::zoomOut(double zoomFactor)
@@ -214,6 +231,45 @@ void MapWidget::zoomOut(double zoomFactor)
     }
 
     TriggerMapRendering();
+    emit zoomLevelChanged();
+    emit zoomLevelNameChanged();
+}
+
+QString MapWidget::zoomLevelName() {
+    double level = magnification.GetMagnification();
+    if(level>=osmscout::Magnification::magWorld && level < osmscout::Magnification::magContinent){
+        return "World";
+    } else if(level>=osmscout::Magnification::magContinent && level < osmscout::Magnification::magState){
+        return "Continent";
+    } else if(level>=osmscout::Magnification::magState && level < osmscout::Magnification::magStateOver){
+        return "State";
+    } else if(level>=osmscout::Magnification::magStateOver && level < osmscout::Magnification::magCounty){
+        return "StateOver";
+    } else if(level>=osmscout::Magnification::magCounty && level < osmscout::Magnification::magRegion){
+        return "County";
+    } else if(level>=osmscout::Magnification::magRegion && level < osmscout::Magnification::magProximity){
+        return "Region";
+    } else if(level>=osmscout::Magnification::magProximity && level < osmscout::Magnification::magCityOver){
+        return "Proximity";
+    } else if(level>=osmscout::Magnification::magCityOver && level < osmscout::Magnification::magCity){
+        return "CityOver";
+    } else if(level>=osmscout::Magnification::magCity && level < osmscout::Magnification::magSuburb){
+        return "City";
+    } else if(level>=osmscout::Magnification::magSuburb && level < osmscout::Magnification::magDetail){
+        return "Suburb";
+    } else if(level>=osmscout::Magnification::magDetail && level < osmscout::Magnification::magClose){
+        return "Detail";
+    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magVeryClose){
+        return "Close";
+    } else if(level>=osmscout::Magnification::magVeryClose && level < osmscout::Magnification::magBlock){
+        return "VeryClose";
+    } else if(level>=osmscout::Magnification::magBlock && level < osmscout::Magnification::magStreet){
+        return "Block";
+    } else if(level>=osmscout::Magnification::magStreet && level < osmscout::Magnification::magHouse){
+        return "Street";
+    } else if(level>=osmscout::Magnification::magHouse){
+        return "House";
+    }
 }
 
 void MapWidget::left()
@@ -344,5 +400,11 @@ void MapWidget::showLocation(Location* location)
 void MapWidget::reloadStyle() {
     DBThread* dbThread=DBThread::GetInstance();
     dbThread->ReloadStyle();
+    TriggerMapRendering();
+}
+
+void MapWidget::reloadTmpStyle() {
+    DBThread* dbThread=DBThread::GetInstance();
+    dbThread->ReloadStyle(TMP_SUFFIX);
     TriggerMapRendering();
 }

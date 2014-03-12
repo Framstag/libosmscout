@@ -42,9 +42,6 @@ namespace osmscout {
         for(std::vector<Image>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
             CGImageRelease(*image);
         }
-        for(std::vector<CGPatternRef>::const_iterator p=patterns.begin(); p<patterns.end();p++){
-            CGPatternRelease(*p);
-        }
         for(std::map<size_t,Font *>::const_iterator f=fonts.begin(); f!=fonts.end();f++){
             #if !__has_feature(objc_arc)
             [f->second release];
@@ -154,7 +151,7 @@ namespace osmscout {
         CGRect rect = CGRectMake(0, 0, CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));
         CGContextDrawImage(cg, rect, imgRef);
     }
-        
+    
     static CGPatternCallbacks patternCallbacks = {
       0, &DrawPattern,NULL
     };
@@ -173,8 +170,8 @@ namespace osmscout {
         
         size_t idx=style.GetPatternId()-1;
         
-        if (idx<patterns.size() &&
-            patterns[idx]) {
+        if (idx<patternImages.size() &&
+            patternImages[idx]) {
 
             return true;
         }
@@ -190,8 +187,6 @@ namespace osmscout {
             NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
 #endif
             if (image) {
-                NSInteger imgWidth = [image size].width;
-                NSInteger imgHeight = [image size].height;
 #if TARGET_OS_IPHONE
                 CGImageRef imgRef= [image CGImage];
 #else
@@ -206,11 +201,7 @@ namespace osmscout {
                 [image release];
                 patternImages.resize(patternImages.size()+1,imgRef);
                 style.SetPatternId(patternImages.size());
-                CGPatternRef pattern = CGPatternCreate(imgRef, CGRectMake(0,0, imgWidth, imgHeight), CGAffineTransformIdentity, imgWidth, imgHeight, kCGPatternTilingNoDistortion, true, &patternCallbacks);
-                patterns.resize(patternImages.size(),pattern);
-                
                 //std::cout << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId() << std::endl;
-                
                 return true;
             }
         }
@@ -433,6 +424,7 @@ namespace osmscout {
                                             const Symbol& symbol,
                                             double space,
                                             size_t transStart, size_t transEnd){
+        
         double lineLength=pathLength(transStart, transEnd);
         CGContextSaveGState(cg);
         
@@ -586,7 +578,6 @@ namespace osmscout {
     /*
      * DrawPrimitivePath()
      */
-    //#define DEBUG_DRAW_POLYGON_IOSX 1
     void MapPainterIOS::DrawPrimitivePath(const Projection& projection,
                                             const MapParameter& parameter,
                                             const DrawPrimitiveRef& p,
@@ -602,18 +593,6 @@ namespace osmscout {
         
         if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
             PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-#ifdef DEBUG_DRAW_POLYGON_IOSX
-            CGContextSaveGState(cg);
-            CGContextSetLineWidth(cg, 1.0);
-            CGContextSetRGBStrokeColor(cg, 1.0, 0, 0, 1);
-            CGContextBeginPath(cg);
-            CGContextMoveToPoint(cg, x, y-10);
-            CGContextAddLineToPoint(cg, x, y+10);
-            CGContextMoveToPoint(cg, x-10, y);
-            CGContextAddLineToPoint(cg, x+10,y);
-            CGContextDrawPath(cg, kCGPathStroke);
-            CGContextRestoreGState(cg);
-#endif
             CGContextBeginPath(cg);
             for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
                  pixel!=polygon->GetCoords().end();
@@ -659,7 +638,6 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const Symbol& symbol,
                     double x, double y){
-        
         double minX;
         double minY;
         double maxX;
@@ -719,7 +697,7 @@ namespace osmscout {
         } else {
             CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*dash.size());
             for (size_t i=0; i<dash.size(); i++) {
-                dashes[i] = dash[i];
+                dashes[i] = dash[i]*width;
             }
             CGContextSetLineDash(cg, 0.0, dashes, dash.size());
             free(dashes); dashes = NULL;
@@ -752,8 +730,9 @@ namespace osmscout {
      *          const FillStyle& fillStyle)
      */
     void MapPainterIOS::SetFill(const Projection& projection,
-                                        const MapParameter& parameter,
-                                        const FillStyle& fillStyle) {
+                                const MapParameter& parameter,
+                                const FillStyle& fillStyle,
+                                CGFloat xOffset, CGFloat yOffset) {
         double borderWidth=ConvertWidthToPixel(parameter,fillStyle.GetBorderWidth());
 
         if (fillStyle.HasPattern() &&
@@ -764,8 +743,13 @@ namespace osmscout {
             CGColorSpaceRelease (sp);
             CGFloat components = 1.0;
             size_t patternIndex = fillStyle.GetPatternId()-1;
-            CGPatternRef pattern = patterns[patternIndex];
+            CGFloat imgWidth = CGImageGetWidth(patternImages[patternIndex]);
+            CGFloat imgHeight = CGImageGetHeight(patternImages[patternIndex]);
+            xOffset = remainder(xOffset, imgWidth);
+            yOffset = remainder(yOffset, imgHeight);
+            CGPatternRef pattern = CGPatternCreate(patternImages[patternIndex], CGRectMake(0,0, imgWidth, imgHeight), CGAffineTransformTranslate(CGAffineTransformIdentity, xOffset, yOffset), imgWidth, imgHeight, kCGPatternTilingNoDistortion, true, &patternCallbacks);
             CGContextSetFillPattern(cg, pattern, &components);
+            CGPatternRelease(pattern);
         } else if (fillStyle.GetFillColor().IsVisible()) {
 
             CGContextSetRGBFillColor(cg, fillStyle.GetFillColor().GetR(), fillStyle.GetFillColor().GetG(),
@@ -787,7 +771,7 @@ namespace osmscout {
             else {
                 CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*fillStyle.GetBorderDash().size());
                 for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
-                    dashes[i] = fillStyle.GetBorderDash()[i];
+                    dashes[i] = fillStyle.GetBorderDash()[i]*borderWidth;
                 }
                 CGContextSetLineDash(cg, 0.0, dashes, fillStyle.GetBorderDash().size());
                 free(dashes); dashes = NULL;
@@ -818,7 +802,7 @@ namespace osmscout {
         else {
             CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*style.GetDash().size());
             for (size_t i=0; i<style.GetDash().size(); i++) {
-                dashes[i] = style.GetDash()[i];
+                dashes[i] = style.GetDash()[i]*lineWidth;
             }
             CGContextSetLineDash(cg, 0.0, dashes, style.GetDash().size());
             free(dashes); dashes = NULL;
@@ -865,9 +849,8 @@ namespace osmscout {
             }
         }
         
-        SetFill(projection,
-                parameter,
-                *area.fillStyle);
+        SetFill(projection, parameter, *area.fillStyle,
+                coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY());
         
         CGContextDrawPath(cg,  kCGPathEOFillStroke);
         CGContextRestoreGState(cg);

@@ -20,12 +20,17 @@ Rectangle {
         mapView.reloadStyle()
     }
 
+    function reloadTmpStyle() {
+        mapView.reloadTmpStyle()
+    }
+
+
     Map {
         id: mapView
         anchors.fill: parent
 
         focus: true
-
+/*
         Keys.onPressed: {
             if (event.key === Qt.Key_Plus) {
                 mapView.zoomIn(2.0)
@@ -46,7 +51,7 @@ Rectangle {
                 mapView.right()
             }
         }
-
+*/
         // Use PinchArea for multipoint zoom in/out?
     }
 
@@ -108,6 +113,24 @@ Rectangle {
 
             onClicked: {
                 mapView.zoomOut(2.0)
+            }
+        }
+    }
+
+    Row {
+        id: statusBar
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 30
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        spacing: 10
+
+        Rectangle {
+            color: "#ffffff"
+            opacity: 0.5
+            Text {
+                id: zoomLevelLabel
+                text: qsTr("Zoom level: ")+mapView.zoomLevelName+" ["+mapView.zoomLevel+"]"
             }
         }
     }

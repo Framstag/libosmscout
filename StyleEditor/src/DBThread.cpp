@@ -116,7 +116,7 @@ void DBThread::Initialize()
   QStringList cmdLineArgs = QApplication::arguments();
   QString databaseDirectory = cmdLineArgs.size() > 1 ? cmdLineArgs.at(1) : QDir::currentPath();
   m_stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
-  iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
+  iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons" + QDir::separator();
   emit stylesheetFilenameChanged();
 
   if (database.Open(databaseDirectory.toLocal8Bit().data())) {
@@ -159,7 +159,7 @@ QString DBThread::stylesheetFilename(){
     return m_stylesheetFilename;
 }
 
-void DBThread::ReloadStyle(){
+void DBThread::ReloadStyle(const QString &suffix){
     if(m_stylesheetFilename.isNull()){
         return;
     }
@@ -167,7 +167,7 @@ void DBThread::ReloadStyle(){
         delete styleConfig;
     }
     styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
-    if (!osmscout::LoadStyleConfig(m_stylesheetFilename.toLocal8Bit().data(),
+    if (!osmscout::LoadStyleConfig((m_stylesheetFilename+suffix).toLocal8Bit().data(),
                                    *styleConfig)) {
         delete styleConfig;
         styleConfig=NULL;

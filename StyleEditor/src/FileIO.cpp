@@ -41,8 +41,15 @@ void FileIO::read()
     if ( file.open(QIODevice::ReadOnly) ) {
         QString line;
         QTextStream t( &file );
+        QVariant length = m_target->property("length");
         QVariant returnedValue;
         bool ret;
+        if(length>0){
+            ret = QMetaObject::invokeMethod(m_target, "remove",
+                                            Q_RETURN_ARG(QVariant, returnedValue),
+                                            Q_ARG(QVariant, QVariant(0)),
+                                            Q_ARG(QVariant, length));
+        }
         do {
             line = t.readLine();
             line.replace("<","&lt;").replace(">","&gt;").replace(" ","&nbsp;").replace("\t","        ");
@@ -66,15 +73,13 @@ void FileIO::read()
     }
 }
 
-bool FileIO::write()
+bool FileIO::write(const QString &fileName)
 {
-    if (m_source.isEmpty()){
-        return false;
-    } else if (m_target == 0){
+    if (m_target == 0){
         return false;
     }
 
-    QFile file(m_source);
+    QFile file(fileName);
     if (!file.open(QFile::WriteOnly | QFile::Truncate))
         return false;
 
@@ -92,6 +97,22 @@ bool FileIO::write()
     file.close();
 
     return true;
+}
+
+bool FileIO::write()
+{
+    if (m_source.isEmpty()){
+        return false;
+    }
+    return write(m_source);
+}
+
+bool FileIO::writeTmp()
+{
+    if (m_source.isEmpty()){
+        return false;
+    }
+    return write(m_source+TMP_SUFFIX);
 }
 
 void FileIO::setTarget(QQuickItem *target)
