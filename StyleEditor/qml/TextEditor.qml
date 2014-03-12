@@ -8,11 +8,47 @@ import "custom"
 
 Rectangle {
     property alias source: styleFile.source
+    property alias selectedText: textArea.selectedText
+    property alias searchText: searchText.text
 
     property MapControl map
 
     width:  300
     height: 200
+
+    function selectText(index, length){
+        textArea.cursorPosition=index;
+        textArea.select(index, index+length)
+        textArea.forceActiveFocus()
+    }
+
+    function findNext(text) {
+        if(text.length>0){
+            var foundIndex = textArea.getText(0, textArea.length).indexOf(text, textArea.cursorPosition);
+            if(foundIndex>0){
+                selectText(foundIndex, text.length);
+            } else {
+                foundIndex = textArea.getText(0, textArea.length).indexOf(text, 0);
+                if(foundIndex>0){
+                    selectText(foundIndex, text.length);
+                }
+            }
+        }
+    }
+
+    function findPrevious(text) {
+        if(text.length>0){
+            var foundIndex = textArea.getText(0, textArea.length).lastIndexOf(text, textArea.cursorPosition-text.length-1);
+            if(foundIndex>0){
+                selectText(foundIndex, text.length);
+            } else {
+                foundIndex = textArea.getText(0, textArea.length).lastIndexOf(text, textArea.length-1);
+                if(foundIndex>0){
+                    selectText(foundIndex, text.length);
+                }
+            }
+        }
+    }
 
     ToolBar {
         id: toolBar
@@ -71,12 +107,27 @@ Rectangle {
                 Layout.minimumWidth: 40
                 radius: 4
 
-                onEditingFinished: {
-                    var foundIndex = textArea.getText(0, textArea.length).indexOf(text, textArea.cursorPosition);
-                    if(foundIndex>0){
-                        textArea.cursorPosition=foundIndex;
-                        textArea.select(foundIndex, foundIndex+text.length)
-                        textArea.forceActiveFocus()
+                onAccepted: {
+                    findNext(text)
+                }
+            }
+            ToolButton {
+                id: previous
+                action: Action {
+                    text: "<"
+                    shortcut: StandardKey.FindPrevious
+                    onTriggered: {
+                        findPrevious(searchText.text)
+                    }
+                }
+            }
+            ToolButton {
+                id: next
+                action: Action {
+                    text: ">"
+                    shortcut: StandardKey.FindNext
+                    onTriggered: {
+                        findNext(searchText.text)
                     }
                 }
             }

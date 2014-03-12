@@ -20,13 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <QQuickView>
+#include <QQmlApplicationEngine>
 
 #include "Settings.h"
 
 #include "MapWidget.h"
 
-class MainWindow : public QQuickView
+class MainWindow : public QQmlApplicationEngine
 {
   Q_OBJECT
 

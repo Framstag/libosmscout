@@ -14,7 +14,7 @@ Item {
     property alias horizontalAlignment: input.horizontalAlignment
     property alias radius: background.radius
 
-    signal editingFinished
+    signal accepted
 
     height: input.implicitHeight+4
 
@@ -39,8 +39,8 @@ Item {
             background.border.color = focus ? selectedFocusColor : focusColor
         }
 
-        onEditingFinished: {
-            lineEdit.editingFinished()
+        onAccepted: {
+            lineEdit.accepted()
         }
     }
 }

@@ -70,16 +70,12 @@ int main(int argc, char* argv[])
 
   window=new MainWindow(settings,
                         dbThread);
-  window->resize(1200,800);
-  window->setResizeMode(QQuickView::SizeRootObjectToView);
 
   dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
   dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
 
   dbThread->moveToThread(&thread);
   thread.start();
-
-  window->show();
 
   result=app.exec();
 

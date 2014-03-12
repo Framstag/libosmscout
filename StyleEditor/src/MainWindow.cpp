@@ -20,21 +20,14 @@
 #include "MainWindow.h"
 
 #include <QGuiApplication>
-//#include <QMenuBar>
-#include <QQuickItem>
-
 #include "SettingsDialog.h"
 
 MainWindow::MainWindow(const SettingsRef& settings,
                        DBThread *dbThread)
- : settings(settings),
-   dbThread(dbThread)/*,
-   map(new MapWidget(NULL,
-                     dbThread))*/
-{
-  setSource(QUrl::fromLocalFile("qml/main.qml"));
-  setTitle("OSMScout");
-
+ : QQmlApplicationEngine(QUrl::fromLocalFile("qml/main.qml")),
+   settings(settings),
+   dbThread(dbThread)
+{  
   connect(dbThread,
           SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
           this,
