@@ -120,7 +120,7 @@ void DBThread::Initialize()
   emit stylesheetFilenameChanged();
 
   if (database.Open(databaseDirectory.toLocal8Bit().data())) {
-    if (database.GetTypeConfig()!=NULL) {
+    if (database.GetTypeConfig()) {
       styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
 
       if (!osmscout::LoadStyleConfig(m_stylesheetFilename.toLocal8Bit().data(),

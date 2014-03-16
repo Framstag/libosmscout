@@ -178,10 +178,10 @@ void MapWidget::wheelEvent(QWheelEvent* event)
         return;
     }
     if (steps>=0) {
-        zoomIn(steps*1.1);
+        zoomIn(std::max(1.01,0.2*steps));
     }
     else {
-        zoomOut(-steps*1.1);
+        zoomOut(std::max(1.01,0.2*steps));
     }
 
     event->accept();
