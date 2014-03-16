@@ -366,6 +366,12 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<childCount; i++) {
+      FileOffset nextChildOffset;
+
+      if (!scanner.ReadFileOffset(nextChildOffset)) {
+        return false;
+      }
+
       if (!VisitRegionLocationEntries(scanner,
                                       visitor,
                                       recursive,
