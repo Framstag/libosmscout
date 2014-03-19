@@ -33,6 +33,11 @@ namespace osmscout {
     : MapPainter(new CoordBufferImpl<Vertex2D>()),
     coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
     {
+#if TARGET_OS_IPHONE
+        contentScale = [[UIScreen mainScreen] scale];
+#else
+        contentScale = 1.0;
+#endif
     }
         
     MapPainterIOS::~MapPainterIOS(){
@@ -78,7 +83,11 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapData& data,
                                CGContextRef paintCG){
-        this->cg = paintCG;
+
+        cg = paintCG;
+        if(contentScale!=1.0){
+            CGContextScaleCTM(cg, 1/contentScale, 1/contentScale);
+        }
         Draw(styleConfig,
              projection,
              parameter,
@@ -272,6 +281,7 @@ namespace osmscout {
             double           r=style->GetTextColor().GetR();
             double           g=style->GetTextColor().GetG();
             double           b=style->GetTextColor().GetB();
+            
             
             CGContextSaveGState(cg);
             CGContextSetTextDrawingMode(cg, kCGTextFill);
@@ -568,7 +578,9 @@ namespace osmscout {
         assert(idx<images.size());
         assert(images[idx]);
         
-        CGRect rect = CGRectMake(x-CGImageGetWidth(images[idx])/2, CGImageGetHeight(images[idx])-y-1.5*CGImageGetHeight(images[idx]), CGImageGetWidth(images[idx]), CGImageGetHeight(images[idx]));
+        CGFloat w = CGImageGetWidth(images[idx]);
+        CGFloat h = CGImageGetHeight(images[idx]);
+        CGRect rect = CGRectMake(x-w/2, -h/2-y, w, h);
         CGContextSaveGState(cg);
         CGContextScaleCTM(cg, 1.0, -1.0);
         CGContextDrawImage(cg, rect, images[idx]);
@@ -646,7 +658,6 @@ namespace osmscout {
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
         
         CGContextSaveGState(cg);
-        
         for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
              p!=symbol.GetPrimitives().end();
              ++p) {
@@ -687,6 +698,7 @@ namespace osmscout {
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd){
+        
         CGContextSaveGState(cg);
         CGContextSetRGBStrokeColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
         CGContextSetLineWidth(cg, width);
@@ -733,6 +745,7 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const FillStyle& fillStyle,
                                 CGFloat xOffset, CGFloat yOffset) {
+        
         double borderWidth=ConvertWidthToPixel(parameter,fillStyle.GetBorderWidth());
 
         if (fillStyle.HasPattern() &&

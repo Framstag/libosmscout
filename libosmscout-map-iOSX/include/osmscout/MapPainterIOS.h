@@ -46,9 +46,10 @@ namespace osmscout {
     
     class MapPainterIOS : public MapPainter {
     private:
-        CoordBufferImpl<Vertex2D>   *coordBuffer;
-
         CGContextRef                cg;
+        CoordBufferImpl<Vertex2D>   *coordBuffer;
+        CGFloat                     contentScale;
+
         std::vector<Image>          images;         // Cached CGImage for icons
         std::vector<Image>          patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
