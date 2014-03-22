@@ -64,11 +64,15 @@
 
 static Lum::Def::AppInfo info;
 
-static osmscout::StyleConfig *styleConfig;
-static osmscout::Database    *database=NULL;
-static osmscout::RouterRef   router;
-static Lum::Model::ActionRef jobFinishedAction;
-static DatabaseTask          *databaseTask=NULL;
+static osmscout::StyleConfig        *styleConfig;
+
+static osmscout::DatabaseRef        database;
+static osmscout::LocationServiceRef locationService;
+static osmscout::MapServiceRef      mapService;
+static osmscout::RoutingServiceRef  router;
+
+static Lum::Model::ActionRef        jobFinishedAction;
+static DatabaseTask                 *databaseTask=NULL;
 
 class MapControl : public Lum::Object
 {
@@ -697,8 +701,13 @@ public:
     databaseParameter.SetDebugPerformance(true);
 
     database=new osmscout::Database(databaseParameter);
-    router=new osmscout::Router(routerParameter,
-                                osmscout::vehicleCar);
+
+    locationService=new osmscout::LocationService(database);
+    mapService=new osmscout::MapService(database);
+
+    router=new osmscout::RoutingService(database,
+                                        routerParameter,
+                                        osmscout::vehicleCar);
 
     jobFinishedAction=new Lum::Model::Action();
 
@@ -715,6 +724,8 @@ public:
     }
 
     databaseTask=new DatabaseTask(database,
+                                  locationService,
+                                  mapService,
                                   router,
                                   jobFinishedAction);
 
@@ -739,11 +750,14 @@ public:
       router->Close();
     }
 
+    router=NULL;
+
+    locationService=NULL;
+
     if (database->IsOpen()) {
       database->Close();
     }
 
-    delete database;
     database=NULL;
   }
 };

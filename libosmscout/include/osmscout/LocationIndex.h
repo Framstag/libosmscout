@@ -27,10 +27,12 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   /**
+   * \ingroup Database
    * Location index returns objects by names (the name should be changed). You
    * can currently either search for regions like 'cities' or for named locations in
    * areas like 'street in city'.
@@ -39,7 +41,7 @@ namespace osmscout {
    * location. Areas are currently build by scanning administrative boundaries and the
    * various sized city typed locations and areas.
    */
-  class OSMSCOUT_API LocationIndex
+  class OSMSCOUT_API LocationIndex : public Referencable
   {
   public:
     static const char* const FILENAME_LOCATION_IDX;
@@ -107,6 +109,8 @@ namespace osmscout {
 
     void DumpStatistics();
   };
+
+  typedef Ref<LocationIndex> LocationIndexRef;
 }
 
 #endif

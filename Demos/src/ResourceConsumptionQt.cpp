@@ -24,6 +24,8 @@
 #include <QApplication>
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
+
 #include <osmscout/MapPainterQt.h>
 #include <osmscout/StyleConfigLoader.h>
 
@@ -137,17 +139,18 @@ int main(int argc, char* argv[])
   databaseParameter.SetWayCacheSize(0);
   databaseParameter.SetAreaCacheSize(0);
 
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef   database(new osmscout::Database(databaseParameter));
+  osmscout::MapServiceRef mapService(new osmscout::MapService(database));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
   }
 
-  database.DumpStatistics();
+  database->DumpStatistics();
 
-  osmscout::StyleConfig styleConfig(database.GetTypeConfig());
+  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
 
   if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
     std::cerr << "Cannot open style" << std::endl;
@@ -187,18 +190,18 @@ int main(int argc, char* argv[])
 
     osmscout::StopClock dbTimer;
 
-    database.GetObjects(nodeTypes,
-                        wayTypes,
-                        areaTypes,
-                        projection.GetLonMin(),
-                        projection.GetLatMin(),
-                        projection.GetLonMax(),
-                        projection.GetLatMax(),
-                        projection.GetMagnification(),
-                        searchParameter,
-                        data.nodes,
-                        data.ways,
-                        data.areas);
+    mapService->GetObjects(nodeTypes,
+                           wayTypes,
+                           areaTypes,
+                           projection.GetLonMin(),
+                           projection.GetLatMin(),
+                           projection.GetLonMax(),
+                           projection.GetLatMax(),
+                           projection.GetMagnification(),
+                           searchParameter,
+                           data.nodes,
+                           data.ways,
+                           data.areas);
 
     dbTimer.Stop();
 
@@ -213,7 +216,7 @@ int main(int argc, char* argv[])
     renderTimer.Stop();
 
     std::cout << "# DB access time " << dbTimer << " render time: " << renderTimer << std::endl;
-    database.DumpStatistics();
+    database->DumpStatistics();
   }
 
   delete painter;
@@ -223,7 +226,7 @@ int main(int argc, char* argv[])
 
   std::cin.get();
 
-  database.FlushCache();
+  database->FlushCache();
 
   std::cout << "# Press return to end application" << std::endl;
 

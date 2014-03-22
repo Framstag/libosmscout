@@ -31,6 +31,13 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Database
+   *
+   * Access to standard format data files.
+   *
+   * Allows to load data objects by offset using various standard library data structures.
+   */
   template <class N>
   class DataFile : public Referencable
   {
@@ -68,6 +75,7 @@ namespace osmscout {
     bool Open(const std::string& path,
               FileScanner::Mode modeData,
               bool memoryMapedData);
+    bool IsOpen() const;
     bool Close();
 
     bool GetByOffset(const std::vector<FileOffset>& offsets,
@@ -120,6 +128,12 @@ namespace osmscout {
 
     isOpen=scanner.Open(datafilename,modeData,memoryMapedData);
 
+    return isOpen;
+  }
+
+  template <class N>
+  bool DataFile<N>::IsOpen() const
+  {
     return isOpen;
   }
 
@@ -418,6 +432,13 @@ namespace osmscout {
     cache.DumpStatistics(datafile.c_str(),DataCacheValueSizer());
   }
 
+  /**
+   * \ingroup Database
+   *
+   * Extension of DataFile to allow loading data not only by offset but
+   * by id using an additional index file, mapping objects id to object
+   * file offset.
+   */
   template <class I, class N>
   class IndexedDataFile : public DataFile<N>
   {

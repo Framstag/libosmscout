@@ -29,7 +29,7 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
 
-#include <osmscout/Router.h>
+#include <osmscout/RoutingService.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/Intersection.h>
 
@@ -681,32 +681,32 @@ namespace osmscout {
     modules.push_back(new RouteDataGenerator());
 
     /* 23 */
-    modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+Router::FILENAME_INTERSECTIONS_IDX+"'",
+    modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+RoutingService::FILENAME_INTERSECTIONS_IDX+"'",
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                 Router::FILENAME_INTERSECTIONS_DAT),
+                                                                                 RoutingService::FILENAME_INTERSECTIONS_DAT),
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                 Router::FILENAME_INTERSECTIONS_IDX)));
+                                                                                 RoutingService::FILENAME_INTERSECTIONS_IDX)));
 
     /* 24 */
-    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_FOOT_IDX+"'",
+    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_FOOT_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              Router::FILENAME_FOOT_DAT),
+                                                                              RoutingService::FILENAME_FOOT_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              Router::FILENAME_FOOT_IDX)));
+                                                                              RoutingService::FILENAME_FOOT_IDX)));
 
     /* 25 */
-    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_BICYCLE_IDX+"'",
+    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_BICYCLE_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              Router::FILENAME_BICYCLE_DAT),
+                                                                              RoutingService::FILENAME_BICYCLE_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              Router::FILENAME_BICYCLE_IDX)));
+                                                                              RoutingService::FILENAME_BICYCLE_IDX)));
 
     /* 26 */
-    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+Router::FILENAME_CAR_IDX+"'",
+    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_CAR_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              Router::FILENAME_CAR_DAT),
+                                                                              RoutingService::FILENAME_CAR_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              Router::FILENAME_CAR_IDX)));
+                                                                              RoutingService::FILENAME_CAR_IDX)));
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
     /* 27 */

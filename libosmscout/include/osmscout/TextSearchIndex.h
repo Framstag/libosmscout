@@ -31,6 +31,7 @@
 namespace osmscout
 {
   /**
+   \ingroup Database
    A class that allows prefix-based searching
    of text data indexed during import
    */

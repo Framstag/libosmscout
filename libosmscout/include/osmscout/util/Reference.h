@@ -189,7 +189,7 @@ namespace osmscout {
 
   /**
     Ref handles references to object using reference counting semantic. The object of type
-    T is onbly deleted if all references have gone invalid.
+    T is only deleted if all references have gone invalid.
 
     Note that type T must inherit from class Referencable!
   */

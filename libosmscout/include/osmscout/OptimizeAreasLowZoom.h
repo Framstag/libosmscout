@@ -30,10 +30,14 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API OptimizeAreasLowZoom
+  /**
+   * \ingroup Database
+   */
+  class OSMSCOUT_API OptimizeAreasLowZoom : public Referencable
   {
   private:
     struct TypeData
@@ -96,6 +100,8 @@ namespace osmscout {
                   TypeSet& areaTypes,
                   std::vector<AreaRef>& areas) const;
   };
+
+  typedef Ref<OptimizeAreasLowZoom> OptimizeAreasLowZoomRef;
 }
 
 #endif

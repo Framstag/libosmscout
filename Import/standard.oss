@@ -150,7 +150,7 @@ SYMBOL christian_church_cross
    [TYPE _tile_land] AREA {color: @landColor;}
    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
-   //[TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------

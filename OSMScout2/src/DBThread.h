@@ -26,7 +26,9 @@
 #include <QMutex>
 
 #include <osmscout/Database.h>
-#include <osmscout/Router.h>
+#include <osmscout/LocationService.h>
+#include <osmscout/MapService.h>
+#include <osmscout/RoutingService.h>
 #include <osmscout/RoutePostprocessor.h>
 
 #include <osmscout/MapPainterQt.h>
@@ -87,14 +89,18 @@ public slots:
 private:
   SettingsRef                  settings;
   mutable QMutex               mutex;
+
   osmscout::DatabaseParameter  databaseParameter;
-  osmscout::Database           database;
+  osmscout::DatabaseRef        database;
+  osmscout::LocationServiceRef locationService;
+  osmscout::MapServiceRef      mapService;
+  osmscout::RouterParameter    routerParameter;
+  osmscout::RoutingServiceRef  router;
+  osmscout::RoutePostprocessor routePostprocessor;
+
   osmscout::StyleConfig        *styleConfig;
   osmscout::MapData            data;
   osmscout::MapPainterQt       painter;
-  osmscout::RouterParameter    routerParameter;
-  osmscout::RouterRef          router;
-  osmscout::RoutePostprocessor routePostprocessor;
   QString                      iconDirectory;
 
   QImage                       *currentImage;

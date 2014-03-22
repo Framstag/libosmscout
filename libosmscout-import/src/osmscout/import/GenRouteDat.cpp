@@ -22,7 +22,8 @@
 #include <algorithm>
 
 #include <osmscout/ObjectRef.h>
-#include <osmscout/Router.h>
+
+#include <osmscout/RoutingService.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -692,7 +693,7 @@ namespace osmscout {
     FileWriter writer;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     Router::FILENAME_INTERSECTIONS_DAT))) {
+                                     RoutingService::FILENAME_INTERSECTIONS_DAT))) {
       progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
@@ -1769,7 +1770,7 @@ namespace osmscout {
       entry->second.sort(ObjectFileRefByFileOffsetComparator());
     }
 
-    progress.SetAction(std::string("Writing intersection file '")+Router::FILENAME_INTERSECTIONS_DAT+"'");
+    progress.SetAction(std::string("Writing intersection file '")+RoutingService::FILENAME_INTERSECTIONS_DAT+"'");
 
     if (!WriteIntersections(parameter,
                             progress,
@@ -1778,7 +1779,7 @@ namespace osmscout {
     }
 
 
-    progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_FOOT_DAT+"'");
+    progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_FOOT_DAT+"'");
 
 
     WriteRouteGraph(parameter,
@@ -1787,9 +1788,9 @@ namespace osmscout {
                     nodeObjectsMap,
                     restrictions,
                     vehicleFoot,
-                    Router::FILENAME_FOOT_DAT);
+                    RoutingService::FILENAME_FOOT_DAT);
 
-    progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_BICYCLE_DAT+"'");
+    progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_BICYCLE_DAT+"'");
 
 
     WriteRouteGraph(parameter,
@@ -1798,9 +1799,9 @@ namespace osmscout {
                     nodeObjectsMap,
                     restrictions,
                     vehicleBicycle,
-                    Router::FILENAME_BICYCLE_DAT);
+                    RoutingService::FILENAME_BICYCLE_DAT);
 
-    progress.SetAction(std::string("Writing route graph '")+Router::FILENAME_CAR_DAT+"'");
+    progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_CAR_DAT+"'");
 
 
     WriteRouteGraph(parameter,
@@ -1809,7 +1810,7 @@ namespace osmscout {
                     nodeObjectsMap,
                     restrictions,
                     vehicleCar,
-                    Router::FILENAME_CAR_DAT);
+                    RoutingService::FILENAME_CAR_DAT);
 
     // Cleaning up...
 

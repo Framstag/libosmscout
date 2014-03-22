@@ -34,6 +34,7 @@
 namespace osmscout {
 
   /**
+    \ingroup Database
     Numeric index handles an index over instance of class <T> where the index criteria
     is of type <N>, where <N> has a numeric nature (usually Id).
     */

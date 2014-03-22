@@ -22,6 +22,8 @@
 #include <limits>
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
+
 #include <osmscout/MapPainterAgg.h>
 #include <osmscout/StyleConfigLoader.h>
 
@@ -136,15 +138,16 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
   }
 
-  osmscout::StyleConfig styleConfig(database.GetTypeConfig());
+  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
 
   if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
     std::cerr << "Cannot open style" << std::endl;
@@ -245,26 +248,26 @@ int main(int argc, char* argv[])
                        tileHeight);
 
 
-        database.GetObjects(searchParameter,
-                            projection.GetMagnification(),
-                            nodeTypes,
-                            minLon2,
-                            minLat2,
-                            maxLon2,
-                            maxLat2,
-                            data.nodes,
-                            wayTypes,
-                            minLon,
-                            minLat,
-                            maxLon,
-                            maxLat,
-                            data.ways,
-                            areaTypes,
-                            minLon2,
-                            minLat2,
-                            maxLon2,
-                            maxLat2,
-                            data.areas);
+        mapService->GetObjects(searchParameter,
+                               projection.GetMagnification(),
+                               nodeTypes,
+                               minLon2,
+                               minLat2,
+                               maxLon2,
+                               maxLat2,
+                               data.nodes,
+                               wayTypes,
+                               minLon,
+                               minLat,
+                               maxLon,
+                               maxLat,
+                               data.ways,
+                               areaTypes,
+                               minLon2,
+                               minLat2,
+                               maxLon2,
+                               maxLat2,
+                               data.areas);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
                             (x-xTileStart)*tileWidth*3;
@@ -311,7 +314,7 @@ int main(int argc, char* argv[])
     std::cout << "max: " << maxTime << " msec" << std::endl;
   }
 
-  database.Close();
+  database->Close();
 
   return 0;
 }

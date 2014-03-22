@@ -29,6 +29,7 @@
 #include <Lum/OS/Display.h>
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
 #include <osmscout/MapPainter.h>
 
 std::list<Map>       maps;

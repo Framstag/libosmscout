@@ -24,7 +24,7 @@
 #include <list>
 
 #include <osmscout/Database.h>
-#include <osmscout/Router.h>
+#include <osmscout/RoutingService.h>
 #include <osmscout/RoutePostprocessor.h>
 
 #include <osmscout/util/Geometry.h>
@@ -488,9 +488,9 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -502,16 +502,17 @@ int main(int argc, char* argv[])
     routerParameter.SetDebugPerformance(true);
   }
 
-  osmscout::Router          router(routerParameter,
-                                   vehicle);
+  osmscout::RoutingServiceRef router(new osmscout::RoutingService(database,
+                                                                  routerParameter,
+                                                                  vehicle));
 
-  if (!router.Open(map.c_str())) {
+  if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;
 
     return 1;
   }
 
-  osmscout::TypeConfigRef             typeConfig=router.GetTypeConfig();
+  osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
 
   //osmscout::ShortestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;
@@ -539,12 +540,12 @@ int main(int argc, char* argv[])
     std::cout << "Searching for routing node for start location..." << std::endl;
   }
 
-  if (!database.GetClosestRoutableNode(startLat,
-                                       startLon,
-                                       vehicle,
-                                       1000,
-                                       startObject,
-                                       startNodeIndex)) {
+  if (!router->GetClosestRoutableNode(startLat,
+                                      startLon,
+                                      vehicle,
+                                      1000,
+                                      startObject,
+                                      startNodeIndex)) {
     std::cerr << "Error while searching for routing node near start location!" << std::endl;
     return 1;
   }
@@ -557,12 +558,12 @@ int main(int argc, char* argv[])
     std::cout << "Searching for routing node for target location..." << std::endl;
   }
 
-  if (!database.GetClosestRoutableNode(targetLat,
-                                       targetLon,
-                                       vehicle,
-                                       1000,
-                                       targetObject,
-                                       targetNodeIndex)) {
+  if (!router->GetClosestRoutableNode(targetLat,
+                                      targetLon,
+                                      vehicle,
+                                      1000,
+                                      targetObject,
+                                      targetNodeIndex)) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
     return 1;
   }
@@ -571,26 +572,26 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 
-  if (!router.CalculateRoute(routingProfile,
-                             startObject,
-                             startNodeIndex,
-                             targetObject,
-                             targetNodeIndex,
-                             data)) {
+  if (!router->CalculateRoute(routingProfile,
+                              startObject,
+                              startNodeIndex,
+                              targetObject,
+                              targetNodeIndex,
+                              data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
-    router.Close();
+    router->Close();
     return 1;
   }
 
   if (data.IsEmpty()) {
     std::cout << "No Route found!" << std::endl;
 
-    router.Close();
+    router->Close();
 
     return 0;
   }
 
-  router.TransformRouteDataToRouteDescription(data,description);
+  router->TransformRouteDataToRouteDescription(data,description);
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
@@ -632,7 +633,7 @@ int main(int argc, char* argv[])
   std::list<osmscout::Point> points;
 
   if(outputGPX) {
-    if (!router.TransformRouteDataToPoints(data,points)) {
+    if (!router->TransformRouteDataToPoints(data,points)) {
       std::cerr << "Error during route conversion" << std::endl;
     }
     std::cout.precision(8);
@@ -872,7 +873,7 @@ int main(int argc, char* argv[])
     prevNode=node;
   }
 
-  router.Close();
+  router->Close();
 
   return 0;
 }

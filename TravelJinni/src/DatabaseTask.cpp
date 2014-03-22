@@ -55,12 +55,16 @@
 
 #include "Configuration.h"
 
-DatabaseTask::DatabaseTask(osmscout::Database* database,
-                           const osmscout::RouterRef& router,
+DatabaseTask::DatabaseTask(const osmscout::DatabaseRef& database,
+                           const osmscout::LocationServiceRef& locationService,
+                           const osmscout::MapServiceRef& mapService,
+                           const osmscout::RoutingServiceRef& router,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
-   styleConfig(NULL),
+   locationService(locationService),
+   mapService(mapService),
    router(router),
+   styleConfig(NULL),
    finish(false),
    newJob(NULL),
    currentJob(NULL),
@@ -226,26 +230,26 @@ void DatabaseTask::Run()
 
         osmscout::StopClock dataRetrievalTimer;
 
-        database->GetObjects(nodeTypes,
-                             wayTypes,
-                             areaTypes,
-                             projection.GetLonMin(),
-                             projection.GetLatMin(),
-                             projection.GetLonMax(),
-                             projection.GetLatMax(),
-                             projection.GetMagnification(),
-                             searchParameter,
-                             data.nodes,
-                             data.ways,
-                             data.areas);
+        mapService->GetObjects(nodeTypes,
+                               wayTypes,
+                               areaTypes,
+                               projection.GetLonMin(),
+                               projection.GetLatMin(),
+                               projection.GetLonMax(),
+                               projection.GetLatMax(),
+                               projection.GetMagnification(),
+                               searchParameter,
+                               data.nodes,
+                               data.ways,
+                               data.areas);
 
         if (drawParameter.GetRenderSeaLand()) {
-          database->GetGroundTiles(projection.GetLonMin(),
-                                   projection.GetLatMin(),
-                                   projection.GetLonMax(),
-                                   projection.GetLatMax(),
-                                   projection.GetMagnification(),
-                                   data.groundTiles);
+          mapService->GetGroundTiles(projection.GetLonMin(),
+                                     projection.GetLatMin(),
+                                     projection.GetLonMax(),
+                                     projection.GetLatMax(),
+                                     projection.GetMagnification(),
+                                     data.groundTiles);
         }
 
         dataRetrievalTimer.Stop();
@@ -321,7 +325,7 @@ bool DatabaseTask::Open(const std::wstring& path)
     return false;
   }
 
-  if (!router->Open(Lum::Base::WStringToString(p.GetPath()).c_str())) {
+  if (!router->Open()) {
     return false;
   }
 
@@ -430,8 +434,8 @@ bool DatabaseTask::SearchForLocations(const osmscout::LocationSearch& search,
     return false;
   }
 
-  return database->SearchForLocations(search,
-                                      result);
+  return locationService->SearchForLocations(search,
+                                             result);
 }
 
 bool DatabaseTask::CalculateRoute(const osmscout::ObjectFileRef& startObject,

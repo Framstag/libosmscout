@@ -21,6 +21,7 @@
 #include <cstring>
 
 #include <osmscout/Database.h>
+#include <osmscout/LocationService.h>
 
 #include <osmscout/util/String.h>
 
@@ -74,21 +75,23 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
   }
 
-  std::list<osmscout::Database::ReverseLookupResult> result;
+  osmscout::LocationServiceRef locationService(new osmscout::LocationService(database));
 
-  if (database.ReverseLookupObjects(objects,
-                                    result)) {
-    for (std::list<osmscout::Database::ReverseLookupResult>::const_iterator entry=result.begin();
-        entry!=result.end();
-        ++entry) {
+  std::list<osmscout::LocationService::ReverseLookupResult> result;
+
+  if (locationService->ReverseLookupObjects(objects,
+                                            result)) {
+    for (std::list<osmscout::LocationService::ReverseLookupResult>::const_iterator entry=result.begin();
+         entry!=result.end();
+         ++entry) {
       std::cout << entry->object.GetTypeName() << " " << entry->object.GetFileOffset() << " matches";
 
       if (entry->adminRegion.Valid()) {
@@ -114,7 +117,7 @@ int main(int argc, char* argv[])
     std::cerr << "Error while reverse lookup" << std::endl;
   }
 
-  database.Close();
+  database->Close();
 
   return 0;
 }

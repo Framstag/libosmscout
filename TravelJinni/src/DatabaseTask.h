@@ -31,7 +31,9 @@
 #include <Lum/OS/Thread.h>
 
 #include <osmscout/Database.h>
-#include <osmscout/Router.h>
+#include <osmscout/LocationService.h>
+#include <osmscout/MapService.h>
+#include <osmscout/RoutingService.h>
 #include <osmscout/RoutePostprocessor.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
@@ -50,31 +52,34 @@ struct Job
 class DatabaseTask : public Lum::OS::Thread
 {
 private:
-  osmscout::Database        *database;
-  osmscout::StyleConfig     *styleConfig;
-  osmscout::MapData         data;
-  osmscout::RouterRef       router;
+  osmscout::DatabaseRef        database;
+  osmscout::LocationServiceRef locationService;
+  osmscout::MapServiceRef      mapService;
+  osmscout::RoutingServiceRef  router;
+
+  osmscout::StyleConfig        *styleConfig;
+  osmscout::MapData            data;
   osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RoutePostprocessor postprocessor;
-  Lum::OS::Condition        condition;
-  osmscout::MapPainterCairo painter;
+  Lum::OS::Condition           condition;
+  osmscout::MapPainterCairo    painter;
 
-  mutable Lum::OS::Mutex    mutex;
-  bool                      finish;
-  Job                       *newJob;
-  Job                       *currentJob;
-  Job                       *finishedJob;
-  Lum::Model::Action        *jobFinishedAction;
-  cairo_surface_t           *currentSurface;
-  cairo_t                   *currentCairo;
-  size_t                    currentWidth,currentHeight;
-  double                    currentLon,currentLat;
-  osmscout::Magnification   currentMagnification;
-  cairo_surface_t           *finishedSurface;
-  cairo_t                   *finishedCairo;
-  size_t                    finishedWidth,finishedHeight;
-  double                    finishedLon,finishedLat;
-  osmscout::Magnification   finishedMagnification;
+  mutable Lum::OS::Mutex       mutex;
+  bool                         finish;
+  Job                          *newJob;
+  Job                          *currentJob;
+  Job                          *finishedJob;
+  Lum::Model::Action           *jobFinishedAction;
+  cairo_surface_t              *currentSurface;
+  cairo_t                      *currentCairo;
+  size_t                       currentWidth,currentHeight;
+  double                       currentLon,currentLat;
+  osmscout::Magnification      currentMagnification;
+  cairo_surface_t              *finishedSurface;
+  cairo_t                      *finishedCairo;
+  size_t                       finishedWidth,finishedHeight;
+  double                       finishedLon,finishedLat;
+  osmscout::Magnification      finishedMagnification;
 
 private:
   void SignalRedraw();
@@ -82,8 +87,10 @@ private:
 
 
 public:
-  DatabaseTask(osmscout::Database* database,
-               const osmscout::RouterRef& router,
+  DatabaseTask(const osmscout::DatabaseRef& database,
+               const osmscout::LocationServiceRef& locationService,
+               const osmscout::MapServiceRef& mapService,
+               const osmscout::RoutingServiceRef& router,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_ROUTER_H
-#define OSMSCOUT_ROUTER_H
+#ifndef OSMSCOUT_ROUTINGSERVICE_H
+#define OSMSCOUT_ROUTINGSERVICE_H
 
 /*
   This source is part of the libosmscout library
@@ -32,8 +32,7 @@
 #include <osmscout/RouteNode.h>
 
 // Datafiles
-#include <osmscout/AreaDataFile.h>
-#include <osmscout/WayDataFile.h>
+#include <osmscout/Database.h>
 
 // Routing
 #include <osmscout/Intersection.h>
@@ -51,35 +50,37 @@ namespace osmscout {
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
-    Database instance initialisation parameter to influence the behaviour of the database
+    Database instance initialization parameter to influence the behavior of the database
     instance.
 
     The following groups attributes are currently available:
-    * cache sizes.
+    - Switch for showing debug information
     */
   class OSMSCOUT_API RouterParameter
   {
   private:
-    unsigned long wayIndexCacheSize;
-    unsigned long wayCacheSize;
-
     bool          debugPerformance;
 
   public:
     RouterParameter();
 
-    void SetWayIndexCacheSize(unsigned long wayIndexCacheSize);
-    void SetWayCacheSize(unsigned long wayCacheSize);
-
     void SetDebugPerformance(bool debug);
-
-    unsigned long GetWayIndexCacheSize() const;
-    unsigned long GetWayCacheSize() const;
 
     bool IsDebugPerformance() const;
   };
 
-  class OSMSCOUT_API Router : public Referencable
+  /**
+   * \ingroup Service
+   * The RoutingService implements functionality in the context of routing.
+   * The following functions are available:
+   * - Calculation of a route from a start node to a target node
+   * - Transformation of the resulting route to a Way
+   * - Transformation of the resulting route to a simple list of points
+   * - Transformation of the resulting route to a routing description with is the base
+   * for further transformations to a textual or visual description of the route
+   * - Returning the closest routeable node to  given geolocation
+   */
+  class OSMSCOUT_API RoutingService : public Referencable
   {
   private:
     /**
@@ -157,38 +158,43 @@ namespace osmscout {
       }
     };
 
-    typedef std::set<RNodeRef,RNodeCostCompare>              OpenList;
-    typedef std::set<RNodeRef,RNodeCostCompare>::iterator    OpenListRef;
+    typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
+    typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
-    typedef OSMSCOUT_HASHMAP<FileOffset,Router::OpenListRef> OpenMap;
-    typedef OSMSCOUT_HASHMAP<FileOffset,Router::RNodeRef>    CloseMap;
+    typedef OSMSCOUT_HASHMAP<FileOffset,OpenListRef>      OpenMap;
+    typedef OSMSCOUT_HASHMAP<FileOffset,RNodeRef>         CloseMap;
 
   public:
+    //! Relative filename of the intersection data file
     static const char* const FILENAME_INTERSECTIONS_DAT;
+    //! Relative filename of the intersection index file
     static const char* const FILENAME_INTERSECTIONS_IDX;
 
+    //! Relative filename of the routing graph data file for foot
     static const char* const FILENAME_FOOT_DAT;
+    //! Relative filename of the routing graph index file for foot
     static const char* const FILENAME_FOOT_IDX;
 
+    //! Relative filename of the routing graph data file for bicycle
     static const char* const FILENAME_BICYCLE_DAT;
+    //! Relative filename of the routing graph index file for bicycle
     static const char* const FILENAME_BICYCLE_IDX;
 
+    //! Relative filename of the routing graph data file for car
     static const char* const FILENAME_CAR_DAT;
+    //! Relative filename of the routing graph index file for car
     static const char* const FILENAME_CAR_IDX;
 
   private:
+    DatabaseRef                          database;          //! Database object, holding all index and data files
     Vehicle                              vehicle;           //! We are a router for this vehicle
     bool                                 isOpen;            //! true, if opened
     bool                                 debugPerformance;
 
     std::string                          path;              //! Path to the directory containing all files
 
-    AreaDataFile                         areaDataFile;      //! Cached access to the 'areas.dat' file
-    WayDataFile                          wayDataFile;       //! Cached access to the 'ways.dat' file
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile; //! Cached access to the 'route.dat' file
     IndexedDataFile<Id,Intersection>     junctionDataFile;  //! Cached access to the 'junctions.dat' file
-
-    TypeConfigRef                        typeConfig;       //! Type config for the currently opened map
 
   private:
     std::string GetDataFilename(Vehicle vehicle) const;
@@ -242,13 +248,14 @@ namespace osmscout {
                   size_t targetNodeIndex);
 
   public:
-    Router(const RouterParameter& parameter,
-           Vehicle vehicle);
-    virtual ~Router();
+    RoutingService(const DatabaseRef& database,
+                   const RouterParameter& parameter,
+                   Vehicle vehicle);
+    virtual ~RoutingService();
 
     Vehicle GetVehicle() const;
 
-    bool Open(const std::string& path);
+    bool Open();
     bool IsOpen() const;
     void Close();
 
@@ -272,10 +279,19 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
+    bool GetClosestRoutableNode(double lat,
+                                double lon,
+                                const osmscout::Vehicle& vehicle,
+                                double radius,
+                                osmscout::ObjectFileRef& object,
+                                size_t& nodeIndex) const;
+
     void DumpStatistics();
   };
 
-  typedef Ref<Router> RouterRef;
+  //! \ingroup Service
+  //! Reference counted reference to an RoutingService instance
+  typedef Ref<RoutingService> RoutingServiceRef;
 }
 
 #endif

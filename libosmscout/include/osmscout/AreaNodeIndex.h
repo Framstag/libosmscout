@@ -30,6 +30,8 @@
 namespace osmscout {
 
   /**
+    \ingroup Database
+
     AreaWayIndex allows you to find ways and way relations in
     a given area.
 

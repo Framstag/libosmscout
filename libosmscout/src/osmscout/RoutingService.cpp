@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Router.h>
+#include <osmscout/RoutingService.h>
 
 #include <algorithm>
 #include <iostream>
@@ -35,21 +35,9 @@
 namespace osmscout {
 
   RouterParameter::RouterParameter()
-  : wayIndexCacheSize(10000),
-    wayCacheSize(0),
-    debugPerformance(false)
+  : debugPerformance(false)
   {
     // no code
-  }
-
-  void RouterParameter::SetWayIndexCacheSize(unsigned long wayIndexCacheSize)
-  {
-    this->wayIndexCacheSize=wayIndexCacheSize;
-  }
-
-  void RouterParameter::SetWayCacheSize(unsigned long wayCacheSize)
-  {
-    this->wayCacheSize=wayCacheSize;
   }
 
   void RouterParameter::SetDebugPerformance(bool debug)
@@ -57,62 +45,61 @@ namespace osmscout {
     debugPerformance=debug;
   }
 
-  unsigned long RouterParameter::GetWayIndexCacheSize() const
-  {
-    return wayIndexCacheSize;
-  }
-
-  unsigned long RouterParameter::GetWayCacheSize() const
-  {
-    return wayCacheSize;
-  }
-
   bool RouterParameter::IsDebugPerformance() const
   {
     return debugPerformance;
   }
 
-  const char* const Router::FILENAME_INTERSECTIONS_DAT = "intersections.dat";
-  const char* const Router::FILENAME_INTERSECTIONS_IDX = "intersections.idx";
+  const char* const RoutingService::FILENAME_INTERSECTIONS_DAT = "intersections.dat";
+  const char* const RoutingService::FILENAME_INTERSECTIONS_IDX = "intersections.idx";
 
-  const char* const Router::FILENAME_FOOT_DAT          = "routefoot.dat";
-  const char* const Router::FILENAME_FOOT_IDX          = "routefoot.idx";
+  const char* const RoutingService::FILENAME_FOOT_DAT          = "routefoot.dat";
+  const char* const RoutingService::FILENAME_FOOT_IDX          = "routefoot.idx";
 
-  const char* const Router::FILENAME_BICYCLE_DAT       = "routebicycle.dat";
-  const char* const Router::FILENAME_BICYCLE_IDX       = "routebicycle.idx";
+  const char* const RoutingService::FILENAME_BICYCLE_DAT       = "routebicycle.dat";
+  const char* const RoutingService::FILENAME_BICYCLE_IDX       = "routebicycle.idx";
 
-  const char* const Router::FILENAME_CAR_DAT           = "routecar.dat";
-  const char* const Router::FILENAME_CAR_IDX           = "routecar.idx";
+  const char* const RoutingService::FILENAME_CAR_DAT           = "routecar.dat";
+  const char* const RoutingService::FILENAME_CAR_IDX           = "routecar.idx";
 
-  Router::Router(const RouterParameter& parameter,
-                 Vehicle vehicle)
-   : vehicle(vehicle),
+  /**
+   * Create a new instance of the routing service.
+   *
+   * @param database
+   *    A valid reference to a database instance
+   * @param parameter
+   *    An instance to the parameter object holding further paramterization
+   * @param vehicle
+   *    The vehicle to route for (this results in loading a
+   *    routing network for the given vehicle).
+   */
+  RoutingService::RoutingService(const DatabaseRef& database,
+                                 const RouterParameter& parameter,
+                                 Vehicle vehicle)
+   : database(database),
+     vehicle(vehicle),
      isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
-     areaDataFile("areas.dat",
-                  parameter.GetWayCacheSize()),
-     wayDataFile("ways.dat",
-                  parameter.GetWayCacheSize()),
      routeNodeDataFile(GetDataFilename(vehicle),
                        GetIndexFilename(vehicle),
                        0,
                        6000),
-     junctionDataFile(Router::FILENAME_INTERSECTIONS_DAT,
-                      Router::FILENAME_INTERSECTIONS_IDX,
+     junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
+                      RoutingService::FILENAME_INTERSECTIONS_IDX,
                       0,
                       6000)
   {
-    // no code
+    assert(database.Valid());
   }
 
-  Router::~Router()
+  RoutingService::~RoutingService()
   {
     if (isOpen) {
       Close();
     }
   }
 
-  std::string Router::GetDataFilename(Vehicle vehicle) const
+  std::string RoutingService::GetDataFilename(Vehicle vehicle) const
   {
     switch (vehicle) {
     case vehicleFoot:
@@ -128,7 +115,7 @@ namespace osmscout {
     return ""; // make the compiler happy
   }
 
-  std::string Router::GetIndexFilename(Vehicle vehicle) const
+  std::string RoutingService::GetIndexFilename(Vehicle vehicle) const
   {
     switch (vehicle) {
     case vehicleFoot:
@@ -144,35 +131,28 @@ namespace osmscout {
     return ""; // make the compiler happy
   }
 
-  Vehicle Router::GetVehicle() const
+  /**
+   * Returns the vehicle this routing service instance was created for
+   *
+   * @return
+   *    The vehicle
+   */
+  Vehicle RoutingService::GetVehicle() const
   {
     return vehicle;
   }
 
-  bool Router::Open(const std::string& path)
+  /**
+   * Opens the routing service. This loads the routing graph for the given vehicle
+   *
+   * @return
+   *    false on error, else true
+   */
+  bool RoutingService::Open()
   {
     assert(!path.empty());
 
-    this->path=path;
-
-    typeConfig=new TypeConfig();
-
-    if (!LoadTypeData(path,*typeConfig)) {
-      std::cerr << "Cannot load 'types.dat'!" << std::endl;
-      return false;
-    }
-
-    if (!areaDataFile.Open(path,
-                           FileScanner::LowMemRandom,false)) {
-      std::cerr << "Cannot open 'areas.dat'!" << std::endl;
-      return false;
-    }
-
-    if (!wayDataFile.Open(path,
-                          FileScanner::LowMemRandom,false)) {
-      std::cerr << "Cannot open 'ways.dat'!" << std::endl;
-      return false;
-    }
+    this->path=database->GetPath();
 
     if (!routeNodeDataFile.Open(path,
                                 FileScanner::FastRandom,true,
@@ -186,36 +166,56 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::IsOpen() const
+  /**
+   * Returns true, if the routing service has been successfully opened, else false.
+   *
+   * @return
+   *    True, if the routing service has been successfully opened
+   */
+  bool RoutingService::IsOpen() const
   {
     return isOpen;
   }
 
-
-  void Router::Close()
+  /**
+   * Close the routing service
+   */
+  void RoutingService::Close()
   {
     routeNodeDataFile.Close();
-    wayDataFile.Close();
-    areaDataFile.Close();
+
+    if (database->IsOpen()) {
+      database->Close();
+    }
 
     isOpen=false;
   }
 
-  void Router::FlushCache()
+  /**
+   * Flush any available caches
+   */
+  void RoutingService::FlushCache()
   {
-    areaDataFile.FlushCache();
-    wayDataFile.FlushCache();
+    if (database->IsOpen()) {
+      database->FlushCache();
+    }
   }
 
-  TypeConfigRef Router::GetTypeConfig() const
+  /**
+   * Returns the type configuration of the underlying database instance
+   *
+   * @return
+   *    A valid type configuration or null if the database is not valid
+   */
+  TypeConfigRef RoutingService::GetTypeConfig() const
   {
-    return typeConfig;
+    return database->GetTypeConfig();
   }
 
-  void Router::GetClosestForwardRouteNode(const WayRef& way,
-                                          size_t nodeIndex,
-                                          RouteNodeRef& routeNode,
-                                          size_t& routeNodeIndex)
+  void RoutingService::GetClosestForwardRouteNode(const WayRef& way,
+                                                  size_t nodeIndex,
+                                                  RouteNodeRef& routeNode,
+                                                  size_t& routeNodeIndex)
   {
     routeNode=NULL;
 
@@ -230,10 +230,10 @@ namespace osmscout {
     }
   }
 
-  void Router::GetClosestBackwardRouteNode(const WayRef& way,
-                                           size_t nodeIndex,
-                                           RouteNodeRef& routeNode,
-                                           size_t& routeNodeIndex)
+  void RoutingService::GetClosestBackwardRouteNode(const WayRef& way,
+                                                   size_t nodeIndex,
+                                                   RouteNodeRef& routeNode,
+                                                   size_t& routeNodeIndex)
   {
     routeNode=NULL;
 
@@ -255,9 +255,9 @@ namespace osmscout {
     }
   }
 
-  void Router::ResolveRNodeChainToList(const RNodeRef& end,
-                                       const CloseMap& closeMap,
-                                       std::list<RNodeRef>& nodes)
+  void RoutingService::ResolveRNodeChainToList(const RNodeRef& end,
+                                               const CloseMap& closeMap,
+                                               std::list<RNodeRef>& nodes)
   {
     CloseMap::const_iterator current=closeMap.find(end->nodeOffset);
 
@@ -274,13 +274,13 @@ namespace osmscout {
     std::reverse(nodes.begin(),nodes.end());
   }
 
-  void Router::AddNodes(RouteData& route,
-                        Id startNodeId,
-                        size_t startNodeIndex,
-                        const ObjectFileRef& object,
-                        size_t idCount,
-                        bool oneway,
-                        size_t targetNodeIndex)
+  void RoutingService::AddNodes(RouteData& route,
+                                Id startNodeId,
+                                size_t startNodeIndex,
+                                const ObjectFileRef& object,
+                                size_t idCount,
+                                bool oneway,
+                                size_t targetNodeIndex)
   {
     assert(startNodeIndex<idCount);
     assert(targetNodeIndex<idCount);
@@ -375,14 +375,17 @@ namespace osmscout {
     }
   }
 
-  bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
-                                        const std::list<RNodeRef>& nodes,
-                                        const ObjectFileRef& startObject,
-                                        size_t startNodeIndex,
-                                        const ObjectFileRef& targetObject,
-                                        size_t targetNodeIndex,
-                                        RouteData& route)
+  bool RoutingService::ResolveRNodesToRouteData(const RoutingProfile& profile,
+                                                const std::list<RNodeRef>& nodes,
+                                                const ObjectFileRef& startObject,
+                                                size_t startNodeIndex,
+                                                const ObjectFileRef& targetObject,
+                                                size_t targetNodeIndex,
+                                                RouteData& route)
   {
+    AreaDataFileRef                           areaDataFile(database->GetAreaDataFile());
+    WayDataFileRef                            wayDataFile(database->GetWayDataFile());
+
     std::set<FileOffset>                      routeNodeOffsets;
     std::set<FileOffset>                      wayOffsets;
     std::set<FileOffset>                      areaOffsets;
@@ -394,6 +397,10 @@ namespace osmscout {
     std::vector<Id>                           *ids=NULL;
     bool                                      oneway=false;
 
+    if (areaDataFile.Invalid() ||
+        wayDataFile.Invalid()) {
+      return false;
+    }
 
     // Collect all route node file offsets on the path and also
     // all area/way file offsets on the path
@@ -443,14 +450,14 @@ namespace osmscout {
       return false;
     }
 
-    if (!areaDataFile.GetByOffset(areaOffsets,
-                                  areaMap)) {
+    if (!areaDataFile->GetByOffset(areaOffsets,
+                                   areaMap)) {
       std::cerr << "Cannot load areas" << std::endl;
       return false;
     }
 
-    if (!wayDataFile.GetByOffset(wayOffsets,
-                                 wayMap)) {
+    if (!wayDataFile->GetByOffset(wayOffsets,
+                                  wayMap)) {
       std::cerr << "Cannot load ways" << std::endl;
       return false;
     }
@@ -632,7 +639,7 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::ResolveRouteDataJunctions(RouteData& route)
+  bool RoutingService::ResolveRouteDataJunctions(RouteData& route)
   {
     std::set<Id> nodeIds;
 
@@ -687,16 +694,24 @@ namespace osmscout {
     return junctionDataFile.Close();
   }
 
-  bool Router::GetStartNodes(const RoutingProfile& profile,
-                             const ObjectFileRef& object,
-                             size_t nodeIndex,
-                             double& targetLon,
-                             double& targetLat,
-                             RouteNodeRef& forwardRouteNode,
-                             RouteNodeRef& backwardRouteNode,
-                             RNodeRef& forwardRNode,
-                             RNodeRef& backwardRNode)
+  bool RoutingService::GetStartNodes(const RoutingProfile& profile,
+                                     const ObjectFileRef& object,
+                                     size_t nodeIndex,
+                                     double& targetLon,
+                                     double& targetLat,
+                                     RouteNodeRef& forwardRouteNode,
+                                     RouteNodeRef& backwardRouteNode,
+                                     RNodeRef& forwardRNode,
+                                     RNodeRef& backwardRNode)
   {
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+    WayDataFileRef  wayDataFile(database->GetWayDataFile());
+
+    if (areaDataFile.Invalid() ||
+        wayDataFile.Invalid()) {
+      return false;
+    }
+
     if (object.GetType()==refArea) {
       // TODO:
       return false;
@@ -710,8 +725,8 @@ namespace osmscout {
       size_t        backwardNodePos;
       FileOffset    backwardOffset;
 
-      if (!wayDataFile.GetByOffset(object.GetFileOffset(),
-                                   way)) {
+      if (!wayDataFile->GetByOffset(object.GetFileOffset(),
+                                    way)) {
         std::cerr << "Cannot get start way!" << std::endl;
         return false;
       }
@@ -795,13 +810,21 @@ namespace osmscout {
     }
   }
 
-  bool Router::GetTargetNodes(const ObjectFileRef& object,
-                              size_t nodeIndex,
-                              double& targetLon,
-                              double& targetLat,
-                              RouteNodeRef& forwardNode,
-                              RouteNodeRef& backwardNode)
+  bool RoutingService::GetTargetNodes(const ObjectFileRef& object,
+                                      size_t nodeIndex,
+                                      double& targetLon,
+                                      double& targetLat,
+                                      RouteNodeRef& forwardNode,
+                                      RouteNodeRef& backwardNode)
   {
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+    WayDataFileRef  wayDataFile(database->GetWayDataFile());
+
+    if (areaDataFile.Invalid() ||
+        wayDataFile.Invalid()) {
+      return false;
+    }
+
     if (object.GetType()==refArea) {
       // TODO:
       return false;
@@ -811,8 +834,8 @@ namespace osmscout {
       size_t forwardNodePos;
       size_t backwardNodePos;
 
-      if (!wayDataFile.GetByOffset(object.GetFileOffset(),
-                                   way)) {
+      if (!wayDataFile->GetByOffset(object.GetFileOffset(),
+                                    way)) {
         std::cerr << "Cannot get end way!" << std::endl;
         return false;
       }
@@ -865,13 +888,30 @@ namespace osmscout {
     }
   }
 
-
-  bool Router::CalculateRoute(const RoutingProfile& profile,
-                              const ObjectFileRef& startObject,
-                              size_t startNodeIndex,
-                              const ObjectFileRef& targetObject,
-                              size_t targetNodeIndex,
-                              RouteData& route)
+  /**
+   * Calculate a route
+   *
+   * @param profile
+   *    Profile to use
+   * @param startObject
+   *    Start object
+   * @param startNodeIndex
+   *    Index of the node within the start object used as starting point
+   * @param targetObject
+   *    Target object
+   * @param targetNodeIndex
+   *    Index of the node within the target object used as target point
+   * @param route
+   *    The route object holding the resulting route on success
+   * @return
+   *    True, if the engine was able to find a route, else false
+   */
+  bool RoutingService::CalculateRoute(const RoutingProfile& profile,
+                                      const ObjectFileRef& startObject,
+                                      size_t startNodeIndex,
+                                      const ObjectFileRef& targetObject,
+                                      size_t targetNodeIndex,
+                                      RouteData& route)
   {
     RouteNodeRef             startForwardRouteNode;
     RouteNodeRef             startBackwardRouteNode;
@@ -1190,11 +1230,30 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::TransformRouteDataToWay(const RouteData& data,
-                                       Way& way)
+  /**
+   * Transforms the route into a Way
+   * @param data
+   *    Route data
+   * @param way
+   *    Way to get initialized to the route on success
+   * @return
+   *    True, if the way could be build, else false
+   */
+  bool RoutingService::TransformRouteDataToWay(const RouteData& data,
+                                               Way& way)
   {
-    TypeId routeType;
-    Way    tmp;
+    TypeConfigRef   typeConfig=database->GetTypeConfig();
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+    WayDataFileRef  wayDataFile(database->GetWayDataFile());
+
+    TypeId          routeType;
+    Way             tmp;
+
+    if (typeConfig.Invalid() ||
+        areaDataFile.Invalid() ||
+        wayDataFile.Invalid()) {
+      return false;
+    }
 
     routeType=typeConfig->GetWayTypeId("_route");
 
@@ -1217,7 +1276,7 @@ namespace osmscout {
         if (iter->GetPathObject().GetType()==refArea) {
           AreaRef a;
 
-          if (!areaDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
+          if (!areaDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
             return false;
           }
 
@@ -1237,7 +1296,7 @@ namespace osmscout {
         else if (iter->GetPathObject().GetType()==refWay) {
           WayRef w;
 
-          if (!wayDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
+          if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
             return false;
           }
 
@@ -1260,9 +1319,26 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::TransformRouteDataToPoints(const RouteData& data,
-                                          std::list<Point>& points)
+  /**
+   * Transforms the route into a list of points.
+   * @param data
+   *    Route data
+   * @param points
+   *    A list of the points holding route nodes
+   * @return
+   *    True, if the way could be build, else false
+   */
+  bool RoutingService::TransformRouteDataToPoints(const RouteData& data,
+                                                  std::list<Point>& points)
   {
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+    WayDataFileRef  wayDataFile(database->GetWayDataFile());
+
+    if (areaDataFile.Invalid() ||
+        wayDataFile.Invalid()) {
+      return false;
+    }
+
     AreaRef a;
     WayRef  w;
 
@@ -1279,7 +1355,7 @@ namespace osmscout {
         if (iter->GetPathObject().GetType()==refArea) {
           if (a.Invalid() ||
               a->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
-            if (!areaDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
+            if (!areaDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
               std::cerr << "Cannot load area with id " << iter->GetPathObject().GetFileOffset() << std::endl;
               return false;
             }
@@ -1304,7 +1380,7 @@ namespace osmscout {
         else if (iter->GetPathObject().GetType()==refWay) {
           if (w.Invalid() ||
               w->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
-            if (!wayDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
+            if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
               std::cerr << "Cannot load way with id " << iter->GetPathObject().GetFileOffset() << std::endl;
               return false;
             }
@@ -1332,8 +1408,18 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                    RouteDescription& description)
+  /**
+   * Transform the route into a RouteDescription. The RouteDescription can be further transformed
+   * to enhanced textual and/or visual description of the route containing additional information.
+   * @param data
+   *    Route data
+   * @param description
+   *    An initialized description on success
+   * @return
+   *    True on success, else false
+   */
+  bool RoutingService::TransformRouteDataToRouteDescription(const RouteData& data,
+                                                            RouteDescription& description)
   {
     description.Clear();
 
@@ -1353,10 +1439,170 @@ namespace osmscout {
     return true;
   }
 
-  void Router::DumpStatistics()
+  void RoutingService::DumpStatistics()
   {
-    wayDataFile.DumpStatistics();
+    if (database.Valid()) {
+      database->DumpStatistics();
+    }
+
     routeNodeDataFile.DumpStatistics();
   }
-}
 
+  /**
+   * Returns the closed routeable object (area or way) relative
+   * to the given coordinate.
+   *
+   * @note The actual object may not be within the given radius
+   * due to internal search index resolution.
+   *
+   * @param lat
+   *    Latitude value of the search center
+   * @param lon
+   *    Longitude value of the search center
+   * @param vehicle
+   *    Vehicle to use (may differ from the vehicle the router was initialized
+   *    but tin this case the route will not return a valid route based on this
+   *    object).
+   * @param radius
+   *    The maximum radius to search in from the search center in meter
+   * @param object
+   *    The resulting object if one was found
+   * @param nodeIndex
+   *    The index of the closed node to the search center.
+   * @return
+   */
+  bool RoutingService::GetClosestRoutableNode(double lat,
+                                              double lon,
+                                              const osmscout::Vehicle& vehicle,
+                                              double radius,
+                                              osmscout::ObjectFileRef& object,
+                                              size_t& nodeIndex) const
+  {
+    object.Invalidate();
+
+    TypeConfigRef    typeConfig=database->GetTypeConfig();
+    AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
+    AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
+    AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
+    WayDataFileRef   wayDataFile=database->GetWayDataFile();
+
+    if (typeConfig.Invalid() ||
+        areaAreaIndex.Invalid() ||
+        areaWayIndex.Invalid() ||
+        areaDataFile.Invalid() ||
+        wayDataFile.Invalid()) {
+      return false;
+    }
+
+    double                         topLat;
+    double                         botLat;
+    double                         leftLon;
+    double                         rightLon;
+    double                         minDistance=std::numeric_limits<double>::max();
+
+    osmscout::GetEllipsoidalDistance(lat,
+                                     lon,
+                                     315.0,
+                                     radius,
+                                     topLat,
+                                     leftLon);
+
+    osmscout::GetEllipsoidalDistance(lat,
+                                     lon,
+                                     135.0,
+                                     radius,
+                                     botLat,
+                                     rightLon);
+
+    osmscout::TypeSet      routableTypes;
+
+    for (size_t typeId=0; typeId<=database->GetTypeConfig()->GetMaxTypeId(); typeId++) {
+      if (typeConfig->GetTypeInfo(typeId).CanRoute(vehicle)) {
+        routableTypes.SetType(typeId);
+      }
+    }
+
+    std::vector<TypeSet>           wayTypes;
+    std::vector<FileOffset>        wayWayOffsets;
+    std::vector<FileOffset>        wayAreaOffsets;
+    std::vector<osmscout::AreaRef> areas;
+    std::vector<osmscout::WayRef>  ways;
+
+    wayTypes.push_back(routableTypes);
+
+    if (!areaWayIndex->GetOffsets(leftLon,
+                                  botLat,
+                                  rightLon,
+                                  topLat,
+                                  wayTypes,
+                                  std::numeric_limits<size_t>::max(),
+                                  wayWayOffsets)) {
+      std::cout << "Error getting ways and relations from area way index!" << std::endl;
+    }
+
+    if (!areaAreaIndex->GetOffsets(leftLon,
+                                   botLat,
+                                   rightLon,
+                                   topLat,
+                                   std::numeric_limits<size_t>::max(),
+                                   routableTypes,
+                                   std::numeric_limits<size_t>::max(),
+                                   wayAreaOffsets)) {
+      std::cout << "Error getting ways and relations from area index!" << std::endl;
+    }
+
+    std::sort(wayWayOffsets.begin(),
+              wayWayOffsets.end());
+    std::sort(wayAreaOffsets.begin(),
+              wayAreaOffsets.end());
+
+    if (!wayDataFile->GetByOffset(wayWayOffsets,
+                                  ways)) {
+      std::cout << "Error reading ways in area!" << std::endl;
+      return false;
+    }
+
+    if (!areaDataFile->GetByOffset(wayAreaOffsets,
+                                   areas)) {
+      std::cout << "Error reading areas in area!" << std::endl;
+      return false;
+    }
+
+    for (std::vector<osmscout::AreaRef>::const_iterator a=areas.begin();
+        a!=areas.end();
+        ++a) {
+      osmscout::AreaRef area(*a);
+
+      for (size_t i=0; i<area->rings[0].nodes.size(); i++) {
+        double distance=sqrt((area->rings[0].nodes[i].GetLat()-lat)*(area->rings[0].nodes[i].GetLat()-lat)+
+                             (area->rings[0].nodes[i].GetLon()-lon)*(area->rings[0].nodes[i].GetLon()-lon));
+
+        if (distance<minDistance) {
+          minDistance=distance;
+
+          object.Set(area->GetFileOffset(),osmscout::refArea);
+          nodeIndex=i;
+        }
+      }
+    }
+
+    for (std::vector<osmscout::WayRef>::const_iterator w=ways.begin();
+        w!=ways.end();
+        ++w) {
+      osmscout::WayRef way(*w);
+
+      for (size_t i=0;  i<way->nodes.size(); i++) {
+        double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
+                             (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));
+        if (distance<minDistance) {
+          minDistance=distance;
+
+          object.Set(way->GetFileOffset(),osmscout::refWay);
+          nodeIndex=i;
+        }
+      }
+    }
+
+    return true;
+  }
+}

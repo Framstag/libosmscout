@@ -25,6 +25,7 @@
 
 namespace osmscout {
   /**
+    \ingroup Database
     Abstraction for getting cached access to the 'ways.dat' file.
     */
   typedef DataFile<Way>    WayDataFile;

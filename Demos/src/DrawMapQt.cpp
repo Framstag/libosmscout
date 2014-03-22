@@ -24,6 +24,8 @@
 #include <QApplication>
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
+
 #include <osmscout/MapPainterQt.h>
 #include <osmscout/StyleConfigLoader.h>
 
@@ -80,15 +82,16 @@ int main(int argc, char* argv[])
   QApplication application(argc,argv,true);
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
   }
 
-  osmscout::StyleConfig styleConfig(database.GetTypeConfig());
+  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
 
   if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
     std::cerr << "Cannot open style" << std::endl;
@@ -126,18 +129,18 @@ int main(int argc, char* argv[])
       styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
                                          areaTypes);
 
-      database.GetObjects(nodeTypes,
-                          wayTypes,
-                          areaTypes,
-                          projection.GetLonMin(),
-                          projection.GetLatMin(),
-                          projection.GetLonMax(),
-                          projection.GetLatMax(),
-                          projection.GetMagnification(),
-                          searchParameter,
-                          data.nodes,
-                          data.ways,
-                          data.areas);
+      mapService->GetObjects(nodeTypes,
+                             wayTypes,
+                             areaTypes,
+                             projection.GetLonMin(),
+                             projection.GetLatMin(),
+                             projection.GetLonMax(),
+                             projection.GetLatMax(),
+                             projection.GetMagnification(),
+                             searchParameter,
+                             data.nodes,
+                             data.ways,
+                             data.areas);
 
       if (mapPainter.DrawMap(styleConfig,
                              projection,

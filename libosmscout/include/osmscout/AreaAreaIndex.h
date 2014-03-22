@@ -31,6 +31,8 @@
 namespace osmscout {
 
   /**
+    \ingroup Database
+
     AreaAreaIndex allows you to find areas in
     a given region.
 

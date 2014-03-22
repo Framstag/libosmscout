@@ -56,21 +56,23 @@ void QBreaker::Reset()
 
 DBThread::DBThread(const SettingsRef& settings)
  : settings(settings),
-   database(databaseParameter),
+   database(new osmscout::Database(databaseParameter)),
+   locationService(new osmscout::LocationService(database)),
+   mapService(new osmscout::MapService(database)),
    styleConfig(NULL),
    iconDirectory(),
-   currentImage(NULL)
-   ,currentLat(0.0)
-   ,currentLon(0.0)
-   ,currentMagnification(0)
-   ,finishedImage(NULL)
-   ,finishedLat(0.0)
-   ,finishedLon(0.0)
-   ,finishedMagnification(0)
-   ,currentRenderRequest()
-   ,doRender(false)
-   , renderBreaker(new QBreaker())
-   , renderBreakerRef(renderBreaker)
+   currentImage(NULL),
+   currentLat(0.0),
+   currentLon(0.0),
+   currentMagnification(0),
+   finishedImage(NULL),
+   finishedLat(0.0),
+   finishedLon(0.0),
+   finishedMagnification(0),
+   currentRenderRequest(),
+   doRender(false),
+   renderBreaker(new QBreaker()),
+   renderBreakerRef(renderBreaker)
 {
 }
 
@@ -85,7 +87,7 @@ void DBThread::FreeMaps()
 
 bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
 {
-  if (!database.IsOpen()) {
+  if (!database->IsOpen()) {
     return false;
   }
 
@@ -98,11 +100,12 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
       router=NULL;
     }
 
-    router=new osmscout::Router(routerParameter,
-                                vehicle);
+    router=new osmscout::RoutingService(database,
+                                        routerParameter,
+                                        vehicle);
 
     std::cout << "Opening routing database..." << std::endl;
-    if (!router->Open(database.GetPath())) {
+    if (!router->Open()) {
       return false;
     }
     std::cout << "done." << std::endl;
@@ -118,8 +121,8 @@ void DBThread::Initialize()
   QString stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
 
-  if (database.Open(databaseDirectory.toLocal8Bit().data())) {
-    osmscout::TypeConfigRef typeConfig=database.GetTypeConfig();
+  if (database->Open(databaseDirectory.toLocal8Bit().data())) {
+    osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
     if (typeConfig.Valid()) {
       styleConfig=new osmscout::StyleConfig(typeConfig);
@@ -142,10 +145,10 @@ void DBThread::Initialize()
 
   DatabaseLoadedResponse response;
 
-  if (!database.GetBoundingBox(response.minLat,
-                               response.minLon,
-                               response.maxLat,
-                               response.maxLon)) {
+  if (!database->GetBoundingBox(response.minLat,
+                                response.minLon,
+                                response.maxLat,
+                                response.maxLon)) {
     std::cerr << "Cannot read initial bounding box" << std::endl;
     return;
   }
@@ -164,8 +167,8 @@ void DBThread::Finalize()
     router->Close();
   }
 
-  if (database.IsOpen()) {
-    database.Close();
+  if (database->IsOpen()) {
+    database->Close();
   }
 }
 
@@ -207,7 +210,7 @@ void DBThread::TriggerMapRendering()
   currentLat=request.lat;
   currentMagnification=request.magnification;
 
-  if (database.IsOpen() &&
+  if (database->IsOpen() &&
       styleConfig!=NULL) {
     osmscout::MercatorProjection  projection;
     osmscout::MapParameter        drawParameter;
@@ -255,26 +258,26 @@ void DBThread::TriggerMapRendering()
 
     osmscout::StopClock dataRetrievalTimer;
 
-    database.GetObjects(nodeTypes,
-                        wayTypes,
-                        areaTypes,
-                        projection.GetLonMin(),
-                        projection.GetLatMin(),
-                        projection.GetLonMax(),
-                        projection.GetLatMax(),
-                        projection.GetMagnification(),
-                        searchParameter,
-                        data.nodes,
-                        data.ways,
-                        data.areas);
+    mapService->GetObjects(nodeTypes,
+                           wayTypes,
+                           areaTypes,
+                           projection.GetLonMin(),
+                           projection.GetLatMin(),
+                           projection.GetLonMax(),
+                           projection.GetLatMax(),
+                           projection.GetMagnification(),
+                           searchParameter,
+                           data.nodes,
+                           data.ways,
+                           data.areas);
 
     if (drawParameter.GetRenderSeaLand()) {
-      database.GetGroundTiles(projection.GetLonMin(),
-                              projection.GetLatMin(),
-                              projection.GetLonMax(),
-                              projection.GetLatMax(),
-                              projection.GetMagnification(),
-                              data.groundTiles);
+      mapService->GetGroundTiles(projection.GetLonMin(),
+                                 projection.GetLatMin(),
+                                 projection.GetLonMax(),
+                                 projection.GetLatMax(),
+                                 projection.GetMagnification(),
+                                 data.groundTiles);
     }
 
     dataRetrievalTimer.Stop();
@@ -303,7 +306,7 @@ void DBThread::TriggerMapRendering()
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
   }
   else {
-    std::cout << "Cannot draw map: " << database.IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+    std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
 
     QPainter *p=NULL;
 
@@ -417,7 +420,7 @@ bool DBThread::RenderMap(QPainter& painter,
 
 osmscout::TypeConfigRef DBThread::GetTypeConfig() const
 {
-  return database.GetTypeConfig();
+  return database->GetTypeConfig();
 }
 
 bool DBThread::GetNodeByOffset(osmscout::FileOffset offset,
@@ -425,7 +428,7 @@ bool DBThread::GetNodeByOffset(osmscout::FileOffset offset,
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetNodeByOffset(offset,node);
+  return database->GetNodeByOffset(offset,node);
 }
 
 bool DBThread::GetAreaByOffset(osmscout::FileOffset offset,
@@ -433,7 +436,7 @@ bool DBThread::GetAreaByOffset(osmscout::FileOffset offset,
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetAreaByOffset(offset,area);
+  return database->GetAreaByOffset(offset,area);
 }
 
 bool DBThread::GetWayByOffset(osmscout::FileOffset offset,
@@ -441,7 +444,7 @@ bool DBThread::GetWayByOffset(osmscout::FileOffset offset,
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetWayByOffset(offset,way);
+  return database->GetWayByOffset(offset,way);
 }
 
 bool DBThread::SearchForLocations(const osmscout::LocationSearch& search,
@@ -449,8 +452,8 @@ bool DBThread::SearchForLocations(const osmscout::LocationSearch& search,
 {
   QMutexLocker locker(&mutex);
 
-  return database.SearchForLocations(search,
-                                     result);
+  return locationService->SearchForLocations(search,
+                                             result);
 }
 
 bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
@@ -572,23 +575,23 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
   if (refObject.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
 
-    if (!database.GetNodeByOffset(refObject.GetFileOffset(),
-                                  node)) {
+    if (!database->GetNodeByOffset(refObject.GetFileOffset(),
+                                   node)) {
       return false;
     }
 
-    return database.GetClosestRoutableNode(node->GetLat(),
-                                           node->GetLon(),
-                                           vehicle,
-                                           radius,
-                                           object,
-                                           nodeIndex);
+    return router->GetClosestRoutableNode(node->GetLat(),
+                                          node->GetLon(),
+                                          vehicle,
+                                          radius,
+                                          object,
+                                          nodeIndex);
   }
   else if (refObject.GetType()==osmscout::refArea) {
     osmscout::AreaRef area;
 
-    if (!database.GetAreaByOffset(refObject.GetFileOffset(),
-                                  area)) {
+    if (!database->GetAreaByOffset(refObject.GetFileOffset(),
+                                   area)) {
       return false;
     }
 
@@ -597,27 +600,27 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
     area->GetCenter(lat,lon);
 
-    return database.GetClosestRoutableNode(lat,
-                                           lon,
-                                           vehicle,
-                                           radius,
-                                           object,
-                                           nodeIndex);
+    return router->GetClosestRoutableNode(lat,
+                                          lon,
+                                          vehicle,
+                                          radius,
+                                          object,
+                                          nodeIndex);
   }
   else if (refObject.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
 
-    if (!database.GetWayByOffset(refObject.GetFileOffset(),
-                                 way)) {
+    if (!database->GetWayByOffset(refObject.GetFileOffset(),
+                                  way)) {
       return false;
     }
 
-    return database.GetClosestRoutableNode(way->nodes[0].GetLat(),
-                                           way->nodes[0].GetLon(),
-                                           vehicle,
-                                           radius,
-                                           object,
-                                           nodeIndex);
+    return router->GetClosestRoutableNode(way->nodes[0].GetLat(),
+                                          way->nodes[0].GetLon(),
+                                          vehicle,
+                                          radius,
+                                          object,
+                                          nodeIndex);
   }
   else {
     return true;

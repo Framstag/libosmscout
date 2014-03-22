@@ -36,6 +36,8 @@
 
 namespace osmscout {
   /**
+    \ingroup File
+
     FileScanner implements platform independent sequential
     scanning-like access to data in files. File access is buffered.
 

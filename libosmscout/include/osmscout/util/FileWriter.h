@@ -31,6 +31,8 @@
 namespace osmscout {
 
   /**
+    \ingroup File
+
     FileScanner implements platform independent writing to data in files.
     It uses C standard library FILE internally and wraps it to offer
     a number of convenience methods.

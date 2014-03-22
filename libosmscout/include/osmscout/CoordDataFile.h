@@ -33,6 +33,9 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Database
+   */
   class OSMSCOUT_API CoordDataFile
   {
   private:

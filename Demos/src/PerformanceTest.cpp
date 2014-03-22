@@ -24,6 +24,8 @@
 #include "config.h"
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
+
 #include <osmscout/StyleConfigLoader.h>
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
@@ -170,14 +172,15 @@ int main(int argc, char* argv[])
 
   //databaseParameter.SetDebugPerformance(true);
 
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
-  osmscout::StyleConfig styleConfig(database.GetTypeConfig());
+  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
 
   if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
     std::cerr << "Cannot open style" << std::endl;
@@ -251,18 +254,18 @@ int main(int argc, char* argv[])
 
         osmscout::StopClock dbTimer;
 
-        database.GetObjects(nodeTypes,
-                            wayTypes,
-                            areaTypes,
-                            projection.GetLonMin(),
-                            projection.GetLatMin(),
-                            projection.GetLonMax(),
-                            projection.GetLatMax(),
-                            projection.GetMagnification(),
-                            searchParameter,
-                            data.nodes,
-                            data.ways,
-                            data.areas);
+        mapService->GetObjects(nodeTypes,
+                               wayTypes,
+                               areaTypes,
+                               projection.GetLonMin(),
+                               projection.GetLatMin(),
+                               projection.GetLonMax(),
+                               projection.GetLatMax(),
+                               projection.GetMagnification(),
+                               searchParameter,
+                               data.nodes,
+                               data.ways,
+                               data.areas);
 
         dbTimer.Stop();
 
@@ -308,7 +311,7 @@ int main(int argc, char* argv[])
     std::cout << "max: " << drawMaxTime << " msec" << std::endl;
   }
 
-  database.Close();
+  database->Close();
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
   if (driver=="cairo") {

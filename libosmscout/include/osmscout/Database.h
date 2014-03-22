@@ -56,6 +56,10 @@
 namespace osmscout {
 
   /**
+   * \defgroup Database Database
+   */
+
+  /**
     Database instance initialization parameter to influence the behavior of the database
     instance.
 
@@ -103,138 +107,45 @@ namespace osmscout {
   };
 
   /**
-    Parameter to influence the search result for searching for (drawable)
-    objects in a given area.
-    */
-  class OSMSCOUT_API AreaSearchParameter
-  {
-  private:
-    unsigned long maxAreaLevel;
-    unsigned long maxNodes;
-    unsigned long maxWays;
-    unsigned long maxAreas;
-    bool          useLowZoomOptimization;
-    BreakerRef    breaker;
-    bool          useMultithreading;
-
-  public:
-    AreaSearchParameter();
-
-    void SetMaximumAreaLevel(unsigned long maxAreaLevel);
-
-    void SetMaximumNodes(unsigned long maxNodes);
-    void SetMaximumWays(unsigned long maxWays);
-    void SetMaximumAreas(unsigned long maxAreas);
-
-    void SetUseLowZoomOptimization(bool useLowZoomOptimization);
-
-    void SetUseMultithreading(bool useMultithreading);
-
-    void SetBreaker(const BreakerRef& breaker);
-
-    unsigned long GetMaximumAreaLevel() const;
-
-    unsigned long GetMaximumNodes() const;
-    unsigned long GetMaximumWays() const;
-    unsigned long GetMaximumAreas() const;
-
-    bool GetUseLowZoomOptimization() const;
-
-    bool GetUseMultithreading() const;
-
-    bool IsAborted() const;
-  };
-
+   * \ingroup Database
+   *
+   * Central access class to all the individual data files and indexes.
+   *
+   * A database is mainly initialized with a number of optional but performance
+   * relevant parameters.
+   *
+   * The Database is opened by passing the directory that contains
+   * all database files.
+   */
   class OSMSCOUT_API Database : public Referencable
   {
   private:
-    bool                  isOpen;              //! true, if opened
-    bool                  debugPerformance;
+    DatabaseParameter               parameter;            //! Parameterization of this database object
 
-    double                minLon;              //! bounding box of data
-    double                minLat;              //! bounding box of data
-    double                maxLon;              //! bounding box of data
-    double                maxLat;              //! bounding box of data
+    std::string                     path;                 //! Path to the directory containing all files
+    bool                            isOpen;               //! true, if opened
 
-    AreaNodeIndex         areaNodeIndex;
-    AreaWayIndex          areaWayIndex;
-    AreaAreaIndex         areaAreaIndex;
+    TypeConfigRef                   typeConfig;           //! Type config for the currently opened map
 
-    LocationIndex         cityStreetIndex;
+    double                          minLon;               //! bounding box of data
+    double                          minLat;               //! bounding box of data
+    double                          maxLon;               //! bounding box of data
+    double                          maxLat;               //! bounding box of data
 
-    WaterIndex            waterIndex;
+    mutable NodeDataFileRef         nodeDataFile;         //! Cached access to the 'nodes.dat' file
+    mutable AreaDataFileRef         areaDataFile;         //! Cached access to the 'areas.dat' file
+    mutable WayDataFileRef          wayDataFile;          //! Cached access to the 'ways.dat' file
 
-    std::string           path;                 //! Path to the directory containing all files
+    mutable AreaNodeIndexRef        areaNodeIndex;        //! Index of nodes by containing area
+    mutable AreaWayIndexRef         areaWayIndex;         //! Index of areas by containing area
+    mutable AreaAreaIndexRef        areaAreaIndex;        //! Index of ways by containing area
 
-    NodeDataFile          nodeDataFile;         //! Cached access to the 'nodes.dat' file
-    AreaDataFile          areaDataFile;         //! Cached access to the 'areas.dat' file
-    WayDataFile           wayDataFile;          //! Cached access to the 'ways.dat' file
+    mutable LocationIndexRef        locationIndex;        //! Location-based index
 
-    OptimizeAreasLowZoom  optimizeAreasLowZoom; //! Optimized data for low zoom situations
-    OptimizeWaysLowZoom   optimizeWaysLowZoom;  //! Optimized data for low zoom situations
+    mutable WaterIndexRef           waterIndex;           //! Index of land/sea tiles
 
-    TypeConfigRef         typeConfig;           //! Type config for the currently opened map
-
-  public:
-    struct OSMSCOUT_API ReverseLookupResult
-    {
-      ObjectFileRef  object;
-      AdminRegionRef adminRegion;
-      POIRef         poi;
-      LocationRef    location;
-      AddressRef     address;
-    };
-
-  private:
-    bool GetObjectsNodes(const AreaSearchParameter& parameter,
-                         const TypeSet &nodeTypes,
-                         double lonMin, double latMin,
-                         double lonMax, double latMax,
-                         std::string& nodeIndexTime,
-                         std::string& nodesTime,
-                         std::vector<NodeRef>& nodes) const;
-
-    bool GetObjectsWays(const AreaSearchParameter& parameter,
-                        const std::vector<TypeSet>& wayTypes,
-                        const Magnification& magnification,
-                        double lonMin, double latMin,
-                        double lonMax, double latMax,
-                        std::string& wayOptimizedTime,
-                        std::string& wayIndexTime,
-                        std::string& waysTime,
-                        std::vector<WayRef>& ways) const;
-
-    bool GetObjectsAreas(const AreaSearchParameter& parameter,
-                               const TypeSet& areaTypes,
-                               const Magnification& magnification,
-                               double lonMin, double latMin,
-                               double lonMax, double latMax,
-                               std::string& areaOptimizedTime,
-                               std::string& areaIndexTime,
-                               std::string& areasTime,
-                               std::vector<AreaRef>& areas) const;
-
-    bool HandleAdminRegion(const LocationSearch& search,
-                           const LocationSearch::Entry& searchEntry,
-                           const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                           LocationSearchResult& result) const;
-
-    bool HandleAdminRegionLocation(const LocationSearch& search,
-                                   const LocationSearch::Entry& searchEntry,
-                                   const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                                   const osmscout::LocationMatchVisitor::LocationResult& locationResult,
-                                   LocationSearchResult& result) const;
-
-    bool HandleAdminRegionPOI(const LocationSearch& search,
-                              const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                              const osmscout::LocationMatchVisitor::POIResult& poiResult,
-                              LocationSearchResult& result) const;
-
-    bool HandleAdminRegionLocationAddress(const LocationSearch& search,
-                                          const osmscout::AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                                          const osmscout::LocationMatchVisitor::LocationResult& locationResult,
-                                          const osmscout::AddressMatchVisitor::AddressResult& addressResult,
-                                          LocationSearchResult& result) const;
+    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom; //! Optimized data for low zoom situations
+    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;  //! Optimized data for low zoom situations
 
   public:
     Database(const DatabaseParameter& parameter);
@@ -249,51 +160,23 @@ namespace osmscout {
     std::string GetPath() const;
     TypeConfigRef GetTypeConfig() const;
 
+    NodeDataFileRef GetNodeDataFile() const;
+    AreaDataFileRef GetAreaDataFile() const;
+    WayDataFileRef GetWayDataFile() const;
+
+    AreaNodeIndexRef GetAreaNodeIndex() const;
+    AreaAreaIndexRef GetAreaAreaIndex() const;
+    AreaWayIndexRef GetAreaWayIndex() const;
+
+    LocationIndexRef GetLocationIndex() const;
+
+    WaterIndexRef GetWaterIndex() const;
+
+    OptimizeAreasLowZoomRef GetOptimizeAreasLowZoom() const;
+    OptimizeWaysLowZoomRef GetOptimizeWaysLowZoom() const;
+
     bool GetBoundingBox(double& minLat,double& minLon,
                         double& maxLat,double& maxLon) const;
-
-    bool GetObjects(const TypeSet &nodeTypes,
-                    const std::vector<TypeSet>& wayTypes,
-                    const TypeSet& areaTypes,
-                    double lonMin, double latMin,
-                    double lonMax, double latMax,
-                    const Magnification& magnification,
-                    const AreaSearchParameter& parameter,
-                    std::vector<NodeRef>& nodes,
-                    std::vector<WayRef>& ways,
-                    std::vector<AreaRef>& areas) const;
-
-    bool GetObjects(const AreaSearchParameter& parameter,
-                    const Magnification& magnification,
-                    const TypeSet &nodeTypes,
-                    double nodeLonMin, double nodeLatMin,
-                    double nodeLonMax, double nodeLatMax,
-                    std::vector<NodeRef>& nodes,
-                    const std::vector<TypeSet>& wayTypes,
-                    double wayLonMin, double wayLatMin,
-                    double wayLonMax, double wayLatMax,
-                    std::vector<WayRef>& ways,
-                    const TypeSet& areaTypes,
-                    double areaLonMin, double areaLatMin,
-                    double areaLonMax, double areaLatMax,
-                    std::vector<AreaRef>& areas) const;
-
-    bool GetObjects(double lonMin, double latMin,
-                    double lonMax, double latMax,
-                    const TypeSet& types,
-                    std::vector<NodeRef>& nodes,
-                    std::vector<WayRef>& ways,
-                    std::vector<AreaRef>& areas) const;
-
-    bool GetObjects(const std::set<ObjectFileRef>& objects,
-                    OSMSCOUT_HASHMAP<FileOffset,NodeRef>& nodesMap,
-                    OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap,
-                    OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap) const;
-
-    bool GetGroundTiles(double lonMin, double latMin,
-                        double lonMax, double latMax,
-                        const Magnification& magnification,
-                        std::list<GroundTile>& tiles) const;
 
     bool GetNodeByOffset(const FileOffset& offset,
                          NodeRef& node) const;
@@ -328,35 +211,22 @@ namespace osmscout {
     bool GetWaysByOffset(const std::set<FileOffset>& offsets,
                          OSMSCOUT_HASHMAP<FileOffset,WayRef>& dataMap) const;
 
-    bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
-
-    bool VisitAdminRegionLocations(const AdminRegion& region,
-                                   LocationVisitor& visitor) const;
-
-    bool VisitLocationAddresses(const AdminRegion& region,
-                                const Location& location,
-                                AddressVisitor& visitor) const;
-
-    bool ResolveAdminRegionHierachie(const AdminRegionRef& adminRegion,
-                                     std::map<FileOffset,AdminRegionRef >& refs) const;
-
-    bool SearchForLocations(const LocationSearch& search,
-                            LocationSearchResult& result) const;
-
-    bool ReverseLookupObjects(const std::list<ObjectFileRef>& objects,
-                              std::list<ReverseLookupResult>& result) const;
-    bool ReverseLookupObject(const ObjectFileRef& object,
-                              std::list<ReverseLookupResult>& result) const;
-
-    bool GetClosestRoutableNode(double lat,
-                                double lon,
-                                const osmscout::Vehicle& vehicle,
-                                double radius,
-                                osmscout::ObjectFileRef& object,
-                                size_t& nodeIndex) const;
-
     void DumpStatistics();
   };
+
+  //! Reference counted reference to an Database instance
+  typedef Ref<Database> DatabaseRef;
+
+  /**
+   * \defgroup Service High level services
+   *
+   * Services offer a application developer targeted interfaces for certain topics
+   * like POIs, location search, routing,...
+   *
+   * In general they need at least a reference to a Database objects since they
+   * are just convenience APIs on top of the existing data files and indexes.
+   *
+   */
 }
 
 #endif

@@ -41,6 +41,8 @@
 #endif
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
+
 #include <osmscout/MapPainterOpenGL.h>
 #include <osmscout/StyleConfigLoader.h>
 
@@ -58,15 +60,15 @@ static double zoom=80000;
 class Database
 {
 private:
-  osmscout::Database            *database;
+  osmscout::DatabaseRef         database;
+  osmscout::MapServiceRef       mapService;
   osmscout::StyleConfig         *styleConfig;
 
   osmscout::AreaSearchParameter searchParameter;
 
 public:
   Database()
-  : database(NULL),
-    styleConfig(NULL)
+  : styleConfig(NULL)
   {
     // no code
   }
@@ -79,6 +81,7 @@ public:
     databaseParameter.SetDebugPerformance(true);
 
     database=new osmscout::Database(databaseParameter);
+    mapService=new osmscout::MapService(database);
 
     if (!database->Open(map.c_str())) {
       std::cerr << "Cannot open database" << std::endl;
@@ -101,7 +104,6 @@ public:
   ~Database()
   {
     delete styleConfig;
-    delete database;
   }
 
   const osmscout::StyleConfig* GetStyleConfig() const
@@ -125,18 +127,18 @@ public:
     styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
                                        areaTypes);
 
-    return database->GetObjects(nodeTypes,
-                                wayTypes,
-                                areaTypes,
-                                projection.GetLonMin(),
-                                projection.GetLatMin(),
-                                projection.GetLonMax(),
-                                projection.GetLatMax(),
-                                projection.GetMagnification(),
-                                searchParameter,
-                                data.nodes,
-                                data.ways,
-                                data.areas);
+    return mapService->GetObjects(nodeTypes,
+                                  wayTypes,
+                                  areaTypes,
+                                  projection.GetLonMin(),
+                                  projection.GetLatMin(),
+                                  projection.GetLonMax(),
+                                  projection.GetLatMax(),
+                                  projection.GetMagnification(),
+                                  searchParameter,
+                                  data.nodes,
+                                  data.ways,
+                                  data.areas);
   }
 };
 

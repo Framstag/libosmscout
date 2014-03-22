@@ -30,10 +30,11 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API OptimizeWaysLowZoom
+  class OSMSCOUT_API OptimizeWaysLowZoom : public Referencable
   {
   private:
     struct TypeData
@@ -96,6 +97,8 @@ namespace osmscout {
                  std::vector<TypeSet>& wayTypes,
                  std::vector<WayRef>& ways) const;
   };
+
+  typedef Ref<OptimizeWaysLowZoom> OptimizeWaysLowZoomRef;
 }
 
 #endif

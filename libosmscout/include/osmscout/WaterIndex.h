@@ -29,12 +29,14 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   /**
-    */
-  class OSMSCOUT_API WaterIndex
+   * \ingroup Database
+   */
+  class OSMSCOUT_API WaterIndex : public Referencable
   {
   private:
     struct Level
@@ -77,6 +79,8 @@ namespace osmscout {
 
     void DumpStatistics();
   };
+
+  typedef Ref<WaterIndex> WaterIndexRef;
 }
 
 #endif

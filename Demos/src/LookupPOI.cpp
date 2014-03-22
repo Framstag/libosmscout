@@ -19,6 +19,7 @@
 
 
 #include <osmscout/Database.h>
+#include <osmscout/POIService.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
@@ -66,9 +67,10 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::POIServiceRef     poiService(new osmscout::POIService(database));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -79,7 +81,8 @@ int main(int argc, char* argv[])
   std::cout << "x";
   std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
 
-  osmscout::TypeSet types(*database.GetTypeConfig());
+  osmscout::TypeConfigRef typeConfig(database->GetTypeConfig());
+  osmscout::TypeSet       types(*typeConfig);
 
   for (std::list<std::string>::const_iterator name=typeNames.begin();
       name!=typeNames.end();
@@ -88,9 +91,9 @@ int main(int argc, char* argv[])
     osmscout::TypeId wayType;
     osmscout::TypeId areaType;
 
-    nodeType=database.GetTypeConfig()->GetNodeTypeId(*name);
-    wayType=database.GetTypeConfig()->GetWayTypeId(*name);
-    areaType=database.GetTypeConfig()->GetAreaTypeId(*name);
+    nodeType=typeConfig->GetNodeTypeId(*name);
+    wayType=typeConfig->GetWayTypeId(*name);
+    areaType=typeConfig->GetAreaTypeId(*name);
 
     if (nodeType==osmscout::typeIgnore &&
         wayType==osmscout::typeIgnore &&
@@ -126,14 +129,14 @@ int main(int argc, char* argv[])
   std::vector<osmscout::WayRef>  ways;
   std::vector<osmscout::AreaRef> areas;
 
-  if (!database.GetObjects(std::min(lonLeft,lonRight),
-                           std::min(latTop,latBottom),
-                           std::max(lonLeft,lonRight),
-                           std::max(latTop,latBottom),
-                           types,
-                           nodes,
-                           ways,
-                           areas)) {
+  if (!poiService->GetPOIsInArea(std::min(lonLeft,lonRight),
+                                 std::min(latTop,latBottom),
+                                 std::max(lonLeft,lonRight),
+                                 std::max(latTop,latBottom),
+                                 types,
+                                 nodes,
+                                 ways,
+                                 areas)) {
     std::cerr << "Cannot load data from database" << std::endl;
 
     return 1;
@@ -143,7 +146,7 @@ int main(int argc, char* argv[])
       node!=nodes.end();
       node++) {
     std::cout << "+ Node " << (*node)->GetFileOffset();
-    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*node)->GetType()).GetName();
+    std::cout << " " << typeConfig->GetTypeInfo((*node)->GetType()).GetName();
     std::cout << " " << (*node)->GetName() << std::endl;
   }
 
@@ -151,7 +154,7 @@ int main(int argc, char* argv[])
       way!=ways.end();
       way++) {
     std::cout << "+ Way " << (*way)->GetFileOffset();
-    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
+    std::cout << " " << typeConfig->GetTypeInfo((*way)->GetType()).GetName();
     std::cout << " " << (*way)->GetName() << std::endl;
   }
 
@@ -159,7 +162,7 @@ int main(int argc, char* argv[])
       area!=areas.end();
       area++) {
     std::cout << "+ Area " << (*area)->GetFileOffset();
-    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
+    std::cout << " " << typeConfig->GetTypeInfo((*area)->GetType()).GetName();
     std::cout << " " << (*area)->rings.front().GetName() << std::endl;
   }
 

@@ -22,16 +22,17 @@
 #include <iomanip>
 
 #include <osmscout/Database.h>
+#include <osmscout/LocationService.h>
 
 #include <osmscout/util/String.h>
 
-bool GetAdminRegionHierachie(const osmscout::Database &database,
+bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
                              const osmscout::AdminRegionRef& adminRegion,
                              std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
                              std::string& path)
 {
-  if (!database.ResolveAdminRegionHierachie(adminRegion,
-                                            adminRegionMap)) {
+  if (!locationService->ResolveAdminRegionHierachie(adminRegion,
+                                                    adminRegionMap)) {
     return false;
   }
 
@@ -72,7 +73,7 @@ bool GetAdminRegionHierachie(const osmscout::Database &database,
   return true;
 }
 
-std::string GetAdminRegionLabel(const osmscout::Database &database,
+std::string GetAdminRegionLabel(const osmscout::LocationServiceRef& locationService,
                                 std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
                                 const osmscout::LocationSearchResult::Entry& entry)
 {
@@ -94,7 +95,7 @@ std::string GetAdminRegionLabel(const osmscout::Database &database,
     label.append(entry.adminRegion->name);
   }
 
-  if (!GetAdminRegionHierachie(database,
+  if (!GetAdminRegionHierachie(locationService,
                                entry.adminRegion,
                                adminRegionMap,
                                path)) {
@@ -135,14 +136,15 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database.Open(map.c_str())) {
+  if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
   }
 
+  osmscout::LocationServiceRef                            locationService(new osmscout::LocationService(database));
   osmscout::LocationSearch                                search;
   osmscout::LocationSearchResult                          searchResult;
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
@@ -152,8 +154,8 @@ int main(int argc, char* argv[])
 
   search.InitializeSearchEntries(searchPattern);
 
-  if (!database.SearchForLocations(search,
-                                   searchResult)) {
+  if (!locationService->SearchForLocations(search,
+                                           searchResult)) {
     std::cerr << "Error while searching for location" << std::endl;
     return false;
   }
@@ -183,7 +185,7 @@ int main(int argc, char* argv[])
 
       std::cout << entry->address->name;
 
-      std::cout << " " << GetAdminRegionLabel(database,
+      std::cout << " " << GetAdminRegionLabel(locationService,
                                               adminRegionMap,
                                               *entry);
 
@@ -202,7 +204,7 @@ int main(int argc, char* argv[])
 
       std::cout << entry->location->name;
 
-      std::cout << " " << GetAdminRegionLabel(database,
+      std::cout << " " << GetAdminRegionLabel(locationService,
                                               adminRegionMap,
                                               *entry);
 
@@ -225,7 +227,7 @@ int main(int argc, char* argv[])
 
       std::cout << entry->poi->name;
 
-      std::cout << " " << GetAdminRegionLabel(database,
+      std::cout << " " << GetAdminRegionLabel(locationService,
                                               adminRegionMap,
                                               *entry);
 
@@ -234,7 +236,7 @@ int main(int argc, char* argv[])
       std::cout << std::endl;
     }
     else if (entry->adminRegion.Valid()) {
-      std::cout << " " << GetAdminRegionLabel(database,
+      std::cout << " " << GetAdminRegionLabel(locationService,
                                               adminRegionMap,
                                               *entry);
 
@@ -253,7 +255,7 @@ int main(int argc, char* argv[])
     std::cout << "<limit reached!>" << std::endl;
   }
 
-  database.Close();
+  database->Close();
 
   return 0;
 }

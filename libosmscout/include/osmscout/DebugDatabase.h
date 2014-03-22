@@ -34,6 +34,7 @@
 namespace osmscout {
 
   /**
+    \ingroup Database
     Database instance initialisation parameter to influence the behaviour of the database
     instance.
 
