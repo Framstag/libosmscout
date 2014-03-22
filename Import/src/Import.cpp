@@ -22,6 +22,7 @@
 
 #include <iostream>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>
@@ -155,6 +156,67 @@ bool ParseSizeTArgument(int argc,
   else {
     std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
     return false;
+  }
+
+  return true;
+}
+
+bool GetFileSize(const std::string& filename,
+                 osmscout::FileOffset& fileSize)
+{
+  if (!osmscout::GetFileSize(filename,
+                             fileSize)) {
+    std::cerr << "Cannot read file size of file '" << filename << "'" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool CountDataSize(const std::string& mapPath,
+                   double& dataSize)
+{
+  std::string              fileName;
+  osmscout::FileOffset     fileSize=0;
+  std::vector<std::string> files;
+
+  files.push_back("types.dat");
+  files.push_back("bounding.dat");
+
+  files.push_back("nodes.dat");
+  files.push_back("areas.dat");
+  files.push_back("ways.dat");
+
+  files.push_back("areasopt.dat");
+  files.push_back("waysopt.dat");
+
+  files.push_back("areanode.idx");
+  files.push_back("areaarea.idx");
+  files.push_back("areaway.idx");
+
+  files.push_back("location.idx");
+
+  files.push_back("water.idx");
+
+  files.push_back("intersections.dat");
+  files.push_back("routefoot.dat");
+  files.push_back("routefoot.idx");
+  files.push_back("routebicycle.dat");
+  files.push_back("routebicycle.idx");
+  files.push_back("routecar.dat");
+  files.push_back("routecar.idx");
+
+  dataSize=0;
+
+  for (std::vector<std::string>:: const_iterator filename=files.begin();
+      filename!=files.end();
+      ++filename) {
+    if (!GetFileSize(osmscout::AppendFileToDir(mapPath,
+                                               *filename),
+                     fileSize)) {
+      return false;
+    }
+    dataSize+=fileSize;
   }
 
   return true;
@@ -450,6 +512,17 @@ int main(int argc, char* argv[])
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
 
   if (osmscout::Import(parameter,progress)) {
+
+    double dataSize=0;
+
+    if (!CountDataSize(destinationDirectory,
+                       dataSize)) {
+      std::cerr << "Error while retrieving data size" << std::endl;
+    }
+    else {
+      std::cout << "Resulting data size: " << osmscout::ByteSizeToString(dataSize) << std::endl;
+    }
+
     std::cout << "Import OK!" << std::endl;
   }
   else {

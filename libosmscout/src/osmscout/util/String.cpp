@@ -140,7 +140,10 @@ namespace osmscout {
     buffer.setf(std::ios::fixed);
     buffer << std::setprecision(1);
 
-    if (ceil(value)>=1024.0*1024*1024*1024*0.5) {
+    if (value<1.0 && value>-1) {
+      buffer << "0 B";
+    }
+    else if (ceil(value)>=1024.0*1024*1024*1024*0.5) {
       buffer << value/(1024.0*1024*1024*1024) << " TiB";
     }
     else if (ceil(value)>=1024.0*1024*1024*0.5) {
