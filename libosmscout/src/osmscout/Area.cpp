@@ -385,17 +385,34 @@ namespace osmscout {
                      uint32_t nodesCount,
                      std::vector<Id>& ids)
   {
-    Id minId;
+    ids.resize(nodesCount,0);
 
-    ids.resize(nodesCount);
+    uint32_t idCount;
 
-    scanner.ReadNumber(minId);
-    for (size_t j=0; j<nodesCount; j++) {
-      Id id;
+    scanner.ReadNumber(idCount);
 
-      scanner.ReadNumber(id);
+    if (idCount>0) {
+      Id      minId;
+      size_t lastIndex=std::numeric_limits<size_t>::max();
 
-      ids[j]=minId+id;
+      scanner.ReadNumber(minId);
+
+      for (size_t i=1; i<=idCount; i++) {
+        uint32_t index;
+        Id       id;
+
+        scanner.ReadNumber(index);
+
+        if (lastIndex!=std::numeric_limits<size_t>::max()) {
+          index=index+lastIndex+1;
+        }
+
+        scanner.ReadNumber(id);
+
+        ids[index]=id+minId;
+
+        lastIndex=index;
+      }
     }
 
     return !scanner.HasError();
@@ -589,16 +606,43 @@ namespace osmscout {
   bool Area::WriteIds(FileWriter& writer,
                       const std::vector<Id>& ids) const
   {
-    Id minId=std::numeric_limits<Id>::max();
+    uint32_t idCount=0;
+    Id       minId=std::numeric_limits<Id>::max();
 
-    for (size_t j=0; j<ids.size(); j++) {
-      minId=std::min(minId,ids[j]);
+    for (size_t i=0; i<ids.size(); i++) {
+      if (ids[i]!=0) {
+        if (idCount==0) {
+          minId=ids[i];
+        }
+        else {
+          minId=std::min(minId,ids[i]);
+        }
+
+        idCount++;
+      }
     }
 
-    writer.WriteNumber(minId);
+    writer.WriteNumber(idCount);
 
-    for (size_t j=0; j<ids.size(); j++) {
-      writer.WriteNumber(ids[j]-minId);
+    if (idCount>0) {
+      size_t lastIndex=std::numeric_limits<size_t>::max();
+
+      writer.WriteNumber(minId);
+
+      for (size_t i=0; i<ids.size(); i++) {
+        if (ids[i]!=0) {
+          if (lastIndex==std::numeric_limits<size_t>::max()) {
+            writer.WriteNumber((uint32_t)i);
+          }
+          else {
+            writer.WriteNumber((uint32_t)(i-lastIndex-1));
+          }
+
+          writer.WriteNumber(ids[i]-minId);
+
+          lastIndex=i;
+        }
+      }
     }
 
     return !writer.HasError();

@@ -693,7 +693,8 @@ namespace osmscout {
     scanner.ReadNumber(idCount);
 
     if (idCount>0) {
-      Id  minId;
+      Id      minId;
+      size_t lastIndex=std::numeric_limits<size_t>::max();
 
       scanner.ReadNumber(minId);
 
@@ -702,9 +703,16 @@ namespace osmscout {
         Id       id;
 
         scanner.ReadNumber(index);
+
+        if (lastIndex!=std::numeric_limits<size_t>::max()) {
+          index=index+lastIndex+1;
+        }
+
         scanner.ReadNumber(id);
 
         ids[index]=id+minId;
+
+        lastIndex=index;
       }
     }
 
@@ -750,6 +758,12 @@ namespace osmscout {
 
   bool Way::Write(FileWriter& writer) const
   {
+    FileOffset fileOffset;
+
+    if (!writer.GetPos(fileOffset)) {
+      return false;
+    }
+
     assert(!nodes.empty());
 
     if (!attributes.Write(writer)) {
@@ -801,12 +815,22 @@ namespace osmscout {
     writer.WriteNumber(idCount);
 
     if (idCount>0) {
+      size_t lastIndex=std::numeric_limits<size_t>::max();
+
       writer.WriteNumber(minId);
 
       for (size_t i=0; i<ids.size(); i++) {
         if (ids[i]!=0) {
-          writer.WriteNumber((uint32_t)i);
+          if (lastIndex==std::numeric_limits<size_t>::max()) {
+            writer.WriteNumber((uint32_t)i);
+          }
+          else {
+            writer.WriteNumber((uint32_t)(i-lastIndex-1));
+          }
+
           writer.WriteNumber(ids[i]-minId);
+
+          lastIndex=i;
         }
       }
     }
