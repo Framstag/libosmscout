@@ -83,37 +83,28 @@
         NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
         #endif
 #if TARGET_OS_IPHONE
-        CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
-        CGContextRef cg = CGBitmapContextCreate(NULL, kOSMScoutDefaultTileSize*_scaleFactor, kOSMScoutDefaultTileSize*_scaleFactor, 8, 0, space, kCGImageAlphaPremultipliedLast);
-        if(cg){
-
-            CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, kOSMScoutDefaultTileSize*_scaleFactor);
-            CGContextConcatCTM(cg, flipVertical);
-            UIGraphicsPushContext(cg);
-            [_osmScout drawMapTo:cg lat:_center.latitude lon:_center.longitude zoom:1<<_zoom width:kOSMScoutDefaultTileSize*_scaleFactor height:kOSMScoutDefaultTileSize*_scaleFactor];
-            UIGraphicsPopContext();
-            CGImageRef cgImage = CGBitmapContextCreateImage(cg);
-            UIImage* img = [UIImage imageWithCGImage:cgImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
-            NSData *imgData = UIImagePNGRepresentation(img);
-            _result(imgData,nil);
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize),YES,0);
+        CGContextRef cg = UIGraphicsGetCurrentContext();
+        [_osmScout drawMapTo:cg lat:_center.latitude lon:_center.longitude zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
+        UIImage* img = UIGraphicsGetImageFromCurrentImageContext();
+        NSData *imgData = UIImagePNGRepresentation(img);
+        UIGraphicsEndImageContext();
+        _result(imgData,nil);
 #if !__has_feature(objc_arc)
             [_result release];
 #endif
-            CGImageRelease(cgImage);
-            CGContextRelease(cg);
-        }
 #else
-        CGContextRef bitmapContext = CGBitmapContextCreate(NULL, kOSMScoutDefaultTileSize*_scaleFactor, kOSMScoutDefaultTileSize*_scaleFactor, 8, 0, [[NSColorSpace genericRGBColorSpace] CGColorSpace], kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst);
+        CGContextRef bitmapContext = CGBitmapContextCreate(NULL, kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize, 8, 0, [[NSColorSpace genericRGBColorSpace] CGColorSpace], kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst);
         NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
         [NSGraphicsContext setCurrentContext:nsgc];
         CGContextRef cg = [nsgc graphicsPort];
         CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, kOSMScoutDefaultTileSize*_scaleFactor);
         CGContextConcatCTM(cg, flipVertical);
-        [_osmScout drawMapTo:cg lat:_center.latitude lon:_center.longitude zoom:1<<_zoom width:kOSMScoutDefaultTileSize*_scaleFactor height:kOSMScoutDefaultTileSize*_scaleFactor];
+        [_osmScout drawMapTo:cg lat:_center.latitude lon:_center.longitude zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
         CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
         CGContextRelease(bitmapContext);
         NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-        NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:Nil];
+        NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:nil];
         _result(imgData,nil);
 #if !__has_feature(objc_arc)
         [_result release];
@@ -143,8 +134,8 @@ static double originShift = M_PI * 6378137;
 
 -(CLLocationCoordinate2D)centerLatLonForTileX:(NSInteger) tx tileY:(NSInteger) ty zoom:(NSInteger) zoom {
     CLLocationCoordinate2D center;
-    double px = (1.0+tx)*kOSMScoutDefaultTileSize;
-    double py = (0.0+ty)*kOSMScoutDefaultTileSize;
+    double px = (0.5+tx)*kOSMScoutDefaultTileSize;
+    double py = (0.5+ty)*kOSMScoutDefaultTileSize;
     
     double res = initialResolution / exp2(zoom);
     double x = px * res - originShift;
@@ -158,7 +149,22 @@ static double originShift = M_PI * 6378137;
 
 - (void)loadTileAtPath:(MKTileOverlayPath)path result:(void (^)(NSData *tileData, NSError *error))result {
     if(!_osmScout && _path){
-        _osmScout = [OSMScout OSMScoutWithPath:_path dpi:220];
+        
+        double scale = 1.0;
+        NSInteger dpi = 163;
+#if TARGET_OS_IPHONE
+        if([[UIDevice currentDevice] respondsToSelector:@selector(userInterfaceIdiom)] &&
+           UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+            dpi = 132;
+        }
+        if ([UIScreen instancesRespondToSelector:@selector(scale)]) {
+            scale = [[UIScreen mainScreen] scale];
+        }
+#else
+        dpi = 220;
+#endif
+        dpi *= scale;
+        _osmScout = [OSMScout OSMScoutWithPath:_path dpi:dpi];
         #if !__has_feature(objc_arc)
         [_osmScout retain];
         #endif
@@ -167,7 +173,7 @@ static double originShift = M_PI * 6378137;
     }
     
     CLLocationCoordinate2D center = [self centerLatLonForTileX:path.x tileY:path.y zoom: path.z];
-    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout center:center zoom:(path.z-1) scaleFactor:path.contentScaleFactor result:result];
+    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout center:center zoom:path.z scaleFactor:path.contentScaleFactor result:result];
     NSEnumerator *e = drawQueue.operations.reverseObjectEnumerator;
     OSMScoutMKTileOperation *i;
     int count=0;
