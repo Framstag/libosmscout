@@ -201,8 +201,8 @@ namespace osmscout {
 #else
                 NSRect rect = CGRectMake(0, 0, 16, 16);
                 NSImageRep *imageRep = [image bestRepresentationForRect:rect context:[NSGraphicsContext currentContext] hints:0];
-                imgWidth = [imageRep pixelsWide];
-                imgHeight = [imageRep pixelsHigh];
+                NSInteger imgWidth = [imageRep pixelsWide];
+                NSInteger imgHeight = [imageRep pixelsHigh];
                 rect = CGRectMake(0, 0, imgWidth, imgHeight);
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
 #endif

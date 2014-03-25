@@ -40,4 +40,6 @@ typedef void (^OSMScoutMKTileOperationCB)(NSData *tileData, NSError *error) ;
 }
 @property (retain, nonatomic) NSString *path;
 
+-(id)initWithURLTemplate: (NSString *)urlTemplate;
+
 @end

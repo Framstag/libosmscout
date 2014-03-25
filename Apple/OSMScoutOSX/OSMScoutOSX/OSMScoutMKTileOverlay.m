@@ -147,6 +147,18 @@ static double originShift = M_PI * 6378137;
     return center;
 }
 
+-(id)initWithURLTemplate: (NSString *)urlTemplate {
+    self = [super initWithURLTemplate:urlTemplate];
+    if(self){
+        self.tileSize = CGSizeMake(kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize);
+        self.canReplaceMapContent = YES;
+        self.minimumZ = 1;
+        self.maximumZ = 21;
+        self.geometryFlipped = YES;
+    }
+    return self;
+}
+
 - (void)loadTileAtPath:(MKTileOverlayPath)path result:(void (^)(NSData *tileData, NSError *error))result {
     if(!_osmScout && _path){
         

@@ -32,10 +32,6 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     overlay.path = [paths objectAtIndex:0];
 #endif
-    overlay.canReplaceMapContent = YES;
-    overlay.minimumZ = 1;
-    overlay.maximumZ = 21;
-    overlay.geometryFlipped = YES;
     [self insertOverlay:overlay atIndex:0 level:MKOverlayLevelAboveLabels];
     tileOverlay = overlay;
     [self insertOverlay:tileOverlay atIndex:0 level:MKOverlayLevelAboveLabels];
