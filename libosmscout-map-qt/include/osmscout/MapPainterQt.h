@@ -27,7 +27,7 @@
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
-
+    
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
   private:
@@ -52,6 +52,9 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const FillStyle& fillStyle);
 
+    bool followPath(double length, double width, size_t transStart, size_t transEnd,
+                    size_t &i, double &currentL, Vertex2D &origin, double &slope);
+      
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
