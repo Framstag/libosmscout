@@ -27,7 +27,17 @@
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
-    
+
+  typedef struct {
+    bool firstPoint;
+    size_t transStart;
+    size_t transEnd;
+    size_t i;
+    size_t nVertex;
+    ssize_t direction;
+    double currentL;
+  } FollowPathHandle;
+
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
   private:
@@ -52,8 +62,9 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const FillStyle& fillStyle);
 
-    bool followPath(double length, double width, size_t transStart, size_t transEnd,
-                    size_t &i, double &currentL, Vertex2D &origin, double &slope);
+    bool followPath(FollowPathHandle &hnd, double space, double width,
+                    Vertex2D &origin, double &slope);
+    void followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation);
       
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

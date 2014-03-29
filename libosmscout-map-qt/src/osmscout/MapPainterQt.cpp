@@ -355,53 +355,60 @@ namespace osmscout {
     painter->resetTransform();
   }
 
-  bool MapPainterQt::followPath(double space, double width, size_t transStart, size_t transEnd,
-                                size_t &i, double &currentL,
-                                Vertex2D &origin, double &slope)
-  {
 
-      ssize_t nVertex = labs(transEnd - transStart);
-      int direction = (transStart < transEnd) ? 1 : -1;
+  void MapPainterQt::followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation) {
+      hnd.i = 0;
+      hnd.firstPoint = true;
+      hnd.nVertex = labs(transEnd - transStart);
+      if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
+          hnd.transStart = transStart;
+          hnd.transEnd = transEnd;
+      } else {
+          hnd.transStart = transEnd;
+          hnd.transEnd = transStart;
+      }
+      hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
+      hnd.currentL = 0;
+  }
+
+  bool MapPainterQt::followPath(FollowPathHandle &hnd, double space, double width,
+                                Vertex2D &origin, double &slope) {
+
       double x,y;
-      if(isnan(origin.GetX()) || isnan(origin.GetY())){
-          x = coordBuffer->buffer[transStart].GetX();
-          y = coordBuffer->buffer[transStart].GetY();
+      if(hnd.firstPoint){
+          x = coordBuffer->buffer[hnd.transStart].GetX();
+          y = coordBuffer->buffer[hnd.transStart].GetY();
+          hnd.firstPoint = false;
       } else {
           x = origin.GetX();
           y = origin.GetY();
       }
-      double x1 = NAN;
-      double y1 = NAN;
-      double len = 0;
-      while(labs(i+direction) < nVertex) {
-          double x2 = coordBuffer->buffer[transStart+(i+1)*direction].GetX();
-          double y2 = coordBuffer->buffer[transStart+(i+1)*direction].GetY();;
+      double remain = width+space;
+      while(hnd.i < hnd.nVertex) {
+          double x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+          double y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();;
 
           double deltaX = (x2 - x);
           double deltaY = (y2 - y);
-          len += sqrt(deltaX*deltaX + deltaY*deltaY);
+          double len = sqrt(deltaX*deltaX + deltaY*deltaY);
 
-          double fracToGo1 = currentL/len;
-          if(fracToGo1<1 && isnan(x1)){
-              x1 = x+(deltaX*fracToGo1);
-              y1 = y+(deltaY*fracToGo1);
-          }
-          double fracToGo2 = (currentL+width)/len;
           //point is before next point in path, interpolate the answer
-          if(fracToGo2 < 1.0) {
-              double xi = x+(deltaX*fracToGo2);
-              double yi = y+(deltaY*fracToGo2);
-              slope = atan2(yi-y1, xi-x1);
-              origin.Set((xi + x1)/2, (yi + y1)/2);
-              currentL = space;
+          double fracToGo = remain/len;
+          if(fracToGo <= 1.0) {
+              double x1 = x+(deltaX*fracToGo);
+              double y1 = y+(deltaY*fracToGo);
+              slope = atan2(y2-y1, x2-x1);
+              origin.Set(x1, y1);
+              hnd.currentL += remain;
               return true;
           }
 
           //advance to next point on the path
-          currentL-=width;
+          hnd.currentL += len;
+          remain -= len;
           x = x2;
           y = y2;
-          i+=direction;
+          hnd.i++;
       }
       return false;
   }
@@ -423,13 +430,16 @@ namespace osmscout {
       double width=ConvertWidthToPixel(parameter,maxX-minX);
       double height=ConvertWidthToPixel(parameter,maxY-minY);
 
-      size_t segment = 0;
-      double currentL = space/2;
-      Vertex2D origin(NAN,NAN);
-      double slope = 0;
+      Vertex2D origin;
+      double slope;
+      FollowPathHandle followPathHnd;
+      followPathInit(followPathHnd, transStart, transEnd, true);
+      if(!followPath(followPathHnd, 0, space/2, origin, slope)){
+          return;
+      }
       QTransform savedTransform = painter->transform();
       QTransform t;
-      while (followPath(space, width, transStart, transEnd, segment, currentL, origin, slope)){
+      while (followPath(followPathHnd, space, width, origin, slope)){
           t = QTransform::fromTranslate(origin.GetX(), origin.GetY());
           t.rotateRadians(slope);
           painter->setTransform(t);
