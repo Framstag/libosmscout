@@ -355,14 +355,97 @@ namespace osmscout {
     painter->resetTransform();
   }
 
-  void MapPainterQt::DrawContourSymbol(const Projection& /*projection*/,
-                                       const MapParameter& /*parameter*/,
-                                       const Symbol& /*symbol*/,
-                                       double /*space*/,
-                                       size_t /*transStart*/,
-                                       size_t /*transEnd*/)
+
+  void MapPainterQt::followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation) {
+      hnd.i = 0;
+      hnd.firstPoint = true;
+      hnd.nVertex = labs(transEnd - transStart);
+      if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
+          hnd.transStart = transStart;
+          hnd.transEnd = transEnd;
+      } else {
+          hnd.transStart = transEnd;
+          hnd.transEnd = transStart;
+      }
+      hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
+      hnd.currentL = 0;
+  }
+
+  bool MapPainterQt::followPath(FollowPathHandle &hnd, double space, double width,
+                                Vertex2D &origin, double &slope) {
+
+      double x,y;
+      if(hnd.firstPoint){
+          x = coordBuffer->buffer[hnd.transStart].GetX();
+          y = coordBuffer->buffer[hnd.transStart].GetY();
+          hnd.firstPoint = false;
+      } else {
+          x = origin.GetX();
+          y = origin.GetY();
+      }
+      double remain = width+space;
+      while(hnd.i < hnd.nVertex) {
+          double x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+          double y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();;
+
+          double deltaX = (x2 - x);
+          double deltaY = (y2 - y);
+          double len = sqrt(deltaX*deltaX + deltaY*deltaY);
+
+          //point is before next point in path, interpolate the answer
+          double fracToGo = remain/len;
+          if(fracToGo <= 1.0) {
+              double x1 = x+(deltaX*fracToGo);
+              double y1 = y+(deltaY*fracToGo);
+              slope = atan2(y2-y1, x2-x1);
+              origin.Set(x1, y1);
+              hnd.currentL += remain;
+              return true;
+          }
+
+          //advance to next point on the path
+          hnd.currentL += len;
+          remain -= len;
+          x = x2;
+          y = y2;
+          hnd.i++;
+      }
+      return false;
+  }
+
+  void MapPainterQt::DrawContourSymbol(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const Symbol& symbol,
+                                       double space,
+                                       size_t transStart,
+                                       size_t transEnd)
   {
-    // Not implemented
+      double minX;
+      double minY;
+      double maxX;
+      double maxY;
+
+      symbol.GetBoundingBox(minX,minY,maxX,maxY);
+
+      double width=ConvertWidthToPixel(parameter,maxX-minX);
+      double height=ConvertWidthToPixel(parameter,maxY-minY);
+
+      Vertex2D origin;
+      double slope;
+      FollowPathHandle followPathHnd;
+      followPathInit(followPathHnd, transStart, transEnd, true);
+      if(!followPath(followPathHnd, 0, space/2, origin, slope)){
+          return;
+      }
+      QTransform savedTransform = painter->transform();
+      QTransform t;
+      while (followPath(followPathHnd, space, width, origin, slope)){
+          t = QTransform::fromTranslate(origin.GetX(), origin.GetY());
+          t.rotateRadians(slope);
+          painter->setTransform(t);
+          DrawSymbol(projection, parameter, symbol, 0, height/2);
+      }
+      painter->setTransform(savedTransform);
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
@@ -603,8 +686,22 @@ namespace osmscout {
     SetFill(projection,
             parameter,
             *area.fillStyle);
-
+    bool restoreTransform = false;
+    size_t idx = -1;
+    if(area.fillStyle->HasPattern()){
+        idx=area.fillStyle->GetPatternId()-1;
+        if(idx<patterns.size() && !patterns[idx].textureImage().isNull()){
+            patterns[idx].setTransform(QTransform::fromTranslate(
+                                              remainder(coordBuffer->buffer[area.transStart].GetX(),patterns[idx].textureImage().width()),
+                                              remainder(coordBuffer->buffer[area.transStart].GetY(),patterns[idx].textureImage().height())));
+            painter->setBrush(patterns[idx]);
+            restoreTransform = true;
+        }
+    }
     painter->drawPath(path);
+    if(restoreTransform){
+        patterns[idx].setTransform(QTransform(1.0,0.0,1.0,0.0,0.0,0.0));
+    }
   }
 
   void MapPainterQt::DrawGround(const Projection& projection,

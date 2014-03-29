@@ -38,11 +38,18 @@
 
 #define MAP_PAINTER_PLATE_LABEL_MARGIN 10
 #define MAP_PAINTER_Y_LABEL_MARGIN 10
-#define MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN 10
+#define MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN 50
 
 namespace osmscout {
-    typedef struct { double x; double y; } Pt;
-    typedef struct { double x; double y; double slope ;} XYSlope;
+    typedef struct {
+        bool firstPoint;
+        size_t transStart;
+        size_t transEnd;
+        size_t i;
+        size_t nVertex;
+        ssize_t direction;
+        double currentL;
+    } FollowPathHandle;
     
     class MapPainterIOS : public MapPainter {
     private:
@@ -97,16 +104,7 @@ namespace osmscout {
         
         void DrawIcon(const IconStyle* style,
                       double x, double y);
-        
-        void DrawPrimitivePath(const Projection& projection,
-                               const MapParameter& parameter,
-                               const DrawPrimitiveRef& primitive,
-                               double x, double y,
-                               double minX,
-                               double minY,
-                               double maxX,
-                               double maxY);
-        
+                
         void DrawSymbol(const Projection& projection,
                         const MapParameter& parameter,
                         const Symbol& symbol,
@@ -144,8 +142,9 @@ namespace osmscout {
     private:
         Font *GetFont(const MapParameter& parameter, double fontSize);
         double pathLength(size_t transStart, size_t transEnd);
-        XYSlope originAndSlopeAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd,
-                                        CGFloat &posX, CGFloat &posY, size_t &i, CGFloat &currentL);
+        bool followPath(FollowPathHandle &hnd, double space, double width,
+                        Vertex2D &origin, double &slope);
+        void followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation);
     };
 }
 

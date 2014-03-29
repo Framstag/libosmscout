@@ -39,7 +39,7 @@ namespace osmscout {
         bool aborted;
     };
     
-    class OSMScoutCPP {
+    class OSMScoutCpp {
     private:
         std::string         map;
         TypeSet             types;
@@ -47,10 +47,6 @@ namespace osmscout {
         DatabaseParameter   databaseParameter;
         Database            database;
         bool                isDatabaseOpened;
-        RouterParameter     routerParameter;
-        Router              router;
-        Vehicle             vehicle;
-        RouteDescription    *description;
         StyleConfig         *styleConfig;
         MapPainterIOS       *mapPainter;
         MercatorProjection  projection;
@@ -64,10 +60,10 @@ namespace osmscout {
         AreaSearchParameter searchParameter;
         MapData             data;
         bool                isMapPainterConfigured;
-        
+
     public:
-        OSMScoutCPP(const char *cDir);
-        virtual ~OSMScoutCPP();
+        OSMScoutCpp(const char *cDir);
+        virtual ~OSMScoutCpp();
         void abortDrawing();
         void drawingBreakerReset();
         bool initDraw(size_t dpi);

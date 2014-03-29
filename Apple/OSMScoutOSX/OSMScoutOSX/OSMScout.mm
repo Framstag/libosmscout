@@ -15,15 +15,14 @@
 
 namespace osmscout {
     
-    OSMScoutCPP::OSMScoutCPP(const char *cDir) : database(databaseParameter),vehicle(vehicleCar),router(routerParameter, vehicleCar),description(NULL),map(cDir),styleConfig(NULL),isMapPainterConfigured(false),loadedMagnification(0),loadedLatMax(0),loadedLonMax(0),loadedLatMin(0),loadedLonMin(0){
+    OSMScoutCpp::OSMScoutCpp(const char *cDir) : database(databaseParameter),map(cDir),styleConfig(NULL),isMapPainterConfigured(false),loadedMagnification(0),loadedLatMax(0),loadedLonMax(0),loadedLatMin(0),loadedLonMin(0){
     }
     
-    OSMScoutCPP::~OSMScoutCPP(){
+    OSMScoutCpp::~OSMScoutCpp(){
         database.Close();
-        router.Close();
     }
 
-    bool OSMScoutCPP::initDraw(size_t dpi) {
+    bool OSMScoutCpp::initDraw(size_t dpi) {
         if (!database.IsOpen() && !database.Open(map.c_str())) {
             std::cerr << "Cannot open database" << std::endl;
             
@@ -61,7 +60,7 @@ namespace osmscout {
         return true;
     }
     
-    void OSMScoutCPP::drawMap(CGContextRef paintCG, double lat, double lon, double zoom, size_t width, size_t height){
+    void OSMScoutCpp::drawMap(CGContextRef paintCG, double lat, double lon, double zoom, size_t width, size_t height){
         assert(isMapPainterConfigured);
         projection.Set(lon, lat, zoom, (width+1), (height+1));
         
@@ -121,14 +120,14 @@ namespace osmscout {
     }
     
     
-    void OSMScoutCPP::abortDrawing(){
+    void OSMScoutCpp::abortDrawing(){
         if(drawBreaker){
             std::cout<<"abortDrawing !"<<std::endl;
             drawBreaker->Break();
         }
     }
     
-    void OSMScoutCPP::drawingBreakerReset(){
+    void OSMScoutCpp::drawingBreakerReset(){
         if(drawBreaker){
             std::cout<<"drawingBreakerReset"<<std::endl;
             drawBreaker->Reset();
@@ -139,11 +138,11 @@ namespace osmscout {
 }
 
 @interface OSMScout ()
-@property (nonatomic, readwrite, assign) osmscout::OSMScoutCPP *osmScout;
+@property (nonatomic, readwrite, assign) osmscout::OSMScoutCpp *osmScout;
 @end
 
 @implementation OSMScout
-@synthesize osmScout = _osmScoutCPP;
+@synthesize osmScout = _osmScoutCpp;
 
 static OSMScout* osmScoutInstance = nil;
 static NSString* osmScoutRootPath = @"";
@@ -160,28 +159,28 @@ static NSString* osmScoutRootPath = @"";
 
 -(id)initWithPath:(NSString *)path dpi:(size_t)dpi {
     if((self = [super init])){
-        _osmScoutCPP = new osmscout::OSMScoutCPP([path UTF8String]);
-        _osmScoutCPP->initDraw(dpi);
+        _osmScoutCpp = new osmscout::OSMScoutCpp([path UTF8String]);
+        _osmScoutCpp->initDraw(dpi);
     }
     return self;
 }
 -(void)dealloc{
-    delete _osmScoutCPP;
+    delete _osmScoutCpp;
 #if !__has_feature(objc_arc)
     [super dealloc];
 #endif
 }
 
 -(void)drawMapTo: (CGContextRef)cg lat:(CLLocationDegrees)lat lon:(CLLocationDegrees)lon zoom: (double) zoom width: (CGFloat) width height: (CGFloat) height {
-    _osmScoutCPP->drawMap(cg, lat, lon, zoom, width, height);
+    _osmScoutCpp->drawMap(cg, lat, lon, zoom, width, height);
 }
 
 -(void)abortDrawing {
-    _osmScoutCPP->abortDrawing();
+    _osmScoutCpp->abortDrawing();
 }
 
 -(void)drawingBreakerReset {
-    _osmScoutCPP->drawingBreakerReset();
+    _osmScoutCpp->drawingBreakerReset();
 }
 
 

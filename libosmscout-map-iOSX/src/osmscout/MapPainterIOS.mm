@@ -201,8 +201,8 @@ namespace osmscout {
 #else
                 NSRect rect = CGRectMake(0, 0, 16, 16);
                 NSImageRep *imageRep = [image bestRepresentationForRect:rect context:[NSGraphicsContext currentContext] hints:0];
-                imgWidth = [imageRep pixelsWide];
-                imgHeight = [imageRep pixelsHigh];
+                NSInteger imgWidth = [imageRep pixelsWide];
+                NSInteger imgHeight = [imageRep pixelsHigh];
                 rect = CGRectMake(0, 0, imgWidth, imgHeight);
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
@@ -380,63 +380,70 @@ namespace osmscout {
         return len;
     }
 
-    XYSlope MapPainterIOS::originAndSlopeAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd,
-                                                   CGFloat &posX, CGFloat &posY, size_t &i, CGFloat &currentL) {
-        CGFloat widthToGo = l - currentL;
-        XYSlope pos = {-1, -1, -1};
-        Pt pos1 = {NAN, NAN};
+    
+    void MapPainterIOS::followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation) {
+        hnd.i = 0;
+        hnd.firstPoint = true;
+        hnd.nVertex = labs(transEnd - transStart);
+        if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
+            hnd.transStart = transStart;
+            hnd.transEnd = transEnd;
+        } else {
+            hnd.transStart = transEnd;
+            hnd.transEnd = transStart;
+        }
+        hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
+        hnd.currentL = 0;
+    }
+    
+    bool MapPainterIOS::followPath(FollowPathHandle &hnd, double space, double width,
+                                  Vertex2D &origin, double &slope) {
         
-        size_t pathSize = labs(transEnd - transStart);
-        int direction = (transStart < transEnd) ? 1 : -1;
-
-        while(widthToGo+nextW >= 0) {
-            //out of path, return invalid point
-            if(i+direction >= pathSize) {
-                return pos;
-            }
+        double x,y;
+        if(hnd.firstPoint){
+            x = coordBuffer->buffer[hnd.transStart].GetX();
+            y = coordBuffer->buffer[hnd.transStart].GetY();
+            hnd.firstPoint = false;
+        } else {
+            x = origin.GetX();
+            y = origin.GetY();
+        }
+        double remain = width+space;
+        while(hnd.i < hnd.nVertex) {
+            double x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+            double y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();;
             
-            CGFloat nextX = coordBuffer->buffer[transStart+(i+1)*direction].GetX();
-            CGFloat nextY = coordBuffer->buffer[transStart+(i+1)*direction].GetY();;
+            double deltaX = (x2 - x);
+            double deltaY = (y2 - y);
+            double len = sqrt(deltaX*deltaX + deltaY*deltaY);
             
-            CGFloat xDiff = (nextX - posX)*direction;
-            CGFloat yDiff = (nextY - posY)*direction;
-            CGFloat distToNext = sqrt(xDiff*xDiff + yDiff*yDiff);
-            
-            CGFloat fracToGo1 = widthToGo/distToNext;
-            if(fracToGo1 < 1 && std::isnan(pos1.x)){
-                pos1.x = posX+(xDiff*fracToGo1);
-                pos1.y = posY+(yDiff*fracToGo1);
-            }
-            
-            CGFloat fracToGo2 = (widthToGo+nextW)/distToNext;
             //point is before next point in path, interpolate the answer
-            if(fracToGo2 < 1) {
-                pos.x = posX+(xDiff*fracToGo2);
-                pos.y = posY+(yDiff*fracToGo2);
-                pos.slope = atan2(pos.y-pos1.y, pos.x-pos1.x);
-                pos.x = (pos.x + pos1.x)/2;
-                pos.y = (pos.y + pos1.y)/2;
-                return pos;
+            double fracToGo = remain/len;
+            if(fracToGo <= 1.0) {
+                double x1 = x+(deltaX*fracToGo);
+                double y1 = y+(deltaY*fracToGo);
+                slope = atan2(y2-y1, x2-x1);
+                origin.Set(x1, y1);
+                hnd.currentL += remain;
+                return true;
             }
             
             //advance to next point on the path
-            widthToGo -= distToNext;
-            currentL += distToNext;
-            posX = nextX;
-            posY = nextY;
-            i+=direction;
+            hnd.currentL += len;
+            remain -= len;
+            x = x2;
+            y = y2;
+            hnd.i++;
         }
-        return pos;
+        return false;
     }
-    
+
     void MapPainterIOS::DrawContourSymbol(const Projection& projection,
-                                            const MapParameter& parameter,
-                                            const Symbol& symbol,
-                                            double space,
-                                            size_t transStart, size_t transEnd){
+                                          const MapParameter& parameter,
+                                          const Symbol& symbol,
+                                          double space,
+                                          size_t transStart, size_t transEnd){
         
-        double lineLength=pathLength(transStart, transEnd);
-        CGContextSaveGState(cg);
         
         double minX;
         double minY;
@@ -448,37 +455,21 @@ namespace osmscout {
         double width=ConvertWidthToPixel(parameter,maxX-minX);
         double height=ConvertWidthToPixel(parameter,maxY-minY);
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-        for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-             p!=symbol.GetPrimitives().end();
-             ++p) {
-            FillStyleRef fillStyle=(*p)->GetFillStyle();
-            
-            CGContextBeginPath(cg);
-            SetFill(projection,
-                          parameter,
-                          *fillStyle);
-            
-            CGFloat lenUpToNow = space/2;
-            CGFloat posX = coordBuffer->buffer[transStart].GetX();
-            CGFloat posY = coordBuffer->buffer[transStart].GetY();
-            size_t segment = 0;
-            CGFloat currentL = 0;
-            while (lenUpToNow+width<lineLength) {
-                XYSlope origin = originAndSlopeAlongPath(lenUpToNow, width, transStart, transEnd, posX, posY, segment, currentL);
-                CGContextSaveGState(cg);
-                
-                CGContextTranslateCTM(cg, origin.x, origin.y);
-                CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(origin.slope));
-                CGContextConcatCTM(cg, ct);
-                DrawPrimitivePath(projection, parameter, *p,
-                                  width,height/2,
-                                  minX, minY, maxX, maxY);
-                CGContextRestoreGState(cg);
-                
-                lenUpToNow+=width+space;
-            }
-            
-            CGContextFillPath(cg);
+        Vertex2D origin;
+        double slope;
+        FollowPathHandle followPathHnd;
+        followPathInit(followPathHnd, transStart, transEnd, true);
+        if(!followPath(followPathHnd, 0, space/2, origin, slope)){
+            return;
+        }
+        CGContextSaveGState(cg);
+        while (followPath(followPathHnd, space, width, origin, slope)){
+            CGContextSaveGState(cg);
+            CGContextTranslateCTM(cg, origin.GetX(), origin.GetY());
+            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
+            CGContextConcatCTM(cg, ct);
+            DrawSymbol(projection, parameter, symbol, 0, height/2);
+            CGContextRestoreGState(cg);
         }
         CGContextRestoreGState(cg);
     }
@@ -496,19 +487,11 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd){
         Font *font = GetFont(parameter,style.GetSize());
-        size_t tStart, tEnd;
-        if(coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
-            tStart = transStart;
-            tEnd = transEnd;
-        } else {
-            tStart = transEnd;
-            tEnd = transStart;
-        }
         double pathLen = pathLength(transStart, transEnd);
         double textLen = textLength(parameter,style.GetSize()*ConvertWidthToPixel(parameter,parameter.GetFontSize()),text)+MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN*2;
         if (textLen > pathLen) {
-             return;
-         }
+            return;
+        }
         
         CGContextSaveGState(cg);
 #if TARGET_OS_IPHONE
@@ -526,22 +509,24 @@ namespace osmscout {
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #endif
         CGAffineTransform ct;
-        CGFloat lenUpToNow = MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN;
         
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-        CGFloat posX = coordBuffer->buffer[transStart].GetX();
-        CGFloat posY = coordBuffer->buffer[transStart].GetY();
-        int charIndex = 0;
-        size_t segment = 0;
-        CGFloat currentL = 0.0;
+        Vertex2D charOrigin;
+        double slope;
+        FollowPathHandle followPathHnd;
+        followPathInit(followPathHnd, transStart, transEnd, false);
+        if(!followPath(followPathHnd, MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN, 0, charOrigin, slope)){
+            CGContextRestoreGState(cg);
+            return;
+        }
         double nww,nhh,xOff,yOff;
         for(int i=0;i<[nsText length];i++) {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
-            GetTextDimension(parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);            
-            XYSlope charOrigin = originAndSlopeAlongPath(lenUpToNow, nww, tStart, tEnd, posX, posY, segment, currentL);
-            if(charOrigin.x == -1 && charOrigin.y == -1){
+            GetTextDimension(parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
+            
+            if(!followPath(followPathHnd, 0, nww, charOrigin, slope)){
                 CGContextRestoreGState(cg);
                 return;
             }
@@ -549,19 +534,16 @@ namespace osmscout {
             
             CGContextSaveGState(cg);
             
-            CGContextTranslateCTM(cg, charOrigin.x, charOrigin.y);
-            ct = CGAffineTransformMakeRotation(charOrigin.slope);
+            CGContextTranslateCTM(cg, charOrigin.GetX(), charOrigin.GetY());
+            ct = CGAffineTransformMakeRotation(slope);
             CGContextConcatCTM(cg, ct);
             
 #if TARGET_OS_IPHONE
-            [str drawAtPoint:CGPointMake(-nww/2,-nhh/2) withFont:font];
+            [str drawAtPoint:CGPointMake(-nww,-nhh/2) withFont:font];
 #else
-            [str drawAtPoint:CGPointMake(-nww/2,-nhh/2) withAttributes:attrsDictionary];
+            [str drawAtPoint:CGPointMake(-nww,-nhh/2) withAttributes:attrsDictionary];
 #endif
             CGContextRestoreGState(cg);
-            lenUpToNow += nww;
-            
-            charIndex++;
         }
         CGContextRestoreGState(cg);
     }
@@ -585,59 +567,6 @@ namespace osmscout {
         CGContextScaleCTM(cg, 1.0, -1.0);
         CGContextDrawImage(cg, rect, images[idx]);
         CGContextRestoreGState(cg);
-    }
-    
-    /*
-     * DrawPrimitivePath()
-     */
-    void MapPainterIOS::DrawPrimitivePath(const Projection& projection,
-                                            const MapParameter& parameter,
-                                            const DrawPrimitiveRef& p,
-                                            double x, double y,
-                                            double minX,
-                                            double minY,
-                                            double maxX,
-                                            double maxY)
-    {
-        DrawPrimitive* primitive=p.Get();
-        double         centerX=maxX-minX;
-        double         centerY=maxY-minY;
-        
-        if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-            PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-            CGContextBeginPath(cg);
-            for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
-                 pixel!=polygon->GetCoords().end();
-                 ++pixel) {
-                if (pixel==polygon->GetCoords().begin()) {
-                    CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                         y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-                } else {
-                    CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                            y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-                }
-            }
-            
-            CGContextDrawPath(cg, kCGPathFill);
-        }
-        else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-            RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                                     y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
-                                     ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                                     ConvertWidthToPixel(parameter,rectangle->GetHeight()));
-            CGContextAddRect(cg,rect);
-            CGContextDrawPath(cg, kCGPathFill);
-        }
-        else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-            CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                                     y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
-                                     ConvertWidthToPixel(parameter,circle->GetRadius()),
-                                     ConvertWidthToPixel(parameter,circle->GetRadius()));
-            CGContextAddEllipseInRect(cg, rect);
-            CGContextDrawPath(cg, kCGPathFill);
-        }
     }
     
     /*
@@ -666,16 +595,46 @@ namespace osmscout {
             SetFill(projection,
                           parameter,
                           *fillStyle);
-
-            DrawPrimitivePath(projection,
-                              parameter,
-                              *p,
-                              x,y,
-                              minX,
-                              minY,
-                              maxX,
-                              maxY);
+  
+            DrawPrimitive* primitive=p->Get();
+            double         centerX=maxX-minX;
+            double         centerY=maxY-minY;
             
+            if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
+                PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+                CGContextBeginPath(cg);
+                for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+                     pixel!=polygon->GetCoords().end();
+                     ++pixel) {
+                    if (pixel==polygon->GetCoords().begin()) {
+                        CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                                             y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+                    } else {
+                        CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                                                y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+                    }
+                }
+                
+                CGContextDrawPath(cg, kCGPathFill);
+            }
+            else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
+                RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
+                                         y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
+                                         ConvertWidthToPixel(parameter,rectangle->GetWidth()),
+                                         ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+                CGContextAddRect(cg,rect);
+                CGContextDrawPath(cg, kCGPathFill);
+            }
+            else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
+                CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                                         y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
+                                         ConvertWidthToPixel(parameter,circle->GetRadius()),
+                                         ConvertWidthToPixel(parameter,circle->GetRadius()));
+                CGContextAddEllipseInRect(cg, rect);
+                CGContextDrawPath(cg, kCGPathFill);
+            }
         }
         CGContextRestoreGState(cg);
     }

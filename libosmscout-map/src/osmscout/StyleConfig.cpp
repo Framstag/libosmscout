@@ -911,8 +911,8 @@ namespace osmscout {
   {
     minX=std::numeric_limits<double>::max();
     minY=std::numeric_limits<double>::max();
-    maxX=std::numeric_limits<double>::min();
-    maxY=std::numeric_limits<double>::min();
+    maxX=-std::numeric_limits<double>::max();
+    maxY=-std::numeric_limits<double>::max();
 
     for (std::list<Coord>::const_iterator coord=coords.begin();
          coord!=coords.end();
@@ -948,10 +948,10 @@ namespace osmscout {
                                           double& maxY) const
   {
     minX=topLeft.x;
-    minY=topLeft.y-height;
+    minY=topLeft.y;
 
     maxX=topLeft.x+width;
-    maxY=topLeft.y;
+    maxY=topLeft.y+height;
   }
 
   CirclePrimitive::CirclePrimitive(const Coord& center,
@@ -980,8 +980,8 @@ namespace osmscout {
   : name(name),
     minX(std::numeric_limits<double>::max()),
     minY(std::numeric_limits<double>::max()),
-    maxX(std::numeric_limits<double>::min()),
-    maxY(std::numeric_limits<double>::min())
+    maxX(-std::numeric_limits<double>::max()),
+    maxY(-std::numeric_limits<double>::max())
   {
     // no code
   }

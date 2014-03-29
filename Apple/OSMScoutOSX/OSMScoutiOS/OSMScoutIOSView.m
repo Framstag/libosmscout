@@ -21,8 +21,9 @@
 #define ZOOM 16
 
 -(void)defaults {
-    [self setCenterCoordinate:CLLocationCoordinate2DMake(LATITUDE, LONGITUDE)];
-    [self setRegion:MKCoordinateRegionMakeWithDistance(self.centerCoordinate, 2000, 2000)];
+    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(LATITUDE, LONGITUDE);
+    MKCoordinateSpan span = MKCoordinateSpanMake(0, 360/pow(2, ZOOM)*self.frame.size.width/256);
+    [self setRegion:MKCoordinateRegionMake(centerCoordinate, span) animated:NO];
     self.delegate = self;
     OSMScoutMKTileOverlay *overlay = [[OSMScoutMKTileOverlay alloc] initWithURLTemplate: nil];
 #if TARGET_IPHONE_SIMULATOR
@@ -31,13 +32,8 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     overlay.path = [paths objectAtIndex:0];
 #endif
-    overlay.canReplaceMapContent = YES;
-    overlay.minimumZ = 1;
-    overlay.maximumZ = 21;
-    overlay.geometryFlipped = YES;
     [self insertOverlay:overlay atIndex:0 level:MKOverlayLevelAboveLabels];
     tileOverlay = overlay;
-    
     [self insertOverlay:tileOverlay atIndex:0 level:MKOverlayLevelAboveLabels];
 }
 

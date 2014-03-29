@@ -158,6 +158,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextSearchIndex.cpp; path = ../../../../libosmscout/src/osmscout/TextSearchIndex.cpp; sourceTree = "<group>"; };
+		F50BC73A18A97D5F002AE090 /* TextSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSearchIndex.h; sourceTree = "<group>"; };
 		F51E3E9F161A5F4000D51926 /* libosmscout.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscout.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51E3EA2161A5F4000D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaAreaIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaAreaIndex.cpp; sourceTree = "<group>"; };
@@ -208,8 +210,6 @@
 		F51E3F32161A604300D51926 /* AreaAreaIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaAreaIndex.h; sourceTree = "<group>"; };
 		F51E3F33161A604300D51926 /* AreaNodeIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaNodeIndex.h; sourceTree = "<group>"; };
 		F51E3F34161A604300D51926 /* AreaWayIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaWayIndex.h; sourceTree = "<group>"; };
-		F51E3F36161A604300D51926 /* CoreFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreFeatures.h; sourceTree = "<group>"; };
-		F51E3F37161A604300D51926 /* CoreFeatures.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CoreFeatures.h.in; sourceTree = "<group>"; };
 		F51E3F38161A604300D51926 /* Database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Database.h; sourceTree = "<group>"; };
 		F51E3F39161A604300D51926 /* DataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataFile.h; sourceTree = "<group>"; };
 		F51E3F3A161A604300D51926 /* GroundTile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroundTile.h; sourceTree = "<group>"; };
@@ -222,8 +222,6 @@
 		F51E3F43161A604300D51926 /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scanner.h; sourceTree = "<group>"; };
 		F51E3F44161A604300D51926 /* Path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Path.h; sourceTree = "<group>"; };
 		F51E3F45161A604300D51926 /* Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Point.h; sourceTree = "<group>"; };
-		F51E3F48161A604300D51926 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
-		F51E3F49161A604300D51926 /* Config.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Config.h.in; sourceTree = "<group>"; };
 		F51E3F4A161A604300D51926 /* CoreImportExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreImportExport.h; sourceTree = "<group>"; };
 		F51E3F4F161A604300D51926 /* Route.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Route.h; sourceTree = "<group>"; };
 		F51E3F50161A604300D51926 /* RouteData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RouteData.h; sourceTree = "<group>"; };
@@ -295,6 +293,9 @@
 		F54FD00B186596AD000E8579 /* LocationIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocationIndex.cpp; path = ../../../../libosmscout/src/osmscout/LocationIndex.cpp; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
+		F5EDD5441891556D00646B92 /* LocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationIndex.h; sourceTree = "<group>"; };
+		F5EDD545189155AA00646B92 /* CoreFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreFeatures.h; sourceTree = "<group>"; };
+		F5EDD5461891561000646B92 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -357,6 +358,7 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */,
 				F54FD00B186596AD000E8579 /* LocationIndex.cpp */,
 				F54DAA3F1815DA6500625DDA /* Area.cpp */,
 				F534FB9C18242F660039CEE4 /* Intersection.cpp */,
@@ -459,6 +461,9 @@
 		F51E3F30161A604300D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				F50BC73A18A97D5F002AE090 /* TextSearchIndex.h */,
+				F5EDD545189155AA00646B92 /* CoreFeatures.h */,
+				F5EDD5441891556D00646B92 /* LocationIndex.h */,
 				F534FB9A1823E8BD0039CEE4 /* Intersection.h */,
 				F54DAA631815DB3F00625DDA /* Area.h */,
 				F54DAA641815DB3F00625DDA /* AreaDataFile.h */,
@@ -474,8 +479,6 @@
 				F51E3F32161A604300D51926 /* AreaAreaIndex.h */,
 				F51E3F33161A604300D51926 /* AreaNodeIndex.h */,
 				F51E3F34161A604300D51926 /* AreaWayIndex.h */,
-				F51E3F36161A604300D51926 /* CoreFeatures.h */,
-				F51E3F37161A604300D51926 /* CoreFeatures.h.in */,
 				F51E3F38161A604300D51926 /* Database.h */,
 				F51E3F39161A604300D51926 /* DataFile.h */,
 				F51E3F3A161A604300D51926 /* GroundTile.h */,
@@ -522,8 +525,7 @@
 		F51E3F46161A604300D51926 /* private */ = {
 			isa = PBXGroup;
 			children = (
-				F51E3F48161A604300D51926 /* Config.h */,
-				F51E3F49161A604300D51926 /* Config.h.in */,
+				F5EDD5461891561000646B92 /* Config.h */,
 				F51E3F4A161A604300D51926 /* CoreImportExport.h */,
 			);
 			path = private;
@@ -806,12 +808,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -823,7 +826,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -833,17 +836,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
