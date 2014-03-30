@@ -22,7 +22,7 @@
 #include <limits>
 
 #include <osmscout/system/Math.h>
-#include <iostream>
+
 namespace osmscout {
 
   bool AreaAttributes::SetTags(Progress& /*progress*/,
