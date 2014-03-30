@@ -150,9 +150,9 @@ namespace osmscout {
    */
   bool RoutingService::Open()
   {
-    assert(!path.empty());
+    path=database->GetPath();
 
-    this->path=database->GetPath();
+    assert(!path.empty());
 
     if (!routeNodeDataFile.Open(path,
                                 FileScanner::FastRandom,true,
