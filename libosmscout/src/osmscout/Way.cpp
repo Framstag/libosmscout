@@ -686,33 +686,34 @@ namespace osmscout {
                    (minLon+lonValue)/conversionFactor-180.0);
     }
 
-    ids.resize(nodeCount,0);
+    ids.resize(nodeCount);
 
-    uint32_t idCount;
+    Id minId;
 
-    scanner.ReadNumber(idCount);
+    scanner.ReadNumber(minId);
 
-    if (idCount>0) {
-      Id      minId;
-      size_t lastIndex=std::numeric_limits<size_t>::max();
+    if (minId>0) {
+      size_t idCurrent=0;
 
-      scanner.ReadNumber(minId);
+      while (idCurrent<ids.size()) {
+        uint8_t bitset;
+        size_t  bitmask=1;
 
-      for (size_t i=1; i<=idCount; i++) {
-        uint32_t index;
-        Id       id;
+        scanner.Read(bitset);
 
-        scanner.ReadNumber(index);
+        for (size_t i=0; i<8 && idCurrent<ids.size(); i++) {
+          if (bitset & bitmask) {
+            scanner.ReadNumber(ids[idCurrent]);
 
-        if (lastIndex!=std::numeric_limits<size_t>::max()) {
-          index=index+lastIndex+1;
+            ids[idCurrent]+=minId;
+          }
+          else {
+            ids[idCurrent]=0;
+          }
+
+          bitmask*=2;
+          idCurrent++;
         }
-
-        scanner.ReadNumber(id);
-
-        ids[index]=id+minId;
-
-        lastIndex=index;
       }
     }
 
@@ -796,42 +797,48 @@ namespace osmscout {
       writer.WriteNumber(lonValue);
     }
 
-    uint32_t idCount=0;
-    Id       minId;
+    Id minId=0;
 
     for (size_t i=0; i<ids.size(); i++) {
       if (ids[i]!=0) {
-        if (idCount==0) {
+        if (minId==0) {
           minId=ids[i];
         }
         else {
           minId=std::min(minId,ids[i]);
         }
-
-        idCount++;
       }
     }
 
-    writer.WriteNumber(idCount);
+    writer.WriteNumber(minId);
 
-    if (idCount>0) {
-      size_t lastIndex=std::numeric_limits<size_t>::max();
+    if (minId>0) {
+      size_t idCurrent=0;
 
-      writer.WriteNumber(minId);
+      while (idCurrent<ids.size()) {
+        uint8_t bitset=0;
+        size_t  bitMask=1;
+        size_t  idEnd=std::min(idCurrent+8,ids.size());
 
-      for (size_t i=0; i<ids.size(); i++) {
-        if (ids[i]!=0) {
-          if (lastIndex==std::numeric_limits<size_t>::max()) {
-            writer.WriteNumber((uint32_t)i);
+        for (size_t i=idCurrent; i<idEnd; i++) {
+          if (ids[i]!=0) {
+            bitset=bitset | bitMask;
           }
-          else {
-            writer.WriteNumber((uint32_t)(i-lastIndex-1));
-          }
 
-          writer.WriteNumber(ids[i]-minId);
-
-          lastIndex=i;
+          bitMask*=2;
         }
+
+        writer.Write(bitset);
+
+        for (size_t i=idCurrent; i<idEnd; i++) {
+          if (ids[i]!=0) {
+            writer.WriteNumber(ids[i]-minId);
+          }
+
+          bitMask=bitMask*2;
+        }
+
+        idCurrent+=8;
       }
     }
 
