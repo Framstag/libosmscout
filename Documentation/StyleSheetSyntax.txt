@@ -1,0 +1,3 @@
+For a detailed description of the style sheet syntax, pleas etake a look
+at the standard.oss file which contains a summary in its initial
+comment block.

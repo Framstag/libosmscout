@@ -241,7 +241,7 @@ namespace osmscout {
        * Within a style priority, we draw transparent lines over solid lines
        *
        * Within a style priority we draw lines in order of style sheet way priority
-       * (more important ways on top of less important ways, higher prioruty value first))
+       * (more important ways on top of less important ways, higher priority value first))
        *
        * @param other
        * @return

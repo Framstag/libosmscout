@@ -1,4 +1,190 @@
 OSS
+ /*
+   The OSS file defines how data is visualsized in a map. In constists of the
+   following sections:
+
+   ORDER WAYS:
+     This section defines in which order ways are rendered. It defines a
+     number groups which contains ways types. Ways types in the same group
+     have the same rendering priority. Groups further down the style sheet
+     are rendered below ways further up in the GROUP list. Rendering order
+     is only relevant if ways of different types cross each other. Note
+     that ways are first ordered by layer, then within a layer by rendering
+     priority. So a bridge will always be rendered on top a "bridged" way,
+     a tunnel always below a "tunneled" ways.
+
+   CONST:
+     This (currently) allows you to define named constants for colors. Named
+     colors can be used anywhere you can use "raw" rgb(a) values using the
+     "@"<colorname> syntax. Note it is possible to enhance the CONST section
+     to support constants for other types, too. Just make a feature request!
+
+   SYMBOL:
+     The SYMBOL sections allows you to define simple vectorized symbols
+     consisting of one or more simple primitives like rectangles and circles.
+     It is medium complicated for a backend to support symbols and likely
+     simpler than support of external images or SVGs. Use SYMBOLs for things
+     like oneway arrows, simple signs or similar.
+
+     Currently the following primives are supported:
+       * RECTANGLE <x> , <y> <width> x <height> { area style definitions }
+       * CIRCLE    <x> , <y> <radius> { area style definitions }
+       * POLYGON   <x> , <y> ...more coordinates... { area style definitions }
+
+     "area style definitions" are normal style definitions for areas as
+     used within the STYLE section.
+
+   STYLE:
+     The style section is a CSS-like aproach to define a number of filters
+     for objects (nodes, areas, ways) put into the renderer, where each
+     filter can manipulate the rendering attributes of the object.
+
+     By default an object is not rendered at all. You need to set at least
+     some attributes to get an object rendered.
+
+     The fundamental aspect of this sections are filters, objects and
+     the style definition itself.
+
+     Filter are defined in "[" ... "]" brackets. The following filter
+     criteria exist:
+     * TYPE <typename> "," <typename> - the filter is valid only for
+       objects that match one of the given types.
+     * MAG <minLevel> - <maxLevel> - the filter is only valid for the
+       given magnification interval. MinLevel or Maxlevel is optional
+       with the obvious default.
+     * ONEWAY - the filter only matches for oneways.
+     * BRIDGE - the filter only matches for bridges
+     * TUNNEL - the filter only matches for tunnels
+     * SIZE <widthInMeter>m <minWidthMM>mm:<minWidthPx>px
+            "<"
+            <maxWidthMM>mm:<maxWidthPx>px - this filter restrict
+       objects by dimension of things on map in releation
+       to some size in real world. The minimum interval or
+       the maximum interval is optional (with 0 and infivity as
+       defaults). For each border the size in mm or the size in pixel
+       is optional, too. The criteria transforms the size in meter
+       to a size on map. This size on the map must be in the given
+       interval.
+
+     If a filter criteria is not given, the filter critera matches
+     everything (all types, all magnifications,...). Criteria can only
+     be used once in a filter and criteria must be written in the order
+     above.
+
+     A filter operations on a directl following sryle object, It can
+     also be followed by a block ("{"..."}") which then can recursively
+     contain additional filters and or style definitions.
+
+     There are certain things we can assign a style onto:
+     * NODE.ICON - A style definition for icon for a node
+     * NODE.TEXT - A style definition for a label for a node
+     * AREA - A style definition for drawing the area itself
+     * AREA.TEXT - A style definition for a label on an area
+     * WAY - A style definition for the main path of a way
+     * Way#<pathName> - Addtional style definition for any
+       number of additional slots/paths with different styles.
+     * WAY.TEXT - A style definition for the contour label of
+       a way.
+     * WAY.SHIELD - A style definition for a plate or shield
+       repeately placed onto the way.
+     * WAY.SYMBOL - A style definition for a symbold repeatly
+       drawn onto the way
+
+     A style definition consists of a starting "{" a list of attributes
+     with values ("<attributeName> ":" <value> ";") and a closing
+     "}".
+
+     A line style for paths has the following attributes:
+     * color: <COLOR> - Color of the line. if not set, color
+       is transparent (a lines is not drawn)
+     * dash: <dashWidth> ","... - Size of the dashes. If not set
+       lines is solid.
+     * gapColor:  <COLOR> - Color drawn in the "gap", if not set
+       gapColor is transparent.
+     * displayWidth : <width>mm - width of the line in millimeter ("size
+       on map")
+     * width : <width>m - Width of the line in meters ("real
+       word dimension").
+     * displayOffset: <offset>mm - Offset of drawn line in relation
+       to the actual path.
+     * offset: <offset>m - Offset of the drawn line in relation
+       to the actual path.
+     * cap: <capStyle> - Cap to be used in all cases. Possible values
+       are butt, round and square.
+     * joinCap: <capStyle> - Cap in case where lines join. Possible values
+       are butt, round and square.
+     * endCap: <capStyle> - Cap in the case where the lines ends without
+       joining another line.  Possible values are butt, round and square.
+     * priority <integer value> - Drawing priority in relation to other
+       slots/pathes of the same object. Smaller values are drawn first.
+
+     An area style for areas has the following attributes:
+     * color: <color> - The fill color. By default transparent so area will
+       not be filled.
+     * pattern: <patternName> - (File)name of an image that is repeately
+       drawn on top of the area. By default no pattern will be drawn.
+     * patternMinMag: <map> - Minimum magnification for the pattern to be
+       drawn (deprecated, should be better defined by a filter). By default
+       this is magWorld, so the pattern will always be drawn.
+     * borderColor: <color> - Color of the border line. By default
+       transparent so not border wil be drawn.
+     * borderWidth: <width>mm - Width of the border in display size. By
+       default the border with is 0.
+     * borderDash:  <dashWidth> "," ... - Dash widths of the border. By
+       default the border is solid.
+
+     An text style for nodes or areas has the following attributes:
+     * label: <labelType> - Depending on the given type (label or ref)
+       either the label value or the fref value of the object is used as
+       label.
+     * style: <styleValue> - Depending on the value (normal or emphasize) the
+       label is eitehr drawn normal or (depending on the backend the
+       visualisation may be different) somehow emphasized.
+     * color: <COLOR> - The color of the text
+     * size: <SIZE> - The size of the text relative to the standard text size.
+       2.0 for example genrates a text twice as height as normal.
+     * scaleMag: <MAG> - Starting with the given magnification in the label
+       is drawn bigger but on the same time with increasing transparency
+       with increasing magnification, genrating an overlay-like effect.
+     * priority: <value> - numeric value defining a relative priority between
+       labels. Labels with a lower value will be drawn in favour of labels
+       with a higher priority value. Note that labels with a certain alpha value
+       will be ignored (so giant scaleMag labels will not "kill" all other
+       labels beneeth).
+
+     A text style for a path has the following attributes:
+     * label: <labelType> - Depending on the given type (label or ref)
+       either the label value or the fref value of the object is used as label.
+     * color: <COLOR> - The color of the text
+     * size: <SIZE> - The size of the text relative to the standard text size.
+       2.0 for example genrates a text twice as height as normal.
+
+     A icon style for a node has the following attributes:
+     * symbol: <symbolName> -  The name of the symbol to draw
+     * name: <iconName>  - The name of the icon to draw. An icon name
+       is normally mapped onto an external image. The supported image
+       formats depend on the actual backend.
+
+     A shield style for a path has the following attributes:
+     * label: <labelType> - Depending on the given type (label or ref)
+       either the label value or the fref value of the object is used as label.
+     * color: <COLOR> - The color of the text
+     * backgroundColor: <COLOR> - The color of the shield itself
+     * borderColor: <COLOR> - The color of the border.
+     * size: - The size of the text relative to the standard text size.
+       2.0 for example genrates a text twice as height as normal.
+     * priority: <value> - numeric value defining a relative priority between
+       labels. Labels with a lower value will be drawn in favour of labels
+       with a higher priority value. Note that labels with a certain alpha
+       value will be ignored (so giant scaleMag labels will not "kill" all
+       other labels beneeth).
+     * shieldSpace: <space>mm - Space between each shield on a path.
+
+     If you are interested in a more details syntax description please take a
+     look at the OSS.atg file, which contains (besides the actual AST building
+     code) the EBNF for the syntax.
+ */
+
  ORDER WAYS
   GROUP _route
   GROUP highway_motorway
