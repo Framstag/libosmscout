@@ -31,6 +31,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Util
    * The NodeUseMap can be used to efficiently check if an
    * id used at least twice. In concrete it is used, to
    * check if a node id is shared by multiple ways/areas.

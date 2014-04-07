@@ -28,6 +28,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Util
    * TypeSet is an libosmscout specific container class for holding a enumeration of types.
    *
    * Internally is uses the technical knowledge that all types have a low, monotinic increasing id, to

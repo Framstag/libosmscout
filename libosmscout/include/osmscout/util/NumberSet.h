@@ -24,6 +24,10 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Util
+   *
+   */
   class OSMSCOUT_API NumberSet
   {
     typedef unsigned long Number;

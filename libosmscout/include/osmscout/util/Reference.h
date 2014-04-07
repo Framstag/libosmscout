@@ -28,8 +28,9 @@
 namespace osmscout {
 
   /**
-    Baseclass for all classes that support reference counting.
-  */
+   * \ingroup Util
+   * Baseclass for all classes that support reference counting.
+   */
   class OSMSCOUT_API Referencable
   {
   public:
@@ -74,17 +75,18 @@ namespace osmscout {
   };
 
   /**
-    LazyRef does delay the allocation fo the referenced object of type T. It also
-    implements references counting on copy and assignment, allow to exchange
-    costly copy operations with cheaper reference assignment operations. Using LazyRef
-    is useful if you reference objects at multiple locations where the object is only
-    destroyed if all locations delete the object and where copying the object is expensive.
-
-    LazyRef allocates a new object instance the first time the reference is dereferenced and
-    the object instance of type T is accessed.
-
-    Note that type T must inherit from class Referencable!
-  */
+   * \ingroup Util
+   * LazyRef does delay the allocation fo the referenced object of type T. It also
+   * implements references counting on copy and assignment, allow to exchange
+   * costly copy operations with cheaper reference assignment operations. Using LazyRef
+   * is useful if you reference objects at multiple locations where the object is only
+   * destroyed if all locations delete the object and where copying the object is expensive.
+   *
+   * LazyRef allocates a new object instance the first time the reference is dereferenced and
+   * the object instance of type T is accessed.
+   *
+   * Note that type T must inherit from class Referencable!
+   */
   template <typename T>
   class OSMSCOUT_API LazyRef
   {
@@ -188,10 +190,11 @@ namespace osmscout {
   };
 
   /**
-    Ref handles references to object using reference counting semantic. The object of type
-    T is only deleted if all references have gone invalid.
-
-    Note that type T must inherit from class Referencable!
+   * \ingroup Util
+   * Ref handles references to object using reference counting semantic. The object of type
+   * T is only deleted if all references have gone invalid.
+   *
+   * Note that type T must inherit from class Referencable!
   */
   template <typename T> class Ref
   {

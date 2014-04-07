@@ -29,6 +29,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Util
    * Encode a signed number into the given buffer using some variable length encoding.
    *
    * The first bit (if set) signals a negative numer. The highest bit in a byte
@@ -71,6 +72,7 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Util
    * Encode an unsigned number into the given buffer using some variable length encoding.
    *
    * The highest bit in a byte is set, if there is an additional byte following.
@@ -125,6 +127,7 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Util
    * Encode a number into the given buffer using some variable length encoding.
    *
    * The current implementation requires the buffer to have at least space
@@ -144,6 +147,7 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Util
    * Decode a signed variable length encoded number from the buffer back to
    * the variable.
    *
@@ -194,6 +198,7 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Util
    * Decode an unsigned variable length encoded number from the buffer back to
    * the variable.
    *
@@ -248,6 +253,7 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Util
    * Decode a variable length encoded number from the buffer back to
    * the variable.
    *

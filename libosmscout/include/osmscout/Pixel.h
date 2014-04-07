@@ -26,11 +26,20 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Geometry
+   *
+   * Representation of a pixel on a display or a plane.
+   * Coordinates are non-negative, values are decimal.
+   */
   struct OSMSCOUT_API Pixel
   {
     uint32_t x;
     uint32_t y;
 
+    /**
+     * The default constructor creates an uninitialized instance (for performance reasons).
+     */
     inline Pixel()
     {
       // no code
@@ -54,12 +63,20 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Geometry
+   * Two dimensional coordinate (floating point values,
+   * negative coordinates possible).
+   */
   struct OSMSCOUT_API Vertex2D
   {
   private:
     double coords[2];
 
   public:
+    /**
+     * The default constructor creates an uninitialized instance (for performance reasons).
+     */
     inline Vertex2D()
     {
       // no code
@@ -118,6 +135,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Geometry
+   * Three dimensional coordinate (floating point values,
+   * negative coordinates possible).
+   */
   struct OSMSCOUT_API Vertex3D
   {
   private:
@@ -126,6 +148,9 @@ namespace osmscout {
     double z;
 
   public:
+    /**
+     * The default constructor creates an uninitialized instance (for performance reasons).
+     */
     inline Vertex3D()
     {
       // no code

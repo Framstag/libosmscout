@@ -25,6 +25,10 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Geometry
+   * A point is a identifiable (has an id) geo-coordinate.
+   */
   class OSMSCOUT_API Point
   {
   private:

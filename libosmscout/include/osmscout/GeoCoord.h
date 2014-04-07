@@ -26,11 +26,19 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Geometry
+   *
+   * Anonymous geographic coordinate.
+   */
   struct OSMSCOUT_API GeoCoord
   {
     double lat;
     double lon;
 
+    /**
+     * The default constructor creates an uninitialized instance (for performance reasons).
+     */
     inline GeoCoord()
     {
       // no code

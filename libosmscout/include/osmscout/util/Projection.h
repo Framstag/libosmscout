@@ -28,6 +28,9 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Geometry
+   */
   class OSMSCOUT_API Projection
   {
   public:
@@ -188,6 +191,9 @@ namespace osmscout {
     friend class BatchTransformer;
   };
 
+  /**
+   * \ingroup Geometry
+   */
   class OSMSCOUT_API MercatorProjection : public Projection
   {
   protected:
@@ -298,6 +304,9 @@ namespace osmscout {
 
   };
 
+  /**
+   * \ingroup Geometry
+   */
   class OSMSCOUT_API ReversedYAxisMercatorProjection : public MercatorProjection
   {
   private:

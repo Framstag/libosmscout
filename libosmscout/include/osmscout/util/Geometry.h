@@ -34,6 +34,15 @@
 namespace osmscout {
 
   /**
+   * \defgroup Geometry Geometric helper
+   *
+   * Collection of classes and methods releated to low level geometric
+   * stuff.
+   */
+
+  /**
+   * \ingroup Geometry
+   *
    * Returns true, if the lines defined by the given coordinates intersect.
    */
   template<typename N>
@@ -78,6 +87,8 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Geometry
+   *
    * Returns true, if the lines defined by the given coordinates intersect. Returns the intersection.
    */
   template<typename N>
@@ -140,9 +151,11 @@ namespace osmscout {
   }
 
   /**
-    Returns true, if point in area.
-
-    http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
+   * \ingroup Geometry
+   *
+   * Returns true, if point in area.
+   *
+   * http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
    */
 /*
   template<typename N, typename M>
@@ -196,10 +209,12 @@ namespace osmscout {
   }*/
 
   /**
-    Returns true, if point in on the area border or within the area.
-
-    See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-    */
+   * \ingroup Geometry
+   *
+   * Returns true, if point in on the area border or within the area.
+   *
+   * See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+   */
   template<typename N, typename M>
   inline bool IsCoordInArea(const N& point,
                             const std::vector<M>& nodes)
@@ -225,10 +240,11 @@ namespace osmscout {
   }
 
   /**
-    Gives information about the position of the point in relation to the area.
-
-    If -1 returned, the point is outside the area, if 0, the point is on the area boundary, 1
-    the point is within the area.
+   * \ingroup Geometry
+   * Gives information about the position of the point in relation to the area.
+   *
+   * If -1 returned, the point is outside the area, if 0, the point is on the area boundary, 1
+   * the point is within the area.
    */
   inline int GetRelationOfPointToArea(const GeoCoord& point,
                                       const std::vector<GeoCoord>& nodes)
@@ -253,8 +269,9 @@ namespace osmscout {
   }
 
   /**
-    Return true, if area a is completely in area b
-    */
+   * \ingroup Geometry
+   * Return true, if area a is completely in area b
+   */
   template<typename N,typename M>
   inline bool IsAreaCompletelyInArea(const std::vector<N>& a,
                                      const std::vector<M>& b)
@@ -269,8 +286,9 @@ namespace osmscout {
   }
 
   /**
-    Return true, if at leats one point of area a in within area b
-    */
+   * \ingroup Geometry
+   * Return true, if at least one point of area a in within area b
+   */
   template<typename N,typename M>
   bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
                                  const std::vector<M>& b)
@@ -285,9 +303,10 @@ namespace osmscout {
   }
 
   /**
-    Returns true, if area a is completely in area b under the assumption that the area a is either
-    completely within or outside the area b.
-    */
+   * \ingroup Geometry
+   * Returns true, if area a is completely in area b under the assumption that the area a is either
+   * completely within or outside the area b.
+   */
   template<typename N,typename M>
   bool IsAreaSubOfArea(const std::vector<N>& a,
                        const std::vector<M>& b)
@@ -306,6 +325,14 @@ namespace osmscout {
     return false;
   }
 
+  /**
+   * \ingroup Geometry
+   * Assumes that the given areas do not intersect.
+   *
+   * Returns true, of area a is within b (because at least
+   * one point of area a is in b), else (at least one point
+   * of area a is outside area b) false
+   */
   inline bool IsAreaSubOfArea(const std::vector<GeoCoord>& a,
                               const std::vector<GeoCoord>& b)
   {
@@ -324,6 +351,7 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Geometry
    * Returns true, if the handed polygon is simple (aka not complex).
    *
    * Currently the following checks are done:
@@ -370,6 +398,7 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Geometry
    * Returns true, if the handed polygons are simple (aka not complex).
    * This method supports passing multiple closed polygons and checks
    * all of them.
@@ -421,6 +450,7 @@ namespace osmscout {
   }
 
   /**
+   * \ingroup Geometry
    *  Returns true, if the polygon is counter clock wise (CCW)
    */
   template<typename N>
@@ -459,6 +489,13 @@ namespace osmscout {
     return signedArea>0.0;
   }
 
+  /**
+   * \ingroup Geometry
+   *
+   * @param outerPoints
+   * @param innerPoints
+   * @return
+   */
   template<typename N>
   bool AreaIsValid(std::vector<N>& outerPoints,
                    std::vector<std::vector<N> >& innerPoints)
@@ -542,6 +579,10 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * \ingroup Geometry
+   *
+   */
   OSMSCOUT_API inline void Normalize(double x,
                                      double y,
                                      double& nx,
@@ -553,6 +594,10 @@ namespace osmscout {
     ny=y/length;
   }
 
+  /**
+   * \ingroup Geometry
+   * Calculates the determinant of the line between the given points.
+   */
   OSMSCOUT_API inline double Det(double x1,
                                  double y1,
                                  double x2,
@@ -562,22 +607,56 @@ namespace osmscout {
   }
 
 
+  /**
+   * \ingroup Math
+   *
+   */
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
+
+  /**
+   * \ingroup Geometry
+   * Calculates the spherical distance between the two given points
+   * on the sphere.
+   */
   extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
                                                   double bLon, double bLat);
+  /**
+   * \ingroup Geometry
+   * Calculates the ellipsoidal (WGS-84) distance between the two given points
+   * on the ellipsoid.
+   */
   extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
                                                    double bLon, double bLat);
 
+  /**
+   * \ingroup Geometry
+   * Given a starting point and a bearing and a distance calculates the
+   * coordinates of the resulting point in the (WGS-84) ellipsoid.
+   */
   extern OSMSCOUT_API void GetEllipsoidalDistance(double lat1, double lon1,
                                                   double bearing, double distance,
                                                   double& lat2, double& lon2);
 
+  /**
+   * \ingroup Geometry
+   *Calculates the initial bearing for a line from one coordinate two the other coordinate
+   *on a sphere.
+   */
   extern OSMSCOUT_API double GetSphericalBearingInitial(double aLon, double aLat,
                                                         double bLon, double bLat);
 
+  /**
+   * \ingroup Geometry
+   *Calculates the final bearing for a line from one coordinate two the other coordinate
+   *on a sphere.
+   */
   extern OSMSCOUT_API double GetSphericalBearingFinal(double aLon, double aLat,
                                                       double bLon, double bLat);
 
+  /**
+   * \ingroup Geometry
+   * Normalizes the given bearing to be in the interval [-180.0 - 180.0]
+   */
   extern OSMSCOUT_API double NormalizeRelativeAngel(double angle);
 
   struct OSMSCOUT_API ScanCell
@@ -588,6 +667,10 @@ namespace osmscout {
     ScanCell(int x, int y);
   };
 
+  /**
+   * \ingroup Geometry
+   * Does a scan conversion for a line between the given coordinates.
+   */
   void OSMSCOUT_API ScanConvertLine(int x1, int y1,
                                     int x2, int y2,
                                     std::vector<ScanCell>& cells);

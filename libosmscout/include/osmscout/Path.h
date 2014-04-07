@@ -29,6 +29,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Geometry
    * A path is defined by the way to be used and the node id of a node on this way
    * which is the target to reach.
    */

@@ -39,6 +39,9 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Geometry
+   */
   class OSMSCOUT_API TransPolygon
   {
   private:
@@ -113,6 +116,9 @@ namespace osmscout {
                         double& cy) const;
   };
 
+  /**
+   * \ingroup Geometry
+   */
   class OSMSCOUT_API CoordBuffer
   {
   public:
@@ -131,6 +137,9 @@ namespace osmscout {
                                  std::vector<ScanCell>& cells) = 0;
   };
 
+  /**
+   * \ingroup Geometry
+   */
   template<class P>
   class OSMSCOUT_API CoordBufferImpl : public CoordBuffer
   {
@@ -347,6 +356,9 @@ namespace osmscout {
     cy=ymin+(ymax-ymin)/2;
   }*/
 
+  /**
+   * \ingroup Geometry
+   */
   class OSMSCOUT_API TransBuffer
   {
   public:

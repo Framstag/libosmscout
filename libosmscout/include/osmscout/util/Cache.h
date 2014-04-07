@@ -37,22 +37,23 @@
 namespace osmscout {
 
   /**
-    Generic FIFO cache implementation with O(n log n) semantic.
-
-    Template parameter class K holds the key value (must be a numerical value),
-    parameter class V holds the data class that is to be cached,
-    and parameter IK holds the internal key value, must be an unsigned value,
-    default is PageId.
-
-    * The cache is not threadsafe.
-    * It uses a std::vector<std::list>> as a hash table for data lookup
-    * It uses an std::list for implementing FIFO characteristics.
-
-    Implementation details: If std::unordered_map ist available we use this
-    for fast detection (O(1)) if an object is already in the cast. If it is not
-    available, we use a vector as a hashtable via the key value with list
-    as entry type for hash code conflict handling.
-
+   * \ingroup Util
+   * Generic FIFO cache implementation with O(n log n) semantic.
+   *
+   * Template parameter class K holds the key value (must be a numerical value),
+   * parameter class V holds the data class that is to be cached,
+   * and parameter IK holds the internal key value, must be an unsigned value,
+   * default is PageId.
+   *
+   * * The cache is not threadsafe.
+   * * It uses a std::vector<std::list>> as a hash table for data lookup
+   * * It uses an std::list for implementing FIFO characteristics.
+   *
+   * Implementation details: If std::unordered_map ist available we use this
+   * for fast detection (O(1)) if an object is already in the cast. If it is not
+   * available, we use a vector as a hashtable via the key value with list
+   * as entry type for hash code conflict handling.
+   *
    */
   template <class K, class V, class IK = PageId>
   class Cache

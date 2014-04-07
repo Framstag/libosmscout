@@ -26,11 +26,18 @@
 
 namespace osmscout {
 
+  /**
+   * Representation of an on-screen coordinate (floating point
+   * value, negative values allowed).
+   */
   struct OSMSCOUT_API Coord
   {
     double x;
     double y;
 
+    /**
+     * The default constructor creates an uninitialized instance (for performance reasons).
+     */
     inline Coord()
     {
       // no code

@@ -27,8 +27,9 @@
 namespace osmscout {
 
   /**
-    Simple stop clock implementation.
-    */
+   * \ingroup Util
+   * Simple stop clock implementation.
+   */
   class OSMSCOUT_API StopClock
   {
   private:

@@ -30,6 +30,9 @@ namespace osmscout {
 
   /**
    * \defgroup File Platform independent file access
+   *
+   * Classes and methods related to low-level platform
+   * independent access to files on disk.
    */
 
   /**

@@ -57,6 +57,9 @@ namespace osmscout {
 
   /**
    * \defgroup Database Database
+   *
+   * Classes and functions for storing and indexing of OSM objects into
+   * database-like on-disk data structures.
    */
 
   /**
@@ -220,8 +223,8 @@ namespace osmscout {
   /**
    * \defgroup Service High level services
    *
-   * Services offer a application developer targeted interfaces for certain topics
-   * like POIs, location search, routing,...
+   * Services offer a application developer targeted interface for certain topics
+   * like handling of POIs, location search, routing,...
    *
    * In general they need at least a reference to a Database objects since they
    * are just convenience APIs on top of the existing data files and indexes.

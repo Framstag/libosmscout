@@ -26,7 +26,10 @@
 
 namespace osmscout {
   /**
-   * \defgroup Location Location related datastructures and services
+   * \defgroup Location Location related data structures and services
+   *
+   * Classes and methods for handling location aspects of object
+   * in the libosmscout database.
    */
 
   /**
