@@ -95,6 +95,13 @@ void Highlighter::updateRules()
     rule.format = kwTUNNELBRIDGEFormat;
     highlightingRules.append(rule);
 
+    kwONEWAYFormat.setFontWeight(QFont::Bold);
+    kwONEWAYFormat.setForeground(QColor("#50ff50"));
+    rule.pattern = QRegExp("ONEWAY");
+    rule.pattern.setMinimal(true);
+    rule.format = kwONEWAYFormat;
+    highlightingRules.append(rule);
+
     commentsFormat.setFontItalic(true);
     commentsFormat.setForeground(QColor("#309030"));
     rule.pattern = QRegExp("//.*");

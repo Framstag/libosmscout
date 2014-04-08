@@ -64,6 +64,7 @@ private:
     QTextCharFormat kwSIZEFormat;
     QTextCharFormat kwTEXTICONFormat;
     QTextCharFormat kwTUNNELBRIDGEFormat;
+    QTextCharFormat kwONEWAYFormat;
     QTextCharFormat commentsFormat;
     QTextCharFormat multiLineCommentFormat;
 };

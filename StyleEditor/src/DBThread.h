@@ -26,7 +26,10 @@
 #include <QMutex>
 
 #include <osmscout/Database.h>
-#include <osmscout/Router.h>
+#include <osmscout/LocationService.h>
+#include <osmscout/MapService.h>
+#include <osmscout/RoutingService.h>
+
 #include <osmscout/RoutePostprocessor.h>
 
 #include <osmscout/MapPainterQt.h>
@@ -90,12 +93,16 @@ private:
   SettingsRef                  settings;
   mutable QMutex               mutex;
   osmscout::DatabaseParameter  databaseParameter;
-  osmscout::Database           database;
   osmscout::StyleConfig        *styleConfig;
   osmscout::MapData            data;
   osmscout::MapPainterQt       painter;
+
+  osmscout::DatabaseRef        database;
+  osmscout::LocationServiceRef locationService;
+  osmscout::MapServiceRef      mapService;
   osmscout::RouterParameter    routerParameter;
-  osmscout::RouterRef          router;
+  osmscout::RoutingServiceRef  router;
+
   osmscout::RoutePostprocessor routePostprocessor;
   QString                      iconDirectory;
   QString                      m_stylesheetFilename;

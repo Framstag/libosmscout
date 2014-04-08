@@ -42,13 +42,12 @@
 
 namespace osmscout {
     typedef struct {
-        bool firstPoint;
+        bool closeWay;
         size_t transStart;
         size_t transEnd;
         size_t i;
         size_t nVertex;
         ssize_t direction;
-        double currentL;
     } FollowPathHandle;
     
     class MapPainterIOS : public MapPainter {
@@ -142,9 +141,9 @@ namespace osmscout {
     private:
         Font *GetFont(const MapParameter& parameter, double fontSize);
         double pathLength(size_t transStart, size_t transEnd);
-        bool followPath(FollowPathHandle &hnd, double space, double width,
-                        Vertex2D &origin, double &slope);
-        void followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation);
+        bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
+        void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
+                            bool isClosed, bool keepOrientation);
     };
 }
 

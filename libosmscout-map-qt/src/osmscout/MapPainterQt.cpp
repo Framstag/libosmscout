@@ -356,10 +356,17 @@ namespace osmscout {
   }
 
 
-  void MapPainterQt::followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation) {
+  void MapPainterQt::followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
+                                     bool isClosed, bool keepOrientation) {
       hnd.i = 0;
-      hnd.firstPoint = true;
       hnd.nVertex = labs(transEnd - transStart);
+      bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
+      if(isClosed && !isReallyClosed){
+          hnd.nVertex++;
+          hnd.closeWay = true;
+      } else {
+          hnd.closeWay = false;
+      }
       if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
           hnd.transStart = transStart;
           hnd.transEnd = transEnd;
@@ -368,44 +375,35 @@ namespace osmscout {
           hnd.transEnd = transStart;
       }
       hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
-      hnd.currentL = 0;
+      origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
   }
 
-  bool MapPainterQt::followPath(FollowPathHandle &hnd, double space, double width,
-                                Vertex2D &origin, double &slope) {
+  bool MapPainterQt::followPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
 
-      double x,y;
-      if(hnd.firstPoint){
-          x = coordBuffer->buffer[hnd.transStart].GetX();
-          y = coordBuffer->buffer[hnd.transStart].GetY();
-          hnd.firstPoint = false;
-      } else {
-          x = origin.GetX();
-          y = origin.GetY();
-      }
-      double remain = width+space;
+      double x = origin.GetX();
+      double y = origin.GetY();
+      double x2,y2;
+      double deltaX, deltaY, len, fracToGo;
       while(hnd.i < hnd.nVertex) {
-          double x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-          double y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();;
+          if(hnd.closeWay && hnd.nVertex - hnd.i == 1){
+              x2 = coordBuffer->buffer[hnd.transStart].GetX();
+              y2 = coordBuffer->buffer[hnd.transStart].GetY();
+          } else {
+              x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+              y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+          }
+          deltaX = (x2 - x);
+          deltaY = (y2 - y);
+          len = sqrt(deltaX*deltaX + deltaY*deltaY);
 
-          double deltaX = (x2 - x);
-          double deltaY = (y2 - y);
-          double len = sqrt(deltaX*deltaX + deltaY*deltaY);
-
-          //point is before next point in path, interpolate the answer
-          double fracToGo = remain/len;
+          fracToGo = l/len;
           if(fracToGo <= 1.0) {
-              double x1 = x+(deltaX*fracToGo);
-              double y1 = y+(deltaY*fracToGo);
-              slope = atan2(y2-y1, x2-x1);
-              origin.Set(x1, y1);
-              hnd.currentL += remain;
+              origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
               return true;
           }
 
           //advance to next point on the path
-          hnd.currentL += len;
-          remain -= len;
+          l -= len;
           x = x2;
           y = y2;
           hnd.i++;
@@ -427,23 +425,39 @@ namespace osmscout {
 
       symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-      double width=ConvertWidthToPixel(parameter,maxX-minX);
-      double height=ConvertWidthToPixel(parameter,maxY-minY);
+      double widthPx=ConvertWidthToPixel(parameter,maxX-minX);
+      double height=maxY-minY;
 
+      bool isClosed = false;
       Vertex2D origin;
-      double slope;
+      double x1,y1,x2,y2,x3,y3,slope;
       FollowPathHandle followPathHnd;
-      followPathInit(followPathHnd, transStart, transEnd, true);
-      if(!followPath(followPathHnd, 0, space/2, origin, slope)){
-          return;
+      followPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
+      if(!isClosed && !followPath(followPathHnd, space/2, origin)){
+              return;
       }
       QTransform savedTransform = painter->transform();
       QTransform t;
-      while (followPath(followPathHnd, space, width, origin, slope)){
-          t = QTransform::fromTranslate(origin.GetX(), origin.GetY());
-          t.rotateRadians(slope);
-          painter->setTransform(t);
-          DrawSymbol(projection, parameter, symbol, 0, height/2);
+      bool loop = true;
+      while (loop){
+          x1 = origin.GetX();
+          y1 = origin.GetY();
+          loop = followPath(followPathHnd, widthPx/2, origin);
+          if(loop){
+              x2 = origin.GetX();
+              y2 = origin.GetY();
+              loop = followPath(followPathHnd, widthPx/2, origin);
+              if(loop){
+                  x3 = origin.GetX();
+                  y3 = origin.GetY();
+                  slope = atan2(y3-y1,x3-x1);
+                  t = QTransform::fromTranslate(x2, y2);
+                  t.rotateRadians(slope);
+                  painter->setTransform(t);
+                  DrawSymbol(projection, parameter, symbol, 0, height);
+                  loop = followPath(followPathHnd, space, origin);
+              }
+           }
       }
       painter->setTransform(savedTransform);
   }
@@ -475,8 +489,8 @@ namespace osmscout {
 
     symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    centerX=maxX-minX;
-    centerY=maxY-minY;
+    centerX=x+(maxX+minX)/2;
+    centerY=y+(maxY+minY)/2;
 
     for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
          p!=symbol.GetPrimitives().end();

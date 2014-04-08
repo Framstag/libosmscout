@@ -379,12 +379,18 @@ namespace osmscout {
         }
         return len;
     }
-
     
-    void MapPainterIOS::followPathInit(FollowPathHandle &hnd, size_t transStart, size_t transEnd, bool keepOrientation) {
+    void MapPainterIOS::followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
+                                       bool isClosed, bool keepOrientation) {
         hnd.i = 0;
-        hnd.firstPoint = true;
         hnd.nVertex = labs(transEnd - transStart);
+        bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
+        if(isClosed && !isReallyClosed){
+            hnd.nVertex++;
+            hnd.closeWay = true;
+        } else {
+            hnd.closeWay = false;
+        }
         if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
             hnd.transStart = transStart;
             hnd.transEnd = transEnd;
@@ -393,44 +399,35 @@ namespace osmscout {
             hnd.transEnd = transStart;
         }
         hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
-        hnd.currentL = 0;
+        origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
     }
     
-    bool MapPainterIOS::followPath(FollowPathHandle &hnd, double space, double width,
-                                  Vertex2D &origin, double &slope) {
+    bool MapPainterIOS::followPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
         
-        double x,y;
-        if(hnd.firstPoint){
-            x = coordBuffer->buffer[hnd.transStart].GetX();
-            y = coordBuffer->buffer[hnd.transStart].GetY();
-            hnd.firstPoint = false;
-        } else {
-            x = origin.GetX();
-            y = origin.GetY();
-        }
-        double remain = width+space;
+        double x = origin.GetX();
+        double y = origin.GetY();
+        double x2,y2;
+        double deltaX, deltaY, len, fracToGo;
         while(hnd.i < hnd.nVertex) {
-            double x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-            double y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();;
+            if(hnd.closeWay && hnd.nVertex - hnd.i == 1){
+                x2 = coordBuffer->buffer[hnd.transStart].GetX();
+                y2 = coordBuffer->buffer[hnd.transStart].GetY();
+            } else {
+                x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+                y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+            }
+            deltaX = (x2 - x);
+            deltaY = (y2 - y);
+            len = sqrt(deltaX*deltaX + deltaY*deltaY);
             
-            double deltaX = (x2 - x);
-            double deltaY = (y2 - y);
-            double len = sqrt(deltaX*deltaX + deltaY*deltaY);
-            
-            //point is before next point in path, interpolate the answer
-            double fracToGo = remain/len;
+            fracToGo = l/len;
             if(fracToGo <= 1.0) {
-                double x1 = x+(deltaX*fracToGo);
-                double y1 = y+(deltaY*fracToGo);
-                slope = atan2(y2-y1, x2-x1);
-                origin.Set(x1, y1);
-                hnd.currentL += remain;
+                origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
                 return true;
             }
             
             //advance to next point on the path
-            hnd.currentL += len;
-            remain -= len;
+            l -= len;
             x = x2;
             y = y2;
             hnd.i++;
@@ -442,34 +439,48 @@ namespace osmscout {
                                           const MapParameter& parameter,
                                           const Symbol& symbol,
                                           double space,
+                                          /*bool isClosed,*/
                                           size_t transStart, size_t transEnd){
         
         
-        double minX;
-        double minY;
-        double maxX;
-        double maxY;
-        
+        double minX,minY,maxX,maxY;
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
         
         double width=ConvertWidthToPixel(parameter,maxX-minX);
         double height=ConvertWidthToPixel(parameter,maxY-minY);
+        bool isClosed = false;
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         Vertex2D origin;
         double slope;
+        double x1,y1,x2,y2,x3,y3;
         FollowPathHandle followPathHnd;
-        followPathInit(followPathHnd, transStart, transEnd, true);
-        if(!followPath(followPathHnd, 0, space/2, origin, slope)){
+        followPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
+        if(!isClosed && !followPath(followPathHnd, space/2, origin)){
             return;
         }
         CGContextSaveGState(cg);
-        while (followPath(followPathHnd, space, width, origin, slope)){
-            CGContextSaveGState(cg);
-            CGContextTranslateCTM(cg, origin.GetX(), origin.GetY());
-            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
-            CGContextConcatCTM(cg, ct);
-            DrawSymbol(projection, parameter, symbol, 0, height/2);
-            CGContextRestoreGState(cg);
+        bool loop = true;
+        while (loop){
+            x1 = origin.GetX();
+            y1 = origin.GetY();
+            loop = followPath(followPathHnd, width/2, origin);
+            if(loop){
+                x2 = origin.GetX();
+                y2 = origin.GetY();
+                if(loop){
+                    loop = followPath(followPathHnd, width/2, origin);
+                    x3 = origin.GetX();
+                    y3 = origin.GetY();
+                    slope = atan2(y3-y1,x3-x1);
+                    CGContextSaveGState(cg);
+                    CGContextTranslateCTM(cg, x2, y2);
+                    CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
+                    CGContextConcatCTM(cg, ct);
+                    DrawSymbol(projection, parameter, symbol, 0, height/2);
+                    CGContextRestoreGState(cg);
+                    loop = followPath(followPathHnd, space, origin);
+                }
+            }
         }
         CGContextRestoreGState(cg);
     }
@@ -509,13 +520,12 @@ namespace osmscout {
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #endif
         CGAffineTransform ct;
-        
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
         Vertex2D charOrigin;
-        double slope;
+        double x1,y1,x2,y2,slope;
         FollowPathHandle followPathHnd;
-        followPathInit(followPathHnd, transStart, transEnd, false);
-        if(!followPath(followPathHnd, MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN, 0, charOrigin, slope)){
+        followPathInit(followPathHnd, charOrigin, transStart, transEnd, false, false);
+        if(!followPath(followPathHnd, MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN, charOrigin)){
             CGContextRestoreGState(cg);
             return;
         }
@@ -525,25 +535,32 @@ namespace osmscout {
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
             GetTextDimension(parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
-            
-            if(!followPath(followPathHnd, 0, nww, charOrigin, slope)){
+            x1 = charOrigin.GetX();
+            y1 = charOrigin.GetY();
+            if(!followPath(followPathHnd,nww, charOrigin)){
                 CGContextRestoreGState(cg);
                 return;
             }
+            x2 = charOrigin.GetX();
+            y2 = charOrigin.GetY();
             //std::cout << " CHARACTER " << [str UTF8String] << " placed at " << charOrigin.x << "," << charOrigin.y << " slope "<< charOrigin.slope << std::endl;
             
             CGContextSaveGState(cg);
-            
-            CGContextTranslateCTM(cg, charOrigin.GetX(), charOrigin.GetY());
+            slope = atan2(y2-y1, x2-x1);
+            CGContextTranslateCTM(cg, x1, y1);
             ct = CGAffineTransformMakeRotation(slope);
             CGContextConcatCTM(cg, ct);
             
 #if TARGET_OS_IPHONE
-            [str drawAtPoint:CGPointMake(-nww,-nhh/2) withFont:font];
+            [str drawAtPoint:CGPointMake(0,-nhh/2) withFont:font];
 #else
-            [str drawAtPoint:CGPointMake(-nww,-nhh/2) withAttributes:attrsDictionary];
+            [str drawAtPoint:CGPointMake(0,-nhh/2) withAttributes:attrsDictionary];
 #endif
             CGContextRestoreGState(cg);
+            if(!followPath(followPathHnd, 2, charOrigin)){
+                CGContextRestoreGState(cg);
+                return;
+            }
         }
         CGContextRestoreGState(cg);
     }
