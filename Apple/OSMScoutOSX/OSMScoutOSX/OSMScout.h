@@ -16,10 +16,11 @@
 #include <osmscout/Tag.h>
 #include <osmscout/WayDataFile.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/Router.h>
 #include <osmscout/RoutePostprocessor.h>
 #include <osmscout/StyleConfigLoader.h>
 #include <osmscout/MapPainterIOS.h>
+#include <osmscout/MapService.h>
+#include <osmscout/LocationService.h>
 
 namespace osmscout {
     class MyBreaker : public Breaker {
@@ -58,6 +59,7 @@ namespace osmscout {
         double              loadedLonMax;
         Magnification       loadedMagnification;
         AreaSearchParameter searchParameter;
+        MapService          mapService;
         MapData             data;
         bool                isMapPainterConfigured;
 

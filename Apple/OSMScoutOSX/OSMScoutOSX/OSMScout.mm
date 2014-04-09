@@ -15,7 +15,8 @@
 
 namespace osmscout {
     
-    OSMScoutCpp::OSMScoutCpp(const char *cDir) : database(databaseParameter),map(cDir),styleConfig(NULL),isMapPainterConfigured(false),loadedMagnification(0),loadedLatMax(0),loadedLonMax(0),loadedLatMin(0),loadedLonMin(0){
+    OSMScoutCpp::OSMScoutCpp(const char *cDir) : database(databaseParameter),map(cDir),styleConfig(NULL),isMapPainterConfigured(false),loadedMagnification(0),loadedLatMax(0),loadedLonMax(0),loadedLatMin(0),loadedLonMin(0),
+        mapService(&database){
     }
     
     OSMScoutCpp::~OSMScoutCpp(){
@@ -51,9 +52,10 @@ namespace osmscout {
             drawParameter.SetDPI(dpi);
             drawParameter.SetRenderSeaLand(true);
             drawParameter.SetDebugPerformance(false);
-            searchParameter.SetMaximumNodes(30000);
             drawBreaker = new MyBreaker();
             drawParameter.SetBreaker(drawBreaker);
+            drawParameter.SetDropNotVisiblePointLabels(false);
+            searchParameter.SetMaximumNodes(30000);
             searchParameter.SetBreaker(drawBreaker);
             isMapPainterConfigured = true;
         }
@@ -94,7 +96,7 @@ namespace osmscout {
                loadedMagnification = projection.GetMagnification();
                std::cout<<"DrawMap at ("<<lon<<","<<lat<<") loading data for ("<<loadedLonMin<<","<<loadedLatMin<<"),(" <<loadedLonMax<<","<<loadedLatMax<<")"<<std::endl;
                database.FlushCache();
-               database.GetObjects(nodeTypes,
+               mapService.GetObjects(nodeTypes,
                                    wayTypes,
                                    areaTypes,
                                    loadedLonMin,
@@ -108,7 +110,7 @@ namespace osmscout {
                                    data.areas);
                
                if (drawParameter.GetRenderSeaLand()) {
-                   database.GetGroundTiles(loadedLonMin,
+                   mapService.GetGroundTiles(loadedLonMin,
                                            loadedLatMin,
                                            loadedLonMax,
                                            loadedLatMax,

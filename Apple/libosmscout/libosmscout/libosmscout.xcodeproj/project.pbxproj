@@ -104,6 +104,10 @@
 		F54C1E5318F480AC008C5EB3 /* MapService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E4F18F480AC008C5EB3 /* MapService.cpp */; };
 		F54C1E5418F480AC008C5EB3 /* POIService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E5018F480AC008C5EB3 /* POIService.cpp */; };
 		F54C1E5518F480AC008C5EB3 /* RoutingService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E5118F480AC008C5EB3 /* RoutingService.cpp */; };
+		F54C1E5918F583BA008C5EB3 /* LocationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E4E18F480AC008C5EB3 /* LocationService.cpp */; };
+		F54C1E5A18F583BD008C5EB3 /* MapService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E4F18F480AC008C5EB3 /* MapService.cpp */; };
+		F54C1E5B18F583BF008C5EB3 /* POIService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E5018F480AC008C5EB3 /* POIService.cpp */; };
+		F54C1E5C18F583C2008C5EB3 /* RoutingService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54C1E5118F480AC008C5EB3 /* RoutingService.cpp */; };
 		F54DAA491815DA6500625DDA /* Area.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA3F1815DA6500625DDA /* Area.cpp */; };
 		F54DAA4A1815DA6500625DDA /* AttributeAccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA401815DA6500625DDA /* AttributeAccess.cpp */; };
 		F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA411815DA6500625DDA /* Coord.cpp */; };
@@ -764,6 +768,8 @@
 				F53BD1AA1638866B006C7AE1 /* Database.cpp in Sources */,
 				F54DAA571815DA8900625DDA /* DebugDatabase.cpp in Sources */,
 				F53BD1AB1638866B006C7AE1 /* GroundTile.cpp in Sources */,
+				F54C1E5A18F583BD008C5EB3 /* MapService.cpp in Sources */,
+				F54C1E5B18F583BF008C5EB3 /* POIService.cpp in Sources */,
 				F53BD1AC1638866B006C7AE1 /* Location.cpp in Sources */,
 				F53BD1AD1638866B006C7AE1 /* Node.cpp in Sources */,
 				F55A609418EEE7D300D91D6F /* TextSearchIndex.cpp in Sources */,
@@ -786,6 +792,7 @@
 				F53BD1BD1638867D006C7AE1 /* TypeConfig.cpp in Sources */,
 				F53BD1BE1638867D006C7AE1 /* TypeConfigLoader.cpp in Sources */,
 				F54DAA621815DAFB00625DDA /* Parser.cpp in Sources */,
+				F54C1E5918F583BA008C5EB3 /* LocationService.cpp in Sources */,
 				F53BD1BF1638867D006C7AE1 /* Types.cpp in Sources */,
 				F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */,
 				F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */,
@@ -815,6 +822,7 @@
 				F53BD1D3163886B2006C7AE1 /* Reference.cpp in Sources */,
 				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
 				F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */,
+				F54C1E5C18F583C2008C5EB3 /* RoutingService.cpp in Sources */,
 				F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */,
 				F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */,
 				F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */,
