@@ -43,7 +43,7 @@ namespace osmscout {
       magProximity =                      512, //  9
       magCityOver  =                     1024, // 10
       magCity      =                   2*1024, // 11
-      magSuburb    =                 2*2*1014, // 12
+      magSuburb    =                 2*2*1024, // 12
       magDetail    =               2*2*2*1024, // 13
       magClose     =             2*2*2*2*1024, // 14
       magVeryClose =           2*2*2*2*2*1024, // 16
