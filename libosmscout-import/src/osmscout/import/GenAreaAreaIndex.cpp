@@ -124,9 +124,9 @@ namespace osmscout {
                                       Progress& progress,
                                       const TypeConfig& /*typeConfig*/)
   {
-    FileScanner               wayScanner;
-    size_t                    ways=0;         // Number of ways found
-    size_t                    waysConsumed=0; // Number of ways consumed
+    FileScanner               scanner;
+    size_t                    areas=0;         // Number of areas found
+    size_t                    areasConsumed=0; // Number of areas consumed
     std::vector<double>       cellWidth;
     std::vector<double>       cellHeight;
     std::map<Pixel,AreaLeaf>  leafs;
@@ -159,7 +159,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "areas.dat"),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
@@ -192,42 +192,42 @@ namespace osmscout {
 
       leafs=newAreaLeafs;
 
-      // Ways
+      // Areas
 
-      if (ways==0 ||
-          (ways>0 && ways>waysConsumed)) {
-        uint32_t wayCount=0;
+      if (areas==0 ||
+          (areas>0 && areas>areasConsumed)) {
+        uint32_t areaCount=0;
 
-        progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
+        progress.Info(std::string("Scanning areas.dat for areas of index level ")+NumberToString(l)+"...");
 
-        if (!wayScanner.GotoBegin()) {
+        if (!scanner.GotoBegin()) {
           progress.Error("Cannot go to begin of way file");
         }
 
-        if (!wayScanner.Read(wayCount)) {
+        if (!scanner.Read(areaCount)) {
           progress.Error("Error while reading number of data entries in file");
           return false;
         }
 
-        ways=0;
-        for (uint32_t w=1; w<=wayCount; w++) {
-          progress.SetProgress(w,wayCount);
+        areas=0;
+        for (uint32_t a=1; a<=areaCount; a++) {
+          progress.SetProgress(a,areaCount);
 
           FileOffset offset;
           Area       area;
 
-          wayScanner.GetPos(offset);
+          scanner.GetPos(offset);
 
-          if (!area.Read(wayScanner)) {
+          if (!area.Read(scanner)) {
             progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(w)+" of "+
-                           NumberToString(wayCount)+
+                           NumberToString(a)+" of "+
+                           NumberToString(areaCount)+
                            " in file '"+
-                           wayScanner.GetFilename()+"'");
+                           scanner.GetFilename()+"'");
             return false;
           }
 
-          ways++;
+          areas++;
 
           double minLon;
           double maxLon;
@@ -280,7 +280,7 @@ namespace osmscout {
             leafs[Pixel((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(entry);
             areaLevelEntries++;
 
-            waysConsumed++;
+            areasConsumed++;
           }
         }
       }
