@@ -367,16 +367,37 @@ namespace osmscout {
                             double& minLat,
                             double& maxLat) const
   {
+    bool firstOuterRing=true;
     assert(!rings.empty());
 
     for (std::vector<Area::Ring>::const_iterator role=rings.begin();
          role!=rings.end();
          ++role) {
       if (role->ring==Area::outerRingId) {
-        role->GetBoundingBox(minLon,
-                             maxLon,
-                             minLat,
-                             maxLat);
+        if (firstOuterRing) {
+          role->GetBoundingBox(minLon,
+                               maxLon,
+                               minLat,
+                               maxLat);
+
+          firstOuterRing=false;
+        }
+        else {
+          double ringMinLon;
+          double ringMaxLon;
+          double ringMinLat;
+          double ringMaxLat;
+
+          role->GetBoundingBox(ringMinLon,
+                               ringMaxLon,
+                               ringMinLat,
+                               ringMaxLat);
+
+          minLon=std::min(minLon,ringMinLon);
+          minLat=std::min(minLat,ringMinLat);
+          maxLon=std::max(maxLon,ringMaxLon);
+          maxLat=std::max(maxLat,ringMaxLat);
+        }
       }
     }
   }
