@@ -269,9 +269,9 @@ namespace osmscout {
             // by the area
             //
             uint32_t minyc=(uint32_t)floor(minLat/cellHeight[level]);
-            uint32_t maxyc=(uint32_t)floor(maxLat/cellHeight[level]);
+            uint32_t maxyc=(uint32_t)ceil(maxLat/cellHeight[level]);
             uint32_t minxc=(uint32_t)floor(minLon/cellWidth[level]);
-            uint32_t maxxc=(uint32_t)floor(maxLon/cellWidth[level]);
+            uint32_t maxxc=(uint32_t)ceil(maxLon/cellWidth[level]);
 
             Entry entry;
 
