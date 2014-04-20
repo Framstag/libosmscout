@@ -96,6 +96,21 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
+      // Tags we are interested in for ways, but not for areas - however they are
+      // nevertheless rather often set
+      else if (tag->key==typeConfig.tagRef ||
+               tag->key==typeConfig.tagLayer ||
+               tag->key==typeConfig.tagSurface ||
+               tag->key==typeConfig.tagOneway ||
+               tag->key==typeConfig.tagMaxSpeed ||
+               tag->key==typeConfig.tagTracktype ||
+               tag->key==typeConfig.tagRestriction ||
+               tag->key==typeConfig.tagWidth ||
+               tag->key==typeConfig.tagTunnel ||
+               tag->key==typeConfig.tagBridge ||
+               tag->key==typeConfig.tagAccess) {
+        tag=tags.erase(tag);
+      }
       else {
         ++tag;
       }
