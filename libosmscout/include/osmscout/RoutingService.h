@@ -50,12 +50,13 @@ namespace osmscout {
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
-    Database instance initialization parameter to influence the behavior of the database
-    instance.
-
-    The following groups attributes are currently available:
-    - Switch for showing debug information
-    */
+   * \ingroup Routing
+   * Database instance initialization parameter to influence the behavior of the database
+   * instance.
+   *
+   * The following groups attributes are currently available:
+   * - Switch for showing debug information
+   */
   class OSMSCOUT_API RouterParameter
   {
   private:
@@ -71,6 +72,7 @@ namespace osmscout {
 
   /**
    * \ingroup Service
+   * \ingroup Routing
    * The RoutingService implements functionality in the context of routing.
    * The following functions are available:
    * - Calculation of a route from a start node to a target node
@@ -292,6 +294,11 @@ namespace osmscout {
   //! \ingroup Service
   //! Reference counted reference to an RoutingService instance
   typedef Ref<RoutingService> RoutingServiceRef;
+
+  /**
+   * \defgroup Routing Routing based data structures and services
+   * Classes and methods for handling routing aspects of object in the libosmscout database
+   */
 }
 
 #endif

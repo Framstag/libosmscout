@@ -33,6 +33,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Routing
    * A route node is the representation of a node in the routing graph.
    */
   class OSMSCOUT_API RouteNode : public Referencable

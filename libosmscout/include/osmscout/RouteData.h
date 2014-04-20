@@ -28,6 +28,9 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Routing
+   */
   class OSMSCOUT_API RouteData
   {
   public:

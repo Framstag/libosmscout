@@ -33,6 +33,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Routing
    * Abstract interface for a routing profile. A routing profile decides about the costs
    * of taking a certain way. It thus may hold information about how fast ways can be used,
    * maximum speed of the traveling device etc...
@@ -64,6 +65,7 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Routing
    * Common base class for our concrete profile instantiations.
    */
   class OSMSCOUT_API AbstractRoutingProfile : public RoutingProfile
@@ -218,6 +220,7 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Routing
    * Profile that defines costs in a way that the shortest way is chosen (cost==distance).
    */
   class OSMSCOUT_API ShortestPathRoutingProfile : public AbstractRoutingProfile
@@ -248,6 +251,7 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Routing
    * Profile that defines costs base of the time the traveling device needs
    * for a certain way resulting in the fastest path chosen (cost=distance/speedForWayType).
    */
