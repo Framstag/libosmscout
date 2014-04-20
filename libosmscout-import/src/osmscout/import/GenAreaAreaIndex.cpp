@@ -111,6 +111,8 @@ namespace osmscout {
            entry!=leaf->second.areas.end();
            entry++) {
         writer.WriteNumber(entry->type);
+        // Since objects are inserted in file position order, we do not need
+        // to sort objects by file offset at this place
         writer.WriteNumber(entry->offset-lastOffset);
 
         lastOffset=entry->offset;

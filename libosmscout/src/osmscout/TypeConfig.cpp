@@ -272,9 +272,6 @@ namespace osmscout {
     RegisterTagForExternalUse("restriction");
     RegisterTagForExternalUse("surface");
     RegisterTagForExternalUse("tracktype");
-    RegisterTagForExternalUse("place");
-    RegisterTagForExternalUse("place_name");
-    RegisterTagForExternalUse("boundary");
     RegisterTagForExternalUse("admin_level");
 
     RegisterTagForExternalUse("access");
@@ -357,8 +354,6 @@ namespace osmscout {
     tagRestriction=GetTagId("restriction");
     tagSurface=GetTagId("surface");
     tagTracktype=GetTagId("tracktype");
-    tagPlace=GetTagId("place");
-    tagBoundary=GetTagId("boundary");
     tagAdminLevel=GetTagId("admin_level");
 
     tagAccess=GetTagId("access");
@@ -398,8 +393,6 @@ namespace osmscout {
     assert(tagRestriction!=tagIgnore);
     assert(tagSurface!=tagIgnore);
     assert(tagTracktype!=tagIgnore);
-    assert(tagPlace!=tagIgnore);
-    assert(tagBoundary!=tagIgnore);
     assert(tagAdminLevel!=tagIgnore);
 
     assert(tagAccess!=tagIgnore);

@@ -473,8 +473,7 @@ namespace osmscout {
     TagId                                  tagRestriction;
     TagId                                  tagSurface;
     TagId                                  tagTracktype;
-    TagId                                  tagPlace;
-    TagId                                  tagBoundary;
+
     TagId                                  tagAdminLevel;
 
     TagId                                  tagAccess;

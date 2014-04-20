@@ -308,7 +308,7 @@ TYPES
   TYPE tourism_motel = NODE AREA ("tourism"=="motel")
   TYPE tourism_museum = NODE AREA ("tourism"=="museum") OPTIONS INDEX_POI
 
-  // Do not delete the following type, they are required by the GenCityStreet import step
+  // Do not delete the following type, they are required by the GenLocation import step
   TYPE boundary_administrative = WAY AREA ("boundary"=="administrative") OR
                                    RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON IGNORESEALAND
 
