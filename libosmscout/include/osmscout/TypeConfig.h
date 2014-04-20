@@ -36,9 +36,9 @@
 
 namespace osmscout {
 
-  const static TagId tagIgnore        = 0;
+  static const TagId tagIgnore        = 0;
 
-  const static TypeId typeIgnore      = 0;
+  static const TypeId typeIgnore      = 0;
 
   class OSMSCOUT_API TagCondition : public Referencable
   {
@@ -155,10 +155,10 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfo
   {
   public:
-    const static unsigned char typeNode     = 1 << 0;
-    const static unsigned char typeWay      = 1 << 1;
-    const static unsigned char typeArea     = 1 << 2;
-    const static unsigned char typeRelation = 1 << 3;
+    static const unsigned char typeNode     = 1 << 0;
+    static const unsigned char typeWay      = 1 << 1;
+    static const unsigned char typeArea     = 1 << 2;
+    static const unsigned char typeRelation = 1 << 3;
 
   public:
     struct TypeCondition

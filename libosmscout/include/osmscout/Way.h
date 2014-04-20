@@ -37,21 +37,21 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    const static uint16_t hasNameAlt      = 1 <<  6; //! We have an alternative name (mainly in a second language)
-    const static uint16_t hasName         = 1 <<  7; //! We have a name
-    const static uint16_t hasRef          = 1 <<  8; //! We have reference name
-    const static uint16_t hasLocation     = 1 <<  9; //! Name of street or place
-    const static uint16_t hasAddress      = 1 << 10; //! House number
-    const static uint16_t hasLayer        = 1 << 11; //! We have optional layer information
-    const static uint16_t hasWidth        = 1 << 12; //! We have width
-    const static uint16_t hasMaxSpeed     = 1 << 13; //! We have maximum speed information
-    const static uint16_t hasGrade        = 1 << 14; //! We have grade information
-    const static uint16_t hasTags         = 1 << 15; //! We have additional tags
+    static const uint16_t hasNameAlt      = 1 <<  6; //! We have an alternative name (mainly in a second language)
+    static const uint16_t hasName         = 1 <<  7; //! We have a name
+    static const uint16_t hasRef          = 1 <<  8; //! We have reference name
+    static const uint16_t hasLocation     = 1 <<  9; //! Name of street or place
+    static const uint16_t hasAddress      = 1 << 10; //! House number
+    static const uint16_t hasLayer        = 1 << 11; //! We have optional layer information
+    static const uint16_t hasWidth        = 1 << 12; //! We have width
+    static const uint16_t hasMaxSpeed     = 1 << 13; //! We have maximum speed information
+    static const uint16_t hasGrade        = 1 << 14; //! We have grade information
+    static const uint16_t hasTags         = 1 << 15; //! We have additional tags
 
-    const static uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
-    const static uint16_t isBridge        = 1 <<  1; //! We are a bridge
-    const static uint16_t isTunnel        = 1 <<  2; //! We are a tunnel
-    const static uint16_t isRoundabout    = 1 <<  4; //! We are a roundabout
+    static const uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
+    static const uint16_t isBridge        = 1 <<  1; //! We are a bridge
+    static const uint16_t isTunnel        = 1 <<  2; //! We are a tunnel
+    static const uint16_t isRoundabout    = 1 <<  4; //! We are a roundabout
 
   public:
     TypeId           type;     //! type of the way/relation

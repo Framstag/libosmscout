@@ -38,10 +38,10 @@ namespace osmscout {
   class OSMSCOUT_API RouteNode : public Referencable
   {
   public:
-    const static uint8_t hasAccess            = 1 << 0; //! We do have access rights to this way/area
-    const static uint8_t usableByFoot         = 1 << 1; //! This path can be traveled by foot
-    const static uint8_t usableByBicycle      = 1 << 2; //! This path can be traveled by bicycle
-    const static uint8_t usableByCar          = 1 << 3; //! This path can be traveled by car
+    static const uint8_t hasAccess            = 1 << 0; //! We do have access rights to this way/area
+    static const uint8_t usableByFoot         = 1 << 1; //! This path can be traveled by foot
+    static const uint8_t usableByBicycle      = 1 << 2; //! This path can be traveled by bicycle
+    static const uint8_t usableByCar          = 1 << 3; //! This path can be traveled by car
 
     /**
      * Exclude regarding use of paths. You cannot use the path with the index "targetPath" if you come
