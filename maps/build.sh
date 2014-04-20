@@ -15,9 +15,6 @@ if [ ! -f "$mappingFile" ]; then
   exit 1
 fi
 
-echo "Mapping File:" | tee $outputFile
-echo " $mappingFile" | tee -a $outputFile
-
 if [ "$mappingFile" != "${mappingFile%.osm.pbf}" ]; then
   mappingFileBase="${mappingFile%.osm.pbf}"
 elif [ "$mappingFile" != "${mappingFile%.osm}" ]; then
@@ -26,6 +23,14 @@ else
   echo "$mapping file is neither an *.osm nor an *.osm.pbf file"
   exit 1
 fi
+
+targetDirectory=$mappingFileBase
+outputFile=${mappingFileBase}.txt
+
+echo -n >$outputFile
+
+echo "Mapping File:" | tee $outputFile
+echo " $mappingFile" | tee -a $outputFile
 
 mappingFileOpt="$scriptDirectory/${mappingFileBase}.opt"
 defaultOpt="$scriptDirectory/default.opt"
@@ -40,9 +45,6 @@ elif [ -f "$defaultOpt" ]; then
   . "$defaultOpt"
 fi
 
-targetDirectory=$mappingFileBase
-
-outputFile=${mappingFileBase}.txt
 
 if [ ! -d $targetDirectory ]; then
   echo "Creating target directory $targetDirectory..."
