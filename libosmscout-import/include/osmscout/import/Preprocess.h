@@ -20,11 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/Import.h>
-#include <osmscout/import/RawRelation.h>
+#include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/FileWriter.h>
+
+#include <osmscout/import/Import.h>
+#include <osmscout/import/RawRelation.h>
+
 
 namespace osmscout {
   class Preprocess : public ImportModule
@@ -37,6 +40,7 @@ namespace osmscout {
     FileWriter          wayWriter;
     FileWriter          relationWriter;
     FileWriter          coastlineWriter;
+    FileWriter          turnRestrictionWriter;
 
     std::vector<Tag>    tags;
 
@@ -45,6 +49,7 @@ namespace osmscout {
     uint32_t            areaCount;
     uint32_t            relationCount;
     uint32_t            coastlineCount;
+    uint32_t            turnRestrictionCount;
 
     OSMId               lastNodeId;
     OSMId               lastWayId;
@@ -68,6 +73,13 @@ namespace osmscout {
     bool StoreCoord(OSMId id,
                     double lat,
                     double lon);
+
+    bool IsTurnRestriction(const TypeConfig& typeConfig,
+                           const std::map<TagId,std::string>& tags,
+                           TurnRestriction::Type& type) const;
+
+    void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
+                                TurnRestriction::Type type);
 
   public:
     std::string GetDescription() const;

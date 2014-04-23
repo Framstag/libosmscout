@@ -37,8 +37,6 @@
 
 #include <osmscout/import/Preprocess.h>
 
-#include <osmscout/import/GenTurnRestrictionDat.h>
-
 #include <osmscout/import/GenNodeDat.h>
 #include <osmscout/import/SortNodeDat.h>
 
@@ -630,78 +628,75 @@ namespace osmscout {
                                                                    AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                    "rawrel.idx")));
     /* 6 */
-    modules.push_back(new TurnRestrictionDataGenerator());
-
-    /* 7 */
     modules.push_back(new RelAreaDataGenerator());
 
-    /* 8 */
+    /* 7 */
     modules.push_back(new WayAreaDataGenerator());
 
-    /* 9 */
+    /* 8 */
     modules.push_back(new WayWayDataGenerator());
 
-    /* 10 */
+    /* 9 */
     modules.push_back(new OptimizeAreaWayIdsGenerator());
 
-    /* 11 */
+    /* 10 */
     modules.push_back(new NodeDataGenerator());
 
-    /* 12 */
+    /* 11 */
     modules.push_back(new SortNodeDataGenerator());
 
-    /* 13 */
+    /* 12 */
     modules.push_back(new SortAreaDataGenerator());
 
-    /* 14 */
+    /* 13 */
     modules.push_back(new SortWayDataGenerator());
 
-    /* 15 */
+    /* 14 */
     modules.push_back(new AreaNodeIndexGenerator());
 
-    /* 16 */
+    /* 15 */
     modules.push_back(new AreaWayIndexGenerator());
 
-    /* 17 */
+    /* 16 */
     modules.push_back(new AreaAreaIndexGenerator());
 
-    /* 18 */
+    /* 17 */
     modules.push_back(new WaterIndexGenerator());
 
-    /* 19 */
+    /* 18 */
     modules.push_back(new OptimizeAreasLowZoomGenerator());
 
-    /* 20 */
+    /* 19 */
     modules.push_back(new OptimizeWaysLowZoomGenerator());
 
-    /* 21 */
+    /* 20 */
     modules.push_back(new LocationIndexGenerator());
 
-    /* 22 */
+    /* 21 */
     modules.push_back(new RouteDataGenerator());
 
-    /* 23 */
+    /* 22 */
     modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+RoutingService::FILENAME_INTERSECTIONS_IDX+"'",
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                  RoutingService::FILENAME_INTERSECTIONS_DAT),
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                  RoutingService::FILENAME_INTERSECTIONS_IDX)));
 
-    /* 24 */
+    /* 23 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_FOOT_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_FOOT_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_FOOT_IDX)));
 
-    /* 25 */
+    /* 24 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_BICYCLE_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_BICYCLE_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_BICYCLE_IDX)));
 
-    /* 26 */
+    /* 25 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_CAR_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_CAR_DAT),
@@ -709,7 +704,7 @@ namespace osmscout {
                                                                               RoutingService::FILENAME_CAR_IDX)));
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 27 */
+    /* 26 */
     modules.push_back(new TextIndexGenerator());
 #endif
 

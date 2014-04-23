@@ -269,7 +269,6 @@ namespace osmscout {
     RegisterTagForExternalUse("addr:street");
     RegisterTagForExternalUse("junction");
     RegisterTagForExternalUse("maxspeed");
-    RegisterTagForExternalUse("restriction");
     RegisterTagForExternalUse("surface");
     RegisterTagForExternalUse("tracktype");
     RegisterTagForExternalUse("admin_level");
@@ -296,6 +295,7 @@ namespace osmscout {
 
     RegisterTagForInternalUse("area");
     RegisterTagForInternalUse("natural");
+    RegisterTagForInternalUse("restriction");
 
     TypeInfo ignore;
     TypeInfo route;
@@ -351,7 +351,6 @@ namespace osmscout {
     tagStreet=GetTagId("addr:street");
     tagJunction=GetTagId("junction");
     tagMaxSpeed=GetTagId("maxspeed");
-    tagRestriction=GetTagId("restriction");
     tagSurface=GetTagId("surface");
     tagTracktype=GetTagId("tracktype");
     tagAdminLevel=GetTagId("admin_level");
@@ -378,6 +377,7 @@ namespace osmscout {
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
+    tagRestriction=GetTagId("restriction");
 
     assert(tagRef!=tagIgnore);
     assert(tagBridge!=tagIgnore);
@@ -390,7 +390,6 @@ namespace osmscout {
     assert(tagStreet!=tagIgnore);
     assert(tagJunction!=tagIgnore);
     assert(tagMaxSpeed!=tagIgnore);
-    assert(tagRestriction!=tagIgnore);
     assert(tagSurface!=tagIgnore);
     assert(tagTracktype!=tagIgnore);
     assert(tagAdminLevel!=tagIgnore);
@@ -417,6 +416,7 @@ namespace osmscout {
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
+    assert(tagRestriction!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()

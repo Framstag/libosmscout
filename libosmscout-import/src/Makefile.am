@@ -32,7 +32,6 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenOptimizeWaysLowZoom.cpp \
                                osmscout/import/GenRelAreaDat.cpp \
                                osmscout/import/GenRouteDat.cpp \
-                               osmscout/import/GenTurnRestrictionDat.cpp \
                                osmscout/import/GenTypeDat.cpp \
                                osmscout/import/GenWaterIndex.cpp \
                                osmscout/import/GenWayAreaDat.cpp \

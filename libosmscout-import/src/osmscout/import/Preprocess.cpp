@@ -119,6 +119,94 @@ namespace osmscout {
     return coordWriter.WriteCoord(lat,lon);
   }
 
+  bool Preprocess::IsTurnRestriction(const TypeConfig& typeConfig,
+                                     const std::map<TagId,std::string>& tags,
+                                     TurnRestriction::Type& type) const
+  {
+    bool isRestriction=false;
+    bool isTurnRestriction=false;
+
+    type=TurnRestriction::Allow;
+
+    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
+        tag!=tags.end();
+        tag++) {
+      if (tag->first==typeConfig.tagType) {
+        if (tag->second=="restriction") {
+          isRestriction=true;
+        }
+      }
+      else if (tag->first==typeConfig.tagRestriction) {
+        if (tag->second=="only_left_turn" ||
+            tag->second=="only_right_turn" ||
+            tag->second=="only_straight_on") {
+          isTurnRestriction=true;
+          type=TurnRestriction::Allow;
+        }
+        else if (tag->second=="no_left_turn" ||
+                 tag->second=="no_right_turn" ||
+                 tag->second=="no_straight_on" ||
+                 tag->second=="no_u_turn") {
+          isTurnRestriction=true;
+          type=TurnRestriction::Forbit;
+        }
+      }
+
+      // finished collection data
+      if (isRestriction &&
+          isTurnRestriction) {
+        break;
+      }
+    }
+
+    return isRestriction &&
+           isTurnRestriction;
+  }
+
+  void Preprocess::ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
+                                          TurnRestriction::Type type)
+  {
+    Id from=0;
+    Id via=0;
+    Id to=0;
+
+    for (std::vector<RawRelation::Member>::const_iterator member=members.begin();
+         member!=members.end();
+         ++member) {
+      if (member->type==RawRelation::memberWay &&
+          member->role=="from") {
+        from=member->id;
+      }
+      else if (member->type==RawRelation::memberNode &&
+               member->role=="via") {
+        via=member->id;
+      }
+      else if (member->type==RawRelation::memberWay &&
+               member->role=="to") {
+        to=member->id;
+      }
+
+      // finished collection data
+      if (from!=0 &&
+          via!=0 &&
+          to!=0) {
+        break;
+      }
+    }
+
+    if (from!=0 &&
+        via!=0 &&
+        to!=0) {
+      TurnRestriction restriction(type,
+                                  from,
+                                  via,
+                                  to);
+
+      restriction.Write(turnRestrictionWriter);
+      turnRestrictionCount++;
+    }
+  }
+
   std::string Preprocess::GetDescription() const
   {
     return "Preprocess";
@@ -171,6 +259,7 @@ namespace osmscout {
     areaCount=0;
     relationCount=0;
     coastlineCount=0;
+    turnRestrictionCount=0;
 
     lastNodeId=std::numeric_limits<OSMId>::min();
     lastWayId=std::numeric_limits<OSMId>::min();
@@ -195,6 +284,10 @@ namespace osmscout {
     coastlineWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                         "rawcoastline.dat"));
     coastlineWriter.Write(coastlineCount);
+
+    turnRestrictionWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawturnrestr.dat"));
+    turnRestrictionWriter.Write(turnRestrictionCount);
 
     coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "coord.dat"));
@@ -401,6 +494,15 @@ namespace osmscout {
                                    const std::vector<RawRelation::Member>& members,
                                    const std::map<TagId,std::string>& tagMap)
   {
+    TurnRestriction::Type turnRestrictionType;
+
+    if (IsTurnRestriction(typeConfig,
+                          tagMap,
+                          turnRestrictionType)) {
+      ProcessTurnRestriction(members,
+                             turnRestrictionType);
+    }
+
     RawRelation relation;
     TypeId      type;
 
@@ -440,6 +542,9 @@ namespace osmscout {
     coastlineWriter.SetPos(0);
     coastlineWriter.Write(coastlineCount);
 
+    turnRestrictionWriter.SetPos(0);
+    turnRestrictionWriter.Write(turnRestrictionCount);
+
     coordWriter.SetPos(0);
 
     coordWriter.Write(coordPageSize);
@@ -463,14 +568,16 @@ namespace osmscout {
     relationWriter.Close();
     coastlineWriter.Close();
     coordWriter.Close();
+    turnRestrictionWriter.Close();
 
-    progress.Info(std::string("Nodes:          ")+NumberToString(nodeCount));
-    progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(wayCount)+" "+
+    progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
+    progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
                   NumberToString(areaCount)+" "+
                   NumberToString(wayCount+areaCount));
-    progress.Info(std::string("Relations:      ")+NumberToString(relationCount));
-    progress.Info(std::string("Coastlines:     ")+NumberToString(coastlineCount));
-    progress.Info(std::string("Coord pages:    ")+NumberToString(coordIndex.size()));
+    progress.Info(std::string("Relations:        ")+NumberToString(relationCount));
+    progress.Info(std::string("Coastlines:       ")+NumberToString(coastlineCount));
+    progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
+    progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
     if (nodeSortingError) {
       progress.Error("Nodes are not sorted by increasing id");

@@ -16,7 +16,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenOptimizeWaysLowZoom.h \
                         osmscout/import/GenRelAreaDat.h \
                         osmscout/import/GenRouteDat.h \
-                        osmscout/import/GenTurnRestrictionDat.h \
                         osmscout/import/GenTypeDat.h \
                         osmscout/import/GenWaterIndex.h \
                         osmscout/import/GenWayAreaDat.h \

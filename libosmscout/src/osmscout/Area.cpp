@@ -104,7 +104,6 @@ namespace osmscout {
                tag->key==typeConfig.tagOneway ||
                tag->key==typeConfig.tagMaxSpeed ||
                tag->key==typeConfig.tagTracktype ||
-               tag->key==typeConfig.tagRestriction ||
                tag->key==typeConfig.tagWidth ||
                tag->key==typeConfig.tagTunnel ||
                tag->key==typeConfig.tagBridge ||

@@ -470,7 +470,6 @@ namespace osmscout {
     TagId                                  tagStreet;
     TagId                                  tagJunction;
     TagId                                  tagMaxSpeed;
-    TagId                                  tagRestriction;
     TagId                                  tagSurface;
     TagId                                  tagTracktype;
 
@@ -499,6 +498,7 @@ namespace osmscout {
     // Internal use (only available during preprocessing)
     TagId                                  tagArea;
     TagId                                  tagNatural;
+    TagId                                  tagRestriction;
 
   public:
     TypeConfig();
