@@ -36,6 +36,7 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   private:
+    Progress            *progress;
     FileWriter          nodeWriter;
     FileWriter          wayWriter;
     FileWriter          relationWriter;
@@ -87,7 +88,8 @@ namespace osmscout {
                 Progress& progress,
                 const TypeConfig& typeConfig);
 
-    bool Initialize(const ImportParameter& parameter);
+    bool Initialize(const ImportParameter& parameter,
+                    Progress& progress);
 
     void ProcessNode(const TypeConfig& typeConfig,
                      const OSMId& id,

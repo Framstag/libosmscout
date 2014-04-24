@@ -1103,16 +1103,6 @@ namespace osmscout {
         return false;
       }
 
-      std::string name=ResolveRelationName(typeConfig,
-                                           rawRel);
-
-      if (rawRel.members.empty()) {
-        progress.Warning("Relation "+
-                         NumberToString(rawRel.GetId())+
-                         " does not have any members!");
-        continue;
-      }
-
       // We should ignore the relation because of its type
       if (rawRel.GetType()!=typeIgnore &&
           typeConfig.GetTypeInfo(rawRel.GetType()).GetIgnore()) {
@@ -1156,7 +1146,9 @@ namespace osmscout {
       // itself, we thus still need to parse the complete relation for
       // type analysis before we can skip it.
 
-      Area rel;
+      std::string name=ResolveRelationName(typeConfig,
+                                           rawRel);
+      Area        rel;
 
       if (!HandleMultipolygonRelation(parameter,
                                       progress,

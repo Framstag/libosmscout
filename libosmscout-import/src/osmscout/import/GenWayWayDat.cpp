@@ -197,10 +197,6 @@ namespace osmscout {
         continue;
       }
 
-      if (way->GetNodeCount()<2) {
-        continue;
-      }
-
       if (ways[way->GetType()].empty()) {
         typesWithWays++;
       }
@@ -213,7 +209,7 @@ namespace osmscout {
              typesWithWays>1) {
         size_t victimType=ways.size();
 
-        // Find the type with the smalest amount of ways loaded
+        // Find the type with the smallest amount of ways loaded
         for (size_t i=0; i<ways.size(); i++) {
           if (!ways[i].empty() &&
               (victimType>=ways.size() ||

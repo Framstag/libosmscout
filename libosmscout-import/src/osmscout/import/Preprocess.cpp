@@ -249,8 +249,12 @@ namespace osmscout {
     return false;
   }
 
-  bool Preprocess::Initialize(const ImportParameter& parameter)
+  bool Preprocess::Initialize(const ImportParameter& parameter,
+                              Progress& progress)
   {
+    // This is something I do not like
+    this->progress=&progress;
+
     coordPageCount=0;
     currentPageId=std::numeric_limits<PageId>::max();
 
@@ -365,6 +369,13 @@ namespace osmscout {
     std::map<TagId,std::string>::const_iterator naturalTag;
     RawWay                                      way;
     bool                                        isCoastline=false;
+
+    if (nodes.size()<2) {
+      progress->Warning("Way "+
+                        NumberToString(id)+
+                        " has less than two nodes!");
+      return;
+    }
 
     if (id<lastWayId) {
       waySortingError=true;
@@ -494,6 +505,13 @@ namespace osmscout {
                                    const std::vector<RawRelation::Member>& members,
                                    const std::map<TagId,std::string>& tagMap)
   {
+    if (members.empty()) {
+      progress->Warning("Relation "+
+                        NumberToString(id)+
+                        " does not have any members!");
+      return;
+    }
+
     TurnRestriction::Type turnRestrictionType;
 
     if (IsTurnRestriction(typeConfig,
@@ -526,6 +544,10 @@ namespace osmscout {
 
   bool Preprocess::Cleanup(Progress& progress)
   {
+    //Since I do not like take a pointer to a reference
+    // I at least try to assure, that we do not misuse it.
+    this->progress=NULL;
+
     if (currentPageId!=0) {
       StoreCurrentPage();
     }
