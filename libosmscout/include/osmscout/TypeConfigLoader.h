@@ -24,8 +24,16 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup type
+   *
+   */
   extern OSMSCOUT_API bool LoadTypeConfig(const char* typeFile,
                                           TypeConfig& config);
+  /**
+   * \ingroup type
+   *
+   */
   extern OSMSCOUT_API bool LoadTypeData(const std::string& path,
                                         TypeConfig& config);
 }

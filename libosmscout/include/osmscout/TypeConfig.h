@@ -36,10 +36,27 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup type
+   *
+   * Magic constant for an unresolved and to be ignored tag
+   */
   static const TagId tagIgnore        = 0;
 
+  /**
+   * \ingroup type
+   *
+   * Magic constant for an unresolved and to be ignored object type.
+   * Object having typeIgnore as type should be handled like
+   * they do not have a type at all.
+   */
   static const TypeId typeIgnore      = 0;
 
+  /**
+   * \ingroup type
+   *
+   * Abstract base class for all tag based conditions
+   */
   class OSMSCOUT_API TagCondition : public Referencable
   {
   public:
@@ -48,8 +65,18 @@ namespace osmscout {
     virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) const = 0;
   };
 
+  /**
+   * \ingroup type
+   *
+   * Reference counted reference to a tag condition
+   */
   typedef Ref<TagCondition> TagConditionRef;
 
+  /**
+   * \ingroup type
+   *
+   * Negates the result of the given child condition
+   */
   class OSMSCOUT_API TagNotCondition : public TagCondition
   {
   private:
@@ -61,6 +88,12 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
+  /**
+   * \ingroup type
+   *
+   * Allows a boolean and/or condition between a number of
+   * child conditions.
+   */
   class OSMSCOUT_API TagBoolCondition : public TagCondition
   {
   public:
@@ -81,6 +114,11 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
+  /**
+   * \ingroup type
+   *
+   * Returns true, if the given tag exists for an object
+   */
   class OSMSCOUT_API TagExistsCondition : public TagCondition
   {
   private:
@@ -92,6 +130,12 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
+  /**
+   * \ingroup type
+   *
+   * Returns true, if the value of the given tag fulfills the given
+   * boolean condition in regard to the comparison value.
+   */
   class OSMSCOUT_API TagBinaryCondition : public TagCondition
   {
   private:
@@ -107,6 +151,12 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
+  /**
+   * \ingroup type
+   *
+   * Returns true, if the tag value of the given is one of the
+   * given values.
+   */
   class OSMSCOUT_API TagIsInCondition : public TagCondition
   {
   private:
@@ -121,6 +171,11 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
+  /**
+   * \ingroup type
+   *
+   * Information about a tag definition
+   */
   class OSMSCOUT_API TagInfo
   {
   private:
@@ -152,6 +207,13 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup type
+   *
+   *  Detailed information about one object type
+   *
+   *  \see TypeConfig
+   */
   class OSMSCOUT_API TypeInfo
   {
   public:
@@ -161,10 +223,17 @@ namespace osmscout {
     static const unsigned char typeRelation = 1 << 3;
 
   public:
+    /**
+     * \ingroup type
+     *
+     * A type can have a number of conditions that allow
+     * to identify the type of an object based on its
+     * tag values.
+     */
     struct TypeCondition
     {
-      unsigned char    types;
-      TagConditionRef  condition;
+      unsigned char    types;     //<! Bitset of types the condition can be applied to
+      TagConditionRef  condition; //<! The root condition
     };
 
   private:
@@ -479,6 +548,12 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup type
+   *
+   * The TypeConfig class holds information about object types
+   * defined by a database instance.
+   */
   class OSMSCOUT_API TypeConfig : public Referencable
   {
   private:
@@ -602,7 +677,14 @@ namespace osmscout {
                             size_t& grade) const;
   };
 
+
+  //! \ingroup type
+  //! Reference counted reference to a TypeConfig instance
   typedef Ref<TypeConfig> TypeConfigRef;
+
+  /**
+   * \defgroup type Object type related data structures and services
+   */
 }
 
 #endif
