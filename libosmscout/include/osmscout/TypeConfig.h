@@ -583,7 +583,6 @@ namespace osmscout {
     TagId                                  tagBridge;
     TagId                                  tagTunnel;
     TagId                                  tagLayer;
-    TagId                                  tagType;
     TagId                                  tagWidth;
     TagId                                  tagOneway;
     TagId                                  tagHouseNr;
@@ -618,6 +617,7 @@ namespace osmscout {
     // Internal use (only available during preprocessing)
     TagId                                  tagArea;
     TagId                                  tagNatural;
+    TagId                                  tagType;
     TagId                                  tagRestriction;
 
   public:

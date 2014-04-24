@@ -39,9 +39,9 @@ namespace osmscout {
     Progress            *progress;
     FileWriter          nodeWriter;
     FileWriter          wayWriter;
-    FileWriter          relationWriter;
     FileWriter          coastlineWriter;
     FileWriter          turnRestrictionWriter;
+    FileWriter          multipolygonWriter;
 
     std::vector<Tag>    tags;
 
@@ -51,6 +51,7 @@ namespace osmscout {
     uint32_t            relationCount;
     uint32_t            coastlineCount;
     uint32_t            turnRestrictionCount;
+    uint32_t            multipolygonCount;
 
     OSMId               lastNodeId;
     OSMId               lastWayId;
@@ -81,6 +82,16 @@ namespace osmscout {
 
     void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
                                 TurnRestriction::Type type);
+
+    bool IsMultipolygon(const TypeConfig& typeConfig,
+                        const std::map<TagId,std::string>& tags,
+                        TypeId& type);
+
+    void ProcessMultipolygon(const TypeConfig& typeConfig,
+                             const std::map<TagId,std::string>& tags,
+                             const std::vector<RawRelation::Member>& members,
+                             OSMId id,
+                             TypeId type);
 
   public:
     std::string GetDescription() const;

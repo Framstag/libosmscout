@@ -98,6 +98,8 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)members.size());
 
+    assert(!members.empty());
+
     if (!members.empty()) {
       OSMId minId=members[0].id;
 

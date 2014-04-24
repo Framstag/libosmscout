@@ -207,6 +207,50 @@ namespace osmscout {
     }
   }
 
+  bool Preprocess::IsMultipolygon(const TypeConfig& typeConfig,
+                                  const std::map<TagId,std::string>& tags,
+                                  TypeId& type)
+  {
+    typeConfig.GetRelationTypeId(tags,type);
+
+    if (type!=typeIgnore &&
+        typeConfig.GetTypeInfo(type).GetIgnore()) {
+      return false;
+    }
+
+    bool isArea=type!=typeIgnore &&
+                typeConfig.GetTypeInfo(type).GetMultipolygon();
+
+    if (!isArea) {
+      std::map<TagId,std::string>::const_iterator typeTag=tags.find(typeConfig.tagType);
+
+      isArea=typeTag!=tags.end() && typeTag->second=="multipolygon";
+    }
+
+    return isArea;
+  }
+
+  void Preprocess::ProcessMultipolygon(const TypeConfig& typeConfig,
+                                       const std::map<TagId,std::string>& tags,
+                                       const std::vector<RawRelation::Member>& members,
+                                       OSMId id,
+                                       TypeId type)
+  {
+    RawRelation relation;
+
+    relation.SetId(id);
+    relation.SetType(type);
+    typeConfig.ResolveTags(tags,
+                           relation.tags);
+
+    relation.members=members;
+
+    relation.Write(multipolygonWriter);
+
+    multipolygonCount++;
+  }
+
+
   std::string Preprocess::GetDescription() const
   {
     return "Preprocess";
@@ -264,6 +308,7 @@ namespace osmscout {
     relationCount=0;
     coastlineCount=0;
     turnRestrictionCount=0;
+    multipolygonCount=0;
 
     lastNodeId=std::numeric_limits<OSMId>::min();
     lastWayId=std::numeric_limits<OSMId>::min();
@@ -281,10 +326,6 @@ namespace osmscout {
                                    "rawways.dat"));
     wayWriter.Write(wayCount+areaCount);
 
-    relationWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawrels.dat"));
-    relationWriter.Write(relationCount);
-
     coastlineWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                         "rawcoastline.dat"));
     coastlineWriter.Write(coastlineCount);
@@ -292,6 +333,10 @@ namespace osmscout {
     turnRestrictionWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                         "rawturnrestr.dat"));
     turnRestrictionWriter.Write(turnRestrictionCount);
+
+    multipolygonWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawrels.dat"));
+    multipolygonWriter.Write(multipolygonCount);
 
     coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "coord.dat"));
@@ -310,8 +355,9 @@ namespace osmscout {
 
     return !nodeWriter.HasError() &&
            !wayWriter.HasError() &&
-           !relationWriter.HasError() &&
            !coastlineWriter.HasError() &&
+           !turnRestrictionWriter.HasError() &&
+           !multipolygonWriter.HasError() &&
            !coordWriter.HasError();
   }
 
@@ -505,6 +551,10 @@ namespace osmscout {
                                    const std::vector<RawRelation::Member>& members,
                                    const std::map<TagId,std::string>& tagMap)
   {
+    if (id<lastRelationId) {
+      relationSortingError=true;
+    }
+
     if (members.empty()) {
       progress->Warning("Relation "+
                         NumberToString(id)+
@@ -521,12 +571,21 @@ namespace osmscout {
                              turnRestrictionType);
     }
 
+    TypeId multipolygonType;
+
+    if (IsMultipolygon(typeConfig,
+                       tagMap,
+                       multipolygonType)) {
+      ProcessMultipolygon(typeConfig,
+                          tagMap,
+                          members,
+                          id,
+                          multipolygonType);
+    }
+
+    /*
     RawRelation relation;
     TypeId      type;
-
-    if (id<lastRelationId) {
-      relationSortingError=true;
-    }
 
     relation.SetId(id);
     relation.members=members;
@@ -536,7 +595,7 @@ namespace osmscout {
 
     relation.SetType(type);
 
-    relation.Write(relationWriter);
+    relation.Write(relationWriter);*/
 
     relationCount++;
     lastRelationId=id;
@@ -558,14 +617,14 @@ namespace osmscout {
     wayWriter.SetPos(0);
     wayWriter.Write(wayCount+areaCount);
 
-    relationWriter.SetPos(0);
-    relationWriter.Write(relationCount);
-
     coastlineWriter.SetPos(0);
     coastlineWriter.Write(coastlineCount);
 
     turnRestrictionWriter.SetPos(0);
     turnRestrictionWriter.Write(turnRestrictionCount);
+
+    multipolygonWriter.SetPos(0);
+    multipolygonWriter.Write(multipolygonCount);
 
     coordWriter.SetPos(0);
 
@@ -587,10 +646,10 @@ namespace osmscout {
 
     nodeWriter.Close();
     wayWriter.Close();
-    relationWriter.Close();
     coastlineWriter.Close();
     coordWriter.Close();
     turnRestrictionWriter.Close();
+    multipolygonWriter.Close();
 
     progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
     progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
@@ -599,6 +658,7 @@ namespace osmscout {
     progress.Info(std::string("Relations:        ")+NumberToString(relationCount));
     progress.Info(std::string("Coastlines:       ")+NumberToString(coastlineCount));
     progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
+    progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
     if (nodeSortingError) {

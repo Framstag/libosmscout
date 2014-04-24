@@ -1056,7 +1056,6 @@ namespace osmscout {
     FileScanner         scanner;
     FileWriter          writer;
     uint32_t            rawRelationCount=0;
-    size_t              selectedRelationCount=0;
     uint32_t            writtenRelationCount=0;
     std::vector<size_t> wayTypeCount;
     std::vector<size_t> wayNodeTypeCount;
@@ -1072,12 +1071,12 @@ namespace osmscout {
                                       "rawrels.dat"),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'rawrels.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
     if (!scanner.Read(rawRelationCount)) {
-      progress.Error("Cannot read nunber of raw relations from data file");
+      progress.Error("Cannot read number of raw relations from data file");
       return false;
     }
 
@@ -1101,43 +1100,6 @@ namespace osmscout {
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
-      }
-
-      // We should ignore the relation because of its type
-      if (rawRel.GetType()!=typeIgnore &&
-          typeConfig.GetTypeInfo(rawRel.GetType()).GetIgnore()) {
-        continue;
-      }
-
-      bool isArea=false;
-
-      selectedRelationCount++;
-
-      // Check, if the type should be handled as multipolygon
-      isArea=typeConfig.GetTypeInfo(rawRel.GetType()).GetMultipolygon();
-
-      // Remove a likely existing type=multipolygon tag
-      // if the type does not define it as multipolygon relation
-      // this surely does anyway.
-      std::vector<Tag>::iterator tag=rawRel.tags.begin();
-      while (tag!=rawRel.tags.end()) {
-        if (tag->key==typeConfig.tagType) {
-          if (tag->value=="multipolygon") {
-            isArea=true;
-          }
-
-          tag=rawRel.tags.erase(tag);
-
-          break;
-        }
-        else {
-          tag++;
-        }
-      }
-
-      // if it is not a area/explicit multipolygon relation skip it.
-      if (!isArea) {
-        continue;
       }
 
       // Normally we now also skip an object because of its missing type, but
@@ -1192,7 +1154,6 @@ namespace osmscout {
     }
 
     progress.Info(NumberToString(rawRelationCount)+" relations read"+
-                  ", "+NumberToString(selectedRelationCount)+" relation selected"+
                   ", "+NumberToString(writtenRelationCount)+" relations written");
 
     writer.SetPos(0);

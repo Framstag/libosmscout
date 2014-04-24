@@ -261,7 +261,6 @@ namespace osmscout {
     RegisterTagForExternalUse("bridge");
     RegisterTagForExternalUse("tunnel");
     RegisterTagForExternalUse("layer");
-    RegisterTagForExternalUse("type");
     RegisterTagForExternalUse("width");
     RegisterTagForExternalUse("oneway");
     RegisterTagForExternalUse("addr:housenumber");
@@ -294,6 +293,7 @@ namespace osmscout {
 
     RegisterTagForInternalUse("area");
     RegisterTagForInternalUse("natural");
+    RegisterTagForInternalUse("type");
     RegisterTagForInternalUse("restriction");
 
     TypeInfo ignore;
@@ -343,7 +343,6 @@ namespace osmscout {
     tagBridge=GetTagId("bridge");
     tagTunnel=GetTagId("tunnel");
     tagLayer=GetTagId("layer");
-    tagType=GetTagId("type");
     tagWidth=GetTagId("width");
     tagOneway=GetTagId("oneway");
     tagHouseNr=GetTagId("addr:housenumber");
@@ -376,13 +375,13 @@ namespace osmscout {
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
+    tagType=GetTagId("type");
     tagRestriction=GetTagId("restriction");
 
     assert(tagRef!=tagIgnore);
     assert(tagBridge!=tagIgnore);
     assert(tagTunnel!=tagIgnore);
     assert(tagLayer!=tagIgnore);
-    assert(tagType!=tagIgnore);
     assert(tagWidth!=tagIgnore);
     assert(tagOneway!=tagIgnore);
     assert(tagHouseNr!=tagIgnore);
@@ -415,6 +414,7 @@ namespace osmscout {
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
+    assert(tagType!=tagIgnore);
     assert(tagRestriction!=tagIgnore);
   }
 
