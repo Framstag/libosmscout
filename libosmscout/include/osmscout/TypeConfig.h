@@ -183,7 +183,6 @@ namespace osmscout {
     bool         indexAsLocation;
     bool         indexAsRegion;
     bool         indexAsPOI;
-    bool         consumeChildren;
     bool         optimizeLowZoom;
     bool         multipolygon;
     bool         pinWay;
@@ -201,26 +200,43 @@ namespace osmscout {
     TypeInfo& AddCondition(unsigned char types,
                            TagCondition* condition);
 
+    /**
+     * The Type Id of the given type
+     */
     inline TypeId GetId() const
     {
       return id;
     }
 
+    /**
+     * The name of the given type
+     */
     inline std::string GetName() const
     {
       return name;
     }
 
+    /**
+     * Returns true, if there are any conditions bound to the type. If the conditions
+     * are met for a given object, the object is in turn of the given type.
+     * to
+     */
     inline bool HasConditions() const
     {
       return conditions.size()>0;
     }
 
+    /**
+     * Returns the list of conditions for the given type.
+     */
     inline const std::list<TypeCondition>& GetConditions() const
     {
       return conditions;
     }
 
+    /**
+     * If set to 'true', a node can be of this type.
+     */
     inline TypeInfo& CanBeNode(bool canBeNode)
     {
       this->canBeNode=canBeNode;
@@ -233,6 +249,9 @@ namespace osmscout {
       return canBeNode;
     }
 
+    /**
+     * If set to 'true', a way can be of this type.
+     */
     inline TypeInfo& CanBeWay(bool canBeWay)
     {
       this->canBeWay=canBeWay;
@@ -245,6 +264,9 @@ namespace osmscout {
       return canBeWay;
     }
 
+    /**
+     * If set to 'true', an area can be of this type.
+     */
     inline TypeInfo& CanBeArea(bool canBeArea)
     {
       this->canBeArea=canBeArea;
@@ -257,6 +279,9 @@ namespace osmscout {
       return canBeArea;
     }
 
+    /**
+     * If set to 'true', a relation can be of this type.
+     */
     inline TypeInfo& CanBeRelation(bool canBeRelation)
     {
       this->canBeRelation=canBeRelation;
@@ -269,6 +294,9 @@ namespace osmscout {
       return canBeRelation;
     }
 
+    /**
+     * If set to 'true', an object of this type can be traveled by feet by default.
+     */
     inline TypeInfo& CanRouteFoot(bool canBeRoute)
     {
       this->canRouteFoot=canBeRoute;
@@ -283,6 +311,9 @@ namespace osmscout {
       return *this;
     }
 
+    /**
+     * If set to 'true', an object of this type can be traveled by car by default.
+     */
     inline TypeInfo& CanRouteCar(bool canBeRoute)
     {
       this->canRouteCar=canBeRoute;
@@ -295,6 +326,9 @@ namespace osmscout {
       return canRouteFoot || canRouteBicycle || canRouteCar;
     }
 
+    /**
+     * If set to 'true', an object of this type can be traveled by the given vehicle by default.
+     */
     inline bool CanRoute(Vehicle vehicle) const
     {
       switch (vehicle)
@@ -325,6 +359,9 @@ namespace osmscout {
       return canRouteCar;
     }
 
+    /**
+     * Sets, if an object of this type should be indexed as a location.
+     */
     inline TypeInfo& SetIndexAsLocation(bool indexAsLocation)
     {
       this->indexAsLocation=indexAsLocation;
@@ -337,6 +374,9 @@ namespace osmscout {
       return indexAsLocation;
     }
 
+    /**
+     * Sets, if an object of this type should be indexed as a region.
+     */
     inline TypeInfo& SetIndexAsRegion(bool indexAsRegion)
     {
       this->indexAsRegion=indexAsRegion;
@@ -349,6 +389,9 @@ namespace osmscout {
       return indexAsRegion;
     }
 
+    /**
+     * Sets, if an object of this type should be indexed as a POI.
+     */
     inline TypeInfo& SetIndexAsPOI(bool indexAsPOI)
     {
       this->indexAsPOI=indexAsPOI;
@@ -361,18 +404,9 @@ namespace osmscout {
       return indexAsPOI;
     }
 
-    inline TypeInfo& SetConsumeChildren(bool consumeChildren)
-    {
-      this->consumeChildren=consumeChildren;
-
-      return *this;
-    }
-
-    inline bool GetConsumeChildren() const
-    {
-      return consumeChildren;
-    }
-
+    /**
+     * Sets, if an object of this type should be optimized for low zoom.
+     */
     inline TypeInfo& SetOptimizeLowZoom(bool optimize)
     {
       this->optimizeLowZoom=optimize;
@@ -385,6 +419,10 @@ namespace osmscout {
       return optimizeLowZoom;
     }
 
+    /**
+     * If set to 'true', an object is handled as multipolygon even though it may not have
+     * type=multipolygon set explicitly.
+     */
     inline TypeInfo& SetMultipolygon(bool multipolygon)
     {
       this->multipolygon=multipolygon;
@@ -409,6 +447,9 @@ namespace osmscout {
       return pinWay;
     }
 
+    /**
+     * Sets, if an object of this type should be ignored for land/sea calculation.
+     */
     inline TypeInfo& SetIgnoreSeaLand(bool ignoreSeaLand)
     {
       this->ignoreSeaLand=ignoreSeaLand;
@@ -421,6 +462,10 @@ namespace osmscout {
       return ignoreSeaLand;
     }
 
+    /**
+     * If set to true, an object of this typoe should be ignored (not exported for renderng, routing,
+     * location indexing or other services).
+     */
     inline TypeInfo& SetIgnore(bool ignore)
     {
       this->ignore=ignore;

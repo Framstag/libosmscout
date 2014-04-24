@@ -191,7 +191,6 @@ namespace osmscout {
      indexAsLocation(false),
      indexAsRegion(false),
      indexAsPOI(false),
-     consumeChildren(false),
      optimizeLowZoom(false),
      multipolygon(false),
      pinWay(false),
