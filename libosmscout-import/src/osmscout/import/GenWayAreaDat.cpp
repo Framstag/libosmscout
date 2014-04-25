@@ -35,26 +35,6 @@
 
 namespace osmscout {
 
-  void WayAreaDataGenerator::GetWayTypes(const TypeConfig& typeConfig,
-                                         std::set<TypeId>& types) const
-  {
-    for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
-        type!=typeConfig.GetTypes().end();
-        type++) {
-      if (type->GetId()==typeIgnore) {
-        continue;
-      }
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (type->CanBeArea()) {
-        types.insert(type->GetId());
-      }
-    }
-  }
-
   std::string WayAreaDataGenerator::GetDescription() const
   {
     return "Generate 'wayarea.tmp'";
@@ -378,8 +358,7 @@ namespace osmscout {
 
     uint32_t         writtenWayCount=0;
 
-    GetWayTypes(typeConfig,
-                wayTypes);
+    typeConfig.GetAreaTypes(wayTypes);
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing

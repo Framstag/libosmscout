@@ -666,6 +666,9 @@ namespace osmscout {
     TypeId GetAreaTypeId(const std::string& name) const;
     TypeId GetRelationTypeId(const std::string& name) const;
 
+    void GetAreaTypes(std::set<TypeId>& types) const;
+    void GetWayTypes(std::set<TypeId>& types) const;
+
     void GetRoutables(std::set<TypeId>& types) const;
     void GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const;
     void GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const;

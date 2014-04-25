@@ -843,6 +843,44 @@ namespace osmscout {
     return typeIgnore;
   }
 
+  void TypeConfig::GetAreaTypes(std::set<TypeId>& types) const
+  {
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
+        type!=this->types.end();
+        type++) {
+      if (type->GetId()==typeIgnore) {
+        continue;
+      }
+
+      if (type->GetIgnore()) {
+        continue;
+      }
+
+      if (type->CanBeArea()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
+
+  void TypeConfig::GetWayTypes(std::set<TypeId>& types) const
+  {
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
+        type!=this->types.end();
+        type++) {
+      if (type->GetId()==typeIgnore) {
+        continue;
+      }
+
+      if (type->GetIgnore()) {
+        continue;
+      }
+
+      if (type->CanBeWay()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
+
   void TypeConfig::GetRoutables(std::set<TypeId>& types) const
   {
     types.clear();

@@ -45,9 +45,6 @@ namespace osmscout {
 
     typedef std::list<RawWayRef>                   WayList;
 
-    void GetWayTypes(const TypeConfig& typeConfig,
-                     std::set<TypeId>& types) const;
-
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
                           BlacklistSet& wayBlacklist);
