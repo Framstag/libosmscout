@@ -74,6 +74,8 @@ namespace osmscout {
               bool memoryMapedData);
     bool Close();
 
+    std::string GetFilename() const;
+
     bool Get(std::set<OSMId>& ids,
              CoordResultMap& coordsMap) const;
   };
