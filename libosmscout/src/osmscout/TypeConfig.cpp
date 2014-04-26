@@ -896,7 +896,7 @@ namespace osmscout {
     }
   }
 
-  void TypeConfig::GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const
+  void TypeConfig::GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const
   {
     types.clear();
 

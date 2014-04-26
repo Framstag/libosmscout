@@ -182,7 +182,7 @@ namespace osmscout {
                     size_t indent,
                     std::ostream& out);
 
-    bool DumpRegionTree(Progress& progress,
+    bool DumpLocationTree(Progress& progress,
                         const Region& rootRegion,
                         const std::string& filename);
 

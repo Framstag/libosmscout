@@ -155,9 +155,9 @@ namespace osmscout {
     }
   }
 
-  bool LocationIndexGenerator::DumpRegionTree(Progress& progress,
-                                              const Region& rootRegion,
-                                              const std::string& filename)
+  bool LocationIndexGenerator::DumpLocationTree(Progress& progress,
+                                                const Region& rootRegion,
+                                                const std::string& filename)
   {
     std::ofstream debugStream;
 
@@ -326,6 +326,8 @@ namespace osmscout {
       region->reference=boundary->reference;
       region->name=boundary->name;
 
+      std::cout << "Boundary: " << region->name << " " << region->reference.GetTypeName() << " " << region->reference.GetFileOffset() << std::endl;
+
       region->areas=boundary->areas;
 
       region->CalculateMinMax();
@@ -379,16 +381,19 @@ namespace osmscout {
       }
 
       if (area.rings.front().GetName().empty()) {
-        progress.Warning(std::string("City area ")+
+        progress.Warning(std::string("Region ")+
                          NumberToString(area.GetType())+" "+
                          NumberToString(area.GetFileOffset())+" has no name");
         continue;
       }
 
+
       RegionRef region=new Region();
 
       region->reference.Set(area.GetFileOffset(),refArea);
       region->name=area.rings.front().GetName();
+
+      std::cout << "Region area: " << region->name << " " << region->reference.GetTypeName() << " " << region->reference.GetFileOffset() << std::endl;
 
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
            ring!=area.rings.end();
@@ -1847,8 +1852,7 @@ namespace osmscout {
     boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
 
-    typeConfig.GetIndexables(indexables);
-
+    typeConfig.GetIndexAsLocationTypes(indexables);
     typeConfig.GetIndexAsRegionTypes(regionTypes);
     typeConfig.GetIndexAsPOITypes(poiTypes);
 
@@ -1883,7 +1887,7 @@ namespace osmscout {
     // Getting all areas of type place=*.
     //
 
-    progress.SetAction("Indexing cities of type 'area'");
+    progress.SetAction("Indexing regions of type 'area'");
 
     if (!IndexRegionAreas(parameter,
                           progress,
@@ -1920,7 +1924,7 @@ namespace osmscout {
     // Getting all nodes of type place=*. We later need an area for these cities.
     //
 
-    progress.SetAction("Indexing cities of type 'node' as area aliases");
+    progress.SetAction("Indexing regions of type 'Node' as area aliases");
 
     if (!IndexRegionNodes(parameter,
                           progress,
@@ -1992,9 +1996,9 @@ namespace osmscout {
       return false;
     }
 
-    progress.SetAction("Dumping areas");
+    progress.SetAction("Dumping location tree");
 
-    DumpRegionTree(progress,
+    DumpLocationTree(progress,
                    *rootRegion,
                    AppendFileToDir(parameter.GetDestinationDirectory(),
                                    "location.txt"));

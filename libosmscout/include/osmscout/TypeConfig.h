@@ -670,7 +670,7 @@ namespace osmscout {
     void GetWayTypes(std::set<TypeId>& types) const;
 
     void GetRoutables(std::set<TypeId>& types) const;
-    void GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const;
+    void GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
     void GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
     void GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const;
 
