@@ -819,8 +819,8 @@ namespace osmscout {
       return false;
     }
 
-    // Reconstruct multiploygon relation by applying the multipolygon resolving
-    // algorithm as destribed at
+    // Reconstruct multipolygon relation by applying the multipolygon resolving
+    // algorithm as described at
     // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
     if (!ResolveMultipolygon(parameter,
                              progress,
