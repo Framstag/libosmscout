@@ -527,6 +527,21 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
                             typeConfig,
                             2);
 
+  if (!area->rings.front().nodes.empty()) {
+    std::cout << std::endl;
+
+    for (size_t n=0; n<area->rings.front().nodes.size(); n++) {
+      std::cout << "  node[" << n << "] {";
+
+      if (n<area->rings.front().ids.size() &&
+          area->rings.front().ids[n]!=0) {
+        std::cout << " id: " << area->rings.front().ids[n];
+      }
+
+      std::cout << " lat: " << area->rings.front().nodes[n].GetLat() << " lon: "<< area->rings.front().nodes[n].GetLon() << " }" << std::endl;
+    }
+  }
+
   for (size_t r=1; r<area->rings.size(); r++) {
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
