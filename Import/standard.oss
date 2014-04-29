@@ -1292,6 +1292,7 @@ SYMBOL christian_church_cross
    [TYPE place_island] {
      NODE.TEXT {label: name; style: emphasize; size: 1.3; priority: 1;}
      AREA.TEXT { label: name; style: emphasize; size: 1.3; }
+     AREA {color: @landColor;}
    }
  }
 
