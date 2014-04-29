@@ -76,7 +76,7 @@ namespace osmscout {
 
   /**
    * \ingroup Util
-   * LazyRef does delay the allocation fo the referenced object of type T. It also
+   * LazyRef does delay the allocation for the referenced object of type T. It also
    * implements references counting on copy and assignment, allow to exchange
    * costly copy operations with cheaper reference assignment operations. Using LazyRef
    * is useful if you reference objects at multiple locations where the object is only
