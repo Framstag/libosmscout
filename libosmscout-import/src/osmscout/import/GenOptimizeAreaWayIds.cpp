@@ -33,6 +33,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::ScanWayAreaIds(const ImportParameter& parameter,
                                                    Progress& progress,
+                                                   const TypeConfig& typeConfig,
                                                    NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -79,10 +80,15 @@ namespace osmscout {
         return false;
       }
 
+
       for (std::vector<Area::Ring>::const_iterator ring=data.rings.begin();
            ring!=data.rings.end();
            ring++) {
         std::set<Id> nodeIds;
+
+        if (!typeConfig.GetTypeInfo(ring->GetType()).CanRoute()) {
+          continue;
+        }
 
         for (std::vector<Id>::const_iterator id=ring->ids.begin();
              id!=ring->ids.end();
@@ -107,6 +113,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::ScanRelAreaIds(const ImportParameter& parameter,
                                                    Progress& progress,
+                                                   const TypeConfig& typeConfig,
                                                    NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -158,6 +165,10 @@ namespace osmscout {
            ring++) {
         std::set<Id> nodeIds;
 
+        if (!typeConfig.GetTypeInfo(ring->GetType()).CanRoute()) {
+          continue;
+        }
+
         for (std::vector<Id>::const_iterator id=ring->ids.begin();
              id!=ring->ids.end();
              id++) {
@@ -181,6 +192,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::ScanWayWayIds(const ImportParameter& parameter,
                                                   Progress& progress,
+                                                  const TypeConfig& typeConfig,
                                                   NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -225,6 +237,10 @@ namespace osmscout {
                        scanner.GetFilename()+"'");
 
         return false;
+      }
+
+      if (!typeConfig.GetTypeInfo(data.GetType()).CanRoute()) {
+        continue;
       }
 
       std::set<Id> nodeIds;
@@ -548,7 +564,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::Import(const ImportParameter& parameter,
                                            Progress& progress,
-                                           const TypeConfig& /*typeConfig*/)
+                                           const TypeConfig& typeConfig)
   {
     progress.SetAction("Optimize ids for areas and ways");
 
@@ -556,18 +572,21 @@ namespace osmscout {
 
     if (!ScanWayAreaIds(parameter,
                         progress,
+                        typeConfig,
                         nodeUseMap)) {
       return false;
     }
 
     if (!ScanRelAreaIds(parameter,
                         progress,
+                        typeConfig,
                         nodeUseMap)) {
       return false;
     }
 
     if (!ScanWayWayIds(parameter,
                        progress,
+                       typeConfig,
                        nodeUseMap)) {
       return false;
     }
