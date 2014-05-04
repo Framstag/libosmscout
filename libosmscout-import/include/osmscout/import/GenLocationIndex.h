@@ -35,13 +35,13 @@ namespace osmscout {
   private:
     /**
      * An area can contain an number of location nodes. Since they do not have
-     * their own area we define the nod ename as an alias for the containing
-     * area, since this is the best aproximation.
+     * their own area we define the node name as an alias for the containing
+     * area, since this is the best approximation.
      */
     struct RegionAlias
     {
-      FileOffset             reference; //! Reference to the node that is the alias
-      std::string            name;      //! The alias itself
+      FileOffset  reference; //<! Reference to the node that is the alias
+      std::string name;      //<! The alias itself
     };
 
     /**
@@ -49,8 +49,8 @@ namespace osmscout {
      */
     struct RegionPOI
     {
-      ObjectFileRef object; //! Object
-      std::string   name;   //! Name of the POI
+      ObjectFileRef object; //<! Object
+      std::string   name;   //<! Name of the POI
 
       bool operator<(const RegionPOI& other) const
       {
@@ -60,8 +60,8 @@ namespace osmscout {
 
     struct RegionAddress
     {
-      ObjectFileRef object; //! Object with the given address
-      std::string   name;   //! The house number
+      ObjectFileRef object; //<! Object with the given address
+      std::string   name;   //<! The house number
 
       bool operator<(const RegionAddress& other) const
       {
@@ -71,9 +71,9 @@ namespace osmscout {
 
     struct RegionLocation
     {
-      FileOffset               addressOffset; //! Offset of place where the address list offset is stored
-      std::list<ObjectFileRef> objects;       //! Objects that represent this location
-      std::list<RegionAddress> addresses;     //! Addresses at this location
+      FileOffset               addressOffset; //<! Offset of place where the address list offset is stored
+      std::list<ObjectFileRef> objects;       //<! Objects that represent this location
+      std::list<RegionAddress> addresses;     //<! Addresses at this location
     };
 
     struct Region;
@@ -88,24 +88,24 @@ namespace osmscout {
       */
     struct Region : public Referencable
     {
-      FileOffset                           indexOffset; //! Offset into the index file
-      FileOffset                           dataOffset;  //! Offset into the index file
+      FileOffset                           indexOffset; //<! Offset into the index file
+      FileOffset                           dataOffset;  //<! Offset into the index file
 
-      ObjectFileRef                        reference;   //! Reference to the object this area is based on
-      std::string                          name;        //! The name of this area
+      ObjectFileRef                        reference;   //<! Reference to the object this area is based on
+      std::string                          name;        //<! The name of this area
 
-      std::list<RegionAlias>               aliases;     //! Location that are represented by this region
-      std::vector<std::vector<GeoCoord> >  areas;       //! the geometric area of this region
+      std::list<RegionAlias>               aliases;     //<! Location that are represented by this region
+      std::vector<std::vector<GeoCoord> >  areas;       //<! the geometric area of this region
 
       double                               minlon;
       double                               minlat;
       double                               maxlon;
       double                               maxlat;
 
-      std::list<RegionPOI>                 pois;        //! A list of POIs in this region
-      std::map<std::string,RegionLocation> locations;   //! list of indexed objects in this region
+      std::list<RegionPOI>                 pois;        //<! A list of POIs in this region
+      std::map<std::string,RegionLocation> locations;   //<! list of indexed objects in this region
 
-      std::list<RegionRef>                 regions;     //! A list of sub regions
+      std::list<RegionRef>                 regions;     //<! A list of sub regions
 
       void CalculateMinMax()
       {
@@ -159,9 +159,9 @@ namespace osmscout {
      */
     struct RegionReference
     {
-      ObjectFileRef          reference; //! Reference of the object that
-                                        //! is the alias
-      FileOffset             offset;    //! Fileoffset of the area
+      ObjectFileRef          reference; //<! Reference of the object that
+                                        //<! is the alias
+      FileOffset             offset;    //<! File offset of the area
 
       inline bool operator<(const RegionReference& other) const
       {

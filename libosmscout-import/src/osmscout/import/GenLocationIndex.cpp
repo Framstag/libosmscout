@@ -1275,14 +1275,14 @@ namespace osmscout {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddAddressWayToRegion(progress,
-                                                     *r,
-                                                     way,
-                                                     minlon,
-                                                     minlat,
-                                                     maxlon,
-                                                     maxlat,
-                                                     added);
+            bool completeMatch=AddPOIWayToRegion(progress,
+                                                 *r,
+                                                 way,
+                                                 minlon,
+                                                 minlat,
+                                                 maxlon,
+                                                 maxlat,
+                                                 added);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
