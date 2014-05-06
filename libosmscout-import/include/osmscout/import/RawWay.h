@@ -34,9 +34,9 @@ namespace osmscout {
   private:
     // Attribute availability flags (for optimized attribute storage)
 
-    const static uint8_t isArea  = 1 <<  0; //! We are an area
-    const static uint8_t hasType = 1 <<  1; //! We have a type
-    const static uint8_t hasTags = 1 <<  2; //! We have tags
+    static const uint8_t isArea  = 1 <<  0; //! We are an area
+    static const uint8_t hasType = 1 <<  1; //! We have a type
+    static const uint8_t hasTags = 1 <<  2; //! We have tags
 
   private:
     OSMId              id;

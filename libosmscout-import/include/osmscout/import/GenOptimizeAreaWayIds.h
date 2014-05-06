@@ -38,14 +38,17 @@ namespace osmscout {
   private:
     bool ScanWayAreaIds(const ImportParameter& parameter,
                         Progress& progress,
+                        const TypeConfig& typeConfig,
                         NodeUseMap& nodeUseMap);
 
     bool ScanRelAreaIds(const ImportParameter& parameter,
                         Progress& progress,
+                        const TypeConfig& typeConfig,
                         NodeUseMap& nodeUseMap);
 
     bool ScanWayWayIds(const ImportParameter& parameter,
                        Progress& progress,
+                       const TypeConfig& typeConfig,
                        NodeUseMap& nodeUseMap);
 
     bool CopyWayArea(const ImportParameter& parameter,

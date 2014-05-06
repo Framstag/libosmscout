@@ -168,7 +168,6 @@ namespace osmscout {
       bool        indexAsLocation;
       bool        indexAsRegion;
       bool        indexAsPOI;
-      bool        consumeChildren;
       bool        optimizeLowZoom;
       bool        multipolygon;
       bool        pinWay;
@@ -187,7 +186,6 @@ namespace osmscout {
             scanner.Read(indexAsLocation) &&
             scanner.Read(indexAsRegion) &&
             scanner.Read(indexAsPOI) &&
-            scanner.Read(consumeChildren) &&
             scanner.Read(optimizeLowZoom) &&
             scanner.Read(multipolygon) &&
             scanner.Read(pinWay) &&
@@ -214,7 +212,6 @@ namespace osmscout {
       typeInfo.SetIndexAsLocation(indexAsLocation);
       typeInfo.SetIndexAsRegion(indexAsRegion);
       typeInfo.SetIndexAsPOI(indexAsPOI);
-      typeInfo.SetConsumeChildren(consumeChildren);
       typeInfo.SetIgnore(optimizeLowZoom);
       typeInfo.SetIgnore(multipolygon);
       typeInfo.SetIgnore(pinWay );

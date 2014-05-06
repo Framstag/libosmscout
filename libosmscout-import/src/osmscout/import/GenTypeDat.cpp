@@ -116,7 +116,6 @@ namespace osmscout {
       writer.Write(type->GetIndexAsLocation());
       writer.Write(type->GetIndexAsRegion());
       writer.Write(type->GetIndexAsPOI());
-      writer.Write(type->GetConsumeChildren());
       writer.Write(type->GetOptimizeLowZoom());
       writer.Write(type->GetMultipolygon());
       writer.Write(type->GetPinWay());

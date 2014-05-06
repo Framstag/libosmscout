@@ -180,36 +180,44 @@ namespace osmscout {
     if (nodeDataFile.Valid() &&
         nodeDataFile->IsOpen()) {
       nodeDataFile->Close();
+      nodeDataFile=NULL;
     }
 
     if (areaDataFile.Valid() &&
         areaDataFile->IsOpen()) {
       areaDataFile->Close();
+      areaDataFile=NULL;
     }
 
     if (wayDataFile.Valid() &&
         wayDataFile->IsOpen()) {
       wayDataFile->Close();
+      wayDataFile=NULL;
     }
 
     if (areaNodeIndex.Valid()) {
       areaNodeIndex->Close();
+      areaNodeIndex=NULL;
     }
 
     if (areaAreaIndex.Valid()) {
       areaAreaIndex->Close();
+      areaAreaIndex=NULL;
     }
 
     if (areaWayIndex.Valid()) {
       areaWayIndex->Close();
+      areaWayIndex=NULL;
     }
 
     if (optimizeWaysLowZoom.Valid()) {
       optimizeWaysLowZoom->Close();
+      optimizeWaysLowZoom=NULL;
     }
 
     if (optimizeAreasLowZoom.Valid()) {
       optimizeAreasLowZoom->Close();
+      optimizeAreasLowZoom=NULL;
     }
 
     isOpen=false;

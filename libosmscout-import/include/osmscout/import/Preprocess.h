@@ -20,11 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/Import.h>
-#include <osmscout/import/RawRelation.h>
+#include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/FileWriter.h>
+
+#include <osmscout/import/Import.h>
+#include <osmscout/import/RawRelation.h>
+
 
 namespace osmscout {
   class Preprocess : public ImportModule
@@ -33,10 +36,12 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   private:
+    Progress            *progress;
     FileWriter          nodeWriter;
     FileWriter          wayWriter;
-    FileWriter          relationWriter;
     FileWriter          coastlineWriter;
+    FileWriter          turnRestrictionWriter;
+    FileWriter          multipolygonWriter;
 
     std::vector<Tag>    tags;
 
@@ -45,6 +50,8 @@ namespace osmscout {
     uint32_t            areaCount;
     uint32_t            relationCount;
     uint32_t            coastlineCount;
+    uint32_t            turnRestrictionCount;
+    uint32_t            multipolygonCount;
 
     OSMId               lastNodeId;
     OSMId               lastWayId;
@@ -69,13 +76,31 @@ namespace osmscout {
                     double lat,
                     double lon);
 
+    bool IsTurnRestriction(const TypeConfig& typeConfig,
+                           const std::map<TagId,std::string>& tags,
+                           TurnRestriction::Type& type) const;
+
+    void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
+                                TurnRestriction::Type type);
+
+    bool IsMultipolygon(const TypeConfig& typeConfig,
+                        const std::map<TagId,std::string>& tags,
+                        TypeId& type);
+
+    void ProcessMultipolygon(const TypeConfig& typeConfig,
+                             const std::map<TagId,std::string>& tags,
+                             const std::vector<RawRelation::Member>& members,
+                             OSMId id,
+                             TypeId type);
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
                 Progress& progress,
                 const TypeConfig& typeConfig);
 
-    bool Initialize(const ImportParameter& parameter);
+    bool Initialize(const ImportParameter& parameter,
+                    Progress& progress);
 
     void ProcessNode(const TypeConfig& typeConfig,
                      const OSMId& id,

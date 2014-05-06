@@ -111,6 +111,8 @@ namespace osmscout {
            entry!=leaf->second.areas.end();
            entry++) {
         writer.WriteNumber(entry->type);
+        // Since objects are inserted in file position order, we do not need
+        // to sort objects by file offset at this place
         writer.WriteNumber(entry->offset-lastOffset);
 
         lastOffset=entry->offset;
@@ -267,9 +269,9 @@ namespace osmscout {
             // by the area
             //
             uint32_t minyc=(uint32_t)floor(minLat/cellHeight[level]);
-            uint32_t maxyc=(uint32_t)floor(maxLat/cellHeight[level]);
+            uint32_t maxyc=(uint32_t)ceil(maxLat/cellHeight[level]);
             uint32_t minxc=(uint32_t)floor(minLon/cellWidth[level]);
-            uint32_t maxxc=(uint32_t)floor(maxLon/cellWidth[level]);
+            uint32_t maxxc=(uint32_t)ceil(maxLon/cellWidth[level]);
 
             Entry entry;
 

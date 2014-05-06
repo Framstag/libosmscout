@@ -440,7 +440,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!Initialize(parameter)) {
+    if (!Initialize(parameter,
+                    progress)) {
       return false;
     }
 

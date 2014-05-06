@@ -37,11 +37,11 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    const static uint8_t hasNameAlt      = 1 << 3; //! We have an alternative name (mainly in a second language)
-    const static uint8_t hasName         = 1 << 4; //! We have a name
-    const static uint8_t hasLocation     = 1 << 5; //! Street and...
-    const static uint8_t hasAddress      = 1 << 6; //! ...house number
-    const static uint8_t hasTags         = 1 << 7; //! We have additional tags
+    static const uint8_t hasNameAlt      = 1 << 3; //! We have an alternative name (mainly in a second language)
+    static const uint8_t hasName         = 1 << 4; //! We have a name
+    static const uint8_t hasLocation     = 1 << 5; //! Street and...
+    static const uint8_t hasAddress      = 1 << 6; //! ...house number
+    static const uint8_t hasTags         = 1 << 7; //! We have additional tags
 
   private:
     mutable uint8_t  flags;

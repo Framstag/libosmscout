@@ -35,26 +35,6 @@
 
 namespace osmscout {
 
-  void WayAreaDataGenerator::GetWayTypes(const TypeConfig& typeConfig,
-                                         std::set<TypeId>& types) const
-  {
-    for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
-        type!=typeConfig.GetTypes().end();
-        type++) {
-      if (type->GetId()==typeIgnore) {
-        continue;
-      }
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (type->CanBeArea()) {
-        types.insert(type->GetId());
-      }
-    }
-  }
-
   std::string WayAreaDataGenerator::GetDescription() const
   {
     return "Generate 'wayarea.tmp'";
@@ -70,7 +50,7 @@ namespace osmscout {
                                       "wayareablack.dat"),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'wayareablack.dat'");
+      progress.Error("Cannot open '" + scanner.GetFilename() + "'");
       return false;
     }
 
@@ -89,14 +69,14 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  bool WayAreaDataGenerator::GetWays(const ImportParameter& parameter,
-                                     Progress& progress,
-                                     const TypeConfig& typeConfig,
-                                     std::set<TypeId>& types,
-                                     std::set<TypeId>& slowFallbackTypes,
-                                     const BlacklistSet& blacklist,
-                                     FileScanner& scanner,
-                                     std::vector<std::list<RawWayRef> >& areas)
+  bool WayAreaDataGenerator::GetAreas(const ImportParameter& parameter,
+                                      Progress& progress,
+                                      const TypeConfig& typeConfig,
+                                      std::set<TypeId>& types,
+                                      std::set<TypeId>& slowFallbackTypes,
+                                      const BlacklistSet& blacklist,
+                                      FileScanner& scanner,
+                                      std::vector<std::list<RawWayRef> >& areas)
   {
     uint32_t         wayCount=0;
     size_t           collectedWaysCount=0;
@@ -208,13 +188,13 @@ namespace osmscout {
     return true;
   }
 
-  bool WayAreaDataGenerator::WriteWay(const ImportParameter& parameter,
-                                      Progress& progress,
-                                      const TypeConfig& typeConfig,
-                                      FileWriter& writer,
-                                      uint32_t& writtenWayCount,
-                                      const CoordDataFile::CoordResultMap& coordsMap,
-                                      const RawWay& rawWay)
+  bool WayAreaDataGenerator::WriteArea(const ImportParameter& parameter,
+                                       Progress& progress,
+                                       const TypeConfig& typeConfig,
+                                       FileWriter& writer,
+                                       uint32_t& writtenWayCount,
+                                       const CoordDataFile::CoordResultMap& coordsMap,
+                                       const RawWay& rawWay)
   {
     std::vector<Tag> tags(rawWay.GetTags());
     Area             area;
@@ -344,7 +324,7 @@ namespace osmscout {
 
       nodeIds.clear();
 
-      if (!WriteWay(parameter,
+      if (!WriteArea(parameter,
                     progress,
                     typeConfig,
                     writer,
@@ -355,7 +335,7 @@ namespace osmscout {
       }
     }
 
-    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(types.size())+" types");
+    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" areas for "+NumberToString(types.size())+" types");
 
     return true;
   }
@@ -366,20 +346,19 @@ namespace osmscout {
   {
     progress.SetAction("Generate wayarea.tmp");
 
-    std::set<TypeId> wayTypes;
+    std::set<TypeId> areaTypes;
     std::set<TypeId> slowFallbackTypes;
 
-    BlacklistSet     wayBlacklist; //! Map of ways, that should be handled
+    BlacklistSet     wayBlacklist; //! Map of ways, that should not be handled
 
     CoordDataFile    coordDataFile("coord.dat");
     FileScanner      scanner;
-    FileWriter       wayWriter;
+    FileWriter       areaWriter;
     uint32_t         rawWayCount=0;
 
     uint32_t         writtenWayCount=0;
 
-    GetWayTypes(typeConfig,
-                wayTypes);
+    typeConfig.GetAreaTypes(areaTypes);
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing
@@ -403,7 +382,7 @@ namespace osmscout {
                                       "rawways.dat"),
                       FileScanner::Sequential,
                       parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'rawways.dat'");
+      progress.Error("Cannot open '" + scanner.GetFilename()+ "'");
       return false;
     }
 
@@ -412,18 +391,18 @@ namespace osmscout {
       return false;
     }
 
-    if (!wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+    if (!areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "wayarea.tmp"))) {
-      progress.Error("Cannot create 'wayarea.tmp'");
+      progress.Error("Cannot create '" + areaWriter.GetFilename() + "'");
       return false;
     }
 
-    wayWriter.Write(writtenWayCount);
+    areaWriter.Write(writtenWayCount);
 
     /* ------ */
 
     size_t iteration=1;
-    while (!wayTypes.empty()) {
+    while (!areaTypes.empty()) {
       std::vector<std::list<RawWayRef> > areasByType(typeConfig.GetTypes().size());
 
       //
@@ -432,14 +411,14 @@ namespace osmscout {
 
       progress.SetAction("Collecting way data by type");
 
-      if (!GetWays(parameter,
-                   progress,
-                   typeConfig,
-                   wayTypes,
-                   slowFallbackTypes,
-                   wayBlacklist,
-                   scanner,
-                   areasByType)) {
+      if (!GetAreas(parameter,
+                    progress,
+                    typeConfig,
+                    areaTypes,
+                    slowFallbackTypes,
+                    wayBlacklist,
+                    scanner,
+                    areasByType)) {
         return false;
       }
 
@@ -478,13 +457,13 @@ namespace osmscout {
              ++w) {
           RawWayRef rawWay(*w);
 
-          WriteWay(parameter,
-                   progress,
-                   typeConfig,
-                   wayWriter,
-                   writtenWayCount,
-                   coordsMap,
-                   *rawWay);
+          WriteArea(parameter,
+                    progress,
+                    typeConfig,
+                    areaWriter,
+                    writtenWayCount,
+                    coordsMap,
+                    *rawWay);
         }
 
         areasByType[type].clear();
@@ -502,7 +481,7 @@ namespace osmscout {
                               scanner,
                               slowFallbackTypes,
                               wayBlacklist,
-                              wayWriter,
+                              areaWriter,
                               writtenWayCount,
                               coordDataFile);
     }
@@ -510,15 +489,15 @@ namespace osmscout {
     /* -------*/
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawways.dat'");
+      progress.Error("Cannot close file '" + scanner.GetFilename() + "'");
       return false;
     }
 
-    wayWriter.SetPos(0);
-    wayWriter.Write(writtenWayCount);
+    areaWriter.SetPos(0);
+    areaWriter.Write(writtenWayCount);
 
 
-    if (!wayWriter.Close()) {
+    if (!areaWriter.Close()) {
       return false;
     }
 

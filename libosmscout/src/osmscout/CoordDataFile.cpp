@@ -116,6 +116,11 @@ namespace osmscout {
     return success;
   }
 
+  std::string CoordDataFile::GetFilename() const
+  {
+    return datafilename;
+  }
+
   bool CoordDataFile::Get(std::set<OSMId>& ids,
                           CoordResultMap& coordsMap) const
   {

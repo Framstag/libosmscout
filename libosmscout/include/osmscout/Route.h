@@ -33,6 +33,7 @@
 namespace osmscout {
 
   /**
+   * \ingroup Routing
    * Description of a route, enhanced with information that are required to
    * give a human textual (or narrative) drive instructions;
    *
@@ -74,7 +75,8 @@ namespace osmscout {
     static const char* const MOTORWAY_LEAVE_DESC;
 
   public:
-    /*
+    /**
+     * \ingroup Routing
      * Base class of all descriptions.
      */
     class OSMSCOUT_API Description : public Referencable
@@ -88,6 +90,7 @@ namespace osmscout {
     typedef Ref<Description> DescriptionRef;
 
     /**
+     * \ingroup Routing
      * Start of the route
      */
     class OSMSCOUT_API StartDescription : public Description
@@ -106,7 +109,8 @@ namespace osmscout {
     typedef Ref<StartDescription> StartDescriptionRef;
 
     /**
-     * Start of the route
+     * \ingroup Routing
+     * Target of the route
      */
     class OSMSCOUT_API TargetDescription : public Description
     {
@@ -124,6 +128,7 @@ namespace osmscout {
     typedef Ref<TargetDescription> TargetDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Something has a name. A name consists of a name and a optional alphanumeric
      * reference (LIke B1 or A40).
      */
@@ -152,6 +157,7 @@ namespace osmscout {
     typedef Ref<NameDescription> NameDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Something has a name. A name consists of a name and a optional alphanumeric
      * reference (Like B1 or A40).
      */
@@ -180,6 +186,7 @@ namespace osmscout {
     typedef Ref<NameChangedDescription> NameChangedDescriptionRef;
 
     /**
+     * \ingroup Routing
      * List the names of allways, that are crossing the current node.
      */
     class OSMSCOUT_API CrossingWaysDescription : public Description
@@ -228,6 +235,7 @@ namespace osmscout {
     typedef Ref<CrossingWaysDescription> CrossingWaysDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Describes the turn and the curve while getting from the previous node to the next node via the current node.
      *
      * The turn is the angle between the incoming way (previous node and current node)
@@ -290,6 +298,7 @@ namespace osmscout {
     typedef Ref<DirectionDescription> DirectionDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Signals an explicit turn
      */
     class OSMSCOUT_API TurnDescription : public Description
@@ -303,6 +312,7 @@ namespace osmscout {
     typedef Ref<TurnDescription> TurnDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Signals entering a roundabout
      */
     class OSMSCOUT_API RoundaboutEnterDescription : public Description
@@ -316,6 +326,7 @@ namespace osmscout {
     typedef Ref<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Signals leaving a roundabout
      */
     class OSMSCOUT_API RoundaboutLeaveDescription : public Description
@@ -337,6 +348,7 @@ namespace osmscout {
     typedef Ref<RoundaboutLeaveDescription> RoundaboutLeaveDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Signals entering a motorway
      */
     class OSMSCOUT_API MotorwayEnterDescription : public Description
@@ -358,6 +370,7 @@ namespace osmscout {
     typedef Ref<MotorwayEnterDescription> MotorwayEnterDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Signals changing a motorway
      */
     class OSMSCOUT_API MotorwayChangeDescription : public Description
@@ -386,6 +399,7 @@ namespace osmscout {
     typedef Ref<MotorwayChangeDescription> MotorwayChangeDescriptionRef;
 
     /**
+     * \ingroup Routing
      * Signals leaving a motorway
      */
     class OSMSCOUT_API MotorwayLeaveDescription : public Description
@@ -406,6 +420,9 @@ namespace osmscout {
 
     typedef Ref<MotorwayLeaveDescription> MotorwayLeaveDescriptionRef;
 
+    /**
+     * \ingroup Routing
+     */
     class OSMSCOUT_API Node
     {
     private:

@@ -819,8 +819,8 @@ namespace osmscout {
       return false;
     }
 
-    // Reconstruct multiploygon relation by applying the multipolygon resolving
-    // algorithm as destribed at
+    // Reconstruct multipolygon relation by applying the multipolygon resolving
+    // algorithm as described at
     // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
     if (!ResolveMultipolygon(parameter,
                              progress,
@@ -1056,7 +1056,6 @@ namespace osmscout {
     FileScanner         scanner;
     FileWriter          writer;
     uint32_t            rawRelationCount=0;
-    size_t              selectedRelationCount=0;
     uint32_t            writtenRelationCount=0;
     std::vector<size_t> wayTypeCount;
     std::vector<size_t> wayNodeTypeCount;
@@ -1072,12 +1071,12 @@ namespace osmscout {
                                       "rawrels.dat"),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'rawrels.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
     if (!scanner.Read(rawRelationCount)) {
-      progress.Error("Cannot read nunber of raw relations from data file");
+      progress.Error("Cannot read number of raw relations from data file");
       return false;
     }
 
@@ -1103,60 +1102,15 @@ namespace osmscout {
         return false;
       }
 
-      std::string name=ResolveRelationName(typeConfig,
-                                           rawRel);
-
-      if (rawRel.members.empty()) {
-        progress.Warning("Relation "+
-                         NumberToString(rawRel.GetId())+
-                         " does not have any members!");
-        continue;
-      }
-
-      // We should ignore the relation because of its type
-      if (rawRel.GetType()!=typeIgnore &&
-          typeConfig.GetTypeInfo(rawRel.GetType()).GetIgnore()) {
-        continue;
-      }
-
-      bool isArea=false;
-
-      selectedRelationCount++;
-
-      // Check, if the type should be handled as multipolygon
-      isArea=typeConfig.GetTypeInfo(rawRel.GetType()).GetMultipolygon();
-
-      // Remove a likely existing type=multipolygon tag
-      // if the type does not define it as multipolygon relation
-      // this surely does anyway.
-      std::vector<Tag>::iterator tag=rawRel.tags.begin();
-      while (tag!=rawRel.tags.end()) {
-        if (tag->key==typeConfig.tagType) {
-          if (tag->value=="multipolygon") {
-            isArea=true;
-          }
-
-          tag=rawRel.tags.erase(tag);
-
-          break;
-        }
-        else {
-          tag++;
-        }
-      }
-
-      // if it is not a area/explicit multipolygon relation skip it.
-      if (!isArea) {
-        continue;
-      }
-
       // Normally we now also skip an object because of its missing type, but
       // in case of relations things are a little bit more difficult,
       // type might be placed at the outer ring and not on the relation
       // itself, we thus still need to parse the complete relation for
       // type analysis before we can skip it.
 
-      Area rel;
+      std::string name=ResolveRelationName(typeConfig,
+                                           rawRel);
+      Area        rel;
 
       if (!HandleMultipolygonRelation(parameter,
                                       progress,
@@ -1200,7 +1154,6 @@ namespace osmscout {
     }
 
     progress.Info(NumberToString(rawRelationCount)+" relations read"+
-                  ", "+NumberToString(selectedRelationCount)+" relation selected"+
                   ", "+NumberToString(writtenRelationCount)+" relations written");
 
     writer.SetPos(0);

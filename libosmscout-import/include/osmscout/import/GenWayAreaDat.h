@@ -45,14 +45,11 @@ namespace osmscout {
 
     typedef std::list<RawWayRef>                   WayList;
 
-    void GetWayTypes(const TypeConfig& typeConfig,
-                     std::set<TypeId>& types) const;
-
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
                           BlacklistSet& wayBlacklist);
 
-    bool GetWays(const ImportParameter& parameter,
+    bool GetAreas(const ImportParameter& parameter,
                  Progress& progress,
                  const TypeConfig& typeConfig,
                  std::set<TypeId>& types,
@@ -61,7 +58,7 @@ namespace osmscout {
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& areas);
 
-    bool WriteWay(const ImportParameter& parameter,
+    bool WriteArea(const ImportParameter& parameter,
                   Progress& progress,
                   const TypeConfig& typeConfig,
                   FileWriter& writer,

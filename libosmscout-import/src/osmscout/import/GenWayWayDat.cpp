@@ -41,26 +41,6 @@ namespace osmscout {
     return a->GetNodeCount()>b->GetNodeCount();
   }
 
-  void WayWayDataGenerator::GetWayTypes(const TypeConfig& typeConfig,
-                                        std::set<TypeId>& types) const
-  {
-    for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
-        type!=typeConfig.GetTypes().end();
-        type++) {
-      if (type->GetId()==typeIgnore) {
-        continue;
-      }
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (type->CanBeWay()) {
-        types.insert(type->GetId());
-      }
-    }
-  }
-
   std::string WayWayDataGenerator::GetDescription() const
   {
     return "Generate 'wayway.tmp'";
@@ -197,10 +177,6 @@ namespace osmscout {
         continue;
       }
 
-      if (way->GetNodeCount()<2) {
-        continue;
-      }
-
       if (ways[way->GetType()].empty()) {
         typesWithWays++;
       }
@@ -213,7 +189,7 @@ namespace osmscout {
              typesWithWays>1) {
         size_t victimType=ways.size();
 
-        // Find the type with the smalest amount of ways loaded
+        // Find the type with the smallest amount of ways loaded
         for (size_t i=0; i<ways.size(); i++) {
           if (!ways[i].empty() &&
               (victimType>=ways.size() ||
@@ -222,16 +198,18 @@ namespace osmscout {
           }
         }
 
-        if (victimType<ways.size()) {
-          collectedWaysCount-=ways[victimType].size();
-          ways[victimType].clear();
+        // If there is more then one type of was, we always must find a "victim" type.
+        assert(victimType<ways.size());
 
-          typesWithWays--;
-          currentTypes.erase(victimType);
-        }
+        collectedWaysCount-=ways[victimType].size();
+        ways[victimType].clear();
+
+        typesWithWays--;
+        currentTypes.erase(victimType);
       }
     }
 
+    // If we are done, remove all successfully collected types from our list of "not yet collected" types.
     for (std::set<TypeId>::const_iterator type=currentTypes.begin();
          type!=currentTypes.end();
          ++type) {
@@ -280,7 +258,7 @@ namespace osmscout {
                                          OSMId nodeId) const
   {
     // We have an index entry for turn restriction, where the given way id is
-    // "from" or "to" so we can jst check for "via" == nodeId
+    // "from" or "to" so we can just check for "via" == nodeId
 
     std::pair<std::multimap<OSMId,TurnRestrictionRef>::const_iterator,
               std::multimap<OSMId,TurnRestrictionRef>::const_iterator> hits=restrictions.equal_range(wayId);
@@ -305,7 +283,7 @@ namespace osmscout {
     // Sort by decreasing node count to assure that we merge longest ways first
     ways.sort(WayByNodeCountSorter);
 
-    // Index by first and last node id (if way is not circular)
+    // Index by first node id (if way is not circular)
     for (WayListPtr w=ways.begin();
         w!=ways.end();
         ++w) {
@@ -389,35 +367,32 @@ namespace osmscout {
             continue;
           }
 
-          bool restricted=false;
-          // Critical section, because this code could be run in multiple thread for
-          // different ways of different way types
-#pragma omp critical
-          {
-            restricted=IsRestricted(restrictions,
-                                    way->GetId(),
-                                    lastNodeId);
-          }
-
-          if (restricted) {
+          if (IsRestricted(restrictions,
+                           way->GetId(),
+                           lastNodeId)) {
             continue;
           }
 
           // This is a match
           hasMerged=true;
 
+          //
+          // Append candidate nodes
+          //
+
           std::vector<OSMId> nodes(way->GetNodes());
 
           nodes.reserve(nodes.size()+candidate->GetNodeCount()-1);
 
-          if (lastNodeId==candidate->GetFirstNodeId()) {
-            // Append candidate nodes
-            for (size_t i=1; i<candidate->GetNodeCount(); i++) {
-              nodes.push_back(candidate->GetNodeId(i));
-            }
+          for (size_t i=1; i<candidate->GetNodeCount(); i++) {
+            nodes.push_back(candidate->GetNodeId(i));
           }
 
           way->SetNodes(nodes);
+
+          //
+          // Cleanup
+          //
 
           WaysByNodeMap::iterator otherEntry;
 
@@ -488,7 +463,6 @@ namespace osmscout {
       }
 
       way.ids[n]=coord->second.point.GetId();
-
       way.nodes[n]=coord->second.point.GetCoords();
     }
 
@@ -527,8 +501,7 @@ namespace osmscout {
     uint32_t                                writtenWayCount=0;
     uint32_t                                mergeCount=0;
 
-    GetWayTypes(typeConfig,
-                wayTypes);
+    typeConfig.GetWayTypes(wayTypes);
 
     //
     // handling of restriction relations

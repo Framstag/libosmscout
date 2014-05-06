@@ -184,10 +184,6 @@ namespace osmscout {
   {
     routeNodeDataFile.Close();
 
-    if (database->IsOpen()) {
-      database->Close();
-    }
-
     isOpen=false;
   }
 

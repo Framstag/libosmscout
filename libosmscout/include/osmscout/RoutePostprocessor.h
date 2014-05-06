@@ -37,6 +37,9 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Routing
+   */
   class OSMSCOUT_API RoutePostprocessor
   {
   public:
@@ -115,6 +118,7 @@ namespace osmscout {
     typedef Ref<Postprocessor> PostprocessorRef;
 
     /**
+     * \ingroup Routing
      * Places the given description at the start node
      */
     class OSMSCOUT_API StartPostprocessor : public Postprocessor
@@ -131,6 +135,7 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
      * Places the given description at the target node
      */
     class OSMSCOUT_API TargetPostprocessor : public Postprocessor
@@ -147,6 +152,7 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
      * Calculates the overall running distance and time for each node
      */
     class OSMSCOUT_API DistanceAndTimePostprocessor : public Postprocessor
@@ -160,6 +166,7 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
      * Places a name description as way description
      */
     class OSMSCOUT_API WayNamePostprocessor : public Postprocessor
@@ -173,6 +180,7 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
      * Places a crossing ways description as a description of the name of all ways crossing the given node
      */
     class OSMSCOUT_API CrossingWaysPostprocessor : public Postprocessor
@@ -194,6 +202,7 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
      * Places a turn description for every node
      */
     class OSMSCOUT_API DirectionPostprocessor : public Postprocessor
@@ -214,6 +223,7 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
      * Generates drive instructions
      */
     class OSMSCOUT_API InstructionPostprocessor : public Postprocessor

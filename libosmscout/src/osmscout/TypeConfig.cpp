@@ -191,7 +191,6 @@ namespace osmscout {
      indexAsLocation(false),
      indexAsRegion(false),
      indexAsPOI(false),
-     consumeChildren(false),
      optimizeLowZoom(false),
      multipolygon(false),
      pinWay(false),
@@ -262,19 +261,14 @@ namespace osmscout {
     RegisterTagForExternalUse("bridge");
     RegisterTagForExternalUse("tunnel");
     RegisterTagForExternalUse("layer");
-    RegisterTagForExternalUse("type");
     RegisterTagForExternalUse("width");
     RegisterTagForExternalUse("oneway");
     RegisterTagForExternalUse("addr:housenumber");
     RegisterTagForExternalUse("addr:street");
     RegisterTagForExternalUse("junction");
     RegisterTagForExternalUse("maxspeed");
-    RegisterTagForExternalUse("restriction");
     RegisterTagForExternalUse("surface");
     RegisterTagForExternalUse("tracktype");
-    RegisterTagForExternalUse("place");
-    RegisterTagForExternalUse("place_name");
-    RegisterTagForExternalUse("boundary");
     RegisterTagForExternalUse("admin_level");
 
     RegisterTagForExternalUse("access");
@@ -299,6 +293,8 @@ namespace osmscout {
 
     RegisterTagForInternalUse("area");
     RegisterTagForInternalUse("natural");
+    RegisterTagForInternalUse("type");
+    RegisterTagForInternalUse("restriction");
 
     TypeInfo ignore;
     TypeInfo route;
@@ -347,18 +343,14 @@ namespace osmscout {
     tagBridge=GetTagId("bridge");
     tagTunnel=GetTagId("tunnel");
     tagLayer=GetTagId("layer");
-    tagType=GetTagId("type");
     tagWidth=GetTagId("width");
     tagOneway=GetTagId("oneway");
     tagHouseNr=GetTagId("addr:housenumber");
     tagStreet=GetTagId("addr:street");
     tagJunction=GetTagId("junction");
     tagMaxSpeed=GetTagId("maxspeed");
-    tagRestriction=GetTagId("restriction");
     tagSurface=GetTagId("surface");
     tagTracktype=GetTagId("tracktype");
-    tagPlace=GetTagId("place");
-    tagBoundary=GetTagId("boundary");
     tagAdminLevel=GetTagId("admin_level");
 
     tagAccess=GetTagId("access");
@@ -383,23 +375,21 @@ namespace osmscout {
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
+    tagType=GetTagId("type");
+    tagRestriction=GetTagId("restriction");
 
     assert(tagRef!=tagIgnore);
     assert(tagBridge!=tagIgnore);
     assert(tagTunnel!=tagIgnore);
     assert(tagLayer!=tagIgnore);
-    assert(tagType!=tagIgnore);
     assert(tagWidth!=tagIgnore);
     assert(tagOneway!=tagIgnore);
     assert(tagHouseNr!=tagIgnore);
     assert(tagStreet!=tagIgnore);
     assert(tagJunction!=tagIgnore);
     assert(tagMaxSpeed!=tagIgnore);
-    assert(tagRestriction!=tagIgnore);
     assert(tagSurface!=tagIgnore);
     assert(tagTracktype!=tagIgnore);
-    assert(tagPlace!=tagIgnore);
-    assert(tagBoundary!=tagIgnore);
     assert(tagAdminLevel!=tagIgnore);
 
     assert(tagAccess!=tagIgnore);
@@ -424,6 +414,8 @@ namespace osmscout {
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
+    assert(tagType!=tagIgnore);
+    assert(tagRestriction!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()
@@ -851,6 +843,44 @@ namespace osmscout {
     return typeIgnore;
   }
 
+  void TypeConfig::GetAreaTypes(std::set<TypeId>& types) const
+  {
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
+        type!=this->types.end();
+        type++) {
+      if (type->GetId()==typeIgnore) {
+        continue;
+      }
+
+      if (type->GetIgnore()) {
+        continue;
+      }
+
+      if (type->CanBeArea()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
+
+  void TypeConfig::GetWayTypes(std::set<TypeId>& types) const
+  {
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
+        type!=this->types.end();
+        type++) {
+      if (type->GetId()==typeIgnore) {
+        continue;
+      }
+
+      if (type->GetIgnore()) {
+        continue;
+      }
+
+      if (type->CanBeWay()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
+
   void TypeConfig::GetRoutables(std::set<TypeId>& types) const
   {
     types.clear();
@@ -866,7 +896,7 @@ namespace osmscout {
     }
   }
 
-  void TypeConfig::GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const
+  void TypeConfig::GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const
   {
     types.clear();
 

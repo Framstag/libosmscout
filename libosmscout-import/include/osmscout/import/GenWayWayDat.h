@@ -46,9 +46,6 @@ namespace osmscout {
     typedef std::list<WayListPtr>                  WayListPtrList;
     typedef OSMSCOUT_HASHMAP<OSMId,WayListPtrList> WaysByNodeMap;
 
-    void GetWayTypes(const TypeConfig& typeConfig,
-                     std::set<TypeId>& types) const;
-
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
                               std::multimap<OSMId,TurnRestrictionRef>& restrictions);

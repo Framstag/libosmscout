@@ -155,9 +155,9 @@ namespace osmscout {
     }
   }
 
-  bool LocationIndexGenerator::DumpRegionTree(Progress& progress,
-                                              const Region& rootRegion,
-                                              const std::string& filename)
+  bool LocationIndexGenerator::DumpLocationTree(Progress& progress,
+                                                const Region& rootRegion,
+                                                const std::string& filename)
   {
     std::ofstream debugStream;
 
@@ -326,6 +326,8 @@ namespace osmscout {
       region->reference=boundary->reference;
       region->name=boundary->name;
 
+      std::cout << "Boundary: " << region->name << " " << region->reference.GetTypeName() << " " << region->reference.GetFileOffset() << std::endl;
+
       region->areas=boundary->areas;
 
       region->CalculateMinMax();
@@ -379,16 +381,19 @@ namespace osmscout {
       }
 
       if (area.rings.front().GetName().empty()) {
-        progress.Warning(std::string("City area ")+
+        progress.Warning(std::string("Region ")+
                          NumberToString(area.GetType())+" "+
                          NumberToString(area.GetFileOffset())+" has no name");
         continue;
       }
 
+
       RegionRef region=new Region();
 
       region->reference.Set(area.GetFileOffset(),refArea);
       region->name=area.rings.front().GetName();
+
+      std::cout << "Region area: " << region->name << " " << region->reference.GetTypeName() << " " << region->reference.GetFileOffset() << std::endl;
 
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
            ring!=area.rings.end();
@@ -615,13 +620,7 @@ namespace osmscout {
   }
 
   /**
-    Add the given object (currently only a way) to
-    the hierarchical area index.
-
-    If the method returns true, the objects was completely contained
-    by the passed area (or one of its sub areas), else it returns false.
-    If it returns false, not all points of the object were covered by the area
-    and the parent area should add the object, too.
+    Add the given location area to the hierarchical area index.
 
     The code is designed to minimize the number of "point in area" checks, it assumes that
     if one point of an object is in a area it is very likely that all points of the object
@@ -678,7 +677,7 @@ namespace osmscout {
 
   bool LocationIndexGenerator::IndexLocationAreas(const ImportParameter& parameter,
                                                   Progress& progress,
-                                                  const OSMSCOUT_HASHSET<TypeId>& indexables,
+                                                  const OSMSCOUT_HASHSET<TypeId>& locationTypes,
                                                   RegionRef& rootRegion,
                                                   const RegionIndex& regionIndex)
   {
@@ -718,7 +717,7 @@ namespace osmscout {
           ++ring) {
         if (ring->GetType()!=typeIgnore &&
             !ring->GetName().empty()) {
-          if (indexables.find(ring->GetType())!=indexables.end()) {
+          if (locationTypes.find(ring->GetType())!=locationTypes.end()) {
             AddLocationAreaToRegion(rootRegion,
                                     area,
                                     *ring,
@@ -737,13 +736,7 @@ namespace osmscout {
   }
 
   /**
-    Add the given object (currently only a way) to
-    the hierarchical area index.
-
-    If the method returns true, the objects was completely contained
-    by the passed area (or one of its sub areas), else it returns false.
-    If it returns false, not all points of the object were covered by the area
-    and the parent area should add the object, too.
+    Add the given location way to the hierarchical area index.
 
     The code is designed to minimize the number of "point in area" checks, it assumes that
     if one point of an object is in a area it is very likely that all points of the object
@@ -797,7 +790,7 @@ namespace osmscout {
 
   bool LocationIndexGenerator::IndexLocationWays(const ImportParameter& parameter,
                                                  Progress& progress,
-                                                 const OSMSCOUT_HASHSET<TypeId>& indexables,
+                                                 const OSMSCOUT_HASHSET<TypeId>& locationTypes,
                                                  RegionRef& rootRegion,
                                                  const RegionIndex& regionIndex)
   {
@@ -833,7 +826,7 @@ namespace osmscout {
         return false;
       }
 
-      if (indexables.find(way.GetType())==indexables.end()) {
+      if (locationTypes.find(way.GetType())==locationTypes.end()) {
         continue;
       }
 
@@ -1282,14 +1275,14 @@ namespace osmscout {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddAddressWayToRegion(progress,
-                                                     *r,
-                                                     way,
-                                                     minlon,
-                                                     minlat,
-                                                     maxlon,
-                                                     maxlat,
-                                                     added);
+            bool completeMatch=AddPOIWayToRegion(progress,
+                                                 *r,
+                                                 way,
+                                                 minlon,
+                                                 minlat,
+                                                 maxlon,
+                                                 maxlat,
+                                                 added);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -1807,14 +1800,17 @@ namespace osmscout {
                                       Progress& progress,
                                       const TypeConfig& typeConfig)
   {
-    OSMSCOUT_HASHSET<TypeId>           regionTypes;
-    OSMSCOUT_HASHSET<TypeId>           poiTypes;
-    OSMSCOUT_HASHSET<TypeId>           indexables;
-    TypeId                             boundaryId;
     RegionRef                          rootRegion;
-    std::list<Boundary>                boundaryAreas;
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
+
+    OSMSCOUT_HASHSET<TypeId>           locationTypes;
+    OSMSCOUT_HASHSET<TypeId>           regionTypes;
+    OSMSCOUT_HASHSET<TypeId>           poiTypes;
+
+    TypeId                             boundaryId;
+    std::list<Boundary>                boundaryAreas;
+
 
     progress.SetAction("Setup");
 
@@ -1847,8 +1843,7 @@ namespace osmscout {
     boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
 
-    typeConfig.GetIndexables(indexables);
-
+    typeConfig.GetIndexAsLocationTypes(locationTypes);
     typeConfig.GetIndexAsRegionTypes(regionTypes);
     typeConfig.GetIndexAsPOITypes(poiTypes);
 
@@ -1883,7 +1878,7 @@ namespace osmscout {
     // Getting all areas of type place=*.
     //
 
-    progress.SetAction("Indexing cities of type 'area'");
+    progress.SetAction("Indexing regions of type 'area'");
 
     if (!IndexRegionAreas(parameter,
                           progress,
@@ -1920,7 +1915,7 @@ namespace osmscout {
     // Getting all nodes of type place=*. We later need an area for these cities.
     //
 
-    progress.SetAction("Indexing cities of type 'node' as area aliases");
+    progress.SetAction("Indexing regions of type 'Node' as area aliases");
 
     if (!IndexRegionNodes(parameter,
                           progress,
@@ -1934,7 +1929,7 @@ namespace osmscout {
 
     if (!IndexLocationAreas(parameter,
                             progress,
-                            indexables,
+                            locationTypes,
                             rootRegion,
                             regionIndex)) {
       return false;
@@ -1944,7 +1939,7 @@ namespace osmscout {
 
     if (!IndexLocationWays(parameter,
                            progress,
-                           indexables,
+                           locationTypes,
                            rootRegion,
                            regionIndex)) {
       return false;
@@ -1992,9 +1987,9 @@ namespace osmscout {
       return false;
     }
 
-    progress.SetAction("Dumping areas");
+    progress.SetAction("Dumping location tree");
 
-    DumpRegionTree(progress,
+    DumpLocationTree(progress,
                    *rootRegion,
                    AppendFileToDir(parameter.GetDestinationDirectory(),
                                    "location.txt"));

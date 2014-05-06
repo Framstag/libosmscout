@@ -76,7 +76,7 @@ namespace osmscout {
 
   /**
    * \ingroup Util
-   * LazyRef does delay the allocation fo the referenced object of type T. It also
+   * LazyRef does delay the allocation for the referenced object of type T. It also
    * implements references counting on copy and assignment, allow to exchange
    * costly copy operations with cheaper reference assignment operations. Using LazyRef
    * is useful if you reference objects at multiple locations where the object is only
@@ -301,7 +301,8 @@ namespace osmscout {
     */
     Ref<T>& operator=(const Ref<T>& other)
     {
-      if (&other!=this && this->ptr!=other.ptr) {
+      if (&other!=this &&
+          this->ptr!=other.ptr) {
         if (ptr!=NULL &&
             ptr->RemoveReference()==0) {
           delete ptr;
@@ -320,7 +321,8 @@ namespace osmscout {
     template<typename T1>
     Ref<T>& operator=(const Ref<T1>& other)
     {
-      if (&other!=this && this->ptr!=other.Get()) {
+      if (&other!=this &&
+          this->ptr!=other.Get()) {
         if (ptr!=NULL &&
             ptr->RemoveReference()) {
           delete ptr;
@@ -389,6 +391,8 @@ namespace osmscout {
     */
     operator T&() const
     {
+      assert(ptr!=NULL);
+
       return *ptr;
     }
 

@@ -323,7 +323,8 @@ namespace osmscout {
     Parser        parser(*this,typeConfig);
     xmlSAXHandler saxParser;
 
-    if (!Initialize(parameter)) {
+    if (!Initialize(parameter,
+                    progress)) {
       return false;
     }
 

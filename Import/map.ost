@@ -1,6 +1,13 @@
 OST
 
 /*
+  Types:
+    A type can be support for any of the following types: 
+    * NODE
+    * WAY
+    * AREA
+    * RELATION
+
   Meaning of the different OPTIONS:
     ROUTE:
       This way or area is routable for the given vehicles
@@ -9,6 +16,8 @@ OST
       reducing visible complexity
     PIN_WAY:
       This is a way, even if the path is closed
+    MULTIPOLYGON:
+      Tye should be handled as multipolygon even if type is not set to multipolygon.
     IGNORESEALAND:
       Ignore this type for calculation of land masses
     INDEX_REGION:
@@ -308,7 +317,7 @@ TYPES
   TYPE tourism_motel = NODE AREA ("tourism"=="motel")
   TYPE tourism_museum = NODE AREA ("tourism"=="museum") OPTIONS INDEX_POI
 
-  // Do not delete the following type, they are required by the GenCityStreet import step
+  // Do not delete the following type, they are required by the GenLocation import step
   TYPE boundary_administrative = WAY AREA ("boundary"=="administrative") OR
                                    RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON IGNORESEALAND
 
