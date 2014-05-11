@@ -173,7 +173,8 @@ bool GetFileSize(const std::string& filename,
   return true;
 }
 
-bool CountDataSize(const std::string& mapPath,
+bool CountDataSize(osmscout::Progress& progress,
+                   const std::string& mapPath,
                    double& dataSize)
 {
   std::string              fileName;
@@ -211,11 +212,16 @@ bool CountDataSize(const std::string& mapPath,
   for (std::vector<std::string>:: const_iterator filename=files.begin();
       filename!=files.end();
       ++filename) {
-    if (!GetFileSize(osmscout::AppendFileToDir(mapPath,
-                                               *filename),
+    std::string filePath=osmscout::AppendFileToDir(mapPath,
+                                                   *filename);
+
+    if (!GetFileSize(filePath,
                      fileSize)) {
       return false;
     }
+
+    progress.Info(std::string("File ")+*filename+": "+osmscout::ByteSizeToString(fileSize));
+
     dataSize+=fileSize;
   }
 
@@ -511,22 +517,28 @@ int main(int argc, char* argv[])
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
 
-  if (osmscout::Import(parameter,progress)) {
+  bool result=osmscout::Import(parameter,
+                               progress);
+
+  progress.SetStep("Summary");
+
+  if (result) {
 
     double dataSize=0;
 
-    if (!CountDataSize(destinationDirectory,
+    if (!CountDataSize(progress,
+                       destinationDirectory,
                        dataSize)) {
-      std::cerr << "Error while retrieving data size" << std::endl;
+      progress.Error("Error while retrieving data size");
     }
     else {
-      std::cout << "Resulting data size: " << osmscout::ByteSizeToString(dataSize) << std::endl;
+      progress.Info(std::string("Resulting data size: ")+osmscout::ByteSizeToString(dataSize));
     }
 
-    std::cout << "Import OK!" << std::endl;
+    progress.Info("Import OK!");
   }
   else {
-    std::cerr << "Import failed!" << std::endl;
+    progress.Error("Import failed!");
   }
 
   return 0;
