@@ -42,7 +42,6 @@ namespace osmscout {
     name.clear();
     nameAlt.clear();
     ref.clear();
-    location.clear();
     address.clear();
     layer=0;
     width=0;
@@ -90,10 +89,6 @@ namespace osmscout {
       }
       else if (tag->key==typeConfig.tagRef) {
         ref=tag->value;
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagStreet) {
-        location=tag->value;
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagHouseNr) {
@@ -333,10 +328,6 @@ namespace osmscout {
       scanner.Read(ref);
     }
 
-    if (flags & hasLocation) {
-      scanner.Read(location);
-    }
-
     if (flags & hasAddress) {
       scanner.Read(address);
     }
@@ -412,13 +403,6 @@ namespace osmscout {
       flags&=~hasRef;
     }
 
-    if (!location.empty()) {
-      flags|=hasLocation;
-    }
-    else {
-      flags&=~hasLocation;
-    }
-
     if (!address.empty()) {
       flags|=hasAddress;
     }
@@ -477,10 +461,6 @@ namespace osmscout {
       writer.Write(ref);
     }
 
-    if (flags & hasLocation) {
-      writer.Write(location);
-    }
-
     if (flags & hasAddress) {
       writer.Write(address);
     }
@@ -528,7 +508,6 @@ namespace osmscout {
         name!=other.name ||
         nameAlt!=other.nameAlt ||
         ref!=other.ref ||
-        location!=other.location ||
         address!=other.address ||
         layer!=other.layer ||
         width!=other.width ||

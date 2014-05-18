@@ -27,6 +27,7 @@ namespace osmscout {
     FileWriter               writer;
     uint32_t                 overallDataCount;
     OSMSCOUT_HASHSET<TypeId> poiTypes;
+    TagId                    tagAddrStreet;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -44,6 +45,7 @@ namespace osmscout {
     overallDataCount=0;
 
     typeConfig.GetIndexAsPOITypes(poiTypes);
+    tagAddrStreet=typeConfig.tagAddrStreet;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "areaaddress.dat"))) {
@@ -60,11 +62,17 @@ namespace osmscout {
   bool AreaLocationProcessorFilter::Process(const FileOffset& offset,
                                            Area& area)
   {
-    for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+    for (std::vector<Area::Ring>::iterator ring=area.rings.begin();
         ring!=area.rings.end();
         ++ring) {
+      std::string location;
+
+      GetAndEraseTag(ring->GetAttributes().GetTags(),
+                     tagAddrStreet,
+                     location);
+
       bool isAddress=ring->GetType()!=typeIgnore &&
-                     !ring->GetAttributes().GetLocation().empty() &&
+                     !location.empty() &&
                      !ring->GetAttributes().GetAddress().empty();
 
       bool isPoi=!ring->GetName().empty() && poiTypes.find(ring->GetType())!=poiTypes.end();
@@ -91,7 +99,7 @@ namespace osmscout {
               return false;
             }
 
-            if (!writer.Write(ring->GetAttributes().GetLocation())) {
+            if (!writer.Write(location)) {
               return false;
             }
 
@@ -120,7 +128,7 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.Write(ring->GetAttributes().GetLocation())) {
+        if (!writer.Write(location)) {
           return false;
         }
 

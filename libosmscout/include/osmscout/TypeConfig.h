@@ -586,7 +586,6 @@ namespace osmscout {
     TagId                                  tagWidth;
     TagId                                  tagOneway;
     TagId                                  tagHouseNr;
-    TagId                                  tagStreet;
     TagId                                  tagJunction;
     TagId                                  tagMaxSpeed;
     TagId                                  tagSurface;
@@ -613,6 +612,8 @@ namespace osmscout {
     TagId                                  tagAccessMotorcar;
     TagId                                  tagAccessMotorcarForward;
     TagId                                  tagAccessMotorcarBackward;
+
+    TagId                                  tagAddrStreet;
 
     // Internal use (only available during preprocessing)
     TagId                                  tagArea;

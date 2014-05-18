@@ -20,4 +20,5 @@
 #include <osmscout/import/SortDat.h>
 
 namespace osmscout {
+
 }

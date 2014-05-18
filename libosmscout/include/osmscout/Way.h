@@ -38,10 +38,9 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    static const uint16_t hasNameAlt      = 1 <<  6; //! We have an alternative name (mainly in a second language)
-    static const uint16_t hasName         = 1 <<  7; //! We have a name
-    static const uint16_t hasRef          = 1 <<  8; //! We have reference name
-    static const uint16_t hasLocation     = 1 <<  9; //! Name of street or place
+    static const uint16_t hasNameAlt      = 1 <<  7; //! We have an alternative name (mainly in a second language)
+    static const uint16_t hasName         = 1 <<  8; //! We have a name
+    static const uint16_t hasRef          = 1 <<  9; //! We have reference name
     static const uint16_t hasAddress      = 1 << 10; //! House number
     static const uint16_t hasLayer        = 1 << 11; //! We have optional layer information
     static const uint16_t hasWidth        = 1 << 12; //! We have width
@@ -63,7 +62,6 @@ namespace osmscout {
     AttributeAccess  access;   //! Information regarding which vehicle can access this way
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
-    std::string      location; //! location name like a street name and...
     std::string      address;  //! an address like a house number
     int8_t           layer;    //! layer to draw on
     uint8_t          width;    //! width of way
@@ -111,11 +109,6 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return ref;
-    }
-
-    inline std::string GetLocation() const
-    {
-      return location;
     }
 
     inline std::string GetAddress() const
@@ -173,6 +166,11 @@ namespace osmscout {
       return tags;
     }
 
+    inline std::vector<Tag>& GetTags()
+    {
+      return tags;
+    }
+
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
                  Id id,
@@ -214,6 +212,11 @@ namespace osmscout {
       return attributes;
     }
 
+    inline WayAttributes& GetAttributes()
+    {
+      return attributes;
+    }
+
     inline TypeId GetType() const
     {
       return attributes.GetType();
@@ -227,11 +230,6 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return attributes.GetRefName();
-    }
-
-    inline std::string GetLocation() const
-    {
-      return attributes.GetLocation();
     }
 
     inline std::string GetAddress() const

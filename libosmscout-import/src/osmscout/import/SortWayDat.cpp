@@ -27,6 +27,7 @@ namespace osmscout {
     FileWriter               writer;
     uint32_t                 overallDataCount;
     OSMSCOUT_HASHSET<TypeId> poiTypes;
+    TagId                    tagAddrStreet;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -44,6 +45,7 @@ namespace osmscout {
     overallDataCount=0;
 
     typeConfig.GetIndexAsPOITypes(poiTypes);
+    tagAddrStreet=typeConfig.tagAddrStreet;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "wayaddress.dat"))) {
@@ -60,7 +62,13 @@ namespace osmscout {
   bool WayLocationProcessorFilter::Process(const FileOffset& offset,
                                            Way& way)
   {
-    bool isAddress=!way.GetLocation().empty() && !way.GetAddress().empty();
+    std::string location;
+
+    GetAndEraseTag(way.GetAttributes().GetTags(),
+                   tagAddrStreet,
+                   location);
+
+    bool isAddress=!location.empty() && !way.GetAddress().empty();
     bool isPoi=!way.GetName().empty() && poiTypes.find(way.GetType())!=poiTypes.end();
 
     if (!isAddress && !isPoi) {
@@ -79,7 +87,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Write(way.GetLocation())) {
+    if (!writer.Write(location)) {
       return false;
     }
 

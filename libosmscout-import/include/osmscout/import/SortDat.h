@@ -82,6 +82,28 @@ namespace osmscout {
   public:
     class ProcessingFilter : public Referencable
     {
+    protected:
+      bool GetAndEraseTag(std::vector<Tag>& tags,
+                          TagId tagId,
+                          std::string& value) const
+      {
+        std::vector<Tag>::iterator tag=tags.begin();
+
+        while (tag!=tags.end()) {
+          if (tag->key==tagId) {
+            value=tag->value;
+
+            tags.erase(tag);
+
+            return true;
+          }
+
+          tag++;
+        }
+
+        return false;
+      }
+
     public:
       virtual ~ProcessingFilter();
 
