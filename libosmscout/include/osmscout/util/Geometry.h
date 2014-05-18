@@ -26,6 +26,7 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 #include <osmscout/system/Types.h>
 
@@ -39,6 +40,39 @@ namespace osmscout {
    * Collection of classes and methods releated to low level geometric
    * stuff.
    */
+
+  /**
+   * \ingroup Geometry
+   * Calculate the bounding box of the (non empty) vector of geo coords
+   *
+   * @param nodes
+   *    The geo coordinates
+   * @param minLon
+   * @param maxLon
+   * @param minLat
+   * @param maxLat
+   */
+  template<typename N>
+  void GetBoundingBox(const std::vector<N>& nodes,
+                      double& minLon,
+                      double& maxLon,
+                      double& minLat,
+                      double& maxLat)
+  {
+    assert(!nodes.empty());
+
+    minLon=nodes[0].GetLon();
+    maxLon=nodes[0].GetLon();
+    minLat=nodes[0].GetLat();
+    maxLat=nodes[0].GetLat();
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLon=std::min(minLon,nodes[i].GetLon());
+      maxLon=std::max(maxLon,nodes[i].GetLon());
+      minLat=std::min(minLat,nodes[i].GetLat());
+      maxLat=std::max(maxLat,nodes[i].GetLat());
+    }
+  }
 
   /**
    * \ingroup Geometry
