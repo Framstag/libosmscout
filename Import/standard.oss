@@ -1059,6 +1059,7 @@ SYMBOL christian_church_cross
          tourism_caravan_site,
          tourism_chalet,
          tourism_guest_house,
+         tourism_hostel,
          tourism_hotel,
          tourism_information,
          tourism_motel,
@@ -1198,6 +1199,9 @@ SYMBOL christian_church_cross
 
    [TYPE leisure_pitch] AREA.TEXT { label: name; }
 
+   [TYPE amenity_school_building,
+         amenity_school] AREA.TEXT { label: name; style: emphasize; color: #000000; size: 1.1;}
+
    [TYPE amenity_hospital_building,
          amenity_hospital] AREA.TEXT { label: name; style: emphasize; color: #da0092; size: 1.1;}
 
@@ -1234,6 +1238,7 @@ SYMBOL christian_church_cross
          tourism_caravan_site,
          tourism_chalet,
          tourism_guest_house,
+         tourism_hostel,
          tourism_hotel,
          tourism_information,
          tourism_motel,
