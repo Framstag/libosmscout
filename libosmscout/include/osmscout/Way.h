@@ -28,6 +28,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
@@ -304,12 +305,20 @@ namespace osmscout {
           (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
+    inline void GetBoundingBox(double& minLon,
+                               double& maxLon,
+                               double& minLat,
+                               double& maxLat) const
+    {
+      osmscout::GetBoundingBox(nodes,
+                               minLon,
+                               maxLon,
+                               minLat,
+                               maxLat);
+    }
+
     bool GetCenter(double& lat,
                    double& lon) const;
-    void GetBoundingBox(double& minLon,
-                        double& maxLon,
-                        double& minLat,
-                        double& maxLat) const;
     void GetCoordinates(size_t nodeIndex,
                         double& lat,
                         double& lon) const;
