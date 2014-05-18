@@ -259,38 +259,25 @@ namespace osmscout {
 
     void AddAddressAreaToRegion(Progress& progress,
                                 Region& region,
-                                const Area& area,
+                                const FileOffset& fileOffset,
+                                const std::string& location,
+                                const std::string& address,
                                 const std::vector<GeoCoord>& nodes,
-                                const Area::Ring& ring,
                                 double minlon,
                                 double minlat,
                                 double maxlon,
                                 double maxlat,
                                 bool& added);
 
-    void AddAddressAreaToRegion(Progress& progress,
-                                RegionRef& region,
-                                const Area& area,
-                                const Area::Ring& ring,
-                                const RegionIndex& regionIndex,
-                                bool& added);
-
     void AddPOIAreaToRegion(Progress& progress,
                             Region& region,
-                            const Area& area,
+                            const FileOffset& fileOffset,
+                            const std::string& name,
                             const std::vector<GeoCoord>& nodes,
-                            const Area::Ring& ring,
                             double minlon,
                             double minlat,
                             double maxlon,
                             double maxlat,
-                                bool& added);
-
-    void AddPOIAreaToRegion(Progress& progress,
-                            RegionRef& region,
-                            const Area& area,
-                            const Area::Ring& ring,
-                            const RegionIndex& regionIndex,
                             bool& added);
 
     bool IndexAddressAreas(const ImportParameter& parameter,
@@ -301,7 +288,10 @@ namespace osmscout {
 
     bool AddAddressWayToRegion(Progress& progress,
                                Region& region,
-                               const Way& way,
+                               const FileOffset& fileOffset,
+                               const std::string& location,
+                               const std::string& address,
+                               const std::vector<GeoCoord>& nodes,
                                double minlon,
                                double minlat,
                                double maxlon,
@@ -310,7 +300,9 @@ namespace osmscout {
 
     bool AddPOIWayToRegion(Progress& progress,
                            Region& region,
-                           const Way& way,
+                           const FileOffset& fileOffset,
+                           const std::string& name,
+                           const std::vector<GeoCoord>& nodes,
                            double minlon,
                            double minlat,
                            double maxlon,
@@ -325,11 +317,14 @@ namespace osmscout {
 
     void AddAddressNodeToRegion(Progress& progress,
                                 Region& region,
-                                const Node& node,
+                                const FileOffset& fileOffset,
+                                const std::string& location,
+                                const std::string& address,
                                 bool& added);
 
     void AddPOINodeToRegion(Region& region,
-                            const Node& node,
+                            const FileOffset& fileOffset,
+                            const std::string& name,
                             bool& added);
 
     bool IndexAddressNodes(const ImportParameter& parameter,

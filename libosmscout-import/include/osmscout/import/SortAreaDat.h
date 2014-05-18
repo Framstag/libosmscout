@@ -33,41 +33,13 @@ namespace osmscout {
   private:
     void GetTopLeftCoordinate(const Area& data,
                               double& maxLat,
-                              double& minLon)
-    {
-      bool start=true;
-      for (size_t r=0; r<data.rings.size(); r++) {
-        if (data.rings[r].ring==Area::outerRingId) {
-          for (size_t n=1; n<data.rings[r].nodes.size(); n++) {
-            if (start) {
-              maxLat=data.rings[r].nodes[n].GetLat();
-              minLon=data.rings[r].nodes[n].GetLon();
-
-              start=false;
-            }
-            else {
-              maxLat=std::max(maxLat,data.rings[r].nodes[n].GetLat());
-              minLon=std::min(minLon,data.rings[r].nodes[n].GetLon());
-            }
-          }
-        }
-      }
-    }
+                              double& minLon);
 
   public:
-    SortAreaDataGenerator()
-    : SortDataGenerator<Area>("areas.dat","areas.idmap")
-    {
-      AddSource(osmRefWay,"wayarea.dat");
-      AddSource(osmRefRelation,"relarea.dat");
-    }
+    SortAreaDataGenerator();
 
-    std::string GetDescription() const
-    {
-      return "Sort/copy areas";
-    }
+    std::string GetDescription() const;
   };
-
 }
 
 #endif

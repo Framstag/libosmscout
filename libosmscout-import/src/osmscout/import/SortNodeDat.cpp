@@ -20,4 +20,107 @@
 #include <osmscout/import/SortNodeDat.h>
 
 namespace osmscout {
+  class NodeLocationProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
+  {
+  private:
+    FileWriter               writer;
+    uint32_t                 overallDataCount;
+    OSMSCOUT_HASHSET<TypeId> poiTypes;
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+    bool Process(const FileOffset& offset,
+                 Node& node);
+    bool AfterProcessingEnd();
+  };
+
+  bool NodeLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
+                                                         Progress& progress,
+                                                         const TypeConfig& typeConfig)
+  {
+    overallDataCount=0;
+
+    typeConfig.GetIndexAsPOITypes(poiTypes);
+
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "nodeaddress.dat"))) {
+      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
+
+      return false;
+    }
+
+    writer.Write(overallDataCount);
+
+    return true;
+  }
+
+  bool NodeLocationProcessorFilter::Process(const FileOffset& offset,
+                                           Node& node)
+  {
+    bool isAddress=!node.GetLocation().empty() && !node.GetAddress().empty();
+    bool isPoi=!node.GetName().empty() && poiTypes.find(node.GetType())!=poiTypes.end();
+
+    if (!isAddress && !isPoi) {
+      return true;
+    }
+
+    if (!writer.WriteFileOffset(offset)) {
+      return false;
+    }
+
+    if (!writer.WriteNumber(node.GetType())) {
+      return false;
+    }
+
+    if (!writer.Write(node.GetName())) {
+      return false;
+    }
+
+    if (!writer.Write(node.GetLocation())) {
+      return false;
+    }
+
+    if (!writer.Write(node.GetAddress())) {
+      return false;
+    }
+
+    if (!writer.WriteCoord(node.GetCoords())) {
+      return false;
+    }
+
+    overallDataCount++;
+
+    return true;
+  }
+
+  bool NodeLocationProcessorFilter::AfterProcessingEnd()
+  {
+    writer.SetPos(0);
+    writer.Write(overallDataCount);
+
+    return writer.Close();
+  }
+
+  void SortNodeDataGenerator::GetTopLeftCoordinate(const Node& data,
+                                                   double& maxLat,
+                                                   double& minLon)
+  {
+    maxLat=data.GetLat();
+    minLon=data.GetLon();
+  }
+
+  SortNodeDataGenerator::SortNodeDataGenerator()
+  : SortDataGenerator<Node>("nodes.dat","nodes.idmap")
+  {
+    AddSource(osmRefNode,"nodes.tmp");
+
+    AddFilter(new NodeLocationProcessorFilter());
+  }
+
+  std::string SortNodeDataGenerator::GetDescription() const
+  {
+    return "Sort/copy nodes";
+  }
 }
