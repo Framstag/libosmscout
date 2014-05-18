@@ -22,6 +22,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include <osmscout/CoreFeatures.h>
 
@@ -103,6 +104,8 @@ namespace osmscout {
 
     bool WriteCoord(const GeoCoord& coord);
     bool WriteCoord(double lat, double lon);
+
+    bool Write(const std::vector<GeoCoord>& nodes);
 
     bool Flush();
     bool FlushCurrentBlockWithZeros(size_t blockSize);

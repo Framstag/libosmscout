@@ -1932,5 +1932,34 @@ namespace osmscout {
 
     return true;
   }
+
+  bool FileScanner::Read(std::vector<GeoCoord>& nodes)
+  {
+    uint32_t nodeCount;
+
+    if (!ReadNumber(nodeCount)) {
+      return false;
+    }
+
+    uint32_t minLat;
+    uint32_t minLon;
+
+    Read(minLat);
+    Read(minLon);
+
+    nodes.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      uint32_t latValue;
+      uint32_t lonValue;
+
+      ReadNumber(latValue);
+      ReadNumber(lonValue);
+
+      nodes[i].Set((minLat+latValue)/conversionFactor-90.0,
+                   (minLon+lonValue)/conversionFactor-180.0);
+    }
+
+    return !HasError();
+  }
 }
 
