@@ -107,6 +107,8 @@ int main(int argc, char* argv[])
       osmscout::MapData             data;
       osmscout::MapPainterCairo     painter;
 
+      drawParameter.SetFontSize(3.0);
+
       projection.Set(lon,
                      lat,
                      zoom,
