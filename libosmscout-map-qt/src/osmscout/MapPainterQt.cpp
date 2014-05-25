@@ -489,8 +489,8 @@ namespace osmscout {
 
     symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    centerX=x+(maxX+minX)/2;
-    centerY=y+(maxY+minY)/2;
+    centerX=maxX-minX;
+    centerY=maxY-minY;
 
     for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
          p!=symbol.GetPrimitives().end();
