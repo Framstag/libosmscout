@@ -523,6 +523,49 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::Write(const std::vector<GeoCoord>& nodes)
+  {
+    if (!WriteNumber((uint32_t)nodes.size())) {
+      return false;
+    }
+
+    double   minLat=nodes[0].GetLat();
+    double   minLon=nodes[0].GetLon();
+    uint32_t minLatValue;
+    uint32_t minLonValue;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLat=std::min(minLat,nodes[i].GetLat());
+      minLon=std::min(minLon,nodes[i].GetLon());
+    }
+
+    minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
+    minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
+
+    if (!Write(minLatValue)) {
+      return false;
+    }
+
+    if (!Write(minLonValue)) {
+      return false;
+    }
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minLat)*conversionFactor);
+      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minLon)*conversionFactor);
+
+      if (!WriteNumber(latValue)) {
+        return false;
+      }
+
+      if (!WriteNumber(lonValue)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   bool FileWriter::Flush()
   {
     if (HasError()) {

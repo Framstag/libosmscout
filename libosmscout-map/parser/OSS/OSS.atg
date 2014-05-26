@@ -287,7 +287,9 @@ PRODUCTIONS
                 }
                 .
 
-  CONSTDEF    = COLORCONSTDEF
+  CONSTDEF    =   COLORCONSTDEF
+                | MAGCONSTDEF
+                | UINTCONSTDEF
                 .
 
   COLORCONSTDEF
@@ -312,6 +314,58 @@ PRODUCTIONS
                 (.
                   if (!errors->hasErrors) {
                     config.AddVariable(name,new StyleVariableColor(color));
+                  }
+                .)
+                .
+
+  MAGCONSTDEF
+              = (.
+                  std::string      name;
+                  StyleVariableRef variable;
+                  Magnification    magnification;
+                .)
+                "MAG"
+                IDENT<name>
+                (.
+                  variable=config.GetVariableByName(name);
+
+                  if (variable.Valid()) {
+                    std::string e="Constant already defined";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                "="
+                MAG<magnification>
+                (.
+                  if (!errors->hasErrors) {
+                    config.AddVariable(name,new StyleVariableMag(magnification));
+                  }
+                .)
+                .
+
+  UINTCONSTDEF
+              = (.
+                  std::string      name;
+                  StyleVariableRef variable;
+                  size_t           value;
+                .)
+                "UINT"
+                IDENT<name>
+                (.
+                  variable=config.GetVariableByName(name);
+
+                  if (variable.Valid()) {
+                    std::string e="Constant already defined";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                "="
+                UINT<value>
+                (.
+                  if (!errors->hasErrors) {
+                    config.AddVariable(name,new StyleVariableUInt(value));
                   }
                 .)
                 .
@@ -849,17 +903,9 @@ PRODUCTIONS
                 | (. size_t priority; .)
                   "priority" ":" UINT<priority>
 	              (.
-	                if (priority<std::numeric_limits<uint8_t>::max()) {
-                     style.style->SetPriority((uint8_t)priority);
-                     style.attributes.insert(TextStyle::attrPriority);
-	                }
-	                else {
-	                  std::string e="Priority must be in the interval [0,"+
-	                                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-
-	                  SemErr(e.c_str());
-	                }
-	               .)
+                    style.style->SetPriority((uint8_t)priority);
+                    style.attributes.insert(TextStyle::attrPriority);
+	              .)
                 )
                 .
 
@@ -1108,9 +1154,39 @@ PRODUCTIONS
                 |
                 (
                   (. size_t level; .)
-                   UINT<level>
-                   (. magnification.SetLevel((uint32_t)level); .)
+                  number
+                  (.
+                    if (!StringToNumber(t->val,level)) {
+                      std::string e="Cannot parse number '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                    else {
+                      magnification.SetLevel((uint32_t)level);
+                    }
+                  .)
                 )
+                | variable
+                  (.
+                    StyleVariableRef variable=config.GetVariableByName(t->val+1);
+
+                    if (!variable.Valid()) {
+                      std::string e="Variable not defined";
+
+                      SemErr(e.c_str());
+                    }
+                    else if (dynamic_cast<StyleVariableMag*>(variable.Get())==NULL) {
+                      std::string e="Variable is not of type 'MAG'";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      StyleVariableMag* magVariable=dynamic_cast<StyleVariableMag*>(variable.Get());
+
+                      magnification=magVariable->GetMag();
+                    }
+                  .)
                .
 
   /* Size in units of screen (currently millimeter) */
@@ -1222,6 +1298,27 @@ PRODUCTIONS
                     SemErr(e.c_str());
                   }
                 .)
+                | variable
+                  (.
+                    StyleVariableRef variable=config.GetVariableByName(t->val+1);
+
+                    if (!variable.Valid()) {
+                      std::string e="Variable not defined";
+
+                      SemErr(e.c_str());
+                    }
+                    else if (dynamic_cast<StyleVariableUInt*>(variable.Get())==NULL) {
+                      std::string e="Variable is not of type 'UINT'";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      StyleVariableUInt* uintVariable=dynamic_cast<StyleVariableUInt*>(variable.Get());
+
+                      value=uintVariable->GetUInt();
+                    }
+                  .)
                 .
 END OSS.
 

@@ -31,23 +31,12 @@ namespace osmscout {
   private:
     void GetTopLeftCoordinate(const Node& data,
                               double& maxLat,
-                              double& minLon)
-    {
-      maxLat=data.GetLat();
-      minLon=data.GetLon();
-    }
+                              double& minLon);
 
   public:
-    SortNodeDataGenerator()
-    : SortDataGenerator<Node>("nodes.dat","nodes.idmap")
-    {
-      AddSource(osmRefNode,"nodes.tmp");
-    }
+    SortNodeDataGenerator();
 
-    std::string GetDescription() const
-    {
-      return "Sort/copy nodes";
-    }
+    std::string GetDescription() const;
   };
 }
 

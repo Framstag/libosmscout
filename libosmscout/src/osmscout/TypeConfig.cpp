@@ -346,7 +346,6 @@ namespace osmscout {
     tagWidth=GetTagId("width");
     tagOneway=GetTagId("oneway");
     tagHouseNr=GetTagId("addr:housenumber");
-    tagStreet=GetTagId("addr:street");
     tagJunction=GetTagId("junction");
     tagMaxSpeed=GetTagId("maxspeed");
     tagSurface=GetTagId("surface");
@@ -373,6 +372,8 @@ namespace osmscout {
     tagAccessMotorcarForward=GetTagId("access:motorcar:foward");
     tagAccessMotorcarBackward=GetTagId("access:motorcar:backward");
 
+    tagAddrStreet=GetTagId("addr:street");
+
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
     tagType=GetTagId("type");
@@ -385,7 +386,6 @@ namespace osmscout {
     assert(tagWidth!=tagIgnore);
     assert(tagOneway!=tagIgnore);
     assert(tagHouseNr!=tagIgnore);
-    assert(tagStreet!=tagIgnore);
     assert(tagJunction!=tagIgnore);
     assert(tagMaxSpeed!=tagIgnore);
     assert(tagSurface!=tagIgnore);
@@ -411,6 +411,8 @@ namespace osmscout {
     assert(tagAccessMotorcar!=tagIgnore);
     assert(tagAccessMotorcarForward!=tagIgnore);
     assert(tagAccessMotorcarBackward!=tagIgnore);
+
+    assert(tagAddrStreet!=tagIgnore);
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);

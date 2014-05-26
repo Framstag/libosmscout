@@ -35,10 +35,9 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    static const uint8_t isSimple        = 1 << 2; //1 We are a simple area, only one Ring, no roles
-    static const uint8_t hasNameAlt      = 1 << 3; //! We have an alternative name (mainly in a second language)
-    static const uint8_t hasName         = 1 << 4; //! We have a name
-    static const uint8_t hasLocation     = 1 << 5; //! A location like a Street or place name and..
+    static const uint8_t isSimple        = 1 << 3; //1 We are a simple area, only one Ring, no roles
+    static const uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
+    static const uint8_t hasName         = 1 << 5; //! We have a name
     static const uint8_t hasAddress      = 1 << 6; //! an address like a house number
     static const uint8_t hasTags         = 1 << 7; //! We have additional tags
 
@@ -50,7 +49,6 @@ namespace osmscout {
   private:
     mutable uint8_t  flags;
     std::string      nameAlt;  //! alternative name
-    std::string      location; //! Street and...
     std::string      address;  //! ...house number
     std::vector<Tag> tags;     //! list of preparsed tags
 
@@ -87,11 +85,6 @@ namespace osmscout {
       return nameAlt;
     }
 
-    inline std::string GetLocation() const
-    {
-      return location;
-    }
-
     inline std::string GetAddress() const
     {
       return address;
@@ -108,6 +101,11 @@ namespace osmscout {
     }
 
     inline const std::vector<Tag>& GetTags() const
+    {
+      return tags;
+    }
+
+    inline std::vector<Tag>& GetTags()
     {
       return tags;
     }
@@ -153,6 +151,11 @@ namespace osmscout {
       }
 
       inline const AreaAttributes& GetAttributes() const
+      {
+        return attributes;
+      }
+
+      inline AreaAttributes& GetAttributes()
       {
         return attributes;
       }

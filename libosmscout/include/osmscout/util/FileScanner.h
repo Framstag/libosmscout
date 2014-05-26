@@ -22,6 +22,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include <osmscout/CoreFeatures.h>
 
@@ -140,6 +141,8 @@ namespace osmscout {
 #endif
 
     bool ReadCoord(GeoCoord& coord);
+
+    bool Read(std::vector<GeoCoord>& nodes);
   };
 }
 

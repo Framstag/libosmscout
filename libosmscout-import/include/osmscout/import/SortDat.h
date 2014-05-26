@@ -79,10 +79,49 @@ namespace osmscout {
       }
     };
 
+  public:
+    class ProcessingFilter : public Referencable
+    {
+    protected:
+      bool GetAndEraseTag(std::vector<Tag>& tags,
+                          TagId tagId,
+                          std::string& value) const
+      {
+        std::vector<Tag>::iterator tag=tags.begin();
+
+        while (tag!=tags.end()) {
+          if (tag->key==tagId) {
+            value=tag->value;
+
+            tags.erase(tag);
+
+            return true;
+          }
+
+          tag++;
+        }
+
+        return false;
+      }
+
+    public:
+      virtual ~ProcessingFilter();
+
+      virtual bool BeforeProcessingStart(const ImportParameter& parameter,
+                                         Progress& progress,
+                                         const TypeConfig& typeConfig) = 0;
+      virtual bool Process(const FileOffset& offset,
+                           N& data) = 0;
+      virtual bool AfterProcessingEnd() = 0;
+    };
+
+    typedef Ref<ProcessingFilter> ProcessingFilterRef;
+
   private:
-    std::list<Source> sources;
-    std::string       dataFilename;
-    std::string       mapFilename;
+    std::list<Source>              sources;
+    std::string                    dataFilename;
+    std::string                    mapFilename;
+    std::list<ProcessingFilterRef> filters;
 
   private:
     bool Renumber(const ImportParameter& parameter,
@@ -102,11 +141,19 @@ namespace osmscout {
     void AddSource(OSMRefType type,
                    const std::string& filename);
 
+    void AddFilter(const ProcessingFilterRef& filter);
+
   public:
     bool Import(const ImportParameter& parameter,
                 Progress& progress,
                 const TypeConfig& typeConfig);
   };
+
+  template <class N>
+  SortDataGenerator<N>::ProcessingFilter::~ProcessingFilter()
+  {
+    // no code
+  }
 
   template <class N>
   SortDataGenerator<N>::SortDataGenerator(const std::string& dataFilename,
@@ -130,17 +177,23 @@ namespace osmscout {
   }
 
   template <class N>
+  void SortDataGenerator<N>::AddFilter(const ProcessingFilterRef& filter)
+  {
+    filters.push_back(filter);
+  }
+
+  template <class N>
   bool SortDataGenerator<N>::Renumber(const ImportParameter& parameter,
                                       Progress& progress)
   {
-    FileWriter  dataWriter;
-    FileWriter  mapWriter;
-    uint32_t    overallDataCount=0;
-    uint32_t    dataCopyiedCount=0;
-    double      zoomLevel=pow(2.0,(double)parameter.GetSortTileMag());
-    size_t      cellCount=zoomLevel*zoomLevel;
-    size_t      minIndex=0;
-    size_t      maxIndex=cellCount-1;
+    FileWriter dataWriter;
+    FileWriter mapWriter;
+    uint32_t   overallDataCount=0;
+    uint32_t   dataCopyiedCount=0;
+    double     zoomLevel=pow(2.0,(double)parameter.GetSortTileMag());
+    size_t     cellCount=zoomLevel*zoomLevel;
+    size_t     minIndex=0;
+    size_t     maxIndex=cellCount-1;
 
     progress.SetAction("Sorting data");
 
@@ -327,6 +380,20 @@ namespace osmscout {
             return false;
           }
 
+          for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
+              f!=filters.end();
+              ++f) {
+            ProcessingFilterRef filter(*f);
+
+            if (!filter->Process(fileOffset,
+                                 data)) {
+              progress.Error(std::string("Error while processing data entry to file '")+
+                             dataWriter.GetFilename()+"'");
+
+              return false;
+            }
+          }
+
           if (!data.Write(dataWriter)) {
             progress.Error(std::string("Error while writing data entry to file '")+
                            dataWriter.GetFilename()+"'");
@@ -453,6 +520,20 @@ namespace osmscout {
           return false;
         }
 
+        for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
+            f!=filters.end();
+            ++f) {
+          ProcessingFilterRef filter(*f);
+
+          if (!filter->Process(fileOffset,
+                               data)) {
+            progress.Error(std::string("Error while processing data entry to file '")+
+                           dataWriter.GetFilename()+"'");
+
+            return false;
+          }
+        }
+
         if (!data.Write(dataWriter)) {
           progress.Error(std::string("Error while writing data entry to file '")+
                          dataWriter.GetFilename()+"'");
@@ -485,8 +566,22 @@ namespace osmscout {
   template <class N>
   bool SortDataGenerator<N>::Import(const ImportParameter& parameter,
                                     Progress& progress,
-                                    const TypeConfig& /*typeConfig*/)
+                                    const TypeConfig& typeConfig)
   {
+    for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
+        f!=filters.end();
+        ++f) {
+      ProcessingFilterRef filter(*f);
+
+      if (!filter->BeforeProcessingStart(parameter,
+                                         progress,
+                                         typeConfig)) {
+        progress.Error("Cannot initialize processor filter");
+
+        return false;
+      }
+    }
+
     if (parameter.GetSortObjects()) {
       if (!Renumber(parameter,
                     progress)) {
@@ -496,6 +591,18 @@ namespace osmscout {
     else {
       if (!Copy(parameter,
                 progress)) {
+        return false;
+      }
+    }
+
+    for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
+        f!=filters.end();
+        ++f) {
+      ProcessingFilterRef filter(*f);
+
+      if (!filter->AfterProcessingEnd()) {
+        progress.Error("Cannot deinitialize processor filter");
+
         return false;
       }
     }

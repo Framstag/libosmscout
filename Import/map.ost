@@ -266,13 +266,20 @@ TYPES
   TYPE amenity_bench = NODE WAY ("amenity"=="bench")
   TYPE amenity_grave_yard = NODE AREA ("amenity"=="grave_yard") OPTIONS INDEX_POI
   TYPE amenity_pharmacy = NODE AREA ("amenity"=="pharmacy") OPTIONS INDEX_POI
+
   TYPE amenity_post_office_building = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
   TYPE amenity_post_office = NODE ("amenity"=="post_office") OPTIONS INDEX_POI
+
   TYPE amenity_post_box = NODE ("amenity"=="post_box")
+
   TYPE amenity_school_building = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
   TYPE amenity_school = NODE AREA ("amenity"=="school") OPTIONS INDEX_POI
+
   TYPE amenity_taxi = NODE AREA ("amenity"=="taxi")
   TYPE amenity_toilets = NODE ("amenity"=="toilets")
+
+  TYPE amenity_fuel_building = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  TYPE amenity_fuel = NODE ("amenity"=="fuel") OPTIONS INDEX_POI
 
   // Churches
   TYPE christian_church_building = AREA ("amenity"=="place_of_worship" AND

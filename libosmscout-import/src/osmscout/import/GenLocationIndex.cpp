@@ -326,8 +326,6 @@ namespace osmscout {
       region->reference=boundary->reference;
       region->name=boundary->name;
 
-      std::cout << "Boundary: " << region->name << " " << region->reference.GetTypeName() << " " << region->reference.GetFileOffset() << std::endl;
-
       region->areas=boundary->areas;
 
       region->CalculateMinMax();
@@ -392,8 +390,6 @@ namespace osmscout {
 
       region->reference.Set(area.GetFileOffset(),refArea);
       region->name=area.rings.front().GetName();
-
-      std::cout << "Region area: " << region->name << " " << region->reference.GetTypeName() << " " << region->reference.GetFileOffset() << std::endl;
 
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
            ring!=area.rings.end();
@@ -861,9 +857,10 @@ namespace osmscout {
 
   void LocationIndexGenerator::AddAddressAreaToRegion(Progress& progress,
                                                       Region& region,
-                                                      const Area& area,
+                                                      const FileOffset& fileOffset,
+                                                      const std::string& location,
+                                                      const std::string& address,
                                                       const std::vector<GeoCoord>& nodes,
-                                                      const Area::Ring& ring,
                                                       double minlon,
                                                       double minlat,
                                                       double maxlon,
@@ -884,9 +881,10 @@ namespace osmscout {
           if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
             AddAddressAreaToRegion(progress,
                                    childRegion,
-                                   area,
+                                   fileOffset,
+                                   location,
+                                   address,
                                    nodes,
-                                   ring,
                                    minlon,minlat,maxlon,maxlat,
                                    added);
             return;
@@ -895,97 +893,37 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator location=region.locations.find(ring.GetAttributes().GetLocation());
+    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
 
-    if (location==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+ring.GetAttributes().GetLocation() +"' '"+ring.GetAttributes().GetAddress()+"' of Area "+NumberToString(area.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
+    if (loc==region.locations.end()) {
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Area "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
 
       return;
     }
 
-    for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
-        address!=location->second.addresses.end();
-        ++address) {
-      if (address->name==ring.GetAttributes().GetAddress()) {
+    for (std::list<RegionAddress>::const_iterator regionAddress=loc->second.addresses.begin();
+        regionAddress!=loc->second.addresses.end();
+        ++regionAddress) {
+      if (regionAddress->name==address) {
         return;
       }
     }
 
-    RegionAddress address;
+    RegionAddress regionAddress;
 
-    address.name=ring.GetAttributes().GetAddress();
-    address.object.Set(area.GetFileOffset(),refArea);
+    regionAddress.name=address;
+    regionAddress.object.Set(fileOffset,refArea);
 
-    location->second.addresses.push_back(address);
+    loc->second.addresses.push_back(regionAddress);
 
     added=true;
   }
 
-  void LocationIndexGenerator::AddAddressAreaToRegion(Progress& progress,
-                                                      RegionRef& rootRegion,
-                                                      const Area& area,
-                                                      const Area::Ring& ring,
-                                                      const RegionIndex& regionIndex,
-                                                      bool& added)
-  {
-    if (ring.ring==Area::masterRingId &&
-        ring.nodes.empty()) {
-      for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
-          r!=area.rings.end();
-          ++r) {
-        if (r->ring==Area::outerRingId) {
-          double minlon;
-          double maxlon;
-          double minlat;
-          double maxlat;
-
-          r->GetBoundingBox(minlon,maxlon,minlat,maxlat);
-
-          RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                        GeoCoord(minlat,minlon));
-
-          AddAddressAreaToRegion(progress,
-                                 region,
-                                 area,
-                                 r->nodes,
-                                 ring,
-                                 minlon,
-                                 minlat,
-                                 maxlon,
-                                 maxlat,
-                                 added);
-        }
-      }
-    }
-    else {
-      double minlon;
-      double maxlon;
-      double minlat;
-      double maxlat;
-
-      ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
-
-      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(minlat,minlon));
-
-      AddAddressAreaToRegion(progress,
-                             region,
-                             area,
-                             ring.nodes,
-                             ring,
-                             minlon,
-                             minlat,
-                             maxlon,
-                             maxlat,
-                             added);
-    }
-  }
-
   void LocationIndexGenerator::AddPOIAreaToRegion(Progress& progress,
                                                   Region& region,
-                                                  const Area& area,
+                                                  const FileOffset& fileOffset,
+                                                  const std::string& name,
                                                   const std::vector<GeoCoord>& nodes,
-                                                  const Area::Ring& ring,
                                                   double minlon,
                                                   double minlat,
                                                   double maxlon,
@@ -1006,9 +944,9 @@ namespace osmscout {
           if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
             AddPOIAreaToRegion(progress,
                                childRegion,
-                               area,
+                               fileOffset,
+                               name,
                                nodes,
-                               ring,
                                minlon,minlat,maxlon,maxlat,
                                added);
             return;
@@ -1019,72 +957,12 @@ namespace osmscout {
 
     RegionPOI poi;
 
-    poi.name=ring.GetAttributes().GetName();
-    poi.object.Set(area.GetFileOffset(),refArea);
+    poi.name=name;
+    poi.object.Set(fileOffset,refArea);
 
     region.pois.push_back(poi);
 
     added=true;
-  }
-
-  void LocationIndexGenerator::AddPOIAreaToRegion(Progress& progress,
-                                                  RegionRef& rootRegion,
-                                                  const Area& area,
-                                                  const Area::Ring& ring,
-                                                  const RegionIndex& regionIndex,
-                                                  bool& added)
-  {
-    if (ring.ring==Area::masterRingId &&
-        ring.nodes.empty()) {
-      for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
-          r!=area.rings.end();
-          ++r) {
-        if (r->ring==Area::outerRingId) {
-          double minlon;
-          double maxlon;
-          double minlat;
-          double maxlat;
-
-          r->GetBoundingBox(minlon,maxlon,minlat,maxlat);
-
-          RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                        GeoCoord(minlat,minlon));
-
-          AddPOIAreaToRegion(progress,
-                             region,
-                             area,
-                             r->nodes,
-                             ring,
-                             minlon,
-                             minlat,
-                             maxlon,
-                             maxlat,
-                             added);
-        }
-      }
-    }
-    else {
-      double minlon;
-      double maxlon;
-      double minlat;
-      double maxlat;
-
-      ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
-
-      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(minlat,minlon));
-
-      AddPOIAreaToRegion(progress,
-                         region,
-                         area,
-                         ring.nodes,
-                         ring,
-                         minlon,
-                         minlat,
-                         maxlon,
-                         maxlat,
-                         added);
-    }
   }
 
   bool LocationIndexGenerator::IndexAddressAreas(const ImportParameter& parameter,
@@ -1099,10 +977,10 @@ namespace osmscout {
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      "areaaddress.dat"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'areas.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -1111,62 +989,92 @@ namespace osmscout {
       return false;
     }
 
-    for (uint32_t w=1; w<=areaCount; w++) {
-      progress.SetProgress(w,areaCount);
+    FileOffset            fileOffset;
+    uint32_t              tmpType;
+    TypeId                type;
+    std::string           name;
+    std::string           location;
+    std::string           address;
+    std::vector<GeoCoord> nodes;
 
-      Area area;
+    for (uint32_t a=1; a<=areaCount; a++) {
+      progress.SetProgress(a,areaCount);
 
-      if (!area.Read(scanner)) {
+      if (!scanner.ReadFileOffset(fileOffset) ||
+          !scanner.ReadNumber(tmpType) ||
+          !scanner.Read(name) ||
+          !scanner.Read(location) ||
+          !scanner.Read(address) ||
+          !scanner.Read(nodes)) {
         progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
+                       NumberToString(a)+" of "+
                        NumberToString(areaCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
       }
 
-      for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-          ring!=area.rings.end();
-          ++ring) {
-        bool isAddress=ring->GetType()!=typeIgnore &&
-                       !ring->GetAttributes().GetLocation().empty() &&
-                       !ring->GetAttributes().GetAddress().empty();
-        bool isPOI=ring->GetType()!=typeIgnore &&
-                   !ring->GetAttributes().GetName().empty() &&
-                   poiTypes.find(ring->GetType())!=poiTypes.end();
+      type=(TypeId)tmpType;
 
-        if (!isAddress && !isPOI) {
-          continue;
+      bool isAddress=!location.empty() &&
+                     !address.empty();
+      bool isPOI=!name.empty() &&
+                 poiTypes.find(type)!=poiTypes.end();
+
+      if (!isAddress && !isPOI) {
+        continue;
+      }
+
+      double minlon;
+      double maxlon;
+      double minlat;
+      double maxlat;
+
+      GetBoundingBox(nodes,
+                     minlon,
+                     maxlon,
+                     minlat,
+                     maxlat);
+
+      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                    GeoCoord(minlat,minlon));
+
+      if (isAddress) {
+        bool added=false;
+
+        AddAddressAreaToRegion(progress,
+                               region,
+                               fileOffset,
+                               location,
+                               address,
+                               nodes,
+                               minlon,
+                               minlat,
+                               maxlon,
+                               maxlat,
+                               added);
+
+        if (added) {
+          addressFound++;
         }
+      }
 
-        if (isAddress) {
-          bool added=false;
+      if (isPOI) {
+        bool added=false;
 
-          AddAddressAreaToRegion(progress,
-                                 rootRegion,
-                                 area,
-                                 *ring,
-                                 regionIndex,
-                                 added);
+        AddPOIAreaToRegion(progress,
+                           region,
+                           fileOffset,
+                           name,
+                           nodes,
+                           minlon,
+                           minlat,
+                           maxlon,
+                           maxlat,
+                           added);
 
-          if (added) {
-            addressFound++;
-          }
-        }
-
-        if (isPOI) {
-          bool added=false;
-
-          AddPOIAreaToRegion(progress,
-                             rootRegion,
-                             area,
-                             *ring,
-                             regionIndex,
-                             added);
-
-          if (added) {
-            poiFound++;
-          }
+        if (added) {
+          poiFound++;
         }
       }
     }
@@ -1178,7 +1086,10 @@ namespace osmscout {
 
   bool LocationIndexGenerator::AddAddressWayToRegion(Progress& progress,
                                                      Region& region,
-                                                     const Way& way,
+                                                     const FileOffset& fileOffset,
+                                                     const std::string& location,
+                                                     const std::string& address,
+                                                     const std::vector<GeoCoord>& nodes,
                                                      double minlon,
                                                      double minlat,
                                                      double maxlon,
@@ -1197,12 +1108,15 @@ namespace osmscout {
           !(minlat>childRegion->maxlat)) {
         // Check if one point is in the area
         for (size_t i=0; i<childRegion->areas.size(); i++) {
-          bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
+          bool match=IsAreaAtLeastPartlyInArea(nodes,childRegion->areas[i]);
 
           if (match) {
             bool completeMatch=AddAddressWayToRegion(progress,
                                                      *r,
-                                                     way,
+                                                     fileOffset,
+                                                     location,
+                                                     address,
+                                                     nodes,
                                                      minlon,
                                                      minlat,
                                                      maxlon,
@@ -1218,32 +1132,32 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator location=region.locations.find(way.GetLocation());
+    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
 
-    if (location==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+way.GetLocation() +"' '"+way.GetAddress()+"' of Way "+NumberToString(way.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
+    if (loc==region.locations.end()) {
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Way "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
     }
     else {
-      for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
-          address!=location->second.addresses.end();
-          ++address) {
-        if (address->name==way.GetAddress()) {
+      for (std::list<RegionAddress>::const_iterator regionAddress=loc->second.addresses.begin();
+          regionAddress!=loc->second.addresses.end();
+          ++regionAddress) {
+        if (regionAddress->name==address) {
           return false;
         }
       }
 
-      RegionAddress address;
+      RegionAddress regionAddress;
 
-      address.name=way.GetAddress();
-      address.object.Set(way.GetFileOffset(),refWay);
+      regionAddress.name=address;
+      regionAddress.object.Set(fileOffset,refWay);
 
-      location->second.addresses.push_back(address);
+      loc->second.addresses.push_back(regionAddress);
 
       added=true;
     }
 
     for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
+      if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
         return true;
       }
     }
@@ -1253,7 +1167,9 @@ namespace osmscout {
 
   bool LocationIndexGenerator::AddPOIWayToRegion(Progress& progress,
                                                  Region& region,
-                                                 const Way& way,
+                                                 const FileOffset& fileOffset,
+                                                 const std::string& name,
+                                                 const std::vector<GeoCoord>& nodes,
                                                  double minlon,
                                                  double minlat,
                                                  double maxlon,
@@ -1272,12 +1188,14 @@ namespace osmscout {
           !(minlat>childRegion->maxlat)) {
         // Check if one point is in the area
         for (size_t i=0; i<childRegion->areas.size(); i++) {
-          bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
+          bool match=IsAreaAtLeastPartlyInArea(nodes,childRegion->areas[i]);
 
           if (match) {
             bool completeMatch=AddPOIWayToRegion(progress,
                                                  *r,
-                                                 way,
+                                                 fileOffset,
+                                                 name,
+                                                 nodes,
                                                  minlon,
                                                  minlat,
                                                  maxlon,
@@ -1295,15 +1213,15 @@ namespace osmscout {
 
     RegionPOI poi;
 
-    poi.name=way.GetName();
-    poi.object.Set(way.GetFileOffset(),refWay);
+    poi.name=name;
+    poi.object.Set(fileOffset,refWay);
 
     region.pois.push_back(poi);
 
     added=true;
 
     for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
+      if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
         return true;
       }
     }
@@ -1323,10 +1241,10 @@ namespace osmscout {
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      "wayaddress.dat"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -1335,13 +1253,23 @@ namespace osmscout {
       return false;
     }
 
+    FileOffset            fileOffset;
+    uint32_t              tmpType;
+    TypeId                type;
+    std::string           name;
+    std::string           location;
+    std::string           address;
+    std::vector<GeoCoord> nodes;
 
     for (uint32_t w=1; w<=wayCount; w++) {
       progress.SetProgress(w,wayCount);
 
-      Way way;
-
-      if (!way.Read(scanner)) {
+      if (!scanner.ReadFileOffset(fileOffset) ||
+          !scanner.ReadNumber(tmpType) ||
+          !scanner.Read(name) ||
+          !scanner.Read(location) ||
+          !scanner.Read(address) ||
+          !scanner.Read(nodes)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
                        NumberToString(wayCount)+
@@ -1350,10 +1278,12 @@ namespace osmscout {
         return false;
       }
 
-      bool isAddress=!way.GetLocation().empty() &&
-                     !way.GetAddress().empty();
-      bool isPOI=!way.GetName().empty() &&
-                 poiTypes.find(way.GetType())!=poiTypes.end();
+      type=(TypeId)tmpType;
+
+      bool isAddress=!location.empty() &&
+                     !address.empty();
+      bool isPOI=!name.empty() &&
+                 poiTypes.find(type)!=poiTypes.end();
 
       if (!isAddress && !isPOI) {
         continue;
@@ -1364,7 +1294,11 @@ namespace osmscout {
       double minlat;
       double maxlat;
 
-      way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+      GetBoundingBox(nodes,
+                     minlon,
+                     maxlon,
+                     minlat,
+                     maxlat);
 
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                     GeoCoord(minlat,minlon));
@@ -1374,7 +1308,10 @@ namespace osmscout {
 
         AddAddressWayToRegion(progress,
                               region,
-                              way,
+                              fileOffset,
+                              location,
+                              address,
+                              nodes,
                               minlon,
                               minlat,
                               maxlon,
@@ -1391,7 +1328,9 @@ namespace osmscout {
 
         AddPOIWayToRegion(progress,
                           region,
-                          way,
+                          fileOffset,
+                          name,
+                          nodes,
                           minlon,
                           minlat,
                           maxlon,
@@ -1411,42 +1350,45 @@ namespace osmscout {
 
   void LocationIndexGenerator::AddAddressNodeToRegion(Progress& progress,
                                                       Region& region,
-                                                      const Node& node,
+                                                      const FileOffset& fileOffset,
+                                                      const std::string& location,
+                                                      const std::string& address,
                                                       bool& added)
   {
-    std::map<std::string,RegionLocation>::iterator location=region.locations.find(node.GetLocation());
+    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
 
-    if (location==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+node.GetLocation() +"' '"+node.GetAddress()+"' of Node "+NumberToString(node.GetFileOffset())+" cannot be resolved in region '"+region.name+"'");
+    if (loc==region.locations.end()) {
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
       return;
     }
 
-    for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
-        address!=location->second.addresses.end();
-        ++address) {
-      if (address->name==node.GetAddress()) {
+    for (std::list<RegionAddress>::const_iterator regionAddress=loc->second.addresses.begin();
+        regionAddress!=loc->second.addresses.end();
+        ++regionAddress) {
+      if (regionAddress->name==address) {
         return;
       }
     }
 
-    RegionAddress address;
+    RegionAddress regionAddress;
 
-    address.name=node.GetAddress();
-    address.object.Set(node.GetFileOffset(),refNode);
+    regionAddress.name=address;
+    regionAddress.object.Set(fileOffset,refNode);
 
-    location->second.addresses.push_back(address);
+    loc->second.addresses.push_back(regionAddress);
 
     added=true;
   }
 
   void LocationIndexGenerator::AddPOINodeToRegion(Region& region,
-                                                  const Node& node,
+                                                  const FileOffset& fileOffset,
+                                                  const std::string& name,
                                                   bool& added)
   {
     RegionPOI poi;
 
-    poi.name=node.GetName();
-    poi.object.Set(node.GetFileOffset(),refNode);
+    poi.name=name;
+    poi.object.Set(fileOffset,refNode);
 
     region.pois.push_back(poi);
 
@@ -1465,10 +1407,10 @@ namespace osmscout {
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "nodes.dat"),
+                                      "nodeaddress.dat"),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'nodes.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -1477,12 +1419,23 @@ namespace osmscout {
       return false;
     }
 
+    FileOffset  fileOffset;
+    uint32_t    tmpType;
+    TypeId      type;
+    std::string name;
+    std::string location;
+    std::string address;
+    GeoCoord    coord;
+
     for (uint32_t n=1; n<=nodeCount; n++) {
       progress.SetProgress(n,nodeCount);
 
-      Node node;
-
-      if (!node.Read(scanner)) {
+      if (!scanner.ReadFileOffset(fileOffset) ||
+          !scanner.ReadNumber(tmpType) ||
+          !scanner.Read(name) ||
+          !scanner.Read(location) ||
+          !scanner.Read(address) ||
+          !scanner.ReadCoord(coord)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(nodeCount)+
@@ -1491,18 +1444,19 @@ namespace osmscout {
         return false;
       }
 
-      bool isAddress=!node.GetLocation().empty() &&
-                     !node.GetAddress().empty();
-      bool isPOI=!node.GetName().empty() &&
-                 poiTypes.find(node.GetType())!=poiTypes.end();
+      type=(TypeId)tmpType;
+
+      bool isAddress=!location.empty() &&
+                     !address.empty();
+      bool isPOI=!name.empty() &&
+                 poiTypes.find(type)!=poiTypes.end();
 
       if (!isAddress && !isPOI) {
         continue;
       }
 
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(node.GetLat(),
-                                                             node.GetLon()));
+                                                    coord);
 
       if (!region.Valid()) {
         continue;
@@ -1513,7 +1467,9 @@ namespace osmscout {
 
         AddAddressNodeToRegion(progress,
                                region,
-                               node,
+                               fileOffset,
+                               location,
+                               address,
                                added);
         if (added) {
           addressFound++;
@@ -1524,7 +1480,8 @@ namespace osmscout {
         bool added=false;
 
         AddPOINodeToRegion(region,
-                           node,
+                           fileOffset,
+                           name,
                            added);
         if (added) {
           poiFound++;
