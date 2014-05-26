@@ -525,7 +525,7 @@ namespace osmscout {
 
   bool FileWriter::Write(const std::vector<GeoCoord>& nodes)
   {
-    if (!WriteNumber(nodes.size())) {
+    if (!WriteNumber((uint32_t)nodes.size())) {
       return false;
     }
 
