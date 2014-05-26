@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 81;
-	noSym = 81;
+	maxT = 82;
+	noSym = 82;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -185,54 +185,55 @@ void Scanner::Init() {
 	keywords.set("CIRCLE", 20);
 	keywords.set("CONST", 21);
 	keywords.set("COLOR", 22);
-	keywords.set("TYPE", 25);
-	keywords.set("MAG", 26);
-	keywords.set("ONEWAY", 28);
-	keywords.set("BRIDGE", 29);
-	keywords.set("TUNNEL", 30);
-	keywords.set("SIZE", 31);
-	keywords.set("m", 33);
-	keywords.set("mm", 34);
-	keywords.set("px", 36);
-	keywords.set("NODE", 38);
-	keywords.set("TEXT", 40);
-	keywords.set("ICON", 41);
-	keywords.set("WAY", 42);
-	keywords.set("SHIELD", 44);
-	keywords.set("AREA", 45);
-	keywords.set("color", 46);
-	keywords.set("dash", 47);
-	keywords.set("gapColor", 48);
-	keywords.set("displayWidth", 49);
-	keywords.set("width", 50);
-	keywords.set("displayOffset", 51);
-	keywords.set("offset", 52);
-	keywords.set("cap", 53);
-	keywords.set("joinCap", 54);
-	keywords.set("endCap", 55);
-	keywords.set("priority", 56);
-	keywords.set("pattern", 57);
-	keywords.set("patternMinMag", 58);
-	keywords.set("borderColor", 59);
-	keywords.set("borderWidth", 60);
-	keywords.set("borderDash", 61);
-	keywords.set("label", 62);
-	keywords.set("style", 63);
-	keywords.set("size", 64);
-	keywords.set("scaleMag", 65);
-	keywords.set("backgroundColor", 66);
-	keywords.set("shieldSpace", 67);
-	keywords.set("symbol", 68);
-	keywords.set("symbolSpace", 69);
-	keywords.set("name", 70);
-	keywords.set("butt", 71);
-	keywords.set("round", 72);
-	keywords.set("square", 73);
-	keywords.set("normal", 74);
-	keywords.set("emphasize", 75);
-	keywords.set("ref", 76);
-	keywords.set("lighten", 77);
-	keywords.set("darken", 80);
+	keywords.set("MAG", 24);
+	keywords.set("UINT", 25);
+	keywords.set("TYPE", 27);
+	keywords.set("ONEWAY", 29);
+	keywords.set("BRIDGE", 30);
+	keywords.set("TUNNEL", 31);
+	keywords.set("SIZE", 32);
+	keywords.set("m", 34);
+	keywords.set("mm", 35);
+	keywords.set("px", 37);
+	keywords.set("NODE", 39);
+	keywords.set("TEXT", 41);
+	keywords.set("ICON", 42);
+	keywords.set("WAY", 43);
+	keywords.set("SHIELD", 45);
+	keywords.set("AREA", 46);
+	keywords.set("color", 47);
+	keywords.set("dash", 48);
+	keywords.set("gapColor", 49);
+	keywords.set("displayWidth", 50);
+	keywords.set("width", 51);
+	keywords.set("displayOffset", 52);
+	keywords.set("offset", 53);
+	keywords.set("cap", 54);
+	keywords.set("joinCap", 55);
+	keywords.set("endCap", 56);
+	keywords.set("priority", 57);
+	keywords.set("pattern", 58);
+	keywords.set("patternMinMag", 59);
+	keywords.set("borderColor", 60);
+	keywords.set("borderWidth", 61);
+	keywords.set("borderDash", 62);
+	keywords.set("label", 63);
+	keywords.set("style", 64);
+	keywords.set("size", 65);
+	keywords.set("scaleMag", 66);
+	keywords.set("backgroundColor", 67);
+	keywords.set("shieldSpace", 68);
+	keywords.set("symbol", 69);
+	keywords.set("symbolSpace", 70);
+	keywords.set("name", 71);
+	keywords.set("butt", 72);
+	keywords.set("round", 73);
+	keywords.set("square", 74);
+	keywords.set("normal", 75);
+	keywords.set("emphasize", 76);
+	keywords.set("ref", 77);
+	keywords.set("lighten", 78);
+	keywords.set("darken", 81);
 
 
   tvalLength = 128;
@@ -470,25 +471,25 @@ Token* Scanner::NextToken() {
 		case 23:
 			{t->kind = 23; break;}
 		case 24:
-			{t->kind = 24; break;}
+			{t->kind = 26; break;}
 		case 25:
-			{t->kind = 27; break;}
+			{t->kind = 28; break;}
 		case 26:
-			{t->kind = 32; break;}
+			{t->kind = 33; break;}
 		case 27:
-			{t->kind = 35; break;}
+			{t->kind = 36; break;}
 		case 28:
-			{t->kind = 37; break;}
+			{t->kind = 38; break;}
 		case 29:
-			{t->kind = 39; break;}
+			{t->kind = 40; break;}
 		case 30:
-			{t->kind = 78; break;}
-		case 31:
 			{t->kind = 79; break;}
+		case 31:
+			{t->kind = 80; break;}
 		case 32:
-			recEnd = pos; recKind = 43;
+			recEnd = pos; recKind = 44;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
-			else {t->kind = 43; break;}
+			else {t->kind = 44; break;}
 
   }
   AppendVal(t);

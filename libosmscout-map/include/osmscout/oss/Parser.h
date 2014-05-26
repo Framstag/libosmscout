@@ -196,10 +196,13 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void DOUBLE(double& value);
 	void CONSTDEF();
 	void COLORCONSTDEF();
+	void MAGCONSTDEF();
+	void UINTCONSTDEF();
 	void COLOR(Color& color);
+	void MAG(Magnification& magnification);
+	void UINT(size_t& value);
 	void STYLEFILTER(StyleFilter& filter);
 	void STYLEDEF(StyleFilter filter);
-	void MAG(Magnification& magnification);
 	void SIZECONDITION(SizeCondition*& condition);
 	void NODESTYLEDEF(StyleFilter filter);
 	void WAYSTYLEDEF(StyleFilter filter);
@@ -228,7 +231,6 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STRING(std::string& value);
 	void TEXTLABEL(TextStyle::Label& label);
 	void LABELSTYLE(TextStyle::Style& style);
-	void UINT(size_t& value);
 	void SHIELDLABEL(ShieldStyle::Label& label);
 	void PATHTEXTLABEL(PathTextStyle::Label& label);
 

@@ -28,13 +28,25 @@ namespace osmscout {
     // no code
   }
 
-    StyleVariable::~StyleVariable()
+  StyleVariable::~StyleVariable()
   {
     // no code
   }
 
   StyleVariableColor::StyleVariableColor(const Color& color)
   : color(color)
+  {
+    // no code
+  }
+
+  StyleVariableMag::StyleVariableMag(Magnification& magnification)
+  : magnification(magnification)
+  {
+    // no code
+  }
+
+  StyleVariableUInt::StyleVariableUInt(size_t& value)
+  : value(value)
   {
     // no code
   }
@@ -526,7 +538,7 @@ namespace osmscout {
   }
 
   LabelStyle::LabelStyle()
-   : priority(0),
+   : priority(std::numeric_limits<size_t>::max()),
      size(1)
   {
     // no code
@@ -543,7 +555,7 @@ namespace osmscout {
     // no code
   }
 
-  LabelStyle& LabelStyle::SetPriority(uint8_t priority)
+  LabelStyle& LabelStyle::SetPriority(size_t priority)
   {
     this->priority=priority;
 

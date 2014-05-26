@@ -63,6 +63,34 @@ namespace osmscout {
     }
   };
 
+  class OSMSCOUT_MAP_API StyleVariableMag : public StyleVariable
+  {
+  private:
+    Magnification magnification;
+
+  public:
+    StyleVariableMag(Magnification& magnification);
+
+    inline const Magnification& GetMag()
+    {
+      return magnification;
+    }
+  };
+
+  class OSMSCOUT_MAP_API StyleVariableUInt : public StyleVariable
+  {
+  private:
+    size_t value;
+
+  public:
+    StyleVariableUInt(size_t& value);
+
+    inline const size_t& GetUInt()
+    {
+      return value;
+    }
+  };
+
   class OSMSCOUT_API SizeCondition : public Referencable
   {
   private:
@@ -522,8 +550,8 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelStyle : public Referencable
   {
   private:
-    uint8_t priority;
-    double  size;
+    size_t priority;
+    double size;
 
   public:
     LabelStyle();
@@ -533,10 +561,10 @@ namespace osmscout {
     virtual bool IsVisible() const = 0;
     virtual double GetAlpha() const = 0;
 
-    LabelStyle& SetPriority(uint8_t priority);
+    LabelStyle& SetPriority(size_t priority);
     LabelStyle& SetSize(double size);
 
-    inline uint8_t GetPriority() const
+    inline size_t GetPriority() const
     {
       return priority;
     }
