@@ -30,7 +30,7 @@ OST
     INDEX_LOC:
       The given way or area should be indexed as location.  
     IGNORE:
-      Ignore objects of this type  
+      Ignore objects of this type
 */
 
 GRADES
@@ -101,6 +101,7 @@ TYPES
   TYPE highway_secondary = WAY ("highway"=="secondary") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_secondary_link = WAY ("highway"=="secondary_link") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
   TYPE highway_tertiary = WAY ("highway"=="tertiary") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+  TYPE highway_tertiary_link = WAY ("highway"=="tertiary_link") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
   TYPE highway_unclassified = WAY ("highway"=="unclassified") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
   TYPE highway_road = WAY ("highway"=="road") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_residential = WAY ("highway"=="residential") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
@@ -119,7 +120,7 @@ TYPES
   TYPE highway_byway = WAY ("highway"=="byway") OPTIONS ROUTE[FOOT] // Obsolete in OSM
   TYPE highway_steps = WAY ("highway"=="steps") OPTIONS ROUTE[FOOT]
   TYPE highway_mini_roundabout = NODE ("highway"=="mini_roundabout")
-  TYPE highway_bus_stop = NODE ("highway"=="bus_stop")
+  TYPE highway_bus_stop = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND "public_transport"=="platform"))
   TYPE highway_turning_cycle = NODE ("highway"=="turning_cycle")
   TYPE highway_construction = WAY ("highway"=="construction")
   TYPE highway_roundabout = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE[FOOT BICYCLE CAR] PIN_WAY
@@ -249,22 +250,37 @@ TYPES
   TYPE leisure_ice_rink = NODE AREA ("leisure"=="ice_rink")
 
   // These are currently special-cased in the style file
-  TYPE amenity_hospital_building = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_hospital = NODE AREA ("amenity"=="hospital") OPTIONS INDEX_POI
+  TYPE amenity_atm = NODE AREA ("amenity"=="atm")  OPTIONS INDEX_POI
 
-  TYPE amenity_parking_building = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_parking = NODE AREA ("amenity"=="parking") OPTIONS INDEX_POI
+  TYPE amenity_bank_building = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
+  TYPE amenity_bank = NODE AREA ("amenity"=="bank")  OPTIONS INDEX_POI
 
   TYPE amenity_bicycle_parking_building = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE amenity_bicycle_parking = NODE WAY AREA ("amenity"=="bicycle_parking")
 
+  TYPE amenity_bench = NODE WAY ("amenity"=="bench")
   TYPE amenity_bus_station = NODE AREA ("amenity"=="bus_station")
+
+  TYPE amenity_cafe_building = AREA ("amenity"=="cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
+  TYPE amenity_cafe = NODE AREA ("amenity"=="cafe")  OPTIONS INDEX_POI
+
+  TYPE amenity_fast_food_building = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
+  TYPE amenity_fast_food = NODE AREA ("amenity"=="fast_food")  OPTIONS INDEX_POI
+
+  TYPE amenity_fuel_building = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  TYPE amenity_fuel = NODE ("amenity"=="fuel") OPTIONS INDEX_POI
+
+  TYPE amenity_grave_yard = NODE AREA ("amenity"=="grave_yard") OPTIONS INDEX_POI
+
+  TYPE amenity_hospital_building = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  TYPE amenity_hospital = NODE AREA ("amenity"=="hospital") OPTIONS INDEX_POI
 
   TYPE amenity_kindergarten_building = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
   TYPE amenity_kindergarten = NODE ("amenity"=="kindergarten") OPTIONS INDEX_POI
 
-  TYPE amenity_bench = NODE WAY ("amenity"=="bench")
-  TYPE amenity_grave_yard = NODE AREA ("amenity"=="grave_yard") OPTIONS INDEX_POI
+  TYPE amenity_parking_building = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  TYPE amenity_parking = NODE AREA ("amenity"=="parking") OPTIONS INDEX_POI
+
   TYPE amenity_pharmacy = NODE AREA ("amenity"=="pharmacy") OPTIONS INDEX_POI
 
   TYPE amenity_post_office_building = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
@@ -272,14 +288,14 @@ TYPES
 
   TYPE amenity_post_box = NODE ("amenity"=="post_box")
 
+  TYPE amenity_restaurant_building = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
+  TYPE amenity_restaurant = NODE AREA ("amenity"=="restaurant")  OPTIONS INDEX_POI
+
   TYPE amenity_school_building = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
   TYPE amenity_school = NODE AREA ("amenity"=="school") OPTIONS INDEX_POI
 
   TYPE amenity_taxi = NODE AREA ("amenity"=="taxi")
   TYPE amenity_toilets = NODE ("amenity"=="toilets")
-
-  TYPE amenity_fuel_building = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_fuel = NODE ("amenity"=="fuel") OPTIONS INDEX_POI
 
   // Churches
   TYPE christian_church_building = AREA ("amenity"=="place_of_worship" AND
@@ -420,6 +436,8 @@ TYPES
 
   TYPE building_garage = AREA ("building"=="garage")
   TYPE building = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
+
+  TYPE speed_camera = NODE ("highway"=="speed_camera") OPTIONS IGNORE
 
   // Currently not supported by stylesheet
   TYPE barrier_hedge = WAY AREA ("barrier"=="hedge")
