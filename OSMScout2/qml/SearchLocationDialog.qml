@@ -8,55 +8,48 @@ import "custom"
 MapDialog {
     id: dialog
 
-    signal showLocation(Location location)
+    label: "Search location..."
 
-    Rectangle {
-        id: content
-        width: mainFrame.implicitWidth+20
-        height: mainFrame.implicitHeight+20
+    content : RowLayout {
+        id: mainFrame
 
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 10
+        Text {
+            Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
-        GridLayout {
-            id: mainFrame
-            anchors.margins: 10
-            anchors.fill: parent
+            text: "Location:"
+        }
 
-            columns: 3
+        LocationEdit {
+            id: locationInput
 
-            Text {
-                Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
+            Layout.minimumWidth: Theme.averageCharWidth*40
+            Layout.preferredWidth: Theme.averageCharWidth*60
+            Layout.maximumWidth: Theme.averageCharWidth*100
 
-                text: "Location:"
-            }
+            horizontalAlignment: TextInput.AlignLeft
+        }
 
-            LocationEdit {
-                id: locationInput
-                width: 250
+        DialogActionButton {
+            id: ok
+            text: "OK"
 
-                horizontalAlignment: TextInput.AlignLeft
-            }
+            onClicked: {
+                locationInput.enforceLocationValue()
 
-            DialogActionButton {
-                id: ok
-                width: 25
-                height: 25
-                text: "OK"
+                var location = locationInput.location
 
-                onClicked: {
-                    locationInput.enforceLocationValue()
-
-                    var location = locationInput.location
-
-                    if (location != null) {
-                        showLocation(location)
-                    }
-
-                    dialog.destroy()
+                if (location != null) {
+                    showLocation(location)
                 }
+
+                dialog.destroy()
             }
         }
+    }
+
+    signal showLocation(Location location)
+
+    onOpened: {
+        locationInput.focus = true
     }
 }

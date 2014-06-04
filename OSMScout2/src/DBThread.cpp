@@ -54,9 +54,8 @@ void QBreaker::Reset()
 }
 
 
-DBThread::DBThread(const SettingsRef& settings)
- : settings(settings),
-   database(new osmscout::Database(databaseParameter)),
+DBThread::DBThread()
+ : database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
    styleConfig(NULL),
@@ -74,6 +73,9 @@ DBThread::DBThread(const SettingsRef& settings)
    renderBreaker(new QBreaker()),
    renderBreakerRef(renderBreaker)
 {
+    QScreen *srn = QApplication::screens().at(0);
+
+    dpi = (double)srn->physicalDotsPerInch();
 }
 
 void DBThread::FreeMaps()
@@ -224,7 +226,7 @@ void DBThread::TriggerMapRendering()
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
-    drawParameter.SetDPI(settings->GetDPI());
+    drawParameter.SetDPI(dpi);
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);
@@ -413,7 +415,7 @@ bool DBThread::RenderMap(QPainter& painter,
     osmscout::Color        backgroundColor;
 
     styleConfig->GetUnknownFillStyle(projection,
-                                     settings->GetDPI(),
+                                     dpi,
                                      unknownFillStyle);
 
     backgroundColor=unknownFillStyle->GetFillColor();
@@ -598,6 +600,10 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 {
   QMutexLocker locker(&mutex);
 
+  if (!AssureRouter(vehicle)) {
+    return false;
+  }
+
   object.Invalidate();
 
   if (refObject.GetType()==osmscout::refNode) {
@@ -657,13 +663,13 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
 static DBThread* dbThreadInstance=NULL;
 
-bool DBThread::InitializeInstance(const SettingsRef& settings)
+bool DBThread::InitializeInstance()
 {
   if (dbThreadInstance!=NULL) {
     return false;
   }
 
-  dbThreadInstance=new DBThread(settings);
+  dbThreadInstance=new DBThread();
 
   return true;
 }

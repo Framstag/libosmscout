@@ -8,137 +8,127 @@ import "custom"
 MapDialog {
     id: dialog
 
-    Rectangle {
-        id: content
+    label: "Route..."
 
-        width: mainFrame.implicitWidth+20
+    content :  ColumnLayout {
+        id: mainFrame
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 10
+        GridLayout {
+            anchors.left: parent.left;
+            anchors.right: parent.right;
 
-        ColumnLayout {
-            id: mainFrame
+            columns: 2
 
-            anchors.margins: 10
-            anchors.fill: parent
+            Text {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
-            GridLayout {
-                anchors.left: parent.left;
-                anchors.right: parent.right;
-
-                columns: 2
-
-                Text {
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
-
-                    text: "Start:"
-                }
-
-                LocationEdit {
-                    id: startInput
-                    width: 250
-
-                    horizontalAlignment: TextInput.AlignLeft
-                }
-
-                Text {
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
-
-                    text: "Target:"
-                }
-
-                LocationEdit {
-                    id: targetInput
-                    width: 250
-
-                    horizontalAlignment: TextInput.AlignLeft
-                }
+                text: "Start:"
             }
 
-            RowLayout {
-                id: buttonRow
-                anchors.left: parent.left
-                anchors.right: parent.right
-                spacing: 10
+            LocationEdit {
+                id: startInput
 
-                Item {
-                    Layout.fillWidth: true
-                    implicitWidth: 0
-                    width: 1
-                }
+                Layout.minimumWidth: Theme.averageCharWidth*40
+                Layout.preferredWidth: Theme.averageCharWidth*60
+                Layout.maximumWidth: Theme.averageCharWidth*100
 
-                DialogActionButton {
-                    id: route
-                    width: 50
-                    height: 25
-                    text: "Route"
+                horizontalAlignment: TextInput.AlignLeft
+            }
 
-                    onClicked: {
-                        startInput.enforceLocationValue()
-                        targetInput.enforceLocationValue()
+            Text {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
-                        if (startInput.location && targetInput.location) {
-                            routingModel.setStartAndTarget(startInput.location,
-                                                           targetInput.location)
-                        }
-                    }
-                }
+                text: "Target:"
+            }
 
-                DialogActionButton {
-                    id: close
-                    width: 50
-                    height: 25
-                    text: "Close"
+            LocationEdit {
+                id: targetInput
 
-                    onClicked: {
-                        dialog.close()
+                Layout.minimumWidth: Theme.averageCharWidth*40
+                Layout.preferredWidth: Theme.averageCharWidth*60
+                Layout.maximumWidth: Theme.averageCharWidth*100
+
+                horizontalAlignment: TextInput.AlignLeft
+            }
+        }
+
+        RowLayout {
+            id: buttonRow
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 10
+
+            Item {
+                Layout.fillWidth: true
+                implicitWidth: 0
+                width: 1
+            }
+
+            DialogActionButton {
+                id: route
+                text: "Route"
+
+                onClicked: {
+                    startInput.enforceLocationValue()
+                    targetInput.enforceLocationValue()
+
+                    if (startInput.location && targetInput.location) {
+                        routingModel.setStartAndTarget(startInput.location,
+                                                       targetInput.location)
                     }
                 }
             }
 
-            Rectangle {
-                height: 100
-                width: 100
+            DialogActionButton {
+                id: close
+                text: "Close"
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                Layout.fillHeight: true
-
-                border.color: "lightgrey"
-                border.width: 1
-
-                RoutingListModel {
-                    id: routingModel
+                onClicked: {
+                    dialog.close()
                 }
+            }
+        }
 
-                ListView {
-                    id: routeView
+        Rectangle {
+            height: 100
+            width: 100
 
-                    model: routingModel
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-                    anchors.fill: parent
+            Layout.fillHeight: true
 
-                    clip: true
+            border.color: "lightgrey"
+            border.width: 1
 
-                    delegate: Component {
-                        Item {
-                            height: text.implicitHeight+4
+            RoutingListModel {
+                id: routingModel
+            }
 
-                            Text {
-                                id: text
-                                anchors.fill: parent
-                                text: label
-                            }
+            ListView {
+                id: routeView
+
+                model: routingModel
+
+                anchors.fill: parent
+
+                clip: true
+
+                delegate: Component {
+                    Item {
+                        height: text.implicitHeight+4
+
+                        Text {
+                            id: text
+                            anchors.fill: parent
+                            text: label
                         }
                     }
                 }
+            }
 
-                ScrollIndicator {
-                    flickableArea: routeView
-                }
+            ScrollIndicator {
+                flickableArea: routeView
             }
         }
     }

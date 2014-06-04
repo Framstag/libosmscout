@@ -87,7 +87,8 @@ public slots:
   void Finalize();
 
 private:
-  SettingsRef                  settings;
+  double                       dpi;
+
   mutable QMutex               mutex;
 
   osmscout::DatabaseParameter  databaseParameter;
@@ -119,7 +120,7 @@ private:
   osmscout::BreakerRef         renderBreakerRef;
 
 private:
-  DBThread(const SettingsRef& settings);
+  DBThread();
 
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
@@ -171,7 +172,7 @@ public:
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);
 
-  static bool InitializeInstance(const SettingsRef& settings);
+  static bool InitializeInstance();
   static DBThread* GetInstance();
   static void FreeInstance();
 };

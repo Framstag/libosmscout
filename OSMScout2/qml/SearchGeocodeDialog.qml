@@ -1,6 +1,8 @@
 import QtQuick 2.2
 import QtQuick.Layouts 1.1
 
+import net.sf.libosmscout.map 1.0
+
 import "custom"
 
 MapDialog {
@@ -23,96 +25,90 @@ MapDialog {
         lonInput.text = stringLon
     }
 
-    Rectangle {
-        id: content
-        width: mainFrame.implicitWidth+20
-        height: mainFrame.implicitHeight+20
+    label: "Goto coordinate..."
 
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 10
+    content : ColumnLayout {
+        id: mainFrame
 
-        ColumnLayout {
-            id: mainFrame
-            anchors.margins: 10
-            anchors.fill: parent
+        GridLayout {
+            anchors.top: parent.top;
+            anchors.left: parent.left;
+            anchors.right: parent.right;
+            anchors.bottom: buttonRow.top;
 
-            GridLayout {
-                anchors.top: parent.top;
-                anchors.left: parent.left;
-                anchors.right: parent.right;
-                anchors.bottom: buttonRow.top;
+            columns: 2
 
-                columns: 2
+            Text {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
-                Text {
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
+                text: "Latitude:"
+            }
 
-                    text: "Latitude:"
-                }
+            LineEdit {
+                id: latInput
 
-                LineEdit {
-                    id: latInput
-                    width: 80
+                maximumLength: 10
+                width: Theme.numberCharWidth*10
 
-                    horizontalAlignment: TextInput.AlignRight
-                    validator: DoubleValidator {
-                        bottom: -90.0
-                        top: 90.0
-                        decimals: 5
-                        notation: DoubleValidator.StandardNotation
-                    }
-                }
-
-                Text {
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
-
-                    text: "Longitude:"
-                }
-
-                LineEdit {
-                    id: lonInput
-                    width: 80
-
-                    horizontalAlignment: TextInput.AlignRight
-                    validator: DoubleValidator {
-                        bottom: -180.0
-                        top: 180.0
-                        decimals: 5
-                        notation: DoubleValidator.StandardNotation
-                    }
+                horizontalAlignment: TextInput.AlignRight
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                validator: DoubleValidator {
+                    bottom: -90.0
+                    top: 90.0
+                    decimals: 5
+                    notation: DoubleValidator.StandardNotation
                 }
             }
 
-            RowLayout {
-                id: buttonRow
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                spacing: 10
+            Text {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
-                Item {
-                    Layout.fillWidth: true
+                text: "Longitude:"
+            }
+
+            LineEdit {
+                id: lonInput
+
+                maximumLength: 10
+                width: Theme.numberCharWidth*10
+
+                horizontalAlignment: TextInput.AlignRight
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                validator: DoubleValidator {
+                    bottom: -180.0
+                    top: 180.0
+                    decimals: 5
+                    notation: DoubleValidator.StandardNotation
                 }
+            }
+        }
 
-                DialogActionButton {
-                    id: ok
-                    width: 25
-                    height: 25
-                    text: "OK"
+        RowLayout {
+            id: buttonRow
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            spacing: 10
 
-                    onClicked: {
-                        if (latInput.text.length >0 && lonInput.text.length > 0) {
-                            var locale = Qt.locale()
+            Item {
+                Layout.fillWidth: true
+            }
 
-                            var numberLat = Number.fromLocaleString(locale, latInput.text)
-                            var numberLon = Number.fromLocaleString(locale, lonInput.text)
+            DialogActionButton {
+                id: ok
+                text: "OK"
 
-                            showCoordinates(numberLat, numberLon)
-                        }
+                onClicked: {
+                    if (latInput.text.length >0 && lonInput.text.length > 0) {
+                        var locale = Qt.locale()
 
-                        dialog.destroy()
+                        var numberLat = Number.fromLocaleString(locale, latInput.text)
+                        var numberLon = Number.fromLocaleString(locale, lonInput.text)
+
+                        showCoordinates(numberLat, numberLon)
                     }
+
+                    dialog.destroy()
                 }
             }
         }

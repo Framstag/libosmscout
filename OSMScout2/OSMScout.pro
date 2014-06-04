@@ -20,18 +20,18 @@ UI_DIR = $$DESTDIR/
 
 SOURCES = src/OSMScout.cpp \
           src/Settings.cpp \
+          src/Theme.cpp \
           src/DBThread.cpp \
           src/MapWidget.cpp \
           src/MainWindow.cpp \
-          src/SettingsDialog.cpp \
           src/SearchLocationModel.cpp \
     src/RoutingModel.cpp
 
 HEADERS = src/Settings.h \
+          src/Theme.h \
           src/DBThread.h \
           src/MapWidget.h \
           src/MainWindow.h \
-          src/SettingsDialog.h \
           src/SearchLocationModel.h \
     src/RoutingModel.h
 
