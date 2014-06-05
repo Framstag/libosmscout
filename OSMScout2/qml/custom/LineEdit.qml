@@ -12,7 +12,10 @@ Item {
     property alias validator: input.validator
     property alias text: input.text
     property alias horizontalAlignment: input.horizontalAlignment
+    property alias maximumLength: input.maximumLength
+    property alias inputMethodHints: input.inputMethodHints
 
+    width: input.width+4
     height: input.implicitHeight+4
 
     Rectangle {
@@ -26,10 +29,10 @@ Item {
 
     TextInput {
         id: input
-        height: parent.height-4
-        width: parent.width-4
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+
+        anchors.fill: parent
+        anchors.margins: 2
+
         clip: true
 
         onFocusChanged: {

@@ -179,6 +179,7 @@ void RoutingListModel::GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_secondary"]=60.0;
   map["highway_secondary_link"]=50.0;
   map["highway_tertiary"]=55.0;
+  map["highway_tertiary_link"]=55.0;
   map["highway_unclassified"]=50.0;
   map["highway_road"]=50.0;
   map["highway_residential"]=40.0;
@@ -278,7 +279,7 @@ void RoutingListModel::DumpRoundaboutLeaveDescription(const osmscout::RouteDescr
   RouteStep leave;
 
   leave.description="Leave roundabout (";
-  leave.description+=roundaboutLeaveDescription->GetExitCount();
+  leave.description+=QString::number(roundaboutLeaveDescription->GetExitCount());
   leave.description+=". exit)";
 
   if (nameDescription.Valid() &&

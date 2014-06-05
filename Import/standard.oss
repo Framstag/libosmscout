@@ -195,7 +195,7 @@ OSS
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary
-  GROUP highway_motorway_link, highway_trunk_link, highway_primary_link, highway_secondary_link
+  GROUP highway_motorway_link, highway_trunk_link, highway_primary_link, highway_secondary_link, highway_tertiary_link
   GROUP highway_unclassified, highway_road, highway_residential
   GROUP railway_rail,
         aeroway_runway, aeroway_taxiway
@@ -209,7 +209,7 @@ OSS
 
 CONST
   MAG stepsMag                     = block;
-  MAG labelPathsMag                = veryClose;
+  MAG labelPathsMag                = block;
   MAG labelSpecialBuildingMag      = veryClose;
   MAG labelBuildingMag             = block;
 
@@ -422,6 +422,9 @@ SYMBOL christian_church_cross
   RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }   // vertical bar
   RECTANGLE 0,1.5 1.5 x 0.5 { color: #000000; } // horizontal bar
 
+SYMBOL speed_camera
+  CIRCLE 0,0 0.75 {color: @red; }
+
  // -------------------------------------------------------
  //
  // Synthetic
@@ -632,6 +635,14 @@ SYMBOL christian_church_cross
      [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm;}
    }
 
+   [TYPE highway_tertiary_link] {
+     [SIZE 12m 0.25mm:3px<] {
+       WAY#outline { color: darken(@secondaryColor,0.4); width: 12m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @secondaryColor; width: 12m;}
+     }
+     [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
+   }
+
    [TYPE highway_unclassified,
          highway_residential] {
      [SIZE 8m 0.1mm:3px<] {
@@ -701,6 +712,8 @@ SYMBOL christian_church_cross
 
    [TYPE highway_service] AREA { color: @roadColor; borderColor: @roadBColor; borderWidth: 0.1mm; }
    [TYPE highway_footway] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
+
+   [TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
  }
 
  [MAG 15-] {
@@ -1202,10 +1215,14 @@ SYMBOL christian_church_cross
    [TYPE amenity_hospital] AREA { color: @hospitalColor; borderColor: @hospitalBorderColor; borderWidth: 0.1mm; }
    [TYPE amenity_taxi] AREA { color: #d2d2d2; }
 
-   // Amenities without special color
+   // (Major) Amenities without special color
    [TYPE amenity,
+         amenity_bank,
+         amenity_cafe,
+         amenity_fast_food,
          amenity_fuel,
          amenity_kindergarten,
+         amenity_restaurant,
          amenity_school] AREA { color: @amenityColor; }
  }
 
@@ -1223,10 +1240,17 @@ SYMBOL christian_church_cross
    [TYPE amenity_hospital_building] AREA { color: @hospitalBuildingColor; borderColor: @hospitalBuildingBorderColor; borderWidth: 0.1mm; }
    [TYPE amenity_post_office_building] AREA { color: @postBuildingColor; borderColor: @postBuildingBorderColor; borderWidth: 0.1mm; }
 
+   // (Minor) Amenities without special color
+   [TYPE amenity_atm] AREA { color: @amenityColor; }
+
    // Amenity buildings
    [TYPE amenity_building,
+         amenity_bank_building,
+         amenity_cafe_building,
+         amenity_fast_food_building,
          amenity_fuel_building,
          amenity_kindergarten_building,
+         amenity_restaurant_building,
          amenity_school_building] AREA { color: @amenityBuildingColor; borderColor: @amenityBuildingBorderColor; borderWidth: 0.1mm;}
 
    [TYPE amenity_parking] {

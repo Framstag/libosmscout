@@ -29,8 +29,21 @@
 // Application settings
 #include "Settings.h"
 
+// Application theming
+#include "Theme.h"
+
 // Main Window
 #include "MainWindow.h"
+
+static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+
+    Theme *theme = new Theme();
+
+    return theme;
+}
 
 int main(int argc, char* argv[])
 {
@@ -58,9 +71,11 @@ int main(int argc, char* argv[])
   qmlRegisterType<RouteStep>("net.sf.libosmscout.map", 1, 0, "RouteStep");
   qmlRegisterType<RoutingListModel>("net.sf.libosmscout.map", 1, 0, "RoutingListModel");
 
+  qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
+
   QThread thread;
 
-  if (!DBThread::InitializeInstance(settings)) {
+  if (!DBThread::InitializeInstance()) {
     std::cerr << "Cannot initialize DBThread" << std::endl;
   }
 
