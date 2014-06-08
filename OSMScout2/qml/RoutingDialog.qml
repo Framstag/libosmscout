@@ -92,10 +92,6 @@ MapDialog {
         }
 
         Rectangle {
-            /*
-            Layout.minimumHeight: 100//height*3
-            Layout.preferredHeight: 5000//text.height*30*/
-            height: 10
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -115,17 +111,28 @@ MapDialog {
 
                 clip: true
 
-                delegate: Component {
-                    Item {
-                        id: item
+                delegate: Item {
+                    id: item
 
-                        height: text.implicitHeight+4
+                    anchors.right: parent.right;
+                    anchors.left: parent.left;
+                    height: text.implicitHeight+5
 
-                        Text {
-                            id: text
-                            anchors.fill: parent
-                            text: label
-                        }
+                    Text {
+                        id: text
+
+                        y:2
+                        x: 2
+                        width: parent.width-4
+                        text: label
+                    }
+
+                    Rectangle {
+                        x: 2
+                        y: parent.height-2
+                        width: parent.width-4
+                        height: 1
+                        color: "lightgrey"
                     }
                 }
             }

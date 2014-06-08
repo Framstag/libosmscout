@@ -108,14 +108,17 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
   if (names.size()>0) {
     std::ostringstream stream;
 
+    stream << "<ul>";
     for (std::set<std::string>::const_iterator name=names.begin();
         name!=names.end();
         ++name) {
+        /*
       if (name!=names.begin()) {
         stream << ", ";
-      }
-      stream << "'" << *name << "'";
+      }*/
+      stream << "<li>'" << *name << "'</li>";
     }
+    stream << "</ul>";
 
     return stream.str();
   }
@@ -218,6 +221,7 @@ void RoutingListModel::DumpTurnDescription(const osmscout::RouteDescription::Tur
                                            const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                                            const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
 {
+  RouteStep   turn;
   std::string crossingWaysString;
 
   if (crossingWaysDescription.Valid()) {
@@ -225,19 +229,14 @@ void RoutingListModel::DumpTurnDescription(const osmscout::RouteDescription::Tur
   }
 
   if (!crossingWaysString.empty()) {
-    RouteStep at;
-
-    at.description="At crossing "+QString::fromUtf8(crossingWaysString.c_str());
-    route.routeSteps.push_back(at);
+    turn.description="At crossing "+QString::fromUtf8(crossingWaysString.c_str())+"";
   }
-
-  RouteStep turn;
 
   if (directionDescription.Valid()) {
-    turn.description=MoveToTurnCommand(directionDescription->GetCurve());
+    turn.description+=MoveToTurnCommand(directionDescription->GetCurve());
   }
   else {
-    turn.description="Turn";
+    turn.description=+"Turn";
   }
 
   if (nameDescription.Valid() &&
@@ -251,6 +250,7 @@ void RoutingListModel::DumpTurnDescription(const osmscout::RouteDescription::Tur
 void RoutingListModel::DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
                                                       const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
+  RouteStep   enter;
   std::string crossingWaysString;
 
   if (crossingWaysDescription.Valid()) {
@@ -258,17 +258,11 @@ void RoutingListModel::DumpRoundaboutEnterDescription(const osmscout::RouteDescr
   }
 
   if (!crossingWaysString.empty()) {
-    RouteStep   at;
-
-    at.description="At crossing ";
-    at.description+=QString::fromUtf8(crossingWaysString.c_str());
-
-    route.routeSteps.push_back(at);
+    enter.description="At crossing "+QString::fromUtf8(crossingWaysString.c_str())+"";
   }
 
-  RouteStep enter;
 
-  enter.description="Enter roundabout";
+  enter.description+="Enter roundabout";
 
   route.routeSteps.push_back(enter);
 }
@@ -295,6 +289,7 @@ void RoutingListModel::DumpRoundaboutLeaveDescription(const osmscout::RouteDescr
 void RoutingListModel::DumpMotorwayEnterDescription(const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
                                                     const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
+  RouteStep   enter;
   std::string crossingWaysString;
 
   if (crossingWaysDescription.Valid()) {
@@ -302,16 +297,10 @@ void RoutingListModel::DumpMotorwayEnterDescription(const osmscout::RouteDescrip
   }
 
   if (!crossingWaysString.empty()) {
-    RouteStep at;
-
-    at.description="At crossing ";
-    at.description+=QString::fromUtf8(crossingWaysString.c_str());
-    route.routeSteps.push_back(at);
+    enter.description="At crossing "+QString::fromUtf8(crossingWaysString.c_str());
   }
 
-  RouteStep enter;
-
-  enter.description="Enter motorway";
+  enter.description+="Enter motorway";
 
   if (motorwayEnterDescription->GetToDescription().Valid() &&
       motorwayEnterDescription->GetToDescription()->HasName()) {
@@ -382,17 +371,23 @@ void RoutingListModel::DumpNameChangedDescription(const osmscout::RouteDescripti
 {
   RouteStep changed;
 
-  changed.description="Way changes name";
+  changed.description="";
 
   if (nameChangedDescription->GetOriginDesccription().Valid()) {
-    changed.description+=" from '";
+    changed.description+="Way changes name<br/>";
+    changed.description+="from '";
     changed.description+=QString::fromUtf8(nameChangedDescription->GetOriginDesccription()->GetDescription().c_str());
+    changed.description+="'<br/>";
+    changed.description+=" to '";
+    changed.description+=QString::fromUtf8(nameChangedDescription->GetTargetDesccription()->GetDescription().c_str());
     changed.description+="'";
   }
-
-  changed.description+="' to '";
-  changed.description+=QString::fromUtf8(nameChangedDescription->GetTargetDesccription()->GetDescription().c_str());
-  changed.description+="'";
+  else {
+    changed.description+="Way changes name<br/>";
+    changed.description+="to '";
+    changed.description+=QString::fromUtf8(nameChangedDescription->GetTargetDesccription()->GetDescription().c_str());
+    changed.description+="'";
+  }
 
   route.routeSteps.push_back(changed);
 }
@@ -488,7 +483,6 @@ void RoutingListModel::setStartAndTarget(Location* start,
   for (std::list<osmscout::RouteDescription::Node>::const_iterator node=route.routeDescription.Nodes().begin();
        node!=route.routeDescription.Nodes().end();
        ++node) {
-      std::cout << "Processing node..." << std::endl;
     osmscout::RouteDescription::DescriptionRef                 desc;
     osmscout::RouteDescription::NameDescriptionRef             nameDescription;
     osmscout::RouteDescription::DirectionDescriptionRef        directionDescription;
@@ -613,8 +607,6 @@ void RoutingListModel::setStartAndTarget(Location* start,
     else {
       continue;
     }
-
-    std::cout << "Dumped descriptions..." << std::endl;
 
     int currentStepIndex;
 

@@ -6,6 +6,8 @@ import net.sf.libosmscout.map 1.0
 Item {
     id: dialog
 
+    property bool fullscreen: false
+
     property alias label : label.text
     property alias content : content.children
 
@@ -41,6 +43,11 @@ Item {
     }
 
     function open() {
+        if (fullscreen) {
+            content.Layout.preferredHeight = overlay.height-5*Theme.vertSpace-title.height
+            content.Layout.maximumHeight = overlay.height-5*Theme.vertSpace-title.height
+        }
+
         visible = true
 
         dialog.opened()
@@ -82,6 +89,7 @@ Item {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: Theme.vertSpace
+        anchors.bottomMargin: Theme.vertSpace
 
         border.color: "black"
         color: "white"
@@ -120,6 +128,7 @@ Item {
                 id: content
 
                 Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 focus: true
 
