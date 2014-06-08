@@ -31,9 +31,8 @@ MapDialog {
         id: mainFrame
 
         GridLayout {
-            anchors.top: parent.top;
-            anchors.left: parent.left;
-            anchors.right: parent.right;
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignTop
             anchors.bottom: buttonRow.top;
 
             columns: 2

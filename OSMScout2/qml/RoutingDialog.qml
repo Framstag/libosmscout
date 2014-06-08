@@ -8,14 +8,17 @@ import "custom"
 MapDialog {
     id: dialog
 
+    fullscreen: true
     label: "Route..."
 
-    content :  ColumnLayout {
+    content : ColumnLayout {
         id: mainFrame
 
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+
         GridLayout {
-            anchors.left: parent.left;
-            anchors.right: parent.right;
+            Layout.fillWidth: true
 
             columns: 2
 
@@ -54,8 +57,7 @@ MapDialog {
 
         RowLayout {
             id: buttonRow
-            anchors.left: parent.left
-            anchors.right: parent.right
+            Layout.fillWidth: true
             spacing: 10
 
             Item {
@@ -90,12 +92,11 @@ MapDialog {
         }
 
         Rectangle {
-            height: 100
-            width: 100
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
+            /*
+            Layout.minimumHeight: 100//height*3
+            Layout.preferredHeight: 5000//text.height*30*/
+            height: 10
+            Layout.fillWidth: true
             Layout.fillHeight: true
 
             border.color: "lightgrey"
@@ -116,6 +117,8 @@ MapDialog {
 
                 delegate: Component {
                     Item {
+                        id: item
+
                         height: text.implicitHeight+4
 
                         Text {

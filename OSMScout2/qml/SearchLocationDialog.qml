@@ -13,6 +13,8 @@ MapDialog {
     content : RowLayout {
         id: mainFrame
 
+        Layout.alignment: Qt.AlignTop
+
         Text {
             Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
