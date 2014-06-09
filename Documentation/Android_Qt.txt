@@ -1,0 +1,93 @@
+This document contains various information regarding usage
+of libosmscout for/under Android using the Qt backend
+as part of Qt applications under Android.
+
+Installation of the Android development environment under Arch Linux
+====================================================================
+
+Instructions are for compiling under x86_64 Arch Linux.
+
+* Activate multilib, see https://wiki.archlinux.org/index.php/multilib
+  and https://wiki.archlinux.org/index.php/Arch64_FAQ
+* Install the Android AUR packages:
+  https://wiki.archlinux.org/index.php/android
+* I did not install any platforms at this point, since the
+  android-qt5 package will install relevant AUR packages (platform
+  versions 10, 11, 16) anyway.
+* Install the normal Qt development environment and also the package
+  android-qt5. Make sure that the Qt versions match. This will also
+  pull in the android-ndk package.
+* set environment variable ANDROID_NDK_ROOT, the variable should point
+  to the root of the NDK.
+  (in case of arch linux: /opt/android-ndk)
+* Because we want to use the C++ compiler together with the stl, we
+  need to create a standalone toolchain. For this call using root
+  rights:
+
+  make-standalone-toolchain.sh \
+    --verbose \
+    --toolchain=arm-linux-androideabi-4.8 \
+    --system=linux-X86_64 \
+    --install-dir=/home/tim/projects/arm-linux-androideabi-4.8
+
+  The install directory of course could be places somewhere else
+
+* set environment variable ANDROID_SYSROOT, the variable should point
+  to the to be used platform tools sysroot directory.
+  (/home/tim/projects/arm-linux-androideabi-4.8/sysroot im my case).
+
+Cross compilation of libosmscout, libosmscout-map and libosmscout-map-qt
+========================================================================
+
+The Android SDK/NDK supports various toolschains for various platforms,
+in the following examples we target arm-linux-androideabi, which is used by
+most modern Android mobiles. We also target API level 16, which corresponds
+to Android 4.1.2 - things however should work similar for other platforms
+and API versions.
+
+* extend the path to contain bin directory of your toolchain
+  (/home/tim/projects/arm-linux-androideabi-4.8/bin)
+* set a number of environment variables to point to the
+  corresponding files in the toolchain directory:
+
+  export CPP=arm-linux-androideabi-cpp
+  export CC=arm-linux-androideabi-gcc
+  export CXX=arm-linux-androideabi-g++
+  export LD=arm-linux-androideabi-ld
+
+  export CPPFLAGS="--sysroot=$ANDROID_SYSROOT -march=armv7-a -mfloat-abi=softfp -mfpu=vfp"
+  export CFLAGS="--sysroot=$ANDROID_SYSROOT -march=armv7-a -mfloat-abi=softfp -mfpu=vfp"
+  export CXXFLAGS="--sysroot=$ANDROID_SYSROOT -march=armv7-a -mfloat-abi=softfp -mfpu=vfp"
+
+  export PKG_CONFIG_LIBDIR=$ANDROID_SYSROOT/lib
+
+  Note that I'm not sure regarding the correct directory for
+  PKG_CONFIG_LIBDIR. However in this example it was just important
+  that it did not find the libraries on the host.
+
+  Note that PKG_CONFIG_SYSROOT_DIR should possibly also have been
+  set, but in this case this would force us to install libosmscout
+  for its headers to be found because all paths in the *.pc would be
+  prefixed with the variable content.
+
+  Note that PKG_CONFIG_PATH should point to the various used libosmscout-*
+  directories and to the directory of the Android-Qt package containing
+  the *.pc files
+  (under arch linux: /opt/android-qt5/5.3.0/lib/pkgconfig/)
+
+* Now configure and compile the libraries using:
+  ./configure --host=arm-linux-androideabi --with-sysroot=$ANDROID_SYSROOT
+
+  Note that the pkg-config tool used is that from the build system, so
+  availability of libs detected via pkg-config is not based on the host
+  (target) system but on the build system.
+* Under Android qmake ignores pkg-config calls (it assumes that evaluating
+  pkg-config does not make sense while cross compiling). You have to ensure
+  that pkg-config is used (and the libosmscout libraries found) by adding
+
+  QT_CONFIG -= no-pkg-config
+
+  to the OSMScout2 project file.
+* Goto the OSMScout2 directory and call the qmake from the Android-Qt5 package
+  to generate a makefile.
+  (under arch linux: /opt/android-qt5/5.3.0/bin/qmake)
