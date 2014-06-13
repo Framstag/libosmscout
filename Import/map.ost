@@ -351,6 +351,8 @@ TYPES
   TYPE place_county = NODE AREA ("place"=="county")
 
   // Do not delete the following types, they are required by the GenCityStreet import step
+  TYPE place_millioncity = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000) OPTIONS INDEX_REGION
+  TYPE place_bigcity = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">100000) OPTIONS INDEX_REGION
   TYPE place_city = NODE AREA ("place"=="city") OPTIONS INDEX_REGION
   TYPE place_town = NODE AREA ("place"=="town") OPTIONS INDEX_REGION
   TYPE place_village = NODE AREA ("place"=="village") OPTIONS INDEX_REGION

@@ -133,8 +133,12 @@ std::string Destring(const char* str)
 	void TAGBOOLCOND(TagCondition*& condition);
 	void TAGBINCOND(TagCondition*& condition);
 	void TAGEXISTSCOND(TagCondition*& condition);
+	void TAGLESSCOND(const std::string& tagName,TagCondition*& condition);
+	void TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& condition);
 	void TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition);
 	void TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& condition);
+	void TAGGREATERCOND(const std::string& tagName,TagCondition*& condition);
+	void TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condition);
 	void TAGISINCOND(const std::string& tagName,TagCondition*& condition);
 	void TYPEKIND(unsigned char& types);
 	void TYPEOPTION(TypeInfo& typeInfo);

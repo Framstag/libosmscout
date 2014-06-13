@@ -190,36 +190,154 @@ PRODUCTIONS
                 .)
                 string (. nameValue=Destring(t->val); .)
                 (
-                  TAGEQUALSCOND<nameValue,condition>
+                  TAGLESSCOND<nameValue,condition>
+                | TAGLESSEQUALCOND<nameValue,condition>
+                | TAGEQUALSCOND<nameValue,condition>
                 | TAGNOTEQUALSCOND<nameValue,condition>
+                | TAGGREATERCOND<nameValue,condition>
+                | TAGGREATEREQUALCOND<nameValue,condition>
                 | TAGISINCOND<nameValue,condition>
+                )
+                .
+
+  TAGLESSCOND<const std::string& tagName,TagCondition*& condition>
+              = (.
+                  std::string stringValue;
+                  size_t      sizeValue;
+                .)
+                "<"
+                (
+                  STRING<stringValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorLess,stringValue);
+                  .)
+                |
+                  UINT<sizeValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
+                  .)
+                )
+                .
+
+  TAGLESSEQUALCOND<const std::string& tagName,TagCondition*& condition>
+              = (.
+                  std::string stringValue;
+                  size_t      sizeValue;
+                .)
+                "<="
+                (
+                  STRING<stringValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorLessEqual,stringValue);
+                  .)
+                |
+                  UINT<sizeValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
+                  .)
                 )
                 .
 
   TAGEQUALSCOND<const std::string& tagName,TagCondition*& condition>
               = (.
-                  std::string valueValue;
+                  std::string stringValue;
+                  size_t      sizeValue;
                 .)
                 "=="
-                string (. valueValue=Destring(t->val); .)
-                (.
-                  TagId tagId=config.RegisterTagForInternalUse(tagName);
+                (
+                  STRING<stringValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
 
-                  condition=new TagBinaryCondition(tagId,operatorEqual,valueValue);
-                .)
+                    condition=new TagBinaryCondition(tagId,operatorEqual,stringValue);
+                  .)
+                |
+                  UINT<sizeValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
+                  .)
+                )
                 .
+
   TAGNOTEQUALSCOND<const std::string& tagName,TagCondition*& condition>
               = (.
-                  std::string valueValue;
+                  std::string stringValue;
+                  size_t      sizeValue;
                 .)
                 "!="
-                string (. valueValue=Destring(t->val); .)
-                (.
-                  TagId tagId=config.RegisterTagForInternalUse(tagName);
+                (
+                  STRING<stringValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
 
-                  condition=new TagBinaryCondition(tagId,operatorNotEqual,valueValue);
-                .)
+                    condition=new TagBinaryCondition(tagId,operatorNotEqual,stringValue);
+                  .)
+                |
+                  UINT<sizeValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
+                  .)
+                )
                 .
+
+  TAGGREATEREQUALCOND<const std::string& tagName,TagCondition*& condition>
+              = (.
+                  std::string stringValue;
+                  size_t      sizeValue;
+                .)
+                ">="
+                (
+                  STRING<stringValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorGreaterEqual,stringValue);
+                  .)
+                |
+                  UINT<sizeValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
+                  .)
+                )
+                .
+
+  TAGGREATERCOND<const std::string& tagName,TagCondition*& condition>
+              = (.
+                  std::string stringValue;
+                  size_t      sizeValue;
+                .)
+                ">"
+                (
+                  STRING<stringValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorGreater,stringValue);
+                  .)
+                |
+                  UINT<sizeValue>
+                  (.
+                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                    condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
+                  .)
+                )
+                .
+
   TAGISINCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                  std::list<std::string> values;
@@ -251,6 +369,7 @@ PRODUCTIONS
                   }
                 .)
                 .
+
   TAGEXISTSCOND<TagCondition*& condition>
               = "EXISTS"
                  string

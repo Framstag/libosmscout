@@ -19,6 +19,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/String.h>
+
 #include <osmscout/system/Assert.h>
 
 #include <iostream>
@@ -97,7 +99,20 @@ namespace osmscout {
                                          const std::string& tagValue)
   : tag(tag),
     binaryOperator(binaryOperator),
-    tagValue(tagValue)
+    valueType(string),
+    tagStringValue(tagValue),
+    tagSizeValue(0)
+  {
+    // no code
+  }
+
+  TagBinaryCondition::TagBinaryCondition(TagId tag,
+                                         BinaryOperator binaryOperator,
+                                         const size_t& tagValue)
+  : tag(tag),
+    binaryOperator(binaryOperator),
+    valueType(sizet),
+    tagSizeValue(tagValue)
   {
     // no code
   }
@@ -108,18 +123,58 @@ namespace osmscout {
 
     t=tagMap.find(tag);
 
-    switch (binaryOperator) {
-    case  operatorEqual:
-      if (t==tagMap.end()) {
+    if (t==tagMap.end()) {
+      return false;
+    }
+
+    if (valueType==string) {
+      switch (binaryOperator) {
+      case  operatorLess:
+        return t->second<tagStringValue;
+      case  operatorLessEqual:
+        return t->second<=tagStringValue;
+      case  operatorEqual:
+        return t->second==tagStringValue;
+      case operatorNotEqual:
+        return t->second!=tagStringValue;
+      case operatorGreaterEqual:
+        return t->second>=tagStringValue;
+      case  operatorGreater:
+        return t->second>tagStringValue;
+      default:
+        assert(false);
+
         return false;
       }
-      return t->second==tagValue;
-    case operatorNotEqual:
-      if (t==tagMap.end()) {
-        return true;
+    }
+    else if (valueType==sizet) {
+      size_t value;
+
+      if (!StringToNumber(t->second,
+                          value)) {
+        return false;
       }
-      return t->second!=tagValue;
-    default:
+
+      switch (binaryOperator) {
+      case  operatorLess:
+        return value<tagSizeValue;
+      case  operatorLessEqual:
+        return value<=tagSizeValue;
+      case  operatorEqual:
+        return value==tagSizeValue;
+      case operatorNotEqual:
+        return value!=tagSizeValue;
+      case operatorGreaterEqual:
+        return value>=tagSizeValue;
+      case  operatorGreater:
+        return value>tagSizeValue;
+      default:
+        assert(false);
+
+        return false;
+      }
+    }
+    else {
       assert(false);
 
       return false;

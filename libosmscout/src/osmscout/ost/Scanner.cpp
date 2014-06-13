@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 45;
-	noSym = 45;
+	maxT = 49;
+	noSym = 49;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -158,13 +158,15 @@ void Scanner::Init() {
 	start.set(34, 3);
 	start.set(123, 7);
 	start.set(125, 8);
-	start.set(61, 16);
+	start.set(61, 18);
 	start.set(40, 9);
 	start.set(41, 10);
-	start.set(33, 17);
-	start.set(91, 13);
-	start.set(44, 14);
-	start.set(93, 15);
+	start.set(33, 19);
+	start.set(60, 20);
+	start.set(62, 21);
+	start.set(91, 15);
+	start.set(44, 16);
+	start.set(93, 17);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OST", 4);
 	keywords.set("END", 5);
@@ -178,24 +180,24 @@ void Scanner::Init() {
 	keywords.set("TAGS", 18);
 	keywords.set("TAG", 19);
 	keywords.set("AND", 20);
-	keywords.set("IN", 24);
-	keywords.set("EXISTS", 28);
-	keywords.set("NODE", 29);
-	keywords.set("WAY", 30);
-	keywords.set("AREA", 31);
-	keywords.set("RELATION", 32);
-	keywords.set("INDEX_LOC", 33);
-	keywords.set("INDEX_REGION", 34);
-	keywords.set("INDEX_POI", 35);
-	keywords.set("OPTIMIZE_LOW_ZOOM", 36);
-	keywords.set("IGNORE", 37);
-	keywords.set("MULTIPOLYGON", 38);
-	keywords.set("PIN_WAY", 39);
-	keywords.set("IGNORESEALAND", 40);
-	keywords.set("ROUTE", 41);
-	keywords.set("FOOT", 42);
-	keywords.set("BICYCLE", 43);
-	keywords.set("CAR", 44);
+	keywords.set("IN", 28);
+	keywords.set("EXISTS", 32);
+	keywords.set("NODE", 33);
+	keywords.set("WAY", 34);
+	keywords.set("AREA", 35);
+	keywords.set("RELATION", 36);
+	keywords.set("INDEX_LOC", 37);
+	keywords.set("INDEX_REGION", 38);
+	keywords.set("INDEX_POI", 39);
+	keywords.set("OPTIMIZE_LOW_ZOOM", 40);
+	keywords.set("IGNORE", 41);
+	keywords.set("MULTIPOLYGON", 42);
+	keywords.set("PIN_WAY", 43);
+	keywords.set("IGNORESEALAND", 44);
+	keywords.set("ROUTE", 45);
+	keywords.set("FOOT", 46);
+	keywords.set("BICYCLE", 47);
+	keywords.set("CAR", 48);
 
 
   tvalLength = 128;
@@ -383,24 +385,38 @@ Token* Scanner::NextToken() {
 			{t->kind = 15; break;}
 		case 11:
 			case_11:
-			{t->kind = 22; break;}
+			{t->kind = 23; break;}
 		case 12:
 			case_12:
-			{t->kind = 23; break;}
+			{t->kind = 24; break;}
 		case 13:
+			case_13:
 			{t->kind = 25; break;}
 		case 14:
+			case_14:
 			{t->kind = 26; break;}
 		case 15:
-			{t->kind = 27; break;}
+			{t->kind = 29; break;}
 		case 16:
-			recEnd = pos; recKind = 13;
-			if (ch == '=') {AddCh(); goto case_11;}
-			else {t->kind = 13; break;}
+			{t->kind = 30; break;}
 		case 17:
-			recEnd = pos; recKind = 21;
+			{t->kind = 31; break;}
+		case 18:
+			recEnd = pos; recKind = 13;
 			if (ch == '=') {AddCh(); goto case_12;}
+			else {t->kind = 13; break;}
+		case 19:
+			recEnd = pos; recKind = 21;
+			if (ch == '=') {AddCh(); goto case_13;}
 			else {t->kind = 21; break;}
+		case 20:
+			recEnd = pos; recKind = 22;
+			if (ch == '=') {AddCh(); goto case_11;}
+			else {t->kind = 22; break;}
+		case 21:
+			recEnd = pos; recKind = 27;
+			if (ch == '=') {AddCh(); goto case_14;}
+			else {t->kind = 27; break;}
 
   }
   AppendVal(t);

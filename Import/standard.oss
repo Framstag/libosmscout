@@ -227,12 +227,14 @@ CONST
   UINT labelPrioState               = 3;
   UINT labelPrioRegion              = 4;
   UINT labelPrioCounty              = 5;
-  UINT labelPrioCity                = 6;
-  UINT labelPrioTown                = 7;
-  UINT labelPrioVillage             = 8;
-  UINT labelPrioHamlet              = 9;
-  UINT labelPrioSuburb              = 10;
-  UINT labelPrioLocality            = 11;
+  UINT labelPrioMillionCity         = 6;
+  UINT labelPrioBigCity             = 7;
+  UINT labelPrioCity                = 8;
+  UINT labelPrioTown                = 9;
+  UINT labelPrioVillage             = 10;
+  UINT labelPrioHamlet              = 11;
+  UINT labelPrioSuburb              = 12;
+  UINT labelPrioLocality            = 13;
 
   UINT labelPrioNatural             = 20;
   UINT labelPrioLanduse             = 25;
@@ -1143,7 +1145,7 @@ SYMBOL speed_camera
          leisure_ice_rink] AREA { color: #b5d6f1; }
  }
 
- [MAG proximity-] {
+ [MAG cityOver-] {
    // Semiransparent overlay
    [TYPE leisure_nature_reserve] AREA { color: #abde9622; borderColor: #abde96; borderWidth: 0.2mm;}
 
@@ -1297,7 +1299,7 @@ SYMBOL speed_camera
 
   // Labels
 
- [MAG proximity-] {
+ [MAG cityOver-] {
    [TYPE leisure_nature_reserve] AREA.TEXT { label: name; priority: @labelPrioNatural; }
  }
 
@@ -1450,11 +1452,20 @@ SYMBOL speed_camera
  }
 
  [MAG stateOver-city] {
-   [TYPE place_city] NODE.TEXT {label: name; style: emphasize; size: 1.3; scaleMag: county; priority: @labelPrioCity;}
+   [TYPE place_millioncity] NODE.TEXT {label: name; style: emphasize; size: 1.5; priority: @labelPrioMillionCity;}
+   [TYPE place_bigcity] NODE.TEXT {label: name; style: emphasize; size: 1.4; priority: @labelPrioBigCity;}
  }
 
+
+ [MAG proximity-city] {
+   [TYPE place_millioncity] NODE.TEXT {size: 1.0; scaleMag: county;}
+   [TYPE place_bigcity] NODE.TEXT {size: 1.0; scaleMag: county;}
+ }
+
+
  [MAG region-city] {
-   [TYPE place_town] NODE.TEXT {label: name; style: emphasize; size: 1.2; scaleMag: region; priority: @labelPrioTown;}
+   [TYPE place_city] NODE.TEXT {label: name; style: emphasize; size: 1.35; scaleMag: region; priority: @labelPrioCity;}
+   [TYPE place_town] NODE.TEXT {label: name; style: emphasize; size: 1.3; scaleMag: region; priority: @labelPrioTown;}
  }
 
  [MAG region-veryClose] {

@@ -139,14 +139,25 @@ namespace osmscout {
   class OSMSCOUT_API TagBinaryCondition : public TagCondition
   {
   private:
+    enum ValueType {
+      string,
+      sizet
+    };
+
+  private:
     TagId          tag;
     BinaryOperator binaryOperator;
-    std::string    tagValue;
+    ValueType      valueType;
+    std::string    tagStringValue;
+    size_t         tagSizeValue;
 
   public:
     TagBinaryCondition(TagId tag,
                        BinaryOperator binaryOperator,
                        const std::string& tagValue);
+    TagBinaryCondition(TagId tag,
+                       BinaryOperator binaryOperator,
+                       const size_t& tagValue);
 
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
