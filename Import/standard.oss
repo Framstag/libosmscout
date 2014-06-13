@@ -1462,10 +1462,13 @@ SYMBOL speed_camera
    [TYPE place_bigcity] NODE.TEXT {size: 1.0; scaleMag: county;}
  }
 
-
  [MAG region-city] {
-   [TYPE place_city] NODE.TEXT {label: name; style: emphasize; size: 1.35; scaleMag: region; priority: @labelPrioCity;}
-   [TYPE place_town] NODE.TEXT {label: name; style: emphasize; size: 1.3; scaleMag: region; priority: @labelPrioTown;}
+   [TYPE place_city] NODE.TEXT {label: name; style: emphasize; size: 1.35; priority: @labelPrioCity;}
+   [TYPE place_town] NODE.TEXT {label: name; style: emphasize; size: 1.3; priority: @labelPrioTown;}
+ }
+
+ [MAG proximity-city] {
+   [TYPE place_city] NODE.TEXT {scaleMag: region;}
  }
 
  [MAG region-veryClose] {
@@ -1477,14 +1480,20 @@ SYMBOL speed_camera
  }
 
  [MAG cityOver-veryClose] {
-   [TYPE place_village] NODE.TEXT {label: name; style: emphasize; size: 1.2; scaleMag: suburb; priority: @labelPrioVillage;}
+   [TYPE place_village] NODE.TEXT {label: name; style: emphasize; size: 1.2; priority: @labelPrioVillage;}
  }
 
  [MAG city-veryClose] {
-   [TYPE place_hamlet] NODE.TEXT {label: name; style: emphasize; size: 1.0; scaleMag: city; priority: @labelPrioHamlet;}
+   [TYPE place_town] NODE.TEXT {scaleMag: region;}
+   [TYPE place_hamlet] NODE.TEXT {label: name; style: emphasize; size: 1.0; priority: @labelPrioHamlet;}
+ }
+
+ [MAG suburb-suburb] {
+   [TYPE place_village] NODE.TEXT {scaleMag: suburb;}
  }
 
  [MAG cityOver-veryClose] {
+   [TYPE place_hamlet] NODE.TEXT {scaleMag: city;}
    [TYPE place_suburb] NODE.TEXT {label: name; style: emphasize; size: 1.3; scaleMag: city; priority: @labelPrioSuburb;}
  }
 
