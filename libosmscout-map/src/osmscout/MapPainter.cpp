@@ -273,15 +273,14 @@ namespace osmscout {
       const TextStyle* textStyle=dynamic_cast<const TextStyle*>(&style);
 
       // Calculate effective font size and alpha value
-      if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag()) {
-        if (parameter.GetDrawFadings()) {
-          double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
-          fontSize=fontSize*pow(2,factor);
-          alpha=alpha/factor;
+      if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
+          parameter.GetDrawFadings()) {
+        double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
+        fontSize=fontSize*pow(1.5,factor);
+        alpha=alpha/factor;
 
-          if (alpha>1.0) {
-            alpha=1.0;
-          }
+        if (alpha>1.0) {
+          alpha=1.0;
         }
       }
     }
