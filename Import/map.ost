@@ -522,4 +522,11 @@ TYPES
   TYPE group_any = RELATION ("type"=="group") OPTIONS IGNORE
   TYPE set_any = RELATION ("type"=="set") OPTIONS IGNORE
   TYPE compound_any = RELATION ("type"=="compound") OPTIONS IGNORE
+
+/*
+  // Example for globally passing through additional tags to the tag vector of all objects
+
+TAGS
+  TAG "bla"
+  */
 END
