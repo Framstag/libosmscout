@@ -107,7 +107,7 @@ MapDialog {
                         showCoordinates(numberLat, numberLon)
                     }
 
-                    dialog.destroy()
+                    close()
                 }
             }
         }

@@ -44,7 +44,7 @@ MapDialog {
                     showLocation(location)
                 }
 
-                dialog.destroy()
+                close()
             }
         }
     }
