@@ -73,12 +73,10 @@ bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService
   return true;
 }
 
-std::string GetAdminRegionLabel(const osmscout::LocationServiceRef& locationService,
-                                std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
-                                const osmscout::LocationSearchResult::Entry& entry)
+std::string GetAdminRegion(const osmscout::LocationServiceRef& locationService,
+                           const osmscout::LocationSearchResult::Entry& entry)
 {
   std::string label;
-  std::string path;
 
 
   if (entry.adminRegionMatchQuality==osmscout::LocationSearchResult::match) {
@@ -95,6 +93,15 @@ std::string GetAdminRegionLabel(const osmscout::LocationServiceRef& locationServ
     label.append(entry.adminRegion->name);
   }
 
+  return label;
+}
+
+std::string GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
+                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
+                                    const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string path;
+
   if (!GetAdminRegionHierachie(locationService,
                                entry.adminRegion,
                                adminRegionMap,
@@ -102,13 +109,7 @@ std::string GetAdminRegionLabel(const osmscout::LocationServiceRef& locationServ
     return "";
   }
 
-  if (!path.empty()) {
-    label.append(" (");
-    label.append(path);
-    label.append(")");
-  }
-
-  return label;
+  return path;
 }
 
 int main(int argc, char* argv[])
@@ -183,13 +184,14 @@ int main(int argc, char* argv[])
         std::cout << " ~ ";
       }
 
-      std::cout << entry->address->name;
+      std::cout << entry->address->name << " " << GetAdminRegion(locationService,*entry) << std::endl;
 
-      std::cout << " " << GetAdminRegionLabel(locationService,
-                                              adminRegionMap,
-                                              *entry);
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      adminRegionMap,
+                                                      *entry);
+      std::cout << std::endl;
 
-      std::cout << " " << entry->address->object.GetTypeName() << " " << entry->address->object.GetFileOffset();
+      std::cout << "   - " << entry->address->object.GetTypeName() << " " << entry->address->object.GetFileOffset();
 
       std::cout << std::endl;
     }
@@ -202,11 +204,11 @@ int main(int argc, char* argv[])
         std::cout << " ~ ";
       }
 
-      std::cout << entry->location->name;
+      std::cout << entry->location->name << " " << GetAdminRegion(locationService,*entry) << std::endl;
 
-      std::cout << " " << GetAdminRegionLabel(locationService,
-                                              adminRegionMap,
-                                              *entry);
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      adminRegionMap,
+                                                      *entry);
 
       std::cout << std::endl;
 
@@ -225,26 +227,32 @@ int main(int argc, char* argv[])
         std::cout << " ~ ";
       }
 
-      std::cout << entry->poi->name;
+      std::cout << entry->poi->name << " " << GetAdminRegion(locationService,*entry) << std::endl;
 
-      std::cout << " " << GetAdminRegionLabel(locationService,
-                                              adminRegionMap,
-                                              *entry);
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      adminRegionMap,
+                                                      *entry);
 
-      std::cout << " " << entry->poi->object.GetTypeName() << " " << entry->poi->object.GetFileOffset();
+      std::cout << std::endl;
+
+      std::cout << "   - " << entry->poi->object.GetTypeName() << " " << entry->poi->object.GetFileOffset();
 
       std::cout << std::endl;
     }
     else if (entry->adminRegion.Valid()) {
-      std::cout << " " << GetAdminRegionLabel(locationService,
-                                              adminRegionMap,
-                                              *entry);
+      std::cout << GetAdminRegion(locationService,*entry) << std::endl;
+
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      adminRegionMap,
+                                                      *entry);
+
+      std::cout << std::endl;
 
       if (entry->adminRegion->aliasObject.Valid()) {
-        std::cout << " " << entry->adminRegion->aliasObject.GetTypeName() << " " << entry->adminRegion->aliasObject.GetFileOffset();
+        std::cout << "   - " << entry->adminRegion->aliasObject.GetTypeName() << " " << entry->adminRegion->aliasObject.GetFileOffset();
       }
       else {
-        std::cout << " " << entry->adminRegion->object.GetTypeName() << " " << entry->adminRegion->object.GetFileOffset();
+        std::cout << "   - " << entry->adminRegion->object.GetTypeName() << " " << entry->adminRegion->object.GetFileOffset();
       }
 
       std::cout << std::endl;
