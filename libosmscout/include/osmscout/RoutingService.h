@@ -271,6 +271,12 @@ namespace osmscout {
                         const ObjectFileRef& targetObject,
                         size_t targetNodeIndex,
                         RouteData& route);
+      
+    bool CalculateRoute(const RoutingProfile& profile,
+                        Vehicle vehicle,
+                        double radius,
+                        std::vector<osmscout::GeoCoord> via,
+                        std::vector<RouteData>& route);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);

@@ -27,6 +27,10 @@
 
 #include <osmscout/private/Math.h>
 
+#if ! __has_feature(objc_arc)
+#error This file must be compiled with ARC. Either turn on ARC for the project or use -fobjc-arc flag
+#endif
+
 namespace osmscout {
         
     MapPainterIOS::MapPainterIOS()
@@ -132,7 +136,6 @@ namespace osmscout {
                 CGImageRef imgRef= [image CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
-                [image release];
                 if (idx>=images.size()) {
                     images.resize(idx+1, NULL);
                 }
@@ -207,7 +210,6 @@ namespace osmscout {
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
-                [image release];
                 patternImages.resize(patternImages.size()+1,imgRef);
                 style.SetPatternId(patternImages.size());
                 //std::cout << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId() << std::endl;
@@ -498,39 +500,32 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd){
         Font *font = GetFont(parameter,style.GetSize());
-        double pathLen = pathLength(transStart, transEnd);
-        double textLen = textLength(parameter,style.GetSize()*ConvertWidthToPixel(parameter,parameter.GetFontSize()),text)+MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN*2;
-        if (textLen > pathLen) {
+        Vertex2D charOrigin;
+        FollowPathHandle followPathHnd;
+        followPathInit(followPathHnd, charOrigin, transStart, transEnd, false, false);
+        if(!followPath(followPathHnd, MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN, charOrigin)){
             return;
         }
-        
+
         CGContextSaveGState(cg);
 #if TARGET_OS_IPHONE
         CGContextSetTextDrawingMode(cg, kCGTextFill);
         CGContextSetLineWidth(cg, 1.0);
         CGContextSetRGBFillColor(cg, style.GetTextColor().GetR(), style.GetTextColor().GetG(), style.GetTextColor().GetB(), style.GetTextColor().GetA());
         CGContextSetRGBStrokeColor(cg, 1, 1, 1, 1);
-#if __has_feature(objc_arc)
         CGContextSetFont(cg, (__bridge CGFontRef)font);
-#else
-        CGContextSetFont(cg, (CGFontRef)font);
-#endif
 #else
         NSColor *color = [NSColor colorWithSRGBRed:style.GetTextColor().GetR() green:style.GetTextColor().GetG() blue:style.GetTextColor().GetB() alpha:style.GetTextColor().GetA()];
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #endif
-        CGAffineTransform ct;
+
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-        Vertex2D charOrigin;
-        double x1,y1,x2,y2,slope;
-        FollowPathHandle followPathHnd;
-        followPathInit(followPathHnd, charOrigin, transStart, transEnd, false, false);
-        if(!followPath(followPathHnd, MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN, charOrigin)){
-            CGContextRestoreGState(cg);
-            return;
-        }
+                double x1,y1,x2,y2,slope;
+        NSUInteger charsCount = [nsText length];
+        Vertex2D *coords = new Vertex2D[charsCount];
+        double *slopes = new double[charsCount];
         double nww,nhh,xOff,yOff;
-        for(int i=0;i<[nsText length];i++) {
+        for(int i=0;i<charsCount;i++) {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
@@ -538,30 +533,35 @@ namespace osmscout {
             x1 = charOrigin.GetX();
             y1 = charOrigin.GetY();
             if(!followPath(followPathHnd,nww, charOrigin)){
-                CGContextRestoreGState(cg);
-                return;
+                goto exit;
             }
             x2 = charOrigin.GetX();
             y2 = charOrigin.GetY();
-            //std::cout << " CHARACTER " << [str UTF8String] << " placed at " << charOrigin.x << "," << charOrigin.y << " slope "<< charOrigin.slope << std::endl;
-            
-            CGContextSaveGState(cg);
             slope = atan2(y2-y1, x2-x1);
-            CGContextTranslateCTM(cg, x1, y1);
-            ct = CGAffineTransformMakeRotation(slope);
-            CGContextConcatCTM(cg, ct);
+            coords[i].Set(x1, y1);
+            slopes[i] = slope;
             
+            if(!followPath(followPathHnd, 2, charOrigin)){
+                goto exit;
+            }
+        }
+        CGAffineTransform ct;
+        for(int i=0;i<charsCount;i++) {
+            NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
+            CGContextSaveGState(cg);
+            CGContextTranslateCTM(cg, coords[i].GetX(),coords[i].GetY());
+            ct = CGAffineTransformMakeRotation(slopes[i]);
+            CGContextConcatCTM(cg, ct);
 #if TARGET_OS_IPHONE
             [str drawAtPoint:CGPointMake(0,-nhh/2) withFont:font];
 #else
             [str drawAtPoint:CGPointMake(0,-nhh/2) withAttributes:attrsDictionary];
 #endif
             CGContextRestoreGState(cg);
-            if(!followPath(followPathHnd, 2, charOrigin)){
-                CGContextRestoreGState(cg);
-                return;
-            }
         }
+    exit:
+        delete coords;
+        delete slopes;
         CGContextRestoreGState(cg);
     }
 

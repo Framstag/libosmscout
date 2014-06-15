@@ -56,6 +56,8 @@ namespace osmscout
     typedef OSMSCOUT_HASHMAP<std::string,std::vector<ObjectFileRef> > ResultsMap;
 
     TextSearchIndex();
+      
+    ~TextSearchIndex();
 
     bool Load(const std::string &path);
 

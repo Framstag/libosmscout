@@ -883,6 +883,57 @@ namespace osmscout {
       return false;
     }
   }
+  
+  /**
+   * Calculate a route
+   *
+   * @param profile
+   *    Profile to use
+   * @param route
+   *    The route object holding the resulting route on success
+   * @return
+   *    True, if the engine was able to find a route, else false
+   */
+
+  bool RoutingService::CalculateRoute(const RoutingProfile& profile,
+                                      Vehicle vehicle,
+                                      double radius,
+                                      std::vector<osmscout::GeoCoord> via,
+                                      std::vector<RouteData>& route)
+  {
+      std::vector<size_t> nodeIndexes;
+      std::vector<osmscout::ObjectFileRef> objects;
+      for (std::vector<osmscout::GeoCoord>::const_iterator etap=via.begin();
+           etap!=via.end();
+           ++etap) {
+          size_t                  targetNodeIndex;
+          osmscout::ObjectFileRef targetObject;
+          if (!GetClosestRoutableNode(etap->GetLat(),
+                                      etap->GetLon(),
+                                      vehicle,
+                                      radius,
+                                      targetObject,
+                                      targetNodeIndex)) {
+              return false;
+          }
+          nodeIndexes.push_back(targetNodeIndex);
+          objects.push_back(targetObject);
+      }
+      
+      for(int index = 0; index<nodeIndexes.size()-1; index++){
+          size_t                  fromNodeIndex = nodeIndexes.at(index);
+          osmscout::ObjectFileRef fromObject = objects.at(index);
+          size_t                  toNodeIndex = nodeIndexes.at(index + 1);
+          osmscout::ObjectFileRef toObject = objects.at(index + 1);
+          RouteData               *routePart = new RouteData;
+          if(!CalculateRoute(profile, fromObject, fromNodeIndex, toObject, toNodeIndex, *routePart)){
+              return false;
+          }
+          route.push_back(*routePart);
+          delete routePart;
+      }
+      return true;
+  }
 
   /**
    * Calculate a route

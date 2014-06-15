@@ -10,6 +10,17 @@ namespace osmscout
     // no code
   }
 
+  TextSearchIndex::~TextSearchIndex()
+  {
+    for(size_t i=0; i < tries.size(); i++) {
+      tries[i].isAvail=false;
+      if(tries[i].trie){
+        delete tries[i].trie;
+        tries[i].trie = 0;
+      }
+    }
+  }
+    
   bool TextSearchIndex::Load(const std::string& path)
   {
     std::string fixedPath=path;
