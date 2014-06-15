@@ -930,6 +930,7 @@ namespace osmscout {
               return false;
           }
           route.push_back(*routePart);
+          delete routePart;
       }
       return true;
   }
