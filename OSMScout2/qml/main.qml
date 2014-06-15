@@ -39,6 +39,15 @@ Rectangle {
         dialog.open()
     }
 
+    function openAboutDialog() {
+        var component = Qt.createComponent("AboutDialog.qml")
+        var dialog = component.createObject(mainWindow, {})
+
+        dialog.opened.connect(onDialogOpened)
+        dialog.closed.connect(onDialogClosed)
+        dialog.open()
+    }
+
     function showCoordinates(lat, lon) {
         map.showCoordinates(lat, lon)
     }
@@ -153,13 +162,23 @@ Rectangle {
                 openRoutingDialog()
             }
         }
+    }
+
+    Column {
+        id: info
+        anchors.left: parent.left
+        anchors.leftMargin: Theme.mapButtonSpace
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Theme.mapButtonSpace
+        spacing: Theme.mapButtonSpace
+
 
         MapButton {
-            id: settings
-            label: "*"
+            id: about
+            label: "?"
 
             onClicked: {
-                console.log("Show settings")
+                openAboutDialog()
             }
         }
     }
