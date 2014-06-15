@@ -49,5 +49,6 @@ OTHER_FILES += \
     qml/custom/LocationEdit.qml \
     qml/custom/ScrollIndicator.qml \
     qml/custom/MapDialog.qml \
-    qml/RoutingDialog.qml
+    qml/RoutingDialog.qml \
+    qml/AboutDialog.qml
 
