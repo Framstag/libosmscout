@@ -32,10 +32,12 @@ class Location : public QObject
 
 private:
     QString                        name;
+    QString                        label;
     QList<osmscout::ObjectFileRef> references;
 
 public:
     Location(const QString& name,
+             const QString& label,
              QObject* parent = 0);
 
     Location(QObject* parent = 0);
@@ -45,6 +47,7 @@ public:
     void addReference(const osmscout::ObjectFileRef reference);
 
     QString getName() const;
+    QString getLabel() const;
     const QList<osmscout::ObjectFileRef>& getReferences() const;
 };
 
@@ -61,7 +64,8 @@ private:
 
 public:
     enum Roles {
-        LabelRole = Qt::UserRole
+        LabelRole = Qt::UserRole,
+        TextRole = Qt::UserRole+1
     };
 
 public:
