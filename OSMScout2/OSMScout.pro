@@ -1,8 +1,11 @@
 TEMPLATE = app
 
+QT_CONFIG -= no-pkg-config
+
 CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
 
 QT += core gui widgets qml quick
+# positioning
 
 PKGCONFIG += libosmscout-map-qt
 

@@ -8,14 +8,17 @@ import "custom"
 MapDialog {
     id: dialog
 
+    fullscreen: true
     label: "Route..."
 
-    content :  ColumnLayout {
+    content : ColumnLayout {
         id: mainFrame
 
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+
         GridLayout {
-            anchors.left: parent.left;
-            anchors.right: parent.right;
+            Layout.fillWidth: true
 
             columns: 2
 
@@ -54,8 +57,7 @@ MapDialog {
 
         RowLayout {
             id: buttonRow
-            anchors.left: parent.left
-            anchors.right: parent.right
+            Layout.fillWidth: true
             spacing: 10
 
             Item {
@@ -90,12 +92,7 @@ MapDialog {
         }
 
         Rectangle {
-            height: 100
-            width: 100
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
+            Layout.fillWidth: true
             Layout.fillHeight: true
 
             border.color: "lightgrey"
@@ -114,15 +111,28 @@ MapDialog {
 
                 clip: true
 
-                delegate: Component {
-                    Item {
-                        height: text.implicitHeight+4
+                delegate: Item {
+                    id: item
 
-                        Text {
-                            id: text
-                            anchors.fill: parent
-                            text: label
-                        }
+                    anchors.right: parent.right;
+                    anchors.left: parent.left;
+                    height: text.implicitHeight+5
+
+                    Text {
+                        id: text
+
+                        y:2
+                        x: 2
+                        width: parent.width-4
+                        text: label
+                    }
+
+                    Rectangle {
+                        x: 2
+                        y: parent.height-2
+                        width: parent.width-4
+                        height: 1
+                        color: "lightgrey"
                     }
                 }
             }

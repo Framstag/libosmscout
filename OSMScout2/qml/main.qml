@@ -1,4 +1,5 @@
 import QtQuick 2.2
+//import QtPositioning 5.0
 
 import net.sf.libosmscout.map 1.0
 
@@ -57,6 +58,28 @@ Rectangle {
 
         map.focus = true
     }
+
+    /*
+    PositionSource {
+        id: position
+
+        active: true
+
+        onValidChanged: {
+            console.log("Positioning is " + position.valid)
+            console.log("Last error " + position.sourceError)
+
+            for (var m in supportedPositioningMethods) {
+                console.log("Method " + m)
+            }
+        }
+
+        onPositionChanged: {
+            var coord = src.position.coordinate
+
+            console.log("Coordinate:", coord.longitude, coord.latitude)
+        }
+    }*/
 
     Map {
         id: map
