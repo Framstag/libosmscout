@@ -218,15 +218,8 @@ LineEdit {
                     }
                }
 
-               highlight: Component {
-                   id: highlightBar
-
-                   Rectangle {
-                       height: locationEdit.height
-                       width: suggestionView.width
-
+               highlight: Rectangle {
                        color: "lightblue"
-                   }
                }
             }
 
