@@ -47,21 +47,10 @@ namespace osmscout {
 
   AdminRegionVisitor::Action LocationService::AdminRegionMatchVisitor::Visit(const AdminRegion& region)
   {
+    bool atLeastOneMatch=true;
+
     bool match;
     bool candidate;
-
-    Match(region.name,
-          match,
-          candidate);
-
-    if (match || candidate) {
-      AdminRegionResult result;
-
-      result.adminRegion=new AdminRegion(region);
-      result.isMatch=match;
-
-      results.push_back(result);
-    }
 
     for (size_t i=0; i<region.aliases.size(); i++) {
       Match(region.aliases[i].name,
@@ -79,7 +68,28 @@ namespace osmscout {
 
         results.push_back(result);
 
+        if (match) {
+          atLeastOneMatch=true;
+        }
+
         limitReached=results.size()>=limit;
+      }
+    }
+
+    // If we have a perfect match for an alias, we not not try to match
+    // the region name itself
+    if (!atLeastOneMatch) {
+      Match(region.name,
+            match,
+            candidate);
+
+      if (match || candidate) {
+        AdminRegionResult result;
+
+        result.adminRegion=new AdminRegion(region);
+        result.isMatch=match;
+
+        results.push_back(result);
       }
     }
 

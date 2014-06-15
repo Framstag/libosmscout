@@ -73,11 +73,57 @@ bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService
   return true;
 }
 
-std::string GetAdminRegion(const osmscout::LocationServiceRef& locationService,
-                           const osmscout::LocationSearchResult::Entry& entry)
+std::string GetAddress(const osmscout::LocationSearchResult::Entry& entry)
 {
   std::string label;
 
+  if (entry.addressMatchQuality==osmscout::LocationSearchResult::match) {
+    label="= ";
+  }
+  else {
+    label="~ ";
+  }
+
+  label+=entry.address->name;
+
+  return label;
+}
+
+std::string GetLocation(const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string label;
+
+  if (entry.locationMatchQuality==osmscout::LocationSearchResult::match) {
+    label="= ";
+  }
+  else {
+    label="~ ";
+  }
+
+  label+=entry.location->name;
+
+  return label;
+}
+
+std::string GetPOI(const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string label;
+
+  if (entry.poiMatchQuality==osmscout::LocationSearchResult::match) {
+    label="= ";
+  }
+  else {
+    label=" ~ ";
+  }
+
+  label+=entry.poi->name;
+
+  return label;
+}
+
+std::string GetAdminRegion(const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string label;
 
   if (entry.adminRegionMatchQuality==osmscout::LocationSearchResult::match) {
     label.append("= ");
@@ -91,6 +137,46 @@ std::string GetAdminRegion(const osmscout::LocationServiceRef& locationService,
   }
   else {
     label.append(entry.adminRegion->name);
+  }
+
+  return label;
+}
+
+std::string GetObject(const osmscout::Database& database,
+                      const osmscout::ObjectFileRef& object)
+{
+  std::string label;
+
+  label=object.GetTypeName();
+  label+=" ";
+  label+=osmscout::NumberToString(object.GetFileOffset());
+
+  if (object.GetType()==osmscout::RefType::refNode) {
+    osmscout::NodeRef node;
+
+    if (database.GetNodeByOffset(object.GetFileOffset(),
+                                 node)) {
+      label+=" ";
+      label+=database.GetTypeConfig()->GetTypeInfo(node->GetType()).GetName();
+    }
+  }
+  else if (object.GetType()==osmscout::RefType::refArea) {
+    osmscout::AreaRef area;
+
+    if (database.GetAreaByOffset(object.GetFileOffset(),
+                                 area)) {
+      label+=" ";
+      label+=database.GetTypeConfig()->GetTypeInfo(area->GetType()).GetName();
+    }
+  }
+  else if (object.GetType()==osmscout::RefType::refWay) {
+    osmscout::WayRef way;
+
+    if (database.GetWayByOffset(object.GetFileOffset(),
+                                way)) {
+      label+=" ";
+      label+=database.GetTypeConfig()->GetTypeInfo(way->GetType()).GetName();
+    }
   }
 
   return label;
@@ -168,43 +254,20 @@ int main(int argc, char* argv[])
     if (entry->adminRegion.Valid() &&
         entry->location.Valid() &&
         entry->address.Valid()) {
-      if (entry->locationMatchQuality==osmscout::LocationSearchResult::match) {
-        std::cout << " = ";
-      }
-      else {
-        std::cout << " ~ ";
-      }
-
-      std::cout << entry->location->name;
-
-      if (entry->addressMatchQuality==osmscout::LocationSearchResult::match) {
-        std::cout << " = ";
-      }
-      else {
-        std::cout << " ~ ";
-      }
-
-      std::cout << entry->address->name << " " << GetAdminRegion(locationService,*entry) << std::endl;
+      std::cout << GetLocation(*entry) << " " << GetAddress(*entry) << " " << GetAdminRegion(*entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
                                                       *entry);
       std::cout << std::endl;
 
-      std::cout << "   - " << entry->address->object.GetTypeName() << " " << entry->address->object.GetFileOffset();
+      std::cout << "   - " << GetObject(database,entry->address->object);
 
       std::cout << std::endl;
     }
     else if (entry->adminRegion.Valid() &&
              entry->location.Valid()) {
-      if (entry->locationMatchQuality==osmscout::LocationSearchResult::match) {
-        std::cout << " = ";
-      }
-      else {
-        std::cout << " ~ ";
-      }
-
-      std::cout << entry->location->name << " " << GetAdminRegion(locationService,*entry) << std::endl;
+      std::cout << GetLocation(*entry) << " " << GetAdminRegion(*entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
@@ -215,19 +278,12 @@ int main(int argc, char* argv[])
       for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry->location->objects.begin();
           object!=entry->location->objects.end();
           ++object) {
-        std::cout << "   - " << object->GetTypeName() << " " << object->GetFileOffset() << std::endl;
+        std::cout << "   - " << GetObject(database,*object) << std::endl;
       }
     }
     else if (entry->adminRegion.Valid() &&
              entry->poi.Valid()) {
-      if (entry->poiMatchQuality==osmscout::LocationSearchResult::match) {
-        std::cout << " = ";
-      }
-      else {
-        std::cout << " ~ ";
-      }
-
-      std::cout << entry->poi->name << " " << GetAdminRegion(locationService,*entry) << std::endl;
+      std::cout << GetPOI(*entry) << " " << GetAdminRegion(*entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
@@ -235,12 +291,12 @@ int main(int argc, char* argv[])
 
       std::cout << std::endl;
 
-      std::cout << "   - " << entry->poi->object.GetTypeName() << " " << entry->poi->object.GetFileOffset();
+      std::cout << "   - " << GetObject(database,entry->poi->object);
 
       std::cout << std::endl;
     }
     else if (entry->adminRegion.Valid()) {
-      std::cout << GetAdminRegion(locationService,*entry) << std::endl;
+      std::cout << GetAdminRegion(*entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
@@ -249,10 +305,10 @@ int main(int argc, char* argv[])
       std::cout << std::endl;
 
       if (entry->adminRegion->aliasObject.Valid()) {
-        std::cout << "   - " << entry->adminRegion->aliasObject.GetTypeName() << " " << entry->adminRegion->aliasObject.GetFileOffset();
+        std::cout << "   - " << GetObject(database,entry->adminRegion->aliasObject);
       }
       else {
-        std::cout << "   - " << entry->adminRegion->object.GetTypeName() << " " << entry->adminRegion->object.GetFileOffset();
+        std::cout << "   - " << GetObject(database,entry->adminRegion->object);
       }
 
       std::cout << std::endl;
