@@ -47,7 +47,7 @@ namespace osmscout {
 
   AdminRegionVisitor::Action LocationService::AdminRegionMatchVisitor::Visit(const AdminRegion& region)
   {
-    bool atLeastOneMatch=true;
+    bool atLeastOneMatch=false;
 
     bool match;
     bool candidate;
