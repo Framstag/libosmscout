@@ -46,8 +46,9 @@ namespace osmscout {
       magSuburb    =                 2*2*1024, // 12
       magDetail    =               2*2*2*1024, // 13
       magClose     =             2*2*2*2*1024, // 14
-      magVeryClose =           2*2*2*2*2*1024, // 16
-      magBlock     =         2*2*2*2*2*2*1024, // 18
+      magCloser    =           2*2*2*2*2*1024, // 15
+      magVeryClose =         2*2*2*2*2*2*1024, // 16
+      magBlock     =     2*2*2*2*2*2*2*2*1024, // 18
       magStreet    =   2*2*2*2*2*2*2*2*2*1024, // 19
       magHouse     = 2*2*2*2*2*2*2*2*2*2*1024  // 20
     };

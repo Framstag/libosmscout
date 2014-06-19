@@ -58,6 +58,7 @@ namespace osmscout {
     stringToMagMap[std::string("suburb")]=Magnification::magSuburb;
     stringToMagMap[std::string("detail")]=Magnification::magDetail;
     stringToMagMap[std::string("close")]=Magnification::magClose;
+    stringToMagMap[std::string("closer")]=Magnification::magCloser;
     stringToMagMap[std::string("veryClose")]=Magnification::magVeryClose;
     stringToMagMap[std::string("block")]=Magnification::magBlock;
     stringToMagMap[std::string("street")]=Magnification::magStreet;
