@@ -126,6 +126,8 @@ TYPES
   TYPE highway_roundabout = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE[FOOT BICYCLE CAR] PIN_WAY
   TYPE highway_motorway_junction = NODE ("highway"=="motorway_junction") OPTIONS ROUTE[CAR]
 
+  TYPE highway_street_lamp = NODE ("highway"=="street_lamp") OPTIONS IGNORE // To many for mobile?
+
   // Waterways and assorted
   TYPE waterway_stream = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE waterway_river = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
@@ -221,7 +223,7 @@ TYPES
   TYPE natural_scree = NODE AREA ("natural"=="scree")
   TYPE natural_scrub = NODE AREA ("natural"=="scrub")
   TYPE natural_spring = NODE ("natural"=="spring")
-  TYPE natural_tree = NODE ("natural"=="tree")
+  TYPE natural_tree = NODE ("natural"=="tree") OPTIONS IGNORE // To many for mobile?
   TYPE natural_volcano = NODE ("natural"=="volcano")
   TYPE natural_water = NODE AREA ("natural"=="water") OPTIONS IGNORESEALAND
   TYPE natural_wetland_marsh = NODE AREA ("natural"=="wetland" AND "wetland"=="marsh")
@@ -296,6 +298,7 @@ TYPES
 
   TYPE amenity_taxi = NODE AREA ("amenity"=="taxi")
   TYPE amenity_toilets = NODE ("amenity"=="toilets")
+  TYPE amenity_vending_machine = NODE ("amenity"=="vending_machine") OPTIONS IGNORE // To many for mobile?
 
   // Churches
   TYPE christian_church_building = AREA ("amenity"=="place_of_worship" AND
@@ -438,6 +441,8 @@ TYPES
 
   TYPE building_garage = AREA ("building"=="garage")
   TYPE building = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
+
+  TYPE address = NODE AREA (EXISTS "addr:street" AND EXISTS "addr:housenumber")
 
   TYPE speed_camera = NODE ("highway"=="speed_camera") OPTIONS IGNORE
 

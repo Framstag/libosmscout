@@ -208,10 +208,10 @@ OSS
   GROUP highway_steps, barrier_fence
 
 CONST
-  MAG stepsMag                     = block;
-  MAG labelPathsMag                = block;
-  MAG labelSpecialBuildingMag      = veryClose;
-  MAG labelBuildingMag             = block;
+  MAG stepsMag                     = veryClose;
+  MAG labelPathsMag                = veryClose;
+  MAG labelSpecialBuildingMag      = closer;
+  MAG labelBuildingMag             = veryClose;
 
 /*
   MAG stepsMag                     = veryClose;//block
@@ -524,7 +524,7 @@ SYMBOL speed_camera
    }
  }
 
- [MAG block-] {
+ [MAG veryClose-] {
    [TYPE waterway_stream,
          waterway_drain,
          waterway_river,
@@ -610,14 +610,6 @@ SYMBOL speed_camera
      }
      [SIZE 8m <0.1mm:3px] WAY { color: #888888; displayWidth: 0.1mm;}
    }
-
-   [TYPE railway_rail] {
-     [SIZE 5m 0.25mm:3px<] {
-       WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
-       WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
-     }
-     [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
-   }
  }
 
  [MAG city-] {
@@ -656,6 +648,14 @@ SYMBOL speed_camera
 
    [TYPE highway_services] AREA { color: #cb9999; }
 
+   [TYPE railway_rail] {
+     [SIZE 5m 0.25mm:3px<] {
+       WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
+       WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
+     }
+     [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
+   }
+
    [TYPE railway_station] AREA { color: @railwayStationColor; }
 
    [TYPE route_ferry] {
@@ -693,9 +693,6 @@ SYMBOL speed_camera
      WAY {color: #b3b3b3; width: 5m;}
    }
 
-   [TYPE railway_station] NODE.ICON { symbol: railway_station; }
-   [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
-
    [TYPE highway_construction] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
 
    [TYPE highway_pedestrian] {
@@ -714,11 +711,11 @@ SYMBOL speed_camera
 
    [TYPE highway_service] AREA { color: @roadColor; borderColor: @roadBColor; borderWidth: 0.1mm; }
    [TYPE highway_footway] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
-
-   [TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
  }
 
- [MAG 15-] {
+ [MAG closer-] {
+   [TYPE railway_station] NODE.ICON { symbol: railway_station; }
+ 
    [TYPE highway_motorway, highway_motorway_link SIZE 20m 0.45mm:3px<] {
      [TUNNEL] {
        WAY#outline { dash: 0.5,0.5; }
@@ -841,6 +838,10 @@ SYMBOL speed_camera
  }
 
  [MAG veryClose-] {
+   [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
+ 
+   [TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
+   
    [TYPE highway_track] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
      WAY {color: #90570c; dash: 3,1; cap: butt; displayWidth: 0.4mm;}
@@ -910,7 +911,7 @@ SYMBOL speed_camera
    }
   }
 
- [MAG block-] {
+ [MAG veryClose-] {
    [TYPE railway_halt] NODE.ICON { symbol: railway_halt;}
 
    [TYPE railway_tram_stop] NODE.ICON { symbol: railway_tram_stop;}
@@ -973,12 +974,10 @@ SYMBOL speed_camera
  }
 
  [MAG close-] {
-   [TYPE railway_station] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
-   [TYPE railway_halt] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayHalt;}
-   [TYPE railway_tram_stop] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt; }
    [TYPE highway_services] NODE.TEXT {label: name; priority: @labelPrioHighwayServices; }
-
    [TYPE highway_construction] WAY.TEXT { label: name;}
+
+   [TYPE railway_station] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
 
    [TYPE leisure_building,
          sport_building] AREA.TEXT { label: name; priority: @labelPrioSpecialBuilding; }
@@ -995,6 +994,10 @@ SYMBOL speed_camera
          leisure_track] WAY.TEXT { label: name; size: 0.9; }
 
    [TYPE highway_service] AREA.TEXT { label: name; priority: @labelPrioHighwayServices; }
+   
+   [TYPE railway_halt] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayHalt;}
+   [TYPE railway_tram_stop] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt; }
+   [TYPE highway_bus_stop] NODE.TEXT { label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt;}
  }
 
  [MAG @labelPathsMag-] {
@@ -1061,10 +1064,6 @@ SYMBOL speed_camera
    [TYPE landuse_reservoir] AREA { color: @waterColor; }
    [TYPE landuse_residential] AREA { color: @residentialColor; }
    [TYPE landuse_recreation_ground] AREA { color: @recreationColor; }
-
-   [TYPE landuse_orchard,
-         landuse_meadow,
-         landuse_village_green] AREA { color: #cfeca8; }
  }
 
  [MAG proximity-] {
@@ -1084,6 +1083,10 @@ SYMBOL speed_camera
 
  [MAG close-] {
    [TYPE landuse_grass] AREA { color: @grassColor; }
+   
+   [TYPE landuse_orchard,
+         landuse_meadow,
+         landuse_village_green] AREA { color: #cfeca8; }
 
    [TYPE landuse_farmyard_building] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
  }
@@ -1114,7 +1117,6 @@ SYMBOL speed_camera
          landuse_orchard,
          landuse_cemetery,
          landuse_meadow,
-         landuse_village_green,
          landuse_recreation_ground] AREA.TEXT { label: name; priority: @labelPrioLanduse; }
 
    [TYPE landuse_industrial,
@@ -1123,7 +1125,8 @@ SYMBOL speed_camera
 
  [MAG veryClose-] {
    [TYPE landuse_railway,
-         landuse_construction] AREA.TEXT { label: name;  priority: @labelPrioLanduse;}
+         landuse_construction,
+         landuse_village_green] AREA.TEXT { label: name;  priority: @labelPrioLanduse;}
  }
 
  // -------------------------------------------------------
@@ -1257,13 +1260,10 @@ SYMBOL speed_camera
 
    [TYPE amenity_parking] {
      AREA { color: #f6eeb6; borderColor: #887b7b;borderWidth: 0.1mm; }
-     NODE.ICON { symbol: amenity_parking; name: parking; }
-     AREA.ICON { name: parking;}
    }
 
    [TYPE amenity_parking_building] {
      AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
-     AREA.ICON { name: parking;}
    }
 
    [TYPE man_made_pier] {
@@ -1273,9 +1273,18 @@ SYMBOL speed_camera
    }
  }
 
- [MAG close-] {
+ [MAG closer-] {
    [TYPE amenity_hospital,
          amenity_hospital_building] AREA.ICON { symbol: amenity_hospital;}
+
+   [TYPE amenity_parking] {
+     NODE.ICON { symbol: amenity_parking; name: parking; }
+     AREA.ICON { name: parking;}
+   }
+
+   [TYPE amenity_parking_building] {
+     AREA.ICON { name: parking;}
+   }
 
    [TYPE railway_station] AREA.ICON { symbol: railway_station; }
  }
@@ -1289,8 +1298,11 @@ SYMBOL speed_camera
 
    // Amenities without special color
    [TYPE amenity,
+         amenity_cafe,
          amenity_fuel,
-         amenity_school] NODE.ICON { symbol: amenity; }
+         amenity_school] {
+         NODE.ICON { symbol: amenity; }
+   }
 
    [TYPE barrier_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
 
@@ -1353,6 +1365,11 @@ SYMBOL speed_camera
  [MAG @labelBuildingMag-] {
    [TYPE building] AREA.TEXT { label: name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
 
+   [TYPE address] {
+     NODE.TEXT { label: name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+     AREA.TEXT { label: name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+   }
+
    [TYPE shop] {
      NODE.TEXT {label: name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
      AREA.TEXT { label: name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
@@ -1404,6 +1421,8 @@ SYMBOL speed_camera
 
    [TYPE amenity,
          amenity_building,
+         amenity_cafe_building,
+         amenity_cafe,
          amenity_fuel,
          amenity_fuel_building,
          amenity_kindergarten,
