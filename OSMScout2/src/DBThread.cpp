@@ -24,6 +24,8 @@
 
 #include <QApplication>
 #include <QMutexLocker>
+#include <QDebug>
+#include <QDir>
 
 #include <osmscout/StyleConfigLoader.h>
 
@@ -118,10 +120,43 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
 
 void DBThread::Initialize()
 {
+#ifdef __ANDROID__
+    QStringList docPaths=QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+
+    QString databaseDirectory;
+
+    // look for standard.oss in each directory
+    for(int i=0; i < docPaths.size(); i++) {
+        QStringList list_filters;
+        list_filters << "osmscout";
+
+        QDir path(docPaths[i]);
+        QStringList list_files = path.entryList(list_filters,QDir::NoDotAndDotDot | QDir::Dirs);
+
+        if(!(list_files.size() == 1)) {
+            continue;
+        }
+
+        databaseDirectory=path.canonicalPath()+"/osmscout";
+    }
+
+    if(databaseDirectory.length() == 0) {
+        qDebug() << "ERROR: map database directory not found";
+    }
+    else {
+        qDebug() << "Loading database from " << databaseDirectory;
+    }
+
+    QString stylesheetFilename=databaseDirectory+"/standard.oss";
+
+    qDebug() << "Loading style sheet from " << stylesheetFilename;
+
+#else
   QStringList cmdLineArgs = QApplication::arguments();
   QString databaseDirectory = cmdLineArgs.size() > 1 ? cmdLineArgs.at(1) : QDir::currentPath();
   QString stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
+#endif
 
   if (database->Open(databaseDirectory.toLocal8Bit().data())) {
     osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -131,16 +166,18 @@ void DBThread::Initialize()
 
 	  if (!osmscout::LoadStyleConfig(stylesheetFilename.toLocal8Bit().data(),
                                    *styleConfig)) {
+        qDebug() << "Cannot load style sheet!";
         delete styleConfig;
         styleConfig=NULL;
       }
     }
     else {
+      qDebug() << "TypeConfig invalid!";
       styleConfig=NULL;
     }
   }
   else {
-    std::cerr << "Cannot open database!" << std::endl;
+    qDebug() << "Cannot open database!";
     return;
   }
 
@@ -151,12 +188,11 @@ void DBThread::Initialize()
                                 response.minLon,
                                 response.maxLat,
                                 response.maxLon)) {
-    std::cerr << "Cannot read initial bounding box" << std::endl;
+    qDebug() << "Cannot read initial bounding box";
     return;
   }
 
-  std::cout << "Initial bounding box [";
-  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
+  qDebug() << "Initial bounding box [" << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]";
 
   emit InitialisationFinished(response);
 }
