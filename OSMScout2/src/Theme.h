@@ -28,6 +28,8 @@ class Theme : public QObject
 
   Q_PROPERTY(qreal dpi READ GetDPI)
 
+    Q_PROPERTY(int textFontSize READ GetTextFontSize CONSTANT)
+
   // Attributes of overlay buttons on map screen
   Q_PROPERTY(qreal mapButtonWidth READ GetMapButtonWidth CONSTANT)
   Q_PROPERTY(qreal mapButtonHeight READ GetMapButtonHeight CONSTANT)
@@ -43,7 +45,9 @@ class Theme : public QObject
 
 private:
     qreal mmToPixel(qreal mm) const;
+    qreal pointToPixel(qreal point) const;
 
+    mutable int textFontSize;
     mutable int averageCharWidth;
     mutable int numberCharWidth;
 
@@ -52,6 +56,8 @@ public:
     ~Theme();
 
     qreal GetDPI() const;
+
+    int GetTextFontSize() const;
 
     qreal GetMapButtonWidth() const;
     qreal GetMapButtonHeight() const;

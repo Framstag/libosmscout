@@ -20,13 +20,14 @@
 #include "Theme.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QFont>
 #include <QFontMetrics>
 #include <QScreen>
 
-#include <iostream>
 Theme::Theme()
-    : averageCharWidth(0),
+    : textFontSize(0),
+      averageCharWidth(0),
       numberCharWidth(0)
 {
   // no code
@@ -42,12 +43,38 @@ qreal Theme::mmToPixel(qreal mm) const
     return mm*GetDPI()/25.4;
 }
 
+qreal Theme::pointToPixel(qreal point) const
+{
+    return point*96.0/*GetDPI()*//72.0;
+}
+
 qreal Theme::GetDPI() const
 {
     QScreen *srn = QApplication::screens().at(0);
     qreal dotsPerInch = (qreal)srn->physicalDotsPerInch();
 
     return dotsPerInch;
+}
+
+int Theme::GetTextFontSize() const
+{
+    if (textFontSize==0) {
+#ifdef __ANDROID__
+        textFontSize=(int)mmToPixel(2.0);
+#else
+        QFont font;
+
+        textFontSize=font.pixelSize();
+
+        if (textFontSize==-1) {
+            textFontSize=pointToPixel(font.pointSize());
+        }
+
+#endif
+        qDebug() << "TextFontSize: " << textFontSize << "px";
+    }
+
+    return textFontSize;
 }
 
 qreal Theme::GetMapButtonWidth() const
@@ -84,9 +111,14 @@ int Theme::GetAverageCharWidth() const
 {
     if (averageCharWidth==0) {
         QFont font;
+
+        font.setPixelSize(GetTextFontSize());
+
         QFontMetrics metrics(font);
 
         averageCharWidth=metrics.averageCharWidth();
+
+        qDebug() << "Average char width: " << averageCharWidth << "px";
     }
 
     return averageCharWidth;
@@ -96,6 +128,9 @@ int Theme::GetNumberCharWidth() const
 {
     if (numberCharWidth==0) {
         QFont font;
+
+        font.setPixelSize(GetTextFontSize());
+
         QFontMetrics metrics(font);
 
         numberCharWidth=std::max(numberCharWidth,metrics.width('-'));
@@ -112,7 +147,7 @@ int Theme::GetNumberCharWidth() const
         numberCharWidth=std::max(numberCharWidth,metrics.width('8'));
         numberCharWidth=std::max(numberCharWidth,metrics.width('9'));
 
-        std::cout << numberCharWidth << std::endl;
+        qDebug() << "Number char width: " << numberCharWidth << "px";
     }
 
     return numberCharWidth;
