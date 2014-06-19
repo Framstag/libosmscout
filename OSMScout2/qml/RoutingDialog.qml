@@ -26,14 +26,15 @@ MapDialog {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
                 text: "Start:"
+                font.pixelSize: Theme.textFontSize
             }
 
             LocationEdit {
                 id: startInput
 
-                Layout.minimumWidth: Theme.averageCharWidth*40
-                Layout.preferredWidth: Theme.averageCharWidth*60
-                Layout.maximumWidth: Theme.averageCharWidth*100
+                Layout.minimumWidth: Theme.averageCharWidth*20
+                Layout.preferredWidth: Theme.averageCharWidth*40
+                Layout.maximumWidth: Theme.averageCharWidth*60
 
                 horizontalAlignment: TextInput.AlignLeft
             }
@@ -42,14 +43,15 @@ MapDialog {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
                 text: "Target:"
+                font.pixelSize: Theme.textFontSize
             }
 
             LocationEdit {
                 id: targetInput
 
-                Layout.minimumWidth: Theme.averageCharWidth*40
-                Layout.preferredWidth: Theme.averageCharWidth*60
-                Layout.maximumWidth: Theme.averageCharWidth*100
+                Layout.minimumWidth: Theme.averageCharWidth*20
+                Layout.preferredWidth: Theme.averageCharWidth*40
+                Layout.maximumWidth: Theme.averageCharWidth*60
 
                 horizontalAlignment: TextInput.AlignLeft
             }
@@ -125,6 +127,7 @@ MapDialog {
                         x: 2
                         width: parent.width-4
                         text: label
+                        font.pixelSize: Theme.textFontSize
                     }
 
                     Rectangle {

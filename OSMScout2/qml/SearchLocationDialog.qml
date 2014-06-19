@@ -51,9 +51,9 @@ MapDialog {
         LineEdit {
             id: locationInput
 
-            Layout.minimumWidth: Theme.averageCharWidth*40
-            Layout.preferredWidth: Theme.averageCharWidth*60
-            Layout.maximumWidth: Theme.averageCharWidth*100
+            Layout.minimumWidth: Theme.averageCharWidth*20
+            Layout.preferredWidth: Theme.averageCharWidth*40
+            Layout.maximumWidth: Theme.averageCharWidth*60
 
             horizontalAlignment: TextInput.AlignLeft
 
@@ -63,6 +63,7 @@ MapDialog {
                 repeat: false
 
                 onTriggered: {
+                    console.log("Search change timer: '"+locationInput.text+"'")
                     updateSuggestions()
                 }
             }
@@ -81,6 +82,7 @@ MapDialog {
             }
 
             Keys.onReturnPressed: {
+                updateSuggestions()
                 if (suggestionView.currentIndex>=0) {
                     selectSuggestion(suggestionView.currentIndex)
                     close()
@@ -122,6 +124,7 @@ MapDialog {
                         x: 2
                         width: parent.width-4
                         text: label
+                        font.pixelSize: Theme.textFontSize
                     }
 
                     Rectangle {

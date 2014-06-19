@@ -197,8 +197,11 @@ LineEdit {
 
                         Text {
                             id: text
+
                             anchors.fill: parent
+
                             text: label
+                            font.pixelSize: Theme.textFontSize
                         }
 
                         MouseArea {

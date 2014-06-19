@@ -1,5 +1,7 @@
 import QtQuick 2.2
 
+import net.sf.libosmscout.map 1.0
+
 Rectangle {
   id: dialogActionButton
   
@@ -37,6 +39,7 @@ Rectangle {
   
   Text {
     id: label
+    font.pixelSize: Theme.textFontSize
     anchors.centerIn: parent
     color: "black"
   }

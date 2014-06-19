@@ -17,28 +17,32 @@ MapDialog {
         Text {
             Layout.fillWidth: true
 
-            text: "<h1><b>OSMScout2</b></h1>"
+            text: "<b>OSMScout2</b>"
+            font.pixelSize: Theme.textFontSize*1.2
             horizontalAlignment: Text.AlignHCenter
         }
 
         Text {
             Layout.fillWidth: true
 
-            text: "A demo application for the libosmscout library"
+            text: "Demo application for the libosmscout library<br/>See http://libosmscout.sf.net"
+            font.pixelSize: Theme.textFontSize
             horizontalAlignment: Text.AlignHCenter
         }
 
         Text {
             Layout.fillWidth: true
 
-            text: "See http://libosmscout.sf.net for more information"
+            text: "All geographic data:<br/>© OpenStreetMap contributors"
+            font.pixelSize: Theme.textFontSize
             horizontalAlignment: Text.AlignHCenter
         }
 
         Text {
             Layout.fillWidth: true
 
-            text: "All geographic data: © OpenStreetMap contributors<br/>For license information see www.openstreetmap.org/copyright"
+            text: "For license information:<br/>See www.openstreetmap.org/copyright"
+            font.pixelSize: Theme.textFontSize
             horizontalAlignment: Text.AlignHCenter
         }
 

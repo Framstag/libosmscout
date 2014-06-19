@@ -41,6 +41,7 @@ MapDialog {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
                 text: "Latitude:"
+                font.pixelSize: Theme.textFontSize
             }
 
             LineEdit {
@@ -63,6 +64,7 @@ MapDialog {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
 
                 text: "Longitude:"
+                font.pixelSize: Theme.textFontSize
             }
 
             LineEdit {

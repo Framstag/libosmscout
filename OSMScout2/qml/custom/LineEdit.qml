@@ -1,5 +1,7 @@
 import QtQuick 2.2
 
+import net.sf.libosmscout.map 1.0
+
 Item {
     id: lineEdit
 
@@ -33,6 +35,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 2
 
+        font.pixelSize: Theme.textFontSize
         clip: true
 
         onFocusChanged: {

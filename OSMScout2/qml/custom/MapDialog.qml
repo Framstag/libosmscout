@@ -119,7 +119,7 @@ Item {
 
                     color: "black"
                     font.bold: true
-                    //font.pixelSize: font.pixelSize*1.3
+                    font.pixelSize: Theme.textFontSize
                     horizontalAlignment: Text.AlignHCenter
                 }
             }
