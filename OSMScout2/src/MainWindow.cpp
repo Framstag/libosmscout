@@ -28,7 +28,7 @@ MainWindow::MainWindow(const SettingsRef& settings,
  : settings(settings),
    dbThread(dbThread)
 {
-  setSource(QUrl::fromLocalFile("qml/main.qml"));
+  setSource(QUrl("qrc:/qml/main.qml"));
   setTitle("OSMScout");
 
   connect(dbThread,
