@@ -1315,7 +1315,7 @@ SYMBOL speed_camera
    [TYPE leisure_nature_reserve] AREA.TEXT { label: name; priority: @labelPrioNatural; }
  }
 
- [MAG close-]{
+ [MAG close-] {
    [TYPE leisure_sports_centre,
          leisure_golf_course,
          leisure_stadium,
