@@ -455,6 +455,7 @@ namespace osmscout
                                                   std::list<WayRef>& optimizedWays,
                                                   size_t width,
                                                   size_t height,
+                                                  double pixel,
                                                   const Magnification& magnification,
                                                   TransPolygon::OptimizeMethod optimizeWayMethod)
   {
@@ -476,12 +477,12 @@ namespace osmscout
       polygon.TransformWay(projection,
                            optimizeWayMethod,
                            way->nodes,
-                           1.0);
+                           pixel/8);
 
       polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
-      if (xmax-xmin<=1.0 &&
-          ymax-ymin<=1.0) {
+      if (xmax-xmin<=pixel &&
+          ymax-ymin<=pixel) {
         continue;
       }
 
@@ -678,6 +679,8 @@ namespace osmscout
   {
     FileScanner   scanner;
     Magnification magnification; // Magnification, we optimize for
+    // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
+    double        pixel=2.0/* mm */ * 320.0 /* DPI*/ / 25.4 /* inch */;
 
     magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 
@@ -755,7 +758,7 @@ namespace osmscout
           // TODO: Wee need to make import parameters for the width and the height
           OptimizeWays(newWays,
                        optimizedWays,
-                       800,640,
+                       1280,768,pixel,
                        magnification,
                        parameter.GetOptimizationWayMethod());
 
@@ -776,7 +779,7 @@ namespace osmscout
           std::cout << "Nodes: " << origNodes << " => " << optNodes << std::endl;*/
 
           if (optimizedWays.empty()) {
-            progress.Info("Empty optimization result for level "+NumberToString(level)+", no index generated");
+            progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index generated");
 
             TypeData typeData;
 

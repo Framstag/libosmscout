@@ -187,6 +187,7 @@ namespace osmscout
                                                     std::list<AreaRef>& optimizedAreas,
                                                     size_t width,
                                                     size_t height,
+                                                    double pixel,
                                                     const Magnification& magnification,
                                                     TransPolygon::OptimizeMethod optimizeWayMethod)
   {
@@ -211,13 +212,13 @@ namespace osmscout
           polygon.TransformArea(projection,
                                 optimizeWayMethod,
                                 area->rings[r].nodes,
-                                1.0);
+                                pixel/8.0);
 
           polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
           if (polygon.IsEmpty() ||
-              (xmax-xmin<=6.0 &&
-               ymax-ymin<=6.0)) {
+              (xmax-xmin<=pixel &&
+               ymax-ymin<=pixel)) {
             // We drop all sub roles of the current role, too
             size_t s=r;
 
@@ -525,6 +526,10 @@ namespace osmscout
                                                   std::list<TypeData>& typesData)
   {
     FileScanner scanner;
+    // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
+    double      pixel=2.0/* mm */ * 320.0 /* DPI*/ / 25.4 /* inch */;
+
+    progress.Info("Minimum visible size in pixel: "+NumberToString((unsigned long)pixel));
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -584,12 +589,12 @@ namespace osmscout
 
           OptimizeAreas(allAreas[type],
                         optimizedAreas,
-                        800,640,
+                        1280,768,pixel,
                         magnification,
                         parameter.GetOptimizationWayMethod());
 
           if (optimizedAreas.empty()) {
-            progress.Info("Empty optimization result for level "+NumberToString(level)+", no index generated");
+            progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index generated");
 
             TypeData typeData;
 
