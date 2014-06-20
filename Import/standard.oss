@@ -978,9 +978,6 @@ SYMBOL speed_camera
    [TYPE highway_construction] WAY.TEXT { label: name;}
 
    [TYPE railway_station] NODE.TEXT {label: name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
-
-   [TYPE leisure_building,
-         sport_building] AREA.TEXT { label: name; priority: @labelPrioSpecialBuilding; }
  }
 
  [MAG veryClose-] {
@@ -1096,7 +1093,6 @@ SYMBOL speed_camera
    [TYPE landuse_residential,
          landuse_retail,
          landuse_brownfield,
-         landuse_commercial,
          landuse_military] AREA.TEXT { label: name; priority: @labelPrioLanduse; }
 
    [TYPE landuse_forest] AREA.TEXT { label: name; style: emphasize; priority: @labelPrioNatural; }
@@ -1116,6 +1112,7 @@ SYMBOL speed_camera
          landuse_greenfield,
          landuse_orchard,
          landuse_cemetery,
+         landuse_commercial,
          landuse_meadow,
          landuse_recreation_ground] AREA.TEXT { label: name; priority: @labelPrioLanduse; }
 
@@ -1153,8 +1150,6 @@ SYMBOL speed_camera
    [TYPE leisure_nature_reserve] AREA { color: #abde9622; borderColor: #abde96; borderWidth: 0.2mm;}
 
    [TYPE military_airfield,
-         military_bunker,
-         military_barracks,
          military_danger_area,
          military_range,
          military_naval_base] AREA { color: #f59897; }
@@ -1169,6 +1164,9 @@ SYMBOL speed_camera
    [TYPE leisure_stadium] AREA { color: #33cb98; }
    [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
    [TYPE sport_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE military_bunker,
+         military_barracks] AREA { color: #f59897; }
 
    [TYPE power_station,
          power_sub_station] AREA { color: #bca9a9; }
@@ -1329,8 +1327,6 @@ SYMBOL speed_camera
          leisure_common,
          leisure_ice_rink,
          military_airfield,
-         military_bunker,
-         military_barracks,
          military_danger_area,
          military_range,
          military_naval_base] AREA.TEXT { label: name; priority: @labelPrioLeisure; }
@@ -1348,6 +1344,9 @@ SYMBOL speed_camera
      NODE.ICON {symbol: christian_church_cross; }
    }
 
+   [TYPE leisure_building,
+         sport_building] AREA.TEXT { label: name; priority: @labelPrioSpecialBuilding; }
+
    [TYPE leisure_pitch] AREA.TEXT { label: name; style: emphasize; color: @pitchLabelColor; size: 0.9;}
 
    [TYPE amenity_school_building,
@@ -1360,6 +1359,10 @@ SYMBOL speed_camera
    }
 
    [TYPE amenity_grave_yard] AREA.TEXT { label: name; style: emphasize; color: #000000; size: 0.8;}
+   
+   [TYPE military_bunker,
+         military_barracks] AREA.TEXT { label: name; priority: @labelPrioLeisure; }
+   
  }
 
  [MAG @labelBuildingMag-] {
