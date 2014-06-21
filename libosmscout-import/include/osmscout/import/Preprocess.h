@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/Coord.h>
 #include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/HashMap.h>
@@ -36,45 +37,43 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   private:
-    Progress            *progress;
-    FileWriter          nodeWriter;
-    FileWriter          wayWriter;
-    FileWriter          coastlineWriter;
-    FileWriter          turnRestrictionWriter;
-    FileWriter          multipolygonWriter;
+    Progress              *progress;
+    FileWriter            nodeWriter;
+    FileWriter            wayWriter;
+    FileWriter            coastlineWriter;
+    FileWriter            turnRestrictionWriter;
+    FileWriter            multipolygonWriter;
 
-    std::vector<Tag>    tags;
+    std::vector<Tag>      tags;
 
-    uint32_t            nodeCount;
-    uint32_t            wayCount;
-    uint32_t            areaCount;
-    uint32_t            relationCount;
-    uint32_t            coastlineCount;
-    uint32_t            turnRestrictionCount;
-    uint32_t            multipolygonCount;
+    uint32_t              nodeCount;
+    uint32_t              wayCount;
+    uint32_t              areaCount;
+    uint32_t              relationCount;
+    uint32_t              coastlineCount;
+    uint32_t              turnRestrictionCount;
+    uint32_t              multipolygonCount;
 
-    OSMId               lastNodeId;
-    OSMId               lastWayId;
-    OSMId               lastRelationId;
+    OSMId                 lastNodeId;
+    OSMId                 lastWayId;
+    OSMId                 lastRelationId;
 
-    bool                nodeSortingError;
-    bool                waySortingError;
-    bool                relationSortingError;
+    bool                  nodeSortingError;
+    bool                  waySortingError;
+    bool                  relationSortingError;
 
-    Id                  coordPageCount;
-    CoordPageOffsetMap  coordIndex;
-    FileWriter          coordWriter;
-    PageId              currentPageId;
-    FileOffset          currentPageOffset;
-    std::vector<double> lats;
-    std::vector<double> lons;
-    std::vector<bool>   isSet;
+    Id                    coordPageCount;
+    CoordPageOffsetMap    coordIndex;
+    FileWriter            coordWriter;
+    PageId                currentPageId;
+    FileOffset            currentPageOffset;
+    std::vector<GeoCoord> coords;
+    std::vector<bool>     isSet;
 
   private:
     bool StoreCurrentPage();
     bool StoreCoord(OSMId id,
-                    double lat,
-                    double lon);
+                    const GeoCoord& coord);
 
     bool IsTurnRestriction(const TypeConfig& typeConfig,
                            const std::map<TagId,std::string>& tags,

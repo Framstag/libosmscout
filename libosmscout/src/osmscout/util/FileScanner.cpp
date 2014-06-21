@@ -1804,9 +1804,6 @@ namespace osmscout {
     uint32_t latDat;
     uint32_t lonDat;
 
-    latDat=0;
-    lonDat=0;
-
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+8-1>=size) {
@@ -1815,53 +1812,19 @@ namespace osmscout {
         return false;
       }
 
-      char     *dataPtr=&buffer[offset];
-      uint32_t add;
+      char *dataPtr=&buffer[offset];
 
-      // Latitude
+      latDat=  ((unsigned char) dataPtr[0] <<  0)
+             | ((unsigned char) dataPtr[1] <<  8)
+             | ((unsigned char) dataPtr[2] << 16)
+             | ((unsigned char) dataPtr[3] << 24);
 
-      add=(unsigned char)(*dataPtr);
-      add=add << 0;
-      latDat|=add;
-      dataPtr++;
+      lonDat=  ((unsigned char) dataPtr[4] <<  0)
+             | ((unsigned char) dataPtr[5] <<  8)
+             | ((unsigned char) dataPtr[6] << 16)
+             | ((unsigned char) dataPtr[7] << 24);
 
-      add=(unsigned char)(*dataPtr);
-      add=add << 8;
-      latDat|=add;
-      dataPtr++;
-
-      add=(unsigned char)(*dataPtr);
-      add=add << 16;
-      latDat|=add;
-      dataPtr++;
-
-      add=(unsigned char)(*dataPtr);
-      add=add << 24;
-      latDat|=add;
-      dataPtr++;
-
-      // Longitude
-
-      add=(unsigned char)(*dataPtr);
-      add=add << 0;
-      lonDat|=add;
-      dataPtr++;
-
-      add=(unsigned char)(*dataPtr);
-      add=add << 8;
-      lonDat|=add;
-      dataPtr++;
-
-      add=(unsigned char)(*dataPtr);
-      add=add << 16;
-      lonDat|=add;
-      dataPtr++;
-
-      add=(unsigned char)(*dataPtr);
-      add=add << 24;
-      lonDat|=add;
-      dataPtr++;
-
+      dataPtr+=2*4;
       offset+=2*4;
 
       coord.Set(latDat/conversionFactor-90.0,
@@ -1881,54 +1844,102 @@ namespace osmscout {
     }
 
     unsigned char *dataPtr=buffer;
-    uint32_t      add;
 
-    // Latitude
+    latDat=  ((unsigned char) dataPtr[0] <<  0)
+           | ((unsigned char) dataPtr[1] <<  8)
+           | ((unsigned char) dataPtr[2] << 16)
+           | ((unsigned char) dataPtr[3] << 24);
 
-    add=(unsigned char)(*dataPtr);
-    add=add << 0;
-    latDat|=add;
-    dataPtr++;
+    lonDat=  ((unsigned char) dataPtr[4] <<  0)
+           | ((unsigned char) dataPtr[5] <<  8)
+           | ((unsigned char) dataPtr[6] << 16)
+           | ((unsigned char) dataPtr[7] << 24);
 
-    add=(unsigned char)(*dataPtr);
-    add=add << 8;
-    latDat|=add;
-    dataPtr++;
-
-    add=(unsigned char)(*dataPtr);
-    add=add << 16;
-    latDat|=add;
-    dataPtr++;
-
-    add=(unsigned char)(*dataPtr);
-    add=add << 24;
-    latDat|=add;
-    dataPtr++;
-
-    // Longitude
-
-    add=(unsigned char)(*dataPtr);
-    add=add << 0;
-    lonDat|=add;
-    dataPtr++;
-
-    add=(unsigned char)(*dataPtr);
-    add=add << 8;
-    lonDat|=add;
-    dataPtr++;
-
-    add=(unsigned char)(*dataPtr);
-    add=add << 16;
-    lonDat|=add;
-    dataPtr++;
-
-    add=(unsigned char)(*dataPtr);
-    add=add << 24;
-    lonDat|=add;
-    dataPtr++;
+    dataPtr+=2*4;
 
     coord.Set(latDat/conversionFactor-90.0,
               lonDat/conversionFactor-180.0);
+
+    return true;
+  }
+
+  bool FileScanner::ReadConditionalCoord(GeoCoord& coord,
+                                         bool& isSet)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    uint32_t latDat;
+    uint32_t lonDat;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+8-1>=size) {
+        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      char *dataPtr=&buffer[offset];
+
+      latDat=  ((unsigned char) dataPtr[0] <<  0)
+             | ((unsigned char) dataPtr[1] <<  8)
+             | ((unsigned char) dataPtr[2] << 16)
+             | ((unsigned char) dataPtr[3] << 24);
+
+      lonDat=  ((unsigned char) dataPtr[4] <<  0)
+             | ((unsigned char) dataPtr[5] <<  8)
+             | ((unsigned char) dataPtr[6] << 16)
+             | ((unsigned char) dataPtr[7] << 24);
+
+      dataPtr+=2*4;
+      offset+=2*4;
+
+      if (latDat==0xffffffff || lonDat==0xffffffff) {
+        isSet=false;
+      }
+      else  {
+        coord.Set(latDat/conversionFactor-90.0,
+                  lonDat/conversionFactor-180.0);
+        isSet=true;
+      }
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[8];
+
+    hasError=fread(&buffer,1,8,file)!=8;
+
+    if (hasError) {
+      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      return false;
+    }
+
+    unsigned char *dataPtr=buffer;
+
+    latDat=  ((unsigned char) dataPtr[0] <<  0)
+           | ((unsigned char) dataPtr[1] <<  8)
+           | ((unsigned char) dataPtr[2] << 16)
+           | ((unsigned char) dataPtr[3] << 24);
+
+    lonDat=  ((unsigned char) dataPtr[4] <<  0)
+           | ((unsigned char) dataPtr[5] <<  8)
+           | ((unsigned char) dataPtr[6] << 16)
+           | ((unsigned char) dataPtr[7] << 24);
+
+    dataPtr+=2*4;
+
+    if (latDat==0xffffffff || lonDat==0xffffffff) {
+      isSet=false;
+    }
+    else  {
+      coord.Set(latDat/conversionFactor-90.0,
+                lonDat/conversionFactor-180.0);
+      isSet=true;
+    }
 
     return true;
   }

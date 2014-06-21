@@ -103,7 +103,7 @@ namespace osmscout {
 #endif
 
     bool WriteCoord(const GeoCoord& coord);
-    bool WriteCoord(double lat, double lon);
+    bool WriteInvalidCoord();
 
     bool Write(const std::vector<GeoCoord>& nodes);
 

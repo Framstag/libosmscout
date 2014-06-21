@@ -141,6 +141,8 @@ namespace osmscout {
 #endif
 
     bool ReadCoord(GeoCoord& coord);
+    bool ReadConditionalCoord(GeoCoord& coord,
+                              bool& isSet);
 
     bool Read(std::vector<GeoCoord>& nodes);
   };

@@ -54,14 +54,10 @@ namespace osmscout {
     for (size_t i=0; i<coordPageSize; i++) {
 
       if (!isSet[i]) {
-        uint32_t latValue=0xffffffff;
-        uint32_t lonValue=0xffffffff;
-
-        coordWriter.Write(latValue);
-        coordWriter.Write(lonValue);
+        coordWriter.WriteInvalidCoord();
       }
       else {
-        coordWriter.WriteCoord(lats[i],lons[i]);
+        coordWriter.WriteCoord(coords[i]);
       }
     }
 
@@ -71,8 +67,7 @@ namespace osmscout {
   }
 
   bool Preprocess::StoreCoord(OSMId id,
-                              double lat,
-                              double lon)
+                              const GeoCoord& coord)
   {
     PageId relatedId=id-std::numeric_limits<Id>::min();
     PageId pageId=relatedId/coordPageSize;
@@ -80,8 +75,7 @@ namespace osmscout {
 
     if (currentPageId!=std::numeric_limits<PageId>::max()) {
       if (currentPageId==pageId) {
-        lats[coordPageOffset]=lat;
-        lons[coordPageOffset]=lon;
+        coords[coordPageOffset]=coord;
         isSet[coordPageOffset]=true;
 
         return true;
@@ -96,8 +90,7 @@ namespace osmscout {
     if (pageOffsetEntry==coordIndex.end()) {
       isSet.assign(coordPageSize,false);
 
-      lats[coordPageOffset]=lat;
-      lons[coordPageOffset]=lon;
+      coords[coordPageOffset]=coord;
       isSet[coordPageOffset]=true;
 
       FileOffset pageOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
@@ -116,7 +109,7 @@ namespace osmscout {
       return false;
     }
 
-    return coordWriter.WriteCoord(lat,lon);
+    return coordWriter.WriteCoord(coord);
   }
 
   bool Preprocess::IsTurnRestriction(const TypeConfig& typeConfig,
@@ -349,8 +342,7 @@ namespace osmscout {
 
     coordPageCount++;
 
-    lats.resize(coordPageSize);
-    lons.resize(coordPageSize);
+    coords.resize(coordPageSize);
     isSet.resize(coordPageSize);
 
     return !nodeWriter.HasError() &&
@@ -396,8 +388,8 @@ namespace osmscout {
     }
 
     StoreCoord(id,
-               lat,
-               lon);
+               GeoCoord(lat,
+                        lon));
 
     lastNodeId=id;
   }

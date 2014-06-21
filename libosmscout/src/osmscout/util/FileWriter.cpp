@@ -477,8 +477,8 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t latValue=(uint32_t)floor((coord.GetLat()+90.0)*conversionFactor+0.5);
-    uint32_t lonValue=(uint32_t)floor((coord.GetLon()+180.0)*conversionFactor+0.5);
+    uint32_t latValue=(uint32_t)floor((coord.GetLat()+90.0)*conversionFactor);
+    uint32_t lonValue=(uint32_t)floor((coord.GetLon()+180.0)*conversionFactor);
 
     char buffer[8];
 
@@ -497,26 +497,23 @@ namespace osmscout {
     return !hasError;
   }
 
-  bool FileWriter::WriteCoord(double lat, double lon)
+  bool FileWriter::WriteInvalidCoord()
   {
     if (HasError()) {
       return false;
     }
 
-    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
-    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
-
     char buffer[8];
 
-    buffer[0]=((latValue >>  0) & 0xff);
-    buffer[1]=((latValue >>  8) & 0xff);
-    buffer[2]=((latValue >> 16) & 0xff);
-    buffer[3]=((latValue >> 24) & 0xff);
+    buffer[0]=0xff;
+    buffer[1]=0xff;
+    buffer[2]=0xff;
+    buffer[3]=0xff;
 
-    buffer[4]=((lonValue >>  0) & 0xff);
-    buffer[5]=((lonValue >>  8) & 0xff);
-    buffer[6]=((lonValue >> 16) & 0xff);
-    buffer[7]=((lonValue >> 24) & 0xff);
+    buffer[4]=0xff;
+    buffer[5]=0xff;
+    buffer[6]=0xff;
+    buffer[7]=0xff;
 
     hasError=fwrite(buffer,1,8,file)!=8;
 

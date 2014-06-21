@@ -145,26 +145,24 @@ namespace osmscout {
 
         scanner.SetPos(offset);
 
-        uint32_t latDat;
-        uint32_t lonDat;
+        bool     isSet;
+        GeoCoord coord;
 
-        scanner.Read(latDat);
-        scanner.Read(lonDat);
-
-        if (latDat==0xffffffff || lonDat==0xffffffff) {
-          continue;
-        }
-
-        if (scanner.HasError()) {
+        if (!scanner.ReadConditionalCoord(coord,
+                                          isSet)) {
           std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << datafilename << "!" << std::endl;
           scanner.Close();
           return false;
         }
 
+        if (!isSet) {
+          continue;
+        }
+
         coordsMap.insert(std::make_pair(*id,
                                         CoordEntry(substituteId,
-                                                   latDat/conversionFactor-90.0,
-                                                   lonDat/conversionFactor-180.0)));
+                                                   coord.GetLat(),
+                                                   coord.GetLon())));
       }
     }
 
