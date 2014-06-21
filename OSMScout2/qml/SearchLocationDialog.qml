@@ -46,14 +46,14 @@ MapDialog {
     content : ColumnLayout {
         id: mainFrame
 
-        Layout.alignment: Qt.AlignTop
+        Layout.minimumWidth: Theme.averageCharWidth*20
+        Layout.preferredWidth: Theme.averageCharWidth*40
+        Layout.maximumWidth: Theme.averageCharWidth*60
 
         LineEdit {
             id: locationInput
 
-            Layout.minimumWidth: Theme.averageCharWidth*20
-            Layout.preferredWidth: Theme.averageCharWidth*40
-            Layout.maximumWidth: Theme.averageCharWidth*60
+            Layout.fillWidth: true
 
             horizontalAlignment: TextInput.AlignLeft
 
@@ -193,8 +193,4 @@ MapDialog {
     }
 
     signal showLocation(Location location)
-
-    onOpened: {
-        locationInput.focus = true
-    }
 }

@@ -8,7 +8,7 @@ Item {
 
     property bool fullscreen: false
 
-    property alias label : label.text
+    property alias label : title.text
     property alias content : content.children
 
     anchors.fill: parent
@@ -45,7 +45,6 @@ Item {
     function open() {
         if (fullscreen) {
             content.Layout.preferredHeight = overlay.height-5*Theme.vertSpace-title.height
-            content.Layout.maximumHeight = overlay.height-5*Theme.vertSpace-title.height
         }
 
         visible = true
@@ -65,7 +64,7 @@ Item {
     Rectangle {
         id: overlay
 
-        z: -1
+        z: -2
         anchors.fill: parent
 
         color: "#000000"
@@ -75,8 +74,8 @@ Item {
             anchors.fill: parent
 
             onClicked: {
-                if (mouse.x<frame.x || mouse.x>frame.x+frame.width ||
-                    mouse.y<frame.y || mouse.y>frame.y+frame.height) {
+                if (mouse.x<mainLayout.x || mouse.x>mainLayout.x+mainLayout.width ||
+                    mouse.y<mainLayout.y || mouse.y>mainLayout.y+mainLayout.height) {
                   close()
                 }
             }
@@ -84,62 +83,54 @@ Item {
     }
 
     Rectangle {
-        id: frame
-
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Theme.vertSpace
-        anchors.bottomMargin: Theme.vertSpace
+        id: background
+        z: -1
 
         border.color: "black"
         color: "white"
 
+        x: mainLayout.x-Theme.horizSpace
+        y: mainLayout.y-Theme.vertSpace
         width: mainLayout.width+2*Theme.horizSpace
         height: mainLayout.height+2*Theme.vertSpace
+    }
+
+    ColumnLayout {
+        id: mainLayout
+
+        x: (parent.width-width)/2
+        y: 2*Theme.vertSpace
+        Layout.minimumWidth: 4*Theme.horizSpace
+        Layout.minimumHeight: 4*Theme.vertSpace
+        Layout.maximumWidth: parent.width-4*Theme.horizSpace
+        Layout.maximumHeight: parent.height-4*Theme.vertSpace
+
+        spacing: Theme.vertSpace
+
+        Text {
+            id: title
+
+            Layout.fillWidth: true
+
+            color: "black"
+            font.bold: true
+            font.pixelSize: Theme.textFontSize
+            horizontalAlignment: Text.AlignHCenter
+        }
 
         ColumnLayout {
-            id: mainLayout
+            id: content
 
-            x: Theme.horizSpace
-            y: Theme.vertSpace
-
-            spacing: Theme.vertSpace
-
-            Rectangle {
-                id: title
-
-                Layout.fillWidth: true
-
-                height: label.implicitHeight
-
-                Text {
-                    id: label
-
-                    width: parent.width
-
-                    color: "black"
-                    font.bold: true
-                    font.pixelSize: Theme.textFontSize
-                    horizontalAlignment: Text.AlignHCenter
+            Keys.onPressed: {
+                if (event.key === Qt.Key_Escape) {
+                    close()
                 }
             }
-
-            ColumnLayout {
-                id: content
-
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                focus: true
-
-                /*
-                Keys.onPressed: {
-                    if (event.key === Qt.Key_Escape) {
-                        close()
-                    }
-                }*/
-            }
         }
+    }
+
+    onOpened: {
+        content.focus = true
     }
 }
 

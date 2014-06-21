@@ -33,15 +33,7 @@ MapDialog {
         Text {
             Layout.fillWidth: true
 
-            text: "All geographic data:<br/>© OpenStreetMap contributors"
-            font.pixelSize: Theme.textFontSize
-            horizontalAlignment: Text.AlignHCenter
-        }
-
-        Text {
-            Layout.fillWidth: true
-
-            text: "For license information:<br/>See www.openstreetmap.org/copyright"
+            text: "All geographic data:<br/>© OpenStreetMap contributors<br/>See www.openstreetmap.org/copyright"
             font.pixelSize: Theme.textFontSize
             horizontalAlignment: Text.AlignHCenter
         }
