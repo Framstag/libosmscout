@@ -108,11 +108,7 @@ namespace osmscout {
 
   Database::Database(const DatabaseParameter& parameter)
    : parameter(parameter),
-     isOpen(false),
-     minLon(0.0),
-     minLat(0.0),
-     maxLon(0.0),
-     maxLat(0.0)
+     isOpen(false)
   {
     // no code
   }
@@ -145,25 +141,15 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t minLonDat;
-    uint32_t minLatDat;
-    uint32_t maxLonDat;
-    uint32_t maxLatDat;
-
-    scanner.ReadNumber(minLatDat);
-    scanner.ReadNumber(minLonDat);
-    scanner.ReadNumber(maxLatDat);
-    scanner.ReadNumber(maxLonDat);
+    if (!scanner.ReadCoord(minCoord) ||
+        !scanner.ReadCoord(maxCoord)) {
+      std::cerr << "Error while reading from '" << file << "'" << std::endl;
+    }
 
     if (scanner.HasError() || !scanner.Close()) {
       std::cerr << "Error while reading/closing '" << file << "'" << std::endl;
       return false;
     }
-
-    minLon=minLonDat/conversionFactor-180.0;
-    minLat=minLatDat/conversionFactor-90.0;
-    maxLon=maxLonDat/conversionFactor-180.0;
-    maxLat=maxLatDat/conversionFactor-90.0;
 
     isOpen=true;
 
@@ -460,10 +446,10 @@ namespace osmscout {
       return false;
     }
 
-    minLat=this->minLat;
-    minLon=this->minLon;
-    maxLat=this->maxLat;
-    maxLon=this->maxLon;
+    minLat=minCoord.GetLat();
+    minLon=minCoord.GetLon();
+    maxLat=maxCoord.GetLat();
+    maxLon=maxCoord.GetLon();
 
     return true;
   }

@@ -130,10 +130,8 @@ namespace osmscout {
 
     TypeConfigRef                   typeConfig;           //! Type config for the currently opened map
 
-    double                          minLon;               //! bounding box of data
-    double                          minLat;               //! bounding box of data
-    double                          maxLon;               //! bounding box of data
-    double                          maxLat;               //! bounding box of data
+    GeoCoord                        minCoord;             //! Bounding box
+    GeoCoord                        maxCoord;             //! Bounding box
 
     mutable NodeDataFileRef         nodeDataFile;         //! Cached access to the 'nodes.dat' file
     mutable AreaDataFileRef         areaDataFile;         //! Cached access to the 'areas.dat' file

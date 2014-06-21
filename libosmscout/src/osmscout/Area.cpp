@@ -436,32 +436,6 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Area::ReadCoords(FileScanner& scanner,
-                        uint32_t nodesCount,
-                        std::vector<GeoCoord>& coords)
-  {
-    uint32_t minLat;
-    uint32_t minLon;
-
-    coords.resize(nodesCount);
-
-    scanner.Read(minLat);
-    scanner.Read(minLon);
-
-    for (size_t j=0; j<nodesCount; j++) {
-      uint32_t latValue;
-      uint32_t lonValue;
-
-      scanner.ReadNumber(latValue);
-      scanner.ReadNumber(lonValue);
-
-      coords[j].Set((minLat+latValue)/conversionFactor-90.0,
-                     (minLon+lonValue)/conversionFactor-180.0);
-    }
-
-    return !scanner.HasError();
-  }
-
   bool Area::Read(FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
@@ -508,9 +482,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!ReadCoords(scanner,
-                      nodesCount,
-                      rings[0].nodes)) {
+      if (!scanner.Read(rings[0].nodes,
+                        nodesCount)) {
         return false;
       }
     }
@@ -538,9 +511,8 @@ namespace osmscout {
       }
 
       if (nodesCount>0) {
-        if (!ReadCoords(scanner,
-                        nodesCount,
-                        rings[i].nodes)) {
+        if (!scanner.Read(rings[i].nodes,
+                          nodesCount)) {
           return false;
         }
       }
@@ -589,9 +561,8 @@ namespace osmscout {
     scanner.ReadNumber(nodesCount);
 
     if (nodesCount>0) {
-      if (!ReadCoords(scanner,
-                      nodesCount,
-                      rings[0].nodes)) {
+      if (!scanner.Read(rings[0].nodes,
+                        nodesCount)) {
         return false;
       }
     }
@@ -610,9 +581,8 @@ namespace osmscout {
       scanner.ReadNumber(nodesCount);
 
       if (nodesCount>0) {
-        if (!ReadCoords(scanner,
-                        nodesCount,
-                        rings[i].nodes)) {
+        if (!scanner.Read(rings[i].nodes,
+                          nodesCount)) {
           return false;
         }
       }
@@ -672,31 +642,6 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool Area::WriteCoords(FileWriter& writer,
-                         const std::vector<GeoCoord>& coords) const
-  {
-    uint32_t minLat=std::numeric_limits<uint32_t>::max();
-    uint32_t minLon=std::numeric_limits<uint32_t>::max();
-
-    for (size_t j=0; j<coords.size(); j++) {
-      minLat=std::min(minLat,(uint32_t)round((coords[j].GetLat()+90.0)*conversionFactor));
-      minLon=std::min(minLon,(uint32_t)round((coords[j].GetLon()+180.0)*conversionFactor));
-    }
-
-    writer.Write(minLat);
-    writer.Write(minLon);
-
-    for (size_t j=0; j<coords.size(); j++) {
-      uint32_t latValue=(uint32_t)round((coords[j].GetLat()+90.0)*conversionFactor);
-      uint32_t lonValue=(uint32_t)round((coords[j].GetLon()+180.0)*conversionFactor);
-
-      writer.WriteNumber(latValue-minLat);
-      writer.WriteNumber(lonValue-minLon);
-    }
-
-    return !writer.HasError();
-  }
-
   bool Area::Write(FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
@@ -732,8 +677,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!WriteCoords(writer,
-                       ring->nodes)) {
+      if (!writer.Write(ring->nodes,
+                        ring->nodes.size())) {
         return false;
       }
     }
@@ -764,8 +709,8 @@ namespace osmscout {
       }
 
       if (!ring->nodes.empty()) {
-        if (!WriteCoords(writer,
-                        ring->nodes)) {
+        if (!writer.Write(ring->nodes,
+                          ring->nodes.size())) {
           return false;
         }
       }
@@ -806,8 +751,8 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)ring->nodes.size());
 
     if (!ring->nodes.empty()) {
-      if (!WriteCoords(writer,
-                      ring->nodes)) {
+      if (!writer.Write(ring->nodes,
+                        ring->nodes.size())) {
         return false;
       }
     }
@@ -830,8 +775,8 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)ring->nodes.size());
 
       if (!ring->nodes.empty()) {
-        if (!WriteCoords(writer,
-                        ring->nodes)) {
+        if (!writer.Write(ring->nodes,
+                          ring->nodes.size())) {
           return false;
         }
       }

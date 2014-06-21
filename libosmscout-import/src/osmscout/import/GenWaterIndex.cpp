@@ -59,23 +59,17 @@ namespace osmscout {
   /**
    * Sets the size of the bitmap and initializes state of all tiles to "unknown"
    */
-  void WaterIndexGenerator::Level::SetBox(uint32_t minLat, uint32_t maxLat,
-                                          uint32_t minLon, uint32_t maxLon,
+  void WaterIndexGenerator::Level::SetBox(const GeoCoord& minCoord,
+                                          const GeoCoord& maxCoord,
                                           double cellWidth, double cellHeight)
   {
     this->cellWidth=cellWidth;
     this->cellHeight=cellHeight;
 
-    // Convert to the real double values
-    this->minLat=minLat/conversionFactor-90.0;
-    this->maxLat=maxLat/conversionFactor-90.0;
-    this->minLon=minLon/conversionFactor-180.0;
-    this->maxLon=maxLon/conversionFactor-180.0;
-
-    cellXStart=(uint32_t)floor((this->minLon+180.0)/cellWidth);
-    cellXEnd=(uint32_t)floor((this->maxLon+180.0)/cellWidth);
-    cellYStart=(uint32_t)floor((this->minLat+90.0)/cellHeight);
-    cellYEnd=(uint32_t)floor((this->maxLat+90.0)/cellHeight);
+    cellXStart=(uint32_t)floor((minCoord.GetLon()+180.0)/cellWidth);
+    cellXEnd=(uint32_t)floor((maxCoord.GetLon()+180.0)/cellWidth);
+    cellYStart=(uint32_t)floor((minCoord.GetLat()+90.0)/cellHeight);
+    cellYEnd=(uint32_t)floor((maxCoord.GetLat()+90.0)/cellHeight);
 
     cellXCount=cellXEnd-cellXStart+1;
     cellYCount=cellYEnd-cellYStart+1;
@@ -1648,10 +1642,8 @@ namespace osmscout {
 
     FileScanner         scanner;
 
-    uint32_t            minLonDat;
-    uint32_t            minLatDat;
-    uint32_t            maxLonDat;
-    uint32_t            maxLatDat;
+    GeoCoord            minCoord;
+    GeoCoord            maxCoord;
 
     std::vector<Level>  levels;
 
@@ -1671,10 +1663,11 @@ namespace osmscout {
       return false;
     }
 
-    scanner.ReadNumber(minLatDat);
-    scanner.ReadNumber(minLonDat);
-    scanner.ReadNumber(maxLatDat);
-    scanner.ReadNumber(maxLonDat);
+    if (!scanner.ReadCoord(minCoord) ||
+        !scanner.ReadCoord(maxCoord)) {
+      progress.Error("Error while reading from 'bounding.dat'");
+      return false;
+    }
 
     if (scanner.HasError() || !scanner.Close()) {
       progress.Error("Error while reading/closing 'bounding.dat'");
@@ -1693,8 +1686,8 @@ namespace osmscout {
     for (size_t level=0; level<=parameter.GetWaterIndexMaxMag(); level++) {
       if (level>=parameter.GetWaterIndexMinMag() &&
           level<=parameter.GetWaterIndexMaxMag()) {
-        levels[level-parameter.GetWaterIndexMinMag()].SetBox(minLatDat,maxLatDat,
-                                                             minLonDat,maxLonDat,
+        levels[level-parameter.GetWaterIndexMinMag()].SetBox(minCoord,
+                                                             maxCoord,
                                                              cellWidth,cellHeight);
       }
 

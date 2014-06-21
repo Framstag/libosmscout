@@ -90,6 +90,24 @@ namespace osmscout {
       this->lon=other.lon;
     }
   };
+
+  /**
+   * \ingroup Util
+   * Coordinates will be stored as unsigned long values in file.
+   * For the conversion the float value is shifted to positive
+   * value sand afterwards multiplied by conversion factor
+   * to get long values without significant values after colon.
+   */
+  extern OSMSCOUT_API const double lonConversionFactor;
+
+  /**
+   * \ingroup Util
+   * Coordinates will be stored as unsigned long values in file.
+   * For the conversion the float value is shifted to positive
+   * value sand afterwards multiplied by conversion factor
+   * to get long values without significant values after colon.
+   */
+  extern OSMSCOUT_API const double latConversionFactor;
 }
 
 #endif

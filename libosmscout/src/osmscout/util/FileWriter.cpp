@@ -477,8 +477,8 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t latValue=(uint32_t)floor((coord.GetLat()+90.0)*conversionFactor);
-    uint32_t lonValue=(uint32_t)floor((coord.GetLon()+180.0)*conversionFactor);
+    uint32_t latValue=(uint32_t)floor((coord.GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)floor((coord.GetLon()+180.0)*lonConversionFactor);
 
     char buffer[8];
 
@@ -526,30 +526,47 @@ namespace osmscout {
       return false;
     }
 
-    double   minLat=nodes[0].GetLat();
-    double   minLon=nodes[0].GetLon();
-    uint32_t minLatValue;
-    uint32_t minLonValue;
+    GeoCoord minCoord=nodes[0];
 
     for (size_t i=1; i<nodes.size(); i++) {
-      minLat=std::min(minLat,nodes[i].GetLat());
-      minLon=std::min(minLon,nodes[i].GetLon());
+      minCoord.Set(std::min(minCoord.GetLat(),nodes[i].GetLat()),
+                   std::min(minCoord.GetLon(),nodes[i].GetLon()));
     }
 
-    minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
-    minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
-
-    if (!Write(minLatValue)) {
-      return false;
-    }
-
-    if (!Write(minLonValue)) {
+    if (!WriteCoord(minCoord)) {
       return false;
     }
 
     for (size_t i=0; i<nodes.size(); i++) {
-      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minLat)*conversionFactor);
-      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minLon)*conversionFactor);
+      if (!WriteNumber((uint32_t)round((nodes[i].GetLat()-minCoord.GetLat())*latConversionFactor))) {
+        return false;
+      }
+
+      if (!WriteNumber((uint32_t)round((nodes[i].GetLon()-minCoord.GetLon())*lonConversionFactor))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool FileWriter::Write(const std::vector<GeoCoord>& nodes,
+                         size_t count)
+  {
+    GeoCoord minCoord=nodes[0];
+
+    for (size_t i=1; i<count; i++) {
+      minCoord.Set(std::min(minCoord.GetLat(),nodes[i].GetLat()),
+                   std::min(minCoord.GetLon(),nodes[i].GetLon()));
+    }
+
+    if (!WriteCoord(minCoord)) {
+      return false;
+    }
+
+    for (size_t i=0; i<count; i++) {
+      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minCoord.GetLat())*latConversionFactor);
+      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minCoord.GetLon())*lonConversionFactor);
 
       if (!WriteNumber(latValue)) {
         return false;

@@ -292,6 +292,9 @@ namespace osmscout {
     // This is something I do not like
     this->progress=&progress;
 
+    minCoord.Set(90.0,180.0);
+    maxCoord.Set(-90.0,-180.0);
+
     coordPageCount=0;
     currentPageId=std::numeric_limits<PageId>::max();
 
@@ -361,18 +364,25 @@ namespace osmscout {
   {
     RawNode    node;
     TypeId     type=typeIgnore;
-    FileOffset nodeOffset;
 
     if (id<lastNodeId) {
       nodeSortingError=true;
     }
 
+    minCoord.Set(std::min(minCoord.GetLat(),lat),
+                 std::min(minCoord.GetLon(),lon));
+
+    maxCoord.Set(std::max(maxCoord.GetLat(),lat),
+                 std::max(maxCoord.GetLon(),lon));
+
+    StoreCoord(id,
+               GeoCoord(lat,
+                        lon));
+
     typeConfig.GetNodeTypeId(tagMap,type);
 
     if (type!=typeIgnore) {
       typeConfig.ResolveTags(tagMap,tags);
-
-      nodeWriter.GetPos(nodeOffset);
 
       node.SetId(id);
       node.SetType(type);
@@ -383,13 +393,6 @@ namespace osmscout {
 
       nodeCount++;
     }
-    else {
-      nodeOffset=0;
-    }
-
-    StoreCoord(id,
-               GeoCoord(lat,
-                        lon));
 
     lastNodeId=id;
   }
@@ -593,7 +596,8 @@ namespace osmscout {
     lastRelationId=id;
   }
 
-  bool Preprocess::Cleanup(Progress& progress)
+  bool Preprocess::Cleanup(const ImportParameter& parameter,
+                           Progress& progress)
   {
     //Since I do not like take a pointer to a reference
     // I at least try to assure, that we do not misuse it.
@@ -652,6 +656,26 @@ namespace osmscout {
     progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
     progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
+
+    //std::cout << "Bounding box: " << "[" << minCoord.GetLat() << "," << minCoord.GetLon() << " x " << maxCoord.GetLat() << "," << maxCoord.GetLon() << "]" << std::endl;
+
+    progress.SetAction("Generating bounding.dat");
+
+    FileWriter writer;
+
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "bounding.dat"))) {
+      progress.Error("Cannot create 'bounding.dat'");
+      return false;
+    }
+
+    if (!writer.WriteCoord(minCoord) ||
+        !writer.WriteCoord(maxCoord)) {
+      progress.Error("Cannot write to 'bounding.dat'");
+      return false;
+    }
+
+    writer.Close();
 
     if (nodeSortingError) {
       progress.Error("Nodes are not sorted by increasing id");

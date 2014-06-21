@@ -337,7 +337,8 @@ namespace osmscout {
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-    return Cleanup(progress);
+    return Cleanup(parameter,
+                   progress);
   }
 }
 

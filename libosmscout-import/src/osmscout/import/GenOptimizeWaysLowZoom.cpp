@@ -680,7 +680,7 @@ namespace osmscout
     FileScanner   scanner;
     Magnification magnification; // Magnification, we optimize for
     // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
-    double        pixel=2.0/* mm */ * 320.0 /* DPI*/ / 25.4 /* inch */;
+    double        pixel=0.5 /* mm */ * 320.0 /* DPI*/ / 25.4 /* inch */;
 
     magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 

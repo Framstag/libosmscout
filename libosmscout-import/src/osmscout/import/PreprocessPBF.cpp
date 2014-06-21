@@ -538,7 +538,8 @@ namespace osmscout {
       }
     }
 
-    return Cleanup(progress);
+    return Cleanup(parameter,
+                   progress);
   }
 }
 

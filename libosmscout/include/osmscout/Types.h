@@ -79,15 +79,6 @@ namespace osmscout {
     vehicleBicycle  = 2,
     vehicleCar      = 3
   };
-
-  /**
-   * \ingroup Util
-   * Coordinates will be stored as unsigned long values in file.
-   * For the conversion the float value is shifted to positive
-   * value sand afterwards multiplied by conversion factor
-   * to get long values without significant values after colon.
-   */
-  extern OSMSCOUT_API const double conversionFactor;
 }
 
 #endif

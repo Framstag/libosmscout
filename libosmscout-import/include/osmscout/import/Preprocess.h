@@ -70,6 +70,9 @@ namespace osmscout {
     std::vector<GeoCoord> coords;
     std::vector<bool>     isSet;
 
+    GeoCoord              minCoord;
+    GeoCoord              maxCoord;
+
   private:
     bool StoreCurrentPage();
     bool StoreCoord(OSMId id,
@@ -114,7 +117,8 @@ namespace osmscout {
                          const std::vector<RawRelation::Member>& members,
                          const std::map<TagId,std::string>& tags);
 
-    bool Cleanup(Progress& progress);
+    bool Cleanup(const ImportParameter& parameter,
+                 Progress& progress);
   };
 }
 

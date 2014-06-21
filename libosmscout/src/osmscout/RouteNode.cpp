@@ -48,8 +48,6 @@ namespace osmscout {
     uint32_t objectCount;
     uint32_t pathCount;
     uint32_t excludesCount;
-    uint32_t minLat;
-    uint32_t minLon;
 
     if (!scanner.GetPos(fileOffset)) {
       return false;
@@ -60,9 +58,6 @@ namespace osmscout {
     scanner.ReadNumber(objectCount);
     scanner.ReadNumber(pathCount);
     scanner.ReadNumber(excludesCount);
-
-    scanner.Read(minLat);
-    scanner.Read(minLon);
 
     if (scanner.HasError()) {
       return false;
@@ -91,26 +86,35 @@ namespace osmscout {
       previousFileOffset=fileOffset;
     }
 
-    paths.resize(pathCount);
-    for (size_t i=0; i<pathCount; i++) {
-      uint32_t latValue;
-      uint32_t lonValue;
-      uint32_t distanceValue;
+    if (pathCount>0) {
+      GeoCoord minCoord;
 
-      scanner.ReadFileOffset(paths[i].offset);
-      scanner.ReadNumber(paths[i].objectIndex);
-      scanner.ReadNumber(paths[i].type);
-      scanner.Read(paths[i].maxSpeed);
-      scanner.Read(paths[i].grade);
-      //scanner.Read(paths[i].bearing);
-      scanner.Read(paths[i].flags);
-      scanner.ReadNumber(distanceValue);
-      scanner.ReadNumber(latValue);
-      scanner.ReadNumber(lonValue);
+      if (!scanner.ReadCoord(minCoord)) {
+        return false;
+      }
 
-      paths[i].distance=distanceValue/(1000.0*100.0);
-      paths[i].lat=(latValue+minLat)/conversionFactor-90.0;
-      paths[i].lon=(lonValue+minLon)/conversionFactor-180.0;
+      paths.resize(pathCount);
+
+      for (size_t i=0; i<pathCount; i++) {
+        uint32_t latValue;
+        uint32_t lonValue;
+        uint32_t distanceValue;
+
+        scanner.ReadFileOffset(paths[i].offset);
+        scanner.ReadNumber(paths[i].objectIndex);
+        scanner.ReadNumber(paths[i].type);
+        scanner.Read(paths[i].maxSpeed);
+        scanner.Read(paths[i].grade);
+        //scanner.Read(paths[i].bearing);
+        scanner.Read(paths[i].flags);
+        scanner.ReadNumber(distanceValue);
+        scanner.ReadNumber(latValue);
+        scanner.ReadNumber(lonValue);
+
+        paths[i].distance=distanceValue/(1000.0*100.0);
+        paths[i].lat=minCoord.GetLat()+latValue/latConversionFactor;
+        paths[i].lon=minCoord.GetLon()+lonValue/lonConversionFactor;
+      }
     }
 
     excludes.resize(excludesCount);
@@ -136,17 +140,6 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)paths.size());
     writer.WriteNumber((uint32_t)excludes.size());
 
-    uint32_t minLat=std::numeric_limits<uint32_t>::max();
-    uint32_t minLon=std::numeric_limits<uint32_t>::max();
-
-    for (size_t i=0; i<paths.size(); i++) {
-      minLat=std::min(minLat,(uint32_t)floor((paths[i].lat+90.0)*conversionFactor+0.5));
-      minLon=std::min(minLon,(uint32_t)floor((paths[i].lon+180.0)*conversionFactor+0.5));
-    }
-
-    writer.Write(minLat);
-    writer.Write(minLon);
-
     Id lastFileOffset=0;
 
     for (std::vector<ObjectFileRef>::const_iterator object=objects.begin();
@@ -158,21 +151,28 @@ namespace osmscout {
       lastFileOffset=object->GetFileOffset();
     }
 
-    for (size_t i=0; i<paths.size(); i++) {
-      uint32_t latValue=(uint32_t)floor((paths[i].lat+90.0)*conversionFactor+0.5);
-      uint32_t lonValue=(uint32_t)floor((paths[i].lon+180.0)*conversionFactor+0.5);
-      uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
+    if (!paths.empty()) {
+      GeoCoord minCoord(paths[0].lat,paths[0].lon);
 
-      writer.WriteFileOffset(paths[i].offset);
-      writer.WriteNumber(paths[i].objectIndex);
-      writer.WriteNumber(paths[i].type);
-      writer.Write(paths[i].maxSpeed);
-      writer.Write(paths[i].grade);
-      //writer.Write(paths[i].bearing);
-      writer.Write(paths[i].flags);
-      writer.WriteNumber(distanceValue);
-      writer.WriteNumber(latValue-minLat);
-      writer.WriteNumber(lonValue-minLon);
+      for (size_t i=1; i<paths.size(); i++) {
+        minCoord.Set(std::min(minCoord.GetLat(),paths[i].lat),
+                     std::min(minCoord.GetLon(),paths[i].lon));
+      }
+
+      writer.WriteCoord(minCoord);
+
+      for (size_t i=0; i<paths.size(); i++) {
+        writer.WriteFileOffset(paths[i].offset);
+        writer.WriteNumber(paths[i].objectIndex);
+        writer.WriteNumber(paths[i].type);
+        writer.Write(paths[i].maxSpeed);
+        writer.Write(paths[i].grade);
+        //writer.Write(paths[i].bearing);
+        writer.Write(paths[i].flags);
+        writer.WriteNumber((uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5));
+        writer.WriteNumber((uint32_t)round((paths[i].lat-minCoord.GetLat())*latConversionFactor));
+        writer.WriteNumber((uint32_t)round((paths[i].lon-minCoord.GetLon())*lonConversionFactor));
+      }
     }
 
     for (size_t i=0; i<excludes.size(); i++) {

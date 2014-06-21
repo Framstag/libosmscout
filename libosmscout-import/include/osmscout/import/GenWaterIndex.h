@@ -109,11 +109,6 @@ namespace osmscout {
     {
       FileOffset                 indexEntryOffset;
 
-      double                     minLat;
-      double                     maxLat;
-      double                     minLon;
-      double                     maxLon;
-
       double                     cellWidth;
       double                     cellHeight;
 
@@ -126,8 +121,8 @@ namespace osmscout {
       uint32_t                   cellYCount;
       std::vector<unsigned char> area;
 
-      void SetBox(uint32_t minLat, uint32_t maxLat,
-                  uint32_t minLon, uint32_t maxLon,
+      void SetBox(const GeoCoord& minCoord,
+                  const GeoCoord& maxCoord,
                   double cellWidth, double cellHeight);
 
       bool IsInAbsolute(uint32_t x, uint32_t y) const;

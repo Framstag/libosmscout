@@ -222,16 +222,11 @@ namespace osmscout {
     bool ReadIds(FileScanner& scanner,
                  uint32_t nodesCount,
                  std::vector<Id>& ids);
-    bool ReadCoords(FileScanner& scanner,
-                    uint32_t nodesCount,
-                    std::vector<GeoCoord>& coords);
     bool Read(FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);
 
     bool WriteIds(FileWriter& writer,
                   const std::vector<Id>& ids) const;
-    bool WriteCoords(FileWriter& writer,
-                    const std::vector<GeoCoord>& coords) const;
     bool Write(FileWriter& writer) const;
     bool WriteOptimized(FileWriter& writer) const;
   };

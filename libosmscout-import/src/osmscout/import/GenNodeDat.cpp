@@ -22,6 +22,7 @@
 #include <iostream>
 #include <map>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Node.h>
 
 #include <osmscout/system/Math.h>
@@ -44,10 +45,6 @@ namespace osmscout {
                                  Progress& progress,
                                  const TypeConfig& typeConfig)
   {
-    double   minLon=-10.0;
-    double   minLat=-10.0;
-    double   maxLon=10.0;
-    double   maxLat=10.0;
     uint32_t rawNodeCount=0;
     uint32_t nodesReadCount=0;
     uint32_t nodesWrittenCount=0;
@@ -100,19 +97,6 @@ namespace osmscout {
         return false;
       }
 
-      if (nodesReadCount==0) {
-        minLat=rawNode.GetLat();
-        minLon=rawNode.GetLon();
-        maxLat=rawNode.GetLat();
-        maxLon=rawNode.GetLon();
-      }
-      else {
-        minLat=std::min(minLat,rawNode.GetLat());
-        minLon=std::min(minLon,rawNode.GetLon());
-        maxLat=std::max(maxLat,rawNode.GetLat());
-        maxLon=std::max(maxLon,rawNode.GetLon());
-      }
-
       nodesReadCount++;
 
       if (rawNode.GetType()!=typeIgnore &&
@@ -153,28 +137,6 @@ namespace osmscout {
     }
 
     progress.Info(std::string("Read "+NumberToString(nodesReadCount)+" nodes, wrote "+NumberToString(nodesWrittenCount)+" nodes"));
-
-    progress.SetAction("Generating bounding.dat");
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "bounding.dat"))) {
-      progress.Error("Cannot create 'bounding.dat'");
-      return false;
-    }
-
-    // TODO: Dump bounding box to debug
-
-    uint32_t minLatDat=(uint32_t)floor((minLat+90.0)*conversionFactor+0.5);
-    uint32_t minLonDat=(uint32_t)floor((minLon+180.0)*conversionFactor+0.5);
-    uint32_t maxLatDat=(uint32_t)floor((maxLat+90.0)*conversionFactor+0.5);
-    uint32_t maxLonDat=(uint32_t)floor((maxLon+180.0)*conversionFactor+0.5);
-
-    writer.WriteNumber(minLatDat);
-    writer.WriteNumber(minLonDat);
-    writer.WriteNumber(maxLatDat);
-    writer.WriteNumber(maxLonDat);
-
-    writer.Close();
 
     return true;
   }

@@ -1827,8 +1827,8 @@ namespace osmscout {
       dataPtr+=2*4;
       offset+=2*4;
 
-      coord.Set(latDat/conversionFactor-90.0,
-                lonDat/conversionFactor-180.0);
+      coord.Set(latDat/latConversionFactor-90.0,
+                lonDat/lonConversionFactor-180.0);
 
       return true;
     }
@@ -1857,8 +1857,8 @@ namespace osmscout {
 
     dataPtr+=2*4;
 
-    coord.Set(latDat/conversionFactor-90.0,
-              lonDat/conversionFactor-180.0);
+    coord.Set(latDat/latConversionFactor-90.0,
+              lonDat/lonConversionFactor-180.0);
 
     return true;
   }
@@ -1900,8 +1900,8 @@ namespace osmscout {
         isSet=false;
       }
       else  {
-        coord.Set(latDat/conversionFactor-90.0,
-                  lonDat/conversionFactor-180.0);
+        coord.Set(latDat/latConversionFactor-90.0,
+                  lonDat/lonConversionFactor-180.0);
         isSet=true;
       }
 
@@ -1936,8 +1936,8 @@ namespace osmscout {
       isSet=false;
     }
     else  {
-      coord.Set(latDat/conversionFactor-90.0,
-                lonDat/conversionFactor-180.0);
+      coord.Set(latDat/latConversionFactor-90.0,
+                lonDat/lonConversionFactor-180.0);
       isSet=true;
     }
 
@@ -1952,22 +1952,50 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t minLat;
-    uint32_t minLon;
+    GeoCoord minCoord;
 
-    Read(minLat);
-    Read(minLon);
+    if (!ReadCoord(minCoord)) {
+      return false;
+    }
 
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
       uint32_t latValue;
       uint32_t lonValue;
 
-      ReadNumber(latValue);
-      ReadNumber(lonValue);
+      if (!ReadNumber(latValue) ||
+          !ReadNumber(lonValue)) {
+        return false;
+      }
 
-      nodes[i].Set((minLat+latValue)/conversionFactor-90.0,
-                   (minLon+lonValue)/conversionFactor-180.0);
+      nodes[i].Set(minCoord.GetLat()+latValue/latConversionFactor,
+                   minCoord.GetLon()+lonValue/lonConversionFactor);
+    }
+
+    return !HasError();
+  }
+
+  bool FileScanner::Read(std::vector<GeoCoord>& nodes,
+                         size_t count)
+  {
+    GeoCoord minCoord;
+
+    if (!ReadCoord(minCoord)) {
+      return false;
+    }
+
+    nodes.resize(count);
+    for (size_t i=0; i<count; i++) {
+      uint32_t latValue;
+      uint32_t lonValue;
+
+      if (!ReadNumber(latValue) ||
+          !ReadNumber(lonValue)) {
+        return false;
+      }
+
+      nodes[i].Set(minCoord.GetLat()+latValue/latConversionFactor,
+                   minCoord.GetLon()+lonValue/lonConversionFactor);
     }
 
     return !HasError();

@@ -20,4 +20,6 @@
 #include <osmscout/GeoCoord.h>
 
 namespace osmscout {
+  const double lonConversionFactor=8388607.0; // 23 Bit
+  const double latConversionFactor=8388607.0; // 23 Bit
 }

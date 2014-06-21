@@ -106,6 +106,8 @@ namespace osmscout {
     bool WriteInvalidCoord();
 
     bool Write(const std::vector<GeoCoord>& nodes);
+    bool Write(const std::vector<GeoCoord>& nodes,
+               size_t count);
 
     bool Flush();
     bool FlushCurrentBlockWithZeros(size_t blockSize);
