@@ -76,7 +76,11 @@ and API versions.
   (under arch linux: /opt/android-qt5/5.3.0/lib/pkgconfig/)
 
 * Now configure and compile the libraries using:
-  ./configure --host=arm-linux-androideabi --with-sysroot=$ANDROID_SYSROOT
+  ./configure --host=arm-linux-androideabi --with-sysroot=$ANDROID_SYSROOT --disable-openmp-support
+
+  Note  that openmp seams to be not supported (I got crashed) so disable it
+  using the above configure option for configure scripts that test for it
+  (libosmscout).
 
   Note that the pkg-config tool used is that from the build system, so
   availability of libs detected via pkg-config is not based on the host
@@ -90,4 +94,6 @@ and API versions.
   to the OSMScout2 project file.
 * Goto the OSMScout2 directory and call the qmake from the Android-Qt5 package
   to generate a makefile.
-  (under arch linux: /opt/android-qt5/5.3.0/bin/qmake)
+  (under arch linux: /opt/android-qt5/5.3.0/bin/qmake).
+
+* Build OSMScout2 by calling make.
