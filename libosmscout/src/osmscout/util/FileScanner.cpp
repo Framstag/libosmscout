@@ -1806,8 +1806,8 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+8-1>=size) {
-        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      if (offset+coordByteSize-1>=size) {
+        std::cerr << "Cannot read geo coord beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1817,15 +1817,14 @@ namespace osmscout {
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
              | ((unsigned char) dataPtr[2] << 16)
-             | ((unsigned char) dataPtr[3] << 24);
+             | ((unsigned char) (dataPtr[6] & 0x0f) << 24);
 
-      lonDat=  ((unsigned char) dataPtr[4] <<  0)
-             | ((unsigned char) dataPtr[5] <<  8)
-             | ((unsigned char) dataPtr[6] << 16)
-             | ((unsigned char) dataPtr[7] << 24);
+      lonDat=  ((unsigned char) dataPtr[3] <<  0)
+             | ((unsigned char) dataPtr[4] <<  8)
+             | ((unsigned char) dataPtr[5] << 16)
+             | ((unsigned char) (dataPtr[6] & 0xf0) << 20);
 
-      dataPtr+=2*4;
-      offset+=2*4;
+      offset+=coordByteSize;
 
       coord.Set(latDat/latConversionFactor-90.0,
                 lonDat/lonConversionFactor-180.0);
@@ -1834,28 +1833,24 @@ namespace osmscout {
     }
 #endif
 
-    unsigned char buffer[8];
+    unsigned char buffer[coordByteSize];
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
     if (hasError) {
-      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      std::cerr << "Cannot read geo coord beyond file end!" << std::endl;
       return false;
     }
 
-    unsigned char *dataPtr=buffer;
+    latDat=  (buffer[0] <<  0)
+           | (buffer[1] <<  8)
+           | (buffer[2] << 16)
+           | ((buffer[6] & 0x0f) << 24);
 
-    latDat=  ((unsigned char) dataPtr[0] <<  0)
-           | ((unsigned char) dataPtr[1] <<  8)
-           | ((unsigned char) dataPtr[2] << 16)
-           | ((unsigned char) dataPtr[3] << 24);
-
-    lonDat=  ((unsigned char) dataPtr[4] <<  0)
-           | ((unsigned char) dataPtr[5] <<  8)
-           | ((unsigned char) dataPtr[6] << 16)
-           | ((unsigned char) dataPtr[7] << 24);
-
-    dataPtr+=2*4;
+    lonDat=  (buffer[3] <<  0)
+           | (buffer[4] <<  8)
+           | (buffer[5] << 16)
+           | ((buffer[6] & 0xf0) << 20);
 
     coord.Set(latDat/latConversionFactor-90.0,
               lonDat/lonConversionFactor-180.0);
@@ -1875,8 +1870,8 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+8-1>=size) {
-        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      if (offset+coordByteSize-1>=size) {
+        std::cerr << "Cannot read geo coord beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1886,17 +1881,17 @@ namespace osmscout {
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
              | ((unsigned char) dataPtr[2] << 16)
-             | ((unsigned char) dataPtr[3] << 24);
+             | ((unsigned char) (dataPtr[6] & 0x0f) << 24);
 
-      lonDat=  ((unsigned char) dataPtr[4] <<  0)
-             | ((unsigned char) dataPtr[5] <<  8)
-             | ((unsigned char) dataPtr[6] << 16)
-             | ((unsigned char) dataPtr[7] << 24);
+      lonDat=  ((unsigned char) dataPtr[3] <<  0)
+             | ((unsigned char) dataPtr[4] <<  8)
+             | ((unsigned char) dataPtr[5] << 16)
+             | ((unsigned char) (dataPtr[6] & 0xf0) << 20);
 
-      dataPtr+=2*4;
-      offset+=2*4;
+      offset+=coordByteSize;
 
-      if (latDat==0xffffffff || lonDat==0xffffffff) {
+      if (latDat==0xfffffff &&
+          lonDat==0xfffffff) {
         isSet=false;
       }
       else  {
@@ -1909,30 +1904,27 @@ namespace osmscout {
     }
 #endif
 
-    unsigned char buffer[8];
+    unsigned char buffer[coordByteSize];
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
     if (hasError) {
-      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      std::cerr << "Cannot read geo coord beyond file end!" << std::endl;
       return false;
     }
 
-    unsigned char *dataPtr=buffer;
+    latDat=  (buffer[0] <<  0)
+           | (buffer[1] <<  8)
+           | (buffer[2] << 16)
+           | ((buffer[6] & 0x0f) << 24);
 
-    latDat=  ((unsigned char) dataPtr[0] <<  0)
-           | ((unsigned char) dataPtr[1] <<  8)
-           | ((unsigned char) dataPtr[2] << 16)
-           | ((unsigned char) dataPtr[3] << 24);
+    lonDat=  (buffer[3] <<  0)
+           | (buffer[4] <<  8)
+           | (buffer[5] << 16)
+           | ((buffer[6] & 0xf0) << 20);
 
-    lonDat=  ((unsigned char) dataPtr[4] <<  0)
-           | ((unsigned char) dataPtr[5] <<  8)
-           | ((unsigned char) dataPtr[6] << 16)
-           | ((unsigned char) dataPtr[7] << 24);
-
-    dataPtr+=2*4;
-
-    if (latDat==0xffffffff || lonDat==0xffffffff) {
+    if (latDat==0xfffffff &&
+        lonDat==0xfffffff) {
       isSet=false;
     }
     else  {

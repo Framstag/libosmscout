@@ -52,7 +52,6 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<coordPageSize; i++) {
-
       if (!isSet[i]) {
         coordWriter.WriteInvalidCoord();
       }
@@ -69,14 +68,14 @@ namespace osmscout {
   bool Preprocess::StoreCoord(OSMId id,
                               const GeoCoord& coord)
   {
-    PageId relatedId=id-std::numeric_limits<Id>::min();
-    PageId pageId=relatedId/coordPageSize;
-    FileOffset coordPageOffset=relatedId%coordPageSize;
+    PageId     relatedId=id-std::numeric_limits<Id>::min();
+    PageId     pageId=relatedId/coordPageSize;
+    FileOffset coordPageIndex=relatedId%coordPageSize;
 
     if (currentPageId!=std::numeric_limits<PageId>::max()) {
       if (currentPageId==pageId) {
-        coords[coordPageOffset]=coord;
-        isSet[coordPageOffset]=true;
+        coords[coordPageIndex]=coord;
+        isSet[coordPageIndex]=true;
 
         return true;
       }
@@ -87,13 +86,15 @@ namespace osmscout {
 
     CoordPageOffsetMap::const_iterator pageOffsetEntry=coordIndex.find(pageId);
 
+    // Do we write a coord to a page, we have not yet written and
+    // thus must begin a new page?
     if (pageOffsetEntry==coordIndex.end()) {
       isSet.assign(coordPageSize,false);
 
-      coords[coordPageOffset]=coord;
-      isSet[coordPageOffset]=true;
+      coords[coordPageIndex]=coord;
+      isSet[coordPageIndex]=true;
 
-      FileOffset pageOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
+      FileOffset pageOffset=coordPageCount*coordPageSize*coordByteSize;
 
       currentPageId=pageId;
       currentPageOffset=pageOffset;
@@ -105,7 +106,8 @@ namespace osmscout {
       return true;
     }
 
-    if (!coordWriter.SetPos(pageOffsetEntry->second+coordPageOffset*2*sizeof(uint32_t))) {
+    // We have to update a coord in a page we have already written
+    if (!coordWriter.SetPos(pageOffsetEntry->second+coordPageIndex*coordByteSize)) {
       return false;
     }
 
@@ -341,7 +343,7 @@ namespace osmscout {
 
     coordWriter.Write(coordPageSize);
     coordWriter.Write(offset);
-    coordWriter.FlushCurrentBlockWithZeros(coordPageSize*2*sizeof(uint32_t));
+    coordWriter.FlushCurrentBlockWithZeros(coordPageSize*coordByteSize);
 
     coordPageCount++;
 
