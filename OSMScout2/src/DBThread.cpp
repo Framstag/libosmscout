@@ -192,8 +192,6 @@ void DBThread::Initialize()
     return;
   }
 
-  qDebug() << "Initial bounding box [" << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]";
-
   emit InitialisationFinished(response);
 }
 
@@ -255,7 +253,7 @@ void DBThread::TriggerMapRendering()
     osmscout::AreaSearchParameter searchParameter;
 
     searchParameter.SetBreaker(renderBreakerRef);
-
+    searchParameter.SetMaximumAreaLevel(4);
     searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
 
     std::list<std::string>        paths;
