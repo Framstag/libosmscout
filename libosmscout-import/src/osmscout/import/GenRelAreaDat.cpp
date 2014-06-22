@@ -613,11 +613,14 @@ namespace osmscout {
 
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
-    std::set<OSMId>                relationIds;
+    std::set<OSMId>                pendingRelationIds;
+    std::set<OSMId>                visitedRelationIds;
 
     CoordDataFile::CoordResultMap  coordMap;
     IdRawWayMap                    wayMap;
     std::map<OSMId,RawRelationRef> relationMap;
+
+    visitedRelationIds.insert(rawRelation.GetId());
 
     // Initial collection of all relation and way ids of the top level relation
 
@@ -636,6 +639,14 @@ namespace osmscout {
                 member->role.empty())) {
         if (boundaryId!=typeIgnore &&
             rawRelation.GetType()==boundaryId) {
+          if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
+            progress.Warning("Relation "+
+                             NumberToString(member->id)+
+                             " is referenced multiple times within relation "+
+                             NumberToString(rawRelation.GetId())+" "+name);
+            continue;
+          }
+
           if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
             progress.Error("Found self referencing relation "+
                            NumberToString(member->id)+
@@ -644,7 +655,7 @@ namespace osmscout {
             return false;
           }
 
-          relationIds.insert(member->id);
+          pendingRelationIds.insert(member->id);
         }
         else {
           progress.Warning("Unsupported relation reference in relation "+
@@ -657,25 +668,26 @@ namespace osmscout {
 
     // Load child relations recursively and collect more way ids at the same time
 
-    while (!relationIds.empty()) {
+    while (!pendingRelationIds.empty()) {
       std::vector<RawRelationRef> childRelations;
 
-      childRelations.reserve(relationIds.size());
+      childRelations.reserve(pendingRelationIds.size());
 
-      if (!relDataFile.Get(relationIds,
+      if (!relDataFile.Get(pendingRelationIds,
                            childRelations)) {
         progress.Error("Cannot resolve child relations of relation "+
                        NumberToString(rawRelation.GetId())+" "+name);
         return false;
       }
 
-      relationIds.clear();
+      pendingRelationIds.clear();
 
       for (std::vector<RawRelationRef>::const_iterator cr=childRelations.begin();
            cr!=childRelations.end();
            ++cr) {
         RawRelationRef childRelation(*cr);
 
+        visitedRelationIds.insert(childRelation->GetId());
         relationMap[childRelation->GetId()]=childRelation;
 
         for (std::vector<RawRelation::Member>::const_iterator member=childRelation->members.begin();
@@ -693,6 +705,14 @@ namespace osmscout {
                     member->role.empty())) {
             if (boundaryId!=typeIgnore &&
                 rawRelation.GetType()==boundaryId) {
+              if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
+                progress.Warning("Relation "+
+                                 NumberToString(member->id)+
+                                 " is referenced multiple times within relation "+
+                                 NumberToString(rawRelation.GetId())+" "+name);
+                continue;;
+              }
+
               if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
                 progress.Error("Found self referencing relation "+
                                NumberToString(member->id)+
@@ -703,7 +723,7 @@ namespace osmscout {
                 return false;
               }
 
-              relationIds.insert(member->id);
+              pendingRelationIds.insert(member->id);
             }
             else {
               progress.Warning("Unsupported relation reference in relation "+
