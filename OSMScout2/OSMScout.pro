@@ -28,7 +28,7 @@ SOURCES = src/OSMScout.cpp \
           src/MapWidget.cpp \
           src/MainWindow.cpp \
           src/SearchLocationModel.cpp \
-    src/RoutingModel.cpp
+          src/RoutingModel.cpp
 
 HEADERS = src/Settings.h \
           src/Theme.h \
@@ -36,7 +36,7 @@ HEADERS = src/Settings.h \
           src/MapWidget.h \
           src/MainWindow.h \
           src/SearchLocationModel.h \
-    src/RoutingModel.h
+          src/RoutingModel.h
 
 OTHER_FILES += \
     qml/custom/MapButton.qml \
@@ -51,4 +51,13 @@ OTHER_FILES += \
     qml/custom/MapDialog.qml \
     qml/RoutingDialog.qml \
     qml/AboutDialog.qml
+
+RESOURCES += \
+    res.qrc
+
+ANDROID_EXTRA_LIBS = ../libosmscout/src/.libs/libosmscout.so \
+                     ../libosmscout-map/src/.libs//libosmscoutmap.so \
+                     ../libosmscout-map-qt/src/.libs/libosmscoutmapqt.so
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
