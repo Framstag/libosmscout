@@ -259,7 +259,7 @@ namespace osmscout {
     return true;
   }
 
-  bool MercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
+  bool MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
   {
     assert(false); //should not be called
     return false;
@@ -344,7 +344,7 @@ namespace osmscout {
         return true;
     }
 
-    bool ReversedYAxisMercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
+    bool ReversedYAxisMercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
     {
         assert(false); //should not be called
         return false;
