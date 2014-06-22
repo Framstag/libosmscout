@@ -154,7 +154,7 @@ void DBThread::Initialize()
   }
 
   std::cout << "Initial bounding box [";
-  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
+  std::cout << response.minLat << "," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
 
   emit InitialisationFinished(response);
 }
