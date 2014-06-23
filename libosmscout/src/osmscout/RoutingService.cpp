@@ -929,6 +929,9 @@ namespace osmscout {
           if(!CalculateRoute(profile, fromObject, fromNodeIndex, toObject, toNodeIndex, *routePart)){
               return false;
           }
+          if (routePart->IsEmpty()) {
+              return false;
+          }
           route.push_back(*routePart);
           delete routePart;
       }
