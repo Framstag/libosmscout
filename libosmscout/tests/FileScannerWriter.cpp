@@ -79,7 +79,7 @@ int main()
 
     writer.Close();
 
-    if (scanner.Open("test.dat",true,false)) {
+    if (scanner.Open("test.dat",osmscout::FileScanner::Normal,false)) {
 
       // Read/Write
 
