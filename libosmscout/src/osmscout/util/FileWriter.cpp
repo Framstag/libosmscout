@@ -478,8 +478,8 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t latValue=(uint32_t)floor((coord.GetLat()+90.0)*latConversionFactor);
-    uint32_t lonValue=(uint32_t)floor((coord.GetLon()+180.0)*lonConversionFactor);
+    uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
 
     char buffer[coordByteSize];
 
