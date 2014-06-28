@@ -22,6 +22,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <string>
+
 #include <osmscout/system/Types.h>
 
 namespace osmscout {
@@ -89,6 +91,9 @@ namespace osmscout {
       this->lat=other.lat;
       this->lon=other.lon;
     }
+
+    static bool Parse(const std::string& text,
+                      GeoCoord& coord);
   };
 
   /**
