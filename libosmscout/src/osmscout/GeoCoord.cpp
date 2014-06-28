@@ -293,23 +293,23 @@ namespace osmscout {
     std::streamsize         oldPrecision=stream.precision(5);
     std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
 
-    if (coord.GetLat()>=0) {
-      stream << "N ";
-    }
-    else {
-      stream << "S ";
-    }
-
     stream << coord.GetLat();
 
-    if (coord.GetLon()>=0) {
-      stream << " E ";
+    if (coord.GetLat()>=0) {
+      stream << " N ";
     }
     else {
-      stream << " W ";
+      stream << " S ";
     }
 
     stream << coord.GetLon();
+
+    if (coord.GetLon()>=0) {
+      stream << " E";
+    }
+    else {
+      stream << " W";
+    }
 
     stream.precision(oldPrecision);
     stream.setf(oldFlags,std::ios::floatfield);
