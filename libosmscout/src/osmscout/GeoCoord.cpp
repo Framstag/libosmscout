@@ -288,6 +288,35 @@ namespace osmscout {
     }
   }
 
+  std::ostream& operator<<(std::ostream& stream, const GeoCoord& coord)
+  {
+    std::streamsize         oldPrecision=stream.precision(5);
+    std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
+
+    if (coord.GetLat()>=0) {
+      stream << "N ";
+    }
+    else {
+      stream << "S ";
+    }
+
+    stream << coord.GetLat();
+
+    if (coord.GetLon()>=0) {
+      stream << " E ";
+    }
+    else {
+      stream << " W ";
+    }
+
+    stream << coord.GetLon();
+
+    stream.precision(oldPrecision);
+    stream.setf(oldFlags,std::ios::floatfield);
+
+    return stream;
+  }
+
   const double latConversionFactor=134217727.0/180.0; // 27 Bit
   const double lonConversionFactor=134217727.0/360.0; // 27 Bit
   const size_t coordByteSize=7;

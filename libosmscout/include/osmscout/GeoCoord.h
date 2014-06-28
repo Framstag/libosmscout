@@ -23,6 +23,7 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <string>
+#include <ostream>
 
 #include <osmscout/system/Types.h>
 
@@ -95,6 +96,8 @@ namespace osmscout {
     static bool Parse(const std::string& text,
                       GeoCoord& coord);
   };
+
+  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const GeoCoord& coord);
 
   /**
    * \ingroup Util

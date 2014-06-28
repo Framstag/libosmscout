@@ -16,7 +16,7 @@ bool CheckParseFail(const std::string& text)
     return true;
   }
   else {
-    std::cerr << "FAIL: Was parsed to " << coord.GetLat() << "," << coord.GetLon() << std::endl;
+    std::cerr << "FAIL: Was parsed to " << coord << std::endl;
     return false;
   }
 }
@@ -26,7 +26,7 @@ bool CheckParseSuccess(const std::string& text,
 {
   osmscout::GeoCoord coord;
 
-  std::cout << "Expect '" << text << "' to parse to " << expected.GetLat() << "," << expected.GetLon() << std::endl;
+  std::cout << "Expect '" << text << "' to parse to " << expected << std::endl;
 
   if (osmscout::GeoCoord::Parse(text,
                                 coord)) {
@@ -38,7 +38,7 @@ bool CheckParseSuccess(const std::string& text,
       return true;
     }
     else {
-      std::cerr << "FAIL: Was parsed to " <<  coord.GetLat() << "," << coord.GetLon() << std::endl;
+      std::cerr << "FAIL: Was parsed to " <<  coord << std::endl;
       return false;
     }
   }
@@ -50,11 +50,6 @@ bool CheckParseSuccess(const std::string& text,
 
 int main()
 {
-  std::cout.precision(5);
-  std::cout.setf(std::ios::fixed,std::ios::floatfield);
-  std::cerr.precision(5);
-  std::cerr.setf(std::ios::fixed,std::ios::floatfield);
-
   // Empty string
   if (!CheckParseFail("")) {
     errors++;
