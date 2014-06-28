@@ -452,7 +452,12 @@ bool DBThread::RenderMap(QPainter& painter,
                                      dpi,
                                      unknownFillStyle);
 
-    backgroundColor=unknownFillStyle->GetFillColor();
+    if (unknownFillStyle.Valid()) {
+      backgroundColor=unknownFillStyle->GetFillColor();
+    }
+    else {
+        backgroundColor=osmscout::Color(0,0,0);
+    }
 
     painter.fillRect(0,
                      0,
