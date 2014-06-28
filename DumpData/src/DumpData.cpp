@@ -232,10 +232,19 @@ static void DumpIndent(size_t indent)
 
 static void DumpCoord(const osmscout::Point& coord)
 {
+
   std::cout << "Coord {" << std::endl;
   std::cout << "  id: " << coord.GetId() << std::endl;
+
+  std::streamsize         oldPrecision=std::cout.precision(5);
+  std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+
   std::cout << "  lat: " << coord.GetLat() << std::endl;
   std::cout << "  lon: " << coord.GetLon() << std::endl;
+
+  std::cout.setf(oldFlags,std::ios::floatfield);
+  std::cout.precision(oldPrecision);
+
   std::cout << "}" << std::endl;
 }
 
@@ -299,8 +308,15 @@ static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
                      IDENT);
 
   std::cout << std::endl;
+
+  std::streamsize         oldPrecision=std::cout.precision(5);
+  std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+
   std::cout << "  lat: " << node->GetLat() << std::endl;
   std::cout << "  lon: " << node->GetLon() << std::endl;
+
+  std::cout.setf(oldFlags,std::ios::floatfield);
+  std::cout.precision(oldPrecision);
 
   std::cout << "}" << std::endl;
 }
@@ -523,7 +539,13 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
         std::cout << " id: " << area->rings.front().ids[n];
       }
 
+      std::streamsize         oldPrecision=std::cout.precision(5);
+      std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+
       std::cout << " lat: " << area->rings.front().nodes[n].GetLat() << " lon: "<< area->rings.front().nodes[n].GetLon() << " }" << std::endl;
+
+      std::cout.setf(oldFlags,std::ios::floatfield);
+      std::cout.precision(oldPrecision);
     }
   }
 
@@ -554,7 +576,13 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
           std::cout << " id: " << area->rings[r].ids[n];
         }
 
+        std::streamsize         oldPrecision=std::cout.precision(5);
+        std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+
         std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;
+
+        std::cout.setf(oldFlags,std::ios::floatfield);
+        std::cout.precision(oldPrecision);
       }
     }
 
