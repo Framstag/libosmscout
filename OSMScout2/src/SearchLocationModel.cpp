@@ -23,26 +23,44 @@
 
 #include "DBThread.h"
 
-Location::Location(const QString& name,
+Location::Location(Type type,
+                   const QString& name,
                    const QString& label,
                    QObject* parent)
     : QObject(parent),
+      type(type),
       name(name),
       label(label)
 {
     // no code
 }
 
+Location::Location(const QString& name,
+                   const QString& label,
+                   const osmscout::GeoCoord& coord,
+                   QObject* parent)
+    : QObject(parent),
+      type(typeCoordinate),
+      name(name),
+      label(label),
+      coord(coord)
+{
+    // no code
+}
+
 Location::Location(QObject* parent)
-    : QObject(parent)
+    : QObject(parent),
+      type(typeNone)
 {
     // no code
 }
 
 Location::Location(const Location& other)
  : QObject(other.parent()),
+   type(other.type),
    name(other.name),
-   references(other.references)
+   references(other.references),
+   coord(other.coord)
 {
     // no code
 }
@@ -54,7 +72,13 @@ Location::~Location()
 
 void Location::addReference(const osmscout::ObjectFileRef reference)
 {
+    assert(type==typeObject);
     references.push_back(reference);
+}
+
+Location::Type Location::getType() const
+{
+    return type;
 }
 
 QString Location::getName() const
@@ -65,6 +89,11 @@ QString Location::getName() const
 QString Location::getLabel() const
 {
     return label;
+}
+
+osmscout::GeoCoord Location::getCoord() const
+{
+    return coord;
 }
 
 const QList<osmscout::ObjectFileRef>& Location::getReferences() const
@@ -213,8 +242,22 @@ void LocationListModel::setPattern(const QString& pattern)
 
   std::string osmPattern=pattern.toUtf8().constData();
 
+  osmscout::GeoCoord coord;
+
+  if (osmscout::GeoCoord::Parse(osmPattern,
+                                coord)) {
+      QString name=QString::fromLocal8Bit(coord.GetDisplayText().c_str());
+      QString label=name;
+
+      Location *location=new Location(name,
+                                      label,
+                                      coord);
+      locations.append(location);
+  }
+
   std::cout << "Searching for '" << osmPattern << "'" << std::endl;
 
+  search.limit=50;
   search.InitializeSearchEntries(osmPattern);
 
   DBThread::GetInstance()->SearchForLocations(search,
@@ -255,9 +298,10 @@ void LocationListModel::setPattern(const QString& pattern)
       label+=GetObjectTypLabel(entry->address->object);
       label+="</i>";
 
-      std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+      std::cout << "- " << name.toLocal8Bit().data() << std::endl;
 
-      location=new Location(name,
+      location=new Location(Location::typeObject,
+                            name,
                             label);
       location->addReference(entry->address->object);
     }
@@ -284,9 +328,10 @@ void LocationListModel::setPattern(const QString& pattern)
       label+=GetObjectTypLabel(entry->location->objects.front());
       label+="</i>";
 
-      std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+      std::cout << "- " << name.toLocal8Bit().data() << std::endl;
 
-      location=new Location(name,
+      location=new Location(Location::typeObject,
+                            name,
                             label);
 
       for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry->location->objects.begin();
@@ -320,9 +365,10 @@ void LocationListModel::setPattern(const QString& pattern)
       label+=GetObjectTypLabel(entry->poi->object);
       label+="</i>";
 
-      std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+      std::cout << "- " << name.toLocal8Bit().data() << std::endl;
 
-      location=new Location(name,
+      location=new Location(Location::typeObject,
+                            name,
                             label);
       location->addReference(entry->poi->object);
     }
@@ -347,10 +393,11 @@ void LocationListModel::setPattern(const QString& pattern)
         }
         label+="</i>";
 
-        location=new Location(name,
+        location=new Location(Location::typeObject,
+                              name,
                               label);
 
-        std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+        std::cout << "- " << name.toLocal8Bit().data() << std::endl;
 
         if (entry->adminRegion->aliasObject.Valid()) {
             location->addReference(entry->adminRegion->aliasObject);

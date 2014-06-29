@@ -23,21 +23,36 @@
 #include <QObject>
 #include <QAbstractListModel>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Location.h>
 
 class Location : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString name READ getName)
+public:
+    enum Type {
+        typeNone,
+        typeObject,
+        typeCoordinate
+    };
 
 private:
+    Type                           type;
     QString                        name;
     QString                        label;
     QList<osmscout::ObjectFileRef> references;
+    osmscout::GeoCoord             coord;
 
 public:
+    Location(Type type,
+             const QString& name,
+             const QString& label,
+             QObject* parent = 0);
+
     Location(const QString& name,
              const QString& label,
+             const osmscout::GeoCoord& coord,
              QObject* parent = 0);
 
     Location(QObject* parent = 0);
@@ -46,8 +61,10 @@ public:
 
     void addReference(const osmscout::ObjectFileRef reference);
 
+    Type getType() const;
     QString getName() const;
     QString getLabel() const;
+    osmscout::GeoCoord getCoord() const;
     const QList<osmscout::ObjectFileRef>& getReferences() const;
 };
 

@@ -296,45 +296,58 @@ void MapWidget::showLocation(Location* location)
 
     std::cout << "MapWidget::showLocation(\"" << location->getName().toLocal8Bit().constData() << "\")" << std::endl;
 
-    osmscout::ObjectFileRef reference=location->getReferences().front();
+    if (location->getType()==Location::typeObject) {
+        osmscout::ObjectFileRef reference=location->getReferences().front();
 
-    DBThread* dbThread=DBThread::GetInstance();
+        DBThread* dbThread=DBThread::GetInstance();
 
-    if (reference.GetType()==osmscout::refNode) {
-        osmscout::NodeRef node;
+        if (reference.GetType()==osmscout::refNode) {
+            osmscout::NodeRef node;
 
-        if (dbThread->GetNodeByOffset(reference.GetFileOffset(),node)) {
-            lon=node->GetLon();
-            lat=node->GetLat();
-            this->magnification=osmscout::Magnification::magVeryClose;
-
-            TriggerMapRendering();
-        }
-    }
-    else if (reference.GetType()==osmscout::refArea) {
-        osmscout::AreaRef area;
-
-        if (dbThread->GetAreaByOffset(reference.GetFileOffset(),area)) {
-            if (area->GetCenter(lat,lon)) {
+            if (dbThread->GetNodeByOffset(reference.GetFileOffset(),node)) {
+                lat=node->GetLat();
+                lon=node->GetLon();
                 this->magnification=osmscout::Magnification::magVeryClose;
 
                 TriggerMapRendering();
             }
         }
-    }
-    else if (reference.GetType()==osmscout::refWay) {
-        osmscout::WayRef way;
+        else if (reference.GetType()==osmscout::refArea) {
+            osmscout::AreaRef area;
 
-        if (dbThread->GetWayByOffset(reference.GetFileOffset(),way)) {
-            if (way->GetCenter(lat,lon)) {
-                this->magnification=osmscout::Magnification::magVeryClose;
+            if (dbThread->GetAreaByOffset(reference.GetFileOffset(),area)) {
+                if (area->GetCenter(lat,lon)) {
+                    this->magnification=osmscout::Magnification::magVeryClose;
 
-                TriggerMapRendering();
+                    TriggerMapRendering();
+                }
             }
         }
+        else if (reference.GetType()==osmscout::refWay) {
+            osmscout::WayRef way;
+
+            if (dbThread->GetWayByOffset(reference.GetFileOffset(),way)) {
+                if (way->GetCenter(lat,lon)) {
+                    this->magnification=osmscout::Magnification::magVeryClose;
+
+                    TriggerMapRendering();
+                }
+            }
+        }
+        else {
+            assert(false);
+        }
     }
-    else {
-        assert(false);
+    else if (location->getType()==Location::typeCoordinate) {
+        osmscout::GeoCoord coord=location->getCoord();
+
+        std::cout << "MapWidget: " << coord.GetDisplayText() << std::endl;
+
+        lat=coord.GetLat();
+        lon=coord.GetLon();
+        this->magnification=osmscout::Magnification::magVeryClose;
+
+        TriggerMapRendering();
     }
 }
 

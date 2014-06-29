@@ -43,7 +43,6 @@ OTHER_FILES += \
     qml/SearchLocationDialog.qml \
     qml/custom/LineEdit.qml \
     qml/custom/DialogActionButton.qml \
-    qml/SearchGeocodeDialog.qml \
     qml/SearchLocationDialog.qml \
     qml/custom/LocationEdit.qml \
     qml/custom/ScrollIndicator.qml \

@@ -10,16 +10,6 @@ Rectangle {
     objectName: "main"
     color: "white"
 
-    function openCoordinateDialog() {
-        var component = Qt.createComponent("SearchGeocodeDialog.qml")
-        var dialog = component.createObject(mainWindow, {"lat": map.lat, "lon": map.lon } )
-
-        dialog.showCoordinates.connect(showCoordinates)
-        dialog.opened.connect(onDialogOpened)
-        dialog.closed.connect(onDialogClosed)
-        dialog.open()
-    }
-
     function openSearchLocationDialog() {
         var component = Qt.createComponent("SearchLocationDialog.qml")
         var dialog = component.createObject(mainWindow, {})
@@ -46,10 +36,6 @@ Rectangle {
         dialog.opened.connect(onDialogOpened)
         dialog.closed.connect(onDialogClosed)
         dialog.open()
-    }
-
-    function showCoordinates(lat, lon) {
-        map.showCoordinates(lat, lon)
     }
 
     function showLocation(location) {
@@ -156,15 +142,6 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: Theme.mapButtonSpace
         spacing: Theme.mapButtonSpace
-
-        MapButton {
-            id: searchGeocode
-            label: ","
-
-            onClicked: {
-                openCoordinateDialog()
-            }
-        }
 
         MapButton {
             id: searchLocation
