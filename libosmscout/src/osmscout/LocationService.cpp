@@ -220,6 +220,12 @@ namespace osmscout {
     return !limitReached;
   }
 
+  LocationSearch::LocationSearch()
+  : limit(50)
+  {
+    // no code
+  }
+
   void LocationSearch::InitializeSearchEntries(const std::string& searchPattern)
   {
     std::list<std::string> tokens;

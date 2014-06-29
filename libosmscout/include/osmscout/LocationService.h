@@ -47,6 +47,8 @@ namespace osmscout {
     std::list<Entry> searches;
     size_t           limit;
 
+    LocationSearch();
+
     /**
      * This takes the given pattern, splits it into tokens,
      * and generates a number of search entries based on the idea
