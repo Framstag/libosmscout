@@ -71,6 +71,8 @@ namespace osmscout {
       return lon;
     }
 
+    std::string GetDisplayText() const;
+
     inline bool IsEqual(const GeoCoord& other) const
     {
       return lat==other.lat && lon==other.lon;

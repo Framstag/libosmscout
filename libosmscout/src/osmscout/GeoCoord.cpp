@@ -19,7 +19,42 @@
 
 #include <osmscout/GeoCoord.h>
 
+#include <sstream>
+
 namespace osmscout {
+
+  std::string GeoCoord::GetDisplayText() const
+  {
+    std::ostringstream stream;
+
+    stream.imbue(std::locale(""));
+
+    std::streamsize         oldPrecision=stream.precision(5);
+    std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
+
+    stream << GetLat();
+
+    if (GetLat()>=0) {
+      stream << " N ";
+    }
+    else {
+      stream << " S ";
+    }
+
+    stream << GetLon();
+
+    if (GetLon()>=0) {
+      stream << " E";
+    }
+    else {
+      stream << " W";
+    }
+
+    stream.precision(oldPrecision);
+    stream.setf(oldFlags,std::ios::floatfield);
+
+    return stream.str();
+  }
 
   static size_t EatWhitespace(const std::string& text,
                               size_t currentPos)
@@ -290,29 +325,7 @@ namespace osmscout {
 
   std::ostream& operator<<(std::ostream& stream, const GeoCoord& coord)
   {
-    std::streamsize         oldPrecision=stream.precision(5);
-    std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
-
-    stream << coord.GetLat();
-
-    if (coord.GetLat()>=0) {
-      stream << " N ";
-    }
-    else {
-      stream << " S ";
-    }
-
-    stream << coord.GetLon();
-
-    if (coord.GetLon()>=0) {
-      stream << " E";
-    }
-    else {
-      stream << " W";
-    }
-
-    stream.precision(oldPrecision);
-    stream.setf(oldFlags,std::ios::floatfield);
+    stream << coord.GetDisplayText();
 
     return stream;
   }
