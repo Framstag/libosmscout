@@ -32,8 +32,10 @@ namespace osmscout {
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
                                const TypeConfig& typeConfig);
-    bool Process(const FileOffset& offset,
-                 Node& node);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Node& node,
+                 bool& save);
     bool AfterProcessingEnd();
   };
 
@@ -58,8 +60,10 @@ namespace osmscout {
     return true;
   }
 
-  bool NodeLocationProcessorFilter::Process(const FileOffset& offset,
-                                           Node& node)
+  bool NodeLocationProcessorFilter::Process(Progress& /*progress*/,
+                                            const FileOffset& offset,
+                                            Node& node,
+                                            bool& /*save*/)
   {
     std::string location;
 

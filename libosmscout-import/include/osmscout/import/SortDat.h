@@ -107,12 +107,22 @@ namespace osmscout {
     public:
       virtual ~ProcessingFilter();
 
-      virtual bool BeforeProcessingStart(const ImportParameter& parameter,
-                                         Progress& progress,
-                                         const TypeConfig& typeConfig) = 0;
-      virtual bool Process(const FileOffset& offset,
-                           N& data) = 0;
-      virtual bool AfterProcessingEnd() = 0;
+      virtual bool BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                         Progress& /*progress*/,
+                                         const TypeConfig& /*typeConfig*/)
+      {
+        return true;
+      }
+
+      virtual bool Process(Progress& progress,
+                           const FileOffset& offset,
+                           N& data,
+                           bool& save) = 0;
+
+      virtual bool AfterProcessingEnd()
+      {
+        return true;
+      }
     };
 
     typedef Ref<ProcessingFilter> ProcessingFilterRef;
@@ -373,6 +383,7 @@ namespace osmscout {
           }
 
           FileOffset fileOffset;
+          bool       save=true;
 
           if (!dataWriter.GetPos(fileOffset)) {
             progress.Error(std::string("Error while reading current fileOffset in file '")+
@@ -385,13 +396,19 @@ namespace osmscout {
               ++f) {
             ProcessingFilterRef filter(*f);
 
-            if (!filter->Process(fileOffset,
-                                 data)) {
+            if (!filter->Process(progress,
+                                 fileOffset,
+                                 data,
+                                 save)) {
               progress.Error(std::string("Error while processing data entry to file '")+
                              dataWriter.GetFilename()+"'");
 
               return false;
             }
+          }
+
+          if (!save) {
+            continue;
           }
 
           if (!data.Write(dataWriter)) {
@@ -423,7 +440,7 @@ namespace osmscout {
       maxIndex=cellCount-1;
     }
 
-    assert(overallDataCount==dataCopyiedCount);
+    assert(overallDataCount>=dataCopyiedCount);
 
     for (typename std::list<Source>::iterator source=sources.begin();
             source!=sources.end();
@@ -433,6 +450,12 @@ namespace osmscout {
         return false;
       }
     }
+
+    dataWriter.SetPos(0);
+    dataWriter.Write(dataCopyiedCount);
+
+    mapWriter.SetPos(0);
+    mapWriter.Write(dataCopyiedCount);
 
     return dataWriter.Close() &&
            mapWriter.Close();
@@ -513,6 +536,7 @@ namespace osmscout {
         }
 
         FileOffset fileOffset;
+        bool       save=true;
 
         if (!dataWriter.GetPos(fileOffset)) {
           progress.Error(std::string("Error while reading current fileOffset in file '")+
@@ -525,13 +549,19 @@ namespace osmscout {
             ++f) {
           ProcessingFilterRef filter(*f);
 
-          if (!filter->Process(fileOffset,
-                               data)) {
+          if (!filter->Process(progress,
+                               fileOffset,
+                               data,
+                               save)) {
             progress.Error(std::string("Error while processing data entry to file '")+
                            dataWriter.GetFilename()+"'");
 
             return false;
           }
+        }
+
+        if (!save) {
+          continue;
         }
 
         if (!data.Write(dataWriter)) {

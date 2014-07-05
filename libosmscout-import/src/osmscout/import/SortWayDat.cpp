@@ -33,8 +33,10 @@ namespace osmscout {
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
                                const TypeConfig& typeConfig);
-    bool Process(const FileOffset& offset,
-                 Way& way);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Way& way,
+                 bool& save);
     bool AfterProcessingEnd();
   };
 
@@ -59,8 +61,10 @@ namespace osmscout {
     return true;
   }
 
-  bool WayLocationProcessorFilter::Process(const FileOffset& offset,
-                                           Way& way)
+  bool WayLocationProcessorFilter::Process(Progress& /*progress*/,
+                                           const FileOffset& offset,
+                                           Way& way,
+                                           bool& /*save*/)
   {
     std::string location;
 
@@ -112,6 +116,109 @@ namespace osmscout {
     return writer.Close();
   }
 
+  class WayNodeReductionProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
+  {
+  private:
+    std::vector<GeoCoord> nodeBuffer;
+    std::vector<Id>       idBuffer;
+
+  private:
+    bool IsEqual(const unsigned char buffer1[],
+                 const unsigned char buffer2[]);
+
+  public:
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Way& way,
+                 bool& save);
+  };
+
+  bool WayNodeReductionProcessorFilter::IsEqual(const unsigned char buffer1[],
+                                                const unsigned char buffer2[])
+  {
+    for (size_t i=0; i<coordByteSize; i++) {
+      if (buffer1[i]!=buffer2[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool WayNodeReductionProcessorFilter::Process(Progress& progress,
+                                                const FileOffset& offset,
+                                                Way& way,
+                                                bool& save)
+  {
+    unsigned char buffers[2][coordByteSize];
+
+    bool reduced=false;
+
+    if (way.nodes.size()>=2) {
+      size_t lastIndex=0;
+      size_t currentIndex=1;
+
+      nodeBuffer.clear();
+      idBuffer.clear();
+
+      way.nodes[0].EncodeToBuffer(buffers[0]);
+
+      nodeBuffer.push_back(way.nodes[0]);
+      if (!way.ids.empty()) {
+        idBuffer.push_back(way.ids[0]);
+      }
+
+      for (size_t n=1; n<way.nodes.size(); n++) {
+        way.nodes[n].EncodeToBuffer(buffers[currentIndex]);
+
+        if (IsEqual(buffers[lastIndex],
+                    buffers[currentIndex])) {
+          if (n>=way.ids.size() ||
+              way.ids[n]==0) {
+            reduced=true;
+          }
+          else if ((n-1)>=way.ids.size() ||
+              way.ids[n-1]==0) {
+            way.ids[n-1]=way.ids[n];
+            reduced=true;
+          }
+          else {
+            nodeBuffer.push_back(way.nodes[n]);
+            if (n<way.ids.size()) {
+              idBuffer.push_back(way.ids[n]);
+            }
+
+            lastIndex=currentIndex;
+            currentIndex=(lastIndex+1)%2;
+          }
+        }
+        else {
+          nodeBuffer.push_back(way.nodes[n]);
+          if (n<way.ids.size()) {
+            idBuffer.push_back(way.ids[n]);
+          }
+
+          lastIndex=currentIndex;
+          currentIndex=(lastIndex+1)%2;
+        }
+      }
+    }
+
+    if (reduced) {
+      if (nodeBuffer.size()<2) {
+        progress.Debug("Way " + NumberToString(offset) + " empty/invalid after node reduction");
+        save=false;
+        return true;
+      }
+      else {
+        way.nodes=nodeBuffer;
+        way.ids=idBuffer;
+      }
+    }
+
+    return true;
+  }
+
   void SortWayDataGenerator::GetTopLeftCoordinate(const Way& data,
                                                   double& maxLat,
                                                   double& minLon)
@@ -131,6 +238,7 @@ namespace osmscout {
     AddSource(osmRefWay,"wayway.dat");
 
     AddFilter(new WayLocationProcessorFilter());
+    AddFilter(new WayNodeReductionProcessorFilter());
   }
 
   std::string SortWayDataGenerator::GetDescription() const

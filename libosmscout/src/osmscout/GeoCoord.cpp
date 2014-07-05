@@ -23,6 +23,10 @@
 
 namespace osmscout {
 
+  const double latConversionFactor=134217727.0/180.0; // 27 Bit
+  const double lonConversionFactor=134217727.0/360.0; // 27 Bit
+  const size_t coordByteSize=7;
+
   std::string GeoCoord::GetDisplayText() const
   {
     std::ostringstream stream;
@@ -122,30 +126,6 @@ namespace osmscout {
     return true;
   }
 
-  /**
-   * Parse a textual representation of a geo coordinate from a string
-   * to an GeoCoord instance.
-   *
-   * The text should follow the following expression:
-   *
-   * [+|-|N|S] DD[.DDDDD] [N|S] [+|-|W|E] DDD[.DDDDD] [W|E]
-   *
-   * The means:
-   * * You first define the latitude, then the longitude value
-   * * You can define with half you mean by either prefixing or postfixing
-   * the actual number with a hint
-   * * The hint can either be a sign ('-' or '+') or a direction ('N' and 'S'
-   * for latitude, 'E' or 'W' for longitude).
-   *
-   *  Possibly in future more variants will be supported.
-   *
-   * @param text
-   *    Text containing the textual representation
-   * @param coord
-   *    The resulting coordinate, if the text was correctly parsed
-   * @return
-   *    true, if the text was correctly parsed, else false
-   */
   bool GeoCoord::Parse(const std::string& text,
                        GeoCoord& coord)
   {
@@ -322,16 +302,4 @@ namespace osmscout {
       return false;
     }
   }
-
-  std::ostream& operator<<(std::ostream& stream, const GeoCoord& coord)
-  {
-    stream << coord.GetDisplayText();
-
-    return stream;
-  }
-
-  const double latConversionFactor=134217727.0/180.0; // 27 Bit
-  const double lonConversionFactor=134217727.0/360.0; // 27 Bit
-  const size_t coordByteSize=7;
-
 }
