@@ -127,6 +127,7 @@ std::string Destring(const char* str)
 	void IDENT(std::string& value);
 	void TYPEKINDS(unsigned char& types);
 	void TAGCONDITION(TagCondition*& condition);
+	void FEATURE(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
 	void TAG();
 	void TAGANDCOND(TagCondition*& condition);

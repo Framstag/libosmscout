@@ -21,7 +21,6 @@
 
 #include <iostream>
 
-#include <osmscout/TypeConfigLoader.h>
 #include <osmscout/Types.h>
 
 
@@ -595,7 +594,7 @@ namespace osmscout {
 
     progress.SetStep("Loading type config");
 
-    if (!LoadTypeConfig(parameter.GetTypefile().c_str(),typeConfig)) {
+    if (!typeConfig.LoadFromOSTFile(parameter.GetTypefile())) {
       progress.Error("Cannot load type configuration!");
       return false;
     }

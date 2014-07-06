@@ -30,7 +30,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/TypeSet.h \
                         osmscout/ost/Scanner.h \
                         osmscout/ost/Parser.h \
-                        osmscout/TypeConfigLoader.h \
                         osmscout/GroundTile.h \
                         osmscout/Coord.h \
                         osmscout/GeoCoord.h \

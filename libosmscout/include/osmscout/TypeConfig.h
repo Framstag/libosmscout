@@ -219,6 +219,49 @@ namespace osmscout {
   };
 
   /**
+   * A feature combines one or multiple tags  to build information attribute for a type.
+   *
+   * The class "Feature" is the abstract base class for a concrete feature implementation
+   * like "NameFeature" or "AccessFeature".
+   *
+   * A feature could just be an alias for one tag (like "name") but it could also combine
+   * a number of attributes (e.g. access and all its variations).
+   */
+  class OSMSCOUT_API Feature : public Referencable
+  {
+  public:
+    Feature();
+    virtual ~Feature();
+
+    /**
+     * Returns the name of the feature
+     */
+    virtual std::string GetName() const = 0;
+  };
+
+  typedef Ref<Feature> FeatureRef;
+
+  class OSMSCOUT_API NameFeature : public Feature
+  {
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    std::string GetName() const;
+  };
+
+  class OSMSCOUT_API RefFeature : public Feature
+  {
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    std::string GetName() const;
+  };
+
+  /**
    * \ingroup type
    *
    *  Detailed information about one object type
@@ -248,37 +291,64 @@ namespace osmscout {
     };
 
   private:
-    TypeId       id;
-    std::string  name;
+    TypeId                        id;
+    std::string                   name;
 
-    std::list<TypeCondition> conditions;
+    std::list<TypeCondition>      conditions;
+    OSMSCOUT_HASHSET<std::string> featureSet;
+    std::list<FeatureRef>         features;
 
-    bool         canBeNode;
-    bool         canBeWay;
-    bool         canBeArea;
-    bool         canBeRelation;
-    bool         canRouteFoot;
-    bool         canRouteBicycle;
-    bool         canRouteCar;
-    bool         indexAsLocation;
-    bool         indexAsRegion;
-    bool         indexAsPOI;
-    bool         optimizeLowZoom;
-    bool         multipolygon;
-    bool         pinWay;
-    bool         ignoreSeaLand;
-    bool         ignore;
+    bool                          canBeNode;
+    bool                          canBeWay;
+    bool                          canBeArea;
+    bool                          canBeRelation;
+    bool                          canRouteFoot;
+    bool                          canRouteBicycle;
+    bool                          canRouteCar;
+    bool                          indexAsLocation;
+    bool                          indexAsRegion;
+    bool                          indexAsPOI;
+    bool                          optimizeLowZoom;
+    bool                          multipolygon;
+    bool                          pinWay;
+    bool                          ignoreSeaLand;
+    bool                          ignore;
 
   public:
     TypeInfo();
     virtual ~TypeInfo();
 
+    /**
+     * Set the id of this type
+     */
     TypeInfo& SetId(TypeId id);
 
+    /**
+     * The the name of this type
+     */
     TypeInfo& SetType(const std::string& name);
 
     TypeInfo& AddCondition(unsigned char types,
                            TagCondition* condition);
+
+    /**
+     * Add a feature to this type
+     */
+    TypeInfo& AddFeature(const FeatureRef& feature);
+
+    /**
+     * Returns true, if the feature with the given name has already been
+     * assigned to this type.
+     */
+    bool HasFeature(const std::string& featureName) const;
+
+    /**
+     * Return the list of features assigned to this type
+     */
+    inline const std::list<FeatureRef>& GetFeatures() const
+    {
+      return features;
+    }
 
     /**
      * The Type Id of the given type
@@ -568,83 +638,84 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig : public Referencable
   {
   private:
-    std::vector<TagInfo>                   tags;
-    std::vector<TypeInfo>                  types;
+    std::vector<TagInfo>                     tags;
+    std::vector<TypeInfo>                    types;
 
-    TagId                                  nextTagId;
-    TypeId                                 nextTypeId;
+    TagId                                    nextTagId;
+    TypeId                                   nextTypeId;
 
-    OSMSCOUT_HASHMAP<std::string,TagId>    stringToTagMap;
-    OSMSCOUT_HASHMAP<std::string,TypeInfo> nameToTypeMap;
-    OSMSCOUT_HASHMAP<TypeId,TypeInfo>      idToTypeMap;
-    OSMSCOUT_HASHMAP<TagId,uint32_t>       nameTagIdToPrioMap;
-    OSMSCOUT_HASHMAP<TagId,uint32_t>       nameAltTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<std::string,TagId>      stringToTagMap;
+    OSMSCOUT_HASHMAP<std::string,TypeInfo>   nameToTypeMap;
+    OSMSCOUT_HASHMAP<TypeId,TypeInfo>        idToTypeMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>         nameTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>         nameAltTagIdToPrioMap;
 
-    OSMSCOUT_HASHMAP<std::string,size_t>   surfaceToGradeMap;
+    OSMSCOUT_HASHMAP<std::string,size_t>     surfaceToGradeMap;
+
+    OSMSCOUT_HASHMAP<std::string,FeatureRef> nameToFeatureMap;
 
   public:
-    TypeId                                 typeTileLand;
-    TypeId                                 typeTileSea;
-    TypeId                                 typeTileCoast;
-    TypeId                                 typeTileUnknown;
-    TypeId                                 typeTileCoastline;
+    TypeId                                   typeTileLand;
+    TypeId                                   typeTileSea;
+    TypeId                                   typeTileCoast;
+    TypeId                                   typeTileUnknown;
+    TypeId                                   typeTileCoastline;
 
     // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                  tagRef;
-    TagId                                  tagBridge;
-    TagId                                  tagTunnel;
-    TagId                                  tagLayer;
-    TagId                                  tagWidth;
-    TagId                                  tagOneway;
-    TagId                                  tagHouseNr;
-    TagId                                  tagJunction;
-    TagId                                  tagMaxSpeed;
-    TagId                                  tagSurface;
-    TagId                                  tagTracktype;
+    TagId                                    tagRef;
+    TagId                                    tagBridge;
+    TagId                                    tagTunnel;
+    TagId                                    tagLayer;
+    TagId                                    tagWidth;
+    TagId                                    tagOneway;
+    TagId                                    tagHouseNr;
+    TagId                                    tagJunction;
+    TagId                                    tagMaxSpeed;
+    TagId                                    tagSurface;
+    TagId                                    tagTracktype;
 
-    TagId                                  tagAdminLevel;
+    TagId                                    tagAdminLevel;
 
-    TagId                                  tagAccess;
-    TagId                                  tagAccessForward;
-    TagId                                  tagAccessBackward;
+    TagId                                    tagAccess;
+    TagId                                    tagAccessForward;
+    TagId                                    tagAccessBackward;
 
-    TagId                                  tagAccessFoot;
-    TagId                                  tagAccessFootForward;
-    TagId                                  tagAccessFootBackward;
+    TagId                                    tagAccessFoot;
+    TagId                                    tagAccessFootForward;
+    TagId                                    tagAccessFootBackward;
 
-    TagId                                  tagAccessBicycle;
-    TagId                                  tagAccessBicycleForward;
-    TagId                                  tagAccessBicycleBackward;
+    TagId                                    tagAccessBicycle;
+    TagId                                    tagAccessBicycleForward;
+    TagId                                    tagAccessBicycleBackward;
 
-    TagId                                  tagAccessMotorVehicle;
-    TagId                                  tagAccessMotorVehicleForward;
-    TagId                                  tagAccessMotorVehicleBackward;
+    TagId                                    tagAccessMotorVehicle;
+    TagId                                    tagAccessMotorVehicleForward;
+    TagId                                    tagAccessMotorVehicleBackward;
 
-    TagId                                  tagAccessMotorcar;
-    TagId                                  tagAccessMotorcarForward;
-    TagId                                  tagAccessMotorcarBackward;
+    TagId                                    tagAccessMotorcar;
+    TagId                                    tagAccessMotorcarForward;
+    TagId                                    tagAccessMotorcarBackward;
 
-    TagId                                  tagAddrStreet;
+    TagId                                    tagAddrStreet;
 
     // Internal use (only available during preprocessing)
-    TagId                                  tagArea;
-    TagId                                  tagNatural;
-    TagId                                  tagType;
-    TagId                                  tagRestriction;
+    TagId                                    tagArea;
+    TagId                                    tagNatural;
+    TagId                                    tagType;
+    TagId                                    tagRestriction;
 
   public:
     TypeConfig();
     virtual ~TypeConfig();
 
-    void RestoreTagInfo(const TagInfo& tagInfo);
-    void RestoreNameTagInfo(TagId tagId, uint32_t priority);
-    void RestoreNameAltTagInfo(TagId tagId, uint32_t priority);
-
     TagId RegisterTagForInternalUse(const std::string& tagName);
     TagId RegisterTagForExternalUse(const std::string& tagName);
 
-    void RegisterNameTag(const std::string& tagName, uint32_t priority);
-    void RegisterNameAltTag(const std::string& tagName, uint32_t priority);
+    TagId RegisterNameTag(const std::string& tagName, uint32_t priority);
+    TagId RegisterNameAltTag(const std::string& tagName, uint32_t priority);
+
+    void RegisterFeature(const FeatureRef& feature);
+    FeatureRef GetFeature(const std::string& name) const;
 
     TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
 
@@ -690,6 +761,10 @@ namespace osmscout {
                                        size_t grade);
     bool GetGradeForSurface(const std::string& surface,
                             size_t& grade) const;
+
+    bool LoadFromOSTFile(const std::string& filename);
+    bool LoadFromDataFile(const std::string& directory);
+    bool StoreToDataFile(const std::string& directory) const;
   };
 
 

@@ -22,8 +22,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include <osmscout/TypeConfigLoader.h>
-
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -60,7 +58,7 @@ namespace osmscout {
 
     typeConfig=new TypeConfig();
 
-    if (!LoadTypeData(path,*typeConfig)) {
+    if (!typeConfig->LoadFromDataFile(path)) {
       std::cerr << "Cannot load 'types.dat'!" << std::endl;
       return false;
     }

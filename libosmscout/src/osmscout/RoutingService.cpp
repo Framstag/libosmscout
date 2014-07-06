@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include <osmscout/RoutingProfile.h>
-#include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -883,7 +882,7 @@ namespace osmscout {
       return false;
     }
   }
-  
+
   /**
    * Calculate a route
    *
@@ -919,7 +918,7 @@ namespace osmscout {
           nodeIndexes.push_back(targetNodeIndex);
           objects.push_back(targetObject);
       }
-      
+
       for(int index = 0; index<nodeIndexes.size()-1; index++){
           size_t                  fromNodeIndex = nodeIndexes.at(index);
           osmscout::ObjectFileRef fromObject = objects.at(index);

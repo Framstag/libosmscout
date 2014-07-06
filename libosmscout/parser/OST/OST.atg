@@ -97,6 +97,18 @@ PRODUCTIONS
                 }
 
                 [
+                  "{"
+                  [
+                    FEATURE<typeInfo>
+                    {
+                      ","
+                      FEATURE<typeInfo>
+                    }
+                  ]  
+                  "}"
+                ]
+
+                [
                   "OPTIONS"
                   TYPEOPTIONS<typeInfo>
                 ]
@@ -400,12 +412,36 @@ PRODUCTIONS
                | "RELATION"  (. types|=TypeInfo::typeRelation; .)
                .
 
+  FEATURE <TypeInfo& typeInfo>
+              = (. std::string name; .)
+                IDENT<name>
+                (.
+                  FeatureRef feature=config.GetFeature(name);
+                  
+                  if (feature.Valid()) {
+                    if (!typeInfo.HasFeature(name)) {
+                      typeInfo.AddFeature(feature);
+                    }
+                    else {
+                    std::string e="Feature '"+name+"' has been already assigned to type";
+
+                    SemErr(e.c_str());
+                    }
+                  }
+                  else {
+                    std::string e="Feature '"+name+"' is unknown";
+
+                    SemErr(e.c_str());
+                  }                
+                .)
+                .
+
   TYPEOPTIONS<TypeInfo& typeInfo>
               = TYPEOPTION<typeInfo>
                 {
                   TYPEOPTION<typeInfo>
                 }
-              .
+                .
 
   TYPEOPTION<TypeInfo& typeInfo>
               =  ROUTE<typeInfo>

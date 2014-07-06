@@ -161,11 +161,11 @@ void Scanner::Init() {
 	start.set(61, 18);
 	start.set(40, 9);
 	start.set(41, 10);
+	start.set(44, 11);
 	start.set(33, 19);
 	start.set(60, 20);
 	start.set(62, 21);
-	start.set(91, 15);
-	start.set(44, 16);
+	start.set(91, 16);
 	start.set(93, 17);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OST", 4);
@@ -176,11 +176,11 @@ void Scanner::Init() {
 	keywords.set("TYPES", 11);
 	keywords.set("TYPE", 12);
 	keywords.set("OR", 16);
-	keywords.set("OPTIONS", 17);
-	keywords.set("TAGS", 18);
-	keywords.set("TAG", 19);
-	keywords.set("AND", 20);
-	keywords.set("IN", 28);
+	keywords.set("OPTIONS", 18);
+	keywords.set("TAGS", 19);
+	keywords.set("TAG", 20);
+	keywords.set("AND", 21);
+	keywords.set("IN", 29);
 	keywords.set("EXISTS", 32);
 	keywords.set("NODE", 33);
 	keywords.set("WAY", 34);
@@ -384,8 +384,7 @@ Token* Scanner::NextToken() {
 		case 10:
 			{t->kind = 15; break;}
 		case 11:
-			case_11:
-			{t->kind = 23; break;}
+			{t->kind = 17; break;}
 		case 12:
 			case_12:
 			{t->kind = 24; break;}
@@ -396,27 +395,28 @@ Token* Scanner::NextToken() {
 			case_14:
 			{t->kind = 26; break;}
 		case 15:
-			{t->kind = 29; break;}
+			case_15:
+			{t->kind = 27; break;}
 		case 16:
 			{t->kind = 30; break;}
 		case 17:
 			{t->kind = 31; break;}
 		case 18:
 			recEnd = pos; recKind = 13;
-			if (ch == '=') {AddCh(); goto case_12;}
+			if (ch == '=') {AddCh(); goto case_13;}
 			else {t->kind = 13; break;}
 		case 19:
-			recEnd = pos; recKind = 21;
-			if (ch == '=') {AddCh(); goto case_13;}
-			else {t->kind = 21; break;}
-		case 20:
 			recEnd = pos; recKind = 22;
-			if (ch == '=') {AddCh(); goto case_11;}
-			else {t->kind = 22; break;}
-		case 21:
-			recEnd = pos; recKind = 27;
 			if (ch == '=') {AddCh(); goto case_14;}
-			else {t->kind = 27; break;}
+			else {t->kind = 22; break;}
+		case 20:
+			recEnd = pos; recKind = 23;
+			if (ch == '=') {AddCh(); goto case_12;}
+			else {t->kind = 23; break;}
+		case 21:
+			recEnd = pos; recKind = 28;
+			if (ch == '=') {AddCh(); goto case_15;}
+			else {t->kind = 28; break;}
 
   }
   AppendVal(t);

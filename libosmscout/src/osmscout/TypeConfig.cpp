@@ -19,9 +19,15 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/String.h>
-
 #include <osmscout/system/Assert.h>
+
+#include <osmscout/ost/Parser.h>
+#include <osmscout/ost/Scanner.h>
+
+#include <osmscout/util/File.h>
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
+#include <osmscout/util/String.h>
 
 #include <iostream>
 namespace osmscout {
@@ -234,6 +240,30 @@ namespace osmscout {
     return *this;
   }
 
+  Feature::Feature()
+  {
+    // no code
+  }
+
+  Feature::~Feature()
+  {
+    // no code
+  }
+
+  const char* const NameFeature::NAME = "Name";
+
+  std::string NameFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  const char* const RefFeature::NAME = "Ref";
+
+  std::string RefFeature::GetName() const
+  {
+    return NAME;
+  }
+
   TypeInfo::TypeInfo()
    : id(0),
      canBeNode(false),
@@ -303,6 +333,22 @@ namespace osmscout {
     return *this;
   }
 
+  TypeInfo& TypeInfo::AddFeature(const FeatureRef& feature)
+  {
+    assert(feature.Valid());
+    assert(featureSet.find(feature->GetName())==featureSet.end());
+
+    features.push_back(feature);
+    featureSet.insert(feature->GetName());
+
+    return *this;
+  }
+
+  bool TypeInfo::HasFeature(const std::string& featureName) const
+  {
+    return featureSet.find(featureName)!=featureSet.end();
+  }
+
   TypeConfig::TypeConfig()
    : nextTagId(0),
      nextTypeId(0)
@@ -350,6 +396,9 @@ namespace osmscout {
     RegisterTagForInternalUse("natural");
     RegisterTagForInternalUse("type");
     RegisterTagForInternalUse("restriction");
+
+    RegisterFeature(new NameFeature());
+    RegisterFeature(new RefFeature());
 
     TypeInfo ignore;
     TypeInfo route;
@@ -542,50 +591,42 @@ namespace osmscout {
     return tagInfo.GetId();
   }
 
-  void TypeConfig::RegisterNameTag(const std::string& tagName, uint32_t priority)
+  TagId TypeConfig::RegisterNameTag(const std::string& tagName, uint32_t priority)
   {
     TagId tagId=RegisterTagForExternalUse(tagName);
 
     nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+
+    return tagId;
   }
 
-  void TypeConfig::RegisterNameAltTag(const std::string& tagName, uint32_t priority)
+  TagId TypeConfig::RegisterNameAltTag(const std::string& tagName, uint32_t priority)
   {
     TagId tagId=RegisterTagForExternalUse(tagName);
 
     nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+
+    return tagId;
   }
 
-  void TypeConfig::RestoreTagInfo(const TagInfo& tagInfo)
+  void TypeConfig::RegisterFeature(const FeatureRef& feature)
   {
-    // We have same tags, that are already and always
-    // registered in the constructor, we skip them here...
-    if (stringToTagMap.find(tagInfo.GetName())!=stringToTagMap.end()) {
-      return;
+    assert(feature.Valid());
+    assert(!feature->GetName().empty());
+
+    nameToFeatureMap[feature->GetName()]=feature;
+  }
+
+  FeatureRef TypeConfig::GetFeature(const std::string& name) const
+  {
+    OSMSCOUT_HASHMAP<std::string,FeatureRef>::const_iterator feature=nameToFeatureMap.find(name);
+
+    if (feature!=nameToFeatureMap.end()) {
+      return feature->second;
     }
-
-    assert(stringToTagMap.find(tagInfo.GetName())==stringToTagMap.end());
-    assert(tagInfo.GetId()!=0 ||
-           (tagInfo.GetId()==0 && tagInfo.GetName().empty()));
-
-    nextTagId=std::max(nextTagId,(TagId)(tagInfo.GetId()+1));
-
-    if (tags.size()>=tagInfo.GetId()) {
-      tags.resize(tagInfo.GetId()+1);
+    else {
+      return NULL;
     }
-
-    tags[tagInfo.GetId()]=tagInfo;
-    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
-  }
-
-  void TypeConfig::RestoreNameTagInfo(TagId tagId, uint32_t priority)
-  {
-    nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
-  }
-
-  void TypeConfig::RestoreNameAltTagInfo(TagId tagId, uint32_t priority)
-  {
-    nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
   }
 
   TypeConfig& TypeConfig::AddTypeInfo(TypeInfo& typeInfo)
@@ -1014,4 +1055,379 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Loads the type configuration from the given *.ost file.
+   *
+   * Note:
+   * Make sure that you load from a OST file only onto a freshly initialized
+   * TypeConfig instance.
+   *
+   * @param filename
+   *    Full filename including path of the OST file
+   * @return
+   *    True, if there were no errors, else false
+   */
+  bool TypeConfig::LoadFromOSTFile(const std::string& filename)
+  {
+    FileOffset fileSize;
+    FILE*      file;
+    bool       success=false;
+
+    if (!GetFileSize(filename,
+                     fileSize)) {
+      std::cerr << "Cannot get size of file '" << filename << "'" << std::endl;
+      return false;
+    }
+
+    file=fopen(filename.c_str(),"rb");
+    if (file==NULL) {
+      std::cerr << "Cannot open file '" << filename << "'" << std::endl;
+      return false;
+    }
+
+    unsigned char* content=new unsigned char[fileSize];
+
+    if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
+      std::cerr << "Cannot load file '" << filename << "'" << std::endl;
+      delete [] content;
+      fclose(file);
+      return false;
+    }
+
+    fclose(file);
+
+    ost::Scanner *scanner=new ost::Scanner(content,
+                                           fileSize);
+    ost::Parser  *parser=new ost::Parser(scanner,
+                                         *this);
+
+    delete [] content;
+
+    parser->Parse();
+
+    success=!parser->errors->hasErrors;
+
+    delete parser;
+    delete scanner;
+
+    return success;
+  }
+
+  /**
+   * Loads the type configuration from the given binary data file.
+   *
+   * Note:
+   * Make sure that you load from afile only onto a freshly initialized
+   * TypeConfig instance.
+   *
+   * @param directory
+   *    Full path excluding the actual filename of the data file
+   *    (filename is always "types.dat")
+   * @return
+   *    True, if there were no errors, else false
+   */
+  bool TypeConfig::LoadFromDataFile(const std::string& directory)
+  {
+    FileScanner scanner;
+
+    if (!scanner.Open(AppendFileToDir(directory,
+                                      "types.dat"),
+                      FileScanner::Sequential,
+                      true)) {
+      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'" << std::endl;
+     return false;
+    }
+
+    uint32_t tagCount;
+
+    if (!scanner.ReadNumber(tagCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=tagCount; i++) {
+      TagId       requestedId;
+      TagId       actualId;
+      std::string name;
+      bool        internalOnly;
+
+      if (!(scanner.ReadNumber(requestedId) &&
+            scanner.Read(name),
+            scanner.Read(internalOnly))) {
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        return false;
+      }
+
+      if (internalOnly) {
+        actualId=RegisterTagForInternalUse(name);
+      }
+      else {
+        actualId=RegisterTagForExternalUse(name);
+      }
+
+      if (actualId!=requestedId) {
+        std::cerr << "Requested and actual tag id do not match" << std::endl;
+        return false;
+      }
+    }
+
+    uint32_t nameTagCount;
+
+    if (!scanner.ReadNumber(nameTagCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=nameTagCount; i++) {
+      TagId       requestedId;
+      TagId       actualId;
+      std::string name;
+      uint32_t    priority = 0;
+
+      if (!(scanner.ReadNumber(requestedId) &&
+            scanner.Read(name) &&
+            scanner.ReadNumber(priority))) {
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      }
+
+      actualId=RegisterNameTag(name,priority);
+
+      if (actualId!=requestedId) {
+        std::cerr << "Requested and actual name tag id do not match" << std::endl;
+        return false;
+      }
+    }
+
+    uint32_t nameAltTagCount;
+
+    if (!scanner.ReadNumber(nameAltTagCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=nameAltTagCount; i++) {
+      TagId       requestedId;
+      TagId       actualId;
+      std::string name;
+      uint32_t    priority = 0;
+
+      if (!(scanner.ReadNumber(requestedId) &&
+            scanner.Read(name) &&
+            scanner.ReadNumber(priority))) {
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      }
+
+      actualId=RegisterNameAltTag(name,priority);
+
+      if (actualId!=requestedId) {
+        std::cerr << "Requested and actual name alt tag id do not match" << std::endl;
+        return false;
+      }
+    }
+
+    uint32_t typeCount;
+
+    if (!scanner.ReadNumber(typeCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=typeCount; i++) {
+      TypeId      id;
+      std::string name;
+      bool        canBeNode;
+      bool        canBeWay;
+      bool        canBeArea;
+      bool        canBeRelation;
+      bool        canRouteFoot;
+      bool        canRouteBicycle;
+      bool        canRouteCar;
+      bool        indexAsLocation;
+      bool        indexAsRegion;
+      bool        indexAsPOI;
+      bool        optimizeLowZoom;
+      bool        multipolygon;
+      bool        pinWay;
+      bool        ignore;
+      bool        ignoreSeaLand;
+
+      if (!(scanner.ReadNumber(id) &&
+            scanner.Read(name) &&
+            scanner.Read(canBeNode) &&
+            scanner.Read(canBeWay) &&
+            scanner.Read(canBeArea) &&
+            scanner.Read(canBeRelation) &&
+            scanner.Read(canRouteFoot) &&
+            scanner.Read(canRouteBicycle) &&
+            scanner.Read(canRouteCar) &&
+            scanner.Read(indexAsLocation) &&
+            scanner.Read(indexAsRegion) &&
+            scanner.Read(indexAsPOI) &&
+            scanner.Read(optimizeLowZoom) &&
+            scanner.Read(multipolygon) &&
+            scanner.Read(pinWay) &&
+            scanner.Read(ignoreSeaLand) &&
+            scanner.Read(ignore))) {
+
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        return false;
+      }
+
+      TypeInfo typeInfo;
+
+      typeInfo.SetId(id);
+
+      typeInfo.SetType(name);
+
+      typeInfo.CanBeNode(canBeNode);
+      typeInfo.CanBeWay(canBeWay);
+      typeInfo.CanBeArea(canBeArea);
+      typeInfo.CanBeRelation(canBeRelation);
+      typeInfo.CanRouteFoot(canRouteFoot);
+      typeInfo.CanRouteBicycle(canRouteBicycle);
+      typeInfo.CanRouteCar(canRouteCar);
+      typeInfo.SetIndexAsLocation(indexAsLocation);
+      typeInfo.SetIndexAsRegion(indexAsRegion);
+      typeInfo.SetIndexAsPOI(indexAsPOI);
+      typeInfo.SetIgnore(optimizeLowZoom);
+      typeInfo.SetIgnore(multipolygon);
+      typeInfo.SetIgnore(pinWay );
+      typeInfo.SetIgnore(ignoreSeaLand);
+      typeInfo.SetIgnore(ignore);
+
+      uint32_t featureCount;
+
+      if (!scanner.ReadNumber(featureCount)) {
+        return false;
+      }
+
+      for (size_t i=0; i<featureCount; i++) {
+        std::string featureName;
+
+        if (!scanner.Read(featureName)) {
+          return false;
+        }
+
+        FeatureRef feature=GetFeature(featureName);
+
+        if (feature.Invalid()) {
+          std::cerr << "Feature '" << featureName << "' not found" << std::endl;
+          return false;
+        }
+
+        typeInfo.AddFeature(feature);
+      }
+
+      AddTypeInfo(typeInfo);
+    }
+
+    return !scanner.HasError() && scanner.Close();
+  }
+
+  /**
+   * Store the part of the TypeConfig information to a data file,
+   * which is necessary to review later on when reading and
+   * evaluation an import.
+   *
+   * @param directory
+   *    Directory the data file should be written to
+   * @return
+   *    True, if there were no errors, else false
+   */
+  bool TypeConfig::StoreToDataFile(const std::string& directory) const
+  {
+    FileWriter writer;
+
+     if (!writer.Open(AppendFileToDir(directory,
+                                      "types.dat"))) {
+       //progress.Error("Cannot create 'types.dat'");
+       return false;
+     }
+
+     writer.WriteNumber((uint32_t)GetTags().size());
+     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
+          tag!=GetTags().end();
+          ++tag) {
+       writer.WriteNumber(tag->GetId());
+       writer.Write(tag->GetName());
+       writer.Write(tag->IsInternalOnly());
+     }
+
+     uint32_t nameTagCount=0;
+     uint32_t nameAltTagCount=0;
+
+     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
+          tag!=GetTags().end();
+          ++tag) {
+       uint32_t priority;
+
+       if (IsNameTag(tag->GetId(),priority)) {
+         nameTagCount++;
+       }
+
+       if (IsNameAltTag(tag->GetId(),priority)) {
+         nameAltTagCount++;
+       }
+     }
+
+     writer.WriteNumber(nameTagCount);
+     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
+      tag!=GetTags().end();
+      ++tag) {
+       uint32_t priority;
+
+       if (IsNameTag(tag->GetId(),priority)) {
+         writer.WriteNumber(tag->GetId());
+         writer.Write(tag->GetName());
+         writer.WriteNumber((uint32_t)priority);
+       }
+     }
+
+     writer.WriteNumber(nameAltTagCount);
+     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
+      tag!=GetTags().end();
+      ++tag) {
+       uint32_t priority;
+
+       if (IsNameAltTag(tag->GetId(),priority)) {
+         writer.WriteNumber(tag->GetId());
+         writer.Write(tag->GetName());
+         writer.WriteNumber((uint32_t)priority);
+       }
+     }
+
+
+     writer.WriteNumber((uint32_t)GetTypes().size());
+
+     for (std::vector<TypeInfo>::const_iterator type=GetTypes().begin();
+          type!=GetTypes().end();
+          ++type) {
+       writer.WriteNumber(type->GetId());
+       writer.Write(type->GetName());
+       writer.Write(type->CanBeNode());
+       writer.Write(type->CanBeWay());
+       writer.Write(type->CanBeArea());
+       writer.Write(type->CanBeRelation());
+       writer.Write(type->CanRouteFoot());
+       writer.Write(type->CanRouteBicycle());
+       writer.Write(type->CanRouteCar());
+       writer.Write(type->GetIndexAsLocation());
+       writer.Write(type->GetIndexAsRegion());
+       writer.Write(type->GetIndexAsPOI());
+       writer.Write(type->GetOptimizeLowZoom());
+       writer.Write(type->GetMultipolygon());
+       writer.Write(type->GetPinWay());
+       writer.Write(type->GetIgnoreSeaLand());
+       writer.Write(type->GetIgnore());
+
+       writer.WriteNumber((uint32_t)type->GetFeatures().size());
+       for (std::list<FeatureRef>::const_iterator feature=type->GetFeatures().begin();
+           feature!=type->GetFeatures().end();
+           ++feature) {
+         writer.Write((*feature)->GetName());
+       }
+     }
+
+     return !writer.HasError() && writer.Close();
+  }
 }
