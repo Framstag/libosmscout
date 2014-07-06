@@ -560,8 +560,8 @@ namespace osmscout {
             CGContextRestoreGState(cg);
         }
     exit:
-        delete coords;
-        delete slopes;
+        delete[] coords;
+        delete[] slopes;
         CGContextRestoreGState(cg);
     }
 
