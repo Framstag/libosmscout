@@ -1237,7 +1237,7 @@ namespace osmscout {
   {
     FileScanner scanner;
     uint32_t    wayCount;
-    size_t      addressFound=0;
+    //size_t      addressFound=0;
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1258,7 +1258,6 @@ namespace osmscout {
     TypeId                type;
     std::string           name;
     std::string           location;
-    std::string           address;
     std::vector<GeoCoord> nodes;
 
     for (uint32_t w=1; w<=wayCount; w++) {
@@ -1268,7 +1267,6 @@ namespace osmscout {
           !scanner.ReadNumber(tmpType) ||
           !scanner.Read(name) ||
           !scanner.Read(location) ||
-          !scanner.Read(address) ||
           !scanner.Read(nodes)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
@@ -1280,12 +1278,10 @@ namespace osmscout {
 
       type=(TypeId)tmpType;
 
-      bool isAddress=!location.empty() &&
-                     !address.empty();
       bool isPOI=!name.empty() &&
                  poiTypes.find(type)!=poiTypes.end();
 
-      if (!isAddress && !isPOI) {
+      if (!isPOI) {
         continue;
       }
 
@@ -1293,6 +1289,10 @@ namespace osmscout {
       double maxlon;
       double minlat;
       double maxlat;
+
+      if (nodes.size()==0) {
+        std::cerr << "Way " << fileOffset << " has no nodes" << std::endl;
+      }
 
       GetBoundingBox(nodes,
                      minlon,
@@ -1303,6 +1303,7 @@ namespace osmscout {
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                     GeoCoord(minlat,minlon));
 
+      /*
       if (isAddress) {
         bool added=false;
 
@@ -1321,7 +1322,7 @@ namespace osmscout {
       if (added) {
         addressFound++;
         }
-      }
+      }*/
 
       if (isPOI) {
         bool added=false;
@@ -1343,7 +1344,7 @@ namespace osmscout {
       }
     }
 
-    progress.Info(NumberToString(wayCount)+" ways analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
+    progress.Info(NumberToString(wayCount)+" ways analyzed, "/*+NumberToString(addressFound)+" addresses founds, "*/+NumberToString(poiFound)+" POIs founds");
 
     return scanner.Close();
   }

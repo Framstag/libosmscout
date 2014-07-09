@@ -94,10 +94,6 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Write("")) {
-      return false;
-    }
-
     if (!writer.Write(way.nodes)) {
       return false;
     }
