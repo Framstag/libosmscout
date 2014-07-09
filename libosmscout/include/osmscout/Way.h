@@ -38,10 +38,9 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    static const uint16_t hasNameAlt      = 1 <<  7; //! We have an alternative name (mainly in a second language)
-    static const uint16_t hasName         = 1 <<  8; //! We have a name
-    static const uint16_t hasRef          = 1 <<  9; //! We have reference name
-    static const uint16_t hasAddress      = 1 << 10; //! House number
+    static const uint16_t hasNameAlt      = 1 <<  8; //! We have an alternative name (mainly in a second language)
+    static const uint16_t hasName         = 1 <<  9; //! We have a name
+    static const uint16_t hasRef          = 1 << 10; //! We have reference name
     static const uint16_t hasLayer        = 1 << 11; //! We have optional layer information
     static const uint16_t hasWidth        = 1 << 12; //! We have width
     static const uint16_t hasMaxSpeed     = 1 << 13; //! We have maximum speed information
@@ -62,7 +61,6 @@ namespace osmscout {
     AttributeAccess  access;   //! Information regarding which vehicle can access this way
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
-    std::string      address;  //! an address like a house number
     int8_t           layer;    //! layer to draw on
     uint8_t          width;    //! width of way
     uint8_t          maxSpeed; //! speed from 1..255km/h (0 means, not set)
@@ -109,11 +107,6 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return ref;
-    }
-
-    inline std::string GetAddress() const
-    {
-      return address;
     }
 
     inline int8_t GetLayer() const
@@ -230,11 +223,6 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return attributes.GetRefName();
-    }
-
-    inline std::string GetAddress() const
-    {
-      return attributes.GetAddress();
     }
 
     inline int8_t GetLayer() const

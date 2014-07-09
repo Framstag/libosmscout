@@ -42,7 +42,6 @@ namespace osmscout {
     name.clear();
     nameAlt.clear();
     ref.clear();
-    address.clear();
     layer=0;
     width=0;
     maxSpeed=0;
@@ -92,7 +91,7 @@ namespace osmscout {
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagHouseNr) {
-        address=tag->value;
+        // Way do not have an address
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagLayer) {
@@ -328,10 +327,6 @@ namespace osmscout {
       scanner.Read(ref);
     }
 
-    if (flags & hasAddress) {
-      scanner.Read(address);
-    }
-
     if (flags & hasLayer) {
       scanner.Read(layer);
     }
@@ -403,13 +398,6 @@ namespace osmscout {
       flags&=~hasRef;
     }
 
-    if (!address.empty()) {
-      flags|=hasAddress;
-    }
-    else {
-      flags&=~hasAddress;
-    }
-
     if (layer!=0) {
       flags|=hasLayer;
     }
@@ -461,10 +449,6 @@ namespace osmscout {
       writer.Write(ref);
     }
 
-    if (flags & hasAddress) {
-      writer.Write(address);
-    }
-
     if (flags & hasLayer) {
       writer.Write(layer);
     }
@@ -508,7 +492,6 @@ namespace osmscout {
         name!=other.name ||
         nameAlt!=other.nameAlt ||
         ref!=other.ref ||
-        address!=other.address ||
         layer!=other.layer ||
         width!=other.width ||
         maxSpeed!=other.maxSpeed ||

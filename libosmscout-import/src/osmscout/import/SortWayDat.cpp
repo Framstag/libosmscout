@@ -72,10 +72,9 @@ namespace osmscout {
                    tagAddrStreet,
                    location);
 
-    bool isAddress=!location.empty() && !way.GetAddress().empty();
     bool isPoi=!way.GetName().empty() && poiTypes.find(way.GetType())!=poiTypes.end();
 
-    if (!isAddress && !isPoi) {
+    if (!isPoi) {
       return true;
     }
 
@@ -95,7 +94,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Write(way.GetAddress())) {
+    if (!writer.Write("")) {
       return false;
     }
 

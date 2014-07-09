@@ -379,11 +379,6 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
-  if (!attributes.GetAddress().empty()) {
-    DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
-  }
-
   if (!attributes.GetRefName().empty()) {
     DumpIndent(indent);
     std::cout << "ref: " << attributes.GetRefName() << std::endl;
