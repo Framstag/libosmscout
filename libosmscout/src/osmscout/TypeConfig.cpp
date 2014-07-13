@@ -240,6 +240,16 @@ namespace osmscout {
     return *this;
   }
 
+  FeatureValue::FeatureValue()
+  {
+    // no code
+  }
+
+  FeatureValue::~FeatureValue()
+  {
+    // no code
+  }
+
   Feature::Feature()
   {
     // no code
@@ -252,16 +262,737 @@ namespace osmscout {
 
   const char* const NameFeature::NAME = "Name";
 
+  void NameFeature::Initialize(TypeConfig& /*typeConfig*/)
+  {
+    // no code
+  }
+
   std::string NameFeature::GetName() const
   {
     return NAME;
   }
 
+  void NameFeature::Parse(Progress& progress,
+                          const TypeConfig& typeConfig,
+                          const TypeInfo& type,
+                          const std::map<TagId,std::string>& tags,
+                          FeatureValue*& value,
+                          bool& set) const
+  {
+    std::string name;
+    uint32_t    namePriority=0;
+
+    std::string nameAlt;
+    uint32_t    nameAltPriority=0;
+
+    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
+         tag!=tags.end();
+         ++tag) {
+      uint32_t ntPrio;
+      bool     isNameTag=typeConfig.IsNameTag(tag->first,ntPrio);
+      uint32_t natPrio;
+      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->first,natPrio);
+
+      if (isNameTag &&
+          (name.empty() || ntPrio>namePriority)) {
+        name=tag->second;
+        namePriority=ntPrio;
+      }
+
+      if (isNameAltTag &&
+          (nameAlt.empty() || natPrio>nameAltPriority)) {
+        nameAlt=tag->second;
+        nameAltPriority=natPrio;
+      }
+    }
+
+    set=!name.empty() || !nameAlt.empty();
+
+    if (set) {
+      value=new NameFeatureValue(name,
+                                 nameAlt);
+    }
+    else {
+      value=NULL;
+    }
+  }
+
   const char* const RefFeature::NAME = "Ref";
+
+  void RefFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagRef=typeConfig.RegisterTagForInternalUse("ref");
+  }
 
   std::string RefFeature::GetName() const
   {
     return NAME;
+  }
+
+  void RefFeature::Parse(Progress& progress,
+                         const TypeConfig& typeConfig,
+                         const TypeInfo& type,
+                         const std::map<TagId,std::string>& tags,
+                         FeatureValue*& value,
+                         bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator ref=tags.find(tagRef);
+
+    if (ref!=tags.end() &&
+        !ref->second.empty()) {
+      set=true;
+      value=new RefFeatureValue(ref->second);
+    }
+    else {
+      set=false;
+      value=NULL;
+    }
+  }
+
+  const char* const AddressFeature::NAME = "Address";
+
+  void AddressFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagAddrHouseNr=typeConfig.RegisterTagForInternalUse("addr:housenumber");
+    tagAddrStreet=typeConfig.RegisterTagForInternalUse("addr:street");
+  }
+
+  std::string AddressFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void AddressFeature::Parse(Progress& progress,
+                             const TypeConfig& typeConfig,
+                             const TypeInfo& type,
+                             const std::map<TagId,std::string>& tags,
+                             FeatureValue*& value,
+                             bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator street;
+    std::map<TagId,std::string>::const_iterator houseNr;
+
+    street=tags.find(tagAddrStreet);
+
+    if (street!=tags.end()) {
+      houseNr=tags.find(tagAddrHouseNr);
+    }
+    else {
+      houseNr=tags.end();
+    }
+
+    if (street!=tags.end() &&
+        !street->second.empty() &&
+        houseNr!=tags.end() &&
+        !houseNr->second.empty()) {
+      value=new AddressFeatureValue(street->second,
+                                    houseNr->second);
+      set=true;
+    }
+    else {
+      value=NULL;
+      set=false;
+    }
+  }
+
+  const char* const AccessFeature::NAME = "Access";
+
+  void AccessFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagOneway=typeConfig.RegisterTagForInternalUse("oneway");
+    tagJunction=typeConfig.RegisterTagForInternalUse("junction");
+
+    tagAccess=typeConfig.RegisterTagForInternalUse("access");
+    tagAccessForward=typeConfig.RegisterTagForInternalUse("access:foward");
+    tagAccessBackward=typeConfig.RegisterTagForInternalUse("access:backward");
+
+    tagAccessFoot=typeConfig.RegisterTagForInternalUse("access:foot");
+    tagAccessFootForward=typeConfig.RegisterTagForInternalUse("access:foot:foward");
+    tagAccessFootBackward=typeConfig.RegisterTagForInternalUse("access:foot:backward");
+
+    tagAccessBicycle=typeConfig.RegisterTagForInternalUse("access:bicycle");
+    tagAccessBicycleForward=typeConfig.RegisterTagForInternalUse("access:bicycle:foward");
+    tagAccessBicycleBackward=typeConfig.RegisterTagForInternalUse("access:bicycle:backward");
+
+    tagAccessMotorVehicle=typeConfig.RegisterTagForInternalUse("access:motor_vehicle");
+    tagAccessMotorVehicleForward=typeConfig.RegisterTagForInternalUse("access:motor_vehicle:foward");
+    tagAccessMotorVehicleBackward=typeConfig.RegisterTagForInternalUse("access:motor_vehicle:backward");
+
+    tagAccessMotorcar=typeConfig.RegisterTagForInternalUse("access:motorcar");
+    tagAccessMotorcarForward=typeConfig.RegisterTagForInternalUse("access:motorcar:foward");
+    tagAccessMotorcarBackward=typeConfig.RegisterTagForInternalUse("access:motorcar:backward");
+  }
+
+  std::string AccessFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void AccessFeature::Parse(Progress& progress,
+                            const TypeConfig& typeConfig,
+                            const TypeInfo& type,
+                            const std::map<TagId,std::string>& tags,
+                            FeatureValue*& value,
+                            bool& set) const
+  {
+    uint8_t access=0;
+
+    if (type.CanRouteFoot()) {
+      access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+    }
+
+    if (type.CanRouteBicycle()) {
+      access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
+    }
+
+    if (type.CanRouteCar()) {
+      access|=(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+    }
+
+    uint8_t defaultAccess=access;
+
+    // Flag access
+
+    std::map<TagId,std::string>::const_iterator accessValue=tags.find(tagAccess);
+
+    if (accessValue!=tags.end()) {
+      access=0;
+
+      if (!(accessValue->second=="no")) {
+        access=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward|AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward|AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+      }
+    }
+
+    // Flag access:forward/access:backward
+
+    std::map<TagId,std::string>::const_iterator accessForwardValue=tags.find(tagAccessForward);
+    std::map<TagId,std::string>::const_iterator accessBackwardValue=tags.find(tagAccessBackward);
+
+    if (accessForwardValue!=tags.end()) {
+      access&=~(AccessFeatureValue::footForward|AccessFeatureValue::bicycleForward|AccessFeatureValue::carForward);
+
+      if (!(accessForwardValue->second=="no")) {
+        access|=(AccessFeatureValue::footForward|AccessFeatureValue::bicycleForward|AccessFeatureValue::carForward);
+      }
+    }
+    else if (accessBackwardValue!=tags.end()) {
+      access&=~(AccessFeatureValue::footBackward|AccessFeatureValue::bicycleBackward|AccessFeatureValue::carBackward);
+
+      if (!(accessBackwardValue->second=="no")) {
+        access|=(AccessFeatureValue::footBackward|AccessFeatureValue::bicycleBackward|AccessFeatureValue::carBackward);
+      }
+    }
+
+    // Flags access:foot, access:bicycle, access:motor_vehicle, access:motorcar
+
+    std::map<TagId,std::string>::const_iterator accessFootValue=tags.find(tagAccessFoot);
+    std::map<TagId,std::string>::const_iterator accessBicycleValue=tags.find(tagAccessBicycle);
+    std::map<TagId,std::string>::const_iterator accessMotorVehicleValue=tags.find(tagAccessMotorVehicle);
+    std::map<TagId,std::string>::const_iterator accessMotorcarValue=tags.find(tagAccessMotorcar);
+
+    if (accessFootValue!=tags.end()) {
+      access&=~(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+      if (!(accessFootValue->second=="no")) {
+        access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+      }
+    }
+    else if (accessBicycleValue!=tags.end()) {
+      access&=~(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
+
+      if (!(accessBicycleValue->second=="no")) {
+        if (!access & AccessFeatureValue::onewayBackward) {
+          access|=(AccessFeatureValue::bicycleForward);
+        }
+        if (!access & AccessFeatureValue::onewayForward) {
+          access|=(AccessFeatureValue::bicycleBackward);
+        }
+      }
+    }
+    else if (accessMotorVehicleValue!=tags.end()) {
+      access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+
+      if (!(accessMotorVehicleValue->second=="no")) {
+        if (!access & AccessFeatureValue::onewayBackward) {
+          access|=(AccessFeatureValue::carForward);
+        }
+        if (!access & AccessFeatureValue::onewayForward) {
+          access|=(AccessFeatureValue::carBackward);
+        }
+      }
+    }
+    else if (accessMotorcarValue!=tags.end()) {
+      access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+
+      if (!(accessMotorcarValue->second=="no")) {
+        if (!access & AccessFeatureValue::onewayBackward) {
+          access|=(AccessFeatureValue::carForward);
+        }
+        if (!access & AccessFeatureValue::onewayForward) {
+          access|=(AccessFeatureValue::carBackward);
+        }
+      }
+    }
+
+    // Flags access:foot::forward/access:foot::backward,
+    //       access:bicycle::forward/access:bicycle::backward,
+    //       access:motor_vehicle::forward/access:motor_vehicle::backward,
+    //       access:motorcar::forward/access:motorcar::backward
+
+    std::map<TagId,std::string>::const_iterator accessFootForwardValue=tags.find(tagAccessFootForward);
+    std::map<TagId,std::string>::const_iterator accessFootBackwardValue=tags.find(tagAccessFootBackward);
+    std::map<TagId,std::string>::const_iterator accessBicycleForwardValue=tags.find(tagAccessBicycleForward);
+    std::map<TagId,std::string>::const_iterator accessBicycleBackwardValue=tags.find(tagAccessBicycleBackward);
+    std::map<TagId,std::string>::const_iterator accessMotorVehicleForwardValue=tags.find(tagAccessMotorVehicleForward);
+    std::map<TagId,std::string>::const_iterator accessMotorVehicleBackwardValue=tags.find(tagAccessMotorVehicleBackward);
+    std::map<TagId,std::string>::const_iterator accessMotorcarForwardValue=tags.find(tagAccessMotorcarForward);
+    std::map<TagId,std::string>::const_iterator accessMotorcarBackwardValue=tags.find(tagAccessMotorcarBackward);
+
+    if (accessFootForwardValue!=tags.end()) {
+      ParseAccessFlag(accessFootForwardValue->second,
+                      access,
+                      AccessFeatureValue::footForward);
+    }
+
+    if (accessFootBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessFootBackwardValue->second,
+                      access,
+                      AccessFeatureValue::footBackward);
+    }
+
+    if (accessBicycleForwardValue!=tags.end()) {
+      ParseAccessFlag(accessBicycleForwardValue->second,
+                      access,
+                      AccessFeatureValue::bicycleForward);
+    }
+
+    if (accessBicycleBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessBicycleBackwardValue->second,
+                      access,
+                      AccessFeatureValue::bicycleBackward);
+    }
+
+    if (accessMotorVehicleForwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorVehicleForwardValue->second,
+                      access,
+                      AccessFeatureValue::carForward);
+    }
+
+    if (accessMotorVehicleBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorVehicleBackwardValue->second,
+                      access,
+                      AccessFeatureValue::carBackward);
+    }
+
+    if (accessMotorcarForwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorcarForwardValue->second,
+                      access,
+                      AccessFeatureValue::carForward);
+    }
+
+    if (accessMotorcarBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorcarBackwardValue->second,
+                      access,
+                      AccessFeatureValue::carBackward);
+    }
+
+    std::map<TagId,std::string>::const_iterator onewayValue=tags.find(tagOneway);
+    std::map<TagId,std::string>::const_iterator junctionValue=tags.find(tagJunction);
+
+    if (onewayValue!=tags.end()) {
+      if (onewayValue->second=="-1") {
+        access&=~(AccessFeatureValue::bicycleForward|AccessFeatureValue::carForward|AccessFeatureValue::onewayForward);
+        access|=AccessFeatureValue::onewayBackward;
+      }
+      else if (!(onewayValue->second=="no" || onewayValue->second=="false" || onewayValue->second=="0")) {
+        access&=~(AccessFeatureValue::bicycleBackward|AccessFeatureValue::carBackward|AccessFeatureValue::onewayBackward);
+        access|=AccessFeatureValue::onewayForward;
+      }
+    }
+    else if (junctionValue!=tags.end()
+             && junctionValue->second=="roundabout") {
+      access&=~(AccessFeatureValue::bicycleBackward|AccessFeatureValue::carBackward|AccessFeatureValue::onewayBackward);
+      access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::carForward|AccessFeatureValue::onewayForward);
+    }
+
+    if (access!=defaultAccess) {
+      set=true;
+      value=new AccessFeatureValue(access);
+    }
+    else {
+      set=false;
+      value=false;
+    }
+  }
+
+  const char* const LayerFeature::NAME = "Layer";
+
+  void LayerFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagLayer=typeConfig.RegisterTagForInternalUse("layer");
+  }
+
+  std::string LayerFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void LayerFeature::Parse(Progress& progress,
+                           const TypeConfig& typeConfig,
+                           const TypeInfo& type,
+                           const std::map<TagId,std::string>& tags,
+                           FeatureValue*& value,
+                           bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator layer=tags.find(tagLayer);
+
+    if (layer!=tags.end()) {
+      int8_t layerValue;
+
+      if (StringToNumber(layer->second,layerValue)) {
+        set=true;
+        value=new LayerFeatureValue(layerValue);
+      }
+      else {
+        progress.Warning(std::string("Layer tag value '")+layer->second+"' for "+NumberToString(0/*id*/)+" is not numeric!");
+        set=false;
+        value=NULL;
+      }
+    }
+
+    set=false;
+    value=NULL;
+  }
+
+  const char* const WidthFeature::NAME = "Width";
+
+  void WidthFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagWidth=typeConfig.RegisterTagForInternalUse("width");
+  }
+
+  std::string WidthFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void WidthFeature::Parse(Progress& progress,
+                           const TypeConfig& typeConfig,
+                           const TypeInfo& type,
+                           const std::map<TagId,std::string>& tags,
+                           FeatureValue*& value,
+                           bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator width=tags.find(tagWidth);
+
+    if (width==tags.end()) {
+      set=false;
+      value=NULL;
+
+      return;
+    }
+
+    std::string widthString=width->second;
+    double      w;
+    size_t      pos=0;
+    size_t      count=0;
+
+    // We expect that float values use '.' as separator, but many values use ',' instead.
+    // Try try fix this if string looks reasonable
+    for (size_t i=0; i<widthString.length() && count<=1; i++) {
+      if (widthString[i]==',') {
+        pos=i;
+        count++;
+      }
+    }
+
+    if (count==1) {
+      widthString[pos]='.';
+    }
+
+    // Some width tagvalues add an 'm' to hint that the unit is meter, remove it.
+    if (widthString.length()>=2) {
+      if (widthString[widthString.length()-1]=='m' &&
+          ((widthString[widthString.length()-2]>='0' &&
+            widthString[widthString.length()-2]<='9') ||
+            widthString[widthString.length()-2]<=' ')) {
+        widthString.erase(widthString.length()-1);
+      }
+
+      // Trim possible trailing spaces
+      while (widthString.length()>0 &&
+             widthString[widthString.length()-1]==' ') {
+        widthString.erase(widthString.length()-1);
+      }
+    }
+
+    if (!StringToNumber(widthString,w)) {
+      progress.Warning(std::string("Width tag value '")+width->second+"' for "+NumberToString(0)+" is no double!");
+    }
+    else if (w<0 && w>255.5) {
+      progress.Warning(std::string("Width tag value '")+width->second+"' for "+NumberToString(0)+" value is too small or too big!");
+    }
+    else {
+      value=new WidthFeatureValue((uint8_t)floor(w+0.5));
+    }
+
+  }
+
+  const char* const MaxSpeedFeature::NAME = "MaxSpeed";
+
+  void MaxSpeedFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagMaxSpeed=typeConfig.RegisterTagForInternalUse("maxspeed");
+  }
+
+  std::string MaxSpeedFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void MaxSpeedFeature::Parse(Progress& progress,
+                              const TypeConfig& typeConfig,
+                              const TypeInfo& type,
+                              const std::map<TagId,std::string>& tags,
+                              FeatureValue*& value,
+                              bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator maxSpeed=tags.find(tagMaxSpeed);
+
+    if (maxSpeed==tags.end()) {
+      set=false;
+      value=NULL;
+
+      return;
+    }
+
+    std::string valueString=maxSpeed->second;
+    size_t      valueNumeric;
+    bool        isMph=false;
+
+    if (valueString=="signals") {
+      set=false;
+      value=NULL;
+
+      return;
+    }
+
+    if (valueString=="none") {
+      set=false;
+      value=NULL;
+
+      return;
+    }
+
+    // "walk" should not be used, but we provide an estimation anyway,
+    // since it is likely still better than the default
+    if (valueString=="walk") {
+      set=true;
+      value=new MaxSpeedFeatureValue(10);
+
+      return;
+    }
+
+    size_t pos;
+
+    pos=valueString.rfind("mph");
+    if (pos!=std::string::npos) {
+      valueString.erase(pos);
+      isMph=true;
+    }
+
+    while (valueString.length()>0 && valueString[valueString.length()-1]==' ') {
+      valueString.erase(valueString.length()-1);
+    }
+
+    if (!StringToNumber(valueString,valueNumeric)) {
+      progress.Warning(std::string("Max speed tag value '")+maxSpeed->second+"' for "+NumberToString(0)+" is not numeric!");
+
+      set=false;
+      value=NULL;
+
+      return;
+    }
+
+    set=true;
+
+    if (isMph) {
+      if (valueNumeric>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
+        value=new MaxSpeedFeatureValue(std::numeric_limits<uint8_t>::max());
+      }
+      else {
+        value=new MaxSpeedFeatureValue((uint8_t)(valueNumeric*1.609+0.5));
+      }
+    }
+    else {
+      if (valueNumeric>std::numeric_limits<uint8_t>::max()) {
+        value=new MaxSpeedFeatureValue(std::numeric_limits<uint8_t>::max());
+      }
+      else {
+        value=new MaxSpeedFeatureValue(valueNumeric);
+      }
+    }
+  }
+
+  const char* const GradeFeature::NAME = "Grade";
+
+  void GradeFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagSurface=typeConfig.RegisterTagForInternalUse("surface");
+    tagTrackType=typeConfig.RegisterTagForInternalUse("tracktype");
+  }
+
+  std::string GradeFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void GradeFeature::Parse(Progress& progress,
+                           const TypeConfig& typeConfig,
+                           const TypeInfo& type,
+                           const std::map<TagId,std::string>& tags,
+                           FeatureValue*& value,
+                           bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator tracktype=tags.find(tagTrackType);
+
+    if (tracktype!=tags.end()) {
+      if (tracktype->second=="grade1") {
+        set=true;
+        value=new GradeFeatureValue(1);
+
+        return;
+      }
+      else if (tracktype->second=="grade2") {
+        set=true;
+        value=new GradeFeatureValue(2);
+
+        return;
+      }
+      else if (tracktype->second=="grade3") {
+        set=true;
+        value=new GradeFeatureValue(3);
+
+        return;
+      }
+      else if (tracktype->second=="grade4") {
+        set=true;
+        value=new GradeFeatureValue(4);
+
+        return;
+      }
+      else if (tracktype->second=="grade5") {
+        set=true;
+        value=new GradeFeatureValue(5);
+
+        return;
+      }
+      else {
+        progress.Warning(std::string("Unsupported tracktype value '")+tracktype->second+"' for "+NumberToString(0));
+      }
+    }
+
+    std::map<TagId,std::string>::const_iterator surface=tags.find(tagSurface);
+
+    if (surface!=tags.end()) {
+      size_t grade;
+
+      if (typeConfig.GetGradeForSurface(surface->second,
+                                        grade)) {
+        set=true;
+        value=new GradeFeatureValue((uint8_t)grade);
+      }
+      else {
+        progress.Warning(std::string("Unknown surface type '")+surface->second+"' for "+NumberToString(0)+"!");
+      }
+    }
+
+    set=false;
+    value=NULL;
+  }
+
+  const char* const BridgeFeature::NAME = "Bridge";
+
+  void BridgeFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagBridge=typeConfig.RegisterTagForInternalUse("bridge");
+  }
+
+  std::string BridgeFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void BridgeFeature::Parse(Progress& progress,
+                            const TypeConfig& typeConfig,
+                            const TypeInfo& type,
+                            const std::map<TagId,std::string>& tags,
+                            FeatureValue*& value,
+                            bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator bridge=tags.find(tagBridge);
+
+    value=NULL;
+
+    set=bridge!=tags.end() &&
+        !(bridge->second=="no" ||
+          bridge->second=="false" ||
+          bridge->second=="0");
+  }
+
+  const char* const TunnelFeature::NAME = "Tunnel";
+
+  void TunnelFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagTunnel=typeConfig.RegisterTagForInternalUse("tunnel");
+  }
+
+  std::string TunnelFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void TunnelFeature::Parse(Progress& progress,
+                            const TypeConfig& typeConfig,
+                            const TypeInfo& type,
+                            const std::map<TagId,std::string>& tags,
+                            FeatureValue*& value,
+                            bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator tunnel=tags.find(tagTunnel);
+
+    value=NULL;
+
+    set=tunnel!=tags.end() &&
+        !(tunnel->second=="no" ||
+          tunnel->second=="false" ||
+          tunnel->second=="0");
+  }
+
+  const char* const RoundaboutFeature::NAME = "Roundabout";
+
+  void RoundaboutFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagJunction=typeConfig.RegisterTagForInternalUse("junction");
+  }
+
+  std::string RoundaboutFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void RoundaboutFeature::Parse(Progress& progress,
+                                const TypeConfig& typeConfig,
+                                const TypeInfo& type,
+                                const std::map<TagId,std::string>& tags,
+                                FeatureValue*& value,
+                                bool& set) const
+  {
+    std::map<TagId,std::string>::const_iterator junction=tags.find(tagJunction);
+
+    value=NULL;
+
+    set=junction!=tags.end() &&
+        junction->second=="roundabout";
   }
 
   TypeInfo::TypeInfo()
@@ -399,6 +1130,12 @@ namespace osmscout {
 
     RegisterFeature(new NameFeature());
     RegisterFeature(new RefFeature());
+    RegisterFeature(new AddressFeature());
+    RegisterFeature(new AccessFeature());
+    RegisterFeature(new LayerFeature());
+    RegisterFeature(new WidthFeature());
+    RegisterFeature(new MaxSpeedFeature());
+    RegisterFeature(new GradeFeature());
 
     TypeInfo ignore;
     TypeInfo route;
@@ -615,6 +1352,8 @@ namespace osmscout {
     assert(!feature->GetName().empty());
 
     nameToFeatureMap[feature->GetName()]=feature;
+
+    feature->Initialize(*this);
   }
 
   FeatureRef TypeConfig::GetFeature(const std::string& name) const

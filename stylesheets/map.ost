@@ -83,102 +83,104 @@ GRADES
   }
 
 TYPES
+  //
   // Motorways and motorways-like (only for cars)
+  //
   
   TYPE highway_motorway
     = WAY ("highway"=="motorway")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   
   // Other roads mainly for cars
   
   TYPE highway_trunk
     = WAY ("highway"=="trunk")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_trunk_link
     = WAY ("highway"=="trunk_link")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
        
   TYPE highway_primary 
     = WAY ("highway"=="primary")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_primary_link
     = WAY ("highway"=="primary_link")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_secondary
     = WAY ("highway"=="secondary")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_secondary_link
     = WAY ("highway"=="secondary_link")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_tertiary
     = WAY ("highway"=="tertiary")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_tertiary_link
     = WAY ("highway"=="tertiary_link")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_unclassified
     = WAY ("highway"=="unclassified")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_road
     = WAY ("highway"=="road")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_residential
     = WAY ("highway"=="residential")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_living_street
     = WAY ("highway"=="living_street")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_service
     = WAY AREA ("highway"=="service")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC PIN_WAY
   
   // Ways with main designation different to car
   
   TYPE highway_track
     = WAY ("highway"=="track")
-      {Name, Ref}
+      {Name, Access}
       OPTIONS ROUTE[FOOT BICYCLE] INDEX_LOC
       
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT] INDEX_LOC PIN_WAY
       
   TYPE highway_services
@@ -191,31 +193,31 @@ TYPES
     
   TYPE highway_path
     = WAY ("highway"=="path")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT BICYCLE] IGNORESEALAND
     
   TYPE highway_cycleway
     = WAY ("highway"=="cycleway")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[BICYCLE]
       
   TYPE highway_footway
     = WAY AREA ("highway"=="footway")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT] INDEX_LOC PIN_WAY
       
   TYPE highway_bridleway
     = WAY ("highway"=="bridleway")
-      {Name}
+      {Name, Access}
     
   TYPE highway_byway // Obsolete in OSM
    = WAY ("highway"=="byway")
-      {Name}
+      {Name, Access}
      OPTIONS ROUTE[FOOT]
      
   TYPE highway_steps
     = WAY ("highway"=="steps")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT]
       
   TYPE highway_mini_roundabout
@@ -236,354 +238,1312 @@ TYPES
     
   TYPE highway_roundabout
     = WAY AREA ("highway"=="roundabout")
-      {Name}
+      {Name, Access}
       OPTIONS ROUTE[FOOT BICYCLE CAR] PIN_WAY
     
   TYPE highway_motorway_junction
     = NODE ("highway"=="motorway_junction")
-      {Name, Ref}
+      {Name, Ref, Access}
       OPTIONS ROUTE[CAR]
 
-  TYPE highway_street_lamp // To many for mobile offline map?
+  TYPE highway_street_lamp // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
       OPTIONS IGNORE 
 
+  TYPE speed_camera
+    = NODE ("highway"=="speed_camera")
+      OPTIONS IGNORE
+
+  //
   // Waterways and assorted
-  TYPE waterway_stream = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
-  TYPE waterway_river = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
-  TYPE waterway_riverbank = AREA ("waterway"=="riverbank")
-  TYPE waterway_canal = WAY ("waterway"=="canal") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
-  TYPE waterway_ditch = WAY ("waterway"=="ditch") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
-  TYPE waterway_drain = WAY ("waterway"=="drain") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
-  TYPE waterway_dock = NODE AREA ("waterway"=="dock")
-  TYPE waterway_lock_gate = NODE ("waterway"=="lock_gate")
-  TYPE waterway_turning_point = NODE ("waterway"=="turning_point")
-  TYPE waterway_boatyard = NODE AREA ("waterway"=="boatyard")
-  TYPE waterway_weir = NODE WAY ("waterway"=="weir") OPTIONS IGNORESEALAND
-  TYPE waterway_dam = WAY AREA ("waterway"=="dam") OPTIONS IGNORESEALAND
+  //
+  
+  TYPE waterway_stream
+    = WAY ("waterway"=="stream")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      
+  TYPE waterway_river
+    = WAY ("waterway"=="river")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      
+  TYPE waterway_riverbank
+    = AREA ("waterway"=="riverbank")
+      {Name}
+    
+  TYPE waterway_canal
+    = WAY ("waterway"=="canal")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      
+  TYPE waterway_ditch
+    = WAY ("waterway"=="ditch")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      
+  TYPE waterway_drain
+    = WAY ("waterway"=="drain")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      
+  TYPE waterway_dock
+    = NODE AREA ("waterway"=="dock")
+      {Name}
+    
+  TYPE waterway_lock_gate
+    = NODE ("waterway"=="lock_gate")
+    
+  TYPE waterway_turning_point
+    = NODE ("waterway"=="turning_point")
+    
+  TYPE waterway_boatyard
+    = NODE AREA ("waterway"=="boatyard")
+      {Name}
+    
+  TYPE waterway_weir
+    = NODE WAY ("waterway"=="weir")
+      {Name}
+      OPTIONS IGNORESEALAND
+      
+  TYPE waterway_dam
+    = WAY AREA ("waterway"=="dam")
+      {Name}
+      OPTIONS IGNORESEALAND
 
+  //
   // Railways and assorted
-  TYPE railway_rail = WAY ("railway"=="rail") //OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE railway_tram = WAY ("railway"=="tram")
-  TYPE railway_light_rail = WAY ("railway"=="light_rail")
-  TYPE railway_subway = WAY ("railway"=="subway")
-  TYPE railway_preserved = WAY ("railway"=="preserved")
-  TYPE railway_disused = WAY ("railway"=="disused")
-  TYPE railway_abandoned = WAY ("railway"=="abandoned")
-  TYPE railway_narrow_gauge = WAY ("railway"=="narrow_gauge")
-  TYPE railway_monorail = WAY ("railway"=="monorail")
-  TYPE railway_station = NODE AREA ("railway"=="station")
-  TYPE railway_halt = NODE ("railway"=="halt")
-  TYPE railway_tram_stop = NODE ("railway"=="tram_stop")
-  TYPE railway_crossing = NODE ("railway"=="crossing")
-  TYPE railway_level_crossing = NODE ("railway"=="level_crossing")
-  TYPE railway_subway_entrance = NODE ("railway"=="subway_entrance")
-  TYPE railway_turntable = NODE AREA ("railway"=="turntable")
+  //
+  
+  TYPE railway_rail
+    = WAY ("railway"=="rail")
+      //OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE railway_tram
+    = WAY ("railway"=="tram")
+    
+  TYPE railway_light_rail
+    = WAY ("railway"=="light_rail")
+    
+  TYPE railway_subway
+    = WAY ("railway"=="subway")
+    
+  TYPE railway_preserved
+    = WAY ("railway"=="preserved")
+    
+  TYPE railway_disused
+    = WAY ("railway"=="disused")
+    
+  TYPE railway_abandoned
+    = WAY ("railway"=="abandoned")
+    
+  TYPE railway_narrow_gauge
+    = WAY ("railway"=="narrow_gauge")
+    
+  TYPE railway_monorail
+    = WAY ("railway"=="monorail")
+    
+  TYPE railway_station
+    = NODE AREA ("railway"=="station")
+      {Name, Address}
+    
+  TYPE railway_halt
+    = NODE ("railway"=="halt")
+      {Name}
+    
+  TYPE railway_tram_stop
+    = NODE ("railway"=="tram_stop")
+      {Name}
+    
+  TYPE railway_crossing
+    = NODE ("railway"=="crossing")
+    
+  TYPE railway_level_crossing
+    = NODE ("railway"=="level_crossing")
+    
+  TYPE railway_subway_entrance
+    = NODE ("railway"=="subway_entrance")
+      {Name}
+    
+  TYPE railway_turntable
+    = NODE AREA ("railway"=="turntable")
 
-  TYPE route_ferry = WAY ("route"=="ferry") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+  TYPE public_transport_platform
+     = WAY AREA ("public_transport"=="platform" OR
+                 "railway"=="platform" OR
+                 "highway"=="platform")
+      {Name}
 
-  TYPE aeroway_aerodrome = NODE AREA ("aeroway"=="aerodrome") OPTIONS INDEX_POI
-  TYPE aeroway_terminal = NODE AREA ("aeroway"=="terminal")
-  TYPE aeroway_helipad = NODE AREA ("aeroway"=="helipad")
-  TYPE aeroway_runway = WAY AREA ("aeroway"=="runway") // Officially not AREA!
-  TYPE aeroway_taxiway = WAY ("aeroway"=="taxiway")
-  TYPE aeroway_apron = AREA ("aeroway"=="apron")
-  TYPE aeroway_gate = NODE ("aeroway"=="gate")
+  //
+  // Water transport
+  // 
 
-  TYPE public_transport_platform = WAY AREA ("public_transport"=="platform" OR
-                                             "railway"=="platform" OR
-                                             "highway"=="platform")
+  TYPE route_ferry
+    = WAY ("route"=="ferry")
+      {Name}
+     OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
 
-  TYPE landuse_allotments = NODE AREA ("landuse"=="allotments")
-  TYPE landuse_basin = NODE AREA ("landuse"=="basin") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_brownfield = NODE AREA ("landuse"=="brownfield") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_cemetery = AREA ("landuse"=="cemetery")
-  TYPE landuse_cemetery_sea = AREA ("landuse"=="cemetery" AND "cemetery"=="sea") OPTIONS IGNORESEALAND
-  TYPE landuse_commercial = NODE AREA ("landuse"=="commercial") OPTIONS OPTIMIZE_LOW_ZOOM 
-  TYPE landuse_construction = NODE AREA ("landuse"=="construction")
-  TYPE landuse_farm = AREA ("landuse"=="farm") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_farmland = AREA ("landuse"=="farmland") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_farmyard_building = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE landuse_farmyard = AREA ("landuse"=="farmyard")
-  TYPE landuse_forest = NODE AREA ("landuse"=="forest") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_garages = AREA ("landuse"=="garages")
-  TYPE landuse_grass = NODE AREA ("landuse"=="grass")
-  TYPE landuse_greenfield = NODE AREA ("landuse"=="greenfield") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_greenhouse_horticulture = AREA ("landuse"=="greenhouse_horticulture")
-  TYPE landuse_industrial = NODE AREA ("landuse"=="industrial") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_landfill = NODE AREA ("landuse"=="landfill") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_meadow = NODE AREA ("landuse"=="meadow")
-  TYPE landuse_military = NODE AREA ("landuse"=="military") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_orchard = NODE AREA ("landuse"=="orchard")
-  TYPE landuse_quarry = NODE AREA ("landuse"=="quarry") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_railway = AREA ("landuse"=="railway")
-  TYPE landuse_recreation_ground = NODE AREA ("landuse"=="recreation_ground") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_reservoir = NODE AREA ("landuse"=="reservoir") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_residential = NODE AREA ("landuse"=="residential") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE landuse_retail = NODE AREA ("landuse"=="retail")
-  TYPE landuse_salt_pond = AREA ("landuse"=="salt_pond")
-  TYPE landuse_village_green = NODE AREA ("landuse"=="village_green")
-  TYPE landuse_vineyard = NODE AREA ("landuse"=="vineyard")
-  TYPE landuse_wood = NODE AREA ("landuse"=="wood") OPTIONS OPTIMIZE_LOW_ZOOM
+  //
+  // air transport
+  //
 
-  TYPE natural_bay = NODE AREA ("natural"=="bay")
-  TYPE natural_beach = NODE AREA ("natural"=="beach") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_cave_entrance = NODE AREA ("natural"=="cave_entrance")
-  TYPE natural_cliff = NODE WAY AREA ("natural"=="cliff")
+  TYPE aeroway_aerodrome
+    = NODE AREA ("aeroway"=="aerodrome")
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE aeroway_terminal
+    = NODE AREA ("aeroway"=="terminal")
+      {Name, Address}
+      
+  TYPE aeroway_helipad
+    = NODE AREA ("aeroway"=="helipad")
+    
+  TYPE aeroway_runway
+    = WAY AREA ("aeroway"=="runway") // Officially not AREA!
+      {Ref}
+    
+  TYPE aeroway_taxiway
+    = WAY ("aeroway"=="taxiway")
+      {Ref}
+    
+  TYPE aeroway_apron
+    = AREA ("aeroway"=="apron")
+      {Ref}
+    
+  TYPE aeroway_gate
+    = NODE ("aeroway"=="gate")
+      {Name}
 
-  TYPE natural_fell = NODE AREA ("natural"=="fell") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_glacier = NODE AREA ("natural"=="glacier") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_grassland = AREA ("natural"=="grassland") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_heath = NODE AREA ("natural"=="heath") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_land = NODE AREA ("natural"=="land") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_marsh = NODE AREA ("natural"=="marsh") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_mud = NODE AREA ("natural"=="mud")
-  TYPE natural_peak = NODE ("natural"=="peak")
-  TYPE natural_sand = NODE AREA ("natural"=="sand")
-  TYPE natural_scree = NODE AREA ("natural"=="scree")
-  TYPE natural_scrub = NODE AREA ("natural"=="scrub") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_spring = NODE ("natural"=="spring")
-  TYPE natural_tree = NODE ("natural"=="tree") OPTIONS IGNORE // To many for mobile?
-  TYPE natural_volcano = NODE ("natural"=="volcano")
-  TYPE natural_water = NODE AREA ("natural"=="water") OPTIONS IGNORESEALAND OPTIMIZE_LOW_ZOOM
-  TYPE natural_wetland_marsh = NODE AREA ("natural"=="wetland" AND "wetland"=="marsh") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_wetland_tidalflat = NODE AREA ("natural"=="wetland" AND "wetland"=="tidalflat") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_wetland = NODE AREA ("natural"=="wetland") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE natural_wood = NODE AREA ("natural"=="wood") OPTIONS OPTIMIZE_LOW_ZOOM
+  //
+  // Landuses
+  //
 
-  TYPE man_made_wastewater_plant = NODE AREA ("man_made"=="wastewater_plant")
-  TYPE man_made_pier = WAY AREA ("man_made"=="pier")
+  TYPE landuse_allotments
+    = NODE AREA ("landuse"=="allotments")
+      {Name}
+     
+  TYPE landuse_basin
+    = NODE AREA ("landuse"=="basin")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+       
+  TYPE landuse_brownfield
+    = NODE AREA ("landuse"=="brownfield")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+       
+  TYPE landuse_cemetery
+    = AREA ("landuse"=="cemetery")
+      {Name}
+    
+  TYPE landuse_cemetery_sea
+    = AREA ("landuse"=="cemetery" AND "cemetery"=="sea")
+      {Name}
+      OPTIONS IGNORESEALAND
+      
+  TYPE landuse_commercial
+    = NODE AREA ("landuse"=="commercial")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+       
+  TYPE landuse_construction
+    = NODE AREA ("landuse"=="construction")
+      {Name}
+    
+  TYPE landuse_farm
+    = AREA ("landuse"=="farm")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_farmland
+    = AREA ("landuse"=="farmland")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+    
+  TYPE landuse_farmyard_building
+    = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name}
+    
+  TYPE landuse_farmyard
+    = AREA ("landuse"=="farmyard")
+      {Name}
+    
+  TYPE landuse_forest
+    = NODE AREA ("landuse"=="forest")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+    
+  TYPE landuse_garages
+    = AREA ("landuse"=="garages")
+      {Name}
+    
+  TYPE landuse_grass
+    = NODE AREA ("landuse"=="grass")
+      {Name}
+    
+  TYPE landuse_greenfield
+    = NODE AREA ("landuse"=="greenfield")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_greenhouse_horticulture
+    = AREA ("landuse"=="greenhouse_horticulture")
+      {Name}
+    
+  TYPE landuse_industrial
+    = NODE AREA ("landuse"=="industrial")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_landfill
+    = NODE AREA ("landuse"=="landfill")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_meadow
+    = NODE AREA ("landuse"=="meadow")
+      {Name}
+    
+  TYPE landuse_military
+    = NODE AREA ("landuse"=="military")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_orchard
+    = NODE AREA ("landuse"=="orchard")
+      {Name}
+    
+  TYPE landuse_quarry
+    = NODE AREA ("landuse"=="quarry")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_railway
+    = AREA ("landuse"=="railway")
+      {Name}
+    
+  TYPE landuse_recreation_ground
+    = NODE AREA ("landuse"=="recreation_ground")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_reservoir
+    = NODE AREA ("landuse"=="reservoir")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_residential
+    = NODE AREA ("landuse"=="residential")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE landuse_retail
+    = NODE AREA ("landuse"=="retail")
+    
+  TYPE landuse_salt_pond
+    = AREA ("landuse"=="salt_pond")
+      {Name}
+    
+  TYPE landuse_village_green
+    = NODE AREA ("landuse"=="village_green")
+      {Name}
+    
+  TYPE landuse_vineyard
+    = NODE AREA ("landuse"=="vineyard")
+      {Name}
+    
+  TYPE landuse_wood
+    = NODE AREA ("landuse"=="wood")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
 
-  TYPE leisure_building = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE leisure_sports_centre = NODE AREA ("leisure"=="sports_centre")
-  TYPE leisure_golf_course = NODE AREA ("leisure"=="golf_course") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_stadium = NODE AREA ("leisure"=="stadium") OPTIONS INDEX_POI
-  TYPE leisure_track = NODE WAY AREA ("leisure"=="track") OPTIONS PIN_WAY OPTIMIZE_LOW_ZOOM
-  TYPE leisure_pitch = NODE AREA ("leisure"=="pitch") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_water_park = NODE AREA ("leisure"=="water_park") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_marina = NODE AREA ("leisure"=="marina") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_slipway = NODE ("leisure"=="slipway")
-  TYPE leisure_fishing = NODE AREA ("leisure"=="fishing") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_nature_reserve = NODE AREA ("leisure"=="nature_reserve")
-  TYPE leisure_park = NODE AREA ("leisure"=="park") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_playground = NODE AREA ("leisure"=="playground")
-  TYPE leisure_garden = NODE AREA ("leisure"=="garden")
-  TYPE leisure_common = NODE AREA ("leisure"=="common") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE leisure_ice_rink = NODE AREA ("leisure"=="ice_rink") OPTIONS OPTIMIZE_LOW_ZOOM
+  //
+  // Natural
+  //
+
+  TYPE natural_bay
+    = NODE AREA ("natural"=="bay")
+      {Name}
+    
+  TYPE natural_beach
+    = NODE AREA ("natural"=="beach")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_cave_entrance
+    = NODE AREA ("natural"=="cave_entrance")
+      {Name}
+    
+  TYPE natural_cliff
+    = NODE WAY AREA ("natural"=="cliff")
+      {Name}
+
+  TYPE natural_fell
+    = NODE AREA ("natural"=="fell")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_glacier
+    = NODE AREA ("natural"=="glacier")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_grassland
+    = AREA ("natural"=="grassland")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_heath
+    = NODE AREA ("natural"=="heath")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_land
+    = NODE AREA ("natural"=="land")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_marsh
+    = NODE AREA ("natural"=="marsh")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_mud
+    = NODE AREA ("natural"=="mud")
+      {Name}
+    
+  TYPE natural_peak
+    = NODE ("natural"=="peak")
+      {Name}
+    
+  TYPE natural_sand
+    = NODE AREA ("natural"=="sand")
+      {Name}
+    
+  TYPE natural_scree
+    = NODE AREA ("natural"=="scree")
+      {Name}
+   
+  TYPE natural_scrub
+    = NODE AREA ("natural"=="scrub")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_spring
+    = NODE ("natural"=="spring")
+      {Name}
+    
+  TYPE natural_tree
+    = NODE ("natural"=="tree")
+      OPTIONS IGNORE // Too many for mobile?
+      
+  TYPE natural_volcano
+    = NODE ("natural"=="volcano")
+      {Name}
+    
+  TYPE natural_water
+    = NODE AREA ("natural"=="water")
+      {Name}
+      OPTIONS IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_wetland_marsh
+    = NODE AREA ("natural"=="wetland" AND "wetland"=="marsh")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_wetland_tidalflat
+    = NODE AREA ("natural"=="wetland" AND "wetland"=="tidalflat")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_wetland
+    = NODE AREA ("natural"=="wetland")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE natural_wood
+    = NODE AREA ("natural"=="wood")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+
+  //
+  // Man made
+  //
+
+  TYPE man_made_wastewater_plant
+    = NODE AREA ("man_made"=="wastewater_plant")
+      {Name}
+    
+  TYPE man_made_pier
+    = WAY AREA ("man_made"=="pier")
+      {Name}
+
+  //
+  // Leisure 
+  //
+
+  TYPE leisure_building
+    = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+     OPTIONS INDEX_POI
+     
+  TYPE leisure_sports_centre
+    = NODE AREA ("leisure"=="sports_centre")
+      {Name, Address}
+    
+  TYPE leisure_golf_course
+    = NODE AREA ("leisure"=="golf_course")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_stadium
+    = NODE AREA ("leisure"=="stadium")
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE leisure_track
+    = NODE WAY AREA ("leisure"=="track")
+      {Name}
+      OPTIONS PIN_WAY OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_pitch
+    = NODE AREA ("leisure"=="pitch")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_water_park
+    = NODE AREA ("leisure"=="water_park")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_marina
+    = NODE AREA ("leisure"=="marina")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_slipway
+    = NODE ("leisure"=="slipway")
+      {Name, Address}
+    
+  TYPE leisure_fishing
+    = NODE AREA ("leisure"=="fishing")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_nature_reserve
+    = NODE AREA ("leisure"=="nature_reserve")
+      {Name}
+    
+  TYPE leisure_park
+    = NODE AREA ("leisure"=="park")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_playground
+    = NODE AREA ("leisure"=="playground")
+      {Name}
+    
+  TYPE leisure_garden
+    = NODE AREA ("leisure"=="garden")
+      {Name}
+    
+  TYPE leisure_common
+    = NODE AREA ("leisure"=="common")
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+      
+  TYPE leisure_ice_rink
+    = NODE AREA ("leisure"=="ice_rink")
+      {Name, Address}
+      OPTIONS OPTIMIZE_LOW_ZOOM
+
+  //
+  // Amenity
+  //
 
   // These are currently special-cased in the style file
-  TYPE amenity_atm = NODE AREA ("amenity"=="atm")  OPTIONS INDEX_POI
+  TYPE amenity_atm
+    = NODE AREA ("amenity"=="atm")
+      {Name}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_bank_building = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
-  TYPE amenity_bank = NODE AREA ("amenity"=="bank")  OPTIONS INDEX_POI
+  TYPE amenity_bank_building
+    = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_bank
+    = NODE AREA ("amenity"=="bank")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_bicycle_parking_building = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity_bicycle_parking = NODE WAY AREA ("amenity"=="bicycle_parking")
+  TYPE amenity_bicycle_parking_building
+    = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+    
+  TYPE amenity_bicycle_parking
+    = NODE WAY AREA ("amenity"=="bicycle_parking")
+      {Name, Address}
 
-  TYPE amenity_bench = NODE WAY ("amenity"=="bench")
-  TYPE amenity_bus_station = NODE AREA ("amenity"=="bus_station")
+  TYPE amenity_bench
+    = NODE WAY ("amenity"=="bench")
+      OPTIONS IGNORE // Too many for mobile?
+    
+  TYPE amenity_bus_station
+    = NODE AREA ("amenity"=="bus_station")
+      {Name}
 
-  TYPE amenity_cafe_building = AREA ("amenity"=="cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
-  TYPE amenity_cafe = NODE AREA ("amenity"=="cafe")  OPTIONS INDEX_POI
+  TYPE amenity_cafe_building
+    = AREA ("amenity"=="cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_cafe
+    = NODE AREA ("amenity"=="cafe")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_fast_food_building = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
-  TYPE amenity_fast_food = NODE AREA ("amenity"=="fast_food")  OPTIONS INDEX_POI
+  TYPE amenity_fast_food_building
+    = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_fast_food
+    = NODE AREA ("amenity"=="fast_food")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_fuel_building = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_fuel = NODE ("amenity"=="fuel") OPTIONS INDEX_POI
+  TYPE amenity_fuel_building
+    = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_fuel
+    = NODE ("amenity"=="fuel")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_grave_yard = NODE AREA ("amenity"=="grave_yard") OPTIONS INDEX_POI
+  TYPE amenity_grave_yard
+    = NODE AREA ("amenity"=="grave_yard")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_hospital_building = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_hospital = NODE AREA ("amenity"=="hospital") OPTIONS INDEX_POI
+  TYPE amenity_hospital_building
+    = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_hospital
+    = NODE AREA ("amenity"=="hospital")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_kindergarten_building = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_kindergarten = NODE ("amenity"=="kindergarten") OPTIONS INDEX_POI
+  TYPE amenity_kindergarten_building
+    = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_kindergarten
+    = NODE ("amenity"=="kindergarten")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_parking_building = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_parking = NODE AREA ("amenity"=="parking") OPTIONS INDEX_POI
+  TYPE amenity_parking_building
+    = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_parking
+    = NODE AREA ("amenity"=="parking")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_pharmacy = NODE AREA ("amenity"=="pharmacy") OPTIONS INDEX_POI
+  TYPE amenity_pharmacy
+    = NODE AREA ("amenity"=="pharmacy")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_post_office_building = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_post_office = NODE ("amenity"=="post_office") OPTIONS INDEX_POI
+  TYPE amenity_post_office_building
+    = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_post_office
+    = NODE ("amenity"=="post_office")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_post_box = NODE ("amenity"=="post_box")
+  TYPE amenity_post_box
+    = NODE ("amenity"=="post_box")
 
-  TYPE amenity_restaurant_building = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))  OPTIONS INDEX_POI
-  TYPE amenity_restaurant = NODE AREA ("amenity"=="restaurant")  OPTIONS INDEX_POI
+  TYPE amenity_restaurant_building
+    = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_restaurant
+    = NODE AREA ("amenity"=="restaurant")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_school_building = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE amenity_school = NODE AREA ("amenity"=="school") OPTIONS INDEX_POI
+  TYPE amenity_school_building
+    = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE amenity_school
+    = NODE AREA ("amenity"=="school")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE amenity_taxi = NODE AREA ("amenity"=="taxi")
-  TYPE amenity_toilets = NODE ("amenity"=="toilets")
-  TYPE amenity_vending_machine = NODE ("amenity"=="vending_machine") OPTIONS IGNORE // To many for mobile?
+  TYPE amenity_taxi
+    = NODE AREA ("amenity"=="taxi")
+    
+  TYPE amenity_toilets
+    = NODE ("amenity"=="toilets")
+    
+  TYPE amenity_vending_machine
+    = NODE ("amenity"=="vending_machine")
+      {Name}
+      OPTIONS IGNORE // Too many for mobile?
 
   // Churches
-  TYPE christian_church_building = AREA ("amenity"=="place_of_worship" AND
-                                           "religion"=="christian" AND
-                                           EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  TYPE christian_church_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="christian" AND
+            EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE christian_church = NODE ("amenity"=="place_of_worship" AND
-                                  "religion"=="christian") OPTIONS INDEX_POI
+  TYPE christian_church
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="christian")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
   // Everything else is just an 'amenity' for now
-  TYPE amenity_building = AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE amenity = NODE (EXISTS "amenity")
+  TYPE amenity_building
+    = AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+    
+  TYPE amenity
+    = NODE (EXISTS "amenity")
+      {Name, Address}
+
+  //
+  // Shops
+  //
 
   // Currently all shops are the same...
-  TYPE shop = NODE AREA (EXISTS "shop")
+  TYPE shop
+    = NODE AREA (EXISTS "shop")
+      {Name, Address}
 
-  TYPE tourism_aquarium = NODE AREA ("tourism"=="aquarium") OPTIONS INDEX_POI
-  TYPE tourism_attraction = NODE AREA ("tourism"=="attraction") OPTIONS INDEX_POI
-  TYPE tourism_artwork = NODE WAY AREA ("tourism"=="artwork") OPTIONS INDEX_POI
-  TYPE tourism_camp_site = NODE AREA ("tourism"=="camp_site")
-  TYPE tourism_caravan_site = NODE AREA ("tourism"=="caravan_site")
-  TYPE tourism_picnic_site = NODE AREA ("tourism"=="picnic_site")
-  TYPE tourism_theme_park = NODE AREA ("tourism"=="theme_park") OPTIONS INDEX_POI
-  TYPE tourism_viewpoint = NODE ("tourism"=="viewpoint")
-  TYPE tourism_zoo = NODE AREA ("tourism"=="zoo") OPTIONS INDEX_POI
+  //
+  // Tourism
+  //
 
-  TYPE tourism_alpine_hut_building = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_chalet_building = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_guest_house_building = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_hostel_building = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_hotel_building = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE tourism_information_building = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_motel_building = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE tourism_museum_building = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  TYPE tourism_aquarium
+    = NODE AREA ("tourism"=="aquarium")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE tourism_attraction
+    = NODE AREA ("tourism"=="attraction")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE tourism_artwork
+    = NODE WAY AREA ("tourism"=="artwork")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE tourism_camp_site
+    = NODE AREA ("tourism"=="camp_site")
+      {Name, Address}
+    
+  TYPE tourism_caravan_site
+    = NODE AREA ("tourism"=="caravan_site")
+      {Name, Address}
+    
+  TYPE tourism_picnic_site
+    = NODE AREA ("tourism"=="picnic_site")
+      {Name, Address}
+    
+  TYPE tourism_theme_park
+    = NODE AREA ("tourism"=="theme_park")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE tourism_viewpoint
+    = NODE ("tourism"=="viewpoint")
+      {Name, Address}
+    
+  TYPE tourism_zoo
+    = NODE AREA ("tourism"=="zoo")
+      {Name, Address}
+      OPTIONS INDEX_POI
 
-  TYPE tourism_alpine_hut = NODE AREA ("tourism"=="alpine_hut")
-  TYPE tourism_chalet = NODE AREA ("tourism"=="chalet")
-  TYPE tourism_guest_house = NODE AREA ("tourism"=="guest_house")
-  TYPE tourism_hostel = NODE AREA ("tourism"=="hostel")
-  TYPE tourism_hotel = NODE AREA ("tourism"=="hotel") OPTIONS INDEX_POI
-  TYPE tourism_information = NODE AREA ("tourism"=="information")
-  TYPE tourism_motel = NODE AREA ("tourism"=="motel")
-  TYPE tourism_museum = NODE AREA ("tourism"=="museum") OPTIONS INDEX_POI
+  TYPE tourism_alpine_hut_building
+    = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism_alpine_hut
+    = NODE AREA ("tourism"=="alpine_hut")
+      {Name, Address}
+    
+  TYPE tourism_chalet_building
+    = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism_chalet
+    = NODE AREA ("tourism"=="chalet")
+      {Name, Address}
+    
+  TYPE tourism_guest_house_building
+    = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism_guest_house
+    = NODE AREA ("tourism"=="guest_house")
+      {Name, Address}
+    
+  TYPE tourism_hostel_building
+    = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism_hostel
+    = NODE AREA ("tourism"=="hostel")
+      {Name, Address}
+    
+  TYPE tourism_hotel_building
+    = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE tourism_hotel
+    = NODE AREA ("tourism"=="hotel")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE tourism_information_building
+    = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism_information
+    = NODE AREA ("tourism"=="information")
+      {Name, Address}
+    
+  TYPE tourism_motel_building
+    = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism_motel
+    = NODE AREA ("tourism"=="motel")
+      {Name, Address}
+    
+  TYPE tourism_museum_building
+    = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE tourism_museum
+    = NODE AREA ("tourism"=="museum")
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE tourism_building
+    = AREA (EXISTS "tourism" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+
+  TYPE tourism
+    = NODE AREA (EXISTS "tourism")
+      {Name, Address}
+
+  //
+  // Historic
+  //
+
+  TYPE historic_castle_building
+    = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE historic_castle
+    = NODE AREA ("historic"=="castle")
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE historic_manor_building
+    = NODE AREA ("historic"=="manor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE historic_manor
+    = NODE AREA ("historic"=="manor")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE historic_monument_building
+    = NODE WAY AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE historic_monument
+    = NODE AREA ("historic"=="monument")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE historic_memorial_building
+    = NODE WAY AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE historic_memorial
+    = NODE AREA ("historic"=="memorial")
+      {Name, Address}
+      OPTIONS INDEX_POI
+    
+  TYPE historic_ruins_building
+    = NODE WAY AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE historic_ruins
+    = NODE WAY AREA ("historic"=="ruins")
+      {Name, Address}
+      OPTIONS INDEX_POI
+       
+  TYPE historic_archaeological_site
+    = NODE WAY AREA ("historic"=="archaeological_site")
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE historic_battlefield
+    = NODE AREA ("historic"=="battlefield")
+      {Name, Address}
+      OPTIONS INDEX_POI
+      
+  TYPE historic_wreck
+    = NODE AREA ("historic"=="wreck")
+      {Name, Address}
+
+  TYPE historic_building
+    = NODE WAY AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  TYPE historic
+    = NODE AREA (EXISTS "historic")
+      {Name, Address}
+      OPTIONS INDEX_POI
+
+  //
+  // Military
+  //
+
+  TYPE military_airfield
+    = NODE AREA ("military"=="airfield")
+      {Name, Address}
+    
+  TYPE military_bunker
+    = NODE AREA ("military"=="bunker")
+      {Name, Address}
+    
+  TYPE military_barracks
+    = NODE AREA ("military"=="barracks")
+      {Name, Address}
+    
+  TYPE military_danger_area
+    = NODE AREA ("military"=="danger_area")
+      {Name}
+    
+  TYPE military_range
+    = NODE AREA ("military"=="range")
+      {Name}
+    
+  TYPE military_naval_base
+    = NODE AREA ("military"=="naval_base")
+      {Name, Address}
+
+  //
+  // Sport
+  //
+
+  TYPE sport_building
+    = AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
+    
+  TYPE sport_9pin
+    = NODE AREA ("sport"=="9pin")
+      {Name, Address}
+    
+  TYPE sport_10pin
+    = NODE AREA ("sport"=="10pin")
+      {Name, Address}
+    
+  TYPE sport_archery
+    = NODE AREA ("sport"=="archery")
+      {Name, Address}
+    
+  TYPE sport_athletics
+    = NODE AREA ("sport"=="athletics")
+      {Name, Address}
+    
+  TYPE sport_australian_football
+    = NODE AREA ("sport"=="australian_football")
+      {Name, Address}
+    
+  TYPE sport_baseball
+    = NODE AREA ("sport"=="baseball")
+      {Name, Address}
+    
+  TYPE sport_basketball
+    = NODE AREA ("sport"=="basketball")
+      {Name, Address}
+    
+  TYPE sport_beachvolleyball
+    = NODE AREA ("sport"=="beachvolleyball")
+      {Name, Address}
+    
+  TYPE sport_boules
+    = NODE AREA ("sport"=="boules")
+      {Name, Address}
+    
+  TYPE sport_bowls
+    = NODE AREA ("sport"=="bowls")
+      {Name, Address}
+    
+  TYPE sport_canoe
+    = NODE AREA ("sport"=="canoe")
+      {Name, Address}
+    
+  TYPE sport_chess
+    = NODE AREA ("sport"=="chess")
+      {Name, Address}
+    
+  TYPE sport_climbing
+    = NODE AREA ("sport"=="climbing")
+      {Name, Address}
+    
+  TYPE sport_cricket
+    = NODE AREA ("sport"=="cricket")
+      {Name, Address}
+    
+  TYPE sport_cricket_nets
+    = NODE AREA ("sport"=="cricket_nets")
+      {Name, Address}
+    
+  TYPE sport_croquet
+    = NODE AREA ("sport"=="croquet")
+      {Name, Address}
+    
+  TYPE sport_cycling
+    = NODE AREA ("sport"=="cycling")
+      {Name, Address}
+    
+  TYPE sport_diving
+    = NODE AREA ("sport"=="diving")
+      {Name, Address}
+    
+  TYPE sport_dog_racing
+    = NODE AREA ("sport"=="dog_racing")
+      {Name, Address}
+    
+  TYPE sport_equestrian
+    = NODE AREA ("sport"=="equestrian")
+      {Name, Address}
+    
+  TYPE sport_football
+    = NODE AREA ("sport"=="football")
+      {Name, Address}
+    
+  TYPE sport_golf
+    = NODE AREA ("sport"=="golf")
+      {Name, Address}
+    
+  TYPE sport_gymnastics
+    = NODE AREA ("sport"=="gymnastics")
+      {Name, Address}
+    
+  TYPE sport_hockey
+    = NODE AREA ("sport"=="hockey")
+      {Name, Address}
+    
+  TYPE sport_horse_racing
+    = NODE AREA ("sport"=="horse_racing")
+      {Name, Address}
+    
+  TYPE sport_motor
+    = NODE AREA ("sport"=="motor")
+      {Name, Address}
+    
+  TYPE sport_multi
+    = NODE AREA ("sport"=="multi")
+      {Name, Address}
+    
+  TYPE sport_orienteering
+    = NODE AREA ("sport"=="orienteering")
+      {Name, Address}
+    
+  TYPE sport_paddle_tennis
+    = NODE AREA ("sport"=="paddle_tennis")
+      {Name, Address}
+    
+  TYPE sport_pelota
+    = NODE AREA ("sport"=="pelota")
+      {Name, Address}
+    
+  TYPE sport_raquet
+    = NODE AREA ("sport"=="raquet")
+      {Name, Address}
+    
+  TYPE sport_rowing
+    = NODE AREA ("sport"=="rowing")
+      {Name, Address}
+    
+  TYPE sport_rugby
+    = NODE AREA ("sport"=="rugby")
+      {Name, Address}
+    
+  TYPE sport_shooting
+    = NODE AREA ("sport"=="shooting")
+      {Name, Address}
+    
+  TYPE sport_skating
+    = NODE AREA ("sport"=="skating")
+      {Name, Address}
+    
+  TYPE sport_skateboard
+    = NODE AREA ("sport"=="skateboard")
+      {Name, Address}
+    
+  TYPE sport_skiing
+    = NODE AREA ("sport"=="skiing")
+      {Name, Address}
+    
+  TYPE sport_soccer 
+    = NODE AREA ("sport"=="soccer")
+      {Name, Address}
+    
+  TYPE sport_swimming
+    = NODE AREA ("sport"=="swimming")
+      {Name, Address}
+    
+  TYPE sport_table_tenis
+    = NODE AREA ("sport"=="table_tenis")
+      {Name, Address}
+    
+  TYPE sport_team_handball
+    = NODE AREA ("sport"=="team_handball")
+      {Name, Address}
+    
+  TYPE sport_tennis
+    = NODE AREA ("sport"=="tennis")
+      {Name, Address}
+    
+  TYPE sport_volleyball
+    = NODE AREA ("sport"=="volleyball")
+      {Name, Address}
+
+  TYPE sport
+    = NODE AREA (EXISTS "sport")
+      {Name, Address}
+
+  //
+  // Power
+  //
+
+  TYPE power_tower
+    = NODE ("power"=="tower")
+    
+  TYPE power_pole
+    = NODE ("power"=="pole")
+    
+  TYPE power_line
+    = WAY ("power"=="line") OPTIONS IGNORESEALAND
+    
+  TYPE power_minor_line
+    = WAY ("power"=="minor_line")
+    
+  TYPE power_station
+    = NODE AREA ("power"=="station")
+      {Name, Address}
+    
+  TYPE power_sub_station
+    = NODE AREA ("power"=="sub_station")
+      {Name, Address}
+    
+  TYPE power_generator
+    = NODE AREA ("power"=="generator")
+      {Address}
+
+  //
+  // Regions, locations, cities stuff
+  // 
 
   // Do not delete the following type, they are required by the GenLocation import step
-  TYPE boundary_administrative = WAY AREA ("boundary"=="administrative") OR
-                                   RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON IGNORESEALAND
+  TYPE boundary_administrative
+    = WAY AREA ("boundary"=="administrative") OR
+                RELATION ("type"=="boundary" AND "boundary"=="administrative")
+      {Name}
+      OPTIONS MULTIPOLYGON IGNORESEALAND
 
-  TYPE place_continent = NODE AREA ("place"=="continent")
-  TYPE place_country = NODE ("place"=="country")
-  TYPE place_state = NODE AREA ("place"=="state")
-  TYPE place_region = NODE AREA ("place"=="region")
-  TYPE place_county = NODE AREA ("place"=="county")
+  TYPE place_continent
+    = NODE AREA ("place"=="continent")
+      {Name}
+    
+  TYPE place_country
+    = NODE ("place"=="country")
+      {Name}
+    
+  TYPE place_state
+    = NODE AREA ("place"=="state")
+      {Name}
+    
+  TYPE place_region
+    = NODE AREA ("place"=="region")
+      {Name}
+    
+  TYPE place_county
+    = NODE AREA ("place"=="county")
+      {Name}
 
   // Do not delete the following types, they are required by the GenCityStreet import step
-  TYPE place_millioncity = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000) OPTIONS INDEX_REGION
-  TYPE place_bigcity = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">100000) OPTIONS INDEX_REGION
-  TYPE place_city = NODE AREA ("place"=="city") OPTIONS INDEX_REGION
-  TYPE place_town = NODE AREA ("place"=="town") OPTIONS INDEX_REGION
-  TYPE place_village = NODE AREA ("place"=="village") OPTIONS INDEX_REGION
-  TYPE place_hamlet = NODE AREA ("place"=="hamlet") OPTIONS INDEX_REGION
-  TYPE place_suburb = NODE AREA ("place"=="suburb") OPTIONS INDEX_REGION
+  TYPE place_millioncity
+    = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000)
+      {Name}
+      OPTIONS INDEX_REGION
+      
+  TYPE place_bigcity
+    = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">100000)
+      {Name}
+      OPTIONS INDEX_REGION
+      
+  TYPE place_city
+    = NODE AREA ("place"=="city")
+      {Name}
+      OPTIONS INDEX_REGION
+    
+  TYPE place_town
+    = NODE AREA ("place"=="town")
+      {Name}
+      OPTIONS INDEX_REGION
+    
+  TYPE place_village
+    = NODE AREA ("place"=="village")
+      {Name}
+      OPTIONS INDEX_REGION
+    
+  TYPE place_hamlet
+    = NODE AREA ("place"=="hamlet")
+      {Name}
+      OPTIONS INDEX_REGION
+    
+  TYPE place_suburb
+    = NODE AREA ("place"=="suburb")
+      {Name}
+      OPTIONS INDEX_REGION
 
-  TYPE place_locality = NODE AREA ("place"=="locality") OPTIONS INDEX_POI
-  TYPE place_island = NODE AREA ("place"=="island")
+  TYPE place_locality
+    = NODE AREA ("place"=="locality")
+      {Name}
+      OPTIONS INDEX_POI
+    
+  TYPE place_island
+    = NODE AREA ("place"=="island")
+      {Name}
 
-  TYPE historic_castle_building = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE historic_monument_building = NODE WAY AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE historic_memorial_building = NODE WAY AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
-  TYPE historic_ruins_building = NODE WAY AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"])) OPTIONS INDEX_POI
+  //
+  // Buildings
+  //
 
-  TYPE historic_castle = NODE AREA ("historic"=="castle") OPTIONS INDEX_POI
-  TYPE historic_ruins = NODE WAY AREA ("historic"=="ruins") OPTIONS INDEX_POI
-  TYPE historic_manor = NODE AREA ("historic"=="manor") OPTIONS INDEX_POI
-  TYPE historic_monument = NODE AREA ("historic"=="monument") OPTIONS INDEX_POI
-  TYPE historic_memorial = NODE AREA ("historic"=="memorial") OPTIONS INDEX_POI
-  TYPE historic_archaeological_site = NODE WAY AREA ("historic"=="archaeological_site") OPTIONS INDEX_POI
-  TYPE historic_battlefield = NODE AREA ("historic"=="battlefield") OPTIONS INDEX_POI
-  TYPE historic_wreck = NODE AREA ("historic"=="wreck")
+  TYPE building_garage
+    = AREA ("building"=="garage")
+      {Address}
+    
+  TYPE building
+    = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, Address}
 
-  TYPE military_airfield = NODE AREA ("military"=="airfield")
-  TYPE military_bunker = NODE AREA ("military"=="bunker")
-  TYPE military_barracks = NODE AREA ("military"=="barracks")
-  TYPE military_danger_area = NODE AREA ("military"=="danger_area")
-  TYPE military_range = NODE AREA ("military"=="range")
-  TYPE military_naval_base = NODE AREA ("military"=="naval_base")
-
-  TYPE sport_building = AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE sport_9pin = NODE AREA ("sport"=="9pin")
-  TYPE sport_10pin = NODE AREA ("sport"=="10pin")
-  TYPE sport_archery = NODE AREA ("sport"=="archery")
-  TYPE sport_athletics = NODE AREA ("sport"=="athletics")
-  TYPE sport_australian_football = NODE AREA ("sport"=="australian_football")
-  TYPE sport_baseball = NODE AREA ("sport"=="baseball")
-  TYPE sport_basketball = NODE AREA ("sport"=="basketball")
-  TYPE sport_beachvolleyball = NODE AREA ("sport"=="beachvolleyball")
-  TYPE sport_boules = NODE AREA ("sport"=="boules")
-  TYPE sport_bowls = NODE AREA ("sport"=="bowls")
-  TYPE sport_canoe = NODE AREA ("sport"=="canoe")
-  TYPE sport_chess = NODE AREA ("sport"=="chess")
-  TYPE sport_climbing = NODE AREA ("sport"=="climbing")
-  TYPE sport_cricket = NODE AREA ("sport"=="cricket")
-  TYPE sport_cricket_nets = NODE AREA ("sport"=="cricket_nets")
-  TYPE sport_croquet = NODE AREA ("sport"=="croquet")
-  TYPE sport_cycling = NODE AREA ("sport"=="cycling")
-  TYPE sport_diving = NODE AREA ("sport"=="diving")
-  TYPE sport_dog_racing = NODE AREA ("sport"=="dog_racing")
-  TYPE sport_equestrian = NODE AREA ("sport"=="equestrian")
-  TYPE sport_football = NODE AREA ("sport"=="football")
-  TYPE sport_golf = NODE AREA ("sport"=="golf")
-  TYPE sport_gymnastics = NODE AREA ("sport"=="gymnastics")
-  TYPE sport_hockey = NODE AREA ("sport"=="hockey")
-  TYPE sport_horse_racing = NODE AREA ("sport"=="horse_racing")
-  TYPE sport_motor = NODE AREA ("sport"=="motor")
-  TYPE sport_multi = NODE AREA ("sport"=="multi")
-  TYPE sport_orienteering = NODE AREA ("sport"=="orienteering")
-  TYPE sport_paddle_tennis = NODE AREA ("sport"=="paddle_tennis")
-  TYPE sport_pelota = NODE AREA ("sport"=="pelota")
-  TYPE sport_raquet = NODE AREA ("sport"=="raquet")
-  TYPE sport_rowing = NODE AREA ("sport"=="rowing")
-  TYPE sport_rugby = NODE AREA ("sport"=="rugby")
-  TYPE sport_shooting = NODE AREA ("sport"=="shooting")
-  TYPE sport_skating = NODE AREA ("sport"=="skating")
-  TYPE sport_skateboard = NODE AREA ("sport"=="skateboard")
-  TYPE sport_skiing = NODE AREA ("sport"=="skiing")
-  TYPE sport_soccer = NODE AREA ("sport"=="soccer")
-  TYPE sport_swimming = NODE AREA ("sport"=="swimming")
-  TYPE sport_table_tenis = NODE AREA ("sport"=="table_tenis")
-  TYPE sport_team_handball = NODE AREA ("sport"=="team_handball")
-  TYPE sport_tennis = NODE AREA ("sport"=="tennis")
-  TYPE sport_volleyball = NODE AREA ("sport"=="volleyball")
-
-  TYPE power_tower = NODE ("power"=="tower")
-  TYPE power_pole = NODE ("power"=="pole")
-  TYPE power_line = WAY ("power"=="line") OPTIONS IGNORESEALAND
-  TYPE power_minor_line = WAY ("power"=="minor_line")
-  TYPE power_station = NODE AREA ("power"=="station")
-  TYPE power_sub_station = NODE AREA ("power"=="sub_station")
-  TYPE power_generator = NODE AREA ("power"=="generator")
-
-  TYPE building_garage = AREA ("building"=="garage")
-  TYPE building = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
-
-  TYPE address = NODE AREA (EXISTS "addr:street" AND EXISTS "addr:housenumber")
-
-  TYPE speed_camera = NODE ("highway"=="speed_camera") OPTIONS IGNORE
+  // Addresses
+  TYPE address
+    = NODE AREA (EXISTS "addr:street" AND EXISTS "addr:housenumber")
+      {Address}
+     
+  //
+  //
+  // Barriers
 
   // Currently not supported by stylesheet
-  TYPE barrier_hedge = WAY AREA ("barrier"=="hedge")
-  TYPE barrier_fence = WAY AREA ("barrier"=="fence") OPTIONS IGNORESEALAND
-  TYPE barrier_wall = WAY AREA ("barrier"=="wall")
-  TYPE barrier_ditch = WAY AREA ("barrier"=="ditch")
-  TYPE barrier_retaining_wall = WAY AREA ("barrier"=="retaining_wall") OPTIONS IGNORESEALAND
-  TYPE barrier_city_wall = WAY AREA ("barrier"=="city_wall")
-  TYPE barrier_bollard = NODE WAY ("barrier"=="bollard")
-  TYPE barrier_cycle_barrier = NODE ("barrier"=="cycle_barrier")
-  TYPE barrier_block = NODE ("barrier"=="block")
-  TYPE barrier_cattle_grid = NODE ("barrier"=="cattle_grid")
-  TYPE barrier_toll_booth = NODE ("barrier"=="toll_booth")
-  TYPE barrier_entrance = NODE ("barrier"=="entrance")
-  TYPE barrier_gate = NODE WAY ("barrier"=="gate")
-  TYPE barrier_lift_gate = NODE ("barrier"=="lift_gate")
-  TYPE barrier_stile = NODE ("barrier"=="stile")
-  TYPE barrier_sally_port = NODE ("barrier"=="sally_port")
-  TYPE barrier_kent_carriage_gate = NODE ("barrier"=="kent_carriage_gate")
+  TYPE barrier_hedge
+    = WAY AREA ("barrier"=="hedge")
+      OPTIONS IGNORE
+    
+  TYPE barrier_fence
+    = WAY AREA ("barrier"=="fence")
+      OPTIONS IGNORESEALAND
+    
+  TYPE barrier_wall
+    = WAY AREA ("barrier"=="wall")
+      OPTIONS IGNORE
+    
+  TYPE barrier_ditch
+    = WAY AREA ("barrier"=="ditch")
+      OPTIONS IGNORE
+    
+  TYPE barrier_retaining_wall
+    = WAY AREA ("barrier"=="retaining_wall")
+      OPTIONS IGNORESEALAND IGNORE
+    
+  TYPE barrier_city_wall
+    = WAY AREA ("barrier"=="city_wall")
+      OPTIONS IGNORE
+    
+  TYPE barrier_bollard
+    = NODE WAY ("barrier"=="bollard")
+      OPTIONS IGNORE
+    
+  TYPE barrier_cycle_barrier
+    = NODE ("barrier"=="cycle_barrier")
+      OPTIONS IGNORE
+    
+  TYPE barrier_block
+    = NODE ("barrier"=="block")
+      OPTIONS IGNORE
+    
+  TYPE barrier_cattle_grid
+    = NODE ("barrier"=="cattle_grid")
+      OPTIONS IGNORE
+    
+  TYPE barrier_toll_booth
+    = NODE ("barrier"=="toll_booth")
+      OPTIONS IGNORE
+    
+  TYPE barrier_entrance
+    = NODE ("barrier"=="entrance")
+      OPTIONS IGNORE
+    
+  TYPE barrier_gate
+    = NODE WAY ("barrier"=="gate")
+      OPTIONS IGNORE
+    
+  TYPE barrier_lift_gate
+    = NODE ("barrier"=="lift_gate")
+      OPTIONS IGNORE
+    
+  TYPE barrier_stile
+    = NODE ("barrier"=="stile")
+      OPTIONS IGNORE
+    
+  TYPE barrier_sally_port
+    = NODE ("barrier"=="sally_port")
+      OPTIONS IGNORE
+    
+  TYPE barrier_kent_carriage_gate
+    = NODE ("barrier"=="kent_carriage_gate")
+      OPTIONS IGNORE
 
   // Types we currently ignore
 

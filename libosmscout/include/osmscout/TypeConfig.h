@@ -32,6 +32,7 @@
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/Parser.h>
+#include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -51,6 +52,11 @@ namespace osmscout {
    * they do not have a type at all.
    */
   static const TypeId typeIgnore      = 0;
+
+  // Forward declaration of classes TypeConfig and TypeInfo because
+  // of circular dependency between them and Feature
+  class TypeConfig;
+  class TypeInfo;
 
   /**
    * \ingroup type
@@ -218,6 +224,13 @@ namespace osmscout {
     }
   };
 
+  class OSMSCOUT_API FeatureValue
+  {
+  public:
+    FeatureValue();
+    virtual ~FeatureValue();
+  };
+
   /**
    * A feature combines one or multiple tags  to build information attribute for a type.
    *
@@ -234,12 +247,51 @@ namespace osmscout {
     virtual ~Feature();
 
     /**
+     * Does further initialization based on the current TypeConfig. For example
+     * it registers Tags (and stores their TagId) for further processing.
+     */
+    virtual void Initialize(TypeConfig& typeConfig) = 0;
+
+    /**
      * Returns the name of the feature
      */
     virtual std::string GetName() const = 0;
+
+    virtual void Parse(Progress& progress,
+                       const TypeConfig& typeConfig,
+                       const TypeInfo& type,
+                       const std::map<TagId,std::string>& tags,
+                       FeatureValue*& value,
+                       bool& set) const = 0;
   };
 
   typedef Ref<Feature> FeatureRef;
+
+  class OSMSCOUT_API NameFeatureValue : public FeatureValue
+  {
+  private:
+    std::string name;
+    std::string nameAlt;
+
+  public:
+    inline NameFeatureValue(const std::string& name,
+                            const std::string& nameAlt)
+    : name(name),
+      nameAlt(nameAlt)
+    {
+      // no code
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline std::string GetNameAlt() const
+    {
+      return nameAlt;
+    }
+  };
 
   class OSMSCOUT_API NameFeature : public Feature
   {
@@ -248,17 +300,540 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
+    void Initialize(TypeConfig& typeConfig);
+
     std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API RefFeatureValue : public FeatureValue
+  {
+  private:
+    std::string ref;
+
+  public:
+    inline RefFeatureValue(const std::string& ref)
+    : ref(ref)
+    {
+      // no code
+    }
+
+    inline std::string GetRef() const
+    {
+      return ref;
+    }
   };
 
   class OSMSCOUT_API RefFeature : public Feature
   {
+  private:
+    TagId tagRef;
+
   public:
     /** Name of this feature */
     static const char* const NAME;
 
   public:
+    void Initialize(TypeConfig& typeConfig);
+
     std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API AddressFeatureValue : public FeatureValue
+  {
+  private:
+    std::string location;
+    std::string address;
+
+  public:
+    inline AddressFeatureValue(const std::string& location,
+                               const std::string& address)
+    : location(location),
+      address(address)
+    {
+      // no code
+    }
+
+    inline std::string GetLocation() const
+    {
+      return location;
+    }
+
+    inline std::string GetAddress() const
+    {
+      return address;
+    }
+  };
+
+  class OSMSCOUT_API AddressFeature : public Feature
+  {
+  private:
+    TagId tagAddrHouseNr;
+    TagId tagAddrStreet;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API AccessFeatureValue : public FeatureValue
+  {
+  public:
+    enum Access {
+      footForward     = 1 << 0,
+      footBackward    = 1 << 1,
+      bicycleForward  = 1 << 2,
+      bicycleBackward = 1 << 3,
+      carForward      = 1 << 4,
+      carBackward     = 1 << 5,
+      onewayForward   = 1 << 6,
+      onewayBackward  = 1 << 7
+    };
+
+  private:
+    uint8_t access;
+
+  public:
+    inline AccessFeatureValue(uint8_t access)
+    : access(access)
+    {
+      // no code
+    }
+
+    inline uint8_t GetAccess()
+    {
+      return access;
+    }
+
+    inline bool CanRoute() const
+    {
+      return access & (footForward|footBackward|bicycleForward|bicycleBackward|carForward|carBackward);
+    }
+
+    inline bool CanRoute(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return access & (footForward|footBackward);
+      case vehicleBicycle:
+        return access & (bicycleForward|bicycleBackward);
+      case vehicleCar:
+        return access & (carForward|carBackward);
+      }
+
+      return false;
+    }
+
+    inline bool CanRouteForward() const
+    {
+      return access & (footForward|bicycleForward|carForward);
+    }
+
+    inline bool CanRouteForward(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return access & footForward;
+      case vehicleBicycle:
+        return access & bicycleForward;
+      case vehicleCar:
+        return access & carForward;
+      }
+
+      return false;
+    }
+
+    inline bool CanRouteBackward() const
+    {
+      return access & (footBackward|bicycleBackward|carBackward);
+    }
+
+    inline bool CanRouteBackward(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return access & footBackward;
+      case vehicleBicycle:
+        return access & bicycleBackward;
+      case vehicleCar:
+        return access & carBackward;
+      }
+
+      return false;
+    }
+
+    inline bool CanRouteFoot() const
+    {
+      return (access & footForward) &&
+             (access & footBackward);
+    }
+
+    inline bool CanRouteFootForward() const
+    {
+      return access & footForward;
+    }
+
+    inline bool CanRouteFootBackward() const
+    {
+      return access & footBackward;
+    }
+
+    inline bool CanRouteBicycle() const
+    {
+      return (access & bicycleForward) &&
+             (access & bicycleBackward);
+    }
+
+    inline bool CanRouteBicycleForward() const
+    {
+      return access & bicycleForward;
+    }
+
+    inline bool CanRouteBicycleBackward() const
+    {
+      return access & bicycleBackward;
+    }
+
+    inline bool CanRouteCar() const
+    {
+      return (access & carForward) &&
+             (access & carBackward);
+    }
+
+    inline bool CanRouteCarForward() const
+    {
+      return access & carForward;
+    }
+
+    inline bool CanRouteCarBackward() const
+    {
+      return access & carBackward;
+    }
+
+    inline bool IsOneway() const
+    {
+      return access & (onewayForward|onewayBackward);
+    }
+
+    inline bool IsOnewayForward() const
+    {
+      return access & onewayForward;
+    }
+
+    inline bool IsOnewayBackward() const
+    {
+      return access & onewayBackward;
+    }
+  };
+
+  class OSMSCOUT_API AccessFeature : public Feature
+  {
+  private:
+    TagId tagOneway;
+    TagId tagJunction;
+
+    TagId tagAccess;
+    TagId tagAccessForward;
+    TagId tagAccessBackward;
+
+    TagId tagAccessFoot;
+    TagId tagAccessFootForward;
+    TagId tagAccessFootBackward;
+
+    TagId tagAccessBicycle;
+    TagId tagAccessBicycleForward;
+    TagId tagAccessBicycleBackward;
+
+    TagId tagAccessMotorVehicle;
+    TagId tagAccessMotorVehicleForward;
+    TagId tagAccessMotorVehicleBackward;
+
+    TagId tagAccessMotorcar;
+    TagId tagAccessMotorcarForward;
+    TagId tagAccessMotorcarBackward;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  private:
+    inline void ParseAccessFlag(const std::string& value,
+                                uint8_t& access,
+                                uint8_t bit) const
+    {
+      access&=~bit;
+
+      if (!(value=="no")) {
+        access|=bit;
+      }
+    }
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API LayerFeatureValue : public FeatureValue
+  {
+  private:
+    int8_t layer;
+
+  public:
+    inline LayerFeatureValue(int8_t layer)
+    : layer(layer)
+    {
+      // no code
+    }
+
+    inline int8_t GetLayer() const
+    {
+      return layer;
+    }
+  };
+
+  class OSMSCOUT_API LayerFeature : public Feature
+  {
+  private:
+    TagId tagLayer;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API WidthFeatureValue : public FeatureValue
+  {
+  private:
+    uint8_t width;
+
+  public:
+    inline WidthFeatureValue(uint8_t width)
+    : width(width)
+    {
+      // no code
+    }
+
+    inline uint8_t GetWidth() const
+    {
+      return width;
+    }
+  };
+
+  class OSMSCOUT_API WidthFeature : public Feature
+  {
+  private:
+    TagId tagWidth;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API MaxSpeedFeatureValue : public FeatureValue
+  {
+  private:
+    uint8_t maxSpeed;
+
+  public:
+    inline MaxSpeedFeatureValue(uint8_t maxSpeed)
+    : maxSpeed(maxSpeed)
+    {
+      // no code
+    }
+
+    inline uint8_t GetMaxSpeed() const
+    {
+      return maxSpeed;
+    }
+  };
+
+  class OSMSCOUT_API MaxSpeedFeature : public Feature
+  {
+  private:
+    TagId tagMaxSpeed;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API GradeFeatureValue : public FeatureValue
+  {
+  private:
+    uint8_t grade;
+
+  public:
+    inline GradeFeatureValue(uint8_t grade)
+    : grade(grade)
+    {
+      // no code
+    }
+
+    inline uint8_t GetGrade() const
+    {
+      return grade;
+    }
+  };
+
+  class OSMSCOUT_API GradeFeature : public Feature
+  {
+  private:
+    TagId tagSurface;
+    TagId tagTrackType;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API BridgeFeature : public Feature
+  {
+  private:
+    TagId tagBridge;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API TunnelFeature : public Feature
+  {
+  private:
+    TagId tagTunnel;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+  };
+
+  class OSMSCOUT_API RoundaboutFeature : public Feature
+  {
+  private:
+    TagId tagJunction;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
   };
 
   /**
