@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
       node!=nodes.end();
       node++) {
     std::cout << "+ Node " << (*node)->GetFileOffset();
-    std::cout << " " << typeConfig->GetTypeInfo((*node)->GetType()).GetName();
+    std::cout << " " << typeConfig->GetTypeInfo((*node)->GetType())->GetName();
     std::cout << " " << (*node)->GetName() << std::endl;
   }
 
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
       way!=ways.end();
       way++) {
     std::cout << "+ Way " << (*way)->GetFileOffset();
-    std::cout << " " << typeConfig->GetTypeInfo((*way)->GetType()).GetName();
+    std::cout << " " << typeConfig->GetTypeInfo((*way)->GetType())->GetName();
     std::cout << " " << (*way)->GetName() << std::endl;
   }
 
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
       area!=areas.end();
       area++) {
     std::cout << "+ Area " << (*area)->GetFileOffset();
-    std::cout << " " << typeConfig->GetTypeInfo((*area)->GetType()).GetName();
+    std::cout << " " << typeConfig->GetTypeInfo((*area)->GetType())->GetName();
     std::cout << " " << (*area)->rings.front().GetName() << std::endl;
   }
 

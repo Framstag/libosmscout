@@ -62,9 +62,11 @@ namespace osmscout
   void OptimizeWaysLowZoomGenerator::GetWayTypesToOptimize(const TypeConfig& typeConfig,
                                                            std::set<TypeId>& types)
   {
-    for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
-        type!=typeConfig.GetTypes().end();
-        type++) {
+    for (std::vector<TypeInfoRef>::const_iterator t=typeConfig.GetTypes().begin();
+        t!=typeConfig.GetTypes().end();
+        t++) {
+      TypeInfoRef type(*t);
+
       if (type->GetOptimizeLowZoom() &&
           type->CanBeWay()) {
         types.insert(type->GetId());
@@ -713,7 +715,7 @@ namespace osmscout
           continue;
         }
 
-        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type).GetName()+" ("+NumberToString(type)+")");
+        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName()+" ("+NumberToString(type)+")");
 
         //
         // Join ways

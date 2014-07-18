@@ -1566,7 +1566,7 @@ namespace osmscout {
     osmscout::TypeSet      routableTypes;
 
     for (size_t typeId=0; typeId<=database->GetTypeConfig()->GetMaxTypeId(); typeId++) {
-      if (typeConfig->GetTypeInfo(typeId).CanRoute(vehicle)) {
+      if (typeConfig->GetTypeInfo(typeId)->CanRoute(vehicle)) {
         routableTypes.SetType(typeId);
       }
     }

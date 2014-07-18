@@ -89,98 +89,98 @@ TYPES
   
   TYPE highway_motorway
     = WAY ("highway"=="motorway")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
   
   // Other roads mainly for cars
   
   TYPE highway_trunk
     = WAY ("highway"=="trunk")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_trunk_link
     = WAY ("highway"=="trunk_link")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
        
   TYPE highway_primary 
     = WAY ("highway"=="primary")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_primary_link
     = WAY ("highway"=="primary_link")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_secondary
     = WAY ("highway"=="secondary")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_secondary_link
     = WAY ("highway"=="secondary_link")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_tertiary
     = WAY ("highway"=="tertiary")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_tertiary_link
     = WAY ("highway"=="tertiary_link")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_unclassified
     = WAY ("highway"=="unclassified")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_road
     = WAY ("highway"=="road")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
       
   TYPE highway_residential
     = WAY ("highway"=="residential")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_living_street
     = WAY ("highway"=="living_street")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
       
   TYPE highway_service
     = WAY AREA ("highway"=="service")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC PIN_WAY
   
   // Ways with main designation different to car
   
   TYPE highway_track
     = WAY ("highway"=="track")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE] INDEX_LOC
       
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT] INDEX_LOC PIN_WAY
       
   TYPE highway_services
@@ -189,30 +189,30 @@ TYPES
     
   TYPE highway_bus_guideway
     = WAY ("highway"=="bus_guideway")
-      {Name, Ref}
+      {Name, Ref, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
     
   TYPE highway_path
     = WAY ("highway"=="path")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE] IGNORESEALAND
     
   TYPE highway_cycleway
     = WAY ("highway"=="cycleway")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[BICYCLE]
       
   TYPE highway_footway
     = WAY AREA ("highway"=="footway")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT] INDEX_LOC PIN_WAY
       
   TYPE highway_bridleway
     = WAY ("highway"=="bridleway")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
     
   TYPE highway_byway // Obsolete in OSM
    = WAY ("highway"=="byway")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
      OPTIONS ROUTE[FOOT]
      
   TYPE highway_steps
@@ -238,12 +238,12 @@ TYPES
     
   TYPE highway_roundabout
     = WAY AREA ("highway"=="roundabout")
-      {Name, Access}
+      {Name, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[FOOT BICYCLE CAR] PIN_WAY
     
   TYPE highway_motorway_junction
     = NODE ("highway"=="motorway_junction")
-      {Name, Ref, Access}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS ROUTE[CAR]
 
   TYPE highway_street_lamp // Too many for mobile offline map?
@@ -317,31 +317,40 @@ TYPES
   
   TYPE railway_rail
     = WAY ("railway"=="rail")
+      {Layer, Width, Bridge, Tunnel}
       //OPTIONS OPTIMIZE_LOW_ZOOM
       
   TYPE railway_tram
     = WAY ("railway"=="tram")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_light_rail
     = WAY ("railway"=="light_rail")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_subway
     = WAY ("railway"=="subway")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_preserved
     = WAY ("railway"=="preserved")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_disused
     = WAY ("railway"=="disused")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_abandoned
     = WAY ("railway"=="abandoned")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_narrow_gauge
     = WAY ("railway"=="narrow_gauge")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_monorail
     = WAY ("railway"=="monorail")
+      {Layer, Width, Bridge, Tunnel}
     
   TYPE railway_station
     = NODE AREA ("railway"=="station")
@@ -367,12 +376,13 @@ TYPES
     
   TYPE railway_turntable
     = NODE AREA ("railway"=="turntable")
+      {Layer, Width, Bridge, Tunnel}
 
   TYPE public_transport_platform
      = WAY AREA ("public_transport"=="platform" OR
                  "railway"=="platform" OR
                  "highway"=="platform")
-      {Name}
+      {Name, Layer, Width, Bridge, Tunnel}
 
   //
   // Water transport
@@ -401,11 +411,11 @@ TYPES
     
   TYPE aeroway_runway
     = WAY AREA ("aeroway"=="runway") // Officially not AREA!
-      {Ref}
+      {Ref, Width}
     
   TYPE aeroway_taxiway
     = WAY ("aeroway"=="taxiway")
-      {Ref}
+      {Ref, Width}
     
   TYPE aeroway_apron
     = AREA ("aeroway"=="apron")
@@ -704,7 +714,7 @@ TYPES
       
   TYPE leisure_track
     = NODE WAY AREA ("leisure"=="track")
-      {Name}
+      {Name, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS PIN_WAY OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_pitch
@@ -956,7 +966,7 @@ TYPES
     
   TYPE tourism_artwork
     = NODE WAY AREA ("tourism"=="artwork")
-      {Name, Address}
+      {Name, Address, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS INDEX_POI
     
   TYPE tourism_camp_site
@@ -1086,7 +1096,7 @@ TYPES
       OPTIONS INDEX_POI
     
   TYPE historic_monument_building
-    = NODE WAY AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = NODE AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
       OPTIONS INDEX_POI
 
@@ -1096,7 +1106,7 @@ TYPES
       OPTIONS INDEX_POI
     
   TYPE historic_memorial_building
-    = NODE WAY AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = NODE AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
       OPTIONS INDEX_POI
 
@@ -1106,18 +1116,18 @@ TYPES
       OPTIONS INDEX_POI
     
   TYPE historic_ruins_building
-    = NODE WAY AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = NODE AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
       OPTIONS INDEX_POI
 
   TYPE historic_ruins
     = NODE WAY AREA ("historic"=="ruins")
-      {Name, Address}
+      {Name, Address, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS INDEX_POI
        
   TYPE historic_archaeological_site
     = NODE WAY AREA ("historic"=="archaeological_site")
-      {Name, Address}
+      {Name, Address, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS INDEX_POI
       
   TYPE historic_battlefield
@@ -1130,7 +1140,7 @@ TYPES
       {Name, Address}
 
   TYPE historic_building
-    = NODE WAY AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = NODE AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
       OPTIONS INDEX_POI
 

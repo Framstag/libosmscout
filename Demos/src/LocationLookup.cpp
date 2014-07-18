@@ -157,7 +157,7 @@ std::string GetObject(const osmscout::Database& database,
     if (database.GetNodeByOffset(object.GetFileOffset(),
                                  node)) {
       label+=" ";
-      label+=database.GetTypeConfig()->GetTypeInfo(node->GetType()).GetName();
+      label+=database.GetTypeConfig()->GetTypeInfo(node->GetType())->GetName();
     }
   }
   else if (object.GetType()==osmscout::RefType::refArea) {
@@ -166,7 +166,7 @@ std::string GetObject(const osmscout::Database& database,
     if (database.GetAreaByOffset(object.GetFileOffset(),
                                  area)) {
       label+=" ";
-      label+=database.GetTypeConfig()->GetTypeInfo(area->GetType()).GetName();
+      label+=database.GetTypeConfig()->GetTypeInfo(area->GetType())->GetName();
     }
   }
   else if (object.GetType()==osmscout::RefType::refWay) {
@@ -175,7 +175,7 @@ std::string GetObject(const osmscout::Database& database,
     if (database.GetWayByOffset(object.GetFileOffset(),
                                 way)) {
       label+=" ";
-      label+=database.GetTypeConfig()->GetTypeInfo(way->GetType()).GetName();
+      label+=database.GetTypeConfig()->GetTypeInfo(way->GetType())->GetName();
     }
   }
 

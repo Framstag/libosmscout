@@ -29,7 +29,7 @@ namespace osmscout {
   {
     access=0;
 
-    TypeInfo typeInfo=typeConfig.GetTypeInfo(type);
+    const TypeInfo& typeInfo=typeConfig.GetTypeInfo(type);
 
     if (typeInfo.CanRouteFoot()) {
       access|=(footForward|footBackward);

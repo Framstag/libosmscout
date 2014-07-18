@@ -240,7 +240,7 @@ namespace osmscout
       }
 
       if(node.GetType() != typeIgnore &&
-         !typeConfig.GetTypeInfo(node.GetType()).GetIgnore()) {
+         !typeConfig.GetTypeInfo(node.GetType())->GetIgnore()) {
 
         NodeAttributes attr=node.GetAttributes();
         if(attr.GetName().empty() &&
@@ -250,15 +250,15 @@ namespace osmscout
 
         // Save name attributes of this node
         // in the right keyset
-        TypeInfo typeInfo=typeConfig.GetTypeInfo(node.GetType());
+        TypeInfoRef typeInfo=typeConfig.GetTypeInfo(node.GetType());
         marisa::Keyset * keyset;
-        if(typeInfo.GetIndexAsPOI()) {
+        if(typeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
         }
-        else if(typeInfo.GetIndexAsLocation()) {
+        else if(typeInfo->GetIndexAsLocation()) {
           keyset = &keysetLocation;
         }
-        else if(typeInfo.GetIndexAsRegion()) {
+        else if(typeInfo->GetIndexAsRegion()) {
           keyset = &keysetRegion;
         }
         else {
@@ -333,7 +333,7 @@ namespace osmscout
       }
 
       if(way.GetType() != typeIgnore &&
-         !typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
+         !typeConfig.GetTypeInfo(way.GetType())->GetIgnore()) {
 
         WayAttributes attr=way.GetAttributes();
         if(attr.GetName().empty() &&
@@ -344,15 +344,15 @@ namespace osmscout
 
         // Save name attributes of this node
         // in the right keyset
-        TypeInfo typeInfo=typeConfig.GetTypeInfo(way.GetType());
+        TypeInfoRef typeInfo=typeConfig.GetTypeInfo(way.GetType());
         marisa::Keyset * keyset;
-        if(typeInfo.GetIndexAsPOI()) {
+        if(typeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
         }
-        else if(typeInfo.GetIndexAsLocation()) {
+        else if(typeInfo->GetIndexAsLocation()) {
           keyset = &keysetLocation;
         }
-        else if(typeInfo.GetIndexAsRegion()) {
+        else if(typeInfo->GetIndexAsRegion()) {
           keyset = &keysetRegion;
         }
         else {
@@ -442,19 +442,19 @@ namespace osmscout
       for(size_t r=0; r < area.rings.size(); r++) {
 
         TypeId areaType=area.rings[r].GetType();
-        TypeInfo areaTypeInfo=typeConfig.GetTypeInfo(areaType);
-        if(areaType==typeIgnore || areaTypeInfo.GetIgnore()) {
+        TypeInfoRef areaTypeInfo=typeConfig.GetTypeInfo(areaType);
+        if(areaType==typeIgnore || areaTypeInfo->GetIgnore()) {
           continue;
         }
 
         marisa::Keyset * keyset;
-        if(areaTypeInfo.GetIndexAsPOI()) {
+        if(areaTypeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
         }
-        else if(areaTypeInfo.GetIndexAsLocation()) {
+        else if(areaTypeInfo->GetIndexAsLocation()) {
           keyset = &keysetLocation;
         }
-        else if(areaTypeInfo.GetIndexAsRegion()) {
+        else if(areaTypeInfo->GetIndexAsRegion()) {
           keyset = &keysetRegion;
         }
         else {

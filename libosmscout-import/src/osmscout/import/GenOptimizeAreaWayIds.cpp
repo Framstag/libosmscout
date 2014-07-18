@@ -86,7 +86,7 @@ namespace osmscout {
            ring++) {
         std::set<Id> nodeIds;
 
-        if (!typeConfig.GetTypeInfo(ring->GetType()).CanRoute()) {
+        if (!typeConfig.GetTypeInfo(ring->GetType())->CanRoute()) {
           continue;
         }
 
@@ -165,7 +165,7 @@ namespace osmscout {
            ring++) {
         std::set<Id> nodeIds;
 
-        if (!typeConfig.GetTypeInfo(ring->GetType()).CanRoute()) {
+        if (!typeConfig.GetTypeInfo(ring->GetType())->CanRoute()) {
           continue;
         }
 
@@ -239,7 +239,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!typeConfig.GetTypeInfo(data.GetType()).CanRoute()) {
+      if (!typeConfig.GetTypeInfo(data.GetType())->CanRoute()) {
         continue;
       }
 

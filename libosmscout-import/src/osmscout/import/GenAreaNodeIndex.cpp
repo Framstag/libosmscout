@@ -85,8 +85,10 @@ namespace osmscout {
     // Initially we must process all types that represents nodes and that should
     // not be ignored
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-      if (typeConfig.GetTypeInfo(i).CanBeNode() &&
-          !typeConfig.GetTypeInfo(i).GetIgnore()) {
+      TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+      if (type->CanBeNode() &&
+          !type->GetIgnore()) {
         remainingNodeTypes.insert(i);
       }
     }
@@ -191,7 +193,7 @@ namespace osmscout {
           // If the fill rate of the index is too low, we use this index level anyway
           if (nodeTypeData[i].indexCells/(1.0*nodeTypeData[i].cellXCount*nodeTypeData[i].cellYCount)<=
               parameter.GetAreaNodeIndexMinFillRate()) {
-            progress.Warning(typeConfig.GetTypeInfo(i).GetName()+" ("+NumberToString(i)+") is not well distributed");
+            progress.Warning(typeConfig.GetTypeInfo(i)->GetName()+" ("+NumberToString(i)+") is not well distributed");
             continue;
           }
 
@@ -214,7 +216,7 @@ namespace osmscout {
            cnt++) {
         maxLevel=std::max(maxLevel,level);
 
-        progress.Info("Type "+typeConfig.GetTypeInfo(*cnt).GetName()+"(" + NumberToString(*cnt)+"), "+NumberToString(nodeTypeData[*cnt].indexCells)+" cells, "+NumberToString(nodeTypeData[*cnt].indexEntries)+" objects");
+        progress.Info("Type "+typeConfig.GetTypeInfo(*cnt)->GetName()+"(" + NumberToString(*cnt)+"), "+NumberToString(nodeTypeData[*cnt].indexCells)+" cells, "+NumberToString(nodeTypeData[*cnt].indexEntries)+" objects");
 
         remainingNodeTypes.erase(*cnt);
       }
@@ -239,7 +241,9 @@ namespace osmscout {
     // Count number of types in index
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
-      if (typeConfig.GetTypeInfo(i).CanBeNode() &&
+      TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+      if (type->CanBeNode() &&
           nodeTypeData[i].HasEntries()) {
         indexEntries++;
       }
@@ -250,12 +254,14 @@ namespace osmscout {
     // Store index data for each type
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
-      if (typeConfig.GetTypeInfo(i).CanBeNode() &&
+      TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+      if (type->CanBeNode() &&
           nodeTypeData[i].HasEntries()) {
         FileOffset bitmapOffset=0;
         uint8_t    dataOffsetBytes=0;
 
-        writer.WriteNumber(typeConfig.GetTypeInfo(i).GetId());
+        writer.WriteNumber(type->GetId());
 
         writer.GetPos(nodeTypeData[i].indexOffset);
 
@@ -278,7 +284,9 @@ namespace osmscout {
       double           cellHeight=180.0/pow(2.0,(int)l);
 
       for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-        if (typeConfig.GetTypeInfo(i).CanBeNode() &&
+        TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+        if (type->CanBeNode() &&
             nodeTypeData[i].HasEntries() &&
             nodeTypeData[i].indexLevel==l) {
           indexTypes.insert(i);
@@ -363,7 +371,7 @@ namespace osmscout {
         uint8_t dataOffsetBytes=BytesNeededToAddressFileData(dataSize);
 
         progress.Info("Writing map for "+
-                      typeConfig.GetTypeInfo(*type).GetName()+", "+
+                      typeConfig.GetTypeInfo(*type)->GetName()+", "+
                       NumberToString(typeCellOffsets[*type].size())+" cells, "+
                       NumberToString(indexEntries)+" entries, "+
                       ByteSizeToString(1.0*dataOffsetBytes*nodeTypeData[*type].cellXCount*nodeTypeData[*type].cellYCount));

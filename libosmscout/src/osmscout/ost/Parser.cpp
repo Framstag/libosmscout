@@ -215,41 +215,41 @@ void Parser::STRING(std::string& value) {
 void Parser::TYPE() {
 		std::string   name;
 		TagCondition  *condition=NULL;
-		TypeInfo      typeInfo;
+		TypeInfoRef   typeInfo(new TypeInfo());
 		unsigned char types;
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "TYPE" */)) {SynErr(55); Get();}
 		Expect(12 /* "TYPE" */);
 		IDENT(name);
-		typeInfo.SetType(name); 
+		typeInfo->SetType(name); 
 		Expect(13 /* "=" */);
 		TYPEKINDS(types);
 		Expect(14 /* "(" */);
 		TAGCONDITION(condition);
 		Expect(15 /* ")" */);
-		typeInfo.AddCondition(types,condition); 
+		typeInfo->AddCondition(types,condition); 
 		while (la->kind == 16 /* "OR" */) {
 			Get();
 			TYPEKINDS(types);
 			Expect(14 /* "(" */);
 			TAGCONDITION(condition);
 			Expect(15 /* ")" */);
-			typeInfo.AddCondition(types,condition); 
+			typeInfo->AddCondition(types,condition); 
 		}
 		if (la->kind == 9 /* "{" */) {
 			Get();
 			if (la->kind == _ident) {
-				FEATURE(typeInfo);
+				FEATURE(*typeInfo);
 				while (la->kind == 17 /* "," */) {
 					Get();
-					FEATURE(typeInfo);
+					FEATURE(*typeInfo);
 				}
 			}
 			Expect(10 /* "}" */);
 		}
 		if (la->kind == 18 /* "OPTIONS" */) {
 			Get();
-			TYPEOPTIONS(typeInfo);
+			TYPEOPTIONS(*typeInfo);
 		}
 		config.AddTypeInfo(typeInfo);
 		

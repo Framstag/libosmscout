@@ -268,7 +268,7 @@ static void DumpNodeAttributes(const osmscout::TypeId& type,
                                size_t indent)
 {
   if (type!=osmscout::typeIgnore) {
-    std::cout << "  type: " << typeConfig->GetTypeInfo(type).GetName() << std::endl;
+    std::cout << "  type: " << typeConfig->GetTypeInfo(type)->GetName() << std::endl;
   }
 
   if (!attributes.GetName().empty()) {
@@ -328,7 +328,7 @@ static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
 {
   if (type!=osmscout::typeIgnore) {
     DumpIndent(indent);
-    std::cout << "type: " << typeConfig->GetTypeInfo(type).GetName() << std::endl;
+    std::cout << "type: " << typeConfig->GetTypeInfo(type)->GetName() << std::endl;
   }
 
   if (!attributes.GetName().empty()) {
@@ -366,7 +366,7 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
 {
   if (attributes.GetType()!=osmscout::typeIgnore) {
     DumpIndent(indent);
-    std::cout << "type: " << typeConfig->GetTypeInfo(attributes.GetType()).GetName() << std::endl;
+    std::cout << "type: " << typeConfig->GetTypeInfo(attributes.GetType())->GetName() << std::endl;
   }
 
   if (!attributes.GetName().empty()) {

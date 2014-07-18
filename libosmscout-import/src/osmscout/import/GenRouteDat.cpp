@@ -83,21 +83,22 @@ namespace osmscout {
   static uint8_t CopyFlags(const TypeConfig& typeConfig,
                            const Area::Ring& ring)
   {
-    uint8_t flags=0;
+    uint8_t     flags=0;
+    TypeInfoRef type(typeConfig.GetTypeInfo(ring.GetType()));
 
     if (ring.attributes.HasAccess()) {
       flags|=RouteNode::hasAccess;
     }
 
-    if (typeConfig.GetTypeInfo(ring.GetType()).CanRouteFoot()) {
+    if (type->CanRouteFoot()) {
       flags|=RouteNode::usableByFoot;
     }
 
-    if (typeConfig.GetTypeInfo(ring.GetType()).CanRouteBicycle()) {
+    if (type->CanRouteBicycle()) {
       flags|=RouteNode::usableByBicycle;
     }
 
-    if (typeConfig.GetTypeInfo(ring.GetType()).CanRouteCar()) {
+    if (type->CanRouteCar()) {
       flags|=RouteNode::usableByCar;
     }
 
@@ -421,7 +422,7 @@ namespace osmscout {
         continue;
       }
 
-      if (typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
+      if (typeConfig.GetTypeInfo(way.GetType())->GetIgnore()) {
         continue;
       }
 
@@ -483,11 +484,13 @@ namespace osmscout {
         continue;
       }
 
-      if (typeConfig.GetTypeInfo(area.GetType()).GetIgnore()) {
+      TypeInfoRef type(typeConfig.GetTypeInfo(area.GetType()));
+
+      if (type->GetIgnore()) {
         continue;
       }
 
-      if (!typeConfig.GetTypeInfo(area.GetType()).CanRoute()) {
+      if (!type->CanRoute()) {
         continue;
       }
 
@@ -572,7 +575,7 @@ namespace osmscout {
         continue;
       }
 
-      if (typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
+      if (typeConfig.GetTypeInfo(way.GetType())->GetIgnore()) {
         continue;
       }
 
@@ -646,11 +649,13 @@ namespace osmscout {
         continue;
       }
 
-      if (typeConfig.GetTypeInfo(area.GetType()).GetIgnore()) {
+      TypeInfoRef type(typeConfig.GetTypeInfo(area.GetType()));
+
+      if (type->GetIgnore()) {
         continue;
       }
 
-      if (!(typeConfig.GetTypeInfo(area.GetType()).CanRoute())) {
+      if (!(type->CanRoute())) {
         continue;
       }
 
@@ -1577,7 +1582,7 @@ namespace osmscout {
               continue;
             }
 
-            if (typeConfig.GetTypeInfo(area->GetType()).CanRoute()) {
+            if (typeConfig.GetTypeInfo(area->GetType())->CanRoute()) {
               isRoutable=true;
             }
           }
@@ -1638,7 +1643,7 @@ namespace osmscout {
               continue;
             }
 
-            if (!typeConfig.GetTypeInfo(area->GetType()).CanRoute()) {
+            if (!typeConfig.GetTypeInfo(area->GetType())->CanRoute()) {
               continue;
             }
 

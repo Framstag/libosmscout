@@ -1342,7 +1342,7 @@ namespace osmscout {
   void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
   {
     for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
-      if (typeConfig->GetTypeInfo(t).CanBeNode()) {
+      if (typeConfig->GetTypeInfo(t)->CanBeNode()) {
         types.push_back(t);
       }
     }
@@ -1351,7 +1351,7 @@ namespace osmscout {
   void StyleConfig::GetAllWayTypes(std::list<TypeId>& types)
   {
     for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
-      if (typeConfig->GetTypeInfo(t).CanBeWay()) {
+      if (typeConfig->GetTypeInfo(t)->CanBeWay()) {
         types.push_back(t);
       }
     }
@@ -1360,7 +1360,7 @@ namespace osmscout {
   void StyleConfig::GetAllAreaTypes(std::list<TypeId>& types)
   {
     for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
-      if (typeConfig->GetTypeInfo(t).CanBeArea()) {
+      if (typeConfig->GetTypeInfo(t)->CanBeArea()) {
         types.push_back(t);
       }
     }
@@ -1607,7 +1607,7 @@ namespace osmscout {
         TypeSet typeSet(*typeConfig);
 
         for (TypeId type=0; type<wayPrio.size(); type++) {
-          if (!typeConfig->GetTypeInfo(type).CanBeWay() ||
+          if (!typeConfig->GetTypeInfo(type)->CanBeWay() ||
               wayPrio[type]!=*prio) {
             continue;
           }

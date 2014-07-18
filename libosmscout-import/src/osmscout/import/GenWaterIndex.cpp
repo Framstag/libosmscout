@@ -590,7 +590,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
+      if (!typeConfig.GetTypeInfo(way.GetType())->GetIgnoreSeaLand()) {
         if (way.nodes.size()>=2) {
           std::set<Pixel> coords;
 

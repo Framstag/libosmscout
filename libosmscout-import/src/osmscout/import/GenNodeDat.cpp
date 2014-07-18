@@ -100,7 +100,7 @@ namespace osmscout {
       nodesReadCount++;
 
       if (rawNode.GetType()!=typeIgnore &&
-          !typeConfig.GetTypeInfo(rawNode.GetType()).GetIgnore()) {
+          !typeConfig.GetTypeInfo(rawNode.GetType())->GetIgnore()) {
         std::vector<Tag> tags(rawNode.GetTags());
 
         node.SetType(rawNode.GetType());

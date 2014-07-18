@@ -427,7 +427,7 @@ namespace osmscout {
       if (member->type==RawRelation::memberRelation) {
         progress.Warning("Unsupported relation reference in relation "+
                          NumberToString(rawRelation.GetId())+" "+
-                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                          name);
       }
       else if (member->type==RawRelation::memberWay &&
@@ -441,7 +441,7 @@ namespace osmscout {
                          NumberToString(member->id)+
                          " for relation "+
                          NumberToString(rawRelation.GetId())+" "+
-                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                          name);
 
           return false;
@@ -465,7 +465,7 @@ namespace osmscout {
                            NumberToString(*id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                            name);
 
             return false;
@@ -508,7 +508,7 @@ namespace osmscout {
                            NumberToString(member->id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                            name);
 
             return false;
@@ -534,7 +534,7 @@ namespace osmscout {
         else {
           progress.Warning("Ignored boundary relation role '"+member->role+"' in relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                            name);
         }
       }
@@ -549,7 +549,7 @@ namespace osmscout {
                          NumberToString(member->id)+
                          " for relation "+
                          NumberToString(rawRelation.GetId())+" "+
-                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                          name);
 
           return false;
@@ -573,7 +573,7 @@ namespace osmscout {
                            NumberToString(*id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                            name);
 
             return false;
@@ -660,7 +660,7 @@ namespace osmscout {
         else {
           progress.Warning("Unsupported relation reference in relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                            name);
         }
       }
@@ -718,7 +718,7 @@ namespace osmscout {
                                NumberToString(member->id)+
                                " during resolving of members of relation "+
                                NumberToString(rawRelation.GetId())+" "+
-                               typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                               typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                                name);
                 return false;
               }
@@ -728,7 +728,7 @@ namespace osmscout {
             else {
               progress.Warning("Unsupported relation reference in relation "+
                                NumberToString(rawRelation.GetId())+" "+
-                               typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                               typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                                name);
             }
           }
@@ -746,7 +746,7 @@ namespace osmscout {
                          ways)) {
       progress.Error("Cannot resolve child ways of relation "+
                      NumberToString(rawRelation.GetId())+" "+
-                     typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                     typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                      name);
       return false;
     }
@@ -778,7 +778,7 @@ namespace osmscout {
                            coordMap)) {
       progress.Error("Cannot resolve child nodes of relation "+
                      NumberToString(rawRelation.GetId())+" "+
-                     typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                     typeConfig.GetTypeInfo(rawRelation.GetType())->GetName()+" "+
                      name);
       return false;
     }
@@ -947,8 +947,8 @@ namespace osmscout {
           else if (masterRing.GetType()!=ring->role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
                              " has conflicting types for outer boundary ("+
-                             typeConfig.GetTypeInfo(masterRing.GetType()).GetName()+
-                             " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType()).GetName()+")");
+                             typeConfig.GetTypeInfo(masterRing.GetType())->GetName()+
+                             " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType())->GetName()+")");
           }
         }
       }
@@ -959,7 +959,7 @@ namespace osmscout {
       return false;
     }
 
-    if (typeConfig.GetTypeInfo(masterRing.GetType()).GetIgnore()) {
+    if (typeConfig.GetTypeInfo(masterRing.GetType())->GetIgnore()) {
       return false;
     }
 
@@ -1205,7 +1205,7 @@ namespace osmscout {
     progress.Info("Dump statistics");
 
     for (size_t i=0; i<typeConfig.GetMaxTypeId(); i++) {
-      std::string buffer=typeConfig.GetTypeInfo(i).GetName()+": "+
+      std::string buffer=typeConfig.GetTypeInfo(i)->GetName()+": "+
               NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
               NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
 

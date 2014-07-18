@@ -30,6 +30,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
 
+#include <limits>
 namespace osmscout {
 
   std::string AreaAreaIndexGenerator::GetDescription() const
@@ -97,7 +98,12 @@ namespace osmscout {
 
       if (level<(int)parameter.GetAreaAreaIndexMaxMag()) {
         for (size_t c=0; c<4; c++) {
-          writer.WriteNumber(leaf->second.children[c]);
+          if (leaf->second.children[c]==0) {
+            writer.WriteNumber(0);
+          }
+          else {
+            writer.WriteNumber(leaf->second.children[c]);
+          }
         }
       }
 
@@ -298,6 +304,44 @@ namespace osmscout {
           return false;
         }
       }
+
+      uint32_t minX=std::numeric_limits<uint32_t>::max();
+      uint32_t minY=std::numeric_limits<uint32_t>::max();
+      uint32_t maxX=std::numeric_limits<uint32_t>::min();
+      uint32_t maxY=std::numeric_limits<uint32_t>::min();
+
+      std::map<TypeId,size_t> useMap;
+
+      for (std::map<Pixel,AreaLeaf>::const_iterator leaf=leafs.begin();
+           leaf!=leafs.end();
+           ++leaf) {
+        minX=std::min(minX,leaf->first.x);
+        maxX=std::max(maxX,leaf->first.x);
+        minY=std::min(minY,leaf->first.y);
+        maxY=std::max(maxY,leaf->first.y);
+
+        for (std::list<Entry>::const_iterator entry=leaf->second.areas.begin();
+             entry!=leaf->second.areas.end();
+             entry++) {
+          std::map<TypeId,size_t>::iterator u=useMap.find(entry->type);
+
+          if (u==useMap.end()) {
+            useMap[entry->type]=1;
+          }
+          else {
+            u->second++;
+          }
+        }
+      }
+
+      /*
+      std::cout << "[" << minX << "-" << maxX << "]x[" << minY << "-" << maxY << "] => " << leafs.size() << "/" << (maxX-minX+1)*(maxY-minY+1) << " " << (int)BytesNeededToAddressFileData(leafs.size()) << " " << ByteSizeToString(BytesNeededToAddressFileData(leafs.size())*(maxX-minX+1)*(maxY-minY+1)) << std::endl;
+
+      for (std::map<TypeId,size_t>::const_iterator u=useMap.begin();
+          u!=useMap.end();
+          ++u) {
+        std::cout << "* " << u->first << " " << typeConfig.GetTypeInfo(u->first).GetName() << " " << u->second << std::endl;
+      }*/
 
       if (!WriteIndexLevel(parameter,
                            writer,

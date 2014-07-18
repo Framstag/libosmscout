@@ -209,12 +209,12 @@ namespace osmscout {
     typeConfig.GetRelationTypeId(tags,type);
 
     if (type!=typeIgnore &&
-        typeConfig.GetTypeInfo(type).GetIgnore()) {
+        typeConfig.GetTypeInfo(type)->GetIgnore()) {
       return false;
     }
 
     bool isArea=type!=typeIgnore &&
-                typeConfig.GetTypeInfo(type).GetMultipolygon();
+                typeConfig.GetTypeInfo(type)->GetMultipolygon();
 
     if (!isArea) {
       std::map<TagId,std::string>::const_iterator typeTag=tags.find(typeConfig.tagType);
@@ -478,7 +478,7 @@ namespace osmscout {
                areaType!=typeIgnore) {
         if (nodes.size()>3 &&
             nodes.front()==nodes.back()) {
-          if (typeConfig.GetTypeInfo(wayType).GetPinWay()) {
+          if (typeConfig.GetTypeInfo(wayType)->GetPinWay()) {
             isArea=-1;
           }
           else {

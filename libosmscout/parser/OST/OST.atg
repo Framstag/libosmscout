@@ -80,29 +80,29 @@ PRODUCTIONS
   TYPE        = (.
                   std::string   name;
                   TagCondition  *condition=NULL;
-                  TypeInfo      typeInfo;
+                  TypeInfoRef   typeInfo(new TypeInfo());
                   unsigned char types;
                 .)
                 SYNC "TYPE"
-                IDENT<name>                       (. typeInfo.SetType(name); .)
+                IDENT<name>                       (. typeInfo->SetType(name); .)
 
                 "="
                 TYPEKINDS<types>
-                "(" TAGCONDITION<condition> ")"   (. typeInfo.AddCondition(types,condition); .)
+                "(" TAGCONDITION<condition> ")"   (. typeInfo->AddCondition(types,condition); .)
 
                 {
                   "OR"
                   TYPEKINDS<types>
-                  "(" TAGCONDITION<condition> ")" (. typeInfo.AddCondition(types,condition); .)
+                  "(" TAGCONDITION<condition> ")" (. typeInfo->AddCondition(types,condition); .)
                 }
 
                 [
                   "{"
                   [
-                    FEATURE<typeInfo>
+                    FEATURE<*typeInfo>
                     {
                       ","
-                      FEATURE<typeInfo>
+                      FEATURE<*typeInfo>
                     }
                   ]  
                   "}"
@@ -110,7 +110,7 @@ PRODUCTIONS
 
                 [
                   "OPTIONS"
-                  TYPEOPTIONS<typeInfo>
+                  TYPEOPTIONS<*typeInfo>
                 ]
 
                 (.

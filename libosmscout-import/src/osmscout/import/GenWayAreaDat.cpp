@@ -136,7 +136,7 @@ namespace osmscout {
           if (!areas[i].empty() &&
               areas[i].size()>parameter.GetRawWayBlockSize()) {
             progress.Warning("Too many objects for type "+
-                             typeConfig.GetTypeInfo(i).GetName()+
+                             typeConfig.GetTypeInfo(i)->GetName()+
                              ", mark it for low memory fall back");
 
             collectedWaysCount-=areas[i].size();
@@ -236,7 +236,7 @@ namespace osmscout {
 
     if (parameter.GetStrictAreas() &&
         !AreaIsSimple(ring.nodes)) {
-      progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(area.GetType()).GetName()+"' is not simple");
+      progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(area.GetType())->GetName()+"' is not simple");
       return true;
     }
 

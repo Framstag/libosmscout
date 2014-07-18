@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Tag.h>
 #include <osmscout/Types.h>
 
@@ -259,6 +260,7 @@ namespace osmscout {
 
     virtual void Parse(Progress& progress,
                        const TypeConfig& typeConfig,
+                       const ObjectOSMRef& object,
                        const TypeInfo& type,
                        const std::map<TagId,std::string>& tags,
                        FeatureValue*& value,
@@ -306,6 +308,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -346,6 +349,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -395,6 +399,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -603,6 +608,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -643,6 +649,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -683,6 +690,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -723,6 +731,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -764,6 +773,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -786,6 +796,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -808,6 +819,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -830,6 +842,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
                const TypeInfo& type,
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
@@ -843,7 +856,7 @@ namespace osmscout {
    *
    *  \see TypeConfig
    */
-  class OSMSCOUT_API TypeInfo
+  class OSMSCOUT_API TypeInfo : public Referencable
   {
   public:
     static const unsigned char typeNode     = 1 << 0;
@@ -889,6 +902,9 @@ namespace osmscout {
     bool                          ignoreSeaLand;
     bool                          ignore;
 
+  private:
+    TypeInfo(const TypeInfo& other);
+
   public:
     TypeInfo();
     virtual ~TypeInfo();
@@ -923,6 +939,29 @@ namespace osmscout {
     inline const std::list<FeatureRef>& GetFeatures() const
     {
       return features;
+    }
+
+    /**
+     * Returns the number of bits required for storing the feature mask
+     */
+    inline size_t GetFeatureBits() const
+    {
+      return features.size();
+    }
+
+    /**
+     * Returns the (rounded) number of bytes required for storing the feature mask
+     */
+    inline size_t GetFeatureBytes() const
+    {
+      size_t size=features.size();
+
+      if (size%8==0) {
+        return size/8;
+      }
+      else {
+        return size/8+1;
+      }
     }
 
     /**
@@ -1204,6 +1243,8 @@ namespace osmscout {
     }
   };
 
+  typedef Ref<TypeInfo> TypeInfoRef;
+
   /**
    * \ingroup type
    *
@@ -1213,71 +1254,71 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig : public Referencable
   {
   private:
-    std::vector<TagInfo>                     tags;
-    std::vector<TypeInfo>                    types;
+    std::vector<TagInfo>                      tags;
+    std::vector<TypeInfoRef>                  types;
 
-    TagId                                    nextTagId;
-    TypeId                                   nextTypeId;
+    TagId                                     nextTagId;
+    TypeId                                    nextTypeId;
 
-    OSMSCOUT_HASHMAP<std::string,TagId>      stringToTagMap;
-    OSMSCOUT_HASHMAP<std::string,TypeInfo>   nameToTypeMap;
-    OSMSCOUT_HASHMAP<TypeId,TypeInfo>        idToTypeMap;
-    OSMSCOUT_HASHMAP<TagId,uint32_t>         nameTagIdToPrioMap;
-    OSMSCOUT_HASHMAP<TagId,uint32_t>         nameAltTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<std::string,TagId>       stringToTagMap;
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
+    OSMSCOUT_HASHMAP<TypeId,TypeInfoRef>      idToTypeMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>          nameTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>          nameAltTagIdToPrioMap;
 
-    OSMSCOUT_HASHMAP<std::string,size_t>     surfaceToGradeMap;
+    OSMSCOUT_HASHMAP<std::string,size_t>      surfaceToGradeMap;
 
-    OSMSCOUT_HASHMAP<std::string,FeatureRef> nameToFeatureMap;
+    OSMSCOUT_HASHMAP<std::string,FeatureRef>  nameToFeatureMap;
 
   public:
-    TypeId                                   typeTileLand;
-    TypeId                                   typeTileSea;
-    TypeId                                   typeTileCoast;
-    TypeId                                   typeTileUnknown;
-    TypeId                                   typeTileCoastline;
+    TypeId                                    typeTileLand;
+    TypeId                                    typeTileSea;
+    TypeId                                    typeTileCoast;
+    TypeId                                    typeTileUnknown;
+    TypeId                                    typeTileCoastline;
 
     // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                    tagRef;
-    TagId                                    tagBridge;
-    TagId                                    tagTunnel;
-    TagId                                    tagLayer;
-    TagId                                    tagWidth;
-    TagId                                    tagOneway;
-    TagId                                    tagHouseNr;
-    TagId                                    tagJunction;
-    TagId                                    tagMaxSpeed;
-    TagId                                    tagSurface;
-    TagId                                    tagTracktype;
+    TagId                                     tagRef;
+    TagId                                     tagBridge;
+    TagId                                     tagTunnel;
+    TagId                                     tagLayer;
+    TagId                                     tagWidth;
+    TagId                                     tagOneway;
+    TagId                                     tagHouseNr;
+    TagId                                     tagJunction;
+    TagId                                     tagMaxSpeed;
+    TagId                                     tagSurface;
+    TagId                                     tagTracktype;
 
-    TagId                                    tagAdminLevel;
+    TagId                                     tagAdminLevel;
 
-    TagId                                    tagAccess;
-    TagId                                    tagAccessForward;
-    TagId                                    tagAccessBackward;
+    TagId                                     tagAccess;
+    TagId                                     tagAccessForward;
+    TagId                                     tagAccessBackward;
 
-    TagId                                    tagAccessFoot;
-    TagId                                    tagAccessFootForward;
-    TagId                                    tagAccessFootBackward;
+    TagId                                     tagAccessFoot;
+    TagId                                     tagAccessFootForward;
+    TagId                                     tagAccessFootBackward;
 
-    TagId                                    tagAccessBicycle;
-    TagId                                    tagAccessBicycleForward;
-    TagId                                    tagAccessBicycleBackward;
+    TagId                                     tagAccessBicycle;
+    TagId                                     tagAccessBicycleForward;
+    TagId                                     tagAccessBicycleBackward;
 
-    TagId                                    tagAccessMotorVehicle;
-    TagId                                    tagAccessMotorVehicleForward;
-    TagId                                    tagAccessMotorVehicleBackward;
+    TagId                                     tagAccessMotorVehicle;
+    TagId                                     tagAccessMotorVehicleForward;
+    TagId                                     tagAccessMotorVehicleBackward;
 
-    TagId                                    tagAccessMotorcar;
-    TagId                                    tagAccessMotorcarForward;
-    TagId                                    tagAccessMotorcarBackward;
+    TagId                                     tagAccessMotorcar;
+    TagId                                     tagAccessMotorcarForward;
+    TagId                                     tagAccessMotorcarBackward;
 
-    TagId                                    tagAddrStreet;
+    TagId                                     tagAddrStreet;
 
     // Internal use (only available during preprocessing)
-    TagId                                    tagArea;
-    TagId                                    tagNatural;
-    TagId                                    tagType;
-    TagId                                    tagRestriction;
+    TagId                                     tagArea;
+    TagId                                     tagNatural;
+    TagId                                     tagType;
+    TagId                                     tagRestriction;
 
   public:
     TypeConfig();
@@ -1292,17 +1333,17 @@ namespace osmscout {
     void RegisterFeature(const FeatureRef& feature);
     FeatureRef GetFeature(const std::string& name) const;
 
-    TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
+    TypeConfig& AddTypeInfo(const TypeInfoRef& typeInfo);
 
     const std::vector<TagInfo>& GetTags() const;
-    const std::vector<TypeInfo>& GetTypes() const;
+    const std::vector<TypeInfoRef>& GetTypes() const;
 
     TypeId GetMaxTypeId() const;
 
     TagId GetTagId(const char* name) const;
 
     const TagInfo& GetTagInfo(TagId id) const;
-    const TypeInfo& GetTypeInfo(TypeId id) const;
+    const TypeInfoRef& GetTypeInfo(TypeId id) const;
 
     void ResolveTags(const std::map<TagId,std::string>& map,
                      std::vector<Tag>& tags) const;

@@ -579,7 +579,7 @@ namespace osmscout {
 
 #pragma omp critical
           if (waysByType[type].size()<originalWayCount) {
-            progress.Info("Reduced ways of '"+typeConfig.GetTypeInfo(type).GetName()+"' from "+
+            progress.Info("Reduced ways of '"+typeConfig.GetTypeInfo(type)->GetName()+"' from "+
                           NumberToString(originalWayCount)+" to "+NumberToString(waysByType[type].size())+ " way(s)");
             mergeCount+=originalWayCount-waysByType[type].size();
           }

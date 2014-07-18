@@ -272,9 +272,10 @@ namespace osmscout {
     return NAME;
   }
 
-  void NameFeature::Parse(Progress& progress,
+  void NameFeature::Parse(Progress& /*progress*/,
                           const TypeConfig& typeConfig,
-                          const TypeInfo& type,
+                          const ObjectOSMRef& /*object*/,
+                          const TypeInfo& /*type*/,
                           const std::map<TagId,std::string>& tags,
                           FeatureValue*& value,
                           bool& set) const
@@ -329,9 +330,10 @@ namespace osmscout {
     return NAME;
   }
 
-  void RefFeature::Parse(Progress& progress,
-                         const TypeConfig& typeConfig,
-                         const TypeInfo& type,
+  void RefFeature::Parse(Progress& /*progress*/,
+                         const TypeConfig& /*typeConfig*/,
+                         const ObjectOSMRef& /*object*/,
+                         const TypeInfo& /*type*/,
                          const std::map<TagId,std::string>& tags,
                          FeatureValue*& value,
                          bool& set) const
@@ -362,9 +364,10 @@ namespace osmscout {
     return NAME;
   }
 
-  void AddressFeature::Parse(Progress& progress,
-                             const TypeConfig& typeConfig,
-                             const TypeInfo& type,
+  void AddressFeature::Parse(Progress& /*progress*/,
+                             const TypeConfig& /*typeConfig*/,
+                             const ObjectOSMRef& /*object*/,
+                             const TypeInfo& /*type*/,
                              const std::map<TagId,std::string>& tags,
                              FeatureValue*& value,
                              bool& set) const
@@ -428,8 +431,9 @@ namespace osmscout {
     return NAME;
   }
 
-  void AccessFeature::Parse(Progress& progress,
-                            const TypeConfig& typeConfig,
+  void AccessFeature::Parse(Progress& /*progress*/,
+                            const TypeConfig& /*typeConfig*/,
+                            const ObjectOSMRef& /*object*/,
                             const TypeInfo& type,
                             const std::map<TagId,std::string>& tags,
                             FeatureValue*& value,
@@ -620,7 +624,7 @@ namespace osmscout {
     }
     else {
       set=false;
-      value=false;
+      value=NULL;
     }
   }
 
@@ -637,8 +641,9 @@ namespace osmscout {
   }
 
   void LayerFeature::Parse(Progress& progress,
-                           const TypeConfig& typeConfig,
-                           const TypeInfo& type,
+                           const TypeConfig& /*typeConfig*/,
+                           const ObjectOSMRef& object,
+                           const TypeInfo& /*type*/,
                            const std::map<TagId,std::string>& tags,
                            FeatureValue*& value,
                            bool& set) const
@@ -653,7 +658,7 @@ namespace osmscout {
         value=new LayerFeatureValue(layerValue);
       }
       else {
-        progress.Warning(std::string("Layer tag value '")+layer->second+"' for "+NumberToString(0/*id*/)+" is not numeric!");
+        progress.Warning(std::string("Layer tag value '")+layer->second+"' for "+object.GetName()+" is not numeric!");
         set=false;
         value=NULL;
       }
@@ -676,8 +681,9 @@ namespace osmscout {
   }
 
   void WidthFeature::Parse(Progress& progress,
-                           const TypeConfig& typeConfig,
-                           const TypeInfo& type,
+                           const TypeConfig& /*typeConfig*/,
+                           const ObjectOSMRef& object,
+                           const TypeInfo& /*type*/,
                            const std::map<TagId,std::string>& tags,
                            FeatureValue*& value,
                            bool& set) const
@@ -726,10 +732,10 @@ namespace osmscout {
     }
 
     if (!StringToNumber(widthString,w)) {
-      progress.Warning(std::string("Width tag value '")+width->second+"' for "+NumberToString(0)+" is no double!");
+      progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" is no double!");
     }
     else if (w<0 && w>255.5) {
-      progress.Warning(std::string("Width tag value '")+width->second+"' for "+NumberToString(0)+" value is too small or too big!");
+      progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" value is too small or too big!");
     }
     else {
       value=new WidthFeatureValue((uint8_t)floor(w+0.5));
@@ -750,8 +756,9 @@ namespace osmscout {
   }
 
   void MaxSpeedFeature::Parse(Progress& progress,
-                              const TypeConfig& typeConfig,
-                              const TypeInfo& type,
+                              const TypeConfig& /*typeConfig*/,
+                              const ObjectOSMRef& object,
+                              const TypeInfo& /*type*/,
                               const std::map<TagId,std::string>& tags,
                               FeatureValue*& value,
                               bool& set) const
@@ -805,7 +812,7 @@ namespace osmscout {
     }
 
     if (!StringToNumber(valueString,valueNumeric)) {
-      progress.Warning(std::string("Max speed tag value '")+maxSpeed->second+"' for "+NumberToString(0)+" is not numeric!");
+      progress.Warning(std::string("Max speed tag value '")+maxSpeed->second+"' for "+object.GetName()+" is not numeric!");
 
       set=false;
       value=NULL;
@@ -848,7 +855,8 @@ namespace osmscout {
 
   void GradeFeature::Parse(Progress& progress,
                            const TypeConfig& typeConfig,
-                           const TypeInfo& type,
+                           const ObjectOSMRef& object,
+                           const TypeInfo& /*type*/,
                            const std::map<TagId,std::string>& tags,
                            FeatureValue*& value,
                            bool& set) const
@@ -887,7 +895,7 @@ namespace osmscout {
         return;
       }
       else {
-        progress.Warning(std::string("Unsupported tracktype value '")+tracktype->second+"' for "+NumberToString(0));
+        progress.Warning(std::string("Unsupported tracktype value '")+tracktype->second+"' for "+object.GetName());
       }
     }
 
@@ -902,7 +910,7 @@ namespace osmscout {
         value=new GradeFeatureValue((uint8_t)grade);
       }
       else {
-        progress.Warning(std::string("Unknown surface type '")+surface->second+"' for "+NumberToString(0)+"!");
+        progress.Warning(std::string("Unknown surface type '")+surface->second+"' for "+object.GetName()+"!");
       }
     }
 
@@ -922,9 +930,10 @@ namespace osmscout {
     return NAME;
   }
 
-  void BridgeFeature::Parse(Progress& progress,
-                            const TypeConfig& typeConfig,
-                            const TypeInfo& type,
+  void BridgeFeature::Parse(Progress& /*progress*/,
+                            const TypeConfig& /*typeConfig*/,
+                            const ObjectOSMRef& /*object*/,
+                            const TypeInfo& /*type*/,
                             const std::map<TagId,std::string>& tags,
                             FeatureValue*& value,
                             bool& set) const
@@ -951,9 +960,10 @@ namespace osmscout {
     return NAME;
   }
 
-  void TunnelFeature::Parse(Progress& progress,
-                            const TypeConfig& typeConfig,
-                            const TypeInfo& type,
+  void TunnelFeature::Parse(Progress& /*progress*/,
+                            const TypeConfig& /*typeConfig*/,
+                            const ObjectOSMRef& /*object*/,
+                            const TypeInfo& /*type*/,
                             const std::map<TagId,std::string>& tags,
                             FeatureValue*& value,
                             bool& set) const
@@ -980,9 +990,10 @@ namespace osmscout {
     return NAME;
   }
 
-  void RoundaboutFeature::Parse(Progress& progress,
-                                const TypeConfig& typeConfig,
-                                const TypeInfo& type,
+  void RoundaboutFeature::Parse(Progress& /*progress*/,
+                                const TypeConfig& /*typeConfig*/,
+                                const ObjectOSMRef& /*object*/,
+                                const TypeInfo& /*type*/,
                                 const std::map<TagId,std::string>& tags,
                                 FeatureValue*& value,
                                 bool& set) const
@@ -1012,6 +1023,16 @@ namespace osmscout {
      pinWay(false),
      ignoreSeaLand(false),
      ignore(false)
+  {
+    // no code
+  }
+
+  /**
+   * We forbid copying of TypeInfo instances
+   *
+   * @param other
+   */
+  TypeInfo::TypeInfo(const TypeInfo& /*other*/)
   {
     // no code
   }
@@ -1136,42 +1157,54 @@ namespace osmscout {
     RegisterFeature(new WidthFeature());
     RegisterFeature(new MaxSpeedFeature());
     RegisterFeature(new GradeFeature());
+    RegisterFeature(new BridgeFeature());
+    RegisterFeature(new TunnelFeature());
+    RegisterFeature(new RoundaboutFeature());
 
-    TypeInfo ignore;
-    TypeInfo route;
-    TypeInfo tileLand;
-    TypeInfo tileSea;
-    TypeInfo tileCoast;
-    TypeInfo tileUnknown;
-    TypeInfo tileCoastline;
+    TypeInfoRef ignore=new TypeInfo();
+    TypeInfoRef route=new TypeInfo();
+    TypeInfoRef tileLand=new TypeInfo();
+    TypeInfoRef tileSea=new TypeInfo();
+    TypeInfoRef tileCoast=new TypeInfo();
+    TypeInfoRef tileUnknown=new TypeInfo();
+    TypeInfoRef tileCoastline=new TypeInfo();
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
-    ignore.SetType("");
+    ignore->SetType("");
 
     AddTypeInfo(ignore);
 
     // Internal type for showing routes
-    route.SetType("_route")
-         .CanBeWay(true);
-
-    // Internal types for the land/sea/coast tiles building the base layer for map drawing
-    tileLand.SetType("_tile_land")
-            .CanBeArea(true);
-    tileSea.SetType("_tile_sea")
-           .CanBeArea(true);
-    tileCoast.SetType("_tile_coast")
-             .CanBeArea(true);
-    tileUnknown.SetType("_tile_unknown")
-               .CanBeArea(true);
-    tileCoastline.SetType("_tile_coastline")
-               .CanBeWay(true);
+    route->SetType("_route")
+          .CanBeWay(true);
 
     AddTypeInfo(route);
+
+    // Internal types for the land/sea/coast tiles building the base layer for map drawing
+    tileLand->SetType("_tile_land")
+              .CanBeArea(true);
+
     AddTypeInfo(tileLand);
+
+    tileSea->SetType("_tile_sea")
+             .CanBeArea(true);
+
     AddTypeInfo(tileSea);
+
+    tileCoast->SetType("_tile_coast")
+               .CanBeArea(true);
+
     AddTypeInfo(tileCoast);
+
+    tileUnknown->SetType("_tile_unknown")
+                .CanBeArea(true);
+
     AddTypeInfo(tileUnknown);
+
+    tileCoastline->SetType("_tile_coastline")
+                   .CanBeWay(true);
+
     AddTypeInfo(tileCoastline);
 
     typeTileLand=GetTypeId("_tile_land");
@@ -1271,7 +1304,7 @@ namespace osmscout {
     return tags;
   }
 
-  const std::vector<TypeInfo>& TypeConfig::GetTypes() const
+  const std::vector<TypeInfoRef>& TypeConfig::GetTypes() const
   {
     return types;
   }
@@ -1368,27 +1401,29 @@ namespace osmscout {
     }
   }
 
-  TypeConfig& TypeConfig::AddTypeInfo(TypeInfo& typeInfo)
+  TypeConfig& TypeConfig::AddTypeInfo(const TypeInfoRef& typeInfo)
   {
-    if (nameToTypeMap.find(typeInfo.GetName())!=nameToTypeMap.end()) {
+    assert(typeInfo.Valid());
+
+    if (nameToTypeMap.find(typeInfo->GetName())!=nameToTypeMap.end()) {
       return *this;
     }
 
-    if (typeInfo.GetId()==0) {
-      typeInfo.SetId(nextTypeId);
+    if (typeInfo->GetId()==0) {
+      typeInfo->SetId(nextTypeId);
 
       nextTypeId++;
     }
     else {
-      nextTypeId=std::max(nextTypeId,(TypeId)(typeInfo.GetId()+1));
+      nextTypeId=std::max(nextTypeId,(TypeId)(typeInfo->GetId()+1));
     }
 
     //std::cout << "Type: " << typeInfo.GetId() << " " << typeInfo.GetName() << std::endl;
 
     types.push_back(typeInfo);
-    nameToTypeMap[typeInfo.GetName()]=typeInfo;
+    nameToTypeMap[typeInfo->GetName()]=typeInfo;
 
-    idToTypeMap[typeInfo.GetId()]=typeInfo;
+    idToTypeMap[typeInfo->GetId()]=typeInfo;
 
     return *this;
   }
@@ -1422,7 +1457,7 @@ namespace osmscout {
     return tags[id];
   }
 
-  const TypeInfo& TypeConfig::GetTypeInfo(TypeId id) const
+  const TypeInfoRef& TypeConfig::GetTypeInfo(TypeId id) const
   {
     assert(id<types.size());
 
@@ -1494,20 +1529,20 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<types.size(); i++) {
-      if (!types[i].HasConditions() ||
-          !types[i].CanBeNode()) {
+      if (!types[i]->HasConditions() ||
+          !types[i]->CanBeNode()) {
         continue;
       }
 
-      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
-           cond!=types[i].GetConditions().end();
+      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
+           cond!=types[i]->GetConditions().end();
            ++cond) {
         if (!(cond->types & TypeInfo::typeNode)) {
           continue;
         }
 
         if (cond->condition->Evaluate(tagMap)) {
-          typeId=types[i].GetId();
+          typeId=types[i]->GetId();
           return true;
         }
       }
@@ -1528,14 +1563,14 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<types.size(); i++) {
-      if (!((types[i].CanBeWay() ||
-             types[i].CanBeArea()) &&
-             types[i].HasConditions())) {
+      if (!((types[i]->CanBeWay() ||
+             types[i]->CanBeArea()) &&
+             types[i]->HasConditions())) {
         continue;
       }
 
-      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
-           cond!=types[i].GetConditions().end();
+      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
+           cond!=types[i]->GetConditions().end();
            ++cond) {
         if (!((cond->types & TypeInfo::typeWay) || (cond->types & TypeInfo::typeArea))) {
           continue;
@@ -1544,12 +1579,12 @@ namespace osmscout {
         if (cond->condition->Evaluate(tagMap)) {
           if (wayType==typeIgnore &&
               (cond->types & TypeInfo::typeWay)) {
-            wayType=types[i].GetId();
+            wayType=types[i]->GetId();
           }
 
           if (areaType==typeIgnore &&
               (cond->types & TypeInfo::typeArea)) {
-            areaType=types[i].GetId();
+            areaType=types[i]->GetId();
           }
 
           if (wayType!=typeIgnore ||
@@ -1577,20 +1612,20 @@ namespace osmscout {
     if (relationType!=tagMap.end() &&
         relationType->second=="multipolygon") {
       for (size_t i=0; i<types.size(); i++) {
-        if (!types[i].HasConditions() ||
-            !types[i].CanBeArea()) {
+        if (!types[i]->HasConditions() ||
+            !types[i]->CanBeArea()) {
           continue;
         }
 
-        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
-             cond!=types[i].GetConditions().end();
+        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
+             cond!=types[i]->GetConditions().end();
              ++cond) {
           if (!(cond->types & TypeInfo::typeArea)) {
             continue;
           }
 
           if (cond->condition->Evaluate(tagMap)) {
-            typeId=types[i].GetId();
+            typeId=types[i]->GetId();
             return true;
           }
         }
@@ -1598,20 +1633,20 @@ namespace osmscout {
     }
     else {
       for (size_t i=0; i<types.size(); i++) {
-        if (!types[i].HasConditions() ||
-            !types[i].CanBeRelation()) {
+        if (!types[i]->HasConditions() ||
+            !types[i]->CanBeRelation()) {
           continue;
         }
 
-        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
-             cond!=types[i].GetConditions().end();
+        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
+             cond!=types[i]->GetConditions().end();
              ++cond) {
           if (!(cond->types & TypeInfo::typeRelation)) {
             continue;
           }
 
           if (cond->condition->Evaluate(tagMap)) {
-            typeId=types[i].GetId();
+            typeId=types[i]->GetId();
             return true;
           }
         }
@@ -1623,10 +1658,10 @@ namespace osmscout {
 
   TypeId TypeConfig::GetTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end()) {
-      return iter->second.GetId();
+      return iter->second->GetId();
     }
 
     return typeIgnore;
@@ -1634,11 +1669,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
-        iter->second.CanBeNode()) {
-      return iter->second.GetId();
+        iter->second->CanBeNode()) {
+      return iter->second->GetId();
     }
 
     return typeIgnore;
@@ -1646,11 +1681,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetWayTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
-        iter->second.CanBeWay()) {
-      return iter->second.GetId();
+        iter->second->CanBeWay()) {
+      return iter->second->GetId();
     }
 
     return typeIgnore;
@@ -1658,11 +1693,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetAreaTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
-        iter->second.CanBeArea()) {
-      return iter->second.GetId();
+        iter->second->CanBeArea()) {
+      return iter->second->GetId();
     }
 
     return typeIgnore;
@@ -1670,11 +1705,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetRelationTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
-        iter->second.CanBeRelation()) {
-      return iter->second.GetId();
+        iter->second->CanBeRelation()) {
+      return iter->second->GetId();
     }
 
     return typeIgnore;
@@ -1682,9 +1717,11 @@ namespace osmscout {
 
   void TypeConfig::GetAreaTypes(std::set<TypeId>& types) const
   {
-    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
-        type!=this->types.end();
-        type++) {
+    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
+         t!=this->types.end();
+         t++) {
+      TypeInfoRef type(*t);
+
       if (type->GetId()==typeIgnore) {
         continue;
       }
@@ -1701,9 +1738,11 @@ namespace osmscout {
 
   void TypeConfig::GetWayTypes(std::set<TypeId>& types) const
   {
-    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
-        type!=this->types.end();
-        type++) {
+    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
+         t!=this->types.end();
+         t++) {
+      TypeInfoRef type(*t);
+
       if (type->GetId()==typeIgnore) {
         continue;
       }
@@ -1722,9 +1761,11 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
-         type!=this->types.end();
-         ++type) {
+    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
+         t!=this->types.end();
+         ++t) {
+      TypeInfoRef type(*t);
+
       if (type->CanRouteFoot() ||
           type->CanRouteBicycle() ||
           type->CanRouteCar()) {
@@ -1737,9 +1778,11 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
-         type!=this->types.end();
-         ++type) {
+    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
+         t!=this->types.end();
+         ++t) {
+      TypeInfoRef type(*t);
+
       if (type->GetIndexAsLocation()) {
         types.insert(type->GetId());
       }
@@ -1750,9 +1793,11 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
-         type!=this->types.end();
-         ++type) {
+    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
+         t!=this->types.end();
+         ++t) {
+      TypeInfoRef type(*t);
+
       if (type->GetIndexAsRegion()) {
         types.insert(type->GetId());
       }
@@ -1763,9 +1808,11 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
-         type!=this->types.end();
-         ++type) {
+    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
+         t!=this->types.end();
+         ++t) {
+      TypeInfoRef type(*t);
+
       if (type->GetIndexAsPOI()) {
         types.insert(type->GetId());
       }
@@ -2012,27 +2059,27 @@ namespace osmscout {
         return false;
       }
 
-      TypeInfo typeInfo;
+      TypeInfoRef typeInfo=new TypeInfo();
 
-      typeInfo.SetId(id);
+      typeInfo->SetId(id);
 
-      typeInfo.SetType(name);
+      typeInfo->SetType(name);
 
-      typeInfo.CanBeNode(canBeNode);
-      typeInfo.CanBeWay(canBeWay);
-      typeInfo.CanBeArea(canBeArea);
-      typeInfo.CanBeRelation(canBeRelation);
-      typeInfo.CanRouteFoot(canRouteFoot);
-      typeInfo.CanRouteBicycle(canRouteBicycle);
-      typeInfo.CanRouteCar(canRouteCar);
-      typeInfo.SetIndexAsLocation(indexAsLocation);
-      typeInfo.SetIndexAsRegion(indexAsRegion);
-      typeInfo.SetIndexAsPOI(indexAsPOI);
-      typeInfo.SetIgnore(optimizeLowZoom);
-      typeInfo.SetIgnore(multipolygon);
-      typeInfo.SetIgnore(pinWay );
-      typeInfo.SetIgnore(ignoreSeaLand);
-      typeInfo.SetIgnore(ignore);
+      typeInfo->CanBeNode(canBeNode);
+      typeInfo->CanBeWay(canBeWay);
+      typeInfo->CanBeArea(canBeArea);
+      typeInfo->CanBeRelation(canBeRelation);
+      typeInfo->CanRouteFoot(canRouteFoot);
+      typeInfo->CanRouteBicycle(canRouteBicycle);
+      typeInfo->CanRouteCar(canRouteCar);
+      typeInfo->SetIndexAsLocation(indexAsLocation);
+      typeInfo->SetIndexAsRegion(indexAsRegion);
+      typeInfo->SetIndexAsPOI(indexAsPOI);
+      typeInfo->SetIgnore(optimizeLowZoom);
+      typeInfo->SetIgnore(multipolygon);
+      typeInfo->SetIgnore(pinWay );
+      typeInfo->SetIgnore(ignoreSeaLand);
+      typeInfo->SetIgnore(ignore);
 
       uint32_t featureCount;
 
@@ -2054,7 +2101,7 @@ namespace osmscout {
           return false;
         }
 
-        typeInfo.AddFeature(feature);
+        typeInfo->AddFeature(feature);
       }
 
       AddTypeInfo(typeInfo);
@@ -2138,9 +2185,12 @@ namespace osmscout {
 
      writer.WriteNumber((uint32_t)GetTypes().size());
 
-     for (std::vector<TypeInfo>::const_iterator type=GetTypes().begin();
-          type!=GetTypes().end();
-          ++type) {
+     /*
+     for (std::vector<TypeInfoRef>::const_iterator t=GetTypes().begin();
+          t!=GetTypes().end();
+          ++t) {
+       TypeInfoRef type(*t);*/
+     for (auto type : GetTypes()) {
        writer.WriteNumber(type->GetId());
        writer.Write(type->GetName());
        writer.Write(type->CanBeNode());

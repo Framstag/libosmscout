@@ -278,8 +278,10 @@ namespace osmscout {
     progress.SetAction("Scanning level distribution of way types");
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-      if (typeConfig.GetTypeInfo(i).CanBeWay() &&
-          !typeConfig.GetTypeInfo(i).GetIgnore()) {
+      TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+      if (type->CanBeWay() &&
+          !type->GetIgnore()) {
         remainingWayTypes.insert(i);
       }
     }
@@ -364,7 +366,7 @@ namespace osmscout {
            cwt++) {
         maxLevel=std::max(maxLevel,level);
 
-        progress.Info("Type "+typeConfig.GetTypeInfo(*cwt).GetName()+"(" + NumberToString(*cwt)+"), "+NumberToString(wayTypeData[*cwt].indexCells)+" cells, "+NumberToString(wayTypeData[*cwt].indexEntries)+" objects");
+        progress.Info("Type "+typeConfig.GetTypeInfo(*cwt)->GetName()+"(" + NumberToString(*cwt)+"), "+NumberToString(wayTypeData[*cwt].indexCells)+" cells, "+NumberToString(wayTypeData[*cwt].indexEntries)+" objects");
 
         remainingWayTypes.erase(*cwt);
       }
@@ -388,7 +390,7 @@ namespace osmscout {
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
-      if (typeConfig.GetTypeInfo(i).CanBeWay() &&
+      if (typeConfig.GetTypeInfo(i)->CanBeWay() &&
           wayTypeData[i].HasEntries()) {
         indexEntries++;
       }
@@ -398,12 +400,14 @@ namespace osmscout {
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
-      if (typeConfig.GetTypeInfo(i).CanBeWay() &&
+      TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+      if (type->CanBeWay() &&
           wayTypeData[i].HasEntries()) {
         uint8_t    dataOffsetBytes=0;
         FileOffset bitmapOffset=0;
 
-        writer.WriteNumber(typeConfig.GetTypeInfo(i).GetId());
+        writer.WriteNumber(type->GetId());
 
         writer.GetPos(wayTypeData[i].indexOffset);
 
@@ -427,7 +431,9 @@ namespace osmscout {
       double           cellHeight=180.0/pow(2.0,(int)l);
 
       for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-        if (typeConfig.GetTypeInfo(i).CanBeWay() &&
+        TypeInfoRef type(typeConfig.GetTypeInfo(i));
+
+        if (type->CanBeWay() &&
             wayTypeData[i].HasEntries() &&
             wayTypeData[i].indexLevel==l) {
           indexTypes.insert(i);
