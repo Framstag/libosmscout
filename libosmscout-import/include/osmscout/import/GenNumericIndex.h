@@ -35,18 +35,23 @@
 namespace osmscout {
 
   template <class N,class T>
-  class NumericIndexGenerator : public ImportModule
+  class NumericIndexBaseGenerator : public ImportModule
   {
   private:
     std::string description;
     std::string datafile;
     std::string indexfile;
 
+  protected:
+    virtual bool ReadData(const TypeConfig& typeConfig,
+                          FileScanner& scanner,
+                          T& data) const = 0;
+
   public:
-    NumericIndexGenerator(const std::string& description,
-                          const std::string& datafile,
-                          const std::string& indexfile);
-    virtual ~NumericIndexGenerator();
+    NumericIndexBaseGenerator(const std::string& description,
+                              const std::string& datafile,
+                              const std::string& indexfile);
+    virtual ~NumericIndexBaseGenerator();
 
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
@@ -55,9 +60,9 @@ namespace osmscout {
   };
 
   template <class N,class T>
-  NumericIndexGenerator<N,T>::NumericIndexGenerator(const std::string& description,
-                                                    const std::string& datafile,
-                                                    const std::string& indexfile)
+  NumericIndexBaseGenerator<N,T>::NumericIndexBaseGenerator(const std::string& description,
+                                                            const std::string& datafile,
+                                                            const std::string& indexfile)
    : description(description),
      datafile(datafile),
      indexfile(indexfile)
@@ -66,21 +71,21 @@ namespace osmscout {
   }
 
   template <class N,class T>
-  NumericIndexGenerator<N,T>::~NumericIndexGenerator()
+  NumericIndexBaseGenerator<N,T>::~NumericIndexBaseGenerator()
   {
     // no code
   }
 
   template <class N,class T>
-  std::string NumericIndexGenerator<N,T>::GetDescription() const
+  std::string NumericIndexBaseGenerator<N,T>::GetDescription() const
   {
     return description;
   }
 
   template <class N,class T>
-  bool NumericIndexGenerator<N,T>::Import(const ImportParameter& parameter,
-                                          Progress& progress,
-                                          const TypeConfig& /*typeConfig*/)
+  bool NumericIndexBaseGenerator<N,T>::Import(const ImportParameter& parameter,
+                                              Progress& progress,
+                                              const TypeConfig& typeConfig)
   {
     FileScanner             scanner;
     FileWriter              writer;
@@ -149,7 +154,9 @@ namespace osmscout {
 
       T data;
 
-      if (!data.Read(scanner)) {
+      if (!ReadData(typeConfig,
+                    scanner,
+                    data)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(d+1)+" of "+
                        NumberToString(dataCount)+
@@ -300,6 +307,39 @@ namespace osmscout {
            scanner.Close() &&
            !writer.HasError() &&
            writer.Close();
+  }
+
+  template <class N,class T>
+  class NumericIndexGenerator : public NumericIndexBaseGenerator<N,T>
+  {
+  protected:
+    bool ReadData(const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  T& data) const;
+
+  public:
+    NumericIndexGenerator(const std::string& description,
+                          const std::string& datafile,
+                          const std::string& indexfile);
+  };
+
+  template <class N,class T>
+  NumericIndexGenerator<N,T>::NumericIndexGenerator(const std::string& description,
+                                                    const std::string& datafile,
+                                                    const std::string& indexfile)
+   : NumericIndexBaseGenerator<N,T>(description,
+                                    datafile,
+                                    indexfile)
+  {
+    // no code
+  }
+
+  template <class N,class T>
+  bool NumericIndexGenerator<N,T>::ReadData(const TypeConfig& /*typeConfig*/,
+                                            FileScanner& scanner,
+                                            T& data) const
+  {
+    return data.Read(scanner);
   }
 }
 

@@ -35,15 +35,14 @@ namespace osmscout {
   class RawNode : public Referencable
   {
   private:
-    OSMId             id;
-    TypeId            type;
-    GeoCoord          coords;
-    std::vector<Tag>  tags;
+    OSMId            id;
+    TypeInfoRef      type;
+    GeoCoord         coords;
+    std::vector<Tag> tags;
 
   public:
     inline RawNode()
-    : id(0),
-      type(typeIgnore)
+    : id(0)
     {
       // no code
     }
@@ -53,9 +52,14 @@ namespace osmscout {
       return id;
     }
 
-    inline TypeId GetType() const
+    inline TypeInfoRef GetType() const
     {
       return type;
+    }
+
+    inline TypeId GetTypeId() const
+    {
+      return type->GetId();
     }
 
     inline const GeoCoord& GetCoords() const
@@ -94,12 +98,14 @@ namespace osmscout {
     }
 
     void SetId(OSMId id);
-    void SetType(TypeId type);
+    void SetType(const TypeInfoRef& type);
     void SetCoords(double lon, double lat);
     void SetTags(const std::vector<Tag>& tags);
 
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
   };
 
   typedef Ref<RawNode> RawNodeRef;

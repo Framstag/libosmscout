@@ -88,7 +88,8 @@ namespace osmscout {
       RawNode rawNode;
       Node    node;
 
-      if (!rawNode.Read(scanner)) {
+      if (!rawNode.Read(typeConfig,
+                        scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(rawNodeCount)+
@@ -99,11 +100,11 @@ namespace osmscout {
 
       nodesReadCount++;
 
-      if (rawNode.GetType()!=typeIgnore &&
-          !typeConfig.GetTypeInfo(rawNode.GetType())->GetIgnore()) {
+      if (rawNode.GetTypeId()!=typeIgnore &&
+          !rawNode.GetType()->GetIgnore()) {
         std::vector<Tag> tags(rawNode.GetTags());
 
-        node.SetType(rawNode.GetType());
+        node.SetType(rawNode.GetType()->GetId());
         node.SetCoords(rawNode.GetCoords());
         node.SetTags(progress,
                      typeConfig,

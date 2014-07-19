@@ -1271,6 +1271,8 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<std::string,FeatureRef>  nameToFeatureMap;
 
   public:
+    TypeInfoRef                               typeInfoIgnore;
+
     TypeId                                    typeTileLand;
     TypeId                                    typeTileSea;
     TypeId                                    typeTileCoast;
@@ -1351,8 +1353,8 @@ namespace osmscout {
     bool IsNameTag(TagId tag, uint32_t& priority) const;
     bool IsNameAltTag(TagId tag, uint32_t& priority) const;
 
-    bool GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
-                       TypeId &typeId) const;
+    TypeInfoRef GetNodeType(const std::map<TagId,std::string>& tagMap) const;
+
     bool GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
                           TypeId &wayType,
                           TypeId &areaType) const;

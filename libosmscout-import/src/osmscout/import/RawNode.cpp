@@ -28,7 +28,7 @@ namespace osmscout {
     this->id=id;
   }
 
-  void RawNode::SetType(TypeId type)
+  void RawNode::SetType(const TypeInfoRef& type)
   {
     this->type=type;
   }
@@ -43,7 +43,8 @@ namespace osmscout {
     this->tags=tags;
   }
 
-  bool RawNode::Read(FileScanner& scanner)
+  bool RawNode::Read(const TypeConfig& typeConfig,
+                     FileScanner& scanner)
   {
     if (!scanner.ReadNumber(id)) {
       return false;
@@ -56,7 +57,7 @@ namespace osmscout {
       return false;
     }
 
-    type=(TypeId)tmpType;
+    type=typeConfig.GetTypeInfo((TypeId)tmpType);
 
     if (!scanner.ReadCoord(coords)) {
       return false;
@@ -80,11 +81,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool RawNode::Write(FileWriter& writer) const
+  bool RawNode::Write(const TypeConfig& /*typeConfig*/,
+                      FileWriter& writer) const
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber(type);
+    writer.WriteNumber(type->GetId());
     writer.WriteCoord(coords);
 
     writer.WriteNumber((uint32_t)tags.size());

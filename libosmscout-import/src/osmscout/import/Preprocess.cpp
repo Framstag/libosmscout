@@ -364,8 +364,7 @@ namespace osmscout {
                                const double& lat,
                                const std::map<TagId,std::string>& tagMap)
   {
-    RawNode    node;
-    TypeId     type=typeIgnore;
+    RawNode node;
 
     if (id<lastNodeId) {
       nodeSortingError=true;
@@ -381,9 +380,9 @@ namespace osmscout {
                GeoCoord(lat,
                         lon));
 
-    typeConfig.GetNodeTypeId(tagMap,type);
+    TypeInfoRef type=typeConfig.GetNodeType(tagMap);
 
-    if (type!=typeIgnore) {
+    if (type->GetId()!=typeIgnore) {
       typeConfig.ResolveTags(tagMap,tags);
 
       node.SetId(id);
@@ -391,7 +390,8 @@ namespace osmscout {
       node.SetCoords(lon,lat);
       node.SetTags(tags);
 
-      node.Write(nodeWriter);
+      node.Write(typeConfig,
+                 nodeWriter);
 
       nodeCount++;
     }

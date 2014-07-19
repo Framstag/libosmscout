@@ -28,6 +28,8 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
 
+#include <osmscout/import/GenRawNodeIndex.h>
+
 #include <osmscout/RoutingService.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/Intersection.h>
@@ -609,11 +611,10 @@ namespace osmscout {
     modules.push_back(new Preprocess());
 
     /* 3 */
-    modules.push_back(new NumericIndexGenerator<OSMId,RawNode>("Generating 'rawnode.idx'",
-                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                               "rawnodes.dat"),
-                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                               "rawnode.idx")));
+    modules.push_back(new RawNodeIndexGenerator(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                "rawnodes.dat"),
+                                                AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                "rawnode.idx")));
     /* 4 */
     modules.push_back(new NumericIndexGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),

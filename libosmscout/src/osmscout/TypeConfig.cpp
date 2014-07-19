@@ -1103,7 +1103,8 @@ namespace osmscout {
 
   TypeConfig::TypeConfig()
    : nextTagId(0),
-     nextTypeId(0)
+     nextTypeId(0),
+     typeInfoIgnore(new TypeInfo())
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
@@ -1161,19 +1162,13 @@ namespace osmscout {
     RegisterFeature(new TunnelFeature());
     RegisterFeature(new RoundaboutFeature());
 
-    TypeInfoRef ignore=new TypeInfo();
-    TypeInfoRef route=new TypeInfo();
-    TypeInfoRef tileLand=new TypeInfo();
-    TypeInfoRef tileSea=new TypeInfo();
-    TypeInfoRef tileCoast=new TypeInfo();
-    TypeInfoRef tileUnknown=new TypeInfo();
-    TypeInfoRef tileCoastline=new TypeInfo();
-
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
-    ignore->SetType("");
+    typeInfoIgnore->SetType("");
 
-    AddTypeInfo(ignore);
+    AddTypeInfo(typeInfoIgnore);
+
+    TypeInfoRef route(new TypeInfo());
 
     // Internal type for showing routes
     route->SetType("_route")
@@ -1181,26 +1176,36 @@ namespace osmscout {
 
     AddTypeInfo(route);
 
+    TypeInfoRef tileLand(new TypeInfo());
+
     // Internal types for the land/sea/coast tiles building the base layer for map drawing
     tileLand->SetType("_tile_land")
               .CanBeArea(true);
 
     AddTypeInfo(tileLand);
 
+    TypeInfoRef tileSea(new TypeInfo());
+
     tileSea->SetType("_tile_sea")
              .CanBeArea(true);
 
     AddTypeInfo(tileSea);
+
+    TypeInfoRef tileCoast(new TypeInfo());
 
     tileCoast->SetType("_tile_coast")
                .CanBeArea(true);
 
     AddTypeInfo(tileCoast);
 
+    TypeInfoRef tileUnknown(new TypeInfo());
+
     tileUnknown->SetType("_tile_unknown")
                 .CanBeArea(true);
 
     AddTypeInfo(tileUnknown);
+
+    TypeInfoRef tileCoastline(new TypeInfo());
 
     tileCoastline->SetType("_tile_coastline")
                    .CanBeWay(true);
@@ -1519,36 +1524,30 @@ namespace osmscout {
     return true;
   }
 
-  bool TypeConfig::GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
-                                 TypeId &typeId) const
+  TypeInfoRef TypeConfig::GetNodeType(const std::map<TagId,std::string>& tagMap) const
   {
-    typeId=typeIgnore;
-
     if (tagMap.empty()) {
-      return false;
+      return typeInfoIgnore;
     }
 
-    for (size_t i=0; i<types.size(); i++) {
-      if (!types[i]->HasConditions() ||
-          !types[i]->CanBeNode()) {
+    for (auto type : types) {
+      if (!type->HasConditions() ||
+          !type->CanBeNode()) {
         continue;
       }
 
-      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
-           cond!=types[i]->GetConditions().end();
-           ++cond) {
-        if (!(cond->types & TypeInfo::typeNode)) {
+      for (auto cond : type->GetConditions()) {
+        if (!(cond.types & TypeInfo::typeNode)) {
           continue;
         }
 
-        if (cond->condition->Evaluate(tagMap)) {
-          typeId=types[i]->GetId();
-          return true;
+        if (cond.condition->Evaluate(tagMap)) {
+          return type;
         }
       }
     }
 
-    return false;
+    return typeInfoIgnore;
   }
 
   bool TypeConfig::GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
