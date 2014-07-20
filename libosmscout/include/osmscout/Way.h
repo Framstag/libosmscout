@@ -52,14 +52,12 @@ namespace osmscout {
     static const uint16_t isTunnel        = 1 <<  2; //! We are a tunnel
     static const uint16_t isRoundabout    = 1 <<  4; //! We are a roundabout
 
-  public:
-    TypeId           type;     //! type of the way/relation
-    std::string      name;     //! name
-
   private:
+    TypeId           type;     //! type of the way/relation
     mutable uint16_t flags;
-    AttributeAccess  access;   //! Information regarding which vehicle can access this way
+    std::string      name;     //! name
     std::string      nameAlt;  //! alternative name
+    AttributeAccess  access;   //! Information regarding which vehicle can access this way
     std::string      ref;      //! reference name (normally drawn in a plate)
     int8_t           layer;    //! layer to draw on
     uint8_t          width;    //! width of way
@@ -163,6 +161,8 @@ namespace osmscout {
     {
       return tags;
     }
+
+    void SetType(TypeId type);
 
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,

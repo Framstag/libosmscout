@@ -322,7 +322,7 @@ namespace osmscout {
       WayAttributes    origAttributes;
       std::vector<Tag> origTags(way->GetTags());
 
-      origAttributes.type=way->GetType();
+      origAttributes.SetType(way->GetType());
       if (!origAttributes.SetTags(silentProgress,
                                   typeConfig,
                                   way->GetId(),
@@ -354,7 +354,7 @@ namespace osmscout {
           WayAttributes     candidateAttributes;
           std::vector<Tag>  candidateTags(candidate->GetTags());
 
-          candidateAttributes.type=candidate->GetType();
+          candidateAttributes.SetType(candidate->GetType());
           if (!candidateAttributes.SetTags(silentProgress,
                                            typeConfig,
                                            candidate->GetId(),

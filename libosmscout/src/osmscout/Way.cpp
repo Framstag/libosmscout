@@ -28,6 +28,11 @@
 
 namespace osmscout {
 
+  void WayAttributes::SetType(TypeId type)
+  {
+    this->type=type;
+  }
+
   bool WayAttributes::SetTags(Progress& progress,
                               const TypeConfig& typeConfig,
                               Id id,
@@ -551,7 +556,7 @@ namespace osmscout {
 
   void Way::SetType(TypeId type)
   {
-    attributes.type=type;
+    attributes.SetType(type);
   }
 
   bool Way::SetTags(Progress& progress,
