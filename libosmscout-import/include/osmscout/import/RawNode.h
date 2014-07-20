@@ -37,15 +37,28 @@ namespace osmscout {
   private:
     OSMId            id;
     TypeInfoRef      type;
+    uint8_t          *featureBits;
+    FeatureValue*    *featureValues;
     GeoCoord         coords;
-    std::vector<Tag> tags;
 
-  public:
-    inline RawNode()
-    : id(0)
+  private:
+    void DeleteFeatureData();
+    void AllocateFeatureData();
+
+    /**
+     * Private copy constructor to forbid copying of RawNodes
+     *
+     * @param other
+     *    The original node to copy from
+     */
+    inline RawNode(const RawNode& /*other*/)
     {
       // no code
     }
+
+  public:
+    RawNode();
+    virtual ~RawNode();
 
     inline OSMId GetId() const
     {
@@ -77,9 +90,19 @@ namespace osmscout {
       return coords.GetLon();
     }
 
-    inline const std::vector<Tag>& GetTags() const
+    inline FeatureValue** GetFeatureValues() const
     {
-      return tags;
+      return featureValues;
+    }
+
+    inline bool HashFeature(size_t idx) const
+    {
+      return featureBits[idx/8] & (1 << idx%8);
+    }
+
+    inline FeatureValue* GetFeatureValue(size_t idx) const
+    {
+      return featureValues[idx];
     }
 
     inline bool IsIdentical(const RawNode& other) const
@@ -99,8 +122,12 @@ namespace osmscout {
 
     void SetId(OSMId id);
     void SetType(const TypeInfoRef& type);
+
     void SetCoords(double lon, double lat);
-    void SetTags(const std::vector<Tag>& tags);
+
+    void SetFeature(size_t idx,
+                    FeatureValue* value);
+    void UnsetFeature(size_t idx);
 
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);

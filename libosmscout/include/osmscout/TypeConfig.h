@@ -30,6 +30,8 @@
 #include <osmscout/Tag.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/Parser.h>
@@ -265,6 +267,11 @@ namespace osmscout {
                        const std::map<TagId,std::string>& tags,
                        FeatureValue*& value,
                        bool& set) const = 0;
+
+    virtual bool Read(FileScanner& scanner,
+                      FeatureValue*& value) = 0;
+    virtual bool Write(FileWriter& writer,
+                       FeatureValue* value) = 0;
   };
 
   typedef Ref<Feature> FeatureRef;
@@ -313,6 +320,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API RefFeatureValue : public FeatureValue
@@ -354,6 +366,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API AddressFeatureValue : public FeatureValue
@@ -404,6 +421,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API AccessFeatureValue : public FeatureValue
@@ -613,6 +635,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API LayerFeatureValue : public FeatureValue
@@ -654,6 +681,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API WidthFeatureValue : public FeatureValue
@@ -695,6 +727,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API MaxSpeedFeatureValue : public FeatureValue
@@ -736,6 +773,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API GradeFeatureValue : public FeatureValue
@@ -778,6 +820,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API BridgeFeature : public Feature
@@ -801,6 +848,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API TunnelFeature : public Feature
@@ -824,6 +876,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   class OSMSCOUT_API RoundaboutFeature : public Feature
@@ -847,6 +904,11 @@ namespace osmscout {
                const std::map<TagId,std::string>& tags,
                FeatureValue*& value,
                bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
   };
 
   /**
@@ -942,9 +1004,9 @@ namespace osmscout {
     }
 
     /**
-     * Returns the number of bits required for storing the feature mask
+     * Returns the number of features of the asisgned type
      */
-    inline size_t GetFeatureBits() const
+    inline size_t GetFeatureCount() const
     {
       return features.size();
     }

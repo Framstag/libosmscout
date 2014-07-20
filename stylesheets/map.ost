@@ -355,6 +355,7 @@ TYPES
   TYPE railway_station
     = NODE AREA ("railway"=="station")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE railway_halt
     = NODE ("railway"=="halt")
@@ -405,6 +406,7 @@ TYPES
   TYPE aeroway_terminal
     = NODE AREA ("aeroway"=="terminal")
       {Name, Address}
+      OPTIONS INDEX_POI
       
   TYPE aeroway_helipad
     = NODE AREA ("aeroway"=="helipad")
@@ -701,11 +703,12 @@ TYPES
   TYPE leisure_sports_centre
     = NODE AREA ("leisure"=="sports_centre")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE leisure_golf_course
     = NODE AREA ("leisure"=="golf_course")
       {Name, Address}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_stadium
     = NODE AREA ("leisure"=="stadium")
@@ -719,18 +722,18 @@ TYPES
       
   TYPE leisure_pitch
     = NODE AREA ("leisure"=="pitch")
-      {Name, Address}
+      {Name}
       OPTIONS OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_water_park
     = NODE AREA ("leisure"=="water_park")
       {Name, Address}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_marina
     = NODE AREA ("leisure"=="marina")
       {Name, Address}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_slipway
     = NODE ("leisure"=="slipway")
@@ -747,8 +750,8 @@ TYPES
     
   TYPE leisure_park
     = NODE AREA ("leisure"=="park")
-      {Name, Address}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      {Name}
+      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_playground
     = NODE AREA ("leisure"=="playground")
@@ -794,7 +797,7 @@ TYPES
     
   TYPE amenity_bicycle_parking
     = NODE WAY AREA ("amenity"=="bicycle_parking")
-      {Name, Address}
+      {Name}
 
   TYPE amenity_bench
     = NODE WAY ("amenity"=="bench")
@@ -972,14 +975,17 @@ TYPES
   TYPE tourism_camp_site
     = NODE AREA ("tourism"=="camp_site")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_caravan_site
     = NODE AREA ("tourism"=="caravan_site")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_picnic_site
     = NODE AREA ("tourism"=="picnic_site")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_theme_park
     = NODE AREA ("tourism"=="theme_park")
@@ -988,7 +994,7 @@ TYPES
     
   TYPE tourism_viewpoint
     = NODE ("tourism"=="viewpoint")
-      {Name, Address}
+      {Name}
     
   TYPE tourism_zoo
     = NODE AREA ("tourism"=="zoo")
@@ -1006,26 +1012,32 @@ TYPES
   TYPE tourism_chalet_building
     = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE tourism_chalet
     = NODE AREA ("tourism"=="chalet")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_guest_house_building
     = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE tourism_guest_house
     = NODE AREA ("tourism"=="guest_house")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_hostel_building
     = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE tourism_hostel
     = NODE AREA ("tourism"=="hostel")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_hotel_building
     = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -1040,18 +1052,22 @@ TYPES
   TYPE tourism_information_building
     = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE tourism_information
     = NODE AREA ("tourism"=="information")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_motel_building
     = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE tourism_motel
     = NODE AREA ("tourism"=="motel")
       {Name, Address}
+      OPTIONS INDEX_POI
     
   TYPE tourism_museum_building
     = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -1066,10 +1082,12 @@ TYPES
   TYPE tourism_building
     = AREA (EXISTS "tourism" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE tourism
     = NODE AREA (EXISTS "tourism")
       {Name, Address}
+      OPTIONS INDEX_POI
 
   //
   // Historic
@@ -1138,6 +1156,7 @@ TYPES
   TYPE historic_wreck
     = NODE AREA ("historic"=="wreck")
       {Name, Address}
+      OPTIONS INDEX_POI
 
   TYPE historic_building
     = NODE AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -1187,179 +1206,179 @@ TYPES
     
   TYPE sport_9pin
     = NODE AREA ("sport"=="9pin")
-      {Name, Address}
+      {Name}
     
   TYPE sport_10pin
     = NODE AREA ("sport"=="10pin")
-      {Name, Address}
+      {Name}
     
   TYPE sport_archery
     = NODE AREA ("sport"=="archery")
-      {Name, Address}
+      {Name}
     
   TYPE sport_athletics
     = NODE AREA ("sport"=="athletics")
-      {Name, Address}
+      {Name}
     
   TYPE sport_australian_football
     = NODE AREA ("sport"=="australian_football")
-      {Name, Address}
+      {Name}
     
   TYPE sport_baseball
     = NODE AREA ("sport"=="baseball")
-      {Name, Address}
+      {Name}
     
   TYPE sport_basketball
     = NODE AREA ("sport"=="basketball")
-      {Name, Address}
+      {Name}
     
   TYPE sport_beachvolleyball
     = NODE AREA ("sport"=="beachvolleyball")
-      {Name, Address}
+      {Name}
     
   TYPE sport_boules
     = NODE AREA ("sport"=="boules")
-      {Name, Address}
+      {Name}
     
   TYPE sport_bowls
     = NODE AREA ("sport"=="bowls")
-      {Name, Address}
+      {Name}
     
   TYPE sport_canoe
     = NODE AREA ("sport"=="canoe")
-      {Name, Address}
+      {Name}
     
   TYPE sport_chess
     = NODE AREA ("sport"=="chess")
-      {Name, Address}
+      {Name}
     
   TYPE sport_climbing
     = NODE AREA ("sport"=="climbing")
-      {Name, Address}
+      {Name}
     
   TYPE sport_cricket
     = NODE AREA ("sport"=="cricket")
-      {Name, Address}
+      {Name}
     
   TYPE sport_cricket_nets
     = NODE AREA ("sport"=="cricket_nets")
-      {Name, Address}
+      {Name}
     
   TYPE sport_croquet
     = NODE AREA ("sport"=="croquet")
-      {Name, Address}
+      {Name}
     
   TYPE sport_cycling
     = NODE AREA ("sport"=="cycling")
-      {Name, Address}
+      {Name}
     
   TYPE sport_diving
     = NODE AREA ("sport"=="diving")
-      {Name, Address}
+      {Name}
     
   TYPE sport_dog_racing
     = NODE AREA ("sport"=="dog_racing")
-      {Name, Address}
+      {Name}
     
   TYPE sport_equestrian
     = NODE AREA ("sport"=="equestrian")
-      {Name, Address}
+      {Name}
     
   TYPE sport_football
     = NODE AREA ("sport"=="football")
-      {Name, Address}
+      {Name}
     
   TYPE sport_golf
     = NODE AREA ("sport"=="golf")
-      {Name, Address}
+      {Name}
     
   TYPE sport_gymnastics
     = NODE AREA ("sport"=="gymnastics")
-      {Name, Address}
+      {Name}
     
   TYPE sport_hockey
     = NODE AREA ("sport"=="hockey")
-      {Name, Address}
+      {Name}
     
   TYPE sport_horse_racing
     = NODE AREA ("sport"=="horse_racing")
-      {Name, Address}
+      {Name}
     
   TYPE sport_motor
     = NODE AREA ("sport"=="motor")
-      {Name, Address}
+      {Name}
     
   TYPE sport_multi
     = NODE AREA ("sport"=="multi")
-      {Name, Address}
+      {Name}
     
   TYPE sport_orienteering
     = NODE AREA ("sport"=="orienteering")
-      {Name, Address}
+      {Name}
     
   TYPE sport_paddle_tennis
     = NODE AREA ("sport"=="paddle_tennis")
-      {Name, Address}
+      {Name}
     
   TYPE sport_pelota
     = NODE AREA ("sport"=="pelota")
-      {Name, Address}
+      {Name}
     
   TYPE sport_raquet
     = NODE AREA ("sport"=="raquet")
-      {Name, Address}
+      {Name}
     
   TYPE sport_rowing
     = NODE AREA ("sport"=="rowing")
-      {Name, Address}
+      {Name}
     
   TYPE sport_rugby
     = NODE AREA ("sport"=="rugby")
-      {Name, Address}
+      {Name}
     
   TYPE sport_shooting
     = NODE AREA ("sport"=="shooting")
-      {Name, Address}
+      {Name}
     
   TYPE sport_skating
     = NODE AREA ("sport"=="skating")
-      {Name, Address}
+      {Name}
     
   TYPE sport_skateboard
     = NODE AREA ("sport"=="skateboard")
-      {Name, Address}
+      {Name}
     
   TYPE sport_skiing
     = NODE AREA ("sport"=="skiing")
-      {Name, Address}
+      {Name}
     
   TYPE sport_soccer 
     = NODE AREA ("sport"=="soccer")
-      {Name, Address}
+      {Name}
     
   TYPE sport_swimming
     = NODE AREA ("sport"=="swimming")
-      {Name, Address}
+      {Name}
     
   TYPE sport_table_tenis
     = NODE AREA ("sport"=="table_tenis")
-      {Name, Address}
+      {Name}
     
   TYPE sport_team_handball
     = NODE AREA ("sport"=="team_handball")
-      {Name, Address}
+      {Name}
     
   TYPE sport_tennis
     = NODE AREA ("sport"=="tennis")
-      {Name, Address}
+      {Name}
     
   TYPE sport_volleyball
     = NODE AREA ("sport"=="volleyball")
-      {Name, Address}
+      {Name}
 
   TYPE sport
     = NODE AREA (EXISTS "sport")
-      {Name, Address}
+      {Name}
 
   //
   // Power

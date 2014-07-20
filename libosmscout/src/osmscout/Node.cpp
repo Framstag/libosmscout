@@ -21,55 +21,26 @@
 
 namespace osmscout {
 
-  bool NodeAttributes::SetTags(Progress& /*progress*/,
-                               const TypeConfig& typeConfig,
-                               std::vector<Tag>& tags)
+  void NodeAttributes::SetFeatures(const TypeConfig& typeConfig,
+                                   const TypeInfo& type,
+                                   FeatureValue* featureValues[])
   {
-    uint32_t namePriority=0;
-    uint32_t nameAltPriority=0;
+    for (size_t i=0; i<type.GetFeatureCount(); i++) {
+      if (dynamic_cast<NameFeatureValue*>(featureValues[i])!=NULL) {
+        NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(featureValues[i]);
 
-    name.clear();
-    nameAlt.clear();
-    address.clear();
-
-    flags=0;
-
-    this->tags.clear();
-
-    std::vector<Tag>::iterator tag=tags.begin();
-    while (tag!=tags.end()) {
-      uint32_t ntPrio;
-      bool     isNameTag=typeConfig.IsNameTag(tag->key,ntPrio);
-      uint32_t natPrio;
-      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->key,natPrio);
-
-      if (isNameTag &&
-          (name.empty() || ntPrio>namePriority)) {
-        name=tag->value;
-        namePriority=ntPrio;
+        name=value->GetName();
+        nameAlt=value->GetNameAlt();
       }
+      else if (dynamic_cast<AddressFeatureValue*>(featureValues[i])!=NULL) {
+        AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(featureValues[i]);
 
-      if (isNameAltTag &&
-          (nameAlt.empty() || natPrio>nameAltPriority)) {
-        nameAlt=tag->value;
-        nameAltPriority=natPrio;
-      }
+        address=value->GetAddress();
 
-      if (isNameTag || isNameAltTag) {
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagHouseNr) {
-        address=tag->value;
-        tag=tags.erase(tag);
-      }
-      else {
-        ++tag;
+        tags.push_back(Tag(typeConfig.tagAddrStreet,
+                           value->GetLocation()));
       }
     }
-
-    this->tags=tags;
-
-    return true;
   }
 
   void NodeAttributes::GetFlags(uint8_t& flags) const
@@ -208,13 +179,13 @@ namespace osmscout {
     this->coords=coords;
   }
 
-  bool Node::SetTags(Progress& progress,
-                     const TypeConfig& typeConfig,
-                     std::vector<Tag>& tags)
+  void Node::SetFeatures(const TypeConfig& typeConfig,
+                         const TypeInfo& type,
+                         FeatureValue* featureValues[])
   {
-    return attributes.SetTags(progress,
-                              typeConfig,
-                              tags);
+    attributes.SetFeatures(typeConfig,
+                           type,
+                           featureValues);
   }
 
   bool Node::Read(FileScanner& scanner)

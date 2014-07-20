@@ -25,8 +25,6 @@
 #include <osmscout/ost/Scanner.h>
 
 #include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/String.h>
 
 #include <iostream>
@@ -318,6 +316,31 @@ namespace osmscout {
     }
   }
 
+  bool NameFeature::Read(FileScanner& scanner,
+                         FeatureValue*& value)
+  {
+    std::string name;
+    std::string altName;
+
+    if (!scanner.Read(name) ||
+        !scanner.Read(altName)) {
+      return false;
+    }
+
+    value=new NameFeatureValue(name,
+                               altName);
+
+    return true;
+  }
+
+  bool NameFeature::Write(FileWriter& writer,
+                          FeatureValue* value)
+  {
+    NameFeatureValue* v=dynamic_cast<NameFeatureValue*>(value);
+
+    return writer.Write(v->GetName()) && writer.Write(v->GetNameAlt());
+  }
+
   const char* const RefFeature::NAME = "Ref";
 
   void RefFeature::Initialize(TypeConfig& typeConfig)
@@ -349,6 +372,28 @@ namespace osmscout {
       set=false;
       value=NULL;
     }
+  }
+
+  bool RefFeature::Read(FileScanner& scanner,
+                        FeatureValue*& value)
+  {
+    std::string ref;
+
+    if (!scanner.Read(ref)) {
+      return false;
+    }
+
+    value=new RefFeatureValue(ref);
+
+    return true;
+  }
+
+  bool RefFeature::Write(FileWriter& writer,
+                         FeatureValue* value)
+  {
+    RefFeatureValue* v=dynamic_cast<RefFeatureValue*>(value);
+
+    return writer.Write(v->GetRef());
   }
 
   const char* const AddressFeature::NAME = "Address";
@@ -396,6 +441,31 @@ namespace osmscout {
       value=NULL;
       set=false;
     }
+  }
+
+  bool AddressFeature::Read(FileScanner& scanner,
+                            FeatureValue*& value)
+  {
+    std::string location;
+    std::string address;
+
+    if (!scanner.Read(location) ||
+        !scanner.Read(address)) {
+      return false;
+    }
+
+    value=new AddressFeatureValue(location,
+                                  address);
+
+    return true;
+  }
+
+  bool AddressFeature::Write(FileWriter& writer,
+                             FeatureValue* value)
+  {
+    AddressFeatureValue* v=dynamic_cast<AddressFeatureValue*>(value);
+
+    return writer.Write(v->GetLocation()) && writer.Write(v->GetAddress());
   }
 
   const char* const AccessFeature::NAME = "Access";
@@ -628,6 +698,28 @@ namespace osmscout {
     }
   }
 
+  bool AccessFeature::Read(FileScanner& scanner,
+                           FeatureValue*& value)
+  {
+    uint8_t access;
+
+    if (!scanner.Read(access)) {
+      return false;
+    }
+
+    value=new AccessFeatureValue(access);
+
+    return true;
+  }
+
+  bool AccessFeature::Write(FileWriter& writer,
+                            FeatureValue* value)
+  {
+    AccessFeatureValue* v=dynamic_cast<AccessFeatureValue*>(value);
+
+    return writer.Write(v->GetAccess());
+  }
+
   const char* const LayerFeature::NAME = "Layer";
 
   void LayerFeature::Initialize(TypeConfig& typeConfig)
@@ -654,8 +746,14 @@ namespace osmscout {
       int8_t layerValue;
 
       if (StringToNumber(layer->second,layerValue)) {
-        set=true;
-        value=new LayerFeatureValue(layerValue);
+        if (layerValue!=0) {
+          set=true;
+          value=new LayerFeatureValue(layerValue);
+        }
+        else {
+          set=false;
+          value=NULL;
+        }
       }
       else {
         progress.Warning(std::string("Layer tag value '")+layer->second+"' for "+object.GetName()+" is not numeric!");
@@ -666,6 +764,28 @@ namespace osmscout {
 
     set=false;
     value=NULL;
+  }
+
+  bool LayerFeature::Read(FileScanner& scanner,
+                          FeatureValue*& value)
+  {
+    int8_t layer;
+
+    if (!scanner.Read(layer)) {
+      return false;
+    }
+
+    value=new LayerFeatureValue(layer);
+
+    return true;
+  }
+
+  bool LayerFeature::Write(FileWriter& writer,
+                           FeatureValue* value)
+  {
+    LayerFeatureValue* v=dynamic_cast<LayerFeatureValue*>(value);
+
+    return writer.Write(v->GetLayer());
   }
 
   const char* const WidthFeature::NAME = "Width";
@@ -741,6 +861,28 @@ namespace osmscout {
       value=new WidthFeatureValue((uint8_t)floor(w+0.5));
     }
 
+  }
+
+  bool WidthFeature::Read(FileScanner& scanner,
+                         FeatureValue*& value)
+  {
+    uint8_t width;
+
+    if (!scanner.Read(width)) {
+      return false;
+    }
+
+    value=new WidthFeatureValue(width);
+
+    return true;
+  }
+
+  bool WidthFeature::Write(FileWriter& writer,
+                           FeatureValue* value)
+  {
+    WidthFeatureValue* v=dynamic_cast<WidthFeatureValue*>(value);
+
+    return writer.Write(v->GetWidth());
   }
 
   const char* const MaxSpeedFeature::NAME = "MaxSpeed";
@@ -840,6 +982,28 @@ namespace osmscout {
     }
   }
 
+  bool MaxSpeedFeature::Read(FileScanner& scanner,
+                             FeatureValue*& value)
+  {
+    uint8_t maxSpeed;
+
+    if (!scanner.Read(maxSpeed)) {
+      return false;
+    }
+
+    value=new MaxSpeedFeatureValue(maxSpeed);
+
+    return true;
+  }
+
+  bool MaxSpeedFeature::Write(FileWriter& writer,
+                              FeatureValue* value)
+  {
+    MaxSpeedFeatureValue* v=dynamic_cast<MaxSpeedFeatureValue*>(value);
+
+    return writer.Write(v->GetMaxSpeed());
+  }
+
   const char* const GradeFeature::NAME = "Grade";
 
   void GradeFeature::Initialize(TypeConfig& typeConfig)
@@ -918,6 +1082,28 @@ namespace osmscout {
     value=NULL;
   }
 
+  bool GradeFeature::Read(FileScanner& scanner,
+                          FeatureValue*& value)
+  {
+    uint8_t grade;
+
+    if (!scanner.Read(grade)) {
+      return false;
+    }
+
+    value=new GradeFeatureValue(grade);
+
+    return true;
+  }
+
+  bool GradeFeature::Write(FileWriter& writer,
+                           FeatureValue* value)
+  {
+    GradeFeatureValue* v=dynamic_cast<GradeFeatureValue*>(value);
+
+    return writer.Write(v->GetGrade());
+  }
+
   const char* const BridgeFeature::NAME = "Bridge";
 
   void BridgeFeature::Initialize(TypeConfig& typeConfig)
@@ -946,6 +1132,18 @@ namespace osmscout {
         !(bridge->second=="no" ||
           bridge->second=="false" ||
           bridge->second=="0");
+  }
+
+  bool BridgeFeature::Read(FileScanner& /*scanner*/,
+                           FeatureValue*& /*value*/)
+  {
+    return true;
+  }
+
+  bool BridgeFeature::Write(FileWriter& /*writer*/,
+                            FeatureValue* /*value*/)
+  {
+    return true;
   }
 
   const char* const TunnelFeature::NAME = "Tunnel";
@@ -978,6 +1176,18 @@ namespace osmscout {
           tunnel->second=="0");
   }
 
+  bool TunnelFeature::Read(FileScanner& /*scanner*/,
+                           FeatureValue*& /*value*/)
+  {
+    return true;
+  }
+
+  bool TunnelFeature::Write(FileWriter& /*writer*/,
+                            FeatureValue* /*value*/)
+  {
+    return true;
+  }
+
   const char* const RoundaboutFeature::NAME = "Roundabout";
 
   void RoundaboutFeature::Initialize(TypeConfig& typeConfig)
@@ -1004,6 +1214,18 @@ namespace osmscout {
 
     set=junction!=tags.end() &&
         junction->second=="roundabout";
+  }
+
+  bool RoundaboutFeature::Read(FileScanner& /*scanner*/,
+                               FeatureValue*& /*value*/)
+  {
+    return true;
+  }
+
+  bool RoundaboutFeature::Write(FileWriter& /*writer*/,
+                                FeatureValue* /*value*/)
+  {
+    return true;
   }
 
   TypeInfo::TypeInfo()

@@ -364,7 +364,9 @@ namespace osmscout {
                                const double& lat,
                                const std::map<TagId,std::string>& tagMap)
   {
-    RawNode node;
+    RawNode      node;
+    ObjectOSMRef object(id,
+                        osmRefNode);
 
     if (id<lastNodeId) {
       nodeSortingError=true;
@@ -388,7 +390,28 @@ namespace osmscout {
       node.SetId(id);
       node.SetType(type);
       node.SetCoords(lon,lat);
-      node.SetTags(tags);
+
+      size_t featureIdx=0;
+      for (auto feature : type->GetFeatures()) {
+        FeatureValue *value=NULL;
+        bool         set;
+
+        feature->Parse(*progress,
+                       typeConfig,
+                       object,
+                       *type,
+                       tagMap,
+                       value,
+                       set);
+
+        if (set) {
+          node.SetFeature(featureIdx,value);
+
+          assert(node.HashFeature(featureIdx));
+        }
+
+        featureIdx++;
+      }
 
       node.Write(typeConfig,
                  nodeWriter);

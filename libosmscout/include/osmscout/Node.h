@@ -99,9 +99,9 @@ namespace osmscout {
       return tags;
     }
 
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 std::vector<Tag>& tags);
+    void SetFeatures(const TypeConfig& typeConfig,
+                     const TypeInfo& type,
+                     FeatureValue* featureValues[]);
 
     bool operator==(const NodeAttributes& other) const;
     bool operator!=(const NodeAttributes& other) const;
@@ -177,9 +177,9 @@ namespace osmscout {
 
     void SetType(TypeId type);
     void SetCoords(const GeoCoord& coords);
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 std::vector<Tag>& tags);
+    void SetFeatures(const TypeConfig& typeConfig,
+                     const TypeInfo& type,
+                     FeatureValue* featureValues[]);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
