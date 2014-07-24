@@ -30,6 +30,10 @@ namespace osmscout {
         NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(featureValues[i]);
 
         name=value->GetName();
+      }
+      else if (dynamic_cast<NameAltFeatureValue*>(featureValues[i])!=NULL) {
+        NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(featureValues[i]);
+
         nameAlt=value->GetNameAlt();
       }
       else if (dynamic_cast<AddressFeatureValue*>(featureValues[i])!=NULL) {

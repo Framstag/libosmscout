@@ -280,13 +280,10 @@ namespace osmscout {
   {
   private:
     std::string name;
-    std::string nameAlt;
 
   public:
-    inline NameFeatureValue(const std::string& name,
-                            const std::string& nameAlt)
-    : name(name),
-      nameAlt(nameAlt)
+    inline NameFeatureValue(const std::string& name)
+    : name(name)
     {
       // no code
     }
@@ -295,6 +292,44 @@ namespace osmscout {
     {
       return name;
     }
+  };
+
+  class OSMSCOUT_API NameFeature : public Feature
+  {
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
+               const TypeInfo& type,
+               const std::map<TagId,std::string>& tags,
+               FeatureValue*& value,
+               bool& set) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue*& value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
+  };
+
+  class OSMSCOUT_API NameAltFeatureValue : public FeatureValue
+  {
+  private:
+    std::string nameAlt;
+
+  public:
+    inline NameAltFeatureValue(const std::string& nameAlt)
+    : nameAlt(nameAlt)
+    {
+      // no code
+    }
 
     inline std::string GetNameAlt() const
     {
@@ -302,7 +337,7 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_API NameFeature : public Feature
+  class OSMSCOUT_API NameAltFeature : public Feature
   {
   public:
     /** Name of this feature */

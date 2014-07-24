@@ -281,35 +281,23 @@ namespace osmscout {
     std::string name;
     uint32_t    namePriority=0;
 
-    std::string nameAlt;
-    uint32_t    nameAltPriority=0;
-
     for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
          tag!=tags.end();
          ++tag) {
       uint32_t ntPrio;
       bool     isNameTag=typeConfig.IsNameTag(tag->first,ntPrio);
-      uint32_t natPrio;
-      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->first,natPrio);
 
       if (isNameTag &&
           (name.empty() || ntPrio>namePriority)) {
         name=tag->second;
         namePriority=ntPrio;
       }
-
-      if (isNameAltTag &&
-          (nameAlt.empty() || natPrio>nameAltPriority)) {
-        nameAlt=tag->second;
-        nameAltPriority=natPrio;
-      }
     }
 
-    set=!name.empty() || !nameAlt.empty();
+    set=!name.empty();
 
     if (set) {
-      value=new NameFeatureValue(name,
-                                 nameAlt);
+      value=new NameFeatureValue(name);
     }
     else {
       value=NULL;
@@ -320,15 +308,12 @@ namespace osmscout {
                          FeatureValue*& value)
   {
     std::string name;
-    std::string altName;
 
-    if (!scanner.Read(name) ||
-        !scanner.Read(altName)) {
+    if (!scanner.Read(name)) {
       return false;
     }
 
-    value=new NameFeatureValue(name,
-                               altName);
+    value=new NameFeatureValue(name);
 
     return true;
   }
@@ -338,7 +323,75 @@ namespace osmscout {
   {
     NameFeatureValue* v=dynamic_cast<NameFeatureValue*>(value);
 
-    return writer.Write(v->GetName()) && writer.Write(v->GetNameAlt());
+    return writer.Write(v->GetName());
+  }
+
+  const char* const NameAltFeature::NAME = "NameAlt";
+
+  void NameAltFeature::Initialize(TypeConfig& /*typeConfig*/)
+  {
+    // no code
+  }
+
+  std::string NameAltFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void NameAltFeature::Parse(Progress& /*progress*/,
+                             const TypeConfig& typeConfig,
+                             const ObjectOSMRef& /*object*/,
+                             const TypeInfo& /*type*/,
+                             const std::map<TagId,std::string>& tags,
+                             FeatureValue*& value,
+                             bool& set) const
+  {
+    std::string nameAlt;
+    uint32_t    nameAltPriority=0;
+
+    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
+         tag!=tags.end();
+         ++tag) {
+      uint32_t natPrio;
+      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->first,natPrio);
+
+      if (isNameAltTag &&
+          (nameAlt.empty() || natPrio>nameAltPriority)) {
+        nameAlt=tag->second;
+        nameAltPriority=natPrio;
+      }
+    }
+
+    set=!nameAlt.empty();
+
+    if (set) {
+      value=new NameAltFeatureValue(nameAlt);
+    }
+    else {
+      value=NULL;
+    }
+  }
+
+  bool NameAltFeature::Read(FileScanner& scanner,
+                            FeatureValue*& value)
+  {
+    std::string altName;
+
+    if (!scanner.Read(altName)) {
+      return false;
+    }
+
+    value=new NameAltFeatureValue(altName);
+
+    return true;
+  }
+
+  bool NameAltFeature::Write(FileWriter& writer,
+                             FeatureValue* value)
+  {
+    NameAltFeatureValue* v=dynamic_cast<NameAltFeatureValue*>(value);
+
+    return writer.Write(v->GetNameAlt());
   }
 
   const char* const RefFeature::NAME = "Ref";
@@ -1373,6 +1426,7 @@ namespace osmscout {
     RegisterTagForInternalUse("restriction");
 
     RegisterFeature(new NameFeature());
+    RegisterFeature(new NameAltFeature());
     RegisterFeature(new RefFeature());
     RegisterFeature(new AddressFeature());
     RegisterFeature(new AccessFeature());
