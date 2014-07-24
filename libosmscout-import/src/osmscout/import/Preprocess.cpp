@@ -40,7 +40,6 @@
   #include <osmscout/import/PreprocessPBF.h>
 #endif
 
-#include <iostream>
 namespace osmscout {
 
   static uint32_t coordPageSize=64;
@@ -384,7 +383,8 @@ namespace osmscout {
 
     TypeInfoRef type=typeConfig.GetNodeType(tagMap);
 
-    if (type->GetId()!=typeIgnore) {
+    if (type->GetId()!=typeIgnore &&
+        !type->GetIgnore()) {
       typeConfig.ResolveTags(tagMap,tags);
 
       node.SetId(id);
