@@ -354,7 +354,7 @@ TYPES
     
   TYPE railway_station
     = NODE AREA ("railway"=="station")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE railway_halt
@@ -400,12 +400,12 @@ TYPES
 
   TYPE aeroway_aerodrome
     = NODE AREA ("aeroway"=="aerodrome")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE aeroway_terminal
     = NODE AREA ("aeroway"=="terminal")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE aeroway_helipad
@@ -697,22 +697,22 @@ TYPES
 
   TYPE leisure_building
     = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
      OPTIONS INDEX_POI
      
   TYPE leisure_sports_centre
     = NODE AREA ("leisure"=="sports_centre")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE leisure_golf_course
     = NODE AREA ("leisure"=="golf_course")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_stadium
     = NODE AREA ("leisure"=="stadium")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE leisure_track
@@ -727,21 +727,21 @@ TYPES
       
   TYPE leisure_water_park
     = NODE AREA ("leisure"=="water_park")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_marina
     = NODE AREA ("leisure"=="marina")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
       
   TYPE leisure_slipway
     = NODE ("leisure"=="slipway")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE leisure_fishing
     = NODE AREA ("leisure"=="fishing")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_nature_reserve
@@ -768,7 +768,7 @@ TYPES
       
   TYPE leisure_ice_rink
     = NODE AREA ("leisure"=="ice_rink")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS OPTIMIZE_LOW_ZOOM
 
   //
@@ -783,17 +783,17 @@ TYPES
 
   TYPE amenity_bank_building
     = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_bank
     = NODE AREA ("amenity"=="bank")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_bicycle_parking_building
     = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE amenity_bicycle_parking
     = NODE WAY AREA ("amenity"=="bicycle_parking")
@@ -809,82 +809,82 @@ TYPES
 
   TYPE amenity_cafe_building
     = AREA ("amenity"=="cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_cafe
     = NODE AREA ("amenity"=="cafe")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_fast_food_building
     = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_fast_food
     = NODE AREA ("amenity"=="fast_food")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_fuel_building
     = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_fuel
     = NODE ("amenity"=="fuel")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_grave_yard
     = NODE AREA ("amenity"=="grave_yard")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_hospital_building
     = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_hospital
     = NODE AREA ("amenity"=="hospital")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_kindergarten_building
     = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_kindergarten
     = NODE ("amenity"=="kindergarten")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_parking_building
     = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_parking
     = NODE AREA ("amenity"=="parking")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_pharmacy
     = NODE AREA ("amenity"=="pharmacy")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_post_office_building
     = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_post_office
     = NODE ("amenity"=="post_office")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_post_box
@@ -892,22 +892,22 @@ TYPES
 
   TYPE amenity_restaurant_building
     = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_restaurant
     = NODE AREA ("amenity"=="restaurant")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_school_building
     = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE amenity_school
     = NODE AREA ("amenity"=="school")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE amenity_taxi
@@ -926,23 +926,23 @@ TYPES
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="christian" AND
             EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE christian_church
     = NODE ("amenity"=="place_of_worship" AND
             "religion"=="christian")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   // Everything else is just an 'amenity' for now
   TYPE amenity_building
     = AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE amenity
     = NODE (EXISTS "amenity")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
 
   //
   // Shops
@@ -951,7 +951,7 @@ TYPES
   // Currently all shops are the same...
   TYPE shop
     = NODE AREA (EXISTS "shop")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
 
   //
   // Tourism
@@ -959,37 +959,37 @@ TYPES
 
   TYPE tourism_aquarium
     = NODE AREA ("tourism"=="aquarium")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_attraction
     = NODE AREA ("tourism"=="attraction")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_artwork
     = NODE WAY AREA ("tourism"=="artwork")
-      {Name, NameAlt, Address, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
+      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS INDEX_POI
     
   TYPE tourism_camp_site
     = NODE AREA ("tourism"=="camp_site")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_caravan_site
     = NODE AREA ("tourism"=="caravan_site")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_picnic_site
     = NODE AREA ("tourism"=="picnic_site")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_theme_park
     = NODE AREA ("tourism"=="theme_park")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_viewpoint
@@ -998,95 +998,95 @@ TYPES
     
   TYPE tourism_zoo
     = NODE AREA ("tourism"=="zoo")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_alpine_hut_building
     = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
 
   TYPE tourism_alpine_hut
     = NODE AREA ("tourism"=="alpine_hut")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE tourism_chalet_building
     = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_chalet
     = NODE AREA ("tourism"=="chalet")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_guest_house_building
     = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_guest_house
     = NODE AREA ("tourism"=="guest_house")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_hostel_building
     = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_hostel
     = NODE AREA ("tourism"=="hostel")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_hotel_building
     = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_hotel
     = NODE AREA ("tourism"=="hotel")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_information_building
     = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_information
     = NODE AREA ("tourism"=="information")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_motel_building
     = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_motel
     = NODE AREA ("tourism"=="motel")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE tourism_museum_building
     = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_museum
     = NODE AREA ("tourism"=="museum")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism_building
     = AREA (EXISTS "tourism" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE tourism
     = NODE AREA (EXISTS "tourism")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   //
@@ -1095,77 +1095,77 @@ TYPES
 
   TYPE historic_castle_building
     = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic_castle
     = NODE AREA ("historic"=="castle")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic_manor_building
     = NODE AREA ("historic"=="manor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE historic_manor
     = NODE AREA ("historic"=="manor")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE historic_monument_building
     = NODE AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic_monument
     = NODE AREA ("historic"=="monument")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE historic_memorial_building
     = NODE AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic_memorial
     = NODE AREA ("historic"=="memorial")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
     
   TYPE historic_ruins_building
     = NODE AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic_ruins
     = NODE WAY AREA ("historic"=="ruins")
-      {Name, NameAlt, Address, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
+      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS INDEX_POI
        
   TYPE historic_archaeological_site
     = NODE WAY AREA ("historic"=="archaeological_site")
-      {Name, NameAlt, Address, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
+      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
       OPTIONS INDEX_POI
       
   TYPE historic_battlefield
     = NODE AREA ("historic"=="battlefield")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
       
   TYPE historic_wreck
     = NODE AREA ("historic"=="wreck")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic_building
     = NODE AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   TYPE historic
     = NODE AREA (EXISTS "historic")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
       OPTIONS INDEX_POI
 
   //
@@ -1174,15 +1174,15 @@ TYPES
 
   TYPE military_airfield
     = NODE AREA ("military"=="airfield")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE military_bunker
     = NODE AREA ("military"=="bunker")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE military_barracks
     = NODE AREA ("military"=="barracks")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE military_danger_area
     = NODE AREA ("military"=="danger_area")
@@ -1194,7 +1194,7 @@ TYPES
     
   TYPE military_naval_base
     = NODE AREA ("military"=="naval_base")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
 
   //
   // Sport
@@ -1202,7 +1202,7 @@ TYPES
 
   TYPE sport_building
     = AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE sport_9pin
     = NODE AREA ("sport"=="9pin")
@@ -1398,11 +1398,11 @@ TYPES
     
   TYPE power_station
     = NODE AREA ("power"=="station")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE power_sub_station
     = NODE AREA ("power"=="sub_station")
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
     
   TYPE power_generator
     = NODE AREA ("power"=="generator")
@@ -1494,7 +1494,7 @@ TYPES
     
   TYPE building
     = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Address}
+      {Name, NameAlt}
 
   // Addresses
   TYPE address

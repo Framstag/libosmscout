@@ -1690,6 +1690,11 @@ namespace osmscout {
       return *this;
     }
 
+    if ((typeInfo->CanBeArea() || typeInfo->CanBeNode()) &&
+        !typeInfo->HasFeature(AddressFeature::NAME)) {
+      typeInfo->AddFeature(GetFeature(AddressFeature::NAME));
+    }
+
     if (typeInfo->GetId()==0) {
       typeInfo->SetId(nextTypeId);
 
