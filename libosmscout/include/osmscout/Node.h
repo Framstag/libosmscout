@@ -100,8 +100,7 @@ namespace osmscout {
     }
 
     void SetFeatures(const TypeConfig& typeConfig,
-                     const TypeInfo& type,
-                     FeatureValue* featureValues[]);
+                     const FeatureValueBuffer& buffer);
 
     bool operator==(const NodeAttributes& other) const;
     bool operator!=(const NodeAttributes& other) const;
@@ -178,8 +177,7 @@ namespace osmscout {
     void SetType(TypeId type);
     void SetCoords(const GeoCoord& coords);
     void SetFeatures(const TypeConfig& typeConfig,
-                     const TypeInfo& type,
-                     FeatureValue* featureValues[]);
+                     const FeatureValueBuffer& buffer);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

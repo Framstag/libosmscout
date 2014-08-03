@@ -391,27 +391,9 @@ namespace osmscout {
       node.SetType(type);
       node.SetCoords(lon,lat);
 
-      size_t featureIdx=0;
-      for (auto feature : type->GetFeatures()) {
-        FeatureValue *value=NULL;
-        bool         set;
-
-        feature->Parse(*progress,
-                       typeConfig,
-                       object,
-                       *type,
-                       tagMap,
-                       value,
-                       set);
-
-        if (set) {
-          node.SetFeature(featureIdx,value);
-
-          assert(node.HashFeature(featureIdx));
-        }
-
-        featureIdx++;
-      }
+      node.Parse(*progress,
+                 typeConfig,
+                 tagMap);
 
       node.Write(typeConfig,
                  nodeWriter);

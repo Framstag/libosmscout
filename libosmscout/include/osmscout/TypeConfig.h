@@ -58,6 +58,7 @@ namespace osmscout {
 
   // Forward declaration of classes TypeConfig and TypeInfo because
   // of circular dependency between them and Feature
+  class FeatureValueBuffer;
   class TypeConfig;
   class TypeInfo;
 
@@ -260,21 +261,51 @@ namespace osmscout {
      */
     virtual std::string GetName() const = 0;
 
+    virtual size_t GetValueSize() const = 0;
+
+    virtual bool HasValue() const
+    {
+      return GetValueSize()>0;
+    }
+
+    virtual void AllocateValue(void* buffer) = 0;
+
     virtual void Parse(Progress& progress,
                        const TypeConfig& typeConfig,
                        const ObjectOSMRef& object,
                        const TypeInfo& type,
+                       size_t idx,
                        const std::map<TagId,std::string>& tags,
-                       FeatureValue*& value,
-                       bool& set) const = 0;
+                       FeatureValueBuffer& buffer) const = 0;
 
     virtual bool Read(FileScanner& scanner,
-                      FeatureValue*& value) = 0;
+                      FeatureValue* value) = 0;
     virtual bool Write(FileWriter& writer,
                        FeatureValue* value) = 0;
   };
 
   typedef Ref<Feature> FeatureRef;
+
+  class OSMSCOUT_API FeatureInstance
+  {
+  private:
+    FeatureRef feature;
+    size_t     offset;
+
+  public:
+    FeatureInstance(const FeatureRef& feature,
+                    size_t offset);
+
+    inline FeatureRef GetFeature() const
+    {
+      return feature;
+    }
+
+    inline size_t GetOffset() const
+    {
+      return offset;
+    }
+  };
 
   class OSMSCOUT_API NameFeatureValue : public FeatureValue
   {
@@ -282,10 +313,20 @@ namespace osmscout {
     std::string name;
 
   public:
+    inline NameFeatureValue()
+    {
+      // no code
+    }
+
     inline NameFeatureValue(const std::string& name)
     : name(name)
     {
       // no code
+    }
+
+    inline void SetName(const std::string& name)
+    {
+      this->name=name;
     }
 
     inline std::string GetName() const
@@ -305,16 +346,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -325,10 +369,20 @@ namespace osmscout {
     std::string nameAlt;
 
   public:
+    inline NameAltFeatureValue()
+    {
+      // no code
+    }
+
     inline NameAltFeatureValue(const std::string& nameAlt)
     : nameAlt(nameAlt)
     {
       // no code
+    }
+
+    inline void SetNameAlt(const std::string& nameAlt)
+    {
+      this->nameAlt=nameAlt;
     }
 
     inline std::string GetNameAlt() const
@@ -348,16 +402,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -368,10 +425,20 @@ namespace osmscout {
     std::string ref;
 
   public:
+    inline RefFeatureValue()
+    {
+      // no code
+    }
+
     inline RefFeatureValue(const std::string& ref)
     : ref(ref)
     {
       // no code
+    }
+
+    inline void SetRef(const std::string& ref)
+    {
+      this->ref=ref;
     }
 
     inline std::string GetRef() const
@@ -394,16 +461,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -415,12 +485,24 @@ namespace osmscout {
     std::string address;
 
   public:
+    inline AddressFeatureValue()
+    {
+      // no code
+    }
+
     inline AddressFeatureValue(const std::string& location,
                                const std::string& address)
     : location(location),
       address(address)
     {
       // no code
+    }
+
+    inline void SetAddress(const std::string& location,
+                           const std::string& address)
+    {
+      this->location=location;
+      this->address=address;
     }
 
     inline std::string GetLocation() const
@@ -449,16 +531,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -481,10 +566,21 @@ namespace osmscout {
     uint8_t access;
 
   public:
+    inline AccessFeatureValue()
+    : access(0)
+    {
+
+    }
+
     inline AccessFeatureValue(uint8_t access)
     : access(access)
     {
       // no code
+    }
+
+    inline void SetAccess(uint8_t access)
+    {
+      this->access=access;
     }
 
     inline uint8_t GetAccess()
@@ -663,16 +759,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -683,10 +782,21 @@ namespace osmscout {
     int8_t layer;
 
   public:
+    inline LayerFeatureValue()
+    : layer(0)
+    {
+
+    }
+
     inline LayerFeatureValue(int8_t layer)
     : layer(layer)
     {
       // no code
+    }
+
+    inline void SetLayer(int8_t layer)
+    {
+      this->layer=layer;
     }
 
     inline int8_t GetLayer() const
@@ -709,16 +819,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -729,10 +842,21 @@ namespace osmscout {
     uint8_t width;
 
   public:
+    inline WidthFeatureValue()
+    : width(0)
+    {
+
+    }
+
     inline WidthFeatureValue(uint8_t width)
     : width(width)
     {
       // no code
+    }
+
+    inline void SetWidth(uint8_t width)
+    {
+      this->width=width;
     }
 
     inline uint8_t GetWidth() const
@@ -755,16 +879,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -775,10 +902,21 @@ namespace osmscout {
     uint8_t maxSpeed;
 
   public:
+    inline MaxSpeedFeatureValue()
+    : maxSpeed(0)
+    {
+
+    }
+
     inline MaxSpeedFeatureValue(uint8_t maxSpeed)
     : maxSpeed(maxSpeed)
     {
       // no code
+    }
+
+    inline void SetMaxSpeed(uint8_t maxSpeed)
+    {
+      this->maxSpeed=maxSpeed;
     }
 
     inline uint8_t GetMaxSpeed() const
@@ -801,16 +939,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -821,10 +962,21 @@ namespace osmscout {
     uint8_t grade;
 
   public:
+    inline GradeFeatureValue()
+    : grade(0)
+    {
+
+    }
+
     inline GradeFeatureValue(uint8_t grade)
     : grade(grade)
     {
       // no code
+    }
+
+    inline void SetGrade(uint8_t grade)
+    {
+      this->grade=grade;
     }
 
     inline uint8_t GetGrade() const
@@ -848,16 +1000,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -876,16 +1031,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -904,16 +1062,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -932,16 +1093,19 @@ namespace osmscout {
 
     std::string GetName() const;
 
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TypeInfo& type,
+               size_t idx,
                const std::map<TagId,std::string>& tags,
-               FeatureValue*& value,
-               bool& set) const;
+               FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
-              FeatureValue*& value);
+              FeatureValue* value);
     bool Write(FileWriter& writer,
                FeatureValue* value);
   };
@@ -981,7 +1145,7 @@ namespace osmscout {
 
     std::list<TypeCondition>      conditions;
     OSMSCOUT_HASHSET<std::string> featureSet;
-    std::list<FeatureRef>         features;
+    std::vector<FeatureInstance>  features;
 
     bool                          canBeNode;
     bool                          canBeWay;
@@ -1031,9 +1195,17 @@ namespace osmscout {
     bool HasFeature(const std::string& featureName) const;
 
     /**
+     * Return the feature at the given index
+     */
+    inline const FeatureInstance& GetFeature(size_t idx) const
+    {
+      return features[idx];
+    }
+
+    /**
      * Return the list of features assigned to this type
      */
-    inline const std::list<FeatureRef>& GetFeatures() const
+    inline const std::vector<FeatureInstance>& GetFeatures() const
     {
       return features;
     }
@@ -1060,6 +1232,11 @@ namespace osmscout {
         return size/8+1;
       }
     }
+
+    /**
+     * Returns the size of the buffer required to store all FeatureVAlues of this type into
+     */
+    size_t GetFeatureValueBufferSize() const;
 
     /**
      * The Type Id of the given type
@@ -1341,6 +1518,55 @@ namespace osmscout {
   };
 
   typedef Ref<TypeInfo> TypeInfoRef;
+
+  class OSMSCOUT_API FeatureValueBuffer
+  {
+  private:
+    TypeInfoRef type;
+    uint8_t     *featureBits;
+    char        *featureValueBuffer;
+
+  private:
+    void DeleteData();
+    void AllocateData();
+
+  public:
+    FeatureValueBuffer();
+    virtual ~FeatureValueBuffer();
+
+    void SetType(const TypeInfoRef& type);
+
+    inline TypeInfoRef GetType() const
+    {
+      return type;
+    }
+
+    inline size_t GetFeatureCount() const
+    {
+      return type->GetFeatureCount();
+    }
+
+    inline FeatureInstance GetFeature(size_t idx) const
+    {
+      return type->GetFeature(idx);
+    }
+
+    bool HasValue(size_t idx) const;
+
+    FeatureValue* GetValue(size_t idx) const;
+
+
+    void AllocateValue(size_t idx);
+    void FreeValue(size_t idx);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
+               const std::map<TagId,std::string>& tags);
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+  };
 
   /**
    * \ingroup type

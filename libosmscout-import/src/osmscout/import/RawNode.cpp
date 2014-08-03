@@ -25,45 +25,14 @@
 namespace osmscout {
 
   RawNode::RawNode()
-  : id(0),
-    featureBits(NULL),
-    featureValues(NULL)
+  : id(0)
   {
     // no code
   }
 
   RawNode::~RawNode()
   {
-    DeleteFeatureData();
-  }
-
-  void RawNode::DeleteFeatureData()
-  {
-    if (type.Valid()) {
-      if (featureValues!=NULL) {
-        for (size_t i=0; i<type->GetFeatureCount(); i++) {
-          delete featureValues[i];
-        }
-      }
-
-      delete [] featureValues;
-      delete [] featureBits;
-    }
-  }
-
-  void RawNode::AllocateFeatureData()
-  {
-    featureBits=new uint8_t[type->GetFeatureBytes()];
-
-    for (size_t i=0; i<type->GetFeatureBytes(); i++) {
-      featureBits[i]=0;
-    }
-
-    featureValues=new FeatureValue*[type->GetFeatureCount()];
-
-    for (size_t i=0; i<type->GetFeatureCount(); i++) {
-      featureValues[i]=NULL;
-    }
+    // no code
   }
 
   void RawNode::SetId(OSMId id)
@@ -75,11 +44,7 @@ namespace osmscout {
   {
     assert(type.Valid());
 
-    DeleteFeatureData();
-
-    this->type=type;
-
-    AllocateFeatureData();
+    featureValueBuffer.SetType(type);
   }
 
   void RawNode::SetCoords(double lon, double lat)
@@ -87,32 +52,27 @@ namespace osmscout {
     coords.Set(lat,lon);
   }
 
-  void RawNode::SetFeature(size_t idx,
-                           FeatureValue* value)
-  {
-    size_t byteIdx=idx/8;
-
-    featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
-
-    delete featureValues[idx];
-    featureValues[idx]=value;
-  }
-
   void RawNode::UnsetFeature(size_t idx)
   {
-    size_t byteIdx=idx/8;
+    featureValueBuffer.FreeValue(idx);
+  }
 
-    featureBits[byteIdx]=featureBits[byteIdx] & ~(1 << idx%8);
+  void RawNode::Parse(Progress& progress,
+                      const TypeConfig& typeConfig,
+                      const std::map<TagId,std::string>& tags)
+  {
+    ObjectOSMRef object(id,
+                        osmRefNode);
 
-    delete featureValues[idx];
-    featureValues[idx]=NULL;
+    featureValueBuffer.Parse(progress,
+                             typeConfig,
+                             object,
+                             tags);
   }
 
   bool RawNode::Read(const TypeConfig& typeConfig,
                      FileScanner& scanner)
   {
-    DeleteFeatureData();
-
     if (!scanner.ReadNumber(id)) {
       return false;
     }
@@ -123,34 +83,16 @@ namespace osmscout {
       return false;
     }
 
-    type=typeConfig.GetTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
 
-    AllocateFeatureData();
+    featureValueBuffer.SetType(type);
 
     if (!scanner.ReadCoord(coords)) {
       return false;
     }
 
-    for (size_t i=0; i<type->GetFeatureBytes(); i++) {
-      if (!scanner.Read(featureBits[i])) {
-        return false;
-      }
-    }
-
-    size_t featureIdx=0;
-    for (auto feature : type->GetFeatures()) {
-      if (HashFeature(featureIdx)) {
-        FeatureValue* value=NULL;
-
-        if (!feature->Read(scanner,
-                           value)) {
-          return false;
-        }
-
-        featureValues[featureIdx]=value;
-      }
-
-      featureIdx++;
+    if (!featureValueBuffer.Read(scanner)) {
+      return false;
     }
 
     return !scanner.HasError();
@@ -161,25 +103,11 @@ namespace osmscout {
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber(type->GetId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
     writer.WriteCoord(coords);
 
-    for (size_t i=0; i<type->GetFeatureBytes(); i++) {
-      if (!writer.Write(featureBits[i])) {
-        return false;
-      }
-    }
-
-    size_t featureIdx=0;
-    for (auto feature : type->GetFeatures()) {
-      if (HashFeature(featureIdx)) {
-        if (!feature->Write(writer,
-                            GetFeatureValue(featureIdx))) {
-          return false;
-        }
-      }
-
-      featureIdx++;
+    if (!featureValueBuffer.Write(writer)) {
+      return false;
     }
 
     return !writer.HasError();

@@ -35,16 +35,11 @@ namespace osmscout {
   class RawNode : public Referencable
   {
   private:
-    OSMId            id;
-    TypeInfoRef      type;
-    uint8_t          *featureBits;
-    FeatureValue*    *featureValues;
-    GeoCoord         coords;
+    OSMId              id;
+    GeoCoord           coords;
+    FeatureValueBuffer featureValueBuffer;
 
   private:
-    void DeleteFeatureData();
-    void AllocateFeatureData();
-
     /**
      * Private copy constructor to forbid copying of RawNodes
      *
@@ -67,12 +62,12 @@ namespace osmscout {
 
     inline TypeInfoRef GetType() const
     {
-      return type;
+      return featureValueBuffer.GetType();
     }
 
     inline TypeId GetTypeId() const
     {
-      return type->GetId();
+      return featureValueBuffer.GetType()->GetId();
     }
 
     inline const GeoCoord& GetCoords() const
@@ -90,19 +85,24 @@ namespace osmscout {
       return coords.GetLon();
     }
 
-    inline FeatureValue** GetFeatureValues() const
+    inline size_t GetFeatureCount() const
     {
-      return featureValues;
+      return featureValueBuffer.GetType()->GetFeatureCount();
     }
 
     inline bool HashFeature(size_t idx) const
     {
-      return featureBits[idx/8] & (1 << idx%8);
+      return featureValueBuffer.HasValue(idx);
     }
 
     inline FeatureValue* GetFeatureValue(size_t idx) const
     {
-      return featureValues[idx];
+      return featureValueBuffer.GetValue(idx);
+    }
+
+    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    {
+      return featureValueBuffer;
     }
 
     inline bool IsIdentical(const RawNode& other) const
@@ -125,10 +125,11 @@ namespace osmscout {
 
     void SetCoords(double lon, double lat);
 
-    void SetFeature(size_t idx,
-                    FeatureValue* value);
     void UnsetFeature(size_t idx);
 
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const std::map<TagId,std::string>& tags);
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     bool Write(const TypeConfig& typeConfig,

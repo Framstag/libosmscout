@@ -22,27 +22,31 @@
 namespace osmscout {
 
   void NodeAttributes::SetFeatures(const TypeConfig& typeConfig,
-                                   const TypeInfo& type,
-                                   FeatureValue* featureValues[])
+                                   const FeatureValueBuffer& buffer)
   {
-    for (size_t i=0; i<type.GetFeatureCount(); i++) {
-      if (dynamic_cast<NameFeatureValue*>(featureValues[i])!=NULL) {
-        NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(featureValues[i]);
+    for (size_t i=0; i<buffer.GetFeatureCount(); i++) {
+      if (buffer.HasValue(i) &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+        FeatureValue* value=buffer.GetValue(i);
 
-        name=value->GetName();
-      }
-      else if (dynamic_cast<NameAltFeatureValue*>(featureValues[i])!=NULL) {
-        NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(featureValues[i]);
+        if (dynamic_cast<NameFeatureValue*>(value)!=NULL) {
+          NameFeatureValue* nameValue=dynamic_cast<NameFeatureValue*>(value);
 
-        nameAlt=value->GetNameAlt();
-      }
-      else if (dynamic_cast<AddressFeatureValue*>(featureValues[i])!=NULL) {
-        AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(featureValues[i]);
+          name=nameValue->GetName();
+        }
+        else if (dynamic_cast<NameAltFeatureValue*>(value)!=NULL) {
+          NameAltFeatureValue* nameAltValue=dynamic_cast<NameAltFeatureValue*>(value);
 
-        address=value->GetAddress();
+          nameAlt=nameAltValue->GetNameAlt();
+        }
+        else if (dynamic_cast<AddressFeatureValue*>(value)!=NULL) {
+          AddressFeatureValue* addressValue=dynamic_cast<AddressFeatureValue*>(value);
 
-        tags.push_back(Tag(typeConfig.tagAddrStreet,
-                           value->GetLocation()));
+          address=addressValue->GetAddress();
+
+          tags.push_back(Tag(typeConfig.tagAddrStreet,
+                             addressValue->GetLocation()));
+        }
       }
     }
   }
@@ -184,12 +188,10 @@ namespace osmscout {
   }
 
   void Node::SetFeatures(const TypeConfig& typeConfig,
-                         const TypeInfo& type,
-                         FeatureValue* featureValues[])
+                         const FeatureValueBuffer& buffer)
   {
     attributes.SetFeatures(typeConfig,
-                           type,
-                           featureValues);
+                           buffer);
   }
 
   bool Node::Read(FileScanner& scanner)
