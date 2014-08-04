@@ -259,8 +259,10 @@ namespace osmscout {
   }
 
   FeatureInstance::FeatureInstance(const FeatureRef& feature,
+                                   size_t index,
                                    size_t offset)
   : feature(feature),
+    index(index),
     offset(offset)
   {
     assert(feature.Valid());
@@ -1434,14 +1436,18 @@ namespace osmscout {
 
   FeatureValueBuffer::~FeatureValueBuffer()
   {
-    DeleteData();
+    if (type.Valid()) {
+      DeleteData();
+    }
   }
 
   void FeatureValueBuffer::SetType(const TypeInfoRef& type)
   {
     assert(type.Valid());
 
-    DeleteData();
+    if (this->type.Valid()) {
+      DeleteData();
+    }
 
     this->type=type;
 
@@ -1450,31 +1456,30 @@ namespace osmscout {
 
   void FeatureValueBuffer::DeleteData()
   {
-    if (type.Valid()) {
-      if (featureValueBuffer!=NULL) {
-        for (size_t i=0; i<type->GetFeatureCount(); i++) {
-          if (HasValue(i)) {
-            FreeValue(i);
-          }
+    assert(type.Valid());
+
+    if (featureValueBuffer!=NULL) {
+      for (size_t i=0; i<type->GetFeatureCount(); i++) {
+        if (HasValue(i)) {
+          FreeValue(i);
         }
-
-        delete [] featureValueBuffer;
       }
 
-      if (featureBits!=NULL) {
-        delete [] featureBits;
-      }
+      delete [] featureValueBuffer;
+      featureValueBuffer=NULL;
+    }
+
+    if (featureBits!=NULL) {
+      delete [] featureBits;
+      featureBits=NULL;
     }
   }
 
   void FeatureValueBuffer::AllocateData()
   {
-    featureBits=new uint8_t[type->GetFeatureBytes()];
+    assert(type.Valid());
 
-    for (size_t i=0; i<type->GetFeatureBytes(); i++) {
-      featureBits[i]=0;
-    }
-
+    featureBits=new uint8_t[type->GetFeatureBytes()]();
     featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
   }
 
@@ -1488,6 +1493,9 @@ namespace osmscout {
 
   FeatureValue* FeatureValueBuffer::GetValue(size_t idx) const
   {
+    assert(type.Valid());
+    assert(idx<type->GetFeatureCount());
+
     return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
   }
 
@@ -1530,43 +1538,43 @@ namespace osmscout {
                                  const ObjectOSMRef& object,
                                  const std::map<TagId,std::string>& tags)
   {
-    size_t featureIdx=0;
+    assert(type.Valid());
+
     for (auto feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(progress,
                                   typeConfig,
                                   object,
                                   *type,
-                                  featureIdx,
+                                  feature.GetIndex(),
                                   tags,
                                   *this);
-
-      featureIdx++;
     }
   }
 
   bool FeatureValueBuffer::Read(FileScanner& scanner)
   {
+    assert(type.Valid());
+
     for (size_t i=0; i<type->GetFeatureBytes(); i++) {
       if (!scanner.Read(featureBits[i])) {
         return false;
       }
     }
 
-    size_t idx=0;
     for (auto feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+
       if (HasValue(idx) &&
-          type->GetFeature(idx).GetFeature()->HasValue()) {
+          feature.GetFeature()->HasValue()) {
         FeatureValue* value=GetValue(idx);
 
-        type->GetFeature(idx).GetFeature()->AllocateValue(value);
+        feature.GetFeature()->AllocateValue(value);
 
         if (!feature.GetFeature()->Read(scanner,
                                         value)) {
           return false;
         }
       }
-
-      idx++;
     }
 
     return true;
@@ -1574,23 +1582,24 @@ namespace osmscout {
 
   bool FeatureValueBuffer::Write(FileWriter& writer) const
   {
+    assert(type.Valid());
+
     for (size_t i=0; i<type->GetFeatureBytes(); i++) {
       if (!writer.Write(featureBits[i])) {
         return false;
       }
     }
 
-    size_t idx=0;
     for (auto feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+
       if (HasValue(idx) &&
-          type->GetFeature(idx).GetFeature()->HasValue()) {
+          feature.GetFeature()->HasValue()) {
         if (!feature.GetFeature()->Write(writer,
                                          GetValue(idx))) {
           return false;
         }
       }
-
-      idx++;
     }
 
     return !writer.HasError();
@@ -1680,10 +1689,12 @@ namespace osmscout {
     assert(feature.Valid());
     assert(featureSet.find(feature->GetName())==featureSet.end());
 
+    size_t index=0;
     size_t offset=0;
     size_t alignment=std::max(sizeof(size_t),sizeof(void*));
 
     if (!features.empty()) {
+      index=features.back().GetIndex()+1;
       offset=features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
       if (offset%alignment!=0) {
         offset=(offset/alignment+1)*alignment;
@@ -1691,6 +1702,7 @@ namespace osmscout {
     }
 
     features.push_back(FeatureInstance(feature,
+                                       index,
                                        offset));
     featureSet.insert(feature->GetName());
 
@@ -1760,18 +1772,41 @@ namespace osmscout {
     RegisterTagForInternalUse("type");
     RegisterTagForInternalUse("restriction");
 
-    RegisterFeature(new NameFeature());
-    RegisterFeature(new NameAltFeature());
-    RegisterFeature(new RefFeature());
-    RegisterFeature(new AddressFeature());
-    RegisterFeature(new AccessFeature());
-    RegisterFeature(new LayerFeature());
-    RegisterFeature(new WidthFeature());
-    RegisterFeature(new MaxSpeedFeature());
-    RegisterFeature(new GradeFeature());
-    RegisterFeature(new BridgeFeature());
-    RegisterFeature(new TunnelFeature());
-    RegisterFeature(new RoundaboutFeature());
+    featureName=new NameFeature();
+    RegisterFeature(featureName);
+
+    featureNameAlt=new NameAltFeature();
+    RegisterFeature(featureNameAlt);
+
+    featureRef=new RefFeature();
+    RegisterFeature(featureRef);
+
+    featureAddress=new AddressFeature();
+    RegisterFeature(featureAddress);
+
+    featureAccess=new AccessFeature();
+    RegisterFeature(featureAccess);
+
+    featureLayer=new LayerFeature();
+    RegisterFeature(featureLayer);
+
+    featureWidth=new WidthFeature();
+    RegisterFeature(featureWidth);
+
+    featureMaxSpeed=new MaxSpeedFeature();
+    RegisterFeature(featureMaxSpeed);
+
+    featureGrade=new GradeFeature();
+    RegisterFeature(featureGrade);
+
+    featureBridge=new BridgeFeature();
+    RegisterFeature(featureBridge);
+
+    featureTunnel=new TunnelFeature();
+    RegisterFeature(featureTunnel);
+
+    featureRoundabout=new RoundaboutFeature();
+    RegisterFeature(featureRoundabout);
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
@@ -2184,21 +2219,20 @@ namespace osmscout {
         continue;
       }
 
-      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
-           cond!=types[i]->GetConditions().end();
-           ++cond) {
-        if (!((cond->types & TypeInfo::typeWay) || (cond->types & TypeInfo::typeArea))) {
+      for (auto cond : types[i]->GetConditions()) {
+        if (!((cond.types & TypeInfo::typeWay) ||
+              (cond.types & TypeInfo::typeArea))) {
           continue;
         }
 
-        if (cond->condition->Evaluate(tagMap)) {
+        if (cond.condition->Evaluate(tagMap)) {
           if (wayType==typeIgnore &&
-              (cond->types & TypeInfo::typeWay)) {
+              (cond.types & TypeInfo::typeWay)) {
             wayType=types[i]->GetId();
           }
 
           if (areaType==typeIgnore &&
-              (cond->types & TypeInfo::typeArea)) {
+              (cond.types & TypeInfo::typeArea)) {
             areaType=types[i]->GetId();
           }
 
@@ -2232,14 +2266,12 @@ namespace osmscout {
           continue;
         }
 
-        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
-             cond!=types[i]->GetConditions().end();
-             ++cond) {
-          if (!(cond->types & TypeInfo::typeArea)) {
+        for (auto cond : types[i]->GetConditions()) {
+          if (!(cond.types & TypeInfo::typeArea)) {
             continue;
           }
 
-          if (cond->condition->Evaluate(tagMap)) {
+          if (cond.condition->Evaluate(tagMap)) {
             typeId=types[i]->GetId();
             return true;
           }
@@ -2253,14 +2285,12 @@ namespace osmscout {
           continue;
         }
 
-        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i]->GetConditions().begin();
-             cond!=types[i]->GetConditions().end();
-             ++cond) {
-          if (!(cond->types & TypeInfo::typeRelation)) {
+        for (auto cond : types[i]->GetConditions()) {
+          if (!(cond.types & TypeInfo::typeRelation)) {
             continue;
           }
 
-          if (cond->condition->Evaluate(tagMap)) {
+          if (cond.condition->Evaluate(tagMap)) {
             typeId=types[i]->GetId();
             return true;
           }
@@ -2332,11 +2362,7 @@ namespace osmscout {
 
   void TypeConfig::GetAreaTypes(std::set<TypeId>& types) const
   {
-    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
-         t!=this->types.end();
-         t++) {
-      TypeInfoRef type(*t);
-
+    for (auto type : this->types) {
       if (type->GetId()==typeIgnore) {
         continue;
       }
@@ -2353,11 +2379,7 @@ namespace osmscout {
 
   void TypeConfig::GetWayTypes(std::set<TypeId>& types) const
   {
-    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
-         t!=this->types.end();
-         t++) {
-      TypeInfoRef type(*t);
-
+    for (auto type : this->types) {
       if (type->GetId()==typeIgnore) {
         continue;
       }
@@ -2376,11 +2398,7 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
-         t!=this->types.end();
-         ++t) {
-      TypeInfoRef type(*t);
-
+    for (auto type : this->types) {
       if (type->CanRouteFoot() ||
           type->CanRouteBicycle() ||
           type->CanRouteCar()) {
@@ -2393,11 +2411,7 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
-         t!=this->types.end();
-         ++t) {
-      TypeInfoRef type(*t);
-
+    for (auto type : this->types) {
       if (type->GetIndexAsLocation()) {
         types.insert(type->GetId());
       }
@@ -2408,11 +2422,7 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
-         t!=this->types.end();
-         ++t) {
-      TypeInfoRef type(*t);
-
+    for (auto type : this->types) {
       if (type->GetIndexAsRegion()) {
         types.insert(type->GetId());
       }
@@ -2423,11 +2433,7 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::vector<TypeInfoRef>::const_iterator t=this->types.begin();
-         t!=this->types.end();
-         ++t) {
-      TypeInfoRef type(*t);
-
+    for (auto type : this->types) {
       if (type->GetIndexAsPOI()) {
         types.insert(type->GetId());
       }
@@ -2746,53 +2752,45 @@ namespace osmscout {
      }
 
      writer.WriteNumber((uint32_t)GetTags().size());
-     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
-          tag!=GetTags().end();
-          ++tag) {
-       writer.WriteNumber(tag->GetId());
-       writer.Write(tag->GetName());
-       writer.Write(tag->IsInternalOnly());
+     for (auto tag : GetTags()) {
+       writer.WriteNumber(tag.GetId());
+       writer.Write(tag.GetName());
+       writer.Write(tag.IsInternalOnly());
      }
 
      uint32_t nameTagCount=0;
      uint32_t nameAltTagCount=0;
 
-     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
-          tag!=GetTags().end();
-          ++tag) {
+     for (auto tag : GetTags()) {
        uint32_t priority;
 
-       if (IsNameTag(tag->GetId(),priority)) {
+       if (IsNameTag(tag.GetId(),priority)) {
          nameTagCount++;
        }
 
-       if (IsNameAltTag(tag->GetId(),priority)) {
+       if (IsNameAltTag(tag.GetId(),priority)) {
          nameAltTagCount++;
        }
      }
 
      writer.WriteNumber(nameTagCount);
-     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
-      tag!=GetTags().end();
-      ++tag) {
+     for (auto tag: GetTags()) {
        uint32_t priority;
 
-       if (IsNameTag(tag->GetId(),priority)) {
-         writer.WriteNumber(tag->GetId());
-         writer.Write(tag->GetName());
+       if (IsNameTag(tag.GetId(),priority)) {
+         writer.WriteNumber(tag.GetId());
+         writer.Write(tag.GetName());
          writer.WriteNumber((uint32_t)priority);
        }
      }
 
      writer.WriteNumber(nameAltTagCount);
-     for (std::vector<TagInfo>::const_iterator tag=GetTags().begin();
-      tag!=GetTags().end();
-      ++tag) {
+     for (auto tag : GetTags()) {
        uint32_t priority;
 
-       if (IsNameAltTag(tag->GetId(),priority)) {
-         writer.WriteNumber(tag->GetId());
-         writer.Write(tag->GetName());
+       if (IsNameAltTag(tag.GetId(),priority)) {
+         writer.WriteNumber(tag.GetId());
+         writer.Write(tag.GetName());
          writer.WriteNumber((uint32_t)priority);
        }
      }

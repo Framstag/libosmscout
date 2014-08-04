@@ -137,7 +137,8 @@ namespace osmscout {
               areas[i].size()>parameter.GetRawWayBlockSize()) {
             progress.Warning("Too many objects for type "+
                              typeConfig.GetTypeInfo(i)->GetName()+
-                             ", mark it for low memory fall back");
+                             " ("+NumberToString(areas[i].size())+
+                             "), mark it for low memory fall back");
 
             collectedWaysCount-=areas[i].size();
             areas[i].clear();

@@ -290,15 +290,22 @@ namespace osmscout {
   {
   private:
     FeatureRef feature;
+    size_t     index;
     size_t     offset;
 
   public:
     FeatureInstance(const FeatureRef& feature,
+                    size_t index,
                     size_t offset);
 
     inline FeatureRef GetFeature() const
     {
       return feature;
+    }
+
+    inline size_t GetIndex() const
+    {
+      return index;
     }
 
     inline size_t GetOffset() const
@@ -1595,6 +1602,19 @@ namespace osmscout {
 
   public:
     TypeInfoRef                               typeInfoIgnore;
+
+    FeatureRef                                featureName;
+    FeatureRef                                featureNameAlt;
+    FeatureRef                                featureRef;
+    FeatureRef                                featureAddress;
+    FeatureRef                                featureAccess;
+    FeatureRef                                featureLayer;
+    FeatureRef                                featureWidth;
+    FeatureRef                                featureMaxSpeed;
+    FeatureRef                                featureGrade;
+    FeatureRef                                featureBridge;
+    FeatureRef                                featureTunnel;
+    FeatureRef                                featureRoundabout;
 
     TypeId                                    typeTileLand;
     TypeId                                    typeTileSea;
