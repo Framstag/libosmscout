@@ -1734,7 +1734,6 @@ namespace osmscout {
     TagId                                     tagTracktype;
 
     TagId                                     tagAdminLevel;
-
     TagId                                     tagAccess;
     TagId                                     tagAccessForward;
     TagId                                     tagAccessBackward;

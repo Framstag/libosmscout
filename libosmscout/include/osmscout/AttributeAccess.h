@@ -194,12 +194,6 @@ namespace osmscout {
       return access & onewayBackward;
     }
 
-    void Parse(Progress& progress,
-               const TypeConfig& typeConfig,
-               TypeId type,
-               Id id,
-               std::vector<Tag>& tags);
-
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
 
