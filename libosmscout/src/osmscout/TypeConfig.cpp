@@ -1920,47 +1920,15 @@ namespace osmscout {
 
   TypeConfig::TypeConfig()
    : nextTagId(0),
-     nextTypeId(0),
-     typeInfoIgnore(new TypeInfo())
+     nextTypeId(0)
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
     RegisterTagForInternalUse("");
 
     RegisterTagForExternalUse("name");
-    RegisterTagForExternalUse("ref");
-    RegisterTagForExternalUse("bridge");
-    RegisterTagForExternalUse("tunnel");
-    RegisterTagForExternalUse("layer");
-    RegisterTagForExternalUse("width");
-    RegisterTagForExternalUse("oneway");
-    RegisterTagForExternalUse("addr:housenumber");
     RegisterTagForExternalUse("addr:street");
-    RegisterTagForExternalUse("junction");
-    RegisterTagForExternalUse("maxspeed");
-    RegisterTagForExternalUse("surface");
-    RegisterTagForExternalUse("tracktype");
     RegisterTagForExternalUse("admin_level");
-
-    RegisterTagForExternalUse("access");
-    RegisterTagForExternalUse("access:foward");
-    RegisterTagForExternalUse("access:backward");
-
-    RegisterTagForExternalUse("access:foot");
-    RegisterTagForExternalUse("access:foot:foward");
-    RegisterTagForExternalUse("access:foot:backward");
-
-    RegisterTagForExternalUse("access:bicycle");
-    RegisterTagForExternalUse("access:bicycle:foward");
-    RegisterTagForExternalUse("access:bicycle:backward");
-
-    RegisterTagForExternalUse("access:motor_vehicle");
-    RegisterTagForExternalUse("access:motor_vehicle:foward");
-    RegisterTagForExternalUse("access:motor_vehicle:backward");
-
-    RegisterTagForExternalUse("access:motorcar");
-    RegisterTagForExternalUse("access:motorcar:foward");
-    RegisterTagForExternalUse("access:motorcar:backward");
 
     RegisterTagForInternalUse("area");
     RegisterTagForInternalUse("natural");
@@ -2008,6 +1976,7 @@ namespace osmscout {
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
+    typeInfoIgnore=new TypeInfo();
     typeInfoIgnore->SetType("");
 
     AddTypeInfo(typeInfoIgnore);
@@ -2062,80 +2031,16 @@ namespace osmscout {
     typeTileUnknown=GetTypeId("_tile_unknown");
     typeTileCoastline=GetTypeId("_tile_coastline");
 
-    tagRef=GetTagId("ref");
-    tagBridge=GetTagId("bridge");
-    tagTunnel=GetTagId("tunnel");
-    tagLayer=GetTagId("layer");
-    tagWidth=GetTagId("width");
-    tagOneway=GetTagId("oneway");
-    tagHouseNr=GetTagId("addr:housenumber");
-    tagJunction=GetTagId("junction");
-    tagMaxSpeed=GetTagId("maxspeed");
-    tagSurface=GetTagId("surface");
-    tagTracktype=GetTagId("tracktype");
     tagAdminLevel=GetTagId("admin_level");
-
-    tagAccess=GetTagId("access");
-    tagAccessForward=GetTagId("access:foward");
-    tagAccessBackward=GetTagId("access:backward");
-
-    tagAccessFoot=GetTagId("access:foot");
-    tagAccessFootForward=GetTagId("access:foot:foward");
-    tagAccessFootBackward=GetTagId("access:foot:backward");
-
-    tagAccessBicycle=GetTagId("access:bicycle");
-    tagAccessBicycleForward=GetTagId("access:bicycle:foward");
-    tagAccessBicycleBackward=GetTagId("access:bicycle:backward");
-
-    tagAccessMotorVehicle=GetTagId("access:motor_vehicle");
-    tagAccessMotorVehicleForward=GetTagId("access:motor_vehicle:foward");
-    tagAccessMotorVehicleBackward=GetTagId("access:motor_vehicle:backward");
-
-    tagAccessMotorcar=GetTagId("access:motorcar");
-    tagAccessMotorcarForward=GetTagId("access:motorcar:foward");
-    tagAccessMotorcarBackward=GetTagId("access:motorcar:backward");
-
     tagAddrStreet=GetTagId("addr:street");
+
+    assert(tagAdminLevel!=tagIgnore);
+    assert(tagAddrStreet!=tagIgnore);
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
     tagType=GetTagId("type");
     tagRestriction=GetTagId("restriction");
-
-    assert(tagRef!=tagIgnore);
-    assert(tagBridge!=tagIgnore);
-    assert(tagTunnel!=tagIgnore);
-    assert(tagLayer!=tagIgnore);
-    assert(tagWidth!=tagIgnore);
-    assert(tagOneway!=tagIgnore);
-    assert(tagHouseNr!=tagIgnore);
-    assert(tagJunction!=tagIgnore);
-    assert(tagMaxSpeed!=tagIgnore);
-    assert(tagSurface!=tagIgnore);
-    assert(tagTracktype!=tagIgnore);
-    assert(tagAdminLevel!=tagIgnore);
-
-    assert(tagAccess!=tagIgnore);
-    assert(tagAccessForward!=tagIgnore);
-    assert(tagAccessBackward!=tagIgnore);
-
-    assert(tagAccessFoot!=tagIgnore);
-    assert(tagAccessFootForward!=tagIgnore);
-    assert(tagAccessFootBackward!=tagIgnore);
-
-    assert(tagAccessBicycle!=tagIgnore);
-    assert(tagAccessBicycleForward!=tagIgnore);
-    assert(tagAccessBicycleBackward!=tagIgnore);
-
-    assert(tagAccessMotorVehicle!=tagIgnore);
-    assert(tagAccessMotorVehicleForward!=tagIgnore);
-    assert(tagAccessMotorVehicleBackward!=tagIgnore);
-
-    assert(tagAccessMotorcar!=tagIgnore);
-    assert(tagAccessMotorcarForward!=tagIgnore);
-    assert(tagAccessMotorcarBackward!=tagIgnore);
-
-    assert(tagAddrStreet!=tagIgnore);
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);

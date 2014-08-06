@@ -86,7 +86,7 @@ namespace osmscout {
 
     if (tmpType>typeConfig.GetMaxTypeId()) {
       isArea=true;
-      tmpType=tmpType-typeConfig.GetMaxTypeId();
+      tmpType=tmpType-typeConfig.GetMaxTypeId()-1;
     }
     else {
       isArea=false;
@@ -135,8 +135,9 @@ namespace osmscout {
     writer.WriteNumber(id);
 
     if (isArea) {
-      writer.WriteNumber((TypeId)(typeConfig.GetMaxTypeId()+
-                                 featureValueBuffer.GetTypeId()));
+      TypeId type=typeConfig.GetMaxTypeId()+1+
+                  featureValueBuffer.GetTypeId();
+      writer.WriteNumber(type);
     }
     else {
       writer.WriteNumber(featureValueBuffer.GetTypeId());

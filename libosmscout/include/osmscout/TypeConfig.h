@@ -1721,39 +1721,7 @@ namespace osmscout {
     TypeId                                    typeTileCoastline;
 
     // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                     tagRef;
-    TagId                                     tagBridge;
-    TagId                                     tagTunnel;
-    TagId                                     tagLayer;
-    TagId                                     tagWidth;
-    TagId                                     tagOneway;
-    TagId                                     tagHouseNr;
-    TagId                                     tagJunction;
-    TagId                                     tagMaxSpeed;
-    TagId                                     tagSurface;
-    TagId                                     tagTracktype;
-
     TagId                                     tagAdminLevel;
-    TagId                                     tagAccess;
-    TagId                                     tagAccessForward;
-    TagId                                     tagAccessBackward;
-
-    TagId                                     tagAccessFoot;
-    TagId                                     tagAccessFootForward;
-    TagId                                     tagAccessFootBackward;
-
-    TagId                                     tagAccessBicycle;
-    TagId                                     tagAccessBicycleForward;
-    TagId                                     tagAccessBicycleBackward;
-
-    TagId                                     tagAccessMotorVehicle;
-    TagId                                     tagAccessMotorVehicleForward;
-    TagId                                     tagAccessMotorVehicleBackward;
-
-    TagId                                     tagAccessMotorcar;
-    TagId                                     tagAccessMotorcarForward;
-    TagId                                     tagAccessMotorcarBackward;
-
     TagId                                     tagAddrStreet;
 
     // Internal use (only available during preprocessing)
