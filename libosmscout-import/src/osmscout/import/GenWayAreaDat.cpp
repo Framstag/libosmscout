@@ -98,7 +98,8 @@ namespace osmscout {
 
       progress.SetProgress(w,wayCount);
 
-      if (!way->Read(scanner)) {
+      if (!way->Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
             NumberToString(w)+" of "+
             NumberToString(wayCount)+
@@ -111,7 +112,7 @@ namespace osmscout {
         continue;
       }
 
-      if (currentTypes.find(way->GetType())==currentTypes.end()) {
+      if (currentTypes.find(way->GetTypeId())==currentTypes.end()) {
         continue;
       }
 
@@ -123,11 +124,11 @@ namespace osmscout {
         continue;
       }
 
-      if (areas[way->GetType()].empty()) {
+      if (areas[way->GetTypeId()].empty()) {
         typesWithWays++;
       }
 
-      areas[way->GetType()].push_back(way);
+      areas[way->GetTypeId()].push_back(way);
 
       collectedWaysCount++;
 
@@ -197,18 +198,14 @@ namespace osmscout {
                                        const CoordDataFile::CoordResultMap& coordsMap,
                                        const RawWay& rawWay)
   {
-    std::vector<Tag> tags(rawWay.GetTags());
-    Area             area;
-    OSMId            wayId=rawWay.GetId();
-    Area::Ring       ring;
+    Area       area;
+    OSMId      wayId=rawWay.GetId();
+    Area::Ring ring;
 
-    if (!ring.attributes.SetTags(progress,
-                                 typeConfig,
-                                 tags)) {
-      return true;
-    }
+    ring.attributes.SetFeatures(typeConfig,
+                                rawWay.GetFeatureValueBuffer());
 
-    ring.SetType(rawWay.GetType());
+    ring.SetType(rawWay.GetTypeId());
     ring.ring=Area::outerRingId;
     ring.ids.resize(rawWay.GetNodeCount());
     ring.nodes.resize(rawWay.GetNodeCount());
@@ -284,7 +281,8 @@ namespace osmscout {
 
       progress.SetProgress(w,wayCount);
 
-      if (!way->Read(scanner)) {
+      if (!way->Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
             NumberToString(w)+" of "+
             NumberToString(wayCount)+
@@ -297,7 +295,7 @@ namespace osmscout {
         continue;
       }
 
-      if (types.find(way->GetType())==types.end()) {
+      if (types.find(way->GetTypeId())==types.end()) {
         continue;
       }
 
@@ -341,9 +339,9 @@ namespace osmscout {
     return true;
   }
 
-  bool WayAreaDataGenerator::Import(const ImportParameter& parameter,
-                                    Progress& progress,
-                                    const TypeConfig& typeConfig)
+  bool WayAreaDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                    const ImportParameter& parameter,
+                                    Progress& progress)
   {
     progress.SetAction("Generate wayarea.tmp");
 
@@ -359,7 +357,7 @@ namespace osmscout {
 
     uint32_t         writtenWayCount=0;
 
-    typeConfig.GetAreaTypes(areaTypes);
+    typeConfig->GetAreaTypes(areaTypes);
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing
@@ -404,7 +402,7 @@ namespace osmscout {
 
     size_t iteration=1;
     while (!areaTypes.empty()) {
-      std::vector<std::list<RawWayRef> > areasByType(typeConfig.GetTypes().size());
+      std::vector<std::list<RawWayRef> > areasByType(typeConfig->GetTypes().size());
 
       //
       // Load type data

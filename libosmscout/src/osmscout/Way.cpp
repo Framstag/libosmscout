@@ -33,16 +33,9 @@ namespace osmscout {
     this->type=type;
   }
 
-  bool WayAttributes::SetTags(Progress& progress,
-                              const TypeConfig& typeConfig,
-                              Id id,
-                              std::vector<Tag>& tags)
+  void WayAttributes::SetFeatures(const TypeConfig& typeConfig,
+                                  const FeatureValueBuffer& buffer)
   {
-    uint32_t namePriority=0;
-    uint32_t nameAltPriority=0;
-    bool     hasGrade=false;
-
-
     flags=0;
     name.clear();
     nameAlt.clear();
@@ -51,253 +44,70 @@ namespace osmscout {
     width=0;
     maxSpeed=0;
     grade=1;
+    access.SetAccess(buffer.GetType()->GetDefaultAccess());
 
-    this->tags.clear();
+    for (size_t i=0; i<buffer.GetFeatureCount(); i++) {
+      if (buffer.HasValue(i)) {
 
-    flags|=hasAccess;
+        if (buffer.GetFeature(i).GetFeature()==typeConfig.featureName &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(buffer.GetValue(i));
 
-    std::vector<Tag>::iterator tag=tags.begin();
-    while (tag!=tags.end()) {
-      uint32_t ntPrio;
-      bool     isNameTag=typeConfig.IsNameTag(tag->key,ntPrio);
-      uint32_t natPrio;
-      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->key,natPrio);
-
-      if (isNameTag &&
-          (name.empty() || ntPrio>namePriority)) {
-        name=tag->value;
-        namePriority=ntPrio;
-
-        /*
-        size_t i=0;
-        while (postfixes[i]!=NULL) {
-          size_t pos=name.rfind(postfixes[i]);
-          if (pos!=std::string::npos &&
-              pos==name.length()-strlen(postfixes[i])) {
-            name=name.substr(0,pos);
-            break;
-          }
-
-          i++;
-        }*/
-      }
-
-      if (isNameAltTag &&
-          (nameAlt.empty() || natPrio>nameAltPriority)) {
-        nameAlt=tag->value;
-        nameAltPriority=natPrio;
-      }
-
-      if (isNameTag || isNameAltTag) {
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagRef) {
-        ref=tag->value;
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagHouseNr) {
-        // Way do not have an address
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagLayer) {
-        if (!StringToNumber(tag->value,layer)) {
-          progress.Warning(std::string("Layer tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
+          name=value->GetName();
         }
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagMaxSpeed) {
-        std::string valueString=tag->value;
-        size_t      value;
-        bool        isMph=false;
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureNameAlt &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(buffer.GetValue(i));
 
-        if (valueString=="signals") {
-          tag=tags.erase(tag);
-          continue;
+          nameAlt=value->GetNameAlt();
         }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureRef &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          RefFeatureValue* value=dynamic_cast<RefFeatureValue*>(buffer.GetValue(i));
 
-        if (valueString=="none") {
-          tag=tags.erase(tag);
-          continue;
+          ref=value->GetRef();
         }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureLayer &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          LayerFeatureValue* value=dynamic_cast<LayerFeatureValue*>(buffer.GetValue(i));
 
-        // "walk" should not be used, but we provide an estimation anyway,
-        // since it is likely still better than the default
-        if (valueString=="walk") {
-          maxSpeed=10;
+          layer=value->GetLayer();
+        }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureWidth &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          WidthFeatureValue* value=dynamic_cast<WidthFeatureValue*>(buffer.GetValue(i));
 
-          tag=tags.erase(tag);
-          continue;
+          width=value->GetWidth();
         }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureMaxSpeed &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.GetValue(i));
 
-        size_t pos;
+          maxSpeed=value->GetMaxSpeed();
+        }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureGrade &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(i));
 
-        pos=valueString.rfind("mph");
-        if (pos!=std::string::npos) {
-          valueString.erase(pos);
-          isMph=true;
+          grade=value->GetGrade();
         }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAccess &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(buffer.GetValue(i));
 
-        while (valueString.length()>0 && valueString[valueString.length()-1]==' ') {
-          valueString.erase(valueString.length()-1);
+          access.SetAccess(value->GetAccess());
         }
-
-        if (StringToNumber(valueString,value)) {
-          if (isMph) {
-            if (value>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
-              maxSpeed=std::numeric_limits<uint8_t>::max();
-            }
-            else {
-              maxSpeed=(uint8_t)(value*1.609+0.5);
-            }
-          }
-          else {
-            if (value>std::numeric_limits<uint8_t>::max()) {
-              maxSpeed=std::numeric_limits<uint8_t>::max();
-            }
-            else {
-              maxSpeed=value;
-            }
-          }
-        }
-        else {
-          progress.Warning(std::string("Max speed tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
-        }
-
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagSurface) {
-        if (!hasGrade) {
-          size_t grade;
-
-          if (typeConfig.GetGradeForSurface(tag->value,
-                                            grade)) {
-            this->grade=(uint8_t)grade;
-          }
-          else {
-            progress.Warning(std::string("Unknown surface type '")+tag->value+"' for "+NumberToString(id)+"!");
-          }
-        }
-
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagTracktype) {
-        if (tag->value=="grade1") {
-          grade=1;
-          hasGrade=true;
-        }
-        else if (tag->value=="grade2") {
-          grade=2;
-          hasGrade=true;
-        }
-        else if (tag->value=="grade3") {
-          grade=3;
-          hasGrade=true;
-        }
-        else if (tag->value=="grade4") {
-          grade=4;
-          hasGrade=true;
-        }
-        else if (tag->value=="grade5") {
-          grade=5;
-          hasGrade=true;
-        }
-
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagBridge) {
-        if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureBridge) {
           flags|=isBridge;
         }
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagTunnel) {
-        if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureTunnel) {
           flags|=isTunnel;
         }
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagAccess) {
-        if (tag->value=="no" ||
-            tag->value=="private" ||
-            tag->value=="destination" ||
-            tag->value=="delivery") {
-          flags&=~hasAccess;
-        }
-
-        ++tag;
-        // We do not remove this tag here, because it is relevant for access
-        // calculation
-      }
-      else if (tag->key==typeConfig.tagJunction) {
-        if (tag->value=="roundabout") {
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureRoundabout) {
           flags|=isRoundabout;
-          // If it is a roundabout is cannot be a area
         }
-
-        ++tag;
-        // We do not remove this tag here, because it is relevant for access
-        // calculation
-      }
-      else if (tag->key==typeConfig.tagWidth) {
-        double w;
-        size_t pos=0;
-        size_t count=0;
-
-        // We expect that float values use '.' as separator, but many values use ',' instead.
-        // Try try fix this if string looks reasonable
-        for (size_t i=0; i<tag->value.length() && count<=1; i++) {
-          if (tag->value[i]==',') {
-            pos=i;
-            count++;
-          }
-        }
-
-        if (count==1) {
-          tag->value[pos]='.';
-        }
-
-        // Some width tagvalues add an 'm' to hint that the unit is meter, remove it.
-        if (tag->value.length()>=2) {
-          if (tag->value[tag->value.length()-1]=='m' &&
-              ((tag->value[tag->value.length()-2]>='0' &&
-                tag->value[tag->value.length()-2]<='9') ||
-                tag->value[tag->value.length()-2]<=' ')) {
-            tag->value.erase(tag->value.length()-1);
-          }
-
-          // Trim possible trailing spaces
-          while (tag->value.length()>0 &&
-                 tag->value[tag->value.length()-1]==' ') {
-            tag->value.erase(tag->value.length()-1);
-          }
-        }
-
-        if (!StringToNumber(tag->value,w)) {
-          progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" is no double!");
-        }
-        else if (w<0 && w>255.5) {
-          progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" value is too small or too big!");
-        }
-        else {
-          width=(uint8_t)floor(w+0.5);
-        }
-
-        tag=tags.erase(tag);
-      }
-      else {
-        ++tag;
       }
     }
-
-    access.Parse(progress,
-                 typeConfig,
-                 type,
-                 id,
-                 tags);
-
-    this->tags=tags;
-
-    return true;
   }
 
   void WayAttributes::SetLayer(int8_t layer)
@@ -488,8 +298,8 @@ namespace osmscout {
       return false;
     }
 
-    if ((flags & (hasAccess | isBridge | isTunnel | isRoundabout))!=
-        (other.flags & (hasAccess | isBridge | isTunnel | isRoundabout))) {
+    if ((flags & (isBridge | isTunnel | isRoundabout))!=
+        (other.flags & (isBridge | isTunnel | isRoundabout))) {
       return false;
     }
 
@@ -559,15 +369,11 @@ namespace osmscout {
     attributes.SetType(type);
   }
 
-  bool Way::SetTags(Progress& progress,
-                    const TypeConfig& typeConfig,
-                    Id id,
-                    std::vector<Tag>& tags)
+  void Way::SetFeatures(const TypeConfig& typeConfig,
+                        const FeatureValueBuffer& buffer)
   {
-    return attributes.SetTags(progress,
-                              typeConfig,
-                              id,
-                              tags);
+    attributes.SetFeatures(typeConfig,
+                           buffer);
   }
 
   void Way::SetLayerToMax()

@@ -64,9 +64,9 @@ namespace osmscout {
                     NodeUseMap& nodeUseMap);
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

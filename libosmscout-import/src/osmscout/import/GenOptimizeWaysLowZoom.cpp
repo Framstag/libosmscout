@@ -834,9 +834,9 @@ namespace osmscout
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool OptimizeWaysLowZoomGenerator::Import(const ImportParameter& parameter,
-                                            Progress& progress,
-                                            const TypeConfig& typeConfig)
+  bool OptimizeWaysLowZoomGenerator::Import(const TypeConfigRef& typeConfig,
+                                            const ImportParameter& parameter,
+                                            Progress& progress)
   {
     FileOffset           indexOffset=0;
     FileWriter           writer;
@@ -844,7 +844,8 @@ namespace osmscout
     std::set<TypeId>     wayTypes;         // Types we optimize
     std::list<TypeData>  wayTypesData;
 
-    GetWayTypesToOptimize(typeConfig,wayTypes);
+    GetWayTypesToOptimize(typeConfig,
+                          wayTypes);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      FILE_WAYSOPT_DAT))) {

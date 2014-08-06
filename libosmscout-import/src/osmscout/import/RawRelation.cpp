@@ -28,34 +28,42 @@ namespace osmscout {
     this->id=id;
   }
 
-  void RawRelation::SetType(TypeId type)
+  void RawRelation::SetType(const TypeInfoRef& type)
   {
-    this->type=type;
+    featureValueBuffer.SetType(type);
   }
 
-  bool RawRelation::Read(FileScanner& scanner)
+  void RawRelation::Parse(Progress& progress,
+                          const TypeConfig& typeConfig,
+                          const std::map<TagId,std::string>& tags)
   {
-    uint32_t tagCount;
+    ObjectOSMRef object(id,
+                        osmRefRelation);
+
+    featureValueBuffer.Parse(progress,
+                             typeConfig,
+                             object,
+                             tags);
+  }
+
+  bool RawRelation::Read(const TypeConfig& typeConfig,
+                         FileScanner& scanner)
+  {
     uint32_t memberCount;
 
     scanner.ReadNumber(id);
-    scanner.ReadNumber(type);
 
-    scanner.ReadNumber(tagCount);
+    uint32_t tmpType;
 
-    if (scanner.HasError()) {
+    if (!scanner.ReadNumber(tmpType)) {
       return false;
     }
 
-    tags.resize(tagCount);
-    for (size_t i=0; i<tagCount; i++) {
-      scanner.ReadNumber(tags[i].key);
-      scanner.Read(tags[i].value);
-    }
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
 
-    scanner.ReadNumber(memberCount);
+    featureValueBuffer.SetType(type);
 
-    if (scanner.HasError()) {
+    if (!scanner.ReadNumber(memberCount)) {
       return false;
     }
 
@@ -82,38 +90,40 @@ namespace osmscout {
       }
     }
 
+    if (!featureValueBuffer.Read(scanner)) {
+      return false;
+    }
+
     return !scanner.HasError();
   }
 
-  bool RawRelation::Write(FileWriter& writer) const
+  bool RawRelation::Write(const TypeConfig& /*typeConfig*/,
+                          FileWriter& writer) const
   {
     writer.WriteNumber(id);
-    writer.WriteNumber(type);
 
-    writer.WriteNumber((uint32_t)tags.size());
-    for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
-      writer.Write(tags[i].value);
-    }
+    writer.WriteNumber(featureValueBuffer.GetTypeId());
 
     writer.WriteNumber((uint32_t)members.size());
 
     assert(!members.empty());
 
-    if (!members.empty()) {
-      OSMId minId=members[0].id;
+    OSMId minId=members[0].id;
 
-      for (size_t i=1; i<members.size(); i++) {
-        minId=std::min(minId,members[i].id);
-      }
+    for (size_t i=1; i<members.size(); i++) {
+      minId=std::min(minId,members[i].id);
+    }
 
-      writer.WriteNumber(minId);
+    writer.WriteNumber(minId);
 
-      for (size_t i=0; i<members.size(); i++) {
-        writer.WriteNumber((uint32_t)members[i].type);
-        writer.WriteNumber(members[i].id-minId);
-        writer.Write(members[i].role);
-      }
+    for (size_t i=0; i<members.size(); i++) {
+      writer.WriteNumber((uint32_t)members[i].type);
+      writer.WriteNumber(members[i].id-minId);
+      writer.Write(members[i].role);
+    }
+
+    if (!featureValueBuffer.Write(writer)) {
+      return false;
     }
 
     return !writer.HasError();

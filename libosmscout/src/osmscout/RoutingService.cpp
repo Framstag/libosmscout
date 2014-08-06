@@ -153,7 +153,8 @@ namespace osmscout {
 
     assert(!path.empty());
 
-    if (!routeNodeDataFile.Open(path,
+    if (!routeNodeDataFile.Open(database->GetTypeConfig(),
+                                path,
                                 FileScanner::FastRandom,true,
                                 FileScanner::FastRandom,true)) {
       std::cerr << "Cannot open 'route.dat'!" << std::endl;
@@ -646,7 +647,8 @@ namespace osmscout {
       }
     }
 
-    if (!junctionDataFile.Open(path,
+    if (!junctionDataFile.Open(database->GetTypeConfig(),
+                               path,
                                FileScanner::FastRandom,
                                false,
                                FileScanner::FastRandom,

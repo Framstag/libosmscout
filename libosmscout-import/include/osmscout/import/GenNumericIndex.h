@@ -54,9 +54,9 @@ namespace osmscout {
     virtual ~NumericIndexBaseGenerator();
 
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 
   template <class N,class T>
@@ -83,9 +83,9 @@ namespace osmscout {
   }
 
   template <class N,class T>
-  bool NumericIndexBaseGenerator<N,T>::Import(const ImportParameter& parameter,
-                                              Progress& progress,
-                                              const TypeConfig& typeConfig)
+  bool NumericIndexBaseGenerator<N,T>::Import(const TypeConfigRef& typeConfig,
+                                              const ImportParameter& parameter,
+                                              Progress& progress)
   {
     FileScanner             scanner;
     FileWriter              writer;

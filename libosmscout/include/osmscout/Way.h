@@ -47,10 +47,9 @@ namespace osmscout {
     static const uint16_t hasGrade        = 1 << 14; //! We have grade information
     static const uint16_t hasTags         = 1 << 15; //! We have additional tags
 
-    static const uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
-    static const uint16_t isBridge        = 1 <<  1; //! We are a bridge
-    static const uint16_t isTunnel        = 1 <<  2; //! We are a tunnel
-    static const uint16_t isRoundabout    = 1 <<  4; //! We are a roundabout
+    static const uint16_t isBridge        = 1 <<  0; //! We are a bridge
+    static const uint16_t isTunnel        = 1 <<  1; //! We are a tunnel
+    static const uint16_t isRoundabout    = 1 <<  2; //! We are a roundabout
 
   private:
     TypeId           type;     //! type of the way/relation
@@ -142,11 +141,6 @@ namespace osmscout {
       return (flags & isRoundabout)!=0;
     }
 
-    inline bool HasAccess() const
-    {
-      return (flags & hasAccess)!=0;
-    }
-
     inline bool HasTags() const
     {
       return !tags.empty();
@@ -164,10 +158,8 @@ namespace osmscout {
 
     void SetType(TypeId type);
 
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 Id id,
-                 std::vector<Tag>& tags);
+    void SetFeatures(const TypeConfig& typeConfig,
+                     const FeatureValueBuffer& buffer);
 
     void SetLayer(int8_t layer);
 
@@ -260,11 +252,6 @@ namespace osmscout {
       return attributes.IsRoundabout();
     }
 
-    inline bool HasAccess() const
-    {
-      return attributes.HasAccess();
-    }
-
     inline bool HasTags() const
     {
       return !attributes.GetTags().empty();
@@ -314,10 +301,8 @@ namespace osmscout {
 
     void SetType(TypeId type);
 
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 Id id,
-                 std::vector<Tag>& tags);
+    void SetFeatures(const TypeConfig& typeConfig,
+                     const FeatureValueBuffer& buffer);
 
     void SetLayerToMax();
 

@@ -38,7 +38,8 @@ namespace osmscout {
   {
     uint8_t flags=0;
 
-    if (way.HasAccess()) {
+    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
+    if (way.GetAttributes().GetAccess().CanRouteForward()) {
       flags|=RouteNode::hasAccess;
     }
 
@@ -61,7 +62,8 @@ namespace osmscout {
   {
     uint8_t flags=0;
 
-    if (way.HasAccess()) {
+    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
+    if (way.GetAttributes().GetAccess().CanRouteBackward()) {
       flags|=RouteNode::hasAccess;
     }
 
@@ -1711,9 +1713,9 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::Import(const ImportParameter& parameter,
-                                  Progress& progress,
-                                  const TypeConfig& typeConfig)
+  bool RouteDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                  const ImportParameter& parameter,
+                                  Progress& progress)
   {
     // List of restrictions for a way
     ViaTurnRestrictionMap restrictions;

@@ -244,7 +244,8 @@ namespace osmscout {
     }
 
     if (!nodeDataFile->IsOpen()) {
-      if (!nodeDataFile->Open(path,
+      if (!nodeDataFile->Open(typeConfig,
+                              path,
                               FileScanner::LowMemRandom,
                               true)) {
         std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
@@ -267,7 +268,8 @@ namespace osmscout {
     }
 
     if (!areaDataFile->IsOpen()) {
-      if (!areaDataFile->Open(path,
+      if (!areaDataFile->Open(typeConfig,
+                              path,
                               FileScanner::LowMemRandom,
                               true)) {
         std::cerr << "Cannot open 'areas.dat'!" << std::endl;
@@ -290,7 +292,8 @@ namespace osmscout {
     }
 
     if (!wayDataFile->IsOpen()) {
-      if (!wayDataFile->Open(path,
+      if (!wayDataFile->Open(typeConfig,
+                             path,
                              FileScanner::LowMemRandom,
                              true)) {
         std::cerr << "Cannot open 'ways.dat'!" << std::endl;

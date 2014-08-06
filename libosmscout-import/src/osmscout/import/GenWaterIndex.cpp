@@ -1634,9 +1634,9 @@ namespace osmscout {
     return "Generate 'water.idx'";
   }
 
-  bool WaterIndexGenerator::Import(const ImportParameter& parameter,
-                                   Progress& progress,
-                                   const TypeConfig& typeConfig)
+  bool WaterIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                   const ImportParameter& parameter,
+                                   Progress& progress)
   {
     std::list<CoastRef> coastlines;
 

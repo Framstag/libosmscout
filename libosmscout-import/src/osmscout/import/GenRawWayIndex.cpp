@@ -1,6 +1,6 @@
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2011  Tim Teulings
+  Copyright (C) 2014  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,31 +17,26 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/GenTypeDat.h>
-
-#include <osmscout/util/String.h>
+#include <osmscout/import/GenRawWayIndex.h>
 
 namespace osmscout {
 
-  std::string TypeDataGenerator::GetDescription() const
+  bool RawWayIndexGenerator::ReadData(const TypeConfig& typeConfig,
+                                      FileScanner& scanner,
+                                      RawWay& data) const
   {
-    return "Generate 'types.dat'";
+    return data.Read(typeConfig,
+                     scanner);
   }
 
-  bool TypeDataGenerator::Import(const TypeConfigRef& typeConfig,
-                                 const ImportParameter& parameter,
-                                 Progress& progress)
+  RawWayIndexGenerator::RawWayIndexGenerator(const std::string& datafile,
+                                             const std::string& indexfile)
+   : NumericIndexBaseGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
+                                             datafile,
+                                             indexfile)
   {
-    progress.SetAction("Generate types.dat");
-
-    progress.Info("Number of types: "+NumberToString(typeConfig->GetMaxTypeId()));
-
-    if (!typeConfig->StoreToDataFile(parameter.GetDestinationDirectory())) {
-      progress.Error("Cannot create 'types.dat'");
-      return false;
-    }
-
-    return true;
+    // no code
   }
+
 }
 

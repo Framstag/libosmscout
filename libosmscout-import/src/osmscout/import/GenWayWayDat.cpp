@@ -136,6 +136,7 @@ namespace osmscout {
 
   bool WayWayDataGenerator::GetWays(const ImportParameter& parameter,
                                      Progress& progress,
+                                     const TypeConfig& typeConfig,
                                      std::set<TypeId>& types,
                                      FileScanner& scanner,
                                      std::vector<std::list<RawWayRef> >& ways)
@@ -160,7 +161,8 @@ namespace osmscout {
 
       progress.SetProgress(w,wayCount);
 
-      if (!way->Read(scanner)) {
+      if (!way->Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
             NumberToString(w)+" of "+
             NumberToString(wayCount)+
@@ -173,15 +175,15 @@ namespace osmscout {
         continue;
       }
 
-      if (currentTypes.find(way->GetType())==currentTypes.end()) {
+      if (currentTypes.find(way->GetTypeId())==currentTypes.end()) {
         continue;
       }
 
-      if (ways[way->GetType()].empty()) {
+      if (ways[way->GetTypeId()].empty()) {
         typesWithWays++;
       }
 
-      ways[way->GetType()].push_back(way);
+      ways[way->GetTypeId()].push_back(way);
 
       collectedWaysCount++;
 
@@ -274,7 +276,6 @@ namespace osmscout {
   }
 
   bool WayWayDataGenerator::MergeWays(Progress& progress,
-                                      const TypeConfig& typeConfig,
                                       std::list<RawWayRef>& ways,
                                       std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
@@ -319,21 +320,10 @@ namespace osmscout {
         continue;
       }
 
-      WayAttributes    origAttributes;
-      std::vector<Tag> origTags(way->GetTags());
-
-      origAttributes.SetType(way->GetType());
-      if (!origAttributes.SetTags(silentProgress,
-                                  typeConfig,
-                                  way->GetId(),
-                                  origTags)) {
-        continue;
-      }
-
       // If we are a oneway that could be merged with more than
       // one alternative, we skip since we cannot be sure
       // that the merge is correct
-      if (origAttributes.GetAccess().IsOneway() &&
+      if (way->IsOneway() &&
           lastNodeCandidate->second.size()>2) {
         continue;
       }
@@ -351,19 +341,8 @@ namespace osmscout {
             continue;
           }
 
-          WayAttributes     candidateAttributes;
-          std::vector<Tag>  candidateTags(candidate->GetTags());
-
-          candidateAttributes.SetType(candidate->GetType());
-          if (!candidateAttributes.SetTags(silentProgress,
-                                           typeConfig,
-                                           candidate->GetId(),
-                                           candidateTags)) {
-            continue;
-          }
-
           //Attributes do not match => No candidate
-          if (origAttributes!=candidateAttributes) {
+          if (way->GetFeatureValueBuffer()!=candidate->GetFeatureValueBuffer()) {
             continue;
           }
 
@@ -433,18 +412,12 @@ namespace osmscout {
                                      const CoordDataFile::CoordResultMap& coordsMap,
                                      const RawWay& rawWay)
   {
-    std::vector<Tag> tags(rawWay.GetTags());
-    Way              way;
-    OSMId            wayId=rawWay.GetId();
+    Way   way;
+    OSMId wayId=rawWay.GetId();
 
-    way.SetType(rawWay.GetType());
-
-    if (!way.SetTags(progress,
-                     typeConfig,
-                     wayId,
-                     tags)) {
-      return true;
-    }
+    way.SetType(rawWay.GetTypeId());
+    way.SetFeatures(typeConfig,
+                    rawWay.GetFeatureValueBuffer());
 
     way.ids.resize(rawWay.GetNodeCount());
     way.nodes.resize(rawWay.GetNodeCount());
@@ -483,9 +456,9 @@ namespace osmscout {
     return true;
   }
 
-  bool WayWayDataGenerator::Import(const ImportParameter& parameter,
-                                   Progress& progress,
-                                   const TypeConfig& typeConfig)
+  bool WayWayDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                   const ImportParameter& parameter,
+                                   Progress& progress)
   {
     progress.SetAction("Generate wayway.tmp");
 
@@ -501,7 +474,7 @@ namespace osmscout {
     uint32_t                                writtenWayCount=0;
     uint32_t                                mergeCount=0;
 
-    typeConfig.GetWayTypes(wayTypes);
+    typeConfig->GetWayTypes(wayTypes);
 
     //
     // handling of restriction relations
@@ -548,7 +521,7 @@ namespace osmscout {
 
     size_t iteration=1;
     while (!wayTypes.empty()) {
-      std::vector<std::list<RawWayRef> > waysByType(typeConfig.GetTypes().size());
+      std::vector<std::list<RawWayRef> > waysByType(typeConfig->GetTypes().size());
 
       //
       // Load type data
@@ -558,6 +531,7 @@ namespace osmscout {
 
       if (!GetWays(parameter,
                    progress,
+                   typeConfig,
                    wayTypes,
                    scanner,
                    waysByType)) {
@@ -573,13 +547,12 @@ namespace osmscout {
 
         if (originalWayCount>0) {
           MergeWays(progress,
-                    typeConfig,
                     waysByType[type],
                     restrictions);
 
 #pragma omp critical
           if (waysByType[type].size()<originalWayCount) {
-            progress.Info("Reduced ways of '"+typeConfig.GetTypeInfo(type)->GetName()+"' from "+
+            progress.Info("Reduced ways of '"+typeConfig->GetTypeInfo(type)->GetName()+"' from "+
                           NumberToString(originalWayCount)+" to "+NumberToString(waysByType[type].size())+ " way(s)");
             mergeCount+=originalWayCount-waysByType[type].size();
           }

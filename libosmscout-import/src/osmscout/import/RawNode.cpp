@@ -103,7 +103,7 @@ namespace osmscout {
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+    writer.WriteNumber(featureValueBuffer.GetTypeId());
     writer.WriteCoord(coords);
 
     if (!featureValueBuffer.Write(writer)) {

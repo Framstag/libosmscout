@@ -41,9 +41,9 @@ namespace osmscout {
     return "Generate 'nodes.tmp'";
   }
 
-  bool NodeDataGenerator::Import(const ImportParameter& parameter,
-                                 Progress& progress,
-                                 const TypeConfig& typeConfig)
+  bool NodeDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                 const ImportParameter& parameter,
+                                 Progress& progress)
   {
     uint32_t rawNodeCount=0;
     uint32_t nodesReadCount=0;
@@ -102,9 +102,6 @@ namespace osmscout {
 
       if (rawNode.GetTypeId()!=typeIgnore &&
           !rawNode.GetType()->GetIgnore()) {
-
-        //std::vector<Tag> tags(rawNode.GetTags());
-
         node.SetType(rawNode.GetType()->GetId());
         node.SetCoords(rawNode.GetCoords());
 

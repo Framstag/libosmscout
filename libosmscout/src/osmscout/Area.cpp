@@ -21,19 +21,18 @@
 
 #include <limits>
 
+#include <osmscout/util/String.h>
+
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
 
-  bool AreaAttributes::SetTags(Progress& /*progress*/,
-                               const TypeConfig& typeConfig,
-                               std::vector<Tag>& tags)
+  void AreaAttributes::SetFeatures(const TypeConfig& typeConfig,
+                                   const FeatureValueBuffer& buffer)
   {
-    uint32_t namePriority=0;
-    uint32_t nameAltPriority=0;
-
     name.clear();
     nameAlt.clear();
+    access.SetAccess(buffer.GetType()->GetDefaultAccess());
     address.clear();
 
     flags=0;
@@ -42,77 +41,45 @@ namespace osmscout {
 
     flags|=hasAccess;
 
-    std::vector<Tag>::iterator tag=tags.begin();
-    while (tag!=tags.end()) {
-      uint32_t ntPrio;
-      bool     isNameTag=typeConfig.IsNameTag(tag->key,ntPrio);
-      uint32_t natPrio;
-      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->key,natPrio);
+    for (size_t i=0; i<buffer.GetFeatureCount(); i++) {
+      if (buffer.HasValue(i)) {
 
-      if (isNameTag &&
-          (name.empty() || ntPrio>namePriority)) {
-        name=tag->value;
-        namePriority=ntPrio;
+        if (buffer.GetFeature(i).GetFeature()==typeConfig.featureName &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(buffer.GetValue(i));
 
-        /*
-        size_t i=0;
-        while (postfixes[i]!=NULL) {
-          size_t pos=name.rfind(postfixes[i]);
-          if (pos!=std::string::npos &&
-              pos==name.length()-strlen(postfixes[i])) {
-            name=name.substr(0,pos);
-            break;
-          }
-
-          i++;
-        }*/
-      }
-
-      if (isNameAltTag &&
-          (nameAlt.empty() || natPrio>nameAltPriority)) {
-        nameAlt=tag->value;
-        nameAltPriority=natPrio;
-      }
-
-      if (isNameTag || isNameAltTag) {
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagHouseNr) {
-        address=tag->value;
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagAccess) {
-        if (tag->value=="no" ||
-            tag->value=="private" ||
-            tag->value=="destination" ||
-            tag->value=="delivery") {
-          flags&=~hasAccess;
+          name=value->GetName();
         }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureNameAlt &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(buffer.GetValue(i));
 
-        tag=tags.erase(tag);
-      }
-      // Tags we are interested in for ways, but not for areas - however they are
-      // nevertheless rather often set
-      else if (tag->key==typeConfig.tagRef ||
-               tag->key==typeConfig.tagLayer ||
-               tag->key==typeConfig.tagSurface ||
-               tag->key==typeConfig.tagOneway ||
-               tag->key==typeConfig.tagMaxSpeed ||
-               tag->key==typeConfig.tagTracktype ||
-               tag->key==typeConfig.tagWidth ||
-               tag->key==typeConfig.tagTunnel ||
-               tag->key==typeConfig.tagBridge ||
-               tag->key==typeConfig.tagAccess) {
-        tag=tags.erase(tag);
-      }
-      else {
-        ++tag;
+          nameAlt=value->GetNameAlt();
+        }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAddress &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.GetValue(i));
+
+          address=value->GetAddress();
+
+          tags.push_back(Tag(typeConfig.tagAddrStreet,
+                             value->GetLocation()));
+        }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAccess &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(buffer.GetValue(i));
+
+          access.SetAccess(value->GetAccess());
+        }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAdminLevel &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          AdminLevelFeatureValue* value=dynamic_cast<AdminLevelFeatureValue*>(buffer.GetValue(i));
+
+          tags.push_back(Tag(typeConfig.tagAdminLevel,
+                             NumberToString(value->GetAdminLevel())));
+        }
       }
     }
-
-    this->tags=tags;
-
-    return true;
   }
 
   void AreaAttributes::GetFlags(uint8_t& flags) const

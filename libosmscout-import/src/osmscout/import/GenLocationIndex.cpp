@@ -1754,9 +1754,9 @@ namespace osmscout {
     return "Generate 'location.idx'";
   }
 
-  bool LocationIndexGenerator::Import(const ImportParameter& parameter,
-                                      Progress& progress,
-                                      const TypeConfig& typeConfig)
+  bool LocationIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                      const ImportParameter& parameter,
+                                      Progress& progress)
   {
     RegionRef                          rootRegion;
     std::vector<std::list<RegionRef> > regionTree;
@@ -1798,12 +1798,12 @@ namespace osmscout {
     rootRegion->indexOffset=0;
     rootRegion->dataOffset=0;
 
-    boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
+    boundaryId=typeConfig->GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
 
-    typeConfig.GetIndexAsLocationTypes(locationTypes);
-    typeConfig.GetIndexAsRegionTypes(regionTypes);
-    typeConfig.GetIndexAsPOITypes(poiTypes);
+    typeConfig->GetIndexAsLocationTypes(locationTypes);
+    typeConfig->GetIndexAsRegionTypes(regionTypes);
+    typeConfig->GetIndexAsPOITypes(poiTypes);
 
     //
     // Getting all areas of type 'administrative boundary'.

@@ -154,9 +154,9 @@ namespace osmscout {
     void AddFilter(const ProcessingFilterRef& filter);
 
   public:
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 
   template <class N>
@@ -594,9 +594,9 @@ namespace osmscout {
   }
 
   template <class N>
-  bool SortDataGenerator<N>::Import(const ImportParameter& parameter,
-                                    Progress& progress,
-                                    const TypeConfig& typeConfig)
+  bool SortDataGenerator<N>::Import(const TypeConfigRef& typeConfig,
+                                    const ImportParameter& parameter,
+                                    Progress& progress)
   {
     for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
         f!=filters.end();

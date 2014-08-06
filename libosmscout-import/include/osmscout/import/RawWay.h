@@ -32,26 +32,17 @@ namespace osmscout {
   class RawWay : public Referencable
   {
   private:
-    // Attribute availability flags (for optimized attribute storage)
-
-    static const uint8_t isArea  = 1 <<  0; //! We are an area
-    static const uint8_t hasType = 1 <<  1; //! We have a type
-    static const uint8_t hasTags = 1 <<  2; //! We have tags
-
-  private:
     OSMId              id;
-    TypeId             type;
-    mutable uint8_t    flags;
-    std::vector<Tag>   tags;
+    bool               isArea;
     std::vector<OSMId> nodes;
+    FeatureValueBuffer featureValueBuffer;
 
   public:
 
   public:
     inline RawWay()
     : id(0),
-      type(typeIgnore),
-      flags(0)
+      isArea(false)
     {
       // no code
     }
@@ -61,19 +52,19 @@ namespace osmscout {
       return id;
     }
 
-    inline TypeId GetType() const
-    {
-      return type;
-    }
-
     inline bool IsArea() const
     {
-      return (flags & isArea)!=0;
+      return isArea;
     }
 
-    inline const std::vector<Tag>& GetTags() const
+    inline TypeInfoRef GetType() const
     {
-      return tags;
+      return featureValueBuffer.GetType();
+    }
+
+    inline TypeId GetTypeId() const
+    {
+      return featureValueBuffer.GetType()->GetId();
     }
 
     inline const std::vector<OSMId>& GetNodes() const
@@ -101,13 +92,45 @@ namespace osmscout {
       return nodes[nodes.size()-1];
     }
 
+    inline size_t GetFeatureCount() const
+    {
+      return featureValueBuffer.GetType()->GetFeatureCount();
+    }
+
+    inline bool HasFeature(size_t idx) const
+    {
+      return featureValueBuffer.HasValue(idx);
+    }
+
+    inline FeatureInstance GetFeature(size_t idx) const
+    {
+      return featureValueBuffer.GetType()->GetFeature(idx);
+    }
+
+    inline FeatureValue* GetFeatureValue(size_t idx) const
+    {
+      return featureValueBuffer.GetValue(idx);
+    }
+
+    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    {
+      return featureValueBuffer;
+    }
+
+    bool IsOneway() const;
+
     void SetId(OSMId id);
-    void SetType(TypeId type, bool area);
-    void SetTags(const std::vector<Tag>& tags);
+    void SetType(const TypeInfoRef& type,
+                 bool area);
     void SetNodes(const std::vector<OSMId>& nodes);
 
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const std::map<TagId,std::string>& tags);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
   };
 
   typedef Ref<RawWay> RawWayRef;

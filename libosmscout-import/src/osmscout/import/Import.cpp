@@ -29,6 +29,8 @@
 #include <osmscout/import/RawRelation.h>
 
 #include <osmscout/import/GenRawNodeIndex.h>
+#include <osmscout/import/GenRawWayIndex.h>
+#include <osmscout/import/GenRawRelIndex.h>
 
 #include <osmscout/RoutingService.h>
 #include <osmscout/RouteNode.h>
@@ -547,7 +549,7 @@ namespace osmscout {
   static bool ExecuteModules(std::list<ImportModule*>& modules,
                             const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig)
+                            const TypeConfigRef& typeConfig)
   {
     StopClock overAllTimer;
     size_t    currentStep=1;
@@ -565,7 +567,9 @@ namespace osmscout {
                          " - "+
                          (*module)->GetDescription());
 
-        success=(*module)->Import(parameter,progress,typeConfig);
+        success=(*module)->Import(typeConfig,
+                                  parameter,
+                                  progress);
 
         timer.Stop();
 
@@ -591,18 +595,20 @@ namespace osmscout {
   {
     // TODO: verify parameter
 
-    TypeConfig               typeConfig;
+    TypeConfigRef            typeConfig(new TypeConfig());
     std::list<ImportModule*> modules;
 
     progress.SetStep("Loading type config");
 
-    if (!typeConfig.LoadFromOSTFile(parameter.GetTypefile())) {
+    if (!typeConfig->LoadFromOSTFile(parameter.GetTypefile())) {
       progress.Error("Cannot load type configuration!");
       return false;
     }
 
-    typeConfig.RegisterNameTag("name",0);
-    typeConfig.RegisterNameTag("place_name",1);
+    progress.Info("Number of types: "+NumberToString(typeConfig->GetMaxTypeId()));
+
+    typeConfig->RegisterNameTag("name",0);
+    typeConfig->RegisterNameTag("place_name",1);
 
     /* 1 */
     modules.push_back(new TypeDataGenerator());
@@ -616,17 +622,15 @@ namespace osmscout {
                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                 "rawnode.idx")));
     /* 4 */
-    modules.push_back(new NumericIndexGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              "rawways.dat"),
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              "rawway.idx")));
+    modules.push_back(new RawWayIndexGenerator(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                               "rawways.dat"),
+                                               AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                               "rawway.idx")));
     /* 5 */
-    modules.push_back(new NumericIndexGenerator<OSMId,RawRelation>("Generating 'rawrel.idx'",
-                                                                   AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                   "rawrels.dat"),
-                                                                   AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                   "rawrel.idx")));
+    modules.push_back(new RawRelationIndexGenerator(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                    "rawrels.dat"),
+                                                    AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                    "rawrel.idx")));
     /* 6 */
     modules.push_back(new RelAreaDataGenerator());
 

@@ -87,19 +87,19 @@ namespace osmscout {
 
     bool IsMultipolygon(const TypeConfig& typeConfig,
                         const std::map<TagId,std::string>& tags,
-                        TypeId& type);
+                        TypeInfoRef& type);
 
     void ProcessMultipolygon(const TypeConfig& typeConfig,
                              const std::map<TagId,std::string>& tags,
                              const std::vector<RawRelation::Member>& members,
                              OSMId id,
-                             TypeId type);
+                             const TypeInfoRef& type);
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
 
     bool Initialize(const ImportParameter& parameter,
                     Progress& progress);

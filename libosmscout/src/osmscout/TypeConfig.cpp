@@ -268,6 +268,13 @@ namespace osmscout {
     assert(feature.Valid());
   }
 
+  bool NameFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const NameFeatureValue& otherValue=dynamic_cast<const NameFeatureValue&>(other);
+
+    return name==otherValue.name;
+  }
+
   const char* const NameFeature::NAME = "Name";
 
   void NameFeature::Initialize(TypeConfig& /*typeConfig*/)
@@ -345,6 +352,13 @@ namespace osmscout {
     NameFeatureValue* v=dynamic_cast<NameFeatureValue*>(value);
 
     return writer.Write(v->GetName());
+  }
+
+  bool NameAltFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const NameAltFeatureValue& otherValue=dynamic_cast<const NameAltFeatureValue&>(other);
+
+    return nameAlt==otherValue.nameAlt;
   }
 
   const char* const NameAltFeature::NAME = "NameAlt";
@@ -426,6 +440,13 @@ namespace osmscout {
     return writer.Write(v->GetNameAlt());
   }
 
+  bool RefFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const RefFeatureValue& otherValue=dynamic_cast<const RefFeatureValue&>(other);
+
+    return ref==otherValue.ref;
+  }
+
   const char* const RefFeature::NAME = "Ref";
 
   void RefFeature::Initialize(TypeConfig& typeConfig)
@@ -490,6 +511,14 @@ namespace osmscout {
     RefFeatureValue* v=dynamic_cast<RefFeatureValue*>(value);
 
     return writer.Write(v->GetRef());
+  }
+
+  bool AddressFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const AddressFeatureValue& otherValue=dynamic_cast<const AddressFeatureValue&>(other);
+
+    return location==otherValue.location &&
+           address==otherValue.address;
   }
 
   const char* const AddressFeature::NAME = "Address";
@@ -573,6 +602,13 @@ namespace osmscout {
     AddressFeatureValue* v=dynamic_cast<AddressFeatureValue*>(value);
 
     return writer.Write(v->GetLocation()) && writer.Write(v->GetAddress());
+  }
+
+  bool AccessFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const AccessFeatureValue& otherValue=dynamic_cast<const AccessFeatureValue&>(other);
+
+    return access==otherValue.access;
   }
 
   const char* const AccessFeature::NAME = "Access";
@@ -838,6 +874,13 @@ namespace osmscout {
     return writer.Write(v->GetAccess());
   }
 
+  bool LayerFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const LayerFeatureValue& otherValue=dynamic_cast<const LayerFeatureValue&>(other);
+
+    return layer==otherValue.layer;
+  }
+
   const char* const LayerFeature::NAME = "Layer";
 
   void LayerFeature::Initialize(TypeConfig& typeConfig)
@@ -910,6 +953,13 @@ namespace osmscout {
     LayerFeatureValue* v=dynamic_cast<LayerFeatureValue*>(value);
 
     return writer.Write(v->GetLayer());
+  }
+
+  bool WidthFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const WidthFeatureValue& otherValue=dynamic_cast<const WidthFeatureValue&>(other);
+
+    return width==otherValue.width;
   }
 
   const char* const WidthFeature::NAME = "Width";
@@ -1020,6 +1070,13 @@ namespace osmscout {
     WidthFeatureValue* v=dynamic_cast<WidthFeatureValue*>(value);
 
     return writer.Write(v->GetWidth());
+  }
+
+  bool MaxSpeedFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const MaxSpeedFeatureValue& otherValue=dynamic_cast<const MaxSpeedFeatureValue&>(other);
+
+    return maxSpeed==otherValue.maxSpeed;
   }
 
   const char* const MaxSpeedFeature::NAME = "MaxSpeed";
@@ -1144,6 +1201,13 @@ namespace osmscout {
     MaxSpeedFeatureValue* v=dynamic_cast<MaxSpeedFeatureValue*>(value);
 
     return writer.Write(v->GetMaxSpeed());
+  }
+
+  bool GradeFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const GradeFeatureValue& otherValue=dynamic_cast<const GradeFeatureValue&>(other);
+
+    return grade==otherValue.grade;
   }
 
   const char* const GradeFeature::NAME = "Grade";
@@ -1272,6 +1336,86 @@ namespace osmscout {
 
     return writer.Write(v->GetGrade());
   }
+
+  bool AdminLevelFeatureValue::operator==(const FeatureValue& other) const
+    {
+      const AdminLevelFeatureValue& otherValue=dynamic_cast<const AdminLevelFeatureValue&>(other);
+
+      return adminLevel==otherValue.adminLevel;
+    }
+
+    const char* const AdminLevelFeature::NAME = "AdminLevel";
+
+    void AdminLevelFeature::Initialize(TypeConfig& typeConfig)
+    {
+      tagAdminLevel=typeConfig.RegisterTagForInternalUse("admin_level");
+    }
+
+    std::string AdminLevelFeature::GetName() const
+    {
+      return NAME;
+    }
+
+    size_t AdminLevelFeature::GetValueSize() const
+    {
+      return sizeof(AdminLevelFeatureValue);
+    }
+
+    void AdminLevelFeature::AllocateValue(void* buffer)
+    {
+      new (buffer) AdminLevelFeatureValue();
+    }
+
+    void AdminLevelFeature::Parse(Progress& progress,
+                                  const TypeConfig& /*typeConfig*/,
+                                  const ObjectOSMRef& object,
+                                  const TypeInfo& /*type*/,
+                                  size_t idx,
+                                  const std::map<TagId,std::string>& tags,
+                                  FeatureValueBuffer& buffer) const
+    {
+      std::map<TagId,std::string>::const_iterator adminLevel=tags.find(tagAdminLevel);
+
+      if (adminLevel!=tags.end()) {
+        uint8_t adminLevelValue;
+
+        if (StringToNumber(adminLevel->second,
+                           adminLevelValue)) {
+          buffer.AllocateValue(idx);
+
+          AdminLevelFeatureValue* value=dynamic_cast<AdminLevelFeatureValue*>(buffer.GetValue(idx));
+
+          value->SetAdminLevel(adminLevelValue);
+        }
+        else {
+          progress.Warning(std::string("Admin level is not numeric '")+adminLevel->second+"' for "+object.GetName()+"!");
+        }
+      }
+    }
+
+    bool AdminLevelFeature::Read(FileScanner& scanner,
+                                 FeatureValue* value)
+    {
+      uint8_t adminLevel;
+
+      if (!scanner.Read(adminLevel)) {
+        return false;
+      }
+
+      AdminLevelFeatureValue* adminLevelFeature=static_cast<AdminLevelFeatureValue*>(value);
+
+      adminLevelFeature->SetAdminLevel(adminLevel);
+
+      return true;
+    }
+
+    bool AdminLevelFeature::Write(FileWriter& writer,
+                             FeatureValue* value)
+    {
+      AdminLevelFeatureValue* v=dynamic_cast<AdminLevelFeatureValue*>(value);
+
+      return writer.Write(v->GetAdminLevel());
+    }
 
   const char* const BridgeFeature::NAME = "Bridge";
 
@@ -1605,6 +1749,38 @@ namespace osmscout {
     return !writer.HasError();
   }
 
+  bool FeatureValueBuffer::operator==(const FeatureValueBuffer& other) const
+  {
+    if (this->type!=other.type) {
+      return false;
+    }
+
+    for (size_t i=0; i<GetFeatureCount(); i++) {
+      if (HasValue(i)!=other.HasValue(i)) {
+        return false;
+      }
+
+      // If a feature has a value, we compare the values
+      if (HasValue(i) &&
+          other.HasValue(i) &&
+          GetFeature(i).GetFeature()->HasValue()) {
+        FeatureValue *thisValue=GetValue(i);
+        FeatureValue *otherValue=other.GetValue(i);
+
+        if (!(*thisValue==*otherValue)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  bool FeatureValueBuffer::operator!=(const FeatureValueBuffer& other) const
+  {
+    return !operator==(other);
+  }
+
   TypeInfo::TypeInfo()
    : id(0),
      canBeNode(false),
@@ -1723,6 +1899,25 @@ namespace osmscout {
     return features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
   }
 
+  uint8_t TypeInfo::GetDefaultAccess() const
+  {
+    uint8_t access=0;
+
+    if (CanRouteFoot()) {
+      access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+    }
+
+    if (CanRouteBicycle()) {
+      access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
+    }
+
+    if (CanRouteCar()) {
+      access|=(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+    }
+
+    return access;
+  }
+
   TypeConfig::TypeConfig()
    : nextTagId(0),
      nextTypeId(0),
@@ -1798,6 +1993,9 @@ namespace osmscout {
 
     featureGrade=new GradeFeature();
     RegisterFeature(featureGrade);
+
+    featureAdminLevel=new AdminLevelFeature();
+    RegisterFeature(featureAdminLevel);
 
     featureBridge=new BridgeFeature();
     RegisterFeature(featureBridge);
@@ -2201,43 +2399,43 @@ namespace osmscout {
     return typeInfoIgnore;
   }
 
-  bool TypeConfig::GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
-                                    TypeId &wayType,
-                                    TypeId &areaType) const
+  bool TypeConfig::GetWayAreaType(const std::map<TagId,std::string>& tagMap,
+                                  TypeInfoRef& wayType,
+                                  TypeInfoRef& areaType) const
   {
-    wayType=typeIgnore;
-    areaType=typeIgnore;
+    wayType=typeInfoIgnore;
+    areaType=typeInfoIgnore;
 
     if (tagMap.empty()) {
       return false;
     }
 
-    for (size_t i=0; i<types.size(); i++) {
-      if (!((types[i]->CanBeWay() ||
-             types[i]->CanBeArea()) &&
-             types[i]->HasConditions())) {
+    for (auto type : types) {
+      if (!((type->CanBeWay() ||
+             type->CanBeArea()) &&
+             type->HasConditions())) {
         continue;
       }
 
-      for (auto cond : types[i]->GetConditions()) {
+      for (auto cond : type->GetConditions()) {
         if (!((cond.types & TypeInfo::typeWay) ||
               (cond.types & TypeInfo::typeArea))) {
           continue;
         }
 
         if (cond.condition->Evaluate(tagMap)) {
-          if (wayType==typeIgnore &&
+          if (wayType==typeInfoIgnore &&
               (cond.types & TypeInfo::typeWay)) {
-            wayType=types[i]->GetId();
+            wayType=type;
           }
 
-          if (areaType==typeIgnore &&
+          if (areaType==typeInfoIgnore &&
               (cond.types & TypeInfo::typeArea)) {
-            areaType=types[i]->GetId();
+            areaType=type;
           }
 
-          if (wayType!=typeIgnore ||
-              areaType!=typeIgnore) {
+          if (wayType!=typeInfoIgnore ||
+              areaType!=typeInfoIgnore) {
             return true;
           }
         }
@@ -2247,13 +2445,10 @@ namespace osmscout {
     return false;
   }
 
-  bool TypeConfig::GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
-                                     TypeId &typeId) const
+  TypeInfoRef TypeConfig::GetRelationType(const std::map<TagId,std::string>& tagMap) const
   {
-    typeId=typeIgnore;
-
     if (tagMap.empty()) {
-      return false;
+      return typeInfoIgnore;
     }
 
     std::map<TagId,std::string>::const_iterator relationType=tagMap.find(tagType);
@@ -2272,8 +2467,7 @@ namespace osmscout {
           }
 
           if (cond.condition->Evaluate(tagMap)) {
-            typeId=types[i]->GetId();
-            return true;
+            return types[i];
           }
         }
       }
@@ -2291,14 +2485,13 @@ namespace osmscout {
           }
 
           if (cond.condition->Evaluate(tagMap)) {
-            typeId=types[i]->GetId();
-            return true;
+            return types[i];
           }
         }
       }
     }
 
-    return false;
+    return typeInfoIgnore;
   }
 
   TypeId TypeConfig::GetTypeId(const std::string& name) const
@@ -2745,84 +2938,82 @@ namespace osmscout {
   {
     FileWriter writer;
 
-     if (!writer.Open(AppendFileToDir(directory,
-                                      "types.dat"))) {
-       //progress.Error("Cannot create 'types.dat'");
-       return false;
-     }
+    if (!writer.Open(AppendFileToDir(directory,"types.dat"))) {
+      //progress.Error("Cannot create 'types.dat'");
+      return false;
+    }
 
-     writer.WriteNumber((uint32_t)GetTags().size());
-     for (auto tag : GetTags()) {
-       writer.WriteNumber(tag.GetId());
-       writer.Write(tag.GetName());
-       writer.Write(tag.IsInternalOnly());
-     }
+    writer.WriteNumber((uint32_t)GetTags().size());
+    for (auto tag : GetTags()) {
+      writer.WriteNumber(tag.GetId());
+      writer.Write(tag.GetName());
+      writer.Write(tag.IsInternalOnly());
+    }
 
-     uint32_t nameTagCount=0;
-     uint32_t nameAltTagCount=0;
+    uint32_t nameTagCount=0;
+    uint32_t nameAltTagCount=0;
 
-     for (auto tag : GetTags()) {
-       uint32_t priority;
+    for (auto tag : GetTags()) {
+      uint32_t priority;
 
-       if (IsNameTag(tag.GetId(),priority)) {
-         nameTagCount++;
-       }
+      if (IsNameTag(tag.GetId(),priority)) {
+        nameTagCount++;
+      }
 
-       if (IsNameAltTag(tag.GetId(),priority)) {
-         nameAltTagCount++;
-       }
-     }
+      if (IsNameAltTag(tag.GetId(),priority)) {
+        nameAltTagCount++;
+      }
+    }
 
-     writer.WriteNumber(nameTagCount);
-     for (auto tag: GetTags()) {
-       uint32_t priority;
+    writer.WriteNumber(nameTagCount);
+    for (auto tag : GetTags()) {
+      uint32_t priority;
 
-       if (IsNameTag(tag.GetId(),priority)) {
-         writer.WriteNumber(tag.GetId());
-         writer.Write(tag.GetName());
-         writer.WriteNumber((uint32_t)priority);
-       }
-     }
+      if (IsNameTag(tag.GetId(),priority)) {
+        writer.WriteNumber(tag.GetId());
+        writer.Write(tag.GetName());
+        writer.WriteNumber((uint32_t)priority);
+      }
+    }
 
-     writer.WriteNumber(nameAltTagCount);
-     for (auto tag : GetTags()) {
-       uint32_t priority;
+    writer.WriteNumber(nameAltTagCount);
+    for (auto tag : GetTags()) {
+      uint32_t priority;
 
-       if (IsNameAltTag(tag.GetId(),priority)) {
-         writer.WriteNumber(tag.GetId());
-         writer.Write(tag.GetName());
-         writer.WriteNumber((uint32_t)priority);
-       }
-     }
+      if (IsNameAltTag(tag.GetId(),priority)) {
+        writer.WriteNumber(tag.GetId());
+        writer.Write(tag.GetName());
+        writer.WriteNumber((uint32_t)priority);
+      }
+    }
 
+    writer.WriteNumber((uint32_t)GetTypes().size());
 
-     writer.WriteNumber((uint32_t)GetTypes().size());
+    for (auto type : GetTypes()) {
+      writer.WriteNumber(type->GetId());
+      writer.Write(type->GetName());
+      writer.Write(type->CanBeNode());
+      writer.Write(type->CanBeWay());
+      writer.Write(type->CanBeArea());
+      writer.Write(type->CanBeRelation());
+      writer.Write(type->CanRouteFoot());
+      writer.Write(type->CanRouteBicycle());
+      writer.Write(type->CanRouteCar());
+      writer.Write(type->GetIndexAsLocation());
+      writer.Write(type->GetIndexAsRegion());
+      writer.Write(type->GetIndexAsPOI());
+      writer.Write(type->GetOptimizeLowZoom());
+      writer.Write(type->GetMultipolygon());
+      writer.Write(type->GetPinWay());
+      writer.Write(type->GetIgnoreSeaLand());
+      writer.Write(type->GetIgnore());
 
-     for (auto type : GetTypes()) {
-       writer.WriteNumber(type->GetId());
-       writer.Write(type->GetName());
-       writer.Write(type->CanBeNode());
-       writer.Write(type->CanBeWay());
-       writer.Write(type->CanBeArea());
-       writer.Write(type->CanBeRelation());
-       writer.Write(type->CanRouteFoot());
-       writer.Write(type->CanRouteBicycle());
-       writer.Write(type->CanRouteCar());
-       writer.Write(type->GetIndexAsLocation());
-       writer.Write(type->GetIndexAsRegion());
-       writer.Write(type->GetIndexAsPOI());
-       writer.Write(type->GetOptimizeLowZoom());
-       writer.Write(type->GetMultipolygon());
-       writer.Write(type->GetPinWay());
-       writer.Write(type->GetIgnoreSeaLand());
-       writer.Write(type->GetIgnore());
+      writer.WriteNumber((uint32_t)type->GetFeatures().size());
+      for (auto feature : type->GetFeatures()) {
+        writer.Write(feature.GetFeature()->GetName());
+      }
+    }
 
-       writer.WriteNumber((uint32_t)type->GetFeatures().size());
-       for (auto feature : type->GetFeatures()) {
-         writer.Write(feature.GetFeature()->GetName());
-       }
-     }
-
-     return !writer.HasError() && writer.Close();
+    return !writer.HasError()&&writer.Close();
   }
 }

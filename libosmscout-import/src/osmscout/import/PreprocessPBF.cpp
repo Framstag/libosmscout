@@ -425,9 +425,9 @@ namespace osmscout {
     }
   }
 
-  bool PreprocessPBF::Import(const ImportParameter& parameter,
-                             Progress& progress,
-                             const TypeConfig& typeConfig)
+  bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress)
   {
     progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfile()+"'");
 

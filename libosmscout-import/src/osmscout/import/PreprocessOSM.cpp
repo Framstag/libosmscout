@@ -316,9 +316,9 @@ namespace osmscout {
     return "Preprocess";
   }
 
-  bool PreprocessOSM::Import(const ImportParameter& parameter,
-                             Progress& progress,
-                             const TypeConfig& typeConfig)
+  bool PreprocessOSM::Import(const TypeConfigRef& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress)
   {
     Parser        parser(*this,typeConfig);
     xmlSAXHandler saxParser;

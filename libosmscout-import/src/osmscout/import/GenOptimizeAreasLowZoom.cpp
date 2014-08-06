@@ -671,9 +671,9 @@ namespace osmscout
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool OptimizeAreasLowZoomGenerator::Import(const ImportParameter& parameter,
-                                             Progress& progress,
-                                             const TypeConfig& typeConfig)
+  bool OptimizeAreasLowZoomGenerator::Import(const TypeConfigRef& typeConfig,
+                                             const ImportParameter& parameter,
+                                             Progress& progress)
   {
     FileOffset           indexOffset=0;
     FileWriter           writer;

@@ -1415,8 +1415,8 @@ TYPES
   // Do not delete the following type, they are required by the GenLocation import step
   TYPE boundary_administrative
     = WAY AREA ("boundary"=="administrative") OR
-                RELATION ("type"=="boundary" AND "boundary"=="administrative")
-      {Name, NameAlt}
+      RELATION ("type"=="boundary" AND "boundary"=="administrative")
+      {Name, NameAlt, AdminLevel}
       OPTIONS MULTIPOLYGON IGNORESEALAND
 
   TYPE place_continent

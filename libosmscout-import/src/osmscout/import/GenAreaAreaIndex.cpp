@@ -128,9 +128,9 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool AreaAreaIndexGenerator::Import(const ImportParameter& parameter,
-                                      Progress& progress,
-                                      const TypeConfig& /*typeConfig*/)
+  bool AreaAreaIndexGenerator::Import(const TypeConfigRef& /*typeConfig*/,
+                                      const ImportParameter& parameter,
+                                      Progress& progress)
   {
     FileScanner               scanner;
     size_t                    areas=0;         // Number of areas found

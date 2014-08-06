@@ -56,6 +56,7 @@ namespace osmscout {
 
     bool GetWays(const ImportParameter& parameter,
                  Progress& progress,
+                 const TypeConfig& typeConfig,
                  std::set<TypeId>& types,
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& ways);
@@ -69,7 +70,6 @@ namespace osmscout {
                       OSMId nodeId) const;
 
     bool MergeWays(Progress& progress,
-                   const TypeConfig& typeConfig,
                    std::list<RawWayRef>& ways,
                    std::multimap<OSMId,TurnRestrictionRef>& restrictions);
 
@@ -82,9 +82,9 @@ namespace osmscout {
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

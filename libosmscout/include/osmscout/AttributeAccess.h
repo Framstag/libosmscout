@@ -66,6 +66,11 @@ namespace osmscout {
       return access;
     }
 
+    inline void SetAccess(uint8_t access)
+    {
+      this->access=access;
+    }
+
     inline bool CanRoute() const
     {
       return access & (footForward|footBackward|bicycleForward|bicycleBackward|carForward|carBackward);

@@ -384,10 +384,11 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
     std::cout << "ref: " << attributes.GetRefName() << std::endl;
   }
 
+  /*
   if (!attributes.HasAccess()) {
     DumpIndent(indent);
     std::cout << "access: false" << std::endl;
-  }
+  }*/
 
   if (attributes.GetAccess().IsOnewayForward()) {
     DumpIndent(indent);

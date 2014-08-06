@@ -562,9 +562,9 @@ namespace osmscout {
     return true;
   }
 
-  bool OptimizeAreaWayIdsGenerator::Import(const ImportParameter& parameter,
-                                           Progress& progress,
-                                           const TypeConfig& typeConfig)
+  bool OptimizeAreaWayIdsGenerator::Import(const TypeConfigRef& typeConfig,
+                                           const ImportParameter& parameter,
+                                           Progress& progress)
   {
     progress.SetAction("Optimize ids for areas and ways");
 

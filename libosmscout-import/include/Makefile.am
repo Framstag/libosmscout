@@ -4,13 +4,17 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/RawCoastline.h \
                         osmscout/import/RawNode.h \
                         osmscout/import/RawRelation.h \
+                        osmscout/import/RawRelIndexedDataFile.h \
                         osmscout/import/RawWay.h \
+                        osmscout/import/RawWayIndexedDataFile.h \
                         osmscout/import/GenAreaAreaIndex.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \
                         osmscout/import/GenLocationIndex.h \
                         osmscout/import/GenNumericIndex.h \
                         osmscout/import/GenRawNodeIndex.h \
+                        osmscout/import/GenRawWayIndex.h \
+                        osmscout/import/GenRawRelIndex.h \
                         osmscout/import/GenNodeDat.h \
                         osmscout/import/GenOptimizeAreaWayIds.h \
                         osmscout/import/GenOptimizeAreasLowZoom.h \

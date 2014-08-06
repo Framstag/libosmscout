@@ -203,17 +203,17 @@ namespace osmscout {
 
   bool Preprocess::IsMultipolygon(const TypeConfig& typeConfig,
                                   const std::map<TagId,std::string>& tags,
-                                  TypeId& type)
+                                  TypeInfoRef& type)
   {
-    typeConfig.GetRelationTypeId(tags,type);
+    type=typeConfig.GetRelationType(tags);
 
-    if (type!=typeIgnore &&
-        typeConfig.GetTypeInfo(type)->GetIgnore()) {
+    if (type!=typeConfig.typeInfoIgnore &&
+        type->GetIgnore()) {
       return false;
     }
 
-    bool isArea=type!=typeIgnore &&
-                typeConfig.GetTypeInfo(type)->GetMultipolygon();
+    bool isArea=type!=typeConfig.typeInfoIgnore &&
+                type->GetMultipolygon();
 
     if (!isArea) {
       std::map<TagId,std::string>::const_iterator typeTag=tags.find(typeConfig.tagType);
@@ -228,18 +228,20 @@ namespace osmscout {
                                        const std::map<TagId,std::string>& tags,
                                        const std::vector<RawRelation::Member>& members,
                                        OSMId id,
-                                       TypeId type)
+                                       const TypeInfoRef& type)
   {
     RawRelation relation;
 
     relation.SetId(id);
     relation.SetType(type);
-    typeConfig.ResolveTags(tags,
-                           relation.tags);
 
     relation.members=members;
 
-    relation.Write(multipolygonWriter);
+    relation.Parse(*progress,
+                   typeConfig,
+                   tags);
+    relation.Write(typeConfig,
+                   multipolygonWriter);
 
     multipolygonCount++;
   }
@@ -250,9 +252,9 @@ namespace osmscout {
     return "Preprocess";
   }
 
-  bool Preprocess::Import(const ImportParameter& parameter,
-                          Progress& progress,
-                          const TypeConfig& typeConfig)
+  bool Preprocess::Import(const TypeConfigRef& typeConfig,
+                          const ImportParameter& parameter,
+                          Progress& progress)
   {
     if (parameter.GetMapfile().length()>=4 &&
         parameter.GetMapfile().substr(parameter.GetMapfile().length()-4)==".osm")  {
@@ -260,9 +262,9 @@ namespace osmscout {
 #if defined(HAVE_LIB_XML)
       PreprocessOSM preprocess;
 
-      return preprocess.Import(parameter,
-                               progress,
-                               typeConfig);
+      return preprocess.Import(typeConfig,
+                               parameter,
+                               progress);
 #else
       progress.Error("Support for the OSM file format is not enabled!");
 #endif
@@ -274,9 +276,9 @@ namespace osmscout {
 #if defined(HAVE_LIB_PROTOBUF)
       PreprocessPBF preprocess;
 
-      return preprocess.Import(parameter,
-                               progress,
-                               typeConfig);
+      return preprocess.Import(typeConfig,
+                               parameter,
+                               progress);
 #else
       progress.Error("Support for the PBF file format is not enabled!");
       return false;
@@ -409,8 +411,8 @@ namespace osmscout {
                               std::vector<OSMId>& nodes,
                               const std::map<TagId,std::string>& tagMap)
   {
-    TypeId                                      areaType=typeIgnore;
-    TypeId                                      wayType=typeIgnore;
+    TypeInfoRef                                 areaType;
+    TypeInfoRef                                 wayType;
     int                                         isArea=0; // 0==unknown, 1==true, -1==false
     bool                                        isCoastlineArea=false;
     std::map<TagId,std::string>::const_iterator areaTag;
@@ -458,32 +460,34 @@ namespace osmscout {
                        isArea==1);
     }
 
-    typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
+    typeConfig.GetWayAreaType(tagMap,
+                              wayType,
+                              areaType);
     typeConfig.ResolveTags(tagMap,tags);
 
     if (isArea==1 &&
-        areaType==typeIgnore) {
+        areaType==typeConfig.typeInfoIgnore) {
       isArea=0;
     }
     else if (isArea==-1 &&
-             wayType==typeIgnore) {
+             wayType==typeConfig.typeInfoIgnore) {
       isArea=0;
     }
 
     if (isArea==0) {
-      if (wayType!=typeIgnore &&
-          areaType==typeIgnore) {
+      if (wayType!=typeConfig.typeInfoIgnore &&
+          areaType==typeConfig.typeInfoIgnore) {
         isArea=-1;
       }
-      else if (wayType==typeIgnore &&
-               areaType!=typeIgnore) {
+      else if (wayType==typeConfig.typeInfoIgnore &&
+               areaType!=typeConfig.typeInfoIgnore) {
         isArea=1;
       }
-      else if (wayType!=typeIgnore &&
-               areaType!=typeIgnore) {
+      else if (wayType!=typeConfig.typeInfoIgnore &&
+               areaType!=typeConfig.typeInfoIgnore) {
         if (nodes.size()>3 &&
             nodes.front()==nodes.back()) {
-          if (typeConfig.GetTypeInfo(wayType)->GetPinWay()) {
+          if (wayType->GetPinWay()) {
             isArea=-1;
           }
           else {
@@ -514,7 +518,7 @@ namespace osmscout {
     default:
       if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
-        way.SetType(typeIgnore,
+        way.SetType(typeConfig.typeInfoIgnore,
                     true);
 
         nodes.pop_back();
@@ -522,16 +526,20 @@ namespace osmscout {
         areaCount++;
       }
       else {
-        way.SetType(typeIgnore,
+        way.SetType(typeConfig.typeInfoIgnore,
                     false);
         wayCount++;
       }
     }
 
     way.SetNodes(nodes);
-    way.SetTags(tags);
 
-    way.Write(wayWriter);
+    way.Parse(*progress,
+              typeConfig,
+              tagMap);
+
+    way.Write(typeConfig,
+              wayWriter);
 
     lastWayId=id;
 
@@ -573,7 +581,7 @@ namespace osmscout {
                              turnRestrictionType);
     }
 
-    TypeId multipolygonType;
+    TypeInfoRef multipolygonType;
 
     if (IsMultipolygon(typeConfig,
                        tagMap,

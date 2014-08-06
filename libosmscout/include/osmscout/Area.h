@@ -22,6 +22,7 @@
 
 #include <osmscout/GeoCoord.h>
 
+#include <osmscout/AttributeAccess.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
@@ -49,6 +50,7 @@ namespace osmscout {
   private:
     mutable uint8_t  flags;
     std::string      nameAlt;  //! alternative name
+    AttributeAccess  access;   //! Information regarding which vehicle can access this area
     std::string      address;  //! ...house number
     std::vector<Tag> tags;     //! list of preparsed tags
 
@@ -110,9 +112,8 @@ namespace osmscout {
       return tags;
     }
 
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 std::vector<Tag>& tags);
+    void SetFeatures(const TypeConfig& typeConfig,
+                     const FeatureValueBuffer& buffer);
 
     bool operator==(const AreaAttributes& other) const;
     bool operator!=(const AreaAttributes& other) const;

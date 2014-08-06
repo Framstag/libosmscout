@@ -233,6 +233,13 @@ namespace osmscout {
   public:
     FeatureValue();
     virtual ~FeatureValue();
+
+    virtual bool operator==(const FeatureValue& other) const = 0;
+
+    virtual inline bool operator!=(const FeatureValue& other) const
+    {
+      return !(*this==other);
+    }
   };
 
   /**
@@ -340,6 +347,8 @@ namespace osmscout {
     {
       return name;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API NameFeature : public Feature
@@ -396,6 +405,8 @@ namespace osmscout {
     {
       return nameAlt;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API NameAltFeature : public Feature
@@ -452,6 +463,8 @@ namespace osmscout {
     {
       return ref;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API RefFeature : public Feature
@@ -521,6 +534,8 @@ namespace osmscout {
     {
       return address;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API AddressFeature : public Feature
@@ -717,6 +732,8 @@ namespace osmscout {
     {
       return access & onewayBackward;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API AccessFeature : public Feature
@@ -810,6 +827,8 @@ namespace osmscout {
     {
       return layer;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API LayerFeature : public Feature
@@ -870,6 +889,8 @@ namespace osmscout {
     {
       return width;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API WidthFeature : public Feature
@@ -930,6 +951,8 @@ namespace osmscout {
     {
       return maxSpeed;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API MaxSpeedFeature : public Feature
@@ -990,6 +1013,8 @@ namespace osmscout {
     {
       return grade;
     }
+
+    bool operator==(const FeatureValue& other) const;
   };
 
   class OSMSCOUT_API GradeFeature : public Feature
@@ -997,6 +1022,68 @@ namespace osmscout {
   private:
     TagId tagSurface;
     TagId tagTrackType;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
+               const TypeInfo& type,
+               size_t idx,
+               const std::map<TagId,std::string>& tags,
+               FeatureValueBuffer& buffer) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue* value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
+  };
+
+  class OSMSCOUT_API AdminLevelFeatureValue : public FeatureValue
+  {
+  private:
+    uint8_t adminLevel;
+
+  public:
+    inline AdminLevelFeatureValue()
+    : adminLevel(0)
+    {
+
+    }
+
+    inline AdminLevelFeatureValue(uint8_t adminLevel)
+    : adminLevel(adminLevel)
+    {
+      // no code
+    }
+
+    inline void SetAdminLevel(uint8_t adminLevel)
+    {
+      this->adminLevel=adminLevel;
+    }
+
+    inline uint8_t GetAdminLevel() const
+    {
+      return adminLevel;
+    }
+
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API AdminLevelFeature : public Feature
+  {
+  private:
+    TagId tagAdminLevel;
 
   public:
     /** Name of this feature */
@@ -1404,6 +1491,8 @@ namespace osmscout {
       return canRouteCar;
     }
 
+    uint8_t GetDefaultAccess() const;
+
     /**
      * Sets, if an object of this type should be indexed as a location.
      */
@@ -1548,6 +1637,11 @@ namespace osmscout {
       return type;
     }
 
+    inline TypeId GetTypeId() const
+    {
+      return type->GetId();
+    }
+
     inline size_t GetFeatureCount() const
     {
       return type->GetFeatureCount();
@@ -1573,6 +1667,9 @@ namespace osmscout {
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
+
+    bool operator==(const FeatureValueBuffer& other) const;
+    bool operator!=(const FeatureValueBuffer& other) const;
   };
 
   /**
@@ -1612,6 +1709,7 @@ namespace osmscout {
     FeatureRef                                featureWidth;
     FeatureRef                                featureMaxSpeed;
     FeatureRef                                featureGrade;
+    FeatureRef                                featureAdminLevel;
     FeatureRef                                featureBridge;
     FeatureRef                                featureTunnel;
     FeatureRef                                featureRoundabout;
@@ -1698,11 +1796,10 @@ namespace osmscout {
 
     TypeInfoRef GetNodeType(const std::map<TagId,std::string>& tagMap) const;
 
-    bool GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
-                          TypeId &wayType,
-                          TypeId &areaType) const;
-    bool GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
-                           TypeId &typeId) const;
+    bool GetWayAreaType(const std::map<TagId,std::string>& tagMap,
+                        TypeInfoRef& wayType,
+                        TypeInfoRef& areaType) const;
+    TypeInfoRef GetRelationType(const std::map<TagId,std::string>& tagMap) const;
 
     TypeId GetTypeId(const std::string& name) const;
     TypeId GetNodeTypeId(const std::string& name) const;

@@ -45,9 +45,9 @@ namespace osmscout
   }
 
 
-  bool TextIndexGenerator::Import(const ImportParameter &parameter,
-                                  Progress &progress,
-                                  const TypeConfig &typeConfig)
+  bool TextIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                  const ImportParameter &parameter,
+                                  Progress &progress)
   {
     if(!this->setFileOffsetSize(parameter,
                                 progress)) {

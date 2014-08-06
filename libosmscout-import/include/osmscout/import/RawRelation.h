@@ -46,16 +46,14 @@ namespace osmscout {
 
   private:
     OSMId               id;
-    TypeId              type;
+    FeatureValueBuffer  featureValueBuffer;
 
   public:
-    std::vector<Tag>    tags;
     std::vector<Member> members;
 
   public:
     inline RawRelation()
-    : id(0),
-      type(typeIgnore)
+    : id(0)
     {
       // no code
     }
@@ -65,16 +63,51 @@ namespace osmscout {
       return id;
     }
 
-    inline TypeId GetType() const
+    inline TypeInfoRef GetType() const
     {
-      return type;
+      return featureValueBuffer.GetType();
+    }
+
+    inline TypeId GetTypeId() const
+    {
+      return featureValueBuffer.GetType()->GetId();
+    }
+
+    inline size_t GetFeatureCount() const
+    {
+      return featureValueBuffer.GetType()->GetFeatureCount();
+    }
+
+    inline bool HasFeature(size_t idx) const
+    {
+      return featureValueBuffer.HasValue(idx);
+    }
+
+    inline FeatureInstance GetFeature(size_t idx) const
+    {
+      return featureValueBuffer.GetType()->GetFeature(idx);
+    }
+
+    inline FeatureValue* GetFeatureValue(size_t idx) const
+    {
+      return featureValueBuffer.GetValue(idx);
+    }
+
+    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    {
+      return featureValueBuffer;
     }
 
     void SetId(OSMId id);
-    void SetType(TypeId type);
+    void SetType(const TypeInfoRef& type);
 
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const std::map<TagId,std::string>& tags);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
   };
 
   typedef Ref<RawRelation> RawRelationRef;
