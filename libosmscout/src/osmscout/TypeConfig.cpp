@@ -268,6 +268,17 @@ namespace osmscout {
     assert(feature.Valid());
   }
 
+  FeatureValue& NameFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const NameFeatureValue& otherValue=dynamic_cast<const NameFeatureValue&>(other);
+
+      name=otherValue.name;
+    }
+
+    return *this;
+  }
+
   bool NameFeatureValue::operator==(const FeatureValue& other) const
   {
     const NameFeatureValue& otherValue=dynamic_cast<const NameFeatureValue&>(other);
@@ -322,9 +333,7 @@ namespace osmscout {
     }
 
     if (!name.empty()) {
-      buffer.AllocateValue(idx);
-
-      NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(buffer.GetValue(idx));
+      NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetName(name);
     }
@@ -352,6 +361,17 @@ namespace osmscout {
     NameFeatureValue* v=dynamic_cast<NameFeatureValue*>(value);
 
     return writer.Write(v->GetName());
+  }
+
+  FeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const NameAltFeatureValue& otherValue=dynamic_cast<const NameAltFeatureValue&>(other);
+
+      nameAlt=otherValue.nameAlt;
+    }
+
+    return *this;
   }
 
   bool NameAltFeatureValue::operator==(const FeatureValue& other) const
@@ -408,9 +428,7 @@ namespace osmscout {
     }
 
     if (!nameAlt.empty()) {
-      buffer.AllocateValue(idx);
-
-      NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(buffer.GetValue(idx));
+      NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetNameAlt(nameAlt);
     }
@@ -438,6 +456,17 @@ namespace osmscout {
     NameAltFeatureValue* v=dynamic_cast<NameAltFeatureValue*>(value);
 
     return writer.Write(v->GetNameAlt());
+  }
+
+  FeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const RefFeatureValue& otherValue=dynamic_cast<const RefFeatureValue&>(other);
+
+      ref=otherValue.ref;
+    }
+
+    return *this;
   }
 
   bool RefFeatureValue::operator==(const FeatureValue& other) const
@@ -481,9 +510,7 @@ namespace osmscout {
 
     if (ref!=tags.end() &&
         !ref->second.empty()) {
-      buffer.AllocateValue(idx);
-
-      RefFeatureValue* value=dynamic_cast<RefFeatureValue*>(buffer.GetValue(idx));
+      RefFeatureValue* value=dynamic_cast<RefFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetRef(ref->second);
     }
@@ -511,6 +538,18 @@ namespace osmscout {
     RefFeatureValue* v=dynamic_cast<RefFeatureValue*>(value);
 
     return writer.Write(v->GetRef());
+  }
+
+  FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const AddressFeatureValue& otherValue=dynamic_cast<const AddressFeatureValue&>(other);
+
+      location=otherValue.location;
+      address=otherValue.address;
+    }
+
+    return *this;
   }
 
   bool AddressFeatureValue::operator==(const FeatureValue& other) const
@@ -568,9 +607,7 @@ namespace osmscout {
         !street->second.empty() &&
         houseNr!=tags.end() &&
         !houseNr->second.empty()) {
-      buffer.AllocateValue(idx);
-
-      AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.GetValue(idx));
+      AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetAddress(street->second,
                         houseNr->second);
@@ -602,6 +639,17 @@ namespace osmscout {
     AddressFeatureValue* v=dynamic_cast<AddressFeatureValue*>(value);
 
     return writer.Write(v->GetLocation()) && writer.Write(v->GetAddress());
+  }
+
+  FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const AccessFeatureValue& otherValue=dynamic_cast<const AccessFeatureValue&>(other);
+
+      access=otherValue.access;
+    }
+
+    return *this;
   }
 
   bool AccessFeatureValue::operator==(const FeatureValue& other) const
@@ -842,9 +890,7 @@ namespace osmscout {
     }
 
     if (access!=defaultAccess) {
-      buffer.AllocateValue(idx);
-
-      AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(buffer.GetValue(idx));
+      AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetAccess(access);
     }
@@ -872,6 +918,17 @@ namespace osmscout {
     AccessFeatureValue* v=dynamic_cast<AccessFeatureValue*>(value);
 
     return writer.Write(v->GetAccess());
+  }
+
+  FeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const LayerFeatureValue& otherValue=dynamic_cast<const LayerFeatureValue&>(other);
+
+      layer=otherValue.layer;
+    }
+
+    return *this;
   }
 
   bool LayerFeatureValue::operator==(const FeatureValue& other) const
@@ -918,9 +975,7 @@ namespace osmscout {
 
       if (StringToNumber(layer->second,layerValue)) {
         if (layerValue!=0) {
-          buffer.AllocateValue(idx);
-
-          LayerFeatureValue* value=dynamic_cast<LayerFeatureValue*>(buffer.GetValue(idx));
+          LayerFeatureValue* value=dynamic_cast<LayerFeatureValue*>(buffer.AllocateValue(idx));
 
           value->SetLayer(layerValue);
         }
@@ -953,6 +1008,17 @@ namespace osmscout {
     LayerFeatureValue* v=dynamic_cast<LayerFeatureValue*>(value);
 
     return writer.Write(v->GetLayer());
+  }
+
+  FeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const WidthFeatureValue& otherValue=dynamic_cast<const WidthFeatureValue&>(other);
+
+      width=otherValue.width;
+    }
+
+    return *this;
   }
 
   bool WidthFeatureValue::operator==(const FeatureValue& other) const
@@ -1039,9 +1105,7 @@ namespace osmscout {
       progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" value is too small or too big!");
     }
     else {
-      buffer.AllocateValue(idx);
-
-      WidthFeatureValue* value=dynamic_cast<WidthFeatureValue*>(buffer.GetValue(idx));
+      WidthFeatureValue* value=dynamic_cast<WidthFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetWidth((uint8_t)floor(w+0.5));
     }
@@ -1070,6 +1134,17 @@ namespace osmscout {
     WidthFeatureValue* v=dynamic_cast<WidthFeatureValue*>(value);
 
     return writer.Write(v->GetWidth());
+  }
+
+  FeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const MaxSpeedFeatureValue& otherValue=dynamic_cast<const MaxSpeedFeatureValue&>(other);
+
+      maxSpeed=otherValue.maxSpeed;
+    }
+
+    return *this;
   }
 
   bool MaxSpeedFeatureValue::operator==(const FeatureValue& other) const
@@ -1130,9 +1205,7 @@ namespace osmscout {
     // "walk" should not be used, but we provide an estimation anyway,
     // since it is likely still better than the default
     if (valueString=="walk") {
-      buffer.AllocateValue(idx);
-
-      MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.GetValue(idx));
+      MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetMaxSpeed(10);
 
@@ -1156,9 +1229,7 @@ namespace osmscout {
       return;
     }
 
-    buffer.AllocateValue(idx);
-
-    MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.GetValue(idx));
+    MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
 
     if (isMph) {
       if (valueNumeric>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
@@ -1203,6 +1274,17 @@ namespace osmscout {
     return writer.Write(v->GetMaxSpeed());
   }
 
+  FeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const GradeFeatureValue& otherValue=dynamic_cast<const GradeFeatureValue&>(other);
+
+      grade=otherValue.grade;
+    }
+
+    return *this;
+  }
+
   bool GradeFeatureValue::operator==(const FeatureValue& other) const
   {
     const GradeFeatureValue& otherValue=dynamic_cast<const GradeFeatureValue&>(other);
@@ -1245,45 +1327,35 @@ namespace osmscout {
 
     if (tracktype!=tags.end()) {
       if (tracktype->second=="grade1") {
-        buffer.AllocateValue(idx);
-
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(idx));
+        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(1);
 
         return;
       }
       else if (tracktype->second=="grade2") {
-        buffer.AllocateValue(idx);
-
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(idx));
+        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(2);
 
         return;
       }
       else if (tracktype->second=="grade3") {
-        buffer.AllocateValue(idx);
-
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(idx));
+        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(3);
 
         return;
       }
       else if (tracktype->second=="grade4") {
-        buffer.AllocateValue(idx);
-
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(idx));
+        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(4);
 
         return;
       }
       else if (tracktype->second=="grade5") {
-        buffer.AllocateValue(idx);
-
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(idx));
+        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(5);
 
@@ -1301,9 +1373,7 @@ namespace osmscout {
 
       if (typeConfig.GetGradeForSurface(surface->second,
                                         grade)) {
-        buffer.AllocateValue(idx);
-
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(idx));
+        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade((uint8_t)grade);
       }
@@ -1335,6 +1405,17 @@ namespace osmscout {
     GradeFeatureValue* v=dynamic_cast<GradeFeatureValue*>(value);
 
     return writer.Write(v->GetGrade());
+  }
+
+  FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const AdminLevelFeatureValue& otherValue=dynamic_cast<const AdminLevelFeatureValue&>(other);
+
+      adminLevel=otherValue.adminLevel;
+    }
+
+    return *this;
   }
 
   bool AdminLevelFeatureValue::operator==(const FeatureValue& other) const
@@ -1381,9 +1462,7 @@ namespace osmscout {
 
         if (StringToNumber(adminLevel->second,
                            adminLevelValue)) {
-          buffer.AllocateValue(idx);
-
-          AdminLevelFeatureValue* value=dynamic_cast<AdminLevelFeatureValue*>(buffer.GetValue(idx));
+          AdminLevelFeatureValue* value=dynamic_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(idx));
 
           value->SetAdminLevel(adminLevelValue);
         }
@@ -1585,6 +1664,22 @@ namespace osmscout {
     }
   }
 
+  void FeatureValueBuffer::Set(const FeatureValueBuffer& other)
+  {
+    SetType(other.GetType());
+
+    for (size_t i=0; i<type->GetFeatureCount(); i++) {
+      if (other.HasValue(i) &&
+          other.GetFeature(i).GetFeature()->HasValue()) {
+        FeatureValue* otherValue=other.GetValue(i);
+
+        FeatureValue* thisValue=AllocateValue(i);
+
+        *thisValue=*otherValue;
+      }
+    }
+  }
+
   void FeatureValueBuffer::SetType(const TypeInfoRef& type)
   {
     assert(type.Valid());
@@ -1643,7 +1738,7 @@ namespace osmscout {
     return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
   }
 
-  void FeatureValueBuffer::AllocateValue(size_t idx)
+  FeatureValue* FeatureValueBuffer::AllocateValue(size_t idx)
   {
     assert(type.Valid());
     assert(idx<type->GetFeatureCount());
@@ -1657,6 +1752,11 @@ namespace osmscout {
       FeatureValue* value=GetValue(idx);
 
       type->GetFeature(idx).GetFeature()->AllocateValue(value);
+
+      return value;
+    }
+    else {
+      return NULL;
     }
   }
 

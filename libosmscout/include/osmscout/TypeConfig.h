@@ -234,6 +234,7 @@ namespace osmscout {
     FeatureValue();
     virtual ~FeatureValue();
 
+    virtual FeatureValue& operator=(const FeatureValue& other) = 0;
     virtual bool operator==(const FeatureValue& other) const = 0;
 
     virtual inline bool operator!=(const FeatureValue& other) const
@@ -348,6 +349,7 @@ namespace osmscout {
       return name;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -406,6 +408,7 @@ namespace osmscout {
       return nameAlt;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -464,6 +467,7 @@ namespace osmscout {
       return ref;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -535,6 +539,7 @@ namespace osmscout {
       return address;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -733,6 +738,7 @@ namespace osmscout {
       return access & onewayBackward;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -828,6 +834,7 @@ namespace osmscout {
       return layer;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -890,6 +897,7 @@ namespace osmscout {
       return width;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -952,6 +960,7 @@ namespace osmscout {
       return maxSpeed;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -1014,6 +1023,7 @@ namespace osmscout {
       return grade;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -1077,6 +1087,7 @@ namespace osmscout {
       return adminLevel;
     }
 
+    FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
 
@@ -1630,6 +1641,8 @@ namespace osmscout {
     FeatureValueBuffer();
     virtual ~FeatureValueBuffer();
 
+    void Set(const FeatureValueBuffer& other);
+
     void SetType(const TypeInfoRef& type);
 
     inline TypeInfoRef GetType() const
@@ -1657,7 +1670,7 @@ namespace osmscout {
     FeatureValue* GetValue(size_t idx) const;
 
 
-    void AllocateValue(size_t idx);
+    FeatureValue* AllocateValue(size_t idx);
     void FreeValue(size_t idx);
 
     void Parse(Progress& progress,
