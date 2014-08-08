@@ -33,8 +33,9 @@ namespace osmscout {
 
   static const char* valueChar="0123456789abcdef";
 
-  MapPainterSVG::MapPainterSVG()
-  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+  MapPainterSVG::MapPainterSVG(const StyleConfigRef& styleConfig)
+  : MapPainter(styleConfig,
+               new CoordBufferImpl<Vertex2D>()),
     coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
     stream(NULL),
     typeConfig(NULL)
@@ -559,19 +560,17 @@ namespace osmscout {
     stream << "          fill=\"" << GetColorValue(style.GetFillColor()) << "\"" << "/>" << std::endl;
   }
 
-  bool MapPainterSVG::DrawMap(const StyleConfig& styleConfig,
-                              const Projection& projection,
+  bool MapPainterSVG::DrawMap(const Projection& projection,
                               const MapParameter& parameter,
                               const MapData& data,
                               std::ostream& stream)
   {
     this->stream.rdbuf(stream.rdbuf());
-    typeConfig=styleConfig.GetTypeConfig();
+    typeConfig=styleConfig->GetTypeConfig();
 
     WriteHeader(projection.GetWidth(),projection.GetHeight());
 
-    Draw(styleConfig,
-         projection,
+    Draw(projection,
          parameter,
          data);
 

@@ -306,7 +306,9 @@ namespace osmscout {
 
   private:
     CoordBuffer               *coordBuffer;
+
   protected:
+    StyleConfigRef            styleConfig;
     /**
        Scratch variables for path optimization algorithm
      */
@@ -721,14 +723,14 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const MapData& data);
 
-    bool Draw(const StyleConfig& styleConfig,
-              const Projection& projection,
+    bool Draw(const Projection& projection,
               const MapParameter& parameter,
               const MapData& data);
     //@}
 
   public:
-    MapPainter(CoordBuffer *buffer);
+    MapPainter(const StyleConfigRef& styleConfig,
+               CoordBuffer *buffer);
     virtual ~MapPainter();
   };
 }

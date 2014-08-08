@@ -31,8 +31,9 @@
 
 namespace osmscout {
 
-  MapPainterQt::MapPainterQt()
-  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+  MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
+  : MapPainter(styleConfig,
+               new CoordBufferImpl<Vertex2D>()),
     coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
     painter(NULL)
   {
@@ -814,8 +815,7 @@ namespace osmscout {
 
   }
 
-  bool MapPainterQt::DrawMap(const StyleConfig& styleConfig,
-                             const Projection& projection,
+  bool MapPainterQt::DrawMap(const Projection& projection,
                              const MapParameter& parameter,
                              const MapData& data,
                              QPainter* painter)
@@ -825,8 +825,7 @@ namespace osmscout {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
 
-    Draw(styleConfig,
-         projection,
+    Draw(projection,
          parameter,
          data);
 

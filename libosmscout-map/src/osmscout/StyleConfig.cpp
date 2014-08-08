@@ -19,7 +19,19 @@
 
 #include <osmscout/StyleConfig.h>
 
+#include <string.h>
+
 #include <set>
+
+#include <iostream>
+#include <sstream>
+
+#include <osmscout/system/Assert.h>
+
+#include <osmscout/util/File.h>
+
+#include <osmscout/oss/Parser.h>
+#include <osmscout/oss/Scanner.h>
 
 namespace osmscout {
 
@@ -2218,5 +2230,56 @@ namespace osmscout {
                lineStyle);
     }
   }
+
+  bool StyleConfig::Load(const std::string& styleFile)
+  {
+    FileOffset fileSize;
+    FILE*      file;
+    bool       success=false;
+
+    if (!GetFileSize(styleFile,fileSize)) {
+      std::cerr << "Cannot get size of file '" << styleFile << "'" << std::endl;
+
+      return false;
+    }
+
+    file=fopen(styleFile.c_str(),"rb");
+    if (file==NULL) {
+      std::cerr << "Cannot open file '" << styleFile << "'" << std::endl;
+
+      return false;
+    }
+
+    unsigned char* content=new unsigned char[fileSize];
+
+    if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
+      std::cerr << "Cannot load file '" << styleFile << "'" << std::endl;
+      delete [] content;
+      fclose(file);
+
+      return NULL;
+    }
+
+    fclose(file);
+
+    oss::Scanner *scanner=new oss::Scanner(content,
+                                           fileSize);
+    oss::Parser  *parser=new oss::Parser(scanner,
+                                         *this);
+
+    delete [] content;
+
+    parser->Parse();
+
+    success=!parser->errors->hasErrors;
+
+    delete parser;
+    delete scanner;
+
+    Postprocess();
+
+    return success;
+  }
+
 }
 

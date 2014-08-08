@@ -43,8 +43,9 @@ namespace osmscout {
      std::cerr << "Tessellation Error: " << estring << std::endl;
   }
 
-  MapPainterOpenGL::MapPainterOpenGL()
-  : MapPainter(new CoordBufferImpl<Vertex3D>()),
+  MapPainterOpenGL::MapPainterOpenGL(const StyleConfigRef& styleConfig)
+  : MapPainter(styleConfig,
+               new CoordBufferImpl<Vertex3D>()),
     coordBuffer((CoordBufferImpl<Vertex3D>*)transBuffer.buffer),
     tesselator(gluNewTess())
   {
@@ -275,13 +276,11 @@ namespace osmscout {
     glEnd();
   }
 
-  bool MapPainterOpenGL::DrawMap(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                const MapParameter& parameter,
-                                const MapData& data)
+  bool MapPainterOpenGL::DrawMap(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const MapData& data)
   {
-    Draw(styleConfig,
-         projection,
+    Draw(projection,
          parameter,
          data);
 

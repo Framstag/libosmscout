@@ -37,8 +37,9 @@
 
 namespace osmscout {
 
-  MapPainterAgg::MapPainterAgg()
-  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+  MapPainterAgg::MapPainterAgg(const StyleConfigRef& styleConfig)
+  : MapPainter(styleConfig,
+               new CoordBufferImpl<Vertex2D>()),
     coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
   {
     // no code
@@ -715,8 +716,7 @@ namespace osmscout {
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
   }
 
-  bool MapPainterAgg::DrawMap(const StyleConfig& styleConfig,
-                              const Projection& projection,
+  bool MapPainterAgg::DrawMap(const Projection& projection,
                               const MapParameter& parameter,
                               const MapData& data,
                               AggPixelFormat* pf)
@@ -736,8 +736,7 @@ namespace osmscout {
 
     convTextContours= new AggTextContourConverter(*convTextCurves);
 
-    Draw(styleConfig,
-         projection,
+    Draw(projection,
          parameter,
          data);
 

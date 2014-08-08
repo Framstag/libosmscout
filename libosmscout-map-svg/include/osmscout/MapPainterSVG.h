@@ -159,12 +159,11 @@ namespace osmscout {
                   const AreaData& area);
 
   public:
-    MapPainterSVG();
+    MapPainterSVG(const StyleConfigRef& styleConfig);
     virtual ~MapPainterSVG();
 
 
-    bool DrawMap(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
                  std::ostream& stream);

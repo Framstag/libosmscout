@@ -1178,7 +1178,7 @@ namespace osmscout {
    * the case, if there is excactly one match in the style sheet. If there are multiple matches a new style has to be
    * allocated and composed from all matches.
    */
-  class OSMSCOUT_MAP_API StyleConfig
+  class OSMSCOUT_MAP_API StyleConfig : public Referencable
   {
   private:
     TypeConfigRef                              typeConfig;
@@ -1353,7 +1353,11 @@ namespace osmscout {
     void GetCoastlineLineStyle(const Projection& projection,
                                double dpi,
                                LineStyleRef& lineStyle) const;
+
+    bool Load(const std::string& styleFile);
   };
+
+  typedef Ref<StyleConfig> StyleConfigRef;
 }
 
 #endif

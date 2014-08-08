@@ -178,9 +178,14 @@ namespace osmscout {
     this->breaker=breaker;
   }
 
-  MapPainter::MapPainter(CoordBuffer *buffer)
+  MapPainter::MapPainter(const StyleConfigRef& styleConfig,
+                         CoordBuffer *buffer)
   : coordBuffer(buffer),
-    transBuffer(coordBuffer)
+    styleConfig(styleConfig),
+    transBuffer(coordBuffer),
+    labelSpace(1.0),
+    shieldLabelSpace(1.0),
+    sameLabelSpace(1.0)
   {
     tunnelDash.push_back(0.4);
     tunnelDash.push_back(0.4);
@@ -1722,8 +1727,7 @@ namespace osmscout {
     }
   }
 
-  bool MapPainter::Draw(const StyleConfig& styleConfig,
-                        const Projection& projection,
+  bool MapPainter::Draw(const Projection& projection,
                         const MapParameter& parameter,
                         const MapData& data)
   {

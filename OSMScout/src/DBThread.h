@@ -97,10 +97,10 @@ private:
   osmscout::RouterParameter    routerParameter;
   osmscout::RoutingServiceRef  router;
 
-  osmscout::StyleConfig        *styleConfig;
+  osmscout::StyleConfigRef     styleConfig;
 
   osmscout::MapData            data;
-  osmscout::MapPainterQt       painter;
+  osmscout::MapPainterQt       *painter;
   osmscout::RoutePostprocessor routePostprocessor;
   QString                      iconDirectory;
 

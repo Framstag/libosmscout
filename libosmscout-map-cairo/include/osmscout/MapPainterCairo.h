@@ -138,12 +138,11 @@ namespace osmscout {
                   const AreaData& area);
 
   public:
-    MapPainterCairo();
+    MapPainterCairo(const StyleConfigRef& styleConfig);
     virtual ~MapPainterCairo();
 
 
-    bool DrawMap(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
                  cairo_t *draw);

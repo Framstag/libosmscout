@@ -25,8 +25,6 @@
 #include <QApplication>
 #include <QMutexLocker>
 
-#include <osmscout/StyleConfigLoader.h>
-
 #include <osmscout/util/StopClock.h>
 
 QBreaker::QBreaker()
@@ -59,7 +57,7 @@ DBThread::DBThread(const SettingsRef& settings)
    database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
-   styleConfig(NULL),
+   painter(NULL),
    iconDirectory(),
    currentImage(NULL),
    currentLat(0.0),
@@ -127,9 +125,13 @@ void DBThread::Initialize()
     if (typeConfig.Valid()) {
       styleConfig=new osmscout::StyleConfig(typeConfig);
 
-	  if (!osmscout::LoadStyleConfig(stylesheetFilename.toLocal8Bit().data(),
-                                   *styleConfig)) {
-        delete styleConfig;
+      delete painter;
+      painter=NULL;
+
+      if (styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+        painter=new osmscout::MapPainterQt(styleConfig);
+      }
+      else {
         styleConfig=NULL;
       }
     }
@@ -211,7 +213,7 @@ void DBThread::TriggerMapRendering()
   currentMagnification=request.magnification;
 
   if (database->IsOpen() &&
-      styleConfig!=NULL) {
+      styleConfig.Valid()) {
     osmscout::MercatorProjection  projection;
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
@@ -292,11 +294,10 @@ void DBThread::TriggerMapRendering()
     p->setRenderHint(QPainter::TextAntialiasing);
     p->setRenderHint(QPainter::SmoothPixmapTransform);
 
-    painter.DrawMap(*styleConfig,
-                    projection,
-                    drawParameter,
-                    data,
-                    p);
+    painter->DrawMap(projection,
+                     drawParameter,
+                     data,
+                     p);
 
     delete p;
 
@@ -306,7 +307,7 @@ void DBThread::TriggerMapRendering()
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
   }
   else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+    std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig.Valid()) << std::endl;
 
     QPainter *p=NULL;
 

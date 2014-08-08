@@ -317,8 +317,9 @@ namespace osmscout {
   }
 #endif
 
-  MapPainterCairo::MapPainterCairo()
-  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+  MapPainterCairo::MapPainterCairo(const StyleConfigRef& styleConfig)
+  : MapPainter(styleConfig,
+               new CoordBufferImpl<Vertex2D>()),
     coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
   {
     // no code
@@ -1262,8 +1263,7 @@ namespace osmscout {
     cairo_fill(draw);
   }
 
-  bool MapPainterCairo::DrawMap(const StyleConfig& styleConfig,
-                                const Projection& projection,
+  bool MapPainterCairo::DrawMap(const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data,
                                 cairo_t *draw)
@@ -1272,8 +1272,7 @@ namespace osmscout {
 
     minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/parameter.GetDPI();
 
-    Draw(styleConfig,
-         projection,
+    Draw(projection,
          parameter,
          data);
 

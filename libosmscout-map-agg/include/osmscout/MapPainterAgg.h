@@ -149,12 +149,11 @@ namespace osmscout {
                   const AreaData& area);
 
   public:
-    MapPainterAgg();
+    MapPainterAgg(const StyleConfigRef& styleConfig);
     virtual ~MapPainterAgg();
 
 
-    bool DrawMap(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
                  AggPixelFormat* pf);
