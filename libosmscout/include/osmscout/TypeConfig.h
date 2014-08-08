@@ -217,6 +217,9 @@ namespace osmscout {
       return name;
     }
 
+    /**
+     * Returns the unique id of this tag
+     */
     inline TagId GetId() const
     {
       return id;
@@ -243,6 +246,8 @@ namespace osmscout {
     }
   };
 
+  typedef uint16_t FeatureId;
+
   /**
    * A feature combines one or multiple tags  to build information attribute for a type.
    *
@@ -254,15 +259,31 @@ namespace osmscout {
    */
   class OSMSCOUT_API Feature : public Referencable
   {
+  private:
+    FeatureId id;
+
   public:
     Feature();
     virtual ~Feature();
+
+    /**
+     * Set the id of this feature
+     */
+    void SetId(FeatureId id);
 
     /**
      * Does further initialization based on the current TypeConfig. For example
      * it registers Tags (and stores their TagId) for further processing.
      */
     virtual void Initialize(TypeConfig& typeConfig) = 0;
+
+    /**
+     * Returns the unique id of this feature
+     */
+    inline FeatureId GetId() const
+    {
+      return id;
+    }
 
     /**
      * Returns the name of the feature
@@ -1344,7 +1365,7 @@ namespace osmscout {
     size_t GetFeatureValueBufferSize() const;
 
     /**
-     * The Type Id of the given type
+     * Returns the unique id of this type
      */
     inline TypeId GetId() const
     {
@@ -1696,9 +1717,9 @@ namespace osmscout {
   private:
     std::vector<TagInfo>                      tags;
     std::vector<TypeInfoRef>                  types;
+    std::vector<FeatureRef>                   features;
 
     TagId                                     nextTagId;
-    TypeId                                    nextTypeId;
 
     OSMSCOUT_HASHMAP<std::string,TagId>       stringToTagMap;
     OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
@@ -1747,32 +1768,51 @@ namespace osmscout {
     TypeConfig();
     virtual ~TypeConfig();
 
+    /**
+     * Methods for dealing with tags
+     */
+    //@{
     TagId RegisterTagForInternalUse(const std::string& tagName);
     TagId RegisterTagForExternalUse(const std::string& tagName);
 
     TagId RegisterNameTag(const std::string& tagName, uint32_t priority);
     TagId RegisterNameAltTag(const std::string& tagName, uint32_t priority);
 
-    void RegisterFeature(const FeatureRef& feature);
-    FeatureRef GetFeature(const std::string& name) const;
-
-    TypeConfig& AddTypeInfo(const TypeInfoRef& typeInfo);
-
+    TagId GetTagId(const char* name) const;
+    const TagInfo& GetTagInfo(TagId id) const;
     const std::vector<TagInfo>& GetTags() const;
+
+    bool IsNameTag(TagId tag, uint32_t& priority) const;
+    bool IsNameAltTag(TagId tag, uint32_t& priority) const;
+
+    void ResolveTags(const std::map<TagId,std::string>& map,
+                     std::vector<Tag>& tags) const;
+    //@}
+
+    /**
+     * Methods for dealing with features. A feature is a attribute set based on parsed tags.
+     * Features can get assigned to a type.
+     */
+    //@{
+    void RegisterFeature(const FeatureRef& feature);
+
+    FeatureRef GetFeature(const std::string& name) const;
+    const FeatureRef& GetFeature(FeatureId id) const;
+    const std::vector<FeatureRef>& GetFeatures() const;
+    //@}
+
+    /**
+     * Methods for dealing with types.
+     */
+    //@{
+    TypeInfoRef RegisterType(const TypeInfoRef& typeInfo);
+
     const std::vector<TypeInfoRef>& GetTypes() const;
 
     TypeId GetMaxTypeId() const;
 
-    TagId GetTagId(const char* name) const;
 
-    const TagInfo& GetTagInfo(TagId id) const;
     const TypeInfoRef& GetTypeInfo(TypeId id) const;
-
-    void ResolveTags(const std::map<TagId,std::string>& map,
-                     std::vector<Tag>& tags) const;
-
-    bool IsNameTag(TagId tag, uint32_t& priority) const;
-    bool IsNameAltTag(TagId tag, uint32_t& priority) const;
 
     TypeInfoRef GetNodeType(const std::map<TagId,std::string>& tagMap) const;
 
@@ -1794,15 +1834,26 @@ namespace osmscout {
     void GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
     void GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
     void GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const;
+    //@}
 
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
     void RegisterSurfaceToGradeMapping(const std::string& surface,
                                        size_t grade);
     bool GetGradeForSurface(const std::string& surface,
                             size_t& grade) const;
+    //@}
 
+    /**
+     * Methods for loading/storing of type information from/to files.
+     */
+    //@{
     bool LoadFromOSTFile(const std::string& filename);
     bool LoadFromDataFile(const std::string& directory);
     bool StoreToDataFile(const std::string& directory) const;
+    //@}
   };
 
 

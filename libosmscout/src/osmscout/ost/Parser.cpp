@@ -251,7 +251,7 @@ void Parser::TYPE() {
 			Get();
 			TYPEOPTIONS(*typeInfo);
 		}
-		config.AddTypeInfo(typeInfo);
+		config.RegisterType(typeInfo);
 		
 }
 

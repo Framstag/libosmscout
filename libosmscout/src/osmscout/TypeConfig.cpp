@@ -258,6 +258,11 @@ namespace osmscout {
     // no code
   }
 
+  void Feature::SetId(FeatureId id)
+  {
+    this->id=id;
+  }
+
   FeatureInstance::FeatureInstance(const FeatureRef& feature,
                                    size_t index,
                                    size_t offset)
@@ -2019,8 +2024,7 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : nextTagId(0),
-     nextTypeId(0)
+   : nextTagId(0)
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
@@ -2079,7 +2083,7 @@ namespace osmscout {
     typeInfoIgnore=new TypeInfo();
     typeInfoIgnore->SetType("");
 
-    AddTypeInfo(typeInfoIgnore);
+    RegisterType(typeInfoIgnore);
 
     TypeInfoRef route(new TypeInfo());
 
@@ -2087,7 +2091,7 @@ namespace osmscout {
     route->SetType("_route")
           .CanBeWay(true);
 
-    AddTypeInfo(route);
+    RegisterType(route);
 
     TypeInfoRef tileLand(new TypeInfo());
 
@@ -2095,35 +2099,35 @@ namespace osmscout {
     tileLand->SetType("_tile_land")
               .CanBeArea(true);
 
-    AddTypeInfo(tileLand);
+    RegisterType(tileLand);
 
     TypeInfoRef tileSea(new TypeInfo());
 
     tileSea->SetType("_tile_sea")
              .CanBeArea(true);
 
-    AddTypeInfo(tileSea);
+    RegisterType(tileSea);
 
     TypeInfoRef tileCoast(new TypeInfo());
 
     tileCoast->SetType("_tile_coast")
                .CanBeArea(true);
 
-    AddTypeInfo(tileCoast);
+    RegisterType(tileCoast);
 
     TypeInfoRef tileUnknown(new TypeInfo());
 
     tileUnknown->SetType("_tile_unknown")
                 .CanBeArea(true);
 
-    AddTypeInfo(tileUnknown);
+    RegisterType(tileUnknown);
 
     TypeInfoRef tileCoastline(new TypeInfo());
 
     tileCoastline->SetType("_tile_coastline")
                    .CanBeWay(true);
 
-    AddTypeInfo(tileCoastline);
+    RegisterType(tileCoastline);
 
     typeTileLand=GetTypeId("_tile_land");
     typeTileSea=GetTypeId("_tile_sea");
@@ -2238,6 +2242,13 @@ namespace osmscout {
     assert(feature.Valid());
     assert(!feature->GetName().empty());
 
+    if (nameToFeatureMap.find(feature->GetName())!=nameToFeatureMap.end()) {
+      return;
+    }
+
+    feature->SetId(features.size());
+
+    features.push_back(feature);
     nameToFeatureMap[feature->GetName()]=feature;
 
     feature->Initialize(*this);
@@ -2255,12 +2266,19 @@ namespace osmscout {
     }
   }
 
-  TypeConfig& TypeConfig::AddTypeInfo(const TypeInfoRef& typeInfo)
+  const std::vector<FeatureRef>& TypeConfig::GetFeatures() const
+  {
+    return features;
+  }
+
+  TypeInfoRef TypeConfig::RegisterType(const TypeInfoRef& typeInfo)
   {
     assert(typeInfo.Valid());
 
-    if (nameToTypeMap.find(typeInfo->GetName())!=nameToTypeMap.end()) {
-      return *this;
+    auto existingType=nameToTypeMap.find(typeInfo->GetName());
+
+    if (existingType!=nameToTypeMap.end()) {
+      return existingType->second;
     }
 
     if ((typeInfo->CanBeArea() || typeInfo->CanBeNode()) &&
@@ -2268,32 +2286,23 @@ namespace osmscout {
       typeInfo->AddFeature(GetFeature(AddressFeature::NAME));
     }
 
-    if (typeInfo->GetId()==0) {
-      typeInfo->SetId(nextTypeId);
-
-      nextTypeId++;
-    }
-    else {
-      nextTypeId=std::max(nextTypeId,(TypeId)(typeInfo->GetId()+1));
-    }
-
-    //std::cout << "Type: " << typeInfo.GetId() << " " << typeInfo.GetName() << std::endl;
+    typeInfo->SetId(types.size());
 
     types.push_back(typeInfo);
     nameToTypeMap[typeInfo->GetName()]=typeInfo;
 
     idToTypeMap[typeInfo->GetId()]=typeInfo;
 
-    return *this;
+    return typeInfo;
   }
 
   TypeId TypeConfig::GetMaxTypeId() const
   {
-    if (nextTypeId==0) {
+    if (types.empty()) {
       return 0;
     }
     else {
-      return nextTypeId-1;
+      return types.size()-1;
     }
   }
 
@@ -2321,6 +2330,13 @@ namespace osmscout {
     assert(id<types.size());
 
     return types[id];
+  }
+
+  const FeatureRef& TypeConfig::GetFeature(FeatureId id) const
+  {
+    assert(id<features.size());
+
+    return features[id];
   }
 
   void TypeConfig::ResolveTags(const std::map<TagId,std::string>& map,
@@ -2743,6 +2759,8 @@ namespace osmscout {
      return false;
     }
 
+    // Tags
+
     uint32_t tagCount;
 
     if (!scanner.ReadNumber(tagCount)) {
@@ -2776,6 +2794,8 @@ namespace osmscout {
       }
     }
 
+    // Name Tags
+
     uint32_t nameTagCount;
 
     if (!scanner.ReadNumber(nameTagCount)) {
@@ -2802,6 +2822,8 @@ namespace osmscout {
         return false;
       }
     }
+
+    // Alternative Name Tags
 
     uint32_t nameAltTagCount;
 
@@ -2830,6 +2852,8 @@ namespace osmscout {
       }
     }
 
+    // Types
+
     uint32_t typeCount;
 
     if (!scanner.ReadNumber(typeCount)) {
@@ -2838,7 +2862,7 @@ namespace osmscout {
     }
 
     for (size_t i=1; i<=typeCount; i++) {
-      TypeId      id;
+      TypeId      requestedId;
       std::string name;
       bool        canBeNode;
       bool        canBeWay;
@@ -2856,7 +2880,7 @@ namespace osmscout {
       bool        ignore;
       bool        ignoreSeaLand;
 
-      if (!(scanner.ReadNumber(id) &&
+      if (!(scanner.ReadNumber(requestedId) &&
             scanner.Read(name) &&
             scanner.Read(canBeNode) &&
             scanner.Read(canBeWay) &&
@@ -2880,8 +2904,6 @@ namespace osmscout {
 
       TypeInfoRef typeInfo=new TypeInfo();
 
-      typeInfo->SetId(id);
-
       typeInfo->SetType(name);
 
       typeInfo->CanBeNode(canBeNode);
@@ -2899,6 +2921,8 @@ namespace osmscout {
       typeInfo->SetIgnore(pinWay );
       typeInfo->SetIgnore(ignoreSeaLand);
       typeInfo->SetIgnore(ignore);
+
+      // Type Features
 
       uint32_t featureCount;
 
@@ -2923,7 +2947,12 @@ namespace osmscout {
         typeInfo->AddFeature(feature);
       }
 
-      AddTypeInfo(typeInfo);
+      typeInfo=RegisterType(typeInfo);
+
+      if (typeInfo->GetId()!=requestedId) {
+        std::cerr << "Requested and actual name tag id do not match" << std::endl;
+        return false;
+      }
     }
 
     return !scanner.HasError() && scanner.Close();
