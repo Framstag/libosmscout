@@ -237,6 +237,11 @@ namespace osmscout {
     FeatureValue();
     virtual ~FeatureValue();
 
+    inline virtual std::string GetLabel() const
+    {
+      return "";
+    }
+
     virtual FeatureValue& operator=(const FeatureValue& other) = 0;
     virtual bool operator==(const FeatureValue& other) const = 0;
 
@@ -295,6 +300,11 @@ namespace osmscout {
     virtual bool HasValue() const
     {
       return GetValueSize()>0;
+    }
+
+    inline virtual bool HasLabel() const
+    {
+      return false;
     }
 
     virtual void AllocateValue(void* buffer) = 0;
@@ -370,6 +380,11 @@ namespace osmscout {
       return name;
     }
 
+    inline std::string GetLabel() const
+    {
+      return name;
+    }
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -387,6 +402,11 @@ namespace osmscout {
 
     size_t GetValueSize() const;
     void AllocateValue(void* buffer);
+
+    inline bool HasLabel() const
+    {
+      return true;
+    }
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
@@ -429,6 +449,11 @@ namespace osmscout {
       return nameAlt;
     }
 
+    inline std::string GetLabel() const
+    {
+      return nameAlt;
+    }
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -446,6 +471,11 @@ namespace osmscout {
 
     size_t GetValueSize() const;
     void AllocateValue(void* buffer);
+
+    inline bool HasLabel() const
+    {
+      return true;
+    }
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
@@ -488,6 +518,11 @@ namespace osmscout {
       return ref;
     }
 
+    inline std::string GetLabel() const
+    {
+      return ref;
+    }
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -508,6 +543,11 @@ namespace osmscout {
 
     size_t GetValueSize() const;
     void AllocateValue(void* buffer);
+
+    inline bool HasLabel() const
+    {
+      return true;
+    }
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
