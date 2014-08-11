@@ -1981,9 +1981,11 @@ namespace osmscout {
      canBeWay(false),
      canBeArea(false),
      canBeRelation(false),
+     isPath(false),
      canRouteFoot(false),
      canRouteBicycle(false),
      canRouteCar(false),
+     indexAsAddress(false),
      indexAsLocation(false),
      indexAsRegion(false),
      indexAsPOI(false),
@@ -2392,9 +2394,62 @@ namespace osmscout {
     }
 
     if ((typeInfo->CanBeArea() || typeInfo->CanBeNode()) &&
-        !typeInfo->HasFeature(AddressFeature::NAME)) {
-      typeInfo->AddFeature(featureLocation);
-      typeInfo->AddFeature(featureAddress);
+        typeInfo->GetIndexAsAddress()) {
+      if (!typeInfo->HasFeature(LocationFeature::NAME)) {
+        typeInfo->AddFeature(featureLocation);
+      }
+      if (!typeInfo->HasFeature(AddressFeature::NAME)) {
+        typeInfo->AddFeature(featureAddress);
+      }
+    }
+
+    // All ways have a layer
+    if (typeInfo->CanBeWay()) {
+      if (!typeInfo->HasFeature(LayerFeature::NAME)) {
+        typeInfo->AddFeature(featureLayer);
+      }
+    }
+
+    // All that is PATH-like automatically has a number of features,
+    // even if it is not routable
+    if (typeInfo->IsPath()) {
+      if (!typeInfo->HasFeature(WidthFeature::NAME)) {
+        typeInfo->AddFeature(featureWidth);
+      }
+      if (!typeInfo->HasFeature(GradeFeature::NAME)) {
+        typeInfo->AddFeature(featureGrade);
+      }
+      if (!typeInfo->HasFeature(BridgeFeature::NAME)) {
+        typeInfo->AddFeature(featureBridge);
+      }
+      if (!typeInfo->HasFeature(TunnelFeature::NAME)) {
+        typeInfo->AddFeature(featureTunnel);
+      }
+      if (!typeInfo->HasFeature(RoundaboutFeature::NAME)) {
+        typeInfo->AddFeature(featureRoundabout);
+      }
+    }
+
+    // Everything routable should have access information and max speed information
+    if (typeInfo->CanRoute()) {
+      if (!typeInfo->HasFeature(AccessFeature::NAME)) {
+        typeInfo->AddFeature(featureAccess);
+      }
+      if (!typeInfo->HasFeature(MaxSpeedFeature::NAME)) {
+        typeInfo->AddFeature(featureMaxSpeed);
+      }
+    }
+
+    // Something that has a name and is a POI automatically get the
+    // location and address features, too.
+    if (typeInfo->HasFeature(NameFeature::NAME) &&
+        typeInfo->GetIndexAsPOI()) {
+      if (!typeInfo->HasFeature(LocationFeature::NAME)) {
+        typeInfo->AddFeature(featureLocation);
+      }
+      if (!typeInfo->HasFeature(AddressFeature::NAME)) {
+        typeInfo->AddFeature(featureAddress);
+      }
     }
 
     typeInfo->SetId(types.size());
@@ -2979,9 +3034,11 @@ namespace osmscout {
       bool        canBeWay;
       bool        canBeArea;
       bool        canBeRelation;
+      bool        isPath;
       bool        canRouteFoot;
       bool        canRouteBicycle;
       bool        canRouteCar;
+      bool        indexAsAddress;
       bool        indexAsLocation;
       bool        indexAsRegion;
       bool        indexAsPOI;
@@ -2997,9 +3054,11 @@ namespace osmscout {
             scanner.Read(canBeWay) &&
             scanner.Read(canBeArea) &&
             scanner.Read(canBeRelation) &&
+            scanner.Read(isPath) &&
             scanner.Read(canRouteFoot) &&
             scanner.Read(canRouteBicycle) &&
             scanner.Read(canRouteCar) &&
+            scanner.Read(indexAsAddress) &&
             scanner.Read(indexAsLocation) &&
             scanner.Read(indexAsRegion) &&
             scanner.Read(indexAsPOI) &&
@@ -3021,9 +3080,11 @@ namespace osmscout {
       typeInfo->CanBeWay(canBeWay);
       typeInfo->CanBeArea(canBeArea);
       typeInfo->CanBeRelation(canBeRelation);
+      typeInfo->SetIsPath(isPath);
       typeInfo->CanRouteFoot(canRouteFoot);
       typeInfo->CanRouteBicycle(canRouteBicycle);
       typeInfo->CanRouteCar(canRouteCar);
+      typeInfo->SetIndexAsAddress(indexAsAddress);
       typeInfo->SetIndexAsLocation(indexAsLocation);
       typeInfo->SetIndexAsRegion(indexAsRegion);
       typeInfo->SetIndexAsPOI(indexAsPOI);
@@ -3141,9 +3202,11 @@ namespace osmscout {
       writer.Write(type->CanBeWay());
       writer.Write(type->CanBeArea());
       writer.Write(type->CanBeRelation());
+      writer.Write(type->IsPath());
       writer.Write(type->CanRouteFoot());
       writer.Write(type->CanRouteBicycle());
       writer.Write(type->CanRouteCar());
+      writer.Write(type->GetIndexAsAddress());
       writer.Write(type->GetIndexAsLocation());
       writer.Write(type->GetIndexAsRegion());
       writer.Write(type->GetIndexAsPOI());

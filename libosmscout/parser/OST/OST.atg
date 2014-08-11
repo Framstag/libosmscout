@@ -109,7 +109,6 @@ PRODUCTIONS
                 ]
 
                 [
-                  "OPTIONS"
                   TYPEOPTIONS<*typeInfo>
                 ]
 
@@ -444,41 +443,45 @@ PRODUCTIONS
                 .
 
   TYPEOPTION<TypeInfo& typeInfo>
-              =  ROUTE<typeInfo>
-               | "INDEX_LOC"         (. typeInfo.SetIndexAsLocation(true); .)
-               | "INDEX_REGION"      (. typeInfo.SetIndexAsRegion(true); .)
-               | "INDEX_POI"         (. typeInfo.SetIndexAsPOI(true); .)
-               | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .)
+              =  PATH<typeInfo>                                               // TODO: Only valid for WAY and AREA
+               | "LOCATION"          (. typeInfo.SetIndexAsLocation(true); .) // TODO: Only valid for WAY
+               | "ADMIN_REGION"      (. typeInfo.SetIndexAsRegion(true); .)   // TODO: Only valid for AREA
+               | "ADDRESS"           (. typeInfo.SetIndexAsAddress(true); .)  // TODO: Only valid for NODE and AREA
+               | "POI"               (. typeInfo.SetIndexAsPOI(true); .)      // TODO: Only valid for NODE and AREA
+               | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .) // TODO: Only valid for WAY AND AREA
                | "IGNORE"            (. typeInfo.SetIgnore(true); .)
-               | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)
-               | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)
+               | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)    // TODO: Only valid for AREA
+               | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)          // TODO: Only valid for WAY
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
                .
 
-  ROUTE<TypeInfo& typeInfo>
-              = "ROUTE"
-                "["
-                   [
-                     "FOOT"
-                     (.
-                       typeInfo.CanRouteFoot(true);
-                     .)
-                   ]
+  PATH<TypeInfo& typeInfo>
+              = "PATH"
+                (. typeInfo.SetIsPath(true); .)
+                [
+                  "["
+                     [
+                       "FOOT"
+                       (.
+                         typeInfo.CanRouteFoot(true);
+                       .)
+                     ]
 
-                   [
-                     "BICYCLE"
-                     (.
-                       typeInfo.CanRouteBicycle(true);
-                     .)
-                   ]
+                     [
+                       "BICYCLE"
+                       (.
+                         typeInfo.CanRouteBicycle(true);
+                       .)
+                     ]
 
-                   [
-                     "CAR"
-                     (.
-                       typeInfo.CanRouteCar(true);
-                     .)
-                   ]
-                "]"
+                     [
+                       "CAR"
+                       (.
+                         typeInfo.CanRouteCar(true);
+                       .)
+                     ]
+                  "]"
+                ]
                 .
 
   IDENT<std::string& value>

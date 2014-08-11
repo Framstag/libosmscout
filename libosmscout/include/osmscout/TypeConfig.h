@@ -1371,9 +1371,11 @@ namespace osmscout {
     bool                                 canBeWay;
     bool                                 canBeArea;
     bool                                 canBeRelation;
+    bool                                 isPath;
     bool                                 canRouteFoot;
     bool                                 canRouteBicycle;
     bool                                 canRouteCar;
+    bool                                 indexAsAddress;
     bool                                 indexAsLocation;
     bool                                 indexAsRegion;
     bool                                 indexAsPOI;
@@ -1559,6 +1561,21 @@ namespace osmscout {
     }
 
     /**
+     * If set to 'true', a node can be of this type.
+     */
+    inline TypeInfo& SetIsPath(bool isPath)
+    {
+      this->isPath=isPath;
+
+      return *this;
+    }
+
+    inline bool IsPath() const
+    {
+      return isPath;
+    }
+
+    /**
      * If set to 'true', an object of this type can be traveled by feet by default.
      */
     inline TypeInfo& CanRouteFoot(bool canBeRoute)
@@ -1626,7 +1643,22 @@ namespace osmscout {
     uint8_t GetDefaultAccess() const;
 
     /**
-     * Sets, if an object of this type should be indexed as a location.
+     * Set, if an object of this type should be indexed as an address.
+     */
+    inline TypeInfo& SetIndexAsAddress(bool indexAsAddress)
+    {
+      this->indexAsAddress=indexAsAddress;
+
+      return *this;
+    }
+
+    inline bool GetIndexAsAddress() const
+    {
+      return indexAsAddress;
+    }
+
+    /**
+     * Set, if an object of this type should be indexed as a location.
      */
     inline TypeInfo& SetIndexAsLocation(bool indexAsLocation)
     {
@@ -1641,7 +1673,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be indexed as a region.
+     * Set, if an object of this type should be indexed as a region.
      */
     inline TypeInfo& SetIndexAsRegion(bool indexAsRegion)
     {
@@ -1656,7 +1688,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be indexed as a POI.
+     * Set, if an object of this type should be indexed as a POI.
      */
     inline TypeInfo& SetIndexAsPOI(bool indexAsPOI)
     {
@@ -1671,7 +1703,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be optimized for low zoom.
+     * Set, if an object of this type should be optimized for low zoom.
      */
     inline TypeInfo& SetOptimizeLowZoom(bool optimize)
     {
@@ -1714,7 +1746,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be ignored for land/sea calculation.
+     * Set, if an object of this type should be ignored for land/sea calculation.
      */
     inline TypeInfo& SetIgnoreSeaLand(bool ignoreSeaLand)
     {

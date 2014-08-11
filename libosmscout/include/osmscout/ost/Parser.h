@@ -143,7 +143,7 @@ std::string Destring(const char* str)
 	void TAGISINCOND(const std::string& tagName,TagCondition*& condition);
 	void TYPEKIND(unsigned char& types);
 	void TYPEOPTION(TypeInfo& typeInfo);
-	void ROUTE(TypeInfo& typeInfo);
+	void PATH(TypeInfo& typeInfo);
 
   void Parse();
 };

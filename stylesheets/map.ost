@@ -4,13 +4,22 @@ OST
   Types:
     A type can be support for any of the following types: 
     * NODE
-    * WAY
+    * WAY: Ways automatically get assigned the following features: Layer
     * AREA
     * RELATION
 
   Meaning of the different OPTIONS:
-    ROUTE:
-      This way or area is routable for the given vehicles
+    PATH:
+      This way or area is a traversable path and possibly routable for the given vehicles.
+      If something is a path, the following features are automatically assigned:
+      * Width
+      * Grade
+      * Bridge
+      * Tunnel
+      * Roundabout 
+      If something is routable, the following features are automatically assigned:
+      * Access
+      * MaxSpeed
     OPTIMIZE_LOW_ZOOM:
       Optimize this area or way for idplaying in low zoom by
       reducing visible complexity
@@ -20,14 +29,23 @@ OST
       Tye should be handled as multipolygon even if type is not set to multipolygon.
     IGNORESEALAND:
       Ignore this type for calculation of land masses
-    INDEX_REGION:
+    ADMIN_REGION:
       The given area or node describes an administrate region
       that should be part of the region tree for the city/street
       index
-    INDEX_POI:
-      The given area, way or node is as POI and should be indexed
-      by its name in relation to the enclosing region.
-    INDEX_LOC:
+    POI:
+      The given area, way or node is a POI and should be indexed
+      by its name in relation to the enclosing region. If something is a POI and has the
+      feature "Name"
+      It automatically get the following features assigned:
+      * Location
+      * Address
+    ADDRESS:
+      Objects should be indexed as address  
+      It automatically get the following features assigned:
+      * Location
+      * Address
+    LOCATION:
       The given way or area should be indexed as location.  
     IGNORE:
       Ignore objects of this type
@@ -89,136 +107,139 @@ TYPES
   
   TYPE highway_motorway
     = WAY ("highway"=="motorway")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
   
   // Other roads mainly for cars
   
   TYPE highway_trunk
     = WAY ("highway"=="trunk")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
       
   TYPE highway_trunk_link
     = WAY ("highway"=="trunk_link")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
        
   TYPE highway_primary 
     = WAY ("highway"=="primary")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
       
   TYPE highway_primary_link
     = WAY ("highway"=="primary_link")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_secondary
     = WAY ("highway"=="secondary")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
       
   TYPE highway_secondary_link
     = WAY ("highway"=="secondary_link")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_tertiary
     = WAY ("highway"=="tertiary")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
       
   TYPE highway_tertiary_link
     = WAY ("highway"=="tertiary_link")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_unclassified
     = WAY ("highway"=="unclassified")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_road
     = WAY ("highway"=="road")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
       
   TYPE highway_residential
     = WAY ("highway"=="residential")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_living_street
     = WAY ("highway"=="living_street")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC
+      {Name, NameAlt}
+      PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_service
     = WAY AREA ("highway"=="service")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX_LOC PIN_WAY
+      {Name, NameAlt}
+      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
   
   // Ways with main designation different to car
   
   TYPE highway_track
     = WAY ("highway"=="track")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE] INDEX_LOC
+      {Name, NameAlt}
+      PATH[FOOT BICYCLE] LOCATION
       
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT] INDEX_LOC PIN_WAY
+      {Name, NameAlt}
+      PATH[FOOT] LOCATION PIN_WAY
       
   TYPE highway_services
     = NODE AREA ("highway"=="services")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE highway_bus_guideway
     = WAY ("highway"=="bus_guideway")
-      {Name, NameAlt, Ref, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
+      {Name, NameAlt, Ref}
+      PATH
     
   TYPE highway_path
     = WAY ("highway"=="path")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE] IGNORESEALAND
+      {Name, NameAlt}
+      PATH[FOOT BICYCLE] IGNORESEALAND
     
   TYPE highway_cycleway
     = WAY ("highway"=="cycleway")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[BICYCLE]
+      {Name, NameAlt}
+      PATH[BICYCLE]
       
   TYPE highway_footway
     = WAY AREA ("highway"=="footway")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT] INDEX_LOC PIN_WAY
+      {Name, NameAlt}
+      PATH[FOOT] LOCATION PIN_WAY
       
   TYPE highway_bridleway
     = WAY ("highway"=="bridleway")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
+      {Name, NameAlt}
+      PATH
     
   TYPE highway_byway // Obsolete in OSM
    = WAY ("highway"=="byway")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-     OPTIONS ROUTE[FOOT]
+      {Name, NameAlt}
+     PATH[FOOT]
      
   TYPE highway_steps
     = WAY ("highway"=="steps")
-      {Name, NameAlt, Access}
-      OPTIONS ROUTE[FOOT]
+      {Name, NameAlt}
+      PATH[FOOT]
       
   TYPE highway_mini_roundabout
     = NODE ("highway"=="mini_roundabout")
@@ -234,25 +255,25 @@ TYPES
     
   TYPE highway_construction
     = WAY ("highway"=="construction")
-      {Name, NameAlt}
+      {Name, NameAlt, Width}
     
   TYPE highway_roundabout
     = WAY AREA ("highway"=="roundabout")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[FOOT BICYCLE CAR] PIN_WAY
+      {Name, NameAlt}
+      PATH[FOOT BICYCLE CAR] PIN_WAY
     
   TYPE highway_motorway_junction
     = NODE ("highway"=="motorway_junction")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS ROUTE[CAR]
+      {Name, NameAlt, Ref}
+      PATH[CAR]
 
   TYPE highway_street_lamp // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
-      OPTIONS IGNORE 
+      IGNORE 
 
   TYPE speed_camera
     = NODE ("highway"=="speed_camera")
-      OPTIONS IGNORE
+      IGNORE
 
   //
   // Waterways and assorted
@@ -260,36 +281,37 @@ TYPES
   
   TYPE waterway_stream
     = WAY ("waterway"=="stream")
-      {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
       
   TYPE waterway_river
     = WAY ("waterway"=="river")
-      {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
       
   TYPE waterway_riverbank
     = AREA ("waterway"=="riverbank")
-      {Name, NameAlt}
+      {Name, NameAlt, Width}
     
   TYPE waterway_canal
     = WAY ("waterway"=="canal")
-      {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
       
   TYPE waterway_ditch
     = WAY ("waterway"=="ditch")
-      {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
       
   TYPE waterway_drain
     = WAY ("waterway"=="drain")
-      {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
       
   TYPE waterway_dock
     = NODE AREA ("waterway"=="dock")
-      {Name, NameAlt}
+      {Name, NameAlt, Width}
+      ADDRESS
     
   TYPE waterway_lock_gate
     = NODE ("waterway"=="lock_gate")
@@ -300,16 +322,17 @@ TYPES
   TYPE waterway_boatyard
     = NODE AREA ("waterway"=="boatyard")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE waterway_weir
     = NODE WAY ("waterway"=="weir")
-      {Name, NameAlt}
-      OPTIONS IGNORESEALAND
+      {Name, NameAlt, Width}
+      IGNORESEALAND
       
   TYPE waterway_dam
     = WAY AREA ("waterway"=="dam")
-      {Name, NameAlt}
-      OPTIONS IGNORESEALAND
+      {Name, NameAlt, Width}
+      IGNORESEALAND
 
   //
   // Railways and assorted
@@ -317,45 +340,45 @@ TYPES
   
   TYPE railway_rail
     = WAY ("railway"=="rail")
-      {Layer, Width, Bridge, Tunnel}
-      //OPTIONS OPTIMIZE_LOW_ZOOM
+      {Bridge, Tunnel, Width}
+      //OPTIMIZE_LOW_ZOOM
       
   TYPE railway_tram
     = WAY ("railway"=="tram")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel, Width}
     
   TYPE railway_light_rail
     = WAY ("railway"=="light_rail")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel, Width}
     
   TYPE railway_subway
     = WAY ("railway"=="subway")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel, Width}
     
   TYPE railway_preserved
     = WAY ("railway"=="preserved")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel, Width}
     
   TYPE railway_disused
     = WAY ("railway"=="disused")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel, Width}
     
   TYPE railway_abandoned
     = WAY ("railway"=="abandoned")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel, Width}
     
   TYPE railway_narrow_gauge
     = WAY ("railway"=="narrow_gauge")
-      {Layer, Width, Bridge, Tunnel}
+      PATH
     
   TYPE railway_monorail
     = WAY ("railway"=="monorail")
-      {Layer, Width, Bridge, Tunnel}
+      PATH
     
   TYPE railway_station
     = NODE AREA ("railway"=="station")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE railway_halt
     = NODE ("railway"=="halt")
@@ -377,13 +400,14 @@ TYPES
     
   TYPE railway_turntable
     = NODE AREA ("railway"=="turntable")
-      {Layer, Width, Bridge, Tunnel}
+      {Bridge, Tunnel}
 
   TYPE public_transport_platform
      = WAY AREA ("public_transport"=="platform" OR
                  "railway"=="platform" OR
                  "highway"=="platform")
-      {Name, NameAlt, Layer, Width, Bridge, Tunnel}
+      {Name, NameAlt}
+      PATH[FOOT]
 
   //
   // Water transport
@@ -392,7 +416,7 @@ TYPES
   TYPE route_ferry
     = WAY ("route"=="ferry")
       {Name, NameAlt}
-     OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+     OPTIMIZE_LOW_ZOOM IGNORESEALAND
 
   //
   // air transport
@@ -401,12 +425,12 @@ TYPES
   TYPE aeroway_aerodrome
     = NODE AREA ("aeroway"=="aerodrome")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE aeroway_terminal
     = NODE AREA ("aeroway"=="terminal")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE aeroway_helipad
     = NODE AREA ("aeroway"=="helipad")
@@ -426,6 +450,7 @@ TYPES
   TYPE aeroway_gate
     = NODE ("aeroway"=="gate")
       {Name, NameAlt}
+      ADDRESS
 
   //
   // Landuses
@@ -438,12 +463,12 @@ TYPES
   TYPE landuse_basin
     = NODE AREA ("landuse"=="basin")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
        
   TYPE landuse_brownfield
     = NODE AREA ("landuse"=="brownfield")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
        
   TYPE landuse_cemetery
     = AREA ("landuse"=="cemetery")
@@ -452,12 +477,12 @@ TYPES
   TYPE landuse_cemetery_sea
     = AREA ("landuse"=="cemetery" AND "cemetery"=="sea")
       {Name, NameAlt}
-      OPTIONS IGNORESEALAND
+      IGNORESEALAND
       
   TYPE landuse_commercial
     = NODE AREA ("landuse"=="commercial")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
        
   TYPE landuse_construction
     = NODE AREA ("landuse"=="construction")
@@ -466,12 +491,12 @@ TYPES
   TYPE landuse_farm
     = AREA ("landuse"=="farm")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_farmland
     = AREA ("landuse"=="farmland")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
     
   TYPE landuse_farmyard_building
     = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -484,7 +509,7 @@ TYPES
   TYPE landuse_forest
     = NODE AREA ("landuse"=="forest")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
     
   TYPE landuse_garages
     = AREA ("landuse"=="garages")
@@ -497,7 +522,7 @@ TYPES
   TYPE landuse_greenfield
     = NODE AREA ("landuse"=="greenfield")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_greenhouse_horticulture
     = AREA ("landuse"=="greenhouse_horticulture")
@@ -506,12 +531,12 @@ TYPES
   TYPE landuse_industrial
     = NODE AREA ("landuse"=="industrial")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_landfill
     = NODE AREA ("landuse"=="landfill")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_meadow
     = NODE AREA ("landuse"=="meadow")
@@ -520,16 +545,20 @@ TYPES
   TYPE landuse_military
     = NODE AREA ("landuse"=="military")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_orchard
     = NODE AREA ("landuse"=="orchard")
+      {Name, NameAlt}
+
+  TYPE landuse_piste
+    = NODE AREA ("landuse"=="piste")
       {Name, NameAlt}
     
   TYPE landuse_quarry
     = NODE AREA ("landuse"=="quarry")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_railway
     = AREA ("landuse"=="railway")
@@ -538,17 +567,17 @@ TYPES
   TYPE landuse_recreation_ground
     = NODE AREA ("landuse"=="recreation_ground")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_reservoir
     = NODE AREA ("landuse"=="reservoir")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_residential
     = NODE AREA ("landuse"=="residential")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE landuse_retail
     = NODE AREA ("landuse"=="retail")
@@ -568,7 +597,7 @@ TYPES
   TYPE landuse_wood
     = NODE AREA ("landuse"=="wood")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
 
   //
   // Natural
@@ -581,7 +610,12 @@ TYPES
   TYPE natural_beach
     = NODE AREA ("natural"=="beach")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
+
+  TYPE natural_bare_rock
+    = NODE AREA ("natural"=="bare_rock")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_cave_entrance
     = NODE AREA ("natural"=="cave_entrance")
@@ -589,37 +623,37 @@ TYPES
     
   TYPE natural_cliff
     = NODE WAY AREA ("natural"=="cliff")
-      {Name, NameAlt}
+      {Name, NameAlt, Width}
 
   TYPE natural_fell
     = NODE AREA ("natural"=="fell")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_glacier
     = NODE AREA ("natural"=="glacier")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_grassland
     = AREA ("natural"=="grassland")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_heath
     = NODE AREA ("natural"=="heath")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_land
     = NODE AREA ("natural"=="land")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_marsh
     = NODE AREA ("natural"=="marsh")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_mud
     = NODE AREA ("natural"=="mud")
@@ -640,7 +674,7 @@ TYPES
   TYPE natural_scrub
     = NODE AREA ("natural"=="scrub")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_spring
     = NODE ("natural"=="spring")
@@ -648,7 +682,7 @@ TYPES
     
   TYPE natural_tree
     = NODE ("natural"=="tree")
-      OPTIONS IGNORE // Too many for mobile?
+      IGNORE // Too many for mobile?
       
   TYPE natural_volcano
     = NODE ("natural"=="volcano")
@@ -657,27 +691,27 @@ TYPES
   TYPE natural_water
     = NODE AREA ("natural"=="water")
       {Name, NameAlt}
-      OPTIONS IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      IGNORESEALAND OPTIMIZE_LOW_ZOOM
       
   TYPE natural_wetland_marsh
     = NODE AREA ("natural"=="wetland" AND "wetland"=="marsh")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_wetland_tidalflat
     = NODE AREA ("natural"=="wetland" AND "wetland"=="tidalflat")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_wetland
     = NODE AREA ("natural"=="wetland")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE natural_wood
     = NODE AREA ("natural"=="wood")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
 
   //
   // Man made
@@ -689,7 +723,7 @@ TYPES
     
   TYPE man_made_pier
     = WAY AREA ("man_made"=="pier")
-      {Name, NameAlt}
+      {Name, NameAlt, Width}
 
   //
   // Leisure 
@@ -698,42 +732,47 @@ TYPES
   TYPE leisure_building
     = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-     OPTIONS INDEX_POI
+     POI
      
   TYPE leisure_sports_centre
     = NODE AREA ("leisure"=="sports_centre")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
-    
-  TYPE leisure_golf_course
-    = NODE AREA ("leisure"=="golf_course")
-      {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
-      
+      ADDRESS POI
+
   TYPE leisure_stadium
     = NODE AREA ("leisure"=="stadium")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
-      
+      ADDRESS POI
+
   TYPE leisure_track
     = NODE WAY AREA ("leisure"=="track")
-      {Name, NameAlt, Ref, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS PIN_WAY OPTIMIZE_LOW_ZOOM
+      {Name, NameAlt, Ref}
+      PATH[FOOT] PIN_WAY OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_pitch
     = NODE AREA ("leisure"=="pitch")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      ADDRESS OPTIMIZE_LOW_ZOOM
+                
+  TYPE leisure_golf_course
+    = NODE AREA ("leisure"=="golf_course")
+      {Name, NameAlt}
+      ADDRESS POI OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_water_park
     = NODE AREA ("leisure"=="water_park")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
-      
+      ADDRESS OPTIMIZE_LOW_ZOOM POI
+
+  TYPE leisure_swimming_pool
+    = NODE AREA ("leisure"=="swimming_pool")
+      {Name, NameAlt}
+      ADDRESS OPTIMIZE_LOW_ZOOM POI
+            
   TYPE leisure_marina
     = NODE AREA ("leisure"=="marina")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
+      ADDRESS OPTIMIZE_LOW_ZOOM POI
       
   TYPE leisure_slipway
     = NODE ("leisure"=="slipway")
@@ -742,7 +781,7 @@ TYPES
   TYPE leisure_fishing
     = NODE AREA ("leisure"=="fishing")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      ADDRESS OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_nature_reserve
     = NODE AREA ("leisure"=="nature_reserve")
@@ -751,7 +790,7 @@ TYPES
   TYPE leisure_park
     = NODE AREA ("leisure"=="park")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM INDEX_POI
+      OPTIMIZE_LOW_ZOOM POI
       
   TYPE leisure_playground
     = NODE AREA ("leisure"=="playground")
@@ -764,12 +803,12 @@ TYPES
   TYPE leisure_common
     = NODE AREA ("leisure"=="common")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
       
   TYPE leisure_ice_rink
     = NODE AREA ("leisure"=="ice_rink")
       {Name, NameAlt}
-      OPTIONS OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
 
   //
   // Amenity
@@ -779,17 +818,17 @@ TYPES
   TYPE amenity_atm
     = NODE AREA ("amenity"=="atm")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      POI
 
   TYPE amenity_bank_building
     = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      POI
       
   TYPE amenity_bank
     = NODE AREA ("amenity"=="bank")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_bicycle_parking_building
     = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -797,11 +836,11 @@ TYPES
     
   TYPE amenity_bicycle_parking
     = NODE WAY AREA ("amenity"=="bicycle_parking")
-      {Name, NameAlt}
+      {Name, NameAlt, Width}
 
   TYPE amenity_bench
     = NODE WAY ("amenity"=="bench")
-      OPTIONS IGNORE // Too many for mobile?
+      IGNORE // Too many for mobile?
     
   TYPE amenity_bus_station
     = NODE AREA ("amenity"=="bus_station")
@@ -810,82 +849,82 @@ TYPES
   TYPE amenity_cafe_building
     = AREA ("amenity"=="cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_cafe
     = NODE AREA ("amenity"=="cafe")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_fast_food_building
     = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_fast_food
     = NODE AREA ("amenity"=="fast_food")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_fuel_building
     = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_fuel
     = NODE ("amenity"=="fuel")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_grave_yard
     = NODE AREA ("amenity"=="grave_yard")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_hospital_building
     = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_hospital
     = NODE AREA ("amenity"=="hospital")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_kindergarten_building
     = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_kindergarten
     = NODE ("amenity"=="kindergarten")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_parking_building
     = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_parking
     = NODE AREA ("amenity"=="parking")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_pharmacy
     = NODE AREA ("amenity"=="pharmacy")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_post_office_building
     = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_post_office
     = NODE ("amenity"=="post_office")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_post_box
     = NODE ("amenity"=="post_box")
@@ -893,22 +932,22 @@ TYPES
   TYPE amenity_restaurant_building
     = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_restaurant
     = NODE AREA ("amenity"=="restaurant")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_school_building
     = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE amenity_school
     = NODE AREA ("amenity"=="school")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE amenity_taxi
     = NODE AREA ("amenity"=="taxi")
@@ -919,7 +958,7 @@ TYPES
   TYPE amenity_vending_machine
     = NODE ("amenity"=="vending_machine")
       {Name, NameAlt}
-      OPTIONS IGNORE // Too many for mobile?
+      IGNORE // Too many for mobile?
 
   // Churches
   TYPE christian_church_building
@@ -927,22 +966,24 @@ TYPES
             "religion"=="christian" AND
             EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE christian_church
     = NODE ("amenity"=="place_of_worship" AND
             "religion"=="christian")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   // Everything else is just an 'amenity' for now
   TYPE amenity_building
     = AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
+      ADDRESS
     
   TYPE amenity
     = NODE (EXISTS "amenity")
       {Name, NameAlt}
+      ADDRESS
 
   //
   // Shops
@@ -952,6 +993,7 @@ TYPES
   TYPE shop
     = NODE AREA (EXISTS "shop")
       {Name, NameAlt}
+      ADDRESS 
 
   //
   // Tourism
@@ -960,37 +1002,37 @@ TYPES
   TYPE tourism_aquarium
     = NODE AREA ("tourism"=="aquarium")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_attraction
     = NODE AREA ("tourism"=="attraction")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_artwork
     = NODE WAY AREA ("tourism"=="artwork")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS INDEX_POI
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}
+      ADDRESS POI
     
   TYPE tourism_camp_site
     = NODE AREA ("tourism"=="camp_site")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_caravan_site
     = NODE AREA ("tourism"=="caravan_site")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_picnic_site
     = NODE AREA ("tourism"=="picnic_site")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_theme_park
     = NODE AREA ("tourism"=="theme_park")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_viewpoint
     = NODE ("tourism"=="viewpoint")
@@ -999,95 +1041,97 @@ TYPES
   TYPE tourism_zoo
     = NODE AREA ("tourism"=="zoo")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_alpine_hut_building
     = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
+      ADDRESS
 
   TYPE tourism_alpine_hut
     = NODE AREA ("tourism"=="alpine_hut")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE tourism_chalet_building
     = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_chalet
     = NODE AREA ("tourism"=="chalet")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_guest_house_building
     = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_guest_house
     = NODE AREA ("tourism"=="guest_house")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_hostel_building
     = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_hostel
     = NODE AREA ("tourism"=="hostel")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_hotel_building
     = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_hotel
     = NODE AREA ("tourism"=="hotel")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_information_building
     = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_information
     = NODE AREA ("tourism"=="information")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_motel_building
     = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_motel
     = NODE AREA ("tourism"=="motel")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE tourism_museum_building
     = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_museum
     = NODE AREA ("tourism"=="museum")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism_building
     = AREA (EXISTS "tourism" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE tourism
     = NODE AREA (EXISTS "tourism")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   //
   // Historic
@@ -1096,77 +1140,77 @@ TYPES
   TYPE historic_castle_building
     = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic_castle
     = NODE AREA ("historic"=="castle")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic_manor_building
     = NODE AREA ("historic"=="manor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE historic_manor
     = NODE AREA ("historic"=="manor")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE historic_monument_building
     = NODE AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic_monument
     = NODE AREA ("historic"=="monument")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE historic_memorial_building
     = NODE AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic_memorial
     = NODE AREA ("historic"=="memorial")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
     
   TYPE historic_ruins_building
     = NODE AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic_ruins
     = NODE WAY AREA ("historic"=="ruins")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS INDEX_POI
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}
+      ADDRESS POI
        
   TYPE historic_archaeological_site
     = NODE WAY AREA ("historic"=="archaeological_site")
-      {Name, NameAlt, Access, Layer, Width, MaxSpeed, Grade, Bridge, Tunnel, Roundabout}
-      OPTIONS INDEX_POI
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}
+      ADDRESS POI
       
   TYPE historic_battlefield
     = NODE AREA ("historic"=="battlefield")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
       
   TYPE historic_wreck
     = NODE AREA ("historic"=="wreck")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic_building
     = NODE AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   TYPE historic
     = NODE AREA (EXISTS "historic")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      ADDRESS POI
 
   //
   // Military
@@ -1175,14 +1219,17 @@ TYPES
   TYPE military_airfield
     = NODE AREA ("military"=="airfield")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE military_bunker
     = NODE AREA ("military"=="bunker")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE military_barracks
     = NODE AREA ("military"=="barracks")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE military_danger_area
     = NODE AREA ("military"=="danger_area")
@@ -1195,190 +1242,232 @@ TYPES
   TYPE military_naval_base
     = NODE AREA ("military"=="naval_base")
       {Name, NameAlt}
+      ADDRESS
 
   //
   // Sport
+  // INFO: THsi is possibly nonsense, since these tags should not appear alone. See http://wiki.openstreetmap.org/wiki/Key:sport
   //
 
   TYPE sport_building
     = AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_9pin
     = NODE AREA ("sport"=="9pin")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_10pin
     = NODE AREA ("sport"=="10pin")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_archery
     = NODE AREA ("sport"=="archery")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_athletics
     = NODE AREA ("sport"=="athletics")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_australian_football
     = NODE AREA ("sport"=="australian_football")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_baseball
     = NODE AREA ("sport"=="baseball")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_basketball
     = NODE AREA ("sport"=="basketball")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_beachvolleyball
     = NODE AREA ("sport"=="beachvolleyball")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_boules
     = NODE AREA ("sport"=="boules")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_bowls
     = NODE AREA ("sport"=="bowls")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_canoe
     = NODE AREA ("sport"=="canoe")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_chess
     = NODE AREA ("sport"=="chess")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_climbing
     = NODE AREA ("sport"=="climbing")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_cricket
     = NODE AREA ("sport"=="cricket")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_cricket_nets
     = NODE AREA ("sport"=="cricket_nets")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_croquet
     = NODE AREA ("sport"=="croquet")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_cycling
     = NODE AREA ("sport"=="cycling")
       {Name, NameAlt}
-    
-  TYPE sport_diving
-    = NODE AREA ("sport"=="diving")
-      {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_dog_racing
     = NODE AREA ("sport"=="dog_racing")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_equestrian
     = NODE AREA ("sport"=="equestrian")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_football
     = NODE AREA ("sport"=="football")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_golf
     = NODE AREA ("sport"=="golf")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_gymnastics
     = NODE AREA ("sport"=="gymnastics")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_hockey
     = NODE AREA ("sport"=="hockey")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_horse_racing
     = NODE AREA ("sport"=="horse_racing")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_motor
     = NODE AREA ("sport"=="motor")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_multi
     = NODE AREA ("sport"=="multi")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_orienteering
     = NODE AREA ("sport"=="orienteering")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_paddle_tennis
     = NODE AREA ("sport"=="paddle_tennis")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_pelota
     = NODE AREA ("sport"=="pelota")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_raquet
     = NODE AREA ("sport"=="raquet")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_rowing
     = NODE AREA ("sport"=="rowing")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_rugby
     = NODE AREA ("sport"=="rugby")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_shooting
     = NODE AREA ("sport"=="shooting")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_skating
     = NODE AREA ("sport"=="skating")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_skateboard
     = NODE AREA ("sport"=="skateboard")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_skiing
     = NODE AREA ("sport"=="skiing")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_soccer 
     = NODE AREA ("sport"=="soccer")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_swimming
     = NODE AREA ("sport"=="swimming")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_table_tenis
     = NODE AREA ("sport"=="table_tenis")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_team_handball
     = NODE AREA ("sport"=="team_handball")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_tennis
     = NODE AREA ("sport"=="tennis")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE sport_volleyball
     = NODE AREA ("sport"=="volleyball")
       {Name, NameAlt}
+      ADDRESS
 
   TYPE sport
     = NODE AREA (EXISTS "sport")
       {Name, NameAlt}
+      ADDRESS
 
   //
   // Power
@@ -1391,7 +1480,7 @@ TYPES
     = NODE ("power"=="pole")
     
   TYPE power_line
-    = WAY ("power"=="line") OPTIONS IGNORESEALAND
+    = WAY ("power"=="line") IGNORESEALAND
     
   TYPE power_minor_line
     = WAY ("power"=="minor_line")
@@ -1399,14 +1488,16 @@ TYPES
   TYPE power_station
     = NODE AREA ("power"=="station")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE power_sub_station
     = NODE AREA ("power"=="sub_station")
       {Name, NameAlt}
+      ADDRESS
     
   TYPE power_generator
     = NODE AREA ("power"=="generator")
-      {Address}
+      ADDRESS
 
   //
   // Regions, locations, cities stuff
@@ -1417,7 +1508,7 @@ TYPES
     = WAY AREA ("boundary"=="administrative") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative")
       {Name, NameAlt, AdminLevel}
-      OPTIONS MULTIPOLYGON IGNORESEALAND
+      MULTIPOLYGON IGNORESEALAND
 
   TYPE place_continent
     = NODE AREA ("place"=="continent")
@@ -1443,42 +1534,42 @@ TYPES
   TYPE place_millioncity
     = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000)
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
       
   TYPE place_bigcity
     = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">100000)
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
       
   TYPE place_city
     = NODE AREA ("place"=="city")
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
     
   TYPE place_town
     = NODE AREA ("place"=="town")
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
     
   TYPE place_village
     = NODE AREA ("place"=="village")
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
     
   TYPE place_hamlet
     = NODE AREA ("place"=="hamlet")
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
     
   TYPE place_suburb
     = NODE AREA ("place"=="suburb")
       {Name, NameAlt}
-      OPTIONS INDEX_REGION
+      ADMIN_REGION
 
   TYPE place_locality
     = NODE AREA ("place"=="locality")
       {Name, NameAlt}
-      OPTIONS INDEX_POI
+      POI
     
   TYPE place_island
     = NODE AREA ("place"=="island")
@@ -1490,16 +1581,16 @@ TYPES
 
   TYPE building_garage
     = AREA ("building"=="garage")
-      {Address}
     
   TYPE building
     = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
+      ADDRESS
 
   // Addresses
   TYPE address
     = NODE AREA (EXISTS "addr:street" AND EXISTS "addr:housenumber")
-      {Address}
+      ADDRESS
      
   //
   //
@@ -1508,134 +1599,135 @@ TYPES
   // Currently not supported by stylesheet
   TYPE barrier_hedge
     = WAY AREA ("barrier"=="hedge")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_fence
     = WAY AREA ("barrier"=="fence")
-      OPTIONS IGNORESEALAND
+      IGNORESEALAND
     
   TYPE barrier_wall
     = WAY AREA ("barrier"=="wall")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_ditch
     = WAY AREA ("barrier"=="ditch")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_retaining_wall
     = WAY AREA ("barrier"=="retaining_wall")
-      OPTIONS IGNORESEALAND IGNORE
+      IGNORESEALAND IGNORE
     
   TYPE barrier_city_wall
     = WAY AREA ("barrier"=="city_wall")
-      OPTIONS IGNORE
+      {Name, NameAlt, Width}
+      IGNORE
     
   TYPE barrier_bollard
     = NODE WAY ("barrier"=="bollard")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_cycle_barrier
     = NODE ("barrier"=="cycle_barrier")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_block
     = NODE ("barrier"=="block")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_cattle_grid
     = NODE ("barrier"=="cattle_grid")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_toll_booth
     = NODE ("barrier"=="toll_booth")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_entrance
     = NODE ("barrier"=="entrance")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_gate
     = NODE WAY ("barrier"=="gate")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_lift_gate
     = NODE ("barrier"=="lift_gate")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_stile
     = NODE ("barrier"=="stile")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_sally_port
     = NODE ("barrier"=="sally_port")
-      OPTIONS IGNORE
+      IGNORE
     
   TYPE barrier_kent_carriage_gate
     = NODE ("barrier"=="kent_carriage_gate")
-      OPTIONS IGNORE
+      IGNORE
 
   // Types we currently ignore
 
   // This does increase the size of nodes data too much 
-  TYPE building_entrance = NODE ("building"=="entrance" OR EXISTS "entrance") OPTIONS IGNORE  
+  TYPE building_entrance = NODE ("building"=="entrance" OR EXISTS "entrance") IGNORE  
 
-  TYPE street_any = RELATION ("type"=="street") OPTIONS IGNORE
-  TYPE tunnel_any = RELATION ("type"=="tunnel") OPTIONS IGNORE
-  TYPE bridge_any = RELATION ("type"=="bridge") OPTIONS IGNORE
-  TYPE dual_carriageway_any = RELATION ("type"=="dual_carriageway") OPTIONS IGNORE
-  TYPE waterway_any = RELATION ("type"=="waterway") OPTIONS IGNORE
+  TYPE street_any = RELATION ("type"=="street") IGNORE
+  TYPE tunnel_any = RELATION ("type"=="tunnel") IGNORE
+  TYPE bridge_any = RELATION ("type"=="bridge") IGNORE
+  TYPE dual_carriageway_any = RELATION ("type"=="dual_carriageway") IGNORE
+  TYPE waterway_any = RELATION ("type"=="waterway") IGNORE
 
-  TYPE wayparts_any = RELATION ("type"=="wayparts") OPTIONS IGNORE
-  TYPE associated_street_any = RELATION ("type"=="associatedStreet") OPTIONS IGNORE
-  TYPE enforcement_any = RELATION ("type"=="enforcement") OPTIONS IGNORE
-  TYPE roadAccess_any = RELATION ("type"=="roadAccess") OPTIONS IGNORE
-  TYPE junction_any = RELATION ("type"=="junction") OPTIONS IGNORE
-  TYPE label_any = RELATION ("type"=="label") OPTIONS IGNORE
-  TYPE composite_Attribute_any = RELATION ("type"=="composite_Attribute") OPTIONS IGNORE
-  TYPE segmented_tag_any = RELATION ("type"=="segmented_tag") OPTIONS IGNORE
+  TYPE wayparts_any = RELATION ("type"=="wayparts") IGNORE
+  TYPE associated_street_any = RELATION ("type"=="associatedStreet") IGNORE
+  TYPE enforcement_any = RELATION ("type"=="enforcement") IGNORE
+  TYPE roadAccess_any = RELATION ("type"=="roadAccess") IGNORE
+  TYPE junction_any = RELATION ("type"=="junction") IGNORE
+  TYPE label_any = RELATION ("type"=="label") IGNORE
+  TYPE composite_Attribute_any = RELATION ("type"=="composite_Attribute") IGNORE
+  TYPE segmented_tag_any = RELATION ("type"=="segmented_tag") IGNORE
 
-  TYPE building_any = RELATION ("type"=="building") OPTIONS IGNORE
-  TYPE related_building_any = RELATION ("type"=="relatedBuilding") OPTIONS IGNORE
-  TYPE site_any = RELATION ("type"=="site") OPTIONS IGNORE
-  TYPE station_any = RELATION ("type"=="station") OPTIONS IGNORE
-  TYPE railway_halt_any = RELATION ("type"=="railway_halt") OPTIONS IGNORE
+  TYPE building_any = RELATION ("type"=="building") IGNORE
+  TYPE related_building_any = RELATION ("type"=="relatedBuilding") IGNORE
+  TYPE site_any = RELATION ("type"=="site") IGNORE
+  TYPE station_any = RELATION ("type"=="station") IGNORE
+  TYPE railway_halt_any = RELATION ("type"=="railway_halt") IGNORE
 
-  TYPE line_any = RELATION ("type"=="line") OPTIONS IGNORE
-  TYPE public_transport_any = RELATION ("type"=="public_transport") OPTIONS IGNORE
-  TYPE public_transport_stop_area_group = RELATION ("public_transport"=="stop_area_group") OPTIONS IGNORE
-  TYPE collection_any = RELATION ("type"=="collection") OPTIONS IGNORE
-  TYPE network_any = RELATION ("type"=="network") OPTIONS IGNORE
-  TYPE route_any = RELATION ("type"=="route") OPTIONS IGNORE
-  TYPE routemaster_any = RELATION ("type"=="route_master") OPTIONS IGNORE
-  TYPE superroute_any = RELATION ("type"=="superroute") OPTIONS IGNORE
-  TYPE netzwolf_route_any = RELATION ("type"=="netzwolf-route") OPTIONS IGNORE
-  TYPE netzwolf_routemaster_any = RELATION ("type"=="netzwolf:route_master") OPTIONS IGNORE
+  TYPE line_any = RELATION ("type"=="line") IGNORE
+  TYPE public_transport_any = RELATION ("type"=="public_transport") IGNORE
+  TYPE public_transport_stop_area_group = RELATION ("public_transport"=="stop_area_group") IGNORE
+  TYPE collection_any = RELATION ("type"=="collection") IGNORE
+  TYPE network_any = RELATION ("type"=="network") IGNORE
+  TYPE route_any = RELATION ("type"=="route") IGNORE
+  TYPE routemaster_any = RELATION ("type"=="route_master") IGNORE
+  TYPE superroute_any = RELATION ("type"=="superroute") IGNORE
+  TYPE netzwolf_route_any = RELATION ("type"=="netzwolf-route") IGNORE
+  TYPE netzwolf_routemaster_any = RELATION ("type"=="netzwolf:route_master") IGNORE
 
-  TYPE address = RELATION ("type"=="address") OPTIONS IGNORE
-  TYPE border = AREA RELATION ("type"=="border") OPTIONS IGNORE
-  TYPE postal_code = AREA RELATION ("type"=="postal_code") OPTIONS IGNORE
-  TYPE organization = AREA RELATION ("type"=="organization") OPTIONS IGNORE
+  TYPE address = RELATION ("type"=="address") IGNORE
+  TYPE border = AREA RELATION ("type"=="border") IGNORE
+  TYPE postal_code = AREA RELATION ("type"=="postal_code") IGNORE
+  TYPE organization = AREA RELATION ("type"=="organization") IGNORE
 
-  TYPE boundary_civil = AREA ("boundary"=="civil")  OPTIONS IGNORE
-  TYPE boundary_national_park = AREA RELATION ("boundary"=="national_park") OPTIONS IGNORE
-  TYPE boundary_maritime = AREA RELATION ("boundary"=="maritime") OPTIONS IGNORE
-  TYPE boundary_political = AREA ("boundary"=="political") OPTIONS IGNORE
-  TYPE boundary_postal_code = AREA RELATION ("boundary"=="postal_code") OPTIONS IGNORE
+  TYPE boundary_civil = AREA ("boundary"=="civil")  IGNORE
+  TYPE boundary_national_park = AREA RELATION ("boundary"=="national_park") IGNORE
+  TYPE boundary_maritime = AREA RELATION ("boundary"=="maritime") IGNORE
+  TYPE boundary_political = AREA ("boundary"=="political") IGNORE
+  TYPE boundary_postal_code = AREA RELATION ("boundary"=="postal_code") IGNORE
 
-  TYPE place_any = RELATION ("type"=="place") OPTIONS IGNORE
-  TYPE amt_any = RELATION ("type"=="amt") OPTIONS IGNORE
-  TYPE suburb_any = RELATION ("type"=="suburb") OPTIONS IGNORE
-  TYPE city_any = RELATION ("type"=="city") OPTIONS IGNORE
-  TYPE town_any = RELATION ("type"=="town") OPTIONS IGNORE
-  TYPE municipality_any = RELATION ("type"=="municipality") OPTIONS IGNORE
-  TYPE district_any = RELATION ("type"=="district") OPTIONS IGNORE
-  TYPE county_any = RELATION ("type"=="county") OPTIONS IGNORE
-  TYPE state_any = RELATION ("type"=="state") OPTIONS IGNORE
-  TYPE tmc_any = AREA (EXISTS "TMC:cid_58:tabcd_1:Class") OR RELATION ("type"=="tmc" OR "type"=="TMC") OPTIONS IGNORE
-  TYPE lez_any = RELATION ("type"=="LEZ") OPTIONS IGNORE
-  TYPE group_any = RELATION ("type"=="group") OPTIONS IGNORE
-  TYPE set_any = RELATION ("type"=="set") OPTIONS IGNORE
-  TYPE compound_any = RELATION ("type"=="compound") OPTIONS IGNORE
+  TYPE place_any = RELATION ("type"=="place") IGNORE
+  TYPE amt_any = RELATION ("type"=="amt") IGNORE
+  TYPE suburb_any = RELATION ("type"=="suburb") IGNORE
+  TYPE city_any = RELATION ("type"=="city") IGNORE
+  TYPE town_any = RELATION ("type"=="town") IGNORE
+  TYPE municipality_any = RELATION ("type"=="municipality") IGNORE
+  TYPE district_any = RELATION ("type"=="district") IGNORE
+  TYPE county_any = RELATION ("type"=="county") IGNORE
+  TYPE state_any = RELATION ("type"=="state") IGNORE
+  TYPE tmc_any = AREA (EXISTS "TMC:cid_58:tabcd_1:Class") OR RELATION ("type"=="tmc" OR "type"=="TMC") IGNORE
+  TYPE lez_any = RELATION ("type"=="LEZ") IGNORE
+  TYPE group_any = RELATION ("type"=="group") IGNORE
+  TYPE set_any = RELATION ("type"=="set") IGNORE
+  TYPE compound_any = RELATION ("type"=="compound") IGNORE
 
 /*
   // Example for globally passing through additional tags to the tag vector of all objects

@@ -176,25 +176,25 @@ void Scanner::Init() {
 	keywords.set("TYPES", 11);
 	keywords.set("TYPE", 12);
 	keywords.set("OR", 16);
-	keywords.set("OPTIONS", 18);
-	keywords.set("TAGS", 19);
-	keywords.set("TAG", 20);
-	keywords.set("AND", 21);
-	keywords.set("IN", 29);
-	keywords.set("EXISTS", 32);
-	keywords.set("NODE", 33);
-	keywords.set("WAY", 34);
-	keywords.set("AREA", 35);
-	keywords.set("RELATION", 36);
-	keywords.set("INDEX_LOC", 37);
-	keywords.set("INDEX_REGION", 38);
-	keywords.set("INDEX_POI", 39);
+	keywords.set("TAGS", 18);
+	keywords.set("TAG", 19);
+	keywords.set("AND", 20);
+	keywords.set("IN", 28);
+	keywords.set("EXISTS", 31);
+	keywords.set("NODE", 32);
+	keywords.set("WAY", 33);
+	keywords.set("AREA", 34);
+	keywords.set("RELATION", 35);
+	keywords.set("LOCATION", 36);
+	keywords.set("ADMIN_REGION", 37);
+	keywords.set("ADDRESS", 38);
+	keywords.set("POI", 39);
 	keywords.set("OPTIMIZE_LOW_ZOOM", 40);
 	keywords.set("IGNORE", 41);
 	keywords.set("MULTIPOLYGON", 42);
 	keywords.set("PIN_WAY", 43);
 	keywords.set("IGNORESEALAND", 44);
-	keywords.set("ROUTE", 45);
+	keywords.set("PATH", 45);
 	keywords.set("FOOT", 46);
 	keywords.set("BICYCLE", 47);
 	keywords.set("CAR", 48);
@@ -387,36 +387,36 @@ Token* Scanner::NextToken() {
 			{t->kind = 17; break;}
 		case 12:
 			case_12:
-			{t->kind = 24; break;}
+			{t->kind = 23; break;}
 		case 13:
 			case_13:
-			{t->kind = 25; break;}
+			{t->kind = 24; break;}
 		case 14:
 			case_14:
-			{t->kind = 26; break;}
+			{t->kind = 25; break;}
 		case 15:
 			case_15:
-			{t->kind = 27; break;}
+			{t->kind = 26; break;}
 		case 16:
-			{t->kind = 30; break;}
+			{t->kind = 29; break;}
 		case 17:
-			{t->kind = 31; break;}
+			{t->kind = 30; break;}
 		case 18:
 			recEnd = pos; recKind = 13;
 			if (ch == '=') {AddCh(); goto case_13;}
 			else {t->kind = 13; break;}
 		case 19:
-			recEnd = pos; recKind = 22;
+			recEnd = pos; recKind = 21;
 			if (ch == '=') {AddCh(); goto case_14;}
-			else {t->kind = 22; break;}
+			else {t->kind = 21; break;}
 		case 20:
-			recEnd = pos; recKind = 23;
+			recEnd = pos; recKind = 22;
 			if (ch == '=') {AddCh(); goto case_12;}
-			else {t->kind = 23; break;}
+			else {t->kind = 22; break;}
 		case 21:
-			recEnd = pos; recKind = 28;
+			recEnd = pos; recKind = 27;
 			if (ch == '=') {AddCh(); goto case_15;}
-			else {t->kind = 28; break;}
+			else {t->kind = 27; break;}
 
   }
   AppendVal(t);
