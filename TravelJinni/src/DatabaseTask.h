@@ -59,7 +59,7 @@ private:
 
   osmscout::StyleConfigRef     styleConfig;
   osmscout::MapData            data;
-  osmscout::FastestPathRoutingProfile routingProfile;
+  osmscout::FastestPathRoutingProfileRef routingProfile;
   osmscout::RoutePostprocessor postprocessor;
   Lum::OS::Condition           condition;
   osmscout::MapPainterCairo    *painter;

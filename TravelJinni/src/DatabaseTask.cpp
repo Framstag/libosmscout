@@ -330,7 +330,8 @@ bool DatabaseTask::Open(const std::wstring& path)
 
   GetCarSpeedTable(speedMap);
 
-  routingProfile.ParametrizeForCar(*router->GetTypeConfig(),
+  routingProfile=new osmscout::FastestPathRoutingProfile(database->GetTypeConfig());
+  routingProfile->ParametrizeForCar(*router->GetTypeConfig(),
                                    speedMap,
                                    160.0);
 
@@ -350,6 +351,7 @@ void DatabaseTask::Close()
 
   router->Close(),
   database->Close();
+  routingProfile=NULL;
 }
 
 

@@ -31,8 +31,9 @@ namespace osmscout {
     // no code
   }
 
-  AbstractRoutingProfile::AbstractRoutingProfile()
-   : vehicle(vehicleCar),
+  AbstractRoutingProfile::AbstractRoutingProfile(const TypeConfigRef& typeConfig)
+   : typeConfig(typeConfig),
+     vehicle(vehicleCar),
      vehicleRouteNodeBit(RouteNode::usableByCar),
      minSpeed(0),
      maxSpeed(0),
@@ -145,6 +146,18 @@ namespace osmscout {
     }
 
     speeds[type]=speed;
+  }
+
+  ShortestPathRoutingProfile::ShortestPathRoutingProfile(const TypeConfigRef& typeConfig)
+  : AbstractRoutingProfile(typeConfig)
+  {
+    // no code
+  }
+
+  FastestPathRoutingProfile::FastestPathRoutingProfile(const TypeConfigRef& typeConfig)
+  : AbstractRoutingProfile(typeConfig)
+  {
+    // no code
   }
 }
 

@@ -28,6 +28,8 @@
 
 #include <osmscout/RouteNode.h>
 
+#include <osmscout/util/Reference.h>
+
 #include "Area.h"
 
 namespace osmscout {
@@ -38,7 +40,7 @@ namespace osmscout {
    * of taking a certain way. It thus may hold information about how fast ways can be used,
    * maximum speed of the traveling device etc...
    */
-  class OSMSCOUT_API RoutingProfile
+  class OSMSCOUT_API RoutingProfile : public Referencable
   {
   public:
     virtual ~RoutingProfile();
@@ -64,13 +66,17 @@ namespace osmscout {
                            double distance) const = 0;
   };
 
+  typedef Ref<RoutingProfile> RoutingProfileRef;
+
   /**
    * \ingroup Routing
-   * Common base class for our concrete profile instantiations.
+   * Common base class for our concrete profile instantiations. Offers a number of profile
+   * type independent interface implementations and helper methods.
    */
   class OSMSCOUT_API AbstractRoutingProfile : public RoutingProfile
   {
   protected:
+    TypeConfigRef       typeConfig;
     Vehicle             vehicle;
     uint8_t             vehicleRouteNodeBit;
     std::vector<double> speeds;
@@ -79,7 +85,7 @@ namespace osmscout {
     double              vehicleMaxSpeed;
 
   public:
-    AbstractRoutingProfile();
+    AbstractRoutingProfile(const TypeConfigRef& typeConfig);
 
     void SetVehicle(Vehicle vehicle);
     void SetVehicleMaxSpeed(double maxSpeed);
@@ -226,6 +232,8 @@ namespace osmscout {
   class OSMSCOUT_API ShortestPathRoutingProfile : public AbstractRoutingProfile
   {
   public:
+    ShortestPathRoutingProfile(const TypeConfigRef& typeConfig);
+
     inline double GetCosts(const RouteNode& currentNode,
                            size_t pathIndex) const
     {
@@ -250,6 +258,8 @@ namespace osmscout {
     }
   };
 
+  typedef Ref<ShortestPathRoutingProfile> ShortestPathRoutingProfileRef;
+
   /**
    * \ingroup Routing
    * Profile that defines costs base of the time the traveling device needs
@@ -258,6 +268,8 @@ namespace osmscout {
   class OSMSCOUT_API FastestPathRoutingProfile : public AbstractRoutingProfile
   {
   public:
+    FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
+
     inline double GetCosts(const RouteNode& currentNode,
                            size_t pathIndex) const
     {
@@ -311,6 +323,8 @@ namespace osmscout {
       return distance/speed;
     }
   };
+
+  typedef Ref<FastestPathRoutingProfile> FastestPathRoutingProfileRef;
 }
 
 #endif

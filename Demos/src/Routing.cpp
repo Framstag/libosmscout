@@ -397,7 +397,6 @@ static void DumpNameChangedDescription(size_t& lineCount,
 int main(int argc, char* argv[])
 {
   osmscout::Vehicle                         vehicle=osmscout::vehicleCar;
-  osmscout::FastestPathRoutingProfile       routingProfile;
   std::string                               map;
 
   double                                    startLat;
@@ -496,7 +495,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::RouterParameter routerParameter;
+  osmscout::FastestPathRoutingProfile routingProfile(database->GetTypeConfig());
+  osmscout::RouterParameter           routerParameter;
 
   if (!outputGPX) {
     routerParameter.SetDebugPerformance(true);

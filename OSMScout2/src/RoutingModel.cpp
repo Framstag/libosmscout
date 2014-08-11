@@ -401,10 +401,10 @@ void RoutingListModel::setStartAndTarget(Location* start,
 
   std::cout << "Routing from '" << start->getName().toLocal8Bit().data() << "' to '" << target->getName().toLocal8Bit().data() << "'" << std::endl;
 
-  osmscout::FastestPathRoutingProfile routingProfile;
+  osmscout::TypeConfigRef             typeConfig=DBThread::GetInstance()->GetTypeConfig();
+  osmscout::FastestPathRoutingProfile routingProfile(typeConfig);
   osmscout::Way                       routeWay;
   osmscout::Vehicle                   vehicle=osmscout::vehicleCar;//settings->GetRoutingVehicle();
-  osmscout::TypeConfigRef             typeConfig=DBThread::GetInstance()->GetTypeConfig();
 
   if (vehicle==osmscout::vehicleFoot) {
     routingProfile.ParametrizeForFoot(*typeConfig,
