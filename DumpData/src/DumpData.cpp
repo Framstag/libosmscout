@@ -262,6 +262,64 @@ static void DumpTags(const osmscout::TypeConfig* typeConfig,
    std::cout << "}" << std::endl;
 }
 
+static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessValue,
+                                   size_t indent)
+{
+  DumpIndent(indent);
+  std::cout << "Access {" << std::endl;
+
+  if (accessValue.IsOnewayForward()) {
+    DumpIndent(indent);
+    std::cout << "oneway: forward" << std::endl;
+  }
+  else if (accessValue.IsOnewayBackward()) {
+    DumpIndent(indent);
+    std::cout << "oneway: backward" << std::endl;
+  }
+
+  if (accessValue.CanRouteFoot()) {
+    DumpIndent(indent);
+    std::cout << "foot: both" << std::endl;
+  }
+  else if (accessValue.CanRouteFootForward()) {
+    DumpIndent(indent);
+    std::cout << "foot: forward" << std::endl;
+  }
+  else if (accessValue.CanRouteFootBackward()) {
+    DumpIndent(indent);
+    std::cout << "foot: backward" << std::endl;
+  }
+
+  if (accessValue.CanRouteBicycle()) {
+    DumpIndent(indent);
+    std::cout << "bicycle: both" << std::endl;
+  }
+  else if (accessValue.CanRouteBicycleForward()) {
+    DumpIndent(indent);
+    std::cout << "bicycle: forward" << std::endl;
+  }
+  else if (accessValue.CanRouteBicycleBackward()) {
+    DumpIndent(indent);
+    std::cout << "bicycle: backward" << std::endl;
+  }
+
+  if (accessValue.CanRouteCar()) {
+    DumpIndent(indent);
+    std::cout << "car: both" << std::endl;
+  }
+  else if (accessValue.CanRouteCarForward()) {
+    DumpIndent(indent);
+    std::cout << "car: forward" << std::endl;
+  }
+  else if (accessValue.CanRouteCarBackward()) {
+    DumpIndent(indent);
+    std::cout << "car: backward" << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
+}
+
 static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                                    size_t indent)
 {
@@ -305,53 +363,8 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
         else if (dynamic_cast<osmscout::AccessFeatureValue*>(value)!=NULL) {
           osmscout::AccessFeatureValue *accessValue=dynamic_cast<osmscout::AccessFeatureValue*>(value);
 
-          if (accessValue->IsOnewayForward()) {
-            DumpIndent(indent);
-            std::cout << "Access.oneway: forward" << std::endl;
-          }
-          else if (accessValue->IsOnewayBackward()) {
-            DumpIndent(indent);
-            std::cout << "Access.oneway: backward" << std::endl;
-          }
-
-          if (accessValue->CanRouteFoot()) {
-            DumpIndent(indent);
-            std::cout << "Access.foot: both" << std::endl;
-          }
-          else if (accessValue->CanRouteFootForward()) {
-            DumpIndent(indent);
-            std::cout << "Access.foot: forward" << std::endl;
-          }
-          else if (accessValue->CanRouteFootBackward()) {
-            DumpIndent(indent);
-            std::cout << "Access.foot: backward" << std::endl;
-          }
-
-          if (accessValue->CanRouteBicycle()) {
-            DumpIndent(indent);
-            std::cout << "Access.bicycle: both" << std::endl;
-          }
-          else if (accessValue->CanRouteBicycleForward()) {
-            DumpIndent(indent);
-            std::cout << "Access.bicycle: forward" << std::endl;
-          }
-          else if (accessValue->CanRouteBicycleBackward()) {
-            DumpIndent(indent);
-            std::cout << "Access.bicycle: backward" << std::endl;
-          }
-
-          if (accessValue->CanRouteCar()) {
-            DumpIndent(indent);
-            std::cout << "Access.car: both" << std::endl;
-          }
-          else if (accessValue->CanRouteCarForward()) {
-            DumpIndent(indent);
-            std::cout << "Access.car: forward" << std::endl;
-          }
-          else if (accessValue->CanRouteCarBackward()) {
-            DumpIndent(indent);
-            std::cout << "Access.car: backward" << std::endl;
-          }
+          DumpAccessFeatureValue(*accessValue,
+                                 indent);
         }
         else if (dynamic_cast<osmscout::LayerFeatureValue*>(value)!=NULL) {
           osmscout::LayerFeatureValue *layerValue=dynamic_cast<osmscout::LayerFeatureValue*>(value);
@@ -396,12 +409,21 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           std::cout << std::endl;
         }
       }
+      // Flag-like Features
       else {
         // We are just a flag...
         DumpIndent(indent);
         std::cout << meta.GetFeature()->GetName() << ": ";
-        std::cout << "true";
         std::cout << std::endl;
+      }
+    }
+    // Features with default value
+    else {
+      if (meta.GetFeature()->GetName()==osmscout::AccessFeature::NAME) {
+        osmscout::AccessFeatureValue accessValue(buffer.GetType()->GetDefaultAccess());
+
+        DumpAccessFeatureValue(accessValue,
+                               indent);
       }
     }
   }
