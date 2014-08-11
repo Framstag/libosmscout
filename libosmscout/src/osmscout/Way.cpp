@@ -453,6 +453,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Way::Read(const TypeConfig& /*typeConfig*/,
+                 FileScanner& scanner)
+  {
+    return Read(scanner);
+  }
+
   bool Way::ReadOptimized(FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
@@ -534,6 +540,12 @@ namespace osmscout {
     }
 
     return !writer.HasError();
+  }
+
+  bool Way::Write(const TypeConfig& /*typeConfig*/,
+                  FileWriter& writer) const
+  {
+    return Write(writer);
   }
 
   bool Way::WriteOptimized(FileWriter& writer) const

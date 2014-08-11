@@ -21,165 +21,9 @@
 
 namespace osmscout {
 
-  void NodeAttributes::SetFeatures(const TypeConfig& typeConfig,
-                                   const FeatureValueBuffer& buffer)
+  void Node::SetType(const TypeInfoRef& type)
   {
-    for (size_t i=0; i<buffer.GetFeatureCount(); i++) {
-      if (buffer.HasValue(i) &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-        FeatureValue* value=buffer.GetValue(i);
-
-        if (dynamic_cast<NameFeatureValue*>(value)!=NULL) {
-          NameFeatureValue* nameValue=dynamic_cast<NameFeatureValue*>(value);
-
-          name=nameValue->GetName();
-        }
-        else if (dynamic_cast<NameAltFeatureValue*>(value)!=NULL) {
-          NameAltFeatureValue* nameAltValue=dynamic_cast<NameAltFeatureValue*>(value);
-
-          nameAlt=nameAltValue->GetNameAlt();
-        }
-        else if (dynamic_cast<AddressFeatureValue*>(value)!=NULL) {
-          AddressFeatureValue* addressValue=dynamic_cast<AddressFeatureValue*>(value);
-
-          address=addressValue->GetAddress();
-
-          tags.push_back(Tag(typeConfig.tagAddrStreet,
-                             addressValue->GetLocation()));
-        }
-      }
-    }
-  }
-
-  void NodeAttributes::GetFlags(uint8_t& flags) const
-  {
-    flags=0;
-
-    if (!name.empty()) {
-      flags|=hasName;
-    }
-
-    if (!nameAlt.empty()) {
-      flags|=hasNameAlt;
-    }
-
-    if (!address.empty()) {
-      flags|=hasAddress;
-    }
-
-    if (!tags.empty()) {
-      flags|=hasTags;
-    }
-  }
-
-  bool NodeAttributes::Read(FileScanner& scanner)
-  {
-    scanner.Read(flags);
-
-    if (scanner.HasError()) {
-      return false;
-    }
-
-    if (flags & hasName) {
-      scanner.Read(name);
-    }
-
-    if (flags & hasNameAlt) {
-      scanner.Read(nameAlt);
-    }
-
-    if (flags & hasAddress) {
-      scanner.Read(address);
-    }
-
-    if (flags & hasTags) {
-      uint32_t tagCount;
-
-      scanner.ReadNumber(tagCount);
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        scanner.ReadNumber(tags[i].key);
-        scanner.Read(tags[i].value);
-      }
-    }
-
-    return !scanner.HasError();
-  }
-
-  bool NodeAttributes::Write(FileWriter& writer) const
-  {
-    uint8_t flags;
-
-    GetFlags(flags);
-
-    writer.Write(flags);
-
-    if (flags & hasName) {
-      writer.Write(name);
-    }
-
-    if (flags & hasNameAlt) {
-      writer.Write(nameAlt);
-    }
-
-    if (flags & hasAddress) {
-      writer.Write(address);
-    }
-
-    if (flags & hasTags) {
-      writer.WriteNumber((uint32_t)tags.size());
-
-      for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
-        writer.Write(tags[i].value);
-      }
-    }
-
-    return !writer.HasError();
-  }
-
-  bool NodeAttributes::operator==(const NodeAttributes& other) const
-  {
-    if (name!=other.name ||
-        nameAlt!=other.nameAlt ||
-        address!=other.address) {
-      return false;
-    }
-
-    if (tags.empty() && other.tags.empty()) {
-      return true;
-    }
-
-    if (tags.size()!=other.tags.size()) {
-      return false;
-    }
-
-    for (size_t t=0; t<tags.size(); t++) {
-      if (tags[t].key!=other.tags[t].key) {
-        return false;
-      }
-
-      if (tags[t].value!=other.tags[t].value) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  bool NodeAttributes::operator!=(const NodeAttributes& other) const
-  {
-    return !this->operator==(other);
-  }
-
-
-  void Node::SetType(TypeId type)
-  {
-    this->type=type;
+    featureValueBuffer.SetType(type);
   }
 
   void Node::SetCoords(const GeoCoord& coords)
@@ -187,14 +31,13 @@ namespace osmscout {
     this->coords=coords;
   }
 
-  void Node::SetFeatures(const TypeConfig& typeConfig,
-                         const FeatureValueBuffer& buffer)
+  void Node::SetFeatures(const FeatureValueBuffer& buffer)
   {
-    attributes.SetFeatures(typeConfig,
-                           buffer);
+    featureValueBuffer.Set(buffer);
   }
 
-  bool Node::Read(FileScanner& scanner)
+  bool Node::Read(const TypeConfig& typeConfig,
+                  FileScanner& scanner)
   {
     uint32_t tmpType;
 
@@ -203,23 +46,28 @@ namespace osmscout {
     }
 
     scanner.ReadNumber(tmpType);
-    type=(TypeId)tmpType;
+
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+
+    featureValueBuffer.SetType(type);
 
     scanner.ReadCoord(coords);
 
-    if (!attributes.Read(scanner)) {
+    if (!featureValueBuffer.Read(scanner)) {
       return false;
     }
 
     return !scanner.HasError();
   }
 
-  bool Node::Write(FileWriter& writer) const
+  bool Node::Write(const TypeConfig& /*typeConfig*/,
+                   FileWriter& writer) const
   {
-    writer.WriteNumber(type);
+    writer.WriteNumber(featureValueBuffer.GetTypeId());
+
     writer.WriteCoord(coords);
 
-    if (!attributes.Write(writer)) {
+    if (!featureValueBuffer.Write(writer)) {
       return false;
     }
 

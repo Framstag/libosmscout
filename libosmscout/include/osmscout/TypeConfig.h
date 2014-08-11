@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <limits>
 #include <list>
 #include <map>
 #include <set>
@@ -563,10 +564,72 @@ namespace osmscout {
                FeatureValue* value);
   };
 
-  class OSMSCOUT_API AddressFeatureValue : public FeatureValue
+  class OSMSCOUT_API LocationFeatureValue : public FeatureValue
   {
   private:
     std::string location;
+
+  public:
+    inline LocationFeatureValue()
+    {
+      // no code
+    }
+
+    inline LocationFeatureValue(const std::string& location)
+    : location(location)
+    {
+      // no code
+    }
+
+    inline void SetLocation(const std::string& location)
+    {
+      this->location=location;
+    }
+
+    inline std::string GetLocation() const
+    {
+      return location;
+    }
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API LocationFeature : public Feature
+  {
+  private:
+    TagId tagAddrStreet;
+    TagId tagAddrHouseNr;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    void AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
+               const TypeInfo& type,
+               size_t idx,
+               const std::map<TagId,std::string>& tags,
+               FeatureValueBuffer& buffer) const;
+
+    bool Read(FileScanner& scanner,
+              FeatureValue* value);
+    bool Write(FileWriter& writer,
+               FeatureValue* value);
+  };
+
+  class OSMSCOUT_API AddressFeatureValue : public FeatureValue
+  {
+  private:
     std::string address;
 
   public:
@@ -575,24 +638,15 @@ namespace osmscout {
       // no code
     }
 
-    inline AddressFeatureValue(const std::string& location,
-                               const std::string& address)
-    : location(location),
-      address(address)
+    inline AddressFeatureValue(const std::string& address)
+    : address(address)
     {
       // no code
     }
 
-    inline void SetAddress(const std::string& location,
-                           const std::string& address)
+    inline void SetAddress(const std::string& address)
     {
-      this->location=location;
       this->address=address;
-    }
-
-    inline std::string GetLocation() const
-    {
-      return location;
     }
 
     inline std::string GetAddress() const
@@ -1306,28 +1360,28 @@ namespace osmscout {
     };
 
   private:
-    TypeId                        id;
-    std::string                   name;
+    TypeId                               id;
+    std::string                          name;
 
-    std::list<TypeCondition>      conditions;
-    OSMSCOUT_HASHSET<std::string> featureSet;
-    std::vector<FeatureInstance>  features;
+    std::list<TypeCondition>             conditions;
+    OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
+    std::vector<FeatureInstance>         features;
 
-    bool                          canBeNode;
-    bool                          canBeWay;
-    bool                          canBeArea;
-    bool                          canBeRelation;
-    bool                          canRouteFoot;
-    bool                          canRouteBicycle;
-    bool                          canRouteCar;
-    bool                          indexAsLocation;
-    bool                          indexAsRegion;
-    bool                          indexAsPOI;
-    bool                          optimizeLowZoom;
-    bool                          multipolygon;
-    bool                          pinWay;
-    bool                          ignoreSeaLand;
-    bool                          ignore;
+    bool                                 canBeNode;
+    bool                                 canBeWay;
+    bool                                 canBeArea;
+    bool                                 canBeRelation;
+    bool                                 canRouteFoot;
+    bool                                 canRouteBicycle;
+    bool                                 canRouteCar;
+    bool                                 indexAsLocation;
+    bool                                 indexAsRegion;
+    bool                                 indexAsPOI;
+    bool                                 optimizeLowZoom;
+    bool                                 multipolygon;
+    bool                                 pinWay;
+    bool                                 ignoreSeaLand;
+    bool                                 ignore;
 
   private:
     TypeInfo(const TypeInfo& other);
@@ -1359,6 +1413,12 @@ namespace osmscout {
      * assigned to this type.
      */
     bool HasFeature(const std::string& featureName) const;
+
+    /**
+     * Return the feature with the given name
+     */
+    bool GetFeature(const std::string& name,
+                    size_t& index) const;
 
     /**
      * Return the feature at the given index
@@ -1777,6 +1837,7 @@ namespace osmscout {
     FeatureRef                                featureName;
     FeatureRef                                featureNameAlt;
     FeatureRef                                featureRef;
+    FeatureRef                                featureLocation;
     FeatureRef                                featureAddress;
     FeatureRef                                featureAccess;
     FeatureRef                                featureLayer;
@@ -1851,7 +1912,6 @@ namespace osmscout {
 
     TypeId GetMaxTypeId() const;
 
-
     const TypeInfoRef& GetTypeInfo(TypeId id) const;
 
     TypeInfoRef GetNodeType(const std::map<TagId,std::string>& tagMap) const;
@@ -1900,6 +1960,153 @@ namespace osmscout {
   //! \ingroup type
   //! Reference counted reference to a TypeConfig instance
   typedef Ref<TypeConfig> TypeConfigRef;
+
+  /**
+   * Helper template class for easy access to the value of a certain feature for objects of any type.
+   *
+   * Each type may have stored the feature in request at a different index. The FeatureValueReader
+   * caches the index for each type once in the constructor and later on allows access to the feature value
+   * in O(1) - without iterating of all feature(values) of an object.
+   */
+  template<class F, class V>
+  class OSMSCOUT_API FeatureValueReader
+  {
+  private:
+    std::vector<size_t> lookupTable;
+
+  public:
+    FeatureValueReader(const TypeConfig& typeConfig);
+
+    /**
+     * Returns the index of the Feature/FeatureValue within the given FeatureValueBuffer.
+     *
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @param index
+     *    The index
+     * @return
+     *    true, if there is a valid index 8because the type has such feature), else false
+     */
+    bool GetIndex(const FeatureValueBuffer& buffer,
+                  size_t& index) const;
+
+    /**
+     * Returns the FeatureValue for the given FeatureValueBuffer
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    A pointer to an instance if the Type and the instance do have the feature and its value is not NULL,
+     *    else NULL
+     */
+    V* GetValue(const FeatureValueBuffer& buffer) const;
+  };
+
+  template<class F, class V>
+  FeatureValueReader<F,V>::FeatureValueReader(const TypeConfig& typeConfig)
+  {
+    FeatureRef feature=typeConfig.GetFeature(F::NAME);
+
+    assert(feature->HasValue());
+
+    lookupTable.resize(typeConfig.GetMaxTypeId()+1,
+                       std::numeric_limits<size_t>::max());
+
+    for (auto type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(F::NAME,
+                          index)) {
+        lookupTable[type->GetId()]=index;
+      }
+    }
+  }
+
+  template<class F, class V>
+  bool FeatureValueReader<F,V>::GetIndex(const FeatureValueBuffer& buffer,
+                                         size_t& index) const
+  {
+    index=lookupTable[buffer.GetTypeId()];
+
+    return index!=std::numeric_limits<size_t>::max();
+  }
+
+  template<class F, class V>
+  V* FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer) const
+  {
+    size_t index=lookupTable[buffer.GetTypeId()];
+
+    if (index!=std::numeric_limits<size_t>::max() &&
+        buffer.HasValue(index)) {
+      return dynamic_cast<V*>(buffer.GetValue(index));
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  typedef FeatureValueReader<NameFeature,NameFeatureValue>         NameFeatureValueReader;
+  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>   NameAltFeatureValueReader;
+  typedef FeatureValueReader<RefFeature,RefFeatureValue>           RefFeatureValueReader;
+  typedef FeatureValueReader<LocationFeature,LocationFeatureValue> LocationFeatureValueReader;
+  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>   AddressFeatureValueReader;
+
+  template <class F, class V>
+  class OSMSCOUT_API FeatureLabelReader
+  {
+  private:
+    std::vector<size_t> lookupTable;
+
+  public:
+    FeatureLabelReader(const TypeConfig& typeConfig);
+
+    /**
+     * Returns the label of the given object
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    The label, if the given feature has a value and a label  or a empty string
+     */
+    std::string GetLabel(const FeatureValueBuffer& buffer) const;
+  };
+
+  template<class F, class V>
+  FeatureLabelReader<F,V>::FeatureLabelReader(const TypeConfig& typeConfig)
+  {
+    FeatureRef feature=typeConfig.GetFeature(F::NAME);
+
+    assert(feature->HasLabel());
+
+    lookupTable.resize(typeConfig.GetMaxTypeId()+1,
+                       std::numeric_limits<size_t>::max());
+
+    for (auto type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(F::NAME,
+                          index)) {
+        lookupTable[type->GetId()]=index;
+      }
+    }
+  }
+
+  template<class F, class V>
+  std::string FeatureLabelReader<F,V>::GetLabel(const FeatureValueBuffer& buffer) const
+  {
+    size_t index=lookupTable[buffer.GetTypeId()];
+
+    if (index!=std::numeric_limits<size_t>::max() &&
+        buffer.HasValue(index)) {
+      V* value=dynamic_cast<V*>(buffer.GetValue(index));
+
+      if (value!=NULL) {
+        return value->GetLabel();
+      }
+    }
+
+    return "";
+  }
+
+  typedef FeatureLabelReader<NameFeature,NameFeatureValue>         NameFeatureLabelReader;
 
   /**
    * \defgroup type Object type related data structures and services

@@ -239,8 +239,7 @@ namespace osmscout {
     }
 
     if (nodeDataFile.Invalid()) {
-      nodeDataFile=new NodeDataFile("nodes.dat",
-                                    parameter.GetNodeCacheSize());
+      nodeDataFile=new NodeDataFile(parameter.GetNodeCacheSize());
     }
 
     if (!nodeDataFile->IsOpen()) {

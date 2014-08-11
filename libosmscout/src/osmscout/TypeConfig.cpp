@@ -545,12 +545,106 @@ namespace osmscout {
     return writer.Write(v->GetRef());
   }
 
+  FeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const LocationFeatureValue& otherValue=dynamic_cast<const LocationFeatureValue&>(other);
+
+      location=otherValue.location;
+    }
+
+    return *this;
+  }
+
+  bool LocationFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const LocationFeatureValue& otherValue=dynamic_cast<const LocationFeatureValue&>(other);
+
+    return location==otherValue.location;
+  }
+
+  const char* const LocationFeature::NAME = "Location";
+
+  void LocationFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagAddrHouseNr=typeConfig.RegisterTagForInternalUse("addr:housenumber");
+    tagAddrStreet=typeConfig.RegisterTagForInternalUse("addr:street");
+  }
+
+  std::string LocationFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t LocationFeature::GetValueSize() const
+  {
+    return sizeof(LocationFeatureValue);
+  }
+
+  void LocationFeature::AllocateValue(void* buffer)
+  {
+    new (buffer) LocationFeatureValue();
+  }
+
+  void LocationFeature::Parse(Progress& /*progress*/,
+                              const TypeConfig& /*typeConfig*/,
+                              const ObjectOSMRef& /*object*/,
+                              const TypeInfo& /*type*/,
+                              size_t idx,
+                              const std::map<TagId,std::string>& tags,
+                              FeatureValueBuffer& buffer) const
+  {
+    std::map<TagId,std::string>::const_iterator street;
+    std::map<TagId,std::string>::const_iterator houseNr;
+
+    street=tags.find(tagAddrStreet);
+
+    if (street!=tags.end()) {
+      houseNr=tags.find(tagAddrHouseNr);
+    }
+    else {
+      houseNr=tags.end();
+    }
+
+    if (street!=tags.end() &&
+        !street->second.empty() &&
+        houseNr!=tags.end() &&
+        !houseNr->second.empty()) {
+      LocationFeatureValue* value=dynamic_cast<LocationFeatureValue*>(buffer.AllocateValue(idx));
+
+      value->SetLocation(street->second);
+    }
+  }
+
+  bool LocationFeature::Read(FileScanner& scanner,
+                            FeatureValue* value)
+  {
+    std::string location;
+
+    if (!scanner.Read(location)) {
+      return false;
+    }
+
+    LocationFeatureValue* locationFeature=static_cast<LocationFeatureValue*>(value);
+
+    locationFeature->SetLocation(location);
+
+    return true;
+  }
+
+  bool LocationFeature::Write(FileWriter& writer,
+                             FeatureValue* value)
+  {
+    LocationFeatureValue* v=dynamic_cast<LocationFeatureValue*>(value);
+
+    return writer.Write(v->GetLocation());
+  }
+
   FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const AddressFeatureValue& otherValue=dynamic_cast<const AddressFeatureValue&>(other);
 
-      location=otherValue.location;
       address=otherValue.address;
     }
 
@@ -561,8 +655,7 @@ namespace osmscout {
   {
     const AddressFeatureValue& otherValue=dynamic_cast<const AddressFeatureValue&>(other);
 
-    return location==otherValue.location &&
-           address==otherValue.address;
+    return address==otherValue.address;
   }
 
   const char* const AddressFeature::NAME = "Address";
@@ -614,26 +707,22 @@ namespace osmscout {
         !houseNr->second.empty()) {
       AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.AllocateValue(idx));
 
-      value->SetAddress(street->second,
-                        houseNr->second);
+      value->SetAddress(houseNr->second);
     }
   }
 
   bool AddressFeature::Read(FileScanner& scanner,
                             FeatureValue* value)
   {
-    std::string location;
     std::string address;
 
-    if (!scanner.Read(location) ||
-        !scanner.Read(address)) {
+    if (!scanner.Read(address)) {
       return false;
     }
 
     AddressFeatureValue* addressFeature=static_cast<AddressFeatureValue*>(value);
 
-    addressFeature->SetAddress(location,
-                               address);
+    addressFeature->SetAddress(address);
 
     return true;
   }
@@ -643,7 +732,7 @@ namespace osmscout {
   {
     AddressFeatureValue* v=dynamic_cast<AddressFeatureValue*>(value);
 
-    return writer.Write(v->GetLocation()) && writer.Write(v->GetAddress());
+    return writer.Write(v->GetAddress());
   }
 
   FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
@@ -1968,7 +2057,7 @@ namespace osmscout {
   TypeInfo& TypeInfo::AddFeature(const FeatureRef& feature)
   {
     assert(feature.Valid());
-    assert(featureSet.find(feature->GetName())==featureSet.end());
+    assert(nameToFeatureMap.find(feature->GetName())==nameToFeatureMap.end());
 
     size_t index=0;
     size_t offset=0;
@@ -1985,14 +2074,32 @@ namespace osmscout {
     features.push_back(FeatureInstance(feature,
                                        index,
                                        offset));
-    featureSet.insert(feature->GetName());
+    nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
 
     return *this;
   }
 
   bool TypeInfo::HasFeature(const std::string& featureName) const
   {
-    return featureSet.find(featureName)!=featureSet.end();
+    return nameToFeatureMap.find(featureName)!=nameToFeatureMap.end();
+  }
+
+  /**
+   * Return the feature with the given name
+   */
+  bool TypeInfo::GetFeature(const std::string& name,
+                            size_t& index) const
+  {
+    auto entry=nameToFeatureMap.find(name);
+
+    if (entry!=nameToFeatureMap.end()) {
+      index=entry->second;
+
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   size_t TypeInfo::GetFeatureValueBufferSize() const
@@ -2047,6 +2154,9 @@ namespace osmscout {
 
     featureRef=new RefFeature();
     RegisterFeature(featureRef);
+
+    featureLocation=new LocationFeature();
+    RegisterFeature(featureLocation);
 
     featureAddress=new AddressFeature();
     RegisterFeature(featureAddress);
@@ -2283,7 +2393,8 @@ namespace osmscout {
 
     if ((typeInfo->CanBeArea() || typeInfo->CanBeNode()) &&
         !typeInfo->HasFeature(AddressFeature::NAME)) {
-      typeInfo->AddFeature(GetFeature(AddressFeature::NAME));
+      typeInfo->AddFeature(featureLocation);
+      typeInfo->AddFeature(featureAddress);
     }
 
     typeInfo->SetId(types.size());

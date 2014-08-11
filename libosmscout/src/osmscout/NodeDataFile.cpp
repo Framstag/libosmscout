@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_NODEDATAFILE_H
-#define OSMSCOUT_NODEDATAFILE_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2014  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,26 +17,23 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Node.h>
-#include <osmscout/DataFile.h>
+#include <osmscout/NodeDataFile.h>
 
 namespace osmscout {
-  /**
-    \ingroup Database
-    Abstraction for getting cached access to the 'nodes.dat' file.
-    */
-  class NodeDataFile : public BaseDataFile<Node>
+
+  NodeDataFile::NodeDataFile(unsigned long dataCacheSize)
+  : BaseDataFile<Node>("nodes.dat",
+                       dataCacheSize)
   {
-  protected:
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  Node& data) const;
+    // no code
+  }
 
-  public:
-    NodeDataFile(unsigned long dataCacheSize);
-  };
-
-  typedef Ref<NodeDataFile> NodeDataFileRef;
+  bool NodeDataFile::ReadData(const TypeConfig& typeConfig,
+                              FileScanner& scanner,
+                              Node& data) const
+  {
+    return data.Read(typeConfig,
+                     scanner);
+  }
 }
 
-#endif

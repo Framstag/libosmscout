@@ -157,7 +157,7 @@ std::string GetObject(const osmscout::Database& database,
     if (database.GetNodeByOffset(object.GetFileOffset(),
                                  node)) {
       label+=" ";
-      label+=database.GetTypeConfig()->GetTypeInfo(node->GetType())->GetName();
+      label+=node->GetType()->GetName();
     }
   }
   else if (object.GetType()==osmscout::RefType::refArea) {

@@ -218,7 +218,8 @@ namespace osmscout {
                           const RegionAlias& location,
                           const GeoCoord& node);
 
-    bool IndexRegionNodes(const ImportParameter& parameter,
+    bool IndexRegionNodes(const TypeConfigRef& typeConfig,
+                          const ImportParameter& parameter,
                           Progress& progress,
                           const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                           RegionRef& rootRegion,

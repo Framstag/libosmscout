@@ -307,9 +307,13 @@ namespace osmscout {
     void SetLayerToMax();
 
     bool Read(FileScanner& scanner);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);
 
     bool Write(FileWriter& writer) const;
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
     bool WriteOptimized(FileWriter& writer) const;
   };
 

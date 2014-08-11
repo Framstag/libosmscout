@@ -499,15 +499,17 @@ namespace osmscout {
   /**
     Return the list of nodes ids with the given type.
     */
-  bool LocationIndexGenerator::IndexRegionNodes(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexRegionNodes(const TypeConfigRef& typeConfig,
+                                                const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                                                 RegionRef& rootRegion,
                                                 const RegionIndex& regionIndex)
   {
-    FileScanner scanner;
-    uint32_t    nodeCount;
-    size_t      citiesFound=0;
+    FileScanner            scanner;
+    uint32_t               nodeCount;
+    size_t                 citiesFound=0;
+    NameFeatureValueReader nameReader(typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "nodes.dat"),
@@ -527,7 +529,8 @@ namespace osmscout {
 
       Node node;
 
-      if (!node.Read(scanner)) {
+      if (!node.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(nodeCount)+
@@ -536,10 +539,10 @@ namespace osmscout {
         return false;
       }
 
-      if (regionTypes.find(node.GetType())!=regionTypes.end()) {
-        std::string name=node.GetName();
+      if (regionTypes.find(node.GetTypeId())!=regionTypes.end()) {
+        NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
 
-        if (name.empty()) {
+        if (nameValue==NULL) {
           progress.Warning(std::string("Node ")+NumberToString(node.GetFileOffset())+" has no name, skipping");
           continue;
         }
@@ -547,7 +550,7 @@ namespace osmscout {
         RegionAlias alias;
 
         alias.reference=node.GetFileOffset();
-        alias.name=name;
+        alias.name=nameValue->GetName();
 
         GeoCoord coord(node.GetLat(),node.GetLon());
 
@@ -1875,7 +1878,8 @@ namespace osmscout {
 
     progress.SetAction("Indexing regions of type 'Node' as area aliases");
 
-    if (!IndexRegionNodes(parameter,
+    if (!IndexRegionNodes(typeConfig,
+                          parameter,
                           progress,
                           regionTypes,
                           rootRegion,

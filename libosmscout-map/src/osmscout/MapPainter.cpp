@@ -183,6 +183,9 @@ namespace osmscout {
   : coordBuffer(buffer),
     styleConfig(styleConfig),
     transBuffer(coordBuffer),
+    nameReader(*styleConfig->GetTypeConfig()),
+    nameAltReader(*styleConfig->GetTypeConfig()),
+    addressReader(*styleConfig->GetTypeConfig()),
     labelSpace(1.0),
     shieldLabelSpace(1.0),
     sameLabelSpace(1.0)
@@ -1147,11 +1150,14 @@ namespace osmscout {
     std::string  label;
 
     if (hasLabel) {
-      if (!node->GetName().empty()) {
-        label=node->GetName();
+      NameFeatureValue    *nameValue=nameReader.GetValue(node->GetFeatureValueBuffer());
+      AddressFeatureValue *addressValue=addressReader.GetValue(node->GetFeatureValueBuffer());
+
+      if (nameValue!=NULL) {
+        label=nameValue->GetName();
       }
-      else if (!node->GetAddress().empty()) {
-        label=node->GetAddress();
+      else if (addressValue!=NULL) {
+        label=addressValue->GetAddress();
       }
 
       hasLabel=!label.empty();

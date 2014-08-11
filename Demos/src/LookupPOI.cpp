@@ -81,8 +81,9 @@ int main(int argc, char* argv[])
   std::cout << "x";
   std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
 
-  osmscout::TypeConfigRef typeConfig(database->GetTypeConfig());
-  osmscout::TypeSet       types(*typeConfig);
+  osmscout::TypeConfigRef          typeConfig(database->GetTypeConfig());
+  osmscout::TypeSet                types(*typeConfig);
+  osmscout::NameFeatureLabelReader nameLabelReader(typeConfig);
 
   for (std::list<std::string>::const_iterator name=typeNames.begin();
       name!=typeNames.end();
@@ -142,12 +143,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  for (std::vector<osmscout::NodeRef>::const_iterator node=nodes.begin();
-      node!=nodes.end();
-      node++) {
-    std::cout << "+ Node " << (*node)->GetFileOffset();
-    std::cout << " " << typeConfig->GetTypeInfo((*node)->GetType())->GetName();
-    std::cout << " " << (*node)->GetName() << std::endl;
+  for (auto node : nodes) {
+    std::cout << "+ Node " << node->GetFileOffset();
+    std::cout << " " << node->GetType()->GetName();
+    std::cout << " " << nameLabelReader.GetLabel((node->GetFeatureValueBuffer())) << std::endl;
   }
 
   for (std::vector<osmscout::WayRef>::const_iterator way=ways.begin();

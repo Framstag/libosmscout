@@ -2060,7 +2060,7 @@ namespace osmscout {
                                      double dpi,
                                      TextStyleRef& textStyle) const
   {
-    GetNodeStyle(nodeTextStyleSelectors[node.GetType()],
+    GetNodeStyle(nodeTextStyleSelectors[node.GetTypeId()],
                  node,
                  projection,
                  dpi,
@@ -2072,7 +2072,7 @@ namespace osmscout {
                                      double dpi,
                                      IconStyleRef& iconStyle) const
   {
-    GetNodeStyle(nodeIconStyleSelectors[node.GetType()],
+    GetNodeStyle(nodeIconStyleSelectors[node.GetTypeId()],
                  node,
                  projection,
                  dpi,

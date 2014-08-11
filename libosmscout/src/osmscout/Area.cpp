@@ -56,14 +56,18 @@ namespace osmscout {
 
           nameAlt=value->GetNameAlt();
         }
+        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureLocation &&
+          buffer.GetFeature(i).GetFeature()->HasValue()) {
+          LocationFeatureValue* value=dynamic_cast<LocationFeatureValue*>(buffer.GetValue(i));
+
+          tags.push_back(Tag(typeConfig.tagAddrStreet,
+                             value->GetLocation()));
+        }
         else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAddress &&
           buffer.GetFeature(i).GetFeature()->HasValue()) {
           AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.GetValue(i));
 
           address=value->GetAddress();
-
-          tags.push_back(Tag(typeConfig.tagAddrStreet,
-                             value->GetLocation()));
         }
         else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAccess &&
           buffer.GetFeature(i).GetFeature()->HasValue()) {
@@ -488,6 +492,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Area::Read(const TypeConfig& /*typeConfig*/,
+                  FileScanner& scanner)
+  {
+    return Read(scanner);
+  }
+
   bool Area::ReadOptimized(FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
@@ -607,6 +617,12 @@ namespace osmscout {
     }
 
     return !writer.HasError();
+  }
+
+  bool Area::Write(const TypeConfig& /*typeConfig*/,
+                   FileWriter& writer) const
+  {
+    return Write(writer);
   }
 
   bool Area::Write(FileWriter& writer) const

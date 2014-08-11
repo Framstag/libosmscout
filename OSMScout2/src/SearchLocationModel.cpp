@@ -202,7 +202,7 @@ QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
 
       if (DBThread::GetInstance()->GetNodeByOffset(object.GetFileOffset(),
                                                    node)) {
-        return QString::fromUtf8(DBThread::GetInstance()->GetTypeConfig()->GetTypeInfo(node->GetType())->GetName().c_str());
+        return QString::fromUtf8(node->GetType()->GetName().c_str());
       }
     }
     else if (object.GetType()==osmscout::RefType::refArea) {

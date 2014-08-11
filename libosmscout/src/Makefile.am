@@ -52,6 +52,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/ObjectRef.cpp \
                         osmscout/NumericIndex.cpp \
                         osmscout/CoordDataFile.cpp \
+                        osmscout/NodeDataFile.cpp \
                         osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \

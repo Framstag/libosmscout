@@ -120,7 +120,8 @@ namespace osmscout {
 
         nodeScanner.GetPos(offset);
 
-        if (!node.Read(nodeScanner)) {
+        if (!node.Read(typeConfig,
+                       nodeScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+
                          NumberToString(nodeCount)+
@@ -131,11 +132,11 @@ namespace osmscout {
 
         // If we still need to handle this type,
         // count number of entries per type and tile cell
-        if (currentNodeTypes.find(node.GetType())!=currentNodeTypes.end()) {
+        if (currentNodeTypes.find(node.GetTypeId())!=currentNodeTypes.end()) {
           uint32_t xc=(uint32_t)floor((node.GetLon()+180.0)/cellWidth);
           uint32_t yc=(uint32_t)floor((node.GetLat()+90.0)/cellHeight);
 
-          cellFillCount[node.GetType()][Pixel(xc,yc)]++;
+          cellFillCount[node.GetTypeId()][Pixel(xc,yc)]++;
         }
       }
 
@@ -321,7 +322,8 @@ namespace osmscout {
 
         nodeScanner.GetPos(offset);
 
-        if (!node.Read(nodeScanner)) {
+        if (!node.Read(typeConfig,
+                       nodeScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+
                          NumberToString(nodeCount)+
@@ -330,11 +332,11 @@ namespace osmscout {
           return false;
         }
 
-        if (indexTypes.find(node.GetType())!=indexTypes.end()) {
+        if (indexTypes.find(node.GetTypeId())!=indexTypes.end()) {
           uint32_t xc=(uint32_t)floor((node.GetLon()+180.0)/cellWidth);
           uint32_t yc=(uint32_t)floor((node.GetLat()+90.0)/cellHeight);
 
-          typeCellOffsets[node.GetType()][Pixel(xc,yc)].push_back(offset);
+          typeCellOffsets[node.GetTypeId()][Pixel(xc,yc)].push_back(offset);
         }
       }
 

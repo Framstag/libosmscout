@@ -207,6 +207,9 @@ namespace osmscout
   {
     progress.SetAction("Getting node text data");
 
+    NameFeatureValueReader    nameReader(typeConfig);
+    NameAltFeatureValueReader nameAltReader(typeConfig);
+
     // Open nodes.dat
     std::string nodesDataFile=
         AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -230,7 +233,8 @@ namespace osmscout
     // data to the corresponding keyset
     for(uint32_t n=1; n <= nodeCount; n++) {
       Node node;
-      if (!node.Read(scanner)) {
+      if (!node.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(nodeCount)+
@@ -239,18 +243,19 @@ namespace osmscout
         return false;
       }
 
-      if(node.GetType() != typeIgnore &&
-         !typeConfig.GetTypeInfo(node.GetType())->GetIgnore()) {
+      if(node.GetTypeId() != typeIgnore &&
+         !node.GetType()->GetIgnore()) {
+        NameFeatureValue    *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
+        NameAltFeatureValue *nameAltValue=nameAltReader.GetValue(node.GetFeatureValueBuffer());
 
-        NodeAttributes attr=node.GetAttributes();
-        if(attr.GetName().empty() &&
-           attr.GetNameAlt().empty()) {
+        if (nameValue==NULL &&
+            nameAltValue==NULL) {
           continue;
         }
 
         // Save name attributes of this node
         // in the right keyset
-        TypeInfoRef typeInfo=typeConfig.GetTypeInfo(node.GetType());
+        TypeInfoRef typeInfo=node.GetType();
         marisa::Keyset * keyset;
         if(typeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
@@ -265,9 +270,9 @@ namespace osmscout
           keyset = &keysetOther;
         }
 
-        if(!(attr.GetName().empty())) {
+        if(nameValue!=NULL) {
           std::string keyString;
-          if(buildKeyStr(attr.GetName(),
+          if(buildKeyStr(nameValue->GetName(),
                          node.GetFileOffset(),
                          refNode,
                          keyString))
@@ -276,9 +281,9 @@ namespace osmscout
                               keyString.length());
           }
         }
-        if(!(attr.GetNameAlt().empty())) {
+        if(nameAltValue!=NULL) {
           std::string keyString;
-          if(buildKeyStr(attr.GetNameAlt(),
+          if(buildKeyStr(nameAltValue->GetNameAlt(),
                          node.GetFileOffset(),
                          refNode,
                          keyString))

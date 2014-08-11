@@ -102,11 +102,9 @@ namespace osmscout {
 
       if (rawNode.GetTypeId()!=typeIgnore &&
           !rawNode.GetType()->GetIgnore()) {
-        node.SetType(rawNode.GetType()->GetId());
+        node.SetType(rawNode.GetType());
         node.SetCoords(rawNode.GetCoords());
-
-        node.SetFeatures(typeConfig,
-                         rawNode.GetFeatureValueBuffer());
+        node.SetFeatures(rawNode.GetFeatureValueBuffer());
 
         FileOffset fileOffset;
 
@@ -117,7 +115,8 @@ namespace osmscout {
         }
 
         writer.Write(rawNode.GetId());
-        node.Write(writer);
+        node.Write(typeConfig,
+                   writer);
 
         nodesWrittenCount++;
       }

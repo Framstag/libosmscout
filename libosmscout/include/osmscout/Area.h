@@ -224,10 +224,14 @@ namespace osmscout {
                  uint32_t nodesCount,
                  std::vector<Id>& ids);
     bool Read(FileScanner& scanner);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);
 
     bool WriteIds(FileWriter& writer,
                   const std::vector<Id>& ids) const;
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
     bool Write(FileWriter& writer) const;
     bool WriteOptimized(FileWriter& writer) const;
   };

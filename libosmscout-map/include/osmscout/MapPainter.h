@@ -316,6 +316,13 @@ namespace osmscout {
     TransBuffer               transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
+    // Attribute readers
+    //@{
+    NameFeatureValueReader    nameReader;
+    NameAltFeatureValueReader nameAltReader;
+    AddressFeatureValueReader addressReader;
+    //@}
+
     /**
       Presets and similar
      */
