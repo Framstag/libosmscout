@@ -217,16 +217,6 @@ namespace osmscout {
       return attributes.GetRefName();
     }
 
-    inline int8_t GetLayer() const
-    {
-      return attributes.GetLayer();
-    }
-
-    inline uint8_t GetWidth() const
-    {
-      return attributes.GetWidth();
-    }
-
     inline uint8_t GetMaxSpeed() const
     {
       return attributes.GetMaxSpeed();
@@ -240,11 +230,6 @@ namespace osmscout {
     inline bool IsBridge() const
     {
       return attributes.IsBridge();
-    }
-
-    inline bool IsTunnel() const
-    {
-      return attributes.IsTunnel();
     }
 
     inline bool IsRoundabout() const
