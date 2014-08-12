@@ -259,8 +259,7 @@ namespace osmscout {
 
     inline bool IsCircular() const
     {
-      return attributes.IsRoundabout() ||
-          (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
+      return (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
     inline void GetBoundingBox(double& minLon,
