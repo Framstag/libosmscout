@@ -617,15 +617,16 @@ int main(int argc, char* argv[])
   size_t                       roundaboutCrossingCounter=0;
 
 #if defined(POINTS_DEBUG)
-  std::list<osmscout::Point> points;
+  std::list<osmscout::Point> debugPoints;
 
-  if (!router.TransformRouteDataToPoints(data,points)) {
+  if (!router->TransformRouteDataToPoints(data,
+                                          debugPoints)) {
     std::cerr << "Error during route conversion" << std::endl;
   }
 
-  std::cout << points.size() << " point(s)" << std::endl;
-  for (std::list<osmscout::Point>::const_iterator point=points.begin();
-      point!=points.end();
+  std::cout << debugPoints.size() << " point(s)" << std::endl;
+  for (std::list<osmscout::Point>::const_iterator point=debugPoints.begin();
+      point!=debugPoints.end();
       ++point) {
     std::cout << "Point " << point->GetId() << " " << point->GetLat() << "," << point->GetLon() << std::endl;
   }
