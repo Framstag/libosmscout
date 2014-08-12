@@ -78,6 +78,7 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_primary_link"]=60.0;
   map["highway_secondary"]=60.0;
   map["highway_secondary_link"]=50.0;
+  map["highway_tertiary_link"]=55.0;
   map["highway_tertiary"]=55.0;
   map["highway_unclassified"]=50.0;
   map["highway_road"]=50.0;
