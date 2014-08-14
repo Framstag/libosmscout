@@ -1767,16 +1767,21 @@ namespace osmscout {
   {
     SetType(other.GetType());
 
-    for (size_t i=0; i<other.GetFeatureCount(); i++) {
-      if (other.GetFeature(i).GetFeature()->HasValue() &&
-          other.HasValue(i)) {
-        FeatureValue* otherValue=other.GetValue(i);
+    for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
+      if (other.HasValue(idx)) {
+        if (other.GetFeature(idx).GetFeature()->HasValue()) {
+          FeatureValue* otherValue=other.GetValue(idx);
+          FeatureValue* thisValue=AllocateValue(idx);
 
-        FeatureValue* thisValue=AllocateValue(i);
+          assert(thisValue!=NULL);
 
-        assert(thisValue!=NULL);
+          *thisValue=*otherValue;
+        }
+        else {
+          size_t byteIdx=idx/8;
 
-        *thisValue=*otherValue;
+          featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
+        }
       }
     }
   }
