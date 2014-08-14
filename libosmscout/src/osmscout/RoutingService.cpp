@@ -225,7 +225,7 @@ namespace osmscout {
     else {
       AccessFeatureValue accessValueDefault(way->GetType()->GetDefaultAccess());
 
-      if (!accessValue->CanRouteForward()) {
+      if (!accessValueDefault.CanRouteForward()) {
         return;
       }
     }
@@ -263,7 +263,7 @@ namespace osmscout {
     else {
       AccessFeatureValue accessValueDefault(way->GetType()->GetDefaultAccess());
 
-      if (!accessValue->CanRouteBackward()) {
+      if (!accessValueDefault.CanRouteBackward()) {
         return;
       }
     }
