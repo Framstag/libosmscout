@@ -255,6 +255,14 @@ namespace osmscout {
           nodeIds.insert(*id);
         }
       }
+
+      // If we have a circular way, we "fake" a double usage,
+      // to make sure, that the node id of the first node
+      // is not dropped later on, and we cannot detect
+      // circular ways anymore
+      if (data.ids.front()==data.ids.back()) {
+        nodeUseMap.SetNodeUsed(data.ids.back());
+      }
     }
 
     if (!scanner.Close()) {
