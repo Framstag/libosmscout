@@ -34,54 +34,6 @@
 
 namespace osmscout {
 
-  static uint8_t CopyFlagsForward(const Way& way)
-  {
-    uint8_t flags=0;
-
-    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
-    if (way.GetAttributes().GetAccess().CanRouteForward()) {
-      flags|=RouteNode::hasAccess;
-    }
-
-    if (way.GetAttributes().GetAccess().CanRouteFootForward()) {
-      flags|=RouteNode::usableByFoot;
-    }
-
-    if (way.GetAttributes().GetAccess().CanRouteBicycleForward()) {
-      flags|=RouteNode::usableByBicycle;
-    }
-
-    if (way.GetAttributes().GetAccess().CanRouteCarForward()) {
-      flags|=RouteNode::usableByCar;
-    }
-
-    return flags;
-  }
-
-  static uint8_t CopyFlagsBackward(const Way& way)
-  {
-    uint8_t flags=0;
-
-    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
-    if (way.GetAttributes().GetAccess().CanRouteBackward()) {
-      flags|=RouteNode::hasAccess;
-    }
-
-    if (way.GetAttributes().GetAccess().CanRouteFootBackward()) {
-      flags|=RouteNode::usableByFoot;
-    }
-
-    if (way.GetAttributes().GetAccess().CanRouteBicycleBackward()) {
-      flags|=RouteNode::usableByBicycle;
-    }
-
-    if (way.GetAttributes().GetAccess().CanRouteCarBackward()) {
-      flags|=RouteNode::usableByCar;
-    }
-
-    return flags;
-  }
-
   static uint8_t CopyFlags(const TypeConfig& typeConfig,
                            const Area::Ring& ring)
   {
@@ -115,6 +67,92 @@ namespace osmscout {
   std::string RouteDataGenerator::GetDescription() const
   {
     return "Generate routing graphs";
+  }
+
+  AccessFeatureValue RouteDataGenerator::GetAccess(const Way& way) const
+  {
+    AccessFeatureValue *accessValue=accessReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      return *accessValue;
+    }
+    else {
+      return AccessFeatureValue (way.GetType()->GetDefaultAccess());
+    }
+  }
+
+  uint8_t RouteDataGenerator::GetMaxSpeed(const Way& way) const
+  {
+    MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (maxSpeedValue!=NULL) {
+      return maxSpeedValue->GetMaxSpeed();
+    }
+    else {
+      return 0;
+    }
+  }
+
+  uint8_t RouteDataGenerator::GetGrade(const Way& way) const
+  {
+    GradeFeatureValue *gradeValue=gradeReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (gradeValue!=NULL) {
+      return gradeValue->GetGrade();
+    }
+    else {
+      return 1;
+    }
+  }
+
+  uint8_t RouteDataGenerator::CopyFlagsForward(const Way& way) const
+  {
+    uint8_t            flags=0;
+    AccessFeatureValue access=GetAccess(way);
+
+    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
+    if (access.CanRouteForward()) {
+      flags|=RouteNode::hasAccess;
+    }
+
+    if (access.CanRouteFootForward()) {
+      flags|=RouteNode::usableByFoot;
+    }
+
+    if (access.CanRouteBicycleForward()) {
+      flags|=RouteNode::usableByBicycle;
+    }
+
+    if (access.CanRouteCarForward()) {
+      flags|=RouteNode::usableByCar;
+    }
+
+    return flags;
+  }
+
+  uint8_t RouteDataGenerator::CopyFlagsBackward(const Way& way) const
+  {
+    uint8_t            flags=0;
+    AccessFeatureValue access=GetAccess(way);
+
+    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
+    if (access.CanRouteBackward()) {
+      flags|=RouteNode::hasAccess;
+    }
+
+    if (access.CanRouteFootBackward()) {
+      flags|=RouteNode::usableByFoot;
+    }
+
+    if (access.CanRouteBicycleBackward()) {
+      flags|=RouteNode::usableByBicycle;
+    }
+
+    if (access.CanRouteCarBackward()) {
+      flags|=RouteNode::usableByCar;
+    }
+
+    return flags;
   }
 
   bool RouteDataGenerator::ReadTurnRestrictionWayIds(const ImportParameter& parameter,
@@ -411,7 +449,8 @@ namespace osmscout {
 
       Way way;
 
-      if (!way.Read(scanner)) {
+      if (!way.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(d)+" of "+
                        NumberToString(dataCount)+
@@ -420,15 +459,11 @@ namespace osmscout {
         return false;
       }
 
-      if (way.GetType()==typeIgnore) {
+      if (way.GetType()->GetIgnore()) {
         continue;
       }
 
-      if (typeConfig.GetTypeInfo(way.GetType())->GetIgnore()) {
-        continue;
-      }
-
-      if (!(way.GetAttributes().GetAccess().CanRoute())) {
+      if (!GetAccess(way).CanRoute()) {
         continue;
       }
 
@@ -532,8 +567,8 @@ namespace osmscout {
                                                       const NodeUseMap& nodeUseMap,
                                                       NodeIdObjectsMap& nodeObjectsMap)
   {
-    FileScanner scanner;
-    uint32_t    dataCount=0;
+    FileScanner              scanner;
+    uint32_t                 dataCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
@@ -564,7 +599,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!way.Read(scanner)) {
+      if (!way.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(d)+" of "+
                        NumberToString(dataCount)+
@@ -573,15 +609,11 @@ namespace osmscout {
         return false;
       }
 
-      if (way.GetType()==typeIgnore) {
+      if (way.GetType()->GetIgnore()) {
         continue;
       }
 
-      if (typeConfig.GetTypeInfo(way.GetType())->GetIgnore()) {
-        continue;
-      }
-
-      if (!(way.GetAttributes().GetAccess().CanRoute())) {
+      if (!GetAccess(way).CanRoute()) {
         continue;
       }
 
@@ -729,7 +761,8 @@ namespace osmscout {
     return writer.Close();
   }
 
-  bool RouteDataGenerator::LoadWays(Progress& progress,
+  bool RouteDataGenerator::LoadWays(const TypeConfig& typeConfig,
+                                    Progress& progress,
                                     FileScanner& scanner,
                                     const std::set<FileOffset>& fileOffsets,
                                     OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap)
@@ -755,7 +788,8 @@ namespace osmscout {
 
       WayRef way=new Way();
 
-      way->Read(scanner);
+      way->Read(typeConfig,
+                scanner);
 
       if (scanner.HasError()) {
         progress.Error("Error while loading way at offset " + NumberToString(*offset));
@@ -1024,7 +1058,7 @@ namespace osmscout {
     // In path direction
 
     int nextNode=currentNode+1;
-    if (way.GetAttributes().GetAccess().CanRouteForward()) {
+    if (GetAccess(way).CanRouteForward()) {
 
       if (nextNode>=(int)way.nodes.size()) {
         nextNode=0;
@@ -1070,9 +1104,9 @@ namespace osmscout {
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-        path.type=way.GetType();
-        path.maxSpeed=way.GetMaxSpeed();
-        path.grade=way.GetGrade();
+        path.type=way.GetTypeId();
+        path.maxSpeed=GetMaxSpeed(way);
+        path.grade=GetGrade(way);
         //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
         path.flags=CopyFlagsForward(way);
         path.lat=way.nodes[nextNode].GetLat();
@@ -1085,7 +1119,7 @@ namespace osmscout {
 
     // Against path direction
 
-    if (way.GetAttributes().GetAccess().CanRouteBackward()) {
+    if (GetAccess(way).CanRouteBackward()) {
       int prevNode=currentNode-1;
 
       if (prevNode<0) {
@@ -1133,9 +1167,9 @@ namespace osmscout {
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-        path.type=way.GetType();
-        path.maxSpeed=way.GetMaxSpeed();
-        path.grade=way.GetGrade();
+        path.type=way.GetTypeId();
+        path.maxSpeed=GetMaxSpeed(way);
+        path.grade=GetGrade(way);
         //path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
         path.flags=CopyFlagsBackward(way);
         path.lat=way.nodes[prevNode].GetLat();
@@ -1157,7 +1191,7 @@ namespace osmscout {
     for (size_t i=0; i<way.nodes.size(); i++) {
       if (way.ids[i]==routeNode.id) {
         // Route backward
-        if (way.GetAttributes().GetAccess().CanRouteBackward() &&
+        if (GetAccess(way).CanRouteBackward() &&
             i>0) {
           int j=i-1;
 
@@ -1190,9 +1224,9 @@ namespace osmscout {
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-            path.type=way.GetType();
-            path.maxSpeed=way.GetMaxSpeed();
-            path.grade=way.GetGrade();
+            path.type=way.GetTypeId();
+            path.maxSpeed=GetMaxSpeed(way);
+            path.grade=GetGrade(way);
             //path.bearing=CalculateEncodedBearing(way,i,j,false);
             path.flags=CopyFlagsBackward(way);
             path.lat=way.nodes[j].GetLat();
@@ -1211,7 +1245,7 @@ namespace osmscout {
         }
 
         // Route forward
-        if (way.GetAttributes().GetAccess().CanRouteForward() &&
+        if (GetAccess(way).CanRouteForward() &&
             i+1<way.nodes.size()) {
           size_t j=i+1;
 
@@ -1245,9 +1279,9 @@ namespace osmscout {
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-            path.type=way.GetType();
-            path.maxSpeed=way.GetMaxSpeed();
-            path.grade=way.GetGrade();
+            path.type=way.GetTypeId();
+            path.maxSpeed=GetMaxSpeed(way);
+            path.grade=GetGrade(way);
             //path.bearing=CalculateEncodedBearing(way,i,j,true);
             path.flags=CopyFlagsForward(way);
             path.lat=way.nodes[j].GetLat();
@@ -1513,7 +1547,8 @@ namespace osmscout {
 
       OSMSCOUT_HASHMAP<FileOffset,WayRef>  waysMap;
 
-      if (!LoadWays(progress,
+      if (!LoadWays(typeConfig,
+                    progress,
                     wayScanner,
                     wayOffsets,
                     waysMap)) {
@@ -1569,7 +1604,7 @@ namespace osmscout {
               continue;
             }
 
-            if (way->GetAttributes().GetAccess().CanRoute(vehicle)) {
+            if (GetAccess(way).CanRoute(vehicle)) {
               isRoutable=true;
             }
 
@@ -1612,7 +1647,7 @@ namespace osmscout {
               continue;
             }
 
-            if (!way->GetAttributes().GetAccess().CanRoute(vehicle)) {
+            if (!GetAccess(way).CanRoute(vehicle)) {
               continue;
             }
 
@@ -1718,10 +1753,17 @@ namespace osmscout {
                                   Progress& progress)
   {
     // List of restrictions for a way
-    ViaTurnRestrictionMap restrictions;
+    ViaTurnRestrictionMap      restrictions;
 
-    NodeUseMap            nodeUseMap;
-    NodeIdObjectsMap      nodeObjectsMap;
+    NodeUseMap                 nodeUseMap;
+    NodeIdObjectsMap           nodeObjectsMap;
+    AccessFeatureValueReader   accessReader(typeConfig);
+    MaxSpeedFeatureValueReader maxSpeedReader(typeConfig);
+    GradeFeatureValueReader    gradeReader(typeConfig);
+
+    this->accessReader=&accessReader;
+    this->maxSpeedReader=&maxSpeedReader;
+    this->gradeReader=&gradeReader;
 
     //
     // Handling of restriction relations

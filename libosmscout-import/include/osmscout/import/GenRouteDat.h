@@ -67,7 +67,18 @@ namespace osmscout {
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
+    AccessFeatureValueReader   *accessReader;
+    MaxSpeedFeatureValueReader *maxSpeedReader;
+    GradeFeatureValueReader    *gradeReader;
+
   private:
+    AccessFeatureValue GetAccess(const Way& way) const;
+    uint8_t GetMaxSpeed(const Way& way) const;
+    uint8_t GetGrade(const Way& way) const;
+
+    uint8_t CopyFlagsForward(const Way& way) const;
+    uint8_t CopyFlagsBackward(const Way& way) const;
+
     /**
      * Read turn restrictions and return a map of way ids together with their (set to 0) file offset
      */
@@ -130,7 +141,8 @@ namespace osmscout {
     /**
      * Loads ways based on their file offset.
      */
-    bool LoadWays(Progress& progress,
+    bool LoadWays(const TypeConfig& typeConfig,
+                  Progress& progress,
                   FileScanner& scanner,
                   const std::set<FileOffset>& fileOffsets,
                   OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);

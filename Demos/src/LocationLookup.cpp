@@ -175,7 +175,7 @@ std::string GetObject(const osmscout::Database& database,
     if (database.GetWayByOffset(object.GetFileOffset(),
                                 way)) {
       label+=" ";
-      label+=database.GetTypeConfig()->GetTypeInfo(way->GetType())->GetName();
+      label+=way->GetType()->GetName();
     }
   }
 

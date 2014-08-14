@@ -77,6 +77,7 @@ namespace osmscout {
                                  Vehicle vehicle)
    : database(database),
      vehicle(vehicle),
+     accessReader(database->GetTypeConfig()),
      isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
      routeNodeDataFile(GetDataFilename(vehicle),
@@ -215,6 +216,22 @@ namespace osmscout {
   {
     routeNode=NULL;
 
+    AccessFeatureValue *accessValue=accessReader.GetValue(way->GetFeatureValueBuffer());
+
+    if (accessValue!=NULL &&
+        !accessValue->CanRouteForward()) {
+      return;
+    }
+    else {
+      AccessFeatureValue accessValueDefault(way->GetType()->GetDefaultAccess());
+
+      if (!accessValue->CanRouteForward()) {
+        return;
+      }
+    }
+
+    // TODO: What if the way is a roundabout?
+
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
       routeNodeDataFile.Get(way->ids[i],
                             routeNode);
@@ -237,8 +254,18 @@ namespace osmscout {
       return;
     }
 
-    if (!way->GetAttributes().GetAccess().CanRouteBackward()) {
+    AccessFeatureValue *accessValue=accessReader.GetValue(way->GetFeatureValueBuffer());
+
+    if (accessValue!=NULL &&
+        !accessValue->CanRouteBackward()) {
       return;
+    }
+    else {
+      AccessFeatureValue accessValueDefault(way->GetType()->GetDefaultAccess());
+
+      if (!accessValue->CanRouteBackward()) {
+        return;
+      }
     }
 
     for (long i=nodeIndex-1; i>=0; i--) {
@@ -1297,7 +1324,6 @@ namespace osmscout {
     AreaDataFileRef areaDataFile(database->GetAreaDataFile());
     WayDataFileRef  wayDataFile(database->GetWayDataFile());
 
-    TypeId          routeType;
     Way             tmp;
 
     if (typeConfig.Invalid() ||
@@ -1306,9 +1332,9 @@ namespace osmscout {
       return false;
     }
 
-    routeType=typeConfig->GetWayTypeId("_route");
+    TypeInfoRef routeType=typeConfig->GetTypeInfo(typeConfig->GetTypeId("_route"));
 
-    assert(routeType!=typeIgnore);
+    assert(routeType!=typeConfig->typeInfoIgnore);
 
     way=tmp;
 

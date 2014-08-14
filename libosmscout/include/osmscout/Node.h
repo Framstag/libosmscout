@@ -99,7 +99,7 @@ namespace osmscout {
       return featureValueBuffer.GetValue(idx);
     }
 
-    inline void FreeFeatureValue(size_t idx)
+    inline void UnsetFeature(size_t idx)
     {
       featureValueBuffer.FreeValue(idx);
     }

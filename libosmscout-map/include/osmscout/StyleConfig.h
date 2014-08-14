@@ -40,6 +40,21 @@
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {
+  class OSMSCOUT_MAP_API StyleResolveContext
+  {
+  private:
+    BridgeFeatureReader      bridgeReader;
+    TunnelFeatureReader      tunnelReader;
+    AccessFeatureValueReader accessReader;
+
+  public:
+    StyleResolveContext(const TypeConfigRef& typeConfig);
+
+    bool IsBridge(const FeatureValueBuffer& buffer) const;
+    bool IsTunnel(const FeatureValueBuffer& buffer) const;
+    bool IsOneway(const FeatureValueBuffer& buffer) const;
+  };
+
   class OSMSCOUT_MAP_API StyleVariable : public Referencable
   {
   public:
@@ -240,7 +255,8 @@ namespace osmscout {
    bool Matches(const AreaAttributes& attributes,
                 double meterInPixel,
                 double meterInMM) const;
-   bool Matches(const WayAttributes& attributes,
+   bool Matches(const StyleResolveContext& context,
+                const FeatureValueBuffer& buffer,
                 double meterInPixel,
                 double meterInMM) const;
   };
@@ -1182,6 +1198,7 @@ namespace osmscout {
   {
   private:
     TypeConfigRef                              typeConfig;
+    StyleResolveContext                        styleResolveContext;
 
     // Symbol
     OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
@@ -1305,19 +1322,19 @@ namespace osmscout {
                           double dpi,
                           IconStyleRef& iconStyle) const;
 
-    void GetWayLineStyles(const WayAttributes& way,
+    void GetWayLineStyles(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           std::vector<LineStyleRef>& lineStyles) const;
-    void GetWayPathTextStyle(const WayAttributes& way,
+    void GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                              const Projection& projection,
                              double dpi,
                              PathTextStyleRef& pathTextStyle) const;
-    void GetWayPathSymbolStyle(const WayAttributes& way,
+    void GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
                                const Projection& projection,
                                double dpi,
                                PathSymbolStyleRef& pathSymbolStyle) const;
-    void GetWayPathShieldStyle(const WayAttributes& way,
+    void GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                const Projection& projection,
                                double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;

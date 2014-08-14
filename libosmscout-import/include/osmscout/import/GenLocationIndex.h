@@ -247,12 +247,14 @@ namespace osmscout {
 
     bool AddLocationWayToRegion(Region& region,
                                 const Way& way,
+                                const std::string& name,
                                 double minlon,
                                 double minlat,
                                 double maxlon,
                                 double maxlat);
 
-    bool IndexLocationWays(const ImportParameter& parameter,
+    bool IndexLocationWays(const TypeConfigRef& typeConfig,
+                           const ImportParameter& parameter,
                            Progress& progress,
                            const OSMSCOUT_HASHSET<TypeId>& indexables,
                            RegionRef& rootRegion,

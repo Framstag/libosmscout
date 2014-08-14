@@ -223,15 +223,16 @@ namespace osmscout {
   public:
     struct OSMSCOUT_MAP_API WayData
     {
-      ObjectFileRef           ref;
-      const WayAttributes     *attributes;     //! Attributes of line segment
-      LineStyleRef            lineStyle;       //! Line style
-      size_t                  wayPriority;     //! Priority of way (from style sheet)
-      size_t                  transStart;      //! Start of coordinates in transformation buffer
-      size_t                  transEnd;        //! End of coordinates in transformation buffer
-      double                  lineWidth;       //! Line width
-      bool                    startIsClosed;   //! The end of the way is closed, it does not lead to another way or area
-      bool                    endIsClosed;     //! The end of the way is closed, it does not lead to another way or area
+      ObjectFileRef            ref;
+      const FeatureValueBuffer *buffer;         //! Features of the line segment
+      int8_t                   layer;           //! Layer this way is in
+      LineStyleRef             lineStyle;       //! Line style
+      size_t                   wayPriority;     //! Priority of way (from style sheet)
+      size_t                   transStart;      //! Start of coordinates in transformation buffer
+      size_t                   transEnd;        //! End of coordinates in transformation buffer
+      double                   lineWidth;       //! Line width
+      bool                     startIsClosed;   //! The end of the way is closed, it does not lead to another way or area
+      bool                     endIsClosed;     //! The end of the way is closed, it does not lead to another way or area
 
       /**
        * We then draw lines in order of layer (Smaller layers first)
@@ -248,9 +249,9 @@ namespace osmscout {
        */
       inline bool operator<(const WayData& other) const
       {
-        if (attributes->GetLayer()!=other.attributes->GetLayer())
+        if (layer!=other.layer)
         {
-          return attributes->GetLayer()<other.attributes->GetLayer();
+          return layer<other.layer;
         }
         else if (lineStyle->GetPriority()!=other.lineStyle->GetPriority()) {
           return lineStyle->GetPriority()<other.lineStyle->GetPriority();
@@ -263,45 +264,45 @@ namespace osmscout {
 
     struct OSMSCOUT_API WayPathData
     {
-      ObjectFileRef           ref;
-      const WayAttributes     *attributes;     //! Attributes of line segment
-      size_t                  transStart;      //! Start of coordinates in transformation buffer
-      size_t                  transEnd;        //! End of coordinates in transformation buffer
+      ObjectFileRef            ref;
+      const FeatureValueBuffer *buffer;        //! Features of the line segment
+      size_t                   transStart;      //! Start of coordinates in transformation buffer
+      size_t                   transEnd;        //! End of coordinates in transformation buffer
     };
 
     struct OSMSCOUT_API PolyData
     {
-      size_t                  transStart;      //! Start of coordinates in transformation buffer
-      size_t                  transEnd;        //! End of coordinates in transformation buffer
+      size_t                   transStart;      //! Start of coordinates in transformation buffer
+      size_t                   transEnd;        //! End of coordinates in transformation buffer
     };
 
     struct OSMSCOUT_API AreaData
     {
-      ObjectFileRef           ref;
-      const AreaAttributes    *attributes;     //! Area attributes
-      FillStyleRef            fillStyle;       //! Fill style
-      double                  minLat;
-      double                  maxLat;
-      double                  minLon;
-      double                  maxLon;
-      size_t                  transStart;      //! Start of coordinates in transformation buffer
-      size_t                  transEnd;        //! End of coordinates in transformation buffer
-      std::list<PolyData>     clippings;       //! Clipping polygons to be used during drawing of this area
+      ObjectFileRef            ref;
+      const AreaAttributes     *attributes;     //! Area attributes
+      FillStyleRef             fillStyle;       //! Fill style
+      double                   minLat;
+      double                   maxLat;
+      double                   minLon;
+      double                   maxLon;
+      size_t                   transStart;      //! Start of coordinates in transformation buffer
+      size_t                   transEnd;        //! End of coordinates in transformation buffer
+      std::list<PolyData>      clippings;       //! Clipping polygons to be used during drawing of this area
     };
 
     struct OSMSCOUT_API LabelData
     {
-      bool              mark;     //! Labels can temporary get marked during label coverage conflict resolution
-      double            x;        //! Coordinate of the left, top edge of the text
-      double            y;        //! Coordinate of the left, top edge of the text
-      double            bx1;      //! Dimensions of bounding box
-      double            by1;      //! Dimensions of bounding box
-      double            bx2;      //! Dimensions of bounding box
-      double            by2;      //! Dimensions of bounding box
-      double            alpha;    //! Alpha value of the label
-      double            fontSize; //! Font size to be used
-      LabelStyleRef     style;    //! Style for drawing
-      std::string       text;     //! The label text
+      bool                     mark;     //! Labels can temporary get marked during label coverage conflict resolution
+      double                   x;        //! Coordinate of the left, top edge of the text
+      double                   y;        //! Coordinate of the left, top edge of the text
+      double                   bx1;      //! Dimensions of bounding box
+      double                   by1;      //! Dimensions of bounding box
+      double                   bx2;      //! Dimensions of bounding box
+      double                   by2;      //! Dimensions of bounding box
+      double                   alpha;    //! Alpha value of the label
+      double                   fontSize; //! Font size to be used
+      LabelStyleRef            style;    //! Style for drawing
+      std::string              text;     //! The label text
     };
 
   private:
@@ -320,6 +321,9 @@ namespace osmscout {
     //@{
     NameFeatureValueReader    nameReader;
     NameAltFeatureValueReader nameAltReader;
+    RefFeatureValueReader     refReader;
+    LayerFeatureValueReader   layerReader;
+    WidthFeatureValueReader   widthReader;
     AddressFeatureValueReader addressReader;
     //@}
 
@@ -370,7 +374,7 @@ namespace osmscout {
     FillStyleRef              landFill;
     FillStyleRef              seaFill;
     TextStyleRef              debugLabel;
-    WayAttributes             coastlineSegmentAttributes;
+    FeatureValueBuffer        coastlineSegmentAttributes;
     //@}
 
     /**
@@ -441,7 +445,7 @@ namespace osmscout {
                            const Projection& projection,
                            const MapParameter& parameter,
                            const ObjectFileRef& ref,
-                           const WayAttributes& attributes,
+                           const FeatureValueBuffer& buffer,
                            const std::vector<GeoCoord>& nodes,
                            const std::vector<Id>& ids);
 

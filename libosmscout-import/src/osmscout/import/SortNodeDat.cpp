@@ -125,7 +125,7 @@ namespace osmscout {
 
       if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
                                    locationIndex)) {
-        node.FreeFeatureValue(locationIndex);
+        node.UnsetFeature(locationIndex);
       }
     }
 

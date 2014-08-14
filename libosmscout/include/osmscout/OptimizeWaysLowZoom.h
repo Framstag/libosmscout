@@ -63,6 +63,7 @@ namespace osmscout {
     };
 
   private:
+    TypeConfigRef                         typeConfig;    //! Metadata information for loading thr actual obejcts
     std::string                           datafile;      //! Basename part for the data file name
     std::string                           datafilename;  //! complete filename for data file
     mutable FileScanner                   scanner;       //! File stream to the data file
@@ -85,7 +86,8 @@ namespace osmscout {
     OptimizeWaysLowZoom();
     virtual ~OptimizeWaysLowZoom();
 
-    bool Open(const std::string& path);
+    bool Open(const TypeConfigRef& typeConfig,
+              const std::string& path);
     bool Close();
 
     bool HasOptimizations(double magnification) const;

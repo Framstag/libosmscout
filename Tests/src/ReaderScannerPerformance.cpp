@@ -33,15 +33,22 @@
 
 int main(int argc, char* argv[])
 {
-  std::string filename="ways.dat";
-  size_t      scannerWayCount;
+  std::string           typeFilename="types.dat";
+  std::string           wayFilename="ways.dat";
+  size_t                scannerWayCount;
 
-  osmscout::StopClock scannerTimer;
+  osmscout::StopClock   scannerTimer;
 
+  osmscout::TypeConfig  typeConfig;
   osmscout::FileScanner scanner;
 
-  if (!scanner.Open(filename,osmscout::FileScanner::Sequential,true)) {
-    std::cerr << "Cannot open of file '" << filename << "'!" << std::endl;
+  if (!typeConfig.LoadFromDataFile(typeFilename)) {
+    std::cerr << "Cannot open of file '" << typeFilename << "'!" << std::endl;
+    return 1;
+  }
+
+  if (!scanner.Open(wayFilename,osmscout::FileScanner::Sequential,true)) {
+    std::cerr << "Cannot open of file '" << wayFilename << "'!" << std::endl;
     return 1;
   }
 
@@ -51,7 +58,8 @@ int main(int argc, char* argv[])
   while (!scanner.HasError()) {
     osmscout::Way way;
 
-    if (way.Read(scanner)) {
+    if (way.Read(typeConfig,
+                 scanner)) {
       scannerWayCount++;
     }
   }

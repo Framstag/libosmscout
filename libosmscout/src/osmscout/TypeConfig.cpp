@@ -353,7 +353,7 @@ namespace osmscout {
       return false;
     }
 
-    NameFeatureValue* nameFeature=static_cast<NameFeatureValue*>(value);
+    NameFeatureValue* nameFeature=dynamic_cast<NameFeatureValue*>(value);
 
     nameFeature->SetName(name);
 
@@ -448,7 +448,7 @@ namespace osmscout {
       return false;
     }
 
-    NameAltFeatureValue* nameAltFeature=static_cast<NameAltFeatureValue*>(value);
+    NameAltFeatureValue* nameAltFeature=dynamic_cast<NameAltFeatureValue*>(value);
 
     nameAltFeature->SetNameAlt(altName);
 
@@ -530,7 +530,7 @@ namespace osmscout {
       return false;
     }
 
-    RefFeatureValue* refFeature=static_cast<RefFeatureValue*>(value);
+    RefFeatureValue* refFeature=dynamic_cast<RefFeatureValue*>(value);
 
     refFeature->SetRef(ref);
 
@@ -625,7 +625,7 @@ namespace osmscout {
       return false;
     }
 
-    LocationFeatureValue* locationFeature=static_cast<LocationFeatureValue*>(value);
+    LocationFeatureValue* locationFeature=dynamic_cast<LocationFeatureValue*>(value);
 
     locationFeature->SetLocation(location);
 
@@ -720,7 +720,7 @@ namespace osmscout {
       return false;
     }
 
-    AddressFeatureValue* addressFeature=static_cast<AddressFeatureValue*>(value);
+    AddressFeatureValue* addressFeature=dynamic_cast<AddressFeatureValue*>(value);
 
     addressFeature->SetAddress(address);
 
@@ -999,7 +999,7 @@ namespace osmscout {
       return false;
     }
 
-    AccessFeatureValue* accessFeature=static_cast<AccessFeatureValue*>(value);
+    AccessFeatureValue* accessFeature=dynamic_cast<AccessFeatureValue*>(value);
 
     accessFeature->SetAccess(access);
 
@@ -1089,7 +1089,7 @@ namespace osmscout {
       return false;
     }
 
-    LayerFeatureValue* layerFeature=static_cast<LayerFeatureValue*>(value);
+    LayerFeatureValue* layerFeature=dynamic_cast<LayerFeatureValue*>(value);
 
     layerFeature->SetLayer(layer);
 
@@ -1215,7 +1215,7 @@ namespace osmscout {
       return false;
     }
 
-    WidthFeatureValue* widthFeature=static_cast<WidthFeatureValue*>(value);
+    WidthFeatureValue* widthFeature=dynamic_cast<WidthFeatureValue*>(value);
 
     widthFeature->SetWidth(width);
 
@@ -1353,7 +1353,7 @@ namespace osmscout {
       return false;
     }
 
-    MaxSpeedFeatureValue* maxSpeedFeature=static_cast<MaxSpeedFeatureValue*>(value);
+    MaxSpeedFeatureValue* maxSpeedFeature=dynamic_cast<MaxSpeedFeatureValue*>(value);
 
     maxSpeedFeature->SetMaxSpeed(maxSpeed);
 
@@ -1486,7 +1486,7 @@ namespace osmscout {
       return false;
     }
 
-    GradeFeatureValue* gradeFeature=static_cast<GradeFeatureValue*>(value);
+    GradeFeatureValue* gradeFeature=dynamic_cast<GradeFeatureValue*>(value);
 
     gradeFeature->SetGrade(grade);
 
@@ -1575,7 +1575,7 @@ namespace osmscout {
         return false;
       }
 
-      AdminLevelFeatureValue* adminLevelFeature=static_cast<AdminLevelFeatureValue*>(value);
+      AdminLevelFeatureValue* adminLevelFeature=dynamic_cast<AdminLevelFeatureValue*>(value);
 
       adminLevelFeature->SetAdminLevel(adminLevel);
 
@@ -1751,6 +1751,11 @@ namespace osmscout {
     // no code
   }
 
+  FeatureValueBuffer::FeatureValueBuffer(const FeatureValueBuffer& other)
+  {
+    Set(other);
+  }
+
   FeatureValueBuffer::~FeatureValueBuffer()
   {
     if (type.Valid()) {
@@ -1762,12 +1767,14 @@ namespace osmscout {
   {
     SetType(other.GetType());
 
-    for (size_t i=0; i<type->GetFeatureCount(); i++) {
-      if (other.HasValue(i) &&
-          other.GetFeature(i).GetFeature()->HasValue()) {
+    for (size_t i=0; i<other.GetFeatureCount(); i++) {
+      if (other.GetFeature(i).GetFeature()->HasValue() &&
+          other.HasValue(i)) {
         FeatureValue* otherValue=other.GetValue(i);
 
         FeatureValue* thisValue=AllocateValue(i);
+
+        assert(thisValue!=NULL);
 
         *thisValue=*otherValue;
       }

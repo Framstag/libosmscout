@@ -475,11 +475,12 @@ protected:
   }
 
   template <class N>
-  bool DataFile<N>::ReadData(const TypeConfig& /*typeConfig*/,
+  bool DataFile<N>::ReadData(const TypeConfig& typeConfig,
                              FileScanner& scanner,
                              N& data) const
   {
-    return data.Read(scanner);
+    return data.Read(typeConfig,
+                     scanner);
   }
 
   /**

@@ -229,7 +229,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -239,7 +240,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!typeConfig.GetTypeInfo(data.GetType())->CanRoute()) {
+      if (!data.GetType()->CanRoute()) {
         continue;
       }
 
@@ -469,6 +470,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::CopyWayWay(const ImportParameter& parameter,
                                                Progress& progress,
+                                               const TypeConfig& typeConfig,
                                                NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -514,7 +516,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -539,7 +542,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Write(writer)) {
+      if (!data.Write(typeConfig,
+                      writer)) {
         progress.Error(std::string("Error while writing data entry to file '")+
                        writer.GetFilename()+"'");
 
@@ -605,6 +609,7 @@ namespace osmscout {
 
     if (!CopyWayWay(parameter,
                     progress,
+                    typeConfig,
                     nodeUseMap)) {
       return false;
     }

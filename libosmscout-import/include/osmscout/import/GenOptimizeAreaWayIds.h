@@ -61,6 +61,7 @@ namespace osmscout {
 
     bool CopyWayWay(const ImportParameter& parameter,
                     Progress& progress,
+                    const TypeConfig& typeConfig,
                     NodeUseMap& nodeUseMap);
   public:
     std::string GetDescription() const;

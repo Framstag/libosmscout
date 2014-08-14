@@ -24,10 +24,11 @@ namespace osmscout {
   class WayLocationProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
   {
   private:
-    FileWriter               writer;
-    uint32_t                 overallDataCount;
-    OSMSCOUT_HASHSET<TypeId> poiTypes;
-    TagId                    tagAddrStreet;
+    FileWriter                 writer;
+    uint32_t                   overallDataCount;
+    OSMSCOUT_HASHSET<TypeId>   poiTypes;
+    NameFeatureValueReader     *nameReader;
+    LocationFeatureValueReader *locationReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -47,7 +48,9 @@ namespace osmscout {
     overallDataCount=0;
 
     typeConfig.GetIndexAsPOITypes(poiTypes);
-    tagAddrStreet=typeConfig.tagAddrStreet;
+
+    nameReader=new NameFeatureValueReader(typeConfig);
+    locationReader=new LocationFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "wayaddress.dat"))) {
@@ -66,13 +69,23 @@ namespace osmscout {
                                            Way& way,
                                            bool& /*save*/)
   {
+    NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
+    LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
+
+    bool isPoi=nameValue!=NULL &&
+               poiTypes.find(way.GetTypeId())!=poiTypes.end();
+
+    std::string name;
     std::string location;
+    std::string address;
 
-    GetAndEraseTag(way.GetAttributes().GetTags(),
-                   tagAddrStreet,
-                   location);
+    if (nameValue!=NULL) {
+      name=nameValue->GetName();
+    }
 
-    bool isPoi=!way.GetName().empty() && poiTypes.find(way.GetType())!=poiTypes.end();
+    if (locationValue!=NULL) {
+      location=locationValue->GetLocation();
+    }
 
     if (!isPoi) {
       return true;
@@ -82,11 +95,11 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.WriteNumber(way.GetType())) {
+    if (!writer.WriteNumber(way.GetTypeId())) {
       return false;
     }
 
-    if (!writer.Write(way.GetName())) {
+    if (!writer.Write(name)) {
       return false;
     }
 
@@ -105,6 +118,12 @@ namespace osmscout {
 
   bool WayLocationProcessorFilter::AfterProcessingEnd()
   {
+    delete nameReader;
+    nameReader=NULL;
+
+    delete locationReader;
+    locationReader=NULL;
+
     writer.SetPos(0);
     writer.Write(overallDataCount);
 

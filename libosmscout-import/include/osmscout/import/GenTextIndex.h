@@ -41,22 +41,22 @@ namespace osmscout
                 Progress &progress);
 
   private:
-    bool setFileOffsetSize(const ImportParameter &parameter,
+    bool SetFileOffsetSize(const ImportParameter &parameter,
                            Progress &progress);
 
-    bool addNodeTextToKeysets(const ImportParameter &parameter,
+    bool AddNodeTextToKeysets(const ImportParameter &parameter,
                               Progress &progress,
                               const TypeConfig &typeConfig);
 
-    bool addWayTextToKeysets(const ImportParameter &parameter,
+    bool AddWayTextToKeysets(const ImportParameter &parameter,
                              Progress &progress,
                              const TypeConfig &typeConfig);
 
-    bool addAreaTextToKeysets(const ImportParameter &parameter,
+    bool AddAreaTextToKeysets(const ImportParameter &parameter,
                               Progress &progress,
                               const TypeConfig &typeConfig);
 
-    bool buildKeyStr(const std::string &text,
+    bool BuildKeyStr(const std::string &text,
                      const FileOffset offset,
                      const RefType reftype,
                      std::string &keyString) const;

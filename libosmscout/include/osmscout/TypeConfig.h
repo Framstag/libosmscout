@@ -1792,6 +1792,7 @@ namespace osmscout {
 
   public:
     FeatureValueBuffer();
+    FeatureValueBuffer(const FeatureValueBuffer& other);
     virtual ~FeatureValueBuffer();
 
     void Set(const FeatureValueBuffer& other);
@@ -1994,6 +1995,89 @@ namespace osmscout {
   typedef Ref<TypeConfig> TypeConfigRef;
 
   /**
+   * Helper template class for easy access to flag-like Features.
+   *
+   * Each type may have stored the feature in request at a different index. The FeatureReader
+   * caches the index for each type once in the constructor and later on allows access to the feature
+   * in O(1) - without iterating of all feature(values) of an object.
+   */
+  template<class F>
+  class OSMSCOUT_API FeatureReader
+  {
+  private:
+    std::vector<size_t> lookupTable;
+
+  public:
+    FeatureReader(const TypeConfig& typeConfig);
+
+    /**
+     * Returns the index of the Feature/FeatureValue within the given FeatureValueBuffer.
+     *
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @param index
+     *    The index
+     * @return
+     *    true, if there is a valid index 8because the type has such feature), else false
+     */
+    bool GetIndex(const FeatureValueBuffer& buffer,
+                  size_t& index) const;
+
+    /**
+     * Returns true, if the feature is set for the given FeatureValueBuffer
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    true if set, else false
+     */
+    bool IsSet(const FeatureValueBuffer& buffer) const;
+  };
+
+  template<class F>
+  FeatureReader<F>::FeatureReader(const TypeConfig& typeConfig)
+  {
+    FeatureRef feature=typeConfig.GetFeature(F::NAME);
+
+    lookupTable.resize(typeConfig.GetMaxTypeId()+1,
+                       std::numeric_limits<size_t>::max());
+
+    for (auto type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(F::NAME,
+                          index)) {
+        lookupTable[type->GetId()]=index;
+      }
+    }
+  }
+
+  template<class F>
+  bool FeatureReader<F>::GetIndex(const FeatureValueBuffer& buffer,
+                                  size_t& index) const
+  {
+    index=lookupTable[buffer.GetTypeId()];
+
+    return index!=std::numeric_limits<size_t>::max();
+  }
+
+  template<class F>
+  bool FeatureReader<F>::IsSet(const FeatureValueBuffer& buffer) const
+  {
+    size_t index=lookupTable[buffer.GetTypeId()];
+
+    if (index!=std::numeric_limits<size_t>::max()) {
+      return buffer.HasValue(index);
+    }
+    else {
+      return false;
+    }
+  }
+
+  typedef FeatureReader<BridgeFeature>     BridgeFeatureReader;
+  typedef FeatureReader<TunnelFeature>     TunnelFeatureReader;
+  typedef FeatureReader<RoundaboutFeature> RoundaboutFeatureReader;
+
+  /**
    * Helper template class for easy access to the value of a certain feature for objects of any type.
    *
    * Each type may have stored the feature in request at a different index. The FeatureValueReader
@@ -2081,6 +2165,11 @@ namespace osmscout {
   typedef FeatureValueReader<RefFeature,RefFeatureValue>           RefFeatureValueReader;
   typedef FeatureValueReader<LocationFeature,LocationFeatureValue> LocationFeatureValueReader;
   typedef FeatureValueReader<AddressFeature,AddressFeatureValue>   AddressFeatureValueReader;
+  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>     AccessFeatureValueReader;
+  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>       LayerFeatureValueReader;
+  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>       WidthFeatureValueReader;
+  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue> MaxSpeedFeatureValueReader;
+  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>       GradeFeatureValueReader;
 
   template <class F, class V>
   class OSMSCOUT_API FeatureLabelReader

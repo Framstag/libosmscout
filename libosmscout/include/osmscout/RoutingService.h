@@ -190,6 +190,7 @@ namespace osmscout {
   private:
     DatabaseRef                          database;          //! Database object, holding all index and data files
     Vehicle                              vehicle;           //! We are a router for this vehicle
+    AccessFeatureValueReader             accessReader;      //! Read access information from objects
     bool                                 isOpen;            //! true, if opened
     bool                                 debugPerformance;
 
@@ -271,7 +272,7 @@ namespace osmscout {
                         const ObjectFileRef& targetObject,
                         size_t targetNodeIndex,
                         RouteData& route);
-      
+
     bool CalculateRoute(const RoutingProfile& profile,
                         Vehicle vehicle,
                         double radius,

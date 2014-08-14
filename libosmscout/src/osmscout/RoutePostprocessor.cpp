@@ -197,10 +197,9 @@ namespace osmscout {
       }
       else if (node->GetPathObject().GetType()==refWay) {
         WayRef                               way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
-        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(way->GetName(),
-                                                                                            way->GetRefName());
+        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(way);
 
-        if (way->IsBridge() &&
+        if (postprocessor.IsBridge(way) &&
             node!=description.Nodes().begin()) {
           std::list<RouteDescription::Node>::iterator lastNode=node;
 
@@ -513,10 +512,10 @@ namespace osmscout {
     else if (node.GetPathObject().GetType()==refWay) {
       WayRef way=postprocessor.GetWay(node.GetPathObject().GetFileOffset());
 
-      if (motorwayLinkTypes.find(way->GetType())!=motorwayLinkTypes.end()) {
+      if (motorwayLinkTypes.find(way->GetTypeId())!=motorwayLinkTypes.end()) {
         return link;
       }
-      else if (motorwayTypes.find(way->GetType())!=motorwayTypes.end()) {
+      else if (motorwayTypes.find(way->GetTypeId())!=motorwayTypes.end()) {
         return motorway;
       }
     }
@@ -875,6 +874,15 @@ namespace osmscout {
     return true;
   }
 
+  RoutePostprocessor::RoutePostprocessor()
+  : nameReader(NULL),
+    refReader(NULL),
+    bridgeReader(NULL),
+    roundaboutReader(NULL)
+  {
+
+  }
+
   bool RoutePostprocessor::ResolveAllAreasAndWays(const RouteDescription& description,
                                                   Database& database)
   {
@@ -954,6 +962,19 @@ namespace osmscout {
   {
     areaMap.clear();
     wayMap.clear();
+
+
+    delete nameReader;
+    nameReader=NULL;
+
+    delete refReader;
+    refReader=NULL;
+
+    delete bridgeReader;
+    bridgeReader=NULL;
+
+    delete roundaboutReader;
+    roundaboutReader=NULL;
   }
 
   AreaRef RoutePostprocessor::GetArea(FileOffset offset) const
@@ -986,14 +1007,32 @@ namespace osmscout {
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      description=new RouteDescription::NameDescription(way->GetName(),
-                                                        way->GetRefName());
+      return GetNameDescription(way);
     }
     else {
       assert(false);
     }
 
     return description;
+  }
+
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const Way& way) const
+  {
+    NameFeatureValue *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
+    RefFeatureValue  *refValue=refReader->GetValue(way.GetFeatureValueBuffer());
+    std::string      name;
+    std::string      ref;
+
+    if (nameValue!=NULL) {
+      name=nameValue->GetName();
+    }
+
+    if (refValue!=NULL) {
+      ref=refValue->GetRef();
+    }
+
+    return new RouteDescription::NameDescription(name,
+                                                 ref);
   }
 
   bool RoutePostprocessor::IsRoundabout(const ObjectFileRef& object) const
@@ -1004,13 +1043,18 @@ namespace osmscout {
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      return way->IsRoundabout();
+      return roundaboutReader->IsSet(way->GetFeatureValueBuffer());
     }
     else {
       assert(false);
 
       return false;
     }
+  }
+
+  bool RoutePostprocessor::IsBridge(const Way& way) const
+  {
+    return bridgeReader->IsSet(way.GetFeatureValueBuffer());
   }
 
   bool RoutePostprocessor::IsOfType(const ObjectFileRef& object,
@@ -1024,7 +1068,7 @@ namespace osmscout {
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      return types.find(way->GetType())!=types.end();
+      return types.find(way->GetTypeId())!=types.end();
     }
     else {
       assert(false);
@@ -1246,6 +1290,11 @@ namespace osmscout {
                                                        std::list<PostprocessorRef> processors)
   {
     Cleanup(); // We do not trust ourself ;-)
+
+    nameReader=new NameFeatureValueReader(database.GetTypeConfig());
+    refReader=new RefFeatureValueReader(database.GetTypeConfig());
+    bridgeReader=new BridgeFeatureReader(database.GetTypeConfig());
+    roundaboutReader=new RoundaboutFeatureReader(database.GetTypeConfig());
 
     if (!ResolveAllAreasAndWays(description,
                                 database)) {

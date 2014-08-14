@@ -183,9 +183,12 @@ namespace osmscout {
   : coordBuffer(buffer),
     styleConfig(styleConfig),
     transBuffer(coordBuffer),
-    nameReader(*styleConfig->GetTypeConfig()),
-    nameAltReader(*styleConfig->GetTypeConfig()),
-    addressReader(*styleConfig->GetTypeConfig()),
+    nameReader(styleConfig->GetTypeConfig()),
+    nameAltReader(styleConfig->GetTypeConfig()),
+    refReader(styleConfig->GetTypeConfig()),
+    layerReader(styleConfig->GetTypeConfig()),
+    widthReader(styleConfig->GetTypeConfig()),
+    addressReader(styleConfig->GetTypeConfig()),
     labelSpace(1.0),
     shieldLabelSpace(1.0),
     sameLabelSpace(1.0)
@@ -696,7 +699,8 @@ namespace osmscout {
             if (lineStart!=lineEnd) {
               WayData data;
 
-              data.attributes=&coastlineSegmentAttributes;
+              data.buffer=&coastlineSegmentAttributes;
+              data.layer=0;
               data.lineStyle=coastlineLine;
               data.wayPriority=std::numeric_limits<size_t>::max();
               data.transStart=start+lineStart;
@@ -1277,7 +1281,7 @@ namespace osmscout {
     {
       PathSymbolStyleRef pathSymbolStyle;
 
-      styleConfig.GetWayPathSymbolStyle(*way->attributes,
+      styleConfig.GetWayPathSymbolStyle(*way->buffer,
                                         projection,
                                         parameter.GetDPI(),
                                         pathSymbolStyle);
@@ -1300,19 +1304,23 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const WayPathData& data)
   {
-    if (data.attributes->GetName().empty() &&
-        data.attributes->GetRefName().empty()) {
+    NameFeatureValue *nameValue=nameReader.GetValue(*data.buffer);
+    RefFeatureValue  *refValue=refReader.GetValue(*data.buffer);
+
+
+    if (nameValue== NULL &&
+        refValue==NULL) {
       return;
     }
 
     PathShieldStyleRef shieldStyle;
     PathTextStyleRef   pathTextStyle;
 
-    styleConfig.GetWayPathShieldStyle(*data.attributes,
+    styleConfig.GetWayPathShieldStyle(*data.buffer,
                                       projection,
                                       parameter.GetDPI(),
                                       shieldStyle);
-    styleConfig.GetWayPathTextStyle(*data.attributes,
+    styleConfig.GetWayPathTextStyle(*data.buffer,
                                     projection,
                                     parameter.GetDPI(),
                                     pathTextStyle);
@@ -1322,22 +1330,22 @@ namespace osmscout {
       case PathTextStyle::none:
         break;
       case PathTextStyle::name:
-        if (!data.attributes->GetName().empty()) {
+        if (nameValue!=NULL) {
           DrawContourLabel(projection,
                            parameter,
                            *pathTextStyle,
-                           data.attributes->GetName(),
+                           nameValue->GetName(),
                            data.transStart,
                            data.transEnd);
           waysLabelDrawn++;
         }
         break;
       case PathTextStyle::ref:
-        if (!data.attributes->GetRefName().empty()) {
+        if (refValue!=NULL) {
           DrawContourLabel(projection,
                            parameter,
                            *pathTextStyle,
-                           data.attributes->GetRefName(),
+                           refValue->GetRef(),
                            data.transStart,
                            data.transEnd);
           waysLabelDrawn++;
@@ -1351,22 +1359,22 @@ namespace osmscout {
       case ShieldStyle::none:
         break;
       case ShieldStyle::name:
-        if (!data.attributes->GetName().empty()) {
+        if (nameValue!=NULL) {
           RegisterPointWayLabel(projection,
                                 parameter,
                                 shieldStyle,
-                                data.attributes->GetName(),
+                                nameValue->GetName(),
                                 data.transStart,
                                 data.transEnd);
           waysLabelDrawn++;
         }
         break;
       case ShieldStyle::ref:
-        if (!data.attributes->GetRefName().empty()) {
+        if (refValue!=NULL) {
           RegisterPointWayLabel(projection,
                                 parameter,
                                 shieldStyle,
-                                data.attributes->GetRefName(),
+                                refValue->GetRef(),
                                 data.transStart,
                                 data.transEnd);
           waysLabelDrawn++;
@@ -1558,11 +1566,11 @@ namespace osmscout {
                                      const Projection& projection,
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
-                                     const WayAttributes& attributes,
+                                     const FeatureValueBuffer& buffer,
                                      const std::vector<GeoCoord>& nodes,
                                      const std::vector<Id>& ids)
   {
-    styleConfig.GetWayLineStyles(attributes,
+    styleConfig.GetWayLineStyles(buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  lineStyles);
@@ -1583,9 +1591,12 @@ namespace osmscout {
       double       lineOffset=0.0;
 
       if (lineStyle->GetWidth()>0.0) {
-        if (attributes.GetWidth()>0.0) {
+        WidthFeatureValue *widthValue=widthReader.GetValue(buffer);
+
+
+        if (widthValue!=NULL) {
           lineWidth+=GetProjectedWidth(projection,
-                                       attributes.GetWidth());
+                                       widthValue->GetWidth());
         }
         else {
           lineWidth+=GetProjectedWidth(projection,
@@ -1634,7 +1645,7 @@ namespace osmscout {
         WayPathData pathData;
 
         pathData.ref=ref;
-        pathData.attributes=&attributes;
+        pathData.buffer=&buffer;
         pathData.transStart=transStart;
         pathData.transEnd=transEnd;
 
@@ -1643,11 +1654,18 @@ namespace osmscout {
         transformed=true;
       }
 
-      data.attributes=&attributes;
+      data.layer=0;
+      data.buffer=&buffer;
       data.lineStyle=lineStyle;
-      data.wayPriority=styleConfig.GetWayPrio(attributes.GetType());
+      data.wayPriority=styleConfig.GetWayPrio(buffer.GetTypeId());
       data.startIsClosed=ids.empty() || ids[0]==0;
       data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
+
+      LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
+
+      if (layerValue!=NULL) {
+        data.layer=layerValue->GetLayer();
+      }
 
       if (lineOffset!=0.0) {
         coordBuffer->GenerateParallelWay(transStart,transEnd,
@@ -1682,7 +1700,7 @@ namespace osmscout {
                         projection,
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
-                        way->GetAttributes(),
+                        way->GetFeatureValueBuffer(),
                         way->nodes,
                         way->ids);
     }
@@ -1696,7 +1714,7 @@ namespace osmscout {
                         projection,
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
-                        way->GetAttributes(),
+                        way->GetFeatureValueBuffer(),
                         way->nodes,
                         way->ids);
     }

@@ -83,11 +83,12 @@ namespace osmscout {
                      const std::list<TypeData>& wayTypesData,
                      uint32_t optimizeMaxMap);
 
-    bool GetWays(const ImportParameter& parameter,
-                           Progress& progress,
-                           FileScanner& scanner,
-                           std::set<TypeId>& types,
-                           std::vector<std::list<WayRef> >& ways);
+    bool GetWays(const TypeConfig& typeConfig,
+                 const ImportParameter& parameter,
+                 Progress& progress,
+                 FileScanner& scanner,
+                 std::set<TypeId>& types,
+                 std::vector<std::list<WayRef> >& ways);
 
     void MergeWays(Progress& progress,
                    const std::list<WayRef>& ways,
@@ -105,7 +106,8 @@ namespace osmscout {
                       const Magnification& magnification,
                       TransPolygon::OptimizeMethod optimizeWayMethod);
 
-    bool WriteWays(FileWriter& writer,
+    bool WriteWays(const TypeConfig& typeConfig,
+                   FileWriter& writer,
                    const std::list<WayRef>& ways,
                    FileOffsetFileOffsetMap& offsets);
 

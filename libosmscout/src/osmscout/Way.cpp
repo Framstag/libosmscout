@@ -28,316 +28,9 @@
 
 namespace osmscout {
 
-  void WayAttributes::SetType(TypeId type)
+  void Way::SetType(const TypeInfoRef& type)
   {
-    this->type=type;
-  }
-
-  void WayAttributes::SetFeatures(const TypeConfig& typeConfig,
-                                  const FeatureValueBuffer& buffer)
-  {
-    flags=0;
-    name.clear();
-    nameAlt.clear();
-    ref.clear();
-    layer=0;
-    width=0;
-    maxSpeed=0;
-    grade=1;
-    access.SetAccess(buffer.GetType()->GetDefaultAccess());
-
-    for (size_t i=0; i<buffer.GetFeatureCount(); i++) {
-      if (buffer.HasValue(i)) {
-
-        if (buffer.GetFeature(i).GetFeature()==typeConfig.featureName &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(buffer.GetValue(i));
-
-          name=value->GetName();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureNameAlt &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(buffer.GetValue(i));
-
-          nameAlt=value->GetNameAlt();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureRef &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          RefFeatureValue* value=dynamic_cast<RefFeatureValue*>(buffer.GetValue(i));
-
-          ref=value->GetRef();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureLayer &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          LayerFeatureValue* value=dynamic_cast<LayerFeatureValue*>(buffer.GetValue(i));
-
-          layer=value->GetLayer();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureWidth &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          WidthFeatureValue* value=dynamic_cast<WidthFeatureValue*>(buffer.GetValue(i));
-
-          width=value->GetWidth();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureMaxSpeed &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.GetValue(i));
-
-          maxSpeed=value->GetMaxSpeed();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureGrade &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.GetValue(i));
-
-          grade=value->GetGrade();
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureAccess &&
-          buffer.GetFeature(i).GetFeature()->HasValue()) {
-          AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(buffer.GetValue(i));
-
-          access.SetAccess(value->GetAccess());
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureBridge) {
-          flags|=isBridge;
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureTunnel) {
-          flags|=isTunnel;
-        }
-        else if (buffer.GetFeature(i).GetFeature()==typeConfig.featureRoundabout) {
-          flags|=isRoundabout;
-        }
-      }
-    }
-  }
-
-  void WayAttributes::SetLayer(int8_t layer)
-  {
-    this->layer=layer;
-  }
-
-  bool WayAttributes::Read(FileScanner& scanner)
-  {
-    uint16_t flags;
-
-    scanner.ReadNumber(type);
-    scanner.Read(flags);
-
-    if (scanner.HasError()) {
-      return false;
-    }
-
-    this->flags=flags;
-
-    access.Read(scanner);
-
-    if (flags & hasName) {
-      scanner.Read(name);
-    }
-
-    if (flags & hasNameAlt) {
-      scanner.Read(nameAlt);
-    }
-
-    if (flags & hasRef) {
-      scanner.Read(ref);
-    }
-
-    if (flags & hasLayer) {
-      scanner.Read(layer);
-    }
-    else {
-      layer=0;
-    }
-
-    if (flags & hasWidth) {
-      scanner.Read(width);
-    }
-    else {
-      width=0;
-    }
-
-    if (flags & hasMaxSpeed) {
-      scanner.Read(maxSpeed);
-    }
-    else {
-      maxSpeed=0;
-    }
-
-    if (flags & hasGrade) {
-      scanner.Read(grade);
-    }
-    else {
-      grade=1;
-    }
-
-    if (flags & hasTags) {
-      uint32_t tagCount;
-
-      scanner.ReadNumber(tagCount);
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        scanner.ReadNumber(tags[i].key);
-        scanner.Read(tags[i].value);
-      }
-    }
-
-    return !scanner.HasError();
-  }
-
-  bool WayAttributes::Write(FileWriter& writer) const
-  {
-    writer.WriteNumber(type);
-
-    if (!name.empty()) {
-      flags|=hasName;
-    }
-    else {
-      flags&=~hasName;
-    }
-
-    if (!nameAlt.empty()) {
-      flags|=hasNameAlt;
-    }
-    else {
-      flags&=~hasNameAlt;
-    }
-
-    if (!ref.empty()) {
-      flags|=hasRef;
-    }
-    else {
-      flags&=~hasRef;
-    }
-
-    if (layer!=0) {
-      flags|=hasLayer;
-    }
-    else {
-      flags&=~hasLayer;
-    }
-
-    if (width!=0) {
-      flags|=hasWidth;
-    }
-    else {
-      flags&=~hasWidth;
-    }
-
-    if (maxSpeed!=0) {
-      flags|=hasMaxSpeed;
-    }
-    else {
-      flags&=~hasMaxSpeed;
-    }
-
-    if (grade!=1) {
-      flags|=hasGrade;
-    }
-    else {
-      flags&=~hasGrade;
-    }
-
-    if (!tags.empty()) {
-      flags|=hasTags;
-    }
-    else {
-      flags&=~hasTags;
-    }
-
-    writer.Write(flags);
-
-    access.Write(writer);
-
-    if (flags & hasName) {
-      writer.Write(name);
-    }
-
-    if (flags & hasNameAlt) {
-      writer.Write(nameAlt);
-    }
-
-    if (flags & hasRef) {
-      writer.Write(ref);
-    }
-
-    if (flags & hasLayer) {
-      writer.Write(layer);
-    }
-
-    if (flags & hasWidth) {
-      writer.Write(width);
-    }
-
-    if (flags & hasMaxSpeed) {
-      writer.Write(maxSpeed);
-    }
-
-    if (flags & hasGrade) {
-      writer.Write(grade);
-    }
-
-    if (flags & hasTags) {
-      writer.WriteNumber((uint32_t)tags.size());
-
-      for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
-        writer.Write(tags[i].value);
-      }
-    }
-
-    return !writer.HasError();
-  }
-
-  bool WayAttributes::operator==(const WayAttributes& other) const
-  {
-    if (type!=other.type) {
-      return false;
-    }
-
-    if ((flags & (isBridge | isTunnel | isRoundabout))!=
-        (other.flags & (isBridge | isTunnel | isRoundabout))) {
-      return false;
-    }
-
-    if (access!=other.access ||
-        name!=other.name ||
-        nameAlt!=other.nameAlt ||
-        ref!=other.ref ||
-        layer!=other.layer ||
-        width!=other.width ||
-        maxSpeed!=other.maxSpeed ||
-        grade!=other.grade) {
-      return false;
-    }
-
-    if (tags.empty() && other.tags.empty()) {
-      return true;
-    }
-
-    if (tags.size()!=other.tags.size()) {
-      return false;
-    }
-
-    for (size_t t=0; t<tags.size(); t++) {
-      if (tags[t].key!=other.tags[t].key) {
-        return false;
-      }
-
-      if (tags[t].value!=other.tags[t].value) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  bool WayAttributes::operator!=(const WayAttributes& other) const
-  {
-    return !this->operator==(other);
+    featureValueBuffer.SetType(type);
   }
 
   bool Way::GetCenter(double& lat, double& lon) const
@@ -364,21 +57,15 @@ namespace osmscout {
     return true;
   }
 
-  void Way::SetType(TypeId type)
+  void Way::SetFeatures(const FeatureValueBuffer& buffer)
   {
-    attributes.SetType(type);
-  }
-
-  void Way::SetFeatures(const TypeConfig& typeConfig,
-                        const FeatureValueBuffer& buffer)
-  {
-    attributes.SetFeatures(typeConfig,
-                           buffer);
+    featureValueBuffer.Set(buffer);
   }
 
   void Way::SetLayerToMax()
   {
-    attributes.SetLayer(std::numeric_limits<int8_t>::max());
+    // TODO
+    // attributes.SetLayer(std::numeric_limits<int8_t>::max());
   }
 
   void Way::GetCoordinates(size_t nodeIndex,
@@ -405,15 +92,20 @@ namespace osmscout {
     return false;
   }
 
-  bool Way::Read(FileScanner& scanner)
+  bool Way::Read(const TypeConfig& typeConfig,
+                 FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
-    if (!attributes.Read(scanner)) {
-      return false;
-    }
+    uint32_t tmpType;
+
+    scanner.ReadNumber(tmpType);
+
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+
+    featureValueBuffer.SetType(type);
 
     if (!scanner.Read(nodes)) {
       return false;
@@ -450,45 +142,45 @@ namespace osmscout {
       }
     }
 
+    if (!featureValueBuffer.Read(scanner)) {
+      return false;
+    }
+
     return !scanner.HasError();
   }
 
-  bool Way::Read(const TypeConfig& /*typeConfig*/,
-                 FileScanner& scanner)
-  {
-    return Read(scanner);
-  }
-
-  bool Way::ReadOptimized(FileScanner& scanner)
+  bool Way::ReadOptimized(const TypeConfig& typeConfig,
+                          FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
-    if (!attributes.Read(scanner)) {
+    uint32_t tmpType;
+
+    scanner.ReadNumber(tmpType);
+
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+
+    featureValueBuffer.SetType(type);
+
+    if (!scanner.Read(nodes)) {
       return false;
     }
 
-    if (!scanner.Read(nodes)) {
+    if (!featureValueBuffer.Read(scanner)) {
       return false;
     }
 
     return !scanner.HasError();
   }
 
-  bool Way::Write(FileWriter& writer) const
+  bool Way::Write(const TypeConfig& /*typeConfig*/,
+                  FileWriter& writer) const
   {
-    FileOffset fileOffset;
-
-    if (!writer.GetPos(fileOffset)) {
-      return false;
-    }
-
     assert(!nodes.empty());
 
-    if (!attributes.Write(writer)) {
-      return false;
-    }
+    writer.WriteNumber(featureValueBuffer.GetTypeId());
 
     if (!writer.Write(nodes)) {
       return false;
@@ -539,24 +231,25 @@ namespace osmscout {
       }
     }
 
-    return !writer.HasError();
-  }
-
-  bool Way::Write(const TypeConfig& /*typeConfig*/,
-                  FileWriter& writer) const
-  {
-    return Write(writer);
-  }
-
-  bool Way::WriteOptimized(FileWriter& writer) const
-  {
-    assert(!nodes.empty());
-
-    if (!attributes.Write(writer)) {
+    if (!featureValueBuffer.Write(writer)) {
       return false;
     }
 
+    return !writer.HasError();
+  }
+
+  bool Way::WriteOptimized(const TypeConfig& /*typeConfig*/,
+                           FileWriter& writer) const
+  {
+    assert(!nodes.empty());
+
+    writer.WriteNumber(featureValueBuffer.GetTypeId());
+
     if (!writer.Write(nodes)) {
+      return false;
+    }
+
+    if (!featureValueBuffer.Write(writer)) {
       return false;
     }
 

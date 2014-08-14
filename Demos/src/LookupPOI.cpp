@@ -149,12 +149,10 @@ int main(int argc, char* argv[])
     std::cout << " " << nameLabelReader.GetLabel((node->GetFeatureValueBuffer())) << std::endl;
   }
 
-  for (std::vector<osmscout::WayRef>::const_iterator way=ways.begin();
-      way!=ways.end();
-      way++) {
-    std::cout << "+ Way " << (*way)->GetFileOffset();
-    std::cout << " " << typeConfig->GetTypeInfo((*way)->GetType())->GetName();
-    std::cout << " " << (*way)->GetName() << std::endl;
+  for (auto way :ways) {
+    std::cout << "+ Way " << way->GetFileOffset();
+    std::cout << " " << way->GetType()->GetName();
+    std::cout << " " << nameLabelReader.GetLabel(way->GetFeatureValueBuffer()) << std::endl;
   }
 
   for (std::vector<osmscout::AreaRef>::const_iterator area=areas.begin();

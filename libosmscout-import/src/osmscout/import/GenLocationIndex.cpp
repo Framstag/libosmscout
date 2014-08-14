@@ -743,6 +743,7 @@ namespace osmscout {
     */
   bool LocationIndexGenerator::AddLocationWayToRegion(Region& region,
                                                       const Way& way,
+                                                      const std::string& name,
                                                       double minlon,
                                                       double minlat,
                                                       double maxlon,
@@ -763,7 +764,7 @@ namespace osmscout {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationWayToRegion(*r,way,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddLocationWayToRegion(*r,way,name,minlon,minlat,maxlon,maxlat);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -776,7 +777,7 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.locations[way.GetName()].objects.push_back(ObjectFileRef(way.GetFileOffset(),refWay));
+    region.locations[name].objects.push_back(ObjectFileRef(way.GetFileOffset(),refWay));
 
     for (size_t i=0; i<region.areas.size(); i++) {
       if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
@@ -787,15 +788,17 @@ namespace osmscout {
     return false;
   }
 
-  bool LocationIndexGenerator::IndexLocationWays(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexLocationWays(const TypeConfigRef& typeConfig,
+                                                 const ImportParameter& parameter,
                                                  Progress& progress,
                                                  const OSMSCOUT_HASHSET<TypeId>& locationTypes,
                                                  RegionRef& rootRegion,
                                                  const RegionIndex& regionIndex)
   {
-    FileScanner scanner;
-    uint32_t    wayCount;
-    size_t      waysFound=0;
+    FileScanner            scanner;
+    uint32_t               wayCount;
+    size_t                 waysFound=0;
+    NameFeatureValueReader nameReader(typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
@@ -816,7 +819,8 @@ namespace osmscout {
 
       Way way;
 
-      if (!way.Read(scanner)) {
+      if (!way.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
                        NumberToString(wayCount)+
@@ -825,11 +829,13 @@ namespace osmscout {
         return false;
       }
 
-      if (locationTypes.find(way.GetType())==locationTypes.end()) {
+      if (locationTypes.find(way.GetTypeId())==locationTypes.end()) {
         continue;
       }
 
-      if (way.GetName().empty()) {
+      NameFeatureValue *nameValue=nameReader.GetValue(way.GetFeatureValueBuffer());
+
+      if (nameValue==NULL) {
         continue;
       }
 
@@ -845,6 +851,7 @@ namespace osmscout {
 
       AddLocationWayToRegion(region,
                              way,
+                             nameValue->GetName(),
                              minlon,
                              minlat,
                              maxlon,
@@ -1899,7 +1906,8 @@ namespace osmscout {
 
     progress.SetAction("Index location ways");
 
-    if (!IndexLocationWays(parameter,
+    if (!IndexLocationWays(typeConfig,
+                           parameter,
                            progress,
                            locationTypes,
                            rootRegion,

@@ -308,7 +308,8 @@ namespace osmscout {
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
-        if (!way.Read(wayScanner)) {
+        if (!way.Read(typeConfig,
+                      wayScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
                          NumberToString(wayCount)+
@@ -318,7 +319,7 @@ namespace osmscout {
         }
 
         // Count number of entries per current type and coordinate
-        if (currentWayTypes.find(way.GetType())==currentWayTypes.end()) {
+        if (currentWayTypes.find(way.GetTypeId())==currentWayTypes.end()) {
           continue;
         }
 
@@ -341,7 +342,7 @@ namespace osmscout {
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[way.GetType()][Pixel(x,y)]++;
+            cellFillCount[way.GetTypeId()][Pixel(x,y)]++;
           }
         }
       }
@@ -464,7 +465,8 @@ namespace osmscout {
 
         wayScanner.GetPos(offset);
 
-        if (!way.Read(wayScanner)) {
+        if (!way.Read(typeConfig,
+                      wayScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
                          NumberToString(wayCount)+
@@ -473,7 +475,7 @@ namespace osmscout {
           return false;
         }
 
-        if (indexTypes.find(way.GetType())==indexTypes.end()) {
+        if (indexTypes.find(way.GetTypeId())==indexTypes.end()) {
           continue;
         }
 
@@ -496,7 +498,7 @@ namespace osmscout {
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
-            typeCellOffsets[way.GetType()][Pixel(x,y)].push_back(offset);
+            typeCellOffsets[way.GetTypeId()][Pixel(x,y)].push_back(offset);
           }
         }
       }

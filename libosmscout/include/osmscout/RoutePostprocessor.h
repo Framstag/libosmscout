@@ -217,6 +217,10 @@ namespace osmscout {
   private:
     OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
     OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
+    NameFeatureValueReader               *nameReader;
+    RefFeatureValueReader                *refReader;
+    BridgeFeatureReader                  *bridgeReader;
+    RoundaboutFeatureReader              *roundaboutReader;
 
   private:
     bool ResolveAllAreasAndWays(const RouteDescription& description,
@@ -224,12 +228,17 @@ namespace osmscout {
     void Cleanup();
 
   public:
+    RoutePostprocessor();
+
     AreaRef GetArea(FileOffset offset) const;
     WayRef GetWay(FileOffset offset) const;
 
     RouteDescription::NameDescriptionRef GetNameDescription(const ObjectFileRef& object) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const Way& way) const;
 
     bool IsRoundabout(const ObjectFileRef& object) const;
+    bool IsBridge(const Way& way) const;
+
     bool IsOfType(const ObjectFileRef& object,
                   const OSMSCOUT_HASHSET<TypeId>& types) const;
 

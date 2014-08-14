@@ -415,9 +415,8 @@ namespace osmscout {
     Way   way;
     OSMId wayId=rawWay.GetId();
 
-    way.SetType(rawWay.GetTypeId());
-    way.SetFeatures(typeConfig,
-                    rawWay.GetFeatureValueBuffer());
+    way.SetType(rawWay.GetType());
+    way.SetFeatures(rawWay.GetFeatureValueBuffer());
 
     way.ids.resize(rawWay.GetNodeCount());
     way.nodes.resize(rawWay.GetNodeCount());
@@ -447,7 +446,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!way.Write(writer)) {
+    if (!way.Write(typeConfig,
+                   writer)) {
       return false;
     }
 

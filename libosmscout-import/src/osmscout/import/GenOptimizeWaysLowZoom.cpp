@@ -112,7 +112,8 @@ namespace osmscout
     return true;
   }
 
-  bool OptimizeWaysLowZoomGenerator::GetWays(const ImportParameter& parameter,
+  bool OptimizeWaysLowZoomGenerator::GetWays(const TypeConfig& typeConfig,
+                                             const ImportParameter& parameter,
                                              Progress& progress,
                                              FileScanner& scanner,
                                              std::set<TypeId>& types,
@@ -137,9 +138,11 @@ namespace osmscout
     for (uint32_t w=1; w<=wayCount; w++) {
       WayRef way=new Way();
 
-      progress.SetProgress(w,wayCount);
+      progress.SetProgress(w,
+                           wayCount);
 
-      if (!way->Read(scanner)) {
+      if (!way->Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
             NumberToString(w)+" of "+
             NumberToString(wayCount)+
@@ -148,29 +151,37 @@ namespace osmscout
         return false;
       }
 
-      if (currentTypes.find(way->GetType())!=currentTypes.end() &&
-          way->nodes.size()>=2) {
-        ways[way->GetType()].push_back(way);
+      if (currentTypes.find(way->GetTypeId())==currentTypes.end()) {
+        continue;
+      }
 
-        collectedWaysCount++;
+      for (size_t f=0; f<way->GetFeatureCount(); f++) {
+        if (way->GetFeature(f).GetFeature()!=typeConfig.featureRef &&
+            way->HasFeature(f)) {
+          way->UnsetFeature(f);
+        }
+      }
 
-        while (collectedWaysCount>parameter.GetOptimizationMaxWayCount() &&
-               currentTypes.size()>1) {
-          size_t victimType=ways.size();
+      ways[way->GetTypeId()].push_back(way);
 
-          for (size_t i=0; i<ways.size(); i++) {
-            if (ways[i].size()>0 &&
-                (victimType>=ways.size() ||
-                 ways[i].size()<ways[victimType].size())) {
-              victimType=i;
-            }
+      collectedWaysCount++;
+
+      while (collectedWaysCount>parameter.GetOptimizationMaxWayCount() &&
+             currentTypes.size()>1) {
+        size_t victimType=ways.size();
+
+        for (size_t i=0; i<ways.size(); i++) {
+          if (ways[i].size()>0 &&
+              (victimType>=ways.size() ||
+               ways[i].size()<ways[victimType].size())) {
+            victimType=i;
           }
+        }
 
-          if (victimType<ways.size()) {
-            collectedWaysCount-=ways[victimType].size();
-            ways[victimType].clear();
-            currentTypes.erase(victimType);
-          }
+        if (victimType<ways.size()) {
+          collectedWaysCount-=ways[victimType].size();
+          ways[victimType].clear();
+          currentTypes.erase(victimType);
         }
       }
     }
@@ -195,15 +206,13 @@ namespace osmscout
 
     progress.Info("Merging "+NumberToString(ways.size())+" ways");
 
-    for (std::list<WayRef>::const_iterator way=ways.begin();
-        way!=ways.end();
-        way++) {
-      if ((*way)->ids.front()!=0) {
-        waysByJoin[(*way)->ids.front()].push_back(*way);
+    for (auto way: ways) {
+      if (way->ids.front()!=0) {
+        waysByJoin[way->ids.front()].push_back(way);
       }
 
-      if ((*way)->ids.back()!=0) {
-        waysByJoin[(*way)->ids.back()].push_back(*way);
+      if (way->ids.back()!=0) {
+        waysByJoin[way->ids.back()].push_back(way);
       }
     }
 
@@ -233,7 +242,7 @@ namespace osmscout
             otherWay=match->second.begin();
             while (otherWay!=match->second.end() &&
                    (usedWays.find((*otherWay)->GetFileOffset())!=usedWays.end() ||
-                    way->GetRefName()!=(*otherWay)->GetRefName())) {
+                    way->GetFeatureValueBuffer()!=(*otherWay)->GetFeatureValueBuffer())) {
               otherWay++;
             }
 
@@ -244,7 +253,7 @@ namespace osmscout
               stillOtherWay++;
               while (stillOtherWay!=match->second.end() &&
                      (usedWays.find((*stillOtherWay)->GetFileOffset())!=usedWays.end() ||
-                      way->GetRefName()!=(*stillOtherWay)->GetRefName())) {
+                      way->GetFeatureValueBuffer()!=(*stillOtherWay)->GetFeatureValueBuffer())) {
                 stillOtherWay++;
               }
 
@@ -306,7 +315,7 @@ namespace osmscout
             otherWay=match->second.begin();
             while (otherWay!=match->second.end() &&
                    (usedWays.find((*otherWay)->GetFileOffset())!=usedWays.end() ||
-                     way->GetRefName()!=(*otherWay)->GetRefName())) {
+                     way->GetFeatureValueBuffer()!=(*otherWay)->GetFeatureValueBuffer())) {
               otherWay++;
             }
 
@@ -317,7 +326,7 @@ namespace osmscout
               stillOtherWay++;
               while (stillOtherWay!=match->second.end() &&
                      (usedWays.find((*stillOtherWay)->GetFileOffset())!=usedWays.end() ||
-                      way->GetRefName()!=(*stillOtherWay)->GetRefName())) {
+                      way->GetFeatureValueBuffer()!=(*stillOtherWay)->GetFeatureValueBuffer())) {
                 stillOtherWay++;
               }
 
@@ -506,7 +515,8 @@ namespace osmscout
     }
   }
 
-  bool OptimizeWaysLowZoomGenerator::WriteWays(FileWriter& writer,
+  bool OptimizeWaysLowZoomGenerator::WriteWays(const TypeConfig& typeConfig,
+                                               FileWriter& writer,
                                                const std::list<WayRef>& ways,
                                                FileOffsetFileOffsetMap& offsets)
   {
@@ -520,7 +530,8 @@ namespace osmscout
 
       offsets[way->GetFileOffset()]=offset;
 
-      if (!way->WriteOptimized(writer)) {
+      if (!way->WriteOptimized(typeConfig,
+                               writer)) {
         return false;
       }
     }
@@ -702,7 +713,8 @@ namespace osmscout
       // Load type data
       //
 
-      if (!GetWays(parameter,
+      if (!GetWays(typeConfig,
+                   parameter,
                    progress,
                    scanner,
                    typesToProcess,
@@ -804,7 +816,8 @@ namespace osmscout
 
           FileOffsetFileOffsetMap offsets;
 
-          if (!WriteWays(writer,
+          if (!WriteWays(typeConfig,
+                         writer,
                          optimizedWays,
                          offsets)) {
             return false;

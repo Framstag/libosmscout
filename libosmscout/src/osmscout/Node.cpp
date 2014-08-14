@@ -39,11 +39,12 @@ namespace osmscout {
   bool Node::Read(const TypeConfig& typeConfig,
                   FileScanner& scanner)
   {
-    uint32_t tmpType;
 
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
+
+    uint32_t tmpType;
 
     scanner.ReadNumber(tmpType);
 
