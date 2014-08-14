@@ -140,20 +140,31 @@ namespace osmscout {
 
       AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
 
-      if (accessValue==NULL) {
-        return false;
+      if (accessValue!=NULL) {
+        switch (vehicle) {
+        case vehicleFoot:
+          return accessValue->CanRouteFoot();
+          break;
+        case vehicleBicycle:
+          return accessValue->CanRouteBicycle();
+          break;
+        case vehicleCar:
+          return accessValue->CanRouteCar();
+          break;
+        }
       }
-
-      switch (vehicle) {
-      case vehicleFoot:
-        return accessValue->CanRouteFoot();
-        break;
-      case vehicleBicycle:
-        return accessValue->CanRouteBicycle();
-        break;
-      case vehicleCar:
-        return accessValue->CanRouteCar();
-        break;
+      else {
+        switch (vehicle) {
+        case vehicleFoot:
+          return way.GetType()->CanRouteFoot();
+          break;
+        case vehicleBicycle:
+          return way.GetType()->CanRouteBicycle();
+          break;
+        case vehicleCar:
+          return way.GetType()->CanRouteCar();
+          break;
+        }
       }
 
       return false;
@@ -169,20 +180,31 @@ namespace osmscout {
 
       AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
 
-      if (accessValue==NULL) {
-        return false;
+      if (accessValue!=NULL) {
+        switch (vehicle) {
+        case vehicleFoot:
+          return accessValue->CanRouteFootForward();
+          break;
+        case vehicleBicycle:
+          return accessValue->CanRouteBicycleForward();
+          break;
+        case vehicleCar:
+          return accessValue->CanRouteCarForward();
+          break;
+        }
       }
-
-      switch (vehicle) {
-      case vehicleFoot:
-        return accessValue->CanRouteFootForward();
-        break;
-      case vehicleBicycle:
-        return accessValue->CanRouteBicycleForward();
-        break;
-      case vehicleCar:
-        return accessValue->CanRouteCarForward();
-        break;
+      else {
+        switch (vehicle) {
+        case vehicleFoot:
+          return way.GetType()->CanRouteFoot();
+          break;
+        case vehicleBicycle:
+          return way.GetType()->CanRouteBicycle();
+          break;
+        case vehicleCar:
+          return way.GetType()->CanRouteCar();
+          break;
+        }
       }
 
       return false;
@@ -198,20 +220,31 @@ namespace osmscout {
 
       AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
 
-      if (accessValue==NULL) {
-        return false;
+      if (accessValue!=NULL) {
+        switch (vehicle) {
+        case vehicleFoot:
+          return accessValue->CanRouteFootBackward();
+          break;
+        case vehicleBicycle:
+          return accessValue->CanRouteBicycleBackward();
+          break;
+        case vehicleCar:
+          return accessValue->CanRouteCarBackward();
+          break;
+        }
       }
-
-      switch (vehicle) {
-      case vehicleFoot:
-        return accessValue->CanRouteFootBackward();
-        break;
-      case vehicleBicycle:
-        return accessValue->CanRouteBicycleBackward();
-        break;
-      case vehicleCar:
-        return accessValue->CanRouteCarBackward();
-        break;
+      else {
+        switch (vehicle) {
+        case vehicleFoot:
+          return way.GetType()->CanRouteFoot();
+          break;
+        case vehicleBicycle:
+          return way.GetType()->CanRouteBicycle();
+          break;
+        case vehicleCar:
+          return way.GetType()->CanRouteCar();
+          break;
+        }
       }
 
       return false;
