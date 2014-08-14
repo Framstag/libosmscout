@@ -413,7 +413,7 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
       else {
         // We are just a flag...
         DumpIndent(indent);
-        std::cout << meta.GetFeature()->GetName() << ": ";
+        std::cout << meta.GetFeature()->GetName() << ": true";
         std::cout << std::endl;
       }
     }
@@ -424,6 +424,12 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
         DumpAccessFeatureValue(accessValue,
                                indent);
+      }
+      else if (!meta.GetFeature()->HasValue()) {
+        // We are just a flag...
+        DumpIndent(indent);
+        std::cout << meta.GetFeature()->GetName() << ": false";
+        std::cout << std::endl;
       }
     }
   }
