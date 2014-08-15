@@ -413,9 +413,12 @@ namespace osmscout {
       return false;
     }
 
+    TypeId   outerType;
     uint32_t ringCount=1;
     uint8_t  outerFlags;
     uint32_t nodesCount;
+
+    scanner.ReadNumber(outerType);
 
     scanner.Read(outerFlags);
 
@@ -430,7 +433,7 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    scanner.ReadNumber(rings[0].type);
+    rings[0].type=outerType;
 
     if (!rings[0].attributes.Read(scanner,
                                   outerFlags)) {
@@ -504,9 +507,12 @@ namespace osmscout {
       return false;
     }
 
+    TypeId   outerType;
     uint32_t ringCount=1;
     uint8_t  outerFlags;
     uint32_t nodesCount;
+
+    scanner.ReadNumber(outerType);
 
     scanner.Read(outerFlags);
 
@@ -521,7 +527,7 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    scanner.ReadNumber(rings[0].type);
+    rings[0].type=outerType;
 
     if (!rings[0].attributes.Read(scanner,
                                   outerFlags)) {
@@ -631,6 +637,8 @@ namespace osmscout {
 
     // Outer ring
 
+    writer.WriteNumber(ring->type);
+
     uint8_t outerFlags;
 
     ring->attributes.GetFlags(outerFlags);
@@ -644,8 +652,6 @@ namespace osmscout {
     if (rings.size()>1) {
       writer.WriteNumber((uint32_t)rings.size()-1);
     }
-
-    writer.WriteNumber(ring->type);
 
     if (!ring->attributes.Write(writer,
                                 outerFlags)) {
@@ -710,6 +716,8 @@ namespace osmscout {
 
     // Outer ring
 
+    writer.WriteNumber(ring->type);
+
     uint8_t outerFlags;
 
     ring->attributes.GetFlags(outerFlags);
@@ -723,8 +731,6 @@ namespace osmscout {
     if (rings.size()>1) {
       writer.WriteNumber((uint32_t)rings.size()-1);
     }
-
-    writer.WriteNumber(ring->type);
 
     if (!ring->attributes.Write(writer,
                                 outerFlags)) {
