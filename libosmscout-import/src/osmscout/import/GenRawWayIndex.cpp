@@ -21,19 +21,11 @@
 
 namespace osmscout {
 
-  bool RawWayIndexGenerator::ReadData(const TypeConfig& typeConfig,
-                                      FileScanner& scanner,
-                                      RawWay& data) const
-  {
-    return data.Read(typeConfig,
-                     scanner);
-  }
-
   RawWayIndexGenerator::RawWayIndexGenerator(const std::string& datafile,
                                              const std::string& indexfile)
-   : NumericIndexBaseGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
-                                             datafile,
-                                             indexfile)
+   : NumericIndexGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
+                                         datafile,
+                                         indexfile)
   {
     // no code
   }

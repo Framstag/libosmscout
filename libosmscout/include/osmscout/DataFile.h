@@ -67,10 +67,10 @@ namespace osmscout {
     bool                isOpen;          //! If true,the data file is opened
     TypeConfigRef       typeConfig;
 
-protected:
-  bool ReadData(const TypeConfig& typeConfig,
-                FileScanner& scanner,
-                N& data) const;
+  private:
+    bool ReadData(const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  N& data) const;
 
   public:
     DataFile(const std::string& datafile,
@@ -487,10 +487,6 @@ protected:
                     unsigned long dataCacheSize,
                     unsigned long indexCacheSize);
 
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  N& data) const;
-
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path,
               FileScanner::Mode modeIndex,
@@ -528,15 +524,6 @@ protected:
     index(indexfile,indexCacheSize)
   {
     // no code
-  }
-
-  template <class I, class N>
-  bool IndexedDataFile<I,N>::ReadData(const TypeConfig& typeConfig,
-                                      FileScanner& scanner,
-                                      N& data) const
-  {
-    return data.Read(typeConfig,
-                     scanner);
   }
 
   template <class I, class N>

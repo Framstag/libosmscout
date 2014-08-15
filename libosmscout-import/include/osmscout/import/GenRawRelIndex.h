@@ -25,13 +25,8 @@
 
 namespace osmscout {
 
-  class RawRelationIndexGenerator : public NumericIndexBaseGenerator<OSMId,RawRelation>
+  class RawRelationIndexGenerator : public NumericIndexGenerator<OSMId,RawRelation>
   {
-  protected:
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  RawRelation& data) const;
-
   public:
     RawRelationIndexGenerator(const std::string& datafile,
                               const std::string& indexfile);

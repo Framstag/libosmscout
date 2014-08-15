@@ -25,13 +25,8 @@
 
 namespace osmscout {
 
-  class RawWayIndexGenerator : public NumericIndexBaseGenerator<OSMId,RawWay>
+  class RawWayIndexGenerator : public NumericIndexGenerator<OSMId,RawWay>
   {
-  protected:
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  RawWay& data) const;
-
   public:
     RawWayIndexGenerator(const std::string& datafile,
                          const std::string& indexfile);

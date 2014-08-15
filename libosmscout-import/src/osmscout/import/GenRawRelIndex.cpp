@@ -21,19 +21,11 @@
 
 namespace osmscout {
 
-  bool RawRelationIndexGenerator::ReadData(const TypeConfig& typeConfig,
-                                           FileScanner& scanner,
-                                           RawRelation& data) const
-  {
-    return data.Read(typeConfig,
-                     scanner);
-  }
-
   RawRelationIndexGenerator::RawRelationIndexGenerator(const std::string& datafile,
                                                        const std::string& indexfile)
-   : NumericIndexBaseGenerator<OSMId,RawRelation>("Generating 'rawrel.idx'",
-                                                  datafile,
-                                                  indexfile)
+   : NumericIndexGenerator<OSMId,RawRelation>("Generating 'rawrel.idx'",
+                                              datafile,
+                                              indexfile)
   {
     // no code
   }
