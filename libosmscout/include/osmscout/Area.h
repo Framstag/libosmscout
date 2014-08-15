@@ -43,11 +43,9 @@ namespace osmscout {
 
     static const uint8_t hasAccess       = 1 << 0; //! We do have (general) access rights to this way/area
 
-  public:
-    std::string      name;     //! name
-
   private:
     mutable uint8_t  flags;
+    std::string      name;     //! name
     std::string      nameAlt;  //! alternative name
     AttributeAccess  access;   //! Information regarding which vehicle can access this area
     std::string      address;  //! ...house number
