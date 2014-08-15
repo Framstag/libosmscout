@@ -28,13 +28,8 @@ namespace osmscout {
     \ingroup Database
     Abstraction for getting cached access to the 'nodes.dat' file.
     */
-  class NodeDataFile : public BaseDataFile<Node>
+  class NodeDataFile : public DataFile<Node>
   {
-  protected:
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  Node& data) const;
-
   public:
     NodeDataFile(unsigned long dataCacheSize);
   };

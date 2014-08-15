@@ -22,18 +22,10 @@
 namespace osmscout {
 
   NodeDataFile::NodeDataFile(unsigned long dataCacheSize)
-  : BaseDataFile<Node>("nodes.dat",
-                       dataCacheSize)
+  : DataFile<Node>("nodes.dat",
+                   dataCacheSize)
   {
     // no code
-  }
-
-  bool NodeDataFile::ReadData(const TypeConfig& typeConfig,
-                              FileScanner& scanner,
-                              Node& data) const
-  {
-    return data.Read(typeConfig,
-                     scanner);
   }
 }
 
