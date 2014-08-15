@@ -200,7 +200,8 @@ namespace osmscout {
                           const std::list<Boundary>& boundaryAreas,
                           size_t level);
 
-    bool IndexRegionAreas(const ImportParameter& parameter,
+    bool IndexRegionAreas(const TypeConfig& typeConfig,
+                          const ImportParameter& parameter,
                           Progress& progress,
                           const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                           Region& rootRegion);
@@ -239,7 +240,8 @@ namespace osmscout {
                                  const Area::Ring& ring,
                                  const RegionIndex& regionIndex);
 
-    bool IndexLocationAreas(const ImportParameter& parameter,
+    bool IndexLocationAreas(const TypeConfig& typeConfig,
+                            const ImportParameter& parameter,
                             Progress& progress,
                             const OSMSCOUT_HASHSET<TypeId>& indexables,
                             RegionRef& rootRegion,

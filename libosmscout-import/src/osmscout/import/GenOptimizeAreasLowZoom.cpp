@@ -60,7 +60,7 @@ namespace osmscout
   }
 
   void OptimizeAreasLowZoomGenerator::GetAreaTypesToOptimize(const TypeConfig& typeConfig,
-                                                       std::set<TypeId>& types)
+                                                             std::set<TypeId>& types)
   {
     for (std::vector<TypeInfoRef>::const_iterator t=typeConfig.GetTypes().begin();
         t!=typeConfig.GetTypes().end();
@@ -75,7 +75,7 @@ namespace osmscout
   }
 
   bool OptimizeAreasLowZoomGenerator::WriteTypeData(FileWriter& writer,
-                                               const TypeData& data)
+                                                    const TypeData& data)
   {
     assert(data.type!=0);
 
@@ -94,8 +94,8 @@ namespace osmscout
   }
 
   bool OptimizeAreasLowZoomGenerator::WriteHeader(FileWriter& writer,
-                                             const std::list<TypeData>& areaTypesData,
-                                             uint32_t optimizeMaxMap)
+                                                  const std::list<TypeData>& areaTypesData,
+                                                  uint32_t optimizeMaxMap)
   {
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)areaTypesData.size());
@@ -112,7 +112,8 @@ namespace osmscout
     return true;
   }
 
-  bool OptimizeAreasLowZoomGenerator::GetAreas(const ImportParameter& parameter,
+  bool OptimizeAreasLowZoomGenerator::GetAreas(const TypeConfig& typeConfig,
+                                               const ImportParameter& parameter,
                                                Progress& progress,
                                                FileScanner& scanner,
                                                std::set<TypeId>& types,
@@ -139,7 +140,8 @@ namespace osmscout
 
       progress.SetProgress(a,areaCount);
 
-      if (!area->Read(scanner)) {
+      if (!area->Read(typeConfig,
+                      scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
             NumberToString(a)+" of "+
             NumberToString(areaCount)+
@@ -354,7 +356,8 @@ namespace osmscout
     }
   }
 
-  bool OptimizeAreasLowZoomGenerator::WriteAreas(FileWriter& writer,
+  bool OptimizeAreasLowZoomGenerator::WriteAreas(const TypeConfig& typeConfig,
+                                                 FileWriter& writer,
                                                  const std::list<AreaRef>& areas,
                                                  FileOffsetFileOffsetMap& offsets)
   {
@@ -368,7 +371,8 @@ namespace osmscout
 
       offsets[area->GetFileOffset()]=offset;
 
-      if (!area->WriteOptimized(writer)) {
+      if (!area->WriteOptimized(typeConfig,
+                                writer)) {
         return false;
       }
     }
@@ -549,7 +553,8 @@ namespace osmscout
       // Load type data
       //
 
-      if (!GetAreas(parameter,
+      if (!GetAreas(typeConfig,
+                    parameter,
                     progress,
                     scanner,
                     typesToProcess,
@@ -643,7 +648,8 @@ namespace osmscout
 
           FileOffsetFileOffsetMap offsets;
 
-          if (!WriteAreas(writer,
+          if (!WriteAreas(typeConfig,
+                          writer,
                           optimizedAreas,
                           offsets)) {
             return false;

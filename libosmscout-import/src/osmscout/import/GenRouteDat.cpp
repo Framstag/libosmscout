@@ -508,7 +508,8 @@ namespace osmscout {
 
       Area area;
 
-      if (!area.Read(scanner)) {
+      if (!area.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(d)+" of "+
                        NumberToString(dataCount)+
@@ -670,7 +671,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!area.Read(scanner)) {
+      if (!area.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(d)+" of "+
                        NumberToString(dataCount)+
@@ -807,7 +809,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::LoadAreas(Progress& progress,
+  bool RouteDataGenerator::LoadAreas(const TypeConfig& typeConfig,
+                                     Progress& progress,
                                      FileScanner& scanner,
                                      const std::set<FileOffset>& fileOffsets,
                                      OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap)
@@ -833,7 +836,8 @@ namespace osmscout {
 
       AreaRef area=new Area();
 
-      area->Read(scanner);
+      area->Read(typeConfig,
+                 scanner);
 
       if (scanner.HasError()) {
         progress.Error("Error while loading area at offset " + NumberToString(*offset));
@@ -1559,7 +1563,8 @@ namespace osmscout {
 
       OSMSCOUT_HASHMAP<FileOffset,AreaRef> areasMap;
 
-      if (!LoadAreas(progress,
+      if (!LoadAreas(typeConfig,
+                     progress,
                      areaScanner,
                      areaOffsets,
                      areasMap)) {

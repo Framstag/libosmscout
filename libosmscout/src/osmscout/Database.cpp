@@ -412,7 +412,8 @@ namespace osmscout {
     if (optimizeAreasLowZoom.Invalid()) {
       optimizeAreasLowZoom=new OptimizeAreasLowZoom();
 
-      if (!optimizeAreasLowZoom->Open(path)) {
+      if (!optimizeAreasLowZoom->Open(typeConfig,
+                                      path)) {
         std::cerr << "Cannot load optimize areas low zoom index!" << std::endl;
         optimizeAreasLowZoom=NULL;
 

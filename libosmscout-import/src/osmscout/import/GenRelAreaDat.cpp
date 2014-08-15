@@ -1154,7 +1154,8 @@ namespace osmscout {
       }
 
       writer.Write(rawRel.GetId());
-      rel.Write(writer);
+      rel.Write(typeConfig,
+                writer);
 
       writtenRelationCount++;
     }

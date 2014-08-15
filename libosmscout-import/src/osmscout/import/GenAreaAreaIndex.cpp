@@ -128,7 +128,7 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool AreaAreaIndexGenerator::Import(const TypeConfigRef& /*typeConfig*/,
+  bool AreaAreaIndexGenerator::Import(const TypeConfigRef& typeConfig,
                                       const ImportParameter& parameter,
                                       Progress& progress)
   {
@@ -226,7 +226,8 @@ namespace osmscout {
 
           scanner.GetPos(offset);
 
-          if (!area.Read(scanner)) {
+          if (!area.Read(typeConfig,
+                         scanner)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(a)+" of "+
                            NumberToString(areaCount)+

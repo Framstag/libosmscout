@@ -82,17 +82,19 @@ namespace osmscout {
                      const std::list<TypeData>& areaTypesData,
                      uint32_t optimizeMaxMap);
 
-    bool GetAreas(const ImportParameter& parameter,
-                            Progress& progress,
-                            FileScanner& scanner,
-                            std::set<TypeId>& types,
-                            std::vector<std::list<AreaRef> >& areas);
+    bool GetAreas(const TypeConfig& typeConfig,
+                  const ImportParameter& parameter,
+                  Progress& progress,
+                  FileScanner& scanner,
+                  std::set<TypeId>& types,
+                  std::vector<std::list<AreaRef> >& areas);
 
     void GetAreaIndexLevel(const ImportParameter& parameter,
                            const std::list<AreaRef>& areas,
                            TypeData& typeData);
 
-    bool WriteAreas(FileWriter& writer,
+    bool WriteAreas(const TypeConfig& typeConfig,
+                    FileWriter& writer,
                     const std::list<AreaRef>& areas,
                     FileOffsetFileOffsetMap& offsets);
 

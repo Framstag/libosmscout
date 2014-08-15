@@ -439,7 +439,8 @@ namespace osmscout
     // data to the corresponding keyset
     for(uint32_t n=1; n <= areaCount; n++) {
       Area area;
-      if(!area.Read(scanner)) {
+      if(!area.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(areaCount)+

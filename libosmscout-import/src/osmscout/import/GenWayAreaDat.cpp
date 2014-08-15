@@ -244,7 +244,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!area.Write(writer)) {
+    if (!area.Write(typeConfig,
+                    writer)) {
       return false;
     }
 

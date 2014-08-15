@@ -36,7 +36,6 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    static const uint8_t isSimple        = 1 << 3; //1 We are a simple area, only one Ring, no roles
     static const uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
     static const uint8_t hasName         = 1 << 5; //! We have a name
     static const uint8_t hasAddress      = 1 << 6; //! an address like a house number
@@ -223,17 +222,17 @@ namespace osmscout {
     bool ReadIds(FileScanner& scanner,
                  uint32_t nodesCount,
                  std::vector<Id>& ids);
-    bool Read(FileScanner& scanner);
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
-    bool ReadOptimized(FileScanner& scanner);
+    bool ReadOptimized(const TypeConfig& typeConfig,
+                       FileScanner& scanner);
 
     bool WriteIds(FileWriter& writer,
                   const std::vector<Id>& ids) const;
     bool Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;
-    bool Write(FileWriter& writer) const;
-    bool WriteOptimized(FileWriter& writer) const;
+    bool WriteOptimized(const TypeConfig& typeConfig,
+                        FileWriter& writer) const;
   };
 
   typedef Ref<Area> AreaRef;

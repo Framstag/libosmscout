@@ -150,7 +150,8 @@ namespace osmscout {
     /**
      * Loads areas based on their file offset.
      */
-    bool LoadAreas(Progress& progress,
+    bool LoadAreas(const TypeConfig& typeConfig,
+                   Progress& progress,
                    FileScanner& scanner,
                    const std::set<FileOffset>& fileOffsets,
                    OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap);

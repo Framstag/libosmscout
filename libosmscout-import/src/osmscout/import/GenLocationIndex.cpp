@@ -238,7 +238,8 @@ namespace osmscout {
 
       Area area;
 
-      if (!area.Read(scanner)) {
+      if (!area.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
                        NumberToString(areaCount)+
@@ -338,7 +339,8 @@ namespace osmscout {
   /**
     Return the list of nodes ids with the given type.
     */
-  bool LocationIndexGenerator::IndexRegionAreas(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexRegionAreas(const TypeConfig& typeConfig,
+                                                const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                                                 Region& rootRegion)
@@ -365,7 +367,8 @@ namespace osmscout {
 
       Area area;
 
-      if (!area.Read(scanner)) {
+      if (!area.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(a)+" of "+
                        NumberToString(areaCount)+
@@ -674,7 +677,8 @@ namespace osmscout {
     }
   }
 
-  bool LocationIndexGenerator::IndexLocationAreas(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexLocationAreas(const TypeConfig& typeConfig,
+                                                  const ImportParameter& parameter,
                                                   Progress& progress,
                                                   const OSMSCOUT_HASHSET<TypeId>& locationTypes,
                                                   RegionRef& rootRegion,
@@ -702,7 +706,8 @@ namespace osmscout {
 
       Area area;
 
-      if (!area.Read(scanner)) {
+      if (!area.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
                        NumberToString(areaCount)+
@@ -1848,7 +1853,8 @@ namespace osmscout {
 
     progress.SetAction("Indexing regions of type 'area'");
 
-    if (!IndexRegionAreas(parameter,
+    if (!IndexRegionAreas(typeConfig,
+                          parameter,
                           progress,
                           regionTypes,
                           *rootRegion)) {
@@ -1896,7 +1902,8 @@ namespace osmscout {
 
     progress.SetAction("Index location areas");
 
-    if (!IndexLocationAreas(parameter,
+    if (!IndexLocationAreas(typeConfig,
+                            parameter,
                             progress,
                             locationTypes,
                             rootRegion,

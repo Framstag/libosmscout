@@ -407,7 +407,8 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Area::Read(FileScanner& scanner)
+  bool Area::Read(const TypeConfig& typeConfig,
+                  FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
       return false;
@@ -418,18 +419,21 @@ namespace osmscout {
     uint8_t  outerFlags;
     uint32_t nodesCount;
 
-    scanner.ReadNumber(outerType);
+    if (!scanner.ReadNumber(outerType)) {
+      return false;
+    }
 
-    scanner.Read(outerFlags);
+    if (outerType>typeConfig.GetMaxTypeId()) {
+      outerType=outerType-typeConfig.GetMaxTypeId()-1;
 
-    if (!(outerFlags & AreaAttributes::isSimple)) {
-      scanner.ReadNumber(ringCount);
-      if (scanner.HasError()) {
+      if (!scanner.ReadNumber(ringCount)) {
         return false;
       }
 
       ringCount++;
     }
+
+    scanner.Read(outerFlags);
 
     rings.resize(ringCount);
 
@@ -495,13 +499,8 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Area::Read(const TypeConfig& /*typeConfig*/,
-                  FileScanner& scanner)
-  {
-    return Read(scanner);
-  }
-
-  bool Area::ReadOptimized(FileScanner& scanner)
+  bool Area::ReadOptimized(const TypeConfig& typeConfig,
+                           FileScanner& scanner)
   {
     if (!scanner.GetPos(fileOffset)) {
       return false;
@@ -512,18 +511,21 @@ namespace osmscout {
     uint8_t  outerFlags;
     uint32_t nodesCount;
 
-    scanner.ReadNumber(outerType);
+    if (!scanner.ReadNumber(outerType)) {
+      return false;
+    }
 
-    scanner.Read(outerFlags);
+    if (outerType>typeConfig.GetMaxTypeId()) {
+      outerType=outerType-typeConfig.GetMaxTypeId()-1;
 
-    if (!(outerFlags & AreaAttributes::isSimple)) {
-      scanner.ReadNumber(ringCount);
-      if (scanner.HasError()) {
+      if (!scanner.ReadNumber(ringCount)) {
         return false;
       }
 
       ringCount++;
     }
+
+    scanner.Read(outerFlags);
 
     rings.resize(ringCount);
 
@@ -625,33 +627,28 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool Area::Write(const TypeConfig& /*typeConfig*/,
+  bool Area::Write(const TypeConfig& typeConfig,
                    FileWriter& writer) const
-  {
-    return Write(writer);
-  }
-
-  bool Area::Write(FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
 
     // Outer ring
 
-    writer.WriteNumber(ring->type);
+    if (rings.size()>1) {
+      TypeId type=typeConfig.GetMaxTypeId()+1+
+                  ring->type;
+      writer.WriteNumber(type);
+      writer.WriteNumber((uint32_t)rings.size()-1);
+    }
+    else {
+      writer.WriteNumber(ring->type);
+    }
 
     uint8_t outerFlags;
 
     ring->attributes.GetFlags(outerFlags);
 
-    if (rings.size()==1) {
-      outerFlags|=AreaAttributes::isSimple;
-    }
-
     writer.Write(outerFlags);
-
-    if (rings.size()>1) {
-      writer.WriteNumber((uint32_t)rings.size()-1);
-    }
 
     if (!ring->attributes.Write(writer,
                                 outerFlags)) {
@@ -710,27 +707,28 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool Area::WriteOptimized(FileWriter& writer) const
+  bool Area::WriteOptimized(const TypeConfig& typeConfig,
+                            FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
 
     // Outer ring
 
-    writer.WriteNumber(ring->type);
+    if (rings.size()>1) {
+      TypeId type=typeConfig.GetMaxTypeId()+1+
+                  ring->type;
+      writer.WriteNumber(type);
+      writer.WriteNumber((uint32_t)rings.size()-1);
+    }
+    else {
+      writer.WriteNumber(ring->type);
+    }
 
     uint8_t outerFlags;
 
     ring->attributes.GetFlags(outerFlags);
 
-    if (rings.size()==1) {
-      outerFlags|=AreaAttributes::isSimple;
-    }
-
     writer.Write(outerFlags);
-
-    if (rings.size()>1) {
-      writer.WriteNumber((uint32_t)rings.size()-1);
-    }
 
     if (!ring->attributes.Write(writer,
                                 outerFlags)) {
