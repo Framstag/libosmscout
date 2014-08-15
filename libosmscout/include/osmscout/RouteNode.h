@@ -25,6 +25,7 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
 #include <osmscout/Types.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
@@ -97,6 +98,8 @@ namespace osmscout {
     uint32_t AddObject(const ObjectFileRef& object);
 
     bool Read(FileScanner& scanner);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };
 

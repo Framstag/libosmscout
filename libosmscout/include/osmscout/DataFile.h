@@ -491,7 +491,7 @@ protected:
    * file offset.
    */
   template <class I, class N>
-  class IndexedBaseDataFile : public BaseDataFile<N>
+  class IndexedDataFile : public BaseDataFile<N>
   {
   public:
     typedef Ref<N> ValueType;
@@ -504,10 +504,14 @@ protected:
     TypeConfigRef typeConfig;
 
   public:
-    IndexedBaseDataFile(const std::string& datafile,
+    IndexedDataFile(const std::string& datafile,
                         const std::string& indexfile,
                         unsigned long dataCacheSize,
                         unsigned long indexCacheSize);
+
+    bool ReadData(const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  N& data) const;
 
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path,
@@ -538,10 +542,10 @@ protected:
   };
 
   template <class I, class N>
-  IndexedBaseDataFile<I,N>::IndexedBaseDataFile(const std::string& datafile,
-                                                const std::string& indexfile,
-                                                unsigned long dataCacheSize,
-                                                unsigned long indexCacheSize)
+  IndexedDataFile<I,N>::IndexedDataFile(const std::string& datafile,
+                                        const std::string& indexfile,
+                                        unsigned long dataCacheSize,
+                                        unsigned long indexCacheSize)
   : BaseDataFile<N>(datafile,dataCacheSize),
     index(indexfile,indexCacheSize)
   {
@@ -549,12 +553,21 @@ protected:
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::Open(const TypeConfigRef& typeConfig,
-                                      const std::string& path,
-                                      FileScanner::Mode modeIndex,
-                                      bool memoryMapedIndex,
-                                      FileScanner::Mode modeData,
-                                      bool memoryMapedData)
+  bool IndexedDataFile<I,N>::ReadData(const TypeConfig& typeConfig,
+                                      FileScanner& scanner,
+                                      N& data) const
+  {
+    return data.Read(typeConfig,
+                     scanner);
+  }
+
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Open(const TypeConfigRef& typeConfig,
+                                  const std::string& path,
+                                  FileScanner::Mode modeIndex,
+                                  bool memoryMapedIndex,
+                                  FileScanner::Mode modeData,
+                                  bool memoryMapedData)
   {
     if (!BaseDataFile<N>::Open(typeConfig,
                                path,
@@ -569,7 +582,7 @@ protected:
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::Close()
+  bool IndexedDataFile<I,N>::Close()
   {
     bool success=BaseDataFile<N>::Close();
 
@@ -581,29 +594,29 @@ protected:
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::GetOffsets(const std::set<I>& ids,
-                                            std::vector<FileOffset>& offsets) const
+  bool IndexedDataFile<I,N>::GetOffsets(const std::set<I>& ids,
+                                        std::vector<FileOffset>& offsets) const
   {
     return index.GetOffsets(ids,offsets);
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::GetOffsets(const std::vector<I>& ids,
-                                            std::vector<FileOffset>& offsets) const
+  bool IndexedDataFile<I,N>::GetOffsets(const std::vector<I>& ids,
+                                        std::vector<FileOffset>& offsets) const
   {
     return index.GetOffsets(ids,offsets);
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::GetOffset(const I& id,
+  bool IndexedDataFile<I,N>::GetOffset(const I& id,
                                        FileOffset& offset) const
   {
     return index.GetOffset(id,offset);
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::Get(const std::vector<I>& ids,
-                                     std::vector<ValueType>& data) const
+  bool IndexedDataFile<I,N>::Get(const std::vector<I>& ids,
+                                 std::vector<ValueType>& data) const
   {
     assert(BaseDataFile<N>::isOpen);
 
@@ -617,8 +630,8 @@ protected:
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::Get(const std::list<I>& ids,
-                                     std::vector<ValueType>& data) const
+  bool IndexedDataFile<I,N>::Get(const std::list<I>& ids,
+                                 std::vector<ValueType>& data) const
   {
     assert(BaseDataFile<N>::isOpen);
 
@@ -632,8 +645,8 @@ protected:
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::Get(const std::set<I>& ids,
-                                     std::vector<ValueType>& data) const
+  bool IndexedDataFile<I,N>::Get(const std::set<I>& ids,
+                                 std::vector<ValueType>& data) const
   {
     assert(BaseDataFile<N>::isOpen);
 
@@ -647,8 +660,8 @@ protected:
   }
 
   template <class I, class N>
-  bool IndexedBaseDataFile<I,N>::Get(const I& id,
-                                     ValueType& entry) const
+  bool IndexedDataFile<I,N>::Get(const I& id,
+                                 ValueType& entry) const
   {
     assert(BaseDataFile<N>::isOpen);
 
@@ -662,47 +675,11 @@ protected:
   }
 
   template <class I, class N>
-  void IndexedBaseDataFile<I,N>::DumpStatistics() const
+  void IndexedDataFile<I,N>::DumpStatistics() const
   {
     BaseDataFile<N>::DumpStatistics();
 
     index.DumpStatistics();
-  }
-
-  template <class I, class N>
-  class IndexedDataFile : public IndexedBaseDataFile<I,N>
-  {
-  protected:
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  N& data) const;
-
-  public:
-    IndexedDataFile(const std::string& datafile,
-                    const std::string& indexfile,
-                    unsigned long dataCacheSize,
-                    unsigned long indexCacheSize);
-  };
-
-  template <class I, class N>
-  IndexedDataFile<I,N>::IndexedDataFile(const std::string& datafile,
-                                        const std::string& indexfile,
-                                        unsigned long dataCacheSize,
-                                        unsigned long indexCacheSize)
-  : IndexedBaseDataFile<I,N>(datafile,
-                             indexfile,
-                             dataCacheSize,
-                             indexCacheSize)
-  {
-    // no code
-  }
-
-  template <class I, class N>
-  bool IndexedDataFile<I,N>::ReadData(const TypeConfig& /*typeConfig*/,
-                                      FileScanner& scanner,
-                                      N& data) const
-  {
-    return data.Read(scanner);
   }
 }
 

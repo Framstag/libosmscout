@@ -69,4 +69,11 @@ namespace osmscout {
 
     return !scanner.HasError();
   }
+
+  bool Intersection::Read(const TypeConfig& /*typeConfig*/,
+                          FileScanner& scanner)
+  {
+    return Read(scanner);
+  }
+
 }

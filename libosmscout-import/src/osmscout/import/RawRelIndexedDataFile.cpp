@@ -23,20 +23,12 @@ namespace osmscout {
 
   RawRelationIndexedDataFile::RawRelationIndexedDataFile(unsigned long dataCacheSize,
                                                          unsigned long indexCacheSize)
-  : IndexedBaseDataFile<OSMId,RawRelation>("rawrels.dat",
-                                           "rawrel.idx",
-                                           dataCacheSize,
-                                           indexCacheSize)
+  : IndexedDataFile<OSMId,RawRelation>("rawrels.dat",
+                                       "rawrel.idx",
+                                       dataCacheSize,
+                                       indexCacheSize)
   {
     // no code
-  }
-
-  bool RawRelationIndexedDataFile::ReadData(const TypeConfig& typeConfig,
-                                            FileScanner& scanner,
-                                            RawRelation& data) const
-  {
-    return data.Read(typeConfig,
-                     scanner);
   }
 }
 

@@ -25,6 +25,7 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/ObjectRef.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Reference.h>
@@ -56,6 +57,8 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
   };
 
   typedef Ref<Intersection> JunctionRef;

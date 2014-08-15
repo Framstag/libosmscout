@@ -132,6 +132,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool RouteNode::Read(const TypeConfig& /*typeConfig*/,
+                       FileScanner& scanner)
+  {
+    return Read(scanner);
+  }
+
   bool RouteNode::Write(FileWriter& writer) const
   {
     writer.WriteNumber(id);

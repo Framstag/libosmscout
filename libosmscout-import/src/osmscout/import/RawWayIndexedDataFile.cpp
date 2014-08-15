@@ -23,20 +23,12 @@ namespace osmscout {
 
   RawWayIndexedDataFile::RawWayIndexedDataFile(unsigned long dataCacheSize,
                                                unsigned long indexCacheSize)
-  : IndexedBaseDataFile<OSMId,RawWay>("rawways.dat",
-                                      "rawway.idx",
-                                      dataCacheSize,
-                                      indexCacheSize)
+  : IndexedDataFile<OSMId,RawWay>("rawways.dat",
+                                  "rawway.idx",
+                                  dataCacheSize,
+                                  indexCacheSize)
   {
     // no code
-  }
-
-  bool RawWayIndexedDataFile::ReadData(const TypeConfig& typeConfig,
-                                       FileScanner& scanner,
-                                       RawWay& data) const
-  {
-    return data.Read(typeConfig,
-                     scanner);
   }
 }
 

@@ -26,13 +26,8 @@
 
 namespace osmscout {
 
-  class RawWayIndexedDataFile : public IndexedBaseDataFile<OSMId,RawWay>
+  class RawWayIndexedDataFile : public IndexedDataFile<OSMId,RawWay>
   {
-  protected:
-    bool ReadData(const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  RawWay& data) const;
-
   public:
     RawWayIndexedDataFile(unsigned long dataCacheSize,
                           unsigned long indexCacheSize);
