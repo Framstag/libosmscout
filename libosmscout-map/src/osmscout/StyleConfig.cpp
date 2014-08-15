@@ -1982,57 +1982,6 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
-  void GetNodeStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                    const Node& /*node*/,
-                    const Projection& projection,
-                    double dpi,
-                    Ref<S>& style)
-  {
-    bool   fastpath=false;
-    bool   composed=false;
-    size_t level=projection.GetMagnification().GetLevel();
-    double meterInPixel=1/projection.GetPixelSize();
-    double meterInMM=meterInPixel*25.4/dpi;
-
-    if (level>=styleSelectors.size()) {
-      level=styleSelectors.size()-1;
-    }
-
-    style=NULL;
-
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
-         s!=styleSelectors[level].end();
-         ++s) {
-      const StyleSelector<S,A>& selector=*s;
-
-      if (!selector.criteria.Matches(meterInPixel,
-                                     meterInMM)) {
-        continue;
-      }
-
-      if (style.Invalid()) {
-        style=selector.style;
-        fastpath=true;
-
-        continue;
-      }
-      else if (fastpath) {
-        style=new S(style);
-        fastpath=false;
-      }
-
-      style->CopyAttributes(*selector.style,
-                            selector.attributes);
-      composed=true;
-    }
-
-    if (composed &&
-        !style->IsVisible()) {
-      style=NULL;
-    }
-  }
-
   /**
    * Get the style data based on the given attributes of an object (OA, either AreaAttributes or WayAttributes),
    * a given style (S) and its style attributes (A).
@@ -2096,7 +2045,7 @@ namespace osmscout {
   template <class S, class A>
   void GetFeatureStyle(const StyleResolveContext& context,
                        const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                       const FeatureValueBuffer& attributes,
+                       const FeatureValueBuffer& buffer,
                        const Projection& projection,
                        double dpi,
                        Ref<S>& style)
@@ -2119,7 +2068,7 @@ namespace osmscout {
       const StyleSelector<S,A>& selector=*s;
 
       if (!selector.criteria.Matches(context,
-                                     attributes,
+                                     buffer,
                                      meterInPixel,
                                      meterInMM)) {
         continue;
@@ -2147,28 +2096,30 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeTextStyle(const Node& node,
+  void StyleConfig::GetNodeTextStyle(const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      TextStyleRef& textStyle) const
   {
-    GetNodeStyle(nodeTextStyleSelectors[node.GetTypeId()],
-                 node,
-                 projection,
-                 dpi,
-                 textStyle);
+    GetFeatureStyle(styleResolveContext,
+                    nodeTextStyleSelectors[buffer.GetTypeId()],
+                    buffer,
+                    projection,
+                    dpi,
+                    textStyle);
   }
 
-  void StyleConfig::GetNodeIconStyle(const Node& node,
+  void StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      IconStyleRef& iconStyle) const
   {
-    GetNodeStyle(nodeIconStyleSelectors[node.GetTypeId()],
-                 node,
-                 projection,
-                 dpi,
-                 iconStyle);
+    GetFeatureStyle(styleResolveContext,
+                    nodeIconStyleSelectors[buffer.GetTypeId()],
+                    buffer,
+                    projection,
+                    dpi,
+                    iconStyle);
   }
 
   void StyleConfig::GetWayLineStyles(const FeatureValueBuffer& buffer,

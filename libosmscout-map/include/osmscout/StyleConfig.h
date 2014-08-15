@@ -1312,12 +1312,12 @@ namespace osmscout {
       }
     }
 
-    void GetNodeTextStyle(const Node& node,
+    void GetNodeTextStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           TextStyleRef& textStyle) const;
 
-    void GetNodeIconStyle(const Node& node,
+    void GetNodeIconStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           IconStyleRef& iconStyle) const;

@@ -1139,11 +1139,11 @@ namespace osmscout {
     TextStyleRef textStyle;
     IconStyleRef iconStyle;
 
-    styleConfig.GetNodeTextStyle(node,
+    styleConfig.GetNodeTextStyle(node->GetFeatureValueBuffer(),
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
-    styleConfig.GetNodeIconStyle(node,
+    styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                  projection,
                                  parameter.GetDPI(),
                                  iconStyle);
