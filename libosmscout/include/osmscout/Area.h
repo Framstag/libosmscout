@@ -129,11 +129,11 @@ namespace osmscout {
     class Ring
     {
     public:
-      TypeId                type;     //! type of ring
+      TypeId                type;       //! type of ring
       AreaAttributes        attributes;
-      uint8_t               ring;
-      std::vector<Id>       ids;
-      std::vector<GeoCoord> nodes;
+      uint8_t               ring;       //! The ring hierarchy number (0...n)
+      std::vector<Id>       ids;        //! The array of ids for a coordinate
+      std::vector<GeoCoord> nodes;      //! The array of coordinates
 
     public:
       inline Ring()
