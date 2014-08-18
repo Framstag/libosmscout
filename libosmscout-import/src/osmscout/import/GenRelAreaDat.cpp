@@ -924,7 +924,7 @@ namespace osmscout {
 
     Area::Ring masterRing;
 
-    masterRing.SetType(rawRelation.GetType());
+    masterRing.SetFeatures(rawRelation.GetFeatureValueBuffer());
     masterRing.ring=Area::masterRingId;
 
     if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
@@ -941,7 +941,7 @@ namespace osmscout {
                              ring->role.GetType()->GetName());
             }
 
-            masterRing.SetType(ring->role.GetType());
+            masterRing.SetFeatures(ring->role.GetFeatureValueBuffer());
             ring->role.SetType(typeConfig.typeInfoIgnore);
           }
           else if (masterRing.GetType()!=ring->role.GetType()) {
@@ -962,8 +962,6 @@ namespace osmscout {
     if (masterRing.GetType()->GetIgnore()) {
       return false;
     }
-
-    masterRing.SetFeatures(rawRelation.GetFeatureValueBuffer());
 
     // Blacklisting areas
 
