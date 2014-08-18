@@ -140,7 +140,8 @@ namespace osmscout {
     }
   }
 
-  bool RelAreaDataGenerator::BuildRings(const ImportParameter& parameter,
+  bool RelAreaDataGenerator::BuildRings(const TypeConfig& typeConfig,
+                                        const ImportParameter& parameter,
                                         Progress& progress,
                                         Id id,
                                         const std::string& name,
@@ -220,6 +221,7 @@ namespace osmscout {
         size_t                       nodeCount;
         Id                           backId;
 
+        ring.role.SetType(typeConfig.typeInfoIgnore);
         ring.role.ring=Area::outerRingId;
         ring.ways=part->ways;
 
@@ -324,7 +326,8 @@ namespace osmscout {
 
     See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
    */
-  bool RelAreaDataGenerator::ResolveMultipolygon(const ImportParameter& parameter,
+  bool RelAreaDataGenerator::ResolveMultipolygon(const TypeConfig& typeConfig,
+                                                 const ImportParameter& parameter,
                                                  Progress& progress,
                                                  Id id,
                                                  const std::string& name,
@@ -336,7 +339,8 @@ namespace osmscout {
     // Ring assignment
     //
 
-    if (!BuildRings(parameter,
+    if (!BuildRings(typeConfig,
+                    parameter,
                     progress,
                     id,
                     name,
@@ -413,7 +417,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RelAreaDataGenerator::ComposeAreaMembers(Progress& progress,
+  bool RelAreaDataGenerator::ComposeAreaMembers(const TypeConfig& typeConfig,
+                                                Progress& progress,
                                                 const CoordDataFile::CoordResultMap& coordMap,
                                                 const IdRawWayMap& wayMap,
                                                 const std::string& name,
@@ -450,10 +455,11 @@ namespace osmscout {
 
         MultipolygonPart part;
 
+        part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.ring=Area::masterRingId;
-
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
+
         for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
@@ -483,8 +489,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RelAreaDataGenerator::ComposeBoundaryMembers(Progress& progress,
-                                                    const TypeConfig& typeConfig,
+  bool RelAreaDataGenerator::ComposeBoundaryMembers(const TypeConfig& typeConfig,
+                                                    Progress& progress,
                                                     const CoordDataFile::CoordResultMap& coordMap,
                                                     const IdRawWayMap& wayMap,
                                                     const std::map<OSMId,RawRelationRef>& relationMap,
@@ -517,8 +523,8 @@ namespace osmscout {
 
           resolvedRelations.insert(member->id);
 
-          if (!ComposeBoundaryMembers(progress,
-                                      typeConfig,
+          if (!ComposeBoundaryMembers(typeConfig,
+                                      progress,
                                       coordMap,
                                       wayMap,
                                       relationMap,
@@ -559,9 +565,10 @@ namespace osmscout {
         MultipolygonPart part;
 
         part.role.ring=Area::masterRingId;
-
+        part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
+
         for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
@@ -788,8 +795,8 @@ namespace osmscout {
 
     if (boundaryId!=typeIgnore &&
         rawRelation.GetTypeId()==boundaryId) {
-      return ComposeBoundaryMembers(progress,
-                                    typeConfig,
+      return ComposeBoundaryMembers(typeConfig,
+                                    progress,
                                     coordMap,
                                     wayMap,
                                     relationMap,
@@ -800,7 +807,8 @@ namespace osmscout {
                                     parts);
     }
     else {
-      return ComposeAreaMembers(progress,
+      return ComposeAreaMembers(typeConfig,
+                                progress,
                                 coordMap,
                                 wayMap,
                                 name,
@@ -840,7 +848,8 @@ namespace osmscout {
     // Reconstruct multipolygon relation by applying the multipolygon resolving
     // algorithm as described at
     // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-    if (!ResolveMultipolygon(parameter,
+    if (!ResolveMultipolygon(typeConfig,
+                             parameter,
                              progress,
                              rawRelation.GetId(),
                              name,
@@ -879,10 +888,9 @@ namespace osmscout {
          ring!=parts.end();
          ring++) {
       if (ring->IsArea() &&
-          ring->ways.front()->GetTypeId()!=typeIgnore) {
-        ring->role.type=ring->ways.front()->GetTypeId();
-        ring->role.attributes.SetFeatures(typeConfig,
-                                          ring->ways.front()->GetFeatureValueBuffer());
+          ring->ways.front()->GetType()!=typeConfig.typeInfoIgnore) {
+        ring->role.SetType(ring->ways.front()->GetType());
+        ring->role.SetFeatures(ring->ways.front()->GetFeatureValueBuffer());
       }
     }
 
@@ -901,7 +909,7 @@ namespace osmscout {
 
           if (childRing->IsArea() &&
               ring->role.GetType()==childRing->role.GetType()) {
-            childRing->role.type=typeIgnore;
+            childRing->role.SetType(typeConfig.typeInfoIgnore);
           }
 
           childRing++;
@@ -916,47 +924,46 @@ namespace osmscout {
 
     Area::Ring masterRing;
 
-    masterRing.SetType(rawRelation.GetTypeId());
+    masterRing.SetType(rawRelation.GetType());
     masterRing.ring=Area::masterRingId;
 
-    if (masterRing.GetType()==typeIgnore) {
+    if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
       for (std::list<MultipolygonPart>::iterator ring=parts.begin();
            ring!=parts.end();
            ring++) {
         if (ring->role.ring==Area::outerRingId &&
             ring->IsArea() &&
-            ring->role.GetType()!=typeIgnore) {
-          if (masterRing.GetType()==typeIgnore) {
+            ring->role.GetType()!=typeConfig.typeInfoIgnore) {
+          if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
             if (progress.OutputDebug()) {
               progress.Debug("Autodetecting type of multipolygon relation "+
                              NumberToString(rawRelation.GetId())+" as "+
-                             NumberToString(ring->role.GetType()));
+                             ring->role.GetType()->GetName());
             }
 
             masterRing.SetType(ring->role.GetType());
-            ring->role.SetType(typeIgnore);
+            ring->role.SetType(typeConfig.typeInfoIgnore);
           }
           else if (masterRing.GetType()!=ring->role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
                              " has conflicting types for outer boundary ("+
-                             typeConfig.GetTypeInfo(masterRing.GetType())->GetName()+
+                             masterRing.GetType()->GetName()+
                              " vs. "+ring->ways.front()->GetType()->GetName()+")");
           }
         }
       }
     }
 
-    if (masterRing.GetType()==typeIgnore) {
+    if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
       progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+" does not have a type, skipping");
       return false;
     }
 
-    if (typeConfig.GetTypeInfo(masterRing.GetType())->GetIgnore()) {
+    if (masterRing.GetType()->GetIgnore()) {
       return false;
     }
 
-    masterRing.attributes.SetFeatures(typeConfig,
-                                      rawRelation.GetFeatureValueBuffer());
+    masterRing.SetFeatures(rawRelation.GetFeatureValueBuffer());
 
     // Blacklisting areas
 
@@ -1134,14 +1141,14 @@ namespace osmscout {
       if (progress.OutputDebug()) {
         progress.Debug("Storing relation "+
                        NumberToString(rawRel.GetId())+" "+
-                       NumberToString(rel.GetType())+" "+
+                       rel.GetType()->GetName()+" "+
                        name);
       }
 
-      areaTypeCount[rel.GetType()]++;
+      areaTypeCount[rel.GetTypeId()]++;
       for (size_t i=0; i<rel.rings.size(); i++) {
         if (rel.rings[i].ring==Area::outerRingId) {
-          areaNodeTypeCount[rel.GetType()]+=rel.rings[i].nodes.size();
+          areaNodeTypeCount[rel.GetTypeId()]+=rel.rings[i].nodes.size();
         }
       }
 

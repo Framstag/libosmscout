@@ -717,7 +717,7 @@ namespace osmscout {
       }
 
       areaData.ref=ObjectFileRef();
-      areaData.attributes=NULL;
+//      areaData.buffer.SetType();
       areaData.transStart=start;
       areaData.transEnd=end;
 
@@ -995,7 +995,7 @@ namespace osmscout {
                                  const Projection& projection,
                                  const MapParameter& parameter,
                                  const TypeId& type,
-                                 const AreaAttributes& attributes,
+                                 const FeatureValueBuffer& buffer,
                                  double x,
                                  double y)
   {
@@ -1003,12 +1003,12 @@ namespace osmscout {
     IconStyleRef  iconStyle;
 
     styleConfig.GetAreaTextStyle(type,
-                                 attributes,
+                                 buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
     styleConfig.GetAreaIconStyle(type,
-                                 attributes,
+                                 buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  iconStyle);
@@ -1029,11 +1029,14 @@ namespace osmscout {
     }
 
     if (hasLabel) {
-      if (!attributes.GetName().empty()) {
-        label=attributes.GetName();
+      NameFeatureValue    *nameValue=nameReader.GetValue(buffer);
+      AddressFeatureValue *addressValue=addressReader.GetValue(buffer);
+
+      if (nameValue!=NULL) {
+        label=nameValue->GetName();
       }
-      else if (!attributes.GetAddress().empty()) {
-        label=attributes.GetAddress();
+      else if (addressValue!=NULL) {
+        label=addressValue->GetAddress();
       }
 
       hasLabel=!label.empty();
@@ -1106,8 +1109,8 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->GetType(),
-                        area->rings[m].attributes,
+                        area->GetTypeId(),
+                        area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
         else {
@@ -1123,8 +1126,8 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->rings[m].GetType(),
-                        area->rings[m].attributes,
+                        area->rings[m].GetTypeId(),
+                        area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
       }
@@ -1487,15 +1490,15 @@ namespace osmscout {
             FillStyleRef fillStyle;
 
             if (ring.ring==Area::outerRingId) {
-              styleConfig.GetAreaFillStyle(area->GetType(),
-                                           ring.GetAttributes(),
+              styleConfig.GetAreaFillStyle(area->GetTypeId(),
+                                           ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
                                            fillStyle);
             }
-            else if (ring.GetType()!=typeIgnore) {
-              styleConfig.GetAreaFillStyle(ring.GetType(),
-                                           ring.GetAttributes(),
+            else if (ring.GetTypeId()!=typeIgnore) {
+              styleConfig.GetAreaFillStyle(ring.GetTypeId(),
+                                           ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
                                            fillStyle);
@@ -1525,14 +1528,14 @@ namespace osmscout {
             size_t j=i+1;
             while (j<area->rings.size() &&
                    area->rings[j].ring==ringId+1 &&
-                   area->rings[j].GetType()==typeIgnore) {
+                   area->rings[j].GetTypeId()==typeIgnore) {
               a.clippings.push_back(data[j]);
 
               j++;
             }
 
             a.ref=ObjectFileRef(area->GetFileOffset(),refArea);
-            a.attributes=&ring.attributes;
+            a.buffer=&ring.GetFeatureValueBuffer();
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;

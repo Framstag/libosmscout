@@ -34,31 +34,6 @@
 
 namespace osmscout {
 
-  static uint8_t CopyFlags(const TypeConfig& typeConfig,
-                           const Area::Ring& ring)
-  {
-    uint8_t     flags=0;
-    TypeInfoRef type(typeConfig.GetTypeInfo(ring.GetType()));
-
-    if (ring.attributes.HasAccess()) {
-      flags|=RouteNode::hasAccess;
-    }
-
-    if (type->CanRouteFoot()) {
-      flags|=RouteNode::usableByFoot;
-    }
-
-    if (type->CanRouteBicycle()) {
-      flags|=RouteNode::usableByBicycle;
-    }
-
-    if (type->CanRouteCar()) {
-      flags|=RouteNode::usableByCar;
-    }
-
-    return flags;
-  }
-
   RouteDataGenerator::RouteDataGenerator()
   {
     // no code
@@ -69,15 +44,15 @@ namespace osmscout {
     return "Generate routing graphs";
   }
 
-  AccessFeatureValue RouteDataGenerator::GetAccess(const Way& way) const
+  AccessFeatureValue RouteDataGenerator::GetAccess(const FeatureValueBuffer& buffer) const
   {
-    AccessFeatureValue *accessValue=accessReader->GetValue(way.GetFeatureValueBuffer());
+    AccessFeatureValue *accessValue=accessReader->GetValue(buffer);
 
     if (accessValue!=NULL) {
       return *accessValue;
     }
     else {
-      return AccessFeatureValue (way.GetType()->GetDefaultAccess());
+      return AccessFeatureValue (buffer.GetType()->GetDefaultAccess());
     }
   }
 
@@ -105,13 +80,38 @@ namespace osmscout {
     }
   }
 
+  uint8_t RouteDataGenerator::CopyFlags(const Area::Ring& ring) const
+  {
+    uint8_t            flags=0;
+    AccessFeatureValue access=GetAccess(ring.GetFeatureValueBuffer());
+
+    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
+    if (access.CanRoute()) {
+      flags|=RouteNode::hasAccess;
+    }
+
+    if (access.CanRouteFoot()) {
+      flags|=RouteNode::usableByFoot;
+    }
+
+    if (access.CanRouteBicycle()) {
+      flags|=RouteNode::usableByBicycle;
+    }
+
+    if (access.CanRouteCar()) {
+      flags|=RouteNode::usableByCar;
+    }
+
+    return flags;
+  }
+
   uint8_t RouteDataGenerator::CopyFlagsForward(const Way& way) const
   {
     uint8_t            flags=0;
-    AccessFeatureValue access=GetAccess(way);
+    AccessFeatureValue access=GetAccess(way.GetFeatureValueBuffer());
 
     // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
-    if (access.CanRouteForward()) {
+    if (access.CanRoute()) {
       flags|=RouteNode::hasAccess;
     }
 
@@ -133,7 +133,7 @@ namespace osmscout {
   uint8_t RouteDataGenerator::CopyFlagsBackward(const Way& way) const
   {
     uint8_t            flags=0;
-    AccessFeatureValue access=GetAccess(way);
+    AccessFeatureValue access=GetAccess(way.GetFeatureValueBuffer());
 
     // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
     if (access.CanRouteBackward()) {
@@ -518,17 +518,11 @@ namespace osmscout {
         return false;
       }
 
-      if (area.GetType()==typeIgnore) {
+      if (area.GetType()->GetIgnore()) {
         continue;
       }
 
-      TypeInfoRef type(typeConfig.GetTypeInfo(area.GetType()));
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (!type->CanRoute()) {
+      if (!area.GetType()->CanRoute()) {
         continue;
       }
 
@@ -681,17 +675,11 @@ namespace osmscout {
         return false;
       }
 
-      if (area.GetType()==typeIgnore) {
+      if (area.GetType()->GetIgnore()) {
         continue;
       }
 
-      TypeInfoRef type(typeConfig.GetTypeInfo(area.GetType()));
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (!(type->CanRoute())) {
+      if (!(area.GetType()->CanRoute())) {
         continue;
       }
 
@@ -892,8 +880,7 @@ namespace osmscout {
     return bearing;
   }*/
 
-  void RouteDataGenerator::CalculateAreaPaths(const TypeConfig& typeConfig,
-                                              RouteNode& routeNode,
+  void RouteDataGenerator::CalculateAreaPaths(RouteNode& routeNode,
                                               const Area& area,
                                               FileOffset routeNodeOffset,
                                               const NodeIdObjectsMap& nodeObjectsMap,
@@ -962,12 +949,11 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=area.GetType();
+      path.type=area.GetTypeId();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
-      path.flags=CopyFlags(typeConfig,
-                           ring);
+      path.flags=CopyFlags(ring);
       path.lat=ring.nodes[nextNode].GetLat();
       path.lon=ring.nodes[nextNode].GetLon();
       path.distance=distance;
@@ -1026,12 +1012,11 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=ring.GetType();
+      path.type=ring.GetTypeId();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
-      path.flags=CopyFlags(typeConfig,
-                           ring);
+      path.flags=CopyFlags(ring);
       path.lat=ring.nodes[prevNode].GetLat();
       path.lon=ring.nodes[prevNode].GetLon();
       path.distance=distance;
@@ -1624,7 +1609,7 @@ namespace osmscout {
               continue;
             }
 
-            if (typeConfig.GetTypeInfo(area->GetType())->CanRoute()) {
+            if (area->GetType()->CanRoute()) {
               isRoutable=true;
             }
           }
@@ -1685,14 +1670,13 @@ namespace osmscout {
               continue;
             }
 
-            if (!typeConfig.GetTypeInfo(area->GetType())->CanRoute()) {
+            if (!area->GetType()->CanRoute()) {
               continue;
             }
 
             routeNode.objects.push_back(*ref);
 
-            CalculateAreaPaths(typeConfig,
-                               routeNode,
+            CalculateAreaPaths(routeNode,
                                *area,
                                routeNodeOffset,
                                nodeObjectsMap,

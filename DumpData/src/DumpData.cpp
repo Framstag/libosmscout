@@ -248,20 +248,6 @@ static void DumpCoord(const osmscout::Point& coord)
   std::cout << "}" << std::endl;
 }
 
-static void DumpTags(const osmscout::TypeConfig* typeConfig,
-                     const std::vector<osmscout::Tag>& tags,
-                     size_t indent)
-{
-   DumpIndent(indent);
-   std::cout << "tags {" << std::endl;
-   for (size_t t=0; t<tags.size(); t++) {
-     DumpIndent(indent+2);
-     std::cout << typeConfig->GetTagInfo(tags[t].key).GetName() << ": " <<tags[t].value << std::endl;
-   }
-   DumpIndent(indent);
-   std::cout << "}" << std::endl;
-}
-
 static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessValue,
                                    size_t indent)
 {
@@ -458,45 +444,6 @@ static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
 
 }
 
-static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
-                                      const osmscout::AreaAttributes& attributes,
-                                      const osmscout::TypeConfigRef& typeConfig,
-                                      size_t indent)
-{
-  if (type!=osmscout::typeIgnore) {
-    DumpIndent(indent);
-    std::cout << "type: " << typeConfig->GetTypeInfo(type)->GetName() << std::endl;
-  }
-
-  if (!attributes.GetName().empty()) {
-    DumpIndent(indent);
-    std::cout << "name: " << attributes.GetName() << std::endl;
-  }
-
-  if (!attributes.GetNameAlt().empty()) {
-    DumpIndent(indent);
-    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
-  }
-
-  if (!attributes.GetAddress().empty()) {
-    DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
-  }
-
-  if (!attributes.HasAccess()) {
-    DumpIndent(indent);
-    std::cout << "access: false" << std::endl;
-  }
-
-  if (attributes.HasTags()) {
-    std::cout << std::endl;
-
-    DumpTags(typeConfig,
-             attributes.GetTags(),
-             indent);
-  }
-}
-
 static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
                     const osmscout::WayRef way,
                     osmscout::Id id)
@@ -537,11 +484,12 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
 
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
+  std::cout << "  type: " << area->GetType()->GetName() << std::endl;
 
-  DumpAreaSegmentAttributes(area->rings.front().GetType(),
-                            area->rings.front().GetAttributes(),
-                            typeConfig,
-                            2);
+  std::cout << std::endl;
+
+  DumpFeatureValueBuffer(area->rings.front().GetFeatureValueBuffer(),
+                         IDENT);
 
   if (!area->rings.front().nodes.empty()) {
     std::cout << std::endl;
@@ -568,11 +516,10 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
     else {
       std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
     }
+    std::cout << "    type: " << area->rings[r].GetType()->GetName() << std::endl;
 
-    DumpAreaSegmentAttributes(area->rings[r].GetType(),
-                              area->rings[r].GetAttributes(),
-                              typeConfig,
-                              4);
+    DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
+                           IDENT+2);
 
     if (!area->rings[r].nodes.empty()) {
       std::cout << std::endl;

@@ -72,10 +72,17 @@ namespace osmscout {
     GradeFeatureValueReader    *gradeReader;
 
   private:
-    AccessFeatureValue GetAccess(const Way& way) const;
+    AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;
+
+    inline AccessFeatureValue GetAccess(const Way& way) const
+    {
+      return GetAccess(way.GetFeatureValueBuffer());
+    }
+
     uint8_t GetMaxSpeed(const Way& way) const;
     uint8_t GetGrade(const Way& way) const;
 
+    uint8_t CopyFlags(const Area::Ring& ring) const;
     uint8_t CopyFlagsForward(const Way& way) const;
     uint8_t CopyFlagsBackward(const Way& way) const;
 
@@ -165,8 +172,7 @@ namespace osmscout {
     /**
      * Calculate all possible route from the given route node for the given area
      */
-    void CalculateAreaPaths(const TypeConfig& typeConfig,
-                            RouteNode& routeNode,
+    void CalculateAreaPaths(RouteNode& routeNode,
                             const Area& area,
                             FileOffset routeNodeOffset,
                             const NodeIdObjectsMap& nodeObjectsMap,

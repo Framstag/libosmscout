@@ -28,11 +28,6 @@
 
 namespace osmscout {
 
-  void Way::SetType(const TypeInfoRef& type)
-  {
-    featureValueBuffer.SetType(type);
-  }
-
   bool Way::GetCenter(double& lat, double& lon) const
   {
     if (nodes.empty()) {
@@ -55,11 +50,6 @@ namespace osmscout {
     lon=minLon+(maxLon-minLon)/2;
 
     return true;
-  }
-
-  void Way::SetFeatures(const FeatureValueBuffer& buffer)
-  {
-    featureValueBuffer.Set(buffer);
   }
 
   void Way::SetLayerToMax()

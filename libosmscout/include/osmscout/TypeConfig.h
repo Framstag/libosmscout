@@ -1835,6 +1835,7 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
 
+    FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
     bool operator==(const FeatureValueBuffer& other) const;
     bool operator!=(const FeatureValueBuffer& other) const;
   };
@@ -2160,16 +2161,17 @@ namespace osmscout {
     }
   }
 
-  typedef FeatureValueReader<NameFeature,NameFeatureValue>         NameFeatureValueReader;
-  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>   NameAltFeatureValueReader;
-  typedef FeatureValueReader<RefFeature,RefFeatureValue>           RefFeatureValueReader;
-  typedef FeatureValueReader<LocationFeature,LocationFeatureValue> LocationFeatureValueReader;
-  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>   AddressFeatureValueReader;
-  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>     AccessFeatureValueReader;
-  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>       LayerFeatureValueReader;
-  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>       WidthFeatureValueReader;
-  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue> MaxSpeedFeatureValueReader;
-  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>       GradeFeatureValueReader;
+  typedef FeatureValueReader<NameFeature,NameFeatureValue>             NameFeatureValueReader;
+  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>       NameAltFeatureValueReader;
+  typedef FeatureValueReader<RefFeature,RefFeatureValue>               RefFeatureValueReader;
+  typedef FeatureValueReader<LocationFeature,LocationFeatureValue>     LocationFeatureValueReader;
+  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>       AddressFeatureValueReader;
+  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>         AccessFeatureValueReader;
+  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>           LayerFeatureValueReader;
+  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>           WidthFeatureValueReader;
+  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>     MaxSpeedFeatureValueReader;
+  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>           GradeFeatureValueReader;
+  typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue> AdminLevelFeatureValueReader;
 
   template <class F, class V>
   class OSMSCOUT_API FeatureLabelReader

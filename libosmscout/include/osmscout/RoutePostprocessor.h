@@ -234,6 +234,7 @@ namespace osmscout {
     WayRef GetWay(FileOffset offset) const;
 
     RouteDescription::NameDescriptionRef GetNameDescription(const ObjectFileRef& object) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const Area& area) const;
     RouteDescription::NameDescriptionRef GetNameDescription(const Way& way) const;
 
     bool IsRoundabout(const ObjectFileRef& object) const;

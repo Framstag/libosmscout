@@ -202,10 +202,9 @@ namespace osmscout {
     OSMId      wayId=rawWay.GetId();
     Area::Ring ring;
 
-    ring.attributes.SetFeatures(typeConfig,
-                                rawWay.GetFeatureValueBuffer());
+    ring.SetType(rawWay.GetType());
+    ring.SetFeatures(rawWay.GetFeatureValueBuffer());
 
-    ring.SetType(rawWay.GetTypeId());
     ring.ring=Area::outerRingId;
     ring.ids.resize(rawWay.GetNodeCount());
     ring.nodes.resize(rawWay.GetNodeCount());
@@ -234,7 +233,7 @@ namespace osmscout {
 
     if (parameter.GetStrictAreas() &&
         !AreaIsSimple(ring.nodes)) {
-      progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(area.GetType())->GetName()+"' is not simple");
+      progress.Error("Area "+NumberToString(wayId)+" of type '"+area.GetType()->GetName()+"' is not simple");
       return true;
     }
 

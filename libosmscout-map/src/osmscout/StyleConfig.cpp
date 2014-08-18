@@ -1289,19 +1289,6 @@ namespace osmscout {
     return true;
   }
 
-  bool StyleCriteria::Matches(const AreaAttributes& /*attributes*/,
-                              double meterInPixel,
-                              double meterInMM) const
-  {
-    if (sizeCondition.Valid()) {
-      if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   bool StyleCriteria::Matches(const StyleResolveContext& context,
                               const FeatureValueBuffer& buffer,
                               double meterInPixel,
@@ -2188,42 +2175,45 @@ namespace osmscout {
   }
 
   void StyleConfig::GetAreaFillStyle(const TypeId& type,
-                                     const AreaAttributes& area,
+                                     const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      FillStyleRef& fillStyle) const
   {
-    GetObjectAttributesStyle(areaFillStyleSelectors[type],
-                             area,
-                             projection,
-                             dpi,
-                             fillStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaFillStyleSelectors[type],
+                    buffer,
+                    projection,
+                    dpi,
+                    fillStyle);
   }
 
   void StyleConfig::GetAreaTextStyle(const TypeId& type,
-                                     const AreaAttributes& area,
+                                     const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      TextStyleRef& textStyle) const
   {
-    GetObjectAttributesStyle(areaTextStyleSelectors[type],
-                             area,
-                             projection,
-                             dpi,
-                             textStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaTextStyleSelectors[type],
+                    buffer,
+                    projection,
+                    dpi,
+                    textStyle);
   }
 
   void StyleConfig::GetAreaIconStyle(const TypeId& type,
-                                     const AreaAttributes& area,
+                                     const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      IconStyleRef& iconStyle) const
   {
-    GetObjectAttributesStyle(areaIconStyleSelectors[type],
-                             area,
-                             projection,
-                             dpi,
-                             iconStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaIconStyleSelectors[type],
+                    buffer,
+                    projection,
+                    dpi,
+                    iconStyle);
   }
 
   void StyleConfig::GetLandFillStyle(const Projection& projection,

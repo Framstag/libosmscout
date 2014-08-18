@@ -191,7 +191,7 @@ namespace osmscout {
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,
-                          const TypeConfig& typeConfig,
+                          const TypeConfigRef& typeConfig,
                           TypeId boundaryId,
                           std::list<Boundary>& boundaryAreas);
 
@@ -238,6 +238,7 @@ namespace osmscout {
     void AddLocationAreaToRegion(RegionRef& rootRegion,
                                  const Area& area,
                                  const Area::Ring& ring,
+                                 const std::string& name,
                                  const RegionIndex& regionIndex);
 
     bool IndexLocationAreas(const TypeConfig& typeConfig,

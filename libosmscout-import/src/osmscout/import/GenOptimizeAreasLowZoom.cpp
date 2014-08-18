@@ -150,8 +150,8 @@ namespace osmscout
         return false;
       }
 
-      if (currentTypes.find(area->GetType())!=currentTypes.end()) {
-        areas[area->GetType()].push_back(area);
+      if (currentTypes.find(area->GetTypeId())!=currentTypes.end()) {
+        areas[area->GetTypeId()].push_back(area);
 
         collectedAreasCount++;
 

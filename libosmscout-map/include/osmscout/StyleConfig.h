@@ -250,15 +250,12 @@ namespace osmscout {
       return oneway;
     }
 
-   bool Matches(double meterInPixel,
-                double meterInMM) const;
-   bool Matches(const AreaAttributes& attributes,
-                double meterInPixel,
-                double meterInMM) const;
-   bool Matches(const StyleResolveContext& context,
-                const FeatureValueBuffer& buffer,
-                double meterInPixel,
-                double meterInMM) const;
+    bool Matches(double meterInPixel,
+                 double meterInMM) const;
+    bool Matches(const StyleResolveContext& context,
+                 const FeatureValueBuffer& buffer,
+                 double meterInPixel,
+                 double meterInMM) const;
   };
 
   /**
@@ -1340,17 +1337,17 @@ namespace osmscout {
                                PathShieldStyleRef& pathShieldStyle) const;
 
     void GetAreaFillStyle(const TypeId& type,
-                          const AreaAttributes& area,
+                          const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           FillStyleRef& fillStyle) const;
     void GetAreaTextStyle(const TypeId& type,
-                          const AreaAttributes& area,
+                          const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           TextStyleRef& textStyle) const;
     void GetAreaIconStyle(const TypeId& type,
-                          const AreaAttributes& area,
+                          const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           IconStyleRef& iconStyle) const;

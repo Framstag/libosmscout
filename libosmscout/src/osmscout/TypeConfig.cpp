@@ -1752,6 +1752,8 @@ namespace osmscout {
   }
 
   FeatureValueBuffer::FeatureValueBuffer(const FeatureValueBuffer& other)
+  : featureBits(NULL),
+    featureValueBuffer(NULL)
   {
     Set(other);
   }
@@ -1765,24 +1767,29 @@ namespace osmscout {
 
   void FeatureValueBuffer::Set(const FeatureValueBuffer& other)
   {
-    SetType(other.GetType());
+    if (other.GetType().Valid()) {
+      SetType(other.GetType());
 
-    for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
-      if (other.HasValue(idx)) {
-        if (other.GetFeature(idx).GetFeature()->HasValue()) {
-          FeatureValue* otherValue=other.GetValue(idx);
-          FeatureValue* thisValue=AllocateValue(idx);
+      for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
+        if (other.HasValue(idx)) {
+          if (other.GetFeature(idx).GetFeature()->HasValue()) {
+            FeatureValue* otherValue=other.GetValue(idx);
+            FeatureValue* thisValue=AllocateValue(idx);
 
-          assert(thisValue!=NULL);
+            assert(thisValue!=NULL);
 
-          *thisValue=*otherValue;
-        }
-        else {
-          size_t byteIdx=idx/8;
+            *thisValue=*otherValue;
+          }
+          else {
+            size_t byteIdx=idx/8;
 
-          featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
+            featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
+          }
         }
       }
+    }
+    else if (type.Valid()) {
+      DeleteData();
     }
   }
 
@@ -1810,7 +1817,7 @@ namespace osmscout {
         }
       }
 
-      delete [] featureValueBuffer;
+      ::operator delete((void*)featureValueBuffer);
       featureValueBuffer=NULL;
     }
 
@@ -1818,6 +1825,8 @@ namespace osmscout {
       delete [] featureBits;
       featureBits=NULL;
     }
+
+    type=NULL;
   }
 
   void FeatureValueBuffer::AllocateData()
@@ -1953,6 +1962,13 @@ namespace osmscout {
     }
 
     return !writer.HasError();
+  }
+
+  FeatureValueBuffer& FeatureValueBuffer::operator=(const FeatureValueBuffer& other)
+  {
+    Set(other);
+
+    return *this;
   }
 
   bool FeatureValueBuffer::operator==(const FeatureValueBuffer& other) const

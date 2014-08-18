@@ -166,7 +166,7 @@ std::string GetObject(const osmscout::Database& database,
     if (database.GetAreaByOffset(object.GetFileOffset(),
                                  area)) {
       label+=" ";
-      label+=database.GetTypeConfig()->GetTypeInfo(area->GetType())->GetName();
+      label+=area->GetType()->GetName();
     }
   }
   else if (object.GetType()==osmscout::RefType::refWay) {
@@ -248,67 +248,63 @@ int main(int argc, char* argv[])
   }
 
 
-  for (std::list<osmscout::LocationSearchResult::Entry>::const_iterator entry=searchResult.results.begin();
-      entry!=searchResult.results.end();
-      ++entry) {
-    if (entry->adminRegion.Valid() &&
-        entry->location.Valid() &&
-        entry->address.Valid()) {
-      std::cout << GetLocation(*entry) << " " << GetAddress(*entry) << " " << GetAdminRegion(*entry) << std::endl;
+  for (auto entry : searchResult.results) {
+    if (entry.adminRegion.Valid() &&
+        entry.location.Valid() &&
+        entry.address.Valid()) {
+      std::cout << GetLocation(entry) << " " << GetAddress(entry) << " " << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
-                                                      *entry);
+                                                      entry);
       std::cout << std::endl;
 
-      std::cout << "   - " << GetObject(database,entry->address->object);
+      std::cout << "   - " << GetObject(database,entry.address->object);
 
       std::cout << std::endl;
     }
-    else if (entry->adminRegion.Valid() &&
-             entry->location.Valid()) {
-      std::cout << GetLocation(*entry) << " " << GetAdminRegion(*entry) << std::endl;
+    else if (entry.adminRegion.Valid() &&
+             entry.location.Valid()) {
+      std::cout << GetLocation(entry) << " " << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
-                                                      *entry);
+                                                      entry);
 
       std::cout << std::endl;
 
-      for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry->location->objects.begin();
-          object!=entry->location->objects.end();
-          ++object) {
-        std::cout << "   - " << GetObject(database,*object) << std::endl;
+      for (auto object : entry.location->objects) {
+        std::cout << "   - " << GetObject(database,object) << std::endl;
       }
     }
-    else if (entry->adminRegion.Valid() &&
-             entry->poi.Valid()) {
-      std::cout << GetPOI(*entry) << " " << GetAdminRegion(*entry) << std::endl;
+    else if (entry.adminRegion.Valid() &&
+             entry.poi.Valid()) {
+      std::cout << GetPOI(entry) << " " << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
-                                                      *entry);
+                                                      entry);
 
       std::cout << std::endl;
 
-      std::cout << "   - " << GetObject(database,entry->poi->object);
+      std::cout << "   - " << GetObject(database,entry.poi->object);
 
       std::cout << std::endl;
     }
-    else if (entry->adminRegion.Valid()) {
-      std::cout << GetAdminRegion(*entry) << std::endl;
+    else if (entry.adminRegion.Valid()) {
+      std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
-                                                      *entry);
+                                                      entry);
 
       std::cout << std::endl;
 
-      if (entry->adminRegion->aliasObject.Valid()) {
-        std::cout << "   - " << GetObject(database,entry->adminRegion->aliasObject);
+      if (entry.adminRegion->aliasObject.Valid()) {
+        std::cout << "   - " << GetObject(database,entry.adminRegion->aliasObject);
       }
       else {
-        std::cout << "   - " << GetObject(database,entry->adminRegion->object);
+        std::cout << "   - " << GetObject(database,entry.adminRegion->object);
       }
 
       std::cout << std::endl;

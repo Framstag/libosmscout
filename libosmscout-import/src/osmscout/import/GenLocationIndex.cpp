@@ -213,12 +213,15 @@ namespace osmscout {
     */
   bool LocationIndexGenerator::GetBoundaryAreas(const ImportParameter& parameter,
                                                 Progress& progress,
-                                                const TypeConfig& typeConfig,
+                                                const TypeConfigRef& typeConfig,
                                                 TypeId boundaryId,
                                                 std::list<Boundary>& boundaryAreas)
   {
-    FileScanner scanner;
-    uint32_t    areaCount;
+    FileScanner                  scanner;
+    uint32_t                     areaCount;
+    NameFeatureValueReader       nameReader(typeConfig);
+    AdminLevelFeatureValueReader adminLevelReader(typeConfig);
+
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -248,53 +251,41 @@ namespace osmscout {
         return false;
       }
 
-      if (area.GetType()!=boundaryId) {
+      if (area.GetTypeId()!=boundaryId) {
         continue;
       }
 
-      size_t level=0;
+      NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-      if (area.rings.front().GetName().empty()) {
+      if (nameValue==NULL) {
         progress.Warning(std::string("Boundary area ")+
-                         NumberToString(area.GetType())+" "+
+                         area.GetType()->GetName()+" "+
                          NumberToString(area.GetFileOffset())+" has no name");
         continue;
       }
 
-      for (std::vector<Tag>::const_iterator tag=area.rings.front().attributes.GetTags().begin();
-          tag!=area.rings.front().attributes.GetTags().end();
-          ++tag) {
-        if (tag->key==typeConfig.tagAdminLevel) {
-          if (StringToNumber(tag->value,level)) {
-            Boundary boundary;
+      AdminLevelFeatureValue *adminLevelValue=adminLevelReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-            boundary.reference.Set(area.GetFileOffset(),refArea);
-            boundary.name=area.rings.front().GetName();
-            boundary.level=level;
+      if (adminLevelValue!=NULL) {
+        Boundary boundary;
 
-            for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-                 ring!=area.rings.end();
-                 ++ring) {
-              if (ring->ring==Area::outerRingId) {
-                boundary.areas.push_back(ring->nodes);
-              }
-            }
+        boundary.reference.Set(area.GetFileOffset(),refArea);
+        boundary.name=nameValue->GetName();
+        boundary.level=adminLevelValue->GetAdminLevel();
 
-            boundaryAreas.push_back(boundary);
+        for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+             ring!=area.rings.end();
+             ++ring) {
+          if (ring->ring==Area::outerRingId) {
+            boundary.areas.push_back(ring->nodes);
           }
-          else {
-            progress.Info("Could not parse admin_level of relation "+
-                          NumberToString(area.GetType())+" "+
-                          NumberToString(area.GetFileOffset()));
-          }
-
-          break;
         }
-      }
 
-      if (level==0) {
+        boundaryAreas.push_back(boundary);
+      }
+      else {
         progress.Info("No tag 'admin_level' for relation "+
-                      NumberToString(area.GetType())+" "+
+                      area.GetType()->GetName()+" "+
                       NumberToString(area.GetFileOffset()));
       }
     }
@@ -345,9 +336,10 @@ namespace osmscout {
                                                 const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                                                 Region& rootRegion)
   {
-    FileScanner scanner;
-    uint32_t    areaCount;
-    size_t      areasFound=0;
+    FileScanner            scanner;
+    uint32_t               areaCount;
+    size_t                 areasFound=0;
+    NameFeatureValueReader nameReader(typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -377,13 +369,15 @@ namespace osmscout {
         return false;
       }
 
-      if (regionTypes.find(area.GetType())==regionTypes.end()) {
+      if (regionTypes.find(area.GetTypeId())==regionTypes.end()) {
         continue;
       }
 
-      if (area.rings.front().GetName().empty()) {
+      NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+
+      if (nameValue==NULL) {
         progress.Warning(std::string("Region ")+
-                         NumberToString(area.GetType())+" "+
+                         area.GetType()->GetName()+" "+
                          NumberToString(area.GetFileOffset())+" has no name");
         continue;
       }
@@ -392,7 +386,7 @@ namespace osmscout {
       RegionRef region=new Region();
 
       region->reference.Set(area.GetFileOffset(),refArea);
-      region->name=area.rings.front().GetName();
+      region->name=nameValue->GetName();
 
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
            ring!=area.rings.end();
@@ -631,6 +625,7 @@ namespace osmscout {
   void LocationIndexGenerator::AddLocationAreaToRegion(RegionRef& rootRegion,
                                                        const Area& area,
                                                        const Area::Ring& ring,
+                                                       const std::string& name,
                                                        const RegionIndex& regionIndex)
   {
     double minlon;
@@ -652,7 +647,7 @@ namespace osmscout {
           AddLocationAreaToRegion(region,
                                   area,
                                   r->nodes,
-                                  ring.GetName(),
+                                  name,
                                   minlon,
                                   minlat,
                                   maxlon,
@@ -669,7 +664,7 @@ namespace osmscout {
       AddLocationAreaToRegion(region,
                               area,
                               ring.nodes,
-                              ring.GetName(),
+                              name,
                               minlon,
                               minlat,
                               maxlon,
@@ -684,9 +679,10 @@ namespace osmscout {
                                                   RegionRef& rootRegion,
                                                   const RegionIndex& regionIndex)
   {
-    FileScanner scanner;
-    uint32_t    areaCount;
-    size_t      areasFound=0;
+    FileScanner            scanner;
+    uint32_t               areaCount;
+    size_t                 areasFound=0;
+    NameFeatureValueReader nameReader(typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -719,18 +715,20 @@ namespace osmscout {
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
           ring!=area.rings.end();
           ++ring) {
-        if (ring->GetType()!=typeIgnore &&
-            !ring->GetName().empty()) {
-          if (locationTypes.find(ring->GetType())!=locationTypes.end()) {
+        if (!ring->GetType()->GetIgnore() &&
+            locationTypes.find(ring->GetTypeId())!=locationTypes.end()) {
+          NameFeatureValue *nameValue=nameReader.GetValue(ring->GetFeatureValueBuffer());
+
+          if (nameValue!=NULL) {
             AddLocationAreaToRegion(rootRegion,
                                     area,
                                     *ring,
+                                    nameValue->GetName(),
                                     regionIndex);
 
             areasFound++;
           }
         }
-
       }
     }
 

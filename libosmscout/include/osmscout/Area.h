@@ -31,91 +31,6 @@
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
-
-  class OSMSCOUT_API AreaAttributes
-  {
-  private:
-    // Attribute availability flags (for optimized attribute storage)
-    static const uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
-    static const uint8_t hasName         = 1 << 5; //! We have a name
-    static const uint8_t hasAddress      = 1 << 6; //! an address like a house number
-    static const uint8_t hasTags         = 1 << 7; //! We have additional tags
-
-    static const uint8_t hasAccess       = 1 << 0; //! We do have (general) access rights to this way/area
-
-  private:
-    mutable uint8_t  flags;
-    std::string      name;     //! name
-    std::string      nameAlt;  //! alternative name
-    AttributeAccess  access;   //! Information regarding which vehicle can access this area
-    std::string      address;  //! ...house number
-    std::vector<Tag> tags;     //! list of preparsed tags
-
-  private:
-    void GetFlags(uint8_t& flags) const;
-    bool Read(FileScanner& scanner);
-    bool Read(FileScanner& scanner,
-              uint8_t flags);
-    bool Write(FileWriter& writer) const;
-    bool Write(FileWriter& writer,
-               uint8_t flags) const;
-
-    friend class Area;
-
-  public:
-    inline AreaAttributes()
-    : flags(0)
-    {
-      // no code
-    }
-
-    inline uint8_t GetFlags() const
-    {
-      return flags;
-    }
-
-    inline std::string GetName() const
-    {
-      return name;
-    }
-
-    inline std::string GetNameAlt() const
-    {
-      return nameAlt;
-    }
-
-    inline std::string GetAddress() const
-    {
-      return address;
-    }
-
-    inline bool HasAccess() const
-    {
-      return (flags & hasAccess)!=0;
-    }
-
-    inline bool HasTags() const
-    {
-      return !tags.empty();
-    }
-
-    inline const std::vector<Tag>& GetTags() const
-    {
-      return tags;
-    }
-
-    inline std::vector<Tag>& GetTags()
-    {
-      return tags;
-    }
-
-    void SetFeatures(const TypeConfig& typeConfig,
-                     const FeatureValueBuffer& buffer);
-
-    bool operator==(const AreaAttributes& other) const;
-    bool operator!=(const AreaAttributes& other) const;
-  };
-
   /**
     Representation of an (complex/multipolygon) area
     */
@@ -129,48 +44,56 @@ namespace osmscout {
     class Ring
     {
     public:
-      TypeId                type;       //! type of ring
-      AreaAttributes        attributes;
-      uint8_t               ring;       //! The ring hierarchy number (0...n)
-      std::vector<Id>       ids;        //! The array of ids for a coordinate
-      std::vector<GeoCoord> nodes;      //! The array of coordinates
+      FeatureValueBuffer    featureValueBuffer; //! List of features
+      uint8_t               ring;               //! The ring hierarchy number (0...n)
+      std::vector<Id>       ids;                //! The array of ids for a coordinate
+      std::vector<GeoCoord> nodes;              //! The array of coordinates
 
     public:
       inline Ring()
-      : type(typeIgnore),
-        ring(0)
+      : ring(0)
       {
         // no code
       }
 
-      inline void SetType(const TypeId& type)
+      inline TypeInfoRef GetType() const
       {
-        this->type=type;
+        return featureValueBuffer.GetType();
       }
 
-      inline const AreaAttributes& GetAttributes() const
+      inline TypeId GetTypeId() const
       {
-        return attributes;
+        return featureValueBuffer.GetTypeId();
       }
 
-      inline AreaAttributes& GetAttributes()
+      inline size_t GetFeatureCount() const
       {
-        return attributes;
+        return featureValueBuffer.GetType()->GetFeatureCount();
       }
 
-      inline TypeId GetType() const
+      inline bool HasFeature(size_t idx) const
       {
-        return type;
+        return featureValueBuffer.HasValue(idx);
       }
 
-      inline uint16_t GetFlags() const
+      inline FeatureInstance GetFeature(size_t idx) const
       {
-        return attributes.GetFlags();
+        return featureValueBuffer.GetType()->GetFeature(idx);
       }
 
-      inline std::string GetName() const
+      inline FeatureValue* GetFeatureValue(size_t idx) const
       {
-        return attributes.GetName();
+        return featureValueBuffer.GetValue(idx);
+      }
+
+      inline void UnsetFeature(size_t idx)
+      {
+        featureValueBuffer.FreeValue(idx);
+      }
+
+      inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+      {
+        return featureValueBuffer;
       }
 
       bool GetCenter(double& lat,
@@ -180,6 +103,16 @@ namespace osmscout {
                           double& maxLon,
                           double& minLat,
                           double& maxLat) const;
+
+      inline void SetType(const TypeInfoRef& type)
+      {
+        featureValueBuffer.SetType(type);
+      }
+
+      inline void SetFeatures(const FeatureValueBuffer& buffer)
+      {
+        featureValueBuffer.Set(buffer);
+      }
     };
 
   private:
@@ -208,7 +141,12 @@ namespace osmscout {
       return fileOffset;
     }
 
-    inline TypeId GetType() const
+    inline TypeId GetTypeId() const
+    {
+      return rings.front().GetTypeId();
+    }
+
+    inline TypeInfoRef GetType() const
     {
       return rings.front().GetType();
     }

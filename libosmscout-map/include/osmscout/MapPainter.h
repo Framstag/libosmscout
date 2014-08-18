@@ -265,7 +265,7 @@ namespace osmscout {
     struct OSMSCOUT_API WayPathData
     {
       ObjectFileRef            ref;
-      const FeatureValueBuffer *buffer;        //! Features of the line segment
+      const FeatureValueBuffer *buffer;         //! Features of the line segment
       size_t                   transStart;      //! Start of coordinates in transformation buffer
       size_t                   transEnd;        //! End of coordinates in transformation buffer
     };
@@ -279,7 +279,7 @@ namespace osmscout {
     struct OSMSCOUT_API AreaData
     {
       ObjectFileRef            ref;
-      const AreaAttributes     *attributes;     //! Area attributes
+      const FeatureValueBuffer *buffer;         //! Features of the line segment
       FillStyleRef             fillStyle;       //! Fill style
       double                   minLat;
       double                   maxLat;
@@ -486,7 +486,7 @@ namespace osmscout {
                        const Projection& projection,
                        const MapParameter& parameter,
                        const TypeId& type,
-                       const AreaAttributes& attributes,
+                       const FeatureValueBuffer& buffer,
                        double x,
                        double y);
 

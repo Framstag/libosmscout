@@ -123,9 +123,15 @@ namespace osmscout {
     bool GetNodeIndexByNodeId(Id id,
                               size_t& index) const;
 
-    void SetType(const TypeInfoRef& type);
+    inline void SetType(const TypeInfoRef& type)
+    {
+      featureValueBuffer.SetType(type);
+    }
 
-    void SetFeatures(const FeatureValueBuffer& buffer);
+    inline void SetFeatures(const FeatureValueBuffer& buffer)
+    {
+      featureValueBuffer.Set(buffer);
+    }
 
     void SetLayerToMax();
 

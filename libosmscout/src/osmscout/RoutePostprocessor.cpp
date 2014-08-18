@@ -190,7 +190,7 @@ namespace osmscout {
 
       if (node->GetPathObject().GetType()==refArea) {
         AreaRef                              area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
-        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(area->rings.front().GetName());
+        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(area);
 
         node->AddDescription(RouteDescription::WAY_NAME_DESC,
                              nameDesc);
@@ -502,10 +502,10 @@ namespace osmscout {
     if (node.GetPathObject().GetType()==refArea) {
       AreaRef area=postprocessor.GetArea(node.GetPathObject().GetFileOffset());
 
-      if (motorwayLinkTypes.find(area->GetType())!=motorwayLinkTypes.end()) {
+      if (motorwayLinkTypes.find(area->GetTypeId())!=motorwayLinkTypes.end()) {
         return link;
       }
-      else if (motorwayTypes.find(area->GetType())!=motorwayTypes.end()) {
+      else if (motorwayTypes.find(area->GetTypeId())!=motorwayTypes.end()) {
         return motorway;
       }
     }
@@ -1002,7 +1002,7 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      description=new RouteDescription::NameDescription(area->rings.front().GetName());
+      return GetNameDescription(area);
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
@@ -1014,6 +1014,18 @@ namespace osmscout {
     }
 
     return description;
+  }
+
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const Area& area) const
+  {
+    NameFeatureValue *nameValue=nameReader->GetValue(area.rings.front().GetFeatureValueBuffer());
+    std::string      name;
+
+    if (nameValue!=NULL) {
+      name=nameValue->GetName();
+    }
+
+    return new RouteDescription::NameDescription(name);
   }
 
   RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const Way& way) const
@@ -1063,7 +1075,7 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return types.find(area->GetType())!=types.end();
+      return types.find(area->GetTypeId())!=types.end();
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());

@@ -125,7 +125,7 @@ namespace osmscout {
         return false;
       }
 
-      TypeId type=area.rings[0].GetType();
+      TypeId type=area.rings[0].GetTypeId();
 
       return type<speeds.size() && speeds[type]>0.0;
     }
@@ -253,7 +253,7 @@ namespace osmscout {
     inline double GetTime(const Area& area,
                           double distance) const
     {
-      double speed=speeds[area.GetType()];
+      double speed=speeds[area.GetTypeId()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 
@@ -346,7 +346,7 @@ namespace osmscout {
     inline double GetCosts(const Area& area,
                            double distance) const
     {
-      double speed=speeds[area.GetType()];
+      double speed=speeds[area.GetTypeId()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 

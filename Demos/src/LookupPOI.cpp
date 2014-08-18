@@ -85,25 +85,23 @@ int main(int argc, char* argv[])
   osmscout::TypeSet                types(*typeConfig);
   osmscout::NameFeatureLabelReader nameLabelReader(typeConfig);
 
-  for (std::list<std::string>::const_iterator name=typeNames.begin();
-      name!=typeNames.end();
-      name++) {
+  for (auto name : typeNames) {
     osmscout::TypeId nodeType;
     osmscout::TypeId wayType;
     osmscout::TypeId areaType;
 
-    nodeType=typeConfig->GetNodeTypeId(*name);
-    wayType=typeConfig->GetWayTypeId(*name);
-    areaType=typeConfig->GetAreaTypeId(*name);
+    nodeType=typeConfig->GetNodeTypeId(name);
+    wayType=typeConfig->GetWayTypeId(name);
+    areaType=typeConfig->GetAreaTypeId(name);
 
     if (nodeType==osmscout::typeIgnore &&
         wayType==osmscout::typeIgnore &&
         areaType==osmscout::typeIgnore) {
-      std::cerr << "Cannot resolve type name '" << *name << "'" << std::endl;
+      std::cerr << "Cannot resolve type name '" << name << "'" << std::endl;
       continue;
     }
 
-    std::cout << "- Searching for '" << *name << "' as";
+    std::cout << "- Searching for '" << name << "' as";
 
     if (nodeType!=osmscout::typeIgnore) {
       std::cout << " node (" << nodeType << ")";
@@ -155,12 +153,10 @@ int main(int argc, char* argv[])
     std::cout << " " << nameLabelReader.GetLabel(way->GetFeatureValueBuffer()) << std::endl;
   }
 
-  for (std::vector<osmscout::AreaRef>::const_iterator area=areas.begin();
-      area!=areas.end();
-      area++) {
-    std::cout << "+ Area " << (*area)->GetFileOffset();
-    std::cout << " " << typeConfig->GetTypeInfo((*area)->GetType())->GetName();
-    std::cout << " " << (*area)->rings.front().GetName() << std::endl;
+  for (auto area : areas) {
+    std::cout << "+ Area " << area->GetFileOffset();
+    std::cout << " " << area->GetType()->GetName();
+    std::cout << " " << nameLabelReader.GetLabel(area->rings.front().GetFeatureValueBuffer()) << std::endl;
   }
 
   return 0;

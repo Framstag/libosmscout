@@ -27,10 +27,12 @@ namespace osmscout {
   class AreaLocationProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
   {
   private:
-    FileWriter               writer;
-    uint32_t                 overallDataCount;
-    OSMSCOUT_HASHSET<TypeId> poiTypes;
-    TagId                    tagAddrStreet;
+    FileWriter                 writer;
+    uint32_t                   overallDataCount;
+    OSMSCOUT_HASHSET<TypeId>   poiTypes;
+    NameFeatureValueReader     *nameReader;
+    LocationFeatureValueReader *locationReader;
+    AddressFeatureValueReader  *addressReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -50,7 +52,10 @@ namespace osmscout {
     overallDataCount=0;
 
     typeConfig.GetIndexAsPOITypes(poiTypes);
-    tagAddrStreet=typeConfig.tagAddrStreet;
+
+    nameReader=new NameFeatureValueReader(typeConfig);
+    locationReader=new LocationFeatureValueReader(typeConfig);
+    addressReader=new AddressFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "areaaddress.dat"))) {
@@ -72,17 +77,39 @@ namespace osmscout {
     for (std::vector<Area::Ring>::iterator ring=area.rings.begin();
         ring!=area.rings.end();
         ++ring) {
-      std::string location;
+      NameFeatureValue     *nameValue=nameReader->GetValue(ring->GetFeatureValueBuffer());
+      LocationFeatureValue *locationValue=locationReader->GetValue(ring->GetFeatureValueBuffer());
+      AddressFeatureValue  *addressValue=addressReader->GetValue(ring->GetFeatureValueBuffer());
 
-      GetAndEraseTag(ring->GetAttributes().GetTags(),
-                     tagAddrStreet,
-                     location);
+      std::string          name;
+      std::string          location;
+      std::string          address;
 
-      bool isAddress=ring->GetType()!=typeIgnore &&
+      if (nameValue!=NULL) {
+        name=nameValue->GetName();
+      }
+
+      if (locationValue!=NULL) {
+        location=locationValue->GetLocation();
+      }
+
+      if (addressValue!=NULL) {
+        address=addressValue->GetAddress();
+      }
+
+      bool isAddress=!ring->GetType()->GetIgnore() &&
                      !location.empty() &&
-                     !ring->GetAttributes().GetAddress().empty();
+                     !address.empty();
 
-      bool isPoi=!ring->GetName().empty() && poiTypes.find(ring->GetType())!=poiTypes.end();
+      bool isPoi=!name.empty() && poiTypes.find(ring->GetTypeId())!=poiTypes.end();
+
+      size_t locationIndex;
+
+      if (locationReader->GetIndex(ring->GetFeatureValueBuffer(),
+                                  locationIndex) &&
+          ring->GetFeatureValueBuffer().HasValue(locationIndex)) {
+        ring->UnsetFeature(locationIndex);
+      }
 
       if (!isAddress && !isPoi) {
         continue;
@@ -98,11 +125,11 @@ namespace osmscout {
               return false;
             }
 
-            if (!writer.WriteNumber(ring->GetType())) {
+            if (!writer.WriteNumber(ring->GetTypeId())) {
               return false;
             }
 
-            if (!writer.Write(ring->GetAttributes().GetName())) {
+            if (!writer.Write(name)) {
               return false;
             }
 
@@ -110,7 +137,7 @@ namespace osmscout {
               return false;
             }
 
-            if (!writer.Write(ring->GetAttributes().GetAddress())) {
+            if (!writer.Write(address)) {
               return false;
             }
 
@@ -127,11 +154,11 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.WriteNumber(ring->GetType())) {
+        if (!writer.WriteNumber(ring->GetTypeId())) {
           return false;
         }
 
-        if (!writer.Write(ring->GetAttributes().GetName())) {
+        if (!writer.Write(name)) {
           return false;
         }
 
@@ -139,7 +166,7 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.Write(ring->GetAttributes().GetAddress())) {
+        if (!writer.Write(address)) {
           return false;
         }
 
@@ -149,7 +176,6 @@ namespace osmscout {
 
         overallDataCount++;
       }
-
     }
 
     return true;
@@ -157,6 +183,15 @@ namespace osmscout {
 
   bool AreaLocationProcessorFilter::AfterProcessingEnd()
   {
+    delete nameReader;
+    nameReader=NULL;
+
+    delete locationReader;
+    locationReader=NULL;
+
+    delete addressReader;
+    addressReader=NULL;
+
     writer.SetPos(0);
     writer.Write(overallDataCount);
 
