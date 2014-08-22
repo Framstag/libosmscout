@@ -203,16 +203,26 @@ namespace osmscout {
     std::string GetDataFilename(Vehicle vehicle) const;
     std::string GetIndexFilename(Vehicle vehicle) const;
 
-    void GetClosestForwardRouteNode(const RoutingProfile& profile,
+    void GetStartForwardRouteNode(const RoutingProfile& profile,
+                                  const WayRef& way,
+                                  size_t nodeIndex,
+                                  RouteNodeRef& routeNode,
+                                  size_t& routeNodeIndex);
+    void GetStartBackwardRouteNode(const RoutingProfile& profile,
+                                   const WayRef& way,
+                                   size_t nodeIndex,
+                                   RouteNodeRef& routeNode,
+                                   size_t& routeNodeIndex);
+    void GetTargetForwardRouteNode(const RoutingProfile& profile,
+                                   const WayRef& way,
+                                   size_t nodeIndex,
+                                   RouteNodeRef& routeNode,
+                                   size_t& routeNodeIndex);
+    void GetTargetBackwardRouteNode(const RoutingProfile& profile,
                                     const WayRef& way,
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode,
                                     size_t& routeNodeIndex);
-    void GetClosestBackwardRouteNode(const RoutingProfile& profile,
-                                     const WayRef& way,
-                                     size_t nodeIndex,
-                                     RouteNodeRef& routeNode,
-                                     size_t& routeNodeIndex);
 
     bool GetStartNodes(const RoutingProfile& profile,
                        const ObjectFileRef& object,
