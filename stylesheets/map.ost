@@ -1241,7 +1241,9 @@ TYPES
 
   //
   // Sport
-  // INFO: THsi is possibly nonsense, since these tags should not appear alone. See http://wiki.openstreetmap.org/wiki/Key:sport
+  // INFO: We expect that only the "node" variant will appear, since the area version should be
+  // handled by "building", "pitch" or similar areas.
+  // See http://wiki.openstreetmap.org/wiki/Key:sport
   //
 
   TYPE sport_building
