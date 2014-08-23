@@ -231,11 +231,6 @@ TYPES
       {Name, NameAlt}
       PATH
     
-  TYPE highway_byway // Obsolete in OSM
-   = WAY ("highway"=="byway")
-      {Name, NameAlt}
-     PATH[FOOT]
-     
   TYPE highway_steps
     = WAY ("highway"=="steps")
       {Name, NameAlt}
@@ -642,11 +637,6 @@ TYPES
       
   TYPE natural_land
     = NODE AREA ("natural"=="land")
-      {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
-      
-  TYPE natural_marsh // Obsolete in OSM
-    = NODE AREA ("natural"=="marsh")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
       
