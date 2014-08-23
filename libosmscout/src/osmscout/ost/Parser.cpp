@@ -403,7 +403,7 @@ void Parser::TAGBINCOND(TagCondition*& condition) {
 void Parser::TAGEXISTSCOND(TagCondition*& condition) {
 		Expect(29 /* "EXISTS" */);
 		Expect(_string);
-		condition=new TagExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
+		condition=new TagExistsCondition(config.RegisterTag(Destring(t->val)));
 		
 }
 
@@ -414,13 +414,13 @@ void Parser::TAGLESSCOND(const std::string& tagName,TagCondition*& condition) {
 		Expect(20 /* "<" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorLess,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
 			
@@ -434,13 +434,13 @@ void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& conditio
 		Expect(21 /* "<=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorLessEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
 			
@@ -454,13 +454,13 @@ void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) 
 		Expect(22 /* "==" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
 			
@@ -474,13 +474,13 @@ void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& conditio
 		Expect(23 /* "!=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorNotEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
 			
@@ -494,13 +494,13 @@ void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition)
 		Expect(25 /* ">" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorGreater,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
 			
@@ -514,13 +514,13 @@ void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condi
 		Expect(24 /* ">=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorGreaterEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTagForInternalUse(tagName);
+			TagId tagId=config.RegisterTag(tagName);
 			
 			condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
 			
@@ -540,7 +540,7 @@ void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
 			values.push_back(Destring(t->val)); 
 		}
 		Expect(28 /* "]" */);
-		TagId tagId=config.RegisterTagForInternalUse(tagName);
+		TagId tagId=config.RegisterTag(tagName);
 		
 		if (values.size()==1) {
 		 condition=new TagBinaryCondition(tagId,operatorEqual,values.front());

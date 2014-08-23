@@ -203,12 +203,10 @@ namespace osmscout {
   private:
     TagId       id;
     std::string name;
-    bool        internalOnly;
 
   public:
     TagInfo();
-    TagInfo(const std::string& name,
-            bool internalOnly);
+    TagInfo(const std::string& name);
 
     TagInfo& SetId(TagId id);
     TagInfo& SetToExternal();
@@ -224,11 +222,6 @@ namespace osmscout {
     inline TagId GetId() const
     {
       return id;
-    }
-
-    inline bool IsInternalOnly() const
-    {
-      return internalOnly;
     }
   };
 
@@ -1889,10 +1882,6 @@ namespace osmscout {
     TypeId                                    typeTileUnknown;
     TypeId                                    typeTileCoastline;
 
-    // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                     tagAdminLevel;
-    TagId                                     tagAddrStreet;
-
     // Internal use (only available during preprocessing)
     TagId                                     tagArea;
     TagId                                     tagNatural;
@@ -1907,8 +1896,7 @@ namespace osmscout {
      * Methods for dealing with tags
      */
     //@{
-    TagId RegisterTagForInternalUse(const std::string& tagName);
-    TagId RegisterTagForExternalUse(const std::string& tagName);
+    TagId RegisterTag(const std::string& tagName);
 
     TagId RegisterNameTag(const std::string& tagName, uint32_t priority);
     TagId RegisterNameAltTag(const std::string& tagName, uint32_t priority);
@@ -1919,9 +1907,6 @@ namespace osmscout {
 
     bool IsNameTag(TagId tag, uint32_t& priority) const;
     bool IsNameAltTag(TagId tag, uint32_t& priority) const;
-
-    void ResolveTags(const std::map<TagId,std::string>& map,
-                     std::vector<Tag>& tags) const;
     //@}
 
     /**

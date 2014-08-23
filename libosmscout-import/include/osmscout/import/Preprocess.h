@@ -44,8 +44,6 @@ namespace osmscout {
     FileWriter            turnRestrictionWriter;
     FileWriter            multipolygonWriter;
 
-    std::vector<Tag>      tags;
-
     uint32_t              nodeCount;
     uint32_t              wayCount;
     uint32_t              areaCount;

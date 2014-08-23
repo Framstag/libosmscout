@@ -387,8 +387,6 @@ namespace osmscout {
 
     if (type->GetId()!=typeIgnore &&
         !type->GetIgnore()) {
-      typeConfig.ResolveTags(tagMap,tags);
-
       node.SetId(id);
       node.SetType(type);
       node.SetCoords(lon,lat);
@@ -463,7 +461,6 @@ namespace osmscout {
     typeConfig.GetWayAreaType(tagMap,
                               wayType,
                               areaType);
-    typeConfig.ResolveTags(tagMap,tags);
 
     if (isArea==1 &&
         areaType==typeConfig.typeInfoIgnore) {

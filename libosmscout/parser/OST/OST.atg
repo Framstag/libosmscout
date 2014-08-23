@@ -202,14 +202,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorLess,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
                   .)
@@ -225,14 +225,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorLessEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
                   .)
@@ -248,14 +248,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
                   .)
@@ -271,14 +271,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorNotEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
                   .)
@@ -294,14 +294,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorGreaterEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
                   .)
@@ -317,14 +317,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorGreater,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTagForInternalUse(tagName);
+                    TagId tagId=config.RegisterTag(tagName);
 
                     condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
                   .)
@@ -344,7 +344,7 @@ PRODUCTIONS
                 }
                 "]"
                 (.
-                  TagId tagId=config.RegisterTagForInternalUse(tagName);
+                  TagId tagId=config.RegisterTag(tagName);
 
                   if (values.size()==1) {
                     condition=new TagBinaryCondition(tagId,operatorEqual,values.front());
@@ -367,7 +367,7 @@ PRODUCTIONS
               = "EXISTS"
                  string
                  (.
-                   condition=new TagExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
+                   condition=new TagExistsCondition(config.RegisterTag(Destring(t->val)));
                  .)
                  .
 

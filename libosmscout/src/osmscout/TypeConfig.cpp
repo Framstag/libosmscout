@@ -210,16 +210,13 @@ namespace osmscout {
   }
 
   TagInfo::TagInfo()
-   : id(0),
-     internalOnly(true)
+   : id(0)
   {
   }
 
-  TagInfo::TagInfo(const std::string& name,
-                   bool internalOnly)
+  TagInfo::TagInfo(const std::string& name)
    : id(0),
-     name(name),
-     internalOnly(internalOnly)
+     name(name)
   {
     // no code
   }
@@ -227,13 +224,6 @@ namespace osmscout {
   TagInfo& TagInfo::SetId(TagId id)
   {
     this->id=id;
-
-    return *this;
-  }
-
-  TagInfo& TagInfo::SetToExternal()
-  {
-    internalOnly=false;
 
     return *this;
   }
@@ -485,7 +475,7 @@ namespace osmscout {
 
   void RefFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagRef=typeConfig.RegisterTagForInternalUse("ref");
+    tagRef=typeConfig.RegisterTag("ref");
   }
 
   std::string RefFeature::GetName() const
@@ -567,8 +557,8 @@ namespace osmscout {
 
   void LocationFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagAddrHouseNr=typeConfig.RegisterTagForInternalUse("addr:housenumber");
-    tagAddrStreet=typeConfig.RegisterTagForInternalUse("addr:street");
+    tagAddrHouseNr=typeConfig.RegisterTag("addr:housenumber");
+    tagAddrStreet=typeConfig.RegisterTag("addr:street");
   }
 
   std::string LocationFeature::GetName() const
@@ -662,8 +652,8 @@ namespace osmscout {
 
   void AddressFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagAddrHouseNr=typeConfig.RegisterTagForInternalUse("addr:housenumber");
-    tagAddrStreet=typeConfig.RegisterTagForInternalUse("addr:street");
+    tagAddrHouseNr=typeConfig.RegisterTag("addr:housenumber");
+    tagAddrStreet=typeConfig.RegisterTag("addr:street");
   }
 
   std::string AddressFeature::GetName() const
@@ -757,28 +747,28 @@ namespace osmscout {
 
   void AccessFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagOneway=typeConfig.RegisterTagForInternalUse("oneway");
-    tagJunction=typeConfig.RegisterTagForInternalUse("junction");
+    tagOneway=typeConfig.RegisterTag("oneway");
+    tagJunction=typeConfig.RegisterTag("junction");
 
-    tagAccess=typeConfig.RegisterTagForInternalUse("access");
-    tagAccessForward=typeConfig.RegisterTagForInternalUse("access:foward");
-    tagAccessBackward=typeConfig.RegisterTagForInternalUse("access:backward");
+    tagAccess=typeConfig.RegisterTag("access");
+    tagAccessForward=typeConfig.RegisterTag("access:foward");
+    tagAccessBackward=typeConfig.RegisterTag("access:backward");
 
-    tagAccessFoot=typeConfig.RegisterTagForInternalUse("access:foot");
-    tagAccessFootForward=typeConfig.RegisterTagForInternalUse("access:foot:foward");
-    tagAccessFootBackward=typeConfig.RegisterTagForInternalUse("access:foot:backward");
+    tagAccessFoot=typeConfig.RegisterTag("access:foot");
+    tagAccessFootForward=typeConfig.RegisterTag("access:foot:foward");
+    tagAccessFootBackward=typeConfig.RegisterTag("access:foot:backward");
 
-    tagAccessBicycle=typeConfig.RegisterTagForInternalUse("access:bicycle");
-    tagAccessBicycleForward=typeConfig.RegisterTagForInternalUse("access:bicycle:foward");
-    tagAccessBicycleBackward=typeConfig.RegisterTagForInternalUse("access:bicycle:backward");
+    tagAccessBicycle=typeConfig.RegisterTag("access:bicycle");
+    tagAccessBicycleForward=typeConfig.RegisterTag("access:bicycle:foward");
+    tagAccessBicycleBackward=typeConfig.RegisterTag("access:bicycle:backward");
 
-    tagAccessMotorVehicle=typeConfig.RegisterTagForInternalUse("access:motor_vehicle");
-    tagAccessMotorVehicleForward=typeConfig.RegisterTagForInternalUse("access:motor_vehicle:foward");
-    tagAccessMotorVehicleBackward=typeConfig.RegisterTagForInternalUse("access:motor_vehicle:backward");
+    tagAccessMotorVehicle=typeConfig.RegisterTag("access:motor_vehicle");
+    tagAccessMotorVehicleForward=typeConfig.RegisterTag("access:motor_vehicle:foward");
+    tagAccessMotorVehicleBackward=typeConfig.RegisterTag("access:motor_vehicle:backward");
 
-    tagAccessMotorcar=typeConfig.RegisterTagForInternalUse("access:motorcar");
-    tagAccessMotorcarForward=typeConfig.RegisterTagForInternalUse("access:motorcar:foward");
-    tagAccessMotorcarBackward=typeConfig.RegisterTagForInternalUse("access:motorcar:backward");
+    tagAccessMotorcar=typeConfig.RegisterTag("access:motorcar");
+    tagAccessMotorcarForward=typeConfig.RegisterTag("access:motorcar:foward");
+    tagAccessMotorcarBackward=typeConfig.RegisterTag("access:motorcar:backward");
   }
 
   std::string AccessFeature::GetName() const
@@ -1036,7 +1026,7 @@ namespace osmscout {
 
   void LayerFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagLayer=typeConfig.RegisterTagForInternalUse("layer");
+    tagLayer=typeConfig.RegisterTag("layer");
   }
 
   std::string LayerFeature::GetName() const
@@ -1126,7 +1116,7 @@ namespace osmscout {
 
   void WidthFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagWidth=typeConfig.RegisterTagForInternalUse("width");
+    tagWidth=typeConfig.RegisterTag("width");
   }
 
   std::string WidthFeature::GetName() const
@@ -1252,7 +1242,7 @@ namespace osmscout {
 
   void MaxSpeedFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagMaxSpeed=typeConfig.RegisterTagForInternalUse("maxspeed");
+    tagMaxSpeed=typeConfig.RegisterTag("maxspeed");
   }
 
   std::string MaxSpeedFeature::GetName() const
@@ -1390,8 +1380,8 @@ namespace osmscout {
 
   void GradeFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagSurface=typeConfig.RegisterTagForInternalUse("surface");
-    tagTrackType=typeConfig.RegisterTagForInternalUse("tracktype");
+    tagSurface=typeConfig.RegisterTag("surface");
+    tagTrackType=typeConfig.RegisterTag("tracktype");
   }
 
   std::string GradeFeature::GetName() const
@@ -1523,7 +1513,7 @@ namespace osmscout {
 
     void AdminLevelFeature::Initialize(TypeConfig& typeConfig)
     {
-      tagAdminLevel=typeConfig.RegisterTagForInternalUse("admin_level");
+      tagAdminLevel=typeConfig.RegisterTag("admin_level");
     }
 
     std::string AdminLevelFeature::GetName() const
@@ -1594,7 +1584,7 @@ namespace osmscout {
 
   void BridgeFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagBridge=typeConfig.RegisterTagForInternalUse("bridge");
+    tagBridge=typeConfig.RegisterTag("bridge");
   }
 
   std::string BridgeFeature::GetName() const
@@ -1646,7 +1636,7 @@ namespace osmscout {
 
   void TunnelFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagTunnel=typeConfig.RegisterTagForInternalUse("tunnel");
+    tagTunnel=typeConfig.RegisterTag("tunnel");
   }
 
   std::string TunnelFeature::GetName() const
@@ -1698,7 +1688,7 @@ namespace osmscout {
 
   void RoundaboutFeature::Initialize(TypeConfig& typeConfig)
   {
-    tagJunction=typeConfig.RegisterTagForInternalUse("junction");
+    tagJunction=typeConfig.RegisterTag("junction");
   }
 
   std::string RoundaboutFeature::GetName() const
@@ -2165,16 +2155,12 @@ namespace osmscout {
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
-    RegisterTagForInternalUse("");
+    RegisterTag("");
 
-    RegisterTagForExternalUse("name");
-    RegisterTagForExternalUse("addr:street");
-    RegisterTagForExternalUse("admin_level");
-
-    RegisterTagForInternalUse("area");
-    RegisterTagForInternalUse("natural");
-    RegisterTagForInternalUse("type");
-    RegisterTagForInternalUse("restriction");
+    RegisterTag("area");
+    RegisterTag("natural");
+    RegisterTag("type");
+    RegisterTag("restriction");
 
     featureName=new NameFeature();
     RegisterFeature(featureName);
@@ -2275,12 +2261,6 @@ namespace osmscout {
     typeTileUnknown=GetTypeId("_tile_unknown");
     typeTileCoastline=GetTypeId("_tile_coastline");
 
-    tagAdminLevel=GetTagId("admin_level");
-    tagAddrStreet=GetTagId("addr:street");
-
-    assert(tagAdminLevel!=tagIgnore);
-    assert(tagAddrStreet!=tagIgnore);
-
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
     tagType=GetTagId("type");
@@ -2307,7 +2287,7 @@ namespace osmscout {
     return types;
   }
 
-  TagId TypeConfig::RegisterTagForInternalUse(const std::string& tagName)
+  TagId TypeConfig::RegisterTag(const std::string& tagName)
   {
     OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
 
@@ -2315,34 +2295,7 @@ namespace osmscout {
       return mapping->second;
     }
 
-    TagInfo tagInfo(tagName,true);
-
-    if (tagInfo.GetId()==0) {
-      tagInfo.SetId(nextTagId);
-
-      nextTagId++;
-    }
-    else {
-      nextTagId=std::max(nextTagId,(TagId)(tagInfo.GetId()+1));
-    }
-
-    tags.push_back(tagInfo);
-    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
-
-    return tagInfo.GetId();
-  }
-
-  TagId TypeConfig::RegisterTagForExternalUse(const std::string& tagName)
-  {
-    OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
-
-    if (mapping!=stringToTagMap.end()) {
-      tags[mapping->second].SetToExternal();
-
-      return mapping->second;
-    }
-
-    TagInfo tagInfo(tagName,false);
+    TagInfo tagInfo(tagName);
 
     if (tagInfo.GetId()==0) {
       tagInfo.SetId(nextTagId);
@@ -2361,7 +2314,7 @@ namespace osmscout {
 
   TagId TypeConfig::RegisterNameTag(const std::string& tagName, uint32_t priority)
   {
-    TagId tagId=RegisterTagForExternalUse(tagName);
+    TagId tagId=RegisterTag(tagName);
 
     nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
 
@@ -2370,7 +2323,7 @@ namespace osmscout {
 
   TagId TypeConfig::RegisterNameAltTag(const std::string& tagName, uint32_t priority)
   {
-    TagId tagId=RegisterTagForExternalUse(tagName);
+    TagId tagId=RegisterTag(tagName);
 
     nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
 
@@ -2531,27 +2484,6 @@ namespace osmscout {
     assert(id<features.size());
 
     return features[id];
-  }
-
-  void TypeConfig::ResolveTags(const std::map<TagId,std::string>& map,
-                               std::vector<Tag>& tags) const
-  {
-    tags.clear();
-
-    for (std::map<TagId,std::string>::const_iterator t=map.begin();
-         t!=map.end();
-         ++t) {
-      if (GetTagInfo(t->first).IsInternalOnly()) {
-        continue;
-      }
-
-      Tag tag;
-
-      tag.key=t->first;
-      tag.value=t->second;
-
-      tags.push_back(tag);
-    }
   }
 
   bool TypeConfig::IsNameTag(TagId tag, uint32_t& priority) const
@@ -2966,21 +2898,14 @@ namespace osmscout {
       TagId       requestedId;
       TagId       actualId;
       std::string name;
-      bool        internalOnly;
 
       if (!(scanner.ReadNumber(requestedId) &&
-            scanner.Read(name),
-            scanner.Read(internalOnly))) {
+            scanner.Read(name))) {
         std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
         return false;
       }
 
-      if (internalOnly) {
-        actualId=RegisterTagForInternalUse(name);
-      }
-      else {
-        actualId=RegisterTagForExternalUse(name);
-      }
+      actualId=RegisterTag(name);
 
       if (actualId!=requestedId) {
         std::cerr << "Requested and actual tag id do not match" << std::endl;
@@ -3181,7 +3106,6 @@ namespace osmscout {
     for (auto tag : GetTags()) {
       writer.WriteNumber(tag.GetId());
       writer.Write(tag.GetName());
-      writer.Write(tag.IsInternalOnly());
     }
 
     uint32_t nameTagCount=0;
