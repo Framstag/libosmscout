@@ -594,11 +594,6 @@ TYPES
     = NODE AREA ("landuse"=="vineyard")
       {Name, NameAlt}
     
-  TYPE landuse_wood
-    = NODE AREA ("landuse"=="wood")
-      {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
-
   //
   // Natural
   //
@@ -650,7 +645,7 @@ TYPES
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
       
-  TYPE natural_marsh
+  TYPE natural_marsh // Obsolete in OSM
     = NODE AREA ("natural"=="marsh")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM

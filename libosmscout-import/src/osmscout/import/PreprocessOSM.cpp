@@ -323,7 +323,8 @@ namespace osmscout {
     Parser        parser(*this,typeConfig);
     xmlSAXHandler saxParser;
 
-    if (!Initialize(parameter,
+    if (!Initialize(typeConfig,
+                    parameter,
                     progress)) {
       return false;
     }
@@ -337,7 +338,8 @@ namespace osmscout {
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-    return Cleanup(parameter,
+    return Cleanup(typeConfig,
+                   parameter,
                    progress);
   }
 }

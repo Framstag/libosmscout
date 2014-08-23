@@ -440,7 +440,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!Initialize(parameter,
+    if (!Initialize(typeConfig,
+                    parameter,
                     progress)) {
       return false;
     }
@@ -538,7 +539,8 @@ namespace osmscout {
       }
     }
 
-    return Cleanup(parameter,
+    return Cleanup(typeConfig,
+                   parameter,
                    progress);
   }
 }

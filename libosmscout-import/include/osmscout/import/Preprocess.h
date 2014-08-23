@@ -71,6 +71,8 @@ namespace osmscout {
     GeoCoord              minCoord;
     GeoCoord              maxCoord;
 
+    std::vector<size_t>   statistics;
+
   private:
     bool StoreCurrentPage();
     bool StoreCoord(OSMId id,
@@ -99,7 +101,8 @@ namespace osmscout {
                 const ImportParameter& parameter,
                 Progress& progress);
 
-    bool Initialize(const ImportParameter& parameter,
+    bool Initialize(const TypeConfigRef& typeConfig,
+                    const ImportParameter& parameter,
                     Progress& progress);
 
     void ProcessNode(const TypeConfig& typeConfig,
@@ -115,7 +118,8 @@ namespace osmscout {
                          const std::vector<RawRelation::Member>& members,
                          const std::map<TagId,std::string>& tags);
 
-    bool Cleanup(const ImportParameter& parameter,
+    bool Cleanup(const TypeConfigRef& typeConfig,
+                 const ImportParameter& parameter,
                  Progress& progress);
   };
 }

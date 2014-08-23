@@ -229,6 +229,8 @@ namespace osmscout {
   {
     RawRelation relation;
 
+    statistics[type->GetId()]++;
+
     relation.SetId(id);
     relation.SetType(type);
 
@@ -286,7 +288,8 @@ namespace osmscout {
     return false;
   }
 
-  bool Preprocess::Initialize(const ImportParameter& parameter,
+  bool Preprocess::Initialize(const TypeConfigRef& typeConfig,
+                              const ImportParameter& parameter,
                               Progress& progress)
   {
     // This is something I do not like
@@ -313,6 +316,8 @@ namespace osmscout {
     nodeSortingError=false;
     waySortingError=false;
     relationSortingError=false;
+
+    statistics.resize(typeConfig->GetMaxTypeId()+1,0);
 
     nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                     "rawnodes.dat"));
@@ -381,6 +386,8 @@ namespace osmscout {
                         lon));
 
     TypeInfoRef type=typeConfig.GetNodeType(tagMap);
+
+    statistics[type->GetId()]++;
 
     if (type->GetId()!=typeIgnore &&
         !type->GetIgnore()) {
@@ -524,6 +531,8 @@ namespace osmscout {
       }
     }
 
+    statistics[way.GetTypeId()]++;
+
     way.SetNodes(nodes);
 
     way.Parse(*progress,
@@ -603,7 +612,8 @@ namespace osmscout {
     lastRelationId=id;
   }
 
-  bool Preprocess::Cleanup(const ImportParameter& parameter,
+  bool Preprocess::Cleanup(const TypeConfigRef& typeConfig,
+                           const ImportParameter& parameter,
                            Progress& progress)
   {
     //Since I do not like take a pointer to a reference
@@ -663,6 +673,19 @@ namespace osmscout {
     progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
     progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
+
+    for (size_t i=0; i<statistics.size(); i++) {
+      TypeInfoRef type=typeConfig->GetTypeInfo(i);
+      if (statistics[i]==0 &&
+          !type->GetIgnore() &&
+          !type->GetName().empty() &&
+          type->GetName()[0]!='_') {
+        progress.Warning("Type "+type->GetName()+ ": "+NumberToString(statistics[i])+" instances");
+      }
+      else {
+        progress.Debug("Type "+type->GetName()+ ": "+NumberToString(statistics[i])+" instance(s)");
+      }
+    }
 
     //std::cout << "Bounding box: " << "[" << minCoord.GetLat() << "," << minCoord.GetLon() << " x " << maxCoord.GetLat() << "," << maxCoord.GetLon() << "]" << std::endl;
 
