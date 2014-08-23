@@ -60,12 +60,12 @@ namespace osmscout
   }
 
   void OptimizeWaysLowZoomGenerator::GetWayTypesToOptimize(const TypeConfig& typeConfig,
-                                                           std::set<TypeId>& types)
+                                                           std::set<TypeInfoRef>& types)
   {
     for (auto type : typeConfig.GetTypes()) {
       if (type->CanBeWay() &&
           type->GetOptimizeLowZoom()) {
-        types.insert(type->GetId());
+        types.insert(type);
       }
     }
   }
@@ -73,9 +73,9 @@ namespace osmscout
   bool OptimizeWaysLowZoomGenerator::WriteTypeData(FileWriter& writer,
                                                    const TypeData& data)
   {
-    assert(data.type!=0);
+    assert(data.type.Valid());
 
-    writer.Write(data.type);
+    writer.Write(data.type->GetId());
     writer.Write(data.optLevel);
     writer.Write(data.indexLevel);
     writer.Write(data.cellXStart);
@@ -96,11 +96,9 @@ namespace osmscout
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)wayTypesData.size());
 
-    for (std::list<TypeData>::const_iterator typeData=wayTypesData.begin();
-        typeData!=wayTypesData.end();
-        typeData++) {
+    for (auto typeData : wayTypesData) {
       if (!WriteTypeData(writer,
-                         *typeData)) {
+                         typeData)) {
         return false;
       }
     }
@@ -112,12 +110,12 @@ namespace osmscout
                                              const ImportParameter& parameter,
                                              Progress& progress,
                                              FileScanner& scanner,
-                                             std::set<TypeId>& types,
+                                             std::set<TypeInfoRef>& types,
                                              std::vector<std::list<WayRef> >& ways)
   {
-    uint32_t         wayCount=0;
-    size_t           collectedWaysCount=0;
-    std::set<TypeId> currentTypes(types);
+    uint32_t              wayCount=0;
+    size_t                collectedWaysCount=0;
+    std::set<TypeInfoRef> currentTypes(types);
 
     progress.SetAction("Collecting way data to optimize");
 
@@ -147,7 +145,7 @@ namespace osmscout
         return false;
       }
 
-      if (currentTypes.find(way->GetTypeId())==currentTypes.end()) {
+      if (currentTypes.find(way->GetType())==currentTypes.end()) {
         continue;
       }
 
@@ -158,34 +156,32 @@ namespace osmscout
         }
       }
 
-      ways[way->GetTypeId()].push_back(way);
+      ways[way->GetType()->GetIndex()].push_back(way);
 
       collectedWaysCount++;
 
       while (collectedWaysCount>parameter.GetOptimizationMaxWayCount() &&
              currentTypes.size()>1) {
-        size_t victimType=ways.size();
+        TypeInfoRef victimType;
 
-        for (size_t i=0; i<ways.size(); i++) {
-          if (ways[i].size()>0 &&
-              (victimType>=ways.size() ||
-               ways[i].size()<ways[victimType].size())) {
-            victimType=i;
+        for (auto type : currentTypes) {
+          if (ways[type->GetIndex()].size()>0 &&
+              (victimType.Invalid() ||
+               ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
+            victimType=type;
           }
         }
 
-        if (victimType<ways.size()) {
-          collectedWaysCount-=ways[victimType].size();
-          ways[victimType].clear();
-          currentTypes.erase(victimType);
-        }
+        assert(victimType.Valid());
+
+        collectedWaysCount-=ways[victimType->GetIndex()].size();
+        ways[victimType->GetIndex()].clear();
+        currentTypes.erase(victimType);
       }
     }
 
-    for (std::set<TypeId>::const_iterator type=currentTypes.begin();
-         type!=currentTypes.end();
-         ++type) {
-      types.erase(*type);
+    for (auto type : currentTypes) {
+      types.erase(type);
     }
 
     progress.Info("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
@@ -470,10 +466,7 @@ namespace osmscout
 
     projection.Set(0,0,magnification,width,height);
 
-    for (std::list<WayRef>::const_iterator w=ways.begin();
-         w!=ways.end();
-         ++w) {
-      WayRef                way(*w);
+    for (auto way :ways) {
       TransPolygon          polygon;
       std::vector<GeoCoord> newNodes;
       double                xmin;
@@ -516,10 +509,7 @@ namespace osmscout
                                                const std::list<WayRef>& ways,
                                                FileOffsetFileOffsetMap& offsets)
   {
-    for (std::list<WayRef>::const_iterator w=ways.begin();
-        w!=ways.end();
-        w++) {
-      WayRef     way(*w);
+    for (auto way : ways) {
       FileOffset offset;
 
       writer.GetPos(offset);
@@ -550,10 +540,7 @@ namespace osmscout
     double                                 cellHeight=180.0/pow(2.0,(int)data.indexLevel);
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
-    for (std::list<WayRef>::const_iterator w=ways.begin();
-        w!=ways.end();
-        w++) {
-      WayRef                          way(*w);
+    for (auto way : ways) {
       double                          minLon;
       double                          maxLon;
       double                          minLat;
@@ -683,7 +670,7 @@ namespace osmscout
                                                 Progress& progress,
                                                 const TypeConfig& typeConfig,
                                                 FileWriter& writer,
-                                                const std::set<TypeId>& types,
+                                                const std::set<TypeInfoRef>& types,
                                                 std::list<TypeData>& typesData)
   {
     FileScanner   scanner;
@@ -701,8 +688,8 @@ namespace osmscout
       return false;
     }
 
-    std::set<TypeId>                typesToProcess(types);
-    std::vector<std::list<WayRef> > allWays(typeConfig.GetTypes().size());
+    std::set<TypeInfoRef>           typesToProcess(types);
+    std::vector<std::list<WayRef> > allWays(typeConfig.GetTypeCount());
 
     while (true) {
       //
@@ -723,7 +710,7 @@ namespace osmscout
           continue;
         }
 
-        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName()+" ("+NumberToString(type)+")");
+        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName());
 
         //
         // Join ways
@@ -793,7 +780,7 @@ namespace osmscout
 
             TypeData typeData;
 
-            typeData.type=type;
+            typeData.type=typeConfig.GetTypeInfo(type);
             typeData.optLevel=level;
 
             typesData.push_back(typeData);
@@ -802,7 +789,7 @@ namespace osmscout
 
           TypeData typeData;
 
-          typeData.type=type;
+          typeData.type=typeConfig.GetTypeInfo(type);
           typeData.optLevel=level;
 
           GetWayIndexLevel(parameter,
@@ -847,11 +834,11 @@ namespace osmscout
                                             const ImportParameter& parameter,
                                             Progress& progress)
   {
-    FileOffset           indexOffset=0;
-    FileWriter           writer;
-    Magnification        magnification; // Magnification, we optimize for
-    std::set<TypeId>     wayTypes;         // Types we optimize
-    std::list<TypeData>  wayTypesData;
+    FileOffset            indexOffset=0;
+    FileWriter            writer;
+    Magnification         magnification; // Magnification, we optimize for
+    std::set<TypeInfoRef> wayTypes;         // Types we optimize
+    std::list<TypeData>   wayTypesData;
 
     GetWayTypesToOptimize(typeConfig,
                           wayTypes);

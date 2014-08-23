@@ -229,7 +229,7 @@ namespace osmscout {
   {
     RawRelation relation;
 
-    areaStat[type->GetId()]++;
+    areaStat[type->GetIndex()]++;
 
     relation.SetId(id);
 
@@ -323,9 +323,9 @@ namespace osmscout {
     waySortingError=false;
     relationSortingError=false;
 
-    nodeStat.resize(typeConfig->GetMaxTypeId()+1,0);
-    areaStat.resize(typeConfig->GetMaxTypeId()+1,0);
-    wayStat.resize(typeConfig->GetMaxTypeId()+1,0);
+    nodeStat.resize(typeConfig->GetTypeCount(),0);
+    areaStat.resize(typeConfig->GetTypeCount()+1,0);
+    wayStat.resize(typeConfig->GetTypeCount()+1,0);
 
     nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                     "rawnodes.dat"));
@@ -395,7 +395,7 @@ namespace osmscout {
 
     TypeInfoRef type=typeConfig.GetNodeType(tagMap);
 
-    nodeStat[type->GetId()]++;
+    nodeStat[type->GetIndex()]++;
 
     if (!type->GetIgnore()) {
       node.SetId(id);
@@ -508,7 +508,7 @@ namespace osmscout {
 
     switch (isArea) {
     case 1:
-      areaStat[areaType->GetId()]++;
+      areaStat[areaType->GetIndex()]++;
 
       if (areaType->GetIgnore()) {
         way.SetType(typeConfig.typeInfoIgnore,
@@ -526,7 +526,7 @@ namespace osmscout {
       areaCount++;
       break;
     case -1:
-      wayStat[wayType->GetId()]++;
+      wayStat[wayType->GetIndex()]++;
 
       if (wayType->GetIgnore()) {
         way.SetType(typeConfig.typeInfoIgnore,false);
@@ -697,8 +697,8 @@ namespace osmscout {
     progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
-    for (size_t i=0; i<=typeConfig->GetMaxTypeId(); i++) {
-      TypeInfoRef type=typeConfig->GetTypeInfo(i);
+    for (auto type : typeConfig->GetTypes()) {
+      size_t      i=type->GetIndex();
       bool        isEmpty=(type->CanBeNode() && nodeStat[i]==0) ||
                           (type->CanBeArea() && areaStat[i]==0) ||
                           (type->CanBeWay() && wayStat[i]==0);

@@ -1979,6 +1979,7 @@ namespace osmscout {
 
   TypeInfo::TypeInfo()
    : id(0),
+     index(0),
      canBeNode(false),
      canBeWay(false),
      canBeArea(false),
@@ -2018,6 +2019,13 @@ namespace osmscout {
   TypeInfo& TypeInfo::SetId(TypeId id)
   {
     this->id=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetIndex(size_t index)
+  {
+    this->index=index;
 
     return *this;
   }
@@ -2260,11 +2268,6 @@ namespace osmscout {
     // no code
   }
 
-  const std::vector<TypeInfoRef>& TypeConfig::GetTypes() const
-  {
-    return types;
-  }
-
   TagId TypeConfig::RegisterTag(const std::string& tagName)
   {
     auto mapping=stringToTagMap.find(tagName);
@@ -2412,6 +2415,7 @@ namespace osmscout {
     }
 
     typeInfo->SetId(types.size());
+    typeInfo->SetIndex(types.size());
 
     types.push_back(typeInfo);
     nameToTypeMap[typeInfo->GetName()]=typeInfo;

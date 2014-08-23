@@ -202,7 +202,7 @@ OSS
   GROUP highway_living_street, highway_service, highway_bus_guideway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
-        highway_footway, highway_bridleway, highway_byway, highway_construction,
+        highway_footway, highway_bridleway, highway_construction,
         leisure_track,
 	    waterway_stream, route_ferry
   GROUP highway_steps, barrier_fence
@@ -462,7 +462,7 @@ SYMBOL speed_camera
    [TYPE natural_fell] AREA { color: @fellColor; }
    [TYPE natural_heath] AREA { color: @heathColor; }
    [TYPE natural_wood] AREA { color: @woodColor; }
-   [TYPE natural_marsh, natural_wetland_marsh] AREA { color: @marshColor; }
+   [TYPE natural_wetland_marsh] AREA { color: @marshColor; }
    [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
    [TYPE natural_water] AREA { color: @waterColor; }
    [TYPE natural_beach] AREA { color: @beachColor; }
@@ -477,8 +477,9 @@ SYMBOL speed_camera
          natural_heath,
          natural_wood,
          natural_scrub,
-         natural_marsh,
          natural_wetland,
+         natural_wetland_marsh,
+         natural_wetland_tidalflat,
          natural_water,
          natural_beach,
          natural_land]
@@ -915,15 +916,6 @@ SYMBOL speed_camera
    [TYPE railway_halt] NODE.ICON { symbol: railway_halt;}
 
    [TYPE railway_tram_stop] NODE.ICON { symbol: railway_tram_stop;}
-
-   [TYPE highway_byway] {
-     WAY {color: #90570c; displayWidth: 0.3mm; }
-
-     [BRIDGE] {
-       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.15mm;}
-       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
-     }
-   }
  }
 
  [MAG @stepsMag-] {
@@ -1004,7 +996,6 @@ SYMBOL speed_camera
          highway_cycleway,
          highway_footway,
          highway_bridleway,
-         highway_byway,
          highway_steps] WAY.TEXT { label: name; size: 0.8;}
 
    [TYPE railway_rail,

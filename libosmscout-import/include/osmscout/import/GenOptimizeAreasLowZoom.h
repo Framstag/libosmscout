@@ -44,23 +44,23 @@ namespace osmscout {
 
     struct TypeData
     {
-      TypeId     type;            //! The type
-      uint32_t   optLevel;        //! The display level this data was optimized for
-      uint32_t   indexLevel;      //! Magnification level of index
+      TypeInfoRef type;            //! The type
+      uint32_t    optLevel;        //! The display level this data was optimized for
+      uint32_t    indexLevel;      //! Magnification level of index
 
-      uint32_t   cellXStart;
-      uint32_t   cellXEnd;
-      uint32_t   cellYStart;
-      uint32_t   cellYEnd;
+      uint32_t    cellXStart;
+      uint32_t    cellXEnd;
+      uint32_t    cellYStart;
+      uint32_t    cellYEnd;
 
-      FileOffset bitmapOffset;    //! Position in file where the offset of the bitmap is written
-      uint8_t    dataOffsetBytes; //! Number of bytes per entry in bitmap
+      FileOffset  bitmapOffset;    //! Position in file where the offset of the bitmap is written
+      uint8_t     dataOffsetBytes; //! Number of bytes per entry in bitmap
 
-      uint32_t   cellXCount;
-      uint32_t   cellYCount;
+      uint32_t    cellXCount;
+      uint32_t    cellYCount;
 
-      size_t     indexCells;      //! Number of filled cells in index
-      size_t     indexEntries;    //! Number of entries over all cells
+      size_t      indexCells;      //! Number of filled cells in index
+      size_t      indexEntries;    //! Number of entries over all cells
 
       TypeData();
 
@@ -73,7 +73,7 @@ namespace osmscout {
 
   private:
     void GetAreaTypesToOptimize(const TypeConfig& typeConfig,
-                                std::set<TypeId>& types);
+                                std::set<TypeInfoRef>& types);
 
     bool WriteTypeData(FileWriter& writer,
                        const TypeData& data);
@@ -86,7 +86,7 @@ namespace osmscout {
                   const ImportParameter& parameter,
                   Progress& progress,
                   FileScanner& scanner,
-                  std::set<TypeId>& types,
+                  std::set<TypeInfoRef>& types,
                   std::vector<std::list<AreaRef> >& areas);
 
     void GetAreaIndexLevel(const ImportParameter& parameter,
@@ -108,7 +108,7 @@ namespace osmscout {
                      Progress& progress,
                      const TypeConfig& typeConfig,
                      FileWriter& writer,
-                     const std::set<TypeId>& types,
+                     const std::set<TypeInfoRef>& types,
                      std::list<TypeData>& typesData);
 
     void OptimizeAreas(const std::list<AreaRef>& areas,

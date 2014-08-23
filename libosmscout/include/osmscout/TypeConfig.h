@@ -1354,6 +1354,7 @@ namespace osmscout {
   private:
     TypeId                               id;
     std::string                          name;
+    size_t                               index;
 
     std::list<TypeCondition>             conditions;
     OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
@@ -1388,6 +1389,11 @@ namespace osmscout {
      * Set the id of this type
      */
     TypeInfo& SetId(TypeId id);
+
+    /**
+     * Set the index of this type. The index is assured to in the interval [0..GetTypeCount()[
+     */
+    TypeInfo& SetIndex(size_t index);
 
     /**
      * The the name of this type
@@ -1454,16 +1460,24 @@ namespace osmscout {
     }
 
     /**
-     * Returns the size of the buffer required to store all FeatureVAlues of this type into
+     * Returns the size of the buffer required to store all FeatureValues of this type into
      */
     size_t GetFeatureValueBufferSize() const;
 
     /**
-     * Returns the unique id of this type
+     * Returns the unique id of this type. You should not use the type id as an index.
      */
     inline TypeId GetId() const
     {
       return id;
+    }
+
+    /**
+     * Returns the index of this type. The index is assured to in the interval [0..GetTypeCount()[
+     */
+    inline size_t GetIndex() const
+    {
+      return index;
     }
 
     /**
@@ -1928,7 +1942,22 @@ namespace osmscout {
     //@{
     TypeInfoRef RegisterType(const TypeInfoRef& typeInfo);
 
-    const std::vector<TypeInfoRef>& GetTypes() const;
+    /**
+     * Return an array of the types available
+     */
+    inline const std::vector<TypeInfoRef>& GetTypes() const
+    {
+      return types;
+    }
+
+    /**
+     * Return the number of types available. The index of a type is garanteed to be in the interval
+     * [0..GetTypeCount()[
+     */
+    inline size_t GetTypeCount() const
+    {
+      return types.size();
+    }
 
     TypeId GetMaxTypeId() const;
 
@@ -2025,7 +2054,7 @@ namespace osmscout {
   {
     FeatureRef feature=typeConfig.GetFeature(F::NAME);
 
-    lookupTable.resize(typeConfig.GetMaxTypeId()+1,
+    lookupTable.resize(typeConfig.GetTypeCount(),
                        std::numeric_limits<size_t>::max());
 
     for (auto type : typeConfig.GetTypes()) {
@@ -2033,7 +2062,7 @@ namespace osmscout {
 
       if (type->GetFeature(F::NAME,
                           index)) {
-        lookupTable[type->GetId()]=index;
+        lookupTable[type->GetIndex()]=index;
       }
     }
   }
@@ -2042,7 +2071,7 @@ namespace osmscout {
   bool FeatureReader<F>::GetIndex(const FeatureValueBuffer& buffer,
                                   size_t& index) const
   {
-    index=lookupTable[buffer.GetTypeId()];
+    index=lookupTable[buffer.GetType()->GetIndex()];
 
     return index!=std::numeric_limits<size_t>::max();
   }
@@ -2050,7 +2079,7 @@ namespace osmscout {
   template<class F>
   bool FeatureReader<F>::IsSet(const FeatureValueBuffer& buffer) const
   {
-    size_t index=lookupTable[buffer.GetTypeId()];
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max()) {
       return buffer.HasValue(index);
@@ -2111,7 +2140,7 @@ namespace osmscout {
 
     assert(feature->HasValue());
 
-    lookupTable.resize(typeConfig.GetMaxTypeId()+1,
+    lookupTable.resize(typeConfig.GetTypeCount(),
                        std::numeric_limits<size_t>::max());
 
     for (auto type : typeConfig.GetTypes()) {
@@ -2119,7 +2148,7 @@ namespace osmscout {
 
       if (type->GetFeature(F::NAME,
                           index)) {
-        lookupTable[type->GetId()]=index;
+        lookupTable[type->GetIndex()]=index;
       }
     }
   }
@@ -2128,7 +2157,7 @@ namespace osmscout {
   bool FeatureValueReader<F,V>::GetIndex(const FeatureValueBuffer& buffer,
                                          size_t& index) const
   {
-    index=lookupTable[buffer.GetTypeId()];
+    index=lookupTable[buffer.GetType()->GetIndex()];
 
     return index!=std::numeric_limits<size_t>::max();
   }
@@ -2136,7 +2165,7 @@ namespace osmscout {
   template<class F, class V>
   V* FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer) const
   {
-    size_t index=lookupTable[buffer.GetTypeId()];
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
         buffer.HasValue(index)) {
@@ -2185,7 +2214,7 @@ namespace osmscout {
 
     assert(feature->HasLabel());
 
-    lookupTable.resize(typeConfig.GetMaxTypeId()+1,
+    lookupTable.resize(typeConfig.GetTypeCount(),
                        std::numeric_limits<size_t>::max());
 
     for (auto type : typeConfig.GetTypes()) {
@@ -2193,7 +2222,7 @@ namespace osmscout {
 
       if (type->GetFeature(F::NAME,
                           index)) {
-        lookupTable[type->GetId()]=index;
+        lookupTable[type->GetIndex()]=index;
       }
     }
   }
@@ -2201,7 +2230,7 @@ namespace osmscout {
   template<class F, class V>
   std::string FeatureLabelReader<F,V>::GetLabel(const FeatureValueBuffer& buffer) const
   {
-    size_t index=lookupTable[buffer.GetTypeId()];
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
         buffer.HasValue(index)) {
