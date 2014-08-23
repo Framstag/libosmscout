@@ -52,11 +52,11 @@ namespace osmscout {
 
     featureValueBuffer.SetType(type);
 
-    scanner.ReadCoord(coords);
-
     if (!featureValueBuffer.Read(scanner)) {
       return false;
     }
+
+    scanner.ReadCoord(coords);
 
     return !scanner.HasError();
   }
@@ -66,11 +66,11 @@ namespace osmscout {
   {
     writer.WriteNumber(featureValueBuffer.GetTypeId());
 
-    writer.WriteCoord(coords);
-
     if (!featureValueBuffer.Write(writer)) {
       return false;
     }
+
+    writer.WriteCoord(coords);
 
     return !writer.HasError();
   }

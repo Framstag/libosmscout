@@ -97,6 +97,10 @@ namespace osmscout {
 
     featureValueBuffer.SetType(type);
 
+    if (!featureValueBuffer.Read(scanner)) {
+      return false;
+    }
+
     if (!scanner.Read(nodes)) {
       return false;
     }
@@ -132,10 +136,6 @@ namespace osmscout {
       }
     }
 
-    if (!featureValueBuffer.Read(scanner)) {
-      return false;
-    }
-
     return !scanner.HasError();
   }
 
@@ -154,11 +154,11 @@ namespace osmscout {
 
     featureValueBuffer.SetType(type);
 
-    if (!scanner.Read(nodes)) {
+    if (!featureValueBuffer.Read(scanner)) {
       return false;
     }
 
-    if (!featureValueBuffer.Read(scanner)) {
+    if (!scanner.Read(nodes)) {
       return false;
     }
 
@@ -171,6 +171,10 @@ namespace osmscout {
     assert(!nodes.empty());
 
     writer.WriteNumber(featureValueBuffer.GetTypeId());
+
+    if (!featureValueBuffer.Write(writer)) {
+      return false;
+    }
 
     if (!writer.Write(nodes)) {
       return false;
@@ -221,10 +225,6 @@ namespace osmscout {
       }
     }
 
-    if (!featureValueBuffer.Write(writer)) {
-      return false;
-    }
-
     return !writer.HasError();
   }
 
@@ -235,11 +235,11 @@ namespace osmscout {
 
     writer.WriteNumber(featureValueBuffer.GetTypeId());
 
-    if (!writer.Write(nodes)) {
+    if (!featureValueBuffer.Write(writer)) {
       return false;
     }
 
-    if (!featureValueBuffer.Write(writer)) {
+    if (!writer.Write(nodes)) {
       return false;
     }
 

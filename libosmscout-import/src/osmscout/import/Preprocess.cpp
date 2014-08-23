@@ -232,7 +232,13 @@ namespace osmscout {
     areaStat[type->GetId()]++;
 
     relation.SetId(id);
-    relation.SetType(type);
+
+    if (type->GetIgnore()) {
+      relation.SetType(typeConfig.typeInfoIgnore);
+    }
+    else {
+      relation.SetType(type);
+    }
 
     relation.members=members;
 
@@ -391,8 +397,7 @@ namespace osmscout {
 
     nodeStat[type->GetId()]++;
 
-    if (type->GetId()!=typeIgnore &&
-        !type->GetIgnore()) {
+    if (!type->GetIgnore()) {
       node.SetId(id);
       node.SetType(type);
       node.SetCoords(lon,lat);
@@ -503,7 +508,15 @@ namespace osmscout {
 
     switch (isArea) {
     case 1:
-      way.SetType(areaType,true);
+      areaStat[areaType->GetId()]++;
+
+      if (areaType->GetIgnore()) {
+        way.SetType(typeConfig.typeInfoIgnore,
+                    true);
+      }
+      else {
+        way.SetType(areaType,true);
+      }
 
       if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
@@ -513,12 +526,21 @@ namespace osmscout {
       areaCount++;
       break;
     case -1:
-      way.SetType(wayType,false);
+      wayStat[wayType->GetId()]++;
+
+      if (wayType->GetIgnore()) {
+        way.SetType(typeConfig.typeInfoIgnore,false);
+      }
+      else {
+        way.SetType(wayType,false);
+      }
+
       wayCount++;
       break;
     default:
       if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
+        areaStat[typeIgnore]++;
         way.SetType(typeConfig.typeInfoIgnore,
                     true);
 
@@ -527,17 +549,11 @@ namespace osmscout {
         areaCount++;
       }
       else {
+        wayStat[typeIgnore]++;
         way.SetType(typeConfig.typeInfoIgnore,
                     false);
         wayCount++;
       }
-    }
-
-    if (way.IsArea()) {
-      areaStat[way.GetTypeId()]++;
-    }
-    else {
-      wayStat[way.GetTypeId()]++;
     }
 
     way.SetNodes(nodes);

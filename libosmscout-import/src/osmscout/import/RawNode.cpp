@@ -87,11 +87,13 @@ namespace osmscout {
 
     featureValueBuffer.SetType(type);
 
-    if (!scanner.ReadCoord(coords)) {
-      return false;
+    if (!type->GetIgnore()) {
+      if (!featureValueBuffer.Read(scanner)) {
+        return false;
+      }
     }
 
-    if (!featureValueBuffer.Read(scanner)) {
+    if (!scanner.ReadCoord(coords)) {
       return false;
     }
 
@@ -104,11 +106,15 @@ namespace osmscout {
     writer.WriteNumber(id);
 
     writer.WriteNumber(featureValueBuffer.GetTypeId());
+
+    if (!featureValueBuffer.GetType()->GetIgnore()) {
+      if (!featureValueBuffer.Write(writer)) {
+        return false;
+      }
+    }
+
     writer.WriteCoord(coords);
 
-    if (!featureValueBuffer.Write(writer)) {
-      return false;
-    }
 
     return !writer.HasError();
   }
