@@ -2259,11 +2259,6 @@ namespace osmscout {
     // no code
   }
 
-  const std::vector<TagInfo>& TypeConfig::GetTags() const
-  {
-    return tags;
-  }
-
   const std::vector<TypeInfoRef>& TypeConfig::GetTypes() const
   {
     return types;
@@ -3084,8 +3079,8 @@ namespace osmscout {
       return false;
     }
 
-    writer.WriteNumber((uint32_t)GetTags().size());
-    for (auto tag : GetTags()) {
+    writer.WriteNumber((uint32_t)tags.size());
+    for (auto tag : tags) {
       writer.WriteNumber(tag.GetId());
       writer.Write(tag.GetName());
     }
@@ -3093,7 +3088,7 @@ namespace osmscout {
     uint32_t nameTagCount=0;
     uint32_t nameAltTagCount=0;
 
-    for (auto tag : GetTags()) {
+    for (auto tag : tags) {
       uint32_t priority;
 
       if (IsNameTag(tag.GetId(),priority)) {
@@ -3106,7 +3101,7 @@ namespace osmscout {
     }
 
     writer.WriteNumber(nameTagCount);
-    for (auto tag : GetTags()) {
+    for (auto tag : tags) {
       uint32_t priority;
 
       if (IsNameTag(tag.GetId(),priority)) {
@@ -3117,7 +3112,7 @@ namespace osmscout {
     }
 
     writer.WriteNumber(nameAltTagCount);
-    for (auto tag : GetTags()) {
+    for (auto tag : tags) {
       uint32_t priority;
 
       if (IsNameAltTag(tag.GetId(),priority)) {

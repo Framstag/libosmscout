@@ -209,7 +209,6 @@ namespace osmscout {
     TagInfo(const std::string& name);
 
     TagInfo& SetId(TagId id);
-    TagInfo& SetToExternal();
 
     inline std::string GetName() const
     {
@@ -1897,15 +1896,18 @@ namespace osmscout {
     //@{
     TagId RegisterTag(const std::string& tagName);
 
-    TagId RegisterNameTag(const std::string& tagName, uint32_t priority);
-    TagId RegisterNameAltTag(const std::string& tagName, uint32_t priority);
+    TagId RegisterNameTag(const std::string& tagName,
+                          uint32_t priority);
+    TagId RegisterNameAltTag(const std::string& tagName,
+                             uint32_t priority);
 
     TagId GetTagId(const char* name) const;
     const TagInfo& GetTagInfo(TagId id) const;
-    const std::vector<TagInfo>& GetTags() const;
 
-    bool IsNameTag(TagId tag, uint32_t& priority) const;
-    bool IsNameAltTag(TagId tag, uint32_t& priority) const;
+    bool IsNameTag(TagId tag,
+                   uint32_t& priority) const;
+    bool IsNameAltTag(TagId tag,
+                      uint32_t& priority) const;
     //@}
 
     /**
