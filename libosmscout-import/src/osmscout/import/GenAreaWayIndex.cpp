@@ -115,7 +115,7 @@ namespace osmscout {
     // If the fill rate of the index is too low, we use this index level anyway
     if (typeData.indexCells/(1.0*typeData.cellXCount*typeData.cellYCount)<=
         parameter.GetAreaWayIndexMinFillRate()) {
-      progress.Warning(typeInfo.GetName()+" ("+NumberToString(typeInfo.GetId())+") is not well distributed");
+      progress.Warning(typeInfo.GetName()+" is not well distributed");
       return true;
     }
 
