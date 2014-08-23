@@ -100,8 +100,7 @@ namespace osmscout {
 
       nodesReadCount++;
 
-      if (rawNode.GetTypeId()!=typeIgnore &&
-          !rawNode.GetType()->GetIgnore()) {
+      if (!rawNode.GetType()->GetIgnore()) {
         node.SetType(rawNode.GetType());
         node.SetCoords(rawNode.GetCoords());
         node.SetFeatures(rawNode.GetFeatureValueBuffer());
