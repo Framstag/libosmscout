@@ -2190,6 +2190,7 @@ namespace osmscout {
     // It assures that id 0 is always reserved for typeIgnore
     typeInfoIgnore=new TypeInfo();
     typeInfoIgnore->SetType("");
+    typeInfoIgnore->SetIgnore(true);
 
     RegisterType(typeInfoIgnore);
 
