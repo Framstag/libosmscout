@@ -466,7 +466,7 @@ TYPES
       OPTIMIZE_LOW_ZOOM
        
   TYPE landuse_brownfield
-    = NODE AREA ("landuse"=="brownfield")
+    = AREA ("landuse"=="brownfield")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
        
@@ -591,7 +591,7 @@ TYPES
       {Name, NameAlt}
     
   TYPE landuse_vineyard
-    = NODE AREA ("landuse"=="vineyard")
+    = AREA ("landuse"=="vineyard")
       {Name, NameAlt}
     
   //
@@ -651,7 +651,7 @@ TYPES
       OPTIMIZE_LOW_ZOOM
       
   TYPE natural_mud
-    = NODE AREA ("natural"=="mud")
+    = AREA ("natural"=="mud")
       {Name, NameAlt}
     
   TYPE natural_peak
@@ -659,7 +659,7 @@ TYPES
       {Name, NameAlt}
     
   TYPE natural_sand
-    = NODE AREA ("natural"=="sand")
+    = AREA ("natural"=="sand")
       {Name, NameAlt}
     
   TYPE natural_scree
@@ -877,7 +877,7 @@ TYPES
       ADDRESS POI
 
   TYPE amenity_hospital_building
-    = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
       
@@ -935,7 +935,7 @@ TYPES
       ADDRESS POI
 
   TYPE amenity_school_building
-    = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
       
@@ -1039,7 +1039,7 @@ TYPES
       ADDRESS POI
 
   TYPE tourism_alpine_hut_building
-    = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
 
@@ -1133,7 +1133,7 @@ TYPES
   //
 
   TYPE historic_castle_building
-    = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
 
@@ -1143,7 +1143,7 @@ TYPES
       ADDRESS POI
 
   TYPE historic_manor_building
-    = NODE AREA ("historic"=="manor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("historic"=="manor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
     
@@ -1153,7 +1153,7 @@ TYPES
       ADDRESS POI
     
   TYPE historic_monument_building
-    = NODE AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
 
@@ -1163,7 +1163,7 @@ TYPES
       ADDRESS POI
     
   TYPE historic_memorial_building
-    = NODE AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
 
@@ -1173,7 +1173,7 @@ TYPES
       ADDRESS POI
     
   TYPE historic_ruins_building
-    = NODE AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
 
@@ -1198,7 +1198,7 @@ TYPES
       ADDRESS POI
 
   TYPE historic_building
-    = NODE AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+    = AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
 
