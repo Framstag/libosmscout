@@ -262,13 +262,11 @@ TYPES
       {Name, NameAlt, Ref}
       PATH[CAR]
 
-  TYPE highway_street_lamp // Too many for mobile offline map?
+  TYPE highway_street_lamp IGNORE // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
-      IGNORE 
 
-  TYPE speed_camera
+  TYPE speed_camera IGNORE
     = NODE ("highway"=="speed_camera")
-      IGNORE
 
   //
   // Waterways and assorted
@@ -665,9 +663,8 @@ TYPES
     = NODE ("natural"=="spring")
       {Name, NameAlt}
     
-  TYPE natural_tree
+  TYPE natural_tree IGNORE // Too many for mobile?
     = NODE ("natural"=="tree")
-      IGNORE // Too many for mobile?
       
   TYPE natural_volcano
     = NODE ("natural"=="volcano")
@@ -823,10 +820,9 @@ TYPES
     = NODE WAY AREA ("amenity"=="bicycle_parking")
       {Name, NameAlt, Width}
 
-  TYPE amenity_bench
+  TYPE amenity_bench IGNORE // Too many for mobile?
     = NODE WAY ("amenity"=="bench")
-      IGNORE // Too many for mobile?
-    
+          
   TYPE amenity_bus_station
     = NODE AREA ("amenity"=="bus_station")
       {Name, NameAlt}
@@ -940,10 +936,9 @@ TYPES
   TYPE amenity_toilets
     = NODE ("amenity"=="toilets")
     
-  TYPE amenity_vending_machine
+  TYPE amenity_vending_machine IGNORE // Too many for mobile?
     = NODE ("amenity"=="vending_machine")
-      {Name, NameAlt}
-      IGNORE // Too many for mobile?
+      {Name, NameAlt}      
 
   // Churches
   TYPE christian_church_building
@@ -1584,142 +1579,216 @@ TYPES
   // Barriers
 
   // Currently not supported by stylesheet
-  TYPE barrier_hedge
+  TYPE barrier_hedge IGNORE
     = WAY AREA ("barrier"=="hedge")
-      IGNORE
     
   TYPE barrier_fence
     = WAY AREA ("barrier"=="fence")
       IGNORESEALAND
     
-  TYPE barrier_wall
+  TYPE barrier_wall IGNORE
     = WAY AREA ("barrier"=="wall")
-      IGNORE
     
-  TYPE barrier_ditch
+  TYPE barrier_ditch IGNORE
     = WAY AREA ("barrier"=="ditch")
-      IGNORE
     
-  TYPE barrier_retaining_wall
+  TYPE barrier_retaining_wall IGNORE
     = WAY AREA ("barrier"=="retaining_wall")
-      IGNORESEALAND IGNORE
+      IGNORESEALAND
     
-  TYPE barrier_city_wall
+  TYPE barrier_city_wall IGNORE
     = WAY AREA ("barrier"=="city_wall")
       {Name, NameAlt, Width}
-      IGNORE
     
-  TYPE barrier_bollard
+  TYPE barrier_bollard IGNORE
     = NODE WAY ("barrier"=="bollard")
-      IGNORE
     
-  TYPE barrier_cycle_barrier
+  TYPE barrier_cycle_barrier IGNORE
     = NODE ("barrier"=="cycle_barrier")
-      IGNORE
     
-  TYPE barrier_block
+  TYPE barrier_block IGNORE
     = NODE ("barrier"=="block")
-      IGNORE
     
-  TYPE barrier_cattle_grid
+  TYPE barrier_cattle_grid IGNORE
     = NODE ("barrier"=="cattle_grid")
-      IGNORE
     
-  TYPE barrier_toll_booth
+  TYPE barrier_toll_booth IGNORE
     = NODE ("barrier"=="toll_booth")
-      IGNORE
     
-  TYPE barrier_entrance
+  TYPE barrier_entrance IGNORE
     = NODE ("barrier"=="entrance")
-      IGNORE
     
-  TYPE barrier_gate
+  TYPE barrier_gate IGNORE
     = NODE WAY ("barrier"=="gate")
-      IGNORE
     
-  TYPE barrier_lift_gate
+  TYPE barrier_lift_gate IGNORE
     = NODE ("barrier"=="lift_gate")
-      IGNORE
     
-  TYPE barrier_stile
+  TYPE barrier_stile IGNORE
     = NODE ("barrier"=="stile")
-      IGNORE
     
-  TYPE barrier_sally_port
+  TYPE barrier_sally_port IGNORE
     = NODE ("barrier"=="sally_port")
-      IGNORE
     
-  TYPE barrier_kent_carriage_gate
+  TYPE barrier_kent_carriage_gate IGNORE
     = NODE ("barrier"=="kent_carriage_gate")
-      IGNORE
 
   // Types we currently ignore
 
   // This does increase the size of nodes data too much 
-  TYPE building_entrance = NODE ("building"=="entrance" OR EXISTS "entrance") IGNORE  
+  TYPE building_entrance  IGNORE
+    = NODE ("building"=="entrance" OR EXISTS "entrance")  
 
-  TYPE street_any = RELATION ("type"=="street") IGNORE
-  TYPE tunnel_any = RELATION ("type"=="tunnel") IGNORE
-  TYPE bridge_any = RELATION ("type"=="bridge") IGNORE
-  TYPE dual_carriageway_any = RELATION ("type"=="dual_carriageway") IGNORE
-  TYPE waterway_any = RELATION ("type"=="waterway") IGNORE
+  TYPE street_any IGNORE
+    = RELATION ("type"=="street")
+    
+  TYPE tunnel_any IGNORE
+    = RELATION ("type"=="tunnel")
+    
+  TYPE bridge_any IGNORE
+    = RELATION ("type"=="bridge")
+    
+  TYPE dual_carriageway_any IGNORE
+    = RELATION ("type"=="dual_carriageway")
+    
+  TYPE waterway_any IGNORE
+    = RELATION ("type"=="waterway")
 
-  TYPE wayparts_any = RELATION ("type"=="wayparts") IGNORE
-  TYPE associated_street_any = RELATION ("type"=="associatedStreet") IGNORE
-  TYPE enforcement_any = RELATION ("type"=="enforcement") IGNORE
-  TYPE roadAccess_any = RELATION ("type"=="roadAccess") IGNORE
-  TYPE junction_any = RELATION ("type"=="junction") IGNORE
-  TYPE label_any = RELATION ("type"=="label") IGNORE
-  TYPE composite_Attribute_any = RELATION ("type"=="composite_Attribute") IGNORE
-  TYPE segmented_tag_any = RELATION ("type"=="segmented_tag") IGNORE
+  TYPE wayparts_any IGNORE
+    = RELATION ("type"=="wayparts")
+    
+  TYPE associated_street_any IGNORE
+    = RELATION ("type"=="associatedStreet")
+    
+  TYPE enforcement_any IGNORE
+    = RELATION ("type"=="enforcement")
+    
+  TYPE roadAccess_any IGNORE
+    = RELATION ("type"=="roadAccess")
+    
+  TYPE junction_any IGNORE
+    = RELATION ("type"=="junction")
+    
+  TYPE label_any IGNORE
+    = RELATION ("type"=="label")
+    
+  TYPE composite_Attribute_any IGNORE
+    = RELATION ("type"=="composite_Attribute")
+    
+  TYPE segmented_tag_any IGNORE
+    = RELATION ("type"=="segmented_tag")
 
-  TYPE building_any = RELATION ("type"=="building") IGNORE
-  TYPE related_building_any = RELATION ("type"=="relatedBuilding") IGNORE
-  TYPE site_any = RELATION ("type"=="site") IGNORE
-  TYPE station_any = RELATION ("type"=="station") IGNORE
-  TYPE railway_halt_any = RELATION ("type"=="railway_halt") IGNORE
+  TYPE building_any IGNORE
+    = RELATION ("type"=="building")
+    
+  TYPE related_building_any IGNORE
+    = RELATION ("type"=="relatedBuilding")
+    
+  TYPE site_any IGNORE
+    = RELATION ("type"=="site")
+    
+  TYPE station_any IGNORE
+    = RELATION ("type"=="station")
+    
+  TYPE railway_halt_any IGNORE
+    = RELATION ("type"=="railway_halt")
 
-  TYPE line_any = RELATION ("type"=="line") IGNORE
-  TYPE public_transport_any = RELATION ("type"=="public_transport") IGNORE
-  TYPE public_transport_stop_area_group = RELATION ("public_transport"=="stop_area_group") IGNORE
-  TYPE collection_any = RELATION ("type"=="collection") IGNORE
-  TYPE network_any = RELATION ("type"=="network") IGNORE
-  TYPE route_any = RELATION ("type"=="route") IGNORE
-  TYPE routemaster_any = RELATION ("type"=="route_master") IGNORE
-  TYPE superroute_any = RELATION ("type"=="superroute") IGNORE
-  TYPE netzwolf_route_any = RELATION ("type"=="netzwolf-route") IGNORE
-  TYPE netzwolf_routemaster_any = RELATION ("type"=="netzwolf:route_master") IGNORE
+  TYPE line_any IGNORE
+    = RELATION ("type"=="line")
 
-  TYPE address = RELATION ("type"=="address") IGNORE
-  TYPE border = AREA RELATION ("type"=="border") IGNORE
-  TYPE postal_code = AREA RELATION ("type"=="postal_code") IGNORE
-  TYPE organization = AREA RELATION ("type"=="organization") IGNORE
+  TYPE public_transport_any IGNORE
+    = RELATION ("type"=="public_transport")
 
-  TYPE boundary_civil = AREA ("boundary"=="civil")  IGNORE
-  TYPE boundary_national_park = AREA RELATION ("boundary"=="national_park") IGNORE
-  TYPE boundary_maritime = AREA RELATION ("boundary"=="maritime") IGNORE
-  TYPE boundary_political = AREA ("boundary"=="political") IGNORE
-  TYPE boundary_postal_code = AREA RELATION ("boundary"=="postal_code") IGNORE
+  TYPE public_transport_stop_area_group IGNORE
+    = RELATION ("public_transport"=="stop_area_group")
 
-  TYPE place_any = RELATION ("type"=="place") IGNORE
-  TYPE amt_any = RELATION ("type"=="amt") IGNORE
-  TYPE suburb_any = RELATION ("type"=="suburb") IGNORE
-  TYPE city_any = RELATION ("type"=="city") IGNORE
-  TYPE town_any = RELATION ("type"=="town") IGNORE
-  TYPE municipality_any = RELATION ("type"=="municipality") IGNORE
-  TYPE district_any = RELATION ("type"=="district") IGNORE
-  TYPE county_any = RELATION ("type"=="county") IGNORE
-  TYPE state_any = RELATION ("type"=="state") IGNORE
-  TYPE tmc_any = AREA (EXISTS "TMC:cid_58:tabcd_1:Class") OR RELATION ("type"=="tmc" OR "type"=="TMC") IGNORE
-  TYPE lez_any = RELATION ("type"=="LEZ") IGNORE
-  TYPE group_any = RELATION ("type"=="group") IGNORE
-  TYPE set_any = RELATION ("type"=="set") IGNORE
-  TYPE compound_any = RELATION ("type"=="compound") IGNORE
+  TYPE collection_any IGNORE
+    = RELATION ("type"=="collection")
 
-/*
-  // Example for globally passing through additional tags to the tag vector of all objects
+  TYPE network_any IGNORE
+    = RELATION ("type"=="network")
+    
+  TYPE route_any IGNORE
+    = RELATION ("type"=="route")
+    
+  TYPE routemaster_any IGNORE
+    = RELATION ("type"=="route_master")
+    
+  TYPE superroute_any IGNORE
+    = RELATION ("type"=="superroute")
 
-TAGS
-  TAG "bla"
-  */
+  TYPE netzwolf_route_any IGNORE
+    = RELATION ("type"=="netzwolf-route")
+
+  TYPE netzwolf_routemaster_any IGNORE
+    = RELATION ("type"=="netzwolf:route_master")
+
+  TYPE address IGNORE
+    = RELATION ("type"=="address")
+
+  TYPE border IGNORE
+    = AREA RELATION ("type"=="border")
+    
+  TYPE postal_code IGNORE
+    = AREA RELATION ("type"=="postal_code")
+
+  TYPE organization IGNORE
+    = AREA RELATION ("type"=="organization")
+
+  TYPE boundary_civil IGNORE
+    = AREA ("boundary"=="civil")
+
+  TYPE boundary_national_park IGNORE
+    = AREA RELATION ("boundary"=="national_park")
+
+  TYPE boundary_maritime IGNORE
+    = AREA RELATION ("boundary"=="maritime")
+
+  TYPE boundary_political IGNORE
+    = AREA ("boundary"=="political")
+
+  TYPE boundary_postal_code IGNORE
+    = AREA RELATION ("boundary"=="postal_code")
+
+  TYPE place_any IGNORE
+    = RELATION ("type"=="place")
+
+  TYPE amt_any IGNORE
+    = RELATION ("type"=="amt")
+
+  TYPE suburb_any IGNORE
+    = RELATION ("type"=="suburb")
+
+  TYPE city_any IGNORE
+    = RELATION ("type"=="city")
+
+  TYPE town_any IGNORE
+    = RELATION ("type"=="town")
+    
+  TYPE municipality_any IGNORE
+    = RELATION ("type"=="municipality")
+
+  TYPE district_any IGNORE
+    = RELATION ("type"=="district")
+
+  TYPE county_any IGNORE
+    = RELATION ("type"=="county")
+
+  TYPE state_any IGNORE
+    = RELATION ("type"=="state")
+
+  TYPE tmc_any IGNORE
+    = AREA (EXISTS "TMC:cid_58:tabcd_1:Class") OR RELATION ("type"=="tmc" OR "type"=="TMC")
+
+  TYPE lez_any IGNORE
+    = RELATION ("type"=="LEZ")
+
+  TYPE group_any IGNORE
+    = RELATION ("type"=="group")
+
+  TYPE set_any IGNORE
+    = RELATION ("type"=="set")
+
+  TYPE compound_any IGNORE
+    = RELATION ("type"=="compound")
 END

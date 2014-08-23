@@ -84,6 +84,9 @@ PRODUCTIONS
                 .)
                 SYNC "TYPE"
                 IDENT<name>                       (. typeInfo->SetType(name); .)
+                [
+                  "IGNORE"                        (. typeInfo->SetIgnore(true); .)
+                ]
 
                 "="
                 TYPEKINDS<types>
@@ -431,7 +434,6 @@ PRODUCTIONS
                | "ADDRESS"           (. typeInfo.SetIndexAsAddress(true); .)  // TODO: Only valid for NODE and AREA
                | "POI"               (. typeInfo.SetIndexAsPOI(true); .)      // TODO: Only valid for NODE and AREA
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .) // TODO: Only valid for WAY AND AREA
-               | "IGNORE"            (. typeInfo.SetIgnore(true); .)
                | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)    // TODO: Only valid for AREA
                | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)          // TODO: Only valid for WAY
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
