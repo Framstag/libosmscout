@@ -229,7 +229,7 @@ namespace osmscout {
   {
     RawRelation relation;
 
-    statistics[type->GetId()]++;
+    areaStat[type->GetId()]++;
 
     relation.SetId(id);
     relation.SetType(type);
@@ -317,7 +317,9 @@ namespace osmscout {
     waySortingError=false;
     relationSortingError=false;
 
-    statistics.resize(typeConfig->GetMaxTypeId()+1,0);
+    nodeStat.resize(typeConfig->GetMaxTypeId()+1,0);
+    areaStat.resize(typeConfig->GetMaxTypeId()+1,0);
+    wayStat.resize(typeConfig->GetMaxTypeId()+1,0);
 
     nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                     "rawnodes.dat"));
@@ -387,7 +389,7 @@ namespace osmscout {
 
     TypeInfoRef type=typeConfig.GetNodeType(tagMap);
 
-    statistics[type->GetId()]++;
+    nodeStat[type->GetId()]++;
 
     if (type->GetId()!=typeIgnore &&
         !type->GetIgnore()) {
@@ -531,7 +533,12 @@ namespace osmscout {
       }
     }
 
-    statistics[way.GetTypeId()]++;
+    if (way.IsArea()) {
+      areaStat[way.GetTypeId()]++;
+    }
+    else {
+      wayStat[way.GetTypeId()]++;
+    }
 
     way.SetNodes(nodes);
 
@@ -674,16 +681,21 @@ namespace osmscout {
     progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
-    for (size_t i=0; i<statistics.size(); i++) {
+    for (size_t i=0; i<=typeConfig->GetMaxTypeId(); i++) {
       TypeInfoRef type=typeConfig->GetTypeInfo(i);
-      if (statistics[i]==0 &&
-          !type->GetIgnore() &&
-          !type->GetName().empty() &&
-          type->GetName()[0]!='_') {
-        progress.Warning("Type "+type->GetName()+ ": "+NumberToString(statistics[i])+" instances");
+      bool        isEmpty=(type->CanBeNode() && nodeStat[i]==0) ||
+                          (type->CanBeArea() && areaStat[i]==0) ||
+                          (type->CanBeWay() && wayStat[i]==0);
+      bool        isImportant=!type->GetIgnore() &&
+                              !type->GetName().empty() &&
+                              type->GetName()[0]!='_';
+
+      if (isEmpty &&
+          isImportant) {
+        progress.Warning("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
       }
       else {
-        progress.Debug("Type "+type->GetName()+ ": "+NumberToString(statistics[i])+" instance(s)");
+        progress.Debug("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
       }
     }
 
