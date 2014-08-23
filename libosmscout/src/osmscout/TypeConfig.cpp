@@ -61,20 +61,16 @@ namespace osmscout {
   {
     switch (type) {
     case boolAnd:
-      for (std::list<TagConditionRef>::const_iterator condition=conditions.begin();
-           condition!=conditions.end();
-           ++condition) {
-        if (!(*condition)->Evaluate(tagMap)) {
+      for (auto condition : conditions) {
+        if (!condition->Evaluate(tagMap)) {
           return false;
         }
       }
 
       return true;
     case boolOr:
-      for (std::list<TagConditionRef>::const_iterator condition=conditions.begin();
-           condition!=conditions.end();
-           ++condition) {
-        if ((*condition)->Evaluate(tagMap)) {
+      for (auto condition : conditions) {
+        if (condition->Evaluate(tagMap)) {
           return true;
         }
       }
@@ -123,9 +119,7 @@ namespace osmscout {
 
   bool TagBinaryCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
-    std::map<TagId,std::string>::const_iterator t;
-
-    t=tagMap.find(tag);
+    auto t=tagMap.find(tag);
 
     if (t==tagMap.end()) {
       return false;
@@ -198,9 +192,7 @@ namespace osmscout {
 
   bool TagIsInCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
-    std::map<TagId,std::string>::const_iterator t;
-
-    t=tagMap.find(tag);
+    auto t=tagMap.find(tag);
 
     if (t==tagMap.end()) {
       return false;
@@ -314,15 +306,13 @@ namespace osmscout {
     std::string name;
     uint32_t    namePriority=0;
 
-    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
-         tag!=tags.end();
-         ++tag) {
+    for (auto tag : tags) {
       uint32_t ntPrio;
-      bool     isNameTag=typeConfig.IsNameTag(tag->first,ntPrio);
+      bool     isNameTag=typeConfig.IsNameTag(tag.first,ntPrio);
 
       if (isNameTag &&
           (name.empty() || ntPrio>namePriority)) {
-        name=tag->second;
+        name=tag.second;
         namePriority=ntPrio;
       }
     }
@@ -409,15 +399,13 @@ namespace osmscout {
     std::string nameAlt;
     uint32_t    nameAltPriority=0;
 
-    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
-         tag!=tags.end();
-         ++tag) {
+    for (auto tag : tags) {
       uint32_t natPrio;
-      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->first,natPrio);
+      bool     isNameAltTag=typeConfig.IsNameAltTag(tag.first,natPrio);
 
       if (isNameAltTag &&
           (nameAlt.empty() || natPrio>nameAltPriority)) {
-        nameAlt=tag->second;
+        nameAlt=tag.second;
         nameAltPriority=natPrio;
       }
     }
@@ -501,7 +489,7 @@ namespace osmscout {
                          const std::map<TagId,std::string>& tags,
                          FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator ref=tags.find(tagRef);
+    auto ref=tags.find(tagRef);
 
     if (ref!=tags.end() &&
         !ref->second.empty()) {
@@ -584,21 +572,19 @@ namespace osmscout {
                               const std::map<TagId,std::string>& tags,
                               FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator street;
-    std::map<TagId,std::string>::const_iterator houseNr;
+    auto street=tags.find(tagAddrStreet);
 
-    street=tags.find(tagAddrStreet);
-
-    if (street!=tags.end()) {
-      houseNr=tags.find(tagAddrHouseNr);
-    }
-    else {
-      houseNr=tags.end();
+    if (street==tags.end()) {
+      return;
     }
 
-    if (street!=tags.end() &&
-        !street->second.empty() &&
-        houseNr!=tags.end() &&
+    auto houseNr=tags.find(tagAddrHouseNr);
+
+    if (houseNr==tags.end()) {
+      return;
+    }
+
+    if (!street->second.empty() &&
         !houseNr->second.empty()) {
       LocationFeatureValue* value=dynamic_cast<LocationFeatureValue*>(buffer.AllocateValue(idx));
 
@@ -679,21 +665,19 @@ namespace osmscout {
                              const std::map<TagId,std::string>& tags,
                              FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator street;
-    std::map<TagId,std::string>::const_iterator houseNr;
+    auto street=tags.find(tagAddrStreet);
 
-    street=tags.find(tagAddrStreet);
-
-    if (street!=tags.end()) {
-      houseNr=tags.find(tagAddrHouseNr);
-    }
-    else {
-      houseNr=tags.end();
+    if (street==tags.end()) {
+      return;
     }
 
-    if (street!=tags.end() &&
-        !street->second.empty() &&
-        houseNr!=tags.end() &&
+    auto houseNr=tags.find(tagAddrHouseNr);
+
+    if (houseNr==tags.end()) {
+      return;
+    }
+
+    if (!street->second.empty() &&
         !houseNr->second.empty()) {
       AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.AllocateValue(idx));
 
@@ -812,7 +796,7 @@ namespace osmscout {
 
     // Flag access
 
-    std::map<TagId,std::string>::const_iterator accessValue=tags.find(tagAccess);
+    auto accessValue=tags.find(tagAccess);
 
     if (accessValue!=tags.end()) {
       access=0;
@@ -824,8 +808,8 @@ namespace osmscout {
 
     // Flag access:forward/access:backward
 
-    std::map<TagId,std::string>::const_iterator accessForwardValue=tags.find(tagAccessForward);
-    std::map<TagId,std::string>::const_iterator accessBackwardValue=tags.find(tagAccessBackward);
+    auto accessForwardValue=tags.find(tagAccessForward);
+    auto accessBackwardValue=tags.find(tagAccessBackward);
 
     if (accessForwardValue!=tags.end()) {
       access&=~(AccessFeatureValue::footForward|AccessFeatureValue::bicycleForward|AccessFeatureValue::carForward);
@@ -844,10 +828,10 @@ namespace osmscout {
 
     // Flags access:foot, access:bicycle, access:motor_vehicle, access:motorcar
 
-    std::map<TagId,std::string>::const_iterator accessFootValue=tags.find(tagAccessFoot);
-    std::map<TagId,std::string>::const_iterator accessBicycleValue=tags.find(tagAccessBicycle);
-    std::map<TagId,std::string>::const_iterator accessMotorVehicleValue=tags.find(tagAccessMotorVehicle);
-    std::map<TagId,std::string>::const_iterator accessMotorcarValue=tags.find(tagAccessMotorcar);
+    auto accessFootValue=tags.find(tagAccessFoot);
+    auto accessBicycleValue=tags.find(tagAccessBicycle);
+    auto accessMotorVehicleValue=tags.find(tagAccessMotorVehicle);
+    auto accessMotorcarValue=tags.find(tagAccessMotorcar);
 
     if (accessFootValue!=tags.end()) {
       access&=~(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
@@ -897,14 +881,14 @@ namespace osmscout {
     //       access:motor_vehicle::forward/access:motor_vehicle::backward,
     //       access:motorcar::forward/access:motorcar::backward
 
-    std::map<TagId,std::string>::const_iterator accessFootForwardValue=tags.find(tagAccessFootForward);
-    std::map<TagId,std::string>::const_iterator accessFootBackwardValue=tags.find(tagAccessFootBackward);
-    std::map<TagId,std::string>::const_iterator accessBicycleForwardValue=tags.find(tagAccessBicycleForward);
-    std::map<TagId,std::string>::const_iterator accessBicycleBackwardValue=tags.find(tagAccessBicycleBackward);
-    std::map<TagId,std::string>::const_iterator accessMotorVehicleForwardValue=tags.find(tagAccessMotorVehicleForward);
-    std::map<TagId,std::string>::const_iterator accessMotorVehicleBackwardValue=tags.find(tagAccessMotorVehicleBackward);
-    std::map<TagId,std::string>::const_iterator accessMotorcarForwardValue=tags.find(tagAccessMotorcarForward);
-    std::map<TagId,std::string>::const_iterator accessMotorcarBackwardValue=tags.find(tagAccessMotorcarBackward);
+    auto accessFootForwardValue=tags.find(tagAccessFootForward);
+    auto accessFootBackwardValue=tags.find(tagAccessFootBackward);
+    auto accessBicycleForwardValue=tags.find(tagAccessBicycleForward);
+    auto accessBicycleBackwardValue=tags.find(tagAccessBicycleBackward);
+    auto accessMotorVehicleForwardValue=tags.find(tagAccessMotorVehicleForward);
+    auto accessMotorVehicleBackwardValue=tags.find(tagAccessMotorVehicleBackward);
+    auto accessMotorcarForwardValue=tags.find(tagAccessMotorcarForward);
+    auto accessMotorcarBackwardValue=tags.find(tagAccessMotorcarBackward);
 
     if (accessFootForwardValue!=tags.end()) {
       ParseAccessFlag(accessFootForwardValue->second,
@@ -954,8 +938,8 @@ namespace osmscout {
                       AccessFeatureValue::carBackward);
     }
 
-    std::map<TagId,std::string>::const_iterator onewayValue=tags.find(tagOneway);
-    std::map<TagId,std::string>::const_iterator junctionValue=tags.find(tagJunction);
+    auto onewayValue=tags.find(tagOneway);
+    auto junctionValue=tags.find(tagJunction);
 
     if (onewayValue!=tags.end()) {
       if (onewayValue->second=="-1") {
@@ -1052,7 +1036,7 @@ namespace osmscout {
                            const std::map<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator layer=tags.find(tagLayer);
+    auto layer=tags.find(tagLayer);
 
     if (layer!=tags.end()) {
       int8_t layerValue;
@@ -1142,7 +1126,7 @@ namespace osmscout {
                            const std::map<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator width=tags.find(tagWidth);
+    auto width=tags.find(tagWidth);
 
     if (width==tags.end()) {
       return;
@@ -1268,7 +1252,7 @@ namespace osmscout {
                               const std::map<TagId,std::string>& tags,
                               FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator maxSpeed=tags.find(tagMaxSpeed);
+    auto maxSpeed=tags.find(tagMaxSpeed);
 
     if (maxSpeed==tags.end()) {
       return;
@@ -1407,7 +1391,7 @@ namespace osmscout {
                            const std::map<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator tracktype=tags.find(tagTrackType);
+    auto tracktype=tags.find(tagTrackType);
 
     if (tracktype!=tags.end()) {
       if (tracktype->second=="grade1") {
@@ -1450,7 +1434,7 @@ namespace osmscout {
       }
     }
 
-    std::map<TagId,std::string>::const_iterator surface=tags.find(tagSurface);
+    auto surface=tags.find(tagSurface);
 
     if (surface!=tags.end()) {
       size_t grade;
@@ -1539,7 +1523,7 @@ namespace osmscout {
                                   const std::map<TagId,std::string>& tags,
                                   FeatureValueBuffer& buffer) const
     {
-      std::map<TagId,std::string>::const_iterator adminLevel=tags.find(tagAdminLevel);
+      auto adminLevel=tags.find(tagAdminLevel);
 
       if (adminLevel!=tags.end()) {
         uint8_t adminLevelValue;
@@ -1610,7 +1594,7 @@ namespace osmscout {
                             const std::map<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator bridge=tags.find(tagBridge);
+    auto bridge=tags.find(tagBridge);
 
     if (bridge!=tags.end() &&
         !(bridge->second=="no" ||
@@ -1662,7 +1646,7 @@ namespace osmscout {
                             const std::map<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator tunnel=tags.find(tagTunnel);
+    auto tunnel=tags.find(tagTunnel);
 
     if (tunnel!=tags.end() &&
         !(tunnel->second=="no" ||
@@ -1714,7 +1698,7 @@ namespace osmscout {
                                 const std::map<TagId,std::string>& tags,
                                 FeatureValueBuffer& buffer) const
   {
-    std::map<TagId,std::string>::const_iterator junction=tags.find(tagJunction);
+    auto junction=tags.find(tagJunction);
 
     if (junction!=tags.end() &&
         junction->second=="roundabout") {
@@ -2165,8 +2149,7 @@ namespace osmscout {
     featureName=new NameFeature();
     RegisterFeature(featureName);
 
-    featureNameAlt=new NameAltFeature();
-    RegisterFeature(featureNameAlt);
+    RegisterFeature(new NameAltFeature());
 
     featureRef=new RefFeature();
     RegisterFeature(featureRef);
@@ -2192,8 +2175,7 @@ namespace osmscout {
     featureGrade=new GradeFeature();
     RegisterFeature(featureGrade);
 
-    featureAdminLevel=new AdminLevelFeature();
-    RegisterFeature(featureAdminLevel);
+    RegisterFeature(new AdminLevelFeature());
 
     featureBridge=new BridgeFeature();
     RegisterFeature(featureBridge);
@@ -2289,7 +2271,7 @@ namespace osmscout {
 
   TagId TypeConfig::RegisterTag(const std::string& tagName)
   {
-    OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
+    auto mapping=stringToTagMap.find(tagName);
 
     if (mapping!=stringToTagMap.end()) {
       return mapping->second;
@@ -2349,7 +2331,7 @@ namespace osmscout {
 
   FeatureRef TypeConfig::GetFeature(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,FeatureRef>::const_iterator feature=nameToFeatureMap.find(name);
+    auto feature=nameToFeatureMap.find(name);
 
     if (feature!=nameToFeatureMap.end()) {
       return feature->second;
@@ -2455,7 +2437,7 @@ namespace osmscout {
 
   TagId TypeConfig::GetTagId(const char* name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator iter=stringToTagMap.find(name);
+    auto iter=stringToTagMap.find(name);
 
     if (iter!=stringToTagMap.end()) {
       return iter->second;
@@ -2492,7 +2474,7 @@ namespace osmscout {
       return false;
     }
 
-    OSMSCOUT_HASHMAP<TagId,uint32_t>::const_iterator entry=nameTagIdToPrioMap.find(tag);
+    auto entry=nameTagIdToPrioMap.find(tag);
 
     if (entry==nameTagIdToPrioMap.end()) {
       return false;
@@ -2509,7 +2491,7 @@ namespace osmscout {
       return false;
     }
 
-    OSMSCOUT_HASHMAP<TagId,uint32_t>::const_iterator entry=nameAltTagIdToPrioMap.find(tag);
+    auto entry=nameAltTagIdToPrioMap.find(tag);
 
     if (entry==nameAltTagIdToPrioMap.end()) {
       return false;
@@ -2598,7 +2580,7 @@ namespace osmscout {
       return typeInfoIgnore;
     }
 
-    std::map<TagId,std::string>::const_iterator relationType=tagMap.find(tagType);
+    auto relationType=tagMap.find(tagType);
 
     if (relationType!=tagMap.end() &&
         relationType->second=="multipolygon") {
@@ -2643,10 +2625,10 @@ namespace osmscout {
 
   TypeId TypeConfig::GetTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
+    auto typeEntry=nameToTypeMap.find(name);
 
-    if (iter!=nameToTypeMap.end()) {
-      return iter->second->GetId();
+    if (typeEntry!=nameToTypeMap.end()) {
+      return typeEntry->second->GetId();
     }
 
     return typeIgnore;
@@ -2654,11 +2636,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
+    auto typeEntry=nameToTypeMap.find(name);
 
-    if (iter!=nameToTypeMap.end() &&
-        iter->second->CanBeNode()) {
-      return iter->second->GetId();
+    if (typeEntry!=nameToTypeMap.end() &&
+        typeEntry->second->CanBeNode()) {
+      return typeEntry->second->GetId();
     }
 
     return typeIgnore;
@@ -2666,11 +2648,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetWayTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
+    auto typeEntry=nameToTypeMap.find(name);
 
-    if (iter!=nameToTypeMap.end() &&
-        iter->second->CanBeWay()) {
-      return iter->second->GetId();
+    if (typeEntry!=nameToTypeMap.end() &&
+        typeEntry->second->CanBeWay()) {
+      return typeEntry->second->GetId();
     }
 
     return typeIgnore;
@@ -2678,11 +2660,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetAreaTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
+    auto typeEntry=nameToTypeMap.find(name);
 
-    if (iter!=nameToTypeMap.end() &&
-        iter->second->CanBeArea()) {
-      return iter->second->GetId();
+    if (typeEntry!=nameToTypeMap.end() &&
+        typeEntry->second->CanBeArea()) {
+      return typeEntry->second->GetId();
     }
 
     return typeIgnore;
@@ -2690,11 +2672,11 @@ namespace osmscout {
 
   TypeId TypeConfig::GetRelationTypeId(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,TypeInfoRef>::const_iterator iter=nameToTypeMap.find(name);
+    auto typeEntry=nameToTypeMap.find(name);
 
-    if (iter!=nameToTypeMap.end() &&
-        iter->second->CanBeRelation()) {
-      return iter->second->GetId();
+    if (typeEntry!=nameToTypeMap.end() &&
+        typeEntry->second->CanBeRelation()) {
+      return typeEntry->second->GetId();
     }
 
     return typeIgnore;
@@ -2790,7 +2772,7 @@ namespace osmscout {
   bool TypeConfig::GetGradeForSurface(const std::string& surface,
                                       size_t& grade) const
   {
-    OSMSCOUT_HASHMAP<std::string,size_t>::const_iterator entry=surfaceToGradeMap.find(surface);
+    auto entry=surfaceToGradeMap.find(surface);
 
     if (entry!=surfaceToGradeMap.end()) {
       grade=entry->second;

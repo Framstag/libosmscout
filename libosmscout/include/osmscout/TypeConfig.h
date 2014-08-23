@@ -1858,12 +1858,6 @@ namespace osmscout {
 
     OSMSCOUT_HASHMAP<std::string,FeatureRef>  nameToFeatureMap;
 
-  public:
-    TypeInfoRef                               typeInfoIgnore;
-
-    FeatureRef                                featureName;
-    FeatureRef                                featureNameAlt;
-    FeatureRef                                featureRef;
     FeatureRef                                featureLocation;
     FeatureRef                                featureAddress;
     FeatureRef                                featureAccess;
@@ -1871,10 +1865,15 @@ namespace osmscout {
     FeatureRef                                featureWidth;
     FeatureRef                                featureMaxSpeed;
     FeatureRef                                featureGrade;
-    FeatureRef                                featureAdminLevel;
     FeatureRef                                featureBridge;
     FeatureRef                                featureTunnel;
     FeatureRef                                featureRoundabout;
+
+  public:
+    TypeInfoRef                               typeInfoIgnore;
+
+    FeatureRef                                featureName;
+    FeatureRef                                featureRef;
 
     TypeId                                    typeTileLand;
     TypeId                                    typeTileSea;

@@ -117,44 +117,41 @@ namespace osmscout {
                                      const std::map<TagId,std::string>& tags,
                                      TurnRestriction::Type& type) const
   {
-    bool isRestriction=false;
-    bool isTurnRestriction=false;
+    auto typeValue=tags.find(typeConfig.tagType);
+
+    if (typeValue==tags.end()) {
+      return false;
+    }
+
+    if (typeValue->second!="restriction") {
+      return false;
+    }
+
+    auto restrictionValue=tags.find(typeConfig.tagRestriction);
+
+    if (restrictionValue==tags.end()) {
+      return false;
+    }
 
     type=TurnRestriction::Allow;
 
-    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
-        tag!=tags.end();
-        tag++) {
-      if (tag->first==typeConfig.tagType) {
-        if (tag->second=="restriction") {
-          isRestriction=true;
-        }
-      }
-      else if (tag->first==typeConfig.tagRestriction) {
-        if (tag->second=="only_left_turn" ||
-            tag->second=="only_right_turn" ||
-            tag->second=="only_straight_on") {
-          isTurnRestriction=true;
-          type=TurnRestriction::Allow;
-        }
-        else if (tag->second=="no_left_turn" ||
-                 tag->second=="no_right_turn" ||
-                 tag->second=="no_straight_on" ||
-                 tag->second=="no_u_turn") {
-          isTurnRestriction=true;
-          type=TurnRestriction::Forbit;
-        }
-      }
+    if (restrictionValue->second=="only_left_turn" ||
+        restrictionValue->second=="only_right_turn" ||
+        restrictionValue->second=="only_straight_on") {
+      type=TurnRestriction::Allow;
 
-      // finished collection data
-      if (isRestriction &&
-          isTurnRestriction) {
-        break;
-      }
+      return true;
+    }
+    else if (restrictionValue->second=="no_left_turn" ||
+             restrictionValue->second=="no_right_turn" ||
+             restrictionValue->second=="no_straight_on" ||
+             restrictionValue->second=="no_u_turn") {
+      type=TurnRestriction::Forbit;
+
+      return true;
     }
 
-    return isRestriction &&
-           isTurnRestriction;
+    return false;
   }
 
   void Preprocess::ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
@@ -216,7 +213,7 @@ namespace osmscout {
                 type->GetMultipolygon();
 
     if (!isArea) {
-      std::map<TagId,std::string>::const_iterator typeTag=tags.find(typeConfig.tagType);
+      auto typeTag=tags.find(typeConfig.tagType);
 
       isArea=typeTag!=tags.end() && typeTag->second=="multipolygon";
     }
@@ -409,14 +406,12 @@ namespace osmscout {
                               std::vector<OSMId>& nodes,
                               const std::map<TagId,std::string>& tagMap)
   {
-    TypeInfoRef                                 areaType;
-    TypeInfoRef                                 wayType;
-    int                                         isArea=0; // 0==unknown, 1==true, -1==false
-    bool                                        isCoastlineArea=false;
-    std::map<TagId,std::string>::const_iterator areaTag;
-    std::map<TagId,std::string>::const_iterator naturalTag;
-    RawWay                                      way;
-    bool                                        isCoastline=false;
+    TypeInfoRef areaType;
+    TypeInfoRef wayType;
+    int         isArea=0; // 0==unknown, 1==true, -1==false
+    bool        isCoastlineArea=false;
+    RawWay      way;
+    bool        isCoastline=false;
 
     if (nodes.size()<2) {
       progress->Warning("Way "+
@@ -431,7 +426,7 @@ namespace osmscout {
 
     way.SetId(id);
 
-    areaTag=tagMap.find(typeConfig.tagArea);
+    auto areaTag=tagMap.find(typeConfig.tagArea);
 
     if (areaTag==tagMap.end()) {
       isArea=0;
@@ -445,7 +440,7 @@ namespace osmscout {
       isArea=1;
     }
 
-    naturalTag=tagMap.find(typeConfig.tagNatural);
+    auto naturalTag=tagMap.find(typeConfig.tagNatural);
 
     if (naturalTag!=tagMap.end() &&
         naturalTag->second=="coastline") {
