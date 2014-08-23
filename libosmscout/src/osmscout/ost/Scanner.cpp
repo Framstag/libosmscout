@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 49;
-	noSym = 49;
+	maxT = 47;
+	noSym = 47;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -176,28 +176,26 @@ void Scanner::Init() {
 	keywords.set("TYPES", 11);
 	keywords.set("TYPE", 12);
 	keywords.set("OR", 16);
-	keywords.set("TAGS", 18);
-	keywords.set("TAG", 19);
-	keywords.set("AND", 20);
-	keywords.set("IN", 28);
-	keywords.set("EXISTS", 31);
-	keywords.set("NODE", 32);
-	keywords.set("WAY", 33);
-	keywords.set("AREA", 34);
-	keywords.set("RELATION", 35);
-	keywords.set("LOCATION", 36);
-	keywords.set("ADMIN_REGION", 37);
-	keywords.set("ADDRESS", 38);
-	keywords.set("POI", 39);
-	keywords.set("OPTIMIZE_LOW_ZOOM", 40);
-	keywords.set("IGNORE", 41);
-	keywords.set("MULTIPOLYGON", 42);
-	keywords.set("PIN_WAY", 43);
-	keywords.set("IGNORESEALAND", 44);
-	keywords.set("PATH", 45);
-	keywords.set("FOOT", 46);
-	keywords.set("BICYCLE", 47);
-	keywords.set("CAR", 48);
+	keywords.set("AND", 18);
+	keywords.set("IN", 26);
+	keywords.set("EXISTS", 29);
+	keywords.set("NODE", 30);
+	keywords.set("WAY", 31);
+	keywords.set("AREA", 32);
+	keywords.set("RELATION", 33);
+	keywords.set("LOCATION", 34);
+	keywords.set("ADMIN_REGION", 35);
+	keywords.set("ADDRESS", 36);
+	keywords.set("POI", 37);
+	keywords.set("OPTIMIZE_LOW_ZOOM", 38);
+	keywords.set("IGNORE", 39);
+	keywords.set("MULTIPOLYGON", 40);
+	keywords.set("PIN_WAY", 41);
+	keywords.set("IGNORESEALAND", 42);
+	keywords.set("PATH", 43);
+	keywords.set("FOOT", 44);
+	keywords.set("BICYCLE", 45);
+	keywords.set("CAR", 46);
 
 
   tvalLength = 128;
@@ -387,36 +385,36 @@ Token* Scanner::NextToken() {
 			{t->kind = 17; break;}
 		case 12:
 			case_12:
-			{t->kind = 23; break;}
+			{t->kind = 21; break;}
 		case 13:
 			case_13:
-			{t->kind = 24; break;}
+			{t->kind = 22; break;}
 		case 14:
 			case_14:
-			{t->kind = 25; break;}
+			{t->kind = 23; break;}
 		case 15:
 			case_15:
-			{t->kind = 26; break;}
+			{t->kind = 24; break;}
 		case 16:
-			{t->kind = 29; break;}
+			{t->kind = 27; break;}
 		case 17:
-			{t->kind = 30; break;}
+			{t->kind = 28; break;}
 		case 18:
 			recEnd = pos; recKind = 13;
 			if (ch == '=') {AddCh(); goto case_13;}
 			else {t->kind = 13; break;}
 		case 19:
-			recEnd = pos; recKind = 21;
+			recEnd = pos; recKind = 19;
 			if (ch == '=') {AddCh(); goto case_14;}
-			else {t->kind = 21; break;}
+			else {t->kind = 19; break;}
 		case 20:
-			recEnd = pos; recKind = 22;
+			recEnd = pos; recKind = 20;
 			if (ch == '=') {AddCh(); goto case_12;}
-			else {t->kind = 22; break;}
+			else {t->kind = 20; break;}
 		case 21:
-			recEnd = pos; recKind = 27;
+			recEnd = pos; recKind = 25;
 			if (ch == '=') {AddCh(); goto case_15;}
-			else {t->kind = 27; break;}
+			else {t->kind = 25; break;}
 
   }
   AppendVal(t);

@@ -119,7 +119,6 @@ std::string Destring(const char* str)
 	void OST();
 	void GRADES();
 	void TYPES();
-	void TAGS();
 	void GRADE();
 	void UINT(size_t& value);
 	void STRING(std::string& value);
@@ -129,7 +128,6 @@ std::string Destring(const char* str)
 	void TAGCONDITION(TagCondition*& condition);
 	void FEATURE(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
-	void TAG();
 	void TAGANDCOND(TagCondition*& condition);
 	void TAGBOOLCOND(TagCondition*& condition);
 	void TAGBINCOND(TagCondition*& condition);

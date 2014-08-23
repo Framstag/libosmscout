@@ -38,7 +38,6 @@ PRODUCTIONS
   OST         = SYNC "OST"
                 [GRADES]
                 [TYPES]
-                [TAGS]
                 "END"
                 .
 
@@ -114,23 +113,6 @@ PRODUCTIONS
 
                 (.
                   config.RegisterType(typeInfo);
-                .)
-                .
-
-  TAGS        = SYNC "TAGS" TAG {TAG}.
-  TAG         = SYNC "TAG"
-                string
-                (.
-                   std::string tagName=Destring(t->val);
-
-                   if (tagName.empty()) {
-                     std::string e="Empty tags are not allowed";
-
-                     SemErr(e.c_str());
-                   }
-                   else {
-                     config.RegisterTagForExternalUse(tagName);
-                   }
                 .)
                 .
 
