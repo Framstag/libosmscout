@@ -73,7 +73,7 @@ namespace osmscout {
   public:
     virtual ~TagCondition();
 
-    virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) const = 0;
+    virtual bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const = 0;
   };
 
   /**
@@ -96,7 +96,7 @@ namespace osmscout {
   public:
     TagNotCondition(TagCondition* condition);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -122,7 +122,7 @@ namespace osmscout {
 
     void AddCondition(TagCondition* condition);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -138,7 +138,7 @@ namespace osmscout {
   public:
     TagExistsCondition(TagId tag);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -170,7 +170,7 @@ namespace osmscout {
                        BinaryOperator binaryOperator,
                        const size_t& tagValue);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -190,7 +190,7 @@ namespace osmscout {
 
     void AddTagValue(const std::string& tagValue);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -308,7 +308,7 @@ namespace osmscout {
                        const ObjectOSMRef& object,
                        const TypeInfo& type,
                        size_t idx,
-                       const std::map<TagId,std::string>& tags,
+                       const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                        FeatureValueBuffer& buffer) const = 0;
 
     virtual bool Read(FileScanner& scanner,
@@ -407,7 +407,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -476,7 +476,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -548,7 +548,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -611,7 +611,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -674,7 +674,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -905,7 +905,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -968,7 +968,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1031,7 +1031,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1094,7 +1094,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1158,7 +1158,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1221,7 +1221,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1252,7 +1252,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1283,7 +1283,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1314,7 +1314,7 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TypeInfo& type,
                size_t idx,
-               const std::map<TagId,std::string>& tags,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
 
     bool Read(FileScanner& scanner,
@@ -1823,7 +1823,7 @@ namespace osmscout {
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
-               const std::map<TagId,std::string>& tags);
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
@@ -1932,12 +1932,12 @@ namespace osmscout {
 
     const TypeInfoRef& GetTypeInfo(TypeId id) const;
 
-    TypeInfoRef GetNodeType(const std::map<TagId,std::string>& tagMap) const;
+    TypeInfoRef GetNodeType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
 
-    bool GetWayAreaType(const std::map<TagId,std::string>& tagMap,
+    bool GetWayAreaType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap,
                         TypeInfoRef& wayType,
                         TypeInfoRef& areaType) const;
-    TypeInfoRef GetRelationType(const std::map<TagId,std::string>& tagMap) const;
+    TypeInfoRef GetRelationType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
 
     TypeId GetTypeId(const std::string& name) const;
     TypeId GetNodeTypeId(const std::string& name) const;

@@ -114,7 +114,7 @@ namespace osmscout {
   }
 
   bool Preprocess::IsTurnRestriction(const TypeConfig& typeConfig,
-                                     const std::map<TagId,std::string>& tags,
+                                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                      TurnRestriction::Type& type) const
   {
     auto typeValue=tags.find(typeConfig.tagType);
@@ -199,7 +199,7 @@ namespace osmscout {
   }
 
   bool Preprocess::IsMultipolygon(const TypeConfig& typeConfig,
-                                  const std::map<TagId,std::string>& tags,
+                                  const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                   TypeInfoRef& type)
   {
     type=typeConfig.GetRelationType(tags);
@@ -222,7 +222,7 @@ namespace osmscout {
   }
 
   void Preprocess::ProcessMultipolygon(const TypeConfig& typeConfig,
-                                       const std::map<TagId,std::string>& tags,
+                                       const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                        const std::vector<RawRelation::Member>& members,
                                        OSMId id,
                                        const TypeInfoRef& type)
@@ -367,7 +367,7 @@ namespace osmscout {
                                const OSMId& id,
                                const double& lon,
                                const double& lat,
-                               const std::map<TagId,std::string>& tagMap)
+                               const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap)
   {
     RawNode      node;
     ObjectOSMRef object(id,
@@ -413,7 +413,7 @@ namespace osmscout {
   void Preprocess::ProcessWay(const TypeConfig& typeConfig,
                               const OSMId& id,
                               std::vector<OSMId>& nodes,
-                              const std::map<TagId,std::string>& tagMap)
+                              const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap)
   {
     TypeInfoRef areaType;
     TypeInfoRef wayType;
@@ -567,7 +567,7 @@ namespace osmscout {
   void Preprocess::ProcessRelation(const TypeConfig& typeConfig,
                                    const OSMId& id,
                                    const std::vector<RawRelation::Member>& members,
-                                   const std::map<TagId,std::string>& tagMap)
+                                   const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap)
   {
     if (id<lastRelationId) {
       relationSortingError=true;

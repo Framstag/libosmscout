@@ -103,7 +103,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
-               const std::map<TagId,std::string>& tags);
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     bool Write(const TypeConfig& typeConfig,

@@ -81,18 +81,18 @@ namespace osmscout {
                     const GeoCoord& coord);
 
     bool IsTurnRestriction(const TypeConfig& typeConfig,
-                           const std::map<TagId,std::string>& tags,
+                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            TurnRestriction::Type& type) const;
 
     void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
                                 TurnRestriction::Type type);
 
     bool IsMultipolygon(const TypeConfig& typeConfig,
-                        const std::map<TagId,std::string>& tags,
+                        const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                         TypeInfoRef& type);
 
     void ProcessMultipolygon(const TypeConfig& typeConfig,
-                             const std::map<TagId,std::string>& tags,
+                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                              const std::vector<RawRelation::Member>& members,
                              OSMId id,
                              const TypeInfoRef& type);
@@ -110,15 +110,15 @@ namespace osmscout {
     void ProcessNode(const TypeConfig& typeConfig,
                      const OSMId& id,
                      const double& lon, const double& lat,
-                     const std::map<TagId,std::string>& tags);
+                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
     void ProcessWay(const TypeConfig& typeConfig,
                     const OSMId& id,
                     std::vector<OSMId>& nodes,
-                    const std::map<TagId,std::string>& tags);
+                    const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
     void ProcessRelation(const TypeConfig& typeConfig,
                          const OSMId& id,
                          const std::vector<RawRelation::Member>& members,
-                         const std::map<TagId,std::string>& tags);
+                         const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
 
     bool Cleanup(const TypeConfigRef& typeConfig,
                  const ImportParameter& parameter,

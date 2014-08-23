@@ -48,14 +48,14 @@ namespace osmscout {
     };
 
   private:
-    Context                          context;
-    PreprocessOSM&                   pp;
-    const TypeConfig&                typeConfig;
-    OSMId                            id;
-    double                           lon,lat;
-    std::map<TagId,std::string>      tags;
-    std::vector<OSMId>               nodes;
-    std::vector<RawRelation::Member> members;
+    Context                             context;
+    PreprocessOSM&                      pp;
+    const TypeConfig&                   typeConfig;
+    OSMId                               id;
+    double                              lon,lat;
+    OSMSCOUT_HASHMAP<TagId,std::string> tags;
+    std::vector<OSMId>                  nodes;
+    std::vector<RawRelation::Member>    members;
 
   public:
     Parser(PreprocessOSM& pp,

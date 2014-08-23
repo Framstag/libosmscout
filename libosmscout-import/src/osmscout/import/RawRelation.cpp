@@ -35,7 +35,7 @@ namespace osmscout {
 
   void RawRelation::Parse(Progress& progress,
                           const TypeConfig& typeConfig,
-                          const std::map<TagId,std::string>& tags)
+                          const OSMSCOUT_HASHMAP<TagId,std::string>& tags)
   {
     ObjectOSMRef object(id,
                         osmRefRelation);

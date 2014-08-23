@@ -41,7 +41,7 @@ namespace osmscout {
     // no code
   }
 
-  bool TagNotCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagNotCondition::Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     return !condition->Evaluate(tagMap);
   }
@@ -57,7 +57,7 @@ namespace osmscout {
     conditions.push_back(condition);
   }
 
-  bool TagBoolCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagBoolCondition::Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     switch (type) {
     case boolAnd:
@@ -89,7 +89,7 @@ namespace osmscout {
     // no code
   }
 
-  bool TagExistsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagExistsCondition::Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     return tagMap.find(tag)!=tagMap.end();
   }
@@ -117,7 +117,7 @@ namespace osmscout {
     // no code
   }
 
-  bool TagBinaryCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagBinaryCondition::Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     auto t=tagMap.find(tag);
 
@@ -190,7 +190,7 @@ namespace osmscout {
     tagValues.insert(tagValue);
   }
 
-  bool TagIsInCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagIsInCondition::Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     auto t=tagMap.find(tag);
 
@@ -300,7 +300,7 @@ namespace osmscout {
                           const ObjectOSMRef& /*object*/,
                           const TypeInfo& /*type*/,
                           size_t idx,
-                          const std::map<TagId,std::string>& tags,
+                          const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                           FeatureValueBuffer& buffer) const
   {
     std::string name;
@@ -393,7 +393,7 @@ namespace osmscout {
                              const ObjectOSMRef& /*object*/,
                              const TypeInfo& /*type*/,
                              size_t idx,
-                             const std::map<TagId,std::string>& tags,
+                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                              FeatureValueBuffer& buffer) const
   {
     std::string nameAlt;
@@ -486,7 +486,7 @@ namespace osmscout {
                          const ObjectOSMRef& /*object*/,
                          const TypeInfo& /*type*/,
                          size_t idx,
-                         const std::map<TagId,std::string>& tags,
+                         const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                          FeatureValueBuffer& buffer) const
   {
     auto ref=tags.find(tagRef);
@@ -569,7 +569,7 @@ namespace osmscout {
                               const ObjectOSMRef& /*object*/,
                               const TypeInfo& /*type*/,
                               size_t idx,
-                              const std::map<TagId,std::string>& tags,
+                              const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                               FeatureValueBuffer& buffer) const
   {
     auto street=tags.find(tagAddrStreet);
@@ -662,7 +662,7 @@ namespace osmscout {
                              const ObjectOSMRef& /*object*/,
                              const TypeInfo& /*type*/,
                              size_t idx,
-                             const std::map<TagId,std::string>& tags,
+                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                              FeatureValueBuffer& buffer) const
   {
     auto street=tags.find(tagAddrStreet);
@@ -775,7 +775,7 @@ namespace osmscout {
                             const ObjectOSMRef& /*object*/,
                             const TypeInfo& type,
                             size_t idx,
-                            const std::map<TagId,std::string>& tags,
+                            const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
     uint8_t access=0;
@@ -1033,7 +1033,7 @@ namespace osmscout {
                            const ObjectOSMRef& object,
                            const TypeInfo& /*type*/,
                            size_t idx,
-                           const std::map<TagId,std::string>& tags,
+                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
     auto layer=tags.find(tagLayer);
@@ -1123,7 +1123,7 @@ namespace osmscout {
                            const ObjectOSMRef& object,
                            const TypeInfo& /*type*/,
                            size_t idx,
-                           const std::map<TagId,std::string>& tags,
+                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
     auto width=tags.find(tagWidth);
@@ -1249,7 +1249,7 @@ namespace osmscout {
                               const ObjectOSMRef& object,
                               const TypeInfo& /*type*/,
                               size_t idx,
-                              const std::map<TagId,std::string>& tags,
+                              const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                               FeatureValueBuffer& buffer) const
   {
     auto maxSpeed=tags.find(tagMaxSpeed);
@@ -1388,7 +1388,7 @@ namespace osmscout {
                            const ObjectOSMRef& object,
                            const TypeInfo& /*type*/,
                            size_t idx,
-                           const std::map<TagId,std::string>& tags,
+                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
     auto tracktype=tags.find(tagTrackType);
@@ -1520,7 +1520,7 @@ namespace osmscout {
                                   const ObjectOSMRef& object,
                                   const TypeInfo& /*type*/,
                                   size_t idx,
-                                  const std::map<TagId,std::string>& tags,
+                                  const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                   FeatureValueBuffer& buffer) const
     {
       auto adminLevel=tags.find(tagAdminLevel);
@@ -1591,7 +1591,7 @@ namespace osmscout {
                             const ObjectOSMRef& /*object*/,
                             const TypeInfo& /*type*/,
                             size_t idx,
-                            const std::map<TagId,std::string>& tags,
+                            const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
     auto bridge=tags.find(tagBridge);
@@ -1643,7 +1643,7 @@ namespace osmscout {
                             const ObjectOSMRef& /*object*/,
                             const TypeInfo& /*type*/,
                             size_t idx,
-                            const std::map<TagId,std::string>& tags,
+                            const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
     auto tunnel=tags.find(tagTunnel);
@@ -1695,7 +1695,7 @@ namespace osmscout {
                                 const ObjectOSMRef& /*object*/,
                                 const TypeInfo& /*type*/,
                                 size_t idx,
-                                const std::map<TagId,std::string>& tags,
+                                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                 FeatureValueBuffer& buffer) const
   {
     auto junction=tags.find(tagJunction);
@@ -1869,7 +1869,7 @@ namespace osmscout {
   void FeatureValueBuffer::Parse(Progress& progress,
                                  const TypeConfig& typeConfig,
                                  const ObjectOSMRef& object,
-                                 const std::map<TagId,std::string>& tags)
+                                 const OSMSCOUT_HASHMAP<TagId,std::string>& tags)
   {
     assert(type.Valid());
 
@@ -2502,7 +2502,7 @@ namespace osmscout {
     return true;
   }
 
-  TypeInfoRef TypeConfig::GetNodeType(const std::map<TagId,std::string>& tagMap) const
+  TypeInfoRef TypeConfig::GetNodeType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     if (tagMap.empty()) {
       return typeInfoIgnore;
@@ -2528,7 +2528,7 @@ namespace osmscout {
     return typeInfoIgnore;
   }
 
-  bool TypeConfig::GetWayAreaType(const std::map<TagId,std::string>& tagMap,
+  bool TypeConfig::GetWayAreaType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap,
                                   TypeInfoRef& wayType,
                                   TypeInfoRef& areaType) const
   {
@@ -2574,7 +2574,7 @@ namespace osmscout {
     return false;
   }
 
-  TypeInfoRef TypeConfig::GetRelationType(const std::map<TagId,std::string>& tagMap) const
+  TypeInfoRef TypeConfig::GetRelationType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const
   {
     if (tagMap.empty()) {
       return typeInfoIgnore;

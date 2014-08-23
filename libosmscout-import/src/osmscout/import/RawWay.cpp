@@ -60,7 +60,7 @@ namespace osmscout {
 
   void RawWay::Parse(Progress& progress,
                      const TypeConfig& typeConfig,
-                     const std::map<TagId,std::string>& tags)
+                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags)
   {
     ObjectOSMRef object(id,
                         osmRefWay);
