@@ -101,9 +101,8 @@ namespace osmscout {
       nodesReadCount++;
 
       if (!rawNode.GetType()->GetIgnore()) {
-        node.SetType(rawNode.GetType());
-        node.SetCoords(rawNode.GetCoords());
         node.SetFeatures(rawNode.GetFeatureValueBuffer());
+        node.SetCoords(rawNode.GetCoords());
 
         FileOffset fileOffset;
 
