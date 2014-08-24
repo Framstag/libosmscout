@@ -1060,15 +1060,10 @@ namespace osmscout {
     FileWriter          writer;
     uint32_t            rawRelationCount=0;
     uint32_t            writtenRelationCount=0;
-    std::vector<size_t> wayTypeCount;
-    std::vector<size_t> wayNodeTypeCount;
-    std::vector<size_t> areaTypeCount;
-    std::vector<size_t> areaNodeTypeCount;
-
-    wayTypeCount.resize(typeConfig->GetMaxTypeId()+1,0);
-    wayNodeTypeCount.resize(typeConfig->GetMaxTypeId()+1,0);
-    areaTypeCount.resize(typeConfig->GetMaxTypeId()+1,0);
-    areaNodeTypeCount.resize(typeConfig->GetMaxTypeId()+1,0);
+    std::vector<size_t> wayTypeCount(typeConfig->GetTypeCount(),0);
+    std::vector<size_t> wayNodeTypeCount(typeConfig->GetTypeCount(),0);
+    std::vector<size_t> areaTypeCount(typeConfig->GetTypeCount(),0);
+    std::vector<size_t> areaNodeTypeCount(typeConfig->GetTypeCount(),0);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawrels.dat"),
@@ -1136,10 +1131,10 @@ namespace osmscout {
                        name);
       }
 
-      areaTypeCount[rel.GetTypeId()]++;
+      areaTypeCount[rel.GetType()->GetIndex()]++;
       for (size_t i=0; i<rel.rings.size(); i++) {
         if (rel.rings[i].ring==Area::outerRingId) {
-          areaNodeTypeCount[rel.GetTypeId()]+=rel.rings[i].nodes.size();
+          areaNodeTypeCount[rel.GetType()->GetIndex()]+=rel.rings[i].nodes.size();
         }
       }
 
@@ -1189,10 +1184,12 @@ namespace osmscout {
 
     progress.Info("Dump statistics");
 
-    for (size_t i=0; i<typeConfig->GetMaxTypeId(); i++) {
-      std::string buffer=typeConfig->GetTypeInfo(i)->GetName()+": "+
-              NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
-              NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
+    for (auto type : typeConfig->GetTypes()) {
+      size_t idx=type->GetIndex();
+
+      std::string buffer=type->GetName()+": "+
+              NumberToString(wayTypeCount[idx])+" "+NumberToString(wayNodeTypeCount[idx])+" "+
+              NumberToString(areaTypeCount[idx])+" "+NumberToString(areaNodeTypeCount[idx]);
 
       progress.Debug(buffer);
     }

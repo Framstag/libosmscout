@@ -1109,7 +1109,7 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->GetTypeId(),
+                        area->GetType()->GetId(),
                         area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
@@ -1126,7 +1126,7 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->rings[m].GetTypeId(),
+                        area->rings[m].GetType()->GetId(),
                         area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
@@ -1490,14 +1490,14 @@ namespace osmscout {
             FillStyleRef fillStyle;
 
             if (ring.ring==Area::outerRingId) {
-              styleConfig.GetAreaFillStyle(area->GetTypeId(),
+              styleConfig.GetAreaFillStyle(area->GetType()->GetId(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
                                            fillStyle);
             }
-            else if (ring.GetTypeId()!=typeIgnore) {
-              styleConfig.GetAreaFillStyle(ring.GetTypeId(),
+            else if (ring.GetType()->GetId()!=typeIgnore) {
+              styleConfig.GetAreaFillStyle(ring.GetType()->GetId(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
@@ -1528,7 +1528,7 @@ namespace osmscout {
             size_t j=i+1;
             while (j<area->rings.size() &&
                    area->rings[j].ring==ringId+1 &&
-                   area->rings[j].GetTypeId()==typeIgnore) {
+                   area->rings[j].GetType()->GetId()==typeIgnore) {
               a.clippings.push_back(data[j]);
 
               j++;

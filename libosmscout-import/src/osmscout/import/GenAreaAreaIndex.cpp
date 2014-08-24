@@ -282,7 +282,7 @@ namespace osmscout {
 
             Entry entry;
 
-            entry.type=area.GetTypeId();
+            entry.type=area.GetType()->GetId();
             entry.offset=offset;
 
             // Add this area to the tile where the center of the area lies in.
@@ -306,6 +306,7 @@ namespace osmscout {
         }
       }
 
+      /*
       uint32_t minX=std::numeric_limits<uint32_t>::max();
       uint32_t minY=std::numeric_limits<uint32_t>::max();
       uint32_t maxX=std::numeric_limits<uint32_t>::min();
@@ -333,7 +334,7 @@ namespace osmscout {
             u->second++;
           }
         }
-      }
+      }*/
 
       /*
       std::cout << "[" << minX << "-" << maxX << "]x[" << minY << "-" << maxY << "] => " << leafs.size() << "/" << (maxX-minX+1)*(maxY-minY+1) << " " << (int)BytesNeededToAddressFileData(leafs.size()) << " " << ByteSizeToString(BytesNeededToAddressFileData(leafs.size())*(maxX-minX+1)*(maxY-minY+1)) << std::endl;

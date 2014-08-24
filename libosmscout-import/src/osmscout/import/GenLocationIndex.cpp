@@ -251,7 +251,7 @@ namespace osmscout {
         return false;
       }
 
-      if (area.GetTypeId()!=boundaryId) {
+      if (area.GetType()->GetId()!=boundaryId) {
         continue;
       }
 

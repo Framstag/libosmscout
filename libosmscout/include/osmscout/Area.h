@@ -60,11 +60,6 @@ namespace osmscout {
         return featureValueBuffer.GetType();
       }
 
-      inline TypeId GetTypeId() const
-      {
-        return featureValueBuffer.GetTypeId();
-      }
-
       inline size_t GetFeatureCount() const
       {
         return featureValueBuffer.GetType()->GetFeatureCount();
@@ -138,11 +133,6 @@ namespace osmscout {
     inline FileOffset GetFileOffset() const
     {
       return fileOffset;
-    }
-
-    inline TypeId GetTypeId() const
-    {
-      return rings.front().GetTypeId();
     }
 
     inline TypeInfoRef GetType() const

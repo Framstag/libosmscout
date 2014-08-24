@@ -165,7 +165,7 @@ namespace osmscout {
       return false;
     }
 
-    TypeId type=area.rings[0].GetTypeId();
+    TypeId type=area.rings[0].GetType()->GetId();
 
     return type<speeds.size() && speeds[type]>0.0;
   }

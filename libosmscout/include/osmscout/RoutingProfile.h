@@ -117,7 +117,7 @@ namespace osmscout {
     inline double GetTime(const Area& area,
                           double distance) const
     {
-      double speed=speeds[area.GetTypeId()];
+      double speed=speeds[area.GetType()->GetId()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 
@@ -210,7 +210,7 @@ namespace osmscout {
     inline double GetCosts(const Area& area,
                            double distance) const
     {
-      double speed=speeds[area.GetTypeId()];
+      double speed=speeds[area.GetType()->GetId()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 

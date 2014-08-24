@@ -949,7 +949,7 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=area.GetTypeId();
+      path.type=area.GetType()->GetId();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
@@ -1012,7 +1012,7 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=ring.GetTypeId();
+      path.type=ring.GetType()->GetId();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
