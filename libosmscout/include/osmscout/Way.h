@@ -60,11 +60,6 @@ namespace osmscout {
       return featureValueBuffer.GetType();
     }
 
-    inline TypeId GetTypeId() const
-    {
-      return featureValueBuffer.GetTypeId();
-    }
-
     inline size_t GetFeatureCount() const
     {
       return featureValueBuffer.GetType()->GetFeatureCount();

@@ -107,148 +107,12 @@ namespace osmscout {
 
     void AddType(TypeId type, double speed);
 
-    inline bool CanUse(const RouteNode& currentNode,
-                       size_t pathIndex) const
-    {
-      if (!(currentNode.paths[pathIndex].flags & vehicleRouteNodeBit)) {
-        return false;
-      }
-
-      TypeId type=currentNode.paths[pathIndex].type;
-
-      return type<speeds.size() && speeds[type]>0.0;
-    }
-
-    inline bool CanUse(const Area& area) const
-    {
-      if (area.rings.size()!=1) {
-        return false;
-      }
-
-      TypeId type=area.rings[0].GetTypeId();
-
-      return type<speeds.size() && speeds[type]>0.0;
-    }
-
-    inline bool CanUse(const Way& way) const
-    {
-      TypeId type=way.GetTypeId();
-
-      if (type>=speeds.size() || speeds[type]<=0.0) {
-        return false;
-      }
-
-      AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
-
-      if (accessValue!=NULL) {
-        switch (vehicle) {
-        case vehicleFoot:
-          return accessValue->CanRouteFoot();
-          break;
-        case vehicleBicycle:
-          return accessValue->CanRouteBicycle();
-          break;
-        case vehicleCar:
-          return accessValue->CanRouteCar();
-          break;
-        }
-      }
-      else {
-        switch (vehicle) {
-        case vehicleFoot:
-          return way.GetType()->CanRouteFoot();
-          break;
-        case vehicleBicycle:
-          return way.GetType()->CanRouteBicycle();
-          break;
-        case vehicleCar:
-          return way.GetType()->CanRouteCar();
-          break;
-        }
-      }
-
-      return false;
-    }
-
-    inline bool CanUseForward(const Way& way) const
-    {
-      TypeId type=way.GetTypeId();
-
-      if (type>=speeds.size() || speeds[type]<=0.0) {
-        return false;
-      }
-
-      AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
-
-      if (accessValue!=NULL) {
-        switch (vehicle) {
-        case vehicleFoot:
-          return accessValue->CanRouteFootForward();
-          break;
-        case vehicleBicycle:
-          return accessValue->CanRouteBicycleForward();
-          break;
-        case vehicleCar:
-          return accessValue->CanRouteCarForward();
-          break;
-        }
-      }
-      else {
-        switch (vehicle) {
-        case vehicleFoot:
-          return way.GetType()->CanRouteFoot();
-          break;
-        case vehicleBicycle:
-          return way.GetType()->CanRouteBicycle();
-          break;
-        case vehicleCar:
-          return way.GetType()->CanRouteCar();
-          break;
-        }
-      }
-
-      return false;
-    }
-
-    inline bool CanUseBackward(const Way& way) const
-    {
-      TypeId type=way.GetTypeId();
-
-      if (type>=speeds.size() || speeds[type]<=0.0) {
-        return false;
-      }
-
-      AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
-
-      if (accessValue!=NULL) {
-        switch (vehicle) {
-        case vehicleFoot:
-          return accessValue->CanRouteFootBackward();
-          break;
-        case vehicleBicycle:
-          return accessValue->CanRouteBicycleBackward();
-          break;
-        case vehicleCar:
-          return accessValue->CanRouteCarBackward();
-          break;
-        }
-      }
-      else {
-        switch (vehicle) {
-        case vehicleFoot:
-          return way.GetType()->CanRouteFoot();
-          break;
-        case vehicleBicycle:
-          return way.GetType()->CanRouteBicycle();
-          break;
-        case vehicleCar:
-          return way.GetType()->CanRouteCar();
-          break;
-        }
-      }
-
-      return false;
-    }
+    bool CanUse(const RouteNode& currentNode,
+                size_t pathIndex) const;
+    bool CanUse(const Area& area) const;
+    bool CanUse(const Way& way) const;
+    bool CanUseForward(const Way& way) const;
+    bool CanUseBackward(const Way& way) const;
 
     inline double GetTime(const Area& area,
                           double distance) const
@@ -272,7 +136,7 @@ namespace osmscout {
         speed=maxSpeedValue->GetMaxSpeed();
       }
       else {
-        speed=speeds[way.GetTypeId()];
+        speed=speeds[way.GetType()->GetId()];
       }
 
       speed=std::min(vehicleMaxSpeed,speed);
@@ -365,7 +229,7 @@ namespace osmscout {
         speed=maxSpeedValue->GetMaxSpeed();
       }
       else {
-        speed=speeds[way.GetTypeId()];
+        speed=speeds[way.GetType()->GetId()];
       }
 
       speed=std::min(vehicleMaxSpeed,speed);

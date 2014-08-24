@@ -75,7 +75,8 @@ namespace osmscout {
     SetVehicleMaxSpeed(maxSpeed);
 
     for (auto type : typeConfig.GetTypes()) {
-      if (type->CanRouteFoot()) {
+      if (!type->GetIgnore() &&
+          type->CanRouteFoot()) {
         AddType(type->GetId(),maxSpeed);
       }
     }
@@ -90,7 +91,8 @@ namespace osmscout {
     SetVehicleMaxSpeed(maxSpeed);
 
     for (auto type : typeConfig.GetTypes()) {
-      if (type->CanRouteBicycle()) {
+      if (!type->GetIgnore() &&
+          type->CanRouteBicycle()) {
         AddType(type->GetId(),maxSpeed);
       }
 
@@ -109,7 +111,8 @@ namespace osmscout {
     SetVehicleMaxSpeed(maxSpeed);
 
     for (auto type : typeConfig.GetTypes()) {
-      if (!type->CanRouteCar()) {
+      if (!type->GetIgnore() &&
+          type->CanRouteCar()) {
         std::map<std::string,double>::const_iterator speed=speedMap.find(type->GetName());
 
         if (speed==speedMap.end()) {
@@ -142,6 +145,149 @@ namespace osmscout {
     }
 
     speeds[type]=speed;
+  }
+
+  bool AbstractRoutingProfile::CanUse(const RouteNode& currentNode,
+                                      size_t pathIndex) const
+  {
+    if (!(currentNode.paths[pathIndex].flags & vehicleRouteNodeBit)) {
+      return false;
+    }
+
+    TypeId type=currentNode.paths[pathIndex].type;
+
+    return type<speeds.size() && speeds[type]>0.0;
+  }
+
+  bool AbstractRoutingProfile::CanUse(const Area& area) const
+  {
+    if (area.rings.size()!=1) {
+      return false;
+    }
+
+    TypeId type=area.rings[0].GetTypeId();
+
+    return type<speeds.size() && speeds[type]>0.0;
+  }
+
+  bool AbstractRoutingProfile::CanUse(const Way& way) const
+  {
+    TypeId type=way.GetType()->GetId();
+
+    if (type>=speeds.size() || speeds[type]<=0.0) {
+      return false;
+    }
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      switch (vehicle) {
+      case vehicleFoot:
+        return accessValue->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return accessValue->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return accessValue->CanRouteCar();
+        break;
+      }
+    }
+    else {
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetType()->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetType()->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetType()->CanRouteCar();
+        break;
+      }
+    }
+
+    return false;
+  }
+
+  bool AbstractRoutingProfile::CanUseForward(const Way& way) const
+  {
+    TypeId type=way.GetType()->GetId();
+
+    if (type>=speeds.size() || speeds[type]<=0.0) {
+      return false;
+    }
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      switch (vehicle) {
+      case vehicleFoot:
+        return accessValue->CanRouteFootForward();
+        break;
+      case vehicleBicycle:
+        return accessValue->CanRouteBicycleForward();
+        break;
+      case vehicleCar:
+        return accessValue->CanRouteCarForward();
+        break;
+      }
+    }
+    else {
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetType()->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetType()->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetType()->CanRouteCar();
+        break;
+      }
+    }
+
+    return false;
+  }
+
+  bool AbstractRoutingProfile::CanUseBackward(const Way& way) const
+  {
+    TypeId type=way.GetType()->GetId();
+
+    if (type>=speeds.size() || speeds[type]<=0.0) {
+      return false;
+    }
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      switch (vehicle) {
+      case vehicleFoot:
+        return accessValue->CanRouteFootBackward();
+        break;
+      case vehicleBicycle:
+        return accessValue->CanRouteBicycleBackward();
+        break;
+      case vehicleCar:
+        return accessValue->CanRouteCarBackward();
+        break;
+      }
+    }
+    else {
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetType()->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetType()->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetType()->CanRouteCar();
+        break;
+      }
+    }
+
+    return false;
   }
 
   ShortestPathRoutingProfile::ShortestPathRoutingProfile(const TypeConfigRef& typeConfig)

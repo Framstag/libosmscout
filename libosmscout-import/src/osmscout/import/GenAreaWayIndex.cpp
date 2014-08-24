@@ -256,7 +256,7 @@ namespace osmscout {
   {
     FileScanner           wayScanner;
     FileWriter            writer;
-    std::set<TypeId>      remainingWayTypes;
+    TypeInfoSet           remainingWayTypes;
     std::vector<TypeData> wayTypeData;
     size_t                level;
     size_t                maxLevel=0;
@@ -277,24 +277,17 @@ namespace osmscout {
 
     progress.SetAction("Scanning level distribution of way types");
 
-    for (size_t i=0; i<typeConfig->GetTypes().size(); i++) {
-      TypeInfoRef type(typeConfig->GetTypeInfo(i));
-
-      if (type->CanBeWay() &&
-          !type->GetIgnore()) {
-        remainingWayTypes.insert(i);
-      }
-    }
+    typeConfig->GetWayTypes(remainingWayTypes);
 
     level=parameter.GetAreaWayMinMag();
-    while (!remainingWayTypes.empty()) {
+    while (!remainingWayTypes.Empty()) {
       uint32_t                   wayCount=0;
-      std::set<TypeId>           currentWayTypes(remainingWayTypes);
+      TypeInfoSet                currentWayTypes(remainingWayTypes);
       double                     cellWidth=360.0/pow(2.0,(int)level);
       double                     cellHeight=180.0/pow(2.0,(int)level);
       std::vector<CoordCountMap> cellFillCount(typeConfig->GetTypes().size());
 
-      progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.size())+" types remaining)");
+      progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
 
       wayScanner.GotoBegin();
 
@@ -319,7 +312,7 @@ namespace osmscout {
         }
 
         // Count number of entries per current type and coordinate
-        if (currentWayTypes.find(way.GetTypeId())==currentWayTypes.end()) {
+        if (!currentWayTypes.IsSet(way.GetType())) {
           continue;
         }
 
@@ -342,34 +335,32 @@ namespace osmscout {
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[way.GetTypeId()][Pixel(x,y)]++;
+            cellFillCount[way.GetType()->GetIndex()][Pixel(x,y)]++;
           }
         }
       }
 
       // Check if cell fill for current type is in defined limits
-      for (size_t i=0; i<typeConfig->GetTypes().size(); i++) {
-        if (currentWayTypes.find(i)!=currentWayTypes.end()) {
-          CalculateStatistics(level,wayTypeData[i],cellFillCount[i]);
+      for (auto type : currentWayTypes) {
+        size_t i=type->GetIndex();
 
-          if (!FitsIndexCriteria(parameter,
-                                 progress,
-                                 typeConfig->GetTypeInfo(i),
-                                 wayTypeData[i],
-                                 cellFillCount[i])) {
-            currentWayTypes.erase(i);
-          }
+        CalculateStatistics(level,wayTypeData[i],cellFillCount[i]);
+
+        if (!FitsIndexCriteria(parameter,
+                               progress,
+                               typeConfig->GetTypeInfo(i),
+                               wayTypeData[i],
+                               cellFillCount[i])) {
+          currentWayTypes.Remove(type);
         }
       }
 
-      for (std::set<TypeId>::const_iterator cwt=currentWayTypes.begin();
-           cwt!=currentWayTypes.end();
-           cwt++) {
+      for (auto type : currentWayTypes) {
         maxLevel=std::max(maxLevel,level);
 
-        progress.Info("Type "+typeConfig->GetTypeInfo(*cwt)->GetName()+"(" + NumberToString(*cwt)+"), "+NumberToString(wayTypeData[*cwt].indexCells)+" cells, "+NumberToString(wayTypeData[*cwt].indexEntries)+" objects");
+        progress.Info("Type "+type->GetName()+", "+NumberToString(wayTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(wayTypeData[type->GetIndex()].indexEntries)+" objects");
 
-        remainingWayTypes.erase(*cwt);
+        remainingWayTypes.Remove(type);
       }
 
       level++;
@@ -399,9 +390,8 @@ namespace osmscout {
 
     writer.Write(indexEntries);
 
-    for (size_t i=0; i<typeConfig->GetTypes().size(); i++)
-    {
-      TypeInfoRef type(typeConfig->GetTypeInfo(i));
+    for (auto type : typeConfig->GetTypes()) {
+      size_t i=type->GetIndex();
 
       if (type->CanBeWay() &&
           wayTypeData[i].HasEntries()) {
@@ -426,22 +416,20 @@ namespace osmscout {
     }
 
     for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
-      std::set<TypeId> indexTypes;
-      uint32_t         wayCount;
-      double           cellWidth=360.0/pow(2.0,(int)l);
-      double           cellHeight=180.0/pow(2.0,(int)l);
+      TypeInfoSet indexTypes(typeConfig);
+      uint32_t    wayCount;
+      double      cellWidth=360.0/pow(2.0,(int)l);
+      double      cellHeight=180.0/pow(2.0,(int)l);
 
-      for (size_t i=0; i<typeConfig->GetTypes().size(); i++) {
-        TypeInfoRef type(typeConfig->GetTypeInfo(i));
-
+      for (auto type : typeConfig->GetTypes()) {
         if (type->CanBeWay() &&
-            wayTypeData[i].HasEntries() &&
-            wayTypeData[i].indexLevel==l) {
-          indexTypes.insert(i);
+            wayTypeData[type->GetIndex()].HasEntries() &&
+            wayTypeData[type->GetIndex()].indexLevel==l) {
+          indexTypes.Set(type);
         }
       }
 
-      if (indexTypes.empty()) {
+      if (indexTypes.Empty()) {
         continue;
       }
 
@@ -475,7 +463,7 @@ namespace osmscout {
           return false;
         }
 
-        if (indexTypes.find(way.GetTypeId())==indexTypes.end()) {
+        if (!indexTypes.IsSet(way.GetType())) {
           continue;
         }
 
@@ -498,19 +486,19 @@ namespace osmscout {
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
-            typeCellOffsets[way.GetTypeId()][Pixel(x,y)].push_back(offset);
+            typeCellOffsets[way.GetType()->GetIndex()][Pixel(x,y)].push_back(offset);
           }
         }
       }
 
-      for (std::set<TypeId>::const_iterator type=indexTypes.begin();
-           type!=indexTypes.end();
-           ++type) {
+      for (auto type : indexTypes) {
+        size_t index=type->GetIndex();
+
         if (!WriteBitmap(progress,
                          writer,
-                         typeConfig->GetTypeInfo(*type),
-                         wayTypeData[*type],
-                         typeCellOffsets[*type])) {
+                         typeConfig->GetTypeInfo(index),
+                         wayTypeData[index],
+                         typeCellOffsets[index])) {
           return false;
         }
       }
