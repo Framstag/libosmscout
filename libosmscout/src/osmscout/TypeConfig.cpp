@@ -253,7 +253,7 @@ namespace osmscout {
   FeatureValue& NameFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const NameFeatureValue& otherValue=dynamic_cast<const NameFeatureValue&>(other);
+      const NameFeatureValue& otherValue=static_cast<const NameFeatureValue&>(other);
 
       name=otherValue.name;
     }
@@ -263,7 +263,7 @@ namespace osmscout {
 
   bool NameFeatureValue::operator==(const FeatureValue& other) const
   {
-    const NameFeatureValue& otherValue=dynamic_cast<const NameFeatureValue&>(other);
+    const NameFeatureValue& otherValue=static_cast<const NameFeatureValue&>(other);
 
     return name==otherValue.name;
   }
@@ -313,7 +313,7 @@ namespace osmscout {
     }
 
     if (!name.empty()) {
-      NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(buffer.AllocateValue(idx));
+      NameFeatureValue* value=static_cast<NameFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetName(name);
     }
@@ -328,7 +328,7 @@ namespace osmscout {
       return false;
     }
 
-    NameFeatureValue* nameFeature=dynamic_cast<NameFeatureValue*>(value);
+    NameFeatureValue* nameFeature=static_cast<NameFeatureValue*>(value);
 
     nameFeature->SetName(name);
 
@@ -338,7 +338,7 @@ namespace osmscout {
   bool NameFeature::Write(FileWriter& writer,
                           FeatureValue* value)
   {
-    NameFeatureValue* v=dynamic_cast<NameFeatureValue*>(value);
+    NameFeatureValue* v=static_cast<NameFeatureValue*>(value);
 
     return writer.Write(v->GetName());
   }
@@ -346,7 +346,7 @@ namespace osmscout {
   FeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const NameAltFeatureValue& otherValue=dynamic_cast<const NameAltFeatureValue&>(other);
+      const NameAltFeatureValue& otherValue=static_cast<const NameAltFeatureValue&>(other);
 
       nameAlt=otherValue.nameAlt;
     }
@@ -356,7 +356,7 @@ namespace osmscout {
 
   bool NameAltFeatureValue::operator==(const FeatureValue& other) const
   {
-    const NameAltFeatureValue& otherValue=dynamic_cast<const NameAltFeatureValue&>(other);
+    const NameAltFeatureValue& otherValue=static_cast<const NameAltFeatureValue&>(other);
 
     return nameAlt==otherValue.nameAlt;
   }
@@ -406,7 +406,7 @@ namespace osmscout {
     }
 
     if (!nameAlt.empty()) {
-      NameAltFeatureValue* value=dynamic_cast<NameAltFeatureValue*>(buffer.AllocateValue(idx));
+      NameAltFeatureValue* value=static_cast<NameAltFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetNameAlt(nameAlt);
     }
@@ -421,7 +421,7 @@ namespace osmscout {
       return false;
     }
 
-    NameAltFeatureValue* nameAltFeature=dynamic_cast<NameAltFeatureValue*>(value);
+    NameAltFeatureValue* nameAltFeature=static_cast<NameAltFeatureValue*>(value);
 
     nameAltFeature->SetNameAlt(altName);
 
@@ -431,7 +431,7 @@ namespace osmscout {
   bool NameAltFeature::Write(FileWriter& writer,
                              FeatureValue* value)
   {
-    NameAltFeatureValue* v=dynamic_cast<NameAltFeatureValue*>(value);
+    NameAltFeatureValue* v=static_cast<NameAltFeatureValue*>(value);
 
     return writer.Write(v->GetNameAlt());
   }
@@ -439,7 +439,7 @@ namespace osmscout {
   FeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const RefFeatureValue& otherValue=dynamic_cast<const RefFeatureValue&>(other);
+      const RefFeatureValue& otherValue=static_cast<const RefFeatureValue&>(other);
 
       ref=otherValue.ref;
     }
@@ -449,7 +449,7 @@ namespace osmscout {
 
   bool RefFeatureValue::operator==(const FeatureValue& other) const
   {
-    const RefFeatureValue& otherValue=dynamic_cast<const RefFeatureValue&>(other);
+    const RefFeatureValue& otherValue=static_cast<const RefFeatureValue&>(other);
 
     return ref==otherValue.ref;
   }
@@ -488,7 +488,7 @@ namespace osmscout {
 
     if (ref!=tags.end() &&
         !ref->second.empty()) {
-      RefFeatureValue* value=dynamic_cast<RefFeatureValue*>(buffer.AllocateValue(idx));
+      RefFeatureValue* value=static_cast<RefFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetRef(ref->second);
     }
@@ -503,7 +503,7 @@ namespace osmscout {
       return false;
     }
 
-    RefFeatureValue* refFeature=dynamic_cast<RefFeatureValue*>(value);
+    RefFeatureValue* refFeature=static_cast<RefFeatureValue*>(value);
 
     refFeature->SetRef(ref);
 
@@ -513,7 +513,7 @@ namespace osmscout {
   bool RefFeature::Write(FileWriter& writer,
                          FeatureValue* value)
   {
-    RefFeatureValue* v=dynamic_cast<RefFeatureValue*>(value);
+    RefFeatureValue* v=static_cast<RefFeatureValue*>(value);
 
     return writer.Write(v->GetRef());
   }
@@ -521,7 +521,7 @@ namespace osmscout {
   FeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const LocationFeatureValue& otherValue=dynamic_cast<const LocationFeatureValue&>(other);
+      const LocationFeatureValue& otherValue=static_cast<const LocationFeatureValue&>(other);
 
       location=otherValue.location;
     }
@@ -531,7 +531,7 @@ namespace osmscout {
 
   bool LocationFeatureValue::operator==(const FeatureValue& other) const
   {
-    const LocationFeatureValue& otherValue=dynamic_cast<const LocationFeatureValue&>(other);
+    const LocationFeatureValue& otherValue=static_cast<const LocationFeatureValue&>(other);
 
     return location==otherValue.location;
   }
@@ -581,7 +581,7 @@ namespace osmscout {
 
     if (!street->second.empty() &&
         !houseNr->second.empty()) {
-      LocationFeatureValue* value=dynamic_cast<LocationFeatureValue*>(buffer.AllocateValue(idx));
+      LocationFeatureValue* value=static_cast<LocationFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetLocation(street->second);
     }
@@ -596,7 +596,7 @@ namespace osmscout {
       return false;
     }
 
-    LocationFeatureValue* locationFeature=dynamic_cast<LocationFeatureValue*>(value);
+    LocationFeatureValue* locationFeature=static_cast<LocationFeatureValue*>(value);
 
     locationFeature->SetLocation(location);
 
@@ -606,7 +606,7 @@ namespace osmscout {
   bool LocationFeature::Write(FileWriter& writer,
                              FeatureValue* value)
   {
-    LocationFeatureValue* v=dynamic_cast<LocationFeatureValue*>(value);
+    LocationFeatureValue* v=static_cast<LocationFeatureValue*>(value);
 
     return writer.Write(v->GetLocation());
   }
@@ -614,7 +614,7 @@ namespace osmscout {
   FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AddressFeatureValue& otherValue=dynamic_cast<const AddressFeatureValue&>(other);
+      const AddressFeatureValue& otherValue=static_cast<const AddressFeatureValue&>(other);
 
       address=otherValue.address;
     }
@@ -624,7 +624,7 @@ namespace osmscout {
 
   bool AddressFeatureValue::operator==(const FeatureValue& other) const
   {
-    const AddressFeatureValue& otherValue=dynamic_cast<const AddressFeatureValue&>(other);
+    const AddressFeatureValue& otherValue=static_cast<const AddressFeatureValue&>(other);
 
     return address==otherValue.address;
   }
@@ -674,7 +674,7 @@ namespace osmscout {
 
     if (!street->second.empty() &&
         !houseNr->second.empty()) {
-      AddressFeatureValue* value=dynamic_cast<AddressFeatureValue*>(buffer.AllocateValue(idx));
+      AddressFeatureValue* value=static_cast<AddressFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetAddress(houseNr->second);
     }
@@ -689,7 +689,7 @@ namespace osmscout {
       return false;
     }
 
-    AddressFeatureValue* addressFeature=dynamic_cast<AddressFeatureValue*>(value);
+    AddressFeatureValue* addressFeature=static_cast<AddressFeatureValue*>(value);
 
     addressFeature->SetAddress(address);
 
@@ -699,7 +699,7 @@ namespace osmscout {
   bool AddressFeature::Write(FileWriter& writer,
                              FeatureValue* value)
   {
-    AddressFeatureValue* v=dynamic_cast<AddressFeatureValue*>(value);
+    AddressFeatureValue* v=static_cast<AddressFeatureValue*>(value);
 
     return writer.Write(v->GetAddress());
   }
@@ -707,7 +707,7 @@ namespace osmscout {
   FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AccessFeatureValue& otherValue=dynamic_cast<const AccessFeatureValue&>(other);
+      const AccessFeatureValue& otherValue=static_cast<const AccessFeatureValue&>(other);
 
       access=otherValue.access;
     }
@@ -717,7 +717,7 @@ namespace osmscout {
 
   bool AccessFeatureValue::operator==(const FeatureValue& other) const
   {
-    const AccessFeatureValue& otherValue=dynamic_cast<const AccessFeatureValue&>(other);
+    const AccessFeatureValue& otherValue=static_cast<const AccessFeatureValue&>(other);
 
     return access==otherValue.access;
   }
@@ -953,7 +953,7 @@ namespace osmscout {
     }
 
     if (access!=defaultAccess) {
-      AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(buffer.AllocateValue(idx));
+      AccessFeatureValue* value=static_cast<AccessFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetAccess(access);
     }
@@ -968,7 +968,7 @@ namespace osmscout {
       return false;
     }
 
-    AccessFeatureValue* accessFeature=dynamic_cast<AccessFeatureValue*>(value);
+    AccessFeatureValue* accessFeature=static_cast<AccessFeatureValue*>(value);
 
     accessFeature->SetAccess(access);
 
@@ -978,7 +978,7 @@ namespace osmscout {
   bool AccessFeature::Write(FileWriter& writer,
                             FeatureValue* value)
   {
-    AccessFeatureValue* v=dynamic_cast<AccessFeatureValue*>(value);
+    AccessFeatureValue* v=static_cast<AccessFeatureValue*>(value);
 
     return writer.Write(v->GetAccess());
   }
@@ -986,7 +986,7 @@ namespace osmscout {
   FeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const LayerFeatureValue& otherValue=dynamic_cast<const LayerFeatureValue&>(other);
+      const LayerFeatureValue& otherValue=static_cast<const LayerFeatureValue&>(other);
 
       layer=otherValue.layer;
     }
@@ -996,7 +996,7 @@ namespace osmscout {
 
   bool LayerFeatureValue::operator==(const FeatureValue& other) const
   {
-    const LayerFeatureValue& otherValue=dynamic_cast<const LayerFeatureValue&>(other);
+    const LayerFeatureValue& otherValue=static_cast<const LayerFeatureValue&>(other);
 
     return layer==otherValue.layer;
   }
@@ -1038,7 +1038,7 @@ namespace osmscout {
 
       if (StringToNumber(layer->second,layerValue)) {
         if (layerValue!=0) {
-          LayerFeatureValue* value=dynamic_cast<LayerFeatureValue*>(buffer.AllocateValue(idx));
+          LayerFeatureValue* value=static_cast<LayerFeatureValue*>(buffer.AllocateValue(idx));
 
           value->SetLayer(layerValue);
         }
@@ -1058,7 +1058,7 @@ namespace osmscout {
       return false;
     }
 
-    LayerFeatureValue* layerFeature=dynamic_cast<LayerFeatureValue*>(value);
+    LayerFeatureValue* layerFeature=static_cast<LayerFeatureValue*>(value);
 
     layerFeature->SetLayer(layer);
 
@@ -1068,7 +1068,7 @@ namespace osmscout {
   bool LayerFeature::Write(FileWriter& writer,
                            FeatureValue* value)
   {
-    LayerFeatureValue* v=dynamic_cast<LayerFeatureValue*>(value);
+    LayerFeatureValue* v=static_cast<LayerFeatureValue*>(value);
 
     return writer.Write(v->GetLayer());
   }
@@ -1076,7 +1076,7 @@ namespace osmscout {
   FeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const WidthFeatureValue& otherValue=dynamic_cast<const WidthFeatureValue&>(other);
+      const WidthFeatureValue& otherValue=static_cast<const WidthFeatureValue&>(other);
 
       width=otherValue.width;
     }
@@ -1086,7 +1086,7 @@ namespace osmscout {
 
   bool WidthFeatureValue::operator==(const FeatureValue& other) const
   {
-    const WidthFeatureValue& otherValue=dynamic_cast<const WidthFeatureValue&>(other);
+    const WidthFeatureValue& otherValue=static_cast<const WidthFeatureValue&>(other);
 
     return width==otherValue.width;
   }
@@ -1168,7 +1168,7 @@ namespace osmscout {
       progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" value is too small or too big!");
     }
     else {
-      WidthFeatureValue* value=dynamic_cast<WidthFeatureValue*>(buffer.AllocateValue(idx));
+      WidthFeatureValue* value=static_cast<WidthFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetWidth((uint8_t)floor(w+0.5));
     }
@@ -1184,7 +1184,7 @@ namespace osmscout {
       return false;
     }
 
-    WidthFeatureValue* widthFeature=dynamic_cast<WidthFeatureValue*>(value);
+    WidthFeatureValue* widthFeature=static_cast<WidthFeatureValue*>(value);
 
     widthFeature->SetWidth(width);
 
@@ -1194,7 +1194,7 @@ namespace osmscout {
   bool WidthFeature::Write(FileWriter& writer,
                            FeatureValue* value)
   {
-    WidthFeatureValue* v=dynamic_cast<WidthFeatureValue*>(value);
+    WidthFeatureValue* v=static_cast<WidthFeatureValue*>(value);
 
     return writer.Write(v->GetWidth());
   }
@@ -1202,7 +1202,7 @@ namespace osmscout {
   FeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const MaxSpeedFeatureValue& otherValue=dynamic_cast<const MaxSpeedFeatureValue&>(other);
+      const MaxSpeedFeatureValue& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
 
       maxSpeed=otherValue.maxSpeed;
     }
@@ -1212,7 +1212,7 @@ namespace osmscout {
 
   bool MaxSpeedFeatureValue::operator==(const FeatureValue& other) const
   {
-    const MaxSpeedFeatureValue& otherValue=dynamic_cast<const MaxSpeedFeatureValue&>(other);
+    const MaxSpeedFeatureValue& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
 
     return maxSpeed==otherValue.maxSpeed;
   }
@@ -1268,7 +1268,7 @@ namespace osmscout {
     // "walk" should not be used, but we provide an estimation anyway,
     // since it is likely still better than the default
     if (valueString=="walk") {
-      MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
+      MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
 
       value->SetMaxSpeed(10);
 
@@ -1292,7 +1292,7 @@ namespace osmscout {
       return;
     }
 
-    MaxSpeedFeatureValue* value=dynamic_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
+    MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
 
     if (isMph) {
       if (valueNumeric>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
@@ -1322,7 +1322,7 @@ namespace osmscout {
       return false;
     }
 
-    MaxSpeedFeatureValue* maxSpeedFeature=dynamic_cast<MaxSpeedFeatureValue*>(value);
+    MaxSpeedFeatureValue* maxSpeedFeature=static_cast<MaxSpeedFeatureValue*>(value);
 
     maxSpeedFeature->SetMaxSpeed(maxSpeed);
 
@@ -1332,7 +1332,7 @@ namespace osmscout {
   bool MaxSpeedFeature::Write(FileWriter& writer,
                               FeatureValue* value)
   {
-    MaxSpeedFeatureValue* v=dynamic_cast<MaxSpeedFeatureValue*>(value);
+    MaxSpeedFeatureValue* v=static_cast<MaxSpeedFeatureValue*>(value);
 
     return writer.Write(v->GetMaxSpeed());
   }
@@ -1340,7 +1340,7 @@ namespace osmscout {
   FeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const GradeFeatureValue& otherValue=dynamic_cast<const GradeFeatureValue&>(other);
+      const GradeFeatureValue& otherValue=static_cast<const GradeFeatureValue&>(other);
 
       grade=otherValue.grade;
     }
@@ -1350,7 +1350,7 @@ namespace osmscout {
 
   bool GradeFeatureValue::operator==(const FeatureValue& other) const
   {
-    const GradeFeatureValue& otherValue=dynamic_cast<const GradeFeatureValue&>(other);
+    const GradeFeatureValue& otherValue=static_cast<const GradeFeatureValue&>(other);
 
     return grade==otherValue.grade;
   }
@@ -1390,35 +1390,35 @@ namespace osmscout {
 
     if (tracktype!=tags.end()) {
       if (tracktype->second=="grade1") {
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(1);
 
         return;
       }
       else if (tracktype->second=="grade2") {
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(2);
 
         return;
       }
       else if (tracktype->second=="grade3") {
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(3);
 
         return;
       }
       else if (tracktype->second=="grade4") {
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(4);
 
         return;
       }
       else if (tracktype->second=="grade5") {
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade(5);
 
@@ -1436,7 +1436,7 @@ namespace osmscout {
 
       if (typeConfig.GetGradeForSurface(surface->second,
                                         grade)) {
-        GradeFeatureValue* value=dynamic_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
 
         value->SetGrade((uint8_t)grade);
       }
@@ -1455,7 +1455,7 @@ namespace osmscout {
       return false;
     }
 
-    GradeFeatureValue* gradeFeature=dynamic_cast<GradeFeatureValue*>(value);
+    GradeFeatureValue* gradeFeature=static_cast<GradeFeatureValue*>(value);
 
     gradeFeature->SetGrade(grade);
 
@@ -1465,7 +1465,7 @@ namespace osmscout {
   bool GradeFeature::Write(FileWriter& writer,
                            FeatureValue* value)
   {
-    GradeFeatureValue* v=dynamic_cast<GradeFeatureValue*>(value);
+    GradeFeatureValue* v=static_cast<GradeFeatureValue*>(value);
 
     return writer.Write(v->GetGrade());
   }
@@ -1473,7 +1473,7 @@ namespace osmscout {
   FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AdminLevelFeatureValue& otherValue=dynamic_cast<const AdminLevelFeatureValue&>(other);
+      const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
       adminLevel=otherValue.adminLevel;
     }
@@ -1483,7 +1483,7 @@ namespace osmscout {
 
   bool AdminLevelFeatureValue::operator==(const FeatureValue& other) const
     {
-      const AdminLevelFeatureValue& otherValue=dynamic_cast<const AdminLevelFeatureValue&>(other);
+      const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
       return adminLevel==otherValue.adminLevel;
     }
@@ -1525,7 +1525,7 @@ namespace osmscout {
 
         if (StringToNumber(adminLevel->second,
                            adminLevelValue)) {
-          AdminLevelFeatureValue* value=dynamic_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(idx));
+          AdminLevelFeatureValue* value=static_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(idx));
 
           value->SetAdminLevel(adminLevelValue);
         }
@@ -1544,7 +1544,7 @@ namespace osmscout {
         return false;
       }
 
-      AdminLevelFeatureValue* adminLevelFeature=dynamic_cast<AdminLevelFeatureValue*>(value);
+      AdminLevelFeatureValue* adminLevelFeature=static_cast<AdminLevelFeatureValue*>(value);
 
       adminLevelFeature->SetAdminLevel(adminLevel);
 
@@ -1554,7 +1554,7 @@ namespace osmscout {
     bool AdminLevelFeature::Write(FileWriter& writer,
                              FeatureValue* value)
     {
-      AdminLevelFeatureValue* v=dynamic_cast<AdminLevelFeatureValue*>(value);
+      AdminLevelFeatureValue* v=static_cast<AdminLevelFeatureValue*>(value);
 
       return writer.Write(v->GetAdminLevel());
     }
@@ -1764,8 +1764,6 @@ namespace osmscout {
 
   void FeatureValueBuffer::SetType(const TypeInfoRef& type)
   {
-    assert(type.Valid());
-
     if (this->type.Valid()) {
       DeleteData();
     }
@@ -1777,8 +1775,6 @@ namespace osmscout {
 
   void FeatureValueBuffer::DeleteData()
   {
-    assert(type.Valid());
-
     if (featureValueBuffer!=NULL) {
       for (size_t i=0; i<type->GetFeatureCount(); i++) {
         if (HasValue(i)) {
@@ -1800,8 +1796,6 @@ namespace osmscout {
 
   void FeatureValueBuffer::AllocateData()
   {
-    assert(type.Valid());
-
     if (type->HasFeatures()) {
       featureBits=new uint8_t[type->GetFeatureBytes()]();
       featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
@@ -1813,28 +1807,8 @@ namespace osmscout {
     }
   }
 
-  bool FeatureValueBuffer::HasValue(size_t idx) const
-  {
-    assert(type.Valid());
-    assert(idx<type->GetFeatureCount());
-
-    return featureBits[idx/8] & (1 << idx%8);
-  }
-
-  FeatureValue* FeatureValueBuffer::GetValue(size_t idx) const
-  {
-    assert(type.Valid());
-    assert(idx<type->GetFeatureCount());
-
-    return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
-  }
-
   FeatureValue* FeatureValueBuffer::AllocateValue(size_t idx)
   {
-    assert(type.Valid());
-    assert(idx<type->GetFeatureCount());
-    assert(!HasValue(idx));
-
     size_t byteIdx=idx/8;
 
     featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
@@ -1853,10 +1827,6 @@ namespace osmscout {
 
   void FeatureValueBuffer::FreeValue(size_t idx)
   {
-    assert(type.Valid());
-    assert(idx<type->GetFeatureCount());
-    assert(HasValue(idx));
-
     size_t byteIdx=idx/8;
 
     featureBits[byteIdx]=featureBits[byteIdx] & ~(1 << idx%8);
@@ -1873,8 +1843,6 @@ namespace osmscout {
                                  const ObjectOSMRef& object,
                                  const OSMSCOUT_HASHMAP<TagId,std::string>& tags)
   {
-    assert(type.Valid());
-
     for (auto feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(progress,
                                   typeConfig,
@@ -1888,8 +1856,6 @@ namespace osmscout {
 
   bool FeatureValueBuffer::Read(FileScanner& scanner)
   {
-    assert(type.Valid());
-
     for (size_t i=0; i<type->GetFeatureBytes(); i++) {
       if (!scanner.Read(featureBits[i])) {
         return false;
@@ -1917,8 +1883,6 @@ namespace osmscout {
 
   bool FeatureValueBuffer::Write(FileWriter& writer) const
   {
-    assert(type.Valid());
-
     for (size_t i=0; i<type->GetFeatureBytes(); i++) {
       if (!writer.Write(featureBits[i])) {
         return false;

@@ -244,8 +244,6 @@ namespace osmscout {
     }
   };
 
-  typedef uint16_t FeatureId;
-
   /**
    * A feature combines one or multiple tags  to build information attribute for a type.
    *
@@ -1967,10 +1965,15 @@ namespace osmscout {
       return type->GetFeature(idx);
     }
 
-    bool HasValue(size_t idx) const;
+    inline bool HasValue(size_t idx) const
+    {
+      return featureBits[idx/8] & (1 << idx%8);
+    }
 
-    FeatureValue* GetValue(size_t idx) const;
-
+    inline FeatureValue* GetValue(size_t idx) const
+    {
+      return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
+    }
 
     FeatureValue* AllocateValue(size_t idx);
     void FreeValue(size_t idx);
