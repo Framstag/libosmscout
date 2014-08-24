@@ -1899,7 +1899,7 @@ namespace osmscout {
       }
     }
 
-    bool IsSet(const TypeInfoRef& type)
+    bool IsSet(const TypeInfoRef& type) const
     {
       return type->GetIndex()<types.size() &&
              types[type->GetIndex()].Valid();

@@ -181,8 +181,8 @@ namespace osmscout {
       };
 
     private:
-      OSMSCOUT_HASHSET<TypeId> motorwayTypes;
-      OSMSCOUT_HASHSET<TypeId> motorwayLinkTypes;
+      TypeInfoSet motorwayTypes;
+      TypeInfoSet motorwayLinkTypes;
 
       bool                     inRoundabout;
       size_t                   roundaboutCrossingCounter;
@@ -210,8 +210,8 @@ namespace osmscout {
                    RouteDescription& description,
                    Database& database);
 
-      void AddMotorwayType(TypeId type);
-      void AddMotorwayLinkType(TypeId type);
+      void AddMotorwayType(const TypeInfoRef& type);
+      void AddMotorwayLinkType(const TypeInfoRef& type);
     };
 
   private:
@@ -241,7 +241,7 @@ namespace osmscout {
     bool IsBridge(const Way& way) const;
 
     bool IsOfType(const ObjectFileRef& object,
-                  const OSMSCOUT_HASHSET<TypeId>& types) const;
+                  const TypeInfoSet& types) const;
 
     Id GetNodeId(const ObjectFileRef& object,
                  size_t nodeIndex) const;

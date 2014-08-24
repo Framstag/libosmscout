@@ -509,12 +509,12 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
 
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
   postprocessors.push_back(instructionProcessor);
 
   if (!routePostprocessor.PostprocessRouteDescription(description,

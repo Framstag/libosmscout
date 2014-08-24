@@ -502,20 +502,20 @@ namespace osmscout {
     if (node.GetPathObject().GetType()==refArea) {
       AreaRef area=postprocessor.GetArea(node.GetPathObject().GetFileOffset());
 
-      if (motorwayLinkTypes.find(area->GetTypeId())!=motorwayLinkTypes.end()) {
+      if (motorwayLinkTypes.IsSet(area->GetType())) {
         return link;
       }
-      else if (motorwayTypes.find(area->GetTypeId())!=motorwayTypes.end()) {
+      else if (motorwayTypes.IsSet(area->GetType())) {
         return motorway;
       }
     }
     else if (node.GetPathObject().GetType()==refWay) {
       WayRef way=postprocessor.GetWay(node.GetPathObject().GetFileOffset());
 
-      if (motorwayLinkTypes.find(way->GetTypeId())!=motorwayLinkTypes.end()) {
+      if (motorwayLinkTypes.IsSet(way->GetType())) {
         return link;
       }
-      else if (motorwayTypes.find(way->GetTypeId())!=motorwayTypes.end()) {
+      else if (motorwayTypes.IsSet(way->GetType())) {
         return motorway;
       }
     }
@@ -667,14 +667,14 @@ namespace osmscout {
     return false;
   }
 
-  void RoutePostprocessor::InstructionPostprocessor::AddMotorwayType(TypeId type)
+  void RoutePostprocessor::InstructionPostprocessor::AddMotorwayType(const TypeInfoRef& type)
   {
-    motorwayTypes.insert(type);
+    motorwayTypes.Set(type);
   }
 
-  void RoutePostprocessor::InstructionPostprocessor::AddMotorwayLinkType(TypeId type)
+  void RoutePostprocessor::InstructionPostprocessor::AddMotorwayLinkType(const TypeInfoRef& type)
   {
-    motorwayLinkTypes.insert(type);
+    motorwayLinkTypes.Set(type);
   }
 
   bool RoutePostprocessor::InstructionPostprocessor::Process(const RoutePostprocessor& postprocessor,
@@ -1070,17 +1070,17 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::IsOfType(const ObjectFileRef& object,
-                                    const OSMSCOUT_HASHSET<TypeId>& types) const
+                                    const TypeInfoSet& types) const
   {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return types.find(area->GetTypeId())!=types.end();
+      return types.IsSet(area->GetType());
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      return types.find(way->GetTypeId())!=types.end();
+      return types.IsSet(way->GetType());
     }
     else {
       assert(false);
