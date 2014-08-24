@@ -404,7 +404,6 @@ namespace osmscout {
     Way   way;
     OSMId wayId=rawWay.GetId();
 
-    way.SetType(rawWay.GetType());
     way.SetFeatures(rawWay.GetFeatureValueBuffer());
 
     way.ids.resize(rawWay.GetNodeCount());

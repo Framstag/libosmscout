@@ -200,7 +200,6 @@ namespace osmscout {
     OSMId      wayId=rawWay.GetId();
     Area::Ring ring;
 
-    ring.SetType(rawWay.GetType());
     ring.SetFeatures(rawWay.GetFeatureValueBuffer());
 
     ring.ring=Area::outerRingId;

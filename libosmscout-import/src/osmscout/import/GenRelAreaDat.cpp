@@ -882,7 +882,6 @@ namespace osmscout {
          ring++) {
       if (ring->IsArea() &&
           ring->ways.front()->GetType()!=typeConfig.typeInfoIgnore) {
-        ring->role.SetType(ring->ways.front()->GetType());
         ring->role.SetFeatures(ring->ways.front()->GetFeatureValueBuffer());
       }
     }
