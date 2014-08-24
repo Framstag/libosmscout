@@ -74,12 +74,10 @@ namespace osmscout {
     SetVehicle(vehicleFoot);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-      if (!typeConfig.GetTypeInfo(typeId)->CanRouteFoot()) {
-        continue;
+    for (auto type : typeConfig.GetTypes()) {
+      if (type->CanRouteFoot()) {
+        AddType(type->GetId(),maxSpeed);
       }
-
-      AddType(typeId,maxSpeed);
     }
   }
 
@@ -91,12 +89,11 @@ namespace osmscout {
     SetVehicle(vehicleBicycle);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-      if (!typeConfig.GetTypeInfo(typeId)->CanRouteBicycle()) {
-        continue;
+    for (auto type : typeConfig.GetTypes()) {
+      if (type->CanRouteBicycle()) {
+        AddType(type->GetId(),maxSpeed);
       }
 
-      AddType(typeId,maxSpeed);
     }
   }
 
@@ -111,22 +108,19 @@ namespace osmscout {
     SetVehicle(vehicleCar);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-      TypeInfoRef type=typeConfig.GetTypeInfo(typeId);
+    for (auto type : typeConfig.GetTypes()) {
       if (!type->CanRouteCar()) {
-        continue;
+        std::map<std::string,double>::const_iterator speed=speedMap.find(type->GetName());
+
+        if (speed==speedMap.end()) {
+          std::cerr << "No speed for type '" << type->GetName() << "' defined!" << std::endl;
+          everythingResolved=false;
+
+          continue;
+        }
+
+        AddType(type->GetId(),speed->second);
       }
-
-      std::map<std::string,double>::const_iterator speed=speedMap.find(type->GetName());
-
-      if (speed==speedMap.end()) {
-        std::cerr << "No speed for type '" << type->GetName() << "' defined!" << std::endl;
-        everythingResolved=false;
-
-        continue;
-      }
-
-      AddType(typeId,speed->second);
     }
 
     return everythingResolved;
