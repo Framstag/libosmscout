@@ -243,8 +243,7 @@ namespace osmscout
         return false;
       }
 
-      if(node.GetTypeId() != typeIgnore &&
-         !node.GetType()->GetIgnore()) {
+      if(!node.GetType()->GetIgnore()) {
         NameFeatureValue    *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
         NameAltFeatureValue *nameAltValue=nameAltReader.GetValue(node.GetFeatureValueBuffer());
 

@@ -57,7 +57,7 @@ namespace osmscout {
     bool GetWays(const ImportParameter& parameter,
                  Progress& progress,
                  const TypeConfig& typeConfig,
-                 std::set<TypeId>& types,
+                 TypeInfoSet& types,
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& ways);
 

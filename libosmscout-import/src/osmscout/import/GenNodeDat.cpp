@@ -119,7 +119,6 @@ namespace osmscout {
 
         nodesWrittenCount++;
       }
-
     }
 
     if (!scanner.Close()) {

@@ -1785,6 +1785,159 @@ namespace osmscout {
 
   typedef Ref<TypeInfo> TypeInfoRef;
 
+  class OSMSCOUT_API TypeInfoSetConstIterator : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
+  {
+  private:
+    std::vector<TypeInfoRef>::const_iterator iterCurrent;
+    std::vector<TypeInfoRef>::const_iterator iterEnd;
+
+  public:
+    TypeInfoSetConstIterator(const std::vector<TypeInfoRef>::const_iterator& iterCurrent,
+                             const std::vector<TypeInfoRef>::const_iterator& iterEnd)
+    : iterCurrent(iterCurrent),
+      iterEnd(iterEnd)
+    {
+      while (this->iterCurrent!=this->iterEnd &&
+            this->iterCurrent->Invalid()) {
+        ++this->iterCurrent;
+      }
+    }
+
+    TypeInfoSetConstIterator(const TypeInfoSetConstIterator& other)
+    : iterCurrent(other.iterCurrent),
+      iterEnd(other.iterEnd)
+    {
+      // no code
+    }
+
+    TypeInfoSetConstIterator& operator++()
+    {
+      ++iterCurrent;
+
+      while (iterCurrent!=iterEnd &&
+            iterCurrent->Invalid()) {
+        ++iterCurrent;
+      }
+
+      return *this;
+    }
+    TypeInfoSetConstIterator operator++(int)
+     {
+      TypeInfoSetConstIterator tmp(*this);
+
+      operator++();
+
+      return tmp;
+     }
+
+    bool operator==(const TypeInfoSetConstIterator& other)
+    {
+      return iterCurrent==other.iterCurrent;
+    }
+
+    bool operator!=(const TypeInfoSetConstIterator& other)
+    {
+      return iterCurrent!=other.iterCurrent;
+    }
+
+    const TypeInfoRef& operator*()
+    {
+      return *iterCurrent;
+    }
+  };
+
+  class OSMSCOUT_API TypeInfoSet
+  {
+  private:
+    std::vector<TypeInfoRef> types;
+    size_t                   count;
+
+  public:
+    TypeInfoSet();
+    TypeInfoSet(const TypeConfig& typeConfig);
+    TypeInfoSet(const TypeInfoSet& other);
+
+    void Adapt(const TypeConfig& typeConfig);
+
+    void Clear()
+    {
+      types.clear();
+      count=0;
+    }
+
+    void Set(const TypeInfoRef& type)
+    {
+      if (type->GetIndex()>=types.size()) {
+        types.resize(type->GetIndex()+1);
+      }
+
+      if (types[type->GetIndex()].Invalid()) {
+        types[type->GetIndex()]=type;
+        count++;
+      }
+    }
+
+    void Remove(const TypeInfoRef& type)
+    {
+      if (type->GetIndex()<types.size() &&
+          types[type->GetIndex()].Valid()) {
+        types[type->GetIndex()]=NULL;
+        count--;
+      }
+    }
+
+    void Remove(const TypeInfoSet& otherTypes)
+    {
+      for (auto type : otherTypes.types)
+      {
+        if (type.Valid() &&
+            type->GetIndex()<types.size() &&
+            types[type->GetIndex()].Valid()) {
+          types[type->GetIndex()]=NULL;
+          count--;
+        }
+      }
+    }
+
+    bool IsSet(const TypeInfoRef& type)
+    {
+      return type->GetIndex()<types.size() &&
+             types[type->GetIndex()].Valid();
+    }
+
+    bool Empty() const
+    {
+      return count==0;
+    }
+
+    size_t Size() const
+    {
+      return count;
+    }
+
+    TypeInfoSet& operator=(const TypeInfoSet& other)
+    {
+      if (&other!=this) {
+        this->types=other.types;
+        this->count=other.count;
+      }
+
+      return *this;
+    }
+
+    TypeInfoSetConstIterator begin() const
+    {
+      return TypeInfoSetConstIterator(types.begin(),
+                                      types.end());
+    }
+
+    TypeInfoSetConstIterator end() const
+    {
+      return TypeInfoSetConstIterator(types.end(),
+                                      types.end());
+    }
+  };
+
   class OSMSCOUT_API FeatureValueBuffer
   {
   private:
@@ -1961,7 +2114,16 @@ namespace osmscout {
 
     TypeId GetMaxTypeId() const;
 
-    const TypeInfoRef& GetTypeInfo(TypeId id) const;
+    /**
+     * Returns the type definition for the given type id
+     */
+    const TypeInfoRef GetTypeInfo(TypeId id) const;
+
+    /**
+     * Returns the type definition for the given type name. If there is no
+     * type definition for the given name and invalid reference is returned.
+     */
+    const TypeInfoRef GetTypeInfo(const std::string& name) const;
 
     TypeInfoRef GetNodeType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
 
@@ -1974,15 +2136,10 @@ namespace osmscout {
     TypeId GetNodeTypeId(const std::string& name) const;
     TypeId GetWayTypeId(const std::string& name) const;
     TypeId GetAreaTypeId(const std::string& name) const;
-    TypeId GetRelationTypeId(const std::string& name) const;
 
-    void GetAreaTypes(std::set<TypeId>& types) const;
-    void GetWayTypes(std::set<TypeId>& types) const;
-
-    void GetRoutables(std::set<TypeId>& types) const;
-    void GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
-    void GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
-    void GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const;
+    void GetNodeTypes(TypeInfoSet& types) const;
+    void GetAreaTypes(TypeInfoSet& types) const;
+    void GetWayTypes(TypeInfoSet& types) const;
     //@}
 
     /**

@@ -59,11 +59,6 @@ namespace osmscout {
       return featureValueBuffer.GetType();
     }
 
-    inline TypeId GetTypeId() const
-    {
-      return featureValueBuffer.GetTypeId();
-    }
-
     inline const GeoCoord& GetCoords() const
     {
       return coords;

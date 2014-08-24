@@ -2142,6 +2142,30 @@ namespace osmscout {
     return access;
   }
 
+  TypeInfoSet::TypeInfoSet()
+  : count(0)
+  {
+    // no code
+  }
+
+  TypeInfoSet::TypeInfoSet(const TypeConfig& typeConfig)
+  : count(0)
+  {
+    types.resize(typeConfig.GetTypeCount());
+  }
+
+  TypeInfoSet::TypeInfoSet(const TypeInfoSet& other)
+  : types(other.types),
+    count(other.count)
+  {
+    // no code
+  }
+
+  void TypeInfoSet::Adapt(const TypeConfig& typeConfig)
+  {
+    types.resize(typeConfig.GetTypeCount());
+  }
+
   TypeConfig::TypeConfig()
    : nextTagId(0)
   {
@@ -2454,11 +2478,22 @@ namespace osmscout {
     return tags[id];
   }
 
-  const TypeInfoRef& TypeConfig::GetTypeInfo(TypeId id) const
+  const TypeInfoRef TypeConfig::GetTypeInfo(TypeId id) const
   {
     assert(id<types.size());
 
     return types[id];
+  }
+
+  const TypeInfoRef TypeConfig::GetTypeInfo(const std::string& name) const
+  {
+    auto typeEntry=nameToTypeMap.find(name);
+
+    if (typeEntry!=nameToTypeMap.end()) {
+      return typeEntry->second;
+    }
+
+    return TypeInfoRef();
   }
 
   const FeatureRef& TypeConfig::GetFeature(FeatureId id) const
@@ -2670,94 +2705,41 @@ namespace osmscout {
     return typeIgnore;
   }
 
-  TypeId TypeConfig::GetRelationTypeId(const std::string& name) const
+  void TypeConfig::GetNodeTypes(TypeInfoSet& types) const
   {
-    auto typeEntry=nameToTypeMap.find(name);
+    types.Clear();
+    types.Adapt(*this);
 
-    if (typeEntry!=nameToTypeMap.end() &&
-        typeEntry->second->CanBeRelation()) {
-      return typeEntry->second->GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  void TypeConfig::GetAreaTypes(std::set<TypeId>& types) const
-  {
     for (auto type : this->types) {
-      if (type->GetId()==typeIgnore) {
-        continue;
-      }
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (type->CanBeArea()) {
-        types.insert(type->GetId());
+      if (!type->GetIgnore() &&
+          type->CanBeNode()) {
+        types.Set(type);
       }
     }
   }
 
-  void TypeConfig::GetWayTypes(std::set<TypeId>& types) const
+  void TypeConfig::GetAreaTypes(TypeInfoSet& types) const
   {
+    types.Clear();
+    types.Adapt(*this);
+
     for (auto type : this->types) {
-      if (type->GetId()==typeIgnore) {
-        continue;
-      }
-
-      if (type->GetIgnore()) {
-        continue;
-      }
-
-      if (type->CanBeWay()) {
-        types.insert(type->GetId());
+      if (!type->GetIgnore() &&
+          type->CanBeArea()) {
+        types.Set(type);
       }
     }
   }
 
-  void TypeConfig::GetRoutables(std::set<TypeId>& types) const
+  void TypeConfig::GetWayTypes(TypeInfoSet& types) const
   {
-    types.clear();
+    types.Clear();
+    types.Adapt(*this);
 
     for (auto type : this->types) {
-      if (type->CanRouteFoot() ||
-          type->CanRouteBicycle() ||
-          type->CanRouteCar()) {
-        types.insert(type->GetId());
-      }
-    }
-  }
-
-  void TypeConfig::GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const
-  {
-    types.clear();
-
-    for (auto type : this->types) {
-      if (type->GetIndexAsLocation()) {
-        types.insert(type->GetId());
-      }
-    }
-  }
-
-  void TypeConfig::GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const
-  {
-    types.clear();
-
-    for (auto type : this->types) {
-      if (type->GetIndexAsRegion()) {
-        types.insert(type->GetId());
-      }
-    }
-  }
-
-  void TypeConfig::GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const
-  {
-    types.clear();
-
-    for (auto type : this->types) {
-      if (type->GetIndexAsPOI()) {
-        types.insert(type->GetId());
+      if (!type->GetIgnore() &&
+          type->CanBeWay()) {
+        types.Set(type);
       }
     }
   }

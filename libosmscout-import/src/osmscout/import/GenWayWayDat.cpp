@@ -137,14 +137,14 @@ namespace osmscout {
   bool WayWayDataGenerator::GetWays(const ImportParameter& parameter,
                                      Progress& progress,
                                      const TypeConfig& typeConfig,
-                                     std::set<TypeId>& types,
+                                     TypeInfoSet& types,
                                      FileScanner& scanner,
                                      std::vector<std::list<RawWayRef> >& ways)
   {
-    uint32_t         wayCount=0;
-    size_t           collectedWaysCount=0;
-    size_t           typesWithWays=0;
-    std::set<TypeId> currentTypes(types);
+    uint32_t    wayCount=0;
+    size_t      collectedWaysCount=0;
+    size_t      typesWithWays=0;
+    TypeInfoSet currentTypes(types);
 
     if (!scanner.GotoBegin()) {
       progress.Error("Error while positioning at start of file");
@@ -175,50 +175,46 @@ namespace osmscout {
         continue;
       }
 
-      if (currentTypes.find(way->GetTypeId())==currentTypes.end()) {
+      if (!currentTypes.IsSet(way->GetType())) {
         continue;
       }
 
-      if (ways[way->GetTypeId()].empty()) {
+      if (ways[way->GetType()->GetIndex()].empty()) {
         typesWithWays++;
       }
 
-      ways[way->GetTypeId()].push_back(way);
+      ways[way->GetType()->GetIndex()].push_back(way);
 
       collectedWaysCount++;
 
       while (collectedWaysCount>parameter.GetRawWayBlockSize() &&
              typesWithWays>1) {
-        size_t victimType=ways.size();
+        TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (size_t i=0; i<ways.size(); i++) {
-          if (!ways[i].empty() &&
-              (victimType>=ways.size() ||
-               ways[i].size()<ways[victimType].size())) {
-            victimType=i;
+        for (auto type : currentTypes) {
+          if (!ways[type->GetIndex()].empty() &&
+              (victimType.Invalid() ||
+               ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
+            victimType=type;
           }
         }
 
-        // If there is more then one type of was, we always must find a "victim" type.
-        assert(victimType<ways.size());
+        // If there is more then one type of way, we always must find a "victim" type.
+        assert(victimType.Valid());
 
-        collectedWaysCount-=ways[victimType].size();
-        ways[victimType].clear();
+        collectedWaysCount-=ways[victimType->GetIndex()].size();
+        ways[victimType->GetIndex()].clear();
 
         typesWithWays--;
-        currentTypes.erase(victimType);
+        currentTypes.Remove(victimType);
       }
     }
 
     // If we are done, remove all successfully collected types from our list of "not yet collected" types.
-    for (std::set<TypeId>::const_iterator type=currentTypes.begin();
-         type!=currentTypes.end();
-         ++type) {
-      types.erase(*type);
-    }
+    types.Remove(currentTypes);
 
-    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
+    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.Size())+" types");
 
     return true;
   }
@@ -239,11 +235,7 @@ namespace osmscout {
 
     restrictions.erase(hits.first,hits.second);
 
-    for (std::list<TurnRestrictionRef>::iterator r=oldRestrictions.begin();
-        r!=oldRestrictions.end();
-        ++r) {
-      TurnRestrictionRef restriction(*r);
-
+    for (auto restriction : oldRestrictions) {
       if (restriction->GetFrom()==oldId) {
         restriction->SetFrom(newId);
         restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
@@ -262,8 +254,8 @@ namespace osmscout {
     // We have an index entry for turn restriction, where the given way id is
     // "from" or "to" so we can just check for "via" == nodeId
 
-    std::pair<std::multimap<OSMId,TurnRestrictionRef>::const_iterator,
-              std::multimap<OSMId,TurnRestrictionRef>::const_iterator> hits=restrictions.equal_range(wayId);
+    auto hits=restrictions.equal_range(wayId);
+
     for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator hit=hits.first;
         hit!=hits.second;
         ++hit) {
@@ -303,11 +295,8 @@ namespace osmscout {
     size_t         wayCount=ways.size();
 
     currentWay=1;
-    for (WayListPtr w=ways.begin();
-         w!=ways.end();
-         ++w) {
-      RawWayRef way(*w);
-      OSMId     lastNodeId=way->GetLastNodeId();
+    for (auto way : ways) {
+      OSMId lastNodeId=way->GetLastNodeId();
 
       progress.SetProgress(currentWay,wayCount);
 
@@ -462,7 +451,7 @@ namespace osmscout {
   {
     progress.SetAction("Generate wayway.tmp");
 
-    std::set<TypeId>                        wayTypes;
+    TypeInfoSet                             wayTypes;
 
     // List of restrictions for a way
     std::multimap<OSMId,TurnRestrictionRef> restrictions; //! Map of restrictions
@@ -520,8 +509,8 @@ namespace osmscout {
     /* ------ */
 
     size_t iteration=1;
-    while (!wayTypes.empty()) {
-      std::vector<std::list<RawWayRef> > waysByType(typeConfig->GetTypes().size());
+    while (!wayTypes.Empty()) {
+      std::vector<std::list<RawWayRef> > waysByType(typeConfig->GetTypeCount());
 
       //
       // Load type data
@@ -565,13 +554,9 @@ namespace osmscout {
       CoordDataFile::CoordResultMap coordsMap;
 
       for (size_t type=0; type<waysByType.size(); type++) {
-        for (std::list<RawWayRef>::const_iterator w=waysByType[type].begin();
-             w!=waysByType[type].end();
-             ++w) {
-          RawWayRef way(*w);
-
-          for (size_t n=0; n<way->GetNodeCount(); n++) {
-            nodeIds.insert(way->GetNodeId(n));
+        for (auto rawWay : waysByType[type]) {
+          for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
+            nodeIds.insert(rawWay->GetNodeId(n));
           }
         }
       }
@@ -587,17 +572,13 @@ namespace osmscout {
       progress.SetAction("Writing ways");
 
       for (size_t type=0; type<waysByType.size(); type++) {
-        for (std::list<RawWayRef>::const_iterator w=waysByType[type].begin();
-             w!=waysByType[type].end();
-             ++w) {
-          RawWayRef rawWay(*w);
-
+        for (auto rawWay : waysByType[type]) {
           WriteWay(progress,
                    typeConfig,
                    wayWriter,
                    writtenWayCount,
                    coordsMap,
-                   *rawWay);
+                   rawWay);
         }
 
         waysByType[type].clear();

@@ -29,7 +29,6 @@ namespace osmscout {
   private:
     FileWriter                 writer;
     uint32_t                   overallDataCount;
-    OSMSCOUT_HASHSET<TypeId>   poiTypes;
     NameFeatureValueReader     *nameReader;
     LocationFeatureValueReader *locationReader;
     AddressFeatureValueReader  *addressReader;
@@ -50,8 +49,6 @@ namespace osmscout {
                                                          const TypeConfig& typeConfig)
   {
     overallDataCount=0;
-
-    typeConfig.GetIndexAsPOITypes(poiTypes);
 
     nameReader=new NameFeatureValueReader(typeConfig);
     locationReader=new LocationFeatureValueReader(typeConfig);
@@ -101,7 +98,7 @@ namespace osmscout {
                      !location.empty() &&
                      !address.empty();
 
-      bool isPoi=!name.empty() && poiTypes.find(ring->GetTypeId())!=poiTypes.end();
+      bool isPoi=!name.empty() && ring->GetType()->GetIndexAsPOI();
 
       size_t locationIndex;
 
@@ -125,7 +122,7 @@ namespace osmscout {
               return false;
             }
 
-            if (!writer.WriteNumber(ring->GetTypeId())) {
+            if (!writer.WriteNumber(ring->GetType()->GetId())) {
               return false;
             }
 
@@ -154,7 +151,7 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.WriteNumber(ring->GetTypeId())) {
+        if (!writer.WriteNumber(ring->GetType()->GetId())) {
           return false;
         }
 

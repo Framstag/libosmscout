@@ -333,7 +333,6 @@ namespace osmscout {
   bool LocationIndexGenerator::IndexRegionAreas(const TypeConfig& typeConfig,
                                                 const ImportParameter& parameter,
                                                 Progress& progress,
-                                                const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                                                 Region& rootRegion)
   {
     FileScanner            scanner;
@@ -369,7 +368,7 @@ namespace osmscout {
         return false;
       }
 
-      if (regionTypes.find(area.GetTypeId())==regionTypes.end()) {
+      if (!area.GetType()->GetIndexAsRegion()) {
         continue;
       }
 
@@ -499,7 +498,6 @@ namespace osmscout {
   bool LocationIndexGenerator::IndexRegionNodes(const TypeConfigRef& typeConfig,
                                                 const ImportParameter& parameter,
                                                 Progress& progress,
-                                                const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                                                 RegionRef& rootRegion,
                                                 const RegionIndex& regionIndex)
   {
@@ -536,7 +534,7 @@ namespace osmscout {
         return false;
       }
 
-      if (regionTypes.find(node.GetTypeId())!=regionTypes.end()) {
+      if (node.GetType()->GetIndexAsRegion()) {
         NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
 
         if (nameValue==NULL) {
@@ -675,7 +673,6 @@ namespace osmscout {
   bool LocationIndexGenerator::IndexLocationAreas(const TypeConfig& typeConfig,
                                                   const ImportParameter& parameter,
                                                   Progress& progress,
-                                                  const OSMSCOUT_HASHSET<TypeId>& locationTypes,
                                                   RegionRef& rootRegion,
                                                   const RegionIndex& regionIndex)
   {
@@ -715,8 +712,7 @@ namespace osmscout {
       for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
           ring!=area.rings.end();
           ++ring) {
-        if (!ring->GetType()->GetIgnore() &&
-            locationTypes.find(ring->GetTypeId())!=locationTypes.end()) {
+        if (!ring->GetType()->GetIgnore() && ring->GetType()->GetIndexAsLocation()) {
           NameFeatureValue *nameValue=nameReader.GetValue(ring->GetFeatureValueBuffer());
 
           if (nameValue!=NULL) {
@@ -794,7 +790,6 @@ namespace osmscout {
   bool LocationIndexGenerator::IndexLocationWays(const TypeConfigRef& typeConfig,
                                                  const ImportParameter& parameter,
                                                  Progress& progress,
-                                                 const OSMSCOUT_HASHSET<TypeId>& locationTypes,
                                                  RegionRef& rootRegion,
                                                  const RegionIndex& regionIndex)
   {
@@ -832,7 +827,7 @@ namespace osmscout {
         return false;
       }
 
-      if (locationTypes.find(way.GetTypeId())==locationTypes.end()) {
+      if (!way.GetType()->GetIndexAsLocation()) {
         continue;
       }
 
@@ -978,10 +973,10 @@ namespace osmscout {
     added=true;
   }
 
-  bool LocationIndexGenerator::IndexAddressAreas(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexAddressAreas(const TypeConfig& typeConfig,
+                                                 const ImportParameter& parameter,
                                                  Progress& progress,
                                                  RegionRef& rootRegion,
-                                                 const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
@@ -1004,7 +999,8 @@ namespace osmscout {
 
     FileOffset            fileOffset;
     uint32_t              tmpType;
-    TypeId                type;
+    TypeId                typeId;
+    TypeInfoRef           type;
     std::string           name;
     std::string           location;
     std::string           address;
@@ -1027,12 +1023,13 @@ namespace osmscout {
         return false;
       }
 
-      type=(TypeId)tmpType;
+      typeId=(TypeId)tmpType;
+      type=typeConfig.GetTypeInfo(typeId);
 
       bool isAddress=!location.empty() &&
                      !address.empty();
       bool isPOI=!name.empty() &&
-                 poiTypes.find(type)!=poiTypes.end();
+                 type->GetIndexAsPOI();
 
       if (!isAddress && !isPOI) {
         continue;
@@ -1242,10 +1239,10 @@ namespace osmscout {
     return false;
   }
 
-  bool LocationIndexGenerator::IndexAddressWays(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexAddressWays(const TypeConfig& typeConfig,
+                                                const ImportParameter& parameter,
                                                 Progress& progress,
                                                 RegionRef& rootRegion,
-                                                const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                                                 const RegionIndex& regionIndex)
   {
     FileScanner scanner;
@@ -1268,7 +1265,8 @@ namespace osmscout {
 
     FileOffset            fileOffset;
     uint32_t              tmpType;
-    TypeId                type;
+    TypeId                typeId;
+    TypeInfoRef           type;
     std::string           name;
     std::string           location;
     std::vector<GeoCoord> nodes;
@@ -1289,10 +1287,11 @@ namespace osmscout {
         return false;
       }
 
-      type=(TypeId)tmpType;
+      typeId=(TypeId)tmpType;
+      type=typeConfig.GetTypeInfo(typeId);
 
       bool isPOI=!name.empty() &&
-                 poiTypes.find(type)!=poiTypes.end();
+                 type->GetIndexAsPOI();
 
       if (!isPOI) {
         continue;
@@ -1409,10 +1408,10 @@ namespace osmscout {
     added=true;
   }
 
-  bool LocationIndexGenerator::IndexAddressNodes(const ImportParameter& parameter,
+  bool LocationIndexGenerator::IndexAddressNodes(const TypeConfig& typeConfig,
+                                                 const ImportParameter& parameter,
                                                  Progress& progress,
                                                  RegionRef& rootRegion,
-                                                 const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
@@ -1435,7 +1434,8 @@ namespace osmscout {
 
     FileOffset  fileOffset;
     uint32_t    tmpType;
-    TypeId      type;
+    TypeId      typeId;
+    TypeInfoRef type;
     std::string name;
     std::string location;
     std::string address;
@@ -1458,12 +1458,13 @@ namespace osmscout {
         return false;
       }
 
-      type=(TypeId)tmpType;
+      typeId=(TypeId)tmpType;
+      type=typeConfig.GetTypeInfo(typeId);
 
       bool isAddress=!location.empty() &&
                      !address.empty();
       bool isPOI=!name.empty() &&
-                 poiTypes.find(type)!=poiTypes.end();
+                 type->GetIndexAsPOI();
 
       if (!isAddress && !isPOI) {
         continue;
@@ -1774,11 +1775,6 @@ namespace osmscout {
     RegionRef                          rootRegion;
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
-
-    OSMSCOUT_HASHSET<TypeId>           locationTypes;
-    OSMSCOUT_HASHSET<TypeId>           regionTypes;
-    OSMSCOUT_HASHSET<TypeId>           poiTypes;
-
     TypeId                             boundaryId;
     std::list<Boundary>                boundaryAreas;
 
@@ -1813,10 +1809,6 @@ namespace osmscout {
 
     boundaryId=typeConfig->GetAreaTypeId("boundary_administrative");
     assert(boundaryId!=typeIgnore);
-
-    typeConfig->GetIndexAsLocationTypes(locationTypes);
-    typeConfig->GetIndexAsRegionTypes(regionTypes);
-    typeConfig->GetIndexAsPOITypes(poiTypes);
 
     //
     // Getting all areas of type 'administrative boundary'.
@@ -1854,7 +1846,6 @@ namespace osmscout {
     if (!IndexRegionAreas(typeConfig,
                           parameter,
                           progress,
-                          regionTypes,
                           *rootRegion)) {
       return false;
     }
@@ -1892,7 +1883,6 @@ namespace osmscout {
     if (!IndexRegionNodes(typeConfig,
                           parameter,
                           progress,
-                          regionTypes,
                           rootRegion,
                           regionIndex)) {
       return false;
@@ -1903,7 +1893,6 @@ namespace osmscout {
     if (!IndexLocationAreas(typeConfig,
                             parameter,
                             progress,
-                            locationTypes,
                             rootRegion,
                             regionIndex)) {
       return false;
@@ -1914,7 +1903,6 @@ namespace osmscout {
     if (!IndexLocationWays(typeConfig,
                            parameter,
                            progress,
-                           locationTypes,
                            rootRegion,
                            regionIndex)) {
       return false;
@@ -1934,30 +1922,30 @@ namespace osmscout {
 
     progress.SetAction("Index address areas");
 
-    if (!IndexAddressAreas(parameter,
+    if (!IndexAddressAreas(typeConfig,
+                           parameter,
                            progress,
                            rootRegion,
-                           poiTypes,
                            regionIndex)) {
       return false;
     }
 
     progress.SetAction("Index address ways");
 
-    if (!IndexAddressWays(parameter,
+    if (!IndexAddressWays(typeConfig,
+                          parameter,
                           progress,
                           rootRegion,
-                          poiTypes,
                           regionIndex)) {
       return false;
     }
 
     progress.SetAction("Index address nodes");
 
-    if (!IndexAddressNodes(parameter,
+    if (!IndexAddressNodes(typeConfig,
+                           parameter,
                            progress,
                            rootRegion,
-                           poiTypes,
                            regionIndex)) {
       return false;
     }

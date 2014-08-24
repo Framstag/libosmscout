@@ -26,7 +26,6 @@ namespace osmscout {
   private:
     FileWriter                 writer;
     uint32_t                   overallDataCount;
-    OSMSCOUT_HASHSET<TypeId>   poiTypes;
     NameFeatureValueReader     *nameReader;
     LocationFeatureValueReader *locationReader;
 
@@ -46,8 +45,6 @@ namespace osmscout {
                                                          const TypeConfig& typeConfig)
   {
     overallDataCount=0;
-
-    typeConfig.GetIndexAsPOITypes(poiTypes);
 
     nameReader=new NameFeatureValueReader(typeConfig);
     locationReader=new LocationFeatureValueReader(typeConfig);
@@ -69,26 +66,25 @@ namespace osmscout {
                                            Way& way,
                                            bool& /*save*/)
   {
-    NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
-    LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
-
-    bool isPoi=nameValue!=NULL &&
-               poiTypes.find(way.GetTypeId())!=poiTypes.end();
-
-    std::string name;
-    std::string location;
-    std::string address;
-
-    if (nameValue!=NULL) {
-      name=nameValue->GetName();
+    if (!way.GetType()->GetIndexAsPOI()) {
+      return true;
     }
+
+    NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (nameValue==NULL) {
+      return true;
+    }
+
+    LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
+    std::string          name;
+    std::string          location;
+    std::string          address;
+
+    name=nameValue->GetName();
 
     if (locationValue!=NULL) {
       location=locationValue->GetLocation();
-    }
-
-    if (!isPoi) {
-      return true;
     }
 
     if (!writer.WriteFileOffset(offset)) {

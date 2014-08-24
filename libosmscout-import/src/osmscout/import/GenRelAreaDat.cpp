@@ -609,14 +609,7 @@ namespace osmscout {
                                                         const RawRelation& rawRelation,
                                                         std::list<MultipolygonPart>& parts)
   {
-    TypeId boundaryId;
-
-    boundaryId=typeConfig.GetWayTypeId("boundary_administrative");
-
-    if (boundaryId==typeIgnore) {
-      boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
-    }
-
+    TypeId                         boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
     std::set<OSMId>                pendingRelationIds;
@@ -644,7 +637,7 @@ namespace osmscout {
                 member->role=="outer" ||
                 member->role.empty())) {
         if (boundaryId!=typeIgnore &&
-            rawRelation.GetTypeId()==boundaryId) {
+            rawRelation.GetType()->GetId()==boundaryId) {
           if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
                              NumberToString(member->id)+
@@ -710,7 +703,7 @@ namespace osmscout {
                     member->role=="outer" ||
                     member->role.empty())) {
             if (boundaryId!=typeIgnore &&
-                rawRelation.GetTypeId()==boundaryId) {
+                rawRelation.GetType()->GetId()==boundaryId) {
               if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
                                  NumberToString(member->id)+
@@ -794,7 +787,7 @@ namespace osmscout {
     // Now build together everything
 
     if (boundaryId!=typeIgnore &&
-        rawRelation.GetTypeId()==boundaryId) {
+        rawRelation.GetType()->GetId()==boundaryId) {
       return ComposeBoundaryMembers(typeConfig,
                                     progress,
                                     coordMap,

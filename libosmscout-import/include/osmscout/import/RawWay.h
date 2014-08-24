@@ -62,11 +62,6 @@ namespace osmscout {
       return featureValueBuffer.GetType();
     }
 
-    inline TypeId GetTypeId() const
-    {
-      return featureValueBuffer.GetType()->GetId();
-    }
-
     inline const std::vector<OSMId>& GetNodes() const
     {
       return nodes;

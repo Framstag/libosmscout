@@ -72,16 +72,16 @@ namespace osmscout {
   bool WayAreaDataGenerator::GetAreas(const ImportParameter& parameter,
                                       Progress& progress,
                                       const TypeConfig& typeConfig,
-                                      std::set<TypeId>& types,
-                                      std::set<TypeId>& slowFallbackTypes,
+                                      TypeInfoSet& types,
+                                      TypeInfoSet& slowFallbackTypes,
                                       const BlacklistSet& blacklist,
                                       FileScanner& scanner,
                                       std::vector<std::list<RawWayRef> >& areas)
   {
-    uint32_t         wayCount=0;
-    size_t           collectedWaysCount=0;
-    size_t           typesWithWays=0;
-    std::set<TypeId> currentTypes(types);
+    uint32_t    wayCount=0;
+    size_t      collectedWaysCount=0;
+    size_t      typesWithWays=0;
+    TypeInfoSet currentTypes(types);
 
     if (!scanner.GotoBegin()) {
       progress.Error("Error while positioning at start of file");
@@ -112,7 +112,7 @@ namespace osmscout {
         continue;
       }
 
-      if (currentTypes.find(way->GetTypeId())==currentTypes.end()) {
+      if (!currentTypes.IsSet(way->GetType())) {
         continue;
       }
 
@@ -124,53 +124,55 @@ namespace osmscout {
         continue;
       }
 
-      if (areas[way->GetTypeId()].empty()) {
+      if (areas[way->GetType()->GetIndex()].empty()) {
         typesWithWays++;
       }
 
-      areas[way->GetTypeId()].push_back(way);
+      areas[way->GetType()->GetIndex()].push_back(way);
 
       collectedWaysCount++;
 
       if (collectedWaysCount>parameter.GetRawWayBlockSize()) {
-        for (size_t i=0; i<areas.size(); i++) {
-          if (!areas[i].empty() &&
-              areas[i].size()>parameter.GetRawWayBlockSize()) {
+        for (auto type : currentTypes) {
+          if (!areas[type->GetIndex()].empty() &&
+              areas[type->GetIndex()].size()>parameter.GetRawWayBlockSize()) {
             progress.Warning("Too many objects for type "+
-                             typeConfig.GetTypeInfo(i)->GetName()+
-                             " ("+NumberToString(areas[i].size())+
+                             type->GetName()+
+                             " ("+NumberToString(areas[type->GetIndex()].size())+
                              "), mark it for low memory fall back");
 
-            collectedWaysCount-=areas[i].size();
-            areas[i].clear();
+            collectedWaysCount-=areas[type->GetIndex()].size();
+            areas[type->GetIndex()].clear();
 
             typesWithWays--;
-            types.erase(i);
-            currentTypes.erase(i);
-            slowFallbackTypes.insert(i);
+            types.Remove(type);
+            slowFallbackTypes.Set(type);
+            currentTypes.Remove(type);
+
+            break;
           }
         }
       }
 
       while (collectedWaysCount>parameter.GetRawWayBlockSize() &&
           typesWithWays>1) {
-        size_t victimType=areas.size();
+        TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (size_t i=0; i<areas.size(); i++) {
-          if (!areas[i].empty() &&
-              (victimType>=areas.size() ||
-               (areas[i].size()<areas[victimType].size()))) {
-            victimType=i;
+        for (auto type : currentTypes) {
+          if (!areas[type->GetIndex()].empty() &&
+              (victimType.Invalid() ||
+               (areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size()))) {
+            victimType=type;
           }
         }
 
-        if (victimType<areas.size()) {
-          collectedWaysCount-=areas[victimType].size();
-          areas[victimType].clear();
+        if (victimType.Valid()) {
+          collectedWaysCount-=areas[victimType->GetIndex()].size();
+          areas[victimType->GetIndex()].clear();
 
           typesWithWays--;
-          currentTypes.erase(victimType);
+          currentTypes.Remove(victimType);
         }
       }
 
@@ -179,13 +181,9 @@ namespace osmscout {
       }
     }
 
-    for (std::set<TypeId>::const_iterator type=currentTypes.begin();
-         type!=currentTypes.end();
-         ++type) {
-      types.erase(*type);
-    }
+    types.Remove(currentTypes);
 
-    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
+    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.Size())+" types");
 
     return true;
   }
@@ -257,7 +255,7 @@ namespace osmscout {
                                                      Progress& progress,
                                                      const TypeConfig& typeConfig,
                                                      FileScanner& scanner,
-                                                     std::set<TypeId>& types,
+                                                     TypeInfoSet& types,
                                                      const BlacklistSet& blacklist,
                                                      FileWriter& writer,
                                                      uint32_t& writtenWayCount,
@@ -295,7 +293,7 @@ namespace osmscout {
         continue;
       }
 
-      if (types.find(way->GetTypeId())==types.end()) {
+      if (types.IsSet(way->GetType())) {
         continue;
       }
 
@@ -334,7 +332,7 @@ namespace osmscout {
       }
     }
 
-    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" areas for "+NumberToString(types.size())+" types");
+    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" areas for "+NumberToString(types.Size())+" types");
 
     return true;
   }
@@ -345,17 +343,17 @@ namespace osmscout {
   {
     progress.SetAction("Generate wayarea.tmp");
 
-    std::set<TypeId> areaTypes;
-    std::set<TypeId> slowFallbackTypes;
+    TypeInfoSet   areaTypes;
+    TypeInfoSet   slowFallbackTypes;
 
-    BlacklistSet     wayBlacklist; //! Map of ways, that should not be handled
+    BlacklistSet  wayBlacklist; //! Map of ways, that should not be handled
 
-    CoordDataFile    coordDataFile("coord.dat");
-    FileScanner      scanner;
-    FileWriter       areaWriter;
-    uint32_t         rawWayCount=0;
+    CoordDataFile coordDataFile("coord.dat");
+    FileScanner   scanner;
+    FileWriter    areaWriter;
+    uint32_t      rawWayCount=0;
 
-    uint32_t         writtenWayCount=0;
+    uint32_t      writtenWayCount=0;
 
     typeConfig->GetAreaTypes(areaTypes);
 
@@ -401,8 +399,8 @@ namespace osmscout {
     /* ------ */
 
     size_t iteration=1;
-    while (!areaTypes.empty()) {
-      std::vector<std::list<RawWayRef> > areasByType(typeConfig->GetTypes().size());
+    while (!areaTypes.Empty()) {
+      std::vector<std::list<RawWayRef> > areasByType(typeConfig->GetTypeCount());
 
       //
       // Load type data
@@ -427,13 +425,9 @@ namespace osmscout {
       CoordDataFile::CoordResultMap coordsMap;
 
       for (size_t type=0; type<areasByType.size(); type++) {
-        for (std::list<RawWayRef>::const_iterator w=areasByType[type].begin();
-             w!=areasByType[type].end();
-             ++w) {
-          RawWayRef areas(*w);
-
-          for (size_t n=0; n<areas->GetNodeCount(); n++) {
-            nodeIds.insert(areas->GetNodeId(n));
+        for (auto rawWay : areasByType[type]) {
+          for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
+            nodeIds.insert(rawWay->GetNodeId(n));
           }
         }
       }
@@ -451,11 +445,7 @@ namespace osmscout {
       progress.SetAction("Writing ways");
 
       for (size_t type=0; type<areasByType.size(); type++) {
-        for (std::list<RawWayRef>::const_iterator w=areasByType[type].begin();
-             w!=areasByType[type].end();
-             ++w) {
-          RawWayRef rawWay(*w);
-
+        for (auto rawWay : areasByType[type]) {
           WriteArea(parameter,
                     progress,
                     typeConfig,
@@ -471,7 +461,7 @@ namespace osmscout {
       iteration++;
     }
 
-    if (!slowFallbackTypes.empty()) {
+    if (!slowFallbackTypes.Empty()) {
       progress.SetAction("Handling low memory fall back");
 
       HandleLowMemoryFallback(parameter,
