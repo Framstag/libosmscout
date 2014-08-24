@@ -240,11 +240,6 @@ namespace osmscout {
     // no code
   }
 
-  void Feature::SetId(FeatureId id)
-  {
-    this->id=id;
-  }
-
   FeatureInstance::FeatureInstance(const FeatureRef& feature,
                                    size_t index,
                                    size_t offset)
@@ -2351,8 +2346,6 @@ namespace osmscout {
       return;
     }
 
-    feature->SetId(features.size());
-
     features.push_back(feature);
     nameToFeatureMap[feature->GetName()]=feature;
 
@@ -2369,11 +2362,6 @@ namespace osmscout {
     else {
       return NULL;
     }
-  }
-
-  const std::vector<FeatureRef>& TypeConfig::GetFeatures() const
-  {
-    return features;
   }
 
   TypeInfoRef TypeConfig::RegisterType(const TypeInfoRef& typeInfo)
@@ -2478,20 +2466,6 @@ namespace osmscout {
     }
   }
 
-  const TagInfo& TypeConfig::GetTagInfo(TagId id) const
-  {
-    assert(id<tags.size());
-
-    return tags[id];
-  }
-
-  const TypeInfoRef TypeConfig::GetTypeInfo(TypeId id) const
-  {
-    assert(id<types.size());
-
-    return types[id];
-  }
-
   const TypeInfoRef TypeConfig::GetTypeInfo(const std::string& name) const
   {
     auto typeEntry=nameToTypeMap.find(name);
@@ -2501,13 +2475,6 @@ namespace osmscout {
     }
 
     return TypeInfoRef();
-  }
-
-  const FeatureRef& TypeConfig::GetFeature(FeatureId id) const
-  {
-    assert(id<features.size());
-
-    return features[id];
   }
 
   bool TypeConfig::IsNameTag(TagId tag, uint32_t& priority) const

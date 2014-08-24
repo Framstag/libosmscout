@@ -257,31 +257,15 @@ namespace osmscout {
    */
   class OSMSCOUT_API Feature : public Referencable
   {
-  private:
-    FeatureId id;
-
   public:
     Feature();
     virtual ~Feature();
-
-    /**
-     * Set the id of this feature
-     */
-    void SetId(FeatureId id);
 
     /**
      * Does further initialization based on the current TypeConfig. For example
      * it registers Tags (and stores their TagId) for further processing.
      */
     virtual void Initialize(TypeConfig& typeConfig) = 0;
-
-    /**
-     * Returns the unique id of this feature
-     */
-    inline FeatureId GetId() const
-    {
-      return id;
-    }
 
     /**
      * Returns the name of the feature
@@ -2074,7 +2058,6 @@ namespace osmscout {
                              uint32_t priority);
 
     TagId GetTagId(const char* name) const;
-    const TagInfo& GetTagInfo(TagId id) const;
 
     bool IsNameTag(TagId tag,
                    uint32_t& priority) const;
@@ -2090,8 +2073,14 @@ namespace osmscout {
     void RegisterFeature(const FeatureRef& feature);
 
     FeatureRef GetFeature(const std::string& name) const;
-    const FeatureRef& GetFeature(FeatureId id) const;
-    const std::vector<FeatureRef>& GetFeatures() const;
+
+    /**
+     * Return all features registered
+     */
+    inline const std::vector<FeatureRef>& GetFeatures() const
+    {
+      return features;
+    }
     //@}
 
     /**
@@ -2122,7 +2111,12 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    const TypeInfoRef GetTypeInfo(TypeId id) const;
+    inline const TypeInfoRef GetTypeInfo(TypeId id) const
+    {
+      assert(id<types.size());
+
+      return types[id];
+    }
 
     /**
      * Returns the type definition for the given type name. If there is no
