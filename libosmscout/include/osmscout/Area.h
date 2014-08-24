@@ -22,7 +22,6 @@
 
 #include <osmscout/GeoCoord.h>
 
-#include <osmscout/AttributeAccess.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>

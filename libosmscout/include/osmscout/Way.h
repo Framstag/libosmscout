@@ -24,8 +24,6 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/AttributeAccess.h>
-
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
