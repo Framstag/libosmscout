@@ -1408,6 +1408,11 @@ namespace osmscout {
      */
     TypeInfo& AddFeature(const FeatureRef& feature);
 
+    inline bool HasFeatures()
+    {
+      return !features.empty();
+    }
+
     /**
      * Returns true, if the feature with the given name has already been
      * assigned to this type.

@@ -1807,8 +1807,15 @@ namespace osmscout {
   {
     assert(type.Valid());
 
-    featureBits=new uint8_t[type->GetFeatureBytes()]();
-    featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
+    if (type->HasFeatures()) {
+      featureBits=new uint8_t[type->GetFeatureBytes()]();
+      featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
+    }
+    else
+    {
+      featureBits=NULL;
+      featureValueBuffer=NULL;
+    }
   }
 
   bool FeatureValueBuffer::HasValue(size_t idx) const
