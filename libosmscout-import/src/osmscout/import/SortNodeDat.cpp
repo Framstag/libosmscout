@@ -68,20 +68,12 @@ namespace osmscout {
                                             Node& node,
                                             bool& /*save*/)
   {
-    if (!node.GetType()->GetIndexAsPOI()) {
-      return true;
-    }
-
     NameFeatureValue     *nameValue=nameReader->GetValue(node.GetFeatureValueBuffer());
     LocationFeatureValue *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
     AddressFeatureValue  *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
 
     bool isAddress=addressValue!=NULL;
     bool isPoi=nameValue!=NULL;
-
-    if (!isAddress && !isPoi) {
-      return true;
-    }
 
     std::string name;
     std::string location;
@@ -94,6 +86,23 @@ namespace osmscout {
     if (addressValue!=NULL && locationValue!=NULL) {
       location=locationValue->GetLocation();
       address=addressValue->GetAddress();
+    }
+
+    if (locationValue!=NULL) {
+      size_t locationIndex;
+
+      if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
+                                   locationIndex)) {
+        node.UnsetFeature(locationIndex);
+      }
+    }
+
+    if (!node.GetType()->GetIndexAsPOI()) {
+      return true;
+    }
+
+    if (!isAddress && !isPoi) {
+      return true;
     }
 
     if (!writer.WriteFileOffset(offset)) {
@@ -118,15 +127,6 @@ namespace osmscout {
 
     if (!writer.WriteCoord(node.GetCoords())) {
       return false;
-    }
-
-    if (locationValue!=NULL) {
-      size_t locationIndex;
-
-      if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
-                                   locationIndex)) {
-        node.UnsetFeature(locationIndex);
-      }
     }
 
     overallDataCount++;
