@@ -202,11 +202,13 @@ namespace osmscout {
     std::string GetDataFilename(Vehicle vehicle) const;
     std::string GetIndexFilename(Vehicle vehicle) const;
 
-    void GetClosestForwardRouteNode(const WayRef& way,
+    void GetClosestForwardRouteNode(const RoutingProfile &profile,
+                                    const WayRef& way,
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode,
                                     size_t& routeNodeIndex);
-    void GetClosestBackwardRouteNode(const WayRef& way,
+    void GetClosestBackwardRouteNode(const RoutingProfile &profile,
+                                     const WayRef& way,
                                      size_t nodeIndex,
                                      RouteNodeRef& routeNode,
                                      size_t& routeNodeIndex);
@@ -221,7 +223,8 @@ namespace osmscout {
                        RNodeRef& forwardRNode,
                        RNodeRef& backwardRNode);
 
-    bool GetTargetNodes(const ObjectFileRef& object,
+    bool GetTargetNodes(const RoutingProfile& profile,
+                        const ObjectFileRef& object,
                         size_t nodeIndex,
                         double& targetLon,
                         double& targetLat,
@@ -276,7 +279,7 @@ namespace osmscout {
                         Vehicle vehicle,
                         double radius,
                         std::vector<osmscout::GeoCoord> via,
-                        std::vector<RouteData>& route);
+                        RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);

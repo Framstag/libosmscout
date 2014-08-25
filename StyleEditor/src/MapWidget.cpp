@@ -22,6 +22,7 @@
 #include <iostream>
 
 #define TMP_SUFFIX ".tmp"
+#define MAX_MAGNIFICATION 1600000
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
@@ -209,8 +210,8 @@ void MapWidget::paint(QPainter *painter)
 
 void MapWidget::zoomIn(double zoomFactor)
 {
-    if (magnification.GetMagnification()*zoomFactor>200000) {
-        magnification.SetMagnification(200000);
+    if (magnification.GetMagnification()*zoomFactor>MAX_MAGNIFICATION) {
+        magnification.SetMagnification(MAX_MAGNIFICATION);
     }
     else {
         magnification.SetMagnification(magnification.GetMagnification()*zoomFactor);

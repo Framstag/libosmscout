@@ -49,6 +49,8 @@ int main(int argc, char* argv[])
   app.setApplicationName("OSMScout");
 
   settings=new Settings();
+//  settings->SetDPI(163*2);
+  settings->SetDPI(110);
 
   //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();

@@ -556,6 +556,7 @@ namespace osmscout {
         }
       }
 
+      iter->SetLocation(curCoord);
       iter->SetDistance(distance);
       iter->SetTime(time);
 

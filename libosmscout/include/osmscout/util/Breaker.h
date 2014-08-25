@@ -23,7 +23,7 @@
 #include <osmscout/CoreFeatures.h>
 
 #if defined(OSMSCOUT_HAVE_THREAD)
-#include <atomic>
+//#include <atomic>
 #include <thread>
 #endif
 
@@ -58,7 +58,7 @@ namespace osmscout {
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:
-    std::atomic_bool aborted;
+    bool aborted;
   public:
     ThreadedBreaker();
 

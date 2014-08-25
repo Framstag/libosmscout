@@ -208,13 +208,18 @@ namespace osmscout {
     return database->GetTypeConfig();
   }
 
-  void RoutingService::GetClosestForwardRouteNode(const WayRef& way,
+  void RoutingService::GetClosestForwardRouteNode(const RoutingProfile &profile,
+                                                  const WayRef& way,
                                                   size_t nodeIndex,
                                                   RouteNodeRef& routeNode,
                                                   size_t& routeNodeIndex)
   {
     routeNode=NULL;
-
+   
+    if(!profile.CanUseForward(way)){
+          return;
+    }
+    
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
       routeNodeDataFile.Get(way->ids[i],
                             routeNode);
@@ -226,7 +231,8 @@ namespace osmscout {
     }
   }
 
-  void RoutingService::GetClosestBackwardRouteNode(const WayRef& way,
+  void RoutingService::GetClosestBackwardRouteNode(const RoutingProfile &profile,
+                                                   const WayRef& way,
                                                    size_t nodeIndex,
                                                    RouteNodeRef& routeNode,
                                                    size_t& routeNodeIndex)
@@ -237,7 +243,8 @@ namespace osmscout {
       return;
     }
 
-    if (!way->GetAttributes().GetAccess().CanRouteBackward()) {
+    /*    if (!way->GetAttributes().GetAccess().CanRouteBackward()) { */
+    if(!profile.CanUseBackward(way)){ 
       return;
     }
 
@@ -735,12 +742,14 @@ namespace osmscout {
       startLon=way->nodes[nodeIndex].GetLon();
       startLat=way->nodes[nodeIndex].GetLat();
 
-      GetClosestForwardRouteNode(way,
+      GetClosestForwardRouteNode(profile,
+                                 way,
                                  nodeIndex,
                                  forwardRouteNode,
                                  forwardNodePos);
 
-      GetClosestBackwardRouteNode(way,
+      GetClosestBackwardRouteNode(profile,
+                                  way,
                                   nodeIndex,
                                   backwardRouteNode,
                                   backwardNodePos);
@@ -806,7 +815,8 @@ namespace osmscout {
     }
   }
 
-  bool RoutingService::GetTargetNodes(const ObjectFileRef& object,
+  bool RoutingService::GetTargetNodes(const RoutingProfile& profile,
+                                      const ObjectFileRef& object,
                                       size_t nodeIndex,
                                       double& targetLon,
                                       double& targetLat,
@@ -844,11 +854,13 @@ namespace osmscout {
       targetLon=way->nodes[nodeIndex].GetLon();
       targetLat=way->nodes[nodeIndex].GetLat();
 
-      GetClosestForwardRouteNode(way,
+      GetClosestForwardRouteNode(profile,
+                                 way,
                                  nodeIndex,
                                  forwardNode,
                                  forwardNodePos);
-      GetClosestBackwardRouteNode(way,
+      GetClosestBackwardRouteNode(profile,
+                                  way,
                                   nodeIndex,
                                   backwardNode,
                                   backwardNodePos);
@@ -899,7 +911,7 @@ namespace osmscout {
                                       Vehicle vehicle,
                                       double radius,
                                       std::vector<osmscout::GeoCoord> via,
-                                      std::vector<RouteData>& route)
+                                      RouteData& route)
   {
       std::vector<size_t> nodeIndexes;
       std::vector<osmscout::ObjectFileRef> objects;
@@ -932,7 +944,10 @@ namespace osmscout {
           if (routePart->IsEmpty()) {
               return false;
           }
-          route.push_back(*routePart);
+          if(index<nodeIndexes.size()-1){
+              routePart->PopEntry();
+          }
+          route.Append(*routePart);
           delete routePart;
       }
       return true;
@@ -991,7 +1006,8 @@ namespace osmscout {
     closeMap.reserve(300000);
 #endif
 
-    if (!GetTargetNodes(targetObject,
+    if (!GetTargetNodes(profile,
+                        targetObject,
                         targetNodeIndex,
                         targetLon,
                         targetLat,
