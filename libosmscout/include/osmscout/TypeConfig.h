@@ -1341,6 +1341,7 @@ namespace osmscout {
     std::list<TypeCondition>             conditions;
     OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
     std::vector<FeatureInstance>         features;
+    size_t                               valueBufferSize;
 
     bool                                 canBeNode;
     bool                                 canBeWay;
@@ -1449,7 +1450,10 @@ namespace osmscout {
     /**
      * Returns the size of the buffer required to store all FeatureValues of this type into
      */
-    size_t GetFeatureValueBufferSize() const;
+    inline size_t GetFeatureValueBufferSize() const
+    {
+      return valueBufferSize;
+    }
 
     /**
      * Returns the unique id of this type. You should not use the type id as an index.

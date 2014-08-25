@@ -1944,6 +1944,7 @@ namespace osmscout {
   TypeInfo::TypeInfo()
    : id(0),
      index(0),
+     valueBufferSize(0),
      canBeNode(false),
      canBeWay(false),
      canBeArea(false),
@@ -2047,10 +2048,13 @@ namespace osmscout {
       }
     }
 
+
     features.push_back(FeatureInstance(feature,
                                        index,
                                        offset));
     nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
+
+    valueBufferSize=offset+feature->GetValueSize();
 
     return *this;
   }
@@ -2076,15 +2080,6 @@ namespace osmscout {
     else {
       return false;
     }
-  }
-
-  size_t TypeInfo::GetFeatureValueBufferSize() const
-  {
-    if (features.empty()) {
-      return 0;
-    }
-
-    return features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
   }
 
   uint8_t TypeInfo::GetDefaultAccess() const
