@@ -1745,8 +1745,6 @@ namespace osmscout {
             FeatureValue* otherValue=other.GetValue(idx);
             FeatureValue* thisValue=AllocateValue(idx);
 
-            assert(thisValue!=NULL);
-
             *thisValue=*otherValue;
           }
           else {
