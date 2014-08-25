@@ -303,7 +303,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (pos>=(FileOffset)size) {
+      if (pos>=size) {
         return false;
       }
 
@@ -414,14 +414,14 @@ namespace osmscout {
 
       size_t start=offset;
 
-      while (offset<(FileOffset)size &&
+      while (offset<size &&
              buffer[offset]!='\0') {
         offset++;
       }
 
       value.assign(&buffer[start],offset-start);
 
-      if (offset>=(FileOffset)size) {
+      if (offset>=size) {
         std::cerr << "String has no terminating '\\0' before file end!" << std::endl;
         hasError=true;
         return false;
@@ -1632,9 +1632,27 @@ namespace osmscout {
         return false;
       }
 
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+      unsigned int shift=0;
 
-      offset+=bytes;
+      while (true) {
+        char data=buffer[offset];
+
+        number|=static_cast<uint16_t>(data & 0x7f) << shift;
+
+        offset++;
+
+        if ((data & 0x80)==0) {
+          return true;
+        }
+
+        if (offset>=size) {
+          std::cerr << "Cannot read uint16_t number beyond file end!" << std::endl;
+          hasError=true;
+          return false;
+        }
+
+        shift+=7;
+      }
 
       return true;
     }
@@ -1651,13 +1669,7 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      uint16_t add;
-
-      add=(unsigned char)buffer;
-      add=add & 0x7f;
-      add=add << shift;
-
-      number|=add;
+      number|=static_cast<uint16_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
         return true;
@@ -1691,9 +1703,27 @@ namespace osmscout {
         return false;
       }
 
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+      unsigned int shift=0;
 
-      offset+=bytes;
+      while (true) {
+        char data=buffer[offset];
+
+        number|=static_cast<uint32_t>(data & 0x7f) << shift;
+
+        offset++;
+
+        if ((data & 0x80)==0) {
+          return true;
+        }
+
+        if (offset>=size) {
+          std::cerr << "Cannot read uint32_t number beyond file end!" << std::endl;
+          hasError=true;
+          return false;
+        }
+
+        shift+=7;
+      }
 
       return true;
     }
@@ -1710,13 +1740,7 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      uint32_t add;
-
-      add=(unsigned char)buffer;
-      add=add & 0x7f;
-      add=add << shift;
-
-      number|=add;
+      number|=static_cast<uint32_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
         return true;
@@ -1751,9 +1775,27 @@ namespace osmscout {
         return false;
       }
 
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+      unsigned int shift=0;
 
-      offset+=bytes;
+      while (true) {
+        char data=buffer[offset];
+
+        number|=static_cast<uint64_t>(data & 0x7f) << shift;
+
+        offset++;
+
+        if ((data & 0x80)==0) {
+          return true;
+        }
+
+        if (offset>=size) {
+          std::cerr << "Cannot read uint64_t number beyond file end!" << std::endl;
+          hasError=true;
+          return false;
+        }
+
+        shift+=7;
+      }
 
       return true;
     }
@@ -1770,13 +1812,7 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      uint64_t add;
-
-      add=(unsigned char)buffer;
-      add=add & 0x7f;
-      add=add << shift;
-
-      number|=add;
+      number|=static_cast<uint64_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
         return true;
