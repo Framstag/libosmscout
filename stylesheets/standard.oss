@@ -1235,7 +1235,8 @@ SYMBOL speed_camera
    [TYPE amenity_post_office_building] AREA { color: @postBuildingColor; borderColor: @postBuildingBorderColor; borderWidth: 0.1mm; }
 
    // (Minor) Amenities without special color
-   [TYPE amenity_atm] AREA { color: @amenityColor; }
+   [TYPE amenity_atm,
+         amenity_recycling] AREA { color: @amenityColor; }
 
    // Amenity buildings
    [TYPE amenity_building,
@@ -1289,7 +1290,8 @@ SYMBOL speed_camera
    [TYPE amenity,
          amenity_cafe,
          amenity_fuel,
-         amenity_school] {
+         amenity_school,
+         amenity_recycling] {
          NODE.ICON { symbol: amenity; }
    }
 
