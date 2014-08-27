@@ -1879,7 +1879,7 @@ namespace osmscout {
 
     void Remove(const TypeInfoSet& otherTypes)
     {
-      for (auto type : otherTypes.types)
+      for (const auto &type : otherTypes.types)
       {
         if (type.Valid() &&
             type->GetIndex()<types.size() &&
@@ -2220,7 +2220,7 @@ namespace osmscout {
     lookupTable.resize(typeConfig.GetTypeCount(),
                        std::numeric_limits<size_t>::max());
 
-    for (auto type : typeConfig.GetTypes()) {
+    for (const auto &type : typeConfig.GetTypes()) {
       size_t index;
 
       if (type->GetFeature(F::NAME,
@@ -2306,7 +2306,7 @@ namespace osmscout {
     lookupTable.resize(typeConfig.GetTypeCount(),
                        std::numeric_limits<size_t>::max());
 
-    for (auto type : typeConfig.GetTypes()) {
+    for (const auto &type : typeConfig.GetTypes()) {
       size_t index;
 
       if (type->GetFeature(F::NAME,
@@ -2380,7 +2380,7 @@ namespace osmscout {
     lookupTable.resize(typeConfig.GetTypeCount(),
                        std::numeric_limits<size_t>::max());
 
-    for (auto type : typeConfig.GetTypes()) {
+    for (const auto &type : typeConfig.GetTypes()) {
       size_t index;
 
       if (type->GetFeature(F::NAME,

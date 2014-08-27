@@ -647,6 +647,10 @@ namespace osmscout {
    */
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
 
+  extern OSMSCOUT_API double CalculateDistancePointToLineSegment(const GeoCoord& p,
+                                                                 const GeoCoord& a,
+                                                                 const GeoCoord& b);
+
   /**
    * \ingroup Geometry
    * Calculates the spherical distance between the two given points

@@ -38,7 +38,9 @@ namespace osmscout {
                  const FileOffset& offset,
                  Node& node,
                  bool& save);
-    bool AfterProcessingEnd();
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
   };
 
   bool NodeLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
@@ -134,7 +136,9 @@ namespace osmscout {
     return true;
   }
 
-  bool NodeLocationProcessorFilter::AfterProcessingEnd()
+  bool NodeLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                       Progress& /*progress*/,
+                                                       const TypeConfig& /*typeConfig*/)
   {
     delete nameReader;
     nameReader=NULL;

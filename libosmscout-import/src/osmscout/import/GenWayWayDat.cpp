@@ -192,7 +192,7 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto type : currentTypes) {
+        for (auto &type : currentTypes) {
           if (!ways[type->GetIndex()].empty() &&
               (victimType.Invalid() ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
@@ -235,7 +235,7 @@ namespace osmscout {
 
     restrictions.erase(hits.first,hits.second);
 
-    for (auto restriction : oldRestrictions) {
+    for (auto &restriction : oldRestrictions) {
       if (restriction->GetFrom()==oldId) {
         restriction->SetFrom(newId);
         restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
@@ -295,7 +295,7 @@ namespace osmscout {
     size_t         wayCount=ways.size();
 
     currentWay=1;
-    for (auto way : ways) {
+    for (auto &way : ways) {
       OSMId lastNodeId=way->GetLastNodeId();
 
       progress.SetProgress(currentWay,wayCount);
@@ -553,7 +553,7 @@ namespace osmscout {
       CoordDataFile::CoordResultMap coordsMap;
 
       for (size_t type=0; type<waysByType.size(); type++) {
-        for (auto rawWay : waysByType[type]) {
+        for (const auto &rawWay : waysByType[type]) {
           for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
             nodeIds.insert(rawWay->GetNodeId(n));
           }
@@ -571,7 +571,7 @@ namespace osmscout {
       progress.SetAction("Writing ways");
 
       for (size_t type=0; type<waysByType.size(); type++) {
-        for (auto rawWay : waysByType[type]) {
+        for (const auto &rawWay : waysByType[type]) {
           WriteWay(progress,
                    typeConfig,
                    wayWriter,

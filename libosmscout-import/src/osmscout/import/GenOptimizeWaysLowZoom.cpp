@@ -62,7 +62,7 @@ namespace osmscout
   void OptimizeWaysLowZoomGenerator::GetWayTypesToOptimize(const TypeConfig& typeConfig,
                                                            std::set<TypeInfoRef>& types)
   {
-    for (auto type : typeConfig.GetTypes()) {
+    for (auto &type : typeConfig.GetTypes()) {
       if (type->CanBeWay() &&
           type->GetOptimizeLowZoom()) {
         types.insert(type);
@@ -96,7 +96,7 @@ namespace osmscout
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)wayTypesData.size());
 
-    for (auto typeData : wayTypesData) {
+    for (const auto &typeData : wayTypesData) {
       if (!WriteTypeData(writer,
                          typeData)) {
         return false;
@@ -164,7 +164,7 @@ namespace osmscout
              currentTypes.size()>1) {
         TypeInfoRef victimType;
 
-        for (auto type : currentTypes) {
+        for (auto &type : currentTypes) {
           if (ways[type->GetIndex()].size()>0 &&
               (victimType.Invalid() ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
@@ -180,7 +180,7 @@ namespace osmscout
       }
     }
 
-    for (auto type : currentTypes) {
+    for (auto &type : currentTypes) {
       types.erase(type);
     }
 
@@ -198,7 +198,7 @@ namespace osmscout
 
     progress.Info("Merging "+NumberToString(ways.size())+" ways");
 
-    for (auto way: ways) {
+    for (const auto &way : ways) {
       if (way->ids.front()!=0) {
         waysByJoin[way->ids.front()].push_back(way);
       }
@@ -466,7 +466,7 @@ namespace osmscout
 
     projection.Set(0,0,magnification,width,height);
 
-    for (auto way :ways) {
+    for (auto &way :ways) {
       TransPolygon          polygon;
       std::vector<GeoCoord> newNodes;
       double                xmin;
@@ -509,7 +509,7 @@ namespace osmscout
                                                const std::list<WayRef>& ways,
                                                FileOffsetFileOffsetMap& offsets)
   {
-    for (auto way : ways) {
+    for (const auto &way : ways) {
       FileOffset offset;
 
       writer.GetPos(offset);
@@ -540,7 +540,7 @@ namespace osmscout
     double                                 cellHeight=180.0/pow(2.0,(int)data.indexLevel);
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
-    for (auto way : ways) {
+    for (const auto &way : ways) {
       double                          minLon;
       double                          maxLon;
       double                          minLat;

@@ -61,7 +61,7 @@ namespace osmscout {
   {
     switch (type) {
     case boolAnd:
-      for (auto condition : conditions) {
+      for (const auto &condition : conditions) {
         if (!condition->Evaluate(tagMap)) {
           return false;
         }
@@ -69,7 +69,7 @@ namespace osmscout {
 
       return true;
     case boolOr:
-      for (auto condition : conditions) {
+      for (const auto &condition : conditions) {
         if (condition->Evaluate(tagMap)) {
           return true;
         }
@@ -301,7 +301,7 @@ namespace osmscout {
     std::string name;
     uint32_t    namePriority=0;
 
-    for (auto tag : tags) {
+    for (const auto &tag : tags) {
       uint32_t ntPrio;
       bool     isNameTag=typeConfig.IsNameTag(tag.first,ntPrio);
 
@@ -394,7 +394,7 @@ namespace osmscout {
     std::string nameAlt;
     uint32_t    nameAltPriority=0;
 
-    for (auto tag : tags) {
+    for (const auto &tag : tags) {
       uint32_t natPrio;
       bool     isNameAltTag=typeConfig.IsNameAltTag(tag.first,natPrio);
 
@@ -1841,7 +1841,7 @@ namespace osmscout {
                                  const ObjectOSMRef& object,
                                  const OSMSCOUT_HASHMAP<TagId,std::string>& tags)
   {
-    for (auto feature : type->GetFeatures()) {
+    for (const auto &feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(progress,
                                   typeConfig,
                                   object,
@@ -1860,7 +1860,7 @@ namespace osmscout {
       }
     }
 
-    for (auto feature : type->GetFeatures()) {
+    for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
       if (HasValue(idx) &&
@@ -1887,7 +1887,7 @@ namespace osmscout {
       }
     }
 
-    for (auto feature : type->GetFeatures()) {
+    for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
       if (HasValue(idx) &&
@@ -2474,13 +2474,13 @@ namespace osmscout {
       return typeInfoIgnore;
     }
 
-    for (auto type : types) {
+    for (const auto &type : types) {
       if (!type->HasConditions() ||
           !type->CanBeNode()) {
         continue;
       }
 
-      for (auto cond : type->GetConditions()) {
+      for (const auto &cond : type->GetConditions()) {
         if (!(cond.types & TypeInfo::typeNode)) {
           continue;
         }
@@ -2505,14 +2505,14 @@ namespace osmscout {
       return false;
     }
 
-    for (auto type : types) {
+    for (const auto &type : types) {
       if (!((type->CanBeWay() ||
              type->CanBeArea()) &&
              type->HasConditions())) {
         continue;
       }
 
-      for (auto cond : type->GetConditions()) {
+      for (const auto &cond : type->GetConditions()) {
         if (!((cond.types & TypeInfo::typeWay) ||
               (cond.types & TypeInfo::typeArea))) {
           continue;
@@ -2556,7 +2556,7 @@ namespace osmscout {
           continue;
         }
 
-        for (auto cond : types[i]->GetConditions()) {
+        for (const auto &cond : types[i]->GetConditions()) {
           if (!(cond.types & TypeInfo::typeArea)) {
             continue;
           }
@@ -2574,7 +2574,7 @@ namespace osmscout {
           continue;
         }
 
-        for (auto cond : types[i]->GetConditions()) {
+        for (const auto &cond : types[i]->GetConditions()) {
           if (!(cond.types & TypeInfo::typeRelation)) {
             continue;
           }
@@ -2641,7 +2641,7 @@ namespace osmscout {
     types.Clear();
     types.Adapt(*this);
 
-    for (auto type : this->types) {
+    for (auto &type : this->types) {
       if (!type->GetIgnore() &&
           type->CanBeNode()) {
         types.Set(type);
@@ -2654,7 +2654,7 @@ namespace osmscout {
     types.Clear();
     types.Adapt(*this);
 
-    for (auto type : this->types) {
+    for (auto &type : this->types) {
       if (!type->GetIgnore() &&
           type->CanBeArea()) {
         types.Set(type);
@@ -2667,7 +2667,7 @@ namespace osmscout {
     types.Clear();
     types.Adapt(*this);
 
-    for (auto type : this->types) {
+    for (auto &type : this->types) {
       if (!type->GetIgnore() &&
           type->CanBeWay()) {
         types.Set(type);
@@ -2998,7 +2998,7 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)tags.size());
-    for (auto tag : tags) {
+    for (const auto &tag : tags) {
       writer.WriteNumber(tag.GetId());
       writer.Write(tag.GetName());
     }
@@ -3006,7 +3006,7 @@ namespace osmscout {
     uint32_t nameTagCount=0;
     uint32_t nameAltTagCount=0;
 
-    for (auto tag : tags) {
+    for (const auto &tag : tags) {
       uint32_t priority;
 
       if (IsNameTag(tag.GetId(),priority)) {
@@ -3019,7 +3019,7 @@ namespace osmscout {
     }
 
     writer.WriteNumber(nameTagCount);
-    for (auto tag : tags) {
+    for (const auto &tag : tags) {
       uint32_t priority;
 
       if (IsNameTag(tag.GetId(),priority)) {
@@ -3030,7 +3030,7 @@ namespace osmscout {
     }
 
     writer.WriteNumber(nameAltTagCount);
-    for (auto tag : tags) {
+    for (const auto &tag : tags) {
       uint32_t priority;
 
       if (IsNameAltTag(tag.GetId(),priority)) {
@@ -3064,7 +3064,7 @@ namespace osmscout {
       writer.Write(type->GetIgnore());
 
       writer.WriteNumber((uint32_t)type->GetFeatures().size());
-      for (auto feature : type->GetFeatures()) {
+      for (const auto &feature : type->GetFeatures()) {
         writer.Write(feature.GetFeature()->GetName());
       }
     }

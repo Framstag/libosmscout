@@ -119,7 +119,9 @@ namespace osmscout {
                            N& data,
                            bool& save) = 0;
 
-      virtual bool AfterProcessingEnd()
+      virtual bool AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                      Progress& /*progress*/,
+                                      const TypeConfig& /*typeConfig*/)
       {
         return true;
       }
@@ -645,7 +647,9 @@ namespace osmscout {
         ++f) {
       ProcessingFilterRef filter(*f);
 
-      if (!filter->AfterProcessingEnd()) {
+      if (!filter->AfterProcessingEnd(parameter,
+                                      progress,
+                                      typeConfig)) {
         progress.Error("Cannot deinitialize processor filter");
 
         error=true;

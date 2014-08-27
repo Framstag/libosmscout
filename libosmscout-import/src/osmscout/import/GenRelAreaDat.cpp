@@ -1183,7 +1183,7 @@ namespace osmscout {
 
     progress.Info("Dump statistics");
 
-    for (auto type : typeConfig->GetTypes()) {
+    for (const auto &type : typeConfig->GetTypes()) {
       size_t idx=type->GetIndex();
 
       std::string buffer=type->GetName()+": "+

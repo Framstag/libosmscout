@@ -892,7 +892,7 @@ namespace osmscout {
     std::set<FileOffset>         wayOffsets;
     std::vector<WayRef>          ways;
 
-    for (auto node : description.Nodes()) {
+    for (const auto &node : description.Nodes()) {
       if (node.HasPathObject()) {
         switch (node.GetPathObject().GetType()) {
         case refNone:
@@ -908,20 +908,18 @@ namespace osmscout {
         }
       }
 
-      for (std::vector<ObjectFileRef>::const_iterator object=node.GetObjects().begin();
-          object!=node.GetObjects().end();
-          ++object) {
+      for (const auto &object : node.GetObjects()) {
 
-        switch (object->GetType()) {
+        switch (object.GetType()) {
         case refNone:
         case refNode:
           assert(false);
           break;
         case refArea:
-          areaOffsets.insert(object->GetFileOffset());
+          areaOffsets.insert(object.GetFileOffset());
         break;
         case refWay:
-          wayOffsets.insert(object->GetFileOffset());
+          wayOffsets.insert(object.GetFileOffset());
           break;
         }
       }

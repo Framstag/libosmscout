@@ -61,7 +61,7 @@ namespace osmscout
   void OptimizeAreasLowZoomGenerator::GetAreaTypesToOptimize(const TypeConfig& typeConfig,
                                                              std::set<TypeInfoRef>& types)
   {
-    for (auto type : typeConfig.GetTypes()) {
+    for (auto &type : typeConfig.GetTypes()) {
       if (type->CanBeArea() &&
           type->GetOptimizeLowZoom()) {
         types.insert(type);
@@ -95,7 +95,7 @@ namespace osmscout
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)areaTypesData.size());
 
-    for (auto typeData : areaTypesData) {
+    for (const auto &typeData : areaTypesData) {
       if (!WriteTypeData(writer,
                          typeData)) {
         return false;
@@ -152,7 +152,7 @@ namespace osmscout
                currentTypes.size()>1) {
           TypeInfoRef victimType;
 
-          for (auto type : currentTypes) {
+          for (auto &type : currentTypes) {
             if (areas[type->GetIndex()].size()>0 &&
                 (victimType.Invalid() ||
                  areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
@@ -169,7 +169,7 @@ namespace osmscout
       }
     }
 
-    for (auto type : currentTypes) {
+    for (auto &type : currentTypes) {
       types.erase(type);
     }
 
@@ -190,7 +190,7 @@ namespace osmscout
 
     projection.Set(0,0,magnification,width,height);
 
-    for (auto area :areas) {
+    for (auto &area :areas) {
       TransPolygon            polygon;
       std::vector<Area::Ring> newRings;
       double                  xmin;
@@ -349,7 +349,7 @@ namespace osmscout
                                                  const std::list<AreaRef>& areas,
                                                  FileOffsetFileOffsetMap& offsets)
   {
-    for (auto area : areas) {
+    for (const auto &area : areas) {
       FileOffset offset;
 
       writer.GetPos(offset);

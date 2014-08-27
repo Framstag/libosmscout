@@ -74,7 +74,7 @@ namespace osmscout {
     SetVehicle(vehicleFoot);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (auto type : typeConfig.GetTypes()) {
+    for (const auto &type : typeConfig.GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRouteFoot()) {
         AddType(type->GetId(),maxSpeed);
@@ -90,7 +90,7 @@ namespace osmscout {
     SetVehicle(vehicleBicycle);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (auto type : typeConfig.GetTypes()) {
+    for (const auto &type : typeConfig.GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRouteBicycle()) {
         AddType(type->GetId(),maxSpeed);
@@ -110,7 +110,7 @@ namespace osmscout {
     SetVehicle(vehicleCar);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (auto type : typeConfig.GetTypes()) {
+    for (const auto &type : typeConfig.GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRouteCar()) {
         std::map<std::string,double>::const_iterator speed=speedMap.find(type->GetName());

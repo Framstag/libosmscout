@@ -136,7 +136,7 @@ namespace osmscout {
       // Check statistics for each type
       // If statistics are within goal limits, use this level
       // for this type (else try again with the next higher level)
-      for (auto type : currentNodeTypes) {
+      for (const auto &type : currentNodeTypes) {
         size_t i=type->GetIndex();
         size_t entryCount=0;
         size_t max=0;
@@ -204,7 +204,7 @@ namespace osmscout {
       }
 
       // Now process all types for this limit, that are within the limits
-      for (auto type : currentNodeTypes) {
+      for (const auto &type : currentNodeTypes) {
         maxLevel=std::max(maxLevel,level);
 
         progress.Info("Type "+type->GetName()+"(" + NumberToString(type->GetIndex())+"), "+NumberToString(nodeTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(nodeTypeData[type->GetIndex()].indexEntries)+" objects");
@@ -274,7 +274,7 @@ namespace osmscout {
       double                cellWidth=360.0/pow(2.0,(int)l);
       double                cellHeight=180.0/pow(2.0,(int)l);
 
-      for (auto type : typeConfig->GetTypes()) {
+      for (auto &type : typeConfig->GetTypes()) {
         if (type->CanBeNode() &&
             nodeTypeData[type->GetIndex()].HasEntries() &&
             nodeTypeData[type->GetIndex()].indexLevel==l) {
@@ -331,12 +331,12 @@ namespace osmscout {
       //
       // Write bitmap
       //
-      for (auto type : indexTypes) {
+      for (const auto &type : indexTypes) {
         size_t indexEntries=0;
         size_t dataSize=0;
         char   buffer[10];
 
-        for (auto cell : typeCellOffsets[type->GetIndex()]) {
+        for (const auto &cell : typeCellOffsets[type->GetIndex()]) {
           indexEntries+=cell.second.size();
 
           dataSize+=EncodeNumber(cell.second.size(),buffer);
@@ -400,7 +400,7 @@ namespace osmscout {
         }
 
         // Now write the list of offsets of objects for every cell with content
-        for (auto cell : typeCellOffsets[type->GetIndex()]) {
+        for (const auto &cell : typeCellOffsets[type->GetIndex()]) {
           FileOffset bitmapCellOffset=bitmapOffset+
                                       ((cell.first.y-nodeTypeData[type->GetIndex()].cellYStart)*nodeTypeData[type->GetIndex()].cellXCount+
                                        cell.first.x-nodeTypeData[type->GetIndex()].cellXStart)*dataOffsetBytes;

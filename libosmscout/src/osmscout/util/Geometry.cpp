@@ -49,6 +49,51 @@ namespace osmscout {
   }
 
   /**
+   * Calculates the distance between a point p and a line defined by the points a and b.
+   * @param p
+   *    The point in distance to a line
+   * @param a
+   *    One point defining the line
+   * @param b
+   *    Another point defining the line
+   * @return
+   *    The distance
+   */
+   double CalculateDistancePointToLineSegment(const GeoCoord& p,
+                                              const GeoCoord& a,
+                                              const GeoCoord& b)
+  {
+    double xdelta=b.lon-a.lon;
+    double ydelta=b.lat-a.lat;
+
+    if (xdelta==0 && ydelta==0) {
+      return std::numeric_limits<double>::infinity();
+    }
+
+    double u=((p.lon-a.lon)*xdelta+(p.lat-a.lat)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
+
+    double cx,cy;
+
+    if (u<0) {
+      cx=a.lon;
+      cy=a.lat;
+    }
+    else if (u>1) {
+      cx=b.lon;
+      cy=b.lat;
+    }
+    else {
+      cx=a.lon+u*xdelta;
+      cy=a.lat+u*ydelta;
+    }
+
+    double dx=cx-p.lon;
+    double dy=cy-p.lat;
+
+    return sqrt(dx*dx+dy*dy);
+  }
+
+  /**
     Calculating basic cost for the A* algorithm based on the
     spherical distance of two points on earth
     */

@@ -697,7 +697,7 @@ namespace osmscout {
     progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
-    for (auto type : typeConfig->GetTypes()) {
+    for (const auto &type : typeConfig->GetTypes()) {
       size_t      i=type->GetIndex();
       bool        isEmpty=(type->CanBeNode() && nodeStat[i]==0) ||
                           (type->CanBeArea() && areaStat[i]==0) ||
@@ -711,7 +711,7 @@ namespace osmscout {
         progress.Warning("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
       }
       else {
-        progress.Debug("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+        progress.Info("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
       }
     }
 

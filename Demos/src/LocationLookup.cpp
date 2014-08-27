@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
   }
 
 
-  for (auto entry : searchResult.results) {
+  for (const auto &entry : searchResult.results) {
     if (entry.adminRegion.Valid() &&
         entry.location.Valid() &&
         entry.address.Valid()) {
@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 
       std::cout << std::endl;
 
-      for (auto object : entry.location->objects) {
+      for (const auto &object : entry.location->objects) {
         std::cout << "   - " << GetObject(database,object) << std::endl;
       }
     }

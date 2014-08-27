@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   osmscout::TypeSet                types(*typeConfig);
   osmscout::NameFeatureLabelReader nameLabelReader(typeConfig);
 
-  for (auto name : typeNames) {
+  for (const auto &name : typeNames) {
     osmscout::TypeId nodeType;
     osmscout::TypeId wayType;
     osmscout::TypeId areaType;
@@ -141,19 +141,19 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  for (auto node : nodes) {
+  for (const auto &node : nodes) {
     std::cout << "+ Node " << node->GetFileOffset();
     std::cout << " " << node->GetType()->GetName();
     std::cout << " " << nameLabelReader.GetLabel((node->GetFeatureValueBuffer())) << std::endl;
   }
 
-  for (auto way :ways) {
+  for (const auto &way :ways) {
     std::cout << "+ Way " << way->GetFileOffset();
     std::cout << " " << way->GetType()->GetName();
     std::cout << " " << nameLabelReader.GetLabel(way->GetFeatureValueBuffer()) << std::endl;
   }
 
-  for (auto area : areas) {
+  for (const auto &area : areas) {
     std::cout << "+ Area " << area->GetFileOffset();
     std::cout << " " << area->GetType()->GetName();
     std::cout << " " << nameLabelReader.GetLabel(area->rings.front().GetFeatureValueBuffer()) << std::endl;

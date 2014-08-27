@@ -341,7 +341,7 @@ namespace osmscout {
       }
 
       // Check if cell fill for current type is in defined limits
-      for (auto type : currentWayTypes) {
+      for (auto &type : currentWayTypes) {
         size_t i=type->GetIndex();
 
         CalculateStatistics(level,wayTypeData[i],cellFillCount[i]);
@@ -355,7 +355,7 @@ namespace osmscout {
         }
       }
 
-      for (auto type : currentWayTypes) {
+      for (const auto &type : currentWayTypes) {
         maxLevel=std::max(maxLevel,level);
 
         progress.Info("Type "+type->GetName()+", "+NumberToString(wayTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(wayTypeData[type->GetIndex()].indexEntries)+" objects");
@@ -390,7 +390,7 @@ namespace osmscout {
 
     writer.Write(indexEntries);
 
-    for (auto type : typeConfig->GetTypes()) {
+    for (const auto &type : typeConfig->GetTypes()) {
       size_t i=type->GetIndex();
 
       if (type->CanBeWay() &&
@@ -421,7 +421,7 @@ namespace osmscout {
       double      cellWidth=360.0/pow(2.0,(int)l);
       double      cellHeight=180.0/pow(2.0,(int)l);
 
-      for (auto type : typeConfig->GetTypes()) {
+      for (const auto &type : typeConfig->GetTypes()) {
         if (type->CanBeWay() &&
             wayTypeData[type->GetIndex()].HasEntries() &&
             wayTypeData[type->GetIndex()].indexLevel==l) {
@@ -491,7 +491,7 @@ namespace osmscout {
         }
       }
 
-      for (auto type : indexTypes) {
+      for (const auto &type : indexTypes) {
         size_t index=type->GetIndex();
 
         if (!WriteBitmap(progress,

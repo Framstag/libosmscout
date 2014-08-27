@@ -569,7 +569,7 @@ int main(int argc, char* argv[])
   }
 
 #ifdef DATA_DEBUG
-  for (auto entry : data.Entries()) {
+  for (const auto &entry : data.Entries()) {
     std::cout << entry.GetPathObject().GetName() << "[" << entry.GetCurrentNodeIndex() << "]" << " = " << entry.GetCurrentNodeId() << " => " << entry.GetTargetNodeIndex() << std::endl;
   }
 #endif
@@ -623,7 +623,7 @@ int main(int argc, char* argv[])
     std::cout << "\t<trk>" << std::endl;
     std::cout << "\t\t<name>Route</name>" << std::endl;
     std::cout << "\t\t<trkseg>" << std::endl;
-    for (auto point : points) {
+    for (const auto &point : points) {
       std::cout << "\t\t\t<trkpt lat=\""<< point.GetLat() << "\" lon=\""<< point.GetLon() <<"\">" << std::endl;
       std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
       std::cout << "\t\t\t</trkpt>" << std::endl;

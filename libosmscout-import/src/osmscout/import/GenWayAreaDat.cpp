@@ -133,7 +133,7 @@ namespace osmscout {
       collectedWaysCount++;
 
       if (collectedWaysCount>parameter.GetRawWayBlockSize()) {
-        for (auto type : currentTypes) {
+        for (auto &type : currentTypes) {
           if (!areas[type->GetIndex()].empty() &&
               areas[type->GetIndex()].size()>parameter.GetRawWayBlockSize()) {
             progress.Warning("Too many objects for type "+
@@ -159,7 +159,7 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto type : currentTypes) {
+        for (auto &type : currentTypes) {
           if (!areas[type->GetIndex()].empty() &&
               (victimType.Invalid() ||
                (areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size()))) {
@@ -424,7 +424,7 @@ namespace osmscout {
       CoordDataFile::CoordResultMap coordsMap;
 
       for (size_t type=0; type<areasByType.size(); type++) {
-        for (auto rawWay : areasByType[type]) {
+        for (const auto &rawWay : areasByType[type]) {
           for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
             nodeIds.insert(rawWay->GetNodeId(n));
           }
@@ -444,7 +444,7 @@ namespace osmscout {
       progress.SetAction("Writing ways");
 
       for (size_t type=0; type<areasByType.size(); type++) {
-        for (auto rawWay : areasByType[type]) {
+        for (const auto &rawWay : areasByType[type]) {
           WriteArea(parameter,
                     progress,
                     typeConfig,

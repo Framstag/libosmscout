@@ -41,7 +41,9 @@ namespace osmscout {
                  const FileOffset& offset,
                  Area& area,
                  bool& save);
-    bool AfterProcessingEnd();
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
   };
 
   bool AreaLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
@@ -178,7 +180,9 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaLocationProcessorFilter::AfterProcessingEnd()
+  bool AreaLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                       Progress& /*progress*/,
+                                                       const TypeConfig& /*typeConfig*/)
   {
     delete nameReader;
     nameReader=NULL;
@@ -200,17 +204,49 @@ namespace osmscout {
   private:
     std::vector<GeoCoord> nodeBuffer;
     std::vector<Id>       idBuffer;
+    size_t                duplicateCount;
+    size_t                redundantCount;
+    size_t                overallCount;
 
   private:
     bool IsEqual(const unsigned char buffer1[],
                  const unsigned char buffer2[]);
 
+    bool RemoveDuplicateNodes(Progress& progress,
+                              const FileOffset& offset,
+                              Area& area,
+                              bool& save);
+
+    bool RemoveRedundantNodes(Progress& progress,
+                              const FileOffset& offset,
+                              Area& area,
+                              bool& save);
+
   public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Area& area,
                  bool& save);
+
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
   };
+
+  bool AreaNodeReductionProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                               Progress& /*progress*/,
+                                                               const TypeConfig& /*typeConfig*/)
+  {
+    duplicateCount=0;
+    redundantCount=0;
+    overallCount=0;
+
+    return true;
+  }
 
   bool AreaNodeReductionProcessorFilter::IsEqual(const unsigned char buffer1[],
                                                  const unsigned char buffer2[])
@@ -224,10 +260,10 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaNodeReductionProcessorFilter::Process(Progress& progress,
-                                                 const FileOffset& offset,
-                                                 Area& area,
-                                                 bool& save)
+  bool AreaNodeReductionProcessorFilter::RemoveDuplicateNodes(Progress& progress,
+                                                              const FileOffset& offset,
+                                                              Area& area,
+                                                              bool& save)
   {
     unsigned char buffers[2][coordByteSize];
 
@@ -308,6 +344,102 @@ namespace osmscout {
         ++ring;
       }
     }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::RemoveRedundantNodes(Progress& /*progress*/,
+                                                              const FileOffset& /*offset*/,
+                                                              Area& area,
+                                                              bool& /*save*/)
+  {
+    for (auto &ring : area.rings) {
+      // In this case there is nothing to optimize
+      if (ring.nodes.size()<3) {
+        continue;
+      }
+
+      nodeBuffer.clear();
+      idBuffer.clear();
+
+      size_t last=0;
+      size_t current=1;
+      bool   reduced=false;
+
+      nodeBuffer.push_back(ring.nodes[0]);
+      if (!ring.ids.empty()) {
+        idBuffer.push_back(ring.ids[0]);
+      }
+
+      while (current+1<ring.nodes.size()) {
+        double distance=CalculateDistancePointToLineSegment(ring.nodes[current],
+                                                            nodeBuffer[last],
+                                                            ring.nodes[current+1]);
+
+        if (distance<1/latConversionFactor &&
+            (current>=ring.ids.size() || ring.ids[current]==0)) {
+          reduced=true;
+          redundantCount++;
+          current++;
+        }
+        else {
+          nodeBuffer.push_back(ring.nodes[current]);
+          if (!ring.ids.empty()) {
+            idBuffer.push_back(ring.ids[current]);
+          }
+
+          last++;
+          current++;
+        }
+      }
+
+      nodeBuffer.push_back(ring.nodes[current]);
+      if (!ring.ids.empty()) {
+        idBuffer.push_back(ring.ids[current]);
+      }
+
+      if (reduced) {
+        ring.nodes=nodeBuffer;
+        ring.ids=idBuffer;
+      }
+    }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::Process(Progress& progress,
+                                                 const FileOffset& offset,
+                                                 Area& area,
+                                                 bool& save)
+  {
+    for (const auto &ring : area.rings) {
+      overallCount+=ring.nodes.size();
+    }
+
+    if (!RemoveDuplicateNodes(progress,
+                              offset,
+                              area,
+                              save)) {
+      return false;
+    }
+
+    if (!RemoveRedundantNodes(progress,
+                              offset,
+                              area,
+                              save)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                            Progress& progress,
+                                                            const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Duplicate nodes removed: " + NumberToString(duplicateCount));
+    progress.Info("Redundant nodes removed: " + NumberToString(redundantCount));
+    progress.Info("Overall nodes: " + NumberToString(overallCount));
 
     return true;
   }
