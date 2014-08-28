@@ -297,16 +297,10 @@ namespace osmscout {
       return attributes.GetTags()[idx].value;
     }
 
-/*    
     inline bool IsCircular() const
     {
       return attributes.IsRoundabout() ||
           (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
-    }
- */
-    inline bool IsCircular() const
-    {
-      return (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
     inline void GetBoundingBox(double& minLon,

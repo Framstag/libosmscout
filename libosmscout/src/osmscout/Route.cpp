@@ -381,8 +381,7 @@ namespace osmscout {
     pathObject(pathObject),
     targetNodeIndex(targetNodeIndex),
     distance(0.0),
-    time(0.0),
-    location(GeoCoord(NAN, NAN))
+    time(0.0)
   {
     // no code
   }
@@ -413,11 +412,6 @@ namespace osmscout {
   void RouteDescription::Node::SetDistance(double distance)
   {
     this->distance=distance;
-  }
-    
-  void RouteDescription::Node::SetLocation(const GeoCoord &coord)
-  {
-    this->location=coord;
   }
 
   void RouteDescription::Node::SetTime(double time)

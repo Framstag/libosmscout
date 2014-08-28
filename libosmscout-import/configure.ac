@@ -123,7 +123,6 @@ AX_CREATE_PKGCONFIG_INFO([],
                          [$PROTOBUF_CFLAGS $ZLIB_CFLAGS $XML2_CFLAGS],
                          [])
 
-LDFLAGS="-lxml2 -losmscout $LDFLAGS"
 AC_CONFIG_FILES([Makefile src/Makefile src/protobuf/Makefile include/Makefile])
 AC_OUTPUT
 

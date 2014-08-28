@@ -61,6 +61,5 @@ AX_CREATE_PKGCONFIG_INFO([],
                          [$LIBQT_CFLAGS],
                          [])
 
-CXXFLAGS="-F/Users/vlad/Dev/QT/Qt5.2.0/5.2.0/clang_64/lib $CXXFLAGS"
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT

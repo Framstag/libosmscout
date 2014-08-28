@@ -26,7 +26,6 @@
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
-#include <osmscout/GeoCoord.h>
 
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/Reference.h>
@@ -433,7 +432,6 @@ namespace osmscout {
       size_t                                       targetNodeIndex;
       double                                       distance;
       double                                       time;
-      GeoCoord                                     location;
       OSMSCOUT_HASHMAP<std::string,DescriptionRef> descriptionMap;
       std::list<DescriptionRef>                    descriptions;
 
@@ -488,21 +486,12 @@ namespace osmscout {
       {
         return time;
       }
-        
-      /**
-       * Location (latitude,longitude) of the node
-       */
-      inline GeoCoord GetLocation() const
-      {
-        return location;
-      }
 
       bool HasDescription(const char* name) const;
       Description* GetDescription(const char* name) const;
 
       void SetDistance(double distance);
       void SetTime(double time);
-      void SetLocation(const GeoCoord &coord);
 
       void AddDescription(const char* name, Description* description);
     };

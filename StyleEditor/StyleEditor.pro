@@ -61,7 +61,7 @@ OTHER_FILES += \
     qml/MapControl.qml
 
 macx: {
-    LIBS += -L$$PWD/../libosmscout-map-qt/build -llibosmscout-map-qt
+    LIBS += -L$$PWD/../libosmscout-map-qt -llibosmscout-map-qt
     INCLUDEPATH += ../libosmscout/include ../libosmscout-map/include ../libosmscout-map-qt/include
-    PRE_TARGETDEPS += $$PWD/../libosmscout-map-qt/build/liblibosmscout-map-qt.a
+    PRE_TARGETDEPS += $$PWD/../libosmscout-map-qt/liblibosmscout-map-qt.a
 }
