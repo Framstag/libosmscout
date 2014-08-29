@@ -2126,7 +2126,8 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : nextTagId(0)
+   : nextTagId(0),
+     nextTypeId(1)
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
@@ -2390,10 +2391,22 @@ namespace osmscout {
       }
     }
 
-    typeInfo->SetId(types.size());
+    if (typeInfo->GetIgnore()) {
+      typeInfo->SetId(0);
+    }
+    else {
+      typeInfo->SetId(nextTypeId);
+      nextTypeId++;
+    }
+
     typeInfo->SetIndex(types.size());
 
     types.push_back(typeInfo);
+
+    if (!typeInfo->GetIgnore() || typeInfo->GetName()=="") {
+      typedTypes.push_back(typeInfo);
+    }
+
     nameToTypeMap[typeInfo->GetName()]=typeInfo;
 
     idToTypeMap[typeInfo->GetId()]=typeInfo;
@@ -2407,7 +2420,7 @@ namespace osmscout {
       return 0;
     }
     else {
-      return types.size()-1;
+      return nextTypeId-1;
     }
   }
 

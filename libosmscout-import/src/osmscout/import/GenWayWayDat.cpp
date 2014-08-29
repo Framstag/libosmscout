@@ -116,11 +116,7 @@ namespace osmscout {
 
     writer.Write((uint32_t)restrictionsSet.size());
 
-    for (std::set<TurnRestrictionRef>::const_iterator r=restrictionsSet.begin();
-        r!=restrictionsSet.end();
-        ++r) {
-      TurnRestrictionRef restriction=*r;
-
+    for (const auto &restriction : restrictionsSet) {
       restriction->Write(writer);
     }
 
@@ -530,19 +526,19 @@ namespace osmscout {
       progress.SetAction("Merging ways");
 
 #pragma omp parallel for
-      for (size_t type=0; type<waysByType.size(); type++) {
-        size_t originalWayCount=waysByType[type].size();
+      for (size_t typeIdx=0; typeIdx<typeConfig->GetTypeCount(); typeIdx++) {
+        size_t originalWayCount=waysByType[typeIdx].size();
 
         if (originalWayCount>0) {
           MergeWays(progress,
-                    waysByType[type],
+                    waysByType[typeIdx],
                     restrictions);
 
 #pragma omp critical
-          if (waysByType[type].size()<originalWayCount) {
-            progress.Info("Reduced ways of '"+typeConfig->GetTypeInfo(type)->GetName()+"' from "+
-                          NumberToString(originalWayCount)+" to "+NumberToString(waysByType[type].size())+ " way(s)");
-            mergeCount+=originalWayCount-waysByType[type].size();
+          if (waysByType[typeIdx].size()<originalWayCount) {
+            progress.Info("Reduced ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
+                          NumberToString(originalWayCount)+" to "+NumberToString(waysByType[typeIdx].size())+ " way(s)");
+            mergeCount+=originalWayCount-waysByType[typeIdx].size();
           }
         }
       }

@@ -2006,9 +2006,11 @@ namespace osmscout {
   private:
     std::vector<TagInfo>                      tags;
     std::vector<TypeInfoRef>                  types;
+    std::vector<TypeInfoRef>                  typedTypes;
     std::vector<FeatureRef>                   features;
 
     TagId                                     nextTagId;
+    TypeId                                    nextTypeId;
 
     OSMSCOUT_HASHMAP<std::string,TagId>       stringToTagMap;
     OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
@@ -2118,11 +2120,21 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
+    inline const TypeInfoRef GetTypeInfo(size_t index) const
+    {
+      assert(index<types.size());
+
+      return types[index];
+    }
+
+    /**
+     * Returns the type definition for the given type id
+     */
     inline const TypeInfoRef GetTypeInfo(TypeId id) const
     {
-      assert(id<types.size());
+      assert(id<typedTypes.size());
 
-      return types[id];
+      return typedTypes[id];
     }
 
     /**
