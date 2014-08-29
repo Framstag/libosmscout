@@ -841,7 +841,7 @@ SYMBOL speed_camera
  [MAG veryClose-] {
    [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
  
-   [TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
+   //[TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
    
    [TYPE highway_track] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
