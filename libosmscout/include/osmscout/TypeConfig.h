@@ -60,6 +60,7 @@ namespace osmscout {
   // Forward declaration of classes TypeConfig and TypeInfo because
   // of circular dependency between them and Feature
   class FeatureValueBuffer;
+  class FeatureInstance;
   class TypeConfig;
   class TypeInfo;
 
@@ -235,6 +236,9 @@ namespace osmscout {
       return "";
     }
 
+    virtual bool Read(FileScanner& scanner);
+    virtual bool Write(FileWriter& writer);
+
     virtual FeatureValue& operator=(const FeatureValue& other) = 0;
     virtual bool operator==(const FeatureValue& other) const = 0;
 
@@ -272,7 +276,7 @@ namespace osmscout {
 
     virtual size_t GetValueSize() const = 0;
 
-    virtual bool HasValue() const
+    inline virtual bool HasValue() const
     {
       return GetValueSize()>0;
     }
@@ -282,20 +286,14 @@ namespace osmscout {
       return false;
     }
 
-    virtual void AllocateValue(void* buffer) = 0;
+    virtual FeatureValue* AllocateValue(void* buffer);
 
     virtual void Parse(Progress& progress,
                        const TypeConfig& typeConfig,
+                       const FeatureInstance& feature,
                        const ObjectOSMRef& object,
-                       const TypeInfo& type,
-                       size_t idx,
                        const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                        FeatureValueBuffer& buffer) const = 0;
-
-    virtual bool Read(FileScanner& scanner,
-                      FeatureValue* value) = 0;
-    virtual bool Write(FileWriter& writer,
-                       FeatureValue* value) = 0;
   };
 
   typedef Ref<Feature> FeatureRef;
@@ -303,18 +301,25 @@ namespace osmscout {
   class OSMSCOUT_API FeatureInstance
   {
   private:
-    FeatureRef feature;
-    size_t     index;
-    size_t     offset;
+    FeatureRef     feature; //<! The feature we are an instance of
+    const TypeInfo *type;   //<! The type we are assigned to (we are no Ref type to avoid circular references)
+    size_t         index;   //<! The index we have in the list of features
+    size_t         offset;  //<! Our offset into the value buffer for our data
 
   public:
     FeatureInstance(const FeatureRef& feature,
+                    const TypeInfo* type,
                     size_t index,
                     size_t offset);
 
     inline FeatureRef GetFeature() const
     {
       return feature;
+    }
+
+    inline const TypeInfo* GetType() const
+    {
+      return type;
     }
 
     inline size_t GetIndex() const
@@ -360,6 +365,9 @@ namespace osmscout {
       return name;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -376,7 +384,7 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     inline bool HasLabel() const
     {
@@ -385,16 +393,10 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API NameAltFeatureValue : public FeatureValue
@@ -429,6 +431,9 @@ namespace osmscout {
       return nameAlt;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -445,7 +450,7 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     inline bool HasLabel() const
     {
@@ -454,16 +459,10 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API RefFeatureValue : public FeatureValue
@@ -498,6 +497,9 @@ namespace osmscout {
       return ref;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -517,7 +519,7 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     inline bool HasLabel() const
     {
@@ -526,16 +528,10 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API LocationFeatureValue : public FeatureValue
@@ -565,6 +561,9 @@ namespace osmscout {
       return location;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -585,20 +584,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API AddressFeatureValue : public FeatureValue
@@ -628,6 +621,9 @@ namespace osmscout {
       return address;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -648,20 +644,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API AccessFeatureValue : public FeatureValue
@@ -827,6 +817,9 @@ namespace osmscout {
       return access & onewayBackward;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -879,20 +872,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API LayerFeatureValue : public FeatureValue
@@ -923,6 +910,9 @@ namespace osmscout {
       return layer;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -942,20 +932,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API WidthFeatureValue : public FeatureValue
@@ -986,6 +970,9 @@ namespace osmscout {
       return width;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -1005,20 +992,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API MaxSpeedFeatureValue : public FeatureValue
@@ -1049,6 +1030,9 @@ namespace osmscout {
       return maxSpeed;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -1068,20 +1052,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API GradeFeatureValue : public FeatureValue
@@ -1112,6 +1090,9 @@ namespace osmscout {
       return grade;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -1132,20 +1113,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API AdminLevelFeatureValue : public FeatureValue
@@ -1176,6 +1151,9 @@ namespace osmscout {
       return adminLevel;
     }
 
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
   };
@@ -1195,20 +1173,14 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API BridgeFeature : public Feature
@@ -1226,20 +1198,13 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API TunnelFeature : public Feature
@@ -1257,20 +1222,13 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   class OSMSCOUT_API RoundaboutFeature : public Feature
@@ -1288,20 +1246,13 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
-    void AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const TypeInfo& type,
-               size_t idx,
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                FeatureValueBuffer& buffer) const;
-
-    bool Read(FileScanner& scanner,
-              FeatureValue* value);
-    bool Write(FileWriter& writer,
-               FeatureValue* value);
   };
 
   /**

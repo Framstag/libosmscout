@@ -230,6 +230,20 @@ namespace osmscout {
     // no code
   }
 
+  bool FeatureValue::Read(FileScanner& /*scanner*/)
+  {
+    assert(false);
+
+    return true;
+  }
+
+  bool FeatureValue::Write(FileWriter& /*writer*/)
+  {
+    assert(false);
+
+    return true;
+  }
+
   Feature::Feature()
   {
     // no code
@@ -240,15 +254,34 @@ namespace osmscout {
     // no code
   }
 
+  FeatureValue* Feature::AllocateValue(void* /*buffer*/)
+  {
+    assert(false);
+    return NULL;
+  }
+
   FeatureInstance::FeatureInstance(const FeatureRef& feature,
+                                   const TypeInfo* type,
                                    size_t index,
                                    size_t offset)
   : feature(feature),
+    type(type),
     index(index),
     offset(offset)
   {
     assert(feature.Valid());
   }
+
+  bool NameFeatureValue::Read(FileScanner& scanner)
+  {
+    return scanner.Read(name);
+  }
+
+  bool NameFeatureValue::Write(FileWriter& writer)
+  {
+    return writer.Write(name);
+  }
+
 
   FeatureValue& NameFeatureValue::operator=(const FeatureValue& other)
   {
@@ -285,16 +318,15 @@ namespace osmscout {
     return sizeof(NameFeatureValue);
   }
 
-  void NameFeature::AllocateValue(void* buffer)
+  FeatureValue* NameFeature::AllocateValue(void* buffer)
   {
-    new (buffer) NameFeatureValue();
+    return new (buffer) NameFeatureValue();
   }
 
   void NameFeature::Parse(Progress& /*progress*/,
                           const TypeConfig& typeConfig,
+                          const FeatureInstance& feature,
                           const ObjectOSMRef& /*object*/,
-                          const TypeInfo& /*type*/,
-                          size_t idx,
                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                           FeatureValueBuffer& buffer) const
   {
@@ -313,34 +345,20 @@ namespace osmscout {
     }
 
     if (!name.empty()) {
-      NameFeatureValue* value=static_cast<NameFeatureValue*>(buffer.AllocateValue(idx));
+      NameFeatureValue* value=static_cast<NameFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetName(name);
     }
   }
 
-  bool NameFeature::Read(FileScanner& scanner,
-                         FeatureValue* value)
+  bool NameAltFeatureValue::Read(FileScanner& scanner)
   {
-    std::string name;
-
-    if (!scanner.Read(name)) {
-      return false;
-    }
-
-    NameFeatureValue* nameFeature=static_cast<NameFeatureValue*>(value);
-
-    nameFeature->SetName(name);
-
-    return true;
+    return scanner.Read(nameAlt);
   }
 
-  bool NameFeature::Write(FileWriter& writer,
-                          FeatureValue* value)
+  bool NameAltFeatureValue::Write(FileWriter& writer)
   {
-    NameFeatureValue* v=static_cast<NameFeatureValue*>(value);
-
-    return writer.Write(v->GetName());
+    return writer.Write(nameAlt);
   }
 
   FeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
@@ -378,16 +396,15 @@ namespace osmscout {
     return sizeof(NameAltFeatureValue);
   }
 
-  void NameAltFeature::AllocateValue(void* buffer)
+  FeatureValue* NameAltFeature::AllocateValue(void* buffer)
   {
-    new (buffer) NameAltFeatureValue();
+    return new (buffer) NameAltFeatureValue();
   }
 
   void NameAltFeature::Parse(Progress& /*progress*/,
                              const TypeConfig& typeConfig,
+                             const FeatureInstance& feature,
                              const ObjectOSMRef& /*object*/,
-                             const TypeInfo& /*type*/,
-                             size_t idx,
                              const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                              FeatureValueBuffer& buffer) const
   {
@@ -406,34 +423,20 @@ namespace osmscout {
     }
 
     if (!nameAlt.empty()) {
-      NameAltFeatureValue* value=static_cast<NameAltFeatureValue*>(buffer.AllocateValue(idx));
+      NameAltFeatureValue* value=static_cast<NameAltFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetNameAlt(nameAlt);
     }
   }
 
-  bool NameAltFeature::Read(FileScanner& scanner,
-                            FeatureValue* value)
+  bool RefFeatureValue::Read(FileScanner& scanner)
   {
-    std::string altName;
-
-    if (!scanner.Read(altName)) {
-      return false;
-    }
-
-    NameAltFeatureValue* nameAltFeature=static_cast<NameAltFeatureValue*>(value);
-
-    nameAltFeature->SetNameAlt(altName);
-
-    return true;
+    return scanner.Read(ref);
   }
 
-  bool NameAltFeature::Write(FileWriter& writer,
-                             FeatureValue* value)
+  bool RefFeatureValue::Write(FileWriter& writer)
   {
-    NameAltFeatureValue* v=static_cast<NameAltFeatureValue*>(value);
-
-    return writer.Write(v->GetNameAlt());
+    return writer.Write(ref);
   }
 
   FeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
@@ -471,16 +474,15 @@ namespace osmscout {
     return sizeof(RefFeatureValue);
   }
 
-  void RefFeature::AllocateValue(void* buffer)
+  FeatureValue* RefFeature::AllocateValue(void* buffer)
   {
-    new (buffer) RefFeatureValue();
+    return new (buffer) RefFeatureValue();
   }
 
   void RefFeature::Parse(Progress& /*progress*/,
                          const TypeConfig& /*typeConfig*/,
+                         const FeatureInstance& feature,
                          const ObjectOSMRef& /*object*/,
-                         const TypeInfo& /*type*/,
-                         size_t idx,
                          const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                          FeatureValueBuffer& buffer) const
   {
@@ -488,34 +490,20 @@ namespace osmscout {
 
     if (ref!=tags.end() &&
         !ref->second.empty()) {
-      RefFeatureValue* value=static_cast<RefFeatureValue*>(buffer.AllocateValue(idx));
+      RefFeatureValue* value=static_cast<RefFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetRef(ref->second);
     }
   }
 
-  bool RefFeature::Read(FileScanner& scanner,
-                        FeatureValue* value)
+  bool LocationFeatureValue::Read(FileScanner& scanner)
   {
-    std::string ref;
-
-    if (!scanner.Read(ref)) {
-      return false;
-    }
-
-    RefFeatureValue* refFeature=static_cast<RefFeatureValue*>(value);
-
-    refFeature->SetRef(ref);
-
-    return true;
+    return scanner.Read(location);
   }
 
-  bool RefFeature::Write(FileWriter& writer,
-                         FeatureValue* value)
+  bool LocationFeatureValue::Write(FileWriter& writer)
   {
-    RefFeatureValue* v=static_cast<RefFeatureValue*>(value);
-
-    return writer.Write(v->GetRef());
+    return writer.Write(location);
   }
 
   FeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
@@ -554,16 +542,15 @@ namespace osmscout {
     return sizeof(LocationFeatureValue);
   }
 
-  void LocationFeature::AllocateValue(void* buffer)
+  FeatureValue* LocationFeature::AllocateValue(void* buffer)
   {
-    new (buffer) LocationFeatureValue();
+    return new (buffer) LocationFeatureValue();
   }
 
   void LocationFeature::Parse(Progress& /*progress*/,
                               const TypeConfig& /*typeConfig*/,
+                              const FeatureInstance& feature,
                               const ObjectOSMRef& /*object*/,
-                              const TypeInfo& /*type*/,
-                              size_t idx,
                               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                               FeatureValueBuffer& buffer) const
   {
@@ -581,34 +568,20 @@ namespace osmscout {
 
     if (!street->second.empty() &&
         !houseNr->second.empty()) {
-      LocationFeatureValue* value=static_cast<LocationFeatureValue*>(buffer.AllocateValue(idx));
+      LocationFeatureValue* value=static_cast<LocationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetLocation(street->second);
     }
   }
 
-  bool LocationFeature::Read(FileScanner& scanner,
-                            FeatureValue* value)
+  bool AddressFeatureValue::Read(FileScanner& scanner)
   {
-    std::string location;
-
-    if (!scanner.Read(location)) {
-      return false;
-    }
-
-    LocationFeatureValue* locationFeature=static_cast<LocationFeatureValue*>(value);
-
-    locationFeature->SetLocation(location);
-
-    return true;
+    return scanner.Read(address);
   }
 
-  bool LocationFeature::Write(FileWriter& writer,
-                             FeatureValue* value)
+  bool AddressFeatureValue::Write(FileWriter& writer)
   {
-    LocationFeatureValue* v=static_cast<LocationFeatureValue*>(value);
-
-    return writer.Write(v->GetLocation());
+    return writer.Write(address);
   }
 
   FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
@@ -647,16 +620,15 @@ namespace osmscout {
     return sizeof(AddressFeatureValue);
   }
 
-  void AddressFeature::AllocateValue(void* buffer)
+  FeatureValue* AddressFeature::AllocateValue(void* buffer)
   {
-    new (buffer) AddressFeatureValue();
+    return new (buffer) AddressFeatureValue();
   }
 
   void AddressFeature::Parse(Progress& /*progress*/,
                              const TypeConfig& /*typeConfig*/,
+                             const FeatureInstance& feature,
                              const ObjectOSMRef& /*object*/,
-                             const TypeInfo& /*type*/,
-                             size_t idx,
                              const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                              FeatureValueBuffer& buffer) const
   {
@@ -674,34 +646,20 @@ namespace osmscout {
 
     if (!street->second.empty() &&
         !houseNr->second.empty()) {
-      AddressFeatureValue* value=static_cast<AddressFeatureValue*>(buffer.AllocateValue(idx));
+      AddressFeatureValue* value=static_cast<AddressFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetAddress(houseNr->second);
     }
   }
 
-  bool AddressFeature::Read(FileScanner& scanner,
-                            FeatureValue* value)
+  bool AccessFeatureValue::Read(FileScanner& scanner)
   {
-    std::string address;
-
-    if (!scanner.Read(address)) {
-      return false;
-    }
-
-    AddressFeatureValue* addressFeature=static_cast<AddressFeatureValue*>(value);
-
-    addressFeature->SetAddress(address);
-
-    return true;
+    return scanner.Read(access);
   }
 
-  bool AddressFeature::Write(FileWriter& writer,
-                             FeatureValue* value)
+  bool AccessFeatureValue::Write(FileWriter& writer)
   {
-    AddressFeatureValue* v=static_cast<AddressFeatureValue*>(value);
-
-    return writer.Write(v->GetAddress());
+    return writer.Write(access);
   }
 
   FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
@@ -760,30 +718,29 @@ namespace osmscout {
     return sizeof(AccessFeatureValue);
   }
 
-  void AccessFeature::AllocateValue(void* buffer)
+  FeatureValue* AccessFeature::AllocateValue(void* buffer)
   {
-    new (buffer) AccessFeatureValue();
+    return new (buffer) AccessFeatureValue();
   }
 
   void AccessFeature::Parse(Progress& /*progress*/,
                             const TypeConfig& /*typeConfig*/,
+                            const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
-                            const TypeInfo& type,
-                            size_t idx,
                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
     uint8_t access=0;
 
-    if (type.CanRouteFoot()) {
+    if (feature.GetType()->CanRouteFoot()) {
       access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
     }
 
-    if (type.CanRouteBicycle()) {
+    if (feature.GetType()->CanRouteBicycle()) {
       access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
     }
 
-    if (type.CanRouteCar()) {
+    if (feature.GetType()->CanRouteCar()) {
       access|=(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
     }
 
@@ -953,34 +910,20 @@ namespace osmscout {
     }
 
     if (access!=defaultAccess) {
-      AccessFeatureValue* value=static_cast<AccessFeatureValue*>(buffer.AllocateValue(idx));
+      AccessFeatureValue* value=static_cast<AccessFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetAccess(access);
     }
   }
 
-  bool AccessFeature::Read(FileScanner& scanner,
-                           FeatureValue* value)
+  bool LayerFeatureValue::Read(FileScanner& scanner)
   {
-    uint8_t access;
-
-    if (!scanner.Read(access)) {
-      return false;
-    }
-
-    AccessFeatureValue* accessFeature=static_cast<AccessFeatureValue*>(value);
-
-    accessFeature->SetAccess(access);
-
-    return true;
+    return scanner.Read(layer);
   }
 
-  bool AccessFeature::Write(FileWriter& writer,
-                            FeatureValue* value)
+  bool LayerFeatureValue::Write(FileWriter& writer)
   {
-    AccessFeatureValue* v=static_cast<AccessFeatureValue*>(value);
-
-    return writer.Write(v->GetAccess());
+    return writer.Write(layer);
   }
 
   FeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
@@ -1018,16 +961,15 @@ namespace osmscout {
     return sizeof(LayerFeatureValue);
   }
 
-  void LayerFeature::AllocateValue(void* buffer)
+  FeatureValue* LayerFeature::AllocateValue(void* buffer)
   {
-    new (buffer) LayerFeatureValue();
+    return new (buffer) LayerFeatureValue();
   }
 
   void LayerFeature::Parse(Progress& progress,
                            const TypeConfig& /*typeConfig*/,
+                           const FeatureInstance& feature,
                            const ObjectOSMRef& object,
-                           const TypeInfo& /*type*/,
-                           size_t idx,
                            const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
@@ -1038,7 +980,7 @@ namespace osmscout {
 
       if (StringToNumber(layer->second,layerValue)) {
         if (layerValue!=0) {
-          LayerFeatureValue* value=static_cast<LayerFeatureValue*>(buffer.AllocateValue(idx));
+          LayerFeatureValue* value=static_cast<LayerFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
           value->SetLayer(layerValue);
         }
@@ -1049,28 +991,14 @@ namespace osmscout {
     }
   }
 
-  bool LayerFeature::Read(FileScanner& scanner,
-                          FeatureValue* value)
+  bool WidthFeatureValue::Read(FileScanner& scanner)
   {
-    int8_t layer;
-
-    if (!scanner.Read(layer)) {
-      return false;
-    }
-
-    LayerFeatureValue* layerFeature=static_cast<LayerFeatureValue*>(value);
-
-    layerFeature->SetLayer(layer);
-
-    return true;
+    return scanner.Read(width);
   }
 
-  bool LayerFeature::Write(FileWriter& writer,
-                           FeatureValue* value)
+  bool WidthFeatureValue::Write(FileWriter& writer)
   {
-    LayerFeatureValue* v=static_cast<LayerFeatureValue*>(value);
-
-    return writer.Write(v->GetLayer());
+    return writer.Write(width);
   }
 
   FeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
@@ -1108,16 +1036,15 @@ namespace osmscout {
     return sizeof(WidthFeatureValue);
   }
 
-  void WidthFeature::AllocateValue(void* buffer)
+  FeatureValue* WidthFeature::AllocateValue(void* buffer)
   {
-    new (buffer) WidthFeatureValue();
+    return new (buffer) WidthFeatureValue();
   }
 
   void WidthFeature::Parse(Progress& progress,
                            const TypeConfig& /*typeConfig*/,
+                           const FeatureInstance& feature,
                            const ObjectOSMRef& object,
-                           const TypeInfo& /*type*/,
-                           size_t idx,
                            const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
@@ -1168,35 +1095,21 @@ namespace osmscout {
       progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" value is too small or too big!");
     }
     else {
-      WidthFeatureValue* value=static_cast<WidthFeatureValue*>(buffer.AllocateValue(idx));
+      WidthFeatureValue* value=static_cast<WidthFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetWidth((uint8_t)floor(w+0.5));
     }
 
   }
 
-  bool WidthFeature::Read(FileScanner& scanner,
-                         FeatureValue* value)
+  bool MaxSpeedFeatureValue::Read(FileScanner& scanner)
   {
-    uint8_t width;
-
-    if (!scanner.Read(width)) {
-      return false;
-    }
-
-    WidthFeatureValue* widthFeature=static_cast<WidthFeatureValue*>(value);
-
-    widthFeature->SetWidth(width);
-
-    return true;
+    return scanner.Read(maxSpeed);
   }
 
-  bool WidthFeature::Write(FileWriter& writer,
-                           FeatureValue* value)
+  bool MaxSpeedFeatureValue::Write(FileWriter& writer)
   {
-    WidthFeatureValue* v=static_cast<WidthFeatureValue*>(value);
-
-    return writer.Write(v->GetWidth());
+    return writer.Write(maxSpeed);
   }
 
   FeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
@@ -1234,16 +1147,15 @@ namespace osmscout {
     return sizeof(MaxSpeedFeatureValue);
   }
 
-  void MaxSpeedFeature::AllocateValue(void* buffer)
+  FeatureValue* MaxSpeedFeature::AllocateValue(void* buffer)
   {
-    new (buffer) MaxSpeedFeatureValue();
+    return new (buffer) MaxSpeedFeatureValue();
   }
 
   void MaxSpeedFeature::Parse(Progress& progress,
                               const TypeConfig& /*typeConfig*/,
+                              const FeatureInstance& feature,
                               const ObjectOSMRef& object,
-                              const TypeInfo& /*type*/,
-                              size_t idx,
                               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                               FeatureValueBuffer& buffer) const
   {
@@ -1268,7 +1180,7 @@ namespace osmscout {
     // "walk" should not be used, but we provide an estimation anyway,
     // since it is likely still better than the default
     if (valueString=="walk") {
-      MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
+      MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetMaxSpeed(10);
 
@@ -1292,7 +1204,7 @@ namespace osmscout {
       return;
     }
 
-    MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(idx));
+    MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
     if (isMph) {
       if (valueNumeric>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
@@ -1313,28 +1225,14 @@ namespace osmscout {
     }
   }
 
-  bool MaxSpeedFeature::Read(FileScanner& scanner,
-                             FeatureValue* value)
+  bool GradeFeatureValue::Read(FileScanner& scanner)
   {
-    uint8_t maxSpeed;
-
-    if (!scanner.Read(maxSpeed)) {
-      return false;
-    }
-
-    MaxSpeedFeatureValue* maxSpeedFeature=static_cast<MaxSpeedFeatureValue*>(value);
-
-    maxSpeedFeature->SetMaxSpeed(maxSpeed);
-
-    return true;
+    return scanner.Read(grade);
   }
 
-  bool MaxSpeedFeature::Write(FileWriter& writer,
-                              FeatureValue* value)
+  bool GradeFeatureValue::Write(FileWriter& writer)
   {
-    MaxSpeedFeatureValue* v=static_cast<MaxSpeedFeatureValue*>(value);
-
-    return writer.Write(v->GetMaxSpeed());
+    return writer.Write(grade);
   }
 
   FeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
@@ -1373,16 +1271,15 @@ namespace osmscout {
     return sizeof(GradeFeatureValue);
   }
 
-  void GradeFeature::AllocateValue(void* buffer)
+  FeatureValue* GradeFeature::AllocateValue(void* buffer)
   {
-    new (buffer) GradeFeatureValue();
+    return new (buffer) GradeFeatureValue();
   }
 
   void GradeFeature::Parse(Progress& progress,
                            const TypeConfig& typeConfig,
+                           const FeatureInstance& feature,
                            const ObjectOSMRef& object,
-                           const TypeInfo& /*type*/,
-                           size_t idx,
                            const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            FeatureValueBuffer& buffer) const
   {
@@ -1390,35 +1287,35 @@ namespace osmscout {
 
     if (tracktype!=tags.end()) {
       if (tracktype->second=="grade1") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(1);
 
         return;
       }
       else if (tracktype->second=="grade2") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(2);
 
         return;
       }
       else if (tracktype->second=="grade3") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(3);
 
         return;
       }
       else if (tracktype->second=="grade4") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(4);
 
         return;
       }
       else if (tracktype->second=="grade5") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(5);
 
@@ -1436,7 +1333,7 @@ namespace osmscout {
 
       if (typeConfig.GetGradeForSurface(surface->second,
                                         grade)) {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(idx));
+        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade((uint8_t)grade);
       }
@@ -1446,28 +1343,14 @@ namespace osmscout {
     }
   }
 
-  bool GradeFeature::Read(FileScanner& scanner,
-                          FeatureValue* value)
+  bool AdminLevelFeatureValue::Read(FileScanner& scanner)
   {
-    uint8_t grade;
-
-    if (!scanner.Read(grade)) {
-      return false;
-    }
-
-    GradeFeatureValue* gradeFeature=static_cast<GradeFeatureValue*>(value);
-
-    gradeFeature->SetGrade(grade);
-
-    return true;
+    return scanner.Read(adminLevel);
   }
 
-  bool GradeFeature::Write(FileWriter& writer,
-                           FeatureValue* value)
+  bool AdminLevelFeatureValue::Write(FileWriter& writer)
   {
-    GradeFeatureValue* v=static_cast<GradeFeatureValue*>(value);
-
-    return writer.Write(v->GetGrade());
+    return writer.Write(adminLevel);
   }
 
   FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
@@ -1482,82 +1365,57 @@ namespace osmscout {
   }
 
   bool AdminLevelFeatureValue::operator==(const FeatureValue& other) const
-    {
-      const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
+  {
+    const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
-      return adminLevel==otherValue.adminLevel;
-    }
+    return adminLevel==otherValue.adminLevel;
+  }
 
-    const char* const AdminLevelFeature::NAME = "AdminLevel";
+  const char* const AdminLevelFeature::NAME = "AdminLevel";
 
-    void AdminLevelFeature::Initialize(TypeConfig& typeConfig)
-    {
-      tagAdminLevel=typeConfig.RegisterTag("admin_level");
-    }
+  void AdminLevelFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagAdminLevel=typeConfig.RegisterTag("admin_level");
+  }
 
-    std::string AdminLevelFeature::GetName() const
-    {
-      return NAME;
-    }
+  std::string AdminLevelFeature::GetName() const
+  {
+    return NAME;
+  }
 
-    size_t AdminLevelFeature::GetValueSize() const
-    {
-      return sizeof(AdminLevelFeatureValue);
-    }
+  size_t AdminLevelFeature::GetValueSize() const
+  {
+    return sizeof(AdminLevelFeatureValue);
+  }
 
-    void AdminLevelFeature::AllocateValue(void* buffer)
-    {
-      new (buffer) AdminLevelFeatureValue();
-    }
+  FeatureValue* AdminLevelFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) AdminLevelFeatureValue();
+  }
 
-    void AdminLevelFeature::Parse(Progress& progress,
-                                  const TypeConfig& /*typeConfig*/,
-                                  const ObjectOSMRef& object,
-                                  const TypeInfo& /*type*/,
-                                  size_t idx,
-                                  const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
-                                  FeatureValueBuffer& buffer) const
-    {
-      auto adminLevel=tags.find(tagAdminLevel);
+  void AdminLevelFeature::Parse(Progress& progress,
+                                const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& object,
+                                const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                                FeatureValueBuffer& buffer) const
+  {
+    auto adminLevel=tags.find(tagAdminLevel);
 
-      if (adminLevel!=tags.end()) {
-        uint8_t adminLevelValue;
+    if (adminLevel!=tags.end()) {
+      uint8_t adminLevelValue;
 
-        if (StringToNumber(adminLevel->second,
-                           adminLevelValue)) {
-          AdminLevelFeatureValue* value=static_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(idx));
+      if (StringToNumber(adminLevel->second,
+                         adminLevelValue)) {
+        AdminLevelFeatureValue* value=static_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-          value->SetAdminLevel(adminLevelValue);
-        }
-        else {
-          progress.Warning(std::string("Admin level is not numeric '")+adminLevel->second+"' for "+object.GetName()+"!");
-        }
+        value->SetAdminLevel(adminLevelValue);
+      }
+      else {
+        progress.Warning(std::string("Admin level is not numeric '")+adminLevel->second+"' for "+object.GetName()+"!");
       }
     }
-
-    bool AdminLevelFeature::Read(FileScanner& scanner,
-                                 FeatureValue* value)
-    {
-      uint8_t adminLevel;
-
-      if (!scanner.Read(adminLevel)) {
-        return false;
-      }
-
-      AdminLevelFeatureValue* adminLevelFeature=static_cast<AdminLevelFeatureValue*>(value);
-
-      adminLevelFeature->SetAdminLevel(adminLevel);
-
-      return true;
-    }
-
-    bool AdminLevelFeature::Write(FileWriter& writer,
-                             FeatureValue* value)
-    {
-      AdminLevelFeatureValue* v=static_cast<AdminLevelFeatureValue*>(value);
-
-      return writer.Write(v->GetAdminLevel());
-    }
+  }
 
   const char* const BridgeFeature::NAME = "Bridge";
 
@@ -1576,16 +1434,10 @@ namespace osmscout {
     return 0;
   }
 
-  void BridgeFeature::AllocateValue(void* /*buffer*/)
-  {
-    assert(true);
-  }
-
   void BridgeFeature::Parse(Progress& /*progress*/,
                             const TypeConfig& /*typeConfig*/,
+                            const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
-                            const TypeInfo& /*type*/,
-                            size_t idx,
                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
@@ -1595,20 +1447,8 @@ namespace osmscout {
         !(bridge->second=="no" ||
           bridge->second=="false" ||
           bridge->second=="0")) {
-      buffer.AllocateValue(idx);
+      buffer.AllocateValue(feature.GetIndex());
     }
-  }
-
-  bool BridgeFeature::Read(FileScanner& /*scanner*/,
-                           FeatureValue* /*value*/)
-  {
-    return true;
-  }
-
-  bool BridgeFeature::Write(FileWriter& /*writer*/,
-                            FeatureValue* /*value*/)
-  {
-    return true;
   }
 
   const char* const TunnelFeature::NAME = "Tunnel";
@@ -1628,16 +1468,10 @@ namespace osmscout {
     return 0;
   }
 
-  void TunnelFeature::AllocateValue(void* /*buffer*/)
-  {
-    assert(true);
-  }
-
   void TunnelFeature::Parse(Progress& /*progress*/,
                             const TypeConfig& /*typeConfig*/,
+                            const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
-                            const TypeInfo& /*type*/,
-                            size_t idx,
                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                             FeatureValueBuffer& buffer) const
   {
@@ -1647,20 +1481,8 @@ namespace osmscout {
         !(tunnel->second=="no" ||
           tunnel->second=="false" ||
           tunnel->second=="0")) {
-      buffer.AllocateValue(idx);
+      buffer.AllocateValue(feature.GetIndex());
     }
-  }
-
-  bool TunnelFeature::Read(FileScanner& /*scanner*/,
-                           FeatureValue* /*value*/)
-  {
-    return true;
-  }
-
-  bool TunnelFeature::Write(FileWriter& /*writer*/,
-                            FeatureValue* /*value*/)
-  {
-    return true;
   }
 
   const char* const RoundaboutFeature::NAME = "Roundabout";
@@ -1680,16 +1502,10 @@ namespace osmscout {
     return 0;
   }
 
-  void RoundaboutFeature::AllocateValue(void* /*buffer*/)
-  {
-    assert(true);
-  }
-
   void RoundaboutFeature::Parse(Progress& /*progress*/,
                                 const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
                                 const ObjectOSMRef& /*object*/,
-                                const TypeInfo& /*type*/,
-                                size_t idx,
                                 const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                 FeatureValueBuffer& buffer) const
   {
@@ -1697,20 +1513,8 @@ namespace osmscout {
 
     if (junction!=tags.end() &&
         junction->second=="roundabout") {
-      buffer.AllocateValue(idx);
+      buffer.AllocateValue(feature.GetIndex());
     }
-  }
-
-  bool RoundaboutFeature::Read(FileScanner& /*scanner*/,
-                               FeatureValue* /*value*/)
-  {
-    return true;
-  }
-
-  bool RoundaboutFeature::Write(FileWriter& /*writer*/,
-                                FeatureValue* /*value*/)
-  {
-    return true;
   }
 
   FeatureValueBuffer::FeatureValueBuffer()
@@ -1814,9 +1618,7 @@ namespace osmscout {
     if (type->GetFeature(idx).GetFeature()->HasValue()) {
       FeatureValue* value=GetValue(idx);
 
-      type->GetFeature(idx).GetFeature()->AllocateValue(value);
-
-      return value;
+      return type->GetFeature(idx).GetFeature()->AllocateValue(value);
     }
     else {
       return NULL;
@@ -1844,9 +1646,8 @@ namespace osmscout {
     for (const auto &feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(progress,
                                   typeConfig,
+                                  feature,
                                   object,
-                                  *type,
-                                  feature.GetIndex(),
                                   tags,
                                   *this);
     }
@@ -1865,12 +1666,9 @@ namespace osmscout {
 
       if (HasValue(idx) &&
           feature.GetFeature()->HasValue()) {
-        FeatureValue* value=GetValue(idx);
+        FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
 
-        feature.GetFeature()->AllocateValue(value);
-
-        if (!feature.GetFeature()->Read(scanner,
-                                        value)) {
+        if (!value->Read(scanner)) {
           return false;
         }
       }
@@ -1892,8 +1690,9 @@ namespace osmscout {
 
       if (HasValue(idx) &&
           feature.GetFeature()->HasValue()) {
-        if (!feature.GetFeature()->Write(writer,
-                                         GetValue(idx))) {
+        FeatureValue* value=GetValue(idx);
+
+        if (!value->Write(writer)) {
           return false;
         }
       }
@@ -2050,6 +1849,7 @@ namespace osmscout {
 
 
     features.push_back(FeatureInstance(feature,
+                                       this,
                                        index,
                                        offset));
     nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
