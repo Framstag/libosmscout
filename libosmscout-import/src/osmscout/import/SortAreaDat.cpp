@@ -21,6 +21,8 @@
 
 #include <osmscout/GeoCoord.h>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <iostream>
 namespace osmscout {
 

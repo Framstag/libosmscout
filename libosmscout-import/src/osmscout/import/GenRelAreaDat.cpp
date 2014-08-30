@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>

@@ -19,6 +19,8 @@
 
 #include <osmscout/import/SortNodeDat.h>
 
+#include <osmscout/TypeFeatures.h>
+
 namespace osmscout {
   class NodeLocationProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
   {

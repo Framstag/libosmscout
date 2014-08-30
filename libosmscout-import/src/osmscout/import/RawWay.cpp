@@ -21,8 +21,10 @@
 
 #include <limits>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/system/Math.h>
-#include <iostream>
+
 namespace osmscout {
 
   bool RawWay::IsOneway() const

@@ -19,7 +19,10 @@
 
 
 #include <osmscout/Database.h>
+
 #include <osmscout/POIService.h>
+
+#include <osmscout/TypeFeatures.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top

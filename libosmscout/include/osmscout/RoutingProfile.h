@@ -23,6 +23,8 @@
 #include <vector>
 
 #include <osmscout/Types.h>
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/Way.h>
 

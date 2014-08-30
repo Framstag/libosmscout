@@ -25,16 +25,21 @@
 
 #include <osmscout/private/MapImportExport.h>
 
-#include <osmscout/util/Geometry.h>
+
+#include <osmscout/ObjectRef.h>
+
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
-#include <osmscout/GroundTile.h>
-#include <osmscout/ObjectRef.h>
+
 #include <osmscout/StyleConfig.h>
 
+#include <osmscout/GroundTile.h>
+
 #include <osmscout/util/Breaker.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Transformation.h>

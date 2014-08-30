@@ -17,10 +17,13 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscout/ObjectRef.h>
+
 #include <osmscout/Way.h>
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
-#include <osmscout/ObjectRef.h>
+
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>

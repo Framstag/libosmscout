@@ -25,6 +25,9 @@
 
 #include <osmscout/CoreFeatures.h>
 
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
+
 // Database
 #include <osmscout/Database.h>
 

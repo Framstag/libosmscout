@@ -23,7 +23,9 @@
 #include <osmscout/NumericIndex.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/TurnRestriction.h>
+
 #include <osmscout/Types.h>
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>

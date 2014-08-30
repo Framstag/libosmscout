@@ -23,6 +23,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/DebugDatabase.h>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <list>
 #include <map>
 #include <string>

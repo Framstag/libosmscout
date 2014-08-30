@@ -26,14 +26,15 @@
 #include <osmscout/private/MapImportExport.h>
 
 #include <osmscout/Coord.h>
+
 #include <osmscout/Types.h>
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
-
-#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Reference.h>

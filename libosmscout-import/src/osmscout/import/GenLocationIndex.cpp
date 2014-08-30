@@ -28,6 +28,8 @@
 
 #include <osmscout/Pixel.h>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/LocationIndex.h>
 
 #include <osmscout/system/Assert.h>

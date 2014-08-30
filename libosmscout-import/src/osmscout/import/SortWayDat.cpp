@@ -19,6 +19,8 @@
 
 #include <osmscout/import/SortWayDat.h>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/util/Geometry.h>
 
 namespace osmscout {
