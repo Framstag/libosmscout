@@ -1660,7 +1660,7 @@ namespace osmscout {
       data.layer=0;
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
-      data.wayPriority=styleConfig.GetWayPrio(buffer.GetTypeId());
+      data.wayPriority=styleConfig.GetWayPrio(buffer.GetType()->GetId());
       data.startIsClosed=ids.empty() || ids[0]==0;
       data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
 

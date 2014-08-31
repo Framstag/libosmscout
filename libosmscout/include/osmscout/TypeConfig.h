@@ -317,6 +317,7 @@ namespace osmscout {
 
     /**
      * Returns the unique id of this type. You should not use the type id as an index.
+
      */
     inline TypeId GetId() const
     {
@@ -812,11 +813,6 @@ namespace osmscout {
     inline TypeInfoRef GetType() const
     {
       return type;
-    }
-
-    inline TypeId GetTypeId() const
-    {
-      return type->GetId();
     }
 
     inline size_t GetFeatureCount() const

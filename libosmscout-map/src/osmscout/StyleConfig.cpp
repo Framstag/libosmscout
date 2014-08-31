@@ -2089,7 +2089,7 @@ namespace osmscout {
                                      TextStyleRef& textStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    nodeTextStyleSelectors[buffer.GetTypeId()],
+                    nodeTextStyleSelectors[buffer.GetType()->GetId()],
                     buffer,
                     projection,
                     dpi,
@@ -2102,7 +2102,7 @@ namespace osmscout {
                                      IconStyleRef& iconStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    nodeIconStyleSelectors[buffer.GetTypeId()],
+                    nodeIconStyleSelectors[buffer.GetType()->GetId()],
                     buffer,
                     projection,
                     dpi,
@@ -2123,7 +2123,7 @@ namespace osmscout {
       style=NULL;
 
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][buffer.GetTypeId()],
+                      wayLineStyleSelectors[slot][buffer.GetType()->GetId()],
                       buffer,
                       projection,
                       dpi,
@@ -2141,7 +2141,7 @@ namespace osmscout {
                                         PathTextStyleRef& pathTextStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    wayPathTextStyleSelectors[buffer.GetTypeId()],
+                    wayPathTextStyleSelectors[buffer.GetType()->GetId()],
                     buffer,
                     projection,
                     dpi,
@@ -2154,7 +2154,7 @@ namespace osmscout {
                                           PathSymbolStyleRef& pathSymbolStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    wayPathSymbolStyleSelectors[buffer.GetTypeId()],
+                    wayPathSymbolStyleSelectors[buffer.GetType()->GetId()],
                     buffer,
                     projection,
                     dpi,
@@ -2167,7 +2167,7 @@ namespace osmscout {
                                           PathShieldStyleRef& pathShieldStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    wayPathShieldStyleSelectors[buffer.GetTypeId()],
+                    wayPathShieldStyleSelectors[buffer.GetType()->GetId()],
                     buffer,
                     projection,
                     dpi,

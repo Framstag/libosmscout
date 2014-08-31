@@ -64,7 +64,7 @@ namespace osmscout {
   bool Node::Write(const TypeConfig& /*typeConfig*/,
                    FileWriter& writer) const
   {
-    writer.WriteNumber(featureValueBuffer.GetTypeId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;

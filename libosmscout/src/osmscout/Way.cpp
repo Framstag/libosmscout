@@ -170,7 +170,7 @@ namespace osmscout {
   {
     assert(!nodes.empty());
 
-    writer.WriteNumber(featureValueBuffer.GetTypeId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;
@@ -233,7 +233,7 @@ namespace osmscout {
   {
     assert(!nodes.empty());
 
-    writer.WriteNumber(featureValueBuffer.GetTypeId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;

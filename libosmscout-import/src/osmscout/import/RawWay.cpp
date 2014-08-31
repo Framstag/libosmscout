@@ -140,11 +140,11 @@ namespace osmscout {
 
     if (isArea) {
       TypeId type=typeConfig.GetMaxTypeId()+1+
-                  featureValueBuffer.GetTypeId();
+                  featureValueBuffer.GetType()->GetId();
       writer.WriteNumber(type);
     }
     else {
-      writer.WriteNumber(featureValueBuffer.GetTypeId());
+      writer.WriteNumber(featureValueBuffer.GetType()->GetId());
     }
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
