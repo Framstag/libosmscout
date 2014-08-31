@@ -1077,6 +1077,29 @@ namespace osmscout {
     }
   }
 
+  void TypeConfig::RegisterMaxSpeedAlias(const std::string& alias,
+                                         uint8_t maxSpeed)
+  {
+    nameToMaxSpeedMap.insert(std::make_pair(alias,
+                                            maxSpeed));
+  }
+
+  bool TypeConfig::GetMaxSpeedFromAlias(const std::string& alias,
+                                        uint8_t& maxSpeed) const
+  {
+    auto entry=nameToMaxSpeedMap.find(alias);
+
+    if (entry!=nameToMaxSpeedMap.end()) {
+      maxSpeed=entry->second;
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+
   /**
    * Loads the type configuration from the given *.ost file.
    *

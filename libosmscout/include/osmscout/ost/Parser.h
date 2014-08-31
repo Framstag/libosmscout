@@ -117,11 +117,13 @@ std::string Destring(const char* str)
   void SemErr(const char* msg);
 
 	void OST();
+	void MAXSPEEDS();
 	void GRADES();
 	void TYPES();
-	void GRADE();
-	void UINT(size_t& value);
+	void MAXSPEED();
 	void STRING(std::string& value);
+	void UINT(size_t& value);
+	void GRADE();
 	void TYPE();
 	void IDENT(std::string& value);
 	void TYPEKINDS(unsigned char& types);

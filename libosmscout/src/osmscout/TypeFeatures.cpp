@@ -906,7 +906,7 @@ namespace osmscout {
   }
 
   void MaxSpeedFeature::Parse(Progress& progress,
-                              const TypeConfig& /*typeConfig*/,
+                              const TypeConfig& typeConfig,
                               const FeatureInstance& feature,
                               const ObjectOSMRef& object,
                               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
@@ -922,11 +922,9 @@ namespace osmscout {
     size_t      valueNumeric;
     bool        isMph=false;
 
-    if (valueString=="signals") {
-      return;
-    }
-
-    if (valueString=="none") {
+    if (valueString=="signals" ||
+        valueString=="none" ||
+        valueString=="no") {
       return;
     }
 
@@ -943,18 +941,36 @@ namespace osmscout {
     size_t pos;
 
     pos=valueString.rfind("mph");
+
     if (pos!=std::string::npos) {
       valueString.erase(pos);
       isMph=true;
+    }
+    else {
+      pos=valueString.rfind("km/h");
+
+      if (pos!=std::string::npos) {
+        valueString.erase(pos);
+        isMph=false;
+      }
     }
 
     while (valueString.length()>0 && valueString[valueString.length()-1]==' ') {
       valueString.erase(valueString.length()-1);
     }
 
-    if (!StringToNumber(valueString,valueNumeric)) {
-      progress.Warning(std::string("Max speed tag value '")+maxSpeed->second+"' for "+object.GetName()+" is not numeric!");
-      return;
+    if (!StringToNumber(valueString,
+                        valueNumeric)) {
+      uint8_t maxSpeedValue;
+
+      if (typeConfig.GetMaxSpeedFromAlias(valueString,
+                                          maxSpeedValue)) {
+        valueNumeric=maxSpeedValue;
+      }
+      else {
+        progress.Warning(std::string("Max speed tag value '")+maxSpeed->second+"' for "+object.GetName()+" is not numeric!");
+        return;
+      }
     }
 
     MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));

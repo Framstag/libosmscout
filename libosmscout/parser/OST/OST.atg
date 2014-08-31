@@ -36,10 +36,40 @@ IGNORE '\t' + '\r' + '\n'
 
 PRODUCTIONS
   OST         = SYNC "OST"
+                [MAXSPEEDS]
                 [GRADES]
                 [TYPES]
                 "END"
                 .
+
+  MAXSPEEDS   = SYNC "MAX" "SPEEDS"
+                MAXSPEED {MAXSPEED}
+                .
+
+  MAXSPEED    = (.
+                  std::string alias;
+                  size_t      speed; 
+                .)
+                SYNC "SPEED"
+                STRING<alias>
+                "="
+                UINT<speed>
+                (.
+                  if (speed>0 && speed<256) {
+                    config.RegisterMaxSpeedAlias(alias,
+                                                 (uint8_t)speed);
+                  }
+                  else {
+                       std::string e="Speed value not in the allowed range (]0..255] km/h)";
+
+                       SemErr(e.c_str());
+                  }
+                .)
+                [
+                "km/h"
+                ]
+                .
+
 
   GRADES      = SYNC "GRADES"
                 GRADE {GRADE}

@@ -129,43 +129,96 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == _EOF || la->kind == 4 /* "OST" */)) {SynErr(48); Get();}
+		while (!(la->kind == _EOF || la->kind == 4 /* "OST" */)) {SynErr(52); Get();}
 		Expect(4 /* "OST" */);
-		if (la->kind == 6 /* "GRADES" */) {
+		if (la->kind == 6 /* "MAX" */) {
+			MAXSPEEDS();
+		}
+		if (la->kind == 11 /* "GRADES" */) {
 			GRADES();
 		}
-		if (la->kind == 11 /* "TYPES" */) {
+		if (la->kind == 16 /* "TYPES" */) {
 			TYPES();
 		}
 		Expect(5 /* "END" */);
 }
 
+void Parser::MAXSPEEDS() {
+		while (!(la->kind == _EOF || la->kind == 6 /* "MAX" */)) {SynErr(53); Get();}
+		Expect(6 /* "MAX" */);
+		Expect(7 /* "SPEEDS" */);
+		MAXSPEED();
+		while (la->kind == 8 /* "SPEED" */) {
+			MAXSPEED();
+		}
+}
+
 void Parser::GRADES() {
-		while (!(la->kind == _EOF || la->kind == 6 /* "GRADES" */)) {SynErr(49); Get();}
-		Expect(6 /* "GRADES" */);
+		while (!(la->kind == _EOF || la->kind == 11 /* "GRADES" */)) {SynErr(54); Get();}
+		Expect(11 /* "GRADES" */);
 		GRADE();
-		while (la->kind == 7 /* "SURFACE" */) {
+		while (la->kind == 12 /* "SURFACE" */) {
 			GRADE();
 		}
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == _EOF || la->kind == 11 /* "TYPES" */)) {SynErr(50); Get();}
-		Expect(11 /* "TYPES" */);
+		while (!(la->kind == _EOF || la->kind == 16 /* "TYPES" */)) {SynErr(55); Get();}
+		Expect(16 /* "TYPES" */);
 		TYPE();
-		while (la->kind == 12 /* "TYPE" */) {
+		while (la->kind == 17 /* "TYPE" */) {
 			TYPE();
 		}
+}
+
+void Parser::MAXSPEED() {
+		std::string alias;
+		size_t      speed; 
+		
+		while (!(la->kind == _EOF || la->kind == 8 /* "SPEED" */)) {SynErr(56); Get();}
+		Expect(8 /* "SPEED" */);
+		STRING(alias);
+		Expect(9 /* "=" */);
+		UINT(speed);
+		if (speed>0 && speed<256) {
+		 config.RegisterMaxSpeedAlias(alias,
+		                              (uint8_t)speed);
+		}
+		else {
+		    std::string e="Speed value not in the allowed range (]0..255] km/h)";
+		
+		    SemErr(e.c_str());
+		}
+		
+		if (la->kind == 10 /* "km/h" */) {
+			Get();
+		}
+}
+
+void Parser::STRING(std::string& value) {
+		Expect(_string);
+		value=Destring(t->val);
+		
+}
+
+void Parser::UINT(size_t& value) {
+		Expect(_number);
+		if (!StringToNumber(t->val,value)) {
+		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
+		
+		 SemErr(e.c_str());
+		}
+		
 }
 
 void Parser::GRADE() {
 		size_t grade;
 		
-		while (!(la->kind == _EOF || la->kind == 7 /* "SURFACE" */)) {SynErr(51); Get();}
-		Expect(7 /* "SURFACE" */);
-		Expect(8 /* "GRADE" */);
+		while (!(la->kind == _EOF || la->kind == 12 /* "SURFACE" */)) {SynErr(57); Get();}
+		Expect(12 /* "SURFACE" */);
+		Expect(13 /* "GRADE" */);
 		UINT(grade);
-		Expect(9 /* "{" */);
+		Expect(14 /* "{" */);
 		while (la->kind == _string) {
 			std::string surface;
 			
@@ -181,23 +234,7 @@ void Parser::GRADE() {
 			}
 			
 		}
-		Expect(10 /* "}" */);
-}
-
-void Parser::UINT(size_t& value) {
-		Expect(_number);
-		if (!StringToNumber(t->val,value)) {
-		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
-		
-		 SemErr(e.c_str());
-		}
-		
-}
-
-void Parser::STRING(std::string& value) {
-		Expect(_string);
-		value=Destring(t->val);
-		
+		Expect(15 /* "}" */);
 }
 
 void Parser::TYPE() {
@@ -206,38 +243,38 @@ void Parser::TYPE() {
 		TypeInfoRef   typeInfo(new TypeInfo());
 		unsigned char types;
 		
-		while (!(la->kind == _EOF || la->kind == 12 /* "TYPE" */)) {SynErr(52); Get();}
-		Expect(12 /* "TYPE" */);
+		while (!(la->kind == _EOF || la->kind == 17 /* "TYPE" */)) {SynErr(58); Get();}
+		Expect(17 /* "TYPE" */);
 		IDENT(name);
 		typeInfo->SetType(name); 
-		if (la->kind == 13 /* "IGNORE" */) {
+		if (la->kind == 18 /* "IGNORE" */) {
 			Get();
 			typeInfo->SetIgnore(true); 
 		}
-		Expect(14 /* "=" */);
+		Expect(9 /* "=" */);
 		TYPEKINDS(types);
-		Expect(15 /* "(" */);
+		Expect(19 /* "(" */);
 		TAGCONDITION(condition);
-		Expect(16 /* ")" */);
+		Expect(20 /* ")" */);
 		typeInfo->AddCondition(types,condition); 
-		while (la->kind == 17 /* "OR" */) {
+		while (la->kind == 21 /* "OR" */) {
 			Get();
 			TYPEKINDS(types);
-			Expect(15 /* "(" */);
+			Expect(19 /* "(" */);
 			TAGCONDITION(condition);
-			Expect(16 /* ")" */);
+			Expect(20 /* ")" */);
 			typeInfo->AddCondition(types,condition); 
 		}
-		if (la->kind == 9 /* "{" */) {
+		if (la->kind == 14 /* "{" */) {
 			Get();
 			if (la->kind == _ident) {
 				FEATURE(*typeInfo);
-				while (la->kind == 18 /* "," */) {
+				while (la->kind == 22 /* "," */) {
 					Get();
 					FEATURE(*typeInfo);
 				}
 			}
-			Expect(10 /* "}" */);
+			Expect(15 /* "}" */);
 		}
 		if (StartOf(1)) {
 			TYPEOPTIONS(*typeInfo);
@@ -257,7 +294,7 @@ void Parser::TYPEKINDS(unsigned char& types) {
 		
 		TYPEKIND(types);
 		while (StartOf(2)) {
-			if (la->kind == 18 /* "," */) {
+			if (la->kind == 22 /* "," */) {
 				Get();
 			}
 			TYPEKIND(types);
@@ -270,7 +307,7 @@ void Parser::TAGCONDITION(TagCondition*& condition) {
 		
 		TAGANDCOND(subCond);
 		conditions.push_back(subCond); 
-		while (la->kind == 17 /* "OR" */) {
+		while (la->kind == 21 /* "OR" */) {
 			Get();
 			TAGANDCOND(subCond);
 			conditions.push_back(subCond); 
@@ -328,7 +365,7 @@ void Parser::TAGANDCOND(TagCondition*& condition) {
 		
 		TAGBOOLCOND(subCond);
 		conditions.push_back(subCond); 
-		while (la->kind == 19 /* "AND" */) {
+		while (la->kind == 23 /* "AND" */) {
 			Get();
 			TAGBOOLCOND(subCond);
 			conditions.push_back(subCond); 
@@ -353,17 +390,17 @@ void Parser::TAGANDCOND(TagCondition*& condition) {
 void Parser::TAGBOOLCOND(TagCondition*& condition) {
 		if (la->kind == _string) {
 			TAGBINCOND(condition);
-		} else if (la->kind == 30 /* "EXISTS" */) {
+		} else if (la->kind == 34 /* "EXISTS" */) {
 			TAGEXISTSCOND(condition);
-		} else if (la->kind == 15 /* "(" */) {
+		} else if (la->kind == 19 /* "(" */) {
 			Get();
 			TAGCONDITION(condition);
-			Expect(16 /* ")" */);
-		} else if (la->kind == 20 /* "!" */) {
+			Expect(20 /* ")" */);
+		} else if (la->kind == 24 /* "!" */) {
 			Get();
 			TAGBOOLCOND(condition);
 			condition=new TagNotCondition(condition); 
-		} else SynErr(53);
+		} else SynErr(59);
 }
 
 void Parser::TAGBINCOND(TagCondition*& condition) {
@@ -372,40 +409,40 @@ void Parser::TAGBINCOND(TagCondition*& condition) {
 		Expect(_string);
 		nameValue=Destring(t->val); 
 		switch (la->kind) {
-		case 21 /* "<" */: {
+		case 25 /* "<" */: {
 			TAGLESSCOND(nameValue,condition);
 			break;
 		}
-		case 22 /* "<=" */: {
+		case 26 /* "<=" */: {
 			TAGLESSEQUALCOND(nameValue,condition);
 			break;
 		}
-		case 23 /* "==" */: {
+		case 27 /* "==" */: {
 			TAGEQUALSCOND(nameValue,condition);
 			break;
 		}
-		case 24 /* "!=" */: {
+		case 28 /* "!=" */: {
 			TAGNOTEQUALSCOND(nameValue,condition);
 			break;
 		}
-		case 26 /* ">" */: {
+		case 30 /* ">" */: {
 			TAGGREATERCOND(nameValue,condition);
 			break;
 		}
-		case 25 /* ">=" */: {
+		case 29 /* ">=" */: {
 			TAGGREATEREQUALCOND(nameValue,condition);
 			break;
 		}
-		case 27 /* "IN" */: {
+		case 31 /* "IN" */: {
 			TAGISINCOND(nameValue,condition);
 			break;
 		}
-		default: SynErr(54); break;
+		default: SynErr(60); break;
 		}
 }
 
 void Parser::TAGEXISTSCOND(TagCondition*& condition) {
-		Expect(30 /* "EXISTS" */);
+		Expect(34 /* "EXISTS" */);
 		Expect(_string);
 		condition=new TagExistsCondition(config.RegisterTag(Destring(t->val)));
 		
@@ -415,7 +452,7 @@ void Parser::TAGLESSCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
-		Expect(21 /* "<" */);
+		Expect(25 /* "<" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
@@ -428,14 +465,14 @@ void Parser::TAGLESSCOND(const std::string& tagName,TagCondition*& condition) {
 			
 			condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
 			
-		} else SynErr(55);
+		} else SynErr(61);
 }
 
 void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
-		Expect(22 /* "<=" */);
+		Expect(26 /* "<=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
@@ -448,14 +485,14 @@ void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& conditio
 			
 			condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
 			
-		} else SynErr(56);
+		} else SynErr(62);
 }
 
 void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
-		Expect(23 /* "==" */);
+		Expect(27 /* "==" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
@@ -468,14 +505,14 @@ void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) 
 			
 			condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
 			
-		} else SynErr(57);
+		} else SynErr(63);
 }
 
 void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
-		Expect(24 /* "!=" */);
+		Expect(28 /* "!=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
@@ -488,14 +525,14 @@ void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& conditio
 			
 			condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
 			
-		} else SynErr(58);
+		} else SynErr(64);
 }
 
 void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
-		Expect(26 /* ">" */);
+		Expect(30 /* ">" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
@@ -508,14 +545,14 @@ void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition)
 			
 			condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
 			
-		} else SynErr(59);
+		} else SynErr(65);
 }
 
 void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
-		Expect(25 /* ">=" */);
+		Expect(29 /* ">=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
@@ -528,22 +565,22 @@ void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condi
 			
 			condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
 			
-		} else SynErr(60);
+		} else SynErr(66);
 }
 
 void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
 		std::list<std::string> values;
 		
-		Expect(27 /* "IN" */);
-		Expect(28 /* "[" */);
+		Expect(31 /* "IN" */);
+		Expect(32 /* "[" */);
 		Expect(_string);
 		values.push_back(Destring(t->val)); 
-		while (la->kind == 18 /* "," */) {
+		while (la->kind == 22 /* "," */) {
 			Get();
 			Expect(_string);
 			values.push_back(Destring(t->val)); 
 		}
-		Expect(29 /* "]" */);
+		Expect(33 /* "]" */);
 		TagId tagId=config.RegisterTag(tagName);
 		
 		if (values.size()==1) {
@@ -564,92 +601,92 @@ void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
 }
 
 void Parser::TYPEKIND(unsigned char& types) {
-		if (la->kind == 31 /* "NODE" */) {
+		if (la->kind == 35 /* "NODE" */) {
 			Get();
 			types|=TypeInfo::typeNode; 
-		} else if (la->kind == 32 /* "WAY" */) {
+		} else if (la->kind == 36 /* "WAY" */) {
 			Get();
 			types|=TypeInfo::typeWay; 
-		} else if (la->kind == 33 /* "AREA" */) {
+		} else if (la->kind == 37 /* "AREA" */) {
 			Get();
 			types|=TypeInfo::typeArea; 
-		} else if (la->kind == 34 /* "RELATION" */) {
+		} else if (la->kind == 38 /* "RELATION" */) {
 			Get();
 			types|=TypeInfo::typeRelation; 
-		} else SynErr(61);
+		} else SynErr(67);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 		switch (la->kind) {
-		case 43 /* "PATH" */: {
+		case 47 /* "PATH" */: {
 			PATH(typeInfo);
 			break;
 		}
-		case 35 /* "LOCATION" */: {
+		case 39 /* "LOCATION" */: {
 			Get();
 			typeInfo.SetIndexAsLocation(true); 
 			break;
 		}
-		case 36 /* "ADMIN_REGION" */: {
+		case 40 /* "ADMIN_REGION" */: {
 			Get();
 			typeInfo.SetIndexAsRegion(true); 
 			break;
 		}
-		case 37 /* "ADDRESS" */: {
+		case 41 /* "ADDRESS" */: {
 			Get();
 			typeInfo.SetIndexAsAddress(true); 
 			break;
 		}
-		case 38 /* "POI" */: {
+		case 42 /* "POI" */: {
 			Get();
 			typeInfo.SetIndexAsPOI(true); 
 			break;
 		}
-		case 39 /* "OPTIMIZE_LOW_ZOOM" */: {
+		case 43 /* "OPTIMIZE_LOW_ZOOM" */: {
 			Get();
 			typeInfo.SetOptimizeLowZoom(true); 
 			break;
 		}
-		case 40 /* "MULTIPOLYGON" */: {
+		case 44 /* "MULTIPOLYGON" */: {
 			Get();
 			typeInfo.SetMultipolygon(true); 
 			break;
 		}
-		case 41 /* "PIN_WAY" */: {
+		case 45 /* "PIN_WAY" */: {
 			Get();
 			typeInfo.SetPinWay(true); 
 			break;
 		}
-		case 42 /* "IGNORESEALAND" */: {
+		case 46 /* "IGNORESEALAND" */: {
 			Get();
 			typeInfo.SetIgnoreSeaLand(true); 
 			break;
 		}
-		default: SynErr(62); break;
+		default: SynErr(68); break;
 		}
 }
 
 void Parser::PATH(TypeInfo& typeInfo) {
-		Expect(43 /* "PATH" */);
+		Expect(47 /* "PATH" */);
 		typeInfo.SetIsPath(true); 
-		if (la->kind == 28 /* "[" */) {
+		if (la->kind == 32 /* "[" */) {
 			Get();
-			if (la->kind == 44 /* "FOOT" */) {
+			if (la->kind == 48 /* "FOOT" */) {
 				Get();
 				typeInfo.CanRouteFoot(true);
 				
 			}
-			if (la->kind == 45 /* "BICYCLE" */) {
+			if (la->kind == 49 /* "BICYCLE" */) {
 				Get();
 				typeInfo.CanRouteBicycle(true);
 				
 			}
-			if (la->kind == 46 /* "CAR" */) {
+			if (la->kind == 50 /* "CAR" */) {
 				Get();
 				typeInfo.CanRouteCar(true);
 				
 			}
-			Expect(29 /* "]" */);
+			Expect(33 /* "]" */);
 		}
 }
 
@@ -669,7 +706,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 47;
+	maxT = 51;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -684,10 +721,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[3][49] = {
-		{T,x,x,x, T,x,T,T, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
+	static bool set[3][53] = {
+		{T,x,x,x, T,x,T,x, T,x,x,T, T,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
 	};
 
 
@@ -716,63 +753,69 @@ void Errors::SynErr(int line, int col, int n)
 			case 3: s = coco_string_create("string expected"); break;
 			case 4: s = coco_string_create("\"OST\" expected"); break;
 			case 5: s = coco_string_create("\"END\" expected"); break;
-			case 6: s = coco_string_create("\"GRADES\" expected"); break;
-			case 7: s = coco_string_create("\"SURFACE\" expected"); break;
-			case 8: s = coco_string_create("\"GRADE\" expected"); break;
-			case 9: s = coco_string_create("\"{\" expected"); break;
-			case 10: s = coco_string_create("\"}\" expected"); break;
-			case 11: s = coco_string_create("\"TYPES\" expected"); break;
-			case 12: s = coco_string_create("\"TYPE\" expected"); break;
-			case 13: s = coco_string_create("\"IGNORE\" expected"); break;
-			case 14: s = coco_string_create("\"=\" expected"); break;
-			case 15: s = coco_string_create("\"(\" expected"); break;
-			case 16: s = coco_string_create("\")\" expected"); break;
-			case 17: s = coco_string_create("\"OR\" expected"); break;
-			case 18: s = coco_string_create("\",\" expected"); break;
-			case 19: s = coco_string_create("\"AND\" expected"); break;
-			case 20: s = coco_string_create("\"!\" expected"); break;
-			case 21: s = coco_string_create("\"<\" expected"); break;
-			case 22: s = coco_string_create("\"<=\" expected"); break;
-			case 23: s = coco_string_create("\"==\" expected"); break;
-			case 24: s = coco_string_create("\"!=\" expected"); break;
-			case 25: s = coco_string_create("\">=\" expected"); break;
-			case 26: s = coco_string_create("\">\" expected"); break;
-			case 27: s = coco_string_create("\"IN\" expected"); break;
-			case 28: s = coco_string_create("\"[\" expected"); break;
-			case 29: s = coco_string_create("\"]\" expected"); break;
-			case 30: s = coco_string_create("\"EXISTS\" expected"); break;
-			case 31: s = coco_string_create("\"NODE\" expected"); break;
-			case 32: s = coco_string_create("\"WAY\" expected"); break;
-			case 33: s = coco_string_create("\"AREA\" expected"); break;
-			case 34: s = coco_string_create("\"RELATION\" expected"); break;
-			case 35: s = coco_string_create("\"LOCATION\" expected"); break;
-			case 36: s = coco_string_create("\"ADMIN_REGION\" expected"); break;
-			case 37: s = coco_string_create("\"ADDRESS\" expected"); break;
-			case 38: s = coco_string_create("\"POI\" expected"); break;
-			case 39: s = coco_string_create("\"OPTIMIZE_LOW_ZOOM\" expected"); break;
-			case 40: s = coco_string_create("\"MULTIPOLYGON\" expected"); break;
-			case 41: s = coco_string_create("\"PIN_WAY\" expected"); break;
-			case 42: s = coco_string_create("\"IGNORESEALAND\" expected"); break;
-			case 43: s = coco_string_create("\"PATH\" expected"); break;
-			case 44: s = coco_string_create("\"FOOT\" expected"); break;
-			case 45: s = coco_string_create("\"BICYCLE\" expected"); break;
-			case 46: s = coco_string_create("\"CAR\" expected"); break;
-			case 47: s = coco_string_create("??? expected"); break;
-			case 48: s = coco_string_create("this symbol not expected in OST"); break;
-			case 49: s = coco_string_create("this symbol not expected in GRADES"); break;
-			case 50: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 51: s = coco_string_create("this symbol not expected in GRADE"); break;
-			case 52: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 53: s = coco_string_create("invalid TAGBOOLCOND"); break;
-			case 54: s = coco_string_create("invalid TAGBINCOND"); break;
-			case 55: s = coco_string_create("invalid TAGLESSCOND"); break;
-			case 56: s = coco_string_create("invalid TAGLESSEQUALCOND"); break;
-			case 57: s = coco_string_create("invalid TAGEQUALSCOND"); break;
-			case 58: s = coco_string_create("invalid TAGNOTEQUALSCOND"); break;
-			case 59: s = coco_string_create("invalid TAGGREATERCOND"); break;
-			case 60: s = coco_string_create("invalid TAGGREATEREQUALCOND"); break;
-			case 61: s = coco_string_create("invalid TYPEKIND"); break;
-			case 62: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 6: s = coco_string_create("\"MAX\" expected"); break;
+			case 7: s = coco_string_create("\"SPEEDS\" expected"); break;
+			case 8: s = coco_string_create("\"SPEED\" expected"); break;
+			case 9: s = coco_string_create("\"=\" expected"); break;
+			case 10: s = coco_string_create("\"km/h\" expected"); break;
+			case 11: s = coco_string_create("\"GRADES\" expected"); break;
+			case 12: s = coco_string_create("\"SURFACE\" expected"); break;
+			case 13: s = coco_string_create("\"GRADE\" expected"); break;
+			case 14: s = coco_string_create("\"{\" expected"); break;
+			case 15: s = coco_string_create("\"}\" expected"); break;
+			case 16: s = coco_string_create("\"TYPES\" expected"); break;
+			case 17: s = coco_string_create("\"TYPE\" expected"); break;
+			case 18: s = coco_string_create("\"IGNORE\" expected"); break;
+			case 19: s = coco_string_create("\"(\" expected"); break;
+			case 20: s = coco_string_create("\")\" expected"); break;
+			case 21: s = coco_string_create("\"OR\" expected"); break;
+			case 22: s = coco_string_create("\",\" expected"); break;
+			case 23: s = coco_string_create("\"AND\" expected"); break;
+			case 24: s = coco_string_create("\"!\" expected"); break;
+			case 25: s = coco_string_create("\"<\" expected"); break;
+			case 26: s = coco_string_create("\"<=\" expected"); break;
+			case 27: s = coco_string_create("\"==\" expected"); break;
+			case 28: s = coco_string_create("\"!=\" expected"); break;
+			case 29: s = coco_string_create("\">=\" expected"); break;
+			case 30: s = coco_string_create("\">\" expected"); break;
+			case 31: s = coco_string_create("\"IN\" expected"); break;
+			case 32: s = coco_string_create("\"[\" expected"); break;
+			case 33: s = coco_string_create("\"]\" expected"); break;
+			case 34: s = coco_string_create("\"EXISTS\" expected"); break;
+			case 35: s = coco_string_create("\"NODE\" expected"); break;
+			case 36: s = coco_string_create("\"WAY\" expected"); break;
+			case 37: s = coco_string_create("\"AREA\" expected"); break;
+			case 38: s = coco_string_create("\"RELATION\" expected"); break;
+			case 39: s = coco_string_create("\"LOCATION\" expected"); break;
+			case 40: s = coco_string_create("\"ADMIN_REGION\" expected"); break;
+			case 41: s = coco_string_create("\"ADDRESS\" expected"); break;
+			case 42: s = coco_string_create("\"POI\" expected"); break;
+			case 43: s = coco_string_create("\"OPTIMIZE_LOW_ZOOM\" expected"); break;
+			case 44: s = coco_string_create("\"MULTIPOLYGON\" expected"); break;
+			case 45: s = coco_string_create("\"PIN_WAY\" expected"); break;
+			case 46: s = coco_string_create("\"IGNORESEALAND\" expected"); break;
+			case 47: s = coco_string_create("\"PATH\" expected"); break;
+			case 48: s = coco_string_create("\"FOOT\" expected"); break;
+			case 49: s = coco_string_create("\"BICYCLE\" expected"); break;
+			case 50: s = coco_string_create("\"CAR\" expected"); break;
+			case 51: s = coco_string_create("??? expected"); break;
+			case 52: s = coco_string_create("this symbol not expected in OST"); break;
+			case 53: s = coco_string_create("this symbol not expected in MAXSPEEDS"); break;
+			case 54: s = coco_string_create("this symbol not expected in GRADES"); break;
+			case 55: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 56: s = coco_string_create("this symbol not expected in MAXSPEED"); break;
+			case 57: s = coco_string_create("this symbol not expected in GRADE"); break;
+			case 58: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 59: s = coco_string_create("invalid TAGBOOLCOND"); break;
+			case 60: s = coco_string_create("invalid TAGBINCOND"); break;
+			case 61: s = coco_string_create("invalid TAGLESSCOND"); break;
+			case 62: s = coco_string_create("invalid TAGLESSEQUALCOND"); break;
+			case 63: s = coco_string_create("invalid TAGEQUALSCOND"); break;
+			case 64: s = coco_string_create("invalid TAGNOTEQUALSCOND"); break;
+			case 65: s = coco_string_create("invalid TAGGREATERCOND"); break;
+			case 66: s = coco_string_create("invalid TAGGREATEREQUALCOND"); break;
+			case 67: s = coco_string_create("invalid TYPEKIND"); break;
+			case 68: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

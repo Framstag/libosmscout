@@ -51,6 +51,23 @@ OST
       Ignore objects of this type
 */
 
+/*
+  List of max speeds aliases. Normally value for the tag "maxspeed" should always
+  have a numeric value and the source of the speed limit should be placed into
+  the value of the tag "source:maxspeed" containing an alias name.
+  In some country this is not (only) the case, the alias is also sometimes
+  placed into "maxspeed" itself. This table helps to resolve these aliases
+  to numeric values again.
+*/
+MAX SPEEDS
+  SPEED "DE:living_street" =  10 km/h
+  SPEED "DE:urban"         =  50 km/h
+  SPEED "DE:rural"         = 100 km/h
+
+/*
+  Allows you to map surface descriptions to a grade value ([1-5]).
+  Grade 1 ist very well, grade 5 is very bad.
+*/
 GRADES
   SURFACE GRADE 1 {
     "paved"

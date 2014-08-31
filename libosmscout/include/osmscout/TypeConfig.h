@@ -873,6 +873,7 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<TypeId,TypeInfoRef>      idToTypeMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>          nameTagIdToPrioMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>          nameAltTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<std::string,uint8_t>     nameToMaxSpeedMap;
 
     OSMSCOUT_HASHMAP<std::string,size_t>      surfaceToGradeMap;
 
@@ -1025,6 +1026,17 @@ namespace osmscout {
     bool GetGradeForSurface(const std::string& surface,
                             size_t& grade) const;
     //@}
+
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
+    void RegisterMaxSpeedAlias(const std::string& alias,
+                               uint8_t maxSpeed);
+    bool GetMaxSpeedFromAlias(const std::string& alias,
+                              uint8_t& maxSpeed) const;
+    //@}
+
 
     /**
      * Methods for loading/storing of type information from/to files.
