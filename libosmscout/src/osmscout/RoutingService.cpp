@@ -796,17 +796,26 @@ namespace osmscout {
       startLon=way->nodes[nodeIndex].GetLon();
       startLat=way->nodes[nodeIndex].GetLat();
 
-      GetStartForwardRouteNode(profile,
-                               way,
-                               nodeIndex,
-                               forwardRouteNode,
-                               forwardNodePos);
+      // Check, if the current node is already the route node
+      routeNodeDataFile.Get(way->ids[nodeIndex],
+                            forwardRouteNode);
 
-      GetStartBackwardRouteNode(profile,
-                                way,
-                                nodeIndex,
-                                backwardRouteNode,
-                                backwardNodePos);
+      if (forwardRouteNode.Valid()) {
+        forwardNodePos=nodeIndex;
+      }
+      else {
+        GetStartForwardRouteNode(profile,
+                                 way,
+                                 nodeIndex,
+                                 forwardRouteNode,
+                                 forwardNodePos);
+
+        GetStartBackwardRouteNode(profile,
+                                  way,
+                                  nodeIndex,
+                                  backwardRouteNode,
+                                  backwardNodePos);
+      }
 
       if (forwardRouteNode.Invalid() &&
           backwardRouteNode.Invalid()) {
@@ -908,16 +917,25 @@ namespace osmscout {
       targetLon=way->nodes[nodeIndex].GetLon();
       targetLat=way->nodes[nodeIndex].GetLat();
 
-      GetTargetForwardRouteNode(profile,
-                                way,
-                                nodeIndex,
-                                forwardNode,
-                                forwardNodePos);
-      GetTargetBackwardRouteNode(profile,
-                                 way,
-                                 nodeIndex,
-                                 backwardNode,
-                                 backwardNodePos);
+      // Check, if the current node is already the route node
+      routeNodeDataFile.Get(way->ids[nodeIndex],
+                            forwardNode);
+
+      if (forwardNode.Valid()) {
+        forwardNodePos=nodeIndex;
+      }
+      else {
+        GetTargetForwardRouteNode(profile,
+                                  way,
+                                  nodeIndex,
+                                  forwardNode,
+                                  forwardNodePos);
+        GetTargetBackwardRouteNode(profile,
+                                   way,
+                                   nodeIndex,
+                                   backwardNode,
+                                   backwardNodePos);
+      }
 
       if (forwardNode.Invalid() &&
           backwardNode.Invalid()) {
