@@ -2,8 +2,6 @@
 
 #include <osmscout/GeoCoord.h>
 
-int errors=0;
-
 bool CheckParseFail(const std::string& text)
 {
   osmscout::GeoCoord coord;
@@ -16,7 +14,7 @@ bool CheckParseFail(const std::string& text)
     return true;
   }
   else {
-    std::cerr << "FAIL: Was parsed to " << coord << std::endl;
+    std::cerr << "FAIL: Was parsed to " << coord.GetDisplayText() << std::endl;
     return false;
   }
 }
@@ -26,7 +24,7 @@ bool CheckParseSuccess(const std::string& text,
 {
   osmscout::GeoCoord coord;
 
-  std::cout << "Expect '" << text << "' to parse to " << expected << std::endl;
+  std::cout << "Expect '" << text << "' to parse to " << expected.GetDisplayText() << std::endl;
 
   if (osmscout::GeoCoord::Parse(text,
                                 coord)) {
@@ -38,7 +36,7 @@ bool CheckParseSuccess(const std::string& text,
       return true;
     }
     else {
-      std::cerr << "FAIL: Was parsed to " <<  coord << std::endl;
+      std::cerr << "FAIL: Was parsed to " <<  coord.GetDisplayText() << std::endl;
       return false;
     }
   }
@@ -50,6 +48,8 @@ bool CheckParseSuccess(const std::string& text,
 
 int main()
 {
+  int errors=0;
+
   // Empty string
   if (!CheckParseFail("")) {
     errors++;
