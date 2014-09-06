@@ -11,6 +11,9 @@ OST
   Meaning of the different OPTIONS:
     PATH:
       This way or area is a traversable path and possibly routable for the given vehicles.
+
+      See: http://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Access-Restrictions
+
       If something is a path, the following features are automatically assigned:
       * Width
       * Grade
@@ -218,21 +221,11 @@ TYPES
       {Name, NameAlt}
       PATH[FOOT] LOCATION PIN_WAY
       
-  TYPE highway_services
-    = NODE AREA ("highway"=="services")
-      {Name, NameAlt}
-      ADDRESS
-    
-  TYPE highway_bus_guideway
-    = WAY ("highway"=="bus_guideway")
-      {Name, NameAlt, Ref}
-      PATH
-    
   TYPE highway_path
     = WAY ("highway"=="path")
       {Name, NameAlt}
       PATH[FOOT BICYCLE] IGNORESEALAND
-    
+
   TYPE highway_cycleway
     = WAY ("highway"=="cycleway")
       {Name, NameAlt}
@@ -252,7 +245,17 @@ TYPES
     = WAY ("highway"=="steps")
       {Name, NameAlt}
       PATH[FOOT]
-      
+
+  TYPE highway_services
+    = NODE AREA ("highway"=="services")
+      {Name, NameAlt}
+      ADDRESS
+
+  TYPE highway_bus_guideway
+    = WAY ("highway"=="bus_guideway")
+      {Name, NameAlt, Ref}
+      PATH
+
   TYPE highway_mini_roundabout
     = NODE ("highway"=="mini_roundabout")
       {Name, NameAlt}
