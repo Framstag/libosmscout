@@ -525,21 +525,21 @@ namespace osmscout {
     TagId tagAccessForward;
     TagId tagAccessBackward;
 
-    TagId tagAccessFoot;
-    TagId tagAccessFootForward;
-    TagId tagAccessFootBackward;
+    TagId tagFoot;
+    TagId tagFootForward;
+    TagId tagFootBackward;
 
-    TagId tagAccessBicycle;
-    TagId tagAccessBicycleForward;
-    TagId tagAccessBicycleBackward;
+    TagId tagBicycle;
+    TagId tagBicycleForward;
+    TagId tagBicycleBackward;
 
-    TagId tagAccessMotorVehicle;
-    TagId tagAccessMotorVehicleForward;
-    TagId tagAccessMotorVehicleBackward;
+    TagId tagMotorVehicle;
+    TagId tagMotorVehicleForward;
+    TagId tagMotorVehicleBackward;
 
-    TagId tagAccessMotorcar;
-    TagId tagAccessMotorcarForward;
-    TagId tagAccessMotorcarBackward;
+    TagId tagMotorcar;
+    TagId tagMotorcarForward;
+    TagId tagMotorcarBackward;
 
   public:
     /** Name of this feature */

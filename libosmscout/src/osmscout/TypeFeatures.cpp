@@ -441,24 +441,24 @@ namespace osmscout {
     tagJunction=typeConfig.RegisterTag("junction");
 
     tagAccess=typeConfig.RegisterTag("access");
-    tagAccessForward=typeConfig.RegisterTag("access:foward");
+    tagAccessForward=typeConfig.RegisterTag("access:forward");
     tagAccessBackward=typeConfig.RegisterTag("access:backward");
 
-    tagAccessFoot=typeConfig.RegisterTag("access:foot");
-    tagAccessFootForward=typeConfig.RegisterTag("access:foot:foward");
-    tagAccessFootBackward=typeConfig.RegisterTag("access:foot:backward");
+    tagFoot=typeConfig.RegisterTag("foot");
+    tagFootForward=typeConfig.RegisterTag("foot:forward");
+    tagFootBackward=typeConfig.RegisterTag("foot:backward");
 
-    tagAccessBicycle=typeConfig.RegisterTag("access:bicycle");
-    tagAccessBicycleForward=typeConfig.RegisterTag("access:bicycle:foward");
-    tagAccessBicycleBackward=typeConfig.RegisterTag("access:bicycle:backward");
+    tagBicycle=typeConfig.RegisterTag("bicycle");
+    tagBicycleForward=typeConfig.RegisterTag("bicycle:forward");
+    tagBicycleBackward=typeConfig.RegisterTag("bicycle:backward");
 
-    tagAccessMotorVehicle=typeConfig.RegisterTag("access:motor_vehicle");
-    tagAccessMotorVehicleForward=typeConfig.RegisterTag("access:motor_vehicle:foward");
-    tagAccessMotorVehicleBackward=typeConfig.RegisterTag("access:motor_vehicle:backward");
+    tagMotorVehicle=typeConfig.RegisterTag("motor_vehicle");
+    tagMotorVehicleForward=typeConfig.RegisterTag("motor_vehicle:forward");
+    tagMotorVehicleBackward=typeConfig.RegisterTag("motor_vehicle:backward");
 
-    tagAccessMotorcar=typeConfig.RegisterTag("access:motorcar");
-    tagAccessMotorcarForward=typeConfig.RegisterTag("access:motorcar:foward");
-    tagAccessMotorcarBackward=typeConfig.RegisterTag("access:motorcar:backward");
+    tagMotorcar=typeConfig.RegisterTag("motorcar");
+    tagMotorcarForward=typeConfig.RegisterTag("motorcar:forward");
+    tagMotorcarBackward=typeConfig.RegisterTag("motorcar:backward");
   }
 
   std::string AccessFeature::GetName() const
@@ -503,12 +503,13 @@ namespace osmscout {
 
     auto accessValue=tags.find(tagAccess);
 
-    if (accessValue!=tags.end()) {
+    if (accessValue!=tags.end() &&
+        accessValue->second=="no") {
+      // Everything is forbidden and possible later positive restrictions added again
       access=0;
 
-      if (!(accessValue->second=="no")) {
-        access=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward|AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward|AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
-      }
+      // In any other case this is a general access restriction for all vehicles that
+      // does not change any of our existing flags, so we ignore it.
     }
 
     // Flag access:forward/access:backward
@@ -531,118 +532,7 @@ namespace osmscout {
       }
     }
 
-    // Flags access:foot, access:bicycle, access:motor_vehicle, access:motorcar
-
-    auto accessFootValue=tags.find(tagAccessFoot);
-    auto accessBicycleValue=tags.find(tagAccessBicycle);
-    auto accessMotorVehicleValue=tags.find(tagAccessMotorVehicle);
-    auto accessMotorcarValue=tags.find(tagAccessMotorcar);
-
-    if (accessFootValue!=tags.end()) {
-      access&=~(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
-      if (!(accessFootValue->second=="no")) {
-        access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
-      }
-    }
-    else if (accessBicycleValue!=tags.end()) {
-      access&=~(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
-
-      if (!(accessBicycleValue->second=="no")) {
-        if (!access & AccessFeatureValue::onewayBackward) {
-          access|=(AccessFeatureValue::bicycleForward);
-        }
-        if (!access & AccessFeatureValue::onewayForward) {
-          access|=(AccessFeatureValue::bicycleBackward);
-        }
-      }
-    }
-    else if (accessMotorVehicleValue!=tags.end()) {
-      access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
-
-      if (!(accessMotorVehicleValue->second=="no")) {
-        if (!access & AccessFeatureValue::onewayBackward) {
-          access|=(AccessFeatureValue::carForward);
-        }
-        if (!access & AccessFeatureValue::onewayForward) {
-          access|=(AccessFeatureValue::carBackward);
-        }
-      }
-    }
-    else if (accessMotorcarValue!=tags.end()) {
-      access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
-
-      if (!(accessMotorcarValue->second=="no")) {
-        if (!access & AccessFeatureValue::onewayBackward) {
-          access|=(AccessFeatureValue::carForward);
-        }
-        if (!access & AccessFeatureValue::onewayForward) {
-          access|=(AccessFeatureValue::carBackward);
-        }
-      }
-    }
-
-    // Flags access:foot::forward/access:foot::backward,
-    //       access:bicycle::forward/access:bicycle::backward,
-    //       access:motor_vehicle::forward/access:motor_vehicle::backward,
-    //       access:motorcar::forward/access:motorcar::backward
-
-    auto accessFootForwardValue=tags.find(tagAccessFootForward);
-    auto accessFootBackwardValue=tags.find(tagAccessFootBackward);
-    auto accessBicycleForwardValue=tags.find(tagAccessBicycleForward);
-    auto accessBicycleBackwardValue=tags.find(tagAccessBicycleBackward);
-    auto accessMotorVehicleForwardValue=tags.find(tagAccessMotorVehicleForward);
-    auto accessMotorVehicleBackwardValue=tags.find(tagAccessMotorVehicleBackward);
-    auto accessMotorcarForwardValue=tags.find(tagAccessMotorcarForward);
-    auto accessMotorcarBackwardValue=tags.find(tagAccessMotorcarBackward);
-
-    if (accessFootForwardValue!=tags.end()) {
-      ParseAccessFlag(accessFootForwardValue->second,
-                      access,
-                      AccessFeatureValue::footForward);
-    }
-
-    if (accessFootBackwardValue!=tags.end()) {
-      ParseAccessFlag(accessFootBackwardValue->second,
-                      access,
-                      AccessFeatureValue::footBackward);
-    }
-
-    if (accessBicycleForwardValue!=tags.end()) {
-      ParseAccessFlag(accessBicycleForwardValue->second,
-                      access,
-                      AccessFeatureValue::bicycleForward);
-    }
-
-    if (accessBicycleBackwardValue!=tags.end()) {
-      ParseAccessFlag(accessBicycleBackwardValue->second,
-                      access,
-                      AccessFeatureValue::bicycleBackward);
-    }
-
-    if (accessMotorVehicleForwardValue!=tags.end()) {
-      ParseAccessFlag(accessMotorVehicleForwardValue->second,
-                      access,
-                      AccessFeatureValue::carForward);
-    }
-
-    if (accessMotorVehicleBackwardValue!=tags.end()) {
-      ParseAccessFlag(accessMotorVehicleBackwardValue->second,
-                      access,
-                      AccessFeatureValue::carBackward);
-    }
-
-    if (accessMotorcarForwardValue!=tags.end()) {
-      ParseAccessFlag(accessMotorcarForwardValue->second,
-                      access,
-                      AccessFeatureValue::carForward);
-    }
-
-    if (accessMotorcarBackwardValue!=tags.end()) {
-      ParseAccessFlag(accessMotorcarBackwardValue->second,
-                      access,
-                      AccessFeatureValue::carBackward);
-    }
-
+    // Flag oneway & junction
     auto onewayValue=tags.find(tagOneway);
     auto junctionValue=tags.find(tagJunction);
 
@@ -660,6 +550,132 @@ namespace osmscout {
              && junctionValue->second=="roundabout") {
       access&=~(AccessFeatureValue::bicycleBackward|AccessFeatureValue::carBackward|AccessFeatureValue::onewayBackward);
       access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::carForward|AccessFeatureValue::onewayForward);
+    }
+
+    // Flags foot, bicycle, motor_vehicle, motorcar
+
+    auto accessFootValue=tags.find(tagFoot);
+
+    if (accessFootValue!=tags.end()) {
+      access&=~(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+
+      if (!(accessFootValue->second=="no")) {
+        access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+      }
+    }
+
+    auto accessBicycleValue=tags.find(tagBicycle);
+
+    if (accessBicycleValue!=tags.end()) {
+      access&=~(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
+
+      if (!(accessBicycleValue->second=="no")) {
+        if (!(access & AccessFeatureValue::onewayBackward)) {
+          access|=(AccessFeatureValue::bicycleForward);
+        }
+        if (!(access & AccessFeatureValue::onewayForward)) {
+          access|=(AccessFeatureValue::bicycleBackward);
+        }
+      }
+    }
+
+    auto accessMotorVehicleValue=tags.find(tagMotorVehicle);
+
+    if (accessMotorVehicleValue!=tags.end()) {
+      access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+
+      if (!(accessMotorVehicleValue->second=="no")) {
+        if (!(access & AccessFeatureValue::onewayBackward)) {
+          access|=(AccessFeatureValue::carForward);
+        }
+        if (!(access & AccessFeatureValue::onewayForward)) {
+          access|=(AccessFeatureValue::carBackward);
+        }
+      }
+    }
+
+    auto accessMotorcarValue=tags.find(tagMotorcar);
+
+    if (accessMotorcarValue!=tags.end()) {
+      access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+
+      if (!(accessMotorcarValue->second=="no")) {
+        if (!(access & AccessFeatureValue::onewayBackward)) {
+          access|=(AccessFeatureValue::carForward);
+        }
+        if (!(access & AccessFeatureValue::onewayForward)) {
+          access|=(AccessFeatureValue::carBackward);
+        }
+      }
+    }
+
+    // Flags foot:forward/foot:backward,
+    //       bicycle:forward/bicycle:backward,
+    //       motor_vehicle:forward/motor_vehicle:backward,
+    //       motorcar:forward/motorcar:backward
+
+    auto accessFootForwardValue=tags.find(tagFootForward);
+
+    if (accessFootForwardValue!=tags.end()) {
+      ParseAccessFlag(accessFootForwardValue->second,
+                      access,
+                      AccessFeatureValue::footForward);
+    }
+
+    auto accessFootBackwardValue=tags.find(tagFootBackward);
+
+    if (accessFootBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessFootBackwardValue->second,
+                      access,
+                      AccessFeatureValue::footBackward);
+    }
+
+    auto accessBicycleForwardValue=tags.find(tagBicycleForward);
+
+    if (accessBicycleForwardValue!=tags.end()) {
+      ParseAccessFlag(accessBicycleForwardValue->second,
+                      access,
+                      AccessFeatureValue::bicycleForward);
+    }
+
+    auto accessBicycleBackwardValue=tags.find(tagBicycleBackward);
+
+    if (accessBicycleBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessBicycleBackwardValue->second,
+                      access,
+                      AccessFeatureValue::bicycleBackward);
+    }
+
+    auto accessMotorVehicleForwardValue=tags.find(tagMotorVehicleForward);
+
+    if (accessMotorVehicleForwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorVehicleForwardValue->second,
+                      access,
+                      AccessFeatureValue::carForward);
+    }
+
+    auto accessMotorVehicleBackwardValue=tags.find(tagMotorVehicleBackward);
+
+    if (accessMotorVehicleBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorVehicleBackwardValue->second,
+                      access,
+                      AccessFeatureValue::carBackward);
+    }
+
+    auto accessMotorcarForwardValue=tags.find(tagMotorcarForward);
+
+    if (accessMotorcarForwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorcarForwardValue->second,
+                      access,
+                      AccessFeatureValue::carForward);
+    }
+
+    auto accessMotorcarBackwardValue=tags.find(tagMotorcarBackward);
+
+    if (accessMotorcarBackwardValue!=tags.end()) {
+      ParseAccessFlag(accessMotorcarBackwardValue->second,
+                      access,
+                      AccessFeatureValue::carBackward);
     }
 
     if (access!=defaultAccess) {
