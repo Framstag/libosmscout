@@ -936,6 +936,7 @@ namespace osmscout {
         break;
       case attrSize:
         size=other.size;
+        break;
       case attrTextColor:
         textColor=other.textColor;
         break;
@@ -2317,6 +2318,5 @@ namespace osmscout {
 
     return success;
   }
-
 }
 
