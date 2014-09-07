@@ -990,12 +990,12 @@ namespace osmscout {
     return true;
   }
 
-  std::string RelAreaDataGenerator::ResolveRelationName(const TypeConfig& typeConfig,
+  std::string RelAreaDataGenerator::ResolveRelationName(const FeatureRef& featureName,
                                                         const RawRelation& rawRelation) const
   {
     for (size_t i=0; i<rawRelation.GetFeatureCount(); i++) {
       if (rawRelation.HasFeature(i) &&
-          rawRelation.GetFeature(i).GetFeature()==typeConfig.featureName &&
+          rawRelation.GetFeature(i).GetFeature()==featureName &&
           rawRelation.GetFeature(i).GetFeature()->HasValue()) {
         NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(rawRelation.GetFeatureValue(i));
 
@@ -1024,6 +1024,7 @@ namespace osmscout {
 
     RawRelationIndexedDataFile relDataFile(parameter.GetRawWayDataCacheSize(),
                                            parameter.GetRawWayIndexCacheSize());
+    FeatureRef                 featureName(typeConfig->GetFeature(RefFeature::NAME));
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
@@ -1108,7 +1109,7 @@ namespace osmscout {
       // itself, we thus still need to parse the complete relation for
       // type analysis before we can skip it.
 
-      std::string name=ResolveRelationName(typeConfig,
+      std::string name=ResolveRelationName(featureName,
                                            rawRel);
       Area        rel;
 

@@ -206,7 +206,7 @@ namespace osmscout {
                                     const std::string& name,
                                     Area& relation);
 
-    std::string ResolveRelationName(const TypeConfig& typeConfig,
+    std::string ResolveRelationName(const FeatureRef& featureName,
                                     const RawRelation& rawRelation) const;
 
   public:

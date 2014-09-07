@@ -20,7 +20,11 @@
 #include <osmscout/import/GenOptimizeWaysLowZoom.h>
 
 #include <osmscout/Pixel.h>
+
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/Way.h>
+
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -116,6 +120,7 @@ namespace osmscout
     uint32_t              wayCount=0;
     size_t                collectedWaysCount=0;
     std::set<TypeInfoRef> currentTypes(types);
+    FeatureRef            featureRef(typeConfig.GetFeature(RefFeature::NAME));
 
     progress.SetAction("Collecting way data to optimize");
 
@@ -150,7 +155,7 @@ namespace osmscout
       }
 
       for (size_t f=0; f<way->GetFeatureCount(); f++) {
-        if (way->GetFeature(f).GetFeature()!=typeConfig.featureRef &&
+        if (way->GetFeature(f).GetFeature()!=featureRef &&
             way->HasFeature(f)) {
           way->UnsetFeature(f);
         }

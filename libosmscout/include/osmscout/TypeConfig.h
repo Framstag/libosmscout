@@ -879,6 +879,8 @@ namespace osmscout {
 
     OSMSCOUT_HASHMAP<std::string,FeatureRef>  nameToFeatureMap;
 
+    FeatureRef                                featureName;
+    FeatureRef                                featureRef;
     FeatureRef                                featureLocation;
     FeatureRef                                featureAddress;
     FeatureRef                                featureAccess;
@@ -898,9 +900,6 @@ namespace osmscout {
     TypeInfoRef                               typeInfoTileCoast;
     TypeInfoRef                               typeInfoTileUnknown;
     TypeInfoRef                               typeInfoTileCoastline;
-
-    FeatureRef                                featureName;
-    FeatureRef                                featureRef;
 
     // Internal use (only available during preprocessing)
     TagId                                     tagArea;
