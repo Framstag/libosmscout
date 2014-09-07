@@ -1971,62 +1971,6 @@ namespace osmscout {
   }
 
   /**
-   * Get the style data based on the given attributes of an object (OA, either AreaAttributes or WayAttributes),
-   * a given style (S) and its style attributes (A).
-   */
-  template <class S, class A, class OA>
-  void GetObjectAttributesStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                                const OA& attributes,
-                                const Projection& projection,
-                                double dpi,
-                                Ref<S>& style)
-  {
-    bool   fastpath=false;
-    bool   composed=false;
-    size_t level=projection.GetMagnification().GetLevel();
-    double meterInPixel=1/projection.GetPixelSize();
-    double meterInMM=meterInPixel*25.4/dpi;
-
-    if (level>=styleSelectors.size()) {
-      level=styleSelectors.size()-1;
-    }
-
-    style=NULL;
-
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
-         s!=styleSelectors[level].end();
-         ++s) {
-      const StyleSelector<S,A>& selector=*s;
-
-      if (!selector.criteria.Matches(attributes,
-                                     meterInPixel,
-                                     meterInMM)) {
-        continue;
-      }
-
-      if (style.Invalid()) {
-        style=selector.style;
-        fastpath=true;
-
-        continue;
-      }
-      else if (fastpath) {
-        style=new S(style);
-        fastpath=false;
-      }
-
-      style->CopyAttributes(*selector.style,
-                            selector.attributes);
-      composed=true;
-    }
-
-    if (composed &&
-        !style->IsVisible()) {
-      style=NULL;
-    }
-  }
-
-  /**
    * Get the style data based on the given features of an object,
    * a given style (S) and its style attributes (A).
    */
