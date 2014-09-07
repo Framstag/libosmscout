@@ -1323,6 +1323,12 @@ namespace osmscout {
    : typeConfig(typeConfig),
      styleResolveContext(typeConfig)
   {
+    tileLandBuffer.SetType(typeConfig->typeInfoTileLand);
+    tileSeaBuffer.SetType(typeConfig->typeInfoTileSea);
+    tileCoastBuffer.SetType(typeConfig->typeInfoTileCoast);
+    tileUnknownBuffer.SetType(typeConfig->typeInfoTileUnknown);
+    tileCoastlineBuffer.SetType(typeConfig->typeInfoTileCoastline);
+
     wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
   }
 
@@ -2165,40 +2171,48 @@ namespace osmscout {
                                      double dpi,
                                      FillStyleRef& fillStyle) const
   {
-    GetStyle(areaFillStyleSelectors[typeConfig->typeTileLand],
-             projection,
-             dpi,
-             fillStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaFillStyleSelectors[tileLandBuffer.GetType()->GetId()],
+                    tileLandBuffer,
+                    projection,
+                    dpi,
+                    fillStyle);
   }
 
   void StyleConfig::GetSeaFillStyle(const Projection& projection,
                                     double dpi,
                                     FillStyleRef& fillStyle) const
   {
-    GetStyle(areaFillStyleSelectors[typeConfig->typeTileSea],
-             projection,
-             dpi,
-             fillStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaFillStyleSelectors[tileSeaBuffer.GetType()->GetId()],
+                    tileSeaBuffer,
+                    projection,
+                    dpi,
+                    fillStyle);
   }
 
   void StyleConfig::GetCoastFillStyle(const Projection& projection,
                                       double dpi,
                                       FillStyleRef& fillStyle) const
   {
-    GetStyle(areaFillStyleSelectors[typeConfig->typeTileCoast],
-             projection,
-             dpi,
-             fillStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaFillStyleSelectors[tileCoastBuffer.GetType()->GetId()],
+                    tileCoastBuffer,
+                    projection,
+                    dpi,
+                    fillStyle);
   }
 
   void StyleConfig::GetUnknownFillStyle(const Projection& projection,
                                         double dpi,
                                         FillStyleRef& fillStyle) const
   {
-    GetStyle(areaFillStyleSelectors[typeConfig->typeTileUnknown],
-             projection,
-             dpi,
-             fillStyle);
+    GetFeatureStyle(styleResolveContext,
+                    areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetId()],
+                    tileUnknownBuffer,
+                    projection,
+                    dpi,
+                    fillStyle);
   }
 
   void StyleConfig::GetCoastlineLineStyle(const Projection& projection,
@@ -2206,10 +2220,12 @@ namespace osmscout {
                                           LineStyleRef& lineStyle) const
   {
     for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-      GetStyle(wayLineStyleSelectors[slot][typeConfig->typeTileCoastline],
-               projection,
-               dpi,
-               lineStyle);
+      GetFeatureStyle(styleResolveContext,
+                      wayLineStyleSelectors[slot][tileCoastlineBuffer.GetType()->GetId()],
+                      tileCoastlineBuffer,
+                      projection,
+                      dpi,
+                      lineStyle);
     }
   }
 

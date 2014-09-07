@@ -893,14 +893,14 @@ namespace osmscout {
   public:
     TypeInfoRef                               typeInfoIgnore;
 
+    TypeInfoRef                               typeInfoTileLand;
+    TypeInfoRef                               typeInfoTileSea;
+    TypeInfoRef                               typeInfoTileCoast;
+    TypeInfoRef                               typeInfoTileUnknown;
+    TypeInfoRef                               typeInfoTileCoastline;
+
     FeatureRef                                featureName;
     FeatureRef                                featureRef;
-
-    TypeId                                    typeTileLand;
-    TypeId                                    typeTileSea;
-    TypeId                                    typeTileCoast;
-    TypeId                                    typeTileUnknown;
-    TypeId                                    typeTileCoastline;
 
     // Internal use (only available during preprocessing)
     TagId                                     tagArea;

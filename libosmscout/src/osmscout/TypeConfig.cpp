@@ -553,55 +553,61 @@ namespace osmscout {
 
     RegisterType(typeInfoIgnore);
 
+
+    //
+    // Internal type for showing routes
+    //
+
     TypeInfoRef route(new TypeInfo());
 
-    // Internal type for showing routes
     route->SetType("_route")
           .CanBeWay(true);
 
     RegisterType(route);
 
-    TypeInfoRef tileLand(new TypeInfo());
-
+    //
     // Internal types for the land/sea/coast tiles building the base layer for map drawing
-    tileLand->SetType("_tile_land")
+    //
+
+    typeInfoTileLand=new TypeInfo();
+
+    typeInfoTileLand->SetType("_tile_land")
               .CanBeArea(true);
 
-    RegisterType(tileLand);
+    RegisterType(typeInfoTileLand);
 
-    TypeInfoRef tileSea(new TypeInfo());
 
-    tileSea->SetType("_tile_sea")
+    typeInfoTileSea=new TypeInfo();
+
+    typeInfoTileSea->SetType("_tile_sea")
              .CanBeArea(true);
 
-    RegisterType(tileSea);
+    RegisterType(typeInfoTileSea);
 
-    TypeInfoRef tileCoast(new TypeInfo());
 
-    tileCoast->SetType("_tile_coast")
+    typeInfoTileCoast=new TypeInfo();
+
+    typeInfoTileCoast->SetType("_tile_coast")
                .CanBeArea(true);
 
-    RegisterType(tileCoast);
+    RegisterType(typeInfoTileCoast);
 
-    TypeInfoRef tileUnknown(new TypeInfo());
 
-    tileUnknown->SetType("_tile_unknown")
+    typeInfoTileUnknown=new TypeInfo();
+
+    typeInfoTileUnknown->SetType("_tile_unknown")
                 .CanBeArea(true);
 
-    RegisterType(tileUnknown);
+    RegisterType(typeInfoTileUnknown);
 
-    TypeInfoRef tileCoastline(new TypeInfo());
 
-    tileCoastline->SetType("_tile_coastline")
+    typeInfoTileCoastline=new TypeInfo();
+
+    typeInfoTileCoastline->SetType("_tile_coastline")
                    .CanBeWay(true);
 
-    RegisterType(tileCoastline);
+    RegisterType(typeInfoTileCoastline);
 
-    typeTileLand=GetTypeId("_tile_land");
-    typeTileSea=GetTypeId("_tile_sea");
-    typeTileCoast=GetTypeId("_tile_coast");
-    typeTileUnknown=GetTypeId("_tile_unknown");
-    typeTileCoastline=GetTypeId("_tile_coastline");
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");

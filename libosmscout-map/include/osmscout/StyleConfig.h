@@ -1198,6 +1198,12 @@ namespace osmscout {
     TypeConfigRef                              typeConfig;
     StyleResolveContext                        styleResolveContext;
 
+    FeatureValueBuffer                         tileLandBuffer;
+    FeatureValueBuffer                         tileSeaBuffer;
+    FeatureValueBuffer                         tileCoastBuffer;
+    FeatureValueBuffer                         tileUnknownBuffer;
+    FeatureValueBuffer                         tileCoastlineBuffer;
+
     // Symbol
     OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
     SymbolRef                                  emptySymbol;
