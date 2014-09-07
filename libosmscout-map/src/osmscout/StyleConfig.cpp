@@ -2175,42 +2175,42 @@ namespace osmscout {
                     pathShieldStyle);
   }
 
-  void StyleConfig::GetAreaFillStyle(const TypeId& type,
+  void StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
                                      const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      FillStyleRef& fillStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[type],
+                    areaFillStyleSelectors[type->GetId()],
                     buffer,
                     projection,
                     dpi,
                     fillStyle);
   }
 
-  void StyleConfig::GetAreaTextStyle(const TypeId& type,
+  void StyleConfig::GetAreaTextStyle(const TypeInfoRef& type,
                                      const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      TextStyleRef& textStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaTextStyleSelectors[type],
+                    areaTextStyleSelectors[type->GetId()],
                     buffer,
                     projection,
                     dpi,
                     textStyle);
   }
 
-  void StyleConfig::GetAreaIconStyle(const TypeId& type,
+  void StyleConfig::GetAreaIconStyle(const TypeInfoRef& type,
                                      const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      double dpi,
                                      IconStyleRef& iconStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaIconStyleSelectors[type],
+                    areaIconStyleSelectors[type->GetId()],
                     buffer,
                     projection,
                     dpi,

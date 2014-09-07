@@ -1337,17 +1337,17 @@ namespace osmscout {
                                double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;
 
-    void GetAreaFillStyle(const TypeId& type,
+    void GetAreaFillStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           FillStyleRef& fillStyle) const;
-    void GetAreaTextStyle(const TypeId& type,
+    void GetAreaTextStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           TextStyleRef& textStyle) const;
-    void GetAreaIconStyle(const TypeId& type,
+    void GetAreaIconStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,

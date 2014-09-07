@@ -1002,12 +1002,12 @@ namespace osmscout {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
 
-    styleConfig.GetAreaTextStyle(type->GetId(),
+    styleConfig.GetAreaTextStyle(type,
                                  buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
-    styleConfig.GetAreaIconStyle(type->GetId(),
+    styleConfig.GetAreaIconStyle(type,
                                  buffer,
                                  projection,
                                  parameter.GetDPI(),
@@ -1490,14 +1490,14 @@ namespace osmscout {
             FillStyleRef fillStyle;
 
             if (ring.ring==Area::outerRingId) {
-              styleConfig.GetAreaFillStyle(area->GetType()->GetId(),
+              styleConfig.GetAreaFillStyle(area->GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
                                            fillStyle);
             }
             else if (ring.GetType()->GetId()!=typeIgnore) {
-              styleConfig.GetAreaFillStyle(ring.GetType()->GetId(),
+              styleConfig.GetAreaFillStyle(ring.GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
