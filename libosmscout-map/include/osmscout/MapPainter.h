@@ -490,7 +490,7 @@ namespace osmscout {
     void DrawAreaLabel(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
-                       const TypeId& type,
+                       const TypeInfoRef& type,
                        const FeatureValueBuffer& buffer,
                        double x,
                        double y);

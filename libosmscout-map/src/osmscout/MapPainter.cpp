@@ -994,7 +994,7 @@ namespace osmscout {
   void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
-                                 const TypeId& type,
+                                 const TypeInfoRef& type,
                                  const FeatureValueBuffer& buffer,
                                  double x,
                                  double y)
@@ -1002,12 +1002,12 @@ namespace osmscout {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
 
-    styleConfig.GetAreaTextStyle(type,
+    styleConfig.GetAreaTextStyle(type->GetId(),
                                  buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
-    styleConfig.GetAreaIconStyle(type,
+    styleConfig.GetAreaIconStyle(type->GetId(),
                                  buffer,
                                  projection,
                                  parameter.GetDPI(),
@@ -1109,7 +1109,7 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->GetType()->GetId(),
+                        area->GetType(),
                         area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
@@ -1126,7 +1126,7 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->rings[m].GetType()->GetId(),
+                        area->rings[m].GetType(),
                         area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
