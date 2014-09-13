@@ -208,6 +208,8 @@ namespace osmscout {
         return false;
       }
 
+      progress.Info(NumberToString(dataCount)+" entries in file '"+source->scanner.GetFileName()+"'");
+
       overallDataCount+=dataCount;
     }
 
@@ -493,6 +495,8 @@ namespace osmscout {
         progress.Error("Error while reading number of data entries in file");
         return false;
       }
+
+      progress.Info(NumberToString(dataCount)+" entries in file '"+source->scanner.GetFileName()+"'");
 
       overallDataCount+=dataCount;
 
