@@ -69,7 +69,7 @@ MAX SPEEDS
 
   SPEED "FR:walk"          =   6 km/h
   SPEED "FR:urban"         =  50 km/h
-  SPPED "FR:rural"         =  90 km/h
+  SPEED "FR:rural"         =  90 km/h
 
 /*
   Allows you to map surface descriptions to a grade value ([1-5]).
