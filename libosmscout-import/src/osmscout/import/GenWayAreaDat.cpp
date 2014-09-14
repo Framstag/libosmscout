@@ -254,7 +254,7 @@ namespace osmscout {
                                                      Progress& progress,
                                                      const TypeConfig& typeConfig,
                                                      FileScanner& scanner,
-                                                     TypeInfoSet& types,
+                                                     const TypeInfoSet& types,
                                                      const BlacklistSet& blacklist,
                                                      FileWriter& writer,
                                                      uint32_t& writtenWayCount,
@@ -262,6 +262,12 @@ namespace osmscout {
   {
     uint32_t wayCount=0;
     size_t   collectedWaysCount=0;
+
+
+    progress.Info("Type dump:");
+    for (auto type : types) {
+      progress.SetAction("* "+type->GetName());
+    }
 
     if (!scanner.GotoBegin()) {
       progress.Error("Error while positioning at start of file");
@@ -292,7 +298,11 @@ namespace osmscout {
         continue;
       }
 
-      if (types.IsSet(way->GetType())) {
+      if (way->GetType()->GetIgnore()) {
+        continue;
+      }
+
+      if (!types.IsSet(way->GetType())) {
         continue;
       }
 
@@ -345,7 +355,7 @@ namespace osmscout {
     TypeInfoSet   areaTypes;
     TypeInfoSet   slowFallbackTypes;
 
-    BlacklistSet  wayBlacklist; //! Map of ways, that should not be handled
+    BlacklistSet  wayBlacklist; //! Set of ways that should not be handled
 
     CoordDataFile coordDataFile("coord.dat");
     FileScanner   scanner;
@@ -397,7 +407,6 @@ namespace osmscout {
 
     /* ------ */
 
-    size_t iteration=1;
     while (!areaTypes.Empty()) {
       std::vector<std::list<RawWayRef> > areasByType(typeConfig->GetTypeCount());
 
@@ -456,12 +465,17 @@ namespace osmscout {
 
         areasByType[type].clear();
       }
-
-      iteration++;
     }
 
+    progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
+                  NumberToString(writtenWayCount) + " areas(s) written");
+
     if (!slowFallbackTypes.Empty()) {
-      progress.SetAction("Handling low memory fall back");
+      progress.SetAction("Handling low memory fall back for the following types");
+
+      for (auto type : slowFallbackTypes) {
+        progress.SetAction("* "+type->GetName());
+      }
 
       HandleLowMemoryFallback(parameter,
                               progress,

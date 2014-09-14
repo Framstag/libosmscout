@@ -70,7 +70,7 @@ namespace osmscout {
                                  Progress& progress,
                                  const TypeConfig& typeConfig,
                                  FileScanner& scanner,
-                                 TypeInfoSet& types,
+                                 const TypeInfoSet& types,
                                  const BlacklistSet& blacklist,
                                  FileWriter& writer,
                                  uint32_t& writtenWayCount,
