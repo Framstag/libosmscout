@@ -104,6 +104,15 @@ namespace osmscout {
     {
       return entries;
     }
+
+    inline void Append(RouteData routePart)
+    {
+      entries.splice(entries.end() , routePart.Entries());
+    }
+
+    inline void PopEntry(){
+      entries.pop_back();
+    }
   };
 }
 

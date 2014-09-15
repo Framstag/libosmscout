@@ -558,6 +558,7 @@ namespace osmscout {
 
       iter->SetDistance(distance);
       iter->SetTime(time);
+      iter->SetLocation(curCoord);
 
       prevObject=curObject;
       prevCoord=curCoord;

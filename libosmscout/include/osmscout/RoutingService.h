@@ -276,7 +276,7 @@ namespace osmscout {
                         Vehicle vehicle,
                         double radius,
                         std::vector<osmscout::GeoCoord> via,
-                        std::vector<RouteData>& route);
+                        RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);

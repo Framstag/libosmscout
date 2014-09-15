@@ -899,7 +899,7 @@ namespace osmscout {
                                       Vehicle vehicle,
                                       double radius,
                                       std::vector<osmscout::GeoCoord> via,
-                                      std::vector<RouteData>& route)
+                                      RouteData& route)
   {
       std::vector<size_t> nodeIndexes;
       std::vector<osmscout::ObjectFileRef> objects;
@@ -932,7 +932,10 @@ namespace osmscout {
           if (routePart->IsEmpty()) {
               return false;
           }
-          route.push_back(*routePart);
+          if(index<nodeIndexes.size()-1){
+              routePart->PopEntry();
+          }
+          route.Append(*routePart);
           delete routePart;
       }
       return true;

@@ -708,6 +708,14 @@ namespace osmscout {
   void OSMSCOUT_API ScanConvertLine(int x1, int y1,
                                     int x2, int y2,
                                     std::vector<ScanCell>& cells);
+   
+  /**
+   * \ingroup Geometry
+   * Return de distance of the point (px,py) to the segment [(p1x,p1y),(p2x,p2y)],
+   * r the abscissa on the line of (qx,qy) the orthogonal projected point from (px,py).
+   * 0 <= r <= 1 if q is between p1 and p2.
+   */
+  extern OSMSCOUT_API double distanceToSegment(double px, double py, double p1x, double p1y, double p2x, double p2y, double &r, double &qx, double &qy);
 }
 
 #endif
