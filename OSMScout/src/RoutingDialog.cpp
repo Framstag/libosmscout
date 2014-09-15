@@ -652,7 +652,7 @@ void RoutingDialog::GetCarSpeedTable(std::map<std::string,double>& map)
 
 void RoutingDialog::CalculateRoute()
 {
-  osmscout::FastestPathRoutingProfile routingProfile;
+  osmscout::FastestPathRoutingProfile routingProfile(dbThread->GetTypeConfig());
   osmscout::RouteData                 routeData;
   osmscout::Way                       routeWay;
   osmscout::Vehicle                   vehicle=settings->GetRoutingVehicle();

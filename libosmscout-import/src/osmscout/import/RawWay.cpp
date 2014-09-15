@@ -21,30 +21,38 @@
 
 #include <limits>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
+
+  bool RawWay::IsOneway() const
+  {
+    for (size_t i=0; i<featureValueBuffer.GetFeatureCount(); i++) {
+      if (featureValueBuffer.HasValue(i) &&
+          featureValueBuffer.GetFeature(i).GetFeature()->HasValue()) {
+        AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(featureValueBuffer.GetValue(i));
+
+        if (value!=NULL) {
+          return value->IsOneway();
+        }
+      }
+    }
+
+    return false;
+  }
 
   void RawWay::SetId(OSMId id)
   {
     this->id=id;
   }
 
-  void RawWay::SetType(TypeId type, bool area)
+  void RawWay::SetType(const TypeInfoRef& type,
+                       bool area)
   {
-    this->type=type;
-
-    if (area) {
-      this->flags|=isArea;
-    }
-    else {
-      this->flags&=~isArea;
-    }
-  }
-
-  void RawWay::SetTags(const std::vector<Tag>& tags)
-  {
-    this->tags=tags;
+    this->isArea=area;
+    featureValueBuffer.SetType(type);
   }
 
   void RawWay::SetNodes(const std::vector<OSMId>& nodes)
@@ -52,51 +60,51 @@ namespace osmscout {
     this->nodes=nodes;
   }
 
-  bool RawWay::Read(FileScanner& scanner)
+  void RawWay::Parse(Progress& progress,
+                     const TypeConfig& typeConfig,
+                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags)
+  {
+    ObjectOSMRef object(id,
+                        osmRefWay);
+
+    featureValueBuffer.Parse(progress,
+                             typeConfig,
+                             object,
+                             tags);
+  }
+
+  bool RawWay::Read(const TypeConfig& typeConfig,
+                    FileScanner& scanner)
   {
     if (!scanner.ReadNumber(id)) {
       return false;
     }
 
-    if (!scanner.Read(flags)) {
+    TypeId tmpType;
+
+    if (!scanner.ReadNumber(tmpType)) {
       return false;
     }
 
-    if ((flags & hasType)!=0) {
-      uint32_t tmpType;
-
-      if (!scanner.ReadNumber(tmpType)) {
-        return false;
-      }
-
-      type=(TypeId)tmpType;
+    if (tmpType>typeConfig.GetMaxTypeId()) {
+      isArea=true;
+      tmpType=tmpType-typeConfig.GetMaxTypeId()-1;
     }
     else {
-      type=typeIgnore;
+      isArea=false;
+    }
+
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+
+    featureValueBuffer.SetType(type);
+
+    if (!type->GetIgnore()) {
+      if (!featureValueBuffer.Read(scanner)) {
+        return false;
+      }
     }
 
     uint32_t nodeCount;
-
-    if ((flags & hasTags)!=0) {
-      uint32_t tagCount;
-
-      if (!scanner.ReadNumber(tagCount)) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        if (!scanner.ReadNumber(tags[i].key)) {
-          return false;
-        }
-        if (!scanner.Read(tags[i].value)) {
-          return false;
-        }
-      }
-    }
-    else {
-      tags.clear();
-    }
 
     if (!scanner.ReadNumber(nodeCount)) {
       return false;
@@ -125,35 +133,23 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool RawWay::Write(FileWriter& writer) const
+  bool RawWay::Write(const TypeConfig& typeConfig,
+                     FileWriter& writer) const
   {
     writer.WriteNumber(id);
 
-    if (type!=typeIgnore) {
-      flags|=hasType;
-    }
-    else {
-      flags&=~hasType;
-    }
-
-    if (!tags.empty()) {
-      flags|=hasTags;
-    }
-    else {
-      flags&=~hasTags;
-    }
-
-    writer.Write(flags);
-
-    if (type!=typeIgnore) {
+    if (isArea) {
+      TypeId type=typeConfig.GetMaxTypeId()+1+
+                  featureValueBuffer.GetType()->GetId();
       writer.WriteNumber(type);
     }
+    else {
+      writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+    }
 
-    if (!tags.empty()) {
-      writer.WriteNumber((uint32_t)tags.size());
-      for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
-        writer.Write(tags[i].value);
+    if (!featureValueBuffer.GetType()->GetIgnore()) {
+      if (!featureValueBuffer.Write(writer)) {
+        return false;
       }
     }
 

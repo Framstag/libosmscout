@@ -38,9 +38,9 @@ namespace osmscout {
   class PreprocessPBF : public Preprocess
   {
   private:
-    std::map<TagId,std::string>      tagMap;
-    std::vector<OSMId>               nodes;
-    std::vector<RawRelation::Member> members;
+    OSMSCOUT_HASHMAP<TagId,std::string> tagMap;
+    std::vector<OSMId>                  nodes;
+    std::vector<RawRelation::Member>    members;
 
   private:
     void ReadNodes(const TypeConfig& typeConfig,
@@ -61,9 +61,9 @@ namespace osmscout {
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

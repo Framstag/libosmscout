@@ -23,6 +23,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/DebugDatabase.h>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <list>
 #include <map>
 #include <string>
@@ -248,49 +250,176 @@ static void DumpCoord(const osmscout::Point& coord)
   std::cout << "}" << std::endl;
 }
 
-static void DumpTags(const osmscout::TypeConfig* typeConfig,
-                     const std::vector<osmscout::Tag>& tags,
-                     size_t indent)
+static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessValue,
+                                   size_t indent)
 {
-   DumpIndent(indent);
-   std::cout << "tags {" << std::endl;
-   for (size_t t=0; t<tags.size(); t++) {
-     DumpIndent(indent+2);
-     std::cout << typeConfig->GetTagInfo(tags[t].key).GetName() << ": " <<tags[t].value << std::endl;
-   }
-   DumpIndent(indent);
-   std::cout << "}" << std::endl;
+  DumpIndent(indent);
+  std::cout << "Access {" << std::endl;
+
+  if (accessValue.IsOnewayForward()) {
+    DumpIndent(indent+2);
+    std::cout << "oneway: forward" << std::endl;
+  }
+  else if (accessValue.IsOnewayBackward()) {
+    DumpIndent(indent+2);
+    std::cout << "oneway: backward" << std::endl;
+  }
+
+  if (accessValue.CanRouteFoot()) {
+    DumpIndent(indent+2);
+    std::cout << "foot: both" << std::endl;
+  }
+  else if (accessValue.CanRouteFootForward()) {
+    DumpIndent(indent+2);
+    std::cout << "foot: forward" << std::endl;
+  }
+  else if (accessValue.CanRouteFootBackward()) {
+    DumpIndent(indent+2);
+    std::cout << "foot: backward" << std::endl;
+  }
+
+  if (accessValue.CanRouteBicycle()) {
+    DumpIndent(indent+2);
+    std::cout << "bicycle: both" << std::endl;
+  }
+  else if (accessValue.CanRouteBicycleForward()) {
+    DumpIndent(indent+2);
+    std::cout << "bicycle: forward" << std::endl;
+  }
+  else if (accessValue.CanRouteBicycleBackward()) {
+    DumpIndent(indent+2);
+    std::cout << "bicycle: backward" << std::endl;
+  }
+
+  if (accessValue.CanRouteCar()) {
+    DumpIndent(indent+2);
+    std::cout << "car: both" << std::endl;
+  }
+  else if (accessValue.CanRouteCarForward()) {
+    DumpIndent(indent+2);
+    std::cout << "car: forward" << std::endl;
+  }
+  else if (accessValue.CanRouteCarBackward()) {
+    DumpIndent(indent+2);
+    std::cout << "car: backward" << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
 }
 
-static void DumpNodeAttributes(const osmscout::TypeId& type,
-                               const osmscout::NodeAttributes& attributes,
-                               const osmscout::TypeConfigRef& typeConfig,
-                               size_t indent)
+static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
+                                   size_t indent)
 {
-  if (type!=osmscout::typeIgnore) {
-    std::cout << "  type: " << typeConfig->GetTypeInfo(type).GetName() << std::endl;
-  }
+  for (size_t idx=0; idx<buffer.GetFeatureCount(); idx++) {
+    osmscout::FeatureInstance meta=buffer.GetFeature(idx);
 
-  if (!attributes.GetName().empty()) {
-    DumpIndent(indent);
-    std::cout << "name: " << attributes.GetName() << std::endl;
-  }
+    if (buffer.HasValue(idx)) {
+      if (meta.GetFeature()->HasValue()) {
+        osmscout::FeatureValue *value=buffer.GetValue(idx);
 
-  if (!attributes.GetNameAlt().empty()) {
-    DumpIndent(indent);
-    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
-  }
+        if (dynamic_cast<osmscout::NameFeatureValue*>(value)!=NULL) {
+          osmscout::NameFeatureValue *nameValue=dynamic_cast<osmscout::NameFeatureValue*>(value);
 
-  if (!attributes.GetAddress().empty()) {
-    DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
-  }
-  if (attributes.HasTags()) {
-    std::cout << std::endl;
+          DumpIndent(indent);
+          std::cout << "Name: " << nameValue->GetName() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::NameAltFeatureValue*>(value)!=NULL) {
+          osmscout::NameAltFeatureValue *nameAltValue=dynamic_cast<osmscout::NameAltFeatureValue*>(value);
 
-    DumpTags(typeConfig,
-             attributes.GetTags(),
-             indent);
+          DumpIndent(indent);
+          std::cout << "NameAlt: " << nameAltValue->GetNameAlt() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::RefFeatureValue*>(value)!=NULL) {
+          osmscout::RefFeatureValue *refValue=dynamic_cast<osmscout::RefFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "Ref: " << refValue->GetRef() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::LocationFeatureValue*>(value)!=NULL) {
+          osmscout::LocationFeatureValue *locationValue=dynamic_cast<osmscout::LocationFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "Location: "<< locationValue->GetLocation() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::AddressFeatureValue*>(value)!=NULL) {
+          osmscout::AddressFeatureValue *addressValue=dynamic_cast<osmscout::AddressFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "Address: " << addressValue->GetAddress() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::AccessFeatureValue*>(value)!=NULL) {
+          osmscout::AccessFeatureValue *accessValue=dynamic_cast<osmscout::AccessFeatureValue*>(value);
+
+          DumpAccessFeatureValue(*accessValue,
+                                 indent);
+        }
+        else if (dynamic_cast<osmscout::LayerFeatureValue*>(value)!=NULL) {
+          osmscout::LayerFeatureValue *layerValue=dynamic_cast<osmscout::LayerFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "Layer: " << (int)layerValue->GetLayer() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::WidthFeatureValue*>(value)!=NULL) {
+          osmscout::WidthFeatureValue *widthValue=dynamic_cast<osmscout::WidthFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "Width: " << (int)widthValue->GetWidth() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::MaxSpeedFeatureValue*>(value)!=NULL) {
+          osmscout::MaxSpeedFeatureValue *maxSpeedValue=dynamic_cast<osmscout::MaxSpeedFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "MaxSpeed: " << (int)maxSpeedValue->GetMaxSpeed() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::GradeFeatureValue*>(value)!=NULL) {
+          osmscout::GradeFeatureValue *gradeValue=dynamic_cast<osmscout::GradeFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "Grade: " << (int)gradeValue->GetGrade() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::AdminLevelFeatureValue*>(value)!=NULL) {
+          osmscout::AdminLevelFeatureValue *adminLevelValue=dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "AdminLevel: " << adminLevelValue->GetAdminLevel() << std::endl;
+        }
+        else if (meta.GetFeature()->HasLabel()) {
+          DumpIndent(indent);
+          std::cout << meta.GetFeature()->GetName() << ": ";
+          std::cout << value->GetLabel();
+          std::cout << std::endl;
+        }
+        else {
+          DumpIndent(indent);
+          std::cout << meta.GetFeature()->GetName() << ": ";
+          std::cout << "<Unknown value>";
+          std::cout << std::endl;
+        }
+      }
+      // Flag-like Features
+      else {
+        // We are just a flag...
+        DumpIndent(indent);
+        std::cout << meta.GetFeature()->GetName() << ": true";
+        std::cout << std::endl;
+      }
+    }
+    // Features with default value
+    else {
+      if (meta.GetFeature()->GetName()==osmscout::AccessFeature::NAME) {
+        osmscout::AccessFeatureValue accessValue(buffer.GetType()->GetDefaultAccess());
+
+        DumpAccessFeatureValue(accessValue,
+                               indent);
+      }
+      else if (!meta.GetFeature()->HasValue()) {
+        // We are just a flag...
+        DumpIndent(indent);
+        std::cout << meta.GetFeature()->GetName() << ": false";
+        std::cout << std::endl;
+      }
+    }
   }
 }
 
@@ -301,187 +430,20 @@ static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
   std::cout << "Node {" << std::endl;
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << node->GetFileOffset() << std::endl;
-
-  DumpNodeAttributes(node->GetType(),
-                     node->GetAttributes(),
-                     typeConfig,
-                     IDENT);
+  std::cout << "  type: " << node->GetType()->GetName() << std::endl;
 
   std::cout << std::endl;
 
-  std::streamsize         oldPrecision=std::cout.precision(5);
-  std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+  DumpFeatureValueBuffer(node->GetFeatureValueBuffer(),
+                         IDENT);
+
+  std::cout << std::endl;
 
   std::cout << "  lat: " << node->GetLat() << std::endl;
   std::cout << "  lon: " << node->GetLon() << std::endl;
 
-  std::cout.setf(oldFlags,std::ios::floatfield);
-  std::cout.precision(oldPrecision);
-
   std::cout << "}" << std::endl;
-}
 
-static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
-                                      const osmscout::AreaAttributes& attributes,
-                                      const osmscout::TypeConfigRef& typeConfig,
-                                      size_t indent)
-{
-  if (type!=osmscout::typeIgnore) {
-    DumpIndent(indent);
-    std::cout << "type: " << typeConfig->GetTypeInfo(type).GetName() << std::endl;
-  }
-
-  if (!attributes.GetName().empty()) {
-    DumpIndent(indent);
-    std::cout << "name: " << attributes.GetName() << std::endl;
-  }
-
-  if (!attributes.GetNameAlt().empty()) {
-    DumpIndent(indent);
-    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
-  }
-
-  if (!attributes.GetAddress().empty()) {
-    DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
-  }
-
-  if (!attributes.HasAccess()) {
-    DumpIndent(indent);
-    std::cout << "access: false" << std::endl;
-  }
-
-  if (attributes.HasTags()) {
-    std::cout << std::endl;
-
-    DumpTags(typeConfig,
-             attributes.GetTags(),
-             indent);
-  }
-}
-
-static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
-                              const osmscout::TypeConfigRef& typeConfig,
-                              size_t indent)
-{
-  if (attributes.GetType()!=osmscout::typeIgnore) {
-    DumpIndent(indent);
-    std::cout << "type: " << typeConfig->GetTypeInfo(attributes.GetType()).GetName() << std::endl;
-  }
-
-  if (!attributes.GetName().empty()) {
-    DumpIndent(indent);
-    std::cout << "name: " << attributes.GetName() << std::endl;
-  }
-
-  if (!attributes.GetNameAlt().empty()) {
-    DumpIndent(indent);
-    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
-  }
-
-  if (!attributes.GetAddress().empty()) {
-    DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetAddress() << std::endl;
-  }
-
-  if (!attributes.GetRefName().empty()) {
-    DumpIndent(indent);
-    std::cout << "ref: " << attributes.GetRefName() << std::endl;
-  }
-
-  if (!attributes.HasAccess()) {
-    DumpIndent(indent);
-    std::cout << "access: false" << std::endl;
-  }
-
-  if (attributes.GetAccess().IsOnewayForward()) {
-    DumpIndent(indent);
-    std::cout << "oneway: forward" << std::endl;
-  }
-  else if (attributes.GetAccess().IsOnewayBackward()) {
-    DumpIndent(indent);
-    std::cout << "oneway: backward" << std::endl;
-  }
-
-  if (attributes.GetAccess().CanRouteFoot()) {
-    DumpIndent(indent);
-    std::cout << "foot: both" << std::endl;
-  }
-  else if (attributes.GetAccess().CanRouteFootForward()) {
-    DumpIndent(indent);
-    std::cout << "foot: forward" << std::endl;
-  }
-  else if (attributes.GetAccess().CanRouteFootBackward()) {
-    DumpIndent(indent);
-    std::cout << "foot: backward" << std::endl;
-  }
-
-  if (attributes.GetAccess().CanRouteBicycle()) {
-    DumpIndent(indent);
-    std::cout << "bicycle: both" << std::endl;
-  }
-  else if (attributes.GetAccess().CanRouteBicycleForward()) {
-    DumpIndent(indent);
-    std::cout << "bicycle: forward" << std::endl;
-  }
-  else if (attributes.GetAccess().CanRouteBicycleBackward()) {
-    DumpIndent(indent);
-    std::cout << "bicycle: backward" << std::endl;
-  }
-
-  if (attributes.GetAccess().CanRouteCar()) {
-    DumpIndent(indent);
-    std::cout << "car: both" << std::endl;
-  }
-  else if (attributes.GetAccess().CanRouteCarForward()) {
-    DumpIndent(indent);
-    std::cout << "car: forward" << std::endl;
-  }
-  else if (attributes.GetAccess().CanRouteCarBackward()) {
-    DumpIndent(indent);
-    std::cout << "car: backward" << std::endl;
-  }
-
-  if (attributes.IsBridge()) {
-    DumpIndent(indent);
-    std::cout << "bridge: true" << std::endl;
-  }
-
-  if (attributes.IsTunnel()) {
-    DumpIndent(indent);
-    std::cout << "tunnel: true" << std::endl;
-  }
-
-  if (attributes.IsRoundabout()) {
-    DumpIndent(indent);
-    std::cout << "roundabout: true" << std::endl;
-  }
-
-  if (attributes.GetWidth()!=0) {
-    DumpIndent(indent);
-    std::cout << "width: " << (size_t)attributes.GetWidth() << std::endl;
-  }
-
-  if (attributes.GetLayer()!=0) {
-    DumpIndent(indent);
-    std::cout << "layer: " << (size_t)attributes.GetLayer() << std::endl;
-  }
-
-  if (attributes.GetMaxSpeed()!=0) {
-    DumpIndent(indent);
-    std::cout << "maxSpeed: " << (size_t)attributes.GetMaxSpeed() << std::endl;
-  }
-
-  DumpIndent(indent);
-  std::cout << "grade: " << (size_t)attributes.GetGrade() << std::endl;
-
-  if (attributes.HasTags()) {
-    std::cout << std::endl;
-
-    DumpTags(typeConfig,
-             attributes.GetTags(),
-             indent);
-  }
 }
 
 static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
@@ -492,10 +454,12 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
 
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
+  std::cout << "  type: " << way->GetType()->GetName() << std::endl;
 
-  DumpWayAttributes(way->GetAttributes(),
-                    typeConfig,
-                    2);
+  std::cout << std::endl;
+
+  DumpFeatureValueBuffer(way->GetFeatureValueBuffer(),
+                         IDENT);
 
   if (!way->nodes.empty()) {
     std::cout << std::endl;
@@ -522,11 +486,12 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
 
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
+  std::cout << "  type: " << area->GetType()->GetName() << std::endl;
 
-  DumpAreaSegmentAttributes(area->rings.front().GetType(),
-                            area->rings.front().GetAttributes(),
-                            typeConfig,
-                            2);
+  std::cout << std::endl;
+
+  DumpFeatureValueBuffer(area->rings.front().GetFeatureValueBuffer(),
+                         IDENT);
 
   if (!area->rings.front().nodes.empty()) {
     std::cout << std::endl;
@@ -539,13 +504,7 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
         std::cout << " id: " << area->rings.front().ids[n];
       }
 
-      std::streamsize         oldPrecision=std::cout.precision(5);
-      std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
-
       std::cout << " lat: " << area->rings.front().nodes[n].GetLat() << " lon: "<< area->rings.front().nodes[n].GetLon() << " }" << std::endl;
-
-      std::cout.setf(oldFlags,std::ios::floatfield);
-      std::cout.precision(oldPrecision);
     }
   }
 
@@ -559,11 +518,10 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
     else {
       std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
     }
+    std::cout << "    type: " << area->rings[r].GetType()->GetName() << std::endl;
 
-    DumpAreaSegmentAttributes(area->rings[r].GetType(),
-                              area->rings[r].GetAttributes(),
-                              typeConfig,
-                              4);
+    DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
+                           IDENT+2);
 
     if (!area->rings[r].nodes.empty()) {
       std::cout << std::endl;
@@ -576,13 +534,7 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
           std::cout << " id: " << area->rings[r].ids[n];
         }
 
-        std::streamsize         oldPrecision=std::cout.precision(5);
-        std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
-
         std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;
-
-        std::cout.setf(oldFlags,std::ios::floatfield);
-        std::cout.precision(oldPrecision);
       }
     }
 
@@ -744,6 +696,9 @@ int main(int argc, char* argv[])
     }
   }
 
+  std::streamsize         oldPrecision=std::cout.precision(5);
+  std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+
   for (std::list<Job>::const_iterator job=jobs.begin();
        job!=jobs.end();
        ++job) {
@@ -827,6 +782,9 @@ int main(int argc, char* argv[])
       }
     }
   }
+
+  std::cout.setf(oldFlags,std::ios::floatfield);
+  std::cout.precision(oldPrecision);
 
   database.Close();
 

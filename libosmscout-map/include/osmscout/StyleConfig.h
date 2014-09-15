@@ -26,20 +26,36 @@
 #include <osmscout/private/MapImportExport.h>
 
 #include <osmscout/Coord.h>
+
 #include <osmscout/Types.h>
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/TypeConfig.h>
-
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Reference.h>
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {
+  class OSMSCOUT_MAP_API StyleResolveContext
+  {
+  private:
+    BridgeFeatureReader      bridgeReader;
+    TunnelFeatureReader      tunnelReader;
+    AccessFeatureValueReader accessReader;
+
+  public:
+    StyleResolveContext(const TypeConfigRef& typeConfig);
+
+    bool IsBridge(const FeatureValueBuffer& buffer) const;
+    bool IsTunnel(const FeatureValueBuffer& buffer) const;
+    bool IsOneway(const FeatureValueBuffer& buffer) const;
+  };
+
   class OSMSCOUT_MAP_API StyleVariable : public Referencable
   {
   public:
@@ -235,14 +251,12 @@ namespace osmscout {
       return oneway;
     }
 
-   bool Matches(double meterInPixel,
-                double meterInMM) const;
-   bool Matches(const AreaAttributes& attributes,
-                double meterInPixel,
-                double meterInMM) const;
-   bool Matches(const WayAttributes& attributes,
-                double meterInPixel,
-                double meterInMM) const;
+    bool Matches(double meterInPixel,
+                 double meterInMM) const;
+    bool Matches(const StyleResolveContext& context,
+                 const FeatureValueBuffer& buffer,
+                 double meterInPixel,
+                 double meterInMM) const;
   };
 
   /**
@@ -1172,11 +1186,23 @@ namespace osmscout {
 
   /**
    * A complete style definition
+   *
+   * Internals:
+   * * Fastpath: Fastpath means, that we can directly return the style definition from the style sheet. This is normally
+   * the case, if there is excactly one match in the style sheet. If there are multiple matches a new style has to be
+   * allocated and composed from all matches.
    */
-  class OSMSCOUT_MAP_API StyleConfig
+  class OSMSCOUT_MAP_API StyleConfig : public Referencable
   {
   private:
     TypeConfigRef                              typeConfig;
+    StyleResolveContext                        styleResolveContext;
+
+    FeatureValueBuffer                         tileLandBuffer;
+    FeatureValueBuffer                         tileSeaBuffer;
+    FeatureValueBuffer                         tileCoastBuffer;
+    FeatureValueBuffer                         tileUnknownBuffer;
+    FeatureValueBuffer                         tileCoastlineBuffer;
 
     // Symbol
     OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
@@ -1290,45 +1316,45 @@ namespace osmscout {
       }
     }
 
-    void GetNodeTextStyle(const Node& node,
+    void GetNodeTextStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           TextStyleRef& textStyle) const;
 
-    void GetNodeIconStyle(const Node& node,
+    void GetNodeIconStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           IconStyleRef& iconStyle) const;
 
-    void GetWayLineStyles(const WayAttributes& way,
+    void GetWayLineStyles(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           std::vector<LineStyleRef>& lineStyles) const;
-    void GetWayPathTextStyle(const WayAttributes& way,
+    void GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                              const Projection& projection,
                              double dpi,
                              PathTextStyleRef& pathTextStyle) const;
-    void GetWayPathSymbolStyle(const WayAttributes& way,
+    void GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
                                const Projection& projection,
                                double dpi,
                                PathSymbolStyleRef& pathSymbolStyle) const;
-    void GetWayPathShieldStyle(const WayAttributes& way,
+    void GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                const Projection& projection,
                                double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;
 
-    void GetAreaFillStyle(const TypeId& type,
-                          const AreaAttributes& area,
+    void GetAreaFillStyle(const TypeInfoRef& type,
+                          const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           FillStyleRef& fillStyle) const;
-    void GetAreaTextStyle(const TypeId& type,
-                          const AreaAttributes& area,
+    void GetAreaTextStyle(const TypeInfoRef& type,
+                          const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           TextStyleRef& textStyle) const;
-    void GetAreaIconStyle(const TypeId& type,
-                          const AreaAttributes& area,
+    void GetAreaIconStyle(const TypeInfoRef& type,
+                          const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           double dpi,
                           IconStyleRef& iconStyle) const;
@@ -1348,7 +1374,11 @@ namespace osmscout {
     void GetCoastlineLineStyle(const Projection& projection,
                                double dpi,
                                LineStyleRef& lineStyle) const;
+
+    bool Load(const std::string& styleFile);
   };
+
+  typedef Ref<StyleConfig> StyleConfigRef;
 }
 
 #endif

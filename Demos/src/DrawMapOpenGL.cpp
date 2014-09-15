@@ -44,7 +44,6 @@
 #include <osmscout/MapService.h>
 
 #include <osmscout/MapPainterOpenGL.h>
-#include <osmscout/StyleConfigLoader.h>
 
 static int window=-1;
 
@@ -57,18 +56,21 @@ static double lat=50.6811;
 static double lon=7.158;
 static double zoom=80000;
 
+static osmscout::ReversedYAxisMercatorProjection  projection;
+static osmscout::MapParameter                     drawParameter;
+static osmscout::MapPainterOpenGL                 *painter=NULL;
+
 class Database
 {
 private:
   osmscout::DatabaseRef         database;
   osmscout::MapServiceRef       mapService;
-  osmscout::StyleConfig         *styleConfig;
+  osmscout::StyleConfigRef      styleConfig;
 
   osmscout::AreaSearchParameter searchParameter;
 
 public:
   Database()
-  : styleConfig(NULL)
   {
     // no code
   }
@@ -91,9 +93,10 @@ public:
 
     styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
 
-    if (!osmscout::LoadStyleConfig(style.c_str(),
-                                   *styleConfig)) {
+    if (!styleConfig->Load(style)) {
       std::cerr << "Cannot open style" << std::endl;
+
+      return false;
     }
 
     searchParameter.SetUseLowZoomOptimization(true);
@@ -103,7 +106,8 @@ public:
 
   ~Database()
   {
-    delete styleConfig;
+    delete painter;
+    painter=NULL;
   }
 
   const osmscout::StyleConfig* GetStyleConfig() const
@@ -127,6 +131,8 @@ public:
     styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
                                        areaTypes);
 
+    painter = new osmscout::MapPainterOpenGL(styleConfig);
+
     return mapService->GetObjects(nodeTypes,
                                   wayTypes,
                                   areaTypes,
@@ -142,10 +148,7 @@ public:
   }
 };
 
-static Database                      database;
-static osmscout::ReversedYAxisMercatorProjection  projection;
-static osmscout::MapParameter        drawParameter;
-static osmscout::MapPainterOpenGL    painter;
+static Database database;
 
 void OnInit()          // We call this right after our OpenGL window is created.
 {
@@ -183,10 +186,9 @@ void OnDisplay()
   //glTranslated(-width/2.0,-height/2.0,-9.0);
   //glRotatef(-15.0f,1.0f,0.0f,0.0f);
 
-  if (!painter.DrawMap(*database.GetStyleConfig(),
-                       projection,
-                       drawParameter,
-                       data)) {
+  if (!painter->DrawMap(projection,
+                        drawParameter,
+                        data)) {
     std::cerr << "Cannot render" << std::endl;
     return;
   }

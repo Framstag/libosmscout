@@ -52,8 +52,8 @@ namespace osmscout {
     bool GetAreas(const ImportParameter& parameter,
                  Progress& progress,
                  const TypeConfig& typeConfig,
-                 std::set<TypeId>& types,
-                 std::set<TypeId>& slowFallbackTypes,
+                 TypeInfoSet& types,
+                 TypeInfoSet& slowFallbackTypes,
                  const BlacklistSet& blacklist,
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& areas);
@@ -70,7 +70,7 @@ namespace osmscout {
                                  Progress& progress,
                                  const TypeConfig& typeConfig,
                                  FileScanner& scanner,
-                                 std::set<TypeId>& types,
+                                 const TypeInfoSet& types,
                                  const BlacklistSet& blacklist,
                                  FileWriter& writer,
                                  uint32_t& writtenWayCount,
@@ -78,9 +78,9 @@ namespace osmscout {
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

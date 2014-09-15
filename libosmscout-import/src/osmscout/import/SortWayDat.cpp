@@ -19,15 +19,19 @@
 
 #include <osmscout/import/SortWayDat.h>
 
+#include <osmscout/TypeFeatures.h>
+
+#include <osmscout/util/Geometry.h>
+
 namespace osmscout {
 
   class WayLocationProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
   {
   private:
-    FileWriter               writer;
-    uint32_t                 overallDataCount;
-    OSMSCOUT_HASHSET<TypeId> poiTypes;
-    TagId                    tagAddrStreet;
+    FileWriter                 writer;
+    uint32_t                   overallDataCount;
+    NameFeatureValueReader     *nameReader;
+    LocationFeatureValueReader *locationReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -37,7 +41,9 @@ namespace osmscout {
                  const FileOffset& offset,
                  Way& way,
                  bool& save);
-    bool AfterProcessingEnd();
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
   };
 
   bool WayLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
@@ -46,8 +52,8 @@ namespace osmscout {
   {
     overallDataCount=0;
 
-    typeConfig.GetIndexAsPOITypes(poiTypes);
-    tagAddrStreet=typeConfig.tagAddrStreet;
+    nameReader=new NameFeatureValueReader(typeConfig);
+    locationReader=new LocationFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "wayaddress.dat"))) {
@@ -66,36 +72,40 @@ namespace osmscout {
                                            Way& way,
                                            bool& /*save*/)
   {
-    std::string location;
-
-    GetAndEraseTag(way.GetAttributes().GetTags(),
-                   tagAddrStreet,
-                   location);
-
-    bool isAddress=!location.empty() && !way.GetAddress().empty();
-    bool isPoi=!way.GetName().empty() && poiTypes.find(way.GetType())!=poiTypes.end();
-
-    if (!isAddress && !isPoi) {
+    if (!way.GetType()->GetIndexAsPOI()) {
       return true;
+    }
+
+    NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (nameValue==NULL) {
+      return true;
+    }
+
+    LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
+    std::string          name;
+    std::string          location;
+    std::string          address;
+
+    name=nameValue->GetName();
+
+    if (locationValue!=NULL) {
+      location=locationValue->GetLocation();
     }
 
     if (!writer.WriteFileOffset(offset)) {
       return false;
     }
 
-    if (!writer.WriteNumber(way.GetType())) {
+    if (!writer.WriteNumber(way.GetType()->GetId())) {
       return false;
     }
 
-    if (!writer.Write(way.GetName())) {
+    if (!writer.Write(name)) {
       return false;
     }
 
     if (!writer.Write(location)) {
-      return false;
-    }
-
-    if (!writer.Write(way.GetAddress())) {
       return false;
     }
 
@@ -108,8 +118,16 @@ namespace osmscout {
     return true;
   }
 
-  bool WayLocationProcessorFilter::AfterProcessingEnd()
+  bool WayLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                      Progress& /*progress*/,
+                                                      const TypeConfig& /*typeConfig*/)
   {
+    delete nameReader;
+    nameReader=NULL;
+
+    delete locationReader;
+    locationReader=NULL;
+
     writer.SetPos(0);
     writer.Write(overallDataCount);
 
@@ -121,17 +139,49 @@ namespace osmscout {
   private:
     std::vector<GeoCoord> nodeBuffer;
     std::vector<Id>       idBuffer;
+    size_t                duplicateCount;
+    size_t                redundantCount;
+    size_t                overallCount;
 
   private:
     bool IsEqual(const unsigned char buffer1[],
                  const unsigned char buffer2[]);
 
+    bool RemoveDuplicateNodes(Progress& progress,
+                              const FileOffset& offset,
+                              Way& way,
+                              bool& save);
+
+    bool RemoveRedundantNodes(Progress& progress,
+                              const FileOffset& offset,
+                              Way& way,
+                              bool& save);
+
   public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Way& way,
                  bool& save);
+
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
   };
+
+  bool WayNodeReductionProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                              Progress& /*progress*/,
+                                                              const TypeConfig& /*typeConfig*/)
+  {
+    duplicateCount=0;
+    redundantCount=0;
+    overallCount=0;
+
+    return true;
+  }
 
   bool WayNodeReductionProcessorFilter::IsEqual(const unsigned char buffer1[],
                                                 const unsigned char buffer2[])
@@ -145,10 +195,10 @@ namespace osmscout {
     return true;
   }
 
-  bool WayNodeReductionProcessorFilter::Process(Progress& progress,
-                                                const FileOffset& offset,
-                                                Way& way,
-                                                bool& save)
+  bool WayNodeReductionProcessorFilter::RemoveDuplicateNodes(Progress& progress,
+                                                             const FileOffset& offset,
+                                                             Way& way,
+                                                             bool& save)
   {
     unsigned char buffers[2][coordByteSize];
 
@@ -161,6 +211,7 @@ namespace osmscout {
       nodeBuffer.clear();
       idBuffer.clear();
 
+      // Prefill with the first coordinate
       way.nodes[0].EncodeToBuffer(buffers[0]);
 
       nodeBuffer.push_back(way.nodes[0]);
@@ -175,11 +226,13 @@ namespace osmscout {
                     buffers[currentIndex])) {
           if (n>=way.ids.size() ||
               way.ids[n]==0) {
+            duplicateCount++;
             reduced=true;
           }
           else if ((n-1)>=way.ids.size() ||
               way.ids[n-1]==0) {
             way.ids[n-1]=way.ids[n];
+            duplicateCount++;
             reduced=true;
           }
           else {
@@ -215,6 +268,98 @@ namespace osmscout {
         way.ids=idBuffer;
       }
     }
+
+    return true;
+  }
+
+  bool WayNodeReductionProcessorFilter::RemoveRedundantNodes(Progress& /*progress*/,
+                                                             const FileOffset& /*offset*/,
+                                                             Way& way,
+                                                             bool& /*save*/)
+  {
+    // In this case there is nothing to optimize
+    if (way.nodes.size()<3) {
+      return true;
+    }
+
+    nodeBuffer.clear();
+    idBuffer.clear();
+
+    size_t last=0;
+    size_t current=1;
+    bool   reduced=false;
+
+    nodeBuffer.push_back(way.nodes[0]);
+    if (!way.ids.empty()) {
+      idBuffer.push_back(way.ids[0]);
+    }
+
+    while (current+1<way.nodes.size()) {
+      double distance=CalculateDistancePointToLineSegment(way.nodes[current],
+                                                          nodeBuffer[last],
+                                                          way.nodes[current+1]);
+
+      if (distance<1/latConversionFactor &&
+          (current>=way.ids.size() || way.ids[current]==0)) {
+        reduced=true;
+        redundantCount++;
+        current++;
+      }
+      else {
+        nodeBuffer.push_back(way.nodes[current]);
+        if (!way.ids.empty()) {
+          idBuffer.push_back(way.ids[current]);
+        }
+
+        last++;
+        current++;
+      }
+    }
+
+    nodeBuffer.push_back(way.nodes[current]);
+    if (!way.ids.empty()) {
+      idBuffer.push_back(way.ids[current]);
+    }
+
+    if (reduced) {
+      way.nodes=nodeBuffer;
+      way.ids=idBuffer;
+    }
+
+    return true;
+  }
+
+  bool WayNodeReductionProcessorFilter::Process(Progress& progress,
+                                                const FileOffset& offset,
+                                                Way& way,
+                                                bool& save)
+  {
+    overallCount+=way.nodes.size();
+
+    if (!RemoveDuplicateNodes(progress,
+                              offset,
+                              way,
+                              save)) {
+      return false;
+    }
+
+    if (!RemoveRedundantNodes(progress,
+                              offset,
+                              way,
+                              save)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool WayNodeReductionProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                           Progress& progress,
+                                                           const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Duplicate nodes removed: " + NumberToString(duplicateCount));
+    progress.Info("Redundant nodes removed: " + NumberToString(redundantCount));
+    progress.Info("Overall nodes: " + NumberToString(overallCount));
 
     return true;
   }

@@ -178,9 +178,20 @@ namespace osmscout {
     this->breaker=breaker;
   }
 
-  MapPainter::MapPainter(CoordBuffer *buffer)
+  MapPainter::MapPainter(const StyleConfigRef& styleConfig,
+                         CoordBuffer *buffer)
   : coordBuffer(buffer),
-    transBuffer(coordBuffer)
+    styleConfig(styleConfig),
+    transBuffer(coordBuffer),
+    nameReader(styleConfig->GetTypeConfig()),
+    nameAltReader(styleConfig->GetTypeConfig()),
+    refReader(styleConfig->GetTypeConfig()),
+    layerReader(styleConfig->GetTypeConfig()),
+    widthReader(styleConfig->GetTypeConfig()),
+    addressReader(styleConfig->GetTypeConfig()),
+    labelSpace(1.0),
+    shieldLabelSpace(1.0),
+    sameLabelSpace(1.0)
   {
     tunnelDash.push_back(0.4);
     tunnelDash.push_back(0.4);
@@ -688,7 +699,8 @@ namespace osmscout {
             if (lineStart!=lineEnd) {
               WayData data;
 
-              data.attributes=&coastlineSegmentAttributes;
+              data.buffer=&coastlineSegmentAttributes;
+              data.layer=0;
               data.lineStyle=coastlineLine;
               data.wayPriority=std::numeric_limits<size_t>::max();
               data.transStart=start+lineStart;
@@ -705,7 +717,7 @@ namespace osmscout {
       }
 
       areaData.ref=ObjectFileRef();
-      areaData.attributes=NULL;
+//      areaData.buffer.SetType();
       areaData.transStart=start;
       areaData.transEnd=end;
 
@@ -982,8 +994,8 @@ namespace osmscout {
   void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
-                                 const TypeId& type,
-                                 const AreaAttributes& attributes,
+                                 const TypeInfoRef& type,
+                                 const FeatureValueBuffer& buffer,
                                  double x,
                                  double y)
   {
@@ -991,12 +1003,12 @@ namespace osmscout {
     IconStyleRef  iconStyle;
 
     styleConfig.GetAreaTextStyle(type,
-                                 attributes,
+                                 buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
     styleConfig.GetAreaIconStyle(type,
-                                 attributes,
+                                 buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  iconStyle);
@@ -1017,11 +1029,14 @@ namespace osmscout {
     }
 
     if (hasLabel) {
-      if (!attributes.GetName().empty()) {
-        label=attributes.GetName();
+      NameFeatureValue    *nameValue=nameReader.GetValue(buffer);
+      AddressFeatureValue *addressValue=addressReader.GetValue(buffer);
+
+      if (nameValue!=NULL) {
+        label=nameValue->GetName();
       }
-      else if (!attributes.GetAddress().empty()) {
-        label=attributes.GetAddress();
+      else if (addressValue!=NULL) {
+        label=addressValue->GetAddress();
       }
 
       hasLabel=!label.empty();
@@ -1095,7 +1110,7 @@ namespace osmscout {
                         projection,
                         parameter,
                         area->GetType(),
-                        area->rings[m].attributes,
+                        area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
         else {
@@ -1112,7 +1127,7 @@ namespace osmscout {
                         projection,
                         parameter,
                         area->rings[m].GetType(),
-                        area->rings[m].attributes,
+                        area->rings[m].GetFeatureValueBuffer(),
                         x,y);
         }
       }
@@ -1127,11 +1142,11 @@ namespace osmscout {
     TextStyleRef textStyle;
     IconStyleRef iconStyle;
 
-    styleConfig.GetNodeTextStyle(node,
+    styleConfig.GetNodeTextStyle(node->GetFeatureValueBuffer(),
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
-    styleConfig.GetNodeIconStyle(node,
+    styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                  projection,
                                  parameter.GetDPI(),
                                  iconStyle);
@@ -1142,11 +1157,14 @@ namespace osmscout {
     std::string  label;
 
     if (hasLabel) {
-      if (!node->GetName().empty()) {
-        label=node->GetName();
+      NameFeatureValue    *nameValue=nameReader.GetValue(node->GetFeatureValueBuffer());
+      AddressFeatureValue *addressValue=addressReader.GetValue(node->GetFeatureValueBuffer());
+
+      if (nameValue!=NULL) {
+        label=nameValue->GetName();
       }
-      else if (!node->GetAddress().empty()) {
-        label=node->GetAddress();
+      else if (addressValue!=NULL) {
+        label=addressValue->GetAddress();
       }
 
       hasLabel=!label.empty();
@@ -1266,7 +1284,7 @@ namespace osmscout {
     {
       PathSymbolStyleRef pathSymbolStyle;
 
-      styleConfig.GetWayPathSymbolStyle(*way->attributes,
+      styleConfig.GetWayPathSymbolStyle(*way->buffer,
                                         projection,
                                         parameter.GetDPI(),
                                         pathSymbolStyle);
@@ -1289,19 +1307,23 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const WayPathData& data)
   {
-    if (data.attributes->GetName().empty() &&
-        data.attributes->GetRefName().empty()) {
+    NameFeatureValue *nameValue=nameReader.GetValue(*data.buffer);
+    RefFeatureValue  *refValue=refReader.GetValue(*data.buffer);
+
+
+    if (nameValue== NULL &&
+        refValue==NULL) {
       return;
     }
 
     PathShieldStyleRef shieldStyle;
     PathTextStyleRef   pathTextStyle;
 
-    styleConfig.GetWayPathShieldStyle(*data.attributes,
+    styleConfig.GetWayPathShieldStyle(*data.buffer,
                                       projection,
                                       parameter.GetDPI(),
                                       shieldStyle);
-    styleConfig.GetWayPathTextStyle(*data.attributes,
+    styleConfig.GetWayPathTextStyle(*data.buffer,
                                     projection,
                                     parameter.GetDPI(),
                                     pathTextStyle);
@@ -1311,22 +1333,22 @@ namespace osmscout {
       case PathTextStyle::none:
         break;
       case PathTextStyle::name:
-        if (!data.attributes->GetName().empty()) {
+        if (nameValue!=NULL) {
           DrawContourLabel(projection,
                            parameter,
                            *pathTextStyle,
-                           data.attributes->GetName(),
+                           nameValue->GetName(),
                            data.transStart,
                            data.transEnd);
           waysLabelDrawn++;
         }
         break;
       case PathTextStyle::ref:
-        if (!data.attributes->GetRefName().empty()) {
+        if (refValue!=NULL) {
           DrawContourLabel(projection,
                            parameter,
                            *pathTextStyle,
-                           data.attributes->GetRefName(),
+                           refValue->GetRef(),
                            data.transStart,
                            data.transEnd);
           waysLabelDrawn++;
@@ -1340,22 +1362,22 @@ namespace osmscout {
       case ShieldStyle::none:
         break;
       case ShieldStyle::name:
-        if (!data.attributes->GetName().empty()) {
+        if (nameValue!=NULL) {
           RegisterPointWayLabel(projection,
                                 parameter,
                                 shieldStyle,
-                                data.attributes->GetName(),
+                                nameValue->GetName(),
                                 data.transStart,
                                 data.transEnd);
           waysLabelDrawn++;
         }
         break;
       case ShieldStyle::ref:
-        if (!data.attributes->GetRefName().empty()) {
+        if (refValue!=NULL) {
           RegisterPointWayLabel(projection,
                                 parameter,
                                 shieldStyle,
-                                data.attributes->GetRefName(),
+                                refValue->GetRef(),
                                 data.transStart,
                                 data.transEnd);
           waysLabelDrawn++;
@@ -1469,14 +1491,14 @@ namespace osmscout {
 
             if (ring.ring==Area::outerRingId) {
               styleConfig.GetAreaFillStyle(area->GetType(),
-                                           ring.GetAttributes(),
+                                           ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
                                            fillStyle);
             }
-            else if (ring.GetType()!=typeIgnore) {
+            else if (ring.GetType()->GetId()!=typeIgnore) {
               styleConfig.GetAreaFillStyle(ring.GetType(),
-                                           ring.GetAttributes(),
+                                           ring.GetFeatureValueBuffer(),
                                            projection,
                                            parameter.GetDPI(),
                                            fillStyle);
@@ -1506,14 +1528,14 @@ namespace osmscout {
             size_t j=i+1;
             while (j<area->rings.size() &&
                    area->rings[j].ring==ringId+1 &&
-                   area->rings[j].GetType()==typeIgnore) {
+                   area->rings[j].GetType()->GetId()==typeIgnore) {
               a.clippings.push_back(data[j]);
 
               j++;
             }
 
             a.ref=ObjectFileRef(area->GetFileOffset(),refArea);
-            a.attributes=&ring.attributes;
+            a.buffer=&ring.GetFeatureValueBuffer();
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
@@ -1547,11 +1569,11 @@ namespace osmscout {
                                      const Projection& projection,
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
-                                     const WayAttributes& attributes,
+                                     const FeatureValueBuffer& buffer,
                                      const std::vector<GeoCoord>& nodes,
                                      const std::vector<Id>& ids)
   {
-    styleConfig.GetWayLineStyles(attributes,
+    styleConfig.GetWayLineStyles(buffer,
                                  projection,
                                  parameter.GetDPI(),
                                  lineStyles);
@@ -1572,9 +1594,12 @@ namespace osmscout {
       double       lineOffset=0.0;
 
       if (lineStyle->GetWidth()>0.0) {
-        if (attributes.GetWidth()>0.0) {
+        WidthFeatureValue *widthValue=widthReader.GetValue(buffer);
+
+
+        if (widthValue!=NULL) {
           lineWidth+=GetProjectedWidth(projection,
-                                       attributes.GetWidth());
+                                       widthValue->GetWidth());
         }
         else {
           lineWidth+=GetProjectedWidth(projection,
@@ -1623,7 +1648,7 @@ namespace osmscout {
         WayPathData pathData;
 
         pathData.ref=ref;
-        pathData.attributes=&attributes;
+        pathData.buffer=&buffer;
         pathData.transStart=transStart;
         pathData.transEnd=transEnd;
 
@@ -1632,11 +1657,18 @@ namespace osmscout {
         transformed=true;
       }
 
-      data.attributes=&attributes;
+      data.layer=0;
+      data.buffer=&buffer;
       data.lineStyle=lineStyle;
-      data.wayPriority=styleConfig.GetWayPrio(attributes.GetType());
+      data.wayPriority=styleConfig.GetWayPrio(buffer.GetType()->GetId());
       data.startIsClosed=ids.empty() || ids[0]==0;
       data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
+
+      LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
+
+      if (layerValue!=NULL) {
+        data.layer=layerValue->GetLayer();
+      }
 
       if (lineOffset!=0.0) {
         coordBuffer->GenerateParallelWay(transStart,transEnd,
@@ -1671,7 +1703,7 @@ namespace osmscout {
                         projection,
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
-                        way->GetAttributes(),
+                        way->GetFeatureValueBuffer(),
                         way->nodes,
                         way->ids);
     }
@@ -1685,7 +1717,7 @@ namespace osmscout {
                         projection,
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
-                        way->GetAttributes(),
+                        way->GetFeatureValueBuffer(),
                         way->nodes,
                         way->ids);
     }
@@ -1722,8 +1754,7 @@ namespace osmscout {
     }
   }
 
-  bool MapPainter::Draw(const StyleConfig& styleConfig,
-                        const Projection& projection,
+  bool MapPainter::Draw(const Projection& projection,
                         const MapParameter& parameter,
                         const MapData& data)
   {

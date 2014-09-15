@@ -44,8 +44,6 @@ namespace osmscout {
     FileWriter            turnRestrictionWriter;
     FileWriter            multipolygonWriter;
 
-    std::vector<Tag>      tags;
-
     uint32_t              nodeCount;
     uint32_t              wayCount;
     uint32_t              areaCount;
@@ -73,51 +71,57 @@ namespace osmscout {
     GeoCoord              minCoord;
     GeoCoord              maxCoord;
 
+    std::vector<size_t>   nodeStat;
+    std::vector<size_t>   areaStat;
+    std::vector<size_t>   wayStat;
+
   private:
     bool StoreCurrentPage();
     bool StoreCoord(OSMId id,
                     const GeoCoord& coord);
 
     bool IsTurnRestriction(const TypeConfig& typeConfig,
-                           const std::map<TagId,std::string>& tags,
+                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                            TurnRestriction::Type& type) const;
 
     void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
                                 TurnRestriction::Type type);
 
     bool IsMultipolygon(const TypeConfig& typeConfig,
-                        const std::map<TagId,std::string>& tags,
-                        TypeId& type);
+                        const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                        TypeInfoRef& type);
 
     void ProcessMultipolygon(const TypeConfig& typeConfig,
-                             const std::map<TagId,std::string>& tags,
+                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                              const std::vector<RawRelation::Member>& members,
                              OSMId id,
-                             TypeId type);
+                             const TypeInfoRef& type);
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
 
-    bool Initialize(const ImportParameter& parameter,
+    bool Initialize(const TypeConfigRef& typeConfig,
+                    const ImportParameter& parameter,
                     Progress& progress);
 
     void ProcessNode(const TypeConfig& typeConfig,
                      const OSMId& id,
                      const double& lon, const double& lat,
-                     const std::map<TagId,std::string>& tags);
+                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
     void ProcessWay(const TypeConfig& typeConfig,
                     const OSMId& id,
                     std::vector<OSMId>& nodes,
-                    const std::map<TagId,std::string>& tags);
+                    const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
     void ProcessRelation(const TypeConfig& typeConfig,
                          const OSMId& id,
                          const std::vector<RawRelation::Member>& members,
-                         const std::map<TagId,std::string>& tags);
+                         const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
 
-    bool Cleanup(const ImportParameter& parameter,
+    bool Cleanup(const TypeConfigRef& typeConfig,
+                 const ImportParameter& parameter,
                  Progress& progress);
   };
 }

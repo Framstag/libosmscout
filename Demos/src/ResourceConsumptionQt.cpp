@@ -27,7 +27,6 @@
 #include <osmscout/MapService.h>
 
 #include <osmscout/MapPainterQt.h>
-#include <osmscout/StyleConfigLoader.h>
 
 #include <osmscout/util/StopClock.h>
 
@@ -150,18 +149,17 @@ int main(int argc, char* argv[])
 
   database->DumpStatistics();
 
-  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
+  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
+  if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
   }
-
 
   osmscout::MercatorProjection  projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
-  osmscout::MapPainterQt        mapPainter;
+  osmscout::MapPainterQt        mapPainter(styleConfig);
 
   for (std::vector<Action>::const_iterator action=actions.begin();
        action!=actions.end();
@@ -179,14 +177,14 @@ int main(int argc, char* argv[])
     std::vector<osmscout::TypeSet> wayTypes;
     osmscout::TypeSet              areaTypes;
 
-    styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                       nodeTypes);
+    styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                        nodeTypes);
 
-    styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                            wayTypes);
+    styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                             wayTypes);
 
-    styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                       areaTypes);
+    styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                        areaTypes);
 
     osmscout::StopClock dbTimer;
 
@@ -207,8 +205,7 @@ int main(int argc, char* argv[])
 
     osmscout::StopClock renderTimer;
 
-    mapPainter.DrawMap(styleConfig,
-                       projection,
+    mapPainter.DrawMap(projection,
                        drawParameter,
                        data,
                        painter);

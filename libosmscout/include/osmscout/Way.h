@@ -24,8 +24,6 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/AttributeAccess.h>
-
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
@@ -34,162 +32,12 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_API WayAttributes
-  {
-  private:
-    // Attribute availability flags (for optimized attribute storage)
-    static const uint16_t hasNameAlt      = 1 <<  7; //! We have an alternative name (mainly in a second language)
-    static const uint16_t hasName         = 1 <<  8; //! We have a name
-    static const uint16_t hasRef          = 1 <<  9; //! We have reference name
-    static const uint16_t hasAddress      = 1 << 10; //! House number
-    static const uint16_t hasLayer        = 1 << 11; //! We have optional layer information
-    static const uint16_t hasWidth        = 1 << 12; //! We have width
-    static const uint16_t hasMaxSpeed     = 1 << 13; //! We have maximum speed information
-    static const uint16_t hasGrade        = 1 << 14; //! We have grade information
-    static const uint16_t hasTags         = 1 << 15; //! We have additional tags
-
-    static const uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
-    static const uint16_t isBridge        = 1 <<  1; //! We are a bridge
-    static const uint16_t isTunnel        = 1 <<  2; //! We are a tunnel
-    static const uint16_t isRoundabout    = 1 <<  4; //! We are a roundabout
-
-  public:
-    TypeId           type;     //! type of the way/relation
-    std::string      name;     //! name
-
-  private:
-    mutable uint16_t flags;
-    AttributeAccess  access;   //! Information regarding which vehicle can access this way
-    std::string      nameAlt;  //! alternative name
-    std::string      ref;      //! reference name (normally drawn in a plate)
-    std::string      address;  //! an address like a house number
-    int8_t           layer;    //! layer to draw on
-    uint8_t          width;    //! width of way
-    uint8_t          maxSpeed; //! speed from 1..255km/h (0 means, not set)
-    uint8_t          grade;    //! Quality of road/track 1 (good)...5 (bad)
-    std::vector<Tag> tags;     //! list of preparsed tags
-
-  public:
-    inline WayAttributes()
-    : type(typeIgnore),
-      flags(0),
-      layer(0),
-      width(0),
-      maxSpeed(0),
-      grade(1)
-    {
-    // no code
-    }
-
-    inline TypeId GetType() const
-    {
-      return type;
-    }
-
-    inline uint16_t GetFlags() const
-    {
-      return flags;
-    }
-
-    inline const AttributeAccess& GetAccess() const
-    {
-      return access;
-    }
-
-    inline std::string GetName() const
-    {
-      return name;
-    }
-
-    inline std::string GetNameAlt() const
-    {
-      return nameAlt;
-    }
-
-    inline std::string GetRefName() const
-    {
-      return ref;
-    }
-
-    inline std::string GetAddress() const
-    {
-      return address;
-    }
-
-    inline int8_t GetLayer() const
-    {
-      return layer;
-    }
-
-    inline uint8_t GetWidth() const
-    {
-      return width;
-    }
-
-    inline uint8_t GetMaxSpeed() const
-    {
-      return maxSpeed;
-    }
-
-    inline uint8_t GetGrade() const
-    {
-      return grade;
-    }
-
-    inline bool IsBridge() const
-    {
-      return (flags & isBridge)!=0;
-    }
-
-    inline bool IsTunnel() const
-    {
-      return (flags & isTunnel)!=0;
-    }
-
-    inline bool IsRoundabout() const
-    {
-      return (flags & isRoundabout)!=0;
-    }
-
-    inline bool HasAccess() const
-    {
-      return (flags & hasAccess)!=0;
-    }
-
-    inline bool HasTags() const
-    {
-      return !tags.empty();
-    }
-
-    inline const std::vector<Tag>& GetTags() const
-    {
-      return tags;
-    }
-
-    inline std::vector<Tag>& GetTags()
-    {
-      return tags;
-    }
-
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 Id id,
-                 std::vector<Tag>& tags);
-
-    void SetLayer(int8_t layer);
-
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
-
-    bool operator==(const WayAttributes& other) const;
-    bool operator!=(const WayAttributes& other) const;
-  };
-
   class OSMSCOUT_API Way : public Referencable
   {
   private:
     FileOffset            fileOffset;
-    WayAttributes         attributes;
+
+    FeatureValueBuffer    featureValueBuffer; //! List of features
 
   public:
     std::vector<Id>       ids;
@@ -207,100 +55,44 @@ namespace osmscout {
       return fileOffset;
     }
 
-    inline const WayAttributes& GetAttributes() const
+    inline TypeInfoRef GetType() const
     {
-      return attributes;
+      return featureValueBuffer.GetType();
     }
 
-    inline WayAttributes& GetAttributes()
+    inline size_t GetFeatureCount() const
     {
-      return attributes;
+      return featureValueBuffer.GetType()->GetFeatureCount();
     }
 
-    inline TypeId GetType() const
+    inline bool HasFeature(size_t idx) const
     {
-      return attributes.GetType();
+      return featureValueBuffer.HasValue(idx);
     }
 
-    inline std::string GetName() const
+    inline FeatureInstance GetFeature(size_t idx) const
     {
-      return attributes.GetName();
+      return featureValueBuffer.GetType()->GetFeature(idx);
     }
 
-    inline std::string GetRefName() const
+    inline FeatureValue* GetFeatureValue(size_t idx) const
     {
-      return attributes.GetRefName();
+      return featureValueBuffer.GetValue(idx);
     }
 
-    inline std::string GetAddress() const
+    inline void UnsetFeature(size_t idx)
     {
-      return attributes.GetAddress();
+      featureValueBuffer.FreeValue(idx);
     }
 
-    inline int8_t GetLayer() const
+    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
-      return attributes.GetLayer();
-    }
-
-    inline uint8_t GetWidth() const
-    {
-      return attributes.GetWidth();
-    }
-
-    inline uint8_t GetMaxSpeed() const
-    {
-      return attributes.GetMaxSpeed();
-    }
-
-    inline uint8_t GetGrade() const
-    {
-      return attributes.GetGrade();
-    }
-
-    inline bool IsBridge() const
-    {
-      return attributes.IsBridge();
-    }
-
-    inline bool IsTunnel() const
-    {
-      return attributes.IsTunnel();
-    }
-
-    inline bool IsRoundabout() const
-    {
-      return attributes.IsRoundabout();
-    }
-
-    inline bool HasAccess() const
-    {
-      return attributes.HasAccess();
-    }
-
-    inline bool HasTags() const
-    {
-      return !attributes.GetTags().empty();
-    }
-
-    inline size_t GetTagCount() const
-    {
-      return attributes.GetTags().size();
-    }
-
-    inline TagId GetTagKey(size_t idx) const
-    {
-      return attributes.GetTags()[idx].key;
-    }
-
-    inline const std::string& GetTagValue(size_t idx) const
-    {
-      return attributes.GetTags()[idx].value;
+      return featureValueBuffer;
     }
 
     inline bool IsCircular() const
     {
-      return attributes.IsRoundabout() ||
-          (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
+      return (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
     inline void GetBoundingBox(double& minLon,
@@ -324,20 +116,27 @@ namespace osmscout {
     bool GetNodeIndexByNodeId(Id id,
                               size_t& index) const;
 
-    void SetType(TypeId type);
+    inline void SetType(const TypeInfoRef& type)
+    {
+      featureValueBuffer.SetType(type);
+    }
 
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 Id id,
-                 std::vector<Tag>& tags);
+    inline void SetFeatures(const FeatureValueBuffer& buffer)
+    {
+      featureValueBuffer.Set(buffer);
+    }
 
     void SetLayerToMax();
 
-    bool Read(FileScanner& scanner);
-    bool ReadOptimized(FileScanner& scanner);
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
+    bool ReadOptimized(const TypeConfig& typeConfig,
+                       FileScanner& scanner);
 
-    bool Write(FileWriter& writer) const;
-    bool WriteOptimized(FileWriter& writer) const;
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
+    bool WriteOptimized(const TypeConfig& typeConfig,
+                        FileWriter& writer) const;
   };
 
   typedef Ref<Way> WayRef;

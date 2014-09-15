@@ -425,9 +425,9 @@ namespace osmscout {
     }
   }
 
-  bool PreprocessPBF::Import(const ImportParameter& parameter,
-                             Progress& progress,
-                             const TypeConfig& typeConfig)
+  bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress)
   {
     progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfile()+"'");
 
@@ -440,7 +440,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!Initialize(parameter,
+    if (!Initialize(typeConfig,
+                    parameter,
                     progress)) {
       return false;
     }
@@ -538,7 +539,8 @@ namespace osmscout {
       }
     }
 
-    return Cleanup(parameter,
+    return Cleanup(typeConfig,
+                   parameter,
                    progress);
   }
 }

@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_TYPECONFIGLOADER_H
-#define OSMSCOUT_TYPECONFIGLOADER_H
+#ifndef OSMSCOUT_IMPORT_RAWRELINDEXEDDATAFILE_H
+#define OSMSCOUT_IMPORT_RAWRELINDEXEDDATAFILE_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2014  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,22 +20,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/DataFile.h>
+
+#include <osmscout/import/RawRelation.h>
 
 namespace osmscout {
 
-  /**
-   * \ingroup type
-   *
-   */
-  extern OSMSCOUT_API bool LoadTypeConfig(const char* typeFile,
-                                          TypeConfig& config);
-  /**
-   * \ingroup type
-   *
-   */
-  extern OSMSCOUT_API bool LoadTypeData(const std::string& path,
-                                        TypeConfig& config);
+  class RawRelationIndexedDataFile : public IndexedDataFile<OSMId,RawRelation>
+  {
+  public:
+    RawRelationIndexedDataFile(unsigned long dataCacheSize,
+                               unsigned long indexCacheSize);
+  };
 }
 
 #endif

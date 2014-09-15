@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_STYLECONFIGLOADER_H
-#define OSMSCOUT_STYLECONFIGLOADER_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2014  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,12 +17,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/StyleConfig.h>
+#include <osmscout/import/GenRawNodeIndex.h>
 
 namespace osmscout {
 
-  extern OSMSCOUT_MAP_API bool LoadStyleConfig(const char* styleFile,
-                                               StyleConfig& styleConfig);
+  RawNodeIndexGenerator::RawNodeIndexGenerator(const std::string& datafile,
+                                               const std::string& indexfile)
+   : NumericIndexGenerator<OSMId,RawNode>("Generating 'rawnode.idx'",
+                                          datafile,
+                                          indexfile)
+  {
+    // no code
+  }
+
 }
 
-#endif

@@ -117,18 +117,19 @@ std::string Destring(const char* str)
   void SemErr(const char* msg);
 
 	void OST();
+	void MAXSPEEDS();
 	void GRADES();
 	void TYPES();
-	void TAGS();
-	void GRADE();
-	void UINT(size_t& value);
+	void MAXSPEED();
 	void STRING(std::string& value);
+	void UINT(size_t& value);
+	void GRADE();
 	void TYPE();
 	void IDENT(std::string& value);
 	void TYPEKINDS(unsigned char& types);
 	void TAGCONDITION(TagCondition*& condition);
+	void FEATURE(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
-	void TAG();
 	void TAGANDCOND(TagCondition*& condition);
 	void TAGBOOLCOND(TagCondition*& condition);
 	void TAGBINCOND(TagCondition*& condition);
@@ -142,7 +143,7 @@ std::string Destring(const char* str)
 	void TAGISINCOND(const std::string& tagName,TagCondition*& condition);
 	void TYPEKIND(unsigned char& types);
 	void TYPEOPTION(TypeInfo& typeInfo);
-	void ROUTE(TypeInfo& typeInfo);
+	void PATH(TypeInfo& typeInfo);
 
   void Parse();
 };

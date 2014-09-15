@@ -27,10 +27,10 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/TypeConfig.h \
+                        osmscout/TypeFeatures.h \
                         osmscout/TypeSet.h \
                         osmscout/ost/Scanner.h \
                         osmscout/ost/Parser.h \
-                        osmscout/TypeConfigLoader.h \
                         osmscout/GroundTile.h \
                         osmscout/Coord.h \
                         osmscout/GeoCoord.h \
@@ -42,7 +42,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Intersection.h \
                         osmscout/Location.h \
                         osmscout/Tag.h \
-                        osmscout/AttributeAccess.h \
                         osmscout/TurnRestriction.h \
                         osmscout/Way.h \
                         osmscout/ObjectRef.h \

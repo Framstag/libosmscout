@@ -149,55 +149,58 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 49;
-	noSym = 49;
+	maxT = 51;
+	noSym = 51;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
-	for (i = 97; i <= 122; ++i) start.set(i, 1);
+	for (i = 97; i <= 106; ++i) start.set(i, 1);
+	for (i = 108; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 2);
 	start.set(34, 3);
-	start.set(123, 7);
-	start.set(125, 8);
-	start.set(61, 18);
-	start.set(40, 9);
-	start.set(41, 10);
-	start.set(33, 19);
-	start.set(60, 20);
-	start.set(62, 21);
-	start.set(91, 15);
-	start.set(44, 16);
-	start.set(93, 17);
+	start.set(61, 20);
+	start.set(107, 21);
+	start.set(123, 9);
+	start.set(125, 10);
+	start.set(40, 11);
+	start.set(41, 12);
+	start.set(44, 13);
+	start.set(33, 22);
+	start.set(60, 23);
+	start.set(62, 24);
+	start.set(91, 18);
+	start.set(93, 19);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OST", 4);
 	keywords.set("END", 5);
-	keywords.set("GRADES", 6);
-	keywords.set("SURFACE", 7);
-	keywords.set("GRADE", 8);
-	keywords.set("TYPES", 11);
-	keywords.set("TYPE", 12);
-	keywords.set("OR", 16);
-	keywords.set("OPTIONS", 17);
-	keywords.set("TAGS", 18);
-	keywords.set("TAG", 19);
-	keywords.set("AND", 20);
-	keywords.set("IN", 28);
-	keywords.set("EXISTS", 32);
-	keywords.set("NODE", 33);
-	keywords.set("WAY", 34);
-	keywords.set("AREA", 35);
-	keywords.set("RELATION", 36);
-	keywords.set("INDEX_LOC", 37);
-	keywords.set("INDEX_REGION", 38);
-	keywords.set("INDEX_POI", 39);
-	keywords.set("OPTIMIZE_LOW_ZOOM", 40);
-	keywords.set("IGNORE", 41);
-	keywords.set("MULTIPOLYGON", 42);
-	keywords.set("PIN_WAY", 43);
-	keywords.set("IGNORESEALAND", 44);
-	keywords.set("ROUTE", 45);
-	keywords.set("FOOT", 46);
-	keywords.set("BICYCLE", 47);
-	keywords.set("CAR", 48);
+	keywords.set("MAX", 6);
+	keywords.set("SPEEDS", 7);
+	keywords.set("SPEED", 8);
+	keywords.set("GRADES", 11);
+	keywords.set("SURFACE", 12);
+	keywords.set("GRADE", 13);
+	keywords.set("TYPES", 16);
+	keywords.set("TYPE", 17);
+	keywords.set("IGNORE", 18);
+	keywords.set("OR", 21);
+	keywords.set("AND", 23);
+	keywords.set("IN", 31);
+	keywords.set("EXISTS", 34);
+	keywords.set("NODE", 35);
+	keywords.set("WAY", 36);
+	keywords.set("AREA", 37);
+	keywords.set("RELATION", 38);
+	keywords.set("LOCATION", 39);
+	keywords.set("ADMIN_REGION", 40);
+	keywords.set("ADDRESS", 41);
+	keywords.set("POI", 42);
+	keywords.set("OPTIMIZE_LOW_ZOOM", 43);
+	keywords.set("MULTIPOLYGON", 44);
+	keywords.set("PIN_WAY", 45);
+	keywords.set("IGNORESEALAND", 46);
+	keywords.set("PATH", 47);
+	keywords.set("FOOT", 48);
+	keywords.set("BICYCLE", 49);
+	keywords.set("CAR", 50);
 
 
   tvalLength = 128;
@@ -376,47 +379,65 @@ Token* Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_5;}
 			else {t->kind = 3; break;}
 		case 7:
-			{t->kind = 9; break;}
+			case_7:
+			if (ch == 'h') {AddCh(); goto case_8;}
+			else {goto case_0;}
 		case 8:
+			case_8:
 			{t->kind = 10; break;}
 		case 9:
 			{t->kind = 14; break;}
 		case 10:
 			{t->kind = 15; break;}
 		case 11:
-			case_11:
-			{t->kind = 23; break;}
+			{t->kind = 19; break;}
 		case 12:
-			case_12:
-			{t->kind = 24; break;}
+			{t->kind = 20; break;}
 		case 13:
-			case_13:
-			{t->kind = 25; break;}
+			{t->kind = 22; break;}
 		case 14:
 			case_14:
 			{t->kind = 26; break;}
 		case 15:
-			{t->kind = 29; break;}
+			case_15:
+			{t->kind = 27; break;}
 		case 16:
-			{t->kind = 30; break;}
+			case_16:
+			{t->kind = 28; break;}
 		case 17:
-			{t->kind = 31; break;}
+			case_17:
+			{t->kind = 29; break;}
 		case 18:
-			recEnd = pos; recKind = 13;
-			if (ch == '=') {AddCh(); goto case_12;}
-			else {t->kind = 13; break;}
+			{t->kind = 32; break;}
 		case 19:
-			recEnd = pos; recKind = 21;
-			if (ch == '=') {AddCh(); goto case_13;}
-			else {t->kind = 21; break;}
+			{t->kind = 33; break;}
 		case 20:
-			recEnd = pos; recKind = 22;
-			if (ch == '=') {AddCh(); goto case_11;}
-			else {t->kind = 22; break;}
+			recEnd = pos; recKind = 9;
+			if (ch == '=') {AddCh(); goto case_15;}
+			else {t->kind = 9; break;}
 		case 21:
-			recEnd = pos; recKind = 27;
+			recEnd = pos; recKind = 1;
+			if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'l') || (ch >= 'n' && ch <= 'z')) {AddCh(); goto case_1;}
+			else if (ch == 'm') {AddCh(); goto case_25;}
+			else {t->kind = 1; char *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
+		case 22:
+			recEnd = pos; recKind = 24;
+			if (ch == '=') {AddCh(); goto case_16;}
+			else {t->kind = 24; break;}
+		case 23:
+			recEnd = pos; recKind = 25;
 			if (ch == '=') {AddCh(); goto case_14;}
-			else {t->kind = 27; break;}
+			else {t->kind = 25; break;}
+		case 24:
+			recEnd = pos; recKind = 30;
+			if (ch == '=') {AddCh(); goto case_17;}
+			else {t->kind = 30; break;}
+		case 25:
+			case_25:
+			recEnd = pos; recKind = 1;
+			if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_1;}
+			else if (ch == '/') {AddCh(); goto case_7;}
+			else {t->kind = 1; char *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
 
   }
   AppendVal(t);

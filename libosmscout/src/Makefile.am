@@ -32,10 +32,10 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Transformation.cpp \
                         osmscout/Types.cpp \
                         osmscout/TypeConfig.cpp \
+                        osmscout/TypeFeatures.cpp \
                         osmscout/TypeSet.cpp \
                         osmscout/ost/Scanner.cpp \
                         osmscout/ost/Parser.cpp \
-                        osmscout/TypeConfigLoader.cpp \
                         osmscout/GroundTile.cpp \
                         osmscout/Intersection.cpp \
                         osmscout/Location.cpp \
@@ -47,12 +47,12 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Path.cpp \
                         osmscout/Point.cpp \
                         osmscout/Tag.cpp \
-                        osmscout/AttributeAccess.cpp \
                         osmscout/TurnRestriction.cpp \
                         osmscout/Way.cpp \
                         osmscout/ObjectRef.cpp \
                         osmscout/NumericIndex.cpp \
                         osmscout/CoordDataFile.cpp \
+                        osmscout/NodeDataFile.cpp \
                         osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \

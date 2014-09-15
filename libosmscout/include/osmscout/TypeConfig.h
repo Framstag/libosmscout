@@ -20,28 +20,25 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <limits>
 #include <list>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Tag.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
-#include <osmscout/util/Parser.h>
+#include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
-
-  /**
-   * \ingroup type
-   *
-   * Magic constant for an unresolved and to be ignored tag
-   */
-  static const TagId tagIgnore        = 0;
 
   /**
    * \ingroup type
@@ -52,169 +49,118 @@ namespace osmscout {
    */
   static const TypeId typeIgnore      = 0;
 
-  /**
-   * \ingroup type
-   *
-   * Abstract base class for all tag based conditions
-   */
-  class OSMSCOUT_API TagCondition : public Referencable
+  // Forward declaration of classes TypeConfig and TypeInfo because
+  // of circular dependency between them and Feature
+  class FeatureValueBuffer;
+  class FeatureInstance;
+  class TypeConfig;
+  class TypeInfo;
+
+  class OSMSCOUT_API FeatureValue
   {
   public:
-    virtual ~TagCondition();
+    FeatureValue();
+    virtual ~FeatureValue();
 
-    virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) const = 0;
-  };
-
-  /**
-   * \ingroup type
-   *
-   * Reference counted reference to a tag condition
-   */
-  typedef Ref<TagCondition> TagConditionRef;
-
-  /**
-   * \ingroup type
-   *
-   * Negates the result of the given child condition
-   */
-  class OSMSCOUT_API TagNotCondition : public TagCondition
-  {
-  private:
-    TagConditionRef condition;
-
-  public:
-    TagNotCondition(TagCondition* condition);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  /**
-   * \ingroup type
-   *
-   * Allows a boolean and/or condition between a number of
-   * child conditions.
-   */
-  class OSMSCOUT_API TagBoolCondition : public TagCondition
-  {
-  public:
-    enum Type {
-      boolAnd,
-      boolOr
-    };
-
-  private:
-    std::list<TagConditionRef> conditions;
-    Type                       type;
-
-  public:
-    TagBoolCondition(Type type);
-
-    void AddCondition(TagCondition* condition);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  /**
-   * \ingroup type
-   *
-   * Returns true, if the given tag exists for an object
-   */
-  class OSMSCOUT_API TagExistsCondition : public TagCondition
-  {
-  private:
-    TagId tag;
-
-  public:
-    TagExistsCondition(TagId tag);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  /**
-   * \ingroup type
-   *
-   * Returns true, if the value of the given tag fulfills the given
-   * boolean condition in regard to the comparison value.
-   */
-  class OSMSCOUT_API TagBinaryCondition : public TagCondition
-  {
-  private:
-    enum ValueType {
-      string,
-      sizet
-    };
-
-  private:
-    TagId          tag;
-    BinaryOperator binaryOperator;
-    ValueType      valueType;
-    std::string    tagStringValue;
-    size_t         tagSizeValue;
-
-  public:
-    TagBinaryCondition(TagId tag,
-                       BinaryOperator binaryOperator,
-                       const std::string& tagValue);
-    TagBinaryCondition(TagId tag,
-                       BinaryOperator binaryOperator,
-                       const size_t& tagValue);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  /**
-   * \ingroup type
-   *
-   * Returns true, if the tag value of the given is one of the
-   * given values.
-   */
-  class OSMSCOUT_API TagIsInCondition : public TagCondition
-  {
-  private:
-    TagId                 tag;
-    std::set<std::string> tagValues;
-
-  public:
-    TagIsInCondition(TagId tag);
-
-    void AddTagValue(const std::string& tagValue);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  /**
-   * \ingroup type
-   *
-   * Information about a tag definition
-   */
-  class OSMSCOUT_API TagInfo
-  {
-  private:
-    TagId       id;
-    std::string name;
-    bool        internalOnly;
-
-  public:
-    TagInfo();
-    TagInfo(const std::string& name,
-            bool internalOnly);
-
-    TagInfo& SetId(TagId id);
-    TagInfo& SetToExternal();
-
-    inline std::string GetName() const
+    inline virtual std::string GetLabel() const
     {
-      return name;
+      return "";
     }
 
-    inline TagId GetId() const
+    virtual bool Read(FileScanner& scanner);
+    virtual bool Write(FileWriter& writer);
+
+    virtual FeatureValue& operator=(const FeatureValue& other) = 0;
+    virtual bool operator==(const FeatureValue& other) const = 0;
+
+    virtual inline bool operator!=(const FeatureValue& other) const
     {
-      return id;
+      return !(*this==other);
+    }
+  };
+
+  /**
+   * A feature combines one or multiple tags  to build information attribute for a type.
+   *
+   * The class "Feature" is the abstract base class for a concrete feature implementation
+   * like "NameFeature" or "AccessFeature".
+   *
+   * A feature could just be an alias for one tag (like "name") but it could also combine
+   * a number of attributes (e.g. access and all its variations).
+   */
+  class OSMSCOUT_API Feature : public Referencable
+  {
+  public:
+    Feature();
+    virtual ~Feature();
+
+    /**
+     * Does further initialization based on the current TypeConfig. For example
+     * it registers Tags (and stores their TagId) for further processing.
+     */
+    virtual void Initialize(TypeConfig& typeConfig) = 0;
+
+    /**
+     * Returns the name of the feature
+     */
+    virtual std::string GetName() const = 0;
+
+    virtual size_t GetValueSize() const = 0;
+
+    inline virtual bool HasValue() const
+    {
+      return GetValueSize()>0;
     }
 
-    inline bool IsInternalOnly() const
+    inline virtual bool HasLabel() const
     {
-      return internalOnly;
+      return false;
+    }
+
+    virtual FeatureValue* AllocateValue(void* buffer);
+
+    virtual void Parse(Progress& progress,
+                       const TypeConfig& typeConfig,
+                       const FeatureInstance& feature,
+                       const ObjectOSMRef& object,
+                       const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                       FeatureValueBuffer& buffer) const = 0;
+  };
+
+  typedef Ref<Feature> FeatureRef;
+
+  class OSMSCOUT_API FeatureInstance
+  {
+  private:
+    FeatureRef     feature; //<! The feature we are an instance of
+    const TypeInfo *type;   //<! The type we are assigned to (we are no Ref type to avoid circular references)
+    size_t         index;   //<! The index we have in the list of features
+    size_t         offset;  //<! Our offset into the value buffer for our data
+
+  public:
+    FeatureInstance(const FeatureRef& feature,
+                    const TypeInfo* type,
+                    size_t index,
+                    size_t offset);
+
+    inline FeatureRef GetFeature() const
+    {
+      return feature;
+    }
+
+    inline const TypeInfo* GetType() const
+    {
+      return type;
+    }
+
+    inline size_t GetIndex() const
+    {
+      return index;
+    }
+
+    inline size_t GetOffset() const
+    {
+      return offset;
     }
   };
 
@@ -225,7 +171,7 @@ namespace osmscout {
    *
    *  \see TypeConfig
    */
-  class OSMSCOUT_API TypeInfo
+  class OSMSCOUT_API TypeInfo : public Referencable
   {
   public:
     static const unsigned char typeNode     = 1 << 0;
@@ -248,44 +194,142 @@ namespace osmscout {
     };
 
   private:
-    TypeId       id;
-    std::string  name;
+    TypeId                               id;
+    std::string                          name;
+    size_t                               index;
 
-    std::list<TypeCondition> conditions;
+    std::list<TypeCondition>             conditions;
+    OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
+    std::vector<FeatureInstance>         features;
+    size_t                               valueBufferSize;
 
-    bool         canBeNode;
-    bool         canBeWay;
-    bool         canBeArea;
-    bool         canBeRelation;
-    bool         canRouteFoot;
-    bool         canRouteBicycle;
-    bool         canRouteCar;
-    bool         indexAsLocation;
-    bool         indexAsRegion;
-    bool         indexAsPOI;
-    bool         optimizeLowZoom;
-    bool         multipolygon;
-    bool         pinWay;
-    bool         ignoreSeaLand;
-    bool         ignore;
+    bool                                 canBeNode;
+    bool                                 canBeWay;
+    bool                                 canBeArea;
+    bool                                 canBeRelation;
+    bool                                 isPath;
+    bool                                 canRouteFoot;
+    bool                                 canRouteBicycle;
+    bool                                 canRouteCar;
+    bool                                 indexAsAddress;
+    bool                                 indexAsLocation;
+    bool                                 indexAsRegion;
+    bool                                 indexAsPOI;
+    bool                                 optimizeLowZoom;
+    bool                                 multipolygon;
+    bool                                 pinWay;
+    bool                                 ignoreSeaLand;
+    bool                                 ignore;
+
+  private:
+    TypeInfo(const TypeInfo& other);
 
   public:
     TypeInfo();
     virtual ~TypeInfo();
 
+    /**
+     * Set the id of this type
+     */
     TypeInfo& SetId(TypeId id);
 
+    /**
+     * Set the index of this type. The index is assured to in the interval [0..GetTypeCount()[
+     */
+    TypeInfo& SetIndex(size_t index);
+
+    /**
+     * The the name of this type
+     */
     TypeInfo& SetType(const std::string& name);
 
     TypeInfo& AddCondition(unsigned char types,
                            TagCondition* condition);
 
     /**
-     * The Type Id of the given type
+     * Add a feature to this type
+     */
+    TypeInfo& AddFeature(const FeatureRef& feature);
+
+    inline bool HasFeatures()
+    {
+      return !features.empty();
+    }
+
+    /**
+     * Returns true, if the feature with the given name has already been
+     * assigned to this type.
+     */
+    bool HasFeature(const std::string& featureName) const;
+
+    /**
+     * Return the feature with the given name
+     */
+    bool GetFeature(const std::string& name,
+                    size_t& index) const;
+
+    /**
+     * Return the feature at the given index
+     */
+    inline const FeatureInstance& GetFeature(size_t idx) const
+    {
+      return features[idx];
+    }
+
+    /**
+     * Return the list of features assigned to this type
+     */
+    inline const std::vector<FeatureInstance>& GetFeatures() const
+    {
+      return features;
+    }
+
+    /**
+     * Returns the number of features of the asisgned type
+     */
+    inline size_t GetFeatureCount() const
+    {
+      return features.size();
+    }
+
+    /**
+     * Returns the (rounded) number of bytes required for storing the feature mask
+     */
+    inline size_t GetFeatureBytes() const
+    {
+      size_t size=features.size();
+
+      if (size%8==0) {
+        return size/8;
+      }
+      else {
+        return size/8+1;
+      }
+    }
+
+    /**
+     * Returns the size of the buffer required to store all FeatureValues of this type into
+     */
+    inline size_t GetFeatureValueBufferSize() const
+    {
+      return valueBufferSize;
+    }
+
+    /**
+     * Returns the unique id of this type. You should not use the type id as an index.
+
      */
     inline TypeId GetId() const
     {
       return id;
+    }
+
+    /**
+     * Returns the index of this type. The index is assured to in the interval [0..GetTypeCount()[
+     */
+    inline size_t GetIndex() const
+    {
+      return index;
     }
 
     /**
@@ -375,6 +419,21 @@ namespace osmscout {
     }
 
     /**
+     * If set to 'true', a node can be of this type.
+     */
+    inline TypeInfo& SetIsPath(bool isPath)
+    {
+      this->isPath=isPath;
+
+      return *this;
+    }
+
+    inline bool IsPath() const
+    {
+      return isPath;
+    }
+
+    /**
      * If set to 'true', an object of this type can be traveled by feet by default.
      */
     inline TypeInfo& CanRouteFoot(bool canBeRoute)
@@ -439,8 +498,25 @@ namespace osmscout {
       return canRouteCar;
     }
 
+    uint8_t GetDefaultAccess() const;
+
     /**
-     * Sets, if an object of this type should be indexed as a location.
+     * Set, if an object of this type should be indexed as an address.
+     */
+    inline TypeInfo& SetIndexAsAddress(bool indexAsAddress)
+    {
+      this->indexAsAddress=indexAsAddress;
+
+      return *this;
+    }
+
+    inline bool GetIndexAsAddress() const
+    {
+      return indexAsAddress;
+    }
+
+    /**
+     * Set, if an object of this type should be indexed as a location.
      */
     inline TypeInfo& SetIndexAsLocation(bool indexAsLocation)
     {
@@ -455,7 +531,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be indexed as a region.
+     * Set, if an object of this type should be indexed as a region.
      */
     inline TypeInfo& SetIndexAsRegion(bool indexAsRegion)
     {
@@ -470,7 +546,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be indexed as a POI.
+     * Set, if an object of this type should be indexed as a POI.
      */
     inline TypeInfo& SetIndexAsPOI(bool indexAsPOI)
     {
@@ -485,7 +561,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be optimized for low zoom.
+     * Set, if an object of this type should be optimized for low zoom.
      */
     inline TypeInfo& SetOptimizeLowZoom(bool optimize)
     {
@@ -528,7 +604,7 @@ namespace osmscout {
     }
 
     /**
-     * Sets, if an object of this type should be ignored for land/sea calculation.
+     * Set, if an object of this type should be ignored for land/sea calculation.
      */
     inline TypeInfo& SetIgnoreSeaLand(bool ignoreSeaLand)
     {
@@ -559,6 +635,222 @@ namespace osmscout {
     }
   };
 
+  typedef Ref<TypeInfo> TypeInfoRef;
+
+  class OSMSCOUT_API TypeInfoSetConstIterator : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
+  {
+  private:
+    std::vector<TypeInfoRef>::const_iterator iterCurrent;
+    std::vector<TypeInfoRef>::const_iterator iterEnd;
+
+  public:
+    TypeInfoSetConstIterator(const std::vector<TypeInfoRef>::const_iterator& iterCurrent,
+                             const std::vector<TypeInfoRef>::const_iterator& iterEnd)
+    : iterCurrent(iterCurrent),
+      iterEnd(iterEnd)
+    {
+      while (this->iterCurrent!=this->iterEnd &&
+            this->iterCurrent->Invalid()) {
+        ++this->iterCurrent;
+      }
+    }
+
+    TypeInfoSetConstIterator(const TypeInfoSetConstIterator& other)
+    : iterCurrent(other.iterCurrent),
+      iterEnd(other.iterEnd)
+    {
+      // no code
+    }
+
+    TypeInfoSetConstIterator& operator++()
+    {
+      ++iterCurrent;
+
+      while (iterCurrent!=iterEnd &&
+            iterCurrent->Invalid()) {
+        ++iterCurrent;
+      }
+
+      return *this;
+    }
+    TypeInfoSetConstIterator operator++(int)
+     {
+      TypeInfoSetConstIterator tmp(*this);
+
+      operator++();
+
+      return tmp;
+     }
+
+    bool operator==(const TypeInfoSetConstIterator& other)
+    {
+      return iterCurrent==other.iterCurrent;
+    }
+
+    bool operator!=(const TypeInfoSetConstIterator& other)
+    {
+      return iterCurrent!=other.iterCurrent;
+    }
+
+    const TypeInfoRef& operator*()
+    {
+      return *iterCurrent;
+    }
+  };
+
+  class OSMSCOUT_API TypeInfoSet
+  {
+  private:
+    std::vector<TypeInfoRef> types;
+    size_t                   count;
+
+  public:
+    TypeInfoSet();
+    TypeInfoSet(const TypeConfig& typeConfig);
+    TypeInfoSet(const TypeInfoSet& other);
+
+    void Adapt(const TypeConfig& typeConfig);
+
+    void Clear()
+    {
+      types.clear();
+      count=0;
+    }
+
+    void Set(const TypeInfoRef& type)
+    {
+      if (type->GetIndex()>=types.size()) {
+        types.resize(type->GetIndex()+1);
+      }
+
+      if (types[type->GetIndex()].Invalid()) {
+        types[type->GetIndex()]=type;
+        count++;
+      }
+    }
+
+    void Remove(const TypeInfoRef& type)
+    {
+      if (type->GetIndex()<types.size() &&
+          types[type->GetIndex()].Valid()) {
+        types[type->GetIndex()]=NULL;
+        count--;
+      }
+    }
+
+    void Remove(const TypeInfoSet& otherTypes)
+    {
+      for (const auto &type : otherTypes.types)
+      {
+        if (type.Valid() &&
+            type->GetIndex()<types.size() &&
+            types[type->GetIndex()].Valid()) {
+          types[type->GetIndex()]=NULL;
+          count--;
+        }
+      }
+    }
+
+    bool IsSet(const TypeInfoRef& type) const
+    {
+      return type->GetIndex()<types.size() &&
+             types[type->GetIndex()].Valid();
+    }
+
+    bool Empty() const
+    {
+      return count==0;
+    }
+
+    size_t Size() const
+    {
+      return count;
+    }
+
+    TypeInfoSet& operator=(const TypeInfoSet& other)
+    {
+      if (&other!=this) {
+        this->types=other.types;
+        this->count=other.count;
+      }
+
+      return *this;
+    }
+
+    TypeInfoSetConstIterator begin() const
+    {
+      return TypeInfoSetConstIterator(types.begin(),
+                                      types.end());
+    }
+
+    TypeInfoSetConstIterator end() const
+    {
+      return TypeInfoSetConstIterator(types.end(),
+                                      types.end());
+    }
+  };
+
+  class OSMSCOUT_API FeatureValueBuffer
+  {
+  private:
+    TypeInfoRef type;
+    uint8_t     *featureBits;
+    char        *featureValueBuffer;
+
+  private:
+    void DeleteData();
+    void AllocateData();
+
+  public:
+    FeatureValueBuffer();
+    FeatureValueBuffer(const FeatureValueBuffer& other);
+    virtual ~FeatureValueBuffer();
+
+    void Set(const FeatureValueBuffer& other);
+
+    void SetType(const TypeInfoRef& type);
+
+    inline TypeInfoRef GetType() const
+    {
+      return type;
+    }
+
+    inline size_t GetFeatureCount() const
+    {
+      return type->GetFeatureCount();
+    }
+
+    inline FeatureInstance GetFeature(size_t idx) const
+    {
+      return type->GetFeature(idx);
+    }
+
+    inline bool HasValue(size_t idx) const
+    {
+      return featureBits[idx/8] & (1 << idx%8);
+    }
+
+    inline FeatureValue* GetValue(size_t idx) const
+    {
+      return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
+    }
+
+    FeatureValue* AllocateValue(size_t idx);
+    void FreeValue(size_t idx);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const ObjectOSMRef& object,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+
+    FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
+    bool operator==(const FeatureValueBuffer& other) const;
+    bool operator!=(const FeatureValueBuffer& other) const;
+  };
+
   /**
    * \ingroup type
    *
@@ -568,128 +860,191 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig : public Referencable
   {
   private:
-    std::vector<TagInfo>                   tags;
-    std::vector<TypeInfo>                  types;
+    std::vector<TagInfo>                      tags;
+    std::vector<TypeInfoRef>                  types;
+    std::vector<TypeInfoRef>                  typedTypes;
+    std::vector<FeatureRef>                   features;
 
-    TagId                                  nextTagId;
-    TypeId                                 nextTypeId;
+    TagId                                     nextTagId;
+    TypeId                                    nextTypeId;
 
-    OSMSCOUT_HASHMAP<std::string,TagId>    stringToTagMap;
-    OSMSCOUT_HASHMAP<std::string,TypeInfo> nameToTypeMap;
-    OSMSCOUT_HASHMAP<TypeId,TypeInfo>      idToTypeMap;
-    OSMSCOUT_HASHMAP<TagId,uint32_t>       nameTagIdToPrioMap;
-    OSMSCOUT_HASHMAP<TagId,uint32_t>       nameAltTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<std::string,TagId>       stringToTagMap;
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
+    OSMSCOUT_HASHMAP<TypeId,TypeInfoRef>      idToTypeMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>          nameTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>          nameAltTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<std::string,uint8_t>     nameToMaxSpeedMap;
 
-    OSMSCOUT_HASHMAP<std::string,size_t>   surfaceToGradeMap;
+    OSMSCOUT_HASHMAP<std::string,size_t>      surfaceToGradeMap;
+
+    OSMSCOUT_HASHMAP<std::string,FeatureRef>  nameToFeatureMap;
+
+    FeatureRef                                featureName;
+    FeatureRef                                featureRef;
+    FeatureRef                                featureLocation;
+    FeatureRef                                featureAddress;
+    FeatureRef                                featureAccess;
+    FeatureRef                                featureLayer;
+    FeatureRef                                featureWidth;
+    FeatureRef                                featureMaxSpeed;
+    FeatureRef                                featureGrade;
+    FeatureRef                                featureBridge;
+    FeatureRef                                featureTunnel;
+    FeatureRef                                featureRoundabout;
 
   public:
-    TypeId                                 typeTileLand;
-    TypeId                                 typeTileSea;
-    TypeId                                 typeTileCoast;
-    TypeId                                 typeTileUnknown;
-    TypeId                                 typeTileCoastline;
+    TypeInfoRef                               typeInfoIgnore;
 
-    // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                  tagRef;
-    TagId                                  tagBridge;
-    TagId                                  tagTunnel;
-    TagId                                  tagLayer;
-    TagId                                  tagWidth;
-    TagId                                  tagOneway;
-    TagId                                  tagHouseNr;
-    TagId                                  tagJunction;
-    TagId                                  tagMaxSpeed;
-    TagId                                  tagSurface;
-    TagId                                  tagTracktype;
-
-    TagId                                  tagAdminLevel;
-
-    TagId                                  tagAccess;
-    TagId                                  tagAccessForward;
-    TagId                                  tagAccessBackward;
-
-    TagId                                  tagAccessFoot;
-    TagId                                  tagAccessFootForward;
-    TagId                                  tagAccessFootBackward;
-
-    TagId                                  tagAccessBicycle;
-    TagId                                  tagAccessBicycleForward;
-    TagId                                  tagAccessBicycleBackward;
-
-    TagId                                  tagAccessMotorVehicle;
-    TagId                                  tagAccessMotorVehicleForward;
-    TagId                                  tagAccessMotorVehicleBackward;
-
-    TagId                                  tagAccessMotorcar;
-    TagId                                  tagAccessMotorcarForward;
-    TagId                                  tagAccessMotorcarBackward;
-
-    TagId                                  tagAddrStreet;
+    TypeInfoRef                               typeInfoTileLand;
+    TypeInfoRef                               typeInfoTileSea;
+    TypeInfoRef                               typeInfoTileCoast;
+    TypeInfoRef                               typeInfoTileUnknown;
+    TypeInfoRef                               typeInfoTileCoastline;
 
     // Internal use (only available during preprocessing)
-    TagId                                  tagArea;
-    TagId                                  tagNatural;
-    TagId                                  tagType;
-    TagId                                  tagRestriction;
+    TagId                                     tagArea;
+    TagId                                     tagNatural;
+    TagId                                     tagType;
+    TagId                                     tagRestriction;
 
   public:
     TypeConfig();
     virtual ~TypeConfig();
 
-    void RestoreTagInfo(const TagInfo& tagInfo);
-    void RestoreNameTagInfo(TagId tagId, uint32_t priority);
-    void RestoreNameAltTagInfo(TagId tagId, uint32_t priority);
+    /**
+     * Methods for dealing with tags
+     */
+    //@{
+    TagId RegisterTag(const std::string& tagName);
 
-    TagId RegisterTagForInternalUse(const std::string& tagName);
-    TagId RegisterTagForExternalUse(const std::string& tagName);
-
-    void RegisterNameTag(const std::string& tagName, uint32_t priority);
-    void RegisterNameAltTag(const std::string& tagName, uint32_t priority);
-
-    TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
-
-    const std::vector<TagInfo>& GetTags() const;
-    const std::vector<TypeInfo>& GetTypes() const;
-
-    TypeId GetMaxTypeId() const;
+    TagId RegisterNameTag(const std::string& tagName,
+                          uint32_t priority);
+    TagId RegisterNameAltTag(const std::string& tagName,
+                             uint32_t priority);
 
     TagId GetTagId(const char* name) const;
 
-    const TagInfo& GetTagInfo(TagId id) const;
-    const TypeInfo& GetTypeInfo(TypeId id) const;
+    bool IsNameTag(TagId tag,
+                   uint32_t& priority) const;
+    bool IsNameAltTag(TagId tag,
+                      uint32_t& priority) const;
+    //@}
 
-    void ResolveTags(const std::map<TagId,std::string>& map,
-                     std::vector<Tag>& tags) const;
+    /**
+     * Methods for dealing with features. A feature is a attribute set based on parsed tags.
+     * Features can get assigned to a type.
+     */
+    //@{
+    void RegisterFeature(const FeatureRef& feature);
 
-    bool IsNameTag(TagId tag, uint32_t& priority) const;
-    bool IsNameAltTag(TagId tag, uint32_t& priority) const;
+    FeatureRef GetFeature(const std::string& name) const;
 
-    bool GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
-                       TypeId &typeId) const;
-    bool GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
-                          TypeId &wayType,
-                          TypeId &areaType) const;
-    bool GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
-                           TypeId &typeId) const;
+    /**
+     * Return all features registered
+     */
+    inline const std::vector<FeatureRef>& GetFeatures() const
+    {
+      return features;
+    }
+    //@}
+
+    /**
+     * Methods for dealing with types.
+     */
+    //@{
+    TypeInfoRef RegisterType(const TypeInfoRef& typeInfo);
+
+    /**
+     * Return an array of the types available
+     */
+    inline const std::vector<TypeInfoRef>& GetTypes() const
+    {
+      return types;
+    }
+
+    /**
+     * Return the number of types available. The index of a type is garanteed to be in the interval
+     * [0..GetTypeCount()[
+     */
+    inline size_t GetTypeCount() const
+    {
+      return types.size();
+    }
+
+    TypeId GetMaxTypeId() const;
+
+    /**
+     * Returns the type definition for the given type id
+     */
+    inline const TypeInfoRef GetTypeInfo(size_t index) const
+    {
+      assert(index<types.size());
+
+      return types[index];
+    }
+
+    /**
+     * Returns the type definition for the given type id
+     */
+    inline const TypeInfoRef GetTypeInfo(TypeId id) const
+    {
+      assert(id<typedTypes.size());
+
+      return typedTypes[id];
+    }
+
+    /**
+     * Returns the type definition for the given type name. If there is no
+     * type definition for the given name and invalid reference is returned.
+     */
+    const TypeInfoRef GetTypeInfo(const std::string& name) const;
+
+    TypeInfoRef GetNodeType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+
+    bool GetWayAreaType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap,
+                        TypeInfoRef& wayType,
+                        TypeInfoRef& areaType) const;
+    TypeInfoRef GetRelationType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
 
     TypeId GetTypeId(const std::string& name) const;
     TypeId GetNodeTypeId(const std::string& name) const;
     TypeId GetWayTypeId(const std::string& name) const;
     TypeId GetAreaTypeId(const std::string& name) const;
-    TypeId GetRelationTypeId(const std::string& name) const;
 
-    void GetAreaTypes(std::set<TypeId>& types) const;
-    void GetWayTypes(std::set<TypeId>& types) const;
+    void GetNodeTypes(TypeInfoSet& types) const;
+    void GetAreaTypes(TypeInfoSet& types) const;
+    void GetWayTypes(TypeInfoSet& types) const;
+    //@}
 
-    void GetRoutables(std::set<TypeId>& types) const;
-    void GetIndexAsLocationTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
-    void GetIndexAsRegionTypes(OSMSCOUT_HASHSET<TypeId>& types) const;
-    void GetIndexAsPOITypes(OSMSCOUT_HASHSET<TypeId>& types) const;
-
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
     void RegisterSurfaceToGradeMapping(const std::string& surface,
                                        size_t grade);
     bool GetGradeForSurface(const std::string& surface,
                             size_t& grade) const;
+    //@}
+
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
+    void RegisterMaxSpeedAlias(const std::string& alias,
+                               uint8_t maxSpeed);
+    bool GetMaxSpeedFromAlias(const std::string& alias,
+                              uint8_t& maxSpeed) const;
+    //@}
+
+
+    /**
+     * Methods for loading/storing of type information from/to files.
+     */
+    //@{
+    bool LoadFromOSTFile(const std::string& filename);
+    bool LoadFromDataFile(const std::string& directory);
+    bool StoreToDataFile(const std::string& directory) const;
+    //@}
   };
 
 

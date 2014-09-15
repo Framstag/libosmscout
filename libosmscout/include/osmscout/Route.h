@@ -448,26 +448,42 @@ namespace osmscout {
         return currentNodeIndex;
       }
 
+      /**
+       * Return the objects that intersect at the current node index.
+       */
       inline const std::vector<ObjectFileRef>& GetObjects() const
       {
         return objects;
       }
 
+      /**
+       * Return a list of descriptions attached to the current node
+       */
       inline const std::list<DescriptionRef>& GetDescriptions() const
       {
         return descriptions;
       }
 
+      /**
+       * There exists a object/path from the current node to the next node
+       * in the route.
+       */
       inline bool HasPathObject() const
       {
         return pathObject.Valid();
       }
 
+      /**
+       * Return the path object that connects the current node to the next node.
+       */
       inline ObjectFileRef GetPathObject() const
       {
         return pathObject;
       }
 
+      /**
+       * The the index of the target node on the path that is the next node on the route.
+       */
       inline size_t GetTargetNodeIndex() const
       {
         return targetNodeIndex;
@@ -522,6 +538,11 @@ namespace osmscout {
                  size_t targetNodeIndex);
 
     inline std::list<Node>& Nodes()
+    {
+      return nodes;
+    }
+
+    inline const std::list<Node>& Nodes() const
     {
       return nodes;
     }

@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include <osmscout/RoutingProfile.h>
-#include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -78,6 +77,7 @@ namespace osmscout {
                                  Vehicle vehicle)
    : database(database),
      vehicle(vehicle),
+     accessReader(database->GetTypeConfig()),
      isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
      routeNodeDataFile(GetDataFilename(vehicle),
@@ -154,7 +154,8 @@ namespace osmscout {
 
     assert(!path.empty());
 
-    if (!routeNodeDataFile.Open(path,
+    if (!routeNodeDataFile.Open(database->GetTypeConfig(),
+                                path,
                                 FileScanner::FastRandom,true,
                                 FileScanner::FastRandom,true)) {
       std::cerr << "Cannot open 'route.dat'!" << std::endl;
@@ -208,12 +209,19 @@ namespace osmscout {
     return database->GetTypeConfig();
   }
 
-  void RoutingService::GetClosestForwardRouteNode(const WayRef& way,
-                                                  size_t nodeIndex,
-                                                  RouteNodeRef& routeNode,
-                                                  size_t& routeNodeIndex)
+  void RoutingService::GetStartForwardRouteNode(const RoutingProfile& profile,
+                                                const WayRef& way,
+                                                size_t nodeIndex,
+                                                RouteNodeRef& routeNode,
+                                                size_t& routeNodeIndex)
   {
     routeNode=NULL;
+
+    if (!profile.CanUseForward(way)) {
+      return;
+    }
+
+    // TODO: What if the way is a roundabout?
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
       routeNodeDataFile.Get(way->ids[i],
@@ -226,10 +234,11 @@ namespace osmscout {
     }
   }
 
-  void RoutingService::GetClosestBackwardRouteNode(const WayRef& way,
-                                                   size_t nodeIndex,
-                                                   RouteNodeRef& routeNode,
-                                                   size_t& routeNodeIndex)
+  void RoutingService::GetStartBackwardRouteNode(const RoutingProfile& profile,
+                                                 const WayRef& way,
+                                                 size_t nodeIndex,
+                                                 RouteNodeRef& routeNode,
+                                                 size_t& routeNodeIndex)
   {
     routeNode=NULL;
 
@@ -237,12 +246,63 @@ namespace osmscout {
       return;
     }
 
-    if (!way->GetAttributes().GetAccess().CanRouteBackward()) {
+    if (!profile.CanUseBackward(way)) {
       return;
     }
 
     for (long i=nodeIndex-1; i>=0; i--) {
       routeNodeDataFile.Get(way->ids[i],routeNode);
+
+      if (routeNode.Valid()) {
+        routeNodeIndex=i;
+        return;
+      }
+    }
+  }
+
+  void RoutingService::GetTargetForwardRouteNode(const RoutingProfile& profile,
+                                                 const WayRef& way,
+                                                 size_t nodeIndex,
+                                                 RouteNodeRef& routeNode,
+                                                 size_t& routeNodeIndex)
+  {
+    routeNode=NULL;
+
+    if (nodeIndex>=way->nodes.size()) {
+      return;
+    }
+
+    if (!profile.CanUseForward(way)) {
+      return;
+    }
+
+    for (long i=nodeIndex-1; i>=0; i--) {
+      routeNodeDataFile.Get(way->ids[i],routeNode);
+
+      if (routeNode.Valid()) {
+        routeNodeIndex=i;
+        return;
+      }
+    }
+  }
+
+  void RoutingService::GetTargetBackwardRouteNode(const RoutingProfile& profile,
+                                                  const WayRef& way,
+                                                  size_t nodeIndex,
+                                                  RouteNodeRef& routeNode,
+                                                  size_t& routeNodeIndex)
+  {
+    routeNode=NULL;
+
+    if (!profile.CanUseBackward(way)) {
+      return;
+    }
+
+    // TODO: What if the way is a roundabout?
+
+    for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
+      routeNodeDataFile.Get(way->ids[i],
+                            routeNode);
 
       if (routeNode.Valid()) {
         routeNodeIndex=i;
@@ -647,7 +707,8 @@ namespace osmscout {
       }
     }
 
-    if (!junctionDataFile.Open(path,
+    if (!junctionDataFile.Open(database->GetTypeConfig(),
+                               path,
                                FileScanner::FastRandom,
                                false,
                                FileScanner::FastRandom,
@@ -735,15 +796,26 @@ namespace osmscout {
       startLon=way->nodes[nodeIndex].GetLon();
       startLat=way->nodes[nodeIndex].GetLat();
 
-      GetClosestForwardRouteNode(way,
+      // Check, if the current node is already the route node
+      routeNodeDataFile.Get(way->ids[nodeIndex],
+                            forwardRouteNode);
+
+      if (forwardRouteNode.Valid()) {
+        forwardNodePos=nodeIndex;
+      }
+      else {
+        GetStartForwardRouteNode(profile,
+                                 way,
                                  nodeIndex,
                                  forwardRouteNode,
                                  forwardNodePos);
 
-      GetClosestBackwardRouteNode(way,
+        GetStartBackwardRouteNode(profile,
+                                  way,
                                   nodeIndex,
                                   backwardRouteNode,
                                   backwardNodePos);
+      }
 
       if (forwardRouteNode.Invalid() &&
           backwardRouteNode.Invalid()) {
@@ -806,7 +878,8 @@ namespace osmscout {
     }
   }
 
-  bool RoutingService::GetTargetNodes(const ObjectFileRef& object,
+  bool RoutingService::GetTargetNodes(const RoutingProfile& profile,
+                                      const ObjectFileRef& object,
                                       size_t nodeIndex,
                                       double& targetLon,
                                       double& targetLat,
@@ -844,14 +917,25 @@ namespace osmscout {
       targetLon=way->nodes[nodeIndex].GetLon();
       targetLat=way->nodes[nodeIndex].GetLat();
 
-      GetClosestForwardRouteNode(way,
-                                 nodeIndex,
-                                 forwardNode,
-                                 forwardNodePos);
-      GetClosestBackwardRouteNode(way,
+      // Check, if the current node is already the route node
+      routeNodeDataFile.Get(way->ids[nodeIndex],
+                            forwardNode);
+
+      if (forwardNode.Valid()) {
+        forwardNodePos=nodeIndex;
+      }
+      else {
+        GetTargetForwardRouteNode(profile,
+                                  way,
                                   nodeIndex,
-                                  backwardNode,
-                                  backwardNodePos);
+                                  forwardNode,
+                                  forwardNodePos);
+        GetTargetBackwardRouteNode(profile,
+                                   way,
+                                   nodeIndex,
+                                   backwardNode,
+                                   backwardNodePos);
+      }
 
       if (forwardNode.Invalid() &&
           backwardNode.Invalid()) {
@@ -883,7 +967,7 @@ namespace osmscout {
       return false;
     }
   }
-  
+
   /**
    * Calculate a route
    *
@@ -919,7 +1003,7 @@ namespace osmscout {
           nodeIndexes.push_back(targetNodeIndex);
           objects.push_back(targetObject);
       }
-      
+
       for(int index = 0; index<nodeIndexes.size()-1; index++){
           size_t                  fromNodeIndex = nodeIndexes.at(index);
           osmscout::ObjectFileRef fromObject = objects.at(index);
@@ -994,7 +1078,8 @@ namespace osmscout {
     closeMap.reserve(300000);
 #endif
 
-    if (!GetTargetNodes(targetObject,
+    if (!GetTargetNodes(profile,
+                        targetObject,
                         targetNodeIndex,
                         targetLon,
                         targetLat,
@@ -1225,23 +1310,23 @@ namespace osmscout {
     if (debugPerformance) {
       std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset();
       std::cout << "[";
-      if (startForwardRouteNode.Valid()) {
-        std::cout << startForwardRouteNode->GetId() << " - ";
+      if (startBackwardRouteNode.Valid()) {
+        std::cout << startBackwardRouteNode->GetId() << " >* ";
       }
       std::cout << startNodeIndex;
-      if (startBackwardRouteNode.Valid()) {
-        std::cout << " - " << startBackwardRouteNode->GetId();
+      if (startForwardRouteNode.Valid()) {
+        std::cout << " *> " << startForwardRouteNode->GetId();
       }
       std::cout << "]" << std::endl;
 
       std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
       std::cout << "[";
       if (targetForwardRouteNode.Valid()) {
-        std::cout << targetForwardRouteNode->GetId() << " - ";
+        std::cout << targetForwardRouteNode->GetId() << " >* ";
       }
       std::cout << targetNodeIndex;
       if (targetBackwardRouteNode.Valid()) {
-        std::cout << " - " << targetBackwardRouteNode->GetId();
+        std::cout << " *> " << targetBackwardRouteNode->GetId();
       }
       std::cout << "]" << std::endl;
 
@@ -1299,7 +1384,6 @@ namespace osmscout {
     AreaDataFileRef areaDataFile(database->GetAreaDataFile());
     WayDataFileRef  wayDataFile(database->GetWayDataFile());
 
-    TypeId          routeType;
     Way             tmp;
 
     if (typeConfig.Invalid() ||
@@ -1308,9 +1392,9 @@ namespace osmscout {
       return false;
     }
 
-    routeType=typeConfig->GetWayTypeId("_route");
+    TypeInfoRef routeType=typeConfig->GetTypeInfo(typeConfig->GetTypeId("_route"));
 
-    assert(routeType!=typeIgnore);
+    assert(routeType!=typeConfig->typeInfoIgnore);
 
     way=tmp;
 
@@ -1544,14 +1628,15 @@ namespace osmscout {
         areaWayIndex.Invalid() ||
         areaDataFile.Invalid() ||
         wayDataFile.Invalid()) {
+      std::cerr << "At least one index file is invalid!" << std::endl;
       return false;
     }
 
-    double                         topLat;
-    double                         botLat;
-    double                         leftLon;
-    double                         rightLon;
-    double                         minDistance=std::numeric_limits<double>::max();
+    double           topLat;
+    double           botLat;
+    double           leftLon;
+    double           rightLon;
+    double           minDistance=std::numeric_limits<double>::max();
 
     osmscout::GetEllipsoidalDistance(lat,
                                      lon,
@@ -1570,7 +1655,7 @@ namespace osmscout {
     osmscout::TypeSet      routableTypes;
 
     for (size_t typeId=0; typeId<=database->GetTypeConfig()->GetMaxTypeId(); typeId++) {
-      if (typeConfig->GetTypeInfo(typeId).CanRoute(vehicle)) {
+      if (typeConfig->GetTypeInfo(typeId)->CanRoute(vehicle)) {
         routableTypes.SetType(typeId);
       }
     }

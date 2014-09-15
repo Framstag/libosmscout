@@ -40,7 +40,6 @@
   #include <osmscout/import/PreprocessPBF.h>
 #endif
 
-#include <iostream>
 namespace osmscout {
 
   static uint32_t coordPageSize=64;
@@ -115,47 +114,44 @@ namespace osmscout {
   }
 
   bool Preprocess::IsTurnRestriction(const TypeConfig& typeConfig,
-                                     const std::map<TagId,std::string>& tags,
+                                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                      TurnRestriction::Type& type) const
   {
-    bool isRestriction=false;
-    bool isTurnRestriction=false;
+    auto typeValue=tags.find(typeConfig.tagType);
+
+    if (typeValue==tags.end()) {
+      return false;
+    }
+
+    if (typeValue->second!="restriction") {
+      return false;
+    }
+
+    auto restrictionValue=tags.find(typeConfig.tagRestriction);
+
+    if (restrictionValue==tags.end()) {
+      return false;
+    }
 
     type=TurnRestriction::Allow;
 
-    for (std::map<TagId,std::string>::const_iterator tag=tags.begin();
-        tag!=tags.end();
-        tag++) {
-      if (tag->first==typeConfig.tagType) {
-        if (tag->second=="restriction") {
-          isRestriction=true;
-        }
-      }
-      else if (tag->first==typeConfig.tagRestriction) {
-        if (tag->second=="only_left_turn" ||
-            tag->second=="only_right_turn" ||
-            tag->second=="only_straight_on") {
-          isTurnRestriction=true;
-          type=TurnRestriction::Allow;
-        }
-        else if (tag->second=="no_left_turn" ||
-                 tag->second=="no_right_turn" ||
-                 tag->second=="no_straight_on" ||
-                 tag->second=="no_u_turn") {
-          isTurnRestriction=true;
-          type=TurnRestriction::Forbit;
-        }
-      }
+    if (restrictionValue->second=="only_left_turn" ||
+        restrictionValue->second=="only_right_turn" ||
+        restrictionValue->second=="only_straight_on") {
+      type=TurnRestriction::Allow;
 
-      // finished collection data
-      if (isRestriction &&
-          isTurnRestriction) {
-        break;
-      }
+      return true;
+    }
+    else if (restrictionValue->second=="no_left_turn" ||
+             restrictionValue->second=="no_right_turn" ||
+             restrictionValue->second=="no_straight_on" ||
+             restrictionValue->second=="no_u_turn") {
+      type=TurnRestriction::Forbit;
+
+      return true;
     }
 
-    return isRestriction &&
-           isTurnRestriction;
+    return false;
   }
 
   void Preprocess::ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
@@ -203,21 +199,21 @@ namespace osmscout {
   }
 
   bool Preprocess::IsMultipolygon(const TypeConfig& typeConfig,
-                                  const std::map<TagId,std::string>& tags,
-                                  TypeId& type)
+                                  const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                                  TypeInfoRef& type)
   {
-    typeConfig.GetRelationTypeId(tags,type);
+    type=typeConfig.GetRelationType(tags);
 
-    if (type!=typeIgnore &&
-        typeConfig.GetTypeInfo(type).GetIgnore()) {
+    if (type!=typeConfig.typeInfoIgnore &&
+        type->GetIgnore()) {
       return false;
     }
 
-    bool isArea=type!=typeIgnore &&
-                typeConfig.GetTypeInfo(type).GetMultipolygon();
+    bool isArea=type!=typeConfig.typeInfoIgnore &&
+                type->GetMultipolygon();
 
     if (!isArea) {
-      std::map<TagId,std::string>::const_iterator typeTag=tags.find(typeConfig.tagType);
+      auto typeTag=tags.find(typeConfig.tagType);
 
       isArea=typeTag!=tags.end() && typeTag->second=="multipolygon";
     }
@@ -226,21 +222,31 @@ namespace osmscout {
   }
 
   void Preprocess::ProcessMultipolygon(const TypeConfig& typeConfig,
-                                       const std::map<TagId,std::string>& tags,
+                                       const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
                                        const std::vector<RawRelation::Member>& members,
                                        OSMId id,
-                                       TypeId type)
+                                       const TypeInfoRef& type)
   {
     RawRelation relation;
 
+    areaStat[type->GetIndex()]++;
+
     relation.SetId(id);
-    relation.SetType(type);
-    typeConfig.ResolveTags(tags,
-                           relation.tags);
+
+    if (type->GetIgnore()) {
+      relation.SetType(typeConfig.typeInfoIgnore);
+    }
+    else {
+      relation.SetType(type);
+    }
 
     relation.members=members;
 
-    relation.Write(multipolygonWriter);
+    relation.Parse(*progress,
+                   typeConfig,
+                   tags);
+    relation.Write(typeConfig,
+                   multipolygonWriter);
 
     multipolygonCount++;
   }
@@ -251,9 +257,9 @@ namespace osmscout {
     return "Preprocess";
   }
 
-  bool Preprocess::Import(const ImportParameter& parameter,
-                          Progress& progress,
-                          const TypeConfig& typeConfig)
+  bool Preprocess::Import(const TypeConfigRef& typeConfig,
+                          const ImportParameter& parameter,
+                          Progress& progress)
   {
     if (parameter.GetMapfile().length()>=4 &&
         parameter.GetMapfile().substr(parameter.GetMapfile().length()-4)==".osm")  {
@@ -261,9 +267,9 @@ namespace osmscout {
 #if defined(HAVE_LIB_XML)
       PreprocessOSM preprocess;
 
-      return preprocess.Import(parameter,
-                               progress,
-                               typeConfig);
+      return preprocess.Import(typeConfig,
+                               parameter,
+                               progress);
 #else
       progress.Error("Support for the OSM file format is not enabled!");
 #endif
@@ -275,9 +281,9 @@ namespace osmscout {
 #if defined(HAVE_LIB_PROTOBUF)
       PreprocessPBF preprocess;
 
-      return preprocess.Import(parameter,
-                               progress,
-                               typeConfig);
+      return preprocess.Import(typeConfig,
+                               parameter,
+                               progress);
 #else
       progress.Error("Support for the PBF file format is not enabled!");
       return false;
@@ -288,7 +294,8 @@ namespace osmscout {
     return false;
   }
 
-  bool Preprocess::Initialize(const ImportParameter& parameter,
+  bool Preprocess::Initialize(const TypeConfigRef& typeConfig,
+                              const ImportParameter& parameter,
                               Progress& progress)
   {
     // This is something I do not like
@@ -315,6 +322,10 @@ namespace osmscout {
     nodeSortingError=false;
     waySortingError=false;
     relationSortingError=false;
+
+    nodeStat.resize(typeConfig->GetTypeCount(),0);
+    areaStat.resize(typeConfig->GetTypeCount()+1,0);
+    wayStat.resize(typeConfig->GetTypeCount()+1,0);
 
     nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                     "rawnodes.dat"));
@@ -362,10 +373,11 @@ namespace osmscout {
                                const OSMId& id,
                                const double& lon,
                                const double& lat,
-                               const std::map<TagId,std::string>& tagMap)
+                               const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap)
   {
-    RawNode    node;
-    TypeId     type=typeIgnore;
+    RawNode      node;
+    ObjectOSMRef object(id,
+                        osmRefNode);
 
     if (id<lastNodeId) {
       nodeSortingError=true;
@@ -381,17 +393,21 @@ namespace osmscout {
                GeoCoord(lat,
                         lon));
 
-    typeConfig.GetNodeTypeId(tagMap,type);
+    TypeInfoRef type=typeConfig.GetNodeType(tagMap);
 
-    if (type!=typeIgnore) {
-      typeConfig.ResolveTags(tagMap,tags);
+    nodeStat[type->GetIndex()]++;
 
+    if (!type->GetIgnore()) {
       node.SetId(id);
       node.SetType(type);
       node.SetCoords(lon,lat);
-      node.SetTags(tags);
 
-      node.Write(nodeWriter);
+      node.Parse(*progress,
+                 typeConfig,
+                 tagMap);
+
+      node.Write(typeConfig,
+                 nodeWriter);
 
       nodeCount++;
     }
@@ -402,16 +418,14 @@ namespace osmscout {
   void Preprocess::ProcessWay(const TypeConfig& typeConfig,
                               const OSMId& id,
                               std::vector<OSMId>& nodes,
-                              const std::map<TagId,std::string>& tagMap)
+                              const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap)
   {
-    TypeId                                      areaType=typeIgnore;
-    TypeId                                      wayType=typeIgnore;
-    int                                         isArea=0; // 0==unknown, 1==true, -1==false
-    bool                                        isCoastlineArea=false;
-    std::map<TagId,std::string>::const_iterator areaTag;
-    std::map<TagId,std::string>::const_iterator naturalTag;
-    RawWay                                      way;
-    bool                                        isCoastline=false;
+    TypeInfoRef areaType;
+    TypeInfoRef wayType;
+    int         isArea=0; // 0==unknown, 1==true, -1==false
+    bool        isCoastlineArea=false;
+    RawWay      way;
+    bool        isCoastline=false;
 
     if (nodes.size()<2) {
       progress->Warning("Way "+
@@ -426,7 +440,7 @@ namespace osmscout {
 
     way.SetId(id);
 
-    areaTag=tagMap.find(typeConfig.tagArea);
+    auto areaTag=tagMap.find(typeConfig.tagArea);
 
     if (areaTag==tagMap.end()) {
       isArea=0;
@@ -440,7 +454,7 @@ namespace osmscout {
       isArea=1;
     }
 
-    naturalTag=tagMap.find(typeConfig.tagNatural);
+    auto naturalTag=tagMap.find(typeConfig.tagNatural);
 
     if (naturalTag!=tagMap.end() &&
         naturalTag->second=="coastline") {
@@ -453,32 +467,33 @@ namespace osmscout {
                        isArea==1);
     }
 
-    typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
-    typeConfig.ResolveTags(tagMap,tags);
+    typeConfig.GetWayAreaType(tagMap,
+                              wayType,
+                              areaType);
 
     if (isArea==1 &&
-        areaType==typeIgnore) {
+        areaType==typeConfig.typeInfoIgnore) {
       isArea=0;
     }
     else if (isArea==-1 &&
-             wayType==typeIgnore) {
+             wayType==typeConfig.typeInfoIgnore) {
       isArea=0;
     }
 
     if (isArea==0) {
-      if (wayType!=typeIgnore &&
-          areaType==typeIgnore) {
+      if (wayType!=typeConfig.typeInfoIgnore &&
+          areaType==typeConfig.typeInfoIgnore) {
         isArea=-1;
       }
-      else if (wayType==typeIgnore &&
-               areaType!=typeIgnore) {
+      else if (wayType==typeConfig.typeInfoIgnore &&
+               areaType!=typeConfig.typeInfoIgnore) {
         isArea=1;
       }
-      else if (wayType!=typeIgnore &&
-               areaType!=typeIgnore) {
+      else if (wayType!=typeConfig.typeInfoIgnore &&
+               areaType!=typeConfig.typeInfoIgnore) {
         if (nodes.size()>3 &&
             nodes.front()==nodes.back()) {
-          if (typeConfig.GetTypeInfo(wayType).GetPinWay()) {
+          if (wayType->GetPinWay()) {
             isArea=-1;
           }
           else {
@@ -493,7 +508,15 @@ namespace osmscout {
 
     switch (isArea) {
     case 1:
-      way.SetType(areaType,true);
+      areaStat[areaType->GetIndex()]++;
+
+      if (areaType->GetIgnore()) {
+        way.SetType(typeConfig.typeInfoIgnore,
+                    true);
+      }
+      else {
+        way.SetType(areaType,true);
+      }
 
       if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
@@ -503,13 +526,22 @@ namespace osmscout {
       areaCount++;
       break;
     case -1:
-      way.SetType(wayType,false);
+      wayStat[wayType->GetIndex()]++;
+
+      if (wayType->GetIgnore()) {
+        way.SetType(typeConfig.typeInfoIgnore,false);
+      }
+      else {
+        way.SetType(wayType,false);
+      }
+
       wayCount++;
       break;
     default:
       if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
-        way.SetType(typeIgnore,
+        areaStat[typeIgnore]++;
+        way.SetType(typeConfig.typeInfoIgnore,
                     true);
 
         nodes.pop_back();
@@ -517,16 +549,21 @@ namespace osmscout {
         areaCount++;
       }
       else {
-        way.SetType(typeIgnore,
+        wayStat[typeIgnore]++;
+        way.SetType(typeConfig.typeInfoIgnore,
                     false);
         wayCount++;
       }
     }
 
     way.SetNodes(nodes);
-    way.SetTags(tags);
 
-    way.Write(wayWriter);
+    way.Parse(*progress,
+              typeConfig,
+              tagMap);
+
+    way.Write(typeConfig,
+              wayWriter);
 
     lastWayId=id;
 
@@ -546,7 +583,7 @@ namespace osmscout {
   void Preprocess::ProcessRelation(const TypeConfig& typeConfig,
                                    const OSMId& id,
                                    const std::vector<RawRelation::Member>& members,
-                                   const std::map<TagId,std::string>& tagMap)
+                                   const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap)
   {
     if (id<lastRelationId) {
       relationSortingError=true;
@@ -568,7 +605,7 @@ namespace osmscout {
                              turnRestrictionType);
     }
 
-    TypeId multipolygonType;
+    TypeInfoRef multipolygonType;
 
     if (IsMultipolygon(typeConfig,
                        tagMap,
@@ -598,7 +635,8 @@ namespace osmscout {
     lastRelationId=id;
   }
 
-  bool Preprocess::Cleanup(const ImportParameter& parameter,
+  bool Preprocess::Cleanup(const TypeConfigRef& typeConfig,
+                           const ImportParameter& parameter,
                            Progress& progress)
   {
     //Since I do not like take a pointer to a reference
@@ -658,6 +696,24 @@ namespace osmscout {
     progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
     progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
     progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
+
+    for (const auto &type : typeConfig->GetTypes()) {
+      size_t      i=type->GetIndex();
+      bool        isEmpty=(type->CanBeNode() && nodeStat[i]==0) ||
+                          (type->CanBeArea() && areaStat[i]==0) ||
+                          (type->CanBeWay() && wayStat[i]==0);
+      bool        isImportant=!type->GetIgnore() &&
+                              !type->GetName().empty() &&
+                              type->GetName()[0]!='_';
+
+      if (isEmpty &&
+          isImportant) {
+        progress.Warning("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+      }
+      else {
+        progress.Info("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+      }
+    }
 
     //std::cout << "Bounding box: " << "[" << minCoord.GetLat() << "," << minCoord.GetLon() << " x " << maxCoord.GetLat() << "," << maxCoord.GetLon() << "]" << std::endl;
 

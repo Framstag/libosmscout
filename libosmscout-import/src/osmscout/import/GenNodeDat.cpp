@@ -41,9 +41,9 @@ namespace osmscout {
     return "Generate 'nodes.tmp'";
   }
 
-  bool NodeDataGenerator::Import(const ImportParameter& parameter,
-                                 Progress& progress,
-                                 const TypeConfig& typeConfig)
+  bool NodeDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                 const ImportParameter& parameter,
+                                 Progress& progress)
   {
     uint32_t rawNodeCount=0;
     uint32_t nodesReadCount=0;
@@ -88,7 +88,8 @@ namespace osmscout {
       RawNode rawNode;
       Node    node;
 
-      if (!rawNode.Read(scanner)) {
+      if (!rawNode.Read(typeConfig,
+                        scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(rawNodeCount)+
@@ -99,15 +100,9 @@ namespace osmscout {
 
       nodesReadCount++;
 
-      if (rawNode.GetType()!=typeIgnore &&
-          !typeConfig.GetTypeInfo(rawNode.GetType()).GetIgnore()) {
-        std::vector<Tag> tags(rawNode.GetTags());
-
-        node.SetType(rawNode.GetType());
+      if (!rawNode.GetType()->GetIgnore()) {
+        node.SetFeatures(rawNode.GetFeatureValueBuffer());
         node.SetCoords(rawNode.GetCoords());
-        node.SetTags(progress,
-                     typeConfig,
-                     tags);
 
         FileOffset fileOffset;
 
@@ -118,11 +113,11 @@ namespace osmscout {
         }
 
         writer.Write(rawNode.GetId());
-        node.Write(writer);
+        node.Write(typeConfig,
+                   writer);
 
         nodesWrittenCount++;
       }
-
     }
 
     if (!scanner.Close()) {

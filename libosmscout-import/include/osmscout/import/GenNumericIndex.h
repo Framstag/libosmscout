@@ -42,6 +42,11 @@ namespace osmscout {
     std::string datafile;
     std::string indexfile;
 
+  private:
+    bool ReadData(const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  T& data) const;
+
   public:
     NumericIndexGenerator(const std::string& description,
                           const std::string& datafile,
@@ -49,9 +54,9 @@ namespace osmscout {
     virtual ~NumericIndexGenerator();
 
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 
   template <class N,class T>
@@ -72,15 +77,24 @@ namespace osmscout {
   }
 
   template <class N,class T>
+  bool NumericIndexGenerator<N,T>::ReadData(const TypeConfig& typeConfig,
+                                            FileScanner& scanner,
+                                            T& data) const
+  {
+    return data.Read(typeConfig,
+                     scanner);
+  }
+
+  template <class N,class T>
   std::string NumericIndexGenerator<N,T>::GetDescription() const
   {
     return description;
   }
 
   template <class N,class T>
-  bool NumericIndexGenerator<N,T>::Import(const ImportParameter& parameter,
-                                          Progress& progress,
-                                          const TypeConfig& /*typeConfig*/)
+  bool NumericIndexGenerator<N,T>::Import(const TypeConfigRef& typeConfig,
+                                          const ImportParameter& parameter,
+                                          Progress& progress)
   {
     FileScanner             scanner;
     FileWriter              writer;
@@ -149,7 +163,9 @@ namespace osmscout {
 
       T data;
 
-      if (!data.Read(scanner)) {
+      if (!ReadData(typeConfig,
+                    scanner,
+                    data)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(d+1)+" of "+
                        NumberToString(dataCount)+

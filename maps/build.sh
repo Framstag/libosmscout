@@ -24,8 +24,8 @@ else
   exit 1
 fi
 
-targetDirectory=$mappingFileBase
-outputFile=${mappingFileBase}.txt
+targetDirectory="$mappingFileBase"
+outputFile="${mappingFileBase}.txt"
 
 echo -n >$outputFile
 
@@ -46,9 +46,9 @@ elif [ -f "$defaultOpt" ]; then
 fi
 
 
-if [ ! -d $targetDirectory ]; then
+if [ ! -d "$targetDirectory" ]; then
   echo "Creating target directory $targetDirectory..."
-  mkdir $targetDirectory
+  mkdir "$targetDirectory"
 fi
 
 echo "Target directory:" | tee -a $outputFile
@@ -60,4 +60,4 @@ echo " $options" | tee -a $outputFile
 echo "Call:" | tee -a $outputFile
 echo " ../Import/src/Import $options --typefile ../stylesheets/map.ost --destinationDirectory $targetDirectory $mappingFile" | tee -a $outputFile
 
-../Import/src/Import $options --typefile ../stylesheets/map.ost --destinationDirectory $targetDirectory $mappingFile 2>&1 | tee -a $outputFile
+../Import/src/Import $options --typefile ../stylesheets/map.ost --destinationDirectory "$targetDirectory" "$mappingFile" 2>&1 | tee -a $outputFile

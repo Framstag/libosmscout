@@ -17,10 +17,13 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscout/ObjectRef.h>
+
 #include <osmscout/Way.h>
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
-#include <osmscout/ObjectRef.h>
+
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
@@ -45,28 +48,28 @@ namespace osmscout
   }
 
 
-  bool TextIndexGenerator::Import(const ImportParameter &parameter,
-                                  Progress &progress,
-                                  const TypeConfig &typeConfig)
+  bool TextIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                  const ImportParameter &parameter,
+                                  Progress &progress)
   {
-    if(!this->setFileOffsetSize(parameter,
+    if(!this->SetFileOffsetSize(parameter,
                                 progress)) {
       return false;
     }
     progress.Info("Using "+NumberToString(offsetSizeBytes)+"-byte offsets");
 
     // add node text data
-    if(!this->addNodeTextToKeysets(parameter,
+    if(!this->AddNodeTextToKeysets(parameter,
                                    progress,
                                    typeConfig)) {
       return false;
     }
-    if(!this->addWayTextToKeysets(parameter,
+    if(!this->AddWayTextToKeysets(parameter,
                                   progress,
                                   typeConfig)) {
       return false;
     }
-    if(!this->addAreaTextToKeysets(parameter,
+    if(!this->AddAreaTextToKeysets(parameter,
                                    progress,
                                    typeConfig)) {
       return false;
@@ -136,7 +139,7 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::setFileOffsetSize(const ImportParameter &parameter,
+  bool TextIndexGenerator::SetFileOffsetSize(const ImportParameter &parameter,
                                              Progress &progress)
   {
     progress.SetAction("Calculating required FileOffset size...");
@@ -201,11 +204,14 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::addNodeTextToKeysets(const ImportParameter &parameter,
+  bool TextIndexGenerator::AddNodeTextToKeysets(const ImportParameter &parameter,
                                                 Progress &progress,
                                                 const TypeConfig &typeConfig)
   {
     progress.SetAction("Getting node text data");
+
+    NameFeatureValueReader    nameReader(typeConfig);
+    NameAltFeatureValueReader nameAltReader(typeConfig);
 
     // Open nodes.dat
     std::string nodesDataFile=
@@ -230,7 +236,8 @@ namespace osmscout
     // data to the corresponding keyset
     for(uint32_t n=1; n <= nodeCount; n++) {
       Node node;
-      if (!node.Read(scanner)) {
+      if (!node.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(nodeCount)+
@@ -239,35 +246,35 @@ namespace osmscout
         return false;
       }
 
-      if(node.GetType() != typeIgnore &&
-         !typeConfig.GetTypeInfo(node.GetType()).GetIgnore()) {
+      if(!node.GetType()->GetIgnore()) {
+        NameFeatureValue    *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
+        NameAltFeatureValue *nameAltValue=nameAltReader.GetValue(node.GetFeatureValueBuffer());
 
-        NodeAttributes attr=node.GetAttributes();
-        if(attr.GetName().empty() &&
-           attr.GetNameAlt().empty()) {
+        if (nameValue==NULL &&
+            nameAltValue==NULL) {
           continue;
         }
 
         // Save name attributes of this node
         // in the right keyset
-        TypeInfo typeInfo=typeConfig.GetTypeInfo(node.GetType());
+        TypeInfoRef typeInfo=node.GetType();
         marisa::Keyset * keyset;
-        if(typeInfo.GetIndexAsPOI()) {
+        if(typeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
         }
-        else if(typeInfo.GetIndexAsLocation()) {
+        else if(typeInfo->GetIndexAsLocation()) {
           keyset = &keysetLocation;
         }
-        else if(typeInfo.GetIndexAsRegion()) {
+        else if(typeInfo->GetIndexAsRegion()) {
           keyset = &keysetRegion;
         }
         else {
           keyset = &keysetOther;
         }
 
-        if(!(attr.GetName().empty())) {
+        if(nameValue!=NULL) {
           std::string keyString;
-          if(buildKeyStr(attr.GetName(),
+          if(BuildKeyStr(nameValue->GetName(),
                          node.GetFileOffset(),
                          refNode,
                          keyString))
@@ -276,9 +283,9 @@ namespace osmscout
                               keyString.length());
           }
         }
-        if(!(attr.GetNameAlt().empty())) {
+        if(nameAltValue!=NULL) {
           std::string keyString;
-          if(buildKeyStr(attr.GetNameAlt(),
+          if(BuildKeyStr(nameAltValue->GetNameAlt(),
                          node.GetFileOffset(),
                          refNode,
                          keyString))
@@ -294,11 +301,15 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::addWayTextToKeysets(const ImportParameter &parameter,
+  bool TextIndexGenerator::AddWayTextToKeysets(const ImportParameter &parameter,
                                                Progress &progress,
                                                const TypeConfig &typeConfig)
   {
     progress.SetAction("Getting way text data");
+
+    NameFeatureValueReader    nameReader(typeConfig);
+    NameAltFeatureValueReader nameAltReader(typeConfig);
+    RefFeatureValueReader     refReader(typeConfig);
 
     // Open ways.dat
     std::string waysDataFile=
@@ -323,7 +334,8 @@ namespace osmscout
     // data to the corresponding keyset
     for(uint32_t n=1; n <= wayCount; n++) {
       Way way;
-      if (!way.Read(scanner)) {
+      if (!way.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(wayCount)+
@@ -332,77 +344,87 @@ namespace osmscout
         return false;
       }
 
-      if(way.GetType() != typeIgnore &&
-         !typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
+      if(way.GetType()->GetIgnore()) {
+        continue;
+      }
 
-        WayAttributes attr=way.GetAttributes();
-        if(attr.GetName().empty() &&
-           attr.GetNameAlt().empty() &&
-           attr.GetRefName().empty()) {
-          continue;
-        }
+      NameFeatureValue    *nameValue=nameReader.GetValue(way.GetFeatureValueBuffer());
+      NameAltFeatureValue *nameAltValue=nameAltReader.GetValue(way.GetFeatureValueBuffer());
+      RefFeatureValue     *refValue=refReader.GetValue(way.GetFeatureValueBuffer());
 
-        // Save name attributes of this node
-        // in the right keyset
-        TypeInfo typeInfo=typeConfig.GetTypeInfo(way.GetType());
-        marisa::Keyset * keyset;
-        if(typeInfo.GetIndexAsPOI()) {
-          keyset = &keysetPoi;
-        }
-        else if(typeInfo.GetIndexAsLocation()) {
-          keyset = &keysetLocation;
-        }
-        else if(typeInfo.GetIndexAsRegion()) {
-          keyset = &keysetRegion;
-        }
-        else {
-          keyset = &keysetOther;
-        }
+      if (nameValue==NULL &&
+          nameAltValue==NULL &&
+          refValue==NULL) {
+        continue;
+      }
 
-        if(!(attr.GetName().empty())) {
-          std::string keyString;
-          if(buildKeyStr(attr.GetName(),
-                         way.GetFileOffset(),
-                         refWay,
-                         keyString))
-          {
-            keyset->push_back(keyString.c_str(),
-                              keyString.length());
-          }
+      // Save name attributes of this node
+      // in the right keyset
+      TypeInfoRef typeInfo=way.GetType();
+      marisa::Keyset * keyset;
+
+      if(typeInfo->GetIndexAsPOI()) {
+        keyset = &keysetPoi;
+      }
+      else if(typeInfo->GetIndexAsLocation()) {
+        keyset = &keysetLocation;
+      }
+      else if(typeInfo->GetIndexAsRegion()) {
+        keyset = &keysetRegion;
+      }
+      else {
+        keyset = &keysetOther;
+      }
+
+      if(nameValue!=NULL) {
+        std::string keyString;
+        if(BuildKeyStr(nameValue->GetName(),
+                       way.GetFileOffset(),
+                       refWay,
+                       keyString))
+        {
+          keyset->push_back(keyString.c_str(),
+                            keyString.length());
         }
-        if(!(attr.GetNameAlt().empty())) {
-          std::string keyString;
-          if(buildKeyStr(attr.GetNameAlt(),
-                         way.GetFileOffset(),
-                         refWay,
-                         keyString))
-          {
-            keyset->push_back(keyString.c_str(),
-                              keyString.length());
-          }
+      }
+
+      if(nameAltValue!=NULL) {
+        std::string keyString;
+        if(BuildKeyStr(nameAltValue->GetNameAlt(),
+                       way.GetFileOffset(),
+                       refWay,
+                       keyString))
+        {
+          keyset->push_back(keyString.c_str(),
+                            keyString.length());
         }
-        if(!(attr.GetRefName().empty())) {
-          std::string keyString;
-          if(buildKeyStr(attr.GetRefName(),
-                         way.GetFileOffset(),
-                         refWay,
-                         keyString))
-          {
-            keyset->push_back(keyString.c_str(),
-                              keyString.length());
-          }
+      }
+
+      if(refValue!=NULL) {
+        std::string keyString;
+        if(BuildKeyStr(refValue->GetRef(),
+                       way.GetFileOffset(),
+                       refWay,
+                       keyString))
+        {
+          keyset->push_back(keyString.c_str(),
+                            keyString.length());
         }
       }
     }
+
     scanner.Close();
 
     return true;
   }
 
-  bool TextIndexGenerator::addAreaTextToKeysets(const ImportParameter &parameter,
+  bool TextIndexGenerator::AddAreaTextToKeysets(const ImportParameter &parameter,
                                                 Progress &progress,
                                                 const TypeConfig &typeConfig)
   {
+    NameFeatureValueReader    nameReader(typeConfig);
+    NameAltFeatureValueReader nameAltReader(typeConfig);
+
     progress.SetAction("Getting area text data");
 
     // Open areas.dat
@@ -428,7 +450,8 @@ namespace osmscout
     // data to the corresponding keyset
     for(uint32_t n=1; n <= areaCount; n++) {
       Area area;
-      if(!area.Read(scanner)) {
+      if(!area.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
                        NumberToString(areaCount)+
@@ -440,31 +463,37 @@ namespace osmscout
       // Rings might have different types and names
       // so we check  each ring individually
       for(size_t r=0; r < area.rings.size(); r++) {
-
-        TypeId areaType=area.rings[r].GetType();
-        TypeInfo areaTypeInfo=typeConfig.GetTypeInfo(areaType);
-        if(areaType==typeIgnore || areaTypeInfo.GetIgnore()) {
+        if(area.rings[r].GetType()->GetIgnore()) {
           continue;
         }
 
-        marisa::Keyset * keyset;
-        if(areaTypeInfo.GetIndexAsPOI()) {
+        NameFeatureValue    *nameValue=nameReader.GetValue(area.rings[r].GetFeatureValueBuffer());
+        NameAltFeatureValue *nameAltValue=nameAltReader.GetValue(area.rings[r].GetFeatureValueBuffer());
+
+        if (nameValue==NULL &&
+            nameAltValue==NULL) {
+          continue;
+        }
+
+        TypeInfoRef    areaTypeInfo=area.rings[r].GetType();
+        marisa::Keyset *keyset;
+
+        if(areaTypeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
         }
-        else if(areaTypeInfo.GetIndexAsLocation()) {
+        else if(areaTypeInfo->GetIndexAsLocation()) {
           keyset = &keysetLocation;
         }
-        else if(areaTypeInfo.GetIndexAsRegion()) {
+        else if(areaTypeInfo->GetIndexAsRegion()) {
           keyset = &keysetRegion;
         }
         else {
           keyset = &keysetOther;
         }
 
-        AreaAttributes attr=area.rings[r].GetAttributes();
-        if(!(attr.GetName().empty())) {
+        if (nameValue!=NULL) {
           std::string keyString;
-          if(buildKeyStr(attr.GetName(),
+          if(BuildKeyStr(nameValue->GetName(),
                          area.GetFileOffset(),
                          refArea,
                          keyString))
@@ -473,9 +502,9 @@ namespace osmscout
                               keyString.length());
           }
         }
-        if(!(attr.GetNameAlt().empty())) {
+        if (nameAltValue!=NULL) {
           std::string keyString;
-          if(buildKeyStr(attr.GetNameAlt(),
+          if(BuildKeyStr(nameAltValue->GetNameAlt(),
                          area.GetFileOffset(),
                          refArea,
                          keyString))
@@ -490,7 +519,7 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::buildKeyStr(const std::string &text,
+  bool TextIndexGenerator::BuildKeyStr(const std::string &text,
                                        const FileOffset offset,
                                        const RefType reftype,
                                        std::string &keyString) const

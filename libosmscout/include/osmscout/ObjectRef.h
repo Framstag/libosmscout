@@ -20,7 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/private/CoreImportExport.h>
+
+#include <string>
+
+#include <osmscout/Types.h>
 
 namespace osmscout {
 
@@ -80,6 +84,8 @@ namespace osmscout {
     {
       return type;
     }
+
+    std::string GetName() const;
 
     inline bool Valid() const
     {
@@ -165,6 +171,8 @@ namespace osmscout {
     {
       return type;
     }
+
+    std::string GetName() const;
 
     inline bool Valid() const
     {

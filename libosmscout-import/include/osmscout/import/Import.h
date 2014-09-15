@@ -234,9 +234,9 @@ namespace osmscout {
   public:
     virtual ~ImportModule();
     virtual std::string GetDescription() const = 0;
-    virtual bool Import(const ImportParameter& parameter,
-                        Progress& progress,
-                        const TypeConfig& typeConfig) = 0;
+    virtual bool Import(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress) = 0;
   };
 
   /**

@@ -23,7 +23,9 @@
 #include <osmscout/NumericIndex.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/TurnRestriction.h>
+
 #include <osmscout/Types.h>
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
@@ -67,7 +69,25 @@ namespace osmscout {
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
+    AccessFeatureValueReader   *accessReader;
+    MaxSpeedFeatureValueReader *maxSpeedReader;
+    GradeFeatureValueReader    *gradeReader;
+
   private:
+    AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;
+
+    inline AccessFeatureValue GetAccess(const Way& way) const
+    {
+      return GetAccess(way.GetFeatureValueBuffer());
+    }
+
+    uint8_t GetMaxSpeed(const Way& way) const;
+    uint8_t GetGrade(const Way& way) const;
+
+    uint8_t CopyFlags(const Area::Ring& ring) const;
+    uint8_t CopyFlagsForward(const Way& way) const;
+    uint8_t CopyFlagsBackward(const Way& way) const;
+
     /**
      * Read turn restrictions and return a map of way ids together with their (set to 0) file offset
      */
@@ -130,7 +150,8 @@ namespace osmscout {
     /**
      * Loads ways based on their file offset.
      */
-    bool LoadWays(Progress& progress,
+    bool LoadWays(const TypeConfig& typeConfig,
+                  Progress& progress,
                   FileScanner& scanner,
                   const std::set<FileOffset>& fileOffsets,
                   OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);
@@ -138,7 +159,8 @@ namespace osmscout {
     /**
      * Loads areas based on their file offset.
      */
-    bool LoadAreas(Progress& progress,
+    bool LoadAreas(const TypeConfig& typeConfig,
+                   Progress& progress,
                    FileScanner& scanner,
                    const std::set<FileOffset>& fileOffsets,
                    OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap);
@@ -152,8 +174,7 @@ namespace osmscout {
     /**
      * Calculate all possible route from the given route node for the given area
      */
-    void CalculateAreaPaths(const TypeConfig& typeConfig,
-                            RouteNode& routeNode,
+    void CalculateAreaPaths(RouteNode& routeNode,
                             const Area& area,
                             FileOffset routeNodeOffset,
                             const NodeIdObjectsMap& nodeObjectsMap,
@@ -209,9 +230,9 @@ namespace osmscout {
   public:
     RouteDataGenerator();
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

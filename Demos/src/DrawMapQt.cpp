@@ -27,7 +27,6 @@
 #include <osmscout/MapService.h>
 
 #include <osmscout/MapPainterQt.h>
-#include <osmscout/StyleConfigLoader.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
@@ -91,9 +90,9 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
+  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
+  if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
   }
 
@@ -107,7 +106,7 @@ int main(int argc, char* argv[])
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
-      osmscout::MapPainterQt        mapPainter;
+      osmscout::MapPainterQt        mapPainter(styleConfig);
 
       projection.Set(lon,
                      lat,
@@ -120,14 +119,14 @@ int main(int argc, char* argv[])
       std::vector<osmscout::TypeSet> wayTypes;
       osmscout::TypeSet              areaTypes;
 
-      styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                         nodeTypes);
+      styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                          nodeTypes);
 
-      styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                              wayTypes);
+      styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                               wayTypes);
 
-      styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                         areaTypes);
+      styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                          areaTypes);
 
       mapService->GetObjects(nodeTypes,
                              wayTypes,
@@ -142,8 +141,7 @@ int main(int argc, char* argv[])
                              data.ways,
                              data.areas);
 
-      if (mapPainter.DrawMap(styleConfig,
-                             projection,
+      if (mapPainter.DrawMap(projection,
                              drawParameter,
                              data,
                              painter)) {

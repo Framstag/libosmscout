@@ -26,8 +26,6 @@
 #include <omp.h>
 #endif
 
-#include <osmscout/TypeConfigLoader.h>
-
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -128,7 +126,7 @@ namespace osmscout {
 
     typeConfig=new TypeConfig();
 
-    if (!LoadTypeData(path,*typeConfig)) {
+    if (!typeConfig->LoadFromDataFile(path)) {
       std::cerr << "Cannot load 'types.dat'!" << std::endl;
       return false;
     }
@@ -241,12 +239,12 @@ namespace osmscout {
     }
 
     if (nodeDataFile.Invalid()) {
-      nodeDataFile=new NodeDataFile("nodes.dat",
-                                    parameter.GetNodeCacheSize());
+      nodeDataFile=new NodeDataFile(parameter.GetNodeCacheSize());
     }
 
     if (!nodeDataFile->IsOpen()) {
-      if (!nodeDataFile->Open(path,
+      if (!nodeDataFile->Open(typeConfig,
+                              path,
                               FileScanner::LowMemRandom,
                               true)) {
         std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
@@ -269,7 +267,8 @@ namespace osmscout {
     }
 
     if (!areaDataFile->IsOpen()) {
-      if (!areaDataFile->Open(path,
+      if (!areaDataFile->Open(typeConfig,
+                              path,
                               FileScanner::LowMemRandom,
                               true)) {
         std::cerr << "Cannot open 'areas.dat'!" << std::endl;
@@ -292,7 +291,8 @@ namespace osmscout {
     }
 
     if (!wayDataFile->IsOpen()) {
-      if (!wayDataFile->Open(path,
+      if (!wayDataFile->Open(typeConfig,
+                             path,
                              FileScanner::LowMemRandom,
                              true)) {
         std::cerr << "Cannot open 'ways.dat'!" << std::endl;
@@ -412,7 +412,8 @@ namespace osmscout {
     if (optimizeAreasLowZoom.Invalid()) {
       optimizeAreasLowZoom=new OptimizeAreasLowZoom();
 
-      if (!optimizeAreasLowZoom->Open(path)) {
+      if (!optimizeAreasLowZoom->Open(typeConfig,
+                                      path)) {
         std::cerr << "Cannot load optimize areas low zoom index!" << std::endl;
         optimizeAreasLowZoom=NULL;
 
@@ -428,7 +429,8 @@ namespace osmscout {
     if (optimizeWaysLowZoom.Invalid()) {
       optimizeWaysLowZoom=new OptimizeWaysLowZoom();
 
-      if (!optimizeWaysLowZoom->Open(path)) {
+      if (!optimizeWaysLowZoom->Open(typeConfig,
+                                     path)) {
         std::cerr << "Cannot load optimize areas low zoom index!" << std::endl;
         optimizeWaysLowZoom=NULL;
 

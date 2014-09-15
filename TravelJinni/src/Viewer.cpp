@@ -64,8 +64,6 @@
 
 static Lum::Def::AppInfo info;
 
-static osmscout::StyleConfig        *styleConfig;
-
 static osmscout::DatabaseRef        database;
 static osmscout::LocationServiceRef locationService;
 static osmscout::MapServiceRef      mapService;
@@ -561,10 +559,7 @@ public:
 
       if (!currentMap.empty() && !currentStyle.empty()) {
         if (databaseTask->Open(currentMap)) {
-          if (databaseTask->LoadStyleConfig(currentStyle,styleConfig)) {
-            databaseTask->SetStyle(styleConfig);
-          }
-          else {
+          if (!databaseTask->LoadStyleConfig(currentStyle)) {
             std::cerr << "Cannot load style configuration '" << Lum::Base::WStringToString(currentStyle) << "'" << std::endl;
           }
         }

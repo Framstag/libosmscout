@@ -48,14 +48,14 @@ namespace osmscout {
     };
 
   private:
-    Context                          context;
-    PreprocessOSM&                   pp;
-    const TypeConfig&                typeConfig;
-    OSMId                            id;
-    double                           lon,lat;
-    std::map<TagId,std::string>      tags;
-    std::vector<OSMId>               nodes;
-    std::vector<RawRelation::Member> members;
+    Context                             context;
+    PreprocessOSM&                      pp;
+    const TypeConfig&                   typeConfig;
+    OSMId                               id;
+    double                              lon,lat;
+    OSMSCOUT_HASHMAP<TagId,std::string> tags;
+    std::vector<OSMId>                  nodes;
+    std::vector<RawRelation::Member>    members;
 
   public:
     Parser(PreprocessOSM& pp,
@@ -316,14 +316,15 @@ namespace osmscout {
     return "Preprocess";
   }
 
-  bool PreprocessOSM::Import(const ImportParameter& parameter,
-                             Progress& progress,
-                             const TypeConfig& typeConfig)
+  bool PreprocessOSM::Import(const TypeConfigRef& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress)
   {
     Parser        parser(*this,typeConfig);
     xmlSAXHandler saxParser;
 
-    if (!Initialize(parameter,
+    if (!Initialize(typeConfig,
+                    parameter,
                     progress)) {
       return false;
     }
@@ -337,7 +338,8 @@ namespace osmscout {
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-    return Cleanup(parameter,
+    return Cleanup(typeConfig,
+                   parameter,
                    progress);
   }
 }

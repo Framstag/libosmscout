@@ -33,93 +33,17 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_API NodeAttributes
-  {
-  private:
-    // Attribute availability flags (for optimized attribute storage)
-    static const uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
-    static const uint8_t hasName         = 1 << 5; //! We have a name
-    static const uint8_t hasAddress      = 1 << 6; //! ...house number
-    static const uint8_t hasTags         = 1 << 7; //! We have additional tags
-
-  private:
-    mutable uint8_t  flags;
-
-    std::string      name;     //! name
-    std::string      nameAlt;  //! alternative name
-    std::string      address;  //! ...house number
-    std::vector<Tag> tags;     //! list of preparsed tags
-
-  private:
-    void GetFlags(uint8_t& flags) const;
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
-
-    friend class Node;
-
-  public:
-    inline NodeAttributes()
-    : flags(0)
-    {
-      // no code
-    }
-
-    inline uint8_t GetFlags() const
-    {
-      return flags;
-    }
-
-    inline std::string GetName() const
-    {
-      return name;
-    }
-
-    inline std::string GetNameAlt() const
-    {
-      return nameAlt;
-    }
-
-    inline std::string GetAddress() const
-    {
-      return address;
-    }
-
-    inline bool HasTags() const
-    {
-      return !tags.empty();
-    }
-
-    inline const std::vector<Tag>& GetTags() const
-    {
-      return tags;
-    }
-
-    inline std::vector<Tag>& GetTags()
-    {
-      return tags;
-    }
-
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 std::vector<Tag>& tags);
-
-    bool operator==(const NodeAttributes& other) const;
-    bool operator!=(const NodeAttributes& other) const;
-  };
-
   class OSMSCOUT_API Node : public Referencable
   {
   private:
-    FileOffset        fileOffset;
+    FileOffset         fileOffset;         //! File offset in the data file, use as unique id
 
-    TypeId            type;       //! Type of Node
-    GeoCoord          coords;     //! Coordinates of node
-    NodeAttributes    attributes; //! Attributes of the nodes
+    GeoCoord           coords;             //! Coordinates of node
+    FeatureValueBuffer featureValueBuffer; //! List of features
 
   public:
     inline Node()
-    : fileOffset(0),
-      type(typeIgnore)
+    : fileOffset(0)
     {
       // no code
     }
@@ -130,9 +54,9 @@ namespace osmscout {
     }
 
   public:
-    inline TypeId GetType() const
+    inline TypeInfoRef GetType() const
     {
-      return type;
+      return featureValueBuffer.GetType();
     }
 
     inline const GeoCoord& GetCoords() const
@@ -150,39 +74,44 @@ namespace osmscout {
       return coords.GetLon();
     }
 
-    inline const NodeAttributes& GetAttributes() const
+    inline size_t GetFeatureCount() const
     {
-      return attributes;
+      return featureValueBuffer.GetType()->GetFeatureCount();
     }
 
-    inline NodeAttributes& GetAttributes()
+    inline bool HasFeature(size_t idx) const
     {
-      return attributes;
+      return featureValueBuffer.HasValue(idx);
     }
 
-    inline std::string GetName() const
+    inline FeatureInstance GetFeature(size_t idx) const
     {
-      return attributes.GetName();
+      return featureValueBuffer.GetType()->GetFeature(idx);
     }
 
-    inline std::string GetAddress() const
+    inline FeatureValue* GetFeatureValue(size_t idx) const
     {
-      return attributes.GetAddress();
+      return featureValueBuffer.GetValue(idx);
     }
 
-    inline bool HasTags() const
+    inline void UnsetFeature(size_t idx)
     {
-      return !attributes.GetTags().empty();
+      featureValueBuffer.FreeValue(idx);
     }
 
-    void SetType(TypeId type);
+    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    {
+      return featureValueBuffer;
+    }
+
+    void SetType(const TypeInfoRef& type);
     void SetCoords(const GeoCoord& coords);
-    bool SetTags(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 std::vector<Tag>& tags);
+    void SetFeatures(const FeatureValueBuffer& buffer);
 
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
+    bool Write(const TypeConfig& typeConfig,
+               FileWriter& writer) const;
   };
 
   typedef Ref<Node> NodeRef;

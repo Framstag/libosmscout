@@ -64,7 +64,7 @@ namespace osmscout {
     bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
     void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                         bool isClosed, bool keepOrientation);
-      
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
@@ -123,12 +123,11 @@ namespace osmscout {
                   const AreaData& area);
 
   public:
-    MapPainterQt();
+    MapPainterQt(const StyleConfigRef& styleConfig);
     virtual ~MapPainterQt();
 
 
-    bool DrawMap(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
                  QPainter* painter);

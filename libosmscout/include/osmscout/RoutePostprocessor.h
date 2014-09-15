@@ -25,6 +25,9 @@
 
 #include <osmscout/CoreFeatures.h>
 
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
+
 // Database
 #include <osmscout/Database.h>
 
@@ -45,72 +48,11 @@ namespace osmscout {
   public:
     class OSMSCOUT_API Postprocessor : public Referencable
     {
-    protected:
-      bool ResolveAllAreasAndWays(RouteDescription& description,
-                                  Database& database,
-                                  OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                                  OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
-
-      RouteDescription::NameDescriptionRef GetNameDescription(const ObjectFileRef& object,
-                                                              const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                                                              const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
-
-      bool IsRoundabout(const ObjectFileRef& object,
-                        const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                        const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
-
-      bool IsOfType(const ObjectFileRef& object,
-                    const OSMSCOUT_HASHSET<TypeId>& types,
-                    const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                    const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
-
-      Id GetNodeId(const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                   const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
-                   const ObjectFileRef& object,
-                   size_t nodeIndex);
-
-      size_t GetNodeIndex(const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                          const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
-                          const ObjectFileRef& object,
-                          Id nodeId);
-
-      bool CanUseBackward(const RoutingProfile& profile,
-                          const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                          const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
-                          Id fromNodeId,
-                          const ObjectFileRef& object);
-
-      bool CanUseForward(const RoutingProfile& profile,
-                         const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                         const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
-                         Id fromNodeId,
-                         const ObjectFileRef& object);
-
-      bool IsBackwardPath(const ObjectFileRef& object,
-                          size_t fromNodeIndex,
-                          size_t toNodeIndex);
-
-      bool IsForwardPath(const ObjectFileRef& object,
-                         size_t fromNodeIndex,
-                         size_t toNodeIndex);
-
-      bool IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
-                                    size_t nodeIndex,
-                                    const ObjectFileRef& object,
-                                    const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                                    const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
-
-      void GetCoordinates(const ObjectFileRef& object,
-                          size_t nodeIndex,
-                          const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                          const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
-                          double& lat,
-                          double& lon);
-
     public:
       virtual ~Postprocessor();
 
-      virtual bool Process(const RoutingProfile& profile,
+      virtual bool Process(const RoutePostprocessor& postprocessor,
+                           const RoutingProfile& profile,
                            RouteDescription& description,
                            Database& database) = 0;
     };
@@ -129,7 +71,8 @@ namespace osmscout {
     public:
       StartPostprocessor(const std::string& startDescription);
 
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
     };
@@ -146,7 +89,8 @@ namespace osmscout {
     public:
       TargetPostprocessor(const std::string& targetDescription);
 
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
     };
@@ -160,7 +104,8 @@ namespace osmscout {
     public:
       DistanceAndTimePostprocessor();
 
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
     };
@@ -174,7 +119,8 @@ namespace osmscout {
     public:
       WayNamePostprocessor();
 
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
     };
@@ -186,17 +132,17 @@ namespace osmscout {
     class OSMSCOUT_API CrossingWaysPostprocessor : public Postprocessor
     {
     private:
-      void AddCrossingWaysDescriptions(RouteDescription::CrossingWaysDescription* description,
+      void AddCrossingWaysDescriptions(const RoutePostprocessor& postprocessor,
+                                       RouteDescription::CrossingWaysDescription* description,
                                        const RouteDescription::Node& node,
                                        const ObjectFileRef& originObject,
-                                       const ObjectFileRef& targetObject,
-                                       const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                                       const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+                                       const ObjectFileRef& targetObject);
 
     public:
       CrossingWaysPostprocessor();
 
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
     };
@@ -217,7 +163,8 @@ namespace osmscout {
     public:
       DirectionPostprocessor();
 
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
     };
@@ -237,16 +184,15 @@ namespace osmscout {
       };
 
     private:
-      OSMSCOUT_HASHSET<TypeId> motorwayTypes;
-      OSMSCOUT_HASHSET<TypeId> motorwayLinkTypes;
+      TypeInfoSet motorwayTypes;
+      TypeInfoSet motorwayLinkTypes;
 
       bool                     inRoundabout;
       size_t                   roundaboutCrossingCounter;
 
     private:
-      State GetInitialState(RouteDescription::Node& node,
-                            const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
-                            const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+      State GetInitialState(const RoutePostprocessor& postprocessor,
+                            RouteDescription::Node& node);
 
       void HandleRoundaboutEnter(RouteDescription::Node& node);
       void HandleRoundaboutNode(RouteDescription::Node& node);
@@ -262,15 +208,74 @@ namespace osmscout {
                                  std::list<RouteDescription::Node>::iterator& node);
 
     public:
-      bool Process(const RoutingProfile& profile,
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
 
-      void AddMotorwayType(TypeId type);
-      void AddMotorwayLinkType(TypeId type);
+      void AddMotorwayType(const TypeInfoRef& type);
+      void AddMotorwayLinkType(const TypeInfoRef& type);
     };
 
+  private:
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
+    OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
+    NameFeatureValueReader               *nameReader;
+    RefFeatureValueReader                *refReader;
+    BridgeFeatureReader                  *bridgeReader;
+    RoundaboutFeatureReader              *roundaboutReader;
+
+  private:
+    bool ResolveAllAreasAndWays(const RouteDescription& description,
+                                Database& database);
+    void Cleanup();
+
   public:
+    RoutePostprocessor();
+
+    AreaRef GetArea(FileOffset offset) const;
+    WayRef GetWay(FileOffset offset) const;
+
+    RouteDescription::NameDescriptionRef GetNameDescription(const ObjectFileRef& object) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const Area& area) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const Way& way) const;
+
+    bool IsRoundabout(const ObjectFileRef& object) const;
+    bool IsBridge(const Way& way) const;
+
+    bool IsOfType(const ObjectFileRef& object,
+                  const TypeInfoSet& types) const;
+
+    Id GetNodeId(const ObjectFileRef& object,
+                 size_t nodeIndex) const;
+    size_t GetNodeIndex(const ObjectFileRef& object,
+                        Id nodeId) const;
+
+    bool CanUseBackward(const RoutingProfile& profile,
+                        Id fromNodeId,
+                        const ObjectFileRef& object) const;
+
+    bool CanUseForward(const RoutingProfile& profile,
+                       Id fromNodeId,
+                       const ObjectFileRef& object) const;
+
+    bool IsBackwardPath(const ObjectFileRef& object,
+                        size_t fromNodeIndex,
+                        size_t toNodeIndex) const;
+
+    bool IsForwardPath(const ObjectFileRef& object,
+                       size_t fromNodeIndex,
+                       size_t toNodeIndex) const;
+
+    bool IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
+                                  size_t nodeIndex,
+                                  const ObjectFileRef& object) const;
+
+    void GetCoordinates(const ObjectFileRef& object,
+                        size_t nodeIndex,
+                        double& lat,
+                        double& lon) const;
+
     bool PostprocessRouteDescription(RouteDescription& description,
                                      const RoutingProfile& profile,
                                      Database& database,

@@ -31,8 +31,11 @@ namespace osmscout {
     // no code
   }
 
-  AbstractRoutingProfile::AbstractRoutingProfile()
-   : vehicle(vehicleCar),
+  AbstractRoutingProfile::AbstractRoutingProfile(const TypeConfigRef& typeConfig)
+   : typeConfig(typeConfig),
+     accessReader(typeConfig),
+     maxSpeedReader(typeConfig),
+     vehicle(vehicleCar),
      vehicleRouteNodeBit(RouteNode::usableByCar),
      minSpeed(0),
      maxSpeed(0),
@@ -71,12 +74,11 @@ namespace osmscout {
     SetVehicle(vehicleFoot);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-      if (!typeConfig.GetTypeInfo(typeId).CanRouteFoot()) {
-        continue;
+    for (const auto &type : typeConfig.GetTypes()) {
+      if (!type->GetIgnore() &&
+          type->CanRouteFoot()) {
+        AddType(type->GetId(),maxSpeed);
       }
-
-      AddType(typeId,maxSpeed);
     }
   }
 
@@ -88,12 +90,12 @@ namespace osmscout {
     SetVehicle(vehicleBicycle);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-      if (!typeConfig.GetTypeInfo(typeId).CanRouteBicycle()) {
-        continue;
+    for (const auto &type : typeConfig.GetTypes()) {
+      if (!type->GetIgnore() &&
+          type->CanRouteBicycle()) {
+        AddType(type->GetId(),maxSpeed);
       }
 
-      AddType(typeId,maxSpeed);
     }
   }
 
@@ -108,21 +110,20 @@ namespace osmscout {
     SetVehicle(vehicleCar);
     SetVehicleMaxSpeed(maxSpeed);
 
-    for (TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
-      if (!typeConfig.GetTypeInfo(typeId).CanRouteCar()) {
-        continue;
+    for (const auto &type : typeConfig.GetTypes()) {
+      if (!type->GetIgnore() &&
+          type->CanRouteCar()) {
+        std::map<std::string,double>::const_iterator speed=speedMap.find(type->GetName());
+
+        if (speed==speedMap.end()) {
+          std::cerr << "No speed for type '" << type->GetName() << "' defined!" << std::endl;
+          everythingResolved=false;
+
+          continue;
+        }
+
+        AddType(type->GetId(),speed->second);
       }
-
-      std::map<std::string,double>::const_iterator speed=speedMap.find(typeConfig.GetTypeInfo(typeId).GetName());
-
-      if (speed==speedMap.end()) {
-        std::cerr << "No speed for type '" << typeConfig.GetTypeInfo(typeId).GetName() << "' defined!" << std::endl;
-        everythingResolved=false;
-
-        continue;
-      }
-
-      AddType(typeId,speed->second);
     }
 
     return everythingResolved;
@@ -144,6 +145,161 @@ namespace osmscout {
     }
 
     speeds[type]=speed;
+  }
+
+  bool AbstractRoutingProfile::CanUse(const RouteNode& currentNode,
+                                      size_t pathIndex) const
+  {
+    if (!(currentNode.paths[pathIndex].flags & vehicleRouteNodeBit)) {
+      return false;
+    }
+
+    TypeId type=currentNode.paths[pathIndex].type;
+
+    return type<speeds.size() && speeds[type]>0.0;
+  }
+
+  bool AbstractRoutingProfile::CanUse(const Area& area) const
+  {
+    if (area.rings.size()!=1) {
+      return false;
+    }
+
+    TypeId type=area.rings[0].GetType()->GetId();
+
+    return type<speeds.size() && speeds[type]>0.0;
+  }
+
+  bool AbstractRoutingProfile::CanUse(const Way& way) const
+  {
+    TypeId type=way.GetType()->GetId();
+
+    if (type>=speeds.size() || speeds[type]<=0.0) {
+      return false;
+    }
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      switch (vehicle) {
+      case vehicleFoot:
+        return accessValue->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return accessValue->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return accessValue->CanRouteCar();
+        break;
+      }
+    }
+    else {
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetType()->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetType()->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetType()->CanRouteCar();
+        break;
+      }
+    }
+
+    return false;
+  }
+
+  bool AbstractRoutingProfile::CanUseForward(const Way& way) const
+  {
+    TypeId type=way.GetType()->GetId();
+
+    if (type>=speeds.size() || speeds[type]<=0.0) {
+      return false;
+    }
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      switch (vehicle) {
+      case vehicleFoot:
+        return accessValue->CanRouteFootForward();
+        break;
+      case vehicleBicycle:
+        return accessValue->CanRouteBicycleForward();
+        break;
+      case vehicleCar:
+        return accessValue->CanRouteCarForward();
+        break;
+      }
+    }
+    else {
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetType()->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetType()->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetType()->CanRouteCar();
+        break;
+      }
+    }
+
+    return false;
+  }
+
+  bool AbstractRoutingProfile::CanUseBackward(const Way& way) const
+  {
+    TypeId type=way.GetType()->GetId();
+
+    if (type>=speeds.size() || speeds[type]<=0.0) {
+      return false;
+    }
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
+
+    if (accessValue!=NULL) {
+      switch (vehicle) {
+      case vehicleFoot:
+        return accessValue->CanRouteFootBackward();
+        break;
+      case vehicleBicycle:
+        return accessValue->CanRouteBicycleBackward();
+        break;
+      case vehicleCar:
+        return accessValue->CanRouteCarBackward();
+        break;
+      }
+    }
+    else {
+      switch (vehicle) {
+      case vehicleFoot:
+        return way.GetType()->CanRouteFoot();
+        break;
+      case vehicleBicycle:
+        return way.GetType()->CanRouteBicycle();
+        break;
+      case vehicleCar:
+        return way.GetType()->CanRouteCar();
+        break;
+      }
+    }
+
+    return false;
+  }
+
+  ShortestPathRoutingProfile::ShortestPathRoutingProfile(const TypeConfigRef& typeConfig)
+  : AbstractRoutingProfile(typeConfig)
+  {
+    // no code
+  }
+
+  FastestPathRoutingProfile::FastestPathRoutingProfile(const TypeConfigRef& typeConfig)
+  : AbstractRoutingProfile(typeConfig)
+  {
+    // no code
   }
 }
 

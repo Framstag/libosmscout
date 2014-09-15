@@ -190,6 +190,7 @@ namespace osmscout {
   private:
     DatabaseRef                          database;          //! Database object, holding all index and data files
     Vehicle                              vehicle;           //! We are a router for this vehicle
+    AccessFeatureValueReader             accessReader;      //! Read access information from objects
     bool                                 isOpen;            //! true, if opened
     bool                                 debugPerformance;
 
@@ -202,14 +203,26 @@ namespace osmscout {
     std::string GetDataFilename(Vehicle vehicle) const;
     std::string GetIndexFilename(Vehicle vehicle) const;
 
-    void GetClosestForwardRouteNode(const WayRef& way,
+    void GetStartForwardRouteNode(const RoutingProfile& profile,
+                                  const WayRef& way,
+                                  size_t nodeIndex,
+                                  RouteNodeRef& routeNode,
+                                  size_t& routeNodeIndex);
+    void GetStartBackwardRouteNode(const RoutingProfile& profile,
+                                   const WayRef& way,
+                                   size_t nodeIndex,
+                                   RouteNodeRef& routeNode,
+                                   size_t& routeNodeIndex);
+    void GetTargetForwardRouteNode(const RoutingProfile& profile,
+                                   const WayRef& way,
+                                   size_t nodeIndex,
+                                   RouteNodeRef& routeNode,
+                                   size_t& routeNodeIndex);
+    void GetTargetBackwardRouteNode(const RoutingProfile& profile,
+                                    const WayRef& way,
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode,
                                     size_t& routeNodeIndex);
-    void GetClosestBackwardRouteNode(const WayRef& way,
-                                     size_t nodeIndex,
-                                     RouteNodeRef& routeNode,
-                                     size_t& routeNodeIndex);
 
     bool GetStartNodes(const RoutingProfile& profile,
                        const ObjectFileRef& object,
@@ -221,7 +234,8 @@ namespace osmscout {
                        RNodeRef& forwardRNode,
                        RNodeRef& backwardRNode);
 
-    bool GetTargetNodes(const ObjectFileRef& object,
+    bool GetTargetNodes(const RoutingProfile& profile,
+                        const ObjectFileRef& object,
                         size_t nodeIndex,
                         double& targetLon,
                         double& targetLat,
@@ -271,7 +285,7 @@ namespace osmscout {
                         const ObjectFileRef& targetObject,
                         size_t targetNodeIndex,
                         RouteData& route);
-      
+
     bool CalculateRoute(const RoutingProfile& profile,
                         Vehicle vehicle,
                         double radius,

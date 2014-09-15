@@ -214,7 +214,6 @@ namespace osmscout {
     number=0;
 
     while (true) {
-
       number|=static_cast<N>(*buffer & 0x7f) << shift;
 
       if (((*buffer) & 0x80)==0) {

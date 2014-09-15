@@ -70,7 +70,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -86,7 +87,7 @@ namespace osmscout {
            ring++) {
         std::set<Id> nodeIds;
 
-        if (!typeConfig.GetTypeInfo(ring->GetType()).CanRoute()) {
+        if (!ring->GetType()->CanRoute()) {
           continue;
         }
 
@@ -150,7 +151,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -165,7 +167,7 @@ namespace osmscout {
            ring++) {
         std::set<Id> nodeIds;
 
-        if (!typeConfig.GetTypeInfo(ring->GetType()).CanRoute()) {
+        if (!ring->GetType()->CanRoute()) {
           continue;
         }
 
@@ -229,7 +231,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -239,7 +242,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!typeConfig.GetTypeInfo(data.GetType()).CanRoute()) {
+      if (!data.GetType()->CanRoute()) {
         continue;
       }
 
@@ -254,6 +257,14 @@ namespace osmscout {
           nodeIds.insert(*id);
         }
       }
+
+      // If we have a circular way, we "fake" a double usage,
+      // to make sure, that the node id of the first node
+      // is not dropped later on, and we cannot detect
+      // circular ways anymore
+      if (data.ids.front()==data.ids.back()) {
+        nodeUseMap.SetNodeUsed(data.ids.back());
+      }
     }
 
     if (!scanner.Close()) {
@@ -267,6 +278,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::CopyWayArea(const ImportParameter& parameter,
                                                 Progress& progress,
+                                                const TypeConfig& typeConfig,
                                                 NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -312,7 +324,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -343,7 +356,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Write(writer)) {
+      if (!data.Write(typeConfig,
+                      writer)) {
         progress.Error(std::string("Error while writing data entry to file '")+
                        writer.GetFilename()+"'");
 
@@ -368,6 +382,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::CopyRelArea(const ImportParameter& parameter,
                                                 Progress& progress,
+                                                const TypeConfig& typeConfig,
                                                 NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -413,7 +428,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -444,7 +460,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Write(writer)) {
+      if (!data.Write(typeConfig,
+                      writer)) {
         progress.Error(std::string("Error while writing data entry to file '")+
                        writer.GetFilename()+"'");
 
@@ -469,6 +486,7 @@ namespace osmscout {
 
   bool OptimizeAreaWayIdsGenerator::CopyWayWay(const ImportParameter& parameter,
                                                Progress& progress,
+                                               const TypeConfig& typeConfig,
                                                NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
@@ -514,7 +532,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Read(scanner)) {
+      if (!data.Read(typeConfig,
+                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -539,7 +558,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!data.Write(writer)) {
+      if (!data.Write(typeConfig,
+                      writer)) {
         progress.Error(std::string("Error while writing data entry to file '")+
                        writer.GetFilename()+"'");
 
@@ -562,9 +582,9 @@ namespace osmscout {
     return true;
   }
 
-  bool OptimizeAreaWayIdsGenerator::Import(const ImportParameter& parameter,
-                                           Progress& progress,
-                                           const TypeConfig& typeConfig)
+  bool OptimizeAreaWayIdsGenerator::Import(const TypeConfigRef& typeConfig,
+                                           const ImportParameter& parameter,
+                                           Progress& progress)
   {
     progress.SetAction("Optimize ids for areas and ways");
 
@@ -593,18 +613,21 @@ namespace osmscout {
 
     if (!CopyWayArea(parameter,
                      progress,
+                     typeConfig,
                      nodeUseMap)) {
       return false;
     }
 
     if (!CopyRelArea(parameter,
                      progress,
+                     typeConfig,
                      nodeUseMap)) {
       return false;
     }
 
     if (!CopyWayWay(parameter,
                     progress,
+                    typeConfig,
                     nodeUseMap)) {
       return false;
     }

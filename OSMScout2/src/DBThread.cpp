@@ -27,8 +27,6 @@
 #include <QDebug>
 #include <QDir>
 
-#include <osmscout/StyleConfigLoader.h>
-
 #include <osmscout/util/StopClock.h>
 
 QBreaker::QBreaker()
@@ -60,7 +58,7 @@ DBThread::DBThread()
  : database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
-   styleConfig(NULL),
+   painter(NULL),
    iconDirectory(),
    currentImage(NULL),
    currentLat(0.0),
@@ -164,10 +162,14 @@ void DBThread::Initialize()
     if (typeConfig.Valid()) {
       styleConfig=new osmscout::StyleConfig(typeConfig);
 
-	  if (!osmscout::LoadStyleConfig(stylesheetFilename.toLocal8Bit().data(),
-                                   *styleConfig)) {
+      delete painter;
+      painter=NULL;
+
+      if (styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+          painter=new osmscout::MapPainterQt(styleConfig);
+      }
+      else {
         qDebug() << "Cannot load style sheet!";
-        delete styleConfig;
         styleConfig=NULL;
       }
     }
@@ -247,7 +249,7 @@ void DBThread::TriggerMapRendering()
   currentMagnification=request.magnification;
 
   if (database->IsOpen() &&
-      styleConfig!=NULL) {
+      styleConfig.Valid()) {
     osmscout::MercatorProjection  projection;
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
@@ -327,11 +329,10 @@ void DBThread::TriggerMapRendering()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    painter.DrawMap(*styleConfig,
-                    projection,
-                    drawParameter,
-                    data,
-                    &p);
+    painter->DrawMap(projection,
+                     drawParameter,
+                     data,
+                     &p);
 
     p.end();
 
@@ -341,7 +342,7 @@ void DBThread::TriggerMapRendering()
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
   }
   else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig.Valid() << std::endl;
 
     QPainter p;
 
@@ -577,12 +578,12 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
 
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
   postprocessors.push_back(instructionProcessor);
 
   if (!routePostprocessor.PostprocessRouteDescription(description,

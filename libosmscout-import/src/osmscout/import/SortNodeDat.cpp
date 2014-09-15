@@ -19,14 +19,18 @@
 
 #include <osmscout/import/SortNodeDat.h>
 
+#include <osmscout/TypeFeatures.h>
+
 namespace osmscout {
   class NodeLocationProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
   {
   private:
-    FileWriter               writer;
-    uint32_t                 overallDataCount;
-    OSMSCOUT_HASHSET<TypeId> poiTypes;
-    TagId                    tagAddrStreet;
+    FileWriter                 writer;
+    uint32_t                   overallDataCount;
+    TagId                      tagAddrStreet;
+    NameFeatureValueReader     *nameReader;
+    LocationFeatureValueReader *locationReader;
+    AddressFeatureValueReader  *addressReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -36,7 +40,9 @@ namespace osmscout {
                  const FileOffset& offset,
                  Node& node,
                  bool& save);
-    bool AfterProcessingEnd();
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
   };
 
   bool NodeLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
@@ -45,8 +51,9 @@ namespace osmscout {
   {
     overallDataCount=0;
 
-    typeConfig.GetIndexAsPOITypes(poiTypes);
-    tagAddrStreet=typeConfig.tagAddrStreet;
+    nameReader=new NameFeatureValueReader(typeConfig);
+    locationReader=new LocationFeatureValueReader(typeConfig);
+    addressReader=new AddressFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "nodeaddress.dat"))) {
@@ -65,14 +72,38 @@ namespace osmscout {
                                             Node& node,
                                             bool& /*save*/)
   {
+    NameFeatureValue     *nameValue=nameReader->GetValue(node.GetFeatureValueBuffer());
+    LocationFeatureValue *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
+    AddressFeatureValue  *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
+
+    bool isAddress=addressValue!=NULL;
+    bool isPoi=nameValue!=NULL;
+
+    std::string name;
     std::string location;
+    std::string address;
 
-    GetAndEraseTag(node.GetAttributes().GetTags(),
-                   tagAddrStreet,
-                   location);
+    if (nameValue!=NULL) {
+      name=nameValue->GetName();
+    }
 
-    bool isAddress=!location.empty() && !node.GetAddress().empty();
-    bool isPoi=!node.GetName().empty() && poiTypes.find(node.GetType())!=poiTypes.end();
+    if (addressValue!=NULL && locationValue!=NULL) {
+      location=locationValue->GetLocation();
+      address=addressValue->GetAddress();
+    }
+
+    if (locationValue!=NULL) {
+      size_t locationIndex;
+
+      if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
+                                   locationIndex)) {
+        node.UnsetFeature(locationIndex);
+      }
+    }
+
+    if (!node.GetType()->GetIndexAsPOI()) {
+      return true;
+    }
 
     if (!isAddress && !isPoi) {
       return true;
@@ -82,11 +113,11 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.WriteNumber(node.GetType())) {
+    if (!writer.WriteNumber(node.GetType()->GetId())) {
       return false;
     }
 
-    if (!writer.Write(node.GetName())) {
+    if (!writer.Write(name)) {
       return false;
     }
 
@@ -94,7 +125,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Write(node.GetAddress())) {
+    if (!writer.Write(address)) {
       return false;
     }
 
@@ -107,8 +138,19 @@ namespace osmscout {
     return true;
   }
 
-  bool NodeLocationProcessorFilter::AfterProcessingEnd()
+  bool NodeLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                       Progress& /*progress*/,
+                                                       const TypeConfig& /*typeConfig*/)
   {
+    delete nameReader;
+    nameReader=NULL;
+
+    delete locationReader;
+    locationReader=NULL;
+
+    delete addressReader;
+    addressReader=NULL;
+
     writer.SetPos(0);
     writer.Write(overallDataCount);
 

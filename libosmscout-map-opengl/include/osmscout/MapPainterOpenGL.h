@@ -109,11 +109,10 @@ namespace osmscout {
                   const AreaData& area);
 
   public:
-    MapPainterOpenGL();
+    MapPainterOpenGL(const StyleConfigRef& styleConfig);
     virtual ~MapPainterOpenGL();
 
-    bool DrawMap(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data);
   };

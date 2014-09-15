@@ -67,6 +67,17 @@ namespace osmscout {
     }
   };
 
+  /**
+   * Calculates the distance between a point p and a line defined by the points a and b.
+   * @param p
+   *    The point in distance to a line
+   * @param a
+   *    One point defining the line
+   * @param b
+   *    Another point defining the line
+   * @return
+   *    The distance
+   */
   static double CalculateDistancePointToLineSegment(const TransPolygon::TransPoint& p,
                                                     const TransPolygon::TransPoint& a,
                                                     const TransPolygon::TransPoint& b)

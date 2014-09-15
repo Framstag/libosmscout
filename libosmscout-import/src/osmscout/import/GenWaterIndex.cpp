@@ -581,7 +581,8 @@ namespace osmscout {
 
       Way way;
 
-      if (!way.Read(scanner)) {
+      if (!way.Read(typeConfig,
+                    scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
                        NumberToString(wayCount)+
@@ -590,7 +591,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
+      if (!way.GetType()->GetIgnoreSeaLand()) {
         if (way.nodes.size()>=2) {
           std::set<Pixel> coords;
 
@@ -1634,9 +1635,9 @@ namespace osmscout {
     return "Generate 'water.idx'";
   }
 
-  bool WaterIndexGenerator::Import(const ImportParameter& parameter,
-                                   Progress& progress,
-                                   const TypeConfig& typeConfig)
+  bool WaterIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                   const ImportParameter& parameter,
+                                   Progress& progress)
   {
     std::list<CoastRef> coastlines;
 

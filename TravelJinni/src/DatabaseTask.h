@@ -57,12 +57,12 @@ private:
   osmscout::MapServiceRef      mapService;
   osmscout::RoutingServiceRef  router;
 
-  osmscout::StyleConfig        *styleConfig;
+  osmscout::StyleConfigRef     styleConfig;
   osmscout::MapData            data;
-  osmscout::FastestPathRoutingProfile routingProfile;
+  osmscout::FastestPathRoutingProfileRef routingProfile;
   osmscout::RoutePostprocessor postprocessor;
   Lum::OS::Condition           condition;
-  osmscout::MapPainterCairo    painter;
+  osmscout::MapPainterCairo    *painter;
 
   mutable Lum::OS::Mutex       mutex;
   bool                         finish;
@@ -102,10 +102,7 @@ public:
 
   void FlushCache();
 
-  bool LoadStyleConfig(const std::wstring& filename,
-                       osmscout::StyleConfig*& styleConfig);
-  void SetStyle(osmscout::StyleConfig* styleConfig);
-
+  bool LoadStyleConfig(const std::wstring& filename);
 
   bool GetBoundingBox(double& minLat,double& minLon,
                       double& maxLat,double& maxLon) const;

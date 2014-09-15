@@ -53,20 +53,23 @@ namespace osmscout {
 
     bool CopyWayArea(const ImportParameter& parameter,
                      Progress& progress,
+                     const TypeConfig& typeConfig,
                      NodeUseMap& nodeUseMap);
 
     bool CopyRelArea(const ImportParameter& parameter,
                      Progress& progress,
+                     const TypeConfig& typeConfig,
                      NodeUseMap& nodeUseMap);
 
     bool CopyWayWay(const ImportParameter& parameter,
                     Progress& progress,
+                    const TypeConfig& typeConfig,
                     NodeUseMap& nodeUseMap);
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

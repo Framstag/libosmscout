@@ -19,7 +19,14 @@
 
 #include <osmscout/ObjectRef.h>
 
+#include <osmscout/util/String.h>
+
 namespace osmscout {
+
+  std::string ObjectOSMRef::GetName() const
+  {
+    return std::string(GetTypeName())+" "+NumberToString(id);
+  }
 
   const char* ObjectOSMRef::GetTypeName() const
   {
@@ -33,6 +40,11 @@ namespace osmscout {
     default:
       return "none";
     }
+  }
+
+  std::string ObjectFileRef::GetName() const
+  {
+    return std::string(GetTypeName())+" "+NumberToString(offset);
   }
 
   const char* ObjectFileRef::GetTypeName() const

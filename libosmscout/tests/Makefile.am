@@ -1,13 +1,17 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include
 AM_LDFLAGS  = ../src/libosmscout.la
 
-check_PROGRAMS = EncodeNumber \
+check_PROGRAMS = AccessParse \
+                 EncodeNumber \
                  FileScannerWriter \
                  GeoCoordParse \
                  NumberSet \
                  ScanConversion
 
 TESTS = $(check_PROGRAMS)
+
+AccessParse_SOURCES = AccessParse.cpp
+AccessParse_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
 
 EncodeNumber_SOURCES = EncodeNumber.cpp
 EncodeNumber_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la

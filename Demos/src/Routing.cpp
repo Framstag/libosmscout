@@ -29,9 +29,9 @@
 
 #include <osmscout/util/Geometry.h>
 
-//#define POINTS_DEBUG
 //#define ROUTE_DEBUG
 //#define NODE_DEBUG
+//#define DATA_DEBUG
 
 /*
   Examples for the nordrhein-westfalen.osm:
@@ -78,6 +78,7 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_primary_link"]=60.0;
   map["highway_secondary"]=60.0;
   map["highway_secondary_link"]=50.0;
+  map["highway_tertiary_link"]=55.0;
   map["highway_tertiary"]=55.0;
   map["highway_unclassified"]=50.0;
   map["highway_road"]=50.0;
@@ -397,7 +398,6 @@ static void DumpNameChangedDescription(size_t& lineCount,
 int main(int argc, char* argv[])
 {
   osmscout::Vehicle                         vehicle=osmscout::vehicleCar;
-  osmscout::FastestPathRoutingProfile       routingProfile;
   std::string                               map;
 
   double                                    startLat;
@@ -473,20 +473,6 @@ int main(int argc, char* argv[])
   }
   currentArg++;
 
-  double tlat;
-  double tlon;
-
-  osmscout::GetEllipsoidalDistance(startLat,
-                                   startLon,
-                                   45,
-                                   1000,
-                                   tlat,
-                                   tlon);
-
-  if (!outputGPX) {
-    std::cout << "[" << startLat << "," << startLon << "] => [" << tlat << "," << tlon << "]" << std::endl;
-  }
-
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
@@ -496,7 +482,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::RouterParameter routerParameter;
+  osmscout::FastestPathRoutingProfile routingProfile(database->GetTypeConfig());
+  osmscout::RouterParameter           routerParameter;
 
   if (!outputGPX) {
     routerParameter.SetDebugPerformance(true);
@@ -513,8 +500,6 @@ int main(int argc, char* argv[])
   }
 
   osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
-
-  //osmscout::ShortestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
@@ -536,10 +521,6 @@ int main(int argc, char* argv[])
     break;
   }
 
-  if (!outputGPX) {
-    std::cout << "Searching for routing node for start location..." << std::endl;
-  }
-
   if (!router->GetClosestRoutableNode(startLat,
                                       startLon,
                                       vehicle,
@@ -552,10 +533,6 @@ int main(int argc, char* argv[])
 
   if (startObject.Invalid() || startObject.GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for start location!" << std::endl;
-  }
-
-  if (!outputGPX) {
-    std::cout << "Searching for routing node for target location..." << std::endl;
   }
 
   if (!router->GetClosestRoutableNode(targetLat,
@@ -591,7 +568,14 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  router->TransformRouteDataToRouteDescription(data,description);
+#ifdef DATA_DEBUG
+  for (const auto &entry : data.Entries()) {
+    std::cout << entry.GetPathObject().GetName() << "[" << entry.GetCurrentNodeIndex() << "]" << " = " << entry.GetCurrentNodeId() << " => " << entry.GetTargetNodeIndex() << std::endl;
+  }
+#endif
+
+  router->TransformRouteDataToRouteDescription(data,
+                                               description);
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
@@ -604,45 +588,45 @@ int main(int argc, char* argv[])
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
 
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
   postprocessors.push_back(instructionProcessor);
 
   osmscout::RoutePostprocessor postprocessor;
   size_t                       roundaboutCrossingCounter=0;
 
-#if defined(POINTS_DEBUG)
-  std::list<osmscout::Point> points;
-
-  if (!router.TransformRouteDataToPoints(data,points)) {
-    std::cerr << "Error during route conversion" << std::endl;
-  }
-
-  std::cout << points.size() << " point(s)" << std::endl;
-  for (std::list<osmscout::Point>::const_iterator point=points.begin();
-      point!=points.end();
-      ++point) {
-    std::cout << "Point " << point->GetId() << " " << point->GetLat() << "," << point->GetLon() << std::endl;
-  }
-#endif
-
   std::list<osmscout::Point> points;
 
   if(outputGPX) {
-    if (!router->TransformRouteDataToPoints(data,points)) {
+    if (!router->TransformRouteDataToPoints(data,
+                                            points)) {
       std::cerr << "Error during route conversion" << std::endl;
     }
     std::cout.precision(8);
-    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"bin2gpx\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n\t<trk>" << std::endl;
+    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << std::endl;
+    std::cout << "<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"bin2gpx\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">" << std::endl;
+
+    std::cout << "\t<wpt lat=\""<< startLat << "\" lon=\""<< startLon << "\">" << std::endl;
+    std::cout << "\t\t<name>Start</name>" << std::endl;
+    std::cout << "\t\t<fix>2d</fix>" << std::endl;
+    std::cout << "\t</wpt>" << std::endl;
+
+    std::cout << "\t<wpt lat=\""<< targetLat << "\" lon=\""<< targetLon << "\">" << std::endl;
+    std::cout << "\t\t<name>Target</name>" << std::endl;
+    std::cout << "\t\t<fix>2d</fix>" << std::endl;
+    std::cout << "\t</wpt>" << std::endl;
+
+    std::cout << "\t<trk>" << std::endl;
+    std::cout << "\t\t<name>Route</name>" << std::endl;
     std::cout << "\t\t<trkseg>" << std::endl;
-    for (std::list<osmscout::Point>::const_iterator point=points.begin();
-	 point!=points.end();
-	 ++point) {
-      std::cout << "\t\t\t<trkpt lat=\""<< point->GetLat() << "\" lon=\""<< point->GetLon() <<"\">\n\t\t\t\t</trkpt><fix>2d</fix>" << std::endl;
+    for (const auto &point : points) {
+      std::cout << "\t\t\t<trkpt lat=\""<< point.GetLat() << "\" lon=\""<< point.GetLon() <<"\">" << std::endl;
+      std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
+      std::cout << "\t\t\t</trkpt>" << std::endl;
     }
     std::cout << "\t\t</trkseg>" << std::endl;
     std::cout << "\t</trk>" << std::endl;
@@ -751,15 +735,8 @@ int main(int argc, char* argv[])
       continue;
     }
 
-#if defined(HTML)
-    std::cout << "<tr><td>";
-#endif
     std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
     std::cout << node->GetDistance() << "km ";
-
-#if defined(HTML)
-    std::cout <<"</td><td>";
-#endif
 
     if (prevNode!=description.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
       std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
@@ -769,14 +746,7 @@ int main(int argc, char* argv[])
       std::cout << "       ";
     }
 
-#if defined(HTML)
-    std::cout << "<tr><td>";
-#endif
     std::cout << TimeToString(node->GetTime()) << "h ";
-
-#if defined(HTML)
-    std::cout <<"</td><td>";
-#endif
 
     if (prevNode!=description.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
       std::cout << TimeToString(node->GetTime()-prevNode->GetTime()) << "h ";
@@ -784,11 +754,6 @@ int main(int argc, char* argv[])
     else {
       std::cout << "       ";
     }
-
-
-#if defined(HTML)
-    std::cout <<"</td><td>";
-#endif
 
     size_t lineCount=0;
 
@@ -865,10 +830,6 @@ int main(int argc, char* argv[])
     if (lineCount==0) {
       std::cout << std::endl;
     }
-
-#if defined(HTML)
-    std::cout << "</td></tr>";
-#endif
 
     prevNode=node;
   }

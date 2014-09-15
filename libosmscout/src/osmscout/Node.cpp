@@ -21,186 +21,9 @@
 
 namespace osmscout {
 
-  bool NodeAttributes::SetTags(Progress& /*progress*/,
-                               const TypeConfig& typeConfig,
-                               std::vector<Tag>& tags)
+  void Node::SetType(const TypeInfoRef& type)
   {
-    uint32_t namePriority=0;
-    uint32_t nameAltPriority=0;
-
-    name.clear();
-    nameAlt.clear();
-    address.clear();
-
-    flags=0;
-
-    this->tags.clear();
-
-    std::vector<Tag>::iterator tag=tags.begin();
-    while (tag!=tags.end()) {
-      uint32_t ntPrio;
-      bool     isNameTag=typeConfig.IsNameTag(tag->key,ntPrio);
-      uint32_t natPrio;
-      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->key,natPrio);
-
-      if (isNameTag &&
-          (name.empty() || ntPrio>namePriority)) {
-        name=tag->value;
-        namePriority=ntPrio;
-      }
-
-      if (isNameAltTag &&
-          (nameAlt.empty() || natPrio>nameAltPriority)) {
-        nameAlt=tag->value;
-        nameAltPriority=natPrio;
-      }
-
-      if (isNameTag || isNameAltTag) {
-        tag=tags.erase(tag);
-      }
-      else if (tag->key==typeConfig.tagHouseNr) {
-        address=tag->value;
-        tag=tags.erase(tag);
-      }
-      else {
-        ++tag;
-      }
-    }
-
-    this->tags=tags;
-
-    return true;
-  }
-
-  void NodeAttributes::GetFlags(uint8_t& flags) const
-  {
-    flags=0;
-
-    if (!name.empty()) {
-      flags|=hasName;
-    }
-
-    if (!nameAlt.empty()) {
-      flags|=hasNameAlt;
-    }
-
-    if (!address.empty()) {
-      flags|=hasAddress;
-    }
-
-    if (!tags.empty()) {
-      flags|=hasTags;
-    }
-  }
-
-  bool NodeAttributes::Read(FileScanner& scanner)
-  {
-    scanner.Read(flags);
-
-    if (scanner.HasError()) {
-      return false;
-    }
-
-    if (flags & hasName) {
-      scanner.Read(name);
-    }
-
-    if (flags & hasNameAlt) {
-      scanner.Read(nameAlt);
-    }
-
-    if (flags & hasAddress) {
-      scanner.Read(address);
-    }
-
-    if (flags & hasTags) {
-      uint32_t tagCount;
-
-      scanner.ReadNumber(tagCount);
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        scanner.ReadNumber(tags[i].key);
-        scanner.Read(tags[i].value);
-      }
-    }
-
-    return !scanner.HasError();
-  }
-
-  bool NodeAttributes::Write(FileWriter& writer) const
-  {
-    uint8_t flags;
-
-    GetFlags(flags);
-
-    writer.Write(flags);
-
-    if (flags & hasName) {
-      writer.Write(name);
-    }
-
-    if (flags & hasNameAlt) {
-      writer.Write(nameAlt);
-    }
-
-    if (flags & hasAddress) {
-      writer.Write(address);
-    }
-
-    if (flags & hasTags) {
-      writer.WriteNumber((uint32_t)tags.size());
-
-      for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
-        writer.Write(tags[i].value);
-      }
-    }
-
-    return !writer.HasError();
-  }
-
-  bool NodeAttributes::operator==(const NodeAttributes& other) const
-  {
-    if (name!=other.name ||
-        nameAlt!=other.nameAlt ||
-        address!=other.address) {
-      return false;
-    }
-
-    if (tags.empty() && other.tags.empty()) {
-      return true;
-    }
-
-    if (tags.size()!=other.tags.size()) {
-      return false;
-    }
-
-    for (size_t t=0; t<tags.size(); t++) {
-      if (tags[t].key!=other.tags[t].key) {
-        return false;
-      }
-
-      if (tags[t].value!=other.tags[t].value) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  bool NodeAttributes::operator!=(const NodeAttributes& other) const
-  {
-    return !this->operator==(other);
-  }
-
-
-  void Node::SetType(TypeId type)
-  {
-    this->type=type;
+    featureValueBuffer.SetType(type);
   }
 
   void Node::SetCoords(const GeoCoord& coords)
@@ -208,43 +31,46 @@ namespace osmscout {
     this->coords=coords;
   }
 
-  bool Node::SetTags(Progress& progress,
-                     const TypeConfig& typeConfig,
-                     std::vector<Tag>& tags)
+  void Node::SetFeatures(const FeatureValueBuffer& buffer)
   {
-    return attributes.SetTags(progress,
-                              typeConfig,
-                              tags);
+    featureValueBuffer.Set(buffer);
   }
 
-  bool Node::Read(FileScanner& scanner)
+  bool Node::Read(const TypeConfig& typeConfig,
+                  FileScanner& scanner)
   {
-    uint32_t tmpType;
 
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
+    uint32_t tmpType;
+
     scanner.ReadNumber(tmpType);
-    type=(TypeId)tmpType;
 
-    scanner.ReadCoord(coords);
+    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
 
-    if (!attributes.Read(scanner)) {
+    featureValueBuffer.SetType(type);
+
+    if (!featureValueBuffer.Read(scanner)) {
       return false;
     }
+
+    scanner.ReadCoord(coords);
 
     return !scanner.HasError();
   }
 
-  bool Node::Write(FileWriter& writer) const
+  bool Node::Write(const TypeConfig& /*typeConfig*/,
+                   FileWriter& writer) const
   {
-    writer.WriteNumber(type);
-    writer.WriteCoord(coords);
+    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
 
-    if (!attributes.Write(writer)) {
+    if (!featureValueBuffer.Write(writer)) {
       return false;
     }
+
+    writer.WriteCoord(coords);
 
     return !writer.HasError();
   }

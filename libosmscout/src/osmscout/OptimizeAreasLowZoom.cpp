@@ -75,8 +75,10 @@ namespace osmscout
     return !scanner.HasError();
   }
 
-  bool OptimizeAreasLowZoom::Open(const std::string& path)
+  bool OptimizeAreasLowZoom::Open(const TypeConfigRef& typeConfig,
+                                  const std::string& path)
   {
+    this->typeConfig=typeConfig;
     datafilename=AppendFileToDir(path,datafile);
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
@@ -314,7 +316,8 @@ namespace osmscout
 
               AreaRef area=new Area();
 
-              if (!area->ReadOptimized(scanner)) {
+              if (!area->ReadOptimized(typeConfig,
+                                       scanner)) {
                 std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
                 continue;
               }

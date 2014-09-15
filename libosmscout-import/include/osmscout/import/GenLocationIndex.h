@@ -191,7 +191,7 @@ namespace osmscout {
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,
-                          const TypeConfig& typeConfig,
+                          const TypeConfigRef& typeConfig,
                           TypeId boundaryId,
                           std::list<Boundary>& boundaryAreas);
 
@@ -200,9 +200,9 @@ namespace osmscout {
                           const std::list<Boundary>& boundaryAreas,
                           size_t level);
 
-    bool IndexRegionAreas(const ImportParameter& parameter,
+    bool IndexRegionAreas(const TypeConfig& typeConfig,
+                          const ImportParameter& parameter,
                           Progress& progress,
-                          const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                           Region& rootRegion);
 
     void SortInRegion(RegionRef& area,
@@ -218,9 +218,9 @@ namespace osmscout {
                           const RegionAlias& location,
                           const GeoCoord& node);
 
-    bool IndexRegionNodes(const ImportParameter& parameter,
+    bool IndexRegionNodes(const TypeConfigRef& typeConfig,
+                          const ImportParameter& parameter,
                           Progress& progress,
-                          const OSMSCOUT_HASHSET<TypeId>& regionTypes,
                           RegionRef& rootRegion,
                           const RegionIndex& regionIndex);
 
@@ -236,24 +236,26 @@ namespace osmscout {
     void AddLocationAreaToRegion(RegionRef& rootRegion,
                                  const Area& area,
                                  const Area::Ring& ring,
+                                 const std::string& name,
                                  const RegionIndex& regionIndex);
 
-    bool IndexLocationAreas(const ImportParameter& parameter,
+    bool IndexLocationAreas(const TypeConfig& typeConfig,
+                            const ImportParameter& parameter,
                             Progress& progress,
-                            const OSMSCOUT_HASHSET<TypeId>& indexables,
                             RegionRef& rootRegion,
                             const RegionIndex& regionIndex);
 
     bool AddLocationWayToRegion(Region& region,
                                 const Way& way,
+                                const std::string& name,
                                 double minlon,
                                 double minlat,
                                 double maxlon,
                                 double maxlat);
 
-    bool IndexLocationWays(const ImportParameter& parameter,
+    bool IndexLocationWays(const TypeConfigRef& typeConfig,
+                           const ImportParameter& parameter,
                            Progress& progress,
-                           const OSMSCOUT_HASHSET<TypeId>& indexables,
                            RegionRef& rootRegion,
                            const RegionIndex& regionIndex);
 
@@ -280,10 +282,10 @@ namespace osmscout {
                             double maxlat,
                             bool& added);
 
-    bool IndexAddressAreas(const ImportParameter& parameter,
+    bool IndexAddressAreas(const TypeConfig& typeConfig,
+                           const ImportParameter& parameter,
                            Progress& progress,
                            RegionRef& rootRegion,
-                           const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                            const RegionIndex& regionIndex);
 
     bool AddAddressWayToRegion(Progress& progress,
@@ -309,10 +311,10 @@ namespace osmscout {
                            double maxlat,
                            bool& added);
 
-    bool IndexAddressWays(const ImportParameter& parameter,
+    bool IndexAddressWays(const TypeConfig& typeConfig,
+                          const ImportParameter& parameter,
                           Progress& progress,
                           RegionRef& rootRegion,
-                          const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                           const RegionIndex& regionIndex);
 
     void AddAddressNodeToRegion(Progress& progress,
@@ -327,10 +329,10 @@ namespace osmscout {
                             const std::string& name,
                             bool& added);
 
-    bool IndexAddressNodes(const ImportParameter& parameter,
+    bool IndexAddressNodes(const TypeConfig& typeConfig,
+                           const ImportParameter& parameter,
                            Progress& progress,
                            RegionRef& rootRegion,
-                           const OSMSCOUT_HASHSET<TypeId>& poiTypes,
                            const RegionIndex& regionIndex);
 
     bool WriteRegionIndexEntry(FileWriter& writer,
@@ -354,9 +356,9 @@ namespace osmscout {
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

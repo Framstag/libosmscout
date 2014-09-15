@@ -55,18 +55,18 @@ namespace osmscout {
     return "Generate 'areanode.idx'";
   }
 
-  bool AreaNodeIndexGenerator::Import(const ImportParameter& parameter,
-                                      Progress& progress,
-                                      const TypeConfig& typeConfig)
+  bool AreaNodeIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                      const ImportParameter& parameter,
+                                      Progress& progress)
   {
     FileScanner           nodeScanner;
     FileWriter            writer;
-    std::set<TypeId>      remainingNodeTypes; //! Set of types we still must process
+    TypeInfoSet           remainingNodeTypes; //! Set of types we still must process
     std::vector<TypeData> nodeTypeData;
     size_t                level;
     size_t                maxLevel=0;
 
-    nodeTypeData.resize(typeConfig.GetTypes().size());
+    nodeTypeData.resize(typeConfig->GetTypes().size());
 
     if (!nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "nodes.dat"),
@@ -84,24 +84,19 @@ namespace osmscout {
 
     // Initially we must process all types that represents nodes and that should
     // not be ignored
-    for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-      if (typeConfig.GetTypeInfo(i).CanBeNode() &&
-          !typeConfig.GetTypeInfo(i).GetIgnore()) {
-        remainingNodeTypes.insert(i);
-      }
-    }
+    typeConfig->GetNodeTypes(remainingNodeTypes);
 
     level=parameter.GetAreaNodeMinMag();
-    while (!remainingNodeTypes.empty()) {
-      uint32_t         nodeCount=0;
-      std::set<TypeId> currentNodeTypes(remainingNodeTypes);
-      double           cellWidth=360.0/pow(2.0,(int)level);
-      double           cellHeight=180.0/pow(2.0,(int)level);
+    while (!remainingNodeTypes.Empty()) {
+      uint32_t              nodeCount=0;
+      TypeInfoSet           currentNodeTypes(remainingNodeTypes);
+      double                cellWidth=360.0/pow(2.0,(int)level);
+      double                cellHeight=180.0/pow(2.0,(int)level);
       std::vector<std::map<Pixel,size_t> > cellFillCount;
 
-      cellFillCount.resize(typeConfig.GetTypes().size());
+      cellFillCount.resize(typeConfig->GetTypeCount());
 
-      progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingNodeTypes.size())+" types still to process)");
+      progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingNodeTypes.Size())+" types still to process)");
 
       nodeScanner.GotoBegin();
 
@@ -118,7 +113,8 @@ namespace osmscout {
 
         nodeScanner.GetPos(offset);
 
-        if (!node.Read(nodeScanner)) {
+        if (!node.Read(typeConfig,
+                       nodeScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+
                          NumberToString(nodeCount)+
@@ -129,95 +125,92 @@ namespace osmscout {
 
         // If we still need to handle this type,
         // count number of entries per type and tile cell
-        if (currentNodeTypes.find(node.GetType())!=currentNodeTypes.end()) {
+        if (currentNodeTypes.IsSet(node.GetType())) {
           uint32_t xc=(uint32_t)floor((node.GetLon()+180.0)/cellWidth);
           uint32_t yc=(uint32_t)floor((node.GetLat()+90.0)/cellHeight);
 
-          cellFillCount[node.GetType()][Pixel(xc,yc)]++;
+          cellFillCount[node.GetType()->GetIndex()][Pixel(xc,yc)]++;
         }
       }
 
       // Check statistics for each type
       // If statistics are within goal limits, use this level
       // for this type (else try again with the next higher level)
-      for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-        if (currentNodeTypes.find(i)!=currentNodeTypes.end()) {
-          size_t entryCount=0;
-          size_t max=0;
+      for (const auto &type : currentNodeTypes) {
+        size_t i=type->GetIndex();
+        size_t entryCount=0;
+        size_t max=0;
 
-          nodeTypeData[i].indexLevel=(uint32_t)level;
-          nodeTypeData[i].indexCells=cellFillCount[i].size();
-          nodeTypeData[i].indexEntries=0;
+        nodeTypeData[i].indexLevel=(uint32_t)level;
+        nodeTypeData[i].indexCells=cellFillCount[i].size();
+        nodeTypeData[i].indexEntries=0;
 
-          if (!cellFillCount[i].empty()) {
-            nodeTypeData[i].cellXStart=cellFillCount[i].begin()->first.x;
-            nodeTypeData[i].cellYStart=cellFillCount[i].begin()->first.y;
+        if (!cellFillCount[i].empty()) {
+          nodeTypeData[i].cellXStart=cellFillCount[i].begin()->first.x;
+          nodeTypeData[i].cellYStart=cellFillCount[i].begin()->first.y;
 
-            nodeTypeData[i].cellXEnd=nodeTypeData[i].cellXStart;
-            nodeTypeData[i].cellYEnd=nodeTypeData[i].cellYStart;
+          nodeTypeData[i].cellXEnd=nodeTypeData[i].cellXStart;
+          nodeTypeData[i].cellYEnd=nodeTypeData[i].cellYStart;
 
-            for (std::map<Pixel,size_t>::const_iterator cell=cellFillCount[i].begin();
-                 cell!=cellFillCount[i].end();
-                 ++cell) {
-              nodeTypeData[i].indexEntries+=cell->second;
-
-              nodeTypeData[i].cellXStart=std::min(nodeTypeData[i].cellXStart,cell->first.x);
-              nodeTypeData[i].cellXEnd=std::max(nodeTypeData[i].cellXEnd,cell->first.x);
-
-              nodeTypeData[i].cellYStart=std::min(nodeTypeData[i].cellYStart,cell->first.y);
-              nodeTypeData[i].cellYEnd=std::max(nodeTypeData[i].cellYEnd,cell->first.y);
-            }
-          }
-
-          nodeTypeData[i].cellXCount=nodeTypeData[i].cellXEnd-nodeTypeData[i].cellXStart+1;
-          nodeTypeData[i].cellYCount=nodeTypeData[i].cellYEnd-nodeTypeData[i].cellYStart+1;
-
-          // Count absolute number of entries
           for (std::map<Pixel,size_t>::const_iterator cell=cellFillCount[i].begin();
                cell!=cellFillCount[i].end();
                ++cell) {
-            entryCount+=cell->second;
-            max=std::max(max,cell->second);
+            nodeTypeData[i].indexEntries+=cell->second;
+
+            nodeTypeData[i].cellXStart=std::min(nodeTypeData[i].cellXStart,cell->first.x);
+            nodeTypeData[i].cellXEnd=std::max(nodeTypeData[i].cellXEnd,cell->first.x);
+
+            nodeTypeData[i].cellYStart=std::min(nodeTypeData[i].cellYStart,cell->first.y);
+            nodeTypeData[i].cellYEnd=std::max(nodeTypeData[i].cellYEnd,cell->first.y);
           }
-
-          // Average number of entries per tile cell
-          double average=entryCount*1.0/cellFillCount[i].size();
-
-          // If we do not have any entries, we store it now
-          if (cellFillCount[i].empty()) {
-            continue;
-          }
-
-          // If the fill rate of the index is too low, we use this index level anyway
-          if (nodeTypeData[i].indexCells/(1.0*nodeTypeData[i].cellXCount*nodeTypeData[i].cellYCount)<=
-              parameter.GetAreaNodeIndexMinFillRate()) {
-            progress.Warning(typeConfig.GetTypeInfo(i).GetName()+" ("+NumberToString(i)+") is not well distributed");
-            continue;
-          }
-
-          // If average fill size and max fill size for tile cells
-          // is within limits, store it now.
-          if (max<=parameter.GetAreaNodeIndexCellSizeMax() &&
-              average<=parameter.GetAreaNodeIndexCellSizeAverage()) {
-            continue;
-          }
-
-          // else, we remove it from the list and try again with an higher
-          // level.
-          currentNodeTypes.erase(i);
         }
+
+        nodeTypeData[i].cellXCount=nodeTypeData[i].cellXEnd-nodeTypeData[i].cellXStart+1;
+        nodeTypeData[i].cellYCount=nodeTypeData[i].cellYEnd-nodeTypeData[i].cellYStart+1;
+
+        // Count absolute number of entries
+        for (std::map<Pixel,size_t>::const_iterator cell=cellFillCount[i].begin();
+             cell!=cellFillCount[i].end();
+             ++cell) {
+          entryCount+=cell->second;
+          max=std::max(max,cell->second);
+        }
+
+        // Average number of entries per tile cell
+        double average=entryCount*1.0/cellFillCount[i].size();
+
+        // If we do not have any entries, we store it now
+        if (cellFillCount[i].empty()) {
+          continue;
+        }
+
+        // If the fill rate of the index is too low, we use this index level anyway
+        if (nodeTypeData[i].indexCells/(1.0*nodeTypeData[i].cellXCount*nodeTypeData[i].cellYCount)<=
+            parameter.GetAreaNodeIndexMinFillRate()) {
+          progress.Warning(typeConfig->GetTypeInfo(i)->GetName()+" ("+NumberToString(i)+") is not well distributed");
+          continue;
+        }
+
+        // If average fill size and max fill size for tile cells
+        // is within limits, store it now.
+        if (max<=parameter.GetAreaNodeIndexCellSizeMax() &&
+            average<=parameter.GetAreaNodeIndexCellSizeAverage()) {
+          continue;
+        }
+
+        // else, we remove it from the list and try again with an higher
+        // level.
+        currentNodeTypes.Remove(type);
       }
 
       // Now process all types for this limit, that are within the limits
-      for (std::set<TypeId>::const_iterator cnt=currentNodeTypes.begin();
-           cnt!=currentNodeTypes.end();
-           cnt++) {
+      for (const auto &type : currentNodeTypes) {
         maxLevel=std::max(maxLevel,level);
 
-        progress.Info("Type "+typeConfig.GetTypeInfo(*cnt).GetName()+"(" + NumberToString(*cnt)+"), "+NumberToString(nodeTypeData[*cnt].indexCells)+" cells, "+NumberToString(nodeTypeData[*cnt].indexEntries)+" objects");
-
-        remainingNodeTypes.erase(*cnt);
+        progress.Info("Type "+type->GetName()+"(" + NumberToString(type->GetIndex())+"), "+NumberToString(nodeTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(nodeTypeData[type->GetIndex()].indexEntries)+" objects");
       }
+
+      remainingNodeTypes.Remove(currentNodeTypes);
 
       level++;
     }
@@ -237,9 +230,11 @@ namespace osmscout {
     uint32_t indexEntries=0;
 
     // Count number of types in index
-    for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
+    for (size_t i=0; i<typeConfig->GetTypes().size(); i++)
     {
-      if (typeConfig.GetTypeInfo(i).CanBeNode() &&
+      TypeInfoRef type(typeConfig->GetTypeInfo(i));
+
+      if (type->CanBeNode() &&
           nodeTypeData[i].HasEntries()) {
         indexEntries++;
       }
@@ -248,14 +243,16 @@ namespace osmscout {
     writer.Write(indexEntries);
 
     // Store index data for each type
-    for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
+    for (size_t i=0; i<typeConfig->GetTypes().size(); i++)
     {
-      if (typeConfig.GetTypeInfo(i).CanBeNode() &&
+      TypeInfoRef type(typeConfig->GetTypeInfo(i));
+
+      if (type->CanBeNode() &&
           nodeTypeData[i].HasEntries()) {
         FileOffset bitmapOffset=0;
         uint8_t    dataOffsetBytes=0;
 
-        writer.WriteNumber(typeConfig.GetTypeInfo(i).GetId());
+        writer.WriteNumber(type->GetId());
 
         writer.GetPos(nodeTypeData[i].indexOffset);
 
@@ -272,16 +269,16 @@ namespace osmscout {
 
     // Now store index bitmap for each type in increasing level order (why?)
     for (size_t l=0; l<=maxLevel; l++) {
-      std::set<TypeId> indexTypes;
-      uint32_t         nodeCount;
-      double           cellWidth=360.0/pow(2.0,(int)l);
-      double           cellHeight=180.0/pow(2.0,(int)l);
+      std::set<TypeInfoRef> indexTypes;
+      uint32_t              nodeCount;
+      double                cellWidth=360.0/pow(2.0,(int)l);
+      double                cellHeight=180.0/pow(2.0,(int)l);
 
-      for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-        if (typeConfig.GetTypeInfo(i).CanBeNode() &&
-            nodeTypeData[i].HasEntries() &&
-            nodeTypeData[i].indexLevel==l) {
-          indexTypes.insert(i);
+      for (auto &type : typeConfig->GetTypes()) {
+        if (type->CanBeNode() &&
+            nodeTypeData[type->GetIndex()].HasEntries() &&
+            nodeTypeData[type->GetIndex()].indexLevel==l) {
+          indexTypes.insert(type);
         }
       }
 
@@ -293,7 +290,7 @@ namespace osmscout {
 
       std::vector<std::map<Pixel,std::list<FileOffset> > > typeCellOffsets;
 
-      typeCellOffsets.resize(typeConfig.GetTypes().size());
+      typeCellOffsets.resize(typeConfig->GetTypes().size());
 
       nodeScanner.GotoBegin();
 
@@ -313,7 +310,8 @@ namespace osmscout {
 
         nodeScanner.GetPos(offset);
 
-        if (!node.Read(nodeScanner)) {
+        if (!node.Read(typeConfig,
+                       nodeScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+
                          NumberToString(nodeCount)+
@@ -326,36 +324,30 @@ namespace osmscout {
           uint32_t xc=(uint32_t)floor((node.GetLon()+180.0)/cellWidth);
           uint32_t yc=(uint32_t)floor((node.GetLat()+90.0)/cellHeight);
 
-          typeCellOffsets[node.GetType()][Pixel(xc,yc)].push_back(offset);
+          typeCellOffsets[node.GetType()->GetIndex()][Pixel(xc,yc)].push_back(offset);
         }
       }
 
       //
       // Write bitmap
       //
-      for (std::set<TypeId>::const_iterator type=indexTypes.begin();
-           type!=indexTypes.end();
-           ++type) {
+      for (const auto &type : indexTypes) {
         size_t indexEntries=0;
         size_t dataSize=0;
         char   buffer[10];
 
-        for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=typeCellOffsets[*type].begin();
-             cell!=typeCellOffsets[*type].end();
-             ++cell) {
-          indexEntries+=cell->second.size();
+        for (const auto &cell : typeCellOffsets[type->GetIndex()]) {
+          indexEntries+=cell.second.size();
 
-          dataSize+=EncodeNumber(cell->second.size(),buffer);
+          dataSize+=EncodeNumber(cell.second.size(),buffer);
 
           FileOffset previousOffset=0;
-          for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
-               offset!=cell->second.end();
-               ++offset) {
-            FileOffset data=*offset-previousOffset;
+          for (auto offset : cell.second) {
+            FileOffset data=offset-previousOffset;
 
             dataSize+=EncodeNumber(data,buffer);
 
-            previousOffset=*offset;
+            previousOffset=offset;
           }
         }
 
@@ -363,10 +355,10 @@ namespace osmscout {
         uint8_t dataOffsetBytes=BytesNeededToAddressFileData(dataSize);
 
         progress.Info("Writing map for "+
-                      typeConfig.GetTypeInfo(*type).GetName()+", "+
-                      NumberToString(typeCellOffsets[*type].size())+" cells, "+
+                      type->GetName()+", "+
+                      NumberToString(typeCellOffsets[type->GetIndex()].size())+" cells, "+
                       NumberToString(indexEntries)+" entries, "+
-                      ByteSizeToString(1.0*dataOffsetBytes*nodeTypeData[*type].cellXCount*nodeTypeData[*type].cellYCount));
+                      ByteSizeToString(1.0*dataOffsetBytes*nodeTypeData[type->GetIndex()].cellXCount*nodeTypeData[type->GetIndex()].cellYCount));
 
         FileOffset bitmapOffset;
 
@@ -375,9 +367,9 @@ namespace osmscout {
           return false;
         }
 
-        assert(nodeTypeData[*type].indexOffset!=0);
+        assert(nodeTypeData[type->GetIndex()].indexOffset!=0);
 
-        if (!writer.SetPos(nodeTypeData[*type].indexOffset)) {
+        if (!writer.SetPos(nodeTypeData[type->GetIndex()].indexOffset)) {
           progress.Error("Cannot go to type index offset in file");
           return false;
         }
@@ -393,7 +385,7 @@ namespace osmscout {
         // Write the bitmap with offsets for each cell
         // We prefill with zero and only overwrite cells that have data
         // So zero means "no data for this cell"
-        for (size_t i=0; i<nodeTypeData[*type].cellXCount*nodeTypeData[*type].cellYCount; i++) {
+        for (size_t i=0; i<nodeTypeData[type->GetIndex()].cellXCount*nodeTypeData[type->GetIndex()].cellYCount; i++) {
           FileOffset cellOffset=0;
 
           writer.WriteFileOffset(cellOffset,
@@ -408,12 +400,10 @@ namespace osmscout {
         }
 
         // Now write the list of offsets of objects for every cell with content
-        for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=typeCellOffsets[*type].begin();
-             cell!=typeCellOffsets[*type].end();
-             ++cell) {
+        for (const auto &cell : typeCellOffsets[type->GetIndex()]) {
           FileOffset bitmapCellOffset=bitmapOffset+
-                                      ((cell->first.y-nodeTypeData[*type].cellYStart)*nodeTypeData[*type].cellXCount+
-                                       cell->first.x-nodeTypeData[*type].cellXStart)*dataOffsetBytes;
+                                      ((cell.first.y-nodeTypeData[type->GetIndex()].cellYStart)*nodeTypeData[type->GetIndex()].cellXCount+
+                                       cell.first.x-nodeTypeData[type->GetIndex()].cellXStart)*dataOffsetBytes;
           FileOffset previousOffset=0;
           FileOffset cellOffset;
 
@@ -435,14 +425,12 @@ namespace osmscout {
             return false;
           }
 
-          writer.WriteNumber((uint32_t)cell->second.size());
+          writer.WriteNumber((uint32_t)cell.second.size());
 
-          for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
-               offset!=cell->second.end();
-               ++offset) {
-            writer.WriteNumber((FileOffset)(*offset-previousOffset));
+          for (auto offset : cell.second) {
+            writer.WriteNumber((FileOffset)(offset-previousOffset));
 
-            previousOffset=*offset;
+            previousOffset=offset;
           }
         }
       }

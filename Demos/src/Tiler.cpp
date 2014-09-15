@@ -25,7 +25,6 @@
 #include <osmscout/MapService.h>
 
 #include <osmscout/MapPainterAgg.h>
-#include <osmscout/StyleConfigLoader.h>
 
 #include <osmscout/util/StopClock.h>
 
@@ -147,9 +146,9 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
+  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
+  if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
   }
 
@@ -174,6 +173,9 @@ int main(int argc, char* argv[])
   searchParameter.SetMaximumWays(std::numeric_limits<unsigned long>::max());
   searchParameter.SetMaximumAreas(std::numeric_limits<unsigned long>::max());
 
+  osmscout::MapPainterAgg painter(styleConfig);
+  osmscout::Magnification magnification;
+
   for (size_t zoom=std::min(startZoom,endZoom);
        zoom<=std::max(startZoom,endZoom);
        zoom++) {
@@ -187,10 +189,8 @@ int main(int argc, char* argv[])
 
     std::cout << "Drawing zoom " << zoom << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
 
-    unsigned long           bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
-    unsigned char           *buffer=new unsigned char[bitmapSize];
-    osmscout::MapPainterAgg painter;
-    osmscout::Magnification magnification;
+    unsigned long bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
+    unsigned char *buffer=new unsigned char[bitmapSize];
 
     magnification.SetLevel(zoom);
 
@@ -209,14 +209,14 @@ int main(int argc, char* argv[])
     std::vector<osmscout::TypeSet> wayTypes;
     osmscout::TypeSet              areaTypes;
 
-    styleConfig.GetNodeTypesWithMaxMag(magnification,
-                                       nodeTypes);
+    styleConfig->GetNodeTypesWithMaxMag(magnification,
+                                        nodeTypes);
 
-    styleConfig.GetWayTypesByPrioWithMaxMag(magnification,
-                                            wayTypes);
+    styleConfig->GetWayTypesByPrioWithMaxMag(magnification,
+                                             wayTypes);
 
-    styleConfig.GetAreaTypesWithMaxMag(magnification,
-                                       areaTypes);
+    styleConfig->GetAreaTypesWithMaxMag(magnification,
+                                        areaTypes);
 
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
       for (size_t x=xTileStart; x<=xTileEnd; x++) {
@@ -276,8 +276,7 @@ int main(int argc, char* argv[])
                     tileWidth,tileHeight,
                     tileWidth*xTileCount*3);
 
-        painter.DrawMap(styleConfig,
-                        projection,
+        painter.DrawMap(projection,
                         drawParameter,
                         data,
                         &pf);

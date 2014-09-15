@@ -65,14 +65,21 @@ namespace osmscout {
 
   protected:
     bool                isOpen;          //! If true,the data file is opened
+    TypeConfigRef       typeConfig;
+
+  private:
+    bool ReadData(const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  N& data) const;
 
   public:
     DataFile(const std::string& datafile,
-             unsigned long dataCacheSize);
+                 unsigned long dataCacheSize);
 
     virtual ~DataFile();
 
-    bool Open(const std::string& path,
+    bool Open(const TypeConfigRef& typeConfig,
+              const std::string& path,
               FileScanner::Mode modeData,
               bool memoryMapedData);
     bool IsOpen() const;
@@ -117,10 +124,22 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Open(const std::string& path,
+  bool DataFile<N>::ReadData(const TypeConfig& typeConfig,
+                             FileScanner& scanner,
+                             N& data) const
+  {
+    return data.Read(typeConfig,
+                     scanner);
+  }
+
+  template <class N>
+  bool DataFile<N>::Open(const TypeConfigRef& typeConfig,
+                         const std::string& path,
                          FileScanner::Mode modeData,
                          bool memoryMapedData)
   {
+    this->typeConfig=typeConfig;
+
     datafilename=AppendFileToDir(path,datafile);
 
     this->memoryMapedData=memoryMapedData;
@@ -141,6 +160,8 @@ namespace osmscout {
   bool DataFile<N>::Close()
   {
     bool success=true;
+
+    typeConfig=NULL;
 
     if (scanner.IsOpen()) {
       if (!scanner.Close()) {
@@ -177,9 +198,9 @@ namespace osmscout {
 
         scanner.SetPos(*offset);
 
-        value->Read(scanner);
-
-        if (scanner.HasError()) {
+        if (!ReadData(typeConfig,
+                      scanner,
+                      *value)) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
@@ -202,9 +223,10 @@ namespace osmscout {
 
           scanner.SetPos(*offset);
           cacheRef->value=new N();
-          cacheRef->value->Read(scanner);
 
-          if (scanner.HasError()) {
+          if (!ReadData(typeConfig,
+                        scanner,
+                        *cacheRef->value)) {
             std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
             // TODO: Remove broken entry from cache
             scanner.Close();
@@ -241,9 +263,10 @@ namespace osmscout {
         N *value=new N();
 
         scanner.SetPos(*offset);
-        value->Read(scanner);
 
-        if (scanner.HasError()) {
+        if (!ReadData(typeConfig,
+                      scanner,
+                      *value)) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
@@ -266,9 +289,10 @@ namespace osmscout {
 
           scanner.SetPos(*offset);
           cacheRef->value=new N();
-          cacheRef->value->Read(scanner);
 
-          if (scanner.HasError()) {
+          if (!ReadData(typeConfig,
+                        scanner,
+                        *cacheRef->value)) {
             std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
             // TODO: Remove broken entry from cache
             scanner.Close();
@@ -305,9 +329,10 @@ namespace osmscout {
         N *value=new N();
 
         scanner.SetPos(*offset);
-        value->Read(scanner);
 
-        if (scanner.HasError()) {
+        if (!ReadData(typeConfig,
+                      scanner,
+                      *value)) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
@@ -330,9 +355,10 @@ namespace osmscout {
 
           scanner.SetPos(*offset);
           cacheRef->value=new N();
-          cacheRef->value->Read(scanner);
 
-          if (scanner.HasError()) {
+          if (!ReadData(typeConfig,
+                        scanner,
+                        *cacheRef->value)) {
             std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
             // TODO: Remove broken entry from cache
             scanner.Close();
@@ -383,9 +409,10 @@ namespace osmscout {
       N *value=new N();
 
       scanner.SetPos(offset);
-      value->Read(scanner);
 
-      if (scanner.HasError()) {
+      if (!ReadData(typeConfig,
+                    scanner,
+                    *value)) {
         std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
         // TODO: Remove broken entry from cache
         scanner.Close();
@@ -404,9 +431,10 @@ namespace osmscout {
 
         scanner.SetPos(offset);
         cacheRef->value=new N();
-        cacheRef->value->Read(scanner);
 
-        if (scanner.HasError()) {
+        if (!ReadData(typeConfig,
+                      scanner,
+                      *cacheRef->value)) {
           std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
@@ -432,6 +460,7 @@ namespace osmscout {
     cache.DumpStatistics(datafile.c_str(),DataCacheValueSizer());
   }
 
+
   /**
    * \ingroup Database
    *
@@ -449,7 +478,8 @@ namespace osmscout {
     typedef NumericIndex<I> DataIndex;
 
   private:
-    DataIndex index;
+    DataIndex     index;
+    TypeConfigRef typeConfig;
 
   public:
     IndexedDataFile(const std::string& datafile,
@@ -457,7 +487,8 @@ namespace osmscout {
                     unsigned long dataCacheSize,
                     unsigned long indexCacheSize);
 
-    bool Open(const std::string& path,
+    bool Open(const TypeConfigRef& typeConfig,
+              const std::string& path,
               FileScanner::Mode modeIndex,
               bool memoryMapedIndex,
               FileScanner::Mode modeData,
@@ -496,17 +527,23 @@ namespace osmscout {
   }
 
   template <class I, class N>
-  bool IndexedDataFile<I,N>::Open(const std::string& path,
+  bool IndexedDataFile<I,N>::Open(const TypeConfigRef& typeConfig,
+                                  const std::string& path,
                                   FileScanner::Mode modeIndex,
                                   bool memoryMapedIndex,
                                   FileScanner::Mode modeData,
                                   bool memoryMapedData)
   {
-    if (!DataFile<N>::Open(path,modeData,memoryMapedData)) {
+    if (!DataFile<N>::Open(typeConfig,
+                               path,
+                               modeData,
+                               memoryMapedData)) {
       return false;
     }
 
-    return index.Open(path,modeIndex,memoryMapedIndex);
+    return index.Open(path,
+                      modeIndex,
+                      memoryMapedIndex);
   }
 
   template <class I, class N>
@@ -609,8 +646,6 @@ namespace osmscout {
 
     index.DumpStatistics();
   }
-
-
 }
 
 #endif

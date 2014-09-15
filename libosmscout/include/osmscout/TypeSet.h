@@ -54,7 +54,7 @@ namespace osmscout {
     TypeSet(const TypeConfig& typeConfig)
     : typeCount(0)
     {
-      types.resize(typeConfig.GetMaxTypeId()+1,false);
+      types.resize(typeConfig.GetTypeCount(),false);
     }
 
     TypeSet(const TypeSet& other)

@@ -33,7 +33,9 @@
 #include <osmscout/util/Geometry.h>
 
 #include <osmscout/import/RawRelation.h>
+#include <osmscout/import/RawRelIndexedDataFile.h>
 #include <osmscout/import/RawWay.h>
+#include <osmscout/import/RawWayIndexedDataFile.h>
 
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
@@ -149,28 +151,30 @@ namespace osmscout {
                      size_t topIndex,
                      size_t id);
 
-    bool BuildRings(const ImportParameter& parameter,
+    bool BuildRings(const TypeConfig& typeConfig,
+                    const ImportParameter& parameter,
                     Progress& progress,
                     Id id,
                     const std::string& name,
                     std::list<MultipolygonPart>& parts);
 
-    bool ResolveMultipolygon(const ImportParameter& parameter,
+    bool ResolveMultipolygon(const TypeConfig& typeConfig,
+                             const ImportParameter& parameter,
                              Progress& progress,
                              Id id,
                              const std::string& name,
                              std::list<MultipolygonPart>& parts);
 
-    bool ComposeAreaMembers(Progress& progress,
-                            const TypeConfig& typeConfig,
+    bool ComposeAreaMembers(const TypeConfig& typeConfig,
+                            Progress& progress,
                             const CoordDataFile::CoordResultMap& coordMap,
                             const IdRawWayMap& wayMap,
                             const std::string& name,
                             const RawRelation& rawRelation,
                             std::list<MultipolygonPart>& parts);
 
-    bool ComposeBoundaryMembers(Progress& progress,
-                                const TypeConfig& typeConfig,
+    bool ComposeBoundaryMembers(const TypeConfig& typeConfig,
+                                Progress& progress,
                                 const CoordDataFile::CoordResultMap& coordMap,
                                 const IdRawWayMap& wayMap,
                                 const std::map<OSMId,RawRelationRef>& relationMap,
@@ -183,8 +187,8 @@ namespace osmscout {
   bool ResolveMultipolygonMembers(Progress& progress,
                                   const TypeConfig& typeConfig,
                                   CoordDataFile& coordDataFile,
-                                  IndexedDataFile<OSMId,RawWay>& wayDataFile,
-                                  IndexedDataFile<OSMId,RawRelation>& relDataFile,
+                                  RawWayIndexedDataFile& wayDataFile,
+                                  RawRelationIndexedDataFile& relDataFile,
                                   IdSet& resolvedRelations,
                                   const Area& relation,
                                   const std::string& name,
@@ -196,20 +200,20 @@ namespace osmscout {
                                     const TypeConfig& typeConfig,
                                     IdSet& wayAreaIndexBlacklist,
                                     CoordDataFile& coordDataFile,
-                                    IndexedDataFile<OSMId,RawWay>& wayDataFile,
-                                    IndexedDataFile<OSMId,RawRelation>& relDataFile,
+                                    RawWayIndexedDataFile& wayDataFile,
+                                    RawRelationIndexedDataFile& relDataFile,
                                     RawRelation& rawRelation,
                                     const std::string& name,
                                     Area& relation);
 
-    std::string ResolveRelationName(const TypeConfig& typeConfig,
+    std::string ResolveRelationName(const FeatureRef& featureName,
                                     const RawRelation& rawRelation) const;
 
   public:
     std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
+    bool Import(const TypeConfigRef& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress);
   };
 }
 

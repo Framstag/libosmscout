@@ -26,8 +26,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 
-#include <osmscout/StyleConfigLoader.h>
-
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
 #include <osmscout/MapPainterCairo.h>
 #endif
@@ -180,11 +178,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::StyleConfig styleConfig(database->GetTypeConfig());
+  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
+  if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
-    return 1;
   }
 
   osmscout::MercatorProjection  projection;
@@ -207,7 +204,7 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    osmscout::MapPainterCairo cairoPainter;
+    osmscout::MapPainterCairo cairoPainter(styleConfig);
 #endif
 
     osmscout::Magnification   magnification;
@@ -243,14 +240,14 @@ int main(int argc, char* argv[])
                        tileWidth,
                        tileHeight);
 
-        styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                           nodeTypes);
+        styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                            nodeTypes);
 
-        styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                                wayTypes);
+        styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                                 wayTypes);
 
-        styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                           areaTypes);
+        styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                            areaTypes);
 
         osmscout::StopClock dbTimer;
 
@@ -280,8 +277,7 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
         if (driver=="cairo") {
           //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-          cairoPainter.DrawMap(styleConfig,
-                               projection,
+          cairoPainter.DrawMap(projection,
                                drawParameter,
                                data,
                                cairo);

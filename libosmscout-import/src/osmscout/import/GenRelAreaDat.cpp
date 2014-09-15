@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <osmscout/TypeFeatures.h>
+
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
@@ -140,7 +142,8 @@ namespace osmscout {
     }
   }
 
-  bool RelAreaDataGenerator::BuildRings(const ImportParameter& parameter,
+  bool RelAreaDataGenerator::BuildRings(const TypeConfig& typeConfig,
+                                        const ImportParameter& parameter,
                                         Progress& progress,
                                         Id id,
                                         const std::string& name,
@@ -220,6 +223,7 @@ namespace osmscout {
         size_t                       nodeCount;
         Id                           backId;
 
+        ring.role.SetType(typeConfig.typeInfoIgnore);
         ring.role.ring=Area::outerRingId;
         ring.ways=part->ways;
 
@@ -324,7 +328,8 @@ namespace osmscout {
 
     See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
    */
-  bool RelAreaDataGenerator::ResolveMultipolygon(const ImportParameter& parameter,
+  bool RelAreaDataGenerator::ResolveMultipolygon(const TypeConfig& typeConfig,
+                                                 const ImportParameter& parameter,
                                                  Progress& progress,
                                                  Id id,
                                                  const std::string& name,
@@ -336,7 +341,8 @@ namespace osmscout {
     // Ring assignment
     //
 
-    if (!BuildRings(parameter,
+    if (!BuildRings(typeConfig,
+                    parameter,
                     progress,
                     id,
                     name,
@@ -413,8 +419,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RelAreaDataGenerator::ComposeAreaMembers(Progress& progress,
-                                                const TypeConfig& typeConfig,
+  bool RelAreaDataGenerator::ComposeAreaMembers(const TypeConfig& typeConfig,
+                                                Progress& progress,
                                                 const CoordDataFile::CoordResultMap& coordMap,
                                                 const IdRawWayMap& wayMap,
                                                 const std::string& name,
@@ -427,7 +433,7 @@ namespace osmscout {
       if (member->type==RawRelation::memberRelation) {
         progress.Warning("Unsupported relation reference in relation "+
                          NumberToString(rawRelation.GetId())+" "+
-                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         rawRelation.GetType()->GetName()+" "+
                          name);
       }
       else if (member->type==RawRelation::memberWay &&
@@ -441,7 +447,7 @@ namespace osmscout {
                          NumberToString(member->id)+
                          " for relation "+
                          NumberToString(rawRelation.GetId())+" "+
-                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         rawRelation.GetType()->GetName()+" "+
                          name);
 
           return false;
@@ -451,10 +457,11 @@ namespace osmscout {
 
         MultipolygonPart part;
 
+        part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.ring=Area::masterRingId;
-
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
+
         for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
@@ -465,7 +472,7 @@ namespace osmscout {
                            NumberToString(*id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           rawRelation.GetType()->GetName()+" "+
                            name);
 
             return false;
@@ -484,8 +491,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RelAreaDataGenerator::ComposeBoundaryMembers(Progress& progress,
-                                                    const TypeConfig& typeConfig,
+  bool RelAreaDataGenerator::ComposeBoundaryMembers(const TypeConfig& typeConfig,
+                                                    Progress& progress,
                                                     const CoordDataFile::CoordResultMap& coordMap,
                                                     const IdRawWayMap& wayMap,
                                                     const std::map<OSMId,RawRelationRef>& relationMap,
@@ -508,7 +515,7 @@ namespace osmscout {
                            NumberToString(member->id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           rawRelation.GetType()->GetName()+" "+
                            name);
 
             return false;
@@ -518,8 +525,8 @@ namespace osmscout {
 
           resolvedRelations.insert(member->id);
 
-          if (!ComposeBoundaryMembers(progress,
-                                      typeConfig,
+          if (!ComposeBoundaryMembers(typeConfig,
+                                      progress,
                                       coordMap,
                                       wayMap,
                                       relationMap,
@@ -534,7 +541,7 @@ namespace osmscout {
         else {
           progress.Warning("Ignored boundary relation role '"+member->role+"' in relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           rawRelation.GetType()->GetName()+" "+
                            name);
         }
       }
@@ -549,7 +556,7 @@ namespace osmscout {
                          NumberToString(member->id)+
                          " for relation "+
                          NumberToString(rawRelation.GetId())+" "+
-                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         rawRelation.GetType()->GetName()+" "+
                          name);
 
           return false;
@@ -560,9 +567,10 @@ namespace osmscout {
         MultipolygonPart part;
 
         part.role.ring=Area::masterRingId;
-
+        part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
+
         for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
@@ -573,7 +581,7 @@ namespace osmscout {
                            NumberToString(*id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           rawRelation.GetType()->GetName()+" "+
                            name);
 
             return false;
@@ -595,22 +603,15 @@ namespace osmscout {
   bool RelAreaDataGenerator::ResolveMultipolygonMembers(Progress& progress,
                                                         const TypeConfig& typeConfig,
                                                         CoordDataFile& coordDataFile,
-                                                        IndexedDataFile<OSMId,RawWay>& wayDataFile,
-                                                        IndexedDataFile<OSMId,RawRelation>& relDataFile,
+                                                        RawWayIndexedDataFile& wayDataFile,
+                                                        RawRelationIndexedDataFile& relDataFile,
                                                         IdSet& resolvedRelations,
                                                         const Area& relation,
                                                         const std::string& name,
                                                         const RawRelation& rawRelation,
                                                         std::list<MultipolygonPart>& parts)
   {
-    TypeId boundaryId;
-
-    boundaryId=typeConfig.GetWayTypeId("boundary_administrative");
-
-    if (boundaryId==typeIgnore) {
-      boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
-    }
-
+    TypeId                         boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
     std::set<OSMId>                pendingRelationIds;
@@ -638,7 +639,7 @@ namespace osmscout {
                 member->role=="outer" ||
                 member->role.empty())) {
         if (boundaryId!=typeIgnore &&
-            rawRelation.GetType()==boundaryId) {
+            rawRelation.GetType()->GetId()==boundaryId) {
           if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
                              NumberToString(member->id)+
@@ -660,7 +661,7 @@ namespace osmscout {
         else {
           progress.Warning("Unsupported relation reference in relation "+
                            NumberToString(rawRelation.GetId())+" "+
-                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           rawRelation.GetType()->GetName()+" "+
                            name);
         }
       }
@@ -704,7 +705,7 @@ namespace osmscout {
                     member->role=="outer" ||
                     member->role.empty())) {
             if (boundaryId!=typeIgnore &&
-                rawRelation.GetType()==boundaryId) {
+                rawRelation.GetType()->GetId()==boundaryId) {
               if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
                                  NumberToString(member->id)+
@@ -718,7 +719,7 @@ namespace osmscout {
                                NumberToString(member->id)+
                                " during resolving of members of relation "+
                                NumberToString(rawRelation.GetId())+" "+
-                               typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                               rawRelation.GetType()->GetName()+" "+
                                name);
                 return false;
               }
@@ -728,7 +729,7 @@ namespace osmscout {
             else {
               progress.Warning("Unsupported relation reference in relation "+
                                NumberToString(rawRelation.GetId())+" "+
-                               typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                               rawRelation.GetType()->GetName()+" "+
                                name);
             }
           }
@@ -746,7 +747,7 @@ namespace osmscout {
                          ways)) {
       progress.Error("Cannot resolve child ways of relation "+
                      NumberToString(rawRelation.GetId())+" "+
-                     typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                     rawRelation.GetType()->GetName()+" "+
                      name);
       return false;
     }
@@ -778,7 +779,7 @@ namespace osmscout {
                            coordMap)) {
       progress.Error("Cannot resolve child nodes of relation "+
                      NumberToString(rawRelation.GetId())+" "+
-                     typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                     rawRelation.GetType()->GetName()+" "+
                      name);
       return false;
     }
@@ -788,9 +789,9 @@ namespace osmscout {
     // Now build together everything
 
     if (boundaryId!=typeIgnore &&
-        rawRelation.GetType()==boundaryId) {
-      return ComposeBoundaryMembers(progress,
-                                    typeConfig,
+        rawRelation.GetType()->GetId()==boundaryId) {
+      return ComposeBoundaryMembers(typeConfig,
+                                    progress,
                                     coordMap,
                                     wayMap,
                                     relationMap,
@@ -801,8 +802,8 @@ namespace osmscout {
                                     parts);
     }
     else {
-      return ComposeAreaMembers(progress,
-                                typeConfig,
+      return ComposeAreaMembers(typeConfig,
+                                progress,
                                 coordMap,
                                 wayMap,
                                 name,
@@ -816,8 +817,8 @@ namespace osmscout {
                                                         const TypeConfig& typeConfig,
                                                         IdSet& wayAreaIndexBlacklist,
                                                         CoordDataFile& coordDataFile,
-                                                        IndexedDataFile<OSMId,RawWay>& wayDataFile,
-                                                        IndexedDataFile<OSMId,RawRelation>& relDataFile,
+                                                        RawWayIndexedDataFile& wayDataFile,
+                                                        RawRelationIndexedDataFile& relDataFile,
                                                         RawRelation& rawRelation,
                                                         const std::string& name,
                                                         Area& relation)
@@ -842,7 +843,8 @@ namespace osmscout {
     // Reconstruct multipolygon relation by applying the multipolygon resolving
     // algorithm as described at
     // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-    if (!ResolveMultipolygon(parameter,
+    if (!ResolveMultipolygon(typeConfig,
+                             parameter,
                              progress,
                              rawRelation.GetId(),
                              name,
@@ -881,16 +883,8 @@ namespace osmscout {
          ring!=parts.end();
          ring++) {
       if (ring->IsArea() &&
-          ring->ways.front()->GetType()!=typeIgnore) {
-        std::vector<Tag> tags(ring->ways.front()->GetTags());
-
-        ring->role.type=ring->ways.front()->GetType();
-
-        if (!ring->role.attributes.SetTags(progress,
-                                           typeConfig,
-                                           tags)) {
-          return false;
-        }
+          ring->ways.front()->GetType()!=typeConfig.typeInfoIgnore) {
+        ring->role.SetFeatures(ring->ways.front()->GetFeatureValueBuffer());
       }
     }
 
@@ -909,7 +903,7 @@ namespace osmscout {
 
           if (childRing->IsArea() &&
               ring->role.GetType()==childRing->role.GetType()) {
-            childRing->role.type=typeIgnore;
+            childRing->role.SetType(typeConfig.typeInfoIgnore);
           }
 
           childRing++;
@@ -924,48 +918,42 @@ namespace osmscout {
 
     Area::Ring masterRing;
 
-    masterRing.SetType(rawRelation.GetType());
+    masterRing.SetFeatures(rawRelation.GetFeatureValueBuffer());
     masterRing.ring=Area::masterRingId;
 
-    if (masterRing.GetType()==typeIgnore) {
+    if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
       for (std::list<MultipolygonPart>::iterator ring=parts.begin();
            ring!=parts.end();
            ring++) {
         if (ring->role.ring==Area::outerRingId &&
             ring->IsArea() &&
-            ring->role.GetType()!=typeIgnore) {
-          if (masterRing.GetType()==typeIgnore) {
+            ring->role.GetType()!=typeConfig.typeInfoIgnore) {
+          if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
             if (progress.OutputDebug()) {
               progress.Debug("Autodetecting type of multipolygon relation "+
                              NumberToString(rawRelation.GetId())+" as "+
-                             NumberToString(ring->role.GetType()));
+                             ring->role.GetType()->GetName());
             }
 
-            masterRing.SetType(ring->role.GetType());
-            ring->role.SetType(typeIgnore);
+            masterRing.SetFeatures(ring->role.GetFeatureValueBuffer());
+            ring->role.SetType(typeConfig.typeInfoIgnore);
           }
           else if (masterRing.GetType()!=ring->role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
                              " has conflicting types for outer boundary ("+
-                             typeConfig.GetTypeInfo(masterRing.GetType()).GetName()+
-                             " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType()).GetName()+")");
+                             masterRing.GetType()->GetName()+
+                             " vs. "+ring->ways.front()->GetType()->GetName()+")");
           }
         }
       }
     }
 
-    if (masterRing.GetType()==typeIgnore) {
+    if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
       progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+" does not have a type, skipping");
       return false;
     }
 
-    if (typeConfig.GetTypeInfo(masterRing.GetType()).GetIgnore()) {
-      return false;
-    }
-
-    if (!masterRing.attributes.SetTags(progress,
-                                       typeConfig,
-                                       rawRelation.tags)) {
+    if (masterRing.GetType()->GetIgnore()) {
       return false;
     }
 
@@ -1002,26 +990,20 @@ namespace osmscout {
     return true;
   }
 
-  std::string RelAreaDataGenerator::ResolveRelationName(const TypeConfig& typeConfig,
+  std::string RelAreaDataGenerator::ResolveRelationName(const FeatureRef& featureName,
                                                         const RawRelation& rawRelation) const
   {
-    TagId       tagName=typeConfig.GetTagId("name");
-    std::string name;
+    for (size_t i=0; i<rawRelation.GetFeatureCount(); i++) {
+      if (rawRelation.HasFeature(i) &&
+          rawRelation.GetFeature(i).GetFeature()==featureName &&
+          rawRelation.GetFeature(i).GetFeature()->HasValue()) {
+        NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(rawRelation.GetFeatureValue(i));
 
-    // Manually scan the tags of the RawRelation just to get a name for the relation
-    // to improve the quality of further error output.
-    if (tagName!=tagIgnore) {
-      for (std::vector<Tag>::const_iterator tag=rawRelation.tags.begin();
-           tag!=rawRelation.tags.end();
-           tag++) {
-        if (tag->key==tagName) {
-          name=tag->value;
-          break;
-        }
+        return value->GetName();
       }
     }
 
-    return name;
+    return "";
   }
 
   std::string RelAreaDataGenerator::GetDescription() const
@@ -1029,23 +1011,20 @@ namespace osmscout {
     return "Generate 'relarea.tmp'";
   }
 
-  bool RelAreaDataGenerator::Import(const ImportParameter& parameter,
-                                    Progress& progress,
-                                    const TypeConfig& typeConfig)
+  bool RelAreaDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                    const ImportParameter& parameter,
+                                    Progress& progress)
   {
-    IdSet                              wayAreaIndexBlacklist;
+    IdSet                      wayAreaIndexBlacklist;
 
-    CoordDataFile                      coordDataFile("coord.dat");
+    CoordDataFile              coordDataFile("coord.dat");
 
-    IndexedDataFile<OSMId,RawWay>      wayDataFile("rawways.dat",
-                                                   "rawway.idx",
-                                                   parameter.GetRawWayDataCacheSize(),
-                                                   parameter.GetRawWayIndexCacheSize());
+    RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayDataCacheSize(),
+                                           parameter.GetRawWayIndexCacheSize());
 
-    IndexedDataFile<OSMId,RawRelation> relDataFile("rawrels.dat",
-                                                   "rawrel.idx",
-                                                   parameter.GetRawWayDataCacheSize(),
-                                                   parameter.GetRawWayIndexCacheSize());
+    RawRelationIndexedDataFile relDataFile(parameter.GetRawWayDataCacheSize(),
+                                           parameter.GetRawWayIndexCacheSize());
+    FeatureRef                 featureName(typeConfig->GetFeature(RefFeature::NAME));
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
@@ -1053,7 +1032,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!wayDataFile.Open(parameter.GetDestinationDirectory(),
+    if (!wayDataFile.Open(typeConfig,
+                          parameter.GetDestinationDirectory(),
                           FileScanner::FastRandom,
                           parameter.GetRawWayIndexMemoryMaped(),
                           FileScanner::FastRandom,
@@ -1062,7 +1042,12 @@ namespace osmscout {
       return false;
     }
 
-    if (!relDataFile.Open(parameter.GetDestinationDirectory(),FileScanner::FastRandom,true,FileScanner::FastRandom,true)) {
+    if (!relDataFile.Open(typeConfig,
+                          parameter.GetDestinationDirectory(),
+                          FileScanner::FastRandom,
+                          true,
+                          FileScanner::FastRandom,
+                          true)) {
       std::cerr << "Cannot open raw relation data files!" << std::endl;
       return false;
     }
@@ -1077,15 +1062,10 @@ namespace osmscout {
     FileWriter          writer;
     uint32_t            rawRelationCount=0;
     uint32_t            writtenRelationCount=0;
-    std::vector<size_t> wayTypeCount;
-    std::vector<size_t> wayNodeTypeCount;
-    std::vector<size_t> areaTypeCount;
-    std::vector<size_t> areaNodeTypeCount;
-
-    wayTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-    wayNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-    areaTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-    areaNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
+    std::vector<size_t> wayTypeCount(typeConfig->GetTypeCount(),0);
+    std::vector<size_t> wayNodeTypeCount(typeConfig->GetTypeCount(),0);
+    std::vector<size_t> areaTypeCount(typeConfig->GetTypeCount(),0);
+    std::vector<size_t> areaNodeTypeCount(typeConfig->GetTypeCount(),0);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawrels.dat"),
@@ -1113,7 +1093,8 @@ namespace osmscout {
 
       RawRelation rawRel;
 
-      if (!rawRel.Read(scanner)) {
+      if (!rawRel.Read(typeConfig,
+                       scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
                        NumberToString(rawRelationCount)+
@@ -1128,7 +1109,7 @@ namespace osmscout {
       // itself, we thus still need to parse the complete relation for
       // type analysis before we can skip it.
 
-      std::string name=ResolveRelationName(typeConfig,
+      std::string name=ResolveRelationName(featureName,
                                            rawRel);
       Area        rel;
 
@@ -1148,14 +1129,14 @@ namespace osmscout {
       if (progress.OutputDebug()) {
         progress.Debug("Storing relation "+
                        NumberToString(rawRel.GetId())+" "+
-                       NumberToString(rel.GetType())+" "+
+                       rel.GetType()->GetName()+" "+
                        name);
       }
 
-      areaTypeCount[rel.GetType()]++;
+      areaTypeCount[rel.GetType()->GetIndex()]++;
       for (size_t i=0; i<rel.rings.size(); i++) {
         if (rel.rings[i].ring==Area::outerRingId) {
-          areaNodeTypeCount[rel.GetType()]+=rel.rings[i].nodes.size();
+          areaNodeTypeCount[rel.GetType()->GetIndex()]+=rel.rings[i].nodes.size();
         }
       }
 
@@ -1168,7 +1149,8 @@ namespace osmscout {
       }
 
       writer.Write(rawRel.GetId());
-      rel.Write(writer);
+      rel.Write(typeConfig,
+                writer);
 
       writtenRelationCount++;
     }
@@ -1204,10 +1186,12 @@ namespace osmscout {
 
     progress.Info("Dump statistics");
 
-    for (size_t i=0; i<typeConfig.GetMaxTypeId(); i++) {
-      std::string buffer=typeConfig.GetTypeInfo(i).GetName()+": "+
-              NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
-              NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
+    for (const auto &type : typeConfig->GetTypes()) {
+      size_t idx=type->GetIndex();
+
+      std::string buffer=type->GetName()+": "+
+              NumberToString(wayTypeCount[idx])+" "+NumberToString(wayNodeTypeCount[idx])+" "+
+              NumberToString(areaTypeCount[idx])+" "+NumberToString(areaNodeTypeCount[idx]);
 
       progress.Debug(buffer);
     }

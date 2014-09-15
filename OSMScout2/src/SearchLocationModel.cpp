@@ -202,7 +202,7 @@ QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
 
       if (DBThread::GetInstance()->GetNodeByOffset(object.GetFileOffset(),
                                                    node)) {
-        return QString::fromUtf8(DBThread::GetInstance()->GetTypeConfig()->GetTypeInfo(node->GetType()).GetName().c_str());
+        return QString::fromUtf8(node->GetType()->GetName().c_str());
       }
     }
     else if (object.GetType()==osmscout::RefType::refArea) {
@@ -210,7 +210,7 @@ QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
 
       if (DBThread::GetInstance()->GetAreaByOffset(object.GetFileOffset(),
                                                    area)) {
-        return QString::fromUtf8(DBThread::GetInstance()->GetTypeConfig()->GetTypeInfo(area->GetType()).GetName().c_str());
+        return QString::fromUtf8(area->GetType()->GetName().c_str());
       }
     }
     else if (object.GetType()==osmscout::RefType::refWay) {
@@ -218,7 +218,7 @@ QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
 
       if (DBThread::GetInstance()->GetWayByOffset(object.GetFileOffset(),
                                                   way)) {
-        return QString::fromUtf8(DBThread::GetInstance()->GetTypeConfig()->GetTypeInfo(way->GetType()).GetName().c_str());
+        return QString::fromUtf8(way->GetType()->GetName().c_str());
       }
     }
 

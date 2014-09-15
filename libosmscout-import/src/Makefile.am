@@ -20,12 +20,17 @@ libosmscoutimport_la_LDFLAGS  = -no-undefined \
 libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/RawNode.cpp \
                                osmscout/import/RawRelation.cpp \
+                               osmscout/import/RawRelIndexedDataFile.cpp \
                                osmscout/import/RawWay.cpp \
+                               osmscout/import/RawWayIndexedDataFile.cpp \
                                osmscout/import/GenAreaAreaIndex.cpp \
                                osmscout/import/GenAreaNodeIndex.cpp \
                                osmscout/import/GenAreaWayIndex.cpp \
                                osmscout/import/GenLocationIndex.cpp \
                                osmscout/import/GenNumericIndex.cpp \
+                               osmscout/import/GenRawNodeIndex.cpp \
+                               osmscout/import/GenRawWayIndex.cpp \
+                               osmscout/import/GenRawRelIndex.cpp \
                                osmscout/import/GenNodeDat.cpp \
                                osmscout/import/GenOptimizeAreaWayIds.cpp \
                                osmscout/import/GenOptimizeAreasLowZoom.cpp \

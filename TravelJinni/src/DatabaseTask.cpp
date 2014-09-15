@@ -29,8 +29,6 @@
   #include <cairo/cairo.h>
 #endif
 
-#include <osmscout/StyleConfigLoader.h>
-
 #include <osmscout/util/StopClock.h>
 
 #include <Lum/Base/String.h>
@@ -64,7 +62,7 @@ DatabaseTask::DatabaseTask(const osmscout::DatabaseRef& database,
    locationService(locationService),
    mapService(mapService),
    router(router),
-   styleConfig(NULL),
+   painter(NULL),
    finish(false),
    newJob(NULL),
    currentJob(NULL),
@@ -144,7 +142,7 @@ void DatabaseTask::Run()
       currentMagnification=currentJob->magnification;
 
       if (database->IsOpen() &&
-          styleConfig!=NULL) {
+          styleConfig.Valid()) {
         osmscout::MercatorProjection  projection;
         osmscout::MapParameter        drawParameter;
         osmscout::AreaSearchParameter searchParameter;
@@ -259,11 +257,10 @@ void DatabaseTask::Run()
         cairo_set_tolerance(currentCairo,0.7);
 
         try {
-          painter.DrawMap(*styleConfig,
-                          projection,
-                          drawParameter,
-                          data,
-                          currentCairo);
+          painter->DrawMap(projection,
+                           drawParameter,
+                           data,
+                           currentCairo);
 
           drawTimer.Stop();
           overallTimer.Stop();
@@ -275,7 +272,7 @@ void DatabaseTask::Run()
         }
       }
       else {
-        std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+        std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig.Valid()) << std::endl;
         cairo_save(currentCairo);
         cairo_set_source_rgb(currentCairo,0,0,0);
         cairo_paint(currentCairo);
@@ -333,7 +330,8 @@ bool DatabaseTask::Open(const std::wstring& path)
 
   GetCarSpeedTable(speedMap);
 
-  routingProfile.ParametrizeForCar(*router->GetTypeConfig(),
+  routingProfile=new osmscout::FastestPathRoutingProfile(database->GetTypeConfig());
+  routingProfile->ParametrizeForCar(*router->GetTypeConfig(),
                                    speedMap,
                                    160.0);
 
@@ -353,6 +351,7 @@ void DatabaseTask::Close()
 
   router->Close(),
   database->Close();
+  routingProfile=NULL;
 }
 
 
@@ -363,8 +362,7 @@ void DatabaseTask::FlushCache()
   database->FlushCache();
 }
 
-bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
-                                   osmscout::StyleConfig*& styleConfig)
+bool DatabaseTask::LoadStyleConfig(const std::wstring& filename)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -377,12 +375,15 @@ bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
   if (typeConfig.Valid()) {
     styleConfig=new osmscout::StyleConfig(typeConfig);
 
-    if (osmscout::LoadStyleConfig(Lum::Base::WStringToString(f.GetPath()).c_str(),
-                                  *styleConfig)) {
+    delete painter;
+    painter=NULL;
+
+    if (styleConfig->Load(Lum::Base::WStringToString(f.GetPath()).c_str())) {
+      painter=new osmscout::MapPainterCairo(styleConfig);
+
       return true;
     }
     else {
-      delete styleConfig;
       styleConfig=NULL;
 
       return false;
@@ -392,13 +393,6 @@ bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
     styleConfig=NULL;
     return false;
   }
-}
-
-void DatabaseTask::SetStyle(osmscout::StyleConfig* styleConfig)
-{
-  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
-
-  this->styleConfig=styleConfig;
 }
 
 bool DatabaseTask::GetBoundingBox(double& minLat,double& minLon,
@@ -490,12 +484,12 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
 
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
   postprocessors.push_back(instructionProcessor);
 
   if (!postprocessor.PostprocessRouteDescription(description,
