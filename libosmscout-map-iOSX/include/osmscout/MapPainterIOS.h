@@ -61,7 +61,7 @@ namespace osmscout {
         std::map<size_t,Font *>     fonts;          // Cached fonts
         
     public:
-        MapPainterIOS();
+        MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();
         
         bool DrawMap(const StyleConfig& styleConfig,

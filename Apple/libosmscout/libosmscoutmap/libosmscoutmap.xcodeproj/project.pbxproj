@@ -12,11 +12,9 @@
 		F51E3F9E161A658300D51926 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F99161A658300D51926 /* Parser.cpp */; };
 		F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9A161A658300D51926 /* Scanner.cpp */; };
 		F51E3FA0161A658300D51926 /* StyleConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9B161A658300D51926 /* StyleConfig.cpp */; };
-		F51E3FA1161A658300D51926 /* StyleConfigLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */; };
 		F53BD16F163883E7006C7AE1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD16E163883E7006C7AE1 /* Cocoa.framework */; };
 		F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F94161A658300D51926 /* MapPainter.cpp */; };
 		F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9B161A658300D51926 /* StyleConfig.cpp */; };
-		F53BD1D916388723006C7AE1 /* StyleConfigLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */; };
 		F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F99161A658300D51926 /* Parser.cpp */; };
 		F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9A161A658300D51926 /* Scanner.cpp */; };
 /* End PBXBuildFile section */
@@ -40,7 +38,6 @@
 		F51E3F99161A658300D51926 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
 		F51E3F9A161A658300D51926 /* Scanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scanner.cpp; sourceTree = "<group>"; };
 		F51E3F9B161A658300D51926 /* StyleConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StyleConfig.cpp; path = "../../../../libosmscout-map/src/osmscout/StyleConfig.cpp"; sourceTree = "<group>"; };
-		F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StyleConfigLoader.cpp; path = "../../../../libosmscout-map/src/osmscout/StyleConfigLoader.cpp"; sourceTree = "<group>"; };
 		F51E3FA3161A65C000D51926 /* MapFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapFeatures.h; sourceTree = "<group>"; };
 		F51E3FA5161A65C000D51926 /* MapPainter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = MapPainter.h; sourceTree = "<group>"; };
 		F51E3FA7161A65C000D51926 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
@@ -49,7 +46,6 @@
 		F51E3FAC161A65C000D51926 /* MapImportExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapImportExport.h; sourceTree = "<group>"; };
 		F51E3FAD161A65C000D51926 /* Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Math.h; sourceTree = "<group>"; };
 		F51E3FB0161A65C000D51926 /* StyleConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StyleConfig.h; sourceTree = "<group>"; };
-		F51E3FB1161A65C000D51926 /* StyleConfigLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StyleConfigLoader.h; sourceTree = "<group>"; };
 		F53BD16D163883E7006C7AE1 /* libosmscoutmap-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libosmscoutmap-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F53BD16E163883E7006C7AE1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		F53BD171163883E7006C7AE1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -120,7 +116,6 @@
 				F51E3F94161A658300D51926 /* MapPainter.cpp */,
 				F51E3F95161A658300D51926 /* oss */,
 				F51E3F9B161A658300D51926 /* StyleConfig.cpp */,
-				F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -151,7 +146,6 @@
 				F51E3FA6161A65C000D51926 /* oss */,
 				F51E3FA9161A65C000D51926 /* private */,
 				F51E3FB0161A65C000D51926 /* StyleConfig.h */,
-				F51E3FB1161A65C000D51926 /* StyleConfigLoader.h */,
 			);
 			name = osmscout;
 			path = "../../../../libosmscout-map/include/osmscout";
@@ -269,7 +263,6 @@
 				F51E3F9E161A658300D51926 /* Parser.cpp in Sources */,
 				F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */,
 				F51E3FA0161A658300D51926 /* StyleConfig.cpp in Sources */,
-				F51E3FA1161A658300D51926 /* StyleConfigLoader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,7 +272,6 @@
 			files = (
 				F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */,
 				F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */,
-				F53BD1D916388723006C7AE1 /* StyleConfigLoader.cpp in Sources */,
 				F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */,
 				F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */,
 			);

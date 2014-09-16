@@ -33,8 +33,8 @@
 
 namespace osmscout {
         
-    MapPainterIOS::MapPainterIOS()
-    : MapPainter(new CoordBufferImpl<Vertex2D>()),
+    MapPainterIOS::MapPainterIOS(const StyleConfigRef& styleConfig)
+    : MapPainter(styleConfig, new CoordBufferImpl<Vertex2D>()),
     coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
     {
 #if TARGET_OS_IPHONE
@@ -92,8 +92,7 @@ namespace osmscout {
         if(contentScale!=1.0){
             CGContextScaleCTM(cg, 1/contentScale, 1/contentScale);
         }
-        Draw(styleConfig,
-             projection,
+        Draw(projection,
              parameter,
              data);
         return true;
