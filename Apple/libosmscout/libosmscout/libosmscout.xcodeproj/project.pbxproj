@@ -147,6 +147,7 @@
 		F556EFFF19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */; };
 		F556F00019C6E36700EAAA8B /* TypeFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */; };
 		F556F00119C6E36700EAAA8B /* TypeFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */; };
+		F556F00319C9D00700EAAA8B /* TypeFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = F556F00219C9D00700EAAA8B /* TypeFeatures.h */; };
 		F55A609318EEE7CF00D91D6F /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */; };
 		F55A609418EEE7D300D91D6F /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
@@ -304,6 +305,7 @@
 		F550E56219B085C700CB6072 /* Navigation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Navigation.h; sourceTree = "<group>"; };
 		F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NodeDataFile.cpp; path = ../../../../libosmscout/src/osmscout/NodeDataFile.cpp; sourceTree = "<group>"; };
 		F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFeatures.cpp; path = ../../../../libosmscout/src/osmscout/TypeFeatures.cpp; sourceTree = "<group>"; };
+		F556F00219C9D00700EAAA8B /* TypeFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeFeatures.h; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
 		F5EDD5441891556D00646B92 /* LocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationIndex.h; sourceTree = "<group>"; };
@@ -477,6 +479,7 @@
 		F51E3F30161A604300D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				F556F00219C9D00700EAAA8B /* TypeFeatures.h */,
 				F550E56219B085C700CB6072 /* Navigation.h */,
 				F54C1E4A18F48070008C5EB3 /* LocationService.h */,
 				F54C1E4B18F48070008C5EB3 /* MapService.h */,
@@ -607,6 +610,7 @@
 				F54DAA761815DB3F00625DDA /* OptimizeWaysLowZoom.h in Headers */,
 				F54DAA711815DB3F00625DDA /* Coord.h in Headers */,
 				F550E56319B085C700CB6072 /* Navigation.h in Headers */,
+				F556F00319C9D00700EAAA8B /* TypeFeatures.h in Headers */,
 				F54DAA731815DB3F00625DDA /* DebugDatabase.h in Headers */,
 				F54DAA721815DB3F00625DDA /* CoordDataFile.h in Headers */,
 				F534FB9B1823E8BD0039CEE4 /* Intersection.h in Headers */,
