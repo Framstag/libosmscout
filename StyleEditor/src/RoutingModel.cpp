@@ -405,7 +405,7 @@ void RoutingListModel::setStartAndTarget(Location* start,
 
   std::cout << "Routing from '" << start->getName().toLocal8Bit().data() << "' to '" << target->getName().toLocal8Bit().data() << "'" << std::endl;
 
-  osmscout::FastestPathRoutingProfile routingProfile;
+  osmscout::FastestPathRoutingProfile routingProfile(DBThread::GetInstance()->GetTypeConfig());
   osmscout::Way                       routeWay;
   osmscout::Vehicle                   vehicle=osmscout::vehicleCar;//settings->GetRoutingVehicle();
 

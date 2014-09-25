@@ -95,7 +95,7 @@ private:
   osmscout::DatabaseParameter  databaseParameter;
   osmscout::StyleConfig        *styleConfig;
   osmscout::MapData            data;
-  osmscout::MapPainterQt       painter;
+  osmscout::MapPainterQt       *painter;
 
   osmscout::DatabaseRef        database;
   osmscout::LocationServiceRef locationService;

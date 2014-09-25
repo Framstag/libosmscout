@@ -25,7 +25,7 @@
 #include <QApplication>
 #include <QMutexLocker>
 
-#include <osmscout/StyleConfigLoader.h>
+#include <osmscout/StyleConfig.h>
 
 #include <osmscout/util/StopClock.h>
 
@@ -69,6 +69,7 @@ DBThread::DBThread(const SettingsRef& settings)
    finishedLat(0.0),
    finishedLon(0.0),
    finishedMagnification(0),
+   painter(NULL),
    currentRenderRequest(),
    doRender(false),
    renderBreaker(new QBreaker()),
@@ -124,12 +125,17 @@ void DBThread::Initialize()
 
   if (database->Open(databaseDirectory.toLocal8Bit().data())) {
     if (database->GetTypeConfig()) {
+      if(painter) {
+        delete painter;
+        painter = NULL;
+      }
       styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
 
-      if (!osmscout::LoadStyleConfig(m_stylesheetFilename.toLocal8Bit().data(),
-                                   *styleConfig)) {
+      if (!styleConfig->Load(m_stylesheetFilename.toLocal8Bit().data())) {
         delete styleConfig;
         styleConfig=NULL;
+      } else {
+          painter = new osmscout::MapPainterQt(styleConfig);
       }
     }
     else {
@@ -167,13 +173,21 @@ void DBThread::ReloadStyle(const QString &suffix){
         return;
     }
     if(styleConfig){
+        // There is no reset(styleConfig), styleConfig must be recreated
         delete styleConfig;
     }
+    if(painter){
+        //TODO: should be deleted but actually it crash...
+        //delete painter;
+        painter = NULL;
+    }
     styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
-    if (!osmscout::LoadStyleConfig((m_stylesheetFilename+suffix).toLocal8Bit().data(),
-                                   *styleConfig)) {
+    if (!styleConfig->Load((m_stylesheetFilename+suffix).toLocal8Bit().data())) {
         delete styleConfig;
         styleConfig=NULL;
+
+    } else {
+        painter = new osmscout::MapPainterQt(styleConfig);
     }
 }
 
@@ -309,8 +323,7 @@ void DBThread::TriggerMapRendering()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    painter.DrawMap(*styleConfig,
-                    projection,
+    painter->DrawMap(projection,
                     drawParameter,
                     data,
                     &p);
@@ -554,12 +567,12 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
 
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
   postprocessors.push_back(instructionProcessor);
 
   if (!routePostprocessor.PostprocessRouteDescription(description,
