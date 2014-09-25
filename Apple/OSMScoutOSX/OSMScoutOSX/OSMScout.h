@@ -17,7 +17,7 @@
 #include <osmscout/WayDataFile.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/RoutePostprocessor.h>
-#include <osmscout/StyleConfigLoader.h>
+#include <osmscout/StyleConfig.h>
 #include <osmscout/MapPainterIOS.h>
 #include <osmscout/MapService.h>
 #include <osmscout/LocationService.h>

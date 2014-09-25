@@ -180,13 +180,13 @@ static double originShift = M_PI * 6378137;
         #if !__has_feature(objc_arc)
         [_osmScout retain];
         #endif
-        drawQueue = [[NSOperationQueue alloc] init];
-        [drawQueue setMaxConcurrentOperationCount:1];
+        _drawQueue = [[NSOperationQueue alloc] init];
+        [_drawQueue setMaxConcurrentOperationCount:1];
     }
     
     CLLocationCoordinate2D center = [self centerLatLonForTileX:path.x tileY:path.y zoom: path.z];
     OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout center:center zoom:path.z scaleFactor:path.contentScaleFactor result:result];
-    NSEnumerator *e = drawQueue.operations.reverseObjectEnumerator;
+    NSEnumerator *e = _drawQueue.operations.reverseObjectEnumerator;
     OSMScoutMKTileOperation *i;
     int count=0;
     while((i = [e nextObject])){
@@ -199,7 +199,7 @@ static double originShift = M_PI * 6378137;
             count++;
         }
     }
-    [drawQueue addOperation:drawOp];
+    [_drawQueue addOperation:drawOp];
     #if !__has_feature(objc_arc)
     [drawOp release];
     #endif

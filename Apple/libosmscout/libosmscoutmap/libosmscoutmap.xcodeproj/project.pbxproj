@@ -44,7 +44,6 @@
 		F51E3FA8161A65C000D51926 /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scanner.h; sourceTree = "<group>"; };
 		F51E3FAA161A65C000D51926 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		F51E3FAC161A65C000D51926 /* MapImportExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapImportExport.h; sourceTree = "<group>"; };
-		F51E3FAD161A65C000D51926 /* Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Math.h; sourceTree = "<group>"; };
 		F51E3FB0161A65C000D51926 /* StyleConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StyleConfig.h; sourceTree = "<group>"; };
 		F53BD16D163883E7006C7AE1 /* libosmscoutmap-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libosmscoutmap-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F53BD16E163883E7006C7AE1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
@@ -165,7 +164,6 @@
 			children = (
 				F51E3FAA161A65C000D51926 /* Config.h */,
 				F51E3FAC161A65C000D51926 /* MapImportExport.h */,
-				F51E3FAD161A65C000D51926 /* Math.h */,
 			);
 			path = private;
 			sourceTree = "<group>";
