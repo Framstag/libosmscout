@@ -172,13 +172,9 @@ void DBThread::ReloadStyle(const QString &suffix){
     if(m_stylesheetFilename.isNull()){
         return;
     }
-    if(styleConfig){
-        // There is no reset(styleConfig), styleConfig must be recreated
-        delete styleConfig;
-    }
+    styleConfig = NULL;
     if(painter){
-        //TODO: should be deleted but actually it crash...
-        //delete painter;
+        delete painter;
         painter = NULL;
     }
     styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
@@ -242,8 +238,7 @@ void DBThread::TriggerMapRendering()
   currentLat=request.lat;
   currentMagnification=request.magnification;
 
-  if (database->IsOpen() &&
-      styleConfig!=NULL) {
+  if (database->IsOpen() && styleConfig.Valid()) {
     osmscout::MercatorProjection  projection;
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
@@ -336,7 +331,7 @@ void DBThread::TriggerMapRendering()
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
   }
   else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig.Valid() << std::endl;
 
     QPainter p;
 

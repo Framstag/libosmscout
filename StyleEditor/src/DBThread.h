@@ -93,7 +93,7 @@ private:
   SettingsRef                  settings;
   mutable QMutex               mutex;
   osmscout::DatabaseParameter  databaseParameter;
-  osmscout::StyleConfig        *styleConfig;
+  osmscout::StyleConfigRef     styleConfig;
   osmscout::MapData            data;
   osmscout::MapPainterQt       *painter;
 
