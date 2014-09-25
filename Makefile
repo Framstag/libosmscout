@@ -15,6 +15,7 @@ programs = libosmscout \
            TravelJinni \
            OSMScout \
            OSMScout2 \
+           StyleEditor \
            Tests
 
 all:
