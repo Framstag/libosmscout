@@ -35,7 +35,7 @@ typedef void (^OSMScoutMKTileOperationCB)(NSData *tileData, NSError *error) ;
 @interface OSMScoutMKTileOverlay : MKTileOverlay {
     NSString                 *_path;
     OSMScout                *_osmScout;
-    NSOperationQueue        *drawQueue;
+    NSOperationQueue        *_drawQueue;
 
 }
 @property (retain, nonatomic) NSString *path;

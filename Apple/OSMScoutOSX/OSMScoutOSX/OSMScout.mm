@@ -34,14 +34,14 @@ namespace osmscout {
             std::string style = map.c_str();
             style += "/standard.oss";
             styleConfig=new StyleConfig(database.GetTypeConfig());
-            if (!LoadStyleConfig(style.c_str(),*styleConfig)) {
+            if (!styleConfig->Load(style)) {
                 std::cerr << "Cannot open style" << std::endl;
                 return false;
             }
         }
         
         if(!isMapPainterConfigured){
-            mapPainter = new osmscout::MapPainterIOS();
+            mapPainter = new osmscout::MapPainterIOS(styleConfig);
             drawParameter.SetFontName("GillSans");
             drawParameter.SetFontSize(1.5);
             std::list<std::string> paths;

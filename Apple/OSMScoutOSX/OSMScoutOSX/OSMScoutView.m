@@ -13,7 +13,7 @@
 
 // This should point to OSM data generated with the OSMScout Import tool
 // If not defined the data would be looked at in the App Document dir
-#define OSMSCOUTDATA @"/Users/vlad/Desktop/France"
+#define OSMSCOUTDATA @"/Users/vlad/Desktop/France.osmscout"
 // The center of the displayed map
 #define LATITUDE 43.694417
 #define LONGITUDE 7.279332
@@ -32,7 +32,6 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     overlay.path = [paths objectAtIndex:0];
 #endif
-    [self insertOverlay:overlay atIndex:0 level:MKOverlayLevelAboveLabels];
     tileOverlay = overlay;
     [self insertOverlay:tileOverlay atIndex:0 level:MKOverlayLevelAboveLabels];
 }
