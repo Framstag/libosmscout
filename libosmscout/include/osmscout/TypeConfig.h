@@ -719,6 +719,8 @@ namespace osmscout {
 
     void Set(const TypeInfoRef& type)
     {
+      assert(type.Valid());
+
       if (type->GetIndex()>=types.size()) {
         types.resize(type->GetIndex()+1);
       }
@@ -731,6 +733,8 @@ namespace osmscout {
 
     void Remove(const TypeInfoRef& type)
     {
+      assert(type.Valid());
+
       if (type->GetIndex()<types.size() &&
           types[type->GetIndex()].Valid()) {
         types[type->GetIndex()]=NULL;
@@ -753,16 +757,18 @@ namespace osmscout {
 
     bool IsSet(const TypeInfoRef& type) const
     {
+      assert(type.Valid());
+
       return type->GetIndex()<types.size() &&
              types[type->GetIndex()].Valid();
     }
 
-    bool Empty() const
+    inline bool Empty() const
     {
       return count==0;
     }
 
-    size_t Size() const
+    inline size_t Size() const
     {
       return count;
     }
@@ -777,13 +783,13 @@ namespace osmscout {
       return *this;
     }
 
-    TypeInfoSetConstIterator begin() const
+    inline TypeInfoSetConstIterator begin() const
     {
       return TypeInfoSetConstIterator(types.begin(),
                                       types.end());
     }
 
-    TypeInfoSetConstIterator end() const
+    inline TypeInfoSetConstIterator end() const
     {
       return TypeInfoSetConstIterator(types.end(),
                                       types.end());
