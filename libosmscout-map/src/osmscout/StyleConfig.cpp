@@ -1337,6 +1337,41 @@ namespace osmscout {
     // no code
   }
 
+  void StyleConfig::Reset()
+  {
+    symbols.clear();
+    emptySymbol=NULL;
+
+    nodeTextStyleConditionals.clear();
+    nodeIconStyleConditionals.clear();
+    nodeTextStyleSelectors.clear();
+    nodeIconStyleSelectors.clear();
+    nodeTypeSets.clear();
+
+    wayPrio.clear();
+    wayLineStyleConditionals.clear();
+    wayPathTextStyleConditionals.clear();
+    wayPathSymbolStyleConditionals.clear();
+    wayPathShieldStyleConditionals.clear();
+    wayLineStyleSelectors.clear();
+    wayPathTextStyleSelectors.clear();
+    wayPathSymbolStyleSelectors.clear();
+    wayPathShieldStyleSelectors.clear();
+    wayTypeSets.clear();
+
+    areaFillStyleConditionals.clear();
+    areaTextStyleConditionals.clear();
+    areaIconStyleConditionals.clear();
+    areaFillStyleSelectors.clear();
+    areaTextStyleSelectors.clear();
+    areaIconStyleSelectors.clear();
+    areaTypeSets.clear();
+
+    variables.clear();
+
+    wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
+  }
+
   StyleVariableRef StyleConfig::GetVariableByName(const std::string& name) const
   {
     StyleVariableRef result;
@@ -2234,6 +2269,8 @@ namespace osmscout {
     FileOffset fileSize;
     FILE*      file;
     bool       success=false;
+
+    Reset();
 
     if (!GetFileSize(styleFile,fileSize)) {
       std::cerr << "Cannot get size of file '" << styleFile << "'" << std::endl;
