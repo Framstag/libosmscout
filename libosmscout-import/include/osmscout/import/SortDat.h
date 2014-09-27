@@ -182,7 +182,7 @@ namespace osmscout {
     FileWriter dataWriter;
     FileWriter mapWriter;
     uint32_t   overallDataCount=0;
-    uint32_t   dataCopyiedCount=0;
+    uint32_t   dataCopiedCount=0;
     double     zoomLevel=pow(2.0,(double)parameter.GetSortTileMag());
     size_t     cellCount=zoomLevel*zoomLevel;
     size_t     minIndex=0;
@@ -231,16 +231,17 @@ namespace osmscout {
     mapWriter.Write(overallDataCount);
 
     while (true) {
-      progress.Info("Reading ways in cell range "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
+      progress.Info("Reading objects in cell range "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
 
-      size_t                                currentEntries=0;
+      size_t                                 currentEntries=0;
       std::map<size_t,std::list<CellEntry> > dataByCellMap;
+      bool                                   reduction=false;
 
       for (typename std::list<Source>::iterator source=sources.begin();
-              source!=sources.end();
+              source!=sources.end() && !reduction;
               ++source) {
         uint32_t dataCount;
-        progress.Info("Reading data from file '"+source->scanner.GetFilename()+"'");
+        progress.Info("Reading objects from file '"+source->scanner.GetFilename()+"'");
 
         if (!source->scanner.GotoBegin()) {
           progress.Error(std::string("Error while setting current position in file '")+
@@ -286,8 +287,8 @@ namespace osmscout {
 
           GetTopLeftCoordinate(data,maxLat,minLon);
 
-          size_t cellY=(size_t)((maxLat+90.0)/zoomLevel);
-          size_t cellX=(size_t)((minLon+180.0)/zoomLevel);
+          size_t cellY=(size_t)((maxLat+90.0)/180.0*zoomLevel);
+          size_t cellX=(size_t)((minLon+180.0)/360.0*zoomLevel);
           size_t cellIndex=cellY*zoomLevel+cellX;
 
           if (cellIndex>=minIndex &&
@@ -300,9 +301,10 @@ namespace osmscout {
             currentEntries++;
           }
 
-          // Reduce cell interval,deleting all already stored nodes beyond the new
+          // Reduce cell interval, deleting all already stored nodes beyond the new
           // cell range end.
-          if (currentEntries>parameter.GetSortBlockSize()) {
+          if (currentEntries>parameter.GetSortBlockSize() &&
+              dataByCellMap.size()>1) {
             size_t                                                    count=0;
             typename std::map<size_t,std::list<CellEntry> >::iterator cutOff=dataByCellMap.end();
 
@@ -315,8 +317,8 @@ namespace osmscout {
                 break;
               }
               else {
-                count+=iter->second.size();
                 maxIndex=iter->first;
+                count+=iter->second.size();
               }
             }
 
@@ -326,6 +328,10 @@ namespace osmscout {
             dataByCellMap.erase(cutOff,dataByCellMap.end());
 
             progress.Debug("Reducing cell range to "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
+
+            reduction=true;
+
+            break;
           }
 
           current++;
@@ -410,7 +416,7 @@ namespace osmscout {
           mapWriter.WriteFileOffset(fileOffset);
 
           copyCount++;
-          dataCopyiedCount++;
+          dataCopiedCount++;
         }
       }
 
@@ -428,7 +434,7 @@ namespace osmscout {
       maxIndex=cellCount-1;
     }
 
-    assert(overallDataCount>=dataCopyiedCount);
+    assert(overallDataCount>=dataCopiedCount);
 
     for (typename std::list<Source>::iterator source=sources.begin();
             source!=sources.end();
@@ -439,11 +445,13 @@ namespace osmscout {
       }
     }
 
+    progress.Info(NumberToString(dataCopiedCount)+" of " +NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+
     dataWriter.SetPos(0);
-    dataWriter.Write(dataCopyiedCount);
+    dataWriter.Write(dataCopiedCount);
 
     mapWriter.SetPos(0);
-    mapWriter.Write(dataCopyiedCount);
+    mapWriter.Write(dataCopiedCount);
 
     return dataWriter.Close() &&
            mapWriter.Close();
@@ -581,6 +589,8 @@ namespace osmscout {
 
     mapWriter.SetPos(0);
     mapWriter.Write(overallDataCount);
+
+    progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
     return dataWriter.Close() &&
            mapWriter.Close();
