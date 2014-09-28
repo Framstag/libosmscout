@@ -172,12 +172,9 @@ void DBThread::ReloadStyle(const QString &suffix){
     if(m_stylesheetFilename.isNull()){
         return;
     }
-    styleConfig = NULL;
-    if(painter){
-        delete painter;
-        painter = NULL;
+    if(styleConfig.Invalid()){
+        styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
     }
-    styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
     if (!styleConfig->Load((m_stylesheetFilename+suffix).toLocal8Bit().data())) {
         delete styleConfig;
         styleConfig=NULL;
