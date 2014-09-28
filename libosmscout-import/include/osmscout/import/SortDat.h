@@ -235,10 +235,9 @@ namespace osmscout {
 
       size_t                                 currentEntries=0;
       std::map<size_t,std::list<CellEntry> > dataByCellMap;
-      bool                                   reduction=false;
 
       for (typename std::list<Source>::iterator source=sources.begin();
-              source!=sources.end() && !reduction;
+              source!=sources.end();
               ++source) {
         uint32_t dataCount;
         progress.Info("Reading objects from file '"+source->scanner.GetFilename()+"'");
@@ -306,13 +305,14 @@ namespace osmscout {
           if (currentEntries>parameter.GetSortBlockSize() &&
               dataByCellMap.size()>1) {
             size_t                                                    count=0;
+            size_t                                                    cutLimit=parameter.GetSortBlockSize()*9/10;
             typename std::map<size_t,std::list<CellEntry> >::iterator cutOff=dataByCellMap.end();
 
             for (typename std::map<size_t,std::list<CellEntry> >::iterator iter=dataByCellMap.begin();
                 iter!=dataByCellMap.end();
                 ++iter) {
-              if (count<=parameter.GetSortBlockSize() &&
-                  count+iter->second.size()>parameter.GetSortBlockSize()) {
+              if (count<=cutLimit &&
+                  count+iter->second.size()>cutLimit) {
                 cutOff=iter;
                 break;
               }
@@ -326,12 +326,6 @@ namespace osmscout {
 
             currentEntries=count;
             dataByCellMap.erase(cutOff,dataByCellMap.end());
-
-            progress.Debug("Reducing cell range to "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
-
-            reduction=true;
-
-            break;
           }
 
           current++;

@@ -89,7 +89,7 @@ namespace osmscout {
      strictAreas(false),
      sortObjects(true),
      sortBlockSize(40000000),
-     sortTileMag(13),
+     sortTileMag(14),
      numericIndexPageSize(4096),
      coordDataMemoryMaped(false),
      rawNodeDataMemoryMaped(false),
