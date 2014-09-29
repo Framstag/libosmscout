@@ -1471,10 +1471,8 @@ namespace osmscout {
            ++c) {
         const ConditionalStyle<S,A>& conditional=*c;
 
-        for (TypeId type=0;
-            type<=typeConfig.GetMaxTypeId();
-            type++) {
-          if (!conditional.filter.HasType(type)) {
+        for (const auto& type : typeConfig.GetTypes()) {
+          if (!conditional.filter.HasType(type->GetId())) {
             continue;
           }
 
@@ -1487,7 +1485,7 @@ namespace osmscout {
             continue;
           }
 
-          typeSets[level].SetType(type);
+          typeSets[level].SetType(type->GetId());
         }
       }
     }
@@ -1499,12 +1497,10 @@ namespace osmscout {
                           size_t maxLevel,
                           std::vector<std::vector<std::list<StyleSelector<S,A> > > >& selectors)
   {
-    selectors.resize(typeConfig.GetMaxTypeId()+1);
+    selectors.resize(typeConfig.GetTypeCount());
 
-    for (TypeId type=0;
-        type<=typeConfig.GetMaxTypeId();
-        type++) {
-      selectors[type].resize(maxLevel+1);
+    for (auto& selector : selectors) {
+      selector.resize(maxLevel+1);
     }
 
     for (typename std::list<ConditionalStyle<S,A> >::const_iterator conditional=conditionals.begin();
@@ -1512,10 +1508,8 @@ namespace osmscout {
          ++conditional) {
       StyleSelector<S,A> selector(conditional->filter,conditional->style);
 
-      for (TypeId type=0;
-          type<=typeConfig.GetMaxTypeId();
-          type++) {
-        if (!conditional->filter.HasType(type)) {
+      for (const auto& type : typeConfig.GetTypes()) {
+        if (!conditional->filter.HasType(type->GetId())) {
           continue;
         }
 
@@ -1530,24 +1524,21 @@ namespace osmscout {
         }
 
         for (size_t level=minLvl; level<=maxLvl; level++) {
-          selectors[type][level].push_back(selector);
+          selectors[type->GetIndex()][level].push_back(selector);
         }
       }
     }
 
-    for (TypeId type=0;
-        type<selectors.size();
-        type++) {
-      for (size_t level=0; level<selectors[type].size(); level++) {
-
-        if (selectors[type][level].size()>=2) {
+    for (auto& selector : selectors) {
+      for (size_t level=0; level<selector.size(); level++) {
+        if (selector[level].size()>=2) {
           // If two consecutive conditions are equal, one can be removed and the style can get merged
-          typename std::list<StyleSelector<S,A> >::iterator prevSelector=selectors[type][level].begin();
+          typename std::list<StyleSelector<S,A> >::iterator prevSelector=selector[level].begin();
           typename std::list<StyleSelector<S,A> >::iterator curSelector=prevSelector;
 
           curSelector++;
 
-          while (curSelector!=selectors[type][level].end()) {
+          while (curSelector!=selector[level].end()) {
             if (prevSelector->criteria==curSelector->criteria) {
               prevSelector->attributes.insert(curSelector->attributes.begin(),
                                               curSelector->attributes.end());
@@ -1555,7 +1546,7 @@ namespace osmscout {
               prevSelector->style->CopyAttributes(curSelector->style,
                                                   curSelector->attributes);
 
-              curSelector=selectors[type][level].erase(curSelector);
+              curSelector=selector[level].erase(curSelector);
             }
             else {
               prevSelector=curSelector;
@@ -1565,17 +1556,10 @@ namespace osmscout {
         }
 
         // If there is only one conditional and it is not visible, we can remove it
-        if (selectors[type][level].size()==1 &&
-            !selectors[type][level].front().style->IsVisible()) {
-          selectors[type][level].clear();
+        if (selector[level].size()==1 &&
+            !selector[level].front().style->IsVisible()) {
+          selector[level].clear();
         }
-      }
-    }
-
-    for (TypeId type=0;
-        type<selectors.size();
-        type++) {
-      for (size_t level=0; level<selectors[type].size(); level++) {
       }
     }
   }
@@ -1681,26 +1665,27 @@ namespace osmscout {
           ++prio) {
         TypeSet typeSet(*typeConfig);
 
-        for (TypeId type=0; type<wayPrio.size(); type++) {
-          if (!typeConfig->GetTypeInfo(type)->CanBeWay() ||
-              wayPrio[type]!=*prio) {
+        for (const auto& type : typeConfig->GetTypes()) {
+          if (!type->CanBeWay() ||
+              type->GetId()>=wayPrio.size() ||
+              wayPrio[type->GetId()]!=*prio) {
             continue;
           }
 
           for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-            if (!wayLineStyleSelectors[slot][type][level].empty()) {
-              typeSet.SetType(type);
+            if (!wayLineStyleSelectors[slot][type->GetIndex()][level].empty()) {
+              typeSet.SetType(type->GetId());
             }
           }
 
-          if (!wayPathTextStyleSelectors[type][level].empty()) {
-            typeSet.SetType(type);
+          if (!wayPathTextStyleSelectors[type->GetIndex()][level].empty()) {
+            typeSet.SetType(type->GetId());
           }
-          else if (!wayPathSymbolStyleSelectors[type][level].empty()) {
-            typeSet.SetType(type);
+          else if (!wayPathSymbolStyleSelectors[type->GetIndex()][level].empty()) {
+            typeSet.SetType(type->GetId());
           }
-          else if (!wayPathShieldStyleSelectors[type][level].empty()) {
-            typeSet.SetType(type);
+          else if (!wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
+            typeSet.SetType(type->GetId());
           }
         }
 
@@ -1769,46 +1754,42 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<std::string,size_t> symbolIdMap;
     size_t                               nextId=1;
 
-    for (size_t type=0; type<areaIconStyleSelectors.size(); type++) {
-      for (size_t level=0; level<areaIconStyleSelectors[type].size(); level++) {
-        for (std::list<IconStyleSelector>::iterator selector=areaIconStyleSelectors[type][level].begin();
-             selector!=areaIconStyleSelectors[type][level].end();
-             ++selector) {
-          if (!selector->style->GetIconName().empty()) {
-            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector->style->GetIconName());
+    for (auto& typeSelector : areaIconStyleSelectors) {
+      for (auto& levelSelector : typeSelector) {
+        for (auto& selector : levelSelector) {
+          if (!selector.style->GetIconName().empty()) {
+            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector.style->GetIconName());
 
             if (entry==symbolIdMap.end()) {
-              symbolIdMap.insert(std::make_pair(selector->style->GetIconName(),nextId));
+              symbolIdMap.insert(std::make_pair(selector.style->GetIconName(),nextId));
 
-              selector->style->SetIconId(nextId);
+              selector.style->SetIconId(nextId);
 
               nextId++;
             }
             else {
-              selector->style->SetIconId(entry->second);
+              selector.style->SetIconId(entry->second);
             }
           }
         }
       }
     }
 
-    for (size_t type=0; type<nodeIconStyleSelectors.size(); type++) {
-      for (size_t level=0; level<nodeIconStyleSelectors[type].size(); level++) {
-        for (std::list<IconStyleSelector>::iterator selector=nodeIconStyleSelectors[type][level].begin();
-             selector!=nodeIconStyleSelectors[type][level].end();
-             ++selector) {
-          if (!selector->style->GetIconName().empty()) {
-            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector->style->GetIconName());
+    for (auto& typeSelector: nodeIconStyleSelectors) {
+      for (auto& levelSelector : typeSelector) {
+        for (auto& selector : levelSelector) {
+          if (!selector.style->GetIconName().empty()) {
+            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector.style->GetIconName());
 
             if (entry==symbolIdMap.end()) {
-              symbolIdMap.insert(std::make_pair(selector->style->GetIconName(),nextId));
+              symbolIdMap.insert(std::make_pair(selector.style->GetIconName(),nextId));
 
-              selector->style->SetIconId(nextId);
+              selector.style->SetIconId(nextId);
 
               nextId++;
             }
             else {
-              selector->style->SetIconId(entry->second);
+              selector.style->SetIconId(entry->second);
             }
           }
         }
@@ -1821,23 +1802,21 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<std::string,size_t> symbolIdMap;
     size_t                               nextId=1;
 
-    for (size_t type=0; type<areaFillStyleSelectors.size(); type++) {
-      for (size_t level=0; level<areaFillStyleSelectors[type].size(); level++) {
-        for (std::list<FillStyleSelector>::iterator selector=areaFillStyleSelectors[type][level].begin();
-             selector!=areaFillStyleSelectors[type][level].end();
-             ++selector) {
-          if (!selector->style->GetPatternName().empty()) {
-            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector->style->GetPatternName());
+    for (auto& typeSelector : areaFillStyleSelectors) {
+      for (auto& levelSelector: typeSelector) {
+        for (auto& selector : levelSelector) {
+          if (!selector.style->GetPatternName().empty()) {
+            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector.style->GetPatternName());
 
             if (entry==symbolIdMap.end()) {
-              symbolIdMap.insert(std::make_pair(selector->style->GetPatternName(),nextId));
+              symbolIdMap.insert(std::make_pair(selector.style->GetPatternName(),nextId));
 
-              selector->style->SetPatternId(nextId);
+              selector.style->SetPatternId(nextId);
 
               nextId++;
             }
             else {
-              selector->style->SetPatternId(entry->second);
+              selector.style->SetPatternId(entry->second);
             }
           }
         }
@@ -2075,7 +2054,7 @@ namespace osmscout {
                                      TextStyleRef& textStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    nodeTextStyleSelectors[buffer.GetType()->GetId()],
+                    nodeTextStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2088,7 +2067,7 @@ namespace osmscout {
                                      IconStyleRef& iconStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    nodeIconStyleSelectors[buffer.GetType()->GetId()],
+                    nodeIconStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2109,7 +2088,7 @@ namespace osmscout {
       style=NULL;
 
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][buffer.GetType()->GetId()],
+                      wayLineStyleSelectors[slot][buffer.GetType()->GetIndex()],
                       buffer,
                       projection,
                       dpi,
@@ -2127,7 +2106,7 @@ namespace osmscout {
                                         PathTextStyleRef& pathTextStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    wayPathTextStyleSelectors[buffer.GetType()->GetId()],
+                    wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2140,7 +2119,7 @@ namespace osmscout {
                                           PathSymbolStyleRef& pathSymbolStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    wayPathSymbolStyleSelectors[buffer.GetType()->GetId()],
+                    wayPathSymbolStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2153,7 +2132,7 @@ namespace osmscout {
                                           PathShieldStyleRef& pathShieldStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    wayPathShieldStyleSelectors[buffer.GetType()->GetId()],
+                    wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2167,7 +2146,7 @@ namespace osmscout {
                                      FillStyleRef& fillStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[type->GetId()],
+                    areaFillStyleSelectors[type->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2181,7 +2160,7 @@ namespace osmscout {
                                      TextStyleRef& textStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaTextStyleSelectors[type->GetId()],
+                    areaTextStyleSelectors[type->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2195,7 +2174,7 @@ namespace osmscout {
                                      IconStyleRef& iconStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaIconStyleSelectors[type->GetId()],
+                    areaIconStyleSelectors[type->GetIndex()],
                     buffer,
                     projection,
                     dpi,
@@ -2207,7 +2186,7 @@ namespace osmscout {
                                      FillStyleRef& fillStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileLandBuffer.GetType()->GetId()],
+                    areaFillStyleSelectors[tileLandBuffer.GetType()->GetIndex()],
                     tileLandBuffer,
                     projection,
                     dpi,
@@ -2219,7 +2198,7 @@ namespace osmscout {
                                     FillStyleRef& fillStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileSeaBuffer.GetType()->GetId()],
+                    areaFillStyleSelectors[tileSeaBuffer.GetType()->GetIndex()],
                     tileSeaBuffer,
                     projection,
                     dpi,
@@ -2231,7 +2210,7 @@ namespace osmscout {
                                       FillStyleRef& fillStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileCoastBuffer.GetType()->GetId()],
+                    areaFillStyleSelectors[tileCoastBuffer.GetType()->GetIndex()],
                     tileCoastBuffer,
                     projection,
                     dpi,
@@ -2243,7 +2222,7 @@ namespace osmscout {
                                         FillStyleRef& fillStyle) const
   {
     GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetId()],
+                    areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetIndex()],
                     tileUnknownBuffer,
                     projection,
                     dpi,
@@ -2256,7 +2235,7 @@ namespace osmscout {
   {
     for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][tileCoastlineBuffer.GetType()->GetId()],
+                      wayLineStyleSelectors[slot][tileCoastlineBuffer.GetType()->GetIndex()],
                       tileCoastlineBuffer,
                       projection,
                       dpi,
