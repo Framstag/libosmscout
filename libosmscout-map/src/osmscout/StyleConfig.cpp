@@ -1177,7 +1177,7 @@ namespace osmscout {
     this->sizeCondition=other.sizeCondition;
   }
 
-  StyleFilter& StyleFilter::SetTypes(const TypeSet& types)
+  StyleFilter& StyleFilter::SetTypes(const TypeInfoSet& types)
   {
     this->types=types;
 
@@ -1472,7 +1472,7 @@ namespace osmscout {
         const ConditionalStyle<S,A>& conditional=*c;
 
         for (const auto& type : typeConfig.GetTypes()) {
-          if (!conditional.filter.HasType(type->GetId())) {
+          if (!conditional.filter.HasType(type)) {
             continue;
           }
 
@@ -1509,7 +1509,7 @@ namespace osmscout {
       StyleSelector<S,A> selector(conditional->filter,conditional->style);
 
       for (const auto& type : typeConfig.GetTypes()) {
-        if (!conditional->filter.HasType(type->GetId())) {
+        if (!conditional->filter.HasType(type)) {
           continue;
         }
 

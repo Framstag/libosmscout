@@ -698,14 +698,14 @@ void Parser::UINT(size_t& value) {
 void Parser::STYLEFILTER(StyleFilter& filter) {
 		Expect(26 /* "[" */);
 		if (la->kind == 27 /* "TYPE" */) {
-			TypeSet     types;
+			TypeInfoSet types;
 			std::string name;
 			
 			Get();
 			IDENT(name);
-			TypeId type=config.GetTypeConfig()->GetTypeId(name);
+			TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 			
-			if (type==typeIgnore) {
+			if (type==config.GetTypeConfig()->typeInfoIgnore) {
 			 std::string e="Unknown type '"+name+"'";
 			
 			 SemErr(e.c_str());
@@ -717,16 +717,16 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			 SemErr(e.c_str());
 			}
 			else {
-			 types.SetType(type);
+			 types.Set(type);
 			}
 			
 			while (la->kind == 12 /* "," */) {
 				std::string name; 
 				Get();
 				IDENT(name);
-				TypeId      type=config.GetTypeConfig()->GetTypeId(name);
+				TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 				
-				if (type==typeIgnore) {
+				if (type==config.GetTypeConfig()->typeInfoIgnore) {
 				 std::string e="Unknown type '"+name+"'";
 				
 				 SemErr(e.c_str());
@@ -738,7 +738,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 				 SemErr(e.c_str());
 				}
 				else {
-				 types.SetType(type);
+				 types.Set(type);
 				}
 				
 			}

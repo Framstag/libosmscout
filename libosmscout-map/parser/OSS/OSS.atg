@@ -390,16 +390,16 @@ PRODUCTIONS
               = "["
                    [
                      (.
-                       TypeSet     types;
+                       TypeInfoSet types;
                        std::string name;
                      .)
 
                      "TYPE"
                      IDENT<name>
                      (.
-                       TypeId type=config.GetTypeConfig()->GetTypeId(name);
+                       TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 
-                       if (type==typeIgnore) {
+                       if (type==config.GetTypeConfig()->typeInfoIgnore) {
                          std::string e="Unknown type '"+name+"'";
 
                          SemErr(e.c_str());
@@ -411,7 +411,7 @@ PRODUCTIONS
                          SemErr(e.c_str());
                        }
                        else {
-                         types.SetType(type);
+                         types.Set(type);
                        }
                      .)
                      {
@@ -419,9 +419,9 @@ PRODUCTIONS
                        ","
                        IDENT<name>
                        (.
-                         TypeId      type=config.GetTypeConfig()->GetTypeId(name);
+                         TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 
-                         if (type==typeIgnore) {
+                         if (type==config.GetTypeConfig()->typeInfoIgnore) {
                            std::string e="Unknown type '"+name+"'";
 
                            SemErr(e.c_str());
@@ -433,7 +433,7 @@ PRODUCTIONS
                            SemErr(e.c_str());
                          }
                          else {
-                           types.SetType(type);
+                           types.Set(type);
                          }
                        .)
                      }

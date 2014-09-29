@@ -145,7 +145,7 @@ namespace osmscout {
   public:
 
   private:
-    TypeSet               types;
+    TypeInfoSet           types;
     size_t                minLevel;
     size_t                maxLevel;
     bool                  bridge;
@@ -157,7 +157,7 @@ namespace osmscout {
     StyleFilter();
     StyleFilter(const StyleFilter& other);
 
-    StyleFilter& SetTypes(const TypeSet& types);
+    StyleFilter& SetTypes(const TypeInfoSet& types);
 
     StyleFilter& SetMinLevel(size_t level);
     StyleFilter& SetMaxLevel(size_t level);
@@ -169,12 +169,12 @@ namespace osmscout {
 
     inline bool HasTypes() const
     {
-      return types.HasTypes();
+      return !types.Empty();
     }
 
-    inline bool HasType(TypeId typeId) const
+    inline bool HasType(const TypeInfoRef& type) const
     {
-      return types.IsTypeSet(typeId);
+      return types.IsSet(type);
     }
 
     inline size_t GetMinLevel() const
