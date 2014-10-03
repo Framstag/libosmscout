@@ -1328,8 +1328,6 @@ namespace osmscout {
     tileCoastBuffer.SetType(typeConfig->typeInfoTileCoast);
     tileUnknownBuffer.SetType(typeConfig->typeInfoTileUnknown);
     tileCoastlineBuffer.SetType(typeConfig->typeInfoTileCoastline);
-
-    wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
   }
 
   StyleConfig::~StyleConfig()
@@ -1368,8 +1366,6 @@ namespace osmscout {
     areaTypeSets.clear();
 
     variables.clear();
-
-    wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
   }
 
   StyleVariableRef StyleConfig::GetVariableByName(const std::string& name) const
@@ -1444,11 +1440,7 @@ namespace osmscout {
   template <class S, class A>
   void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals, size_t& maxLevel)
   {
-    for (typename std::list<ConditionalStyle<S,A> >::const_iterator c=conditionals.begin();
-         c!=conditionals.end();
-         ++c) {
-      const ConditionalStyle<S,A>& conditional=*c;
-
+    for (const auto& conditional : conditionals) {
       maxLevel=std::max(maxLevel,conditional.filter.GetMinLevel()+1);
 
       if (conditional.filter.HasMaxLevel()) {
@@ -1466,11 +1458,7 @@ namespace osmscout {
     for (size_t level=0;
         level<maxLevel;
         ++level) {
-      for (typename std::list<ConditionalStyle<S,A> >::const_iterator c=conditionals.begin();
-           c!=conditionals.end();
-           ++c) {
-        const ConditionalStyle<S,A>& conditional=*c;
-
+      for (const auto& conditional : conditionals) {
         for (const auto& type : typeConfig.GetTypes()) {
           if (!conditional.filter.HasType(type)) {
             continue;
@@ -1503,25 +1491,16 @@ namespace osmscout {
       selector.resize(maxLevel+1);
     }
 
-    for (typename std::list<ConditionalStyle<S,A> >::const_iterator conditional=conditionals.begin();
-         conditional!=conditionals.end();
-         ++conditional) {
-      StyleSelector<S,A> selector(conditional->filter,conditional->style);
+    for (const auto& conditional: conditionals) {
+      StyleSelector<S,A> selector(conditional.filter,conditional.style);
 
       for (const auto& type : typeConfig.GetTypes()) {
-        if (!conditional->filter.HasType(type)) {
+        if (!conditional.filter.HasType(type)) {
           continue;
         }
 
-        size_t minLvl=conditional->filter.GetMinLevel();
-        size_t maxLvl=maxLevel;
-
-        if (conditional->filter.HasMaxLevel()) {
-          maxLvl=conditional->filter.GetMaxLevel();
-        }
-        else {
-          maxLvl=maxLevel;
-        }
+        size_t minLvl=conditional.filter.GetMinLevel();
+        size_t maxLvl=conditional.filter.HasMaxLevel() ? conditional.filter.GetMaxLevel() : maxLevel;
 
         for (size_t level=minLvl; level<=maxLvl; level++) {
           selectors[type->GetIndex()][level].push_back(selector);
@@ -1616,10 +1595,8 @@ namespace osmscout {
 
     OSMSCOUT_HASHMAP<std::string,std::list<LineConditionalStyle> > lineStyleBySlot;
 
-    for (std::list<LineConditionalStyle>::const_iterator entry=wayLineStyleConditionals.begin();
-         entry!=wayLineStyleConditionals.end();
-         ++entry) {
-      lineStyleBySlot[entry->style.style->GetSlot()].push_back(*entry);
+    for (auto& conditional : wayLineStyleConditionals) {
+      lineStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
     }
 
     wayLineStyleSelectors.resize(lineStyleBySlot.size());
@@ -1651,26 +1628,28 @@ namespace osmscout {
 
     wayTypeSets.resize(maxLevel);
 
-    std::set<size_t> prios;
+    std::map<size_t,std::list<TypeInfoRef>> wayTypeByPrioMap;
 
-    for (TypeId type=0; type<wayPrio.size(); type++) {
-      prios.insert(wayPrio[type]);
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->GetIndex()<wayPrio.size()) {
+        wayTypeByPrioMap[wayPrio[type->GetIndex()]].push_back(type);
+      }
     }
 
     for (size_t level=0;
         level<maxLevel;
         ++level) {
-      for (std::set<size_t>::const_iterator prio=prios.begin();
-          prio!=prios.end();
+      for (std::map<size_t,std::list<TypeInfoRef>>::const_iterator prio=wayTypeByPrioMap.begin();
+          prio!=wayTypeByPrioMap.end();
           ++prio) {
-        TypeSet typeSet(*typeConfig);
 
-        for (const auto& type : typeConfig->GetTypes()) {
-          if (!type->CanBeWay() ||
-              type->GetId()>=wayPrio.size() ||
-              wayPrio[type->GetId()]!=*prio) {
+        for (const auto& type : prio->second) {
+          if (!type->CanBeWay()) {
+            // we ignore any way specific style sheets for this type, since there will be no way for it :-)
             continue;
           }
+
+          TypeSet typeSet(*typeConfig);
 
           for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
             if (!wayLineStyleSelectors[slot][type->GetIndex()][level].empty()) {
@@ -1678,19 +1657,15 @@ namespace osmscout {
             }
           }
 
-          if (!wayPathTextStyleSelectors[type->GetIndex()][level].empty()) {
+          if (!wayPathTextStyleSelectors[type->GetIndex()][level].empty() ||
+              !wayPathSymbolStyleSelectors[type->GetIndex()][level].empty() ||
+              !wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
             typeSet.SetType(type->GetId());
           }
-          else if (!wayPathSymbolStyleSelectors[type->GetIndex()][level].empty()) {
-            typeSet.SetType(type->GetId());
-          }
-          else if (!wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
-            typeSet.SetType(type->GetId());
-          }
-        }
 
-        if (typeSet.HasTypes()) {
-          wayTypeSets[level].push_back(typeSet);
+          if (typeSet.HasTypes()) {
+            wayTypeSets[level].push_back(typeSet);
+          }
         }
       }
     }
@@ -1839,9 +1814,15 @@ namespace osmscout {
     return typeConfig;
   }
 
-  StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
+  StyleConfig& StyleConfig::SetWayPrio(const TypeInfoRef& type,
+                                       size_t prio)
   {
-    wayPrio[type]=prio;
+    if (wayPrio.size()<=type->GetIndex()) {
+      wayPrio.resize(type->GetIndex()+1,
+                     std::numeric_limits<size_t>::max());
+    }
+
+    wayPrio[type->GetIndex()]=prio;
 
     return *this;
   }

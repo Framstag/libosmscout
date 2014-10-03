@@ -216,34 +216,44 @@ void Parser::WAYGROUP(size_t priority) {
 		Expect(11 /* "GROUP" */);
 		if (la->kind == _ident) {
 			std::string wayTypeName;
-			TypeId      wayType;
+			TypeInfoRef wayType;
 			
 			IDENT(wayTypeName);
-			wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
+			wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 			
-			if (wayType==typeIgnore) {
+			if (wayType.Invalid()) {
 			  std::string e="Unknown way type '"+wayTypeName+"'";
 			  SemErr(e.c_str());
 			}
+			else if (!wayType->CanBeWay()) {
+			  std::string e="Tyype '"+wayTypeName+"' is not a way type";
+			  SemErr(e.c_str());
+			}
 			else {
-			  config.SetWayPrio(wayType,priority);
+			  config.SetWayPrio(wayType,
+			                    priority);
 			}
 			
 		}
 		while (la->kind == 12 /* "," */) {
 			std::string wayTypeName;
-			TypeId      wayType;
+			TypeInfoRef wayType;
 			
 			Get();
 			IDENT(wayTypeName);
-			wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
+			wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 			
-			if (wayType==typeIgnore) {
-			  std::string e="Unknown way type '"+wayTypeName+"'";
+			if (wayType.Invalid()) {
+			 std::string e="Unknown way type '"+wayTypeName+"'";
+			 SemErr(e.c_str());
+			}
+			else if (!wayType->CanBeWay()) {
+			 std::string e="Tyype '"+wayTypeName+"' is not a way type";
 			 SemErr(e.c_str());
 			}
 			else {
-			  config.SetWayPrio(wayType,priority);
+			 config.SetWayPrio(wayType,
+			                   priority);
 			}
 			
 		}
@@ -705,7 +715,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			IDENT(name);
 			TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 			
-			if (type==config.GetTypeConfig()->typeInfoIgnore) {
+			if (type.Invalid()) {
 			 std::string e="Unknown type '"+name+"'";
 			
 			 SemErr(e.c_str());
@@ -726,7 +736,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 				IDENT(name);
 				TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 				
-				if (type==config.GetTypeConfig()->typeInfoIgnore) {
+				if (type.Invalid()) {
 				 std::string e="Unknown type '"+name+"'";
 				
 				 SemErr(e.c_str());

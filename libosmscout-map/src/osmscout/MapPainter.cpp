@@ -1310,7 +1310,6 @@ namespace osmscout {
     NameFeatureValue *nameValue=nameReader.GetValue(*data.buffer);
     RefFeatureValue  *refValue=refReader.GetValue(*data.buffer);
 
-
     if (nameValue== NULL &&
         refValue==NULL) {
       return;
@@ -1586,10 +1585,7 @@ namespace osmscout {
     size_t transStart=0; // Make the compiler happy
     size_t transEnd=0;   // Make the compiler happy
 
-    for (std::vector<LineStyleRef>::const_iterator ls=lineStyles.begin();
-         ls!=lineStyles.end();
-         ++ls) {
-      LineStyleRef lineStyle(*ls);
+    for (const auto& lineStyle : lineStyles) {
       double       lineWidth=0.0;
       double       lineOffset=0.0;
 
@@ -1660,7 +1656,7 @@ namespace osmscout {
       data.layer=0;
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
-      data.wayPriority=styleConfig.GetWayPrio(buffer.GetType()->GetId());
+      data.wayPriority=styleConfig.GetWayPrio(buffer.GetType());
       data.startIsClosed=ids.empty() || ids[0]==0;
       data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
 
@@ -1694,11 +1690,7 @@ namespace osmscout {
     wayData.clear();
     wayPathData.clear();
 
-    for (std::vector<WayRef>::const_iterator w=data.ways.begin();
-         w!=data.ways.end();
-         ++w) {
-      const WayRef& way=*w;
-
+    for (const auto& way : data.ways) {
       PrepareWaySegment(styleConfig,
                         projection,
                         parameter,
@@ -1708,11 +1700,7 @@ namespace osmscout {
                         way->ids);
     }
 
-    for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
-         p!=data.poiWays.end();
-         ++p) {
-      const WayRef& way=*p;
-
+    for (const auto& way : data.poiWays) {
       PrepareWaySegment(styleConfig,
                         projection,
                         parameter,

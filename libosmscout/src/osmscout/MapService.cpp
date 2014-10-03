@@ -339,11 +339,9 @@ namespace osmscout {
 
     OSMSCOUT_HASHMAP<FileOffset,WayRef> cachedWays;
 
-    for (std::vector<WayRef>::const_iterator way=ways.begin();
-        way!=ways.end();
-        ++way) {
-      if ((*way)->GetFileOffset()!=0) {
-        cachedWays[(*way)->GetFileOffset()]=*way;
+    for (auto& way : ways) {
+      if (way->GetFileOffset()!=0) {
+        cachedWays[way->GetFileOffset()]=way;
       }
     }
 
@@ -389,7 +387,7 @@ namespace osmscout {
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
                                     offsets)) {
-        std::cout << "Error getting ways Glations from area way index!" << std::endl;
+        std::cout << "Error getting ways from area way index!" << std::endl;
         return false;
       }
     }

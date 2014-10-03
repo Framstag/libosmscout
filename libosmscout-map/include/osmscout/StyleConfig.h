@@ -1277,7 +1277,8 @@ namespace osmscout {
 
     TypeConfigRef GetTypeConfig() const;
 
-    StyleConfig& SetWayPrio(TypeId type, size_t prio);
+    StyleConfig& SetWayPrio(const TypeInfoRef& type,
+                            size_t prio);
 
     void AddNodeTextStyle(const StyleFilter& filter,
                           TextPartialStyle& stype);
@@ -1308,10 +1309,10 @@ namespace osmscout {
                                 TypeSet& types) const;
 
 
-    inline size_t GetWayPrio(TypeId type) const
+    inline size_t GetWayPrio(const TypeInfoRef& type) const
     {
-      if (type<wayPrio.size()) {
-        return wayPrio[type];
+      if (type->GetIndex()<wayPrio.size()) {
+        return wayPrio[type->GetIndex()];
       }
       else {
         return std::numeric_limits<size_t>::max();
