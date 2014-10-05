@@ -261,7 +261,7 @@ namespace osmscout {
     size_t                level;
     size_t                maxLevel=0;
 
-    wayTypeData.resize(typeConfig->GetTypes().size());
+    wayTypeData.resize(typeConfig->GetTypeCount());
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
@@ -285,7 +285,7 @@ namespace osmscout {
       TypeInfoSet                currentWayTypes(remainingWayTypes);
       double                     cellWidth=360.0/pow(2.0,(int)level);
       double                     cellHeight=180.0/pow(2.0,(int)level);
-      std::vector<CoordCountMap> cellFillCount(typeConfig->GetTypes().size());
+      std::vector<CoordCountMap> cellFillCount(typeConfig->GetTypeCount());
 
       progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
 
@@ -380,21 +380,19 @@ namespace osmscout {
 
     uint32_t indexEntries=0;
 
-    for (size_t i=0; i<typeConfig->GetTypes().size(); i++)
+    for (const auto& type : typeConfig->GetWayTypes())
     {
-      if (typeConfig->GetTypeInfo(i)->CanBeWay() &&
-          wayTypeData[i].HasEntries()) {
+      if (wayTypeData[type->GetIndex()].HasEntries()) {
         indexEntries++;
       }
     }
 
     writer.Write(indexEntries);
 
-    for (const auto &type : typeConfig->GetTypes()) {
+    for (const auto &type : typeConfig->GetWayTypes()) {
       size_t i=type->GetIndex();
 
-      if (type->CanBeWay() &&
-          wayTypeData[i].HasEntries()) {
+      if (wayTypeData[i].HasEntries()) {
         uint8_t    dataOffsetBytes=0;
         FileOffset bitmapOffset=0;
 
@@ -421,9 +419,8 @@ namespace osmscout {
       double      cellWidth=360.0/pow(2.0,(int)l);
       double      cellHeight=180.0/pow(2.0,(int)l);
 
-      for (const auto &type : typeConfig->GetTypes()) {
-        if (type->CanBeWay() &&
-            wayTypeData[type->GetIndex()].HasEntries() &&
+      for (const auto &type : typeConfig->GetWayTypes()) {
+        if (wayTypeData[type->GetIndex()].HasEntries() &&
             wayTypeData[type->GetIndex()].indexLevel==l) {
           indexTypes.Set(type);
         }
@@ -435,7 +432,7 @@ namespace osmscout {
 
       progress.Info("Scanning ways for index level "+NumberToString(l));
 
-      std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypes().size());
+      std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
 
       wayScanner.GotoBegin();
 

@@ -868,6 +868,9 @@ namespace osmscout {
   private:
     std::vector<TagInfo>                      tags;
     std::vector<TypeInfoRef>                  types;
+    std::vector<TypeInfoRef>                  nodeTypes;
+    std::vector<TypeInfoRef>                  wayTypes;
+    std::vector<TypeInfoRef>                  areaTypes;
     std::vector<TypeInfoRef>                  typedTypes;
     std::vector<FeatureRef>                   features;
 
@@ -969,6 +972,30 @@ namespace osmscout {
     }
 
     /**
+     * Return an array of the node types available
+     */
+    inline const std::vector<TypeInfoRef>& GetNodeTypes() const
+    {
+      return nodeTypes;
+    }
+
+    /**
+     * Return an array of the way types available
+     */
+    inline const std::vector<TypeInfoRef>& GetWayTypes() const
+    {
+      return wayTypes;
+    }
+
+    /**
+     * Return an array of the area types available
+     */
+    inline const std::vector<TypeInfoRef>& GetAreaTypes() const
+    {
+      return areaTypes;
+    }
+
+    /**
      * Return the number of types available. The index of a type is garanteed to be in the interval
      * [0..GetTypeCount()[
      */
@@ -1017,9 +1044,18 @@ namespace osmscout {
     TypeId GetWayTypeId(const std::string& name) const;
     TypeId GetAreaTypeId(const std::string& name) const;
 
+    /**
+     * Return a TypeInfo set with all node types
+     */
     void GetNodeTypes(TypeInfoSet& types) const;
-    void GetAreaTypes(TypeInfoSet& types) const;
+    /**
+     * Return a TypeInfo set with all way types
+     */
     void GetWayTypes(TypeInfoSet& types) const;
+    /**
+     * Return a TypeInfo set with all area types
+     */
+    void GetAreaTypes(TypeInfoSet& types) const;
     //@}
 
     /**

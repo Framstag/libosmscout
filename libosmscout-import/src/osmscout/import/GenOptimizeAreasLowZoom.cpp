@@ -61,9 +61,8 @@ namespace osmscout
   void OptimizeAreasLowZoomGenerator::GetAreaTypesToOptimize(const TypeConfig& typeConfig,
                                                              std::set<TypeInfoRef>& types)
   {
-    for (auto &type : typeConfig.GetTypes()) {
-      if (type->CanBeArea() &&
-          type->GetOptimizeLowZoom()) {
+    for (auto &type : typeConfig.GetAreaTypes()) {
+      if (type->GetOptimizeLowZoom()) {
         types.insert(type);
       }
     }

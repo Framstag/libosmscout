@@ -780,6 +780,18 @@ namespace osmscout {
       typedTypes.push_back(typeInfo);
     }
 
+    if (typeInfo->CanBeNode()) {
+      nodeTypes.push_back(typeInfo);
+    }
+
+    if (typeInfo->CanBeWay()) {
+      wayTypes.push_back(typeInfo);
+    }
+
+    if (typeInfo->CanBeArea()) {
+      areaTypes.push_back(typeInfo);
+    }
+
     nameToTypeMap[typeInfo->GetName()]=typeInfo;
 
     idToTypeMap[typeInfo->GetId()]=typeInfo;

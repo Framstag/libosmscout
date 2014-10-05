@@ -66,7 +66,7 @@ namespace osmscout {
     size_t                level;
     size_t                maxLevel=0;
 
-    nodeTypeData.resize(typeConfig->GetTypes().size());
+    nodeTypeData.resize(typeConfig->GetTypeCount());
 
     if (!nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "nodes.dat"),
@@ -230,12 +230,8 @@ namespace osmscout {
     uint32_t indexEntries=0;
 
     // Count number of types in index
-    for (size_t i=0; i<typeConfig->GetTypes().size(); i++)
-    {
-      TypeInfoRef type(typeConfig->GetTypeInfo(i));
-
-      if (type->CanBeNode() &&
-          nodeTypeData[i].HasEntries()) {
+    for (const auto& type : typeConfig->GetNodeTypes()) {
+      if (nodeTypeData[type->GetIndex()].HasEntries()) {
         indexEntries++;
       }
     }
@@ -243,12 +239,10 @@ namespace osmscout {
     writer.Write(indexEntries);
 
     // Store index data for each type
-    for (size_t i=0; i<typeConfig->GetTypes().size(); i++)
-    {
-      TypeInfoRef type(typeConfig->GetTypeInfo(i));
+    for (const auto& type : typeConfig->GetNodeTypes()) {
+      size_t i=type->GetIndex();
 
-      if (type->CanBeNode() &&
-          nodeTypeData[i].HasEntries()) {
+      if (nodeTypeData[i].HasEntries()) {
         FileOffset bitmapOffset=0;
         uint8_t    dataOffsetBytes=0;
 
@@ -274,9 +268,8 @@ namespace osmscout {
       double                cellWidth=360.0/pow(2.0,(int)l);
       double                cellHeight=180.0/pow(2.0,(int)l);
 
-      for (auto &type : typeConfig->GetTypes()) {
-        if (type->CanBeNode() &&
-            nodeTypeData[type->GetIndex()].HasEntries() &&
+      for (auto &type : typeConfig->GetNodeTypes()) {
+        if (nodeTypeData[type->GetIndex()].HasEntries() &&
             nodeTypeData[type->GetIndex()].indexLevel==l) {
           indexTypes.insert(type);
         }
@@ -290,7 +283,7 @@ namespace osmscout {
 
       std::vector<std::map<Pixel,std::list<FileOffset> > > typeCellOffsets;
 
-      typeCellOffsets.resize(typeConfig->GetTypes().size());
+      typeCellOffsets.resize(typeConfig->GetTypeCount());
 
       nodeScanner.GotoBegin();
 

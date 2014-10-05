@@ -66,9 +66,8 @@ namespace osmscout
   void OptimizeWaysLowZoomGenerator::GetWayTypesToOptimize(const TypeConfig& typeConfig,
                                                            std::set<TypeInfoRef>& types)
   {
-    for (auto &type : typeConfig.GetTypes()) {
-      if (type->CanBeWay() &&
-          type->GetOptimizeLowZoom()) {
+    for (auto &type : typeConfig.GetWayTypes()) {
+      if (type->GetOptimizeLowZoom()) {
         types.insert(type);
       }
     }
