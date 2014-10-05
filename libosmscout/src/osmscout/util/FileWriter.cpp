@@ -295,6 +295,64 @@ namespace osmscout {
   }
 #endif
 
+  bool FileWriter::Write(uint16_t number, size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char buffer[2];
+
+    buffer[0]=((number >> 0) & 0xff);
+    buffer[1]=((number >> 8) & 0xff);
+
+    hasError=fwrite(buffer,1,bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(uint32_t number, size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char buffer[4];
+
+    buffer[0]=((number >>  0) & 0xff);
+    buffer[1]=((number >>  8) & 0xff);
+    buffer[2]=((number >> 16) & 0xff);
+    buffer[3]=((number >> 24) & 0xff);
+
+    hasError=fwrite(buffer,1,bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+  bool FileWriter::Write(uint64_t number, size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char buffer[8];
+
+    buffer[0]=((number >>  0) & 0xff);
+    buffer[1]=((number >>  8) & 0xff);
+    buffer[2]=((number >> 16) & 0xff);
+    buffer[3]=((number >> 24) & 0xff);
+    buffer[4]=((number >> 32) & 0xff);
+    buffer[5]=((number >> 40) & 0xff);
+    buffer[6]=((number >> 48) & 0xff);
+    buffer[7]=((number >> 56) & 0xff);
+
+    hasError=fwrite(buffer,1,bytes,file)!=bytes;
+
+    return !hasError;
+  }
+#endif
+
   bool FileWriter::WriteFileOffset(FileOffset fileOffset)
   {
     if (HasError()) {

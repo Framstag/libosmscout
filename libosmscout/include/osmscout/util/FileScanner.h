@@ -124,6 +124,12 @@ namespace osmscout {
     bool Read(uint64_t& number);
 #endif
 
+    bool Read(uint16_t& number, size_t bytes);
+    bool Read(uint32_t& number, size_t bytes);
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+    bool Read(uint64_t& number, size_t bytes);
+#endif
+
     bool ReadFileOffset(FileOffset& offset);
     bool ReadFileOffset(FileOffset& offset,
                         size_t bytes);

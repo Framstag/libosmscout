@@ -1084,6 +1084,315 @@ namespace osmscout {
   }
 #endif
 
+  bool FileScanner::Read(uint16_t& number,
+                         size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+bytes-1>=size) {
+        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      char     *dataPtr=&buffer[offset];
+      uint16_t add;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      number|=add;
+      dataPtr++;
+
+      if (bytes>=2) {
+        add=(unsigned char)(*dataPtr);
+        add=add << 8;
+        number|=add;
+        dataPtr++;
+      }
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[2];
+
+    hasError=fread(&buffer,1,bytes,file)!=bytes;
+
+    if (hasError) {
+      std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+      return false;
+    }
+
+    unsigned char *dataPtr=buffer;
+    uint16_t      add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    number|=add;
+    dataPtr++;
+
+    if (bytes>=2) {
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      number|=add;
+      dataPtr++;
+    }
+
+    return true;
+  }
+
+  bool FileScanner::Read(uint32_t& number,
+                         size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+bytes-1>=size) {
+        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      char     *dataPtr=&buffer[offset];
+      uint32_t add;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      number|=add;
+      dataPtr++;
+
+      if (bytes>=2) {
+        add=(unsigned char)(*dataPtr);
+        add=add << 8;
+        number|=add;
+        dataPtr++;
+
+        if (bytes>=3) {
+          add=(unsigned char)(*dataPtr);
+          add=add << 16;
+          number|=add;
+          dataPtr++;
+
+          if (bytes>=4) {
+            add=(unsigned char)(*dataPtr);
+            add=add << 24;
+            number|=add;
+            dataPtr++;
+          }
+        }
+      }
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[4];
+
+    hasError=fread(&buffer,1,bytes,file)!=bytes;
+
+    if (hasError) {
+      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      return false;
+    }
+
+    unsigned char *dataPtr=buffer;
+    uint32_t      add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    number|=add;
+    dataPtr++;
+
+    if (bytes>=2) {
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      number|=add;
+      dataPtr++;
+
+      if (bytes>=3) {
+        add=(unsigned char)(*dataPtr);
+        add=add << 16;
+        number|=add;
+        dataPtr++;
+
+        if (bytes>=4) {
+          add=(unsigned char)(*dataPtr);
+          add=add << 24;
+          number|=add;
+          dataPtr++;
+        }
+      }
+    }
+
+    return true;
+  }
+
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+  bool FileScanner::Read(uint64_t& number,
+                         size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+bytes-1>=size) {
+        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      char     *dataPtr=&buffer[offset];
+      uint64_t add;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      number|=add;
+      dataPtr++;
+
+      if (bytes>=2) {
+        add=(unsigned char)(*dataPtr);
+        add=add << 8;
+        number|=add;
+        dataPtr++;
+
+        if (bytes>=3) {
+          add=(unsigned char)(*dataPtr);
+          add=add << 16;
+          number|=add;
+          dataPtr++;
+
+          if (bytes>=4) {
+            add=(unsigned char)(*dataPtr);
+            add=add << 24;
+            number|=add;
+            dataPtr++;
+
+            if (bytes>=5) {
+              add=(unsigned char)(*dataPtr);
+              add=add << 32;
+              number|=add;
+              dataPtr++;
+
+              if (bytes>=6) {
+                add=(unsigned char)(*dataPtr);
+                add=add << 40;
+                number|=add;
+                dataPtr++;
+
+                if (bytes>=7) {
+                  add=(unsigned char)(*dataPtr);
+                  add=add << 48;
+                  number|=add;
+                  dataPtr++;
+
+                  if (bytes>=8) {
+                    add=(unsigned char)(*dataPtr);
+                    add=add << 56;
+                    number|=add;
+                    dataPtr++;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[8];
+
+    hasError=fread(&buffer,1,bytes,file)!=bytes;
+
+    if (hasError) {
+      std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+      return false;
+    }
+
+    unsigned char *dataPtr=buffer;
+    uint64_t      add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    number|=add;
+    dataPtr++;
+
+    if (bytes>=2) {
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      number|=add;
+      dataPtr++;
+
+      if (bytes>=3) {
+        add=(unsigned char)(*dataPtr);
+        add=add << 16;
+        number|=add;
+        dataPtr++;
+
+        if (bytes>=4) {
+          add=(unsigned char)(*dataPtr);
+          add=add << 24;
+          number|=add;
+          dataPtr++;
+
+          if (bytes>=5) {
+            add=(unsigned char)(*dataPtr);
+            add=add << 32;
+            number|=add;
+            dataPtr++;
+
+            if (bytes>=6) {
+              add=(unsigned char)(*dataPtr);
+              add=add << 40;
+              number|=add;
+              dataPtr++;
+
+              if (bytes>=7) {
+                add=(unsigned char)(*dataPtr);
+                add=add << 48;
+                number|=add;
+                dataPtr++;
+
+                if (bytes>=8) {
+                  add=(unsigned char)(*dataPtr);
+                  add=add << 56;
+                  number|=add;
+                  dataPtr++;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+#endif
+
   bool FileScanner::ReadFileOffset(FileOffset& fileOffset)
   {
     if (HasError()) {
