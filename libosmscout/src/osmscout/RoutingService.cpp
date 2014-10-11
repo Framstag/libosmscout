@@ -1392,7 +1392,7 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoRef routeType=typeConfig->GetTypeInfo(typeConfig->GetTypeId("_route"));
+    TypeInfoRef routeType=typeConfig->GetTypeInfo("_route");
 
     assert(routeType!=typeConfig->typeInfoIgnore);
 
@@ -1654,9 +1654,10 @@ namespace osmscout {
 
     osmscout::TypeSet      routableTypes;
 
-    for (size_t typeId=0; typeId<=database->GetTypeConfig()->GetMaxTypeId(); typeId++) {
-      if (typeConfig->GetTypeInfo(typeId)->CanRoute(vehicle)) {
-        routableTypes.SetType(typeId);
+    for (const auto& type : database->GetTypeConfig()->GetTypes()) {
+      if (!type->GetIgnore() &&
+          type->CanRoute(vehicle)) {
+        routableTypes.SetType(type->GetId());
       }
     }
 

@@ -708,6 +708,7 @@ namespace osmscout {
     TypeInfoSet();
     TypeInfoSet(const TypeConfig& typeConfig);
     TypeInfoSet(const TypeInfoSet& other);
+    TypeInfoSet(const std::vector<TypeInfoRef>& types);
 
     void Adapt(const TypeConfig& typeConfig);
 
@@ -717,43 +718,11 @@ namespace osmscout {
       count=0;
     }
 
-    void Set(const TypeInfoRef& type)
-    {
-      assert(type.Valid());
+    void Set(const TypeInfoRef& type);
+    void Set(const std::vector<TypeInfoRef>& types);
 
-      if (type->GetIndex()>=types.size()) {
-        types.resize(type->GetIndex()+1);
-      }
-
-      if (types[type->GetIndex()].Invalid()) {
-        types[type->GetIndex()]=type;
-        count++;
-      }
-    }
-
-    void Remove(const TypeInfoRef& type)
-    {
-      assert(type.Valid());
-
-      if (type->GetIndex()<types.size() &&
-          types[type->GetIndex()].Valid()) {
-        types[type->GetIndex()]=NULL;
-        count--;
-      }
-    }
-
-    void Remove(const TypeInfoSet& otherTypes)
-    {
-      for (const auto &type : otherTypes.types)
-      {
-        if (type.Valid() &&
-            type->GetIndex()<types.size() &&
-            types[type->GetIndex()].Valid()) {
-          types[type->GetIndex()]=NULL;
-          count--;
-        }
-      }
-    }
+    void Remove(const TypeInfoRef& type);
+    void Remove(const TypeInfoSet& otherTypes);
 
     bool IsSet(const TypeInfoRef& type) const
     {
@@ -946,6 +915,10 @@ namespace osmscout {
     //@{
     void RegisterFeature(const FeatureRef& feature);
 
+    /**
+     * Return the feature with the given name or an invalid reference
+     * if no feature with the given name is registered.
+     */
     FeatureRef GetFeature(const std::string& name) const;
 
     /**
@@ -972,7 +945,7 @@ namespace osmscout {
     }
 
     /**
-     * Return an array of the node types available
+     * Returns an array of the (ignore=false) node types available
      */
     inline const std::vector<TypeInfoRef>& GetNodeTypes() const
     {
@@ -980,7 +953,7 @@ namespace osmscout {
     }
 
     /**
-     * Return an array of the way types available
+     * Returns an array of (ignore=false) the way types available
      */
     inline const std::vector<TypeInfoRef>& GetWayTypes() const
     {
@@ -988,7 +961,7 @@ namespace osmscout {
     }
 
     /**
-     * Return an array of the area types available
+     * Returns an array of the (ignore=false) area types available
      */
     inline const std::vector<TypeInfoRef>& GetAreaTypes() const
     {
@@ -996,7 +969,7 @@ namespace osmscout {
     }
 
     /**
-     * Return the number of types available. The index of a type is garanteed to be in the interval
+     * Returns the number of types available. The index of a type is guaranteed to be in the interval
      * [0..GetTypeCount()[
      */
     inline size_t GetTypeCount() const
@@ -1004,6 +977,9 @@ namespace osmscout {
       return types.size();
     }
 
+    /**
+     * Return the highest used type id.
+     */
     TypeId GetMaxTypeId() const;
 
     /**
@@ -1032,30 +1008,31 @@ namespace osmscout {
      */
     const TypeInfoRef GetTypeInfo(const std::string& name) const;
 
+    /**
+     * Return a node type (or an invalid reference if no type got detected)
+     * based on the given map of tag and tag values. The method iterates over all
+     * node type definitions, evaluates their conditions and returns the first matching
+     * type.
+     */
     TypeInfoRef GetNodeType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
 
+    /**
+     * Return a way/area type (or an invalid reference if no type got detected)
+     * based on the given map of tag and tag values. The method iterates over all
+     * way/area type definitions, evaluates their conditions and returns the first matching
+     * type.
+     */
     bool GetWayAreaType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap,
                         TypeInfoRef& wayType,
                         TypeInfoRef& areaType) const;
+
+    /**
+     * Return a relation type (or an invalid reference if no type got detected)
+     * based on the given map of tag and tag values. The method iterates over all
+     * relation type definitions, evaluates their conditions and returns the first matching
+     * type.
+     */
     TypeInfoRef GetRelationType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
-
-    TypeId GetTypeId(const std::string& name) const;
-    TypeId GetNodeTypeId(const std::string& name) const;
-    TypeId GetWayTypeId(const std::string& name) const;
-    TypeId GetAreaTypeId(const std::string& name) const;
-
-    /**
-     * Return a TypeInfo set with all node types
-     */
-    void GetNodeTypes(TypeInfoSet& types) const;
-    /**
-     * Return a TypeInfo set with all way types
-     */
-    void GetWayTypes(TypeInfoSet& types) const;
-    /**
-     * Return a TypeInfo set with all area types
-     */
-    void GetAreaTypes(TypeInfoSet& types) const;
     //@}
 
     /**

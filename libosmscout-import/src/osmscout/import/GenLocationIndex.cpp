@@ -1777,7 +1777,7 @@ namespace osmscout {
     RegionRef                          rootRegion;
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
-    TypeId                             boundaryId;
+    TypeInfoRef                        boundaryType;
     std::list<Boundary>                boundaryAreas;
 
 
@@ -1809,8 +1809,8 @@ namespace osmscout {
     rootRegion->indexOffset=0;
     rootRegion->dataOffset=0;
 
-    boundaryId=typeConfig->GetAreaTypeId("boundary_administrative");
-    assert(boundaryId!=typeIgnore);
+    boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
+    assert(boundaryType.Valid());
 
     //
     // Getting all areas of type 'administrative boundary'.
@@ -1821,7 +1821,7 @@ namespace osmscout {
     if (!GetBoundaryAreas(parameter,
                           progress,
                           typeConfig,
-                          boundaryId,
+                          boundaryType->GetId(),
                           boundaryAreas)) {
       return false;
     }

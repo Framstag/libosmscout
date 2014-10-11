@@ -84,7 +84,7 @@ namespace osmscout {
 
     // Initially we must process all types that represents nodes and that should
     // not be ignored
-    typeConfig->GetNodeTypes(remainingNodeTypes);
+    remainingNodeTypes.Set(typeConfig->GetNodeTypes());
 
     level=parameter.GetAreaNodeMinMag();
     while (!remainingNodeTypes.Empty()) {

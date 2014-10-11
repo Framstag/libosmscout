@@ -34,7 +34,7 @@ namespace osmscout {
   {
     progress.SetAction("Generate types.dat");
 
-    progress.Info("Number of types: "+NumberToString(typeConfig->GetMaxTypeId()));
+    progress.Info("Number of types: "+NumberToString(typeConfig->GetTypes().size()));
 
     if (!typeConfig->StoreToDataFile(parameter.GetDestinationDirectory())) {
       progress.Error("Cannot create 'types.dat'");

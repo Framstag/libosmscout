@@ -1412,28 +1412,22 @@ namespace osmscout {
 
   void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
   {
-    for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
-      if (typeConfig->GetTypeInfo(t)->CanBeNode()) {
-        types.push_back(t);
-      }
+    for (const auto& type : typeConfig->GetNodeTypes()) {
+      types.push_back(type->GetId());
     }
   }
 
   void StyleConfig::GetAllWayTypes(std::list<TypeId>& types)
   {
-    for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
-      if (typeConfig->GetTypeInfo(t)->CanBeWay()) {
-        types.push_back(t);
-      }
+    for (const auto& type : typeConfig->GetWayTypes()) {
+      types.push_back(type->GetId());
     }
   }
 
   void StyleConfig::GetAllAreaTypes(std::list<TypeId>& types)
   {
-    for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
-      if (typeConfig->GetTypeInfo(t)->CanBeArea()) {
-        types.push_back(t);
-      }
+    for (const auto& type : typeConfig->GetAreaTypes()) {
+      types.push_back(type->GetId());
     }
   }
 

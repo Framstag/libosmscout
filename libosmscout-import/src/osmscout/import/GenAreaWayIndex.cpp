@@ -277,7 +277,7 @@ namespace osmscout {
 
     progress.SetAction("Scanning level distribution of way types");
 
-    typeConfig->GetWayTypes(remainingWayTypes);
+    remainingWayTypes.Set(typeConfig->GetWayTypes());
 
     level=parameter.GetAreaWayMinMag();
     while (!remainingWayTypes.Empty()) {

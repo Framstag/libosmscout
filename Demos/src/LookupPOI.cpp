@@ -89,39 +89,29 @@ int main(int argc, char* argv[])
   osmscout::NameFeatureLabelReader nameLabelReader(typeConfig);
 
   for (const auto &name : typeNames) {
-    osmscout::TypeId nodeType;
-    osmscout::TypeId wayType;
-    osmscout::TypeId areaType;
+    osmscout::TypeInfoRef type=typeConfig->GetTypeInfo(name);
 
-    nodeType=typeConfig->GetNodeTypeId(name);
-    wayType=typeConfig->GetWayTypeId(name);
-    areaType=typeConfig->GetAreaTypeId(name);
-
-    if (nodeType==osmscout::typeIgnore &&
-        wayType==osmscout::typeIgnore &&
-        areaType==osmscout::typeIgnore) {
+    if (type->GetIgnore()) {
       std::cerr << "Cannot resolve type name '" << name << "'" << std::endl;
       continue;
     }
 
+    types.SetType(type->GetId());
+
     std::cout << "- Searching for '" << name << "' as";
 
-    if (nodeType!=osmscout::typeIgnore) {
-      std::cout << " node (" << nodeType << ")";
 
-      types.SetType(nodeType);
+    if (type->CanBeNode()) {
+      std::cout << " node";
+
     }
 
-    if (wayType!=osmscout::typeIgnore) {
-      std::cout << " way (" << wayType << ")";
-
-      types.SetType(wayType);
+    if (type->CanBeWay()) {
+      std::cout << " way";
     }
 
-    if (areaType!=osmscout::typeIgnore) {
-      std::cout << " area (" << areaType << ")";
-
-      types.SetType(areaType);
+    if (type->CanBeArea()) {
+      std::cout << " area";
     }
 
     std::cout << std::endl;

@@ -487,9 +487,63 @@ namespace osmscout {
     // no code
   }
 
+  TypeInfoSet::TypeInfoSet(const std::vector<TypeInfoRef>& types)
+  {
+    for (const auto& type : types) {
+      Set(type);
+    }
+  }
+
   void TypeInfoSet::Adapt(const TypeConfig& typeConfig)
   {
     types.resize(typeConfig.GetTypeCount());
+  }
+
+  void TypeInfoSet::Set(const TypeInfoRef& type)
+  {
+    assert(type.Valid());
+
+    if (type->GetIndex()>=types.size()) {
+      types.resize(type->GetIndex()+1);
+    }
+
+    if (types[type->GetIndex()].Invalid()) {
+      types[type->GetIndex()]=type;
+      count++;
+    }
+  }
+
+  void TypeInfoSet::Set(const std::vector<TypeInfoRef>& types)
+  {
+    Clear();
+
+    for (const auto& type : types) {
+      Set(type);
+    }
+  }
+
+  void TypeInfoSet::Remove(const TypeInfoRef& type)
+  {
+    assert(type.Valid());
+
+    if (type->GetIndex()<types.size() &&
+        types[type->GetIndex()].Valid()) {
+      types[type->GetIndex()]=NULL;
+      count--;
+    }
+  }
+
+  void TypeInfoSet::Remove(const TypeInfoSet& otherTypes)
+  {
+    for (const auto &type : otherTypes.types)
+    {
+      if (type.Valid() &&
+          type->GetIndex()<types.size() &&
+          types[type->GetIndex()].Valid()) {
+        types[type->GetIndex()]=NULL;
+        count--;
+      }
+    }
   }
 
   TypeConfig::TypeConfig()
@@ -780,15 +834,18 @@ namespace osmscout {
       typedTypes.push_back(typeInfo);
     }
 
-    if (typeInfo->CanBeNode()) {
+    if (!typeInfo->GetIgnore() &&
+        typeInfo->CanBeNode()) {
       nodeTypes.push_back(typeInfo);
     }
 
-    if (typeInfo->CanBeWay()) {
+    if (!typeInfo->GetIgnore() &&
+        typeInfo->CanBeWay()) {
       wayTypes.push_back(typeInfo);
     }
 
-    if (typeInfo->CanBeArea()) {
+    if (!typeInfo->GetIgnore() &&
+        typeInfo->CanBeArea()) {
       areaTypes.push_back(typeInfo);
     }
 
@@ -985,92 +1042,6 @@ namespace osmscout {
     }
 
     return typeInfoIgnore;
-  }
-
-  TypeId TypeConfig::GetTypeId(const std::string& name) const
-  {
-    auto typeEntry=nameToTypeMap.find(name);
-
-    if (typeEntry!=nameToTypeMap.end()) {
-      return typeEntry->second->GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
-  {
-    auto typeEntry=nameToTypeMap.find(name);
-
-    if (typeEntry!=nameToTypeMap.end() &&
-        typeEntry->second->CanBeNode()) {
-      return typeEntry->second->GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  TypeId TypeConfig::GetWayTypeId(const std::string& name) const
-  {
-    auto typeEntry=nameToTypeMap.find(name);
-
-    if (typeEntry!=nameToTypeMap.end() &&
-        typeEntry->second->CanBeWay()) {
-      return typeEntry->second->GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  TypeId TypeConfig::GetAreaTypeId(const std::string& name) const
-  {
-    auto typeEntry=nameToTypeMap.find(name);
-
-    if (typeEntry!=nameToTypeMap.end() &&
-        typeEntry->second->CanBeArea()) {
-      return typeEntry->second->GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  void TypeConfig::GetNodeTypes(TypeInfoSet& types) const
-  {
-    types.Clear();
-    types.Adapt(*this);
-
-    for (auto &type : this->types) {
-      if (!type->GetIgnore() &&
-          type->CanBeNode()) {
-        types.Set(type);
-      }
-    }
-  }
-
-  void TypeConfig::GetAreaTypes(TypeInfoSet& types) const
-  {
-    types.Clear();
-    types.Adapt(*this);
-
-    for (auto &type : this->types) {
-      if (!type->GetIgnore() &&
-          type->CanBeArea()) {
-        types.Set(type);
-      }
-    }
-  }
-
-  void TypeConfig::GetWayTypes(TypeInfoSet& types) const
-  {
-    types.Clear();
-    types.Adapt(*this);
-
-    for (auto &type : this->types) {
-      if (!type->GetIgnore() &&
-          type->CanBeWay()) {
-        types.Set(type);
-      }
-    }
   }
 
   void TypeConfig::RegisterSurfaceToGradeMapping(const std::string& surface,

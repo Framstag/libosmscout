@@ -458,7 +458,7 @@ namespace osmscout {
     uint32_t                                writtenWayCount=0;
     uint32_t                                mergeCount=0;
 
-    typeConfig->GetWayTypes(wayTypes);
+    wayTypes.Set(typeConfig->GetWayTypes());
 
     //
     // handling of restriction relations

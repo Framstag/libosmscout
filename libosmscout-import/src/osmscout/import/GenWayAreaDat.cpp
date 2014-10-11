@@ -364,7 +364,7 @@ namespace osmscout {
 
     uint32_t      writtenWayCount=0;
 
-    typeConfig->GetAreaTypes(areaTypes);
+    areaTypes.Set(typeConfig->GetAreaTypes());
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing

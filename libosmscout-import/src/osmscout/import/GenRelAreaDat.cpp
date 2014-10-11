@@ -611,7 +611,7 @@ namespace osmscout {
                                                         const RawRelation& rawRelation,
                                                         std::list<MultipolygonPart>& parts)
   {
-    TypeId                         boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
+    TypeInfoRef                    boundaryType=typeConfig.GetTypeInfo("boundary_administrative");
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
     std::set<OSMId>                pendingRelationIds;
@@ -638,8 +638,8 @@ namespace osmscout {
                (member->role=="inner" ||
                 member->role=="outer" ||
                 member->role.empty())) {
-        if (boundaryId!=typeIgnore &&
-            rawRelation.GetType()->GetId()==boundaryId) {
+        if (boundaryType.Valid() &&
+            rawRelation.GetType()==boundaryType) {
           if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
                              NumberToString(member->id)+
@@ -704,8 +704,8 @@ namespace osmscout {
                    (member->role=="inner" ||
                     member->role=="outer" ||
                     member->role.empty())) {
-            if (boundaryId!=typeIgnore &&
-                rawRelation.GetType()->GetId()==boundaryId) {
+            if (boundaryType.Valid() &&
+                rawRelation.GetType()==boundaryType) {
               if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
                                  NumberToString(member->id)+
@@ -788,8 +788,8 @@ namespace osmscout {
 
     // Now build together everything
 
-    if (boundaryId!=typeIgnore &&
-        rawRelation.GetType()->GetId()==boundaryId) {
+    if (boundaryType.Valid() &&
+        rawRelation.GetType()==boundaryType) {
       return ComposeBoundaryMembers(typeConfig,
                                     progress,
                                     coordMap,
