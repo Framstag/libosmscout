@@ -107,7 +107,7 @@ namespace osmscout {
       return vehicle;
     }
 
-    void AddType(TypeId type, double speed);
+    void AddType(const TypeInfoRef& type, double speed);
 
     bool CanUse(const RouteNode& currentNode,
                 size_t pathIndex) const;

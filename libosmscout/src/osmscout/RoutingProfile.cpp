@@ -77,7 +77,7 @@ namespace osmscout {
     for (const auto &type : typeConfig.GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRouteFoot()) {
-        AddType(type->GetId(),maxSpeed);
+        AddType(type,maxSpeed);
       }
     }
   }
@@ -93,7 +93,7 @@ namespace osmscout {
     for (const auto &type : typeConfig.GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRouteBicycle()) {
-        AddType(type->GetId(),maxSpeed);
+        AddType(type,maxSpeed);
       }
 
     }
@@ -122,14 +122,14 @@ namespace osmscout {
           continue;
         }
 
-        AddType(type->GetId(),speed->second);
+        AddType(type,speed->second);
       }
     }
 
     return everythingResolved;
   }
 
-  void AbstractRoutingProfile::AddType(TypeId type, double speed)
+  void AbstractRoutingProfile::AddType(const TypeInfoRef& type, double speed)
   {
     if (speeds.empty()) {
       minSpeed=speed;
@@ -140,11 +140,11 @@ namespace osmscout {
       maxSpeed=std::max(maxSpeed,speed);
     }
 
-    if (type>=speeds.size()) {
-      speeds.resize(type+1,0.0);
+    if (type->GetIndex()>=speeds.size()) {
+      speeds.resize(type->GetIndex()+1,0.0);
     }
 
-    speeds[type]=speed;
+    speeds[type->GetIndex()]=speed;
   }
 
   bool AbstractRoutingProfile::CanUse(const RouteNode& currentNode,
@@ -165,16 +165,16 @@ namespace osmscout {
       return false;
     }
 
-    TypeId type=area.rings[0].GetType()->GetId();
+    size_t index=area.rings[0].GetType()->GetIndex();
 
-    return type<speeds.size() && speeds[type]>0.0;
+    return index<speeds.size() && speeds[index]>0.0;
   }
 
   bool AbstractRoutingProfile::CanUse(const Way& way) const
   {
-    TypeId type=way.GetType()->GetId();
+    size_t index=way.GetType()->GetIndex();
 
-    if (type>=speeds.size() || speeds[type]<=0.0) {
+    if (index>=speeds.size() || speeds[index]<=0.0) {
       return false;
     }
 
@@ -212,9 +212,9 @@ namespace osmscout {
 
   bool AbstractRoutingProfile::CanUseForward(const Way& way) const
   {
-    TypeId type=way.GetType()->GetId();
+    size_t index=way.GetType()->GetIndex();
 
-    if (type>=speeds.size() || speeds[type]<=0.0) {
+    if (index>=speeds.size() || speeds[index]<=0.0) {
       return false;
     }
 
@@ -252,9 +252,9 @@ namespace osmscout {
 
   bool AbstractRoutingProfile::CanUseBackward(const Way& way) const
   {
-    TypeId type=way.GetType()->GetId();
+    size_t index=way.GetType()->GetIndex();
 
-    if (type>=speeds.size() || speeds[type]<=0.0) {
+    if (index>=speeds.size() || speeds[index]<=0.0) {
       return false;
     }
 
