@@ -1495,7 +1495,7 @@ namespace osmscout {
                                            parameter.GetDPI(),
                                            fillStyle);
             }
-            else if (ring.GetType()->GetId()!=typeIgnore) {
+            else if (!ring.GetType()->GetIgnore()) {
               styleConfig.GetAreaFillStyle(ring.GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
@@ -1527,7 +1527,7 @@ namespace osmscout {
             size_t j=i+1;
             while (j<area->rings.size() &&
                    area->rings[j].ring==ringId+1 &&
-                   area->rings[j].GetType()->GetId()==typeIgnore) {
+                   area->rings[j].GetType()->GetIgnore()) {
               a.clippings.push_back(data[j]);
 
               j++;
