@@ -216,7 +216,7 @@ namespace osmscout {
   bool LocationIndexGenerator::GetBoundaryAreas(const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const TypeConfigRef& typeConfig,
-                                                TypeId boundaryId,
+                                                const TypeInfoRef& boundaryType,
                                                 std::list<Boundary>& boundaryAreas)
   {
     FileScanner                  scanner;
@@ -253,7 +253,7 @@ namespace osmscout {
         return false;
       }
 
-      if (area.GetType()->GetId()!=boundaryId) {
+      if (area.GetType()!=boundaryType) {
         continue;
       }
 
@@ -1821,7 +1821,7 @@ namespace osmscout {
     if (!GetBoundaryAreas(parameter,
                           progress,
                           typeConfig,
-                          boundaryType->GetId(),
+                          boundaryType,
                           boundaryAreas)) {
       return false;
     }
