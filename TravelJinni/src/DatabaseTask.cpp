@@ -56,12 +56,10 @@
 DatabaseTask::DatabaseTask(const osmscout::DatabaseRef& database,
                            const osmscout::LocationServiceRef& locationService,
                            const osmscout::MapServiceRef& mapService,
-                           const osmscout::RoutingServiceRef& router,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
    locationService(locationService),
    mapService(mapService),
-   router(router),
    painter(NULL),
    finish(false),
    newJob(NULL),
@@ -322,6 +320,14 @@ bool DatabaseTask::Open(const std::wstring& path)
     return false;
   }
 
+  osmscout::RouterParameter routerParameter;
+
+  routerParameter.SetDebugPerformance(true);
+
+  router=new osmscout::RoutingService(database,
+                                      routerParameter,
+                                      osmscout::vehicleCar);
+
   if (!router->Open()) {
     return false;
   }
@@ -342,14 +348,17 @@ bool DatabaseTask::IsOpen() const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  return database->IsOpen() && router->IsOpen();
+  return database->IsOpen() && router.Valid() && router->IsOpen();
 }
 
 void DatabaseTask::Close()
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  router->Close(),
+  if (router.Valid()) {
+    router->Close();
+  }
+
   database->Close();
   routingProfile=NULL;
 }
@@ -440,7 +449,8 @@ bool DatabaseTask::CalculateRoute(const osmscout::ObjectFileRef& startObject,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (!router->IsOpen()) {
+  if (!router.Valid() ||
+      !router->IsOpen()) {
     return false;
   }
 
@@ -459,15 +469,16 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (!router->IsOpen()) {
+  if (!database->IsOpen()) {
+    return false;
+  }
+
+  if (!router.Valid() ||
+      !router->IsOpen()) {
     return false;
   }
 
   if (!router->TransformRouteDataToRouteDescription(data,description)) {
-    return false;
-  }
-
-  if (!database->IsOpen()) {
     return false;
   }
 
@@ -507,7 +518,8 @@ bool DatabaseTask::TransformRouteDataToWay(const osmscout::RouteData& data,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (!router->IsOpen()) {
+  if (!router.Valid() ||
+      !router->IsOpen()) {
     return false;
   }
 

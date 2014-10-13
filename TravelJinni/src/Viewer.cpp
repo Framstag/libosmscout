@@ -67,7 +67,6 @@ static Lum::Def::AppInfo info;
 static osmscout::DatabaseRef        database;
 static osmscout::LocationServiceRef locationService;
 static osmscout::MapServiceRef      mapService;
-static osmscout::RoutingServiceRef  router;
 
 static Lum::Model::ActionRef        jobFinishedAction;
 static DatabaseTask                 *databaseTask=NULL;
@@ -691,7 +690,6 @@ public:
 #endif
 
     osmscout::DatabaseParameter databaseParameter;
-    osmscout::RouterParameter   routerParameter;
 
     databaseParameter.SetDebugPerformance(true);
 
@@ -699,10 +697,6 @@ public:
 
     locationService=new osmscout::LocationService(database);
     mapService=new osmscout::MapService(database);
-
-    router=new osmscout::RoutingService(database,
-                                        routerParameter,
-                                        osmscout::vehicleCar);
 
     jobFinishedAction=new Lum::Model::Action();
 
@@ -721,7 +715,6 @@ public:
     databaseTask=new DatabaseTask(database,
                                   locationService,
                                   mapService,
-                                  router,
                                   jobFinishedAction);
 
     databaseTask->Start();
@@ -740,12 +733,6 @@ public:
     }
 
     Lum::GUIApplication<MainDialog>::Cleanup();
-
-    if (router->IsOpen()) {
-      router->Close();
-    }
-
-    router=NULL;
 
     locationService=NULL;
 

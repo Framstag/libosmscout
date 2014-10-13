@@ -90,7 +90,6 @@ public:
   DatabaseTask(const osmscout::DatabaseRef& database,
                const osmscout::LocationServiceRef& locationService,
                const osmscout::MapServiceRef& mapService,
-               const osmscout::RoutingServiceRef& router,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();
