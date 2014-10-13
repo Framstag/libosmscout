@@ -999,7 +999,9 @@ namespace osmscout {
           rawRelation.GetFeature(i).GetFeature()->HasValue()) {
         NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(rawRelation.GetFeatureValue(i));
 
-        return value->GetName();
+        if (value!=NULL) {
+          return value->GetName();
+        }
       }
     }
 
