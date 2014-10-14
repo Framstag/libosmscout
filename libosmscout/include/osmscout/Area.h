@@ -40,7 +40,7 @@ namespace osmscout {
     static const size_t outerRingId = 1;
 
   public:
-    class Ring
+    class OSMSCOUT_API Ring
     {
     public:
       FeatureValueBuffer    featureValueBuffer; //! List of features
