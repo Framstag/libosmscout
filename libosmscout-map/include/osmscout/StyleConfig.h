@@ -107,7 +107,7 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_API SizeCondition : public Referencable
+  class OSMSCOUT_MAP_API SizeCondition : public Referencable
   {
   private:
     double minMM;
