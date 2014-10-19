@@ -1652,12 +1652,19 @@ namespace osmscout {
                                      botLat,
                                      rightLon);
 
-    osmscout::TypeSet      routableTypes;
+    osmscout::TypeSet      wayRoutableTypes;
+    osmscout::TypeSet      areaRoutableTypes;
 
     for (const auto& type : database->GetTypeConfig()->GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRoute(vehicle)) {
-        routableTypes.SetType(type->GetId());
+        if (type->CanBeWay()) {
+          wayRoutableTypes.SetType(type->GetWayId());
+        }
+
+        if (type->CanBeArea()) {
+          areaRoutableTypes.SetType(type->GetAreaId());
+        }
       }
     }
 
@@ -1667,7 +1674,7 @@ namespace osmscout {
     std::vector<osmscout::AreaRef> areas;
     std::vector<osmscout::WayRef>  ways;
 
-    wayTypes.push_back(routableTypes);
+    wayTypes.push_back(wayRoutableTypes);
 
     if (!areaWayIndex->GetOffsets(leftLon,
                                   botLat,
@@ -1684,7 +1691,7 @@ namespace osmscout {
                                    rightLon,
                                    topLat,
                                    std::numeric_limits<size_t>::max(),
-                                   routableTypes,
+                                   areaRoutableTypes,
                                    std::numeric_limits<size_t>::max(),
                                    wayAreaOffsets)) {
       std::cout << "Error getting ways and relations from area index!" << std::endl;

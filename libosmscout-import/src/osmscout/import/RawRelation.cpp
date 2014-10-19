@@ -59,7 +59,7 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetTypeInfo(tmpType);
 
     featureValueBuffer.SetType(type);
 
@@ -104,7 +104,7 @@ namespace osmscout {
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetIndex());
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
       if (!featureValueBuffer.Write(writer)) {

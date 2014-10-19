@@ -1413,26 +1413,27 @@ namespace osmscout {
   void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
   {
     for (const auto& type : typeConfig->GetNodeTypes()) {
-      types.push_back(type->GetId());
+      types.push_back(type->GetNodeId());
     }
   }
 
   void StyleConfig::GetAllWayTypes(std::list<TypeId>& types)
   {
     for (const auto& type : typeConfig->GetWayTypes()) {
-      types.push_back(type->GetId());
+      types.push_back(type->GetWayId());
     }
   }
 
   void StyleConfig::GetAllAreaTypes(std::list<TypeId>& types)
   {
     for (const auto& type : typeConfig->GetAreaTypes()) {
-      types.push_back(type->GetId());
+      types.push_back(type->GetAreaId());
     }
   }
 
   template <class S, class A>
-  void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals, size_t& maxLevel)
+  void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals,
+                                 size_t& maxLevel)
   {
     for (const auto& conditional : conditionals) {
       maxLevel=std::max(maxLevel,conditional.filter.GetMinLevel()+1);
@@ -1443,11 +1444,36 @@ namespace osmscout {
     }
   }
 
+  class TypeIdProvider
+  {
+  public:
+    virtual TypeId GetId(const TypeInfoRef& type) const = 0;
+  };
+
+  class NodeTypeIdProvider : public TypeIdProvider
+  {
+  public:
+    inline TypeId GetId(const TypeInfoRef& type) const
+    {
+      return type->GetNodeId();
+    }
+  };
+
+  class AreaTypeIdProvider : public TypeIdProvider
+  {
+  public:
+    inline TypeId GetId(const TypeInfoRef& type) const
+    {
+      return type->GetAreaId();
+    }
+  };
+
   template <class S, class A>
   void CalculateUsedTypes(const TypeConfig typeConfig,
                           const std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
-                          std::vector<TypeSet>& typeSets)
+                          std::vector<TypeSet>& typeSets,
+                          const TypeIdProvider& typeIdProvider)
   {
     for (size_t level=0;
         level<maxLevel;
@@ -1467,7 +1493,7 @@ namespace osmscout {
             continue;
           }
 
-          typeSets[level].SetType(type->GetId());
+          typeSets[level].SetType(typeIdProvider.GetId(type));
         }
       }
     }
@@ -1564,11 +1590,13 @@ namespace osmscout {
     CalculateUsedTypes(*typeConfig,
                        nodeTextStyleConditionals,
                        maxLevel,
-                       nodeTypeSets);
+                       nodeTypeSets,
+                       NodeTypeIdProvider());
     CalculateUsedTypes(*typeConfig,
                        nodeIconStyleConditionals,
                        maxLevel,
-                       nodeTypeSets);
+                       nodeTypeSets,
+                       NodeTypeIdProvider());
 
     nodeTextStyleConditionals.clear();
     nodeIconStyleConditionals.clear();
@@ -1647,14 +1675,14 @@ namespace osmscout {
 
           for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
             if (!wayLineStyleSelectors[slot][type->GetIndex()][level].empty()) {
-              typeSet.SetType(type->GetId());
+              typeSet.SetType(type->GetWayId());
             }
           }
 
           if (!wayPathTextStyleSelectors[type->GetIndex()][level].empty() ||
               !wayPathSymbolStyleSelectors[type->GetIndex()][level].empty() ||
               !wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
-            typeSet.SetType(type->GetId());
+            typeSet.SetType(type->GetWayId());
           }
 
           if (typeSet.HasTypes()) {
@@ -1703,15 +1731,18 @@ namespace osmscout {
     CalculateUsedTypes(*typeConfig,
                        areaFillStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
+                       areaTypeSets,
+                       AreaTypeIdProvider());
     CalculateUsedTypes(*typeConfig,
                        areaTextStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
+                       areaTypeSets,
+                       AreaTypeIdProvider());
     CalculateUsedTypes(*typeConfig,
                        areaIconStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
+                       areaTypeSets,
+                       AreaTypeIdProvider());
 
     areaFillStyleConditionals.clear();
     areaTextStyleConditionals.clear();

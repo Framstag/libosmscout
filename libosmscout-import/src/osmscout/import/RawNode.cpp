@@ -21,7 +21,6 @@
 
 #include <osmscout/system/Math.h>
 
-#include <iostream>
 namespace osmscout {
 
   RawNode::RawNode()
@@ -83,7 +82,7 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetNodeTypeInfo((TypeId)tmpType);
 
     featureValueBuffer.SetType(type);
 
@@ -105,7 +104,7 @@ namespace osmscout {
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetNodeId());
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
       if (!featureValueBuffer.Write(writer)) {

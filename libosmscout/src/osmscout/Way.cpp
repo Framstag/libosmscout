@@ -93,7 +93,7 @@ namespace osmscout {
 
     scanner.ReadNumber(tmpType);
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetWayTypeInfo((TypeId)tmpType);
 
     featureValueBuffer.SetType(type);
 
@@ -150,7 +150,7 @@ namespace osmscout {
 
     scanner.ReadNumber(tmpType);
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetWayTypeInfo((TypeId)tmpType);
 
     featureValueBuffer.SetType(type);
 
@@ -170,7 +170,7 @@ namespace osmscout {
   {
     assert(!nodes.empty());
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetWayId());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;
@@ -233,7 +233,7 @@ namespace osmscout {
   {
     assert(!nodes.empty());
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+    writer.WriteNumber(featureValueBuffer.GetType()->GetWayId());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;

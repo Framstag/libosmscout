@@ -949,7 +949,7 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=area.GetType()->GetId();
+      path.type=area.GetType()->GetAreaId();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
@@ -1012,7 +1012,7 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=ring.GetType()->GetId();
+      path.type=ring.GetType()->GetAreaId();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
@@ -1093,7 +1093,7 @@ namespace osmscout {
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-        path.type=way.GetType()->GetId();
+        path.type=way.GetType()->GetWayId();
         path.maxSpeed=GetMaxSpeed(way);
         path.grade=GetGrade(way);
         //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
@@ -1156,7 +1156,7 @@ namespace osmscout {
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-        path.type=way.GetType()->GetId();
+        path.type=way.GetType()->GetWayId();
         path.maxSpeed=GetMaxSpeed(way);
         path.grade=GetGrade(way);
         //path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
@@ -1213,7 +1213,7 @@ namespace osmscout {
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-            path.type=way.GetType()->GetId();
+            path.type=way.GetType()->GetWayId();
             path.maxSpeed=GetMaxSpeed(way);
             path.grade=GetGrade(way);
             //path.bearing=CalculateEncodedBearing(way,i,j,false);
@@ -1268,7 +1268,7 @@ namespace osmscout {
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-            path.type=way.GetType()->GetId();
+            path.type=way.GetType()->GetWayId();
             path.maxSpeed=GetMaxSpeed(way);
             path.grade=GetGrade(way);
             //path.bearing=CalculateEncodedBearing(way,i,j,true);

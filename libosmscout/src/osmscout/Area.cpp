@@ -232,11 +232,11 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)outerType);
+    TypeInfoRef type=typeConfig.GetAreaTypeInfo(outerType);
 
     rings[0].SetType(type);
 
-    if (!rings[0].featureValueBuffer.GetType()->GetIgnore()) {
+    if (rings[0].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
       if (!rings[0].featureValueBuffer.Read(scanner)) {
         return false;
       }
@@ -269,11 +269,11 @@ namespace osmscout {
 
       scanner.ReadNumber(ringType);
 
-      type=typeConfig.GetTypeInfo(ringType);
+      type=typeConfig.GetAreaTypeInfo(ringType);
 
       rings[i].SetType(type);
 
-      if (!rings[i].featureValueBuffer.GetType()->GetIgnore()) {
+      if (rings[i].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
         if (!rings[i].featureValueBuffer.Read(scanner)) {
           return false;
         }
@@ -284,7 +284,7 @@ namespace osmscout {
       scanner.ReadNumber(nodesCount);
 
       if (nodesCount>0 &&
-          !rings[i].GetType()->GetIgnore()) {
+          rings[i].GetType()->GetAreaId()!=typeIgnore) {
         if (!ReadIds(scanner,
                      nodesCount,
                      rings[i].ids)) {
@@ -330,11 +330,11 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)outerType);
+    TypeInfoRef type=typeConfig.GetAreaTypeInfo((TypeId)outerType);
 
     rings[0].SetType(type);
 
-    if (!rings[0].featureValueBuffer.GetType()->GetIgnore()) {
+    if (rings[0].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
       if (!rings[0].featureValueBuffer.Read(scanner)) {
         return false;
       }
@@ -361,11 +361,11 @@ namespace osmscout {
 
       scanner.ReadNumber(ringType);
 
-      type=typeConfig.GetTypeInfo(ringType);
+      type=typeConfig.GetAreaTypeInfo(ringType);
 
       rings[i].SetType(type);
 
-      if (!rings[i].featureValueBuffer.GetType()->GetIgnore()) {
+      if (rings[i].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
         if (!rings[i].featureValueBuffer.Read(scanner)) {
           return false;
         }
@@ -446,15 +446,16 @@ namespace osmscout {
 
     if (rings.size()>1) {
       TypeId type=typeConfig.GetMaxTypeId()+1+
-                  ring->GetType()->GetId();
+                  ring->GetType()->GetAreaId();
+
       writer.WriteNumber(type);
       writer.WriteNumber((uint32_t)rings.size()-1);
     }
     else {
-      writer.WriteNumber(ring->GetType()->GetId());
+      writer.WriteNumber(ring->GetType()->GetAreaId());
     }
 
-    if (!ring->featureValueBuffer.GetType()->GetIgnore()) {
+    if (ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
       if (!ring->featureValueBuffer.Write(writer)) {
         return false;
       }
@@ -479,9 +480,11 @@ namespace osmscout {
     // Potential additional rings
 
     while (ring!=rings.end()) {
-      writer.WriteNumber(ring->GetType()->GetId());
+      TypeId type=ring->GetType()->GetAreaId();
 
-      if (!ring->GetType()->GetIgnore()) {
+      writer.WriteNumber(type);
+
+      if (ring->GetType()->GetAreaId()!=typeIgnore) {
         if (!ring->featureValueBuffer.Write(writer)) {
           return false;
         }
@@ -492,7 +495,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)ring->nodes.size());
 
       if (!ring->nodes.empty() &&
-          !ring->featureValueBuffer.GetType()->GetIgnore()) {
+          ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
         if (!WriteIds(writer,
                       ring->ids)) {
           return false;
@@ -521,15 +524,15 @@ namespace osmscout {
 
     if (rings.size()>1) {
       TypeId type=typeConfig.GetMaxTypeId()+1+
-                  ring->GetType()->GetId();
+                  ring->GetType()->GetAreaId();
       writer.WriteNumber(type);
       writer.WriteNumber((uint32_t)rings.size()-1);
     }
     else {
-      writer.WriteNumber(ring->GetType()->GetId());
+      writer.WriteNumber(ring->GetType()->GetAreaId());
     }
 
-    if (!ring->featureValueBuffer.GetType()->GetIgnore()) {
+    if (ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
       if (!ring->featureValueBuffer.Write(writer)) {
         return false;
       }
@@ -549,9 +552,9 @@ namespace osmscout {
     // Potential additional rings
 
     while (ring!=rings.end()) {
-      writer.WriteNumber(ring->GetType()->GetId());
+      writer.WriteNumber(ring->GetType()->GetAreaId());
 
-      if (!ring->featureValueBuffer.GetType()->GetIgnore()) {
+      if (ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
         if (!ring->featureValueBuffer.Write(writer)) {
           return false;
         }

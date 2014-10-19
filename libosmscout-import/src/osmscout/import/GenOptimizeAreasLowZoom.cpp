@@ -73,7 +73,7 @@ namespace osmscout
   {
     assert(data.type.Valid());
 
-    writer.Write(data.type->GetId());
+    writer.Write(data.type->GetAreaId());
     writer.Write(data.optLevel);
     writer.Write(data.indexLevel);
     writer.Write(data.cellXStart);

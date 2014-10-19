@@ -126,7 +126,7 @@ namespace osmscout {
               return false;
             }
 
-            if (!writer.WriteNumber(ring->GetType()->GetId())) {
+            if (!writer.WriteNumber(ring->GetType()->GetAreaId())) {
               return false;
             }
 
@@ -155,7 +155,7 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.WriteNumber(ring->GetType()->GetId())) {
+        if (!writer.WriteNumber(ring->GetType()->GetAreaId())) {
           return false;
         }
 

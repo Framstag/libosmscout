@@ -113,7 +113,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.WriteNumber(node.GetType()->GetId())) {
+    if (!writer.WriteNumber(node.GetType()->GetNodeId())) {
       return false;
     }
 

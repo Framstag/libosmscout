@@ -39,7 +39,7 @@
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
-
+#include <iostream>
 namespace osmscout {
 
   /**
@@ -196,7 +196,9 @@ namespace osmscout {
     };
 
   private:
-    TypeId                               id;
+    TypeId                               nodeId;
+    TypeId                               wayId;
+    TypeId                               areaId;
     std::string                          name;
     size_t                               index;
 
@@ -233,7 +235,17 @@ namespace osmscout {
     /**
      * Set the id of this type
      */
-    TypeInfo& SetId(TypeId id);
+    TypeInfo& SetNodeId(TypeId id);
+
+    /**
+     * Set the id of this type
+     */
+    TypeInfo& SetWayId(TypeId id);
+
+    /**
+     * Set the id of this type
+     */
+    TypeInfo& SetAreaId(TypeId id);
 
     /**
      * Set the index of this type. The index is assured to in the interval [0..GetTypeCount()[
@@ -321,9 +333,27 @@ namespace osmscout {
      * Returns the unique id of this type. You should not use the type id as an index.
 
      */
-    inline TypeId GetId() const
+    inline TypeId GetNodeId() const
     {
-      return id;
+      return nodeId;
+    }
+
+    /**
+     * Returns the unique id of this type. You should not use the type id as an index.
+
+     */
+    inline TypeId GetWayId() const
+    {
+      return wayId;
+    }
+
+    /**
+     * Returns the unique id of this type. You should not use the type id as an index.
+
+     */
+    inline TypeId GetAreaId() const
+    {
+      return areaId;
     }
 
     /**
@@ -842,15 +872,12 @@ namespace osmscout {
     std::vector<TypeInfoRef>                  nodeTypes;
     std::vector<TypeInfoRef>                  wayTypes;
     std::vector<TypeInfoRef>                  areaTypes;
-    std::vector<TypeInfoRef>                  typedTypes;
     std::vector<FeatureRef>                   features;
 
     TagId                                     nextTagId;
-    TypeId                                    nextTypeId;
 
     OSMSCOUT_HASHMAP<std::string,TagId>       stringToTagMap;
     OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
-    OSMSCOUT_HASHMAP<TypeId,TypeInfoRef>      idToTypeMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>          nameTagIdToPrioMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>          nameAltTagIdToPrioMap;
     OSMSCOUT_HASHMAP<std::string,uint8_t>     nameToMaxSpeedMap;
@@ -997,11 +1024,50 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline const TypeInfoRef GetTypeInfo(TypeId id) const
+    inline const TypeInfoRef GetNodeTypeInfo(TypeId id) const
     {
-      assert(id<typedTypes.size());
+      assert(id<=nodeTypes.size());
 
-      return typedTypes[id];
+      if (id==typeIgnore) {
+        return typeInfoIgnore;
+      }
+      else {
+        return nodeTypes[id-1];
+      }
+    }
+
+    /**
+     * Returns the type definition for the given type id
+     */
+    inline const TypeInfoRef GetWayTypeInfo(TypeId id) const
+    {
+      assert(id<=wayTypes.size());
+
+      if (id==typeIgnore) {
+        return typeInfoIgnore;
+      }
+      else {
+        return wayTypes[id-1];
+      }
+    }
+
+    /**
+     * Returns the type definition for the given type id
+     */
+    inline const TypeInfoRef GetAreaTypeInfo(TypeId id) const
+    {
+      if (!(id<=areaTypes.size())) {
+        std::cout << "assert(" << id << "<" << areaTypes.size() << ")" << std::endl;
+      }
+
+      assert(id<=areaTypes.size());
+
+      if (id==typeIgnore) {
+        return typeInfoIgnore;
+      }
+      else {
+        return areaTypes[id-1];
+      }
     }
 
     /**

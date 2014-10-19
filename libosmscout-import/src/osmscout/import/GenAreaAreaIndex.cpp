@@ -282,7 +282,7 @@ namespace osmscout {
 
             Entry entry;
 
-            entry.type=area.GetType()->GetId();
+            entry.type=area.GetType()->GetAreaId();
             entry.offset=offset;
 
             // Add this area to the tile where the center of the area lies in.

@@ -94,7 +94,14 @@ namespace osmscout {
       isArea=false;
     }
 
-    TypeInfoRef type=typeConfig.GetTypeInfo((TypeId)tmpType);
+    TypeInfoRef type;
+
+    if (isArea) {
+      type=typeConfig.GetAreaTypeInfo((TypeId)tmpType);
+    }
+    else {
+      type=typeConfig.GetWayTypeInfo((TypeId)tmpType);
+    }
 
     featureValueBuffer.SetType(type);
 
@@ -140,11 +147,11 @@ namespace osmscout {
 
     if (isArea) {
       TypeId type=typeConfig.GetMaxTypeId()+1+
-                  featureValueBuffer.GetType()->GetId();
+                  featureValueBuffer.GetType()->GetAreaId();
       writer.WriteNumber(type);
     }
     else {
-      writer.WriteNumber(featureValueBuffer.GetType()->GetId());
+      writer.WriteNumber(featureValueBuffer.GetType()->GetWayId());
     }
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {

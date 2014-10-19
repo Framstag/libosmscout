@@ -308,7 +308,9 @@ namespace osmscout {
   }
 
   TypeInfo::TypeInfo()
-   : id(0),
+   : nodeId(0),
+     wayId(0),
+     areaId(0),
      index(0),
      valueBufferSize(0),
      canBeNode(false),
@@ -347,9 +349,23 @@ namespace osmscout {
     // no code
   }
 
-  TypeInfo& TypeInfo::SetId(TypeId id)
+  TypeInfo& TypeInfo::SetNodeId(TypeId id)
   {
-    this->id=id;
+    this->nodeId=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetWayId(TypeId id)
+  {
+    this->wayId=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetAreaId(TypeId id)
+  {
+    this->areaId=id;
 
     return *this;
   }
@@ -547,8 +563,7 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : nextTagId(0),
-     nextTypeId(1)
+   : nextTagId(0)
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
@@ -759,7 +774,8 @@ namespace osmscout {
       return existingType->second;
     }
 
-    if ((typeInfo->CanBeArea() || typeInfo->CanBeNode()) &&
+    if ((typeInfo->CanBeArea() ||
+         typeInfo->CanBeNode()) &&
         typeInfo->GetIndexAsAddress()) {
       if (!typeInfo->HasFeature(LocationFeature::NAME)) {
         typeInfo->AddFeature(featureLocation);
@@ -818,40 +834,31 @@ namespace osmscout {
       }
     }
 
-    if (typeInfo->GetIgnore()) {
-      typeInfo->SetId(0);
-    }
-    else {
-      typeInfo->SetId(nextTypeId);
-      nextTypeId++;
-    }
-
     typeInfo->SetIndex(types.size());
 
     types.push_back(typeInfo);
 
-    if (!typeInfo->GetIgnore() || typeInfo->GetName()=="") {
-      typedTypes.push_back(typeInfo);
-    }
-
     if (!typeInfo->GetIgnore() &&
-        typeInfo->CanBeNode()) {
-      nodeTypes.push_back(typeInfo);
-    }
+        (typeInfo->CanBeNode() ||
+         typeInfo->CanBeWay() ||
+         typeInfo->CanBeArea())) {
+      if (typeInfo->CanBeNode()) {
+        typeInfo->SetNodeId(nodeTypes.size()+1);
+        nodeTypes.push_back(typeInfo);
+      }
 
-    if (!typeInfo->GetIgnore() &&
-        typeInfo->CanBeWay()) {
-      wayTypes.push_back(typeInfo);
-    }
+      if (typeInfo->CanBeWay()) {
+        typeInfo->SetWayId(wayTypes.size()+1);
+        wayTypes.push_back(typeInfo);
+      }
 
-    if (!typeInfo->GetIgnore() &&
-        typeInfo->CanBeArea()) {
-      areaTypes.push_back(typeInfo);
+      if (typeInfo->CanBeArea()) {
+        typeInfo->SetAreaId(areaTypes.size()+1);
+        areaTypes.push_back(typeInfo);
+      }
     }
 
     nameToTypeMap[typeInfo->GetName()]=typeInfo;
-
-    idToTypeMap[typeInfo->GetId()]=typeInfo;
 
     return typeInfo;
   }
@@ -862,7 +869,7 @@ namespace osmscout {
       return 0;
     }
     else {
-      return nextTypeId-1;
+      return types.size();
     }
   }
 
@@ -1268,7 +1275,6 @@ namespace osmscout {
     }
 
     for (size_t i=1; i<=typeCount; i++) {
-      TypeId      requestedId;
       std::string name;
       bool        canBeNode;
       bool        canBeWay;
@@ -1288,8 +1294,7 @@ namespace osmscout {
       bool        ignore;
       bool        ignoreSeaLand;
 
-      if (!(scanner.ReadNumber(requestedId) &&
-            scanner.Read(name) &&
+      if (!(scanner.Read(name) &&
             scanner.Read(canBeNode) &&
             scanner.Read(canBeWay) &&
             scanner.Read(canBeArea) &&
@@ -1360,11 +1365,6 @@ namespace osmscout {
       }
 
       typeInfo=RegisterType(typeInfo);
-
-      if (typeInfo->GetId()!=requestedId) {
-        std::cerr << "Requested and actual name tag id do not match" << std::endl;
-        return false;
-      }
     }
 
     return !scanner.HasError() && scanner.Close();
@@ -1435,7 +1435,6 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)GetTypes().size());
 
     for (auto type : GetTypes()) {
-      writer.WriteNumber(type->GetId());
       writer.Write(type->GetName());
       writer.Write(type->CanBeNode());
       writer.Write(type->CanBeWay());

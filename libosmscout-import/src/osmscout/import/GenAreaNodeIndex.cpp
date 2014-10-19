@@ -246,7 +246,7 @@ namespace osmscout {
         FileOffset bitmapOffset=0;
         uint8_t    dataOffsetBytes=0;
 
-        writer.WriteNumber(type->GetId());
+        writer.WriteNumber(type->GetNodeId());
 
         writer.GetPos(nodeTypeData[i].indexOffset);
 

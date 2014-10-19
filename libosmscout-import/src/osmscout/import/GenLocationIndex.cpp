@@ -1026,7 +1026,7 @@ namespace osmscout {
       }
 
       typeId=(TypeId)tmpType;
-      type=typeConfig.GetTypeInfo(typeId);
+      type=typeConfig.GetAreaTypeInfo(typeId);
 
       bool isAddress=!location.empty() &&
                      !address.empty();
@@ -1290,7 +1290,7 @@ namespace osmscout {
       }
 
       typeId=(TypeId)tmpType;
-      type=typeConfig.GetTypeInfo(typeId);
+      type=typeConfig.GetWayTypeInfo(typeId);
 
       bool isPOI=!name.empty() &&
                  type->GetIndexAsPOI();
@@ -1461,7 +1461,7 @@ namespace osmscout {
       }
 
       typeId=(TypeId)tmpType;
-      type=typeConfig.GetTypeInfo(typeId);
+      type=typeConfig.GetNodeTypeInfo(typeId);
 
       bool isAddress=!location.empty() &&
                      !address.empty();

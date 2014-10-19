@@ -396,7 +396,7 @@ namespace osmscout {
         uint8_t    dataOffsetBytes=0;
         FileOffset bitmapOffset=0;
 
-        writer.WriteNumber(type->GetId());
+        writer.WriteNumber(type->GetWayId());
 
         writer.GetPos(wayTypeData[i].indexOffset);
 
