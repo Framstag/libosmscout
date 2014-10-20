@@ -24,25 +24,54 @@
 
 namespace osmscout {
 
+  LocationService::VisitorMatcher::VisitorMatcher(const std::string& searchPattern)
+  :pattern(searchPattern)
+  {
+    TolowerUmlaut(pattern);
+  }
+
+  void LocationService::VisitorMatcher::Match(const std::string& name,
+                             bool& match,
+                             bool& candidate) const
+  {
+    std::string tmpname = name;
+    std::string::size_type matchPosition;
+    TolowerUmlaut(tmpname);
+
+    matchPosition = tmpname.find(pattern);
+
+    match = matchPosition==0 && tmpname.length()==pattern.length();
+    candidate = matchPosition!=std::string::npos;  
+  }
+  
+  void LocationService::VisitorMatcher::TolowerUmlaut(std::string& s) const
+  {
+    for ( std::string::iterator it=s.begin(); 
+          it!=s.end(); 
+          ++it) 
+    {
+      /* this filter matches all character from the table
+       * http://en.wikipedia.org/wiki/Latin-1_Supplement_%28Unicode_block%29#Compact_table
+       * beginning at U+0x00C0 to U+0x00DE
+       */
+      if((uint8_t)*it == 0xC3)
+      {
+        ++it;
+        if((uint8_t)*it >= 0x80 && (uint8_t)*it <= 0x9E) // 0x9F is german "sz" which is already small caps.
+          *it += 0x20;
+      }
+      else
+        *it = tolower(*it);
+    }
+  }
+  
   LocationService::AdminRegionMatchVisitor::AdminRegionMatchVisitor(const std::string& pattern,
                                                                     size_t limit)
-  : pattern(pattern),
+  : VisitorMatcher(pattern),
     limit(limit),
     limitReached(false)
   {
     // no code
-  }
-
-  void LocationService::AdminRegionMatchVisitor::Match(const std::string& name,
-                                                       bool& match,
-                                                       bool& candidate) const
-  {
-    std::string::size_type matchPosition;
-
-    matchPosition=name.find(pattern);
-
-    match=matchPosition==0 && name.length()==pattern.length();
-    candidate=matchPosition!=std::string::npos;
   }
 
   AdminRegionVisitor::Action LocationService::AdminRegionMatchVisitor::Visit(const AdminRegion& region)
@@ -103,23 +132,11 @@ namespace osmscout {
 
   LocationService::LocationMatchVisitor::LocationMatchVisitor(const std::string& pattern,
                                                               size_t limit)
-  : pattern(pattern),
+  : VisitorMatcher(pattern),
     limit(limit),
     limitReached(false)
   {
     // no code
-  }
-
-  void LocationService::LocationMatchVisitor::Match(const std::string& name,
-                                                    bool& match,
-                                                    bool& candidate) const
-  {
-    std::string::size_type matchPosition;
-
-    matchPosition=name.find(pattern);
-
-    match=matchPosition==0 && name.length()==pattern.length();
-    candidate=matchPosition!=std::string::npos;
   }
 
   bool LocationService::LocationMatchVisitor::Visit(const AdminRegion& adminRegion,
@@ -174,23 +191,11 @@ namespace osmscout {
 
   LocationService::AddressMatchVisitor::AddressMatchVisitor(const std::string& pattern,
                                                             size_t limit)
-  : pattern(pattern),
+  : VisitorMatcher(pattern),
     limit(limit),
     limitReached(false)
   {
     // no code
-  }
-
-  void LocationService::AddressMatchVisitor::Match(const std::string& name,
-                                                   bool& match,
-                                                   bool& candidate) const
-  {
-    std::string::size_type matchPosition;
-
-    matchPosition=name.find(pattern);
-
-    match=matchPosition==0 && name.length()==pattern.length();
-    candidate=matchPosition!=std::string::npos;
   }
 
   bool LocationService::AddressMatchVisitor::Visit(const AdminRegion& adminRegion,
