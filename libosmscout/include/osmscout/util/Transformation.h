@@ -167,15 +167,6 @@ namespace osmscout {
     void ScanConvertLine(size_t start,
                          size_t end,
                          std::vector<ScanCell>& cells);
-
-/*
-    void GetBoundingBox(size_t start, size_t end,
-                        double& xmin, double& ymin,
-                        double& xmax, double& ymax) const;
-
-    void GetCenterPixel(size_t start, size_t end,
-                        double& cx,
-                        double& cy) const;*/
   };
 
   template<class P>
@@ -320,41 +311,6 @@ namespace osmscout {
                                 cells);
     }
   }
-
-  /*
-  template<class P>
-  void CoordBufferImpl<P>::GetBoundingBox(size_t start, size_t end,
-                                          double& xmin, double& ymin,
-                                          double& xmax, double& ymax) const
-  {
-    xmin=buffer[start].GetX();
-    xmax=xmin;
-    ymin=buffer[start].GetY();
-    ymax=ymin;
-
-    for (size_t i=start+1; i<=end; i++) {
-      xmin=std::min(xmin,buffer[i].GetX());
-      xmax=std::max(xmax,buffer[i].GetX());
-      ymin=std::min(ymin,buffer[i].GetY());
-      ymax=std::max(ymax,buffer[i].GetY());
-    }
-  }
-
-  template<class P>
-  void CoordBufferImpl<P>::GetCenterPixel(size_t start, size_t end,
-                                          double& cx,
-                                          double& cy) const
-  {
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    GetBoundingBox(start,end,xmin,ymin,xmax,ymax);
-
-    cx=xmin+(xmax-xmin)/2;
-    cy=ymin+(ymax-ymin)/2;
-  }*/
 
   /**
    * \ingroup Geometry

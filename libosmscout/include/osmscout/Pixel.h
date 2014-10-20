@@ -68,7 +68,7 @@ namespace osmscout {
    * Two dimensional coordinate (floating point values,
    * negative coordinates possible).
    */
-  struct OSMSCOUT_API Vertex2D
+  class OSMSCOUT_API Vertex2D
   {
   private:
     double coords[2];
@@ -140,7 +140,7 @@ namespace osmscout {
    * Three dimensional coordinate (floating point values,
    * negative coordinates possible).
    */
-  struct OSMSCOUT_API Vertex3D
+  class OSMSCOUT_API Vertex3D
   {
   private:
     double x;
