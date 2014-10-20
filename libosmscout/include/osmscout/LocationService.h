@@ -116,20 +116,20 @@ namespace osmscout {
   class OSMSCOUT_API LocationService : public Referencable
   {
   private:
-    /** 
+    /**
      * \ingroup Location
      *
-     * Matching algorithm that can compare names regardless of their case. 
+     * Matching algorithm that can compare names regardless of their case.
      * Defined abstract because this function is used in the classes
      * \see AdminRegionVisitor
      * \see LocationMatchVisitor
-     * \see AddressMatchVisitor   
-     */  
+     * \see AddressMatchVisitor
+     */
      class VisitorMatcher
      {
      public:
        VisitorMatcher(const std::string& pattern);
-       
+
      protected:
        std::string              pattern;
 
@@ -137,7 +137,7 @@ namespace osmscout {
        void Match(const std::string& name,
                   bool& match,
                   bool& candidate) const;
-                        
+
      private:
        void TolowerUmlaut(std::string& s) const;
      };

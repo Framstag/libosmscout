@@ -31,24 +31,25 @@ namespace osmscout {
   }
 
   void LocationService::VisitorMatcher::Match(const std::string& name,
-                             bool& match,
-                             bool& candidate) const
+                                              bool& match,
+                                              bool& candidate) const
   {
-    std::string tmpname = name;
+    std::string            tmpname=name;
     std::string::size_type matchPosition;
+
     TolowerUmlaut(tmpname);
 
-    matchPosition = tmpname.find(pattern);
+    matchPosition=tmpname.find(pattern);
 
-    match = matchPosition==0 && tmpname.length()==pattern.length();
-    candidate = matchPosition!=std::string::npos;  
+    match=matchPosition==0 && tmpname.length()==pattern.length();
+    candidate=matchPosition!=std::string::npos;
   }
-  
+
   void LocationService::VisitorMatcher::TolowerUmlaut(std::string& s) const
   {
-    for ( std::string::iterator it=s.begin(); 
-          it!=s.end(); 
-          ++it) 
+    for (std::string::iterator it=s.begin();
+         it!=s.end();
+         ++it)
     {
       /* this filter matches all character from the table
        * http://en.wikipedia.org/wiki/Latin-1_Supplement_%28Unicode_block%29#Compact_table
@@ -57,14 +58,18 @@ namespace osmscout {
       if((uint8_t)*it == 0xC3)
       {
         ++it;
-        if((uint8_t)*it >= 0x80 && (uint8_t)*it <= 0x9E) // 0x9F is german "sz" which is already small caps.
-          *it += 0x20;
+
+        if((uint8_t)*it>=0x80 && (uint8_t)*it<=0x9E) {
+          // 0x9F is german "sz" which is already small caps.
+          *it+=0x20;
+        }
       }
-      else
-        *it = tolower(*it);
+      else {
+        *it=tolower(*it);
+      }
     }
   }
-  
+
   LocationService::AdminRegionMatchVisitor::AdminRegionMatchVisitor(const std::string& pattern,
                                                                     size_t limit)
   : VisitorMatcher(pattern),
