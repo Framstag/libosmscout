@@ -116,7 +116,33 @@ namespace osmscout {
   class OSMSCOUT_API LocationService : public Referencable
   {
   private:
-    class AdminRegionMatchVisitor : public AdminRegionVisitor
+    /** 
+     * \ingroup Location
+     *
+     * Matching algorithm that can compare names regardless of their case. 
+     * Defined abstract because this function is used in the classes
+     * \see AdminRegionVisitor
+     * \see LocationMatchVisitor
+     * \see AddressMatchVisitor   
+     */  
+     class VisitorMatcher
+     {
+     public:
+       VisitorMatcher(const std::string& pattern);
+       
+     protected:
+       std::string              pattern;
+
+     protected:
+       void Match(const std::string& name,
+                  bool& match,
+                  bool& candidate) const;
+                        
+     private:
+       void TolowerUmlaut(std::string& s) const;
+     };
+
+    class AdminRegionMatchVisitor : public AdminRegionVisitor, public VisitorMatcher
     {
     public:
       class AdminRegionResult
@@ -127,17 +153,11 @@ namespace osmscout {
       };
 
     private:
-      std::string                  pattern;
       size_t                       limit;
 
     public:
       std::list<AdminRegionResult> results;
       bool                         limitReached;
-
-    private:
-      void Match(const std::string& name,
-                 bool& match,
-                 bool& candidate) const;
 
     public:
       AdminRegionMatchVisitor(const std::string& pattern,
@@ -150,7 +170,7 @@ namespace osmscout {
      * Visitor that gets called for every location found in the given region.
      * It is the task of the visitor to decide if a location matches the given criteria.
      */
-    class LocationMatchVisitor : public LocationVisitor
+    class LocationMatchVisitor : public LocationVisitor, public VisitorMatcher
     {
     public:
       class POIResult
@@ -170,18 +190,12 @@ namespace osmscout {
       };
 
     private:
-      std::string         pattern;
       size_t              limit;
 
     public:
       std::list<POIResult>      poiResults;
       std::list<LocationResult> locationResults;
       bool                      limitReached;
-
-    private:
-      void Match(const std::string& name,
-                 bool& match,
-                 bool& candidate) const;
 
     public:
       LocationMatchVisitor(const std::string& pattern,
@@ -193,7 +207,7 @@ namespace osmscout {
                  const Location &location);
     };
 
-    class AddressMatchVisitor : public AddressVisitor
+    class AddressMatchVisitor : public AddressVisitor, public VisitorMatcher
     {
     public:
       class AddressResult
@@ -206,17 +220,11 @@ namespace osmscout {
       };
 
     private:
-      std::string              pattern;
       size_t                   limit;
 
     public:
       std::list<AddressResult> results;
       bool                     limitReached;
-
-    private:
-      void Match(const std::string& name,
-                 bool& match,
-                 bool& candidate) const;
 
     public:
       AddressMatchVisitor(const std::string& pattern,
