@@ -85,7 +85,9 @@ int main(int argc, char* argv[])
   std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
 
   osmscout::TypeConfigRef          typeConfig(database->GetTypeConfig());
-  osmscout::TypeSet                types(*typeConfig);
+  osmscout::TypeSet                nodeTypes(*typeConfig);
+  osmscout::TypeSet                wayTypes(*typeConfig);
+  osmscout::TypeSet                areaTypes(*typeConfig);
   osmscout::NameFeatureLabelReader nameLabelReader(typeConfig);
 
   for (const auto &name : typeNames) {
@@ -96,22 +98,24 @@ int main(int argc, char* argv[])
       continue;
     }
 
-    types.SetType(type->GetId());
-
     std::cout << "- Searching for '" << name << "' as";
 
 
-    if (type->CanBeNode()) {
-      std::cout << " node";
+    if (!type->GetIgnore()) {
+      if (type->CanBeNode()) {
+        std::cout << " node";
+        nodeTypes.SetType(type->GetNodeId());
+      }
 
-    }
+      if (type->CanBeWay()) {
+        std::cout << " way";
+        wayTypes.SetType(type->GetWayId());
+      }
 
-    if (type->CanBeWay()) {
-      std::cout << " way";
-    }
-
-    if (type->CanBeArea()) {
-      std::cout << " area";
+      if (type->CanBeArea()) {
+        std::cout << " area";
+        areaTypes.SetType(type->GetAreaId());
+      }
     }
 
     std::cout << std::endl;
@@ -125,9 +129,11 @@ int main(int argc, char* argv[])
                                  std::min(latTop,latBottom),
                                  std::max(lonLeft,lonRight),
                                  std::max(latTop,latBottom),
-                                 types,
+                                 nodeTypes,
                                  nodes,
+                                 wayTypes,
                                  ways,
+                                 areaTypes,
                                  areas)) {
     std::cerr << "Cannot load data from database" << std::endl;
 

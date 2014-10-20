@@ -58,9 +58,11 @@ namespace osmscout {
 
     bool GetPOIsInArea(double lonMin, double latMin,
                        double lonMax, double latMax,
-                       const TypeSet& types,
+                       const TypeSet& nodeTypes,
                        std::vector<NodeRef>& nodes,
+                       const TypeSet& wayTypes,
                        std::vector<WayRef>& ways,
+                       const TypeSet& areaTypes,
                        std::vector<AreaRef>& areas) const;
   };
 

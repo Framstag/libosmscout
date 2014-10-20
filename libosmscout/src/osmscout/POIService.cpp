@@ -189,9 +189,11 @@ namespace osmscout {
    */
   bool POIService::GetPOIsInArea(double lonMin, double latMin,
                                  double lonMax, double latMax,
-                                 const TypeSet& types,
+                                 const TypeSet& nodeTypes,
                                  std::vector<NodeRef>& nodes,
+                                 const TypeSet& wayTypes,
                                  std::vector<WayRef>& ways,
+                                 const TypeSet& areaTypes,
                                  std::vector<AreaRef>& areas) const
   {
     bool nodesSuccess=true;
@@ -206,7 +208,7 @@ namespace osmscout {
                                   latMin,
                                   lonMax,
                                   latMax,
-                                  types,
+                                  nodeTypes,
                                   nodes);
 
 #pragma omp section
@@ -215,7 +217,7 @@ namespace osmscout {
                                   latMin,
                                   lonMax,
                                   latMax,
-                                  types,
+                                  areaTypes,
                                   areas);
 
 #pragma omp section
@@ -223,7 +225,7 @@ namespace osmscout {
                                 latMin,
                                 lonMax,
                                 latMax,
-                                types,
+                                wayTypes,
                                 ways);
     }
 
