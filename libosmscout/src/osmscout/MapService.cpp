@@ -257,7 +257,8 @@ namespace osmscout {
     StopClock               areaIndexTimer;
 
     if (internalAreaTypes.HasTypes()) {
-      if (!areaAreaIndex->GetOffsets(lonMin,
+      if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
+                                     lonMin,
                                      latMin,
                                      lonMax,
                                      latMax,

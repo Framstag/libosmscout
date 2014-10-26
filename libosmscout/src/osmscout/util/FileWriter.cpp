@@ -641,6 +641,16 @@ namespace osmscout {
     return true;
   }
 
+  bool FileWriter::WriteTypeId(TypeId id, uint8_t maxBytes)
+  {
+    if (maxBytes==1) {
+      return Write((uint8_t)id);
+    }
+    else {
+      return WriteNumber(id);
+    }
+  }
+
   bool FileWriter::Flush()
   {
     if (HasError()) {

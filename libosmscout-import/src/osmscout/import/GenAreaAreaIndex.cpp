@@ -80,7 +80,8 @@ namespace osmscout {
     }
   }
 
-  bool AreaAreaIndexGenerator::WriteIndexLevel(const ImportParameter& parameter,
+  bool AreaAreaIndexGenerator::WriteIndexLevel(const TypeConfigRef& typeConfig,
+                                               const ImportParameter& parameter,
                                                FileWriter& writer,
                                                int level,
                                                std::map<Pixel,AreaLeaf>& leafs)
@@ -116,7 +117,8 @@ namespace osmscout {
       for (std::list<Entry>::const_iterator entry=leaf->second.areas.begin();
            entry!=leaf->second.areas.end();
            entry++) {
-        writer.WriteNumber(entry->type);
+        writer.WriteTypeId(entry->type,
+                           typeConfig->GetAreaTypeIdBytes());
         // Since objects are inserted in file position order, we do not need
         // to sort objects by file offset at this place
         writer.WriteNumber(entry->offset-lastOffset);
@@ -345,7 +347,8 @@ namespace osmscout {
         std::cout << "* " << u->first << " " << typeConfig.GetTypeInfo(u->first).GetName() << " " << u->second << std::endl;
       }*/
 
-      if (!WriteIndexLevel(parameter,
+      if (!WriteIndexLevel(typeConfig,
+                           parameter,
                            writer,
                            (int)l,
                            leafs)) {

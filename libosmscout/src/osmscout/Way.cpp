@@ -89,11 +89,12 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t tmpType;
+    TypeId typeId;
 
-    scanner.ReadNumber(tmpType);
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetWayTypeIdBytes());
 
-    TypeInfoRef type=typeConfig.GetWayTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
 
     featureValueBuffer.SetType(type);
 
@@ -146,11 +147,12 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t tmpType;
+    TypeId typeId;
 
-    scanner.ReadNumber(tmpType);
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetWayTypeIdBytes());
 
-    TypeInfoRef type=typeConfig.GetWayTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
 
     featureValueBuffer.SetType(type);
 
@@ -165,12 +167,13 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Way::Write(const TypeConfig& /*typeConfig*/,
+  bool Way::Write(const TypeConfig& typeConfig,
                   FileWriter& writer) const
   {
     assert(!nodes.empty());
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetWayId());
+    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                       typeConfig.GetWayTypeIdBytes());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;
@@ -228,12 +231,13 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool Way::WriteOptimized(const TypeConfig& /*typeConfig*/,
+  bool Way::WriteOptimized(const TypeConfig& typeConfig,
                            FileWriter& writer) const
   {
     assert(!nodes.empty());
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetWayId());
+    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                       typeConfig.GetWayTypeIdBytes());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;

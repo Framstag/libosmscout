@@ -155,6 +155,9 @@ namespace osmscout {
     bool Read(std::vector<GeoCoord>& nodes);
     bool Read(std::vector<GeoCoord>& nodes,
               size_t count);
+
+    bool ReadTypeId(TypeId& id,
+                    uint8_t maxBytes);
   };
 }
 

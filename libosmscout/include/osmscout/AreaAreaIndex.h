@@ -112,7 +112,8 @@ namespace osmscout {
     mutable IndexCache              indexCache;     //! Cached map of all index entries by file offset
 
   private:
-    bool GetIndexCell(uint32_t level,
+    bool GetIndexCell(const TypeConfigRef& typeConfig,
+                      uint32_t level,
                       FileOffset offset,
                       IndexCache::CacheRef& cacheRef) const;
 
@@ -122,7 +123,8 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetOffsets(double minlon,
+    bool GetOffsets(const TypeConfigRef& typeConfig,
+                    double minlon,
                     double minlat,
                     double maxlon,
                     double maxlat,

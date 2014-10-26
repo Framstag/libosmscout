@@ -44,11 +44,12 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t tmpType;
+    TypeId typeId;
 
-    scanner.ReadNumber(tmpType);
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetNodeTypeIdBytes());
 
-    TypeInfoRef type=typeConfig.GetNodeTypeInfo((TypeId)tmpType);
+    TypeInfoRef type=typeConfig.GetNodeTypeInfo(typeId);
 
     featureValueBuffer.SetType(type);
 
@@ -61,10 +62,11 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Node::Write(const TypeConfig& /*typeConfig*/,
+  bool Node::Write(const TypeConfig& typeConfig,
                    FileWriter& writer) const
   {
-    writer.WriteNumber(featureValueBuffer.GetType()->GetNodeId());
+    writer.WriteTypeId(featureValueBuffer.GetType()->GetNodeId(),
+                       typeConfig.GetNodeTypeIdBytes());
 
     if (!featureValueBuffer.Write(writer)) {
       return false;

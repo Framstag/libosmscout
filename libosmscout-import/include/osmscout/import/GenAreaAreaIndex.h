@@ -61,7 +61,8 @@ namespace osmscout {
     void SetOffsetOfChildren(const std::map<Pixel,AreaLeaf>& leafs,
                              std::map<Pixel,AreaLeaf>& newAreaLeafs);
 
-    bool WriteIndexLevel(const ImportParameter& parameter,
+    bool WriteIndexLevel(const TypeConfigRef& typeConfig,
+                         const ImportParameter& parameter,
                          FileWriter& writer,
                          int level,
                          std::map<Pixel,AreaLeaf>& leafs);

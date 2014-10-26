@@ -41,7 +41,8 @@ namespace osmscout {
     }
   }
 
-  bool AreaAreaIndex::GetIndexCell(uint32_t level,
+  bool AreaAreaIndex::GetIndexCell(const TypeConfigRef& typeConfig,
+                                   uint32_t level,
                                    FileOffset offset,
                                    IndexCache::CacheRef& cacheRef) const
   {
@@ -91,7 +92,8 @@ namespace osmscout {
       FileOffset prevOffset=0;
 
       for (size_t c=0; c<offsetCount; c++) {
-        if (!scanner.ReadNumber(cacheRef->value.areas[c].type)) {
+        if (!scanner.ReadTypeId(cacheRef->value.areas[c].type,
+                                typeConfig->GetAreaTypeIdBytes())) {
           std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
           return false;
         }
@@ -143,7 +145,8 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool AreaAreaIndex::GetOffsets(double minlon,
+  bool AreaAreaIndex::GetOffsets(const TypeConfigRef& typeConfig,
+                                 double minlon,
                                  double minlat,
                                  double maxlon,
                                  double maxlat,
@@ -199,7 +202,10 @@ namespace osmscout {
         double               y;
         IndexCache::CacheRef cell;
 
-        if (!GetIndexCell(level,cellRefs[i].offset,cell)) {
+        if (!GetIndexCell(typeConfig,
+                          level,
+                          cellRefs[i].offset,
+                          cell)) {
           std::cerr << "Cannot find offset " << cellRefs[i].offset << " in level " << level << " => aborting!" << std::endl;
           return false;
         }

@@ -57,7 +57,8 @@ namespace osmscout {
     }
   }
 
-  bool AreaWayIndex::Load(const std::string& path)
+  bool AreaWayIndex::Load(const TypeConfigRef& typeConfig,
+                          const std::string& path)
   {
     datafilename=path+"/"+filepart;
 
@@ -73,7 +74,8 @@ namespace osmscout {
     for (size_t i=0; i<indexEntries; i++) {
       TypeId type;
 
-      scanner.ReadNumber(type);
+      scanner.ReadTypeId(type,
+                         typeConfig->GetWayTypeIdBytes());
 
       if (type>=wayTypeData.size()) {
         wayTypeData.resize(type+1);

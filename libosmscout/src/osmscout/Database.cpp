@@ -352,7 +352,8 @@ namespace osmscout {
     if (areaWayIndex.Invalid()) {
       areaWayIndex=new AreaWayIndex();
 
-      if (!areaWayIndex->Load(path)) {
+      if (!areaWayIndex->Load(typeConfig,
+                              path)) {
         std::cerr << "Cannot load area way index!" << std::endl;
         areaWayIndex=NULL;
 

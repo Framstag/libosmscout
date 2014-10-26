@@ -95,7 +95,8 @@ namespace osmscout {
 
     std::vector<FileOffset> wayAreaOffsets;
 
-    if (!areaAreaIndex->GetOffsets(lonMin,
+    if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
+                                   lonMin,
                                    latMin,
                                    lonMax,
                                    latMax,

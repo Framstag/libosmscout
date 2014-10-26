@@ -2337,5 +2337,25 @@ namespace osmscout {
 
     return !HasError();
   }
+
+  bool FileScanner::ReadTypeId(TypeId& id,
+                               uint8_t maxBytes)
+  {
+    if (maxBytes==1) {
+      uint8_t byteValue;
+
+      if (Read(byteValue)) {
+        id=byteValue;
+
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      return ReadNumber(id);
+    }
+  }
 }
 

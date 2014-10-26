@@ -563,7 +563,10 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : nextTagId(0)
+   : nextTagId(0),
+     nodeTypIdBytes(1),
+     wayTypIdBytes(1),
+     areaTypIdBytes(1)
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
@@ -845,16 +848,37 @@ namespace osmscout {
       if (typeInfo->CanBeNode()) {
         typeInfo->SetNodeId(nodeTypes.size()+1);
         nodeTypes.push_back(typeInfo);
+
+        if (nodeTypes.size()<256) {
+          nodeTypIdBytes=1;
+        }
+        else {
+          nodeTypIdBytes=2;
+        }
       }
 
       if (typeInfo->CanBeWay()) {
         typeInfo->SetWayId(wayTypes.size()+1);
         wayTypes.push_back(typeInfo);
+
+        if (wayTypes.size()<256) {
+          wayTypIdBytes=1;
+        }
+        else {
+          wayTypIdBytes=2;
+        }
       }
 
       if (typeInfo->CanBeArea()) {
         typeInfo->SetAreaId(areaTypes.size()+1);
         areaTypes.push_back(typeInfo);
+
+        if (areaTypes.size()<256) {
+          areaTypIdBytes=1;
+        }
+        else {
+          areaTypIdBytes=2;
+        }
       }
     }
 

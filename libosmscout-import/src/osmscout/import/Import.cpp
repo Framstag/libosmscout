@@ -605,31 +605,10 @@ namespace osmscout {
       return false;
     }
 
-    size_t nodeTypeCount=0;
-    size_t wayTypeCount=0;
-    size_t areaTypeCount=0;
-
-    for (const auto &type : typeConfig->GetTypes()) {
-      if (!type->GetIgnore() &&
-          type->CanBeNode()) {
-        nodeTypeCount++;
-      }
-
-      if (!type->GetIgnore() &&
-          type->CanBeWay()) {
-        wayTypeCount++;
-      }
-
-      if (!type->GetIgnore() &&
-          type->CanBeArea()) {
-        areaTypeCount++;
-      }
-    }
-
-    progress.Info("Number of types: "+NumberToString(typeConfig->GetTypeCount()));
-    progress.Info("Number of node types: "+NumberToString(nodeTypeCount));
-    progress.Info("Number of way types: "+NumberToString(wayTypeCount));
-    progress.Info("Number of area types: "+NumberToString(areaTypeCount));
+    progress.Info("Number of types: "+NumberToString(typeConfig->GetTypes().size()));
+    progress.Info("Number of node types: "+NumberToString(typeConfig->GetNodeTypes().size())+" "+NumberToString(typeConfig->GetNodeTypeIdBytes())+" byte(s)");
+    progress.Info("Number of way types: "+NumberToString(typeConfig->GetWayTypes().size())+" "+NumberToString(typeConfig->GetWayTypeIdBytes())+" byte(s)");
+    progress.Info("Number of area types: "+NumberToString(typeConfig->GetAreaTypes().size())+" "+NumberToString(typeConfig->GetAreaTypeIdBytes())+" byte(s)");
 
     typeConfig->RegisterNameTag("name",0);
     typeConfig->RegisterNameTag("place_name",1);

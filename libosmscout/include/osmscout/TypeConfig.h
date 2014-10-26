@@ -867,22 +867,36 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig : public Referencable
   {
   private:
+
+    // Tags
+
     std::vector<TagInfo>                      tags;
-    std::vector<TypeInfoRef>                  types;
-    std::vector<TypeInfoRef>                  nodeTypes;
-    std::vector<TypeInfoRef>                  wayTypes;
-    std::vector<TypeInfoRef>                  areaTypes;
-    std::vector<FeatureRef>                   features;
 
     TagId                                     nextTagId;
 
     OSMSCOUT_HASHMAP<std::string,TagId>       stringToTagMap;
-    OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>          nameTagIdToPrioMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>          nameAltTagIdToPrioMap;
     OSMSCOUT_HASHMAP<std::string,uint8_t>     nameToMaxSpeedMap;
 
     OSMSCOUT_HASHMAP<std::string,size_t>      surfaceToGradeMap;
+
+    // Types
+
+    std::vector<TypeInfoRef>                  types;
+    std::vector<TypeInfoRef>                  nodeTypes;
+    std::vector<TypeInfoRef>                  wayTypes;
+    std::vector<TypeInfoRef>                  areaTypes;
+
+    uint8_t                                   nodeTypIdBytes;
+    uint8_t                                   wayTypIdBytes;
+    uint8_t                                   areaTypIdBytes;
+
+    OSMSCOUT_HASHMAP<std::string,TypeInfoRef> nameToTypeMap;
+
+    // Features
+
+    std::vector<FeatureRef>                   features;
 
     OSMSCOUT_HASHMAP<std::string,FeatureRef>  nameToFeatureMap;
 
@@ -900,19 +914,18 @@ namespace osmscout {
     FeatureRef                                featureRoundabout;
 
   public:
-    TypeInfoRef                               typeInfoIgnore;
-
-    TypeInfoRef                               typeInfoTileLand;
-    TypeInfoRef                               typeInfoTileSea;
-    TypeInfoRef                               typeInfoTileCoast;
-    TypeInfoRef                               typeInfoTileUnknown;
-    TypeInfoRef                               typeInfoTileCoastline;
-
     // Internal use (only available during preprocessing)
     TagId                                     tagArea;
     TagId                                     tagNatural;
     TagId                                     tagType;
     TagId                                     tagRestriction;
+
+    TypeInfoRef                               typeInfoIgnore;
+    TypeInfoRef                               typeInfoTileLand;
+    TypeInfoRef                               typeInfoTileSea;
+    TypeInfoRef                               typeInfoTileCoast;
+    TypeInfoRef                               typeInfoTileUnknown;
+    TypeInfoRef                               typeInfoTileCoastline;
 
   public:
     TypeConfig();
@@ -938,28 +951,6 @@ namespace osmscout {
     //@}
 
     /**
-     * Methods for dealing with features. A feature is a attribute set based on parsed tags.
-     * Features can get assigned to a type.
-     */
-    //@{
-    void RegisterFeature(const FeatureRef& feature);
-
-    /**
-     * Return the feature with the given name or an invalid reference
-     * if no feature with the given name is registered.
-     */
-    FeatureRef GetFeature(const std::string& name) const;
-
-    /**
-     * Return all features registered
-     */
-    inline const std::vector<FeatureRef>& GetFeatures() const
-    {
-      return features;
-    }
-    //@}
-
-    /**
      * Methods for dealing with types.
      */
     //@{
@@ -981,6 +972,11 @@ namespace osmscout {
       return nodeTypes;
     }
 
+    uint8_t GetNodeTypeIdBytes() const
+    {
+      return nodeTypIdBytes;
+    }
+
     /**
      * Returns an array of (ignore=false) the way types available
      */
@@ -989,12 +985,22 @@ namespace osmscout {
       return wayTypes;
     }
 
+    uint8_t GetWayTypeIdBytes() const
+    {
+      return wayTypIdBytes;
+    }
+
     /**
      * Returns an array of the (ignore=false) area types available
      */
     inline const std::vector<TypeInfoRef>& GetAreaTypes() const
     {
       return areaTypes;
+    }
+
+    uint8_t GetAreaTypeIdBytes() const
+    {
+      return areaTypIdBytes;
     }
 
     /**
@@ -1101,6 +1107,28 @@ namespace osmscout {
      * type.
      */
     TypeInfoRef GetRelationType(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+    //@}
+
+    /**
+     * Methods for dealing with features. A feature is a attribute set based on parsed tags.
+     * Features can get assigned to a type.
+     */
+    //@{
+    void RegisterFeature(const FeatureRef& feature);
+
+    /**
+     * Return the feature with the given name or an invalid reference
+     * if no feature with the given name is registered.
+     */
+    FeatureRef GetFeature(const std::string& name) const;
+
+    /**
+     * Return all features registered
+     */
+    inline const std::vector<FeatureRef>& GetFeatures() const
+    {
+      return features;
+    }
     //@}
 
     /**

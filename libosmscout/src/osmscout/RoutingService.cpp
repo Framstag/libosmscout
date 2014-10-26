@@ -1686,7 +1686,8 @@ namespace osmscout {
       std::cout << "Error getting ways and relations from area way index!" << std::endl;
     }
 
-    if (!areaAreaIndex->GetOffsets(leftLon,
+    if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
+                                   leftLon,
                                    botLat,
                                    rightLon,
                                    topLat,
