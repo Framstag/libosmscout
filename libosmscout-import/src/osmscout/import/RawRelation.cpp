@@ -104,7 +104,7 @@ namespace osmscout {
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber(featureValueBuffer.GetType()->GetIndex());
+    writer.WriteNumber((uint32_t)featureValueBuffer.GetType()->GetIndex());
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
       if (!featureValueBuffer.Write(writer)) {
