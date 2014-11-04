@@ -27,6 +27,7 @@
 #include <osmscout/ost/Scanner.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
 #include <iostream>
@@ -313,6 +314,7 @@ namespace osmscout {
      areaId(0),
      index(0),
      featureMaskBytes(0),
+     specialFeatureMaskBytes(0),
      valueBufferSize(0),
      canBeNode(false),
      canBeWay(false),
@@ -438,14 +440,8 @@ namespace osmscout {
                                        offset));
     nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
 
-    size_t featureCount=features.size();
-
-    if (featureCount%8==0) {
-      featureMaskBytes=featureCount/8;
-    }
-    else {
-      featureMaskBytes=featureCount/8+1;
-    }
+    featureMaskBytes=BitsToBytes(features.size());
+    specialFeatureMaskBytes=BitsToBytes(features.size()+1);
 
     valueBufferSize=offset+feature->GetValueSize();
 

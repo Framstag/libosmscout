@@ -265,6 +265,12 @@ namespace osmscout {
     return DecodeNumberTemplated<std::numeric_limits<N>::is_signed, N>
       ::f(buffer,number);
   }
+
+  template<typename N>
+  inline N BitsToBytes(N bits)
+  {
+    return bits%8==0 ? bits/8 : bits/8+1;
+  }
 }
 
 #endif

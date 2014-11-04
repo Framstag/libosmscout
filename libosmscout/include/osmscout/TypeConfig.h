@@ -39,7 +39,7 @@
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
-#include <iostream>
+
 namespace osmscout {
 
   /**
@@ -196,35 +196,36 @@ namespace osmscout {
     };
 
   private:
-    TypeId                               nodeId;                 //<! Type if in case the object is a node
-    TypeId                               wayId;                  //<! Type if in case the object is a way
-    TypeId                               areaId;                 //<! Type if in case the object is a area
-    std::string                          name;                   //<! Name of the type
-    size_t                               index;                  //<! Internal unique index of the type
+    TypeId                               nodeId;                  //<! Type if in case the object is a node
+    TypeId                               wayId;                   //<! Type if in case the object is a way
+    TypeId                               areaId;                  //<! Type if in case the object is a area
+    std::string                          name;                    //<! Name of the type
+    size_t                               index;                   //<! Internal unique index of the type
 
-    std::list<TypeCondition>             conditions;             //<! One of this conditions must be fulfilled for a object to match this type
+    std::list<TypeCondition>             conditions;              //<! One of this conditions must be fulfilled for a object to match this type
     OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
-    std::vector<FeatureInstance>         features;               //<! List of feature this type has
-    size_t                               featureMaskBytes;       //<! Size of the feature bitmask in bytes
-    size_t                               valueBufferSize;        //<! Size of the value buffer holding values for all feature of the type
+    std::vector<FeatureInstance>         features;                //<! List of feature this type has
+    size_t                               featureMaskBytes;        //<! Size of the feature bitmask in bytes
+    size_t                               specialFeatureMaskBytes; //<! Size of the feature bitmask in bytes
+    size_t                               valueBufferSize;         //<! Size of the value buffer holding values for all feature of the type
 
-    bool                                 canBeNode;              //<! Type can be a node
-    bool                                 canBeWay;               //<! Type can be a way
-    bool                                 canBeArea;              //<! Type can be a area
+    bool                                 canBeNode;               //<! Type can be a node
+    bool                                 canBeWay;                //<! Type can be a way
+    bool                                 canBeArea;               //<! Type can be a area
     bool                                 canBeRelation;
-    bool                                 isPath;                 //<! Type has path characteristics (features like bridges, tunnels, names,...)
-    bool                                 canRouteFoot;           //<! Object of this type are by default routable for foot
-    bool                                 canRouteBicycle;        //<! Object of this type are by default routable for bicylce
-    bool                                 canRouteCar;            //<! Object of this type are by default routable for car
-    bool                                 indexAsAddress;         //<! Objects of this type are addressable
-    bool                                 indexAsLocation;        //<! Objects of this type are defining a location (e.g. street)
-    bool                                 indexAsRegion;          //<! Objects of this type are defining a administrative region (e.g. city, county,...)
-    bool                                 indexAsPOI;             //<! Objects of this type are defining a POI
-    bool                                 optimizeLowZoom;        //<! Optimize objects of this type for low zoom rendering
+    bool                                 isPath;                  //<! Type has path characteristics (features like bridges, tunnels, names,...)
+    bool                                 canRouteFoot;            //<! Object of this type are by default routable for foot
+    bool                                 canRouteBicycle;         //<! Object of this type are by default routable for bicylce
+    bool                                 canRouteCar;             //<! Object of this type are by default routable for car
+    bool                                 indexAsAddress;          //<! Objects of this type are addressable
+    bool                                 indexAsLocation;         //<! Objects of this type are defining a location (e.g. street)
+    bool                                 indexAsRegion;           //<! Objects of this type are defining a administrative region (e.g. city, county,...)
+    bool                                 indexAsPOI;              //<! Objects of this type are defining a POI
+    bool                                 optimizeLowZoom;         //<! Optimize objects of this type for low zoom rendering
     bool                                 multipolygon;
-    bool                                 pinWay;                 //<! If there is no way/area information treat this object as way even it the way is closed
-    bool                                 ignoreSeaLand;          //<! Ignore objects of this type for sea/land calculation
-    bool                                 ignore;                 //<! Ignore objects of this type
+    bool                                 pinWay;                  //<! If there is no way/area information treat this object as way even it the way is closed
+    bool                                 ignoreSeaLand;           //<! Ignore objects of this type for sea/land calculation
+    bool                                 ignore;                  //<! Ignore objects of this type
 
   private:
     TypeInfo(const TypeInfo& other);
@@ -313,6 +314,15 @@ namespace osmscout {
     inline size_t GetFeatureMaskBytes() const
     {
       return featureMaskBytes;
+    }
+
+    /**
+     * Returns the (rounded) number of bytes required for storing the feature mask and one additional
+     * general purpose signal byte.
+     */
+    inline size_t GetSpecialFeatureMaskBytes() const
+    {
+      return specialFeatureMaskBytes;
     }
 
     /**
@@ -1056,10 +1066,6 @@ namespace osmscout {
      */
     inline const TypeInfoRef GetAreaTypeInfo(TypeId id) const
     {
-      if (!(id<=areaTypes.size())) {
-        std::cout << "assert(" << id << "<" << areaTypes.size() << ")" << std::endl;
-      }
-
       assert(id<=areaTypes.size());
 
       if (id==typeIgnore) {
