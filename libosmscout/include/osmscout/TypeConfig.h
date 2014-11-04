@@ -196,35 +196,35 @@ namespace osmscout {
     };
 
   private:
-    TypeId                               nodeId;
-    TypeId                               wayId;
-    TypeId                               areaId;
-    std::string                          name;
-    size_t                               index;
+    TypeId                               nodeId;                 //<! Type if in case the object is a node
+    TypeId                               wayId;                  //<! Type if in case the object is a way
+    TypeId                               areaId;                 //<! Type if in case the object is a area
+    std::string                          name;                   //<! Name of the type
+    size_t                               index;                  //<! Internal unique index of the type
 
-    std::list<TypeCondition>             conditions;
+    std::list<TypeCondition>             conditions;             //<! One of this conditions must be fulfilled for a object to match this type
     OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
-    std::vector<FeatureInstance>         features;
-    size_t                               featureMaskBytes;
-    size_t                               valueBufferSize;
+    std::vector<FeatureInstance>         features;               //<! List of feature this type has
+    size_t                               featureMaskBytes;       //<! Size of the feature bitmask in bytes
+    size_t                               valueBufferSize;        //<! Size of the value buffer holding values for all feature of the type
 
-    bool                                 canBeNode;
-    bool                                 canBeWay;
-    bool                                 canBeArea;
+    bool                                 canBeNode;              //<! Type can be a node
+    bool                                 canBeWay;               //<! Type can be a way
+    bool                                 canBeArea;              //<! Type can be a area
     bool                                 canBeRelation;
-    bool                                 isPath;
-    bool                                 canRouteFoot;
-    bool                                 canRouteBicycle;
-    bool                                 canRouteCar;
-    bool                                 indexAsAddress;
-    bool                                 indexAsLocation;
-    bool                                 indexAsRegion;
-    bool                                 indexAsPOI;
-    bool                                 optimizeLowZoom;
+    bool                                 isPath;                 //<! Type has path characteristics (features like bridges, tunnels, names,...)
+    bool                                 canRouteFoot;           //<! Object of this type are by default routable for foot
+    bool                                 canRouteBicycle;        //<! Object of this type are by default routable for bicylce
+    bool                                 canRouteCar;            //<! Object of this type are by default routable for car
+    bool                                 indexAsAddress;         //<! Objects of this type are addressable
+    bool                                 indexAsLocation;        //<! Objects of this type are defining a location (e.g. street)
+    bool                                 indexAsRegion;          //<! Objects of this type are defining a administrative region (e.g. city, county,...)
+    bool                                 indexAsPOI;             //<! Objects of this type are defining a POI
+    bool                                 optimizeLowZoom;        //<! Optimize objects of this type for low zoom rendering
     bool                                 multipolygon;
-    bool                                 pinWay;
-    bool                                 ignoreSeaLand;
-    bool                                 ignore;
+    bool                                 pinWay;                 //<! If there is no way/area information treat this object as way even it the way is closed
+    bool                                 ignoreSeaLand;          //<! Ignore objects of this type for sea/land calculation
+    bool                                 ignore;                 //<! Ignore objects of this type
 
   private:
     TypeInfo(const TypeInfo& other);
