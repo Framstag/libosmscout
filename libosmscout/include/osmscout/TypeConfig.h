@@ -205,6 +205,7 @@ namespace osmscout {
     std::list<TypeCondition>             conditions;
     OSMSCOUT_HASHMAP<std::string,size_t> nameToFeatureMap;
     std::vector<FeatureInstance>         features;
+    size_t                               featureMaskBytes;
     size_t                               valueBufferSize;
 
     bool                                 canBeNode;
@@ -309,16 +310,9 @@ namespace osmscout {
     /**
      * Returns the (rounded) number of bytes required for storing the feature mask
      */
-    inline size_t GetFeatureBytes() const
+    inline size_t GetFeatureMaskBytes() const
     {
-      size_t size=features.size();
-
-      if (size%8==0) {
-        return size/8;
-      }
-      else {
-        return size/8+1;
-      }
+      return featureMaskBytes;
     }
 
     /**

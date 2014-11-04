@@ -166,7 +166,7 @@ namespace osmscout {
   void FeatureValueBuffer::AllocateData()
   {
     if (type->HasFeatures()) {
-      featureBits=new uint8_t[type->GetFeatureBytes()]();
+      featureBits=new uint8_t[type->GetFeatureMaskBytes()]();
       featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
     }
     else
@@ -222,7 +222,7 @@ namespace osmscout {
 
   bool FeatureValueBuffer::Read(FileScanner& scanner)
   {
-    for (size_t i=0; i<type->GetFeatureBytes(); i++) {
+    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
       if (!scanner.Read(featureBits[i])) {
         return false;
       }
@@ -246,7 +246,7 @@ namespace osmscout {
 
   bool FeatureValueBuffer::Write(FileWriter& writer) const
   {
-    for (size_t i=0; i<type->GetFeatureBytes(); i++) {
+    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
       if (!writer.Write(featureBits[i])) {
         return false;
       }
@@ -312,6 +312,7 @@ namespace osmscout {
      wayId(0),
      areaId(0),
      index(0),
+     featureMaskBytes(0),
      valueBufferSize(0),
      canBeNode(false),
      canBeWay(false),
@@ -436,6 +437,15 @@ namespace osmscout {
                                        index,
                                        offset));
     nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
+
+    size_t featureCount=features.size();
+
+    if (featureCount%8==0) {
+      featureMaskBytes=featureCount/8;
+    }
+    else {
+      featureMaskBytes=featureCount/8+1;
+    }
 
     valueBufferSize=offset+feature->GetValueSize();
 
