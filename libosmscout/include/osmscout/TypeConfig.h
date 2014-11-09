@@ -131,6 +131,9 @@ namespace osmscout {
 
   typedef Ref<Feature> FeatureRef;
 
+  /**
+   * An instantiation of a feature for a certain type.
+   */
   class OSMSCOUT_API FeatureInstance
   {
   private:
@@ -145,21 +148,33 @@ namespace osmscout {
                     size_t index,
                     size_t offset);
 
+    /**
+     * Return the feature itself.
+     */
     inline FeatureRef GetFeature() const
     {
       return feature;
     }
 
+    /**
+     * Return a pointer back tot he type we are assigned to.
+     */
     inline const TypeInfo* GetType() const
     {
       return type;
     }
 
+    /**
+     * return the index of this feature within the list of features of the type.
+     */
     inline size_t GetIndex() const
     {
       return index;
     }
 
+    /**
+     * Return the file offset within the feature value buffer for the value of this feature.
+     */
     inline size_t GetOffset() const
     {
       return offset;
@@ -176,10 +191,10 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfo : public Referencable
   {
   public:
-    static const unsigned char typeNode     = 1 << 0;
-    static const unsigned char typeWay      = 1 << 1;
-    static const unsigned char typeArea     = 1 << 2;
-    static const unsigned char typeRelation = 1 << 3;
+    static const unsigned char typeNode     = 1 << 0; //<! Condition applies to nodes
+    static const unsigned char typeWay      = 1 << 1; //<! Condition applies to ways
+    static const unsigned char typeArea     = 1 << 2; //<! Condition applies to areas
+    static const unsigned char typeRelation = 1 << 3; //<! Condition applies to releations
 
   public:
     /**
