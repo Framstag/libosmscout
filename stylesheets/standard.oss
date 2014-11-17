@@ -645,6 +645,8 @@ SYMBOL speed_camera
        WAY { color: @roadColor; width: 8m;}
      }
      [SIZE 8m <0.1mm:3px] WAY { color: #999999; displayWidth: 0.1mm; }
+
+     AREA { color: #999999; }
    }
 
    [TYPE highway_services] AREA { color: #cb9999; }

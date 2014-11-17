@@ -199,7 +199,7 @@ TYPES
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
       
   TYPE highway_residential
-    = WAY ("highway"=="residential")
+    = WAY AREA ("highway"=="residential")
       {Name, NameAlt, Ref}
       PATH[FOOT BICYCLE CAR] LOCATION
       
