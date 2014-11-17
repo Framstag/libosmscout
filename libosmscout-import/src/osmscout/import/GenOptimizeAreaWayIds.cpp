@@ -162,22 +162,18 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Area::Ring>::const_iterator ring=data.rings.begin();
-           ring!=data.rings.end();
-           ring++) {
+      for (const auto& ring: data.rings) {
         std::set<Id> nodeIds;
 
-        if (!ring->GetType()->CanRoute()) {
+        if (!ring.GetType()->CanRoute()) {
           continue;
         }
 
-        for (std::vector<Id>::const_iterator id=ring->ids.begin();
-             id!=ring->ids.end();
-             id++) {
-          if (nodeIds.find(*id)==nodeIds.end()) {
-            nodeUseMap.SetNodeUsed(*id);
+        for (const auto id: ring.ids) {
+          if (nodeIds.find(id)==nodeIds.end()) {
+            nodeUseMap.SetNodeUsed(id);
 
-            nodeIds.insert(*id);
+            nodeIds.insert(id);
           }
         }
       }
