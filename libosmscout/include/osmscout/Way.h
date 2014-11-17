@@ -35,9 +35,10 @@ namespace osmscout {
   class OSMSCOUT_API Way : public Referencable
   {
   private:
+    FeatureValueBuffer    featureValueBuffer; //! List of features
+
     FileOffset            fileOffset;
 
-    FeatureValueBuffer    featureValueBuffer; //! List of features
 
   public:
     std::vector<Id>       ids;
