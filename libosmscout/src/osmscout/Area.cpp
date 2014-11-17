@@ -212,17 +212,25 @@ namespace osmscout {
       return false;
     }
 
-    TypeId   outerType;
+    TypeId   ringType;
+    bool     multipleRings;
     uint32_t ringCount=1;
     uint32_t nodesCount;
+    FeatureValueBuffer featureValueBuffer;
 
-    if (!scanner.ReadNumber(outerType)) {
+    scanner.ReadTypeId(ringType,
+                       typeConfig.GetAreaTypeIdBytes());
+
+    TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
+
+    featureValueBuffer.SetType(type);
+
+    if (!featureValueBuffer.Read(scanner,
+                                 multipleRings)) {
       return false;
     }
 
-    if (outerType>typeConfig.GetMaxTypeId()) {
-      outerType=outerType-typeConfig.GetMaxTypeId()-1;
-
+    if (multipleRings) {
       if (!scanner.ReadNumber(ringCount)) {
         return false;
       }
@@ -232,15 +240,7 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    TypeInfoRef type=typeConfig.GetAreaTypeInfo(outerType);
-
-    rings[0].SetType(type);
-
-    if (rings[0].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-      if (!rings[0].featureValueBuffer.Read(scanner)) {
-        return false;
-      }
-    }
+    rings[0].featureValueBuffer=featureValueBuffer;
 
     if (ringCount>1) {
       rings[0].ring=masterRingId;
@@ -249,7 +249,9 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    scanner.ReadNumber(nodesCount);
+    if (!scanner.ReadNumber(nodesCount)) {
+      return false;
+    }
 
     if (nodesCount>0) {
       if (!ReadIds(scanner,
@@ -265,8 +267,6 @@ namespace osmscout {
     }
 
     for (size_t i=1; i<ringCount; i++) {
-      TypeId ringType;
-
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
@@ -311,17 +311,25 @@ namespace osmscout {
       return false;
     }
 
-    TypeId   outerType;
+    TypeId   ringType;
+    bool     multipleRings;
     uint32_t ringCount=1;
     uint32_t nodesCount;
+    FeatureValueBuffer featureValueBuffer;
 
-    if (!scanner.ReadNumber(outerType)) {
+    scanner.ReadTypeId(ringType,
+                       typeConfig.GetAreaTypeIdBytes());
+
+    TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
+
+    featureValueBuffer.SetType(type);
+
+    if (!featureValueBuffer.Read(scanner,
+                                 multipleRings)) {
       return false;
     }
 
-    if (outerType>typeConfig.GetMaxTypeId()) {
-      outerType=outerType-typeConfig.GetMaxTypeId()-1;
-
+    if (multipleRings) {
       if (!scanner.ReadNumber(ringCount)) {
         return false;
       }
@@ -331,15 +339,7 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    TypeInfoRef type=typeConfig.GetAreaTypeInfo((TypeId)outerType);
-
-    rings[0].SetType(type);
-
-    if (rings[0].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-      if (!rings[0].featureValueBuffer.Read(scanner)) {
-        return false;
-      }
-    }
+    rings[0].featureValueBuffer=featureValueBuffer;
 
     if (ringCount>1) {
       rings[0].ring=masterRingId;
@@ -348,7 +348,9 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    scanner.ReadNumber(nodesCount);
+    if (!scanner.ReadNumber(nodesCount)) {
+      return false;
+    }
 
     if (nodesCount>0) {
       if (!scanner.Read(rings[0].nodes,
@@ -358,8 +360,6 @@ namespace osmscout {
     }
 
     for (size_t i=1; i<ringCount; i++) {
-      TypeId ringType;
-
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
@@ -443,24 +443,20 @@ namespace osmscout {
                    FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
+    bool                              multipleRings=rings.size()>1;
 
     // Outer ring
 
-    if (rings.size()>1) {
-      TypeId type=typeConfig.GetMaxTypeId()+1+
-                  ring->GetType()->GetAreaId();
+    writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                       typeConfig.GetAreaTypeIdBytes());
 
-      writer.WriteNumber(type);
-      writer.WriteNumber((uint32_t)rings.size()-1);
-    }
-    else {
-      writer.WriteNumber(ring->GetType()->GetAreaId());
+    if (!ring->featureValueBuffer.Write(writer,
+                                        multipleRings)) {
+      return false;
     }
 
-    if (ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-      if (!ring->featureValueBuffer.Write(writer)) {
-        return false;
-      }
+    if (multipleRings) {
+      writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
     writer.WriteNumber((uint32_t)ring->nodes.size());
@@ -520,23 +516,20 @@ namespace osmscout {
                             FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
+    bool                              multipleRings=rings.size()>1;
 
     // Outer ring
 
-    if (rings.size()>1) {
-      TypeId type=typeConfig.GetMaxTypeId()+1+
-                  ring->GetType()->GetAreaId();
-      writer.WriteNumber(type);
-      writer.WriteNumber((uint32_t)rings.size()-1);
-    }
-    else {
-      writer.WriteNumber(ring->GetType()->GetAreaId());
+    writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                       typeConfig.GetAreaTypeIdBytes());
+
+    if (!ring->featureValueBuffer.Write(writer,
+                                        multipleRings)) {
+      return false;
     }
 
-    if (ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-      if (!ring->featureValueBuffer.Write(writer)) {
-        return false;
-      }
+    if (multipleRings) {
+      writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
     writer.WriteNumber((uint32_t)ring->nodes.size());
@@ -556,7 +549,7 @@ namespace osmscout {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      if (ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
+      if (ring->GetType()->GetAreaId()!=typeIgnore) {
         if (!ring->featureValueBuffer.Write(writer)) {
           return false;
         }

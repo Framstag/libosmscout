@@ -870,7 +870,11 @@ namespace osmscout {
                const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
 
     bool Read(FileScanner& scanner);
+    bool Read(FileScanner& scanner,
+              bool& specialFlag);
     bool Write(FileWriter& writer) const;
+    bool Write(FileWriter& writer,
+               bool specialFlag) const;
 
     FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
     bool operator==(const FeatureValueBuffer& other) const;

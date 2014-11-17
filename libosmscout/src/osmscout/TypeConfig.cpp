@@ -19,6 +19,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <iostream>
+
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/system/Assert.h>
@@ -30,7 +32,6 @@
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
-#include <iostream>
 namespace osmscout {
 
   FeatureValue::FeatureValue()
@@ -242,13 +243,98 @@ namespace osmscout {
       }
     }
 
-    return true;
+    return !scanner.HasError();
+  }
+
+  bool FeatureValueBuffer::Read(FileScanner& scanner,
+                                bool& specialFlag)
+  {
+    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+      if (!scanner.Read(featureBits[i])) {
+        return false;
+      }
+    }
+
+    if (type->GetFeatureCount()%8!=0) {
+      specialFlag=featureBits[type->GetFeatureMaskBytes()-1] & 0x80;
+    }
+    else {
+      uint8_t addByte;
+
+      if (!scanner.Read(addByte)) {
+        return false;
+      }
+
+      specialFlag=addByte & 0x80;
+    }
+
+    for (const auto &feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+
+      if (HasValue(idx) &&
+          feature.GetFeature()->HasValue()) {
+        FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
+
+        if (!value->Read(scanner)) {
+          return false;
+        }
+      }
+    }
+
+    return !scanner.HasError();
   }
 
   bool FeatureValueBuffer::Write(FileWriter& writer) const
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
       if (!writer.Write(featureBits[i])) {
+        return false;
+      }
+    }
+
+    for (const auto &feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+
+      if (HasValue(idx) &&
+          feature.GetFeature()->HasValue()) {
+        FeatureValue* value=GetValue(idx);
+
+        if (!value->Write(writer)) {
+          return false;
+        }
+      }
+    }
+
+    return !writer.HasError();
+  }
+
+  bool FeatureValueBuffer::Write(FileWriter& writer,
+                                 bool specialFlag) const
+  {
+    if (type->GetFeatureCount()%8!=0) {
+      if (specialFlag) {
+        featureBits[type->GetFeatureMaskBytes()-1]|=0x80;
+      }
+      else {
+        featureBits[type->GetFeatureMaskBytes()-1]&=~0x80;
+      }
+
+      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+        if (!writer.Write(featureBits[i])) {
+          return false;
+        }
+      }
+    }
+    else {
+      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+        if (!writer.Write(featureBits[i])) {
+          return false;
+        }
+      }
+
+      uint8_t addByte=specialFlag ? 0x80 : 0x00;
+
+      if (!writer.Write(addByte)) {
         return false;
       }
     }
