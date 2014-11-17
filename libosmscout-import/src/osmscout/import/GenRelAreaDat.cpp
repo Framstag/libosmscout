@@ -911,6 +911,17 @@ namespace osmscout {
       }
     }
 
+    // Ring which have a type that is not a valid ring type get their type set to ignore.
+    for (auto& ring : parts) {
+      if (ring.role.GetType()!=typeConfig.typeInfoIgnore &&
+          !ring.role.GetType()->CanBeArea()) {
+        progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
+                         " has ring of type "+
+                         ring.role.GetType()->GetName()+
+                         " which is not an area type");
+        ring.role.SetType(typeConfig.typeInfoIgnore);
+      }
+    }
 
     //
     // If the relation itself does not have a type, try to autodetect the type from the outer rings
