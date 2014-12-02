@@ -29,6 +29,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Reference.cpp \
                         osmscout/util/StopClock.cpp \
                         osmscout/util/String.cpp \
+                        osmscout/util/Tiling.cpp \
                         osmscout/util/Transformation.cpp \
                         osmscout/Types.cpp \
                         osmscout/TypeConfig.cpp \

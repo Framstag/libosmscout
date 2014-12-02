@@ -23,6 +23,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Reference.h \
                         osmscout/util/StopClock.h \
                         osmscout/util/String.h \
+                        osmscout/util/Tiling.h \
                         osmscout/util/Transformation.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
