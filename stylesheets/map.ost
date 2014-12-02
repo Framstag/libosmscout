@@ -286,14 +286,17 @@ TYPES
       {Name, NameAlt, Ref}
       PATH[CAR]
 
-  TYPE highway_street_lamp IGNORE // Too many for mobile offline map?
+  TYPE highway_street_lamp
+    IGNORE // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
 
   // Since rendering of speed cameras is not allowed everwhere, it is disabled by default
-  TYPE speed_camera IGNORE
+  TYPE speed_camera
+    IGNORE
     = NODE ("highway"=="speed_camera")
 
-  TYPE highway_traffic_signals IGNORE // No visualisation yet
+  TYPE highway_traffic_signals
+    IGNORE // No visualisation yet
     = NODE ("highway"=="traffic_signals")
 
   //
@@ -691,7 +694,8 @@ TYPES
     = NODE ("natural"=="spring")
       {Name, NameAlt}
     
-  TYPE natural_tree IGNORE // Too many for mobile?
+  TYPE natural_tree
+    IGNORE // Too many for mobile?
     = NODE ("natural"=="tree")
       
   TYPE natural_volcano
@@ -848,7 +852,8 @@ TYPES
     = NODE WAY AREA ("amenity"=="bicycle_parking")
       {Name, NameAlt, Width}
 
-  TYPE amenity_bench IGNORE // Too many for mobile?
+  TYPE amenity_bench
+    IGNORE // Too many for mobile?
     = NODE ("amenity"=="bench")
           
   TYPE amenity_bus_station
@@ -865,16 +870,20 @@ TYPES
       {Name, NameAlt}
       ADDRESS POI
 
-  TYPE amenity_charging_station IGNORE // No visualisation yet
+  TYPE amenity_charging_station
+    IGNORE // No visualisation yet
     = NODE ("amenity"=="charging_station")
 
-  TYPE amenity_clock IGNORE // Too many for mobile?
+  TYPE amenity_clock
+    IGNORE // Too many for mobile?
     = NODE ("amenity"=="clock")
 
-  TYPE amenity_drinking_water IGNORE // No visualisation yet
+  TYPE amenity_drinking_water
+    IGNORE // No visualisation yet
     = NODE ("amenity"=="drinking_water")
 
-  TYPE amenity_ev_charging IGNORE // No visualisation yet
+  TYPE amenity_ev_charging
+    IGNORE // No visualisation yet
     = NODE ("amenity"=="ev_charging")
 
   TYPE amenity_fast_food_building
@@ -902,7 +911,8 @@ TYPES
       {Name, NameAlt}
       ADDRESS POI
 
-  TYPE amenity_grit_bin IGNORE // No visualisation yet
+  TYPE amenity_grit_bin
+    IGNORE // No visualisation yet
     = NODE ("amenity"=="grit_bin")
 
   TYPE amenity_hospital_building
@@ -930,10 +940,12 @@ TYPES
       {Name, NameAlt}
       ADDRESS POI
 
-  TYPE amenity_parking_entrance IGNORE // No visualisation yet
+  TYPE amenity_parking_entrance
+    IGNORE // No visualisation yet
     = NODE ("amenity"=="parking_entrance")
 
-  TYPE amenity_parking_space IGNORE // No visualisation yet
+  TYPE amenity_parking_space
+    IGNORE // No visualisation yet
     = NODE AREA ("amenity"=="parking_space")
       
   TYPE amenity_parking
@@ -946,7 +958,8 @@ TYPES
       {Name, NameAlt}
       ADDRESS POI
 
-  TYPE amenity_photo_booth IGNORE // Too many for mobile?
+  TYPE amenity_photo_booth
+    IGNORE // Too many for mobile?
     = NODE ("amenity"=="photo_booth")
 
   TYPE amenity_post_office_building
@@ -991,17 +1004,21 @@ TYPES
   TYPE amenity_toilets
     = NODE ("amenity"=="toilets")
     
-  TYPE amenity_vending_machine IGNORE // Too many for mobile?
+  TYPE amenity_vending_machine
+    IGNORE // Too many for mobile?
     = NODE ("amenity"=="vending_machine")
       {Name, NameAlt}      
 
-  TYPE amenity_waste_disposal IGNORE // Too many for mobile?
+  TYPE amenity_waste_disposal
+    IGNORE // Too many for mobile?
     = NODE ("amenity"=="waste_disposal")
 
-  TYPE amenity_watering_place IGNORE // Too many for mobile?
+  TYPE amenity_watering_place IGNORE
+    // Too many for mobile?
     = NODE ("amenity"=="watering_place")
 
-  TYPE amenity_water_point IGNORE // Too many for mobile?
+  TYPE amenity_water_point
+    IGNORE // Too many for mobile?
     = NODE ("amenity"=="water_point")
 
   // Churches
@@ -1210,6 +1227,11 @@ TYPES
     = NODE AREA ("historic"=="monument")
       {Name, NameAlt}
       ADDRESS POI
+
+  TYPE historic_memorial_stolperstein
+    IGNORE // only for "theme" maps?
+    = NODE ("historic"=="memorial" AND "memorial:type"=="stolperstein")
+      {Name, NameAlt}
     
   TYPE historic_memorial_building
     = AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -1220,10 +1242,6 @@ TYPES
     = NODE AREA ("historic"=="memorial")
       {Name, NameAlt}
       ADDRESS POI
-
-  TYPE historic_memorial_stolperstein IGNORE // only for "theme" maps?
-    = NODE ("historic"=="memorial" AND "memorial:type"=="stolperstein")
-      {Name, NameAlt}
     
   TYPE historic_ruins_building
     = AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -1647,58 +1665,74 @@ TYPES
   // Barriers
 
   // Currently not supported by stylesheet
-  TYPE barrier_hedge IGNORE
+  TYPE barrier_hedge
+    IGNORE
     = WAY AREA ("barrier"=="hedge")
     
   TYPE barrier_fence
     = WAY AREA ("barrier"=="fence")
       IGNORESEALAND
     
-  TYPE barrier_wall IGNORE
+  TYPE barrier_wall
+    IGNORE
     = WAY AREA ("barrier"=="wall")
     
-  TYPE barrier_ditch IGNORE
+  TYPE barrier_ditch
+    IGNORE
     = WAY AREA ("barrier"=="ditch")
     
-  TYPE barrier_retaining_wall IGNORE
+  TYPE barrier_retaining_wall
+    IGNORE
     = WAY AREA ("barrier"=="retaining_wall")
       IGNORESEALAND
     
-  TYPE barrier_city_wall IGNORE
+  TYPE barrier_city_wall
+    IGNORE
     = WAY AREA ("barrier"=="city_wall")
       {Name, NameAlt, Width}
     
-  TYPE barrier_bollard IGNORE
+  TYPE barrier_bollard
+    IGNORE
     = NODE WAY ("barrier"=="bollard")
     
-  TYPE barrier_cycle_barrier IGNORE
+  TYPE barrier_cycle_barrier
+    IGNORE
     = NODE ("barrier"=="cycle_barrier")
     
-  TYPE barrier_block IGNORE
+  TYPE barrier_block
+    IGNORE
     = NODE ("barrier"=="block")
     
-  TYPE barrier_cattle_grid IGNORE
+  TYPE barrier_cattle_grid
+    IGNORE
     = NODE ("barrier"=="cattle_grid")
     
-  TYPE barrier_toll_booth IGNORE
+  TYPE barrier_toll_booth
+    IGNORE
     = NODE ("barrier"=="toll_booth")
     
-  TYPE barrier_entrance IGNORE
+  TYPE barrier_entrance
+    IGNORE
     = NODE ("barrier"=="entrance")
     
-  TYPE barrier_gate IGNORE
+  TYPE barrier_gate
+    IGNORE
     = NODE WAY ("barrier"=="gate")
     
-  TYPE barrier_lift_gate IGNORE
+  TYPE barrier_lift_gate
+    IGNORE
     = NODE ("barrier"=="lift_gate")
     
-  TYPE barrier_stile IGNORE
+  TYPE barrier_stile
+    IGNORE
     = NODE ("barrier"=="stile")
     
-  TYPE barrier_sally_port IGNORE
+  TYPE barrier_sally_port
+    IGNORE
     = NODE ("barrier"=="sally_port")
     
-  TYPE barrier_kent_carriage_gate IGNORE
+  TYPE barrier_kent_carriage_gate
+    IGNORE
     = NODE ("barrier"=="kent_carriage_gate")
 
   // Types we currently ignore
