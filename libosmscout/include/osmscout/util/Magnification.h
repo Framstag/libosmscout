@@ -54,7 +54,7 @@ namespace osmscout {
     };
 
   private:
-    double magnification;
+    double   magnification;
     uint32_t level;
 
   public:
