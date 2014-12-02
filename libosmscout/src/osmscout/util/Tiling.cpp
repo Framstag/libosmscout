@@ -23,6 +23,9 @@
 
 namespace osmscout {
 
+  // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
+  // coordinate transformation
+
   size_t LonToTileX(double lon,
                      const Magnification& magnification)
   {
