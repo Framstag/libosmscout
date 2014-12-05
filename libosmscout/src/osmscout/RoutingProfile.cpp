@@ -129,7 +129,8 @@ namespace osmscout {
     return everythingResolved;
   }
 
-  void AbstractRoutingProfile::AddType(const TypeInfoRef& type, double speed)
+  void AbstractRoutingProfile::AddType(const TypeInfoRef& type,
+                                       double speed)
   {
     if (speeds.empty()) {
       minSpeed=speed;
@@ -154,9 +155,24 @@ namespace osmscout {
       return false;
     }
 
-    TypeId type=currentNode.paths[pathIndex].type;
 
-    return type<speeds.size() && speeds[type]>0.0;
+    ObjectFileRef object=currentNode.objects[currentNode.paths[pathIndex].objectIndex];
+    TypeId        typeId=currentNode.paths[pathIndex].type;
+    TypeInfoRef   type;
+
+    if (object.GetType()==refWay) {
+      type=typeConfig->GetWayTypeInfo(typeId);
+    }
+    else if (object.GetType()==refArea) {
+      type=typeConfig->GetAreaTypeInfo(typeId);
+    }
+    else {
+      assert(false);
+    }
+
+    size_t index=type->GetIndex();
+
+    return index<speeds.size() && speeds[index]>0.0;
   }
 
   bool AbstractRoutingProfile::CanUse(const Area& area) const
