@@ -201,7 +201,23 @@ namespace osmscout {
         speed=currentNode.paths[pathIndex].maxSpeed;
       }
       else {
-        speed=speeds[currentNode.paths[pathIndex].type];
+        ObjectFileRef object=currentNode.objects[currentNode.paths[pathIndex].objectIndex];
+        TypeId        typeId=currentNode.paths[pathIndex].type;
+        TypeInfoRef   type;
+
+        if (object.GetType()==refWay) {
+          type=typeConfig->GetWayTypeInfo(typeId);
+        }
+        else if (object.GetType()==refArea) {
+          type=typeConfig->GetAreaTypeInfo(typeId);
+        }
+        else {
+          assert(false);
+        }
+
+        size_t index=type->GetIndex();
+
+        speed=speeds[index];
       }
 
       speed=std::min(vehicleMaxSpeed,speed);
