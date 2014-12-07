@@ -377,18 +377,6 @@ namespace osmscout {
   };
 
   /**
-   * \ingroup Geometry
-   */
-  class OSMSCOUT_API ReversedYAxisMercatorProjection : public MercatorProjection
-  {
-  private:
-    bool PixelToGeo(double x, double y, double& lon, double& lat) const;
-    bool GeoToPixel(double lon, double lat, double& x, double& y) const;
-  protected:
-    bool GeoToPixel(const BatchTransformer& transformData) const;
-  };
-
-  /**
    * Mercator projection that tries to render the resulting map in the same
    * physical size on all devices. If the physical DPI of the device is
    * correctly given, objects on any device has the same size. Bigger devices

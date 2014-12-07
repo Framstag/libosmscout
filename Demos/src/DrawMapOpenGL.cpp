@@ -58,9 +58,9 @@ static const double lat=50.6811;
 static const double lon=7.158;
 static const double zoom=80000;
 
-static osmscout::ReversedYAxisMercatorProjection  projection;
-static osmscout::MapParameter                     drawParameter;
-static osmscout::MapPainterOpenGL                 *painter=NULL;
+static osmscout::Mercator2Projection projection;
+static osmscout::MapParameter        drawParameter;
+static osmscout::MapPainterOpenGL    *painter=NULL;
 
 class Database
 {
