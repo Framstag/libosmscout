@@ -60,7 +60,8 @@ namespace osmscout {
     double                                 minimumLineWidth; //! Minimum width a line must have to be visible
 
   private:
-    Font GetFont(const MapParameter& parameter,
+    Font GetFont(const Projection& projection,
+                 const MapParameter& parameter,
                  double fontSize);
 
     void SetLineAttributes(const Color& color,
@@ -79,7 +80,8 @@ namespace osmscout {
     bool HasPattern(const MapParameter& parameter,
                     const FillStyle& style);
 
-    void GetTextDimension(const MapParameter& parameter,
+    void GetTextDimension(const Projection& projection,
+                          const MapParameter& parameter,
                           double fontSize,
                           const std::string& text,
                           double& xOff,

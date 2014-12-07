@@ -226,7 +226,6 @@ void DBThread::TriggerMapRendering()
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
-    drawParameter.SetDPI(settings->GetDPI());
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);
@@ -242,7 +241,7 @@ void DBThread::TriggerMapRendering()
     projection.Set(currentLon,
                    currentLat,
                    currentMagnification,
-                   drawParameter.GetDPI(),
+                   settings->GetDPI(),
                    request.width,
                    request.height);
 

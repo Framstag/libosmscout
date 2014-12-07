@@ -51,7 +51,8 @@ namespace osmscout {
     std::vector<double>       sin;           //! Lookup table for sin calculation
 
   private:
-    QFont GetFont(const MapParameter& parameter,
+    QFont GetFont(const Projection& projection,
+                  const MapParameter& parameter,
                   double fontSize);
 
     void SetPen(const LineStyle& style,
@@ -73,7 +74,8 @@ namespace osmscout {
     bool HasPattern(const MapParameter& parameter,
                     const FillStyle& style);
 
-    void GetTextDimension(const MapParameter& parameter,
+    void GetTextDimension(const Projection& projection,
+                          const MapParameter& parameter,
                           double fontSize,
                           const std::string& text,
                           double& xOff,

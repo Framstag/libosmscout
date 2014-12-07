@@ -50,12 +50,13 @@ namespace osmscout {
     // TODO: Clean up fonts
   }
 
-  QFont MapPainterQt::GetFont(const MapParameter& parameter,
+  QFont MapPainterQt::GetFont(const Projection& projection,
+                              const MapParameter& parameter,
                               double fontSize)
   {
     std::map<size_t,QFont>::const_iterator f;
 
-    fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+    fontSize=fontSize*ConvertWidthToPixel(projection,parameter.GetFontSize());
 
     f=fonts.find(fontSize);
 
@@ -163,7 +164,8 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterQt::GetTextDimension(const MapParameter& parameter,
+  void MapPainterQt::GetTextDimension(const Projection& projection,
+                                      const MapParameter& parameter,
                                       double fontSize,
                                       const std::string& text,
                                       double& xOff,
@@ -171,7 +173,9 @@ namespace osmscout {
                                       double& width,
                                       double& height)
   {
-    QFont        font(GetFont(parameter,fontSize));
+    QFont        font(GetFont(projection,
+                              parameter,
+                              fontSize));
     QFontMetrics metrics=QFontMetrics(font);
     QString      string=QString::fromUtf8(text.c_str());
     QRect        extents=metrics.boundingRect(string);
@@ -182,7 +186,7 @@ namespace osmscout {
     height=extents.height();
   }
 
-  void MapPainterQt::DrawLabel(const Projection& /*projection*/,
+  void MapPainterQt::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const LabelData& label)
   {
@@ -192,7 +196,9 @@ namespace osmscout {
       double           g=style->GetTextColor().GetG();
       double           b=style->GetTextColor().GetB();
 
-      QFont        font(GetFont(parameter,label.fontSize));
+      QFont        font(GetFont(projection,
+                                parameter,
+                                label.fontSize));
       QString      string=QString::fromUtf8(label.text.c_str());
       QFontMetrics metrics=QFontMetrics(font);
 
@@ -224,7 +230,9 @@ namespace osmscout {
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
       const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
-      QFont              font(GetFont(parameter,label.fontSize));
+      QFont              font(GetFont(projection,
+                                      parameter,
+                                      label.fontSize));
       QFontMetrics       metrics=QFontMetrics(font);
       QString            string=QString::fromUtf8(label.text.c_str());
 
@@ -260,7 +268,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawContourLabel(const Projection& /*projection*/,
+  void MapPainterQt::DrawContourLabel(const Projection& projection,
                                       const MapParameter& parameter,
                                       const PathTextStyle& style,
                                       const std::string& text,
@@ -273,7 +281,9 @@ namespace osmscout {
     double a=style.GetTextColor().GetA();
 
     QPen          pen;
-    QFont         font(GetFont(parameter,fontSize));
+    QFont         font(GetFont(projection,
+                               parameter,
+                               fontSize));
     QFontMetricsF metrics=QFontMetricsF(font,painter->device());
     QString       string=QString::fromUtf8(text.c_str());
     double        stringLength=metrics.width(string);
@@ -426,7 +436,7 @@ namespace osmscout {
 
       symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-      double widthPx=ConvertWidthToPixel(parameter,maxX-minX);
+      double widthPx=ConvertWidthToPixel(projection,maxX-minX);
       double height=maxY-minY;
 
       bool isClosed = false;
@@ -512,12 +522,12 @@ namespace osmscout {
              pixel!=polygon->GetCoords().end();
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
-            path.moveTo(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                        y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+            path.moveTo(x+ConvertWidthToPixel(projection,pixel->x-centerX),
+                        y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
           }
           else {
-            path.lineTo(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                        y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+            path.lineTo(x+ConvertWidthToPixel(projection,pixel->x-centerX),
+                        y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
           }
         }
 
@@ -533,10 +543,10 @@ namespace osmscout {
 
         QPainterPath path;
 
-        path.addRect(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                     y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
-                     ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                     ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+        path.addRect(x+ConvertWidthToPixel(projection,rectangle->GetTopLeft().x-centerX),
+                     y+ConvertWidthToPixel(projection,maxY-rectangle->GetTopLeft().y-centerY),
+                     ConvertWidthToPixel(projection,rectangle->GetWidth()),
+                     ConvertWidthToPixel(projection,rectangle->GetHeight()));
 
         painter->drawPath(path);
       }
@@ -550,10 +560,10 @@ namespace osmscout {
 
         QPainterPath path;
 
-        path.addEllipse(QPointF(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                                y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY)),
-                        ConvertWidthToPixel(parameter,circle->GetRadius()),
-                        ConvertWidthToPixel(parameter,circle->GetRadius()));
+        path.addEllipse(QPointF(x+ConvertWidthToPixel(projection,circle->GetCenter().x-centerX),
+                                y+ConvertWidthToPixel(projection,maxY-circle->GetCenter().y-centerY)),
+                        ConvertWidthToPixel(projection,circle->GetRadius()),
+                        ConvertWidthToPixel(projection,circle->GetRadius()));
 
         painter->drawPath(path);
       }
@@ -763,7 +773,7 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const FillStyle& fillStyle)
   {
-    double borderWidth=ConvertWidthToPixel(parameter,
+    double borderWidth=ConvertWidthToPixel(projection,
                                            fillStyle.GetBorderWidth());
 
     if (fillStyle.HasPattern() &&

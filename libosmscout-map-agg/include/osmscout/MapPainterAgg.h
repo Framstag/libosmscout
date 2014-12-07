@@ -71,10 +71,12 @@ namespace osmscout {
     AggTextContourConverter   *convTextContours;
 
   private:
-    void SetFont(const MapParameter& parameter,
+    void SetFont(const Projection& projection,
+                 const MapParameter& parameter,
                  double size);
 
-    void SetOutlineFont(const MapParameter& parameter,
+    void SetOutlineFont(const Projection& projection,
+                        const MapParameter& parameter,
                         double size);
 
     void GetTextDimension(const std::wstring& text,
@@ -99,7 +101,8 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style);
 
-    void GetTextDimension(const MapParameter& parameter,
+    void GetTextDimension(const Projection& projection,
+                          const MapParameter& parameter,
                           double fontSize,
                           const std::string& text,
                           double& xOff,

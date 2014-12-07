@@ -33,6 +33,8 @@
   src/DrawMapAgg ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.45274 51.49256 50000 test.ppm
 */
 
+static const double DPI=96.0;
+
 bool write_ppm(const unsigned char* buf,
                unsigned width,
                unsigned height,
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
   projection.Set(lon,
                  lat,
                  zoom,
-                 drawParameter.GetDPI(),
+                 DPI,
                  width,
                  height);
 

@@ -92,7 +92,8 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterOpenGL::GetTextDimension(const MapParameter& parameter,
+  void MapPainterOpenGL::GetTextDimension(const Projection& projection,
+                                          const MapParameter& parameter,
                                           double fontSize,
                                           const std::string& text,
                                           double& xOff,
@@ -237,7 +238,7 @@ namespace osmscout {
 
     if (area.fillStyle->GetBorderWidth()>0 &&
         area.fillStyle->GetBorderColor().IsVisible()) {
-      double borderWidth=ConvertWidthToPixel(parameter,
+      double borderWidth=ConvertWidthToPixel(projection,
                                              area.fillStyle->GetBorderWidth());
 
       glColor4d(area.fillStyle->GetBorderColor().GetR(),

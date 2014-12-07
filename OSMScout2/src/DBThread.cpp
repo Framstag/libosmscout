@@ -261,7 +261,6 @@ void DBThread::TriggerMapRendering()
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
-    drawParameter.SetDPI(dpi);
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);
@@ -277,7 +276,7 @@ void DBThread::TriggerMapRendering()
     projection.Set(currentLon,
                    currentLat,
                    currentMagnification,
-                   drawParameter.GetDPI(),
+                   dpi,
                    request.width,
                    request.height);
 
@@ -448,7 +447,6 @@ bool DBThread::RenderMap(QPainter& painter,
     osmscout::Color        backgroundColor;
 
     styleConfig->GetUnknownFillStyle(projection,
-                                     dpi,
                                      unknownFillStyle);
 
     if (unknownFillStyle.Valid()) {

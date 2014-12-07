@@ -1321,61 +1321,47 @@ namespace osmscout {
 
     void GetNodeTextStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
-                          double dpi,
                           TextStyleRef& textStyle) const;
 
     void GetNodeIconStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
-                          double dpi,
                           IconStyleRef& iconStyle) const;
 
     void GetWayLineStyles(const FeatureValueBuffer& buffer,
                           const Projection& projection,
-                          double dpi,
                           std::vector<LineStyleRef>& lineStyles) const;
     void GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                              const Projection& projection,
-                             double dpi,
                              PathTextStyleRef& pathTextStyle) const;
     void GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
                                const Projection& projection,
-                               double dpi,
                                PathSymbolStyleRef& pathSymbolStyle) const;
     void GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                const Projection& projection,
-                               double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;
 
     void GetAreaFillStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
-                          double dpi,
                           FillStyleRef& fillStyle) const;
     void GetAreaTextStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
-                          double dpi,
                           TextStyleRef& textStyle) const;
     void GetAreaIconStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
-                          double dpi,
                           IconStyleRef& iconStyle) const;
 
     void GetLandFillStyle(const Projection& projection,
-                          double dpi,
                           FillStyleRef& fillStyle) const;
     void GetSeaFillStyle(const Projection& projection,
-                          double dpi,
                          FillStyleRef& fillStyle) const;
     void GetCoastFillStyle(const Projection& projection,
-                          double dpi,
                            FillStyleRef& fillStyle) const;
     void GetUnknownFillStyle(const Projection& projection,
-                             double dpi,
                              FillStyleRef& fillStyle) const;
     void GetCoastlineLineStyle(const Projection& projection,
-                               double dpi,
                                LineStyleRef& lineStyle) const;
 
     bool Load(const std::string& styleFile);

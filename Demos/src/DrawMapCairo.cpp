@@ -32,6 +32,8 @@
   src/DrawMapCairo ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.png
 */
 
+static const double DPI=96.0;
+
 int main(int argc, char* argv[])
 {
   std::string   map;
@@ -106,13 +108,12 @@ int main(int argc, char* argv[])
       osmscout::MapData             data;
       osmscout::MapPainterCairo     painter(styleConfig);
 
-      drawParameter.SetDPI(59.667);
       drawParameter.SetFontSize(3.0);
 
       projection.Set(lon,
                      lat,
                      zoom,
-                     drawParameter.GetDPI(),
+                     DPI,
                      width,
                      height);
 

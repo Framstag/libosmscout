@@ -57,6 +57,7 @@ void QBreaker::Reset()
 DBThread::DBThread(const SettingsRef& settings)
  : settings(settings),
    styleConfig(NULL),
+   painter(NULL),
    database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
@@ -69,7 +70,6 @@ DBThread::DBThread(const SettingsRef& settings)
    finishedLat(0.0),
    finishedLon(0.0),
    finishedMagnification(0),
-   painter(NULL),
    currentRenderRequest(),
    doRender(false),
    renderBreaker(new QBreaker()),
@@ -248,7 +248,6 @@ void DBThread::TriggerMapRendering()
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
-    drawParameter.SetDPI(settings->GetDPI());
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);
@@ -264,6 +263,7 @@ void DBThread::TriggerMapRendering()
     projection.Set(currentLon,
                    currentLat,
                    currentMagnification,
+                   settings->GetDPI(),
                    request.width,
                    request.height);
 
@@ -436,7 +436,6 @@ bool DBThread::RenderMap(QPainter& painter,
     osmscout::Color        backgroundColor;
 
     styleConfig->GetUnknownFillStyle(projection,
-                                     settings->GetDPI(),
                                      unknownFillStyle);
 
     backgroundColor=unknownFillStyle->GetFillColor();

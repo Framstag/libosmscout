@@ -147,6 +147,8 @@ void DatabaseTask::Run()
 
         std::list<std::string>        paths;
 
+        double                        dpiValue;
+
         paths.push_back("../libosmscout/data/icons/14x14/standard/");
 
         searchParameter.SetMaximumNodes(maxNodes->Get());
@@ -169,10 +171,10 @@ void DatabaseTask::Run()
         drawParameter.SetDebugPerformance(true);
 
         if (!dpi->IsNull()) {
-          drawParameter.SetDPI(dpi->GetDouble());
+          dpiValue=dpi->GetDouble();
         }
         else {
-          drawParameter.SetDPI(Lum::OS::display->GetDPI());
+          dpiValue=Lum::OS::display->GetDPI();
         }
 
         std::cout << std::endl;
@@ -182,7 +184,7 @@ void DatabaseTask::Run()
         projection.Set(currentLon,
                        currentLat,
                        currentMagnification,
-                       drawParameter.GetDPI(),
+                       dpiValue,
                        currentWidth,
                        currentHeight);
 /*

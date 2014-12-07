@@ -49,6 +49,8 @@ void DumpHelp()
   std::cerr << "ResourceConsumptionQt <map directory> <style-file> <width> <height> [<lat> <lon> <zoom>]..." << std::endl;
 }
 
+static const double DPI=96.0;
+
 int main(int argc, char* argv[])
 {
   std::string         map;
@@ -170,7 +172,7 @@ int main(int argc, char* argv[])
     projection.Set(action->lon,
                    action->lat,
                    action->magnification,
-                   drawParameter.GetDPI(),
+                   DPI,
                    width,
                    height);
 

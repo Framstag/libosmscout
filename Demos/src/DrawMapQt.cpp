@@ -109,13 +109,12 @@ int main(int argc, char* argv[])
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
       osmscout::MapPainterQt        mapPainter(styleConfig);
-
-      drawParameter.SetDPI(application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch());
+      double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
 
       projection.Set(lon,
                      lat,
                      zoom,
-                     drawParameter.GetDPI(),
+                     dpi,
                      width,
                      height);
 

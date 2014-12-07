@@ -33,6 +33,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/StopClock.h>
+#include <osmscout/util/Tiling.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
@@ -44,27 +45,8 @@
 // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
 // coordinate transformation
 
-size_t long2tilex(double lon, double z)
-{
-  return (size_t)(floor((lon + 180.0) / 360.0 *pow(2.0,z)));
-}
+static const double DPI=96.0;
 
-size_t lat2tiley(double lat, double z)
-{
-  return (size_t)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * pow(2.0,z)));
-}
-
-double tilex2long(int x, double z)
-{
-  return x / pow(2.0,z) * 360.0 - 180;
-}
-
-double tiley2lat(int y, double z)
-{
-  double n = M_PI - 2.0 * M_PI * y / pow(2.0,z);
-
-  return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
-}
 
 int main(int argc, char* argv[])
 {
@@ -191,12 +173,12 @@ int main(int argc, char* argv[])
   for (size_t zoom=std::min(startZoom,endZoom);
        zoom<=std::max(startZoom,endZoom);
        zoom++) {
-    xTileStart=long2tilex(std::min(lonLeft,lonRight),zoom);
-    xTileEnd=long2tilex(std::max(lonLeft,lonRight),zoom);
+    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),zoom);
+    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),zoom);
     xTileCount=xTileEnd-xTileStart+1;
 
-    yTileStart=lat2tiley(std::max(latTop,latBottom),zoom);
-    yTileEnd=lat2tiley(std::min(latTop,latBottom),zoom);
+    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),zoom);
+    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),zoom);
     yTileCount=yTileEnd-yTileStart+1;
 
     std::cout << "Drawing zoom " << zoom;
@@ -227,8 +209,8 @@ int main(int argc, char* argv[])
         osmscout::TypeSet              areaTypes;
         osmscout::MapData              data;
 
-        lat=(tiley2lat(y,zoom)+tiley2lat(y+1,zoom))/2;
-        lon=(tilex2long(x,zoom)+tilex2long(x+1,zoom))/2;
+        lat=(osmscout::TileYToLat(y,zoom)+osmscout::TileYToLat(y+1,zoom))/2;
+        lon=(osmscout::TileXToLon(x,zoom)+osmscout::TileXToLon(x+1,zoom))/2;
 
         //std::cout << "Drawing tile at " << lat << "," << lon << "/";
         //std::cout << x << "," << y << "/";
@@ -237,7 +219,7 @@ int main(int argc, char* argv[])
         projection.Set(lon,
                        lat,
                        magnification,
-                       drawParameter.GetDPI(),
+                       DPI,
                        tileWidth,
                        tileHeight);
 

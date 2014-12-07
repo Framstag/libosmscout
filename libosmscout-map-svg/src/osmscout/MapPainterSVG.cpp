@@ -67,12 +67,13 @@ namespace osmscout {
   }
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-  PangoFontDescription* MapPainterSVG::GetFont(const MapParameter& parameter,
+  PangoFontDescription* MapPainterSVG::GetFont(const Projection& projection,
+                                               const MapParameter& parameter,
                                                double fontSize)
   {
     FontMap::const_iterator f;
 
-    fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+    fontSize=fontSize*ConvertWidthToPixel(projection,parameter.GetFontSize());
 
     f=fonts.find(fontSize);
 
@@ -160,7 +161,7 @@ namespace osmscout {
 
         stream << ";fillRule:nonzero";
 
-        double borderWidth=ConvertWidthToPixel(parameter,
+        double borderWidth=ConvertWidthToPixel(projection,
                                                area->fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
@@ -209,11 +210,11 @@ namespace osmscout {
         double lineWidth;
 
         if (way->lineStyle->GetWidth()==0) {
-          lineWidth=ConvertWidthToPixel(parameter,way->lineStyle->GetDisplayWidth());
+          lineWidth=ConvertWidthToPixel(projection,way->lineStyle->GetDisplayWidth());
         }
         else {
           lineWidth=GetProjectedWidth(projection,
-                                      ConvertWidthToPixel(parameter,way->lineStyle->GetDisplayWidth()),
+                                      ConvertWidthToPixel(projection,way->lineStyle->GetDisplayWidth()),
                                       way->lineStyle->GetWidth());
         }
 
@@ -280,7 +281,8 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterSVG::GetTextDimension(const MapParameter& parameter,
+  void MapPainterSVG::GetTextDimension(const Projection& projection,
+                                       const MapParameter& parameter,
                                        double fontSize,
                                        const std::string& text,
                                        double& xOff,
@@ -293,7 +295,8 @@ namespace osmscout {
     PangoLayout          *layout=pango_layout_new(pangoContext);
     PangoRectangle       extends;
 
-    font=GetFont(parameter,
+    font=GetFont(projection,
+                 parameter,
                  fontSize);
 
     pango_layout_set_font_description(layout,font);
@@ -317,7 +320,8 @@ namespace osmscout {
     if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
       const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
   #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-      PangoFontDescription* font=GetFont(parameter,
+      PangoFontDescription* font=GetFont(projection,
+                                         parameter,
                                          label.fontSize);
   #endif
 
@@ -326,9 +330,9 @@ namespace osmscout {
 
       stream << "    <text";
       stream << " x=\"" << label.x << "\"";
-      stream << " y=\"" << label.y+ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " y=\"" << label.y+ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " font-family=\"" << parameter.GetFontName() << "\"";
-      stream << " font-size=\"" << ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-size=\"" << ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
 
       if (label.alpha!=1.0) {
@@ -346,8 +350,9 @@ namespace osmscout {
     else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
       const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-     PangoFontDescription* font=GetFont(parameter,
-                                       label.fontSize);
+     PangoFontDescription* font=GetFont(projection,
+                                        parameter,
+                                        label.fontSize);
 #endif
      // Shield background
      stream << "    <rect";
@@ -375,9 +380,9 @@ namespace osmscout {
 
       stream << "    <text";
       stream << " x=\"" << label.x << "\"";
-      stream << " y=\"" << label.y+ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " y=\"" << label.y+ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " font-family=\"" << parameter.GetFontName() << "\"";
-      stream << " font-size=\"" << ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-size=\"" << ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
 
       if (label.alpha!=1.0) {

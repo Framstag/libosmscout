@@ -50,11 +50,13 @@ static int window=-1;
 static int width=640;
 static int height=480;
 
+static const double DPI=96.0;
+
 //static double lat=51.577;
 //static double lon=7.46;
-static double lat=50.6811;
-static double lon=7.158;
-static double zoom=80000;
+static const double lat=50.6811;
+static const double lon=7.158;
+static const double zoom=80000;
 
 static osmscout::ReversedYAxisMercatorProjection  projection;
 static osmscout::MapParameter                     drawParameter;
@@ -171,7 +173,7 @@ void OnDisplay()
   projection.Set(lon,
                  lat,
                  zoom,
-                 drawParameter.GetDPI(),
+                 DPI,
                  width,
                  height);
 

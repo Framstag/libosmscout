@@ -58,7 +58,8 @@ namespace osmscout {
     std::string GetColorValue(const Color& color);
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-    PangoFontDescription* GetFont(const MapParameter& parameter,
+    PangoFontDescription* GetFont(const Projection& projection,
+                                  const MapParameter& parameter,
                                   double fontSize);
 #endif
 
@@ -91,7 +92,8 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style);
 
-    void GetTextDimension(const MapParameter& parameter,
+    void GetTextDimension(const Projection& projection,
+                          const MapParameter& parameter,
                           double fontSize,
                           const std::string& text,
                           double& xOff,

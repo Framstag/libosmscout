@@ -38,6 +38,7 @@
 
 static unsigned long tileWidth=256;
 static unsigned long tileHeight=256;
+static const double  DPI=96.0;
 
 bool write_ppm(const agg::rendering_buffer& buffer,
                const char* file_name)
@@ -236,7 +237,7 @@ int main(int argc, char* argv[])
 
         projection.Set(x,y,
                        magnification,
-                       drawParameter.GetDPI(),
+                       DPI,
                        tileWidth,
                        tileHeight);
 

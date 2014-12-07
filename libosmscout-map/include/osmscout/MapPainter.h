@@ -52,8 +52,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
-    double                       dpi;                //! DPI of the display, default is 92
-
     std::string                  fontName;           //! Name of the font to use
     double                       fontSize;           //! Metric size of base font (aka font size 100%) in millimeter
 
@@ -83,8 +81,6 @@ namespace osmscout {
     MapParameter();
     virtual ~MapParameter();
 
-    void SetDPI(double dpi);
-
     void SetFontName(const std::string& fontName);
     void SetFontSize(double fontSize);
 
@@ -111,10 +107,6 @@ namespace osmscout {
 
     void SetBreaker(const BreakerRef& breaker);
 
-    inline double GetDPI() const
-    {
-      return dpi;
-    }
 
     inline std::string GetFontName() const
     {
@@ -156,7 +148,7 @@ namespace osmscout {
       return optimizeErrorToleranceMm;
     }
 
-    inline double GetOptimizeErrorToleranceDots() const
+    inline double GetOptimizeErrorToleranceDots(double dpi) const
     {
       return dpi*optimizeErrorToleranceMm/25.4;
     }
@@ -554,16 +546,16 @@ namespace osmscout {
      * @return
      *    Width in screen pixel
      */
-    inline double ConvertWidthToPixel(const MapParameter& parameter,
+    inline double ConvertWidthToPixel(const Projection& projection,
                                       double width) const
     {
-      return width*parameter.GetDPI()/25.4;
+      return width*projection.GetDPI()/25.4;
     }
 
-    inline double ConvertPixelToWidth(const MapParameter& parameter,
+    inline double ConvertPixelToWidth(const Projection& projection,
                                       double pixel) const
     {
-      return pixel*25.4/parameter.GetDPI();
+      return pixel*25.4/projection.GetDPI();
     }
 
     //@}
@@ -608,7 +600,8 @@ namespace osmscout {
       that later calls to corresponding DrawXXX methods will honour the initial
       bounding box.
       */
-    virtual void GetTextDimension(const MapParameter& parameter,
+    virtual void GetTextDimension(const Projection& projection,
+                                  const MapParameter& parameter,
                                   double fontSize,
                                   const std::string& text,
                                   double& xOff,

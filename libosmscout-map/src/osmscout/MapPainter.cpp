@@ -63,13 +63,12 @@ namespace osmscout {
   }
 
   MapParameter::MapParameter()
-  : dpi(96.0),
-    fontName("sans-serif"),
+  : fontName("sans-serif"),
     fontSize(2.0),
     lineMinWidthPixel(0.2),
     optimizeWayNodes(TransPolygon::none),
     optimizeAreaNodes(TransPolygon::none),
-    optimizeErrorToleranceMm(25.4/dpi), //1 pixel
+    optimizeErrorToleranceMm(25.4/96.0),
     drawFadings(true),
     drawWaysWithFixedWidth(false),
     labelSpace(3.0),
@@ -85,11 +84,6 @@ namespace osmscout {
   MapParameter::~MapParameter()
   {
     // no code
-  }
-
-  void MapParameter::SetDPI(double dpi)
-  {
-    this->dpi=dpi;
   }
 
   void MapParameter::SetFontName(const std::string& fontName)
@@ -519,7 +513,6 @@ namespace osmscout {
 #endif
 
     styleConfig.GetLandFillStyle(projection,
-                                 parameter.GetDPI(),
                                  landFill);
 
     if (landFill.Invalid()) {
@@ -543,16 +536,12 @@ namespace osmscout {
     size_t                end=0;   // Make the compiler happy
 
     styleConfig.GetSeaFillStyle(projection,
-                                parameter.GetDPI(),
                                 seaFill);
     styleConfig.GetCoastFillStyle(projection,
-                                  parameter.GetDPI(),
                                   coastFill);
     styleConfig.GetUnknownFillStyle(projection,
-                                    parameter.GetDPI(),
                                     unknownFill);
     styleConfig.GetCoastlineLineStyle(projection,
-                                      parameter.GetDPI(),
                                       coastlineLine);
 
     if (seaFill.Invalid()) {
@@ -604,7 +593,7 @@ namespace osmscout {
         transBuffer.transPolygon.TransformArea(projection,
                                                TransPolygon::none,
                                                points,
-                                               parameter.GetOptimizeErrorToleranceDots());
+                                               parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
 
         size_t s=transBuffer.transPolygon.GetStart();
 
@@ -640,7 +629,7 @@ namespace osmscout {
         transBuffer.transPolygon.TransformArea(projection,
                                                TransPolygon::none,
                                                points,
-                                               parameter.GetOptimizeErrorToleranceDots());
+                                               parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
 
         for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
           double x,y;
@@ -706,7 +695,7 @@ namespace osmscout {
               data.transStart=start+lineStart;
               data.transEnd=start+lineEnd;
               data.lineWidth=GetProjectedWidth(projection,
-                                               ConvertWidthToPixel(parameter,coastlineLine->GetDisplayWidth()),
+                                               ConvertWidthToPixel(projection,coastlineLine->GetDisplayWidth()),
                                                coastlineLine->GetWidth());
               wayData.push_back(data);
             }
@@ -773,7 +762,7 @@ namespace osmscout {
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    double stepSizeInPixel=ConvertWidthToPixel(parameter,shieldStyle->GetShieldSpace());
+    double stepSizeInPixel=ConvertWidthToPixel(projection,shieldStyle->GetShieldSpace());
 
     wayScanlines.clear();
 
@@ -860,7 +849,8 @@ namespace osmscout {
 
     double xOff,yOff,width,height;
 
-    GetTextDimension(parameter,
+    GetTextDimension(projection,
+                     parameter,
                      fontSize,
                      text,
                      xOff,yOff,width,height);
@@ -1005,12 +995,10 @@ namespace osmscout {
     styleConfig.GetAreaTextStyle(type,
                                  buffer,
                                  projection,
-                                 parameter.GetDPI(),
                                  textStyle);
     styleConfig.GetAreaIconStyle(type,
                                  buffer,
                                  projection,
-                                 parameter.GetDPI(),
                                  iconStyle);
 
     bool          hasLabel=textStyle.Valid();
@@ -1052,9 +1040,9 @@ namespace osmscout {
                            parameter,
                            textStyle,
                            label,
-                           x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
-                               ConvertWidthToPixel(parameter,1.0)+
-                               ConvertWidthToPixel(parameter,textStyle->GetSize())/2);
+                           x,y+ConvertWidthToPixel(projection,iconStyle->GetSymbol()->GetHeight())/2+
+                               ConvertWidthToPixel(projection,1.0)+
+                               ConvertWidthToPixel(projection,textStyle->GetSize())/2);
       }
       else if (hasIcon) {
         RegisterPointLabel(projection,
@@ -1144,11 +1132,9 @@ namespace osmscout {
 
     styleConfig.GetNodeTextStyle(node->GetFeatureValueBuffer(),
                                  projection,
-                                 parameter.GetDPI(),
                                  textStyle);
     styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                  projection,
-                                 parameter.GetDPI(),
                                  iconStyle);
 
     bool         hasLabel=textStyle.Valid();
@@ -1194,9 +1180,9 @@ namespace osmscout {
                            parameter,
                            textStyle,
                            label,
-                           x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
-                               ConvertWidthToPixel(parameter,1.0)+
-                               ConvertWidthToPixel(parameter,textStyle->GetSize())/2);
+                           x,y+ConvertWidthToPixel(projection,iconStyle->GetSymbol()->GetHeight())/2+
+                               ConvertWidthToPixel(projection,1.0)+
+                               ConvertWidthToPixel(projection,textStyle->GetSize())/2);
       }
       else if (hasIcon) {
         RegisterPointLabel(projection,
@@ -1286,11 +1272,10 @@ namespace osmscout {
 
       styleConfig.GetWayPathSymbolStyle(*way->buffer,
                                         projection,
-                                        parameter.GetDPI(),
                                         pathSymbolStyle);
 
       if (pathSymbolStyle.Valid()) {
-        double symbolSpace=ConvertWidthToPixel(parameter,
+        double symbolSpace=ConvertWidthToPixel(projection,
                                                pathSymbolStyle->GetSymbolSpace());
 
         DrawContourSymbol(projection,
@@ -1320,11 +1305,9 @@ namespace osmscout {
 
     styleConfig.GetWayPathShieldStyle(*data.buffer,
                                       projection,
-                                      parameter.GetDPI(),
                                       shieldStyle);
     styleConfig.GetWayPathTextStyle(*data.buffer,
                                     projection,
-                                    parameter.GetDPI(),
                                     pathTextStyle);
 
     if (pathTextStyle.Valid()) {
@@ -1473,7 +1456,7 @@ namespace osmscout {
                                   parameter.GetOptimizeAreaNodes(),
                                   area->rings[i].nodes,
                                   data[i].transStart,data[i].transEnd,
-                                  parameter.GetOptimizeErrorToleranceDots());
+                                  parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
       }
 
       size_t ringId=Area::outerRingId;
@@ -1492,14 +1475,12 @@ namespace osmscout {
               styleConfig.GetAreaFillStyle(area->GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
-                                           parameter.GetDPI(),
                                            fillStyle);
             }
             else if (!ring.GetType()->GetIgnore()) {
               styleConfig.GetAreaFillStyle(ring.GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
-                                           parameter.GetDPI(),
                                            fillStyle);
             }
 
@@ -1574,7 +1555,6 @@ namespace osmscout {
   {
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
-                                 parameter.GetDPI(),
                                  lineStyles);
 
     if (lineStyles.empty()) {
@@ -1604,7 +1584,7 @@ namespace osmscout {
       }
 
       if (lineStyle->GetDisplayWidth()>0.0) {
-        lineWidth+=ConvertWidthToPixel(parameter,
+        lineWidth+=ConvertWidthToPixel(projection,
                                        lineStyle->GetDisplayWidth());
       }
 
@@ -1618,7 +1598,7 @@ namespace osmscout {
       }
 
       if (lineStyle->GetDisplayOffset()!=0.0) {
-        lineOffset+=ConvertWidthToPixel(parameter,
+        lineOffset+=ConvertWidthToPixel(projection,
                                         lineStyle->GetDisplayOffset());
       }
 
@@ -1639,7 +1619,7 @@ namespace osmscout {
                                  nodes,
                                  transStart,
                                  transEnd,
-                                 parameter.GetOptimizeErrorToleranceDots());
+                                 parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
 
         WayPathData pathData;
 
@@ -1763,9 +1743,9 @@ namespace osmscout {
 
     transBuffer.Reset();
 
-    labelSpace=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
-    shieldLabelSpace=ConvertWidthToPixel(parameter,parameter.GetPlateLabelSpace());
-    sameLabelSpace=ConvertWidthToPixel(parameter,parameter.GetSameLabelSpace());
+    labelSpace=ConvertWidthToPixel(projection,parameter.GetLabelSpace());
+    shieldLabelSpace=ConvertWidthToPixel(projection,parameter.GetPlateLabelSpace());
+    sameLabelSpace=ConvertWidthToPixel(projection,parameter.GetSameLabelSpace());
 
     if (parameter.IsAborted()) {
       return false;
@@ -1778,7 +1758,7 @@ namespace osmscout {
       std::cout << projection.GetLatMax() << ",";
       std::cout << projection.GetLonMax() << "] ";
       std::cout << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " ";
-      std::cout << projection.GetWidth() << "x" << projection.GetHeight() << " " << parameter.GetDPI()<< " DPI" << std::endl;
+      std::cout << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI" << std::endl;
     }
 
     //
