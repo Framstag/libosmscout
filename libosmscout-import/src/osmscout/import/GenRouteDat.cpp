@@ -614,19 +614,17 @@ namespace osmscout {
 
       std::set<Id> nodeIds;
 
-      for (std::vector<Id>::const_iterator id=way.ids.begin();
-          id!=way.ids.end();
-          id++) {
-        if (*id==0) {
+      for (auto id : way.ids) {
+        if (id==0) {
           continue;
         }
 
-        if (nodeIds.find(*id)==nodeIds.end()) {
-          if (nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
-            nodeObjectsMap[*id].push_back(ObjectFileRef(fileOffset,refWay));
+        if (nodeIds.find(id)==nodeIds.end()) {
+          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refWay));
           }
 
-          nodeIds.insert(*id);
+          nodeIds.insert(id);
         }
       }
     }
@@ -690,19 +688,17 @@ namespace osmscout {
 
       std::set<Id> nodeIds;
 
-      for (std::vector<Id>::const_iterator id=area.rings.front().ids.begin();
-          id!=area.rings.front().ids.end();
-          id++) {
-        if (*id==0) {
+      for (auto id : area.rings.front().ids) {
+        if (id==0) {
           continue;
         }
 
-        if (nodeIds.find(*id)==nodeIds.end()) {
-          if (nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
-            nodeObjectsMap[*id].push_back(ObjectFileRef(fileOffset,refArea));
+        if (nodeIds.find(id)==nodeIds.end()) {
+          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refArea));
           }
 
-          nodeIds.insert(*id);
+          nodeIds.insert(id);
         }
       }
     }
@@ -768,11 +764,9 @@ namespace osmscout {
       return false;
     }
 
-    for (std::set<FileOffset>::const_iterator offset=fileOffsets.begin();
-         offset!=fileOffsets.end();
-         offset++) {
-      if (!scanner.SetPos(*offset)) {
-        progress.Error("Error while moving to way at offset " + NumberToString(*offset));
+    for (auto offset : fileOffsets) {
+      if (!scanner.SetPos(offset)) {
+        progress.Error("Error while moving to way at offset " + NumberToString(offset));
         return false;
       }
 
@@ -782,11 +776,11 @@ namespace osmscout {
                 scanner);
 
       if (scanner.HasError()) {
-        progress.Error("Error while loading way at offset " + NumberToString(*offset));
+        progress.Error("Error while loading way at offset " + NumberToString(offset));
         return false;
       }
 
-      waysMap[*offset]=way;
+      waysMap[offset]=way;
     }
 
     if (!scanner.SetPos(oldPos)) {
@@ -814,11 +808,9 @@ namespace osmscout {
       return false;
     }
 
-    for (std::set<FileOffset>::const_iterator offset=fileOffsets.begin();
-         offset!=fileOffsets.end();
-         offset++) {
-      if (!scanner.SetPos(*offset)) {
-        progress.Error("Error while moving to area at offset " + NumberToString(*offset));
+    for (auto offset : fileOffsets) {
+      if (!scanner.SetPos(offset)) {
+        progress.Error("Error while moving to area at offset " + NumberToString(offset));
         return false;
       }
 
@@ -828,11 +820,11 @@ namespace osmscout {
                  scanner);
 
       if (scanner.HasError()) {
-        progress.Error("Error while loading area at offset " + NumberToString(*offset));
+        progress.Error("Error while loading area at offset " + NumberToString(offset));
         return false;
       }
 
-      areasMap[*offset]=area;
+      areasMap[offset]=area;
     }
 
     if (!scanner.SetPos(oldPos)) {
@@ -1514,10 +1506,8 @@ namespace osmscout {
       std::set<FileOffset> areaOffsets;
 
       for (size_t b=0; b<blockCount; b++) {
-        for (std::list<ObjectFileRef>::const_iterator ref=block[b]->second.begin();
-            ref!=block[b]->second.end();
-            ref++) {
-          switch (ref->GetType())
+        for (const auto& ref : block[b]->second) {
+          switch (ref.GetType())
           {
           case refNone:
           case refNode:
@@ -1525,10 +1515,10 @@ namespace osmscout {
             assert(false);
             break;
           case refWay:
-            wayOffsets.insert(ref->GetFileOffset());
+            wayOffsets.insert(ref.GetFileOffset());
             break;
           case refArea:
-            areaOffsets.insert(ref->GetFileOffset());
+            areaOffsets.insert(ref.GetFileOffset());
             break;
           }
         }
