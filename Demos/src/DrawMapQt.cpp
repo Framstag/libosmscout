@@ -20,8 +20,10 @@
 #include <iostream>
 #include <iomanip>
 
-#include <QPixmap>
 #include <QApplication>
+#include <QDesktopWidget>
+#include <QPixmap>
+#include <QScreen>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
@@ -102,15 +104,18 @@ int main(int argc, char* argv[])
     QPainter* painter=new QPainter(pixmap);
 
     if (painter!=NULL) {
-      osmscout::MercatorProjection  projection;
+      osmscout::Mercator2Projection projection;
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
       osmscout::MapPainterQt        mapPainter(styleConfig);
 
+      drawParameter.SetDPI(application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch());
+
       projection.Set(lon,
                      lat,
                      zoom,
+                     drawParameter.GetDPI(),
                      width,
                      height);
 

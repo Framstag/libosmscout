@@ -237,6 +237,7 @@ int main(int argc, char* argv[])
         projection.Set(lon,
                        lat,
                        magnification,
+                       drawParameter.GetDPI(),
                        tileWidth,
                        tileHeight);
 

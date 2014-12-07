@@ -126,11 +126,12 @@ int main(int argc, char* argv[])
   osmscout::MapData             data;
   osmscout::MapPainterAgg       painter(styleConfig);
 
-  drawParameter.SetFontName("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
+  drawParameter.SetFontName("/usr/share/fonts/TTF/LiberationSans-Regular.ttf");
 
   projection.Set(lon,
                  lat,
                  zoom,
+                 drawParameter.GetDPI(),
                  width,
                  height);
 

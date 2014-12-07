@@ -170,6 +170,7 @@ int main(int argc, char* argv[])
     projection.Set(action->lon,
                    action->lat,
                    action->magnification,
+                   drawParameter.GetDPI(),
                    width,
                    height);
 

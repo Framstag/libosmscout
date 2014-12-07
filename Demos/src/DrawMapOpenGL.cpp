@@ -171,6 +171,7 @@ void OnDisplay()
   projection.Set(lon,
                  lat,
                  zoom,
+                 drawParameter.GetDPI(),
                  width,
                  height);
 

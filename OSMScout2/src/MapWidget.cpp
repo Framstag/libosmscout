@@ -103,9 +103,9 @@ void MapWidget::TriggerMapRendering()
 
 void MapWidget::HandleMouseMove(QMouseEvent* event)
 {
-    double                       olon, olat;
-    double                       tlon, tlat;
-    osmscout::MercatorProjection projection;
+    double                        olon, olat;
+    double                        tlon, tlat;
+    osmscout::Mercator2Projection projection;
 
     projection.Set(lon,lat,
                    magnification,

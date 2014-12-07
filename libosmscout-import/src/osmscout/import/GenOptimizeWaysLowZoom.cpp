@@ -462,13 +462,14 @@ namespace osmscout
                                                   std::list<WayRef>& optimizedWays,
                                                   size_t width,
                                                   size_t height,
+                                                  double dpi,
                                                   double pixel,
                                                   const Magnification& magnification,
                                                   TransPolygon::OptimizeMethod optimizeWayMethod)
   {
     MercatorProjection projection;
 
-    projection.Set(0,0,magnification,width,height);
+    projection.Set(0,0,magnification,dpi,width,height);
 
     for (auto &way :ways) {
       TransPolygon          polygon;
@@ -680,7 +681,8 @@ namespace osmscout
     FileScanner   scanner;
     Magnification magnification; // Magnification, we optimize for
     // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
-    double        pixel=0.5 /* mm */ * 320.0 /* DPI*/ / 25.4 /* inch */;
+    double        dpi=320.0;
+    double        pixel=0.5 /* mm */ * dpi / 25.4 /* inch */;
 
     magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 
@@ -759,7 +761,9 @@ namespace osmscout
           // TODO: Wee need to make import parameters for the width and the height
           OptimizeWays(newWays,
                        optimizedWays,
-                       1280,768,pixel,
+                       1280,768,
+                       dpi,
+                       pixel,
                        magnification,
                        parameter.GetOptimizationWayMethod());
 

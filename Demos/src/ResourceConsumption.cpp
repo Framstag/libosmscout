@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
       projection.Set(action->lon,
                      action->lat,
                      action->magnification,
+                     96.0,
                      width,
                      height);
 

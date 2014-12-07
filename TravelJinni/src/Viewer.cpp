@@ -249,6 +249,7 @@ public:
 
     projection.Set(lon,lat,
                    magnification,
+                   projection.GetDPI(),
                    width,height);
 
     // Get origin coordinates

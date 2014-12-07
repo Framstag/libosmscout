@@ -135,7 +135,7 @@ public:
                   size_t width, size_t height,
                   double lon, double lat,
                   const osmscout::Magnification& magnification,
-                  osmscout::Projection& projection);
+                  osmscout::MercatorProjection& projection);
 };
 
 #endif

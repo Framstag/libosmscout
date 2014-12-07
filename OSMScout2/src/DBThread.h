@@ -87,37 +87,38 @@ public slots:
   void Finalize();
 
 private:
-  double                       dpi;
+  double                        dpi;
 
-  mutable QMutex               mutex;
+  mutable QMutex                mutex;
 
-  osmscout::DatabaseParameter  databaseParameter;
-  osmscout::DatabaseRef        database;
-  osmscout::LocationServiceRef locationService;
-  osmscout::MapServiceRef      mapService;
-  osmscout::RouterParameter    routerParameter;
-  osmscout::RoutingServiceRef  router;
-  osmscout::RoutePostprocessor routePostprocessor;
+  osmscout::DatabaseParameter   databaseParameter;
+  osmscout::DatabaseRef         database;
+  osmscout::LocationServiceRef  locationService;
+  osmscout::MapServiceRef       mapService;
+  osmscout::Mercator2Projection projection;
+  osmscout::RouterParameter     routerParameter;
+  osmscout::RoutingServiceRef   router;
+  osmscout::RoutePostprocessor  routePostprocessor;
 
-  osmscout::StyleConfigRef     styleConfig;
-  osmscout::MapData            data;
-  osmscout::MapPainterQt       *painter;
-  QString                      iconDirectory;
+  osmscout::StyleConfigRef      styleConfig;
+  osmscout::MapData             data;
+  osmscout::MapPainterQt        *painter;
+  QString                       iconDirectory;
 
-  QImage                       *currentImage;
-  double                       currentLat;
-  double                       currentLon;
-  osmscout::Magnification      currentMagnification;
+  QImage                        *currentImage;
+  double                        currentLat;
+  double                        currentLon;
+  osmscout::Magnification       currentMagnification;
 
-  QImage                       *finishedImage;
-  double                       finishedLat;
-  double                       finishedLon;
-  osmscout::Magnification      finishedMagnification;
+  QImage                        *finishedImage;
+  double                        finishedLat;
+  double                        finishedLon;
+  osmscout::Magnification       finishedMagnification;
 
-  RenderMapRequest             currentRenderRequest;
-  bool                         doRender;
-  QBreaker*                    renderBreaker;
-  osmscout::BreakerRef         renderBreakerRef;
+  RenderMapRequest              currentRenderRequest;
+  bool                          doRender;
+  QBreaker*                     renderBreaker;
+  osmscout::BreakerRef          renderBreakerRef;
 
 private:
   DBThread();

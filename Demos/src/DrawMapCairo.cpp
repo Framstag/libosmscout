@@ -100,17 +100,19 @@ int main(int argc, char* argv[])
     cairo=cairo_create(surface);
 
     if (cairo!=NULL) {
-      osmscout::MercatorProjection  projection;
+      osmscout::Mercator2Projection  projection;
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
       osmscout::MapPainterCairo     painter(styleConfig);
 
+      drawParameter.SetDPI(59.667);
       drawParameter.SetFontSize(3.0);
 
       projection.Set(lon,
                      lat,
                      zoom,
+                     drawParameter.GetDPI(),
                      width,
                      height);
 

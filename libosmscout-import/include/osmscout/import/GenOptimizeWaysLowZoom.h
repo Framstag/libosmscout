@@ -102,6 +102,7 @@ namespace osmscout {
                       std::list<WayRef>& optimizedWays,
                       size_t width,
                       size_t height,
+                      double dpi,
                       double pixel,
                       const Magnification& magnification,
                       TransPolygon::OptimizeMethod optimizeWayMethod);

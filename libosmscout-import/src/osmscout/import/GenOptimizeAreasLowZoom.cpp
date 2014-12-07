@@ -181,13 +181,14 @@ namespace osmscout
                                                     std::list<AreaRef>& optimizedAreas,
                                                     size_t width,
                                                     size_t height,
+                                                    double dpi,
                                                     double pixel,
                                                     const Magnification& magnification,
                                                     TransPolygon::OptimizeMethod optimizeWayMethod)
   {
     MercatorProjection projection;
 
-    projection.Set(0,0,magnification,width,height);
+    projection.Set(0,0,magnification,dpi,width,height);
 
     for (auto &area :areas) {
       TransPolygon            polygon;
@@ -517,7 +518,8 @@ namespace osmscout
   {
     FileScanner scanner;
     // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
-    double      pixel=2.0/* mm */ * 320.0 /* DPI*/ / 25.4 /* inch */;
+    double dpi=320.0;
+    double pixel=2.0/* mm */ * dpi / 25.4 /* inch */;
 
     progress.Info("Minimum visible size in pixel: "+NumberToString((unsigned long)pixel));
 
@@ -580,7 +582,9 @@ namespace osmscout
 
           OptimizeAreas(allAreas[type],
                         optimizedAreas,
-                        1280,768,pixel,
+                        1280,768,
+                        dpi,
+                        pixel,
                         magnification,
                         parameter.GetOptimizationWayMethod());
 

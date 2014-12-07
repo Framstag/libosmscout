@@ -250,7 +250,6 @@ void DBThread::TriggerMapRendering()
 
   if (database->IsOpen() &&
       styleConfig.Valid()) {
-    osmscout::MercatorProjection  projection;
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
 
@@ -278,6 +277,7 @@ void DBThread::TriggerMapRendering()
     projection.Set(currentLon,
                    currentLat,
                    currentMagnification,
+                   drawParameter.GetDPI(),
                    request.width,
                    request.height);
 
@@ -399,8 +399,6 @@ bool DBThread::RenderMap(QPainter& painter,
 
     return false;
   }
-
-  osmscout::MercatorProjection projection;
 
   projection.Set(finishedLon,finishedLat,
                  finishedMagnification,

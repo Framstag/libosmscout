@@ -182,6 +182,7 @@ void DatabaseTask::Run()
         projection.Set(currentLon,
                        currentLat,
                        currentMagnification,
+                       drawParameter.GetDPI(),
                        currentWidth,
                        currentHeight);
 /*
@@ -574,7 +575,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
                               size_t width, size_t height,
                               double lon, double lat,
                               const osmscout::Magnification& magnification,
-                              osmscout::Projection& projection)
+                              osmscout::MercatorProjection& projection)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 

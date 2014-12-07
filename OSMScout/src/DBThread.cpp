@@ -242,6 +242,7 @@ void DBThread::TriggerMapRendering()
     projection.Set(currentLon,
                    currentLat,
                    currentMagnification,
+                   drawParameter.GetDPI(),
                    request.width,
                    request.height);
 

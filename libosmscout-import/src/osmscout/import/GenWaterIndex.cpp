@@ -1731,7 +1731,7 @@ namespace osmscout {
 
       magnification.SetLevel((uint32_t)(level+parameter.GetWaterIndexMinMag()));
 
-      projection.Set(0,0,magnification,640,480);
+      projection.Set(0,0,magnification,72,640,480);
 
       progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 
