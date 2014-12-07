@@ -56,7 +56,7 @@ namespace osmscout {
   {
     std::map<size_t,QFont>::const_iterator f;
 
-    fontSize=fontSize*ConvertWidthToPixel(projection,parameter.GetFontSize());
+    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
     f=fonts.find(fontSize);
 
@@ -367,7 +367,7 @@ namespace osmscout {
   }
 
 
-  void MapPainterQt::followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
+  void MapPainterQt::FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                                      bool isClosed, bool keepOrientation) {
       hnd.i = 0;
       hnd.nVertex = labs(transEnd - transStart);
@@ -389,7 +389,7 @@ namespace osmscout {
       origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
   }
 
-  bool MapPainterQt::followPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
+  bool MapPainterQt::FollowPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
 
       double x = origin.GetX();
       double y = origin.GetY();
@@ -436,15 +436,15 @@ namespace osmscout {
 
       symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-      double widthPx=ConvertWidthToPixel(projection,maxX-minX);
+      double widthPx=projection.ConvertWidthToPixel(maxX-minX);
       double height=maxY-minY;
 
       bool isClosed = false;
       Vertex2D origin;
       double x1,y1,x2,y2,x3,y3,slope;
       FollowPathHandle followPathHnd;
-      followPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
-      if(!isClosed && !followPath(followPathHnd, space/2, origin)){
+      FollowPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
+      if(!isClosed && !FollowPath(followPathHnd, space/2, origin)){
               return;
       }
       QTransform savedTransform = painter->transform();
@@ -453,11 +453,11 @@ namespace osmscout {
       while (loop){
           x1 = origin.GetX();
           y1 = origin.GetY();
-          loop = followPath(followPathHnd, widthPx/2, origin);
+          loop = FollowPath(followPathHnd, widthPx/2, origin);
           if(loop){
               x2 = origin.GetX();
               y2 = origin.GetY();
-              loop = followPath(followPathHnd, widthPx/2, origin);
+              loop = FollowPath(followPathHnd, widthPx/2, origin);
               if(loop){
                   x3 = origin.GetX();
                   y3 = origin.GetY();
@@ -466,7 +466,7 @@ namespace osmscout {
                   t.rotateRadians(slope);
                   painter->setTransform(t);
                   DrawSymbol(projection, parameter, symbol, 0, height);
-                  loop = followPath(followPathHnd, space, origin);
+                  loop = FollowPath(followPathHnd, space, origin);
               }
            }
       }
@@ -522,12 +522,12 @@ namespace osmscout {
              pixel!=polygon->GetCoords().end();
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
-            path.moveTo(x+ConvertWidthToPixel(projection,pixel->x-centerX),
-                        y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
+            path.moveTo(x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
           }
           else {
-            path.lineTo(x+ConvertWidthToPixel(projection,pixel->x-centerX),
-                        y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
+            path.lineTo(x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
           }
         }
 
@@ -543,10 +543,10 @@ namespace osmscout {
 
         QPainterPath path;
 
-        path.addRect(x+ConvertWidthToPixel(projection,rectangle->GetTopLeft().x-centerX),
-                     y+ConvertWidthToPixel(projection,maxY-rectangle->GetTopLeft().y-centerY),
-                     ConvertWidthToPixel(projection,rectangle->GetWidth()),
-                     ConvertWidthToPixel(projection,rectangle->GetHeight()));
+        path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX),
+                     y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY),
+                     projection.ConvertWidthToPixel(rectangle->GetWidth()),
+                     projection.ConvertWidthToPixel(rectangle->GetHeight()));
 
         painter->drawPath(path);
       }
@@ -560,10 +560,10 @@ namespace osmscout {
 
         QPainterPath path;
 
-        path.addEllipse(QPointF(x+ConvertWidthToPixel(projection,circle->GetCenter().x-centerX),
-                                y+ConvertWidthToPixel(projection,maxY-circle->GetCenter().y-centerY)),
-                        ConvertWidthToPixel(projection,circle->GetRadius()),
-                        ConvertWidthToPixel(projection,circle->GetRadius()));
+        path.addEllipse(QPointF(x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
+                                y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY)),
+                        projection.ConvertWidthToPixel(circle->GetRadius()),
+                        projection.ConvertWidthToPixel(circle->GetRadius()));
 
         painter->drawPath(path);
       }
@@ -773,8 +773,7 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const FillStyle& fillStyle)
   {
-    double borderWidth=ConvertWidthToPixel(projection,
-                                           fillStyle.GetBorderWidth());
+    double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
 
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&

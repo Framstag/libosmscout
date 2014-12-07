@@ -64,8 +64,8 @@ namespace osmscout {
     }
 
     //fontEngine->resolution(72);
-    fontEngine->width(size*ConvertWidthToPixel(projection,parameter.GetFontSize()));
-    fontEngine->height(size*ConvertWidthToPixel(projection,parameter.GetFontSize()));
+    fontEngine->width(size*projection.ConvertWidthToPixel(parameter.GetFontSize()));
+    fontEngine->height(size*projection.ConvertWidthToPixel(parameter.GetFontSize()));
     fontEngine->hinting(true);
     fontEngine->flip_y(true);
   }
@@ -83,8 +83,8 @@ namespace osmscout {
     }
 
     //fontEngine->resolution(72);
-    fontEngine->width(size*ConvertWidthToPixel(projection,parameter.GetFontSize()));
-    fontEngine->height(size*ConvertWidthToPixel(projection,parameter.GetFontSize()));
+    fontEngine->width(size*projection.ConvertWidthToPixel(parameter.GetFontSize()));
+    fontEngine->height(size*projection.ConvertWidthToPixel(parameter.GetFontSize()));
     fontEngine->hinting(true);
     fontEngine->flip_y(true);
   }
@@ -252,8 +252,7 @@ namespace osmscout {
       agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
     }
 
-    double borderWidth=ConvertWidthToPixel(projection,
-                                           fillStyle.GetBorderWidth());
+    double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
 
     if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       renderer_aa->color(agg::rgba(fillStyle.GetBorderColor().GetR(),
@@ -513,12 +512,12 @@ namespace osmscout {
              pixel!=polygon->GetCoords().end();
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
-            path.move_to(x+ConvertWidthToPixel(projection,pixel->x-centerX),
-                         y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
+            path.move_to(x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                         y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
           }
           else {
-            path.line_to(x+ConvertWidthToPixel(projection,pixel->x-centerX),
-                         y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
+            path.line_to(x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                         y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
           }
         }
 
@@ -535,10 +534,10 @@ namespace osmscout {
         RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
         FillStyleRef        style=rectangle->GetFillStyle();
         agg::path_storage   path;
-        double              xPos=x+ConvertWidthToPixel(projection,rectangle->GetTopLeft().x-centerX);
-        double              yPos=y+ConvertWidthToPixel(projection,maxY-rectangle->GetTopLeft().y-centerY);
-        double              width=ConvertWidthToPixel(projection,rectangle->GetWidth());
-        double              height=ConvertWidthToPixel(projection,rectangle->GetHeight());
+        double              xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX);
+        double              yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY);
+        double              width=projection.ConvertWidthToPixel(rectangle->GetWidth());
+        double              height=projection.ConvertWidthToPixel(rectangle->GetHeight());
 
         path.move_to(xPos,yPos);
         path.line_to(xPos+width,yPos);
@@ -558,10 +557,10 @@ namespace osmscout {
         CirclePrimitive*  circle=dynamic_cast<CirclePrimitive*>(primitive);
         FillStyleRef      style=circle->GetFillStyle();
         agg::path_storage path;
-        double            radius=ConvertWidthToPixel(projection,circle->GetRadius());
+        double            radius=projection.ConvertWidthToPixel(circle->GetRadius());
 
-        agg::ellipse ellipse(x+ConvertWidthToPixel(projection,circle->GetCenter().x-centerX),
-                             y+ConvertWidthToPixel(projection,maxY-circle->GetCenter().y-centerY),
+        agg::ellipse ellipse(x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
+                             y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY),
                              radius,
                              radius);
 

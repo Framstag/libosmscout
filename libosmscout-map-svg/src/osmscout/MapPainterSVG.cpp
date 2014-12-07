@@ -73,7 +73,7 @@ namespace osmscout {
   {
     FontMap::const_iterator f;
 
-    fontSize=fontSize*ConvertWidthToPixel(projection,parameter.GetFontSize());
+    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
     f=fonts.find(fontSize);
 
@@ -161,8 +161,7 @@ namespace osmscout {
 
         stream << ";fillRule:nonzero";
 
-        double borderWidth=ConvertWidthToPixel(projection,
-                                               area->fillStyle->GetBorderWidth());
+        double borderWidth=projection.ConvertWidthToPixel(area->fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
           stream << ";stroke:" << GetColorValue(area->fillStyle->GetBorderColor());
@@ -210,11 +209,11 @@ namespace osmscout {
         double lineWidth;
 
         if (way->lineStyle->GetWidth()==0) {
-          lineWidth=ConvertWidthToPixel(projection,way->lineStyle->GetDisplayWidth());
+          lineWidth=projection.ConvertWidthToPixel(way->lineStyle->GetDisplayWidth());
         }
         else {
           lineWidth=GetProjectedWidth(projection,
-                                      ConvertWidthToPixel(projection,way->lineStyle->GetDisplayWidth()),
+                                      projection.ConvertWidthToPixel(way->lineStyle->GetDisplayWidth()),
                                       way->lineStyle->GetWidth());
         }
 
@@ -330,9 +329,9 @@ namespace osmscout {
 
       stream << "    <text";
       stream << " x=\"" << label.x << "\"";
-      stream << " y=\"" << label.y+ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " y=\"" << label.y+projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " font-family=\"" << parameter.GetFontName() << "\"";
-      stream << " font-size=\"" << ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-size=\"" << projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
 
       if (label.alpha!=1.0) {
@@ -380,9 +379,9 @@ namespace osmscout {
 
       stream << "    <text";
       stream << " x=\"" << label.x << "\"";
-      stream << " y=\"" << label.y+ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " y=\"" << label.y+projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " font-family=\"" << parameter.GetFontName() << "\"";
-      stream << " font-size=\"" << ConvertWidthToPixel(projection,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-size=\"" << projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
       stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
 
       if (label.alpha!=1.0) {

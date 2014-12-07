@@ -371,7 +371,7 @@ namespace osmscout {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     FontMap::const_iterator f;
 
-    fontSize=fontSize*ConvertWidthToPixel(projection,parameter.GetFontSize());
+    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
     f=fonts.find(fontSize);
 
@@ -492,8 +492,7 @@ namespace osmscout {
     }
 
     if (hasBorder) {
-      double borderWidth=ConvertWidthToPixel(projection,
-                                             fill.GetBorderWidth());
+      double borderWidth=projection.ConvertWidthToPixel(fill.GetBorderWidth());
 
       if (borderWidth>=parameter.GetLineMinWidthPixel()) {
         SetLineAttributes(fill.GetBorderColor(),
@@ -698,8 +697,8 @@ namespace osmscout {
 
     symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    double width=ConvertWidthToPixel(projection,maxX-minX);
-    double height=ConvertWidthToPixel(projection,maxY-minY);
+    double width=projection.ConvertWidthToPixel(maxX-minX);
+    double height=projection.ConvertWidthToPixel(maxY-minY);
 
     for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
          p!=symbol.GetPrimitives().end();
@@ -1055,13 +1054,13 @@ namespace osmscout {
            ++pixel) {
         if (pixel==polygon->GetCoords().begin()) {
           cairo_move_to(draw,
-                        x+ConvertWidthToPixel(projection,pixel->x-centerX),
-                        y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
+                        x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
         }
         else {
           cairo_line_to(draw,
-                        x+ConvertWidthToPixel(projection,pixel->x-centerX),
-                        y+ConvertWidthToPixel(projection,maxY-pixel->y-centerY));
+                        x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
         }
       }
 
@@ -1071,18 +1070,18 @@ namespace osmscout {
       RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
 
       cairo_rectangle(draw,
-                      x+ConvertWidthToPixel(projection,rectangle->GetTopLeft().x-centerX),
-                      y+ConvertWidthToPixel(projection,maxY-rectangle->GetTopLeft().y-centerY),
-                      ConvertWidthToPixel(projection,rectangle->GetWidth()),
-                      ConvertWidthToPixel(projection,rectangle->GetHeight()));
+                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX),
+                      y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY),
+                      projection.ConvertWidthToPixel(rectangle->GetWidth()),
+                      projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
     else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
       CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
 
       cairo_arc(draw,
-                x+ConvertWidthToPixel(projection,circle->GetCenter().x-centerX),
-                y+ConvertWidthToPixel(projection,maxY-circle->GetCenter().y-centerY),
-                ConvertWidthToPixel(projection,circle->GetRadius()),
+                x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
+                y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY),
+                projection.ConvertWidthToPixel(circle->GetRadius()),
                 0,2*M_PI);
     }
   }

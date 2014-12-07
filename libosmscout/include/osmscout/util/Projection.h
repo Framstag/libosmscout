@@ -227,6 +227,33 @@ namespace osmscout {
      */
     virtual double GetPixelSize() const = 0;
 
+    /**
+     * Convert a width in mm into the equivalent pixel size based on the given DPI
+     *
+     * @param width
+     *    Width in mm
+     * @return
+     *    Width in screen pixel
+     */
+    inline double ConvertWidthToPixel(double width) const
+    {
+      return width*GetDPI()/25.4;
+    }
+
+    /**
+     * Convert a width in pixel into the equivalent mm size based on the given DPI
+     *
+     * @param width
+     *    Width in screen pixel
+     * @return
+     *    Width in mm
+     */
+    inline double ConvertPixelToWidth(double pixel) const
+    {
+      return pixel*25.4/GetDPI();
+    }
+
+
   protected:
     virtual bool GeoToPixel(const BatchTransformer& transformData) const = 0;
 

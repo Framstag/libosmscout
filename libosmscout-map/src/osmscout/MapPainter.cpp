@@ -695,7 +695,7 @@ namespace osmscout {
               data.transStart=start+lineStart;
               data.transEnd=start+lineEnd;
               data.lineWidth=GetProjectedWidth(projection,
-                                               ConvertWidthToPixel(projection,coastlineLine->GetDisplayWidth()),
+                                               projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
                                                coastlineLine->GetWidth());
               wayData.push_back(data);
             }
@@ -762,7 +762,7 @@ namespace osmscout {
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    double stepSizeInPixel=ConvertWidthToPixel(projection,shieldStyle->GetShieldSpace());
+    double stepSizeInPixel=projection.ConvertWidthToPixel(shieldStyle->GetShieldSpace());
 
     wayScanlines.clear();
 
@@ -1040,9 +1040,9 @@ namespace osmscout {
                            parameter,
                            textStyle,
                            label,
-                           x,y+ConvertWidthToPixel(projection,iconStyle->GetSymbol()->GetHeight())/2+
-                               ConvertWidthToPixel(projection,1.0)+
-                               ConvertWidthToPixel(projection,textStyle->GetSize())/2);
+                           x,y+projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight())/2+
+                           projection.ConvertWidthToPixel(1.0)+
+                           projection.ConvertWidthToPixel(textStyle->GetSize())/2);
       }
       else if (hasIcon) {
         RegisterPointLabel(projection,
@@ -1180,9 +1180,9 @@ namespace osmscout {
                            parameter,
                            textStyle,
                            label,
-                           x,y+ConvertWidthToPixel(projection,iconStyle->GetSymbol()->GetHeight())/2+
-                               ConvertWidthToPixel(projection,1.0)+
-                               ConvertWidthToPixel(projection,textStyle->GetSize())/2);
+                           x,y+projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight())/2+
+                           projection.ConvertWidthToPixel(1.0)+
+                           projection.ConvertWidthToPixel(textStyle->GetSize())/2);
       }
       else if (hasIcon) {
         RegisterPointLabel(projection,
@@ -1275,8 +1275,7 @@ namespace osmscout {
                                         pathSymbolStyle);
 
       if (pathSymbolStyle.Valid()) {
-        double symbolSpace=ConvertWidthToPixel(projection,
-                                               pathSymbolStyle->GetSymbolSpace());
+        double symbolSpace=projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
 
         DrawContourSymbol(projection,
                           parameter,
@@ -1584,8 +1583,7 @@ namespace osmscout {
       }
 
       if (lineStyle->GetDisplayWidth()>0.0) {
-        lineWidth+=ConvertWidthToPixel(projection,
-                                       lineStyle->GetDisplayWidth());
+        lineWidth+=projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
       }
 
       if (lineWidth==0.0) {
@@ -1598,8 +1596,7 @@ namespace osmscout {
       }
 
       if (lineStyle->GetDisplayOffset()!=0.0) {
-        lineOffset+=ConvertWidthToPixel(projection,
-                                        lineStyle->GetDisplayOffset());
+        lineOffset+=projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
       }
 
       WayData data;
@@ -1743,9 +1740,9 @@ namespace osmscout {
 
     transBuffer.Reset();
 
-    labelSpace=ConvertWidthToPixel(projection,parameter.GetLabelSpace());
-    shieldLabelSpace=ConvertWidthToPixel(projection,parameter.GetPlateLabelSpace());
-    sameLabelSpace=ConvertWidthToPixel(projection,parameter.GetSameLabelSpace());
+    labelSpace=projection.ConvertWidthToPixel(parameter.GetLabelSpace());
+    shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
+    sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
 
     if (parameter.IsAborted()) {
       return false;

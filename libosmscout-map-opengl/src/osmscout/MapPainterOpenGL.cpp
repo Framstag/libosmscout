@@ -238,8 +238,7 @@ namespace osmscout {
 
     if (area.fillStyle->GetBorderWidth()>0 &&
         area.fillStyle->GetBorderColor().IsVisible()) {
-      double borderWidth=ConvertWidthToPixel(projection,
-                                             area.fillStyle->GetBorderWidth());
+      double borderWidth=projection.ConvertWidthToPixel(area.fillStyle->GetBorderWidth());
 
       glColor4d(area.fillStyle->GetBorderColor().GetR(),
                 area.fillStyle->GetBorderColor().GetG(),
