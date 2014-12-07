@@ -68,7 +68,7 @@ namespace osmscout {
     lineMinWidthPixel(0.2),
     optimizeWayNodes(TransPolygon::none),
     optimizeAreaNodes(TransPolygon::none),
-    optimizeErrorToleranceMm(25.4/96.0),
+    optimizeErrorToleranceMm(0.25),
     drawFadings(true),
     drawWaysWithFixedWidth(false),
     labelSpace(3.0),
@@ -534,6 +534,7 @@ namespace osmscout {
     std::vector<GeoCoord> points;
     size_t                start=0; // Make the compiler happy
     size_t                end=0;   // Make the compiler happy
+    double                errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
 
     styleConfig.GetSeaFillStyle(projection,
                                 seaFill);
@@ -593,7 +594,7 @@ namespace osmscout {
         transBuffer.transPolygon.TransformArea(projection,
                                                TransPolygon::none,
                                                points,
-                                               parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
+                                               errorTolerancePixel);
 
         size_t s=transBuffer.transPolygon.GetStart();
 
@@ -629,7 +630,7 @@ namespace osmscout {
         transBuffer.transPolygon.TransformArea(projection,
                                                TransPolygon::none,
                                                points,
-                                               parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
+                                               errorTolerancePixel);
 
         for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
           double x,y;
@@ -1436,6 +1437,8 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
+    double errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
+
     areaData.clear();
 
     //Areas
@@ -1455,7 +1458,7 @@ namespace osmscout {
                                   parameter.GetOptimizeAreaNodes(),
                                   area->rings[i].nodes,
                                   data[i].transStart,data[i].transEnd,
-                                  parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
+                                  errorTolerancePixel);
       }
 
       size_t ringId=Area::outerRingId;
@@ -1563,6 +1566,7 @@ namespace osmscout {
     bool   transformed=false;
     size_t transStart=0; // Make the compiler happy
     size_t transEnd=0;   // Make the compiler happy
+    double errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
 
     for (const auto& lineStyle : lineStyles) {
       double       lineWidth=0.0;
@@ -1616,7 +1620,7 @@ namespace osmscout {
                                  nodes,
                                  transStart,
                                  transEnd,
-                                 parameter.GetOptimizeErrorToleranceDots(projection.GetDPI()));
+                                 errorTolerancePixel);
 
         WayPathData pathData;
 

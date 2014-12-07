@@ -148,11 +148,6 @@ namespace osmscout {
       return optimizeErrorToleranceMm;
     }
 
-    inline double GetOptimizeErrorToleranceDots(double dpi) const
-    {
-      return dpi*optimizeErrorToleranceMm/25.4;
-    }
-
     inline bool GetDrawFadings() const
     {
       return drawFadings;
