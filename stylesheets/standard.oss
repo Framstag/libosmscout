@@ -448,7 +448,7 @@ SYMBOL speed_camera
    [TYPE _tile_land] AREA {color: @landColor;}
    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
-   //[TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------
@@ -500,10 +500,24 @@ SYMBOL speed_camera
  [MAG proximity-] {
    [TYPE waterway_river,
          waterway_canal] {
+     [SIZE 15m 0.25mm:3px<] {
+       WAY {color: @waterColor; width: 15m;}
 
+       [TUNNEL] {
+         WAY#ldash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: -7.5m; priority: 1; }
+         WAY#rdash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: 7.5m; priority: 1;}
 
-     [SIZE 15m 0.25mm:3px<] WAY {color: @waterColor; width: 15m;}
-     [SIZE 15m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm; }
+         WAY {color: #f2f6f6; width: 15m;}
+       }
+     }
+
+     [SIZE 15m <0.25mm:3px] {
+       WAY {color: @waterColor; displayWidth: 0.25mm; }
+
+       [TUNNEL] {
+         WAY {color: #ff000000;}
+       }
+     }
    }
 
    [TYPE waterway_dock,
