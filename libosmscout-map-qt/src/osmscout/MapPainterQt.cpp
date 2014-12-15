@@ -700,10 +700,12 @@ namespace osmscout {
 
         path.moveTo(coordBuffer->buffer[data.transStart].GetX(),
                     coordBuffer->buffer[data.transStart].GetY());
+
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
           path.lineTo(coordBuffer->buffer[i].GetX(),
                       coordBuffer->buffer[i].GetY());
         }
+
         path.closeSubpath();
       }
     }
@@ -713,19 +715,22 @@ namespace osmscout {
             *area.fillStyle);
     bool restoreTransform = false;
     size_t idx = -1;
-    if(area.fillStyle->HasPattern()){
-        idx=area.fillStyle->GetPatternId()-1;
-        if(idx<patterns.size() && !patterns[idx].textureImage().isNull()){
-            patterns[idx].setTransform(QTransform::fromTranslate(
-                                              remainder(coordBuffer->buffer[area.transStart].GetX(),patterns[idx].textureImage().width()),
-                                              remainder(coordBuffer->buffer[area.transStart].GetY(),patterns[idx].textureImage().height())));
-            painter->setBrush(patterns[idx]);
-            restoreTransform = true;
-        }
+    if (area.fillStyle->HasPattern()) {
+      idx=area.fillStyle->GetPatternId()-1;
+
+      if (idx<patterns.size() && !patterns[idx].textureImage().isNull()) {
+        patterns[idx].setTransform(QTransform::fromTranslate(
+                                          remainder(coordBuffer->buffer[area.transStart].GetX(),patterns[idx].textureImage().width()),
+                                          remainder(coordBuffer->buffer[area.transStart].GetY(),patterns[idx].textureImage().height())));
+        painter->setBrush(patterns[idx]);
+        restoreTransform = true;
+      }
     }
+
     painter->drawPath(path);
-    if(restoreTransform){
-        patterns[idx].setTransform(QTransform(1.0,0.0,1.0,0.0,0.0,0.0));
+
+    if (restoreTransform) {
+      patterns[idx].setTransform(QTransform(1.0,0.0,1.0,0.0,0.0,0.0));
     }
   }
 
