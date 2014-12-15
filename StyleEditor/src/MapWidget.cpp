@@ -270,6 +270,10 @@ QString MapWidget::zoomLevelName() {
     } else if(level>=osmscout::Magnification::magHouse){
         return "House";
     }
+
+    assert(false);
+
+    return "";
 }
 
 void MapWidget::left()
