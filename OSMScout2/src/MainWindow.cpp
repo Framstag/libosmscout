@@ -39,10 +39,10 @@ MainWindow::MainWindow(const SettingsRef& settings,
 
 MainWindow::~MainWindow()
 {
-  // no code
+    // no code
 }
 
 void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& /*response*/)
 {
-  std::cout << "InitialisationFinished()" << std::endl;
+    // no code
 }
