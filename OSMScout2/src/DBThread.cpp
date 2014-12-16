@@ -63,6 +63,7 @@ DBThread::DBThread()
    currentImage(NULL),
    currentLat(0.0),
    currentLon(0.0),
+   currentAngle(0.0),
    currentMagnification(0),
    finishedImage(NULL),
    finishedLat(0.0),
@@ -106,11 +107,9 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
                                         routerParameter,
                                         vehicle);
 
-    std::cout << "Opening routing database..." << std::endl;
     if (!router->Open()) {
       return false;
     }
-    std::cout << "done." << std::endl;
   }
 
   return true;
@@ -210,6 +209,13 @@ void DBThread::Finalize()
   }
 }
 
+void DBThread::GetProjection(osmscout::Mercator2Projection& projection)
+{
+    QMutexLocker locker(&mutex);
+
+    projection=this->projection;
+}
+
 void DBThread::UpdateRenderRequest(const RenderMapRequest& request)
 {
   QMutexLocker locker(&mutex);
@@ -246,6 +252,7 @@ void DBThread::TriggerMapRendering()
 
   currentLon=request.lon;
   currentLat=request.lat;
+  currentAngle=request.angle;
   currentMagnification=request.magnification;
 
   if (database->IsOpen() &&
@@ -275,6 +282,7 @@ void DBThread::TriggerMapRendering()
 
     projection.Set(currentLon,
                    currentLat,
+                   currentAngle,
                    currentMagnification,
                    dpi,
                    request.width,
@@ -283,6 +291,9 @@ void DBThread::TriggerMapRendering()
     osmscout::TypeSet              nodeTypes;
     std::vector<osmscout::TypeSet> wayTypes;
     osmscout::TypeSet              areaTypes;
+    double                         lonMin,lonMax,latMin,latMax;
+
+    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
     styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
                                         nodeTypes);
@@ -298,10 +309,10 @@ void DBThread::TriggerMapRendering()
     mapService->GetObjects(nodeTypes,
                            wayTypes,
                            areaTypes,
-                           projection.GetLonMin(),
-                           projection.GetLatMin(),
-                           projection.GetLonMax(),
-                           projection.GetLatMax(),
+                           lonMin,
+                           latMin,
+                           lonMax,
+                           latMax,
                            projection.GetMagnification(),
                            searchParameter,
                            data.nodes,
@@ -309,10 +320,10 @@ void DBThread::TriggerMapRendering()
                            data.areas);
 
     if (drawParameter.GetRenderSeaLand()) {
-      mapService->GetGroundTiles(projection.GetLonMin(),
-                                 projection.GetLatMin(),
-                                 projection.GetLonMax(),
-                                 projection.GetLatMax(),
+      mapService->GetGroundTiles(lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
                                  projection.GetMagnification(),
                                  data.groundTiles);
     }
@@ -374,6 +385,7 @@ void DBThread::TriggerMapRendering()
   std::swap(currentImage,finishedImage);
   std::swap(currentLon,finishedLon);
   std::swap(currentLat,finishedLat);
+  std::swap(currentAngle,finishedAngle);
   std::swap(currentMagnification,finishedMagnification);
 
   emit HandleMapRenderingResult();
@@ -400,6 +412,7 @@ bool DBThread::RenderMap(QPainter& painter,
   }
 
   projection.Set(finishedLon,finishedLat,
+                 finishedAngle,
                  finishedMagnification,
                  finishedImage->width(),
                  finishedImage->height());
@@ -437,8 +450,19 @@ bool DBThread::RenderMap(QPainter& painter,
   double dx=0;
   double dy=0;
   if (request.lon!=finishedLon || request.lat!=finishedLat) {
-    dx-=(request.lon-finishedLon)*request.width/(lonMax-lonMin);
-    dy+=(request.lat-finishedLat)*request.height/(latMax-latMin);
+      double rx,ry,fx,fy;
+
+      if (projection.GeoToPixel(request.lon,
+                                request.lat,
+                                rx,
+                                ry) &&
+          projection.GeoToPixel(finishedLon,
+                                finishedLat,
+                                fx,
+                                fy)) {
+          dx=fx-rx;
+          dy=fy-ry;
+      }
   }
 
   if (dx!=0 ||
@@ -458,8 +482,8 @@ bool DBThread::RenderMap(QPainter& painter,
 
     painter.fillRect(0,
                      0,
-                     request.width,
-                     request.height,
+                     projection.GetWidth(),
+                     projection.GetHeight(),
                      QColor::fromRgbF(backgroundColor.GetR(),
                                       backgroundColor.GetG(),
                                       backgroundColor.GetB(),
@@ -472,6 +496,7 @@ bool DBThread::RenderMap(QPainter& painter,
          finishedImage->height()==(int)request.height &&
          finishedLon==request.lon &&
          finishedLat==request.lat &&
+         finishedAngle==request.angle &&
          finishedMagnification==request.magnification;
 }
 

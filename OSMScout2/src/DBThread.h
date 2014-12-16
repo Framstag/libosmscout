@@ -41,6 +41,7 @@ struct RenderMapRequest
 {
   double                  lon;
   double                  lat;
+  double                  angle;
   osmscout::Magnification magnification;
   size_t                  width;
   size_t                  height;
@@ -108,11 +109,13 @@ private:
   QImage                        *currentImage;
   double                        currentLat;
   double                        currentLon;
+  double                        currentAngle;
   osmscout::Magnification       currentMagnification;
 
   QImage                        *finishedImage;
   double                        finishedLat;
   double                        finishedLon;
+  double                        finishedAngle;
   osmscout::Magnification       finishedMagnification;
 
   RenderMapRequest              currentRenderRequest;
@@ -126,6 +129,8 @@ private:
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
 public:
+  void GetProjection(osmscout::Mercator2Projection& projection);
+
   void UpdateRenderRequest(const RenderMapRequest& request);
 
   bool RenderMap(QPainter& painter,

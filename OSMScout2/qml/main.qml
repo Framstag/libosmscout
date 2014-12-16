@@ -69,7 +69,7 @@ Rectangle {
         }
 
         onPositionChanged: {
-            console.long("Position changed:")
+            console.log("Position changed:")
 
             if (position.latitudeValid) {
                 console.log("  latitude: " + position.coordinate.latitude)
@@ -117,10 +117,20 @@ Rectangle {
                 map.down()
             }
             else if (event.key === Qt.Key_Left) {
-                map.left()
+                if (event.modifiers & Qt.ShiftModifier) {
+                    map.rotateLeft();
+                }
+                else {
+                    map.left();
+                }
             }
             else if (event.key === Qt.Key_Right) {
-                map.right()
+                if (event.modifiers & Qt.ShiftModifier) {
+                    map.rotateRight();
+                }
+                else {
+                    map.right();
+                }
             }
             else if (event.modifiers===Qt.ControlModifier &&
                      event.key === Qt.Key_F) {

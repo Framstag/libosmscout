@@ -198,12 +198,14 @@ namespace osmscout {
     seaFill=new FillStyle();
     seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0/255));
 
-    debugLabel=new TextStyle();
+    TextStyleRef textStyle=new TextStyle();
 
-    debugLabel->SetStyle(TextStyle::normal);
-    debugLabel->SetPriority(0);
-    debugLabel->SetTextColor(Color(0,0,0,0.5));
-    debugLabel->SetSize(1.2);
+    textStyle->SetStyle(TextStyle::normal);
+    textStyle->SetPriority(0);
+    textStyle->SetTextColor(Color(0,0,0,0.5));
+    textStyle->SetSize(1.2);
+
+    debugLabel=textStyle.Get();
   }
 
   MapPainter::~MapPainter()
@@ -232,29 +234,29 @@ namespace osmscout {
       latMax=std::max(latMax,nodes[i].GetLat());
     }
 
-    double xMin;
-    double xMax;
-    double yMin;
-    double yMax;
+    double x1;
+    double x2;
     double y1;
     double y2;
 
     if (!projection.GeoToPixel(lonMin,
-                               latMax,
-                               xMin,
+                               latMin,
+                               x1,
                                y1)) {
       return false;
     }
 
     if (!projection.GeoToPixel(lonMax,
-                               latMin,
-                               xMax,
+                               latMax,
+                               x2,
                                y2)) {
       return false;
     }
 
-    yMax = std::max(y1,y2);
-    yMin = std::min(y1,y2);
+    double xMin=std::min(x1,x2);
+    double xMax=std::max(x1,x2);
+    double yMin=std::min(y1,y2);
+    double yMax=std::max(y1,y2);
 
     xMin-=pixelOffset;
     yMin-=pixelOffset;
@@ -582,6 +584,8 @@ namespace osmscout {
       areaData.minLon=tile->xAbs*tile->cellWidth-180.0;
       areaData.maxLon=areaData.minLon+tile->cellWidth;
 
+      // std::cout << "* " << areaData.minLat << " - " << areaData.minLon << " x " << areaData.maxLat << " - " << areaData.maxLon << std::endl;
+
       if (tile->coords.empty()) {
         points.resize(5);
 
@@ -613,6 +617,12 @@ namespace osmscout {
 
         end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
                                           ceil(transBuffer.transPolygon.points[s+4].y));
+
+        /*
+        std::cout << "--" << std::endl;
+        for (size_t i=s; i<=s+4; i++) {
+          std::cout << transBuffer.transPolygon.points[i].x << "," << transBuffer.transPolygon.points[i].y << std::endl;
+        }*/
       }
       else {
         points.resize(tile->coords.size());
@@ -707,7 +717,6 @@ namespace osmscout {
       }
 
       areaData.ref=ObjectFileRef();
-//      areaData.buffer.SetType();
       areaData.transStart=start;
       areaData.transEnd=end;
 
@@ -1753,11 +1762,15 @@ namespace osmscout {
     }
 
     if (parameter.IsDebugPerformance()) {
+      double lonMin,latMin,lonMax,latMax;
+
+      projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+
       std::cout << "Draw: [";
-      std::cout << projection.GetLatMin() <<",";
-      std::cout << projection.GetLonMin() << "-";
-      std::cout << projection.GetLatMax() << ",";
-      std::cout << projection.GetLonMax() << "] ";
+      std::cout << latMin <<",";
+      std::cout << lonMin << "-";
+      std::cout << latMax << ",";
+      std::cout << lonMax << "] ";
       std::cout << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " ";
       std::cout << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI" << std::endl;
     }

@@ -69,7 +69,7 @@ namespace osmscout {
     double                       labelSpace;         //! Space between point labels in mm (default 3).
     double                       plateLabelSpace;    //! Space between plates in mm (default 5).
     double                       sameLabelSpace;     //! Space between labels with the same value in mm (default 40)
-    bool                         dropNotVisiblePointLabels; //! Point labels that are not visbile, are clips during label positioning phase
+    bool                         dropNotVisiblePointLabels; //! Point labels that are not visible, are clipped during label positioning phase
 
     bool                         renderSeaLand;      //! Rendering of sea/land tiles
 
@@ -365,7 +365,7 @@ namespace osmscout {
     //@{
     FillStyleRef              landFill;
     FillStyleRef              seaFill;
-    TextStyleRef              debugLabel;
+    LabelStyleRef             debugLabel;
     FeatureValueBuffer        coastlineSegmentAttributes;
     //@}
 

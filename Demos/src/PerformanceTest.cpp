@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
         std::vector<osmscout::TypeSet> wayTypes;
         osmscout::TypeSet              areaTypes;
         osmscout::MapData              data;
+        double                         lonMin,lonMax,latMin,latMax;
 
         lat=(osmscout::TileYToLat(y,zoom)+osmscout::TileYToLat(y+1,zoom))/2;
         lon=(osmscout::TileXToLon(x,zoom)+osmscout::TileXToLon(x+1,zoom))/2;
@@ -223,6 +224,9 @@ int main(int argc, char* argv[])
                        tileWidth,
                        tileHeight);
 
+
+        projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+
         styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
                                             nodeTypes);
 
@@ -237,10 +241,10 @@ int main(int argc, char* argv[])
         mapService->GetObjects(nodeTypes,
                                wayTypes,
                                areaTypes,
-                               projection.GetLonMin(),
-                               projection.GetLatMin(),
-                               projection.GetLonMax(),
-                               projection.GetLatMax(),
+                               lonMin,
+                               latMin,
+                               lonMax,
+                               latMax,
                                projection.GetMagnification(),
                                searchParameter,
                                data.nodes,

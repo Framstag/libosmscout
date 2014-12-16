@@ -77,20 +77,23 @@ namespace osmscout {
                              double& y)
       {
 #ifdef OSMSCOUT_HAVE_SSE2
+        if (projection.CanBatch()) {
+          this->lon[count]=lon;
+          this->lat[count]=lat;
+          xPointer[count]=&x;
+          yPointer[count]=&y;
+          count++;
 
-        this->lon[count]=lon;
-        this->lat[count]=lat;
-        xPointer[count]=&x;
-        yPointer[count]=&y;
-        count++;
+          if (count==2) {
+            count=0;
+            return projection.GeoToPixel(*this);
+          }
 
-        if (count==2) {
-          count=0;
-          return projection.GeoToPixel(*this);
+          return true;
         }
-
-        return true;
-
+        else {
+          return projection.GeoToPixel(lon,lat,x,y);
+        }
 #else
         return projection.GeoToPixel(lon,lat,x,y);
 #endif
@@ -112,6 +115,8 @@ namespace osmscout {
 
     virtual ~Projection();
 
+    virtual bool CanBatch() const = 0;
+
     /**
      * Returns longitude coordinate of the region center.
      *
@@ -125,6 +130,12 @@ namespace osmscout {
     virtual double GetLat() const = 0;
 
     /**
+     * Returns the angle ([0..2*PI[) of the display in relation to the north. A degree of 0 means
+     * north is to the top, a degree of PI, renders with the south to the top of the display).
+     */
+    virtual double GetAngle() const = 0;
+
+    /**
      * Returns the width of the screen
      */
     virtual size_t GetWidth() const = 0;
@@ -132,26 +143,6 @@ namespace osmscout {
      * Returns the height of the screen
      */
     virtual size_t GetHeight() const = 0;
-
-    /**
-     * Returns minimum longitude value of the area covered by the projection.
-     */
-    virtual double GetLonMin() const = 0;
-
-    /**
-     * Returns minimum latitude value of the area covered by the projection.
-     */
-    virtual double GetLatMin() const = 0;
-
-    /**
-     * Returns maximum longitude value of the area covered by the projection.
-     */
-    virtual double GetLonMax() const = 0;
-
-    /**
-     * Returns maximum latitude value of the area covered by the projection.
-     */
-    virtual double GetLatMax() const = 0;
 
     /**
      * Return the magnification as part of the projection.
@@ -303,6 +294,11 @@ namespace osmscout {
   public:
     MercatorProjection();
 
+    inline bool CanBatch() const
+    {
+      return true;
+    }
+
     inline double GetLon() const
     {
       return lon;
@@ -313,6 +309,11 @@ namespace osmscout {
       return lat;
     }
 
+    inline double GetAngle() const
+    {
+      return 0;
+    }
+
     inline size_t GetWidth() const
     {
       return width;
@@ -321,26 +322,6 @@ namespace osmscout {
     inline size_t GetHeight() const
     {
       return height;
-    }
-
-    inline double GetLonMin() const
-    {
-      return lonMin;
-    }
-
-    inline double GetLatMin() const
-    {
-      return latMin;
-    }
-
-    inline double GetLonMax() const
-    {
-      return lonMax;
-    }
-
-    inline double GetLatMax() const
-    {
-      return latMax;
     }
 
     inline Magnification GetMagnification() const
@@ -416,40 +397,38 @@ namespace osmscout {
   class OSMSCOUT_API Mercator2Projection : public Projection
   {
   protected:
-    bool                valid;         //! projection is valid
+    bool                valid;          //! projection is valid
 
-    double              lon;           //! Longitude coordinate of the center of the image
-    double              lat;           //! Latitude coordinate of the center of the image
-    Magnification       magnification; //! Current magnification
-    double              dpi;           //! Screen DPI
-    size_t              width;         //! Width of image
-    size_t              height;        //! Height of image
+    double              lon;            //! Longitude coordinate of the center of the image
+    double              lat;            //! Latitude coordinate of the center of the image
+    double              angle;          //! Display rotation angle
+    Magnification       magnification;  //! Current magnification
+    double              dpi;            //! Screen DPI
+    size_t              width;          //! Width of image
+    size_t              height;         //! Height of image
 
-    double              lonMin;        //! Longitude of the upper left corner of the image
-    double              latMin;        //! Latitude of the upper left corner of the image
-    double              lonMax;        //! Longitude of the lower right corner of the image
-    double              latMax;        //! Latitude of the lower right corner of the image
+    double              lonMin;         //! Longitude of the upper left corner of the image
+    double              latMin;         //! Latitude of the upper left corner of the image
+    double              lonMax;         //! Longitude of the lower right corner of the image
+    double              latMax;         //! Latitude of the lower right corner of the image
 
-    double              lonOffset;
-    double              latOffset;
+    double              latOffset;      //! Absolute and untransformed screen position of lat coordinate
+    double              angleSin;
+    double              angleCos;
+    double              angleNegSin;
+    double              angleNegCos;
+
     double              scale;
-    double              scaleGradtorad; //!Precalculated scale*Gradtorad
-    double              pixelSize;     //! Size of a pixel in meter
-
-#ifdef OSMSCOUT_HAVE_SSE2
-      //some extra vars for special sse needs
-      v2df              sse2LonOffset;
-      v2df              sse2LatOffset;
-      v2df              sse2Scale;
-      v2df              sse2ScaleGradtorad;
-      v2df              sse2Height;
-#endif
-
-  private:
-
+    double              scaleGradtorad; //! Precalculated scale*Gradtorad
+    double              pixelSize;      //! Size of a pixel in meter
 
   public:
     Mercator2Projection();
+
+    inline bool CanBatch() const
+    {
+      return false;
+    }
 
     inline double GetLon() const
     {
@@ -459,6 +438,11 @@ namespace osmscout {
     inline double GetLat() const
     {
       return lat;
+    }
+
+    inline double GetAngle() const
+    {
+      return angle;
     }
 
     inline size_t GetWidth() const
@@ -471,26 +455,6 @@ namespace osmscout {
       return height;
     }
 
-    inline double GetLonMin() const
-    {
-      return lonMin;
-    }
-
-    inline double GetLatMin() const
-    {
-      return latMin;
-    }
-
-    inline double GetLonMax() const
-    {
-      return lonMax;
-    }
-
-    inline double GetLatMax() const
-    {
-      return latMax;
-    }
-
     inline Magnification GetMagnification() const
     {
       return magnification;
@@ -501,14 +465,31 @@ namespace osmscout {
       return dpi;
     }
 
-    bool Set(double lon, double lat,
+    inline bool Set(double lon, double lat,
              const Magnification& magnification,
              size_t width, size_t height)
     {
-      return Set(lon,lat,magnification,GetDPI(),width,height);
+      return Set(lon,lat,0,magnification,GetDPI(),width,height);
+    }
+
+    inline bool Set(double lon, double lat,
+                    double angle,
+                    const Magnification& magnification,
+                    size_t width, size_t height)
+    {
+      return Set(lon,lat,angle,magnification,GetDPI(),width,height);
+    }
+
+    inline bool Set(double lon, double lat,
+                    const Magnification& magnification,
+                    double dpi,
+                    size_t width, size_t height)
+    {
+      return Set(lon,lat,0,magnification,dpi,width,height);
     }
 
     bool Set(double lon, double lat,
+             double angle,
              const Magnification& magnification,
              double dpi,
              size_t width, size_t height);
@@ -527,6 +508,29 @@ namespace osmscout {
                        double& lonMax, double& latMax) const;
 
     double GetPixelSize() const;
+
+    bool Move(double horizPixel,
+              double vertPixel);
+
+    inline bool MoveUp(double pixel)
+    {
+      return Move(0,pixel);
+    }
+
+    inline bool MoveDown(double pixel)
+    {
+      return Move(0,-pixel);
+    }
+
+    inline bool MoveLeft(double pixel)
+    {
+      return Move(-pixel,0);
+    }
+
+    inline bool MoveRight(double pixel)
+    {
+      return Move(pixel,0);
+    }
 
   protected:
      bool GeoToPixel(const BatchTransformer& transformData) const;
@@ -578,6 +582,11 @@ namespace osmscout {
   public:
     TileProjection();
 
+    inline bool CanBatch() const
+    {
+      return true;
+    }
+
     inline double GetTileX() const
     {
       return tileX;
@@ -608,24 +617,9 @@ namespace osmscout {
       return lat;
     }
 
-    inline double GetLonMin() const
+    inline double GetAngle() const
     {
-      return lonMin;
-    }
-
-    inline double GetLatMin() const
-    {
-      return latMin;
-    }
-
-    inline double GetLonMax() const
-    {
-      return lonMax;
-    }
-
-    inline double GetLatMax() const
-    {
-      return latMax;
+      return 0;
     }
 
     inline Magnification GetMagnification() const

@@ -248,6 +248,9 @@ void DBThread::TriggerMapRendering()
     osmscout::TypeSet              nodeTypes;
     std::vector<osmscout::TypeSet> wayTypes;
     osmscout::TypeSet              areaTypes;
+    double                         lonMin,lonMax,latMin,latMax;
+
+    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
     styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
                                         nodeTypes);
@@ -263,10 +266,10 @@ void DBThread::TriggerMapRendering()
     mapService->GetObjects(nodeTypes,
                            wayTypes,
                            areaTypes,
-                           projection.GetLonMin(),
-                           projection.GetLatMin(),
-                           projection.GetLonMax(),
-                           projection.GetLatMax(),
+                           lonMin,
+                           latMin,
+                           lonMax,
+                           latMax,
                            projection.GetMagnification(),
                            searchParameter,
                            data.nodes,
@@ -274,10 +277,10 @@ void DBThread::TriggerMapRendering()
                            data.areas);
 
     if (drawParameter.GetRenderSeaLand()) {
-      mapService->GetGroundTiles(projection.GetLonMin(),
-                                 projection.GetLatMin(),
-                                 projection.GetLonMax(),
-                                 projection.GetLatMax(),
+      mapService->GetGroundTiles(lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
                                  projection.GetMagnification(),
                                  data.groundTiles);
     }

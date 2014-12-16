@@ -135,13 +135,17 @@ public:
 
     painter = new osmscout::MapPainterOpenGL(styleConfig);
 
+    double lonMin,latMin,lonMax,latMax;
+
+    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+
     return mapService->GetObjects(nodeTypes,
                                   wayTypes,
                                   areaTypes,
-                                  projection.GetLonMin(),
-                                  projection.GetLatMin(),
-                                  projection.GetLonMax(),
-                                  projection.GetLatMax(),
+                                  lonMin,
+                                  latMin,
+                                  lonMax,
+                                  latMax,
                                   projection.GetMagnification(),
                                   searchParameter,
                                   data.nodes,
@@ -172,7 +176,7 @@ void OnDisplay()
 
   projection.Set(lon,
                  lat,
-                 zoom,
+                 osmscout::Magnification(zoom),
                  DPI,
                  width,
                  height);
