@@ -21,6 +21,9 @@
 
 #include <iostream>
 
+//! We rotate in 16 steps
+static double DELTA_ANGLE=2*M_PI/16.0;
+
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
       requestNewMap(true)
@@ -45,6 +48,7 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     lon=0;
     lat=0;
+    angle=0;
     magnification=64;
 }
 
@@ -64,9 +68,6 @@ void MapWidget::initialisationFinished(const DatabaseLoadedResponse& response)
     double dlat=360;
     double dlon=180;
 
-    std::cout << "Initial bounding box [";
-    std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
-
     lat=response.minLat+(response.maxLat-response.minLat)/2;
     lon=response.minLon+(response.maxLon-response.minLon)/2;
 
@@ -79,8 +80,6 @@ void MapWidget::initialisationFinished(const DatabaseLoadedResponse& response)
 
     magnification=zoom;
 
-    std::cout << "Magnification: " << magnification.GetMagnification() << "x" << std::endl;
-
     TriggerMapRendering();
 }
 
@@ -91,6 +90,7 @@ void MapWidget::TriggerMapRendering()
 
     request.lat=lat;
     request.lon=lon;
+    request.angle=angle;
     request.magnification=magnification;
     request.width=width();
     request.height=height();
@@ -103,32 +103,24 @@ void MapWidget::TriggerMapRendering()
 
 void MapWidget::HandleMouseMove(QMouseEvent* event)
 {
-    double                        olon, olat;
-    double                        tlon, tlat;
-    osmscout::Mercator2Projection projection;
+    osmscout::Mercator2Projection projection=startProjection;
 
-    projection.Set(lon,lat,
-                   magnification,
-                   width(),height());
+    if (!projection.Move(startX-event->x(),
+                         event->y()-startY)) {
+        return;
+    }
 
-    // Get origin coordinates
-    projection.PixelToGeo(0,0,
-                          olon,olat);
-
-    // Get current mouse pos coordinates (relative to drag start)
-    projection.PixelToGeo(event->x()-startX,
-                          event->y()-startY,
-                          tlon,tlat);
-
-    lon=startLon-(tlon-olon);
-    lat=startLat-(tlat-olat);
+    lat=projection.GetLat();
+    lon=projection.GetLon();
 }
 
 void MapWidget::mousePressEvent(QMouseEvent* event)
 {
     if (event->button()==1) {
-        startLon=lon;
-        startLat=lat;
+        DBThread *dbThread=DBThread::GetInstance();
+
+        dbThread->GetProjection(startProjection);
+
         startX=event->x();
         startY=event->y();
     }
@@ -173,6 +165,7 @@ void MapWidget::paint(QPainter *painter)
 
     request.lat=lat;
     request.lon=lon;
+    request.angle=angle;
     request.magnification=magnification;
     request.width=boundingBox.width();
     request.height=boundingBox.height();
@@ -215,64 +208,82 @@ void MapWidget::zoomOut(double zoomFactor)
 
 void MapWidget::left()
 {
-    osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    DBThread                      *dbThread=DBThread::GetInstance();
+    osmscout::Mercator2Projection projection;
 
-    projection.Set(lon,lat,
-                   magnification,
-                   width(),height());
+    dbThread->GetProjection(projection);
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.MoveLeft(width()/3);
 
-    lon-=(lonMax-lonMin)*0.3;
+    lat=projection.GetLat();
+    lon=projection.GetLon();
 
     TriggerMapRendering();
 }
 
 void MapWidget::right()
 {
-    osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    DBThread                      *dbThread=DBThread::GetInstance();
+    osmscout::Mercator2Projection projection;
 
-    projection.Set(lon,lat,
-                   magnification,
-                   width(),height());
+    dbThread->GetProjection(projection);
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.MoveRight(width()/3);
 
-    lon+=(lonMax-lonMin)*0.3;
+    lat=projection.GetLat();
+    lon=projection.GetLon();
 
     TriggerMapRendering();
 }
 
 void MapWidget::up()
 {
-    osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    DBThread                      *dbThread=DBThread::GetInstance();
+    osmscout::Mercator2Projection projection;
 
-    projection.Set(lon,lat,
-                   magnification,
-                   width(),height());
+    dbThread->GetProjection(projection);
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.MoveUp(height()/3);
 
-    lat+=(latMax-latMin)*0.3;
+    lat=projection.GetLat();
+    lon=projection.GetLon();
 
     TriggerMapRendering();
 }
 
 void MapWidget::down()
 {
-    osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    DBThread                      *dbThread=DBThread::GetInstance();
+    osmscout::Mercator2Projection projection;
 
-    projection.Set(lon,lat,
-                   magnification,
-                   width(),height());
+    dbThread->GetProjection(projection);
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.MoveDown(height()/3);
 
-    lat-=(latMax-latMin)*0.3;
+    lat=projection.GetLat();
+    lon=projection.GetLon();
+
+    TriggerMapRendering();
+}
+
+void MapWidget::rotateLeft()
+{
+    angle=round(angle/DELTA_ANGLE)*DELTA_ANGLE-DELTA_ANGLE;
+
+    if (angle<0) {
+        angle+=2*M_PI;
+    }
+
+    TriggerMapRendering();
+}
+
+void MapWidget::rotateRight()
+{
+    angle=round(angle/DELTA_ANGLE)*DELTA_ANGLE+DELTA_ANGLE;
+
+    if (angle>=2*M_PI) {
+        angle-=2*M_PI;
+    }
 
     TriggerMapRendering();
 }
@@ -350,5 +361,3 @@ void MapWidget::showLocation(Location* location)
         TriggerMapRendering();
     }
 }
-
-
