@@ -29,7 +29,8 @@ namespace osmscout {
   {
     uint32_t index=0;
 
-    while (index<objects.size() && objects[index]!=object) {
+    while (index<objects.size() &&
+           objects[index].object!=object) {
       index++;
     }
 
@@ -37,7 +38,11 @@ namespace osmscout {
       return index;
     }
 
-    objects.push_back(object);
+    ObjectData data;
+
+    data.object=object;
+
+    objects.push_back(data);
 
     return index;
   }
@@ -81,7 +86,7 @@ namespace osmscout {
 
       fileOffset+=previousFileOffset;
 
-      objects[i].Set(fileOffset,(RefType)type);
+      objects[i].object.Set(fileOffset,(RefType)type);
 
       previousFileOffset=fileOffset;
     }
@@ -148,13 +153,11 @@ namespace osmscout {
 
     Id lastFileOffset=0;
 
-    for (std::vector<ObjectFileRef>::const_iterator object=objects.begin();
-        object!=objects.end();
-        ++object) {
-      writer.Write((uint8_t)object->GetType());
-      writer.WriteNumber(object->GetFileOffset()-lastFileOffset);
+    for (const auto& object : objects) {
+      writer.Write((uint8_t)object.object.GetType());
+      writer.WriteNumber(object.object.GetFileOffset()-lastFileOffset);
 
-      lastFileOffset=object->GetFileOffset();
+      lastFileOffset=object.object.GetFileOffset();
     }
 
     if (!paths.empty()) {
@@ -167,24 +170,24 @@ namespace osmscout {
 
       writer.WriteCoord(minCoord);
 
-      for (size_t i=0; i<paths.size(); i++) {
-        writer.WriteFileOffset(paths[i].offset);
-        writer.WriteNumber(paths[i].objectIndex);
-        writer.WriteNumber(paths[i].type);
-        writer.Write(paths[i].maxSpeed);
-        writer.Write(paths[i].grade);
+      for (const auto& path : paths) {
+        writer.WriteFileOffset(path.offset);
+        writer.WriteNumber(path.objectIndex);
+        writer.WriteNumber(path.type);
+        writer.Write(path.maxSpeed);
+        writer.Write(path.grade);
         //writer.Write(paths[i].bearing);
-        writer.Write(paths[i].flags);
-        writer.WriteNumber((uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5));
-        writer.WriteNumber((uint32_t)round((paths[i].lat-minCoord.GetLat())*latConversionFactor));
-        writer.WriteNumber((uint32_t)round((paths[i].lon-minCoord.GetLon())*lonConversionFactor));
+        writer.Write(path.flags);
+        writer.WriteNumber((uint32_t)floor(path.distance*(1000.0*100.0)+0.5));
+        writer.WriteNumber((uint32_t)round((path.lat-minCoord.GetLat())*latConversionFactor));
+        writer.WriteNumber((uint32_t)round((path.lon-minCoord.GetLon())*lonConversionFactor));
       }
     }
 
-    for (size_t i=0; i<excludes.size(); i++) {
-      writer.Write((uint8_t)excludes[i].source.GetType());
-      writer.WriteFileOffset(excludes[i].source.GetFileOffset());
-      writer.WriteNumber(excludes[i].targetIndex);
+    for (const auto& exclude : excludes) {
+      writer.Write((uint8_t)exclude.source.GetType());
+      writer.WriteFileOffset(exclude.source.GetFileOffset());
+      writer.WriteNumber(exclude.targetIndex);
     }
 
     return !writer.HasError();

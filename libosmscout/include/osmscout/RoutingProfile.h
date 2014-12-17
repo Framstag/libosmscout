@@ -201,7 +201,7 @@ namespace osmscout {
         speed=currentNode.paths[pathIndex].maxSpeed;
       }
       else {
-        ObjectFileRef object=currentNode.objects[currentNode.paths[pathIndex].objectIndex];
+        ObjectFileRef object=currentNode.objects[currentNode.paths[pathIndex].objectIndex].object;
         TypeId        typeId=currentNode.paths[pathIndex].type;
         TypeInfoRef   type;
 

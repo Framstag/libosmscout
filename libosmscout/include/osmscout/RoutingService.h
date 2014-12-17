@@ -149,7 +149,8 @@ namespace osmscout {
 
     struct RNodeCostCompare
     {
-      inline bool operator()(const RNodeRef& a, const RNodeRef& b) const
+      inline bool operator()(const RNodeRef& a,
+                             const RNodeRef& b) const
       {
         if (a->overallCost==b->overallCost) {
          return a->nodeOffset<b->nodeOffset;

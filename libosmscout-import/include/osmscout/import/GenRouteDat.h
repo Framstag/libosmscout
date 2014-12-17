@@ -88,6 +88,12 @@ namespace osmscout {
     uint8_t CopyFlagsForward(const Way& way) const;
     uint8_t CopyFlagsBackward(const Way& way) const;
 
+    bool IsAnyRoutable(Progress& progress,
+                       const std::list<ObjectFileRef>& objects,
+                       const OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap,
+                       const OSMSCOUT_HASHMAP<FileOffset,AreaRef>&  areasMap,
+                       Vehicle vehicle) const;
+
     /**
      * Read turn restrictions and return a map of way ids together with their (set to 0) file offset
      */
@@ -216,7 +222,7 @@ namespace osmscout {
                               const NodeIdOffsetMap& routeNodeIdOffsetMap,
                               PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                               FileWriter& routeNodeWriter,
-                              std::vector<NodeIdObjectsMap::const_iterator>& block,
+                              const std::vector<NodeIdObjectsMap::const_iterator>& block,
                               size_t blockCount);
 
     bool WriteRouteGraph(const ImportParameter& parameter,

@@ -985,43 +985,55 @@ namespace osmscout {
                                       std::vector<osmscout::GeoCoord> via,
                                       RouteData& route)
   {
-      std::vector<size_t> nodeIndexes;
+      std::vector<size_t>                  nodeIndexes;
       std::vector<osmscout::ObjectFileRef> objects;
-      for (std::vector<osmscout::GeoCoord>::const_iterator etap=via.begin();
-           etap!=via.end();
-           ++etap) {
-          size_t                  targetNodeIndex;
-          osmscout::ObjectFileRef targetObject;
-          if (!GetClosestRoutableNode(etap->GetLat(),
-                                      etap->GetLon(),
-                                      vehicle,
-                                      radius,
-                                      targetObject,
-                                      targetNodeIndex)) {
-              return false;
-          }
-          nodeIndexes.push_back(targetNodeIndex);
-          objects.push_back(targetObject);
+
+      for (const auto& etap : via) {
+        size_t                  targetNodeIndex;
+        osmscout::ObjectFileRef targetObject;
+
+        if (!GetClosestRoutableNode(etap.GetLat(),
+                                    etap.GetLon(),
+                                    vehicle,
+                                    radius,
+                                    targetObject,
+                                    targetNodeIndex)) {
+          return false;
+        }
+
+        nodeIndexes.push_back(targetNodeIndex);
+        objects.push_back(targetObject);
       }
 
-      for(int index = 0; index<nodeIndexes.size()-1; index++){
-          size_t                  fromNodeIndex = nodeIndexes.at(index);
-          osmscout::ObjectFileRef fromObject = objects.at(index);
-          size_t                  toNodeIndex = nodeIndexes.at(index + 1);
-          osmscout::ObjectFileRef toObject = objects.at(index + 1);
-          RouteData               *routePart = new RouteData;
-          if(!CalculateRoute(profile, fromObject, fromNodeIndex, toObject, toNodeIndex, *routePart)){
-              return false;
-          }
-          if (routePart->IsEmpty()) {
-              return false;
-          }
-          if(index<nodeIndexes.size()-1){
-              routePart->PopEntry();
-          }
-          route.Append(*routePart);
-          delete routePart;
+      for (int index=0; index<nodeIndexes.size()-1; index++) {
+        size_t                  fromNodeIndex=nodeIndexes.at(index);
+        osmscout::ObjectFileRef fromObject=objects.at(index);
+        size_t                  toNodeIndex=nodeIndexes.at(index+1);
+        osmscout::ObjectFileRef toObject=objects.at(index+1);
+        RouteData               *routePart=new RouteData;
+
+        if (!CalculateRoute(profile,
+                            fromObject,
+                            fromNodeIndex,
+                            toObject,
+                            toNodeIndex,
+                            *routePart)) {
+            return false;
+        }
+
+        if (routePart->IsEmpty()) {
+          return false;
+        }
+
+        if (index<nodeIndexes.size()-1) {
+          routePart->PopEntry();
+        }
+
+        route.Append(*routePart);
+
+        delete routePart;
       }
+
       return true;
   }
 
@@ -1055,7 +1067,8 @@ namespace osmscout {
     RNodeRef                 startForwardNode;
     RNodeRef                 startBackwardNode;
 
-    double                   targetLon=0.0L,targetLat=0.0L;
+    double                   targetLon=0.0L;
+    double                   targetLat=0.0L;
 
     RouteNodeRef             targetForwardRouteNode;
     RouteNodeRef             targetBackwardRouteNode;
@@ -1102,11 +1115,13 @@ namespace osmscout {
 
     if (startForwardNode.Valid()) {
       std::pair<OpenListRef,bool> result=openList.insert(startForwardNode);
+
       openMap[startForwardNode->nodeOffset]=result.first;
     }
 
     if (startBackwardNode.Valid()) {
       std::pair<OpenListRef,bool> result=openList.insert(startBackwardNode);
+
       openMap[startBackwardNode->nodeOffset]=result.first;
     }
 
@@ -1140,11 +1155,8 @@ namespace osmscout {
       std::cout << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
       size_t i=0;
-      for (std::vector<osmscout::RouteNode::Path>::const_iterator path=currentRouteNode->paths.begin();
-           path!=currentRouteNode->paths.end();
-           ++path,
-           ++i) {
-        if (path->offset==current->prev) {
+      for (const auto& path : currentRouteNode->paths) {
+        if (path.offset==current->prev) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path->offset;
@@ -1152,11 +1164,12 @@ namespace osmscout {
           std::cout << " => back to the last node visited" << std::endl;
 #endif
           nodesIgnoredCount++;
+          i++;
           continue;
         }
 
         if (!current->access &&
-            path->HasAccess()) {
+            path.HasAccess()) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path->offset;
@@ -1164,6 +1177,7 @@ namespace osmscout {
           std::cout << " => moving from non-accessible way back to accessible way" << std::endl;
 #endif
           nodesIgnoredCount++;
+          i++;
           continue;
         }
 
@@ -1175,24 +1189,27 @@ namespace osmscout {
           std::cout << " => Cannot be used"<< std::endl;
 #endif
           nodesIgnoredCount++;
+          i++;
           continue;
         }
 
-        if (closeMap.find(path->offset)!=closeMap.end()) {
+        if (closeMap.find(path.offset)!=closeMap.end()) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path->offset;
           std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
           std::cout << " => already calculated" << std::endl;
 #endif
+          i++;
           continue;
         }
 
         if (!currentRouteNode->excludes.empty()) {
           bool canTurnedInto=true;
-          for (size_t e=0; e<currentRouteNode->excludes.size(); e++) {
-            if (currentRouteNode->excludes[e].source==current->object &&
-                currentRouteNode->excludes[e].targetIndex==i) {
+
+          for (const auto& exclude : currentRouteNode->excludes) {
+            if (exclude.source==current->object &&
+                exclude.targetIndex==i) {
 #if defined(DEBUG_ROUTING)
               std::cout << "  Skipping route";
               std::cout << " to " << path->offset;
@@ -1206,6 +1223,7 @@ namespace osmscout {
 
           if (!canTurnedInto) {
             nodesIgnoredCount++;
+            i++;
             continue;
           }
         }
@@ -1213,7 +1231,7 @@ namespace osmscout {
         double currentCost=current->currentCost+
                            profile.GetCosts(*currentRouteNode,i);
 
-        OpenMap::iterator openEntry=openMap.find(path->offset);
+        OpenMap::iterator openEntry=openMap.find(path.offset);
 
         // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
         // into the open list
@@ -1225,11 +1243,12 @@ namespace osmscout {
           std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
           std::cout << "  => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << std::endl;
 #endif
+          i++;
           continue;
         }
 
-        double distanceToTarget=GetSphericalDistance(path->lon,
-                                                     path->lat,
+        double distanceToTarget=GetSphericalDistance(path.lon,
+                                                     path.lat,
                                                      targetLon,
                                                      targetLat);
         // Estimate costs for the rest of the distance to the target
@@ -1242,7 +1261,7 @@ namespace osmscout {
           RNodeRef node=*openEntry->second;
 
           node->prev=current->nodeOffset;
-          node->object=currentRouteNode->objects[path->objectIndex];
+          node->object=currentRouteNode->objects[path.objectIndex].object;
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
@@ -1259,14 +1278,14 @@ namespace osmscout {
           openEntry->second=result.first;
         }
         else {
-          RNodeRef node=new RNode(path->offset,
-                                  currentRouteNode->objects[path->objectIndex],
+          RNodeRef node=new RNode(path.offset,
+                                  currentRouteNode->objects[path.objectIndex].object,
                                   current->nodeOffset);
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
           node->overallCost=overallCost;
-          node->access=path->HasAccess();
+          node->access=path.HasAccess();
 
 #if defined(DEBUG_ROUTING)
           std::cout << "  Inserting route to " << path->offset;
@@ -1277,6 +1296,8 @@ namespace osmscout {
           std::pair<OpenListRef,bool> result=openList.insert(node);
           openMap[node->nodeOffset]=result.first;
         }
+
+        i++;
       }
 
       //

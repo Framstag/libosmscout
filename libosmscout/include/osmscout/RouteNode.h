@@ -45,13 +45,18 @@ namespace osmscout {
     static const uint8_t usableByBicycle      = 1 << 2; //! This path can be traveled by bicycle
     static const uint8_t usableByCar          = 1 << 3; //! This path can be traveled by car
 
+    struct OSMSCOUT_API ObjectData
+    {
+      ObjectFileRef object; //! Reference to the object
+    };
+
     /**
      * Exclude regarding use of paths. You cannot use the path with the index "targetPath" if you come
-     * from the way with the id "sourceWay".
+     * from the source object.
      */
     struct OSMSCOUT_API Exclude
     {
-      ObjectFileRef source;       //! The source way
+      ObjectFileRef source;      //! The source object
       uint32_t      targetIndex; //! The index of the target path
     };
 
@@ -61,16 +66,16 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Path
     {
-      FileOffset      offset;      //! File Offset of the  targeting route node
-      uint32_t        objectIndex; //! The index of the way to use from this route node to the target route node
-      TypeId          type;        //! The type of the way
-      uint8_t         maxSpeed;    //! Maximum speed allowed on the way
-      uint8_t         grade;       //! Quality of road/track 1 (good)...5 (bad)
-      //uint8_t         bearing;     //! Encoded initial and final bearing of this path
-      uint8_t         flags;       //! Certain flags
       double          distance;    //! Distance from the current route node to the target route node
       double          lat;         //! Latitude of the target node
       double          lon;         //! Longitude of the target node
+      FileOffset      offset;      //! File Offset of the  targeting route node
+      uint32_t        objectIndex; //! The index of the way to use from this route node to the target route node
+      TypeId          type;        //! The type of the way
+      uint8_t         flags;       //! Certain flags
+      uint8_t         maxSpeed;    //! Maximum speed allowed on the way
+      uint8_t         grade;       //! Quality of road/track 1 (good)...5 (bad)
+      //uint8_t         bearing;     //! Encoded initial and final bearing of this path
 
       inline bool HasAccess() const
       {
@@ -79,9 +84,9 @@ namespace osmscout {
     };
 
   public:
-    Id                         id;         //! Id of the route node, equal the id of the underlying node
     FileOffset                 fileOffset; //! FileOffset of the route node
-    std::vector<ObjectFileRef> objects;    //! List of objects (ways, areas) that cross this route node
+    Id                         id;         //! Id of the route node, equal the id of the underlying node
+    std::vector<ObjectData>    objects;    //! List of objects (ways, areas) that cross this route node
     std::vector<Path>          paths;      //! List of paths that can in principle be used from this node
     std::vector<Exclude>       excludes;   //! List of potential excludes regarding use of paths
 
