@@ -353,6 +353,12 @@ namespace osmscout {
   }
 #endif
 
+  bool FileWriter::Write(const ObjectFileRef& ref)
+  {
+    return Write((uint8_t)ref.GetType()) &&
+           WriteFileOffset(ref.GetFileOffset());
+  }
+
   bool FileWriter::WriteFileOffset(FileOffset fileOffset)
   {
     if (HasError()) {

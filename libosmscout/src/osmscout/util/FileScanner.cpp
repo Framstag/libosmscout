@@ -1393,6 +1393,21 @@ namespace osmscout {
   }
 #endif
 
+  bool FileScanner::Read(ObjectFileRef& ref)
+  {
+    uint8_t    typeByte;
+    FileOffset fileOffset;
+
+    if (!(Read(typeByte) &&
+          ReadFileOffset(fileOffset))) {
+      return false;
+    }
+
+    ref.Set(fileOffset,(RefType)typeByte);
+
+    return true;
+  }
+
   bool FileScanner::ReadFileOffset(FileOffset& fileOffset)
   {
     if (HasError()) {

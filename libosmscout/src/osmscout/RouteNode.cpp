@@ -79,20 +79,25 @@ namespace osmscout {
     Id previousFileOffset=0;
 
     for (size_t i=0; i<objectCount; i++) {
-      uint8_t    type;
+      RefType    type;
       FileOffset fileOffset;
-
-      if (!scanner.Read(type)) {
-        return false;
-      }
 
       if (!scanner.ReadNumber(fileOffset)) {
         return false;
       }
 
+      if (fileOffset % 2==0) {
+        type=refWay;
+      }
+      else {
+        type=refArea;
+      }
+
+      fileOffset=fileOffset/2;
+
       fileOffset+=previousFileOffset;
 
-      objects[i].object.Set(fileOffset,(RefType)type);
+      objects[i].object.Set(fileOffset,type);
 
       scanner.ReadNumber(objects[i].type);
       scanner.Read(objects[i].maxSpeed);
@@ -131,14 +136,8 @@ namespace osmscout {
 
     excludes.resize(excludesCount);
     for (size_t i=0; i<excludesCount; i++) {
-      FileOffset fileOffset;
-      uint8_t    typeByte;
-
-      scanner.Read(typeByte);
-      scanner.ReadFileOffset(fileOffset);
+      scanner.Read(excludes[i].source);
       scanner.ReadNumber(excludes[i].targetIndex);
-
-      excludes[i].source.Set(fileOffset,(RefType)typeByte);;
     }
 
     return !scanner.HasError();
@@ -161,8 +160,19 @@ namespace osmscout {
     Id lastFileOffset=0;
 
     for (const auto& object : objects) {
-      writer.Write((uint8_t)object.object.GetType());
-      writer.WriteNumber(object.object.GetFileOffset()-lastFileOffset);
+      FileOffset offset=object.object.GetFileOffset()-lastFileOffset;
+
+      if (object.object.GetType()==refWay) {
+        offset=offset*2;
+      }
+      else if (object.object.GetType()==refArea) {
+        offset=offset*2+1;
+      }
+      else {
+        assert(false);
+      }
+
+      writer.WriteNumber(offset);
       writer.WriteNumber(object.type);
       writer.Write(object.maxSpeed);
       writer.Write(object.grade);
@@ -192,8 +202,7 @@ namespace osmscout {
     }
 
     for (const auto& exclude : excludes) {
-      writer.Write((uint8_t)exclude.source.GetType());
-      writer.WriteFileOffset(exclude.source.GetFileOffset());
+      writer.Write(exclude.source);
       writer.WriteNumber(exclude.targetIndex);
     }
 

@@ -29,6 +29,7 @@
 #include <osmscout/CoreFeatures.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Types.h>
 
 namespace osmscout {
@@ -93,6 +94,8 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Write(uint64_t number, size_t bytes);
 #endif
+
+    bool Write(const ObjectFileRef& ref);
 
     bool WriteFileOffset(FileOffset offset);
     bool WriteFileOffset(FileOffset offset,

@@ -29,6 +29,7 @@
 #include <osmscout/CoreFeatures.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Types.h>
 
 #if defined(__WIN32__) || defined(WIN32)
@@ -131,6 +132,8 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Read(uint64_t& number, size_t bytes);
 #endif
+
+    bool Read(ObjectFileRef& ref);
 
     bool ReadFileOffset(FileOffset& offset);
     bool ReadFileOffset(FileOffset& offset,
