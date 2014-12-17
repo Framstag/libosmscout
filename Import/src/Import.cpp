@@ -200,6 +200,7 @@ bool CountDataSize(osmscout::Progress& progress,
   files.push_back("water.idx");
 
   files.push_back("intersections.dat");
+  files.push_back("intersections.idx");
   files.push_back("routefoot.dat");
   files.push_back("routefoot.idx");
   files.push_back("routebicycle.dat");
