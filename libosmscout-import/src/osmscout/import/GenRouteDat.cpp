@@ -977,10 +977,10 @@ namespace osmscout {
         pendingOffsetsMap[ring.ids[nextNode]].push_back(pendingOffset);
       }
 
-      path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=area.GetType()->GetAreaId();
-      path.maxSpeed=0;
-      path.grade=1;
+      path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea),
+                                           area.GetType()->GetAreaId(),
+                                           0,
+                                           1);
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
       path.flags=CopyFlags(ring);
       path.lat=ring.nodes[nextNode].GetLat();
@@ -1040,10 +1040,10 @@ namespace osmscout {
         pendingOffsetsMap[ring.ids[prevNode]].push_back(pendingOffset);
       }
 
-      path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea));
-      path.type=ring.GetType()->GetAreaId();
-      path.maxSpeed=0;
-      path.grade=1;
+      path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea),
+                                           ring.GetType()->GetAreaId(),
+                                           0,
+                                           1);
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
       path.flags=CopyFlags(ring);
       path.lat=ring.nodes[prevNode].GetLat();
@@ -1121,10 +1121,10 @@ namespace osmscout {
           pendingOffsetsMap[way.ids[nextNode]].push_back(pendingOffset);
         }
 
-        path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-        path.type=way.GetType()->GetWayId();
-        path.maxSpeed=GetMaxSpeed(way);
-        path.grade=GetGrade(way);
+        path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
+                                             way.GetType()->GetWayId(),
+                                             GetMaxSpeed(way),
+                                             GetGrade(way));
         //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
         path.flags=CopyFlagsForward(way);
         path.lat=way.nodes[nextNode].GetLat();
@@ -1184,10 +1184,10 @@ namespace osmscout {
           pendingOffsetsMap[way.ids[prevNode]].push_back(pendingOffset);
         }
 
-        path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-        path.type=way.GetType()->GetWayId();
-        path.maxSpeed=GetMaxSpeed(way);
-        path.grade=GetGrade(way);
+        path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
+                                             way.GetType()->GetWayId(),
+                                             GetMaxSpeed(way),
+                                             GetGrade(way));
         //path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
         path.flags=CopyFlagsBackward(way);
         path.lat=way.nodes[prevNode].GetLat();
@@ -1241,10 +1241,10 @@ namespace osmscout {
               path.offset=0;
             }
 
-            path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-            path.type=way.GetType()->GetWayId();
-            path.maxSpeed=GetMaxSpeed(way);
-            path.grade=GetGrade(way);
+            path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
+                                                 way.GetType()->GetWayId(),
+                                                 GetMaxSpeed(way),
+                                                 GetGrade(way));
             //path.bearing=CalculateEncodedBearing(way,i,j,false);
             path.flags=CopyFlagsBackward(way);
             path.lat=way.nodes[j].GetLat();
@@ -1296,10 +1296,10 @@ namespace osmscout {
               path.offset=0;
             }
 
-            path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay));
-            path.type=way.GetType()->GetWayId();
-            path.maxSpeed=GetMaxSpeed(way);
-            path.grade=GetGrade(way);
+            path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
+                                                 way.GetType()->GetWayId(),
+                                                 GetMaxSpeed(way),
+                                                 GetGrade(way));
             //path.bearing=CalculateEncodedBearing(way,i,j,true);
             path.flags=CopyFlagsForward(way);
             path.lat=way.nodes[j].GetLat();
@@ -1665,7 +1665,10 @@ namespace osmscout {
               continue;
             }
 
-            routeNode.AddObject(ref);
+            routeNode.AddObject(ref,
+                                area->GetType()->GetAreaId(),
+                                0,
+                                1);
 
             CalculateAreaPaths(routeNode,
                                *area,

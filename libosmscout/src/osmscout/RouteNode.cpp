@@ -25,7 +25,10 @@
 
 namespace osmscout {
 
-  uint32_t RouteNode::AddObject(const ObjectFileRef& object)
+  uint32_t RouteNode::AddObject(const ObjectFileRef& object,
+                                TypeId type,
+                                uint8_t maxSpeed,
+                                uint8_t grade)
   {
     uint32_t index=0;
 
@@ -41,6 +44,9 @@ namespace osmscout {
     ObjectData data;
 
     data.object=object;
+    data.type=type;
+    data.maxSpeed=maxSpeed;
+    data.grade=grade;
 
     objects.push_back(data);
 
@@ -88,6 +94,10 @@ namespace osmscout {
 
       objects[i].object.Set(fileOffset,(RefType)type);
 
+      scanner.ReadNumber(objects[i].type);
+      scanner.Read(objects[i].maxSpeed);
+      scanner.Read(objects[i].grade);
+
       previousFileOffset=fileOffset;
     }
 
@@ -107,9 +117,6 @@ namespace osmscout {
 
         scanner.ReadFileOffset(paths[i].offset);
         scanner.ReadNumber(paths[i].objectIndex);
-        scanner.ReadNumber(paths[i].type);
-        scanner.Read(paths[i].maxSpeed);
-        scanner.Read(paths[i].grade);
         //scanner.Read(paths[i].bearing);
         scanner.Read(paths[i].flags);
         scanner.ReadNumber(distanceValue);
@@ -156,6 +163,9 @@ namespace osmscout {
     for (const auto& object : objects) {
       writer.Write((uint8_t)object.object.GetType());
       writer.WriteNumber(object.object.GetFileOffset()-lastFileOffset);
+      writer.WriteNumber(object.type);
+      writer.Write(object.maxSpeed);
+      writer.Write(object.grade);
 
       lastFileOffset=object.object.GetFileOffset();
     }
@@ -173,9 +183,6 @@ namespace osmscout {
       for (const auto& path : paths) {
         writer.WriteFileOffset(path.offset);
         writer.WriteNumber(path.objectIndex);
-        writer.WriteNumber(path.type);
-        writer.Write(path.maxSpeed);
-        writer.Write(path.grade);
         //writer.Write(paths[i].bearing);
         writer.Write(path.flags);
         writer.WriteNumber((uint32_t)floor(path.distance*(1000.0*100.0)+0.5));

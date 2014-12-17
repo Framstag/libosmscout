@@ -196,13 +196,14 @@ namespace osmscout {
                            size_t pathIndex) const
     {
       double speed;
+      size_t index=currentNode.paths[pathIndex].objectIndex;
 
-      if (currentNode.paths[pathIndex].maxSpeed>0) {
-        speed=currentNode.paths[pathIndex].maxSpeed;
+      if (currentNode.objects[index].maxSpeed>0) {
+        speed=currentNode.objects[index].maxSpeed;
       }
       else {
-        ObjectFileRef object=currentNode.objects[currentNode.paths[pathIndex].objectIndex].object;
-        TypeId        typeId=currentNode.paths[pathIndex].type;
+        ObjectFileRef object=currentNode.objects[index].object;
+        TypeId        typeId=currentNode.objects[index].type;
         TypeInfoRef   type;
 
         if (object.GetType()==refWay) {
@@ -215,9 +216,7 @@ namespace osmscout {
           assert(false);
         }
 
-        size_t index=type->GetIndex();
-
-        speed=speeds[index];
+        speed=speeds[type->GetIndex()];
       }
 
       speed=std::min(vehicleMaxSpeed,speed);

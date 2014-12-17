@@ -156,8 +156,9 @@ namespace osmscout {
     }
 
 
-    ObjectFileRef object=currentNode.objects[currentNode.paths[pathIndex].objectIndex].object;
-    TypeId        typeId=currentNode.paths[pathIndex].type;
+    size_t        index=currentNode.paths[pathIndex].objectIndex;
+    ObjectFileRef object=currentNode.objects[index].object;
+    TypeId        typeId=currentNode.objects[index].type;
     TypeInfoRef   type;
 
     if (object.GetType()==refWay) {
@@ -170,9 +171,9 @@ namespace osmscout {
       assert(false);
     }
 
-    size_t index=type->GetIndex();
+    size_t typeIndex=type->GetIndex();
 
-    return index<speeds.size() && speeds[index]>0.0;
+    return typeIndex<speeds.size() && speeds[typeIndex]>0.0;
   }
 
   bool AbstractRoutingProfile::CanUse(const Area& area) const
