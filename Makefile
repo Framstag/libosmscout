@@ -12,7 +12,6 @@ programs = libosmscout \
            Import \
            DumpData \
            Demos \
-           TravelJinni \
            OSMScout \
            OSMScout2 \
            StyleEditor \
