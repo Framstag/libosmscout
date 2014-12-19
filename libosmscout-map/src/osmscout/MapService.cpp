@@ -462,17 +462,25 @@ namespace osmscout {
     styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
                                        areaTypes);
 
-    return GetObjects(nodeTypes,
+    return GetObjects(parameter,
+                      projection.GetMagnification(),
+                      nodeTypes,
+                      lonMin,
+                      latMin,
+                      lonMax,
+                      latMax,
+                      data.nodes,
                       wayTypes,
+                      lonMin,
+                      latMin,
+                      lonMax,
+                      latMax,
+                      data.ways,
                       areaTypes,
                       lonMin,
                       latMin,
                       lonMax,
                       latMax,
-                      projection.GetMagnification(),
-                      parameter,
-                      data.nodes,
-                      data.ways,
                       data.areas);
   }
 
@@ -506,29 +514,6 @@ namespace osmscout {
    * @return
    *    False, if there was an error, else true.
    */
-  bool MapService::GetObjects(const TypeSet &nodeTypes,
-                              const std::vector<TypeSet>& wayTypes,
-                              const TypeSet& areaTypes,
-                              double lonMin, double latMin,
-                              double lonMax, double latMax,
-                              const Magnification& magnification,
-                              const AreaSearchParameter& parameter,
-                              std::vector<NodeRef>& nodes,
-                              std::vector<WayRef>& ways,
-                              std::vector<AreaRef>& areas) const
-  {
-    return GetObjects(parameter,
-                      magnification,
-                      nodeTypes,
-                      lonMin,latMin,lonMax,latMax,
-                      nodes,
-                      wayTypes,
-                      lonMin,latMin,lonMax,latMax,
-                      ways,
-                      areaTypes,
-                      lonMin,latMin,lonMax,latMax,
-                      areas);
-  }
 
   /**
    * Returns all objects conforming to the given restrictions.

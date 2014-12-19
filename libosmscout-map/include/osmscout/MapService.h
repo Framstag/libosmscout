@@ -134,17 +134,6 @@ namespace osmscout {
                     const Projection& projection,
                     MapData& data) const;
 
-    bool GetObjects(const TypeSet &nodeTypes,
-                    const std::vector<TypeSet>& wayTypes,
-                    const TypeSet& areaTypes,
-                    double lonMin, double latMin,
-                    double lonMax, double latMax,
-                    const Magnification& magnification,
-                    const AreaSearchParameter& parameter,
-                    std::vector<NodeRef>& nodes,
-                    std::vector<WayRef>& ways,
-                    std::vector<AreaRef>& areas) const;
-
     bool GetObjects(const AreaSearchParameter& parameter,
                     const Magnification& magnification,
                     const TypeSet &nodeTypes,
