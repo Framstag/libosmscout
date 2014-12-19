@@ -58,12 +58,13 @@ namespace osmscout {
         }
     }
     
-    Font *MapPainterIOS::GetFont(const MapParameter& parameter,
-                                double fontSize)
+    Font *MapPainterIOS::GetFont(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 double fontSize)
     {
         std::map<size_t,Font *>::const_iterator f;
         
-        fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
         
         f=fonts.find(fontSize);
         
@@ -225,14 +226,15 @@ namespace osmscout {
     /*
      * GetTextDimension()
      */
-     void MapPainterIOS::GetTextDimension(const MapParameter& parameter,
-                          double fontSize,
-                          const std::string& text,
-                          double& xOff,
-                          double& yOff,
-                          double& width,
-                          double& height){
-        Font *font = GetFont(parameter,fontSize);
+    void MapPainterIOS::GetTextDimension(const Projection& projection,
+                                         const MapParameter& parameter,
+                                         double fontSize,
+                                         const std::string& text,
+                                         double& xOff,
+                                         double& yOff,
+                                         double& width,
+                                         double& height){
+        Font *font = GetFont(projection,parameter,fontSize);
         NSString *str = [NSString stringWithUTF8String:text.c_str()];
 #if TARGET_OS_IPHONE
         CGSize size = [str sizeWithFont:font];
@@ -246,21 +248,21 @@ namespace osmscout {
         height = size.height;
     }
  
-    double MapPainterIOS::textLength(const MapParameter& parameter, double fontSize, std::string text){
+    double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
         double xOff;
         double yOff;
         double width;
         double height;
-        GetTextDimension(parameter,fontSize,text,xOff,yOff,width,height);
+        GetTextDimension(projection,parameter,fontSize,text,xOff,yOff,width,height);
         return width;
     }
     
-    double MapPainterIOS::textHeight(const MapParameter& parameter, double fontSize, std::string text){
+    double MapPainterIOS::textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
         double xOff;
         double yOff;
         double width;
         double height;
-        GetTextDimension(parameter,fontSize,text,xOff,yOff,width,height);
+        GetTextDimension(projection, parameter,fontSize,text,xOff,yOff,width,height);
         return height;
     }
     
@@ -286,7 +288,7 @@ namespace osmscout {
             
             CGContextSaveGState(cg);
             CGContextSetTextDrawingMode(cg, kCGTextFill);
-            Font *font = GetFont(parameter,label.fontSize);
+            Font *font = GetFont(projection, parameter, label.fontSize);
             NSString *str = [NSString stringWithCString:label.text.c_str() encoding:NSUTF8StringEncoding];
             //std::cout << "label : "<< label.text << " font size : " << label.fontSize << std::endl;
             
@@ -352,7 +354,7 @@ namespace osmscout {
             CGContextDrawPath(cg, kCGPathStroke);
             
             
-            Font *font = GetFont(parameter,label.fontSize);
+            Font *font = GetFont(projection, parameter, label.fontSize);
             NSString *str = [NSString stringWithUTF8String:label.text.c_str()];
 #if TARGET_OS_IPHONE
             CGContextSetRGBFillColor(cg,style->GetTextColor().GetR(),
@@ -447,8 +449,8 @@ namespace osmscout {
         double minX,minY,maxX,maxY;
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
         
-        double width=ConvertWidthToPixel(parameter,maxX-minX);
-        double height=ConvertWidthToPixel(parameter,maxY-minY);
+        double width=projection.ConvertWidthToPixel(maxX-minX);
+        double height=projection.ConvertWidthToPixel(maxY-minY);
         bool isClosed = false;
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         Vertex2D origin;
@@ -498,7 +500,7 @@ namespace osmscout {
                           const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd){
-        Font *font = GetFont(parameter,style.GetSize());
+        Font *font = GetFont(projection, parameter, style.GetSize());
         Vertex2D charOrigin;
         FollowPathHandle followPathHnd;
         followPathInit(followPathHnd, charOrigin, transStart, transEnd, false, false);
@@ -528,7 +530,7 @@ namespace osmscout {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
-            GetTextDimension(parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
+            GetTextDimension(projection, parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
             x1 = charOrigin.GetX();
             y1 = charOrigin.GetY();
             if(!followPath(followPathHnd,nww, charOrigin)){
@@ -623,11 +625,11 @@ namespace osmscout {
                      pixel!=polygon->GetCoords().end();
                      ++pixel) {
                     if (pixel==polygon->GetCoords().begin()) {
-                        CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                             y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                                             y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
                     } else {
-                        CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                                y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->x-centerX),
+                                                y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
                     }
                 }
                 
@@ -635,19 +637,19 @@ namespace osmscout {
             }
             else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
                 RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                                         y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
-                                         ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                                         ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX),
+                                         y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY),
+                                         projection.ConvertWidthToPixel(rectangle->GetWidth()),
+                                         projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
                 CGContextDrawPath(cg, kCGPathFill);
             }
             else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
                 CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                                         y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
-                                         ConvertWidthToPixel(parameter,circle->GetRadius()),
-                                         ConvertWidthToPixel(parameter,circle->GetRadius()));
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
+                                         y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY),
+                                         projection.ConvertWidthToPixel(circle->GetRadius()),
+                                         projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);
                 CGContextDrawPath(cg, kCGPathFill);
             }
@@ -721,7 +723,7 @@ namespace osmscout {
                                 const FillStyle& fillStyle,
                                 CGFloat xOffset, CGFloat yOffset) {
         
-        double borderWidth=ConvertWidthToPixel(parameter,fillStyle.GetBorderWidth());
+        double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
 
         if (fillStyle.HasPattern() &&
             projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
