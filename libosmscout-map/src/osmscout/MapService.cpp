@@ -441,6 +441,41 @@ namespace osmscout {
     return !parameter.IsAborted();
   }
 
+  bool MapService::GetObjects(const AreaSearchParameter& parameter,
+                              const StyleConfig& styleConfig,
+                              const Projection& projection,
+                              MapData& data) const
+  {
+    osmscout::TypeSet              nodeTypes;
+    std::vector<osmscout::TypeSet> wayTypes;
+    osmscout::TypeSet              areaTypes;
+    double                         lonMin,lonMax,latMin,latMax;
+
+    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+
+    styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                       nodeTypes);
+
+    styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                            wayTypes);
+
+    styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                       areaTypes);
+
+    return GetObjects(nodeTypes,
+                      wayTypes,
+                      areaTypes,
+                      lonMin,
+                      latMin,
+                      lonMax,
+                      latMax,
+                      projection.GetMagnification(),
+                      parameter,
+                      data.nodes,
+                      data.ways,
+                      data.areas);
+  }
+
   /**
    * Returns all objects conforming to the given restrictions.
    *
@@ -637,6 +672,18 @@ namespace osmscout {
     }*/
 
     return true;
+  }
+
+  bool MapService::GetGroundTiles(const Projection& projection,
+                                  std::list<GroundTile>& tiles) const
+  {
+    double lonMin,lonMax,latMin,latMax;
+
+    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+
+    return GetGroundTiles(lonMin,latMin,lonMax,latMax,
+                          projection.GetMagnification(),
+                          tiles);
   }
 
   /**

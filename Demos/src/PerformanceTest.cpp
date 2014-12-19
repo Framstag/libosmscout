@@ -203,12 +203,8 @@ int main(int argc, char* argv[])
 
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
       for (size_t x=xTileStart; x<=xTileEnd; x++) {
-        double                         lat,lon;
-        osmscout::TypeSet              nodeTypes;
-        std::vector<osmscout::TypeSet> wayTypes;
-        osmscout::TypeSet              areaTypes;
-        osmscout::MapData              data;
-        double                         lonMin,lonMax,latMin,latMax;
+        double            lat,lon;
+        osmscout::MapData data;
 
         lat=(osmscout::TileYToLat(y,zoom)+osmscout::TileYToLat(y+1,zoom))/2;
         lon=(osmscout::TileXToLon(x,zoom)+osmscout::TileXToLon(x+1,zoom))/2;
@@ -224,32 +220,12 @@ int main(int argc, char* argv[])
                        tileWidth,
                        tileHeight);
 
-
-        projection.GetDimensions(lonMin,latMin,lonMax,latMax);
-
-        styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                            nodeTypes);
-
-        styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                                 wayTypes);
-
-        styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                            areaTypes);
-
         osmscout::StopClock dbTimer;
 
-        mapService->GetObjects(nodeTypes,
-                               wayTypes,
-                               areaTypes,
-                               lonMin,
-                               latMin,
-                               lonMax,
-                               latMax,
-                               projection.GetMagnification(),
-                               searchParameter,
-                               data.nodes,
-                               data.ways,
-                               data.areas);
+        mapService->GetObjects(searchParameter,
+                               styleConfig,
+                               projection,
+                               data);
 
         dbTimer.Stop();
 

@@ -120,37 +120,12 @@ public:
   bool LoadData(const osmscout::Projection& projection,
                 osmscout::MapData& data)
   {
-    osmscout::TypeSet              nodeTypes;
-    std::vector<osmscout::TypeSet> wayTypes;
-    osmscout::TypeSet              areaTypes;
-
-    styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                       nodeTypes);
-
-    styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                            wayTypes);
-
-    styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                       areaTypes);
-
     painter = new osmscout::MapPainterOpenGL(styleConfig);
 
-    double lonMin,latMin,lonMax,latMax;
-
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
-
-    return mapService->GetObjects(nodeTypes,
-                                  wayTypes,
-                                  areaTypes,
-                                  lonMin,
-                                  latMin,
-                                  lonMax,
-                                  latMax,
-                                  projection.GetMagnification(),
-                                  searchParameter,
-                                  data.nodes,
-                                  data.ways,
-                                  data.areas);
+    return mapService->GetObjects(searchParameter,
+                                  styleConfig,
+                                  projection,
+                                  data);
   }
 };
 

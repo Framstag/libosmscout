@@ -25,11 +25,12 @@
 
 #include <osmscout/private/MapImportExport.h>
 
-// Type and style sheet configuration
+#include <osmscout/Database.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
-#include <osmscout/Database.h>
+#include <osmscout/MapPainter.h>
+#include <osmscout/StyleConfig.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/StopClock.h>
@@ -128,6 +129,11 @@ namespace osmscout {
     MapService(const DatabaseRef& database);
     virtual ~MapService();
 
+    bool GetObjects(const AreaSearchParameter& parameter,
+                    const StyleConfig& styleConfig,
+                    const Projection& projection,
+                    MapData& data) const;
+
     bool GetObjects(const TypeSet &nodeTypes,
                     const std::vector<TypeSet>& wayTypes,
                     const TypeSet& areaTypes,
@@ -153,6 +159,9 @@ namespace osmscout {
                     double areaLonMin, double areaLatMin,
                     double areaLonMax, double areaLatMax,
                     std::vector<AreaRef>& areas) const;
+
+    bool GetGroundTiles(const Projection& projection,
+                        std::list<GroundTile>& tiles) const;
 
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,

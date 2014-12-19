@@ -125,39 +125,15 @@ int main(int argc, char* argv[])
                  width,
                  height);
 
-  osmscout::TypeSet              nodeTypes;
-  std::vector<osmscout::TypeSet> wayTypes;
-  osmscout::TypeSet              areaTypes;
-  double                         lonMin,lonMax,latMin,latMax;
-
-  projection.GetDimensions(lonMin,latMin,lonMax,latMax);
-
-  styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                      nodeTypes);
-
-  styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                           wayTypes);
-
-  styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                      areaTypes);
-
-  mapService->GetObjects(nodeTypes,
-                         wayTypes,
-                         areaTypes,
-                         lonMin,
-                         latMin,
-                         lonMax,
-                         latMax,
-                         projection.GetMagnification(),
-                         searchParameter,
-                         data.nodes,
-                         data.ways,
-                         data.areas);
-
   searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
   searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());
   searchParameter.SetMaximumAreas(std::numeric_limits<size_t>::max());
   searchParameter.SetMaximumAreaLevel(6);
+
+  mapService->GetObjects(searchParameter,
+                         styleConfig,
+                         projection,
+                         data);
 
   painter.DrawMap(projection,
                   drawParameter,
