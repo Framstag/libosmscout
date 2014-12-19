@@ -2372,5 +2372,37 @@ namespace osmscout {
       return ReadNumber(id);
     }
   }
-}
 
+  ObjectFileRefStreamReader::ObjectFileRefStreamReader(FileScanner& reader)
+  : reader(reader),
+    lastFileOffset(0)
+  {
+    // no code
+  }
+
+  void ObjectFileRefStreamReader::Reset()
+  {
+    lastFileOffset=0;
+  }
+
+  bool ObjectFileRefStreamReader::Read(ObjectFileRef& ref)
+  {
+    RefType    type;
+    FileOffset offset;
+
+    if (!reader.ReadNumber(offset)) {
+      return false;
+    }
+
+    type=(RefType)(offset%4);
+
+    offset=offset >> 2;
+    offset=offset+lastFileOffset;
+
+    ref.Set(offset,type);
+
+    lastFileOffset=offset;
+
+    return true;
+  }
+}

@@ -46,25 +46,10 @@ namespace osmscout {
 
     objects.resize(objectCount);
 
-    Id previousFileOffset=0;
+    ObjectFileRefStreamReader objectFileRefReader(scanner);
 
     for (size_t i=0; i<objectCount; i++) {
-      uint8_t    type;
-      FileOffset fileOffset;
-
-      if (!scanner.Read(type)) {
-        return false;
-      }
-
-      if (!scanner.ReadNumber(fileOffset)) {
-        return false;
-      }
-
-      fileOffset+=previousFileOffset;
-
-      objects[i].Set(fileOffset,(RefType)type);
-
-      previousFileOffset=fileOffset;
+      objectFileRefReader.Read(objects[i]);
     }
 
     return !scanner.HasError();

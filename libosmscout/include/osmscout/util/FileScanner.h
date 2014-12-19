@@ -162,6 +162,24 @@ namespace osmscout {
     bool ReadTypeId(TypeId& id,
                     uint8_t maxBytes);
   };
+
+  /**
+   * Read back a stream of sorted ObjectFileRefs as written by the ObjectFileRefStreamWriter.
+   */
+  class OSMSCOUT_API ObjectFileRefStreamReader
+  {
+  private:
+    FileScanner& reader;
+    FileOffset   lastFileOffset;
+
+  public:
+    ObjectFileRefStreamReader(FileScanner& reader);
+
+    void Reset();
+
+    bool Read(ObjectFileRef& ref);
+  };
+
 }
 
 #endif

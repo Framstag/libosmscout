@@ -125,6 +125,25 @@ namespace osmscout {
     bool Flush();
     bool FlushCurrentBlockWithZeros(size_t blockSize);
   };
+
+  /**
+   * Efficiently (in disk space handling) write a number of (sorted by file offset) ObjectFileRefs.
+   *
+   * Note that the delta between two offsets is limited by sizeof(FileOffset)-2 bits.
+   */
+  class OSMSCOUT_API ObjectFileRefStreamWriter
+  {
+  private:
+    FileWriter& writer;
+    FileOffset  lastFileOffset;
+
+  public:
+    ObjectFileRefStreamWriter(FileWriter& writer);
+
+    void Reset();
+
+    bool Write(const ObjectFileRef& ref);
+  };
 }
 
 #endif

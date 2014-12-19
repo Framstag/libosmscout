@@ -218,12 +218,10 @@ namespace osmscout {
       return false;
     }
 
-    FileOffset lastOffset=0;
+    ObjectFileRefStreamReader objectFileRefReader(scanner);
 
     for (size_t i=0; i<poiCount; i++) {
-      POI        poi;
-      uint8_t    type;
-      FileOffset offset;
+      POI poi;
 
       poi.regionOffset=adminRegion.regionOffset;
 
@@ -231,19 +229,9 @@ namespace osmscout {
         return false;
       }
 
-      if (!scanner.Read(type)) {
+      if (!objectFileRefReader.Read(poi.object)) {
         return false;
       }
-
-      if (!scanner.ReadNumber(offset)) {
-        return false;
-      }
-
-      offset+=lastOffset;
-
-      poi.object.Set(offset,(RefType)type);
-
-      lastOffset=offset;
 
       if (!visitor.Visit(adminRegion,
                          poi)) {
@@ -292,25 +280,16 @@ namespace osmscout {
         location.addressesOffset=0;
       }
 
-      FileOffset lastOffset=0;
+      objectFileRefReader.Reset();
 
       for (size_t j=0; j<objectCount; j++) {
-        uint8_t    type;
-        FileOffset offset;
+        ObjectFileRef ref;
 
-        if (!scanner.Read(type)) {
+        if (!objectFileRefReader.Read(ref)) {
           return false;
         }
 
-        if (!scanner.ReadNumber(offset)) {
-          return false;
-        }
-
-        offset+=lastOffset;
-
-        location.objects.push_back(ObjectFileRef(offset,(RefType)type));
-
-        lastOffset=offset;
+        location.objects.push_back(ref);
       }
 
       if (!visitor.Visit(adminRegion,
@@ -403,12 +382,10 @@ namespace osmscout {
       return false;
     }
 
-    FileOffset lastOffset=0;
+    ObjectFileRefStreamReader objectFileRefReader(scanner);
 
     for (size_t i=0; i<addressCount; i++) {
-      Address     address;
-      uint8_t     type;
-      FileOffset  offset;
+      Address address;
 
       if (!scanner.GetPos(address.addressOffset)) {
         return false;
@@ -421,20 +398,9 @@ namespace osmscout {
         return false;
       }
 
-      if (!scanner.Read(type)) {
+      if (!objectFileRefReader.Read(address.object)) {
         return false;
       }
-
-
-      if (!scanner.ReadNumber(offset)) {
-        return false;
-      }
-
-      offset+=lastOffset;
-
-      address.object.Set(offset,(RefType)type);
-
-      lastOffset=offset;
 
       if (!visitor.Visit(region,
                          location,
@@ -590,14 +556,12 @@ namespace osmscout {
     while (!offsets.empty()) {
       std::list<FileOffset> newOffsets;
 
-      for (std::list<FileOffset>::const_iterator offset=offsets.begin();
-          offset!=offsets.end();
-          ++offset) {
-        if (refs.find(*offset)!=refs.end()) {
+      for (const auto& offset : offsets) {
+        if (refs.find(offset)!=refs.end()) {
           continue;
         }
 
-        if (!scanner.SetPos(*offset)) {
+        if (!scanner.SetPos(offset)) {
           return false;
         }
 

@@ -697,5 +697,35 @@ namespace osmscout {
 
     return !hasError;
   }
+
+  ObjectFileRefStreamWriter::ObjectFileRefStreamWriter(FileWriter& writer)
+  : writer(writer),
+    lastFileOffset(0)
+  {
+    // no code
+  }
+
+  void ObjectFileRefStreamWriter::Reset()
+  {
+    lastFileOffset=0;
+  }
+
+  bool ObjectFileRefStreamWriter::Write(const ObjectFileRef& ref)
+  {
+    // ObjectFileRefs must be sorted
+    assert(ref.GetFileOffset()>=lastFileOffset);
+
+    FileOffset offset=ref.GetFileOffset()-lastFileOffset;
+
+    // Make room for two additional lower bits
+    offset=offset << 2;
+
+    offset=offset+ref.GetType();
+
+    lastFileOffset=ref.GetFileOffset();
+
+    return writer.WriteNumber(offset);
+  }
+
 }
 

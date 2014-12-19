@@ -53,11 +53,7 @@ namespace osmscout {
     std::map<Pixel,std::list<RegionRef> >::const_iterator indexCell=index.find(Pixel(minX,minY));
 
     if (indexCell!=index.end()) {
-      for (std::list<RegionRef>::const_iterator r=indexCell->second.begin();
-          r!=indexCell->second.end();
-          ++r) {
-        RegionRef region(*r);
-
+      for (const auto& region : indexCell->second) {
         for (size_t i=0; i<region->areas.size(); i++) {
           if (IsCoordInArea(coord,region->areas[i])) {
             return region;
@@ -93,61 +89,47 @@ namespace osmscout {
                                           size_t indent,
                                           std::ostream& out)
   {
-    for (std::list<RegionRef>::const_iterator r=parent.regions.begin();
-         r!=parent.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : parent.regions) {
       for (size_t i=0; i<indent; i++) {
         out << " ";
       }
       out << " + " << childRegion->name << " " << childRegion->reference.GetTypeName() << " " << childRegion->reference.GetFileOffset() << std::endl;
 
-      for (std::list<RegionAlias>::const_iterator l=childRegion->aliases.begin();
-           l!=childRegion->aliases.end();
-           l++) {
+      for (const auto& alias : childRegion->aliases) {
         for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
-        out << " = " << l->name << " Node " << l->reference << std::endl;
+        out << " = " << alias.name << " Node " << alias.reference << std::endl;
       }
 
-      for (std::list<RegionPOI>::const_iterator poi=childRegion->pois.begin();
-          poi!=childRegion->pois.end();
-          ++poi) {
+      for (const auto& poi : childRegion->pois) {
         for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
 
-        out << " * " << poi->name << " " << poi->object.GetTypeName() << " " << poi->object.GetFileOffset() << std::endl;
+        out << " * " << poi.name << " " << poi.object.GetTypeName() << " " << poi.object.GetFileOffset() << std::endl;
       }
 
-      for (std::map<std::string,RegionLocation>::const_iterator nodeEntry=childRegion->locations.begin();
-          nodeEntry!=childRegion->locations.end();
-          ++nodeEntry) {
+      for (const auto& nodeEntry : childRegion->locations) {
         for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
-        out << " - " << nodeEntry->first << std::endl;
+        out << " - " << nodeEntry.first << std::endl;
 
-        for (std::list<ObjectFileRef>::const_iterator object=nodeEntry->second.objects.begin();
-            object!=nodeEntry->second.objects.end();
-            ++object) {
+        for (const auto& object : nodeEntry.second.objects) {
           for (size_t i=0; i<indent+4; i++) {
             out << " ";
           }
 
-          out << " = " << object->GetTypeName() << " " << object->GetFileOffset() << std::endl;
+          out << " = " << object.GetTypeName() << " " << object.GetFileOffset() << std::endl;
         }
 
-        for (std::list<RegionAddress>::const_iterator address=nodeEntry->second.addresses.begin();
-            address!=nodeEntry->second.addresses.end();
-            ++address) {
+        for (const auto& address : nodeEntry.second.addresses) {
           for (size_t i=0; i<indent+6; i++) {
             out << " ";
           }
 
-          out << " @ " << address->name << " " << address->object.GetTypeName() << " " << address->object.GetFileOffset() << std::endl;
+          out << " @ " << address.name << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
         }
       }
 
@@ -183,11 +165,7 @@ namespace osmscout {
   void LocationIndexGenerator::AddRegion(Region& parent,
                                          const RegionRef& region)
   {
-    for (std::list<RegionRef>::iterator r=parent.regions.begin();
-         r!=parent.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : parent.regions) {
       if (!(region->maxlon<childRegion->minlon) &&
           !(region->minlon>childRegion->maxlon) &&
           !(region->maxlat<childRegion->minlat) &&
@@ -198,7 +176,7 @@ namespace osmscout {
               // If we already have the same name and are a "minor" reference, we skip...
               if (!(region->name==childRegion->name &&
                     region->reference.type<childRegion->reference.type)) {
-                AddRegion(*r,region);
+                AddRegion(childRegion,region);
               }
               return;
             }
@@ -303,24 +281,22 @@ namespace osmscout {
     size_t currentBoundary=0;
     size_t maxBoundary=boundaryAreas.size();
 
-    for (std::list<Boundary>::const_iterator boundary=boundaryAreas.begin();
-         boundary!=boundaryAreas.end();
-         ++boundary) {
+    for (const auto&  boundary : boundaryAreas) {
       currentBoundary++;
 
       progress.SetProgress(currentBoundary,
                            maxBoundary);
 
-      if (boundary->level!=level) {
+      if (boundary.level!=level) {
         continue;
       }
 
       RegionRef region(new Region());
 
-      region->reference=boundary->reference;
-      region->name=boundary->name;
+      region->reference=boundary.reference;
+      region->name=boundary.name;
 
-      region->areas=boundary->areas;
+      region->areas=boundary.areas;
 
       region->CalculateMinMax();
 
@@ -389,11 +365,9 @@ namespace osmscout {
       region->reference.Set(area.GetFileOffset(),refArea);
       region->name=nameValue->GetName();
 
-      for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-           ring!=area.rings.end();
-           ++ring) {
-        if (ring->ring==Area::outerRingId) {
-          region->areas.push_back(ring->nodes);
+      for (const auto& ring : area.rings) {
+        if (ring.ring==Area::outerRingId) {
+          region->areas.push_back(ring.nodes);
         }
       }
 
@@ -414,11 +388,7 @@ namespace osmscout {
   {
     unsigned long depth=0;
 
-    for (std::list<RegionRef>::const_iterator a=rootRegion.regions.begin();
-         a!=rootRegion.regions.end();
-         a++) {
-      RegionRef childRegion(*a);
-
+    for (const auto& childRegion : rootRegion.regions) {
       depth=std::max(depth,GetRegionTreeDepth(*childRegion));
     }
 
@@ -432,11 +402,7 @@ namespace osmscout {
   {
     regionTree[level].push_back(area);
 
-    for (std::list<RegionRef>::iterator r=area->regions.begin();
-         r!=area->regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (auto& childRegion : area->regions) {
       SortInRegion(childRegion,
                    regionTree,
                    level+1);
@@ -447,11 +413,7 @@ namespace osmscout {
                                             RegionIndex& regionIndex)
   {
     for (size_t level=regionTree.size()-1; level>=1; level--) {
-      for (std::list<RegionRef>::const_iterator r=regionTree[level].begin();
-           r!=regionTree[level].end();
-           ++r) {
-        RegionRef region(*r);
-
+      for (const auto& region : regionTree[level]) {
         size_t cellMinX=(region->minlon+180.0)/regionIndex.cellWidth;
         size_t cellMaxX=(region->maxlon+180.0)/regionIndex.cellWidth;
         size_t cellMinY=(region->minlat+90.0)/regionIndex.cellHeight;
@@ -472,11 +434,7 @@ namespace osmscout {
                                                 const RegionAlias& location,
                                                 const GeoCoord& node)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       for (size_t i=0; i<childRegion->areas.size(); i++) {
         if (IsCoordInArea(node,childRegion->areas[i])) {
           AddAliasToRegion(*childRegion,
@@ -576,11 +534,7 @@ namespace osmscout {
                                                        double maxlon,
                                                        double maxlat)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
       if (!(maxlon<childRegion->minlon) &&
           !(minlon>childRegion->maxlon) &&
@@ -591,7 +545,7 @@ namespace osmscout {
           bool match=IsCoordInArea(nodes[0],childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationAreaToRegion(*r,area,nodes,name,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddLocationAreaToRegion(childRegion,area,nodes,name,minlon,minlat,maxlon,maxlat);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -711,16 +665,14 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-          ring!=area.rings.end();
-          ++ring) {
-        if (!ring->GetType()->GetIgnore() && ring->GetType()->GetIndexAsLocation()) {
-          NameFeatureValue *nameValue=nameReader.GetValue(ring->GetFeatureValueBuffer());
+      for (const auto& ring : area.rings) {
+        if (!ring.GetType()->GetIgnore() && ring.GetType()->GetIndexAsLocation()) {
+          NameFeatureValue *nameValue=nameReader.GetValue(ring.GetFeatureValueBuffer());
 
           if (nameValue!=NULL) {
             AddLocationAreaToRegion(rootRegion,
                                     area,
-                                    *ring,
+                                    ring,
                                     nameValue->GetName(),
                                     regionIndex);
 
@@ -750,11 +702,7 @@ namespace osmscout {
                                                       double maxlon,
                                                       double maxlat)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
       if (!(maxlon<childRegion->minlon) &&
           !(minlon>childRegion->maxlon) &&
@@ -765,7 +713,7 @@ namespace osmscout {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationWayToRegion(*r,way,name,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddLocationWayToRegion(childRegion,way,name,minlon,minlat,maxlon,maxlat);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -877,11 +825,7 @@ namespace osmscout {
                                                       double maxlat,
                                                       bool& added)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
       if (!(maxlon<childRegion->minlon) &&
           !(minlon>childRegion->maxlon) &&
@@ -911,10 +855,8 @@ namespace osmscout {
       return;
     }
 
-    for (std::list<RegionAddress>::const_iterator regionAddress=loc->second.addresses.begin();
-        regionAddress!=loc->second.addresses.end();
-        ++regionAddress) {
-      if (regionAddress->name==address) {
+    for (const auto& regionAddress : loc->second.addresses) {
+      if (regionAddress.name==address) {
         return;
       }
     }
@@ -940,11 +882,7 @@ namespace osmscout {
                                                   double maxlat,
                                                   bool& added)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
       if (!(maxlon<childRegion->minlon) &&
           !(minlon>childRegion->maxlon) &&
@@ -1108,11 +1046,7 @@ namespace osmscout {
                                                      double maxlat,
                                                      bool& added)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
       if (!(maxlon<childRegion->minlon) &&
           !(minlon>childRegion->maxlon) &&
@@ -1124,7 +1058,7 @@ namespace osmscout {
 
           if (match) {
             bool completeMatch=AddAddressWayToRegion(progress,
-                                                     *r,
+                                                     childRegion,
                                                      fileOffset,
                                                      location,
                                                      address,
@@ -1150,10 +1084,8 @@ namespace osmscout {
       progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Way "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
     }
     else {
-      for (std::list<RegionAddress>::const_iterator regionAddress=loc->second.addresses.begin();
-          regionAddress!=loc->second.addresses.end();
-          ++regionAddress) {
-        if (regionAddress->name==address) {
+      for (const auto& regionAddress : loc->second.addresses) {
+        if (regionAddress.name==address) {
           return false;
         }
       }
@@ -1377,10 +1309,8 @@ namespace osmscout {
       return;
     }
 
-    for (std::list<RegionAddress>::const_iterator regionAddress=loc->second.addresses.begin();
-        regionAddress!=loc->second.addresses.end();
-        ++regionAddress) {
-      if (regionAddress->name==address) {
+    for (const auto& regionAddress : loc->second.addresses) {
+      if (regionAddress.name==address) {
         return;
       }
     }
@@ -1528,20 +1458,15 @@ namespace osmscout {
           region.reference);
 
     writer.WriteNumber((uint32_t)region.aliases.size());
-    for (std::list<RegionAlias>::const_iterator alias=region.aliases.begin();
-        alias!=region.aliases.end();
-        ++alias) {
-      writer.Write(alias->name);
-      writer.WriteFileOffset(alias->reference,
+    for (const auto& alias : region.aliases) {
+      writer.Write(alias.name);
+      writer.WriteFileOffset(alias.reference,
                              bytesForNodeFileOffset);
     }
 
     writer.WriteNumber((uint32_t)region.regions.size());
 
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef  childRegion(*r);
+    for (const auto& childRegion : region.regions) {
       FileOffset nextChildOffsetOffset;
 
       if (!writer.GetPos(nextChildOffsetOffset) ||
@@ -1573,10 +1498,7 @@ namespace osmscout {
   {
     writer.WriteNumber((uint32_t)rootRegion.regions.size());
 
-    for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
-         r!=rootRegion.regions.end();
-         ++r) {
-      RegionRef  childRegion(*r);
+    for (const auto& childRegion : rootRegion.regions) {
       FileOffset nextChildOffsetOffset;
 
       if (!writer.GetPos(nextChildOffsetOffset) ||
@@ -1624,55 +1546,40 @@ namespace osmscout {
 
     region.pois.sort();
 
-    FileOffset lastOffset=0;
-
     writer.WriteNumber((uint32_t)region.pois.size());
 
-    for (std::list<RegionPOI>::iterator poi=region.pois.begin();
-         poi!=region.pois.end();
-         ++poi) {
-      writer.Write(poi->name);
-      writer.Write((uint8_t)poi->object.GetType());
-      writer.WriteNumber(poi->object.GetFileOffset()-lastOffset);
+    ObjectFileRefStreamWriter objectFileRefWriter(writer);
 
-      lastOffset=poi->object.GetFileOffset();
+    for (const auto& poi : region.pois) {
+      writer.Write(poi.name);
+
+      objectFileRefWriter.Write(poi.object);
     }
 
     writer.WriteNumber((uint32_t)region.locations.size());
-    for (std::map<std::string,RegionLocation>::iterator location=region.locations.begin();
-         location!=region.locations.end();
-         ++location) {
-      location->second.objects.sort(ObjectFileRefByFileOffsetComparator());
+    for (auto& location : region.locations) {
+      location.second.objects.sort(ObjectFileRefByFileOffsetComparator());
 
-      writer.Write(location->first);
-      writer.WriteNumber((uint32_t)location->second.objects.size()); // Number of objects
+      writer.Write(location.first);
+      writer.WriteNumber((uint32_t)location.second.objects.size()); // Number of objects
 
-      if (!location->second.addresses.empty()) {
+      if (!location.second.addresses.empty()) {
         writer.Write(true);
-        writer.GetPos(location->second.addressOffset);
+        writer.GetPos(location.second.addressOffset);
         writer.WriteFileOffset(0);
       }
       else {
         writer.Write(false);
       }
 
-      FileOffset lastOffset=0;
+      objectFileRefWriter.Reset();
 
-      for (std::list<ObjectFileRef>::const_iterator object=location->second.objects.begin();
-             object!=location->second.objects.end();
-             ++object) {
-        writer.Write((uint8_t)object->GetType());
-        writer.WriteNumber(object->GetFileOffset()-lastOffset);
-
-        lastOffset=object->GetFileOffset();
+      for (const auto& object : location.second.objects) {
+        objectFileRefWriter.Write(object);
       }
     }
 
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       if (!WriteRegionDataEntry(writer,
                                 *childRegion)) {
         return false;
@@ -1685,11 +1592,7 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteRegionData(FileWriter& writer,
                                                  Region& rootRegion)
   {
-    for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
-         r!=rootRegion.regions.end();
-         ++r) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : rootRegion.regions) {
       if (!WriteRegionDataEntry(writer,
                                 *childRegion)) {
         return false;
@@ -1702,43 +1605,31 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteAddressDataEntry(FileWriter& writer,
                                                      Region& region)
   {
-    for (std::map<std::string,RegionLocation>::iterator location=region.locations.begin();
-         location!=region.locations.end();
-         ++location) {
-
-      if (!location->second.addresses.empty()) {
+    for (auto& location : region.locations) {
+      if (!location.second.addresses.empty()) {
         FileOffset offset;
 
         writer.GetPos(offset);
 
-        writer.SetPos(location->second.addressOffset);
+        writer.SetPos(location.second.addressOffset);
         writer.WriteFileOffset(offset);
         writer.SetPos(offset);
 
-        location->second.addresses.sort();
+        location.second.addresses.sort();
 
-        FileOffset lastOffset=0;
+        writer.WriteNumber((uint32_t)location.second.addresses.size());
 
-        writer.WriteNumber((uint32_t)location->second.addresses.size());
+        ObjectFileRefStreamWriter objectFileRefWriter(writer);
 
-        for (std::list<RegionAddress>::const_iterator address=location->second.addresses.begin();
-            address!=location->second.addresses.end();
-            ++address) {
-          writer.Write(address->name);
+        for (const auto& address : location.second.addresses) {
+          writer.Write(address.name);
 
-          writer.Write((uint8_t)address->object.GetType());
-          writer.WriteNumber(address->object.GetFileOffset()-lastOffset);
-
-          lastOffset=address->object.GetFileOffset();
+          objectFileRefWriter.Write(address.object);
         }
       }
     }
 
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion: region.regions) {
       if (!WriteAddressDataEntry(writer,
                                  *childRegion)) {
         return false;
@@ -1751,11 +1642,7 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteAddressData(FileWriter& writer,
                                                 Region& rootRegion)
   {
-    for (std::list<RegionRef>::iterator r=rootRegion.regions.begin();
-         r!=rootRegion.regions.end();
-         ++r) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : rootRegion.regions) {
       if (!WriteAddressDataEntry(writer,
                                  *childRegion)) {
         return false;

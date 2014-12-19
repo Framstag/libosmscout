@@ -771,13 +771,10 @@ namespace osmscout {
       writer.WriteNumber(junction.first);
       writer.WriteNumber((uint32_t)junction.second.size());
 
-      Id lastFileOffset=0;
+      ObjectFileRefStreamWriter objectFileRefWriter(writer);
 
       for (const auto& object : junction.second) {
-        writer.Write((uint8_t)object.GetType());
-        writer.WriteNumber(object.GetFileOffset()-lastFileOffset);
-
-        lastFileOffset=object.GetFileOffset();
+        objectFileRefWriter.Write(object);
       }
     }
 
