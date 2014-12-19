@@ -71,7 +71,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/SRTM.cpp \
                         osmscout/LocationService.cpp \
                         osmscout/POIService.cpp \
-                        osmscout/MapService.cpp \
                         osmscout/RoutingService.cpp                         
 
 if OSMSCOUT_HAVE_SSE2

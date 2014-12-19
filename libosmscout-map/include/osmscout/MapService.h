@@ -23,6 +23,8 @@
 #include <list>
 #include <vector>
 
+#include <osmscout/private/MapImportExport.h>
+
 // Type and style sheet configuration
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
@@ -39,7 +41,7 @@ namespace osmscout {
     Parameter to influence the search result for searching for (drawable)
     objects in a given area.
     */
-  class OSMSCOUT_API AreaSearchParameter
+  class OSMSCOUT_MAP_API AreaSearchParameter
   {
   private:
     unsigned long maxAreaLevel;
@@ -88,7 +90,7 @@ namespace osmscout {
    * limits on the resulting data (size of area, number of objects,
    * low zoom optimizations,...).
    */
-  class OSMSCOUT_API MapService : public Referencable
+  class OSMSCOUT_MAP_API MapService : public Referencable
   {
   private:
     DatabaseRef database;
