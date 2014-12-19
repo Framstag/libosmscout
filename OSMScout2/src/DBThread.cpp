@@ -209,7 +209,7 @@ void DBThread::Finalize()
   }
 }
 
-void DBThread::GetProjection(osmscout::Mercator2Projection& projection)
+void DBThread::GetProjection(osmscout::MercatorProjection& projection)
 {
     QMutexLocker locker(&mutex);
 

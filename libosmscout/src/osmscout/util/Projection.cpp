@@ -58,204 +58,6 @@ namespace osmscout {
   : valid(false),
     lon(0),
     lat(0),
-    magnification(0),
-    dpi(96),
-    width(256),
-    height(256),
-    lonMin(0.0),
-    latMin(0.0),
-    lonMax(0.0),
-    latMax(0.0),
-    lonOffset(0.0),
-    latOffset(0.0),
-    scale(1),
-    scaleGradtorad(0),
-    pixelSize(1)
-  {
-    // No code
-  }
-
-  bool MercatorProjection::Set(double lon, double lat,
-                               const Magnification& magnification,
-                               double dpi,
-                               size_t width, size_t height)
-  {
-    if (valid &&
-        this->lon==lon &&
-        this->lat==lat &&
-        this->magnification==magnification &&
-        this->dpi==dpi &&
-        this->width==width &&
-        this->height==height) {
-      return true;
-    }
-
-    valid=true;
-
-    // Make a copy of the context information
-    this->lon=lon;
-    this->lat=lat;
-    this->magnification=magnification;
-    this->dpi=dpi;
-    this->width=width;
-    this->height=height;
-
-    //
-    // Calculation of bounds and scaling factors
-    //
-    // We have three projections:
-    // * Mercator projection of longitude to X-coordinate
-    // * Mercator projection of latitude to Y-coordinate
-    // * Projection of X and Y coordinate as result of mercator projection to on screen coordinates
-    //
-
-    double boxWidth=360.0/magnification.GetMagnification(); // Part of the full earth circle that has to be shown, in degree
-
-    // longitude does scale linear, so left and right longitude borders is easy to calculate
-    lonMin=lon-boxWidth/2;
-    lonMax=lon+boxWidth/2;
-
-    scale=(width-1)/(gradtorad*(lonMax-lonMin));
-    scaleGradtorad = scale * gradtorad;
-
-    // Width of an pixel in meter
-    double d=(lonMax-lonMin)*gradtorad;
-
-    pixelSize=d*180*60/M_PI*1852.216/width;
-
-    // Absolute Y mercator coordinate for latitude
-    double y=atanh(sin(lat*gradtorad));
-
-    latMin=atan(sinh(y-(height/2)/scale))/gradtorad;
-    latMax=atan(sinh(y+(height/2)/scale))/gradtorad;
-
-    lonOffset=lonMin*scale*gradtorad;
-    latOffset=scale*atanh(sin(latMin*gradtorad));
-/*
-    std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
-    std::cout << "Center (grad):" << this->lat << "x" << this->lon << std::endl;
-    std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
-    std::cout << "Scale: " << scale << std::endl;
-    std::cout << "Screen dimension: " << width << "x" << height << std::endl;
-    std::cout << "d: " << d << " " << d*180*60/M_PI << std::endl;
-    std::cout << "The complete screen are " << d*180*60/M_PI*1852.216 << " meters" << std::endl;
-    std::cout << "1 pixel are " << pixelSize << " meters" << std::endl;
-    std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;*/
-
-#ifdef OSMSCOUT_HAVE_SSE2
-    sse2LonOffset      = _mm_set1_pd(lonOffset);
-    sse2LatOffset      = _mm_set1_pd(latOffset);
-    sse2Scale          = _mm_set1_pd(scale);
-    sse2ScaleGradtorad = _mm_set1_pd(scaleGradtorad);
-    sse2Height         = _mm_set1_pd(height);
-#endif
-
-    return true;
-  }
-
-  bool MercatorProjection::GeoIsIn(double lon, double lat) const
-  {
-    assert(valid);
-
-    return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
-  }
-
-  bool MercatorProjection::GeoIsIn(double lonMin, double latMin,
-                                   double lonMax, double latMax) const
-  {
-    assert(valid);
-
-    return !(lonMin>this->lonMax ||
-             lonMax<this->lonMin ||
-             latMin>this->latMax ||
-             latMax<this->latMin);
-  }
-
-  bool MercatorProjection::PixelToGeo(double x, double y,
-                                      double& lon, double& lat) const
-  {
-    assert(valid);
-
-    lon=(x+lonOffset)/(scale*gradtorad);
-    lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
-
-    return true;
-  }
-
-#ifdef OSMSCOUT_HAVE_SSE2
-
-  bool MercatorProjection::GeoToPixel(double lon, double lat,
-                                      double& x, double& y) const
-  {
-    assert(valid);
-
-    x=lon*scaleGradtorad-lonOffset;
-    y=height-(scale*atanh_sin_pd(lat*gradtorad)-latOffset);
-
-    return true;
-  }
-
-  //this basically transforms 2 coordinates in 1 call
-  bool MercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
-  {
-    v2df x = _mm_sub_pd(_mm_mul_pd( ARRAY2V2DF(transformData.lon), sse2ScaleGradtorad), sse2LonOffset);
-    __m128d test = ARRAY2V2DF(transformData.lat);
-    v2df y = _mm_sub_pd(sse2Height, _mm_sub_pd(_mm_mul_pd(sse2Scale, atanh_sin_pd( _mm_mul_pd( test,  ARRAY2V2DF(sseGradtorad)))), sse2LatOffset));
-
-    //store results:
-    _mm_storel_pd (transformData.xPointer[0], x);
-    _mm_storeh_pd (transformData.xPointer[1], x);
-    _mm_storel_pd (transformData.yPointer[0], y);
-    _mm_storeh_pd (transformData.yPointer[1], y);
-
-    return true;
-  }
-
-#else
-
-  bool MercatorProjection::GeoToPixel(double lon, double lat,
-                                      double& x, double& y) const
-  {
-    assert(valid);
-
-    x=lon*scaleGradtorad-lonOffset;
-    y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
-
-    return true;
-  }
-
-  bool MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
-  {
-    assert(false); //should not be called
-    return false;
-  }
-
-#endif
-
-  bool MercatorProjection::GetDimensions(double& lonMin, double& latMin,
-                                         double& lonMax, double& latMax) const
-  {
-    assert(valid);
-
-    lonMin=this->lonMin;
-    latMin=this->latMin;
-    lonMax=this->lonMax;
-    latMax=this->latMax;
-
-    return true;
-  }
-
-  double MercatorProjection::GetPixelSize() const
-  {
-    assert(valid);
-
-    return pixelSize;
-  }
-
-  Mercator2Projection::Mercator2Projection()
-  : valid(false),
-    lon(0),
-    lat(0),
     angle(0),
     magnification(0),
     dpi(96),
@@ -273,7 +75,7 @@ namespace osmscout {
     // no code
   }
 
-  bool Mercator2Projection::Set(double lon, double lat,
+  bool MercatorProjection::Set(double lon, double lat,
                                 double angle,
                                 const Magnification& magnification,
                                 double dpi,
@@ -376,14 +178,14 @@ namespace osmscout {
     return true;
   }
 
-  bool Mercator2Projection::GeoIsIn(double lon, double lat) const
+  bool MercatorProjection::GeoIsIn(double lon, double lat) const
   {
     assert(valid);
 
     return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
   }
 
-  bool Mercator2Projection::GeoIsIn(double lonMin, double latMin,
+  bool MercatorProjection::GeoIsIn(double lonMin, double latMin,
                                     double lonMax, double latMax) const
   {
     assert(valid);
@@ -394,7 +196,7 @@ namespace osmscout {
              latMax<this->latMin);
   }
 
-  bool Mercator2Projection::PixelToGeo(double x, double y,
+  bool MercatorProjection::PixelToGeo(double x, double y,
                                        double& lon, double& lat) const
   {
     assert(valid);
@@ -418,7 +220,7 @@ namespace osmscout {
     return true;
   }
 
-  bool Mercator2Projection::GeoToPixel(double lon, double lat,
+  bool MercatorProjection::GeoToPixel(double lon, double lat,
                                        double& x, double& y) const
   {
     assert(valid);
@@ -442,13 +244,13 @@ namespace osmscout {
     return true;
   }
 
-  bool Mercator2Projection::GeoToPixel(const BatchTransformer& /*transformData*/) const
+  bool MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
   {
     assert(false); //should not be called
     return false;
   }
 
-  bool Mercator2Projection::GetDimensions(double& lonMin, double& latMin,
+  bool MercatorProjection::GetDimensions(double& lonMin, double& latMin,
                                           double& lonMax, double& latMax) const
   {
     assert(valid);
@@ -461,14 +263,14 @@ namespace osmscout {
     return true;
   }
 
-  double Mercator2Projection::GetPixelSize() const
+  double MercatorProjection::GetPixelSize() const
   {
     assert(valid);
 
     return pixelSize;
   }
 
-  bool Mercator2Projection::Move(double horizPixel,
+  bool MercatorProjection::Move(double horizPixel,
                                  double vertPixel)
   {
     double x;

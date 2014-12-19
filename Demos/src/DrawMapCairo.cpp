@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     cairo=cairo_create(surface);
 
     if (cairo!=NULL) {
-      osmscout::Mercator2Projection  projection;
+      osmscout::MercatorProjection  projection;
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;

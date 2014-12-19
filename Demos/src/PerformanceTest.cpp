@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  osmscout::MercatorProjection  projection;
+  osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
 

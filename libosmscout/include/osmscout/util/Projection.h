@@ -252,139 +252,6 @@ namespace osmscout {
   };
 
   /**
-   * \ingroup Geometry
-   *
-   * Original mercator projection.
-   */
-  class OSMSCOUT_API MercatorProjection : public Projection
-  {
-  protected:
-    bool                valid;         //! projects is valid
-
-    double              lon;           //! Longitude coordinate of the center of the image
-    double              lat;           //! Latitude coordinate of the center of the image
-    Magnification       magnification; //! Current magnification
-    double              dpi;           //! Screen DPI
-    size_t              width;         //! Width of image
-    size_t              height;        //! Height of image
-
-    double              lonMin;        //! Longitude of the upper left corner of the image
-    double              latMin;        //! Latitude of the upper left corner of the image
-    double              lonMax;        //! Longitude of the lower right corner of the image
-    double              latMax;        //! Latitude of the lower right corner of the image
-
-    double              lonOffset;
-    double              latOffset;
-    double              scale;
-    double              scaleGradtorad; //!Precalculated scale*Gradtorad
-
-#ifdef OSMSCOUT_HAVE_SSE2
-      //some extra vars for special sse needs
-      v2df              sse2LonOffset;
-      v2df              sse2LatOffset;
-      v2df              sse2Scale;
-      v2df              sse2ScaleGradtorad;
-      v2df              sse2Height;
-#endif
-
-  private:
-
-    double              pixelSize;     //! Size of a pixel in meter
-
-  public:
-    MercatorProjection();
-
-    inline bool CanBatch() const
-    {
-      return true;
-    }
-
-    inline double GetLon() const
-    {
-      return lon;
-    }
-
-    inline double GetLat() const
-    {
-      return lat;
-    }
-
-    inline double GetAngle() const
-    {
-      return 0;
-    }
-
-    inline size_t GetWidth() const
-    {
-      return width;
-    }
-
-    inline size_t GetHeight() const
-    {
-      return height;
-    }
-
-    inline Magnification GetMagnification() const
-    {
-      return magnification;
-    }
-
-    inline double GetDPI() const
-    {
-      return dpi;
-    }
-
-    /**
-     * Set the "screen" for the projection.
-     *
-     * @param lon Longitude coordinate of the center of the screen/image
-     * @param lat Latitude coordinate of the center of the screen/image
-     * @param magnification Magnification to apply
-     * @param width Width of screen/image
-     * @param height Height of screen/image
-     */
-    bool Set(double lon, double lat,
-             const Magnification& magnification,
-             size_t width, size_t height)
-    {
-      return Set(lon,lat,magnification,GetDPI(),width,height);
-    }
-
-    /**
-     * Set the "screen" for the projection.
-     *
-     * @param lon Longitude coordinate of the center of the screen/image
-     * @param lat Latitude coordinate of the center of the screen/image
-     * @param magnification Magnification to apply
-     * @param dpi DPI of the screen/image
-     * @param width Width of screen/image
-     * @param height Height of screen/image
-     */
-    bool Set(double lon, double lat,
-             const Magnification& magnification,
-             double dpi,
-             size_t width, size_t height);
-
-    bool GeoIsIn(double lon, double lat) const;
-    bool GeoIsIn(double lonMin, double latMin,
-                 double lonMax, double latMax) const;
-
-    bool PixelToGeo(double x, double y,
-                    double& lon, double& lat) const;
-
-    bool GeoToPixel(double lon, double lat,
-                    double& x, double& y) const;
-
-    bool GetDimensions(double& lonMin, double& latMin,
-                       double& lonMax, double& latMax) const;
-
-    double GetPixelSize() const;
-
-  protected:
-     bool GeoToPixel(const BatchTransformer& transformData) const;
-  };
-
-  /**
    * Mercator projection that tries to render the resulting map in the same
    * physical size on all devices. If the physical DPI of the device is
    * correctly given, objects on any device has the same size. Bigger devices
@@ -394,7 +261,7 @@ namespace osmscout {
    * tiles were designed for 96 DPI displays.
    *
    */
-  class OSMSCOUT_API Mercator2Projection : public Projection
+  class OSMSCOUT_API MercatorProjection : public Projection
   {
   protected:
     bool                valid;          //! projection is valid
@@ -423,7 +290,7 @@ namespace osmscout {
     double              pixelSize;      //! Size of a pixel in meter
 
   public:
-    Mercator2Projection();
+    MercatorProjection();
 
     inline bool CanBatch() const
     {

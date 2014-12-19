@@ -96,7 +96,7 @@ private:
   osmscout::DatabaseRef         database;
   osmscout::LocationServiceRef  locationService;
   osmscout::MapServiceRef       mapService;
-  osmscout::Mercator2Projection projection;
+  osmscout::MercatorProjection  projection;
   osmscout::RouterParameter     routerParameter;
   osmscout::RoutingServiceRef   router;
   osmscout::RoutePostprocessor  routePostprocessor;
@@ -129,7 +129,7 @@ private:
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
 public:
-  void GetProjection(osmscout::Mercator2Projection& projection);
+  void GetProjection(osmscout::MercatorProjection& projection);
 
   void UpdateRenderRequest(const RenderMapRequest& request);
 

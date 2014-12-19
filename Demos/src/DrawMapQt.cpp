@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     QPainter* painter=new QPainter(pixmap);
 
     if (painter!=NULL) {
-      osmscout::Mercator2Projection projection;
+      osmscout::MercatorProjection  projection;
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;

@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 
   projection.Set(lon,
                  lat,
-                 zoom,
+                 osmscout::Magnification(zoom),
                  DPI,
                  width,
                  height);

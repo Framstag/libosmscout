@@ -32,15 +32,15 @@ class MapWidget : public QQuickPaintedItem
   Q_PROPERTY(double lon READ GetLon)
 
 private:
-  double                        lon;
-  double                        lat;
-  double                        angle;
-  osmscout::Magnification       magnification;
+  double                       lon;
+  double                       lat;
+  double                       angle;
+  osmscout::Magnification      magnification;
 
   // Drag and drop
-  int                           startX;
-  int                           startY;
-  osmscout::Mercator2Projection startProjection;
+  int                          startX;
+  int                          startY;
+  osmscout::MercatorProjection startProjection;
 
   // Controlling rerendering...
   bool                          requestNewMap;

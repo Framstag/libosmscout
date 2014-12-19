@@ -103,7 +103,7 @@ void MapWidget::TriggerMapRendering()
 
 void MapWidget::HandleMouseMove(QMouseEvent* event)
 {
-    osmscout::Mercator2Projection projection=startProjection;
+    osmscout::MercatorProjection projection=startProjection;
 
     if (!projection.Move(startX-event->x(),
                          event->y()-startY)) {
@@ -208,8 +208,8 @@ void MapWidget::zoomOut(double zoomFactor)
 
 void MapWidget::left()
 {
-    DBThread                      *dbThread=DBThread::GetInstance();
-    osmscout::Mercator2Projection projection;
+    DBThread                     *dbThread=DBThread::GetInstance();
+    osmscout::MercatorProjection projection;
 
     dbThread->GetProjection(projection);
 
@@ -223,8 +223,8 @@ void MapWidget::left()
 
 void MapWidget::right()
 {
-    DBThread                      *dbThread=DBThread::GetInstance();
-    osmscout::Mercator2Projection projection;
+    DBThread                     *dbThread=DBThread::GetInstance();
+    osmscout::MercatorProjection projection;
 
     dbThread->GetProjection(projection);
 
@@ -238,8 +238,8 @@ void MapWidget::right()
 
 void MapWidget::up()
 {
-    DBThread                      *dbThread=DBThread::GetInstance();
-    osmscout::Mercator2Projection projection;
+    DBThread                     *dbThread=DBThread::GetInstance();
+    osmscout::MercatorProjection projection;
 
     dbThread->GetProjection(projection);
 
@@ -253,8 +253,8 @@ void MapWidget::up()
 
 void MapWidget::down()
 {
-    DBThread                      *dbThread=DBThread::GetInstance();
-    osmscout::Mercator2Projection projection;
+    DBThread                     *dbThread=DBThread::GetInstance();
+    osmscout::MercatorProjection projection;
 
     dbThread->GetProjection(projection);
 

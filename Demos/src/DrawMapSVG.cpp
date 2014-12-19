@@ -39,9 +39,10 @@ int main(int argc, char* argv[])
 {
   std::string   map;
   std::string   style;
-  double        latTop,latBottom,lonLeft,lonRight;
+  double        lat,lon;
   double        zoom;
   size_t        width;
+  size_t        height;
   std::string   output;
 
   if (argc!=10) {
@@ -55,22 +56,22 @@ int main(int argc, char* argv[])
   map=argv[1];
   style=argv[2];
 
-  if (sscanf(argv[3],"%lf",&latTop)!=1) {
+  if (!osmscout::StringToNumber(argv[3],width)) {
+    std::cerr << "width is not numeric!" << std::endl;
+    return 1;
+  }
+
+  if (!osmscout::StringToNumber(argv[4],height)) {
+    std::cerr << "height is not numeric!" << std::endl;
+    return 1;
+  }
+
+  if (sscanf(argv[5],"%lf",&lon)!=1) {
     std::cerr << "lon is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[4],"%lf",&lonLeft)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&latBottom)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[6],"%lf",&lonRight)!=1) {
+  if (sscanf(argv[6],"%lf",&lat)!=1) {
     std::cerr << "lat is not numeric!" << std::endl;
     return 1;
   }
@@ -80,12 +81,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (!osmscout::StringToNumber(argv[8],width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
-  }
-
-  output=argv[9];
+  output=argv[8];
 
   osmscout::DatabaseParameter databaseParameter;
 
@@ -123,12 +119,11 @@ int main(int argc, char* argv[])
   drawParameter.SetFontSize(2.0);
   drawParameter.SetDebugPerformance(true);
 
-  projection.Set(std::min(lonLeft,lonRight),
-                 std::min(latTop,latBottom),
-                 std::max(lonLeft,lonRight),
-                 std::max(latTop,latBottom),
-                 zoom,
-                 width);
+  projection.Set(lon,
+                 lat,
+                 osmscout::Magnification(zoom),
+                 width,
+                 height);
 
   osmscout::TypeSet              nodeTypes;
   std::vector<osmscout::TypeSet> wayTypes;
