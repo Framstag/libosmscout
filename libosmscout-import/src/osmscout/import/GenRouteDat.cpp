@@ -471,6 +471,8 @@ namespace osmscout {
     FileScanner scanner;
     uint32_t    dataCount=0;
 
+    progress.Info("Scanning ways");
+
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
                       FileScanner::Sequential,
@@ -529,6 +531,8 @@ namespace osmscout {
       progress.Error("Cannot close file 'ways.dat'");
       return false;
     }
+
+    progress.Info("Scanning areas");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
