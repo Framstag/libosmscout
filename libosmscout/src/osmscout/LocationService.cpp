@@ -43,10 +43,6 @@ namespace osmscout {
 
     match=matchPosition==0 && tmpname.length()==pattern.length();
     candidate=matchPosition!=std::string::npos;
-
-    if (candidate || match) {
-      std::cout << "'" << pattern << "' '" << name << "' '" << tmpname << "' " << match << " " << candidate << std::endl;
-    }
   }
 
   void LocationService::VisitorMatcher::TolowerUmlaut(std::string& s) const
