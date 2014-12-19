@@ -12,7 +12,6 @@ programs = libosmscout \
            Import \
            DumpData \
            Demos \
-           OSMScout \
            OSMScout2 \
            StyleEditor \
            Tests
