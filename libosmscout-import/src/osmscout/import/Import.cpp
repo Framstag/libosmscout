@@ -103,7 +103,7 @@ namespace osmscout {
      areaDataCacheSize(0),
      wayDataMemoryMaped(false),
      wayDataCacheSize(0),
-     areaAreaIndexMaxMag(17),
+     areaAreaIndexMaxMag(15),
      areaWayMinMag(11), // Should not be >= than optimizationMaxMag
      areaNodeMinMag(8),
      areaNodeIndexMinFillRate(0.1),

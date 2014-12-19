@@ -43,12 +43,10 @@ namespace osmscout {
   {
     // For every cell that had entries in one of its children we create
     // an index entry.
-    for (std::map<Pixel,AreaLeaf>::const_iterator leaf=leafs.begin();
-         leaf!=leafs.end();
-         ++leaf) {
+    for (const auto& leaf: leafs) {
       // Coordinates of the children in "children dimension" calculated from the tile id
-      uint32_t xc=leaf->first.x;
-      uint32_t yc=leaf->first.y;
+      uint32_t xc=leaf.first.x;
+      uint32_t yc=leaf.first.y;
 
       size_t index;
 
@@ -74,56 +72,47 @@ namespace osmscout {
         }
       }
 
-      assert(leaf->second.offset!=0);
+      assert(leaf.second.offset!=0);
 
-      newAreaLeafs[Pixel(xc/2,yc/2)].children[index]=leaf->second.offset;
+      newAreaLeafs[Pixel(xc/2,yc/2)].children[index]=leaf.second.offset;
     }
   }
 
   bool AreaAreaIndexGenerator::WriteIndexLevel(const TypeConfigRef& typeConfig,
                                                const ImportParameter& parameter,
                                                FileWriter& writer,
-                                               int level,
+                                               size_t level,
                                                std::map<Pixel,AreaLeaf>& leafs)
   {
-    for (std::map<Pixel,AreaLeaf>::iterator leaf=leafs.begin();
-         leaf!=leafs.end();
-         ++leaf) {
-      writer.GetPos(leaf->second.offset);
+    for (auto& leaf : leafs) {
+      writer.GetPos(leaf.second.offset);
 
-      assert(!leaf->second.areas.empty() ||
-             leaf->second.children[0]!=0 ||
-             leaf->second.children[1]!=0 ||
-             leaf->second.children[2]!=0 ||
-             leaf->second.children[3]!=0);
+      assert(!leaf.second.areas.empty() ||
+             leaf.second.children[0]!=0 ||
+             leaf.second.children[1]!=0 ||
+             leaf.second.children[2]!=0 ||
+             leaf.second.children[3]!=0);
 
-      if (level<(int)parameter.GetAreaAreaIndexMaxMag()) {
+      if (level<parameter.GetAreaAreaIndexMaxMag()) {
         for (size_t c=0; c<4; c++) {
-          if (leaf->second.children[c]==0) {
-            writer.WriteNumber(0);
-          }
-          else {
-            writer.WriteNumber(leaf->second.children[c]);
-          }
+          writer.WriteNumber(leaf.second.children[c]);
         }
       }
 
       FileOffset lastOffset;
 
       // Areas
-      writer.WriteNumber((uint32_t)leaf->second.areas.size());
+      writer.WriteNumber((uint32_t)leaf.second.areas.size());
 
       lastOffset=0;
-      for (std::list<Entry>::const_iterator entry=leaf->second.areas.begin();
-           entry!=leaf->second.areas.end();
-           entry++) {
-        writer.WriteTypeId(entry->type,
+      for (const auto& entry : leaf.second.areas) {
+        writer.WriteTypeId(entry.type,
                            typeConfig->GetAreaTypeIdBytes());
         // Since objects are inserted in file position order, we do not need
         // to sort objects by file offset at this place
-        writer.WriteNumber(entry->offset-lastOffset);
+        writer.WriteNumber(entry.offset-lastOffset);
 
-        lastOffset=entry->offset;
+        lastOffset=entry.offset;
       }
     }
 
@@ -161,7 +150,7 @@ namespace osmscout {
 
     FileWriter writer;
     FileOffset topLevelOffset=0;
-    FileOffset topLevelOffsetOffset; // Offset of the toplevel entry
+    FileOffset topLevelOffsetOffset; // Offset of the top level entry
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "areaarea.idx"))) {
@@ -189,16 +178,17 @@ namespace osmscout {
       return false;
     }
 
-    int l=parameter.GetAreaAreaIndexMaxMag();
+    size_t l=parameter.GetAreaAreaIndexMaxMag();
 
-    while (l>=0) {
+    while (true) {
       size_t areaLevelEntries=0;
 
       progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
 
       newAreaLeafs.clear();
 
-      SetOffsetOfChildren(leafs,newAreaLeafs);
+      SetOffsetOfChildren(leafs,
+                          newAreaLeafs);
 
       leafs=newAreaLeafs;
 
@@ -253,10 +243,14 @@ namespace osmscout {
           // hold the geometric center of the tile.
           //
 
-          int level=parameter.GetAreaAreaIndexMaxMag();
-          while (level>=0) {
+          size_t level=parameter.GetAreaAreaIndexMaxMag();
+          while (true) {
             if (maxLon-minLon<=cellWidth[level] &&
                 maxLat-minLat<=cellHeight[level]) {
+              break;
+            }
+
+            if (level==0) {
               break;
             }
 
@@ -265,7 +259,7 @@ namespace osmscout {
 
           if (level==l) {
             //
-            // Renormated coordinate space (everything is >=0)
+            // Renormalized coordinate space (everything is >=0)
             //
 
             minLon+=180;
@@ -350,9 +344,13 @@ namespace osmscout {
       if (!WriteIndexLevel(typeConfig,
                            parameter,
                            writer,
-                           (int)l,
+                           l,
                            leafs)) {
         return false;
+      }
+
+      if (l==0) {
+        break;
       }
 
       l--;
@@ -364,4 +362,3 @@ namespace osmscout {
     return !writer.HasError() && writer.Close();
   }
 }
-

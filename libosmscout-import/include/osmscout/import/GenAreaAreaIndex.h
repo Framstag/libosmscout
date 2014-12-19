@@ -64,7 +64,7 @@ namespace osmscout {
     bool WriteIndexLevel(const TypeConfigRef& typeConfig,
                          const ImportParameter& parameter,
                          FileWriter& writer,
-                         int level,
+                         size_t level,
                          std::map<Pixel,AreaLeaf>& leafs);
 
 
