@@ -104,10 +104,7 @@ namespace osmscout {
      wayDataMemoryMaped(false),
      wayDataCacheSize(0),
      areaAreaIndexMaxMag(17),
-     areaWayMinMag(14),
-     areaWayIndexMinFillRate(0.1),
-     areaWayIndexCellSizeAverage(16),
-     areaWayIndexCellSizeMax(256),
+     areaWayMinMag(11), // Should not be >= than optimizationMaxMag
      areaNodeMinMag(8),
      areaNodeIndexMinFillRate(0.1),
      areaNodeIndexCellSizeAverage(16),
@@ -259,21 +256,6 @@ namespace osmscout {
   size_t ImportParameter::GetAreaWayMinMag() const
   {
     return areaWayMinMag;
-  }
-
-  double ImportParameter::GetAreaWayIndexMinFillRate() const
-  {
-    return areaWayIndexMinFillRate;
-  }
-
-  size_t ImportParameter::GetAreaWayIndexCellSizeAverage() const
-  {
-    return areaWayIndexCellSizeAverage;
-  }
-
-  size_t ImportParameter::GetAreaWayIndexCellSizeMax() const
-  {
-    return areaWayIndexCellSizeMax;
   }
 
   size_t ImportParameter::GetAreaAreaIndexMaxMag() const
@@ -474,21 +456,6 @@ namespace osmscout {
     this->areaWayMinMag=areaWayMinMag;
   }
 
-  void ImportParameter::SetAreaWayIndexMinFillRate(double areaWayIndexMinFillRate)
-  {
-    this->areaWayIndexMinFillRate=areaWayIndexMinFillRate;
-  }
-
-  void ImportParameter::SetAreaWayIndexCellSizeAverage(size_t areaWayIndexCellSizeAverage)
-  {
-    this->areaWayIndexCellSizeAverage=areaWayIndexCellSizeAverage;
-  }
-
-  void ImportParameter::SetAreaWayIndexCellSizeMax(size_t areaWayIndexCellSizeMax)
-  {
-    this->areaWayIndexCellSizeMax=areaWayIndexCellSizeMax;
-  }
-
   void ImportParameter::SetWaterIndexMinMag(size_t waterIndexMinMag)
   {
     this->waterIndexMinMag=waterIndexMinMag;
@@ -597,6 +564,10 @@ namespace osmscout {
 
     TypeConfigRef            typeConfig(new TypeConfig());
     std::list<ImportModule*> modules;
+
+    if (parameter.GetAreaWayMinMag()<=parameter.GetOptimizationMaxMag()) {
+      progress.Error("Area way index minimum magnification is <= than optimization max magnification");
+    }
 
     progress.SetStep("Loading type config");
 
