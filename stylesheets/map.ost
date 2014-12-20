@@ -70,6 +70,7 @@ MAX SPEEDS
   SPEED "FR:walk"          =   6 km/h
   SPEED "FR:urban"         =  50 km/h
   SPEED "FR:rural"         =  90 km/h
+  SPEED "FR:motorway"      = 130 km/h
 
 /*
   Allows you to map surface descriptions to a grade value ([1-5]).
@@ -1064,12 +1065,17 @@ TYPES
     = NODE AREA ("tourism"=="aquarium")
       {Name, NameAlt}
       ADDRESS POI
+
+  TYPE tourism_attraction_building
+    = NODE AREA ("tourism"=="attraction" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
     
   TYPE tourism_attraction
     = NODE AREA ("tourism"=="attraction")
       {Name, NameAlt}
       ADDRESS POI
-    
+
   TYPE tourism_artwork
     = NODE WAY AREA ("tourism"=="artwork")
       {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}

@@ -213,13 +213,6 @@ CONST
   MAG labelSpecialBuildingMag      = closer;
   MAG labelBuildingMag             = veryClose;
 
-/*
-  MAG stepsMag                     = veryClose;//block
-  MAG labelPathsMag                = close;//veryClose;
-  MAG labelSpecialBuildingMag      = veryClose;//veryClose;
-  MAG labelBuildingMag             = veryClose;//block;
-*/
-
   // Label priorities
   UINT labelPrioContinent           = 1;
   UINT labelPrioIsland              = 1;
@@ -1203,7 +1196,8 @@ SYMBOL speed_camera
          historic_ruins,
          historic_wreck] AREA { color: @tourismColor; }
 
-   [TYPE tourism_alpine_hut_building,
+   [TYPE tourism_attraction_building,
+         tourism_alpine_hut_building,
          tourism_chalet_building,
          tourism_guest_house_building,
          tourism_hostel_building,
