@@ -51,11 +51,6 @@ namespace osmscout {
         for(std::vector<Image>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
             CGImageRelease(*image);
         }
-        for(std::map<size_t,Font *>::const_iterator f=fonts.begin(); f!=fonts.end();f++){
-            #if !__has_feature(objc_arc)
-            [f->second release];
-            #endif
-        }
     }
     
     Font *MapPainterIOS::GetFont(const Projection& projection,
@@ -73,9 +68,6 @@ namespace osmscout {
         }
         
         Font *font = [Font fontWithName:[NSString stringWithUTF8String: parameter.GetFontName().c_str()] size:fontSize];
-        #if !__has_feature(objc_arc)
-        [font retain];
-        #endif
         return fonts.insert(std::pair<size_t,Font *>(fontSize,font)).first->second;
     }
 

@@ -148,8 +148,8 @@
 		F556F00019C6E36700EAAA8B /* TypeFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */; };
 		F556F00119C6E36700EAAA8B /* TypeFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */; };
 		F556F00319C9D00700EAAA8B /* TypeFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = F556F00219C9D00700EAAA8B /* TypeFeatures.h */; };
-		F55A609318EEE7CF00D91D6F /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */; };
-		F55A609418EEE7D300D91D6F /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */; };
+		F55A3ACE1A45E57A0010005B /* Tiling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55A3ACD1A45E57A0010005B /* Tiling.cpp */; };
+		F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55A3ACD1A45E57A0010005B /* Tiling.cpp */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 /* End PBXBuildFile section */
@@ -167,8 +167,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextSearchIndex.cpp; path = ../../../../libosmscout/src/osmscout/TextSearchIndex.cpp; sourceTree = "<group>"; };
-		F50BC73A18A97D5F002AE090 /* TextSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSearchIndex.h; sourceTree = "<group>"; };
 		F51E3E9F161A5F4000D51926 /* libosmscout.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscout.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51E3EA2161A5F4000D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaAreaIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaAreaIndex.cpp; sourceTree = "<group>"; };
@@ -306,6 +304,7 @@
 		F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NodeDataFile.cpp; path = ../../../../libosmscout/src/osmscout/NodeDataFile.cpp; sourceTree = "<group>"; };
 		F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFeatures.cpp; path = ../../../../libosmscout/src/osmscout/TypeFeatures.cpp; sourceTree = "<group>"; };
 		F556F00219C9D00700EAAA8B /* TypeFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeFeatures.h; sourceTree = "<group>"; };
+		F55A3ACD1A45E57A0010005B /* Tiling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tiling.cpp; path = ../../../../libosmscout/src/osmscout/util/Tiling.cpp; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
 		F5EDD5441891556D00646B92 /* LocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationIndex.h; sourceTree = "<group>"; };
@@ -373,13 +372,13 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F55A3ACD1A45E57A0010005B /* Tiling.cpp */,
 				F54C1E4E18F480AC008C5EB3 /* LocationService.cpp */,
 				F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */,
 				F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */,
 				F54C1E4F18F480AC008C5EB3 /* MapService.cpp */,
 				F54C1E5018F480AC008C5EB3 /* POIService.cpp */,
 				F54C1E5118F480AC008C5EB3 /* RoutingService.cpp */,
-				F50BC73718A97D2C002AE090 /* TextSearchIndex.cpp */,
 				F54FD00B186596AD000E8579 /* LocationIndex.cpp */,
 				F54DAA3F1815DA6500625DDA /* Area.cpp */,
 				F534FB9C18242F660039CEE4 /* Intersection.cpp */,
@@ -485,7 +484,6 @@
 				F54C1E4B18F48070008C5EB3 /* MapService.h */,
 				F54C1E4C18F48070008C5EB3 /* POIService.h */,
 				F54C1E4D18F48070008C5EB3 /* RoutingService.h */,
-				F50BC73A18A97D5F002AE090 /* TextSearchIndex.h */,
 				F5EDD545189155AA00646B92 /* CoreFeatures.h */,
 				F5EDD5441891556D00646B92 /* LocationIndex.h */,
 				F534FB9A1823E8BD0039CEE4 /* Intersection.h */,
@@ -704,7 +702,6 @@
 				F54C1E5418F480AC008C5EB3 /* POIService.cpp in Sources */,
 				F51E3F05161A5FEC00D51926 /* Location.cpp in Sources */,
 				F51E3F06161A5FEC00D51926 /* Node.cpp in Sources */,
-				F55A609318EEE7CF00D91D6F /* TextSearchIndex.cpp in Sources */,
 				F51E3F07161A5FEC00D51926 /* NumericIndex.cpp in Sources */,
 				F51E3F08161A5FEC00D51926 /* ObjectRef.cpp in Sources */,
 				F556F00019C6E36700EAAA8B /* TypeFeatures.cpp in Sources */,
@@ -728,6 +725,7 @@
 				F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */,
 				F51E3F19161A5FEC00D51926 /* TypeConfig.cpp in Sources */,
 				F51E3F1B161A5FEC00D51926 /* Types.cpp in Sources */,
+				F55A3ACE1A45E57A0010005B /* Tiling.cpp in Sources */,
 				F54DAA521815DA6500625DDA /* SRTM.cpp in Sources */,
 				F51E3F1C161A5FEC00D51926 /* TypeSet.cpp in Sources */,
 				F51E3F1D161A5FEC00D51926 /* Breaker.cpp in Sources */,
@@ -775,7 +773,6 @@
 				F54C1E5B18F583BF008C5EB3 /* POIService.cpp in Sources */,
 				F53BD1AC1638866B006C7AE1 /* Location.cpp in Sources */,
 				F53BD1AD1638866B006C7AE1 /* Node.cpp in Sources */,
-				F55A609418EEE7D300D91D6F /* TextSearchIndex.cpp in Sources */,
 				F53BD1AE1638866B006C7AE1 /* NumericIndex.cpp in Sources */,
 				F53BD1AF1638866B006C7AE1 /* ObjectRef.cpp in Sources */,
 				F556F00119C6E36700EAAA8B /* TypeFeatures.cpp in Sources */,
@@ -799,6 +796,7 @@
 				F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */,
 				F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */,
 				F53BD1C216388682006C7AE1 /* Way.cpp in Sources */,
+				F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */,
 				F54DAA5C1815DA9A00625DDA /* SRTM.cpp in Sources */,
 				F53BD1C31638868B006C7AE1 /* Parser.cpp in Sources */,
 				F53BD1C41638868B006C7AE1 /* Scanner.cpp in Sources */,
@@ -894,6 +892,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
+				HEADER_SEARCH_PATHS = (
+					../../../libosmscout/include,
+					../../../../../iphone/marisa/lib,
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -912,6 +914,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
+				HEADER_SEARCH_PATHS = (
+					../../../libosmscout/include,
+					../../../../../iphone/marisa/lib,
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
