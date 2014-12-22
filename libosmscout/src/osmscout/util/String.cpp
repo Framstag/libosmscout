@@ -163,6 +163,37 @@ namespace osmscout {
     return buffer.str();
   }
 
+  void SplitStringAtSpace(const std::string& input,
+                          std::list<std::string>& tokens)
+  {
+    std::string::size_type wordBegin=0;
+    std::string::size_type wordEnd=0;
+
+    while (wordBegin<input.length()) {
+      while (wordBegin<input.length() &&
+             std::isspace(input[wordBegin])) {
+        wordBegin++;
+      }
+
+      if (wordBegin>=input.length()) {
+        return;
+      }
+
+      wordEnd=wordBegin;
+
+      while (wordEnd+1<input.length() &&
+             !std::isspace(input[wordEnd+1])) {
+        wordEnd++;
+      }
+
+      std::string token=input.substr(wordBegin,wordEnd-wordBegin+1);
+
+      tokens.push_back(token);
+
+      wordBegin=wordEnd+1;
+    }
+  }
+
   void TokenizeString(const std::string& input,
                       std::list<std::string>& tokens)
   {

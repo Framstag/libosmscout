@@ -351,6 +351,13 @@ namespace osmscout {
 
   /**
    * \ingroup Util
+   * Converts the given string into a list of whitespace separated (std::isspace()) strings.
+   */
+  extern OSMSCOUT_API void SplitStringAtSpace(const std::string& input,
+                                              std::list<std::string>& tokens);
+
+  /**
+   * \ingroup Util
    * Converts the given string into a list of whitespace or colon-separated strings.
    */
   extern OSMSCOUT_API void TokenizeString(const std::string& input,
