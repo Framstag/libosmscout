@@ -171,16 +171,14 @@ void LocationListModel::setPattern(const QString& pattern)
 
   locations.clear();
 
-  osmscout::LocationSearch       search;
   osmscout::LocationSearchResult searchResult;
 
   std::string osmPattern=pattern.toUtf8().constData();
 
   std::cout << "Searching for '" << osmPattern << "'" << std::endl;
 
-  search.InitializeSearchEntries(osmPattern);
-
-  DBThread::GetInstance()->SearchForLocations(search,
+  DBThread::GetInstance()->SearchForLocations(osmPattern,
+                                              50,
                                               searchResult);
 
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;

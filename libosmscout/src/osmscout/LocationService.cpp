@@ -236,114 +236,6 @@ namespace osmscout {
     // no code
   }
 
-  void LocationSearch::InitializeSearchEntries(const std::string& searchPattern)
-  {
-    std::list<std::string> tokens;
-
-    if (searchPattern.empty()) {
-      return;
-    }
-
-    TokenizeString(searchPattern,
-                   tokens);
-
-    if (tokens.empty()) {
-      return;
-    }
-
-    SimplifyTokenList(tokens);
-
-    if (tokens.size()>=3) {
-      std::list<std::list<std::string> > slices;
-
-      GroupStringListToStrings(tokens.begin(),
-                               tokens.size(),
-                               3,
-                               slices);
-
-      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
-          slice!=slices.end();
-          ++slice) {
-        std::list<std::string>::const_iterator text1;
-        std::list<std::string>::const_iterator text2;
-        std::list<std::string>::const_iterator text3;
-
-        text1=slice->begin();
-        text2=text1;
-        text2++;
-        text3=text2;
-        text3++;
-
-        osmscout::LocationSearch::Entry search;
-
-        search.locationPattern=*text1;
-        search.addressPattern=*text2;
-        search.adminRegionPattern=*text3;
-
-        searches.push_back(search);
-
-        search.locationPattern=*text2;
-        search.addressPattern=*text3;
-        search.adminRegionPattern=*text1;
-
-        searches.push_back(search);
-      }
-    }
-
-    if (tokens.size()>=2) {
-      std::list<std::list<std::string> > slices;
-
-      GroupStringListToStrings(tokens.begin(),
-                               tokens.size(),
-                               2,
-                               slices);
-
-      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
-          slice!=slices.end();
-          ++slice) {
-        std::list<std::string>::const_iterator text1;
-        std::list<std::string>::const_iterator text2;
-
-        text1=slice->begin();
-        text2=text1;
-        text2++;
-
-        osmscout::LocationSearch::Entry search;
-
-        search.locationPattern=*text1;
-        search.adminRegionPattern=*text2;
-
-        searches.push_back(search);
-
-        search.locationPattern=*text2;
-        search.adminRegionPattern=*text1;
-
-        searches.push_back(search);
-      }
-    }
-
-    if (tokens.size()>=1) {
-      std::list<std::list<std::string> > slices;
-
-      GroupStringListToStrings(tokens.begin(),
-                               tokens.size(),
-                               1,
-                               slices);
-
-      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
-          slice!=slices.end();
-          ++slice) {
-        std::list<std::string>::const_iterator text1=slice->begin();
-
-        osmscout::LocationSearch::Entry search;
-
-        search.adminRegionPattern=*text1;
-
-        searches.push_back(search);
-      }
-    }
-  }
-
   bool LocationSearchResult::Entry::operator<(const Entry& other) const
   {
     if (adminRegionMatchQuality!=other.adminRegionMatchQuality) {
@@ -769,6 +661,149 @@ namespace osmscout {
     }
 
     result.results.push_back(entry);
+
+    return true;
+  }
+
+  /**
+   * This takes the given pattern, splits it into tokens,
+   * and generates a number of search entries based on the idea
+   * that the input follows one of the following patterns:
+   * - AdminRegion Location Address
+   * - Location Address AdminRegion
+   * - AdminRegion Location
+   * - Location AdminRegion
+   * - AdminRegion
+   */
+  bool LocationService::InitializeLocationSearchEntries(const std::string& searchPattern,
+                                                        LocationSearch& locationSearch)
+  {
+    LocationIndexRef locationIndex=database->GetLocationIndex();
+
+    if (locationIndex.Invalid()) {
+      return false;
+    }
+
+    std::list<std::string> tokens;
+
+    locationSearch.searches.clear();
+
+    if (searchPattern.empty()) {
+      return true;
+    }
+
+    TokenizeString(searchPattern,
+                   tokens);
+
+    if (tokens.empty()) {
+      return true;
+    }
+
+    SimplifyTokenList(tokens);
+
+    if (tokens.size()>=3) {
+      std::list<std::list<std::string> > slices;
+
+      GroupStringListToStrings(tokens.begin(),
+                               tokens.size(),
+                               3,
+                               slices);
+
+      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
+          slice!=slices.end();
+          ++slice) {
+        std::list<std::string>::const_iterator text1;
+        std::list<std::string>::const_iterator text2;
+        std::list<std::string>::const_iterator text3;
+
+        text1=slice->begin();
+        text2=text1;
+        text2++;
+        text3=text2;
+        text3++;
+
+        osmscout::LocationSearch::Entry search;
+
+        search.locationPattern=*text1;
+        search.addressPattern=*text2;
+        search.adminRegionPattern=*text3;
+
+        if (!locationIndex->IsLocationIgnoreToken(search.locationPattern) &&
+            !locationIndex->IsRegionIgnoreToken(search.adminRegionPattern)) {
+          locationSearch.searches.push_back(search);
+        }
+
+        search.locationPattern=*text2;
+        search.addressPattern=*text3;
+        search.adminRegionPattern=*text1;
+
+        if (!locationIndex->IsLocationIgnoreToken(search.locationPattern) &&
+            !locationIndex->IsRegionIgnoreToken(search.adminRegionPattern)) {
+          locationSearch.searches.push_back(search);
+        }
+      }
+    }
+
+    if (tokens.size()>=2) {
+      std::list<std::list<std::string> > slices;
+
+      GroupStringListToStrings(tokens.begin(),
+                               tokens.size(),
+                               2,
+                               slices);
+
+      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
+          slice!=slices.end();
+          ++slice) {
+        std::list<std::string>::const_iterator text1;
+        std::list<std::string>::const_iterator text2;
+
+        text1=slice->begin();
+        text2=text1;
+        text2++;
+
+        osmscout::LocationSearch::Entry search;
+
+        search.locationPattern=*text1;
+        search.adminRegionPattern=*text2;
+
+        if (!locationIndex->IsLocationIgnoreToken(search.locationPattern) &&
+            !locationIndex->IsRegionIgnoreToken(search.adminRegionPattern)) {
+          locationSearch.searches.push_back(search);
+        }
+
+        search.locationPattern=*text2;
+        search.adminRegionPattern=*text1;
+
+        if (!locationIndex->IsLocationIgnoreToken(search.locationPattern) &&
+            !locationIndex->IsRegionIgnoreToken(search.adminRegionPattern)) {
+          locationSearch.searches.push_back(search);
+        }
+      }
+    }
+
+    if (tokens.size()>=1) {
+      std::list<std::list<std::string> > slices;
+
+      GroupStringListToStrings(tokens.begin(),
+                               tokens.size(),
+                               1,
+                               slices);
+
+      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
+          slice!=slices.end();
+          ++slice) {
+        std::list<std::string>::const_iterator text1=slice->begin();
+
+        osmscout::LocationSearch::Entry search;
+
+        search.adminRegionPattern=*text1;
+
+        if (!locationIndex->IsRegionIgnoreToken(search.adminRegionPattern)) {
+          locationSearch.searches.push_back(search);
+        }
+      }
+    }
 
     return true;
   }

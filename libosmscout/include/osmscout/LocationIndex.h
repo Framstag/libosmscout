@@ -47,13 +47,15 @@ namespace osmscout {
     static const char* const FILENAME_LOCATION_IDX;
 
   private:
-    std::string      path;
-    mutable uint8_t  bytesForNodeFileOffset;
-    mutable uint8_t  bytesForAreaFileOffset;
-    mutable uint8_t  bytesForWayFileOffset;
+    std::string                   path;
+    mutable uint8_t               bytesForNodeFileOffset;
+    mutable uint8_t               bytesForAreaFileOffset;
+    mutable uint8_t               bytesForWayFileOffset;
+    OSMSCOUT_HASHSET<std::string> regionIgnoreTokens;
+    OSMSCOUT_HASHSET<std::string> locationIgnoreTokens;
+    FileOffset                    indexOffset;
 
   private:
-    bool ReadObjectFileOffsetBytes(FileScanner& scanner) const;
     bool Read(FileScanner& scanner,
               ObjectFileRef& object) const;
 
@@ -84,6 +86,9 @@ namespace osmscout {
     virtual ~LocationIndex();
 
     bool Load(const std::string& path);
+
+    bool IsRegionIgnoreToken(const std::string& token) const;
+    bool IsLocationIgnoreToken(const std::string& token) const;
 
     /**
      * Visit all admin regions

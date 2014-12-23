@@ -148,7 +148,8 @@ public:
   bool ResolveAdminRegionHierachie(const osmscout::AdminRegionRef& adminRegion,
                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef >& refs) const;
 
-  bool SearchForLocations(const osmscout::LocationSearch& search,
+  bool SearchForLocations(const std::string& searchPattern,
+                          size_t limit,
                           osmscout::LocationSearchResult& result) const;
 
   bool CalculateRoute(osmscout::Vehicle vehicle,

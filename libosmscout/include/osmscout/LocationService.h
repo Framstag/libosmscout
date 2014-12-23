@@ -48,18 +48,6 @@ namespace osmscout {
     size_t           limit;
 
     LocationSearch();
-
-    /**
-     * This takes the given pattern, splits it into tokens,
-     * and generates a number of search entries based on the idea
-     * that the input follows one of the following patterns:
-     * - AdminRegion Location Address
-     * - Location Address AdminRegion
-     * - AdminRegion Location
-     * - Location AdminRegion
-     * - AdminRegion
-     */
-    void InitializeSearchEntries(const std::string& searchPattern);
   };
 
   class OSMSCOUT_API LocationSearchResult
@@ -288,6 +276,9 @@ namespace osmscout {
 
     bool ResolveAdminRegionHierachie(const AdminRegionRef& adminRegion,
                                      std::map<FileOffset,AdminRegionRef >& refs) const;
+
+    bool InitializeLocationSearchEntries(const std::string& searchPattern,
+                                         LocationSearch& search);
 
     bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;

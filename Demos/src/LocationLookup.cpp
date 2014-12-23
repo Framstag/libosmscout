@@ -239,7 +239,11 @@ int main(int argc, char* argv[])
 
   search.limit=50;
 
-  search.InitializeSearchEntries(searchPattern);
+  if (!locationService->InitializeLocationSearchEntries(searchPattern,
+                                                        search)) {
+    std::cerr << "Error while parsing search string" << std::endl;
+    return false;
+  }
 
   if (!locationService->SearchForLocations(search,
                                            searchResult)) {

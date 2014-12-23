@@ -44,14 +44,67 @@ namespace osmscout {
   {
     this->path=path;
 
-    return true;
+    FileScanner scanner;
+
+    if (!scanner.Open(AppendFileToDir(path,
+                                      FILENAME_LOCATION_IDX),
+                      FileScanner::LowMemRandom,
+                      true)) {
+      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      return false;
+    }
+
+    if (!(scanner.Read(bytesForNodeFileOffset) &&
+          scanner.Read(bytesForAreaFileOffset) &&
+          scanner.Read(bytesForWayFileOffset))) {
+      return false;
+    }
+
+    uint32_t ignoreTokenCount;
+
+    if (!scanner.ReadNumber(ignoreTokenCount)) {
+      return false;
+    }
+
+    for (size_t i=0; i<ignoreTokenCount; i++) {
+      std::string token;
+
+      if (!scanner.Read(token)) {
+        return false;
+      }
+
+      regionIgnoreTokens.insert(token);
+    }
+
+    if (!scanner.ReadNumber(ignoreTokenCount)) {
+      return false;
+    }
+
+    for (size_t i=0; i<ignoreTokenCount; i++) {
+      std::string token;
+
+      if (!scanner.Read(token)) {
+        return false;
+      }
+
+      locationIgnoreTokens.insert(token);
+    }
+
+    if (!scanner.GetPos(indexOffset)) {
+      return false;
+    }
+
+    return !scanner.HasError() && scanner.Close();
   }
 
-  bool LocationIndex::ReadObjectFileOffsetBytes(FileScanner& scanner) const
+  bool LocationIndex::IsRegionIgnoreToken(const std::string& token) const
   {
-    return scanner.Read(bytesForNodeFileOffset) &&
-           scanner.Read(bytesForAreaFileOffset) &&
-           scanner.Read(bytesForWayFileOffset);
+    return regionIgnoreTokens.find(token)!=regionIgnoreTokens.end();
+  }
+
+  bool LocationIndex::IsLocationIgnoreToken(const std::string& token) const
+  {
+    return locationIgnoreTokens.find(token)!=locationIgnoreTokens.end();
   }
 
   bool LocationIndex::Read(FileScanner& scanner,
@@ -426,7 +479,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!ReadObjectFileOffsetBytes(scanner)) {
+    if (!scanner.SetPos(indexOffset)) {
       return false;
     }
 
@@ -480,7 +533,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!ReadObjectFileOffsetBytes(scanner)) {
+    if (!scanner.SetPos(indexOffset)) {
       return false;
     }
 
@@ -513,7 +566,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!ReadObjectFileOffsetBytes(scanner)) {
+    if (!scanner.SetPos(indexOffset)) {
       return false;
     }
 
@@ -541,7 +594,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!ReadObjectFileOffsetBytes(scanner)) {
+    if (!scanner.SetPos(indexOffset)) {
       return false;
     }
 

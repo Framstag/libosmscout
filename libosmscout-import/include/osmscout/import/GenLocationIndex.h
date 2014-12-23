@@ -178,13 +178,30 @@ namespace osmscout {
     bool Write(FileWriter& writer,
                const ObjectFileRef& object);
 
+    void AnalyseStringForIgnoreTokens(const std::string& string,
+                                      OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
+                                      OSMSCOUT_HASHSET<std::string>& blacklist);
+
+    void CalculateRegionNameIgnoreTokens(const Region& parent,
+                                         OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
+                                         OSMSCOUT_HASHSET<std::string>& blacklist);
+
+    void CalculateLocationNameIgnoreTokens(const Region& parent,
+                                           OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
+                                           OSMSCOUT_HASHSET<std::string>& blacklist);
+
+    bool CalculateIgnoreTokens(const Region& rootRegion,
+                               std::list<std::string>& regionTokens,
+                               std::list<std::string>& locationTokens);
+
+
     void DumpRegion(const Region& parent,
                     size_t indent,
                     std::ostream& out);
 
     bool DumpLocationTree(Progress& progress,
-                        const Region& rootRegion,
-                        const std::string& filename);
+                          const Region& rootRegion,
+                          const std::string& filename);
 
     void AddRegion(Region& parent,
                    const RegionRef& region);
@@ -334,6 +351,10 @@ namespace osmscout {
                            Progress& progress,
                            RegionRef& rootRegion,
                            const RegionIndex& regionIndex);
+
+    bool WriteIgnoreTokens(FileWriter& writer,
+                           const std::list<std::string>& regionIgnoreTokens,
+                           const std::list<std::string>& locationIgnoreTokens);
 
     bool WriteRegionIndexEntry(FileWriter& writer,
                                const Region& parentRegion,

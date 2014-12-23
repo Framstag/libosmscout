@@ -472,10 +472,21 @@ bool DBThread::ResolveAdminRegionHierachie(const osmscout::AdminRegionRef& admin
                                                       refs);
 }
 
-bool DBThread::SearchForLocations(const osmscout::LocationSearch& search,
+bool DBThread::SearchForLocations(const std::string& searchPattern,
+                                  size_t limit,
                                   osmscout::LocationSearchResult& result) const
 {
   QMutexLocker locker(&mutex);
+
+
+  osmscout::LocationSearch search;
+
+  search.limit=limit;
+
+  if (!locationService->InitializeLocationSearchEntries(searchPattern,
+                                                        search)) {
+      return false;
+  }
 
   return locationService->SearchForLocations(search,
                                              result);
