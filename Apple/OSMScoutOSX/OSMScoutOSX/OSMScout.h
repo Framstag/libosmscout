@@ -50,7 +50,7 @@ namespace osmscout {
         bool                isDatabaseOpened;
         StyleConfig         *styleConfig;
         MapPainterIOS       *mapPainter;
-        MercatorProjection  projection;
+        TileProjection      projection;
         MapParameter        drawParameter;
         MyBreaker           *drawBreaker;
         double              loadedLatMin;
@@ -58,6 +58,7 @@ namespace osmscout {
         double              loadedLatMax;
         double              loadedLonMax;
         Magnification       loadedMagnification;
+        double              dpi;
         AreaSearchParameter searchParameter;
         MapService          mapService;
         MapData             data;
@@ -68,8 +69,8 @@ namespace osmscout {
         virtual ~OSMScoutCpp();
         void abortDrawing();
         void drawingBreakerReset();
-        bool initDraw(size_t dpi);
-        void drawMap(CGContextRef paintCG, double lat, double lon, double zoom, size_t width, size_t height);
+        bool initDraw(double dpi);
+        void drawMap(CGContextRef paintCG, size_t x, size_t y, double zoom, size_t width, size_t height);
     };
 }
 #endif
@@ -77,9 +78,9 @@ namespace osmscout {
 #import <CoreLocation/CLLocation.h>
 @interface OSMScout : NSObject {
 }
-+(OSMScout *)OSMScoutWithPath:(NSString *)path dpi:(size_t)dpi;
--(id)initWithPath:(NSString *)path dpi:(size_t)dpi;
--(void)drawMapTo: (CGContextRef) cg lat:(CLLocationDegrees)lat lon:(CLLocationDegrees)lon zoom: (double) zoom width: (CGFloat) width height: (CGFloat) height;
++(OSMScout *)OSMScoutWithPath:(NSString *)path dpi:(double)dpi;
+-(id)initWithPath:(NSString *)path dpi:(double)dpi;
+-(void)drawMapTo: (CGContextRef) cg x:(NSUInteger)lat y:(NSUInteger)y zoom: (double) zoom width: (CGFloat) width height: (CGFloat) height;
 
 @end
 

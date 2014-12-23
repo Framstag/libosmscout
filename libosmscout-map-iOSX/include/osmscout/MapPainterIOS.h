@@ -77,7 +77,8 @@ namespace osmscout {
         bool HasPattern(const MapParameter& parameter,
                         const FillStyle& style);
         
-        void GetTextDimension(const MapParameter& parameter,
+        void GetTextDimension(const Projection& projection,
+                              const MapParameter& parameter,
                               double fontSize,
                               const std::string& text,
                               double& xOff,
@@ -135,11 +136,11 @@ namespace osmscout {
         void SetPen(const LineStyle& style,
                     double lineWidth);
 
-        double textLength(const MapParameter& parameter, double fontSize, std::string text);
-        double textHeight(const MapParameter& parameter, double fontSize, std::string text);
+        double textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text);
+        double textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text);
         
     private:
-        Font *GetFont(const MapParameter& parameter, double fontSize);
+        Font *GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
         double pathLength(size_t transStart, size_t transEnd);
         bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
         void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
