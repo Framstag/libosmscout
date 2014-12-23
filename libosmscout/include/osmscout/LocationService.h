@@ -181,12 +181,14 @@ namespace osmscout {
       size_t              limit;
 
     public:
+      AdminRegionRef            adminRegion;
       std::list<POIResult>      poiResults;
       std::list<LocationResult> locationResults;
       bool                      limitReached;
 
     public:
-      LocationMatchVisitor(const std::string& pattern,
+      LocationMatchVisitor(const AdminRegionRef& adminRegion,
+                           const std::string& pattern,
                            size_t limit);
 
       bool Visit(const AdminRegion& adminRegion,

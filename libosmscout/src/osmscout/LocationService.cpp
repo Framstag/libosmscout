@@ -81,47 +81,56 @@ namespace osmscout {
 
   AdminRegionVisitor::Action LocationService::AdminRegionMatchVisitor::Visit(const AdminRegion& region)
   {
-    bool atLeastOneMatch=false;
+    bool atLeastOneAliasMatch=false;
 
-    bool match;
-    bool candidate;
+    bool regionMatch;
+    bool regionCandidate;
 
-    for (size_t i=0; i<region.aliases.size(); i++) {
-      Match(region.aliases[i].name,
-            match,
-            candidate);
+    Match(region.name,
+          regionMatch,
+          regionCandidate);
 
-      if (match || candidate) {
-        AdminRegionResult result;
+    if (!regionMatch) {
+      for (const auto& alias : region.aliases) {
+        bool match;
+        bool candidate;
 
-        result.adminRegion=new AdminRegion(region);
-        result.isMatch=match;
+        Match(alias.name,
+              match,
+              candidate);
 
-        result.adminRegion->aliasName=region.aliases[i].name;
-        result.adminRegion->aliasObject.Set(region.aliases[i].objectOffset,refNode);
+        if (match || candidate) {
+          AdminRegionResult result;
 
-        results.push_back(result);
+          result.adminRegion=new AdminRegion(region);
+          result.isMatch=match;
 
-        if (match) {
-          atLeastOneMatch=true;
+          result.adminRegion->aliasName=alias.name;
+          result.adminRegion->aliasObject.Set(alias.objectOffset,refNode);
+
+          //std::cout << pattern << " => (alias) " << result.adminRegion->aliasName << " " << match << " " << regionCandidate << " " << std::endl;
+
+          results.push_back(result);
+
+          if (match) {
+            atLeastOneAliasMatch=true;
+          }
+
+          limitReached=results.size()>=limit;
         }
-
-        limitReached=results.size()>=limit;
       }
     }
 
-    // If we have a perfect match for an alias, we not not try to match
+    // If we have a perfect match for an alias, we not not try to regionMatch
     // the region name itself
-    if (!atLeastOneMatch) {
-      Match(region.name,
-            match,
-            candidate);
-
-      if (match || candidate) {
+    if (!atLeastOneAliasMatch) {
+      if (regionMatch || regionCandidate) {
         AdminRegionResult result;
 
         result.adminRegion=new AdminRegion(region);
-        result.isMatch=match;
+        result.isMatch=regionMatch;
+
+        //std::cout << pattern << " => (region) " << result.adminRegion->name << " " << regionMatch << " " << regionCandidate << std::endl;
 
         results.push_back(result);
       }
@@ -135,10 +144,12 @@ namespace osmscout {
     }
   }
 
-  LocationService::LocationMatchVisitor::LocationMatchVisitor(const std::string& pattern,
+  LocationService::LocationMatchVisitor::LocationMatchVisitor(const AdminRegionRef& adminRegion,
+                                                              const std::string& pattern,
                                                               size_t limit)
   : VisitorMatcher(pattern),
     limit(limit),
+    adminRegion(adminRegion),
     limitReached(false)
   {
     // no code
@@ -157,7 +168,13 @@ namespace osmscout {
     if (match || candidate) {
       POIResult result;
 
-      result.adminRegion=new AdminRegion(adminRegion);
+      if (adminRegion.object==this->adminRegion->object) {
+        result.adminRegion=new AdminRegion(this->adminRegion);
+      }
+      else {
+        result.adminRegion=new AdminRegion(adminRegion);
+      }
+
       result.poi=new POI(poi);
       result.isMatch=match;
 
@@ -182,11 +199,19 @@ namespace osmscout {
     if (match || candidate) {
       LocationResult result;
 
-      result.adminRegion=new AdminRegion(adminRegion);
+      if (adminRegion.object==this->adminRegion->object) {
+        result.adminRegion=new AdminRegion(this->adminRegion);
+      }
+      else {
+        result.adminRegion=new AdminRegion(adminRegion);
+      }
+
       result.location=new Location(loc);
       result.isMatch=match;
 
       locationResults.push_back(result);
+
+      //std::cout << pattern << " =>  " << result.location->name << " " << adminRegion.name << "/" << adminRegion.aliasName << " " << match << " " << candidate << " " << std::endl;
 
       limitReached=poiResults.size()+locationResults.size()>=limit;
     }
@@ -221,6 +246,8 @@ namespace osmscout {
       result.location=new Location(location);
       result.address=new Address(address);
       result.isMatch=match;
+
+      //std::cout << pattern << " =>  " << result.address->name << " " << location.name << " " << adminRegion.name << "/" << adminRegion.aliasName << " " << match << " " << candidate << " " << std::endl;
 
       results.push_back(result);
 
@@ -453,9 +480,10 @@ namespace osmscout {
       return true;
     }
 
-    //std::cout << "  Search for location '" << searchEntry.locationPattern << "'" << std::endl;
+    //std::cout << "  Search for location '" << searchEntry.locationPattern << "'" << " in " << adminRegionResult.adminRegion->name << "/" << adminRegionResult.adminRegion->aliasName << std::endl;
 
-    LocationMatchVisitor visitor(searchEntry.locationPattern,
+    LocationMatchVisitor visitor(adminRegionResult.adminRegion,
+                                 searchEntry.locationPattern,
                                  search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
 
@@ -473,26 +501,22 @@ namespace osmscout {
       return true;
     }
 
-    for (std::list<LocationMatchVisitor::POIResult>::const_iterator poiResult=visitor.poiResults.begin();
-        poiResult!=visitor.poiResults.end();
-        ++poiResult) {
+    for (const auto& poiResult : visitor.poiResults) {
       if (!HandleAdminRegionPOI(search,
                                 adminRegionResult,
-                                *poiResult,
+                                poiResult,
                                 result)) {
         std::cerr << "Error during traversal of region poi list" << std::endl;
         return false;
       }
     }
 
-    for (std::list<LocationMatchVisitor::LocationResult>::const_iterator locationResult=visitor.locationResults.begin();
-        locationResult!=visitor.locationResults.end();
-        ++locationResult) {
+    for (const auto& locationResult : visitor.locationResults) {
       //std::cout << "  - '" << locationResult->location->name << "'" << std::endl;
       if (!HandleAdminRegionLocation(search,
                                      searchEntry,
                                      adminRegionResult,
-                                     *locationResult,
+                                     locationResult,
                                      result)) {
         std::cerr << "Error during traversal of region location list" << std::endl;
         return false;
@@ -577,14 +601,12 @@ namespace osmscout {
       return true;
     }
 
-    for (std::list<AddressMatchVisitor::AddressResult>::const_iterator addressResult=visitor.results.begin();
-        addressResult!=visitor.results.end();
-        ++addressResult) {
+    for (const auto& addressResult : visitor.results) {
       //std::cout << "    - '" << addressResult->address->name << "'" << std::endl;
       if (!HandleAdminRegionLocationAddress(search,
                                             adminRegionResult,
                                             locationResult,
-                                            *addressResult,
+                                            addressResult,
                                             result)) {
         return false;
       }
@@ -823,16 +845,14 @@ namespace osmscout {
     result.limitReached=false;
     result.results.clear();
 
-    for (std::list<LocationSearch::Entry>::const_iterator searchEntry=search.searches.begin();
-        searchEntry!=search.searches.end();
-        ++searchEntry) {
-      if (searchEntry->adminRegionPattern.empty()) {
+    for (const auto& searchEntry : search.searches) {
+      if (searchEntry.adminRegionPattern.empty()) {
         continue;
       }
 
       //std::cout << "Search for region '" << searchEntry->adminRegionPattern << "'..." << std::endl;
 
-      AdminRegionMatchVisitor adminRegionVisitor(searchEntry->adminRegionPattern,
+      AdminRegionMatchVisitor adminRegionVisitor(searchEntry.adminRegionPattern,
                                                  search.limit);
 
       if (!VisitAdminRegions(adminRegionVisitor)) {
@@ -844,14 +864,12 @@ namespace osmscout {
         result.limitReached=true;
       }
 
-      for (std::list<AdminRegionMatchVisitor::AdminRegionResult>::const_iterator regionResult=adminRegionVisitor.results.begin();
-          regionResult!=adminRegionVisitor.results.end();
-          ++regionResult) {
-        //std::cout << "- '" << regionResult->adminRegion->name << "', '" << regionResult->adminRegion->aliasName << "'..." << std::endl;
+      for (const auto& regionResult : adminRegionVisitor.results) {
+        // std::cout << "- '" << regionResult.adminRegion->name << "', '" << regionResult.adminRegion->aliasName << "'..." << std::endl;
 
         if (!HandleAdminRegion(search,
-                               *searchEntry,
-                               *regionResult,
+                               searchEntry,
+                               regionResult,
                                result)) {
           return false;
         }
@@ -933,17 +951,15 @@ namespace osmscout {
           continue;
         }
 
-        for (std::list<SearchEntry>::const_iterator entry=searchEntries.begin();
-            entry!=searchEntries.end();
-            ++entry) {
-          if (entry->coords.size()==1) {
-            if (!IsCoordInArea(entry->coords.front(),
+        for (const auto& entry : searchEntries) {
+          if (entry.coords.size()==1) {
+            if (!IsCoordInArea(entry.coords.front(),
                                area->rings[r].nodes)) {
               continue;
             }
           }
           else {
-            if (!IsAreaAtLeastPartlyInArea(entry->coords,
+            if (!IsAreaAtLeastPartlyInArea(entry.coords,
                                            area->rings[r].nodes)) {
               continue;
             }
@@ -1038,13 +1054,11 @@ namespace osmscout {
 
     locations.push_back(l);
 
-    for (std::vector<ObjectFileRef>::const_iterator object=location.objects.begin();
-        object!=location.objects.end();
-        ++object) {
-      if (objects.find(*object)!=objects.end()) {
+    for (const auto& object : location.objects) {
+      if (objects.find(object)!=objects.end()) {
         LocationService::ReverseLookupResult result;
 
-        result.object=*object;
+        result.object=object;
         result.adminRegion=l.adminRegion;
         result.location=l.location;
 
@@ -1124,30 +1138,28 @@ namespace osmscout {
     AdminRegionReverseLookupVisitor adminRegionVisitor(*database,
                                                        result);
 
-    for (std::list<ObjectFileRef>::const_iterator object=objects.begin();
-        object!=objects.end();
-        ++object) {
+    for (const auto& object : objects) {
       std::vector<GeoCoord> coords;
 
-      if (object->GetType()==refNode) {
+      if (object.GetType()==refNode) {
         NodeRef node;
 
-        if (!database->GetNodeByOffset(object->GetFileOffset(),
+        if (!database->GetNodeByOffset(object.GetFileOffset(),
                                        node)) {
           return false;
         }
 
         AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
-        searchEntry.object=*object;
+        searchEntry.object=object;
         searchEntry.coords.push_back(node->GetCoords());
 
         adminRegionVisitor.AddSearchEntry(searchEntry);
       }
-      else if (object->GetType()==refArea) {
+      else if (object.GetType()==refArea) {
         AreaRef area;
 
-        if (!database->GetAreaByOffset(object->GetFileOffset(),
+        if (!database->GetAreaByOffset(object.GetFileOffset(),
                                        area)) {
           return false;
         }
@@ -1156,24 +1168,24 @@ namespace osmscout {
           if (area->rings[r].ring==Area::outerRingId) {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
-            searchEntry.object=*object;
+            searchEntry.object=object;
             searchEntry.coords=area->rings[r].nodes;
 
             adminRegionVisitor.AddSearchEntry(searchEntry);
           }
         }
       }
-      else if (object->GetType()==refWay) {
+      else if (object.GetType()==refWay) {
         WayRef way;
 
-        if (!database->GetWayByOffset(object->GetFileOffset(),
+        if (!database->GetWayByOffset(object.GetFileOffset(),
                                       way)) {
           return false;
         }
 
         AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
-        searchEntry.object=*object;
+        searchEntry.object=object;
         searchEntry.coords=way->nodes;
 
         adminRegionVisitor.AddSearchEntry(searchEntry);
@@ -1193,16 +1205,12 @@ namespace osmscout {
 
     LocationReverseLookupVisitor locationVisitor(result);
 
-    for (std::list<ObjectFileRef>::const_iterator object=objects.begin();
-        object!=objects.end();
-        ++object) {
-      locationVisitor.AddObject(*object);
+    for (const auto& object : objects) {
+      locationVisitor.AddObject(object);
     }
 
-    for (std::map<FileOffset,AdminRegionRef>::const_iterator regionEntry=adminRegionVisitor.adminRegions.begin();
-        regionEntry!=adminRegionVisitor.adminRegions.end();
-        ++regionEntry) {
-      if (!locationIndex->VisitAdminRegionLocations(*regionEntry->second,
+    for (const auto& regionEntry : adminRegionVisitor.adminRegions) {
+      if (!locationIndex->VisitAdminRegionLocations(*regionEntry.second,
                                                     locationVisitor,
                                                     false)) {
         return false;
@@ -1211,18 +1219,13 @@ namespace osmscout {
 
     AddressReverseLookupVisitor addressVisitor(result);
 
-    for (std::list<ObjectFileRef>::const_iterator object=objects.begin();
-        object!=objects.end();
-        ++object) {
-      addressVisitor.AddObject(*object);
+    for (const auto& object : objects) {
+      addressVisitor.AddObject(object);
     }
 
-    for (std::list<LocationReverseLookupVisitor::Loc>::const_iterator location=locationVisitor.locations.begin();
-        location!=locationVisitor.locations.end();
-        ++location) {
-
-      if (!locationIndex->VisitLocationAddresses(location->adminRegion,
-                                                 location->location,
+    for (const auto& location : locationVisitor.locations) {
+      if (!locationIndex->VisitLocationAddresses(location.adminRegion,
+                                                 location.location,
                                                  addressVisitor)) {
         return false;
       }
