@@ -827,6 +827,8 @@ namespace osmscout {
         if (!routeNodeDataFile.GetOffset(forwardRouteNode->id,
                                          forwardOffset)) {
           std::cerr << "Cannot get offset of startForwardRouteNode" << std::endl;
+
+          return false;
         }
 
         RNodeRef node=new RNode(forwardOffset,
@@ -851,6 +853,8 @@ namespace osmscout {
         if (!routeNodeDataFile.GetOffset(backwardRouteNode->id,
                                          backwardOffset)) {
           std::cerr << "Cannot get offset of startBackwardRouteNode" << std::endl;
+
+          return false;
         }
 
         RNodeRef node=new RNode(backwardOffset,
