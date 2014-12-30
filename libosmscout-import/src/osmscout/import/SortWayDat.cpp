@@ -380,7 +380,7 @@ namespace osmscout {
   SortWayDataGenerator::SortWayDataGenerator()
   : SortDataGenerator<Way>("ways.dat","ways.idmap")
   {
-    AddSource("wayway.dat");
+    AddSource("ways.tmp");
 
     AddFilter(new WayLocationProcessorFilter());
     AddFilter(new WayNodeReductionProcessorFilter());

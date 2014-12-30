@@ -22,8 +22,6 @@
 
 #include <osmscout/ImportFeatures.h>
 
-#include <map>
-
 #include <osmscout/import/Import.h>
 
 #include <osmscout/Area.h>
@@ -36,35 +34,25 @@ namespace osmscout {
   class OptimizeAreaWayIdsGenerator : public ImportModule
   {
   private:
-    bool ScanWayAreaIds(const ImportParameter& parameter,
-                        Progress& progress,
-                        const TypeConfig& typeConfig,
-                        NodeUseMap& nodeUseMap);
-
-    bool ScanRelAreaIds(const ImportParameter& parameter,
-                        Progress& progress,
-                        const TypeConfig& typeConfig,
-                        NodeUseMap& nodeUseMap);
-
-    bool ScanWayWayIds(const ImportParameter& parameter,
-                       Progress& progress,
-                       const TypeConfig& typeConfig,
-                       NodeUseMap& nodeUseMap);
-
-    bool CopyWayArea(const ImportParameter& parameter,
+    bool ScanAreaIds(const ImportParameter& parameter,
                      Progress& progress,
                      const TypeConfig& typeConfig,
                      NodeUseMap& nodeUseMap);
 
-    bool CopyRelArea(const ImportParameter& parameter,
-                     Progress& progress,
-                     const TypeConfig& typeConfig,
-                     NodeUseMap& nodeUseMap);
-
-    bool CopyWayWay(const ImportParameter& parameter,
+    bool ScanWayIds(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,
                     NodeUseMap& nodeUseMap);
+
+    bool CopyAreas(const ImportParameter& parameter,
+                   Progress& progress,
+                   const TypeConfig& typeConfig,
+                   NodeUseMap& nodeUseMap);
+
+    bool CopyWays(const ImportParameter& parameter,
+                  Progress& progress,
+                  const TypeConfig& typeConfig,
+                  NodeUseMap& nodeUseMap);
   public:
     std::string GetDescription() const;
     bool Import(const TypeConfigRef& typeConfig,

@@ -68,10 +68,9 @@ wayway.tmp (import only):
  * Conversion of rawnodes.dat, rawways.dat and rawrels.dat to
    the export data structures.
 
-relarea.dat,
-wayarea.dat,
-wayway.dat (import only):
- * New version of *.tmp after nodes ids have been reduce to
+areas.tmp,
+ways.tmp (import only):
+ * New version of *.tmp after nodes ids have been reduced to
    only those nodes that are referenced at least twice. 
 
 turnrestr.dat (import only):

@@ -472,8 +472,7 @@ namespace osmscout {
   SortAreaDataGenerator::SortAreaDataGenerator()
   : SortDataGenerator<Area>("areas.dat","areas.idmap")
   {
-    AddSource("wayarea.dat");
-    AddSource("relarea.dat");
+    AddSource("areas.tmp");
 
     AddFilter(new AreaLocationProcessorFilter());
     AddFilter(new AreaNodeReductionProcessorFilter());
