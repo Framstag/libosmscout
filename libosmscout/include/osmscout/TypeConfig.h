@@ -239,7 +239,7 @@ namespace osmscout {
     bool                                 optimizeLowZoom;         //<! Optimize objects of this type for low zoom rendering
     bool                                 multipolygon;
     bool                                 pinWay;                  //<! If there is no way/area information treat this object as way even it the way is closed
-    bool                                 mergeArea;               //<! Areas of this type are merged under certain conditions
+    bool                                 mergeAreas;              //<! Areas of this type are merged under certain conditions
     bool                                 ignoreSeaLand;           //<! Ignore objects of this type for sea/land calculation
     bool                                 ignore;                  //<! Ignore objects of this type
 
@@ -658,16 +658,16 @@ namespace osmscout {
     /**
      * Set to true, if "touching" areas of this type should get merged.
      */
-    inline TypeInfo& SetMergeArea(bool mergeArea)
+    inline TypeInfo& SetMergeAreas(bool mergeAreas)
     {
-      this->mergeArea=mergeArea;
+      this->mergeAreas=mergeAreas;
 
       return *this;
     }
 
-    inline bool GetMergeArea() const
+    inline bool GetMergeAreas() const
     {
-      return mergeArea;
+      return mergeAreas;
     }
 
     /**

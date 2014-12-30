@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 51;
-	noSym = 51;
+	maxT = 52;
+	noSym = 52;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 106; ++i) start.set(i, 1);
@@ -196,11 +196,12 @@ void Scanner::Init() {
 	keywords.set("OPTIMIZE_LOW_ZOOM", 43);
 	keywords.set("MULTIPOLYGON", 44);
 	keywords.set("PIN_WAY", 45);
-	keywords.set("IGNORESEALAND", 46);
-	keywords.set("PATH", 47);
-	keywords.set("FOOT", 48);
-	keywords.set("BICYCLE", 49);
-	keywords.set("CAR", 50);
+	keywords.set("MERGE_AREAS", 46);
+	keywords.set("IGNORESEALAND", 47);
+	keywords.set("PATH", 48);
+	keywords.set("FOOT", 49);
+	keywords.set("BICYCLE", 50);
+	keywords.set("CAR", 51);
 
 
   tvalLength = 128;

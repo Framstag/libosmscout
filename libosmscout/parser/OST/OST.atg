@@ -466,6 +466,7 @@ PRODUCTIONS
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .) // TODO: Only valid for WAY AND AREA
                | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)    // TODO: Only valid for AREA
                | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)          // TODO: Only valid for WAY
+               | "MERGE_AREAS"       (. typeInfo.SetMergeAreas(true); .)      // TODO: Only valid for AREA
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
                .
 

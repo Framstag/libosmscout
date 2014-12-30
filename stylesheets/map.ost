@@ -48,7 +48,7 @@ OST
       * Address
     LOCATION:
       The given way or area should be indexed as location.
-    MERGE_AREA:
+    MERGE_AREAS:
       Areas of this type that "touch" each other and the same attribute values
       will get merged.    
     IGNORESEALAND:
@@ -488,6 +488,7 @@ TYPES
   TYPE landuse_allotments
     = NODE AREA ("landuse"=="allotments")
       {Name, NameAlt}
+      MERGE_AREAS
      
   TYPE landuse_basin
     = NODE AREA ("landuse"=="basin")
@@ -497,7 +498,7 @@ TYPES
   TYPE landuse_brownfield
     = AREA ("landuse"=="brownfield")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
        
   TYPE landuse_cemetery
     = AREA ("landuse"=="cemetery")
@@ -511,11 +512,11 @@ TYPES
   TYPE landuse_commercial
     = NODE AREA ("landuse"=="commercial")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
        
   TYPE landuse_construction
     = NODE AREA ("landuse"=="construction")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_farm
     = AREA ("landuse"=="farm")
@@ -525,7 +526,7 @@ TYPES
   TYPE landuse_farmland
     = AREA ("landuse"=="farmland")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
     
   TYPE landuse_farmyard_building
     = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -533,12 +534,12 @@ TYPES
     
   TYPE landuse_farmyard
     = AREA ("landuse"=="farmyard")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_forest
     = NODE AREA ("landuse"=="forest")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
     
   TYPE landuse_garages
     = AREA ("landuse"=="garages")
@@ -546,30 +547,30 @@ TYPES
     
   TYPE landuse_grass
     = NODE AREA ("landuse"=="grass")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_greenfield
     = NODE AREA ("landuse"=="greenfield")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE landuse_greenhouse_horticulture
     = AREA ("landuse"=="greenhouse_horticulture")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_industrial
     = NODE AREA ("landuse"=="industrial")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE landuse_landfill
     = NODE AREA ("landuse"=="landfill")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE landuse_meadow
     = NODE AREA ("landuse"=="meadow")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_military
     = NODE AREA ("landuse"=="military")
@@ -578,25 +579,25 @@ TYPES
       
   TYPE landuse_orchard
     = NODE AREA ("landuse"=="orchard")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
 
   TYPE landuse_piste
     = NODE AREA ("landuse"=="piste")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_quarry
     = NODE AREA ("landuse"=="quarry")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE landuse_railway
     = AREA ("landuse"=="railway")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_recreation_ground
     = NODE AREA ("landuse"=="recreation_ground")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE landuse_reservoir
     = NODE AREA ("landuse"=="reservoir")
@@ -606,10 +607,10 @@ TYPES
   TYPE landuse_residential
     = NODE AREA ("landuse"=="residential")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE landuse_retail
-    = NODE AREA ("landuse"=="retail")
+    = NODE AREA ("landuse"=="retail") MERGE_AREAS
     
   TYPE landuse_salt_pond
     = AREA ("landuse"=="salt_pond")
@@ -617,11 +618,11 @@ TYPES
     
   TYPE landuse_village_green
     = NODE AREA ("landuse"=="village_green")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE landuse_vineyard
     = AREA ("landuse"=="vineyard")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   //
   // Natural
@@ -634,12 +635,12 @@ TYPES
   TYPE natural_beach
     = NODE AREA ("natural"=="beach")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
 
   TYPE natural_bare_rock
     = NODE AREA ("natural"=="bare_rock")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_cave_entrance
     = NODE AREA ("natural"=="cave_entrance")
@@ -648,35 +649,36 @@ TYPES
   TYPE natural_cliff
     = NODE WAY AREA ("natural"=="cliff")
       {Name, NameAlt, Width}
+      MERGE_AREAS
 
   TYPE natural_fell
     = NODE AREA ("natural"=="fell")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_glacier
     = NODE AREA ("natural"=="glacier")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_grassland
     = AREA ("natural"=="grassland")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_heath
     = NODE AREA ("natural"=="heath")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_land
     = NODE AREA ("natural"=="land")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_mud
     = AREA ("natural"=="mud")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE natural_peak
     = NODE ("natural"=="peak")
@@ -684,16 +686,16 @@ TYPES
     
   TYPE natural_sand
     = AREA ("natural"=="sand")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
     
   TYPE natural_scree
     = NODE AREA ("natural"=="scree")
-      {Name, NameAlt}
+      {Name, NameAlt} MERGE_AREAS
    
   TYPE natural_scrub
     = NODE AREA ("natural"=="scrub")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_spring
     = NODE ("natural"=="spring")
@@ -710,27 +712,27 @@ TYPES
   TYPE natural_water
     = NODE AREA ("natural"=="water")
       {Name, NameAlt}
-      IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      IGNORESEALAND OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_wetland_marsh
     = NODE AREA ("natural"=="wetland" AND "wetland"=="marsh")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_wetland_tidalflat
     = NODE AREA ("natural"=="wetland" AND "wetland"=="tidalflat")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_wetland
     = NODE AREA ("natural"=="wetland")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE natural_wood
     = NODE AREA ("natural"=="wood")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
 
   //
   // Man made
