@@ -263,12 +263,6 @@ namespace osmscout {
     uint32_t wayCount=0;
     size_t   collectedWaysCount=0;
 
-
-    progress.Info("Type dump:");
-    for (auto type : types) {
-      progress.SetAction("* "+type->GetName());
-    }
-
     if (!scanner.GotoBegin()) {
       progress.Error("Error while positioning at start of file");
       return false;
