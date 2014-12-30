@@ -118,7 +118,7 @@ namespace osmscout {
   }
 
   /**
-    Recursivly consume all direct children and all direct children of that children)
+    Recursively consume all direct children and all direct children of that children)
     of the given role.
    */
   void RelAreaDataGenerator::ConsumeSubs(const std::list<MultipolygonPart>& rings,
@@ -157,10 +157,8 @@ namespace osmscout {
 
     // First check, if relation only consists of closed areas
     // In this case nothing is to do
-    for (std::list<MultipolygonPart>::iterator part=parts.begin();
-         part!=parts.end();
-         ++part) {
-      if (!part->IsArea()) {
+    for (const auto& part : parts) {
+      if (!part.IsArea()) {
         allArea=false;
       }
     }
@@ -171,46 +169,40 @@ namespace osmscout {
     }
 
     // Now build up temporary structures to merge all ways to closed areas
-    for (std::list<MultipolygonPart>::iterator part=parts.begin();
-         part!=parts.end();
-         ++part) {
-      if (part->IsArea()) {
-        rings.push_back(*part);
+    for (auto& part : parts) {
+      if (part.IsArea()) {
+        rings.push_back(part);
       }
       else {
-        partsByEnd[part->role.ids.front()].push_back(&(*part));
-        partsByEnd[part->role.ids.back()].push_back(&(*part));
+        partsByEnd[part.role.ids.front()].push_back(&part);
+        partsByEnd[part.role.ids.back()].push_back(&part);
       }
     }
 
-    for (std::map<Id, std::list<MultipolygonPart*> >::iterator entry=partsByEnd.begin();
-         entry!=partsByEnd.end();
-         ++entry) {
-      if (entry->second.size()<2) {
-        progress.Error("Node "+NumberToString(entry->first)+
-                       " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
+    for (const auto& entry : partsByEnd) {
+      if (entry.second.size()<2) {
+        progress.Error("Node "+NumberToString(entry.first)+
+                       " of way "+NumberToString(entry.second.front()->ways.front()->GetId())+
                        " cannot be joined with any other way of the relation "+
                        NumberToString(id)+" "+name);
         return false;
       }
 
-      if (entry->second.size()%2!=0) {
-        progress.Error("Node "+NumberToString(entry->first)+
-                       " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
+      if (entry.second.size()%2!=0) {
+        progress.Error("Node "+NumberToString(entry.first)+
+                       " of way "+NumberToString(entry.second.front()->ways.front()->GetId())+
                        " can be joined with uneven number of ways of the relation "+
                        NumberToString(id)+" "+name);
         return false;
       }
     }
 
-    for (std::map<Id, std::list<MultipolygonPart*> >::iterator entry=partsByEnd.begin();
-         entry!=partsByEnd.end();
-         ++entry) {
-      while (!entry->second.empty()) {
+    for (auto& entry : partsByEnd) {
+      while (!entry.second.empty()) {
 
-        MultipolygonPart* part=entry->second.front();
+        MultipolygonPart* part=entry.second.front();
 
-        entry->second.pop_front();
+        entry.second.pop_front();
 
         if (usedParts.find(part)!=usedParts.end()) {
           continue;
@@ -272,8 +264,8 @@ namespace osmscout {
         ring.role.nodes.reserve(nodeCount);
 
         for (std::list<MultipolygonPart*>::const_iterator p=ringParts.begin();
-             p!=ringParts.end();
-             ++p) {
+            p!=ringParts.end();
+            p++) {
           MultipolygonPart* part=*p;
 
           if (p==ringParts.begin()) {
@@ -298,7 +290,7 @@ namespace osmscout {
           }
         }
 
-        // During concatination we might define a closed ring with start==end, but everywhere else
+        // During concatenation we might define a closed ring with start==end, but everywhere else
         // in the code we store areas without repeating the start, so we remove the final node again
         if (ring.role.ids.back()==ring.role.ids.front()) {
           ring.role.ids.pop_back();
@@ -357,15 +349,12 @@ namespace osmscout {
     GroupingState state(parts.size());
 
     size_t ix=0;
-    for (std::list<MultipolygonPart>::const_iterator r1=parts.begin();
-         r1!=parts.end();
-         ++r1) {
+    for (const auto& r1 : parts) {
       size_t jx=0;
-      for (std::list<MultipolygonPart>::const_iterator r2=parts.begin();
-           r2!=parts.end();
-           ++r2) {
+      for (const auto& r2 : parts) {
         if (ix!=jx) {
-          if (IsAreaSubOfArea(r2->role.nodes,r1->role.nodes)) {
+          if (IsAreaSubOfArea(r2.role.nodes,
+                              r1.role.nodes)) {
             state.SetIncluded(ix,jx);
           }
         }
