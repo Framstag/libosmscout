@@ -189,25 +189,23 @@ namespace osmscout {
 
     progress.SetAction("Sorting data");
 
-    for (typename std::list<Source>::iterator source=sources.begin();
-            source!=sources.end();
-            ++source) {
+    for (auto& source : sources) {
       uint32_t dataCount;
 
-      if (!source->scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                source->filename),
+      if (!source.scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                               source.filename),
                                 FileScanner::Sequential,
                                 parameter.GetWayDataMemoryMaped())) {
-        progress.Error(std::string("Cannot open '")+source->scanner.GetFilename()+"'");
+        progress.Error(std::string("Cannot open '")+source.scanner.GetFilename()+"'");
         return false;
       }
 
-      if (!source->scanner.Read(dataCount)) {
+      if (!source.scanner.Read(dataCount)) {
         progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      progress.Info(NumberToString(dataCount)+" entries in file '"+source->scanner.GetFilename()+"'");
+      progress.Info(NumberToString(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
       overallDataCount+=dataCount;
     }
@@ -236,8 +234,8 @@ namespace osmscout {
       std::map<size_t,std::list<CellEntry> > dataByCellMap;
 
       for (typename std::list<Source>::iterator source=sources.begin();
-              source!=sources.end();
-              ++source) {
+           source!=sources.end();
+           ++source) {
         uint32_t dataCount;
         progress.Info("Reading objects from file '"+source->scanner.GetFilename()+"'");
 
@@ -338,26 +336,24 @@ namespace osmscout {
 
         iter->second.sort();
 
-        for (typename std::list<CellEntry>::const_iterator entry=iter->second.begin();
-            entry!=iter->second.end();
-            ++entry) {
+        for (auto& entry : iter->second) {
           progress.SetProgress(copyCount,currentEntries);
 
           N data;
 
-          if (!entry->source->scanner.SetPos(entry->fileOffset)) {
+          if (!entry.source->scanner.SetPos(entry.fileOffset)) {
             progress.Error(std::string("Error while setting current position in file '")+
-                           entry->source->scanner.GetFilename()+"'");
+                           entry.source->scanner.GetFilename()+"'");
 
             return false;
           }
 
           if (!data.Read(typeConfig,
-                         entry->source->scanner))  {
+                         entry.source->scanner))  {
             progress.Error(std::string("Error while reading data entry at offset ")+
-                           NumberToString(entry->fileOffset)+
+                           NumberToString(entry.fileOffset)+
                            " in file '"+
-                           entry->source->scanner.GetFilename()+"'");
+                           entry.source->scanner.GetFilename()+"'");
 
             return false;
           }
@@ -371,11 +367,7 @@ namespace osmscout {
             return false;
           }
 
-          for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
-              f!=filters.end();
-              ++f) {
-            ProcessingFilterRef filter(*f);
-
+          for (const auto& filter : filters) {
             if (!filter->Process(progress,
                                  fileOffset,
                                  data,
@@ -398,8 +390,8 @@ namespace osmscout {
             return false;
           }
 
-          mapWriter.Write(entry->id);
-          mapWriter.Write(entry->type);
+          mapWriter.Write(entry.id);
+          mapWriter.Write(entry.type);
           mapWriter.WriteFileOffset(fileOffset);
 
           copyCount++;
@@ -423,11 +415,9 @@ namespace osmscout {
 
     assert(overallDataCount>=dataCopiedCount);
 
-    for (typename std::list<Source>::iterator source=sources.begin();
-            source!=sources.end();
-            ++source) {
-      if (!source->scanner.Close()) {
-        progress.Error(std::string("Error while  closing '")+source->scanner.GetFilename()+"'");
+    for (auto& source : sources) {
+      if (!source.scanner.Close()) {
+        progress.Error(std::string("Error while  closing '")+source.scanner.GetFilename()+"'");
         return false;
       }
     }
@@ -471,27 +461,25 @@ namespace osmscout {
 
     mapWriter.Write(overallDataCount);
 
-    for (typename std::list<Source>::iterator source=sources.begin();
-            source!=sources.end();
-            ++source) {
+    for (auto& source : sources) {
       uint32_t dataCount=0;
 
-      progress.Info("Copying from file '"+source->scanner.GetFilename()+"'");
+      progress.Info("Copying from file '"+source.scanner.GetFilename()+"'");
 
-      if (!source->scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                source->filename),
-                                                FileScanner::Sequential,
-                                                parameter.GetWayDataMemoryMaped())) {
-        progress.Error(std::string("Cannot open '")+source->scanner.GetFilename()+"'");
+      if (!source.scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                               source.filename),
+                               FileScanner::Sequential,
+                               parameter.GetWayDataMemoryMaped())) {
+        progress.Error(std::string("Cannot open '")+source.scanner.GetFilename()+"'");
         return false;
       }
 
-      if (!source->scanner.Read(dataCount)) {
+      if (!source.scanner.Read(dataCount)) {
         progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      progress.Info(NumberToString(dataCount)+" entries in file '"+source->scanner.GetFilename()+"'");
+      progress.Info(NumberToString(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
       overallDataCount+=dataCount;
 
@@ -502,15 +490,15 @@ namespace osmscout {
 
         progress.SetProgress(current,dataCount);
 
-        if (!source->scanner.Read(type) ||
-            !source->scanner.Read(id) ||
+        if (!source.scanner.Read(type) ||
+            !source.scanner.Read(id) ||
             !data.Read(typeConfig,
-                       source->scanner)) {
+                       source.scanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(current)+" of "+
                          NumberToString(dataCount)+
                          " in file '"+
-                         source->scanner.GetFilename()+"'");
+                         source.scanner.GetFilename()+"'");
 
           return false;
         }
@@ -524,11 +512,7 @@ namespace osmscout {
           return false;
         }
 
-        for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
-            f!=filters.end();
-            ++f) {
-          ProcessingFilterRef filter(*f);
-
+        for (auto& filter : filters) {
           if (!filter->Process(progress,
                                fileOffset,
                                data,
@@ -557,9 +541,9 @@ namespace osmscout {
         mapWriter.WriteFileOffset(fileOffset);
       }
 
-      if (!source->scanner.Close()) {
+      if (!source.scanner.Close()) {
         progress.Error(std::string("Error while closing file '")+
-                       source->scanner.GetFilename()+"'");
+                       source.scanner.GetFilename()+"'");
         return false;
       }
     }
