@@ -1407,6 +1407,7 @@ namespace osmscout {
       bool        optimizeLowZoom;
       bool        multipolygon;
       bool        pinWay;
+      bool        mergeArea;
       bool        ignore;
       bool        ignoreSeaLand;
 
@@ -1426,6 +1427,7 @@ namespace osmscout {
             scanner.Read(optimizeLowZoom) &&
             scanner.Read(multipolygon) &&
             scanner.Read(pinWay) &&
+            scanner.Read(mergeArea) &&
             scanner.Read(ignoreSeaLand) &&
             scanner.Read(ignore))) {
 
@@ -1449,10 +1451,11 @@ namespace osmscout {
       typeInfo->SetIndexAsLocation(indexAsLocation);
       typeInfo->SetIndexAsRegion(indexAsRegion);
       typeInfo->SetIndexAsPOI(indexAsPOI);
-      typeInfo->SetIgnore(optimizeLowZoom);
-      typeInfo->SetIgnore(multipolygon);
-      typeInfo->SetIgnore(pinWay );
-      typeInfo->SetIgnore(ignoreSeaLand);
+      typeInfo->SetOptimizeLowZoom(optimizeLowZoom);
+      typeInfo->SetMultipolygon(multipolygon);
+      typeInfo->SetPinWay(pinWay);
+      typeInfo->SetMergeArea(mergeArea);
+      typeInfo->SetIgnoreSeaLand(ignoreSeaLand);
       typeInfo->SetIgnore(ignore);
 
       // Type Features
@@ -1567,6 +1570,7 @@ namespace osmscout {
       writer.Write(type->GetOptimizeLowZoom());
       writer.Write(type->GetMultipolygon());
       writer.Write(type->GetPinWay());
+      writer.Write(type->GetMergeArea());
       writer.Write(type->GetIgnoreSeaLand());
       writer.Write(type->GetIgnore());
 

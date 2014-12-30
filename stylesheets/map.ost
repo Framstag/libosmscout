@@ -9,7 +9,7 @@ OST
     * RELATION
 
   Meaning of the different OPTIONS:
-    PATH:
+    PATH[[FOOT] [BICYLCE] [CAR]]:
       This way or area is a traversable path and possibly routable for the given vehicles.
 
       See: http://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Access-Restrictions
@@ -30,8 +30,6 @@ OST
       This is a way, even if the path is closed
     MULTIPOLYGON:
       Tye should be handled as multipolygon even if type is not set to multipolygon.
-    IGNORESEALAND:
-      Ignore this type for calculation of land masses
     ADMIN_REGION:
       The given area or node describes an administrate region
       that should be part of the region tree for the city/street
@@ -49,7 +47,13 @@ OST
       * Location
       * Address
     LOCATION:
-      The given way or area should be indexed as location.  
+      The given way or area should be indexed as location.
+    MERGE_AREA:
+      Areas of this type that "touch" each other and the same attribute values
+      will get merged.    
+    IGNORESEALAND:
+      Ignore this type for calculation of land masses (because objects of this type can
+      occur on sea, too, and thus have no distinguishing character).
     IGNORE:
       Ignore objects of this type
 */
