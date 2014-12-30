@@ -168,7 +168,7 @@ namespace osmscout {
   SortNodeDataGenerator::SortNodeDataGenerator()
   : SortDataGenerator<Node>("nodes.dat","nodes.idmap")
   {
-    AddSource(osmRefNode,"nodes.tmp");
+    AddSource("nodes.tmp");
 
     AddFilter(new NodeLocationProcessorFilter());
   }

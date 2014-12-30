@@ -55,10 +55,21 @@ namespace osmscout {
     }
 
     for (size_t current=1; current<=dataCount; current++) {
-      Id   id;
-      Area data;
+      uint8_t type;
+      Id      id;
+      Area    data;
 
       progress.SetProgress(current,dataCount);
+
+      if (!scanner.Read(type)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(current)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
 
       if (!scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -136,10 +147,21 @@ namespace osmscout {
     }
 
     for (size_t current=1; current<=dataCount; current++) {
-      Id   id;
-      Area data;
+      uint8_t type;
+      Id      id;
+      Area    data;
 
       progress.SetProgress(current,dataCount);
+
+      if (!scanner.Read(type)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(current)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
 
       if (!scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -212,10 +234,21 @@ namespace osmscout {
     }
 
     for (size_t current=1; current<=dataCount; current++) {
-      Id  id;
-      Way data;
+      uint8_t type;
+      Id      id;
+      Way     data;
 
       progress.SetProgress(current,dataCount);
+
+      if (!scanner.Read(type)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(current)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
 
       if (!scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -305,10 +338,21 @@ namespace osmscout {
     writer.Write(dataCount);
 
     for (size_t current=1; current<=dataCount; current++) {
-      Id   id;
-      Area data;
+      uint8_t type;
+      Id      id;
+      Area    data;
 
       progress.SetProgress(current,dataCount);
+
+      if (!scanner.Read(type)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(current)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
 
       if (!scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -343,6 +387,13 @@ namespace osmscout {
             *id=0;
           }
         }
+      }
+
+      if (!writer.Write(type)) {
+        progress.Error(std::string("Error while writing data id to file '")+
+                       writer.GetFilename()+"'");
+
+        return false;
       }
 
       if (!writer.Write(id)) {
@@ -409,10 +460,21 @@ namespace osmscout {
     writer.Write(dataCount);
 
     for (size_t current=1; current<=dataCount; current++) {
-      Id   id;
-      Area data;
+      uint8_t type;
+      Id      id;
+      Area    data;
 
       progress.SetProgress(current,dataCount);
+
+      if (!scanner.Read(type)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(current)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
 
       if (!scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -447,6 +509,13 @@ namespace osmscout {
             *id=0;
           }
         }
+      }
+
+      if (!writer.Write(type)) {
+        progress.Error(std::string("Error while writing data id to file '")+
+                       writer.GetFilename()+"'");
+
+        return false;
       }
 
       if (!writer.Write(id)) {
@@ -513,10 +582,21 @@ namespace osmscout {
     writer.Write(dataCount);
 
     for (size_t current=1; current<=dataCount; current++) {
-      Id  id;
-      Way data;
+      uint8_t type;
+      Id      id;
+      Way     data;
 
       progress.SetProgress(current,dataCount);
+
+      if (!scanner.Read(type)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(current)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
 
       if (!scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -545,6 +625,13 @@ namespace osmscout {
         if (!nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
           *id=0;
         }
+      }
+
+      if (!writer.Write(type)) {
+        progress.Error(std::string("Error while writing data id to file '")+
+                       writer.GetFilename()+"'");
+
+        return false;
       }
 
       if (!writer.Write(id)) {

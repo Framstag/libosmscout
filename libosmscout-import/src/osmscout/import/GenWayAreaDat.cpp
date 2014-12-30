@@ -236,11 +236,9 @@ namespace osmscout {
 
     area.rings.push_back(ring);
 
-    if (!writer.Write(wayId)) {
-      return false;
-    }
-
-    if (!area.Write(typeConfig,
+    if (!writer.Write((uint8_t)osmRefWay) ||
+        !writer.Write(wayId) ||
+        !area.Write(typeConfig,
                     writer)) {
       return false;
     }

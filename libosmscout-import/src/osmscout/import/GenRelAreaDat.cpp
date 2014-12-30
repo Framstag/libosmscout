@@ -1150,9 +1150,12 @@ namespace osmscout {
         return false;
       }
 
-      writer.Write(rawRel.GetId());
-      rel.Write(typeConfig,
-                writer);
+      if (!writer.Write((uint8_t)osmRefRelation) ||
+          !writer.Write(rawRel.GetId()) ||
+          !rel.Write(typeConfig,
+                     writer)) {
+        return false;
+      }
 
       writtenRelationCount++;
     }

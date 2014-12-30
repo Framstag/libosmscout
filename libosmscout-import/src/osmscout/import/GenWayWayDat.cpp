@@ -426,11 +426,9 @@ namespace osmscout {
       return true;
     }
 
-    if (!writer.Write(wayId)) {
-      return false;
-    }
-
-    if (!way.Write(typeConfig,
+    if (!writer.Write((uint8_t)osmRefWay) ||
+        !writer.Write(wayId) ||
+        !way.Write(typeConfig,
                    writer)) {
       return false;
     }

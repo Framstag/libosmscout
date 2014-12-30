@@ -100,24 +100,29 @@ namespace osmscout {
 
       nodesReadCount++;
 
-      if (!rawNode.GetType()->GetIgnore()) {
-        node.SetFeatures(rawNode.GetFeatureValueBuffer());
-        node.SetCoords(rawNode.GetCoords());
-
-        FileOffset fileOffset;
-
-        if (!writer.GetPos(fileOffset)) {
-          progress.Error(std::string("Error while reading current fileOffset in file '")+
-                         writer.GetFilename()+"'");
-          return false;
-        }
-
-        writer.Write(rawNode.GetId());
-        node.Write(typeConfig,
-                   writer);
-
-        nodesWrittenCount++;
+      if (rawNode.GetType()->GetIgnore()) {
+        continue;
       }
+
+      node.SetFeatures(rawNode.GetFeatureValueBuffer());
+      node.SetCoords(rawNode.GetCoords());
+
+      FileOffset fileOffset;
+
+      if (!writer.GetPos(fileOffset)) {
+        progress.Error(std::string("Error while reading current fileOffset in file '")+
+                       writer.GetFilename()+"'");
+        return false;
+      }
+
+      if (!writer.Write((uint8_t)osmRefNode) ||
+          !writer.Write(rawNode.GetId()) ||
+          !node.Write(typeConfig,
+                      writer)) {
+        return false;
+      }
+
+      nodesWrittenCount++;
     }
 
     if (!scanner.Close()) {

@@ -41,25 +41,27 @@ namespace osmscout {
 
     struct Source
     {
-      OSMRefType  type;
       std::string filename;
       FileScanner scanner;
     };
 
     struct CellEntry
     {
+      uint8_t                              type;
       Id                                   id;
       typename std::list<Source>::iterator source;
       FileOffset                           fileOffset;
       double                               lat;
       double                               lon;
 
-      inline CellEntry(Id id,
+      inline CellEntry(uint8_t type,
+                       Id id,
                        const typename std::list<Source>::iterator source,
                        FileOffset fileOffset,
                        double lat,
                        double lon)
-      : id(id),
+      : type(type),
+        id(id),
         source(source),
         fileOffset(fileOffset),
         lat(lat),
@@ -130,8 +132,7 @@ namespace osmscout {
     SortDataGenerator(const std::string& mapFilename,
                       const std::string& tmpFilename);
 
-    void AddSource(OSMRefType type,
-                   const std::string& filename);
+    void AddSource(const std::string& filename);
 
     void AddFilter(const ProcessingFilterRef& filter);
 
@@ -157,12 +158,10 @@ namespace osmscout {
   }
 
   template <class N>
-  void SortDataGenerator<N>::AddSource(OSMRefType type,
-                                       const std::string& filename)
+  void SortDataGenerator<N>::AddSource(const std::string& filename)
   {
     Source source;
 
-    source.type=type;
     source.filename=filename;
 
     sources.push_back(source);
@@ -256,22 +255,15 @@ namespace osmscout {
         uint32_t current=1;
 
         while (current<=dataCount) {
-          Id  id;
-          N   data;
+          uint8_t type;
+          Id      id;
+          N       data;
 
           progress.SetProgress(current,dataCount);
 
-          if (!source->scanner.Read(id)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(current)+" of "+
-                           NumberToString(dataCount)+
-                           " in file '"+
-                           source->scanner.GetFilename()+"'");
-
-            return false;
-          }
-
-          if (!data.Read(typeConfig,
+          if (!source->scanner.Read(type) ||
+              !source->scanner.Read(id) ||
+              !data.Read(typeConfig,
                          source->scanner)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(current)+" of "+
@@ -292,7 +284,8 @@ namespace osmscout {
 
           if (cellIndex>=minIndex &&
               cellIndex<=maxIndex) {
-            dataByCellMap[cellIndex].push_back(CellEntry(id,
+            dataByCellMap[cellIndex].push_back(CellEntry(type,
+                                                         id,
                                                          source,
                                                          data.GetFileOffset(),
                                                          maxLat,
@@ -406,7 +399,7 @@ namespace osmscout {
           }
 
           mapWriter.Write(entry->id);
-          mapWriter.Write((uint8_t)entry->source->type);
+          mapWriter.Write(entry->type);
           mapWriter.WriteFileOffset(fileOffset);
 
           copyCount++;
@@ -503,22 +496,15 @@ namespace osmscout {
       overallDataCount+=dataCount;
 
       for (size_t current=1; current<=dataCount; current++) {
-        Id id;
-        N  data;
+        uint8_t type;
+        Id      id;
+        N       data;
 
         progress.SetProgress(current,dataCount);
 
-        if (!source->scanner.Read(id)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(current)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         source->scanner.GetFilename()+"'");
-
-          return false;
-        }
-
-        if (!data.Read(typeConfig,
+        if (!source->scanner.Read(type) ||
+            !source->scanner.Read(id) ||
+            !data.Read(typeConfig,
                        source->scanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(current)+" of "+
@@ -567,7 +553,7 @@ namespace osmscout {
         }
 
         mapWriter.Write(id);
-        mapWriter.Write((uint8_t)source->type);
+        mapWriter.Write(type);
         mapWriter.WriteFileOffset(fileOffset);
       }
 
