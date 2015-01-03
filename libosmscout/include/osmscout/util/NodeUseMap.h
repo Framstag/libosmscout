@@ -49,6 +49,7 @@ namespace osmscout {
   class OSMSCOUT_API NodeUseMap
   {
   private:
+    size_t                                  nodeCount;
     typedef std::bitset<4096>               Bitset;
     typedef OSMSCOUT_HASHMAP<PageId,Bitset> Map;
 
@@ -56,10 +57,12 @@ namespace osmscout {
     Map nodeUseMap;
 
   public:
+    NodeUseMap();
     virtual ~NodeUseMap();
 
     void SetNodeUsed(Id id);
     bool IsNodeUsedAtLeastTwice(Id id) const;
+    size_t GetNodeUsedCount() const;
 
     void Clear();
   };

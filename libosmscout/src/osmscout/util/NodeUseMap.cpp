@@ -23,6 +23,12 @@
 
 namespace osmscout {
 
+  NodeUseMap::NodeUseMap()
+  : nodeCount(0)
+  {
+    // no code
+  }
+
   NodeUseMap::~NodeUseMap()
   {
     // no code
@@ -48,6 +54,7 @@ namespace osmscout {
       entry->second.set(index+1);
     }
     else {
+      nodeCount++;
       entry->second.set(index);
     }
   }
@@ -70,8 +77,14 @@ namespace osmscout {
     return result;
   }
 
+  size_t NodeUseMap::GetNodeUsedCount() const
+  {
+    return nodeCount;
+  }
+
   void NodeUseMap::Clear()
   {
     nodeUseMap.clear();
+    nodeCount=0;
   }
 }
