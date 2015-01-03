@@ -501,7 +501,6 @@ namespace osmscout {
 
     /* ------ */
 
-    size_t iteration=1;
     while (!wayTypes.Empty()) {
       std::vector<std::list<RawWayRef> > waysByType(typeConfig->GetTypeCount());
 
@@ -576,8 +575,6 @@ namespace osmscout {
 
         waysByType[type].clear();
       }
-
-      iteration++;
     }
 
     /* -------*/
