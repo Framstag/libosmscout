@@ -17,6 +17,9 @@
 		F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9B161A658300D51926 /* StyleConfig.cpp */; };
 		F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F99161A658300D51926 /* Parser.cpp */; };
 		F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9A161A658300D51926 /* Scanner.cpp */; };
+		F5A66ACC1A4A0782007AD752 /* MapService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66ACB1A4A0782007AD752 /* MapService.cpp */; };
+		F5A66ACD1A4A0782007AD752 /* MapService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66ACB1A4A0782007AD752 /* MapService.cpp */; };
+		F5A66ACF1A4A07A1007AD752 /* MapService.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A66ACE1A4A07A1007AD752 /* MapService.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +53,8 @@
 		F53BD171163883E7006C7AE1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		F53BD172163883E7006C7AE1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F53BD173163883E7006C7AE1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F5A66ACB1A4A0782007AD752 /* MapService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapService.cpp; path = "../../../../libosmscout-map/src/osmscout/MapService.cpp"; sourceTree = "<group>"; };
+		F5A66ACE1A4A07A1007AD752 /* MapService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapService.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +117,7 @@
 		F51E3F92161A653C00D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F5A66ACB1A4A0782007AD752 /* MapService.cpp */,
 				F51E3F94161A658300D51926 /* MapPainter.cpp */,
 				F51E3F95161A658300D51926 /* oss */,
 				F51E3F9B161A658300D51926 /* StyleConfig.cpp */,
@@ -140,6 +146,7 @@
 		F51E3FA2161A65C000D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				F5A66ACE1A4A07A1007AD752 /* MapService.h */,
 				F51E3FA3161A65C000D51926 /* MapFeatures.h */,
 				F51E3FA5161A65C000D51926 /* MapPainter.h */,
 				F51E3FA6161A65C000D51926 /* oss */,
@@ -185,6 +192,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5A66ACF1A4A07A1007AD752 /* MapService.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +266,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */,
+				F5A66ACC1A4A0782007AD752 /* MapService.cpp in Sources */,
 				F51E3F9E161A658300D51926 /* Parser.cpp in Sources */,
 				F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */,
 				F51E3FA0161A658300D51926 /* StyleConfig.cpp in Sources */,
@@ -269,6 +278,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */,
+				F5A66ACD1A4A0782007AD752 /* MapService.cpp in Sources */,
 				F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */,
 				F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */,
 				F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */,

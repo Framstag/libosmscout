@@ -98,18 +98,30 @@ namespace osmscout {
                loadedMagnification = projection.GetMagnification();
                std::cout<<"DrawMap tile ("<<x<<","<<y<<") loading data for ("<<loadedLonMin<<","<<loadedLatMin<<"),(" <<loadedLonMax<<","<<loadedLatMax<<")"<<std::endl;
                database.FlushCache();
-               mapService.GetObjects(nodeTypes,
-                                   wayTypes,
-                                   areaTypes,
-                                   loadedLonMin,
-                                   loadedLatMin,
-                                   loadedLonMax,
-                                   loadedLatMax,
-                                   loadedMagnification,
-                                   searchParameter,
-                                   data.nodes,
-                                   data.ways,
-                                   data.areas);
+               
+               mapService.GetObjects(searchParameter,
+                                     loadedMagnification,
+                                     
+                                     nodeTypes,
+                                     loadedLonMin,
+                                     loadedLatMin,
+                                     loadedLonMax,
+                                     loadedLatMax,
+                                     data.nodes,
+                                     
+                                     wayTypes,
+                                     loadedLonMin,
+                                     loadedLatMin,
+                                     loadedLonMax,
+                                     loadedLatMax,
+                                     data.ways,
+                                     
+                                     areaTypes,
+                                     loadedLonMin,
+                                     loadedLatMin,
+                                     loadedLonMax,
+                                     loadedLatMax,
+                                     data.areas);
                
                if (drawParameter.GetRenderSeaLand()) {
                    mapService.GetGroundTiles(loadedLonMin,
