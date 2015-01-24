@@ -417,6 +417,7 @@ namespace osmscout {
      optimizeLowZoom(false),
      multipolygon(false),
      pinWay(false),
+     mergeAreas(false),
      ignoreSeaLand(false),
      ignore(false)
   {
