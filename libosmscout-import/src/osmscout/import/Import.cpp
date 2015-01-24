@@ -45,6 +45,8 @@
 
 #include <osmscout/import/GenRelAreaDat.h>
 #include <osmscout/import/GenWayAreaDat.h>
+#include <osmscout/import/MergeAreaData.h>
+#include <osmscout/import/GenMergeAreas.h>
 #include <osmscout/import/SortAreaDat.h>
 
 #include <osmscout/import/GenWayWayDat.h>
@@ -77,9 +79,9 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=27;
+  static const size_t defaultEndStep=28;
 #else
-  static const size_t defaultEndStep=26;
+  static const size_t defaultEndStep=27;
 #endif
 
   ImportParameter::ImportParameter()
@@ -612,69 +614,75 @@ namespace osmscout {
     modules.push_back(new WayAreaDataGenerator());
 
     /* 8 */
-    modules.push_back(new WayWayDataGenerator());
+    modules.push_back(new MergeAreaDataGenerator());
 
     /* 9 */
-    modules.push_back(new OptimizeAreaWayIdsGenerator());
+    modules.push_back(new MergeAreasGenerator());
 
     /* 10 */
-    modules.push_back(new NodeDataGenerator());
+    modules.push_back(new WayWayDataGenerator());
 
     /* 11 */
-    modules.push_back(new SortNodeDataGenerator());
+    modules.push_back(new OptimizeAreaWayIdsGenerator());
 
     /* 12 */
-    modules.push_back(new SortAreaDataGenerator());
+    modules.push_back(new NodeDataGenerator());
 
     /* 13 */
-    modules.push_back(new SortWayDataGenerator());
+    modules.push_back(new SortNodeDataGenerator());
 
     /* 14 */
-    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new SortAreaDataGenerator());
 
     /* 15 */
-    modules.push_back(new AreaWayIndexGenerator());
+    modules.push_back(new SortWayDataGenerator());
 
     /* 16 */
-    modules.push_back(new AreaAreaIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
 
     /* 17 */
-    modules.push_back(new WaterIndexGenerator());
+    modules.push_back(new AreaWayIndexGenerator());
 
     /* 18 */
-    modules.push_back(new OptimizeAreasLowZoomGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
 
     /* 19 */
-    modules.push_back(new OptimizeWaysLowZoomGenerator());
+    modules.push_back(new WaterIndexGenerator());
 
     /* 20 */
-    modules.push_back(new LocationIndexGenerator());
+    modules.push_back(new OptimizeAreasLowZoomGenerator());
 
     /* 21 */
-    modules.push_back(new RouteDataGenerator());
+    modules.push_back(new OptimizeWaysLowZoomGenerator());
 
     /* 22 */
+    modules.push_back(new LocationIndexGenerator());
+
+    /* 23 */
+    modules.push_back(new RouteDataGenerator());
+
+    /* 24 */
     modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+RoutingService::FILENAME_INTERSECTIONS_IDX+"'",
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                  RoutingService::FILENAME_INTERSECTIONS_DAT),
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                  RoutingService::FILENAME_INTERSECTIONS_IDX)));
 
-    /* 23 */
+    /* 25 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_FOOT_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_FOOT_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_FOOT_IDX)));
 
-    /* 24 */
+    /* 26 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_BICYCLE_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_BICYCLE_DAT),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_BICYCLE_IDX)));
 
-    /* 25 */
+    /* 27 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_CAR_IDX+"'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               RoutingService::FILENAME_CAR_DAT),
@@ -682,7 +690,7 @@ namespace osmscout {
                                                                               RoutingService::FILENAME_CAR_IDX)));
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 26 */
+    /* 28 */
     modules.push_back(new TextIndexGenerator());
 #endif
 

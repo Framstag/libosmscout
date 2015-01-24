@@ -11,6 +11,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \
                         osmscout/import/GenLocationIndex.h \
+                        osmscout/import/GenMergeAreas.h \
                         osmscout/import/GenNumericIndex.h \
                         osmscout/import/GenRawNodeIndex.h \
                         osmscout/import/GenRawWayIndex.h \
@@ -25,6 +26,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenWaterIndex.h \
                         osmscout/import/GenWayAreaDat.h \
                         osmscout/import/GenWayWayDat.h \
+                        osmscout/import/MergeAreaData.h \
                         osmscout/import/SortDat.h \
                         osmscout/import/SortAreaDat.h \
                         osmscout/import/SortNodeDat.h \

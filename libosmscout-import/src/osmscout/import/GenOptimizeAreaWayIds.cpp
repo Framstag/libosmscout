@@ -40,70 +40,12 @@ namespace osmscout {
     FileScanner scanner;
     uint32_t    dataCount=0;
 
-    progress.SetAction("Scanning ids from 'wayarea.tmp'");
+    progress.SetAction("Scanning ids from 'areas.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayarea.tmp"),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (size_t current=1; current<=dataCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
-
-      progress.SetProgress(current,dataCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
-
-      for (const auto& ring: data.rings) {
-        OSMSCOUT_HASHSET<Id> nodeIds;
-
-        if (!ring.GetType()->CanRoute()) {
-          continue;
-        }
-
-        for (const auto id: ring.ids) {
-          if (nodeIds.find(id)==nodeIds.end()) {
-            nodeUseMap.SetNodeUsed(id);
-
-            nodeIds.insert(id);
-          }
-        }
-      }
-    }
-
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
-      return false;
-    }
-
-    progress.SetAction("Scanning ids from 'relarea.tmp'");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "relarea.tmp"),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
+                                      "areas.tmp"),
+                      FileScanner::Sequential,
+                      parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
@@ -241,39 +183,37 @@ namespace osmscout {
   {
     FileScanner scanner;
     FileWriter  writer;
-    uint32_t    dataCount=0;
-    uint32_t    wayAreaCount=0;
-    uint32_t    relAreaCount=0;
+    uint32_t    areaCount=0;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areas.tmp"))) {
+                                     "areas2.tmp"))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
       return false;
     }
 
-    writer.Write(dataCount);
+    writer.Write(areaCount);
 
-    progress.SetAction("Copy data from 'wayarea.tmp' to 'areas.tmp'");
+    progress.SetAction("Copy data from 'areas.tmp' to 'areas2.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayarea.tmp"),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
+                                      "areas.tmp"),
+                      FileScanner::Sequential,
+                      parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
 
-    if (!scanner.Read(wayAreaCount)) {
+    if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (size_t current=1; current<=wayAreaCount; current++) {
+    for (size_t current=1; current<=areaCount; current++) {
       uint8_t type;
       Id      id;
       Area    data;
 
-      progress.SetProgress(current,wayAreaCount);
+      progress.SetProgress(current,areaCount);
 
       if (!scanner.Read(type) ||
           !scanner.Read(id) ||
@@ -281,7 +221,7 @@ namespace osmscout {
                      scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
-                       NumberToString(wayAreaCount)+
+                       NumberToString(areaCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
 
@@ -315,74 +255,11 @@ namespace osmscout {
       return false;
     }
 
-    progress.SetAction("Copy data from 'relarea.tmp' to 'areas.tmp'");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "relarea.tmp"),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
-
-    if (!scanner.Read(relAreaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (size_t current=1; current<=relAreaCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
-
-      progress.SetProgress(current,relAreaCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(relAreaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
-
-      for (auto& ring : data.rings) {
-        OSMSCOUT_HASHSET<Id> nodeIds;
-
-        for (auto& id : ring.ids) {
-          if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-            id=0;
-          }
-        }
-      }
-
-      if (!writer.Write(type) ||
-          !writer.Write(id) ||
-          !data.Write(typeConfig,
-                      writer)) {
-        progress.Error(std::string("Error while writing data entry to file '")+
-                       writer.GetFilename()+"'");
-
-        return false;
-      }
-    }
-
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
-      return false;
-    }
-
-    dataCount=wayAreaCount+relAreaCount;
     if (!writer.SetPos(0)) {
       return false;
     }
 
-    if (!writer.Write(dataCount)) {
+    if (!writer.Write(areaCount)) {
       return false;
     }
 

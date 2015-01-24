@@ -27,6 +27,7 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenAreaNodeIndex.cpp \
                                osmscout/import/GenAreaWayIndex.cpp \
                                osmscout/import/GenLocationIndex.cpp \
+                               osmscout/import/GenMergeAreas.cpp \
                                osmscout/import/GenNumericIndex.cpp \
                                osmscout/import/GenRawNodeIndex.cpp \
                                osmscout/import/GenRawWayIndex.cpp \
@@ -41,6 +42,7 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenWaterIndex.cpp \
                                osmscout/import/GenWayAreaDat.cpp \
                                osmscout/import/GenWayWayDat.cpp \
+                               osmscout/import/MergeAreaData.cpp \
                                osmscout/import/SortDat.cpp \
                                osmscout/import/SortAreaDat.cpp \
                                osmscout/import/SortNodeDat.cpp \
