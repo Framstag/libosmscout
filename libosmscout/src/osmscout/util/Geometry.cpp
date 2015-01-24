@@ -29,7 +29,7 @@
 #endif
 
 #include <osmscout/system/Assert.h>
-
+#include <iostream>
 namespace osmscout {
 
   size_t Pow(size_t a, size_t b)
@@ -46,6 +46,40 @@ namespace osmscout {
     }
 
     return res;
+  }
+
+  bool AreaIsClockwise(const std::vector<GeoCoord>& edges)
+  {
+    assert(edges.size()>=3);
+    // based on http://en.wikipedia.org/wiki/Curve_orientation
+    // and http://local.wasp.uwa.edu.au/~pbourke/geometry/clockwise/
+
+    // note: polygon must be simple
+
+    size_t ptIdx=0;
+
+    for (size_t i=1; i<edges.size(); i++) {
+      // find the point with the smallest y value,
+      if (edges[i].GetLat()<edges[ptIdx].GetLat()) {
+        ptIdx=i;
+      }
+      // if y values are equal save the point with greatest x
+      else if (edges[i].GetLat()==edges[ptIdx].GetLat()) {
+        if (edges[i].GetLon()<edges[ptIdx].GetLon()) {
+          ptIdx=i;
+        }
+      }
+    }
+
+    size_t prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
+    size_t nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
+
+    double signedArea=(edges[ptIdx].GetLon()-edges[prevIdx].GetLon())*
+                      (edges[nextIdx].GetLat()-edges[ptIdx].GetLat())-
+                      (edges[ptIdx].GetLat()-edges[prevIdx].GetLat())*
+                      (edges[nextIdx].GetLon()-edges[ptIdx].GetLon());
+
+    return signedArea<0.0;
   }
 
   /**
@@ -420,19 +454,19 @@ namespace osmscout {
    * r is the abscissa of q on the line, 0 <= r <= 1 if q is between p1 and p2.
    */
   double distanceToSegment(double px, double py, double p1x, double p1y, double p2x, double p2y, double &r, double &qx, double &qy){
-    
+
     if(p1x == p2x && p1y == p2y){
         return NAN;
     }
-    
+
     double rn = (px-p1x)*(p2x-p1x) + (py-p1y)*(p2y-p1y);
     double rd = (p2x-p1x)*(p2x-p1x) + (p2y-p1y)*(p2y-p1y);
     r = rn / rd;
     double ppx = p1x + r*(p2x-p1x);
     double ppy = p1y + r*(p2y-p1y);
     double s =  ((p1y-py)*(p2x-p1x)-(p1x-px)*(p2y-p1y)) / rd;
-    
-    
+
+
     if ((r >= 0) && (r <= 1))
     {
         qx = ppx;
@@ -457,6 +491,190 @@ namespace osmscout {
         }
     }
   }
-    
+
+  void PolygonMerger::AddPolygon(const std::vector<GeoCoord>& polygonCoords,
+                                 const std::vector<Id>& polygonIds)
+  {
+    assert(polygonCoords.size()>=3);
+    assert(polygonCoords.size()==polygonIds.size());
+
+    std::vector<GeoCoord> coords(polygonCoords);
+    std::vector<Id>       ids(polygonIds);
+
+    if (!AreaIsClockwise(polygonCoords)) {
+      std::reverse(coords.begin(),coords.end());
+      std::reverse(ids.begin(),ids.end());
+    }
+
+    nodes.reserve(nodes.size()+coords.size());
+
+    // Optimize: index retrieval (next is current in the next iteration
+    // Optimize: No need to reverse the arrays, if we just traverse the other way round as second case
+
+    for (size_t i=0; i<coords.size(); i++) {
+      size_t current=i;
+      size_t next=i+1==coords.size() ? 0 : i+1;
+
+      auto currentNode=nodeIdIndexMap.find(ids[current]);
+      auto nextNode=nodeIdIndexMap.find(ids[next]);
+
+      if (currentNode==nodeIdIndexMap.end()) {
+        Node node;
+
+        node.coord=coords[current];
+        node.id=ids[current];
+
+        nodes.push_back(node);
+
+        currentNode=nodeIdIndexMap.insert(std::make_pair(node.id,nodes.size()-1)).first;
+      }
+
+      if (nextNode==nodeIdIndexMap.end()) {
+        Node node;
+
+        node.coord=coords[next];
+        node.id=ids[next];
+
+        nodes.push_back(node);
+
+        nextNode=nodeIdIndexMap.insert(std::make_pair(node.id,nodes.size()-1)).first;
+      }
+
+      Edge edge;
+
+      edge.fromIndex=currentNode->second;
+      edge.toIndex=nextNode->second;
+
+      edges.push_back(edge);
+    }
+  }
+
+  void PolygonMerger::RemoveEliminatingEdges()
+  {
+    OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
+
+    // We first group edge by the sum of the from and to index. This way,
+    // were can be sure, that a node(a=>b) is in the same list as a node(b=>a).
+    for (std::list<Edge>::iterator edge=edges.begin();
+        edge!=edges.end();
+        ++edge) {
+      idEdgeMap[edge->fromIndex+edge->toIndex].push_back(edge);
+    }
+
+    for (auto& edgeList : idEdgeMap) {
+      auto currentEdge=edgeList.second.begin();
+
+      while (currentEdge!=edgeList.second.end()) {
+        auto lookup=currentEdge;
+
+        lookup++;
+        while (lookup!=edgeList.second.end() &&
+            !((*currentEdge)->fromIndex==(*lookup)->toIndex &&
+              (*currentEdge)->toIndex==(*lookup)->fromIndex)) {
+          lookup++;
+        }
+
+        if (lookup!=edgeList.second.end()) {
+          //std::cout << "Delete matching edges " << (*currentEdge)->fromIndex << "=>" << (*currentEdge)->toIndex << " and " << (*lookup)->fromIndex << "=>" << (*lookup)->toIndex << std::endl;
+          // Delete lookup from list of edges
+          edges.erase(*lookup);
+          // Delete currentEdge from list of edges
+          edges.erase(*currentEdge);
+          // Delete lookup from list
+          edgeList.second.erase(lookup);
+          // Delete currentEdge from list
+          currentEdge=edgeList.second.erase(currentEdge);
+        }
+        else {
+          currentEdge++;
+        }
+      }
+    }
+  }
+
+  bool PolygonMerger::Merge(std::list<Polygon>& result)
+  {
+    result.clear();
+
+    RemoveEliminatingEdges();
+
+    OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
+
+    // We first group edge by the sum of the from and to index. This way,
+    // were can be sure, that a node(a=>b) is in the same list as a node(b=>a).
+    for (std::list<Edge>::iterator edge=edges.begin();
+        edge!=edges.end();
+        ++edge) {
+      //std::cout << "* " << edge->fromIndex << "=>" << edge->toIndex << std::endl;
+      idEdgeMap[edge->fromIndex].push_back(edge);
+    }
+
+    std::list<std::list<Edge> > polygons;
+
+    while (!edges.empty()) {
+      std::list<Edge>::iterator current=edges.begin();
+
+      // Start a new polygon
+      //std::cout << "---" << std::endl;
+      polygons.push_back(std::list<Edge>());
+
+      //std::cout << "* " << current->fromIndex << "=>" << current->toIndex << std::endl;
+      polygons.back().push_back(*current);
+
+      // Delete entry from the idEdgeMap
+      OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator > >::iterator mapEntry;
+
+      mapEntry=idEdgeMap.find(current->fromIndex);
+
+      assert(mapEntry!=idEdgeMap.end());
+
+      for (std::list<std::list<Edge>::iterator>::iterator edge=mapEntry->second.begin();
+          edge!=mapEntry->second.end();
+          ++edge) {
+        if (*edge==current) {
+          mapEntry->second.erase(edge);
+          break;
+        }
+      }
+
+      // Delete entry from the list of edges
+      edges.pop_front();
+
+      do {
+        mapEntry=idEdgeMap.find(polygons.back().back().toIndex);
+
+        if (mapEntry->second.empty()) {
+          std::cerr << "No matching node found" << std::endl;
+          return false;
+        }
+
+        current=mapEntry->second.front();
+
+        mapEntry->second.pop_front();
+
+        //std::cout << "* " << current->fromIndex << "=>" << current->toIndex << std::endl;
+        polygons.back().push_back(*current);
+
+        edges.erase(current);
+      } while (!edges.empty() && polygons.back().back().toIndex!=polygons.back().front().fromIndex);
+
+      if (polygons.back().back().toIndex!=polygons.back().front().fromIndex) {
+        //std::cerr << "Merges run out of edges" << std::endl;
+        return false;
+      }
+    }
+
+    for (const auto& polygon : polygons) {
+      result.push_back(Polygon());
+
+      for (const auto& edge : polygon) {
+        result.back().coords.push_back(nodes[edge.fromIndex].coord);
+        result.back().ids.push_back(nodes[edge.fromIndex].id);
+      }
+    }
+
+    return true;
+  }
+
 }
 

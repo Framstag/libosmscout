@@ -21,6 +21,7 @@
 */
 
 #include <algorithm>
+#include <list>
 #include <utility>
 #include <vector>
 
@@ -31,6 +32,9 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Types.h>
+
+#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -647,6 +651,17 @@ namespace osmscout {
    */
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
 
+  /**
+   * \ingroup Geometry
+   * Returns true, if the closed polygon with the given nodes is oriented clockwise.
+   *
+   * It is assumed, that the polygon is valid. Validity is not checked.
+   *
+   * See http://en.wikipedia.org/wiki/Curve_orientation.
+   */
+  extern OSMSCOUT_API bool AreaIsClockwise(const std::vector<GeoCoord>& edges);
+
+
   extern OSMSCOUT_API double CalculateDistancePointToLineSegment(const GeoCoord& p,
                                                                  const GeoCoord& a,
                                                                  const GeoCoord& b);
@@ -712,7 +727,7 @@ namespace osmscout {
   void OSMSCOUT_API ScanConvertLine(int x1, int y1,
                                     int x2, int y2,
                                     std::vector<ScanCell>& cells);
-   
+
   /**
    * \ingroup Geometry
    * Return de distance of the point (px,py) to the segment [(p1x,p1y),(p2x,p2y)],
@@ -720,6 +735,44 @@ namespace osmscout {
    * 0 <= r <= 1 if q is between p1 and p2.
    */
   extern OSMSCOUT_API double distanceToSegment(double px, double py, double p1x, double p1y, double p2x, double p2y, double &r, double &qx, double &qy);
+
+  class OSMSCOUT_API PolygonMerger
+  {
+  private:
+    struct Node
+    {
+      GeoCoord coord;
+      Id       id;
+    };
+
+    struct Edge
+    {
+      size_t fromIndex;
+      size_t toIndex;
+    };
+
+  public:
+    struct Polygon
+    {
+      std::vector<GeoCoord> coords;
+      std::vector<Id>       ids;
+    };
+
+  private:
+    OSMSCOUT_HASHMAP<Id,size_t>                               nodeIdIndexMap;
+    std::vector<Node>                                         nodes;
+    std::list<Edge>                                           edges;
+    OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator>> idEdgeMap;
+
+  private:
+    void RemoveEliminatingEdges();
+
+  public:
+    void AddPolygon(const std::vector<GeoCoord>& polygonsCoords,
+                    const std::vector<Id>& polygonsIds);
+
+    bool Merge(std::list<Polygon>& result);
+  };
 }
 
 #endif
