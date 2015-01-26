@@ -1501,7 +1501,7 @@ namespace osmscout {
 
   template <class S, class A>
   void SortInConditionals(const TypeConfig typeConfig,
-                          std::list<ConditionalStyle<S,A> >& conditionals,
+                          const std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
                           std::vector<std::vector<std::list<StyleSelector<S,A> > > >& selectors)
   {
@@ -1511,7 +1511,7 @@ namespace osmscout {
       selector.resize(maxLevel+1);
     }
 
-    for (const auto& conditional: conditionals) {
+    for (const auto& conditional : conditionals) {
       StyleSelector<S,A> selector(conditional.filter,conditional.style);
 
       for (const auto& type : typeConfig.GetTypes()) {
@@ -1624,11 +1624,9 @@ namespace osmscout {
     wayLineStyleSelectors.resize(lineStyleBySlot.size());
 
     size_t idx=0;
-    for (OSMSCOUT_HASHMAP<std::string,std::list<LineConditionalStyle> >::iterator entry=lineStyleBySlot.begin();
-         entry!=lineStyleBySlot.end();
-         ++entry) {
+    for (const auto& entry : lineStyleBySlot) {
       SortInConditionals(*typeConfig,
-                         entry->second,
+                         entry.second,
                          maxLevel,
                          wayLineStyleSelectors[idx]);
 
