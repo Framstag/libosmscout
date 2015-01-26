@@ -69,18 +69,20 @@ namespace osmscout {
     /** Name of this feature */
     static const char* const NAME;
 
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
   public:
+    NameFeature();
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
 
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
-
-    inline bool HasLabel() const
-    {
-      return true;
-    }
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
@@ -135,18 +137,20 @@ namespace osmscout {
     /** Name of this feature */
     static const char* const NAME;
 
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
   public:
+    NameAltFeature();
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
 
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
-
-    inline bool HasLabel() const
-    {
-      return true;
-    }
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
@@ -203,19 +207,19 @@ namespace osmscout {
   public:
     /** Name of this feature */
     static const char* const NAME;
+    /** Name of this feature */
+    static const char* const NAME_LABEL;
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
 
   public:
+    RefFeature();
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
 
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
-
-    inline bool HasLabel() const
-    {
-      return true;
-    }
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,

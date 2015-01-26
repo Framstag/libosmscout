@@ -68,6 +68,16 @@ namespace osmscout {
     // no code
   }
 
+  size_t Feature::RegisterLabel(const std::string& labelName,
+                                size_t index)
+  {
+    assert(labels.find(labelName)==labels.end());
+
+    labels[labelName]=index;
+
+    return index;
+  }
+
   FeatureValue* Feature::AllocateValue(void* /*buffer*/)
   {
     assert(false);

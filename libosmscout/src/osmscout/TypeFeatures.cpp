@@ -54,7 +54,16 @@ namespace osmscout {
     return name==otherValue.name;
   }
 
-  const char* const NameFeature::NAME = "Name";
+  const char* const NameFeature::NAME             = "Name";
+  const char* const NameFeature::NAME_LABEL       = "name";
+  const size_t      NameFeature::NAME_LABEL_INDEX = 0;
+
+
+  NameFeature::NameFeature()
+  {
+    RegisterLabel(NAME_LABEL,
+                  NAME_LABEL_INDEX);
+  }
 
   void NameFeature::Initialize(TypeConfig& /*typeConfig*/)
   {
@@ -132,11 +141,19 @@ namespace osmscout {
     return nameAlt==otherValue.nameAlt;
   }
 
-  const char* const NameAltFeature::NAME = "NameAlt";
+  const char* const NameAltFeature::NAME             = "NameAlt";
+  const char* const NameAltFeature::NAME_LABEL       = "name";
+  const size_t      NameAltFeature::NAME_LABEL_INDEX = 0;
 
   void NameAltFeature::Initialize(TypeConfig& /*typeConfig*/)
   {
     // no code
+  }
+
+  NameAltFeature::NameAltFeature()
+  {
+    RegisterLabel(NAME_LABEL,
+                  NAME_LABEL_INDEX);
   }
 
   std::string NameAltFeature::GetName() const
@@ -210,7 +227,16 @@ namespace osmscout {
     return ref==otherValue.ref;
   }
 
-  const char* const RefFeature::NAME = "Ref";
+  const char* const RefFeature::NAME             = "Ref";
+  const char* const RefFeature::NAME_LABEL       = "name";
+  const size_t      RefFeature::NAME_LABEL_INDEX = 0;
+
+  RefFeature::RefFeature()
+  : tagRef(0)
+  {
+    RegisterLabel(NAME_LABEL,
+                  NAME_LABEL_INDEX);
+  }
 
   void RefFeature::Initialize(TypeConfig& typeConfig)
   {

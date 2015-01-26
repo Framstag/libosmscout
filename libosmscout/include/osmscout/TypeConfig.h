@@ -92,6 +92,13 @@ namespace osmscout {
    */
   class OSMSCOUT_API Feature : public Referencable
   {
+  private:
+    OSMSCOUT_HASHMAP<std::string,size_t> labels;
+
+  protected:
+    size_t RegisterLabel(const std::string& labelName,
+                         size_t index);
+
   public:
     Feature();
     virtual ~Feature();
@@ -116,7 +123,7 @@ namespace osmscout {
 
     inline virtual bool HasLabel() const
     {
-      return false;
+      return !labels.empty();
     }
 
     virtual FeatureValue* AllocateValue(void* buffer);
