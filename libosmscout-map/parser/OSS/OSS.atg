@@ -587,7 +587,12 @@ PRODUCTIONS
               = SYNC "TEXT"
                 (.
                   TextPartialStyle style;
+                  std::string      slot;
                 .)
+                [
+                  "#"
+                  IDENT<slot> (. style.style->SetSlot(slot); .)
+                ]
                 SYNC "{"
                 {
                   TEXTSTYLEATTR<style> WEAK ";"

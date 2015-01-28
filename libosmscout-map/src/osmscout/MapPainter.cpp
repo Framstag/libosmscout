@@ -999,19 +999,18 @@ namespace osmscout {
                                  double x,
                                  double y)
   {
-    TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
 
-    styleConfig.GetAreaTextStyle(type,
-                                 buffer,
-                                 projection,
-                                 textStyle);
+    styleConfig.GetAreaTextStyles(type,
+                                  buffer,
+                                  projection,
+                                  textStyles);
     styleConfig.GetAreaIconStyle(type,
                                  buffer,
                                  projection,
                                  iconStyle);
 
-    bool          hasLabel=textStyle.Valid();
+    bool          hasLabel=!textStyles.empty();
     bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool          hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
     std::string   label;
@@ -1026,47 +1025,44 @@ namespace osmscout {
       return;
     }
 
-    if (hasLabel) {
-      NameFeatureValue    *nameValue=nameReader.GetValue(buffer);
-      AddressFeatureValue *addressValue=addressReader.GetValue(buffer);
-
-      if (nameValue!=NULL) {
-        label=nameValue->GetName();
-      }
-      else if (addressValue!=NULL) {
-        label=addressValue->GetAddress();
-      }
-
-      hasLabel=!label.empty();
-    }
-
     if (!hasSymbol && !hasLabel && !hasIcon) {
       return;
     }
 
     if (hasLabel) {
-      if (hasSymbol) {
-        RegisterPointLabel(projection,
-                           parameter,
-                           textStyle,
-                           label,
-                           x,y+projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight())/2+
-                           projection.ConvertWidthToPixel(1.0)+
-                           projection.ConvertWidthToPixel(textStyle->GetSize())/2);
-      }
-      else if (hasIcon) {
-        RegisterPointLabel(projection,
-                           parameter,
-                           textStyle,
-                           label,
-                           x,y+14+5); // TODO: Better layout to real size of icon
-      }
-      else {
-        RegisterPointLabel(projection,
-                           parameter,
-                           textStyle,
-                           label,
-                           x,y);
+      for (const auto textStyle : textStyles) {
+        NameFeatureValue    *nameValue=nameReader.GetValue(buffer);
+        AddressFeatureValue *addressValue=addressReader.GetValue(buffer);
+
+        if (nameValue!=NULL) {
+          label=nameValue->GetName();
+        }
+        else if (addressValue!=NULL) {
+          label=addressValue->GetAddress();
+        }
+        if (hasSymbol) {
+          RegisterPointLabel(projection,
+                             parameter,
+                             textStyle,
+                             label,
+                             x,y+projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight())/2+
+                             projection.ConvertWidthToPixel(1.0)+
+                             projection.ConvertWidthToPixel(textStyle->GetSize())/2);
+        }
+        else if (hasIcon) {
+          RegisterPointLabel(projection,
+                             parameter,
+                             textStyle,
+                             label,
+                             x,y+14+5); // TODO: Better layout to real size of icon
+        }
+        else {
+          RegisterPointLabel(projection,
+                             parameter,
+                             textStyle,
+                             label,
+                             x,y);
+        }
       }
 
       areasLabelDrawn++;
@@ -1137,34 +1133,19 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const NodeRef& node)
   {
-    TextStyleRef textStyle;
     IconStyleRef iconStyle;
 
-    styleConfig.GetNodeTextStyle(node->GetFeatureValueBuffer(),
+    styleConfig.GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                  projection,
-                                 textStyle);
+                                 textStyles);
     styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                  projection,
                                  iconStyle);
 
-    bool         hasLabel=textStyle.Valid();
+    bool         hasLabel=!textStyles.empty();
     bool         hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool         hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
     std::string  label;
-
-    if (hasLabel) {
-      NameFeatureValue    *nameValue=nameReader.GetValue(node->GetFeatureValueBuffer());
-      AddressFeatureValue *addressValue=addressReader.GetValue(node->GetFeatureValueBuffer());
-
-      if (nameValue!=NULL) {
-        label=nameValue->GetName();
-      }
-      else if (addressValue!=NULL) {
-        label=addressValue->GetAddress();
-      }
-
-      hasLabel=!label.empty();
-    }
 
     if (hasIcon) {
       hasIcon=HasIcon(styleConfig,
@@ -1185,28 +1166,40 @@ namespace osmscout {
               x,y);
 
     if (hasLabel) {
-      if (hasSymbol) {
-        RegisterPointLabel(projection,
-                           parameter,
-                           textStyle,
-                           label,
-                           x,y+projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight())/2+
-                           projection.ConvertWidthToPixel(1.0)+
-                           projection.ConvertWidthToPixel(textStyle->GetSize())/2);
-      }
-      else if (hasIcon) {
-        RegisterPointLabel(projection,
-                           parameter,
-                           textStyle,
-                           label,
-                           x,y+14+5); // TODO: Better layout to real size of icon
-      }
-      else {
-        RegisterPointLabel(projection,
-                           parameter,
-                           textStyle,
-                           label,
-                           x,y);
+      for (const auto textStyle : textStyles) {
+        NameFeatureValue    *nameValue=nameReader.GetValue(node->GetFeatureValueBuffer());
+        AddressFeatureValue *addressValue=addressReader.GetValue(node->GetFeatureValueBuffer());
+
+        if (nameValue!=NULL) {
+          label=nameValue->GetName();
+        }
+        else if (addressValue!=NULL) {
+          label=addressValue->GetAddress();
+        }
+
+        if (hasSymbol) {
+          RegisterPointLabel(projection,
+                             parameter,
+                             textStyle,
+                             label,
+                             x,y+projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight())/2+
+                             projection.ConvertWidthToPixel(1.0)+
+                             projection.ConvertWidthToPixel(textStyle->GetSize())/2);
+        }
+        else if (hasIcon) {
+          RegisterPointLabel(projection,
+                             parameter,
+                             textStyle,
+                             label,
+                             x,y+14+5); // TODO: Better layout to real size of icon
+        }
+        else {
+          RegisterPointLabel(projection,
+                             parameter,
+                             textStyle,
+                             label,
+                             x,y);
+        }
       }
     }
 

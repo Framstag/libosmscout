@@ -197,8 +197,8 @@ void Scanner::Init() {
 	keywords.set("px", 37);
 	keywords.set("NODE", 39);
 	keywords.set("TEXT", 41);
-	keywords.set("ICON", 42);
-	keywords.set("WAY", 43);
+	keywords.set("ICON", 43);
+	keywords.set("WAY", 44);
 	keywords.set("SHIELD", 45);
 	keywords.set("AREA", 46);
 	keywords.set("color", 47);
@@ -487,9 +487,9 @@ Token* Scanner::NextToken() {
 		case 31:
 			{t->kind = 80; break;}
 		case 32:
-			recEnd = pos; recKind = 44;
+			recEnd = pos; recKind = 42;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
-			else {t->kind = 44; break;}
+			else {t->kind = 42; break;}
 
   }
   AppendVal(t);

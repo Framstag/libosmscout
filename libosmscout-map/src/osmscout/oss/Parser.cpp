@@ -207,7 +207,7 @@ void Parser::STYLE(StyleFilter filter) {
 				STYLE(filter);
 			}
 			Expect(17 /* "}" */);
-		} else if (la->kind == 39 /* "NODE" */ || la->kind == 43 /* "WAY" */ || la->kind == 46 /* "AREA" */) {
+		} else if (la->kind == 39 /* "NODE" */ || la->kind == 44 /* "WAY" */ || la->kind == 46 /* "AREA" */) {
 			STYLEDEF(filter);
 		} else SynErr(84);
 }
@@ -222,16 +222,16 @@ void Parser::WAYGROUP(size_t priority) {
 			wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 			
 			if (wayType.Invalid()) {
-			  std::string e="Unknown way type '"+wayTypeName+"'";
-			  SemErr(e.c_str());
+			 std::string e="Unknown way type '"+wayTypeName+"'";
+			 SemErr(e.c_str());
 			}
 			else if (!wayType->CanBeWay()) {
-			  std::string e="Tyype '"+wayTypeName+"' is not a way type";
-			  SemErr(e.c_str());
+			 std::string e="Tyype '"+wayTypeName+"' is not a way type";
+			 SemErr(e.c_str());
 			}
 			else {
-			  config.SetWayPrio(wayType,
-			                    priority);
+			 config.SetWayPrio(wayType,
+			                   priority);
 			}
 			
 		}
@@ -815,7 +815,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 void Parser::STYLEDEF(StyleFilter filter) {
 		if (la->kind == 39 /* "NODE" */) {
 			NODESTYLEDEF(filter);
-		} else if (la->kind == 43 /* "WAY" */) {
+		} else if (la->kind == 44 /* "WAY" */) {
 			WAYSTYLEDEF(filter);
 		} else if (la->kind == 46 /* "AREA" */) {
 			AREASTYLEDEF(filter);
@@ -885,15 +885,15 @@ void Parser::NODESTYLEDEF(StyleFilter filter) {
 		Expect(40 /* "." */);
 		if (la->kind == 41 /* "TEXT" */) {
 			NODETEXTSTYLE(filter);
-		} else if (la->kind == 42 /* "ICON" */) {
+		} else if (la->kind == 43 /* "ICON" */) {
 			NODEICONSTYLE(filter);
 		} else SynErr(100);
 }
 
 void Parser::WAYSTYLEDEF(StyleFilter filter) {
-		while (!(la->kind == _EOF || la->kind == 43 /* "WAY" */)) {SynErr(101); Get();}
-		Expect(43 /* "WAY" */);
-		if (la->kind == 15 /* "{" */ || la->kind == 44 /* "#" */) {
+		while (!(la->kind == _EOF || la->kind == 44 /* "WAY" */)) {SynErr(101); Get();}
+		Expect(44 /* "WAY" */);
+		if (la->kind == 15 /* "{" */ || la->kind == 42 /* "#" */) {
 			WAYSTYLE(filter);
 		} else if (la->kind == 40 /* "." */) {
 			Get();
@@ -916,7 +916,7 @@ void Parser::AREASTYLEDEF(StyleFilter filter) {
 			Get();
 			if (la->kind == 41 /* "TEXT" */) {
 				AREATEXTSTYLE(filter);
-			} else if (la->kind == 42 /* "ICON" */) {
+			} else if (la->kind == 43 /* "ICON" */) {
 				AREAICONSTYLE(filter);
 			} else SynErr(105);
 		} else SynErr(106);
@@ -926,7 +926,13 @@ void Parser::NODETEXTSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 41 /* "TEXT" */)) {SynErr(107); Get();}
 		Expect(41 /* "TEXT" */);
 		TextPartialStyle style;
+		std::string      slot;
 		
+		if (la->kind == 42 /* "#" */) {
+			Get();
+			IDENT(slot);
+			style.style->SetSlot(slot); 
+		}
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(108); Get();}
 		Expect(15 /* "{" */);
 		while (StartOf(4)) {
@@ -940,8 +946,8 @@ void Parser::NODETEXTSTYLE(StyleFilter filter) {
 }
 
 void Parser::NODEICONSTYLE(StyleFilter filter) {
-		while (!(la->kind == _EOF || la->kind == 42 /* "ICON" */)) {SynErr(110); Get();}
-		Expect(42 /* "ICON" */);
+		while (!(la->kind == _EOF || la->kind == 43 /* "ICON" */)) {SynErr(110); Get();}
+		Expect(43 /* "ICON" */);
 		IconPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(111); Get();}
@@ -1057,7 +1063,7 @@ void Parser::WAYSTYLE(StyleFilter filter) {
 		LinePartialStyle style;
 		std::string      slot;
 		
-		if (la->kind == 44 /* "#" */) {
+		if (la->kind == 42 /* "#" */) {
 			Get();
 			IDENT(slot);
 			style.style->SetSlot(slot); 
@@ -1428,8 +1434,8 @@ void Parser::AREATEXTSTYLE(StyleFilter filter) {
 }
 
 void Parser::AREAICONSTYLE(StyleFilter filter) {
-		while (!(la->kind == _EOF || la->kind == 42 /* "ICON" */)) {SynErr(135); Get();}
-		Expect(42 /* "ICON" */);
+		while (!(la->kind == _EOF || la->kind == 43 /* "ICON" */)) {SynErr(135); Get();}
+		Expect(43 /* "ICON" */);
 		IconPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(136); Get();}
@@ -1574,19 +1580,19 @@ bool Parser::StartOf(int s)
   const bool x = false;
 
 	static bool set[13][84] = {
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,T, T,T,T,T, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, T,x,x,T, x,T,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, T,x,x,T, x,T,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x}
+		{T,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, T,x,x,T, x,T,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x}
 	};
 
 
@@ -1651,9 +1657,9 @@ void Errors::SynErr(int line, int col, int n)
 			case 39: s = coco_string_create("\"NODE\" expected"); break;
 			case 40: s = coco_string_create("\".\" expected"); break;
 			case 41: s = coco_string_create("\"TEXT\" expected"); break;
-			case 42: s = coco_string_create("\"ICON\" expected"); break;
-			case 43: s = coco_string_create("\"WAY\" expected"); break;
-			case 44: s = coco_string_create("\"#\" expected"); break;
+			case 42: s = coco_string_create("\"#\" expected"); break;
+			case 43: s = coco_string_create("\"ICON\" expected"); break;
+			case 44: s = coco_string_create("\"WAY\" expected"); break;
 			case 45: s = coco_string_create("\"SHIELD\" expected"); break;
 			case 46: s = coco_string_create("\"AREA\" expected"); break;
 			case 47: s = coco_string_create("\"color\" expected"); break;

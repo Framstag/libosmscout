@@ -340,6 +340,7 @@ namespace osmscout {
     std::vector<ScanCell>     wayScanlines;
     //@}
 
+    std::vector<TextStyleRef> textStyles;     //! Temporary storage for StyleConfig return value
     std::vector<LineStyleRef> lineStyles;     //! Temporary storage for StyleConfig return value
     /**
       Statistics counter

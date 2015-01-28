@@ -625,12 +625,20 @@ namespace osmscout {
 
   TextStyle::TextStyle(const TextStyle& style)
   : LabelStyle(style),
+    slot(style.slot),
     style(style.style),
     scaleAndFadeMag(style.scaleAndFadeMag),
     label(style.label),
     textColor(style.textColor)
   {
     // no code
+  }
+
+  TextStyle& TextStyle::SetSlot(const std::string& slot)
+  {
+    this->slot=slot;
+
+    return *this;
   }
 
   TextStyle& TextStyle::SetStyle(Style style)
@@ -1572,10 +1580,24 @@ namespace osmscout {
     GetMaxLevelInConditionals(nodeIconStyleConditionals,
                               maxLevel);
 
-    SortInConditionals(*typeConfig,
-                       nodeTextStyleConditionals,
-                       maxLevel,
-                       nodeTextStyleSelectors);
+    OSMSCOUT_HASHMAP<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
+
+    for (auto& conditional : nodeTextStyleConditionals) {
+      textStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
+    }
+
+    nodeTextStyleSelectors.resize(textStyleBySlot.size());
+
+    size_t idx=0;
+    for (const auto& entry : textStyleBySlot) {
+      SortInConditionals(*typeConfig,
+                         entry.second,
+                         maxLevel,
+                         nodeTextStyleSelectors[idx]);
+
+      idx++;
+    }
+
     SortInConditionals(*typeConfig,
                        nodeIconStyleConditionals,
                        maxLevel,
@@ -1711,10 +1733,25 @@ namespace osmscout {
                        areaFillStyleConditionals,
                        maxLevel,
                        areaFillStyleSelectors);
-    SortInConditionals(*typeConfig,
-                       areaTextStyleConditionals,
-                       maxLevel,
-                       areaTextStyleSelectors);
+
+    OSMSCOUT_HASHMAP<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
+
+    for (auto& conditional : areaTextStyleConditionals) {
+      textStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
+    }
+
+    areaTextStyleSelectors.resize(textStyleBySlot.size());
+
+    size_t idx=0;
+    for (const auto& entry : textStyleBySlot) {
+      SortInConditionals(*typeConfig,
+                         entry.second,
+                         maxLevel,
+                         areaTextStyleSelectors[idx]);
+
+      idx++;
+    }
+
     SortInConditionals(*typeConfig,
                        areaIconStyleConditionals,
                        maxLevel,
@@ -2051,15 +2088,28 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeTextStyle(const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     TextStyleRef& textStyle) const
+  void StyleConfig::GetNodeTextStyles(const FeatureValueBuffer& buffer,
+                                      const Projection& projection,
+                                      std::vector<TextStyleRef>& textStyles) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    nodeTextStyleSelectors[buffer.GetType()->GetIndex()],
-                    buffer,
-                    projection,
-                    textStyle);
+    TextStyleRef style;
+
+    textStyles.clear();
+    textStyles.reserve(nodeTextStyleSelectors.size());
+
+    for (size_t slot=0; slot<nodeTextStyleSelectors.size(); slot++) {
+      style=NULL;
+
+      GetFeatureStyle(styleResolveContext,
+                      nodeTextStyleSelectors[slot][buffer.GetType()->GetIndex()],
+                      buffer,
+                      projection,
+                      style);
+
+      if (style.Valid()) {
+        textStyles.push_back(style);
+      }
+    }
   }
 
   void StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
@@ -2142,16 +2192,29 @@ namespace osmscout {
                     fillStyle);
   }
 
-  void StyleConfig::GetAreaTextStyle(const TypeInfoRef& type,
-                                     const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     TextStyleRef& textStyle) const
+  void StyleConfig::GetAreaTextStyles(const TypeInfoRef& type,
+                                      const FeatureValueBuffer& buffer,
+                                      const Projection& projection,
+                                      std::vector<TextStyleRef>& textStyles) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaTextStyleSelectors[type->GetIndex()],
-                    buffer,
-                    projection,
-                    textStyle);
+    TextStyleRef style;
+
+    textStyles.clear();
+    textStyles.reserve(areaTextStyleSelectors.size());
+
+    for (size_t slot=0; slot<areaTextStyleSelectors.size(); slot++) {
+      style=NULL;
+
+      GetFeatureStyle(styleResolveContext,
+                      areaTextStyleSelectors[slot][type->GetIndex()],
+                      buffer,
+                      projection,
+                      style);
+
+      if (style.Valid()) {
+        textStyles.push_back(style);
+      }
+    }
   }
 
   void StyleConfig::GetAreaIconStyle(const TypeInfoRef& type,

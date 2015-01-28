@@ -618,6 +618,7 @@ namespace osmscout {
     };
 
   private:
+    std::string   slot;
     Style         style;
     Magnification scaleAndFadeMag;
     Label         label;
@@ -626,6 +627,8 @@ namespace osmscout {
   public:
     TextStyle();
     TextStyle(const TextStyle& style);
+
+    TextStyle& SetSlot(const std::string& slot);
 
     TextStyle& SetPriority(uint8_t priority);
     TextStyle& SetSize(double size);
@@ -643,6 +646,11 @@ namespace osmscout {
     inline double GetAlpha() const
     {
       return textColor.GetA();
+    }
+
+    inline const std::string& GetSlot() const
+    {
+      return slot;
     }
 
     inline Label GetLabel() const
@@ -757,7 +765,7 @@ namespace osmscout {
   typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;  //!Index selectors by type and level
 
   /**
-   * A stle definng repretive drawing of a shiled label along a path. It consists
+   * A style defining repretive drawing of a shield label along a path. It consists
    * mainly of the attributes of the shield itself (it internally holds a shield
    * label for this) and some more attributes defining the way of repetition.
    */
@@ -1213,7 +1221,7 @@ namespace osmscout {
     std::list<TextConditionalStyle>            nodeTextStyleConditionals;
     std::list<IconConditionalStyle>            nodeIconStyleConditionals;
 
-    TextStyleLookupTable                       nodeTextStyleSelectors;
+    std::vector<TextStyleLookupTable>          nodeTextStyleSelectors;
     IconStyleLookupTable                       nodeIconStyleSelectors;
 
     std::vector<TypeSet>                       nodeTypeSets;
@@ -1241,7 +1249,7 @@ namespace osmscout {
     std::list<IconConditionalStyle>            areaIconStyleConditionals;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
-    TextStyleLookupTable                       areaTextStyleSelectors;
+    std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
     IconStyleLookupTable                       areaIconStyleSelectors;
 
     std::vector<TypeSet>                       areaTypeSets;
@@ -1319,9 +1327,9 @@ namespace osmscout {
       }
     }
 
-    void GetNodeTextStyle(const FeatureValueBuffer& buffer,
-                          const Projection& projection,
-                          TextStyleRef& textStyle) const;
+    void GetNodeTextStyles(const FeatureValueBuffer& buffer,
+                           const Projection& projection,
+                           std::vector<TextStyleRef>& textStyles) const;
 
     void GetNodeIconStyle(const FeatureValueBuffer& buffer,
                           const Projection& projection,
@@ -1344,10 +1352,10 @@ namespace osmscout {
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           FillStyleRef& fillStyle) const;
-    void GetAreaTextStyle(const TypeInfoRef& type,
-                          const FeatureValueBuffer& buffer,
-                          const Projection& projection,
-                          TextStyleRef& textStyle) const;
+    void GetAreaTextStyles(const TypeInfoRef& type,
+                           const FeatureValueBuffer& buffer,
+                           const Projection& projection,
+                           std::vector<TextStyleRef>& textStyles) const;
     void GetAreaIconStyle(const TypeInfoRef& type,
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
