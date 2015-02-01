@@ -126,6 +126,9 @@ namespace osmscout {
       return !labels.empty();
     }
 
+    bool GetLabelIndex(const std::string& labelName,
+                       size_t& index) const;
+
     virtual FeatureValue* AllocateValue(void* buffer);
 
     virtual void Parse(Progress& progress,

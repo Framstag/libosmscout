@@ -965,12 +965,10 @@ void Parser::NODEICONSTYLE(StyleFilter filter) {
 void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 		switch (la->kind) {
 		case 63 /* "label" */: {
-			TextStyle::Label label; 
+			
 			Get();
 			Expect(36 /* ":" */);
-			TEXTLABEL(label);
-			style.style->SetLabel(label);
-			style.attributes.insert(TextStyle::attrLabel);
+			TEXTLABEL(style);
 			
 			break;
 		}
@@ -1508,14 +1506,46 @@ void Parser::STRING(std::string& value) {
 		
 }
 
-void Parser::TEXTLABEL(TextStyle::Label& label) {
-		if (la->kind == 71 /* "name" */) {
+void Parser::TEXTLABEL(TextPartialStyle& style) {
+		std::string featureName;
+		std::string labelName;
+		
+		IDENT(featureName);
+		Expect(40 /* "." */);
+		if (la->kind == _ident) {
+			IDENT(labelName);
+		} else if (la->kind == 71 /* "name" */) {
 			Get();
-			label=TextStyle::name; 
-		} else if (la->kind == 77 /* "ref" */) {
-			Get();
-			label=TextStyle::ref; 
+			labelName="name"; 
 		} else SynErr(139);
+		FeatureRef feature;
+		
+		feature=config.GetTypeConfig()->GetFeature(featureName);
+		
+		if (feature.Invalid()) {
+		 std::string e="'"+featureName+"' is not a registered feature";
+		
+		 SemErr(e.c_str());
+		 return;
+		}
+		
+		if (!feature->HasLabel()) {
+		 std::string e="'"+featureName+"' does not support labels";
+		
+		 SemErr(e.c_str());
+		 return;
+		}
+		
+		size_t labelIndex;
+		
+		if (!feature->GetLabelIndex(labelName,
+		                           labelIndex)) {
+		 std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
+		
+		 SemErr(e.c_str());
+		 return;
+		}
+		
 }
 
 void Parser::LABELSTYLE(TextStyle::Style& style) {

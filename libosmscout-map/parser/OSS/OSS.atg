@@ -885,11 +885,11 @@ PRODUCTIONS
 
   TEXTSTYLEATTR<TextPartialStyle& style>
               = (
-                  (. TextStyle::Label label; .)
-                  "label" ":" TEXTLABEL<label>
+                  (.  .)
+                  "label" ":" TEXTLABEL<style>
                   (.
-                     style.style->SetLabel(label);
-                     style.attributes.insert(TextStyle::attrLabel);
+                     //style.style->SetLabel(label);
+                     //style.attributes.insert(TextStyle::attrLabel);
                   .)
                 | (. TextStyle::Style labelStyle; .)
                   "style" ":" LABELSTYLE<labelStyle>
@@ -1073,11 +1073,45 @@ PRODUCTIONS
                 | "emphasize" (. style=TextStyle::emphasize; .)
                 ).
 
-  TEXTLABEL<TextStyle::Label& label>
-              = (
-                  "name" (. label=TextStyle::name; .)
-                | "ref"  (. label=TextStyle::ref; .)
-                ).
+  TEXTLABEL<TextPartialStyle& style>
+              = (.
+                  std::string featureName;
+                  std::string labelName;
+                 .)
+                IDENT<featureName>
+                "."
+                // This is a hack, since "name" is a reserved token, we could not have a IDENT name... 
+                ( IDENT<labelName> | "name" (. labelName="name"; .) )
+                (.
+                  FeatureRef feature;
+                  
+                  feature=config.GetTypeConfig()->GetFeature(featureName);
+                  
+                  if (feature.Invalid()) {
+                    std::string e="'"+featureName+"' is not a registered feature";
+
+                    SemErr(e.c_str());
+                    return;
+                  }
+                  
+                  if (!feature->HasLabel()) {
+                    std::string e="'"+featureName+"' does not support labels";
+
+                    SemErr(e.c_str());
+                    return;
+                  }
+
+                  size_t labelIndex;
+                  
+                  if (!feature->GetLabelIndex(labelName,
+                                              labelIndex)) {
+                    std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
+
+                    SemErr(e.c_str());
+                    return;
+                  }
+                .)
+                .
 
   SHIELDLABEL<ShieldStyle::Label& label>
               = (

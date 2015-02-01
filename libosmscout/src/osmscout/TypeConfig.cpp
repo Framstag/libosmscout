@@ -78,6 +78,20 @@ namespace osmscout {
     return index;
   }
 
+  bool Feature::GetLabelIndex(const std::string& labelName,
+                             size_t& index) const
+  {
+    const auto entry=labels.find(labelName);
+
+    if (entry==labels.end()) {
+      return false;
+    }
+
+    index=entry->second;
+
+    return true;
+  }
+
   FeatureValue* Feature::AllocateValue(void* /*buffer*/)
   {
     assert(false);
