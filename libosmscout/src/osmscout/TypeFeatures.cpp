@@ -1363,4 +1363,86 @@ namespace osmscout {
       buffer.AllocateValue(feature.GetIndex());
     }
   }
+
+  DynamicFeatureLabelReader::DynamicFeatureLabelReader()
+  : labelIndex(std::numeric_limits<size_t>::max())
+  {
+    // no code
+  }
+
+  DynamicFeatureLabelReader::DynamicFeatureLabelReader(const TypeConfig& typeConfig,
+                                                       const std::string& featureName,
+                                                       size_t labelIndex)
+  {
+    AssignLabel(typeConfig,
+                featureName,
+                labelIndex);
+  }
+
+  bool DynamicFeatureLabelReader::AssignLabel(const TypeConfig& typeConfig,
+                                              const std::string& featureName,
+                                              size_t labelIndex)
+  {
+    // Reset state
+    ClearLabel();
+
+    FeatureRef feature=typeConfig.GetFeature(featureName);
+
+    if (feature.Invalid()) {
+      return false;
+    }
+
+    if (!feature->HasLabel()) {
+      return false;
+    }
+
+    this->labelIndex=labelIndex;
+
+    lookupTable.resize(typeConfig.GetTypeCount(),
+                       std::numeric_limits<size_t>::max());
+
+    for (const auto &type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(featureName,
+                          index)) {
+        lookupTable[type->GetIndex()]=index;
+      }
+    }
+
+    return true;
+  }
+
+  void DynamicFeatureLabelReader::ClearLabel()
+  {
+    labelIndex=std::numeric_limits<size_t>::max();
+    lookupTable.clear();
+  }
+
+  bool DynamicFeatureLabelReader::HasLabel() const
+  {
+    return labelIndex!=std::numeric_limits<size_t>::max();
+  }
+
+  std::string DynamicFeatureLabelReader::GetLabel(const FeatureValueBuffer& buffer) const
+  {
+    if (!HasLabel()) {
+      return "";
+    }
+
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
+
+    if (index!=std::numeric_limits<size_t>::max() &&
+        buffer.HasValue(index)) {
+      FeatureValue *value=buffer.GetValue(index);
+
+      if (value!=NULL) {
+        return value->GetLabel();
+      }
+    }
+
+    return "";
+
+  }
+
 }

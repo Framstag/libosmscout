@@ -1211,6 +1211,75 @@ namespace osmscout {
 
   typedef FeatureLabelReader<NameFeature,NameFeatureValue>         NameFeatureLabelReader;
 
+  class OSMSCOUT_API DynamicFeatureLabelReader
+  {
+
+  private:
+    std::vector<size_t> lookupTable;
+    size_t              labelIndex;
+
+  public:
+    /**
+     * Default initialization assign to label to the reader
+     */
+    DynamicFeatureLabelReader();
+
+    /**
+     * Assigns a label to the reader
+     *
+     * @param typeConfig
+     *   Reference to the current type configuration
+     * @param featureName
+     *   Name of the feature which must be valid and must support labels
+     * @param labelIndex
+     *   The index of the labels to use (a feature might support multiple labels)
+     * @returns true, if the assignment was valid
+     *
+     * @note Calls #AssignLabel
+     */
+    DynamicFeatureLabelReader(const TypeConfig& typeConfig,
+                              const std::string& featureName,
+                              size_t labelIndex);
+
+    /**
+     * Assigns a label to the reader
+     *
+     * @param typeConfig
+     *   Reference to the current type configuration
+     * @param featureName
+     *   Name of the feature which must be valid and must support labels
+     * @param labelIndex
+     *   The index of the labels to use (a feature might support multiple labels)
+     * @returns true, if the assignment was valid
+     *
+     * @note Calls #AssignLabel
+     */
+    bool AssignLabel(const TypeConfig& typeConfig,
+                     const std::string& featureName,
+                     size_t labelIndex);
+
+    /**
+     * Resets all information about a assigned feature label. HashLabel() will return
+     * false afterwards,
+     */
+    void ClearLabel();
+
+    /**
+     * Returns true, if the reader was assigned a feature and a label index
+     * and (both were valid). Else it returns false.
+     */
+    bool HasLabel() const;
+
+    /**
+     * Returns the label of the given object
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    The label, if the given feature has a value and a label or a empty string
+     */
+    std::string GetLabel(const FeatureValueBuffer& buffer) const;
+  };
+
   /**
    * \defgroup type Object type related data structures and services
    */
