@@ -229,7 +229,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void CAPSTYLE(LineStyle::CapStyle& style);
 	void INT(int& value);
 	void STRING(std::string& value);
-	void TEXTLABEL(TextPartialStyle& style);
+	void TEXTLABEL(DynamicFeatureLabelReader& label);
 	void LABELSTYLE(TextStyle::Style& style);
 	void SHIELDLABEL(ShieldStyle::Label& label);
 	void PATHTEXTLABEL(PathTextStyle::Label& label);

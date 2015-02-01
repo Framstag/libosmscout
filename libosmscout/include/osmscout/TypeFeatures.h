@@ -316,6 +316,11 @@ namespace osmscout {
       return address;
     }
 
+    inline std::string GetLabel() const
+    {
+      return address;
+    }
+
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer);
 
@@ -333,7 +338,14 @@ namespace osmscout {
     /** Name of this feature */
     static const char* const NAME;
 
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
   public:
+    AddressFeature();
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
@@ -1235,7 +1247,7 @@ namespace osmscout {
      *   The index of the labels to use (a feature might support multiple labels)
      * @returns true, if the assignment was valid
      *
-     * @note Calls #AssignLabel
+     * @note Calls #SetLabel
      */
     DynamicFeatureLabelReader(const TypeConfig& typeConfig,
                               const std::string& featureName,
@@ -1251,18 +1263,16 @@ namespace osmscout {
      * @param labelIndex
      *   The index of the labels to use (a feature might support multiple labels)
      * @returns true, if the assignment was valid
-     *
-     * @note Calls #AssignLabel
      */
-    bool AssignLabel(const TypeConfig& typeConfig,
-                     const std::string& featureName,
-                     size_t labelIndex);
+    bool Set(const TypeConfig& typeConfig,
+             const std::string& featureName,
+             size_t labelIndex);
 
     /**
      * Resets all information about a assigned feature label. HashLabel() will return
      * false afterwards,
      */
-    void ClearLabel();
+    void Clear();
 
     /**
      * Returns true, if the reader was assigned a feature and a label index

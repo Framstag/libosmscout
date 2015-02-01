@@ -721,11 +721,17 @@ PRODUCTIONS
                 .)
                 .
 
+
   AREATEXTSTYLE<StyleFilter filter>
               = SYNC "TEXT"
                 (.
                   TextPartialStyle style;
+                  std::string      slot;
                 .)
+                [
+                  "#"
+                  IDENT<slot> (. style.style->SetSlot(slot); .)
+                ]
                 SYNC "{"
                 {
                   TEXTSTYLEATTR<style> WEAK ";"
@@ -885,11 +891,11 @@ PRODUCTIONS
 
   TEXTSTYLEATTR<TextPartialStyle& style>
               = (
-                  (.  .)
-                  "label" ":" TEXTLABEL<style>
+                  (. DynamicFeatureLabelReader label; .)
+                  "label" ":" TEXTLABEL<label>
                   (.
-                     //style.style->SetLabel(label);
-                     //style.attributes.insert(TextStyle::attrLabel);
+                     style.style->SetLabel(label);
+                     style.attributes.insert(TextStyle::attrLabel);
                   .)
                 | (. TextStyle::Style labelStyle; .)
                   "style" ":" LABELSTYLE<labelStyle>
@@ -1073,10 +1079,12 @@ PRODUCTIONS
                 | "emphasize" (. style=TextStyle::emphasize; .)
                 ).
 
-  TEXTLABEL<TextPartialStyle& style>
+  TEXTLABEL<DynamicFeatureLabelReader& label>
               = (.
                   std::string featureName;
                   std::string labelName;
+                  
+                  label.Clear();
                  .)
                 IDENT<featureName>
                 "."
@@ -1110,6 +1118,10 @@ PRODUCTIONS
                     SemErr(e.c_str());
                     return;
                   }
+                  
+                  label.Set(config.GetTypeConfig(),
+                            featureName,
+                            labelIndex);
                 .)
                 .
 

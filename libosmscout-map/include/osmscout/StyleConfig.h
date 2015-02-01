@@ -602,12 +602,6 @@ namespace osmscout {
       emphasize
     };
 
-    enum Label {
-      none,
-      name,
-      ref
-    };
-
     enum Attribute {
       attrPriority,
       attrSize,
@@ -618,11 +612,11 @@ namespace osmscout {
     };
 
   private:
-    std::string   slot;
-    Style         style;
-    Magnification scaleAndFadeMag;
-    Label         label;
-    Color         textColor;
+    std::string               slot;
+    Style                     style;
+    Magnification             scaleAndFadeMag;
+    DynamicFeatureLabelReader label;
+    Color                     textColor;
 
   public:
     TextStyle();
@@ -632,14 +626,14 @@ namespace osmscout {
 
     TextStyle& SetPriority(uint8_t priority);
     TextStyle& SetSize(double size);
-    TextStyle& SetLabel(Label label);
+    TextStyle& SetLabel(const DynamicFeatureLabelReader& label);
     TextStyle& SetTextColor(const Color& color);
     TextStyle& SetStyle(Style style);
     TextStyle& SetScaleAndFadeMag(const Magnification& mag);
 
     inline bool IsVisible() const
     {
-      return label!=none &&
+      return label.HasLabel() &&
              GetTextColor().IsVisible();
     }
 
@@ -653,7 +647,7 @@ namespace osmscout {
       return slot;
     }
 
-    inline Label GetLabel() const
+    inline const DynamicFeatureLabelReader& GetLabel() const
     {
       return label;
     }

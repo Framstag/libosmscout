@@ -1369,7 +1369,10 @@ SYMBOL speed_camera
  }
 
  [MAG @labelBuildingMag-] {
-   [TYPE building] AREA.TEXT { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+   [TYPE building] {
+     AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+     AREA.TEXT#buildingAddress { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+   }
 
    [TYPE address] {
      NODE.TEXT { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }

@@ -1013,7 +1013,6 @@ namespace osmscout {
     bool          hasLabel=!textStyles.empty();
     bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool          hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
-    std::string   label;
 
     if (hasIcon) {
       hasIcon=HasIcon(styleConfig,
@@ -1031,15 +1030,8 @@ namespace osmscout {
 
     if (hasLabel) {
       for (const auto textStyle : textStyles) {
-        NameFeatureValue    *nameValue=nameReader.GetValue(buffer);
-        AddressFeatureValue *addressValue=addressReader.GetValue(buffer);
+        std::string label=textStyle->GetLabel().GetLabel(buffer);
 
-        if (nameValue!=NULL) {
-          label=nameValue->GetName();
-        }
-        else if (addressValue!=NULL) {
-          label=addressValue->GetAddress();
-        }
         if (hasSymbol) {
           RegisterPointLabel(projection,
                              parameter,
@@ -1145,7 +1137,6 @@ namespace osmscout {
     bool         hasLabel=!textStyles.empty();
     bool         hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool         hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
-    std::string  label;
 
     if (hasIcon) {
       hasIcon=HasIcon(styleConfig,
@@ -1167,15 +1158,7 @@ namespace osmscout {
 
     if (hasLabel) {
       for (const auto textStyle : textStyles) {
-        NameFeatureValue    *nameValue=nameReader.GetValue(node->GetFeatureValueBuffer());
-        AddressFeatureValue *addressValue=addressReader.GetValue(node->GetFeatureValueBuffer());
-
-        if (nameValue!=NULL) {
-          label=nameValue->GetName();
-        }
-        else if (addressValue!=NULL) {
-          label=addressValue->GetAddress();
-        }
+        std::string label=textStyle->GetLabel().GetLabel(node->GetFeatureValueBuffer());
 
         if (hasSymbol) {
           RegisterPointLabel(projection,

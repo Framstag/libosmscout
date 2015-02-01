@@ -965,10 +965,12 @@ void Parser::NODEICONSTYLE(StyleFilter filter) {
 void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 		switch (la->kind) {
 		case 63 /* "label" */: {
-			
+			DynamicFeatureLabelReader label; 
 			Get();
 			Expect(36 /* ":" */);
-			TEXTLABEL(style);
+			TEXTLABEL(label);
+			style.style->SetLabel(label);
+			style.attributes.insert(TextStyle::attrLabel);
 			
 			break;
 		}
@@ -1418,7 +1420,13 @@ void Parser::AREATEXTSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 41 /* "TEXT" */)) {SynErr(132); Get();}
 		Expect(41 /* "TEXT" */);
 		TextPartialStyle style;
+		std::string      slot;
 		
+		if (la->kind == 42 /* "#" */) {
+			Get();
+			IDENT(slot);
+			style.style->SetSlot(slot); 
+		}
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(133); Get();}
 		Expect(15 /* "{" */);
 		while (StartOf(4)) {
@@ -1506,9 +1514,11 @@ void Parser::STRING(std::string& value) {
 		
 }
 
-void Parser::TEXTLABEL(TextPartialStyle& style) {
+void Parser::TEXTLABEL(DynamicFeatureLabelReader& label) {
 		std::string featureName;
 		std::string labelName;
+		
+		label.Clear();
 		
 		IDENT(featureName);
 		Expect(40 /* "." */);
@@ -1545,6 +1555,10 @@ void Parser::TEXTLABEL(TextPartialStyle& style) {
 		 SemErr(e.c_str());
 		 return;
 		}
+		
+		label.Set(config.GetTypeConfig(),
+		         featureName,
+		         labelIndex);
 		
 }
 

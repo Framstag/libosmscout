@@ -616,7 +616,6 @@ namespace osmscout {
   TextStyle::TextStyle()
    : style(normal),
      scaleAndFadeMag(1000000),
-     label(none),
      textColor(0,0,0)
 
   {
@@ -669,7 +668,7 @@ namespace osmscout {
     return *this;
   }
 
-  TextStyle& TextStyle::SetLabel(Label label)
+  TextStyle& TextStyle::SetLabel(const DynamicFeatureLabelReader& label)
   {
     this->label=label;
 
@@ -1455,6 +1454,11 @@ namespace osmscout {
   class TypeIdProvider
   {
   public:
+    virtual ~TypeIdProvider()
+    {
+      // no code
+    }
+
     virtual TypeId GetId(const TypeInfoRef& type) const = 0;
   };
 

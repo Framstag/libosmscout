@@ -381,7 +381,18 @@ namespace osmscout {
     return address==otherValue.address;
   }
 
-  const char* const AddressFeature::NAME = "Address";
+  const char* const AddressFeature::NAME             = "Address";
+  const char* const AddressFeature::NAME_LABEL       = "name";
+  const size_t      AddressFeature::NAME_LABEL_INDEX = 0;
+
+
+  AddressFeature::AddressFeature()
+  : tagAddrHouseNr(0),
+    tagAddrStreet(0)
+  {
+    RegisterLabel(NAME_LABEL,
+                  NAME_LABEL_INDEX);
+  }
 
   void AddressFeature::Initialize(TypeConfig& typeConfig)
   {
@@ -1374,17 +1385,17 @@ namespace osmscout {
                                                        const std::string& featureName,
                                                        size_t labelIndex)
   {
-    AssignLabel(typeConfig,
-                featureName,
-                labelIndex);
+    Set(typeConfig,
+        featureName,
+        labelIndex);
   }
 
-  bool DynamicFeatureLabelReader::AssignLabel(const TypeConfig& typeConfig,
-                                              const std::string& featureName,
-                                              size_t labelIndex)
+  bool DynamicFeatureLabelReader::Set(const TypeConfig& typeConfig,
+                                      const std::string& featureName,
+                                      size_t labelIndex)
   {
     // Reset state
-    ClearLabel();
+    Clear();
 
     FeatureRef feature=typeConfig.GetFeature(featureName);
 
@@ -1413,7 +1424,7 @@ namespace osmscout {
     return true;
   }
 
-  void DynamicFeatureLabelReader::ClearLabel()
+  void DynamicFeatureLabelReader::Clear()
   {
     labelIndex=std::numeric_limits<size_t>::max();
     lookupTable.clear();
