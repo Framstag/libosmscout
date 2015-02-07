@@ -136,12 +136,16 @@ namespace osmscout {
   {
   private:
     OSMSCOUT_HASHMAP<std::string,Magnification::Mag> stringToMagMap;
+    OSMSCOUT_HASHMAP<size_t,std::string>             levelToStringMap;
 
   public:
     MagnificationConverter();
 
     bool Convert(const std::string& name,
                  Magnification& magnification);
+
+    bool Convert(const size_t level,
+                 std::string& name);
   };
 
 }

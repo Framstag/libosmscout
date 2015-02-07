@@ -63,6 +63,24 @@ namespace osmscout {
     stringToMagMap[std::string("block")]=Magnification::magBlock;
     stringToMagMap[std::string("street")]=Magnification::magStreet;
     stringToMagMap[std::string("house")]=Magnification::magHouse;
+
+    levelToStringMap[(uint32_t)log2(Magnification::magWorld)]="world";
+    levelToStringMap[(uint32_t)log2(Magnification::magContinent)]="continent";
+    levelToStringMap[(uint32_t)log2(Magnification::magState)]="state";
+    levelToStringMap[(uint32_t)log2(Magnification::magStateOver)]="stateOver";
+    levelToStringMap[(uint32_t)log2(Magnification::magCounty)]="county";
+    levelToStringMap[(uint32_t)log2(Magnification::magRegion)]="region";
+    levelToStringMap[(uint32_t)log2(Magnification::magProximity)]="proximity";
+    levelToStringMap[(uint32_t)log2(Magnification::magCityOver)]="cityOver";
+    levelToStringMap[(uint32_t)log2(Magnification::magCity)]="city";
+    levelToStringMap[(uint32_t)log2(Magnification::magSuburb)]="suburb";
+    levelToStringMap[(uint32_t)log2(Magnification::magDetail)]="detail";
+    levelToStringMap[(uint32_t)log2(Magnification::magClose)]="close";
+    levelToStringMap[(uint32_t)log2(Magnification::magCloser)]="closer";
+    levelToStringMap[(uint32_t)log2(Magnification::magVeryClose)]="veryClose";
+    levelToStringMap[(uint32_t)log2(Magnification::magBlock)]="block";
+    levelToStringMap[(uint32_t)log2(Magnification::magStreet)]="street";
+    levelToStringMap[(uint32_t)log2(Magnification::magHouse)]="house";
   }
 
   bool MagnificationConverter::Convert(const std::string& name,
@@ -79,4 +97,17 @@ namespace osmscout {
     return true;
   }
 
+  bool MagnificationConverter::Convert(size_t level,
+                                       std::string& name)
+  {
+    OSMSCOUT_HASHMAP<size_t,std::string>::const_iterator entry=levelToStringMap.find(level);
+
+    if (entry==levelToStringMap.end()) {
+      return false;
+    }
+
+    name=entry->second;
+
+    return true;
+  }
 }
