@@ -1987,54 +1987,6 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
-  void GetStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                const Projection& projection,
-                double dpi,
-                Ref<S>& style)
-  {
-    bool   fastpath=style.Invalid();
-    bool   composed=false;
-    size_t level=projection.GetMagnification().GetLevel();
-    double meterInPixel=1/projection.GetPixelSize();
-    double meterInMM=meterInPixel*25.4/dpi;
-
-    if (level>=styleSelectors.size()) {
-      level=styleSelectors.size()-1;
-    }
-
-    style=NULL;
-
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
-         s!=styleSelectors[level].end();
-         ++s) {
-      const StyleSelector<S,A>& selector=*s;
-
-      if (!selector.criteria.Matches(meterInPixel,
-                                     meterInMM)) {
-        continue;
-      }
-
-      if (style.Invalid()) {
-        style=selector.style;
-        continue;
-      }
-      else if (fastpath) {
-        style=new S(selector.style);
-        fastpath=false;
-      }
-
-      style->CopyAttributes(*selector.style,
-                            selector.attributes);
-      composed=true;
-    }
-
-    if (composed &&
-        !style->IsVisible()) {
-      style=NULL;
-    }
-  }
-
   /**
    * Get the style data based on the given features of an object,
    * a given style (S) and its style attributes (A).
@@ -2058,11 +2010,7 @@ namespace osmscout {
 
     style=NULL;
 
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
-         s!=styleSelectors[level].end();
-         ++s) {
-      const StyleSelector<S,A>& selector=*s;
-
+    for (const auto& selector : styleSelectors[level]) {
       if (!selector.criteria.Matches(context,
                                      buffer,
                                      meterInPixel,
