@@ -1024,13 +1024,13 @@ namespace osmscout {
       return;
     }
 
-    if (!hasSymbol && !hasLabel && !hasIcon) {
-      return;
-    }
-
     if (hasLabel) {
       for (const auto textStyle : textStyles) {
         std::string label=textStyle->GetLabel().GetLabel(buffer);
+
+        if (label.empty()) {
+          continue;
+        }
 
         if (hasSymbol) {
           RegisterPointLabel(projection,
@@ -1159,6 +1159,10 @@ namespace osmscout {
     if (hasLabel) {
       for (const auto textStyle : textStyles) {
         std::string label=textStyle->GetLabel().GetLabel(node->GetFeatureValueBuffer());
+
+        if (label.empty()) {
+          continue;
+        }
 
         if (hasSymbol) {
           RegisterPointLabel(projection,
