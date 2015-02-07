@@ -22,6 +22,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <string>
+
 #include <osmscout/system/Assert.h>
 
 namespace osmscout {
@@ -144,6 +146,8 @@ namespace osmscout {
                    g-g*factor,
                    b-b*factor);
     }
+
+    std::string ToHexString() const;
 
     inline bool operator==(const Color& other) const
     {
