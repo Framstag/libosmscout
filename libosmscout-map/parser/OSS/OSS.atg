@@ -452,6 +452,26 @@ PRODUCTIONS
                      (. filter.SetTypes(types); .)
                    ]
                    [
+                     (. 
+                       TypeInfoSet types;
+                      .)
+                     "PATH"
+                     (.
+                       for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                         if (type->IsPath()) {
+                           if (filter.HasTypes() &&
+                               !filter.HasType(type)) {
+                             continue;
+                           }
+                           
+                           types.Set(type);
+                         }
+                       }
+                       
+                       filter.SetTypes(types);
+                     .)
+                   ]
+                   [
                      (.
                        TypeInfoSet types;
                        std::string name;

@@ -47,10 +47,12 @@ OSS
 
      Filter are defined in "[" ... "]" brackets. The following filter
      criteria exist:
-     * TYPE <typename> "," <typename> - the filter is valid only for
-       objects that match one of the given types (OR semantic).
      * FEATURE <featurename> "," <featurename> - matches all types
        that have ALL the given features (AND semantic).
+     * PATH - matches all types wihich are annotated as PATH in the
+       OST file.  
+     * TYPE <typename> "," <typename> - the filter is valid only for
+       objects that match one of the given types (OR semantic).
      * MAG <minLevel> - <maxLevel> - the filter is only valid for the
        given magnification interval. MinLevel or Maxlevel is optional
        with the obvious default.
@@ -1024,23 +1026,7 @@ SYMBOL speed_camera
 
  // Oneways
 
- [TYPE highway_motorway,
-       highway_motorway_trunk,
-       highway_motorway_primary,
-       highway_motorway_link,
-       highway_trunk,
-       highway_trunk_link,
-       highway_primary,
-       highway_primary_link,
-       highway_secondary,
-       highway_secondary_link,
-       highway_tertiary,
-       highway_road,
-       highway_unclassified,
-       highway_residential,
-       highway_service,
-       highway_living_street,
-       highway_pedestrian
+ [PATH
   MAG veryClose-
   ONEWAY] WAY.SYMBOL {symbol: oneway_arrow; }
 
