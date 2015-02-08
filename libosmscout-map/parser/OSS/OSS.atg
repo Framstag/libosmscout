@@ -399,6 +399,59 @@ PRODUCTIONS
   STYLEFILTER<StyleFilter& filter>
               = "["
                    [
+                     (. 
+                       TypeInfoSet types;
+                       std::string featureName;
+                      .)
+                     "FEATURE"
+                     IDENT<featureName>
+                     (.
+                       FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
+
+                       if (feature.Invalid()) {
+                         std::string e="Unknown feature '"+featureName+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       else {
+                         for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                            if (type->HasFeature(featureName)) {
+                              if (filter.HasTypes() &&
+                                  !filter.HasType(type)) {
+                                continue;
+                              }
+                              
+                              types.Set(type);
+                            }
+                         }
+                       }
+                     .)
+                     {
+                       (. std::string featureName; .)
+                       ","
+                       IDENT<featureName>
+                       (.
+                         FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
+
+                         if (feature.Invalid()) {
+                           std::string e="Unknown feature '"+featureName+"'";
+
+                           SemErr(e.c_str());
+                         }
+                         else {
+                           for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                              if (types.IsSet(type) &&
+                                  !type->HasFeature(featureName)) {
+                                types.Remove(type);
+                              }
+                           }
+                         }
+                       .)
+                     }
+                     
+                     (. filter.SetTypes(types); .)
+                   ]
+                   [
                      (.
                        TypeInfoSet types;
                        std::string name;
@@ -1121,7 +1174,7 @@ PRODUCTIONS
                   
                   label.Set(config.GetTypeConfig(),
                             featureName,
-                            labelIndex);
+                            labelName);
                 .)
                 .
 
