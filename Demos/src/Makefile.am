@@ -1,4 +1,5 @@
-bin_PROGRAMS = LocationLookup \
+bin_PROGRAMS = DumpOSS \
+               LocationLookup \
                ReverseLocationLookup \
                PerformanceTest \
                ResourceConsumption \
@@ -33,6 +34,12 @@ endif
 if OSMSCOUT_HAVE_LIB_MARISA
 bin_PROGRAMS += LookupText
 endif
+
+DumpOSS_SOURCES = DumpOSS.cpp
+DumpOSS_CXXFLAGS = $(LIBOSMSCOUTMAP_CFLAGS) \
+                   $(LIBOSMSCOUT_CFLAGS)
+DumpOSS_LDADD = $(LIBOSMSCOUTMAP_LIBS) \
+                $(LIBOSMSCOUT_LIBS)
 
 LocationLookup_SOURCES = LocationLookup.cpp
 LocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
