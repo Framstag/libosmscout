@@ -48,7 +48,9 @@ OSS
      Filter are defined in "[" ... "]" brackets. The following filter
      criteria exist:
      * TYPE <typename> "," <typename> - the filter is valid only for
-       objects that match one of the given types.
+       objects that match one of the given types (OR semantic).
+     * FEATURE <featurename> "," <featurename> - matches all types
+       that have ALL the given features (AND semantic).
      * MAG <minLevel> - <maxLevel> - the filter is only valid for the
        given magnification interval. MinLevel or Maxlevel is optional
        with the obvious default.
@@ -1369,18 +1371,17 @@ SYMBOL speed_camera
  }
 
  [MAG @labelBuildingMag-] {
-   [TYPE building] {
-     AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
-     AREA.TEXT#buildingAddress { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+   [FEATURE Address] {
+     NODE.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+     AREA.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
    }
 
-   [TYPE address] {
-     NODE.TEXT { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
-     AREA.TEXT { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+   [TYPE building] {
+     AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
    }
 
    [TYPE shop] {
-     NODE.TEXT {label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
+     NODE.TEXT { label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
      AREA.TEXT { label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
    }
 
