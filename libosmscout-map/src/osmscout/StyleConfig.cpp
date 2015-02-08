@@ -711,6 +711,73 @@ namespace osmscout {
     }
   }
 
+  bool TextStyle::operator==(const TextStyle& other) const
+  {
+    if (GetPriority()!=other.GetPriority()) {
+      return false;
+    }
+
+    if (GetSize()!=other.GetSize()) {
+      return false;
+    }
+
+    if (slot!=other.slot) {
+      return false;
+    }
+
+    if (style!=other.style) {
+      return false;
+    }
+
+    if (scaleAndFadeMag!=other.scaleAndFadeMag) {
+      return false;
+    }
+
+    if (label!=other.label) {
+      return false;
+    }
+
+    if (textColor!=other.textColor) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool TextStyle::operator!=(const TextStyle& other) const
+  {
+    return !operator==(other);
+  }
+
+  bool TextStyle::operator<(const TextStyle& other) const
+  {
+    if (GetPriority()!=other.GetPriority()) {
+      return GetPriority()<other.GetPriority();
+    }
+
+    if (GetSize()!=other.GetSize()) {
+      return GetSize()<other.GetSize();
+    }
+
+    if (slot!=other.slot) {
+      return slot<other.slot;
+    }
+
+    if (style!=other.style) {
+      return style<other.style;
+    }
+
+    if (scaleAndFadeMag!=other.scaleAndFadeMag) {
+      return scaleAndFadeMag<other.scaleAndFadeMag;
+    }
+
+    if (label!=other.label) {
+      return label<other.label;
+    }
+
+    return textColor<other.textColor;
+  }
+
   ShieldStyle::ShieldStyle()
    : label(none),
      textColor(0,0,0),
@@ -2024,7 +2091,8 @@ namespace osmscout {
 
         continue;
       }
-      else if (fastpath) {
+
+      if (fastpath) {
         style=new S(style);
         fastpath=false;
       }
@@ -2230,6 +2298,59 @@ namespace osmscout {
                       tileCoastlineBuffer,
                       projection,
                       lineStyle);
+    }
+  }
+
+  void StyleConfig::GetNodeTextStyleSelectors(size_t level,
+                                              const TypeInfoRef& type,
+                                              std::list<TextStyleSelector>& selectors) const
+  {
+    selectors.clear();
+
+    for (const auto& slotEntry : nodeTextStyleSelectors) {
+      size_t l=level;
+
+      if (l>=slotEntry[type->GetIndex()].size()) {
+        l=slotEntry[type->GetIndex()].size()-1;
+      }
+
+      for (const auto& selector : slotEntry[type->GetIndex()][l]) {
+        selectors.push_back(selector);
+      }
+    }
+  }
+
+  void StyleConfig::GetAreaFillStyleSelectors(size_t level,
+                                              const TypeInfoRef& type,
+                                              std::list<FillStyleSelector>& selectors) const
+  {
+    selectors.clear();
+
+    if (level>=areaFillStyleSelectors[type->GetIndex()].size()) {
+      level=areaFillStyleSelectors[type->GetIndex()].size()-1;
+    }
+
+    for (const auto& selector : areaFillStyleSelectors[type->GetIndex()][level]) {
+      selectors.push_back(selector);
+    }
+  }
+
+  void StyleConfig::GetAreaTextStyleSelectors(size_t level,
+                                              const TypeInfoRef& type,
+                                              std::list<TextStyleSelector>& selectors) const
+  {
+    selectors.clear();
+
+    for (const auto& slotEntry : areaTextStyleSelectors) {
+      size_t l=level;
+
+      if (l>=slotEntry[type->GetIndex()].size()) {
+        l=slotEntry[type->GetIndex()].size()-1;
+      }
+
+      for (const auto& selector : slotEntry[type->GetIndex()][l]) {
+        selectors.push_back(selector);
+      }
     }
   }
 

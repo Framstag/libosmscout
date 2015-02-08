@@ -236,6 +236,14 @@ namespace osmscout {
     bool operator==(const StyleCriteria& other) const;
     bool operator!=(const StyleCriteria& other) const;
 
+    inline bool HasCriteria() const
+    {
+      return bridge ||
+             tunnel ||
+             oneway ||
+             sizeCondition.Valid();
+    }
+
     inline bool GetBridge() const
     {
       return bridge;
@@ -669,6 +677,10 @@ namespace osmscout {
 
     void CopyAttributes(const TextStyle& other,
                         const std::set<Attribute>& attributes);
+
+    bool operator==(const TextStyle& other) const;
+    bool operator!=(const TextStyle& other) const;
+    bool operator<(const TextStyle& other) const;
   };
 
   typedef Ref<TextStyle>                                   TextStyleRef;
@@ -1243,7 +1255,7 @@ namespace osmscout {
     std::list<IconConditionalStyle>            areaIconStyleConditionals;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
-    std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
+    std::vector<TextStyleLookupTable>          areaTextStyleSelectors; // Vector entry for each slot
     IconStyleLookupTable                       areaIconStyleSelectors;
 
     std::vector<TypeSet>                       areaTypeSets;
@@ -1321,6 +1333,11 @@ namespace osmscout {
       }
     }
 
+
+    /**
+     * Methods for retrieval of styles for a given object.
+     */
+    //@{
     void GetNodeTextStyles(const FeatureValueBuffer& buffer,
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
@@ -1365,8 +1382,29 @@ namespace osmscout {
                              FillStyleRef& fillStyle) const;
     void GetCoastlineLineStyle(const Projection& projection,
                                LineStyleRef& lineStyle) const;
+    //@}
 
+    /**
+     * Methods for low level debugging access to the style sheet internals
+     */
+    //@{
+    void GetNodeTextStyleSelectors(size_t level,
+                                   const TypeInfoRef& type,
+                                   std::list<TextStyleSelector>& selectors) const;
+    void GetAreaFillStyleSelectors(size_t level,
+                                   const TypeInfoRef& type,
+                                   std::list<FillStyleSelector>& selectors) const;
+    void GetAreaTextStyleSelectors(size_t level,
+                                   const TypeInfoRef& type,
+                                   std::list<TextStyleSelector>& selectors) const;
+    //@}
+
+    /**
+     * Methods for loading a concrete OSS style sheet
+     */
+    //@{
     bool Load(const std::string& styleFile);
+    //@}
   };
 
   typedef Ref<StyleConfig> StyleConfigRef;
