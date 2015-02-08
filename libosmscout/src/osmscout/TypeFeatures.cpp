@@ -1383,21 +1383,22 @@ namespace osmscout {
 
   DynamicFeatureLabelReader::DynamicFeatureLabelReader(const TypeConfig& typeConfig,
                                                        const std::string& featureName,
-                                                       size_t labelIndex)
+                                                       const std::string& labelName)
   {
     Set(typeConfig,
         featureName,
-        labelIndex);
+        labelName);
   }
 
   bool DynamicFeatureLabelReader::Set(const TypeConfig& typeConfig,
                                       const std::string& featureName,
-                                      size_t labelIndex)
+                                      const std::string& labelName)
   {
     // Reset state
     Clear();
 
     FeatureRef feature=typeConfig.GetFeature(featureName);
+    size_t     labelIndex;
 
     if (feature.Invalid()) {
       return false;
@@ -1407,6 +1408,13 @@ namespace osmscout {
       return false;
     }
 
+    if (!feature->GetLabelIndex(labelName,
+                                labelIndex)) {
+      return false;
+    }
+
+    this->featureName=featureName;
+    this->labelName=labelName;
     this->labelIndex=labelIndex;
 
     lookupTable.resize(typeConfig.GetTypeCount(),
@@ -1453,7 +1461,26 @@ namespace osmscout {
     }
 
     return "";
-
   }
 
+  bool DynamicFeatureLabelReader::operator==(const DynamicFeatureLabelReader& other) const
+  {
+    return featureName==other.featureName &&
+           labelIndex==other.labelIndex;
+  }
+
+  bool DynamicFeatureLabelReader::operator!=(const DynamicFeatureLabelReader& other) const
+  {
+    return featureName!=other.featureName ||
+           labelIndex!=other.labelIndex;
+  }
+
+  bool DynamicFeatureLabelReader::operator<(const DynamicFeatureLabelReader& other) const
+  {
+    if (featureName!=other.featureName) {
+      return featureName<other.featureName;
+    }
+
+    return labelIndex<other.labelIndex;
+  }
 }

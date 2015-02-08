@@ -1228,6 +1228,8 @@ namespace osmscout {
 
   private:
     std::vector<size_t> lookupTable;
+    std::string         featureName;
+    std::string         labelName;
     size_t              labelIndex;
 
   public:
@@ -1251,7 +1253,7 @@ namespace osmscout {
      */
     DynamicFeatureLabelReader(const TypeConfig& typeConfig,
                               const std::string& featureName,
-                              size_t labelIndex);
+                              const std::string& labelName);
 
     /**
      * Assigns a label to the reader
@@ -1266,13 +1268,23 @@ namespace osmscout {
      */
     bool Set(const TypeConfig& typeConfig,
              const std::string& featureName,
-             size_t labelIndex);
+             const std::string& labelName);
 
     /**
      * Resets all information about a assigned feature label. HashLabel() will return
      * false afterwards,
      */
     void Clear();
+
+    inline std::string GetFeatureName() const
+    {
+      return featureName;
+    }
+
+    inline std::string GetLabelName() const
+    {
+      return labelName;
+    }
 
     /**
      * Returns true, if the reader was assigned a feature and a label index
@@ -1288,6 +1300,10 @@ namespace osmscout {
      *    The label, if the given feature has a value and a label or a empty string
      */
     std::string GetLabel(const FeatureValueBuffer& buffer) const;
+
+    bool operator==(const DynamicFeatureLabelReader& other) const;
+    bool operator!=(const DynamicFeatureLabelReader& other) const;
+    bool operator<(const DynamicFeatureLabelReader& other) const;
   };
 
   /**
