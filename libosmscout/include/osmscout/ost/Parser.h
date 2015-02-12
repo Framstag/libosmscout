@@ -130,6 +130,7 @@ std::string Destring(const char* str)
 	void TAGCONDITION(TagCondition*& condition);
 	void FEATURE(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
+	void GROUPS(TypeInfo& typeInfo);
 	void TAGANDCOND(TagCondition*& condition);
 	void TAGBOOLCOND(TagCondition*& condition);
 	void TAGBINCOND(TagCondition*& condition);

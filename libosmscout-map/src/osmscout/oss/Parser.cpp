@@ -707,6 +707,37 @@ void Parser::UINT(size_t& value) {
 
 void Parser::STYLEFILTER(StyleFilter& filter) {
 		Expect(26 /* "[" */);
+		if (la->kind == 11 /* "GROUP" */) {
+			TypeInfoSet types;
+			std::string groupName;
+			
+			Get();
+			IDENT(groupName);
+			for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+			  if (type->IsInGroup(groupName)) {
+			    if (filter.HasTypes() &&
+			        !filter.HasType(type)) {
+			      continue;
+			    }
+			  
+			    types.Set(type);
+			  }
+			}
+			
+			while (la->kind == 12 /* "," */) {
+				std::string groupName; 
+				Get();
+				IDENT(groupName);
+				for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+				if (types.IsSet(type) &&
+				      !type->IsInGroup(groupName)) {
+				    types.Remove(type);
+				  }
+				}
+				
+			}
+			filter.SetTypes(types); 
+		}
 		if (la->kind == 27 /* "FEATURE" */) {
 			TypeInfoSet types;
 			std::string featureName;

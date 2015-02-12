@@ -144,6 +144,9 @@ PRODUCTIONS
                   TYPEOPTIONS<*typeInfo>
                 ]
 
+                [
+                  GROUPS<*typeInfo>
+                ]
                 (.
                   config.RegisterType(typeInfo);
                 .)
@@ -498,6 +501,19 @@ PRODUCTIONS
                   "]"
                 ]
                 .
+
+  GROUPS<TypeInfo& typeInfo>
+              = "GROUP"
+                (. std::string groupName; .)
+                IDENT<groupName>
+                (. typeInfo.AddGroup(groupName); .)
+                {
+                  ","
+                  IDENT<groupName>
+                  (. typeInfo.AddGroup(groupName); .)
+                }
+                .
+
 
   IDENT<std::string& value>
               = ident

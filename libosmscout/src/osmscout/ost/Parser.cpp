@@ -129,7 +129,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == _EOF || la->kind == 4 /* "OST" */)) {SynErr(53); Get();}
+		while (!(la->kind == _EOF || la->kind == 4 /* "OST" */)) {SynErr(54); Get();}
 		Expect(4 /* "OST" */);
 		if (la->kind == 6 /* "MAX" */) {
 			MAXSPEEDS();
@@ -144,7 +144,7 @@ void Parser::OST() {
 }
 
 void Parser::MAXSPEEDS() {
-		while (!(la->kind == _EOF || la->kind == 6 /* "MAX" */)) {SynErr(54); Get();}
+		while (!(la->kind == _EOF || la->kind == 6 /* "MAX" */)) {SynErr(55); Get();}
 		Expect(6 /* "MAX" */);
 		Expect(7 /* "SPEEDS" */);
 		MAXSPEED();
@@ -154,7 +154,7 @@ void Parser::MAXSPEEDS() {
 }
 
 void Parser::GRADES() {
-		while (!(la->kind == _EOF || la->kind == 11 /* "GRADES" */)) {SynErr(55); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "GRADES" */)) {SynErr(56); Get();}
 		Expect(11 /* "GRADES" */);
 		GRADE();
 		while (la->kind == 12 /* "SURFACE" */) {
@@ -163,7 +163,7 @@ void Parser::GRADES() {
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == _EOF || la->kind == 16 /* "TYPES" */)) {SynErr(56); Get();}
+		while (!(la->kind == _EOF || la->kind == 16 /* "TYPES" */)) {SynErr(57); Get();}
 		Expect(16 /* "TYPES" */);
 		TYPE();
 		while (la->kind == 17 /* "TYPE" */) {
@@ -175,7 +175,7 @@ void Parser::MAXSPEED() {
 		std::string alias;
 		size_t      speed; 
 		
-		while (!(la->kind == _EOF || la->kind == 8 /* "SPEED" */)) {SynErr(57); Get();}
+		while (!(la->kind == _EOF || la->kind == 8 /* "SPEED" */)) {SynErr(58); Get();}
 		Expect(8 /* "SPEED" */);
 		STRING(alias);
 		Expect(9 /* "=" */);
@@ -214,7 +214,7 @@ void Parser::UINT(size_t& value) {
 void Parser::GRADE() {
 		size_t grade;
 		
-		while (!(la->kind == _EOF || la->kind == 12 /* "SURFACE" */)) {SynErr(58); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "SURFACE" */)) {SynErr(59); Get();}
 		Expect(12 /* "SURFACE" */);
 		Expect(13 /* "GRADE" */);
 		UINT(grade);
@@ -243,7 +243,7 @@ void Parser::TYPE() {
 		TypeInfoRef   typeInfo(new TypeInfo());
 		unsigned char types;
 		
-		while (!(la->kind == _EOF || la->kind == 17 /* "TYPE" */)) {SynErr(59); Get();}
+		while (!(la->kind == _EOF || la->kind == 17 /* "TYPE" */)) {SynErr(60); Get();}
 		Expect(17 /* "TYPE" */);
 		IDENT(name);
 		typeInfo->SetType(name); 
@@ -278,6 +278,9 @@ void Parser::TYPE() {
 		}
 		if (StartOf(1)) {
 			TYPEOPTIONS(*typeInfo);
+		}
+		if (la->kind == 52 /* "GROUP" */) {
+			GROUPS(*typeInfo);
 		}
 		config.RegisterType(typeInfo);
 		
@@ -359,6 +362,18 @@ void Parser::TYPEOPTIONS(TypeInfo& typeInfo) {
 		}
 }
 
+void Parser::GROUPS(TypeInfo& typeInfo) {
+		Expect(52 /* "GROUP" */);
+		std::string groupName; 
+		IDENT(groupName);
+		typeInfo.AddGroup(groupName); 
+		while (la->kind == 22 /* "," */) {
+			Get();
+			IDENT(groupName);
+			typeInfo.AddGroup(groupName); 
+		}
+}
+
 void Parser::TAGANDCOND(TagCondition*& condition) {
 		std::list<TagCondition*> conditions;
 		TagCondition             *subCond;
@@ -400,7 +415,7 @@ void Parser::TAGBOOLCOND(TagCondition*& condition) {
 			Get();
 			TAGBOOLCOND(condition);
 			condition=new TagNotCondition(condition); 
-		} else SynErr(60);
+		} else SynErr(61);
 }
 
 void Parser::TAGBINCOND(TagCondition*& condition) {
@@ -437,7 +452,7 @@ void Parser::TAGBINCOND(TagCondition*& condition) {
 			TAGISINCOND(nameValue,condition);
 			break;
 		}
-		default: SynErr(61); break;
+		default: SynErr(62); break;
 		}
 }
 
@@ -465,7 +480,7 @@ void Parser::TAGLESSCOND(const std::string& tagName,TagCondition*& condition) {
 			
 			condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
 			
-		} else SynErr(62);
+		} else SynErr(63);
 }
 
 void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& condition) {
@@ -485,7 +500,7 @@ void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& conditio
 			
 			condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
 			
-		} else SynErr(63);
+		} else SynErr(64);
 }
 
 void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
@@ -505,7 +520,7 @@ void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) 
 			
 			condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
 			
-		} else SynErr(64);
+		} else SynErr(65);
 }
 
 void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
@@ -525,7 +540,7 @@ void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& conditio
 			
 			condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
 			
-		} else SynErr(65);
+		} else SynErr(66);
 }
 
 void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition) {
@@ -545,7 +560,7 @@ void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition)
 			
 			condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
 			
-		} else SynErr(66);
+		} else SynErr(67);
 }
 
 void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condition) {
@@ -565,7 +580,7 @@ void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condi
 			
 			condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
 			
-		} else SynErr(67);
+		} else SynErr(68);
 }
 
 void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
@@ -613,7 +628,7 @@ void Parser::TYPEKIND(unsigned char& types) {
 		} else if (la->kind == 38 /* "RELATION" */) {
 			Get();
 			types|=TypeInfo::typeRelation; 
-		} else SynErr(68);
+		} else SynErr(69);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
@@ -667,7 +682,7 @@ void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 			typeInfo.SetIgnoreSeaLand(true); 
 			break;
 		}
-		default: SynErr(69); break;
+		default: SynErr(70); break;
 		}
 }
 
@@ -711,7 +726,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 52;
+	maxT = 53;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -726,10 +741,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[3][54] = {
-		{T,x,x,x, T,x,T,x, T,x,x,T, T,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, T,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+	static bool set[3][55] = {
+		{T,x,x,x, T,x,T,x, T,x,x,T, T,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, T,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
 	};
 
 
@@ -804,24 +819,25 @@ void Errors::SynErr(int line, int col, int n)
 			case 49: s = coco_string_create("\"FOOT\" expected"); break;
 			case 50: s = coco_string_create("\"BICYCLE\" expected"); break;
 			case 51: s = coco_string_create("\"CAR\" expected"); break;
-			case 52: s = coco_string_create("??? expected"); break;
-			case 53: s = coco_string_create("this symbol not expected in OST"); break;
-			case 54: s = coco_string_create("this symbol not expected in MAXSPEEDS"); break;
-			case 55: s = coco_string_create("this symbol not expected in GRADES"); break;
-			case 56: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 57: s = coco_string_create("this symbol not expected in MAXSPEED"); break;
-			case 58: s = coco_string_create("this symbol not expected in GRADE"); break;
-			case 59: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 60: s = coco_string_create("invalid TAGBOOLCOND"); break;
-			case 61: s = coco_string_create("invalid TAGBINCOND"); break;
-			case 62: s = coco_string_create("invalid TAGLESSCOND"); break;
-			case 63: s = coco_string_create("invalid TAGLESSEQUALCOND"); break;
-			case 64: s = coco_string_create("invalid TAGEQUALSCOND"); break;
-			case 65: s = coco_string_create("invalid TAGNOTEQUALSCOND"); break;
-			case 66: s = coco_string_create("invalid TAGGREATERCOND"); break;
-			case 67: s = coco_string_create("invalid TAGGREATEREQUALCOND"); break;
-			case 68: s = coco_string_create("invalid TYPEKIND"); break;
-			case 69: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 52: s = coco_string_create("\"GROUP\" expected"); break;
+			case 53: s = coco_string_create("??? expected"); break;
+			case 54: s = coco_string_create("this symbol not expected in OST"); break;
+			case 55: s = coco_string_create("this symbol not expected in MAXSPEEDS"); break;
+			case 56: s = coco_string_create("this symbol not expected in GRADES"); break;
+			case 57: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 58: s = coco_string_create("this symbol not expected in MAXSPEED"); break;
+			case 59: s = coco_string_create("this symbol not expected in GRADE"); break;
+			case 60: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 61: s = coco_string_create("invalid TAGBOOLCOND"); break;
+			case 62: s = coco_string_create("invalid TAGBINCOND"); break;
+			case 63: s = coco_string_create("invalid TAGLESSCOND"); break;
+			case 64: s = coco_string_create("invalid TAGLESSEQUALCOND"); break;
+			case 65: s = coco_string_create("invalid TAGEQUALSCOND"); break;
+			case 66: s = coco_string_create("invalid TAGNOTEQUALSCOND"); break;
+			case 67: s = coco_string_create("invalid TAGGREATERCOND"); break;
+			case 68: s = coco_string_create("invalid TAGGREATEREQUALCOND"); break;
+			case 69: s = coco_string_create("invalid TYPEKIND"); break;
+			case 70: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

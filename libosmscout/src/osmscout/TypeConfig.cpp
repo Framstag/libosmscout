@@ -559,6 +559,13 @@ namespace osmscout {
     return *this;
   }
 
+  TypeInfo& TypeInfo::AddGroup(const std::string& groupName)
+  {
+    groups.insert(groupName);
+
+    return *this;
+  }
+
   bool TypeInfo::HasFeature(const std::string& featureName) const
   {
     return nameToFeatureMap.find(featureName)!=nameToFeatureMap.end();
@@ -1514,6 +1521,24 @@ namespace osmscout {
         typeInfo->AddFeature(feature);
       }
 
+      // Groups
+
+      uint32_t groupCount;
+
+      if (!scanner.ReadNumber(groupCount)) {
+        return false;
+      }
+
+      for (size_t i=0; i<groupCount; i++) {
+        std::string groupName;
+
+        if (!scanner.Read(groupName)) {
+          return false;
+        }
+
+        typeInfo->AddGroup(groupName);
+      }
+
       typeInfo=RegisterType(typeInfo);
     }
 
@@ -1608,6 +1633,11 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)type->GetFeatures().size());
       for (const auto &feature : type->GetFeatures()) {
         writer.Write(feature.GetFeature()->GetName());
+      }
+
+      writer.WriteNumber((uint32_t)type->GetGroups().size());
+      for (const auto &groupName : type->GetGroups()) {
+        writer.Write(groupName);
       }
     }
 

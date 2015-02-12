@@ -489,140 +489,171 @@ TYPES
     = NODE AREA ("landuse"=="allotments")
       {Name, NameAlt}
       MERGE_AREAS
+      GROUP landuse
      
   TYPE landuse_basin
     = NODE AREA ("landuse"=="basin")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
+      GROUP landuse
        
   TYPE landuse_brownfield
     = AREA ("landuse"=="brownfield")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
        
   TYPE landuse_cemetery
     = AREA ("landuse"=="cemetery")
       {Name, NameAlt}
+      GROUP landuse
     
   TYPE landuse_cemetery_sea
     = AREA ("landuse"=="cemetery" AND "cemetery"=="sea")
       {Name, NameAlt}
       IGNORESEALAND
+      GROUP landuse
       
   TYPE landuse_commercial
     = NODE AREA ("landuse"=="commercial")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
        
   TYPE landuse_construction
     = NODE AREA ("landuse"=="construction")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_farm
     = AREA ("landuse"=="farm")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
+      GROUP landuse
       
   TYPE landuse_farmland
     = AREA ("landuse"=="farmland")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_farmyard_building
     = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
+      GROUP landuse
     
   TYPE landuse_farmyard
     = AREA ("landuse"=="farmyard")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_forest
     = NODE AREA ("landuse"=="forest")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_garages
     = AREA ("landuse"=="garages")
       {Name, NameAlt}
+      GROUP landuse
     
   TYPE landuse_grass
     = NODE AREA ("landuse"=="grass")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_greenfield
     = NODE AREA ("landuse"=="greenfield")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
       
   TYPE landuse_greenhouse_horticulture
     = AREA ("landuse"=="greenhouse_horticulture")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_industrial
     = NODE AREA ("landuse"=="industrial")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
       
   TYPE landuse_landfill
     = NODE AREA ("landuse"=="landfill")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
       
   TYPE landuse_meadow
     = NODE AREA ("landuse"=="meadow")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_military
     = NODE AREA ("landuse"=="military")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
+      GROUP landuse
       
   TYPE landuse_orchard
     = NODE AREA ("landuse"=="orchard")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
 
   TYPE landuse_piste
     = NODE AREA ("landuse"=="piste")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_quarry
     = NODE AREA ("landuse"=="quarry")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
       
   TYPE landuse_railway
     = AREA ("landuse"=="railway")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_recreation_ground
     = NODE AREA ("landuse"=="recreation_ground")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
       
   TYPE landuse_reservoir
     = NODE AREA ("landuse"=="reservoir")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
+      GROUP landuse
       
   TYPE landuse_residential
     = NODE AREA ("landuse"=="residential")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
       
   TYPE landuse_retail
     = NODE AREA ("landuse"=="retail") MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_salt_pond
     = AREA ("landuse"=="salt_pond")
       {Name, NameAlt}
+      GROUP landuse
     
   TYPE landuse_village_green
     = NODE AREA ("landuse"=="village_green")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   TYPE landuse_vineyard
     = AREA ("landuse"=="vineyard")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
     
   //
   // Natural
@@ -840,193 +871,236 @@ TYPES
     = NODE AREA ("amenity"=="atm")
       {Name, NameAlt}
       POI
+      GROUP amenity
 
   TYPE amenity_bank_building
     = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       POI
+      GROUP amenity, building
       
   TYPE amenity_bank
     = NODE AREA ("amenity"=="bank")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_bicycle_parking_building
     = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
+      GROUP amenity, building
     
   TYPE amenity_bicycle_parking
     = NODE WAY AREA ("amenity"=="bicycle_parking")
       {Name, NameAlt, Width}
+      GROUP amenity, building
 
   TYPE amenity_bench
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="bench")
+      GROUP amenity
           
   TYPE amenity_bus_station
     = NODE AREA ("amenity"=="bus_station")
       {Name, NameAlt}
+      GROUP amenity
 
   TYPE amenity_cafe_building
     = AREA ("amenity"=="cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_cafe
     = NODE AREA ("amenity"=="cafe")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_charging_station
     IGNORE // No visualisation yet
     = NODE ("amenity"=="charging_station")
+      GROUP amenity
 
   TYPE amenity_clock
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="clock")
+      GROUP amenity
 
   TYPE amenity_drinking_water
     IGNORE // No visualisation yet
     = NODE ("amenity"=="drinking_water")
+      GROUP amenity
 
   TYPE amenity_ev_charging
     IGNORE // No visualisation yet
     = NODE ("amenity"=="ev_charging")
+      GROUP amenity
 
   TYPE amenity_fast_food_building
     = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_fast_food
     = NODE AREA ("amenity"=="fast_food")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_fuel_building
     = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_fuel
     = NODE ("amenity"=="fuel")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_grave_yard
     = NODE AREA ("amenity"=="grave_yard")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_grit_bin
     IGNORE // No visualisation yet
     = NODE ("amenity"=="grit_bin")
+      GROUP amenity
 
   TYPE amenity_hospital_building
     = AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_hospital
     = NODE AREA ("amenity"=="hospital")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_kindergarten_building
     = AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_kindergarten
     = NODE ("amenity"=="kindergarten")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_parking_building
     = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
 
   TYPE amenity_parking_entrance
     IGNORE // No visualisation yet
     = NODE ("amenity"=="parking_entrance")
+      GROUP amenity
 
   TYPE amenity_parking_space
     IGNORE // No visualisation yet
     = NODE AREA ("amenity"=="parking_space")
+      GROUP amenity
       
   TYPE amenity_parking
     = NODE AREA ("amenity"=="parking")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_pharmacy
     = NODE AREA ("amenity"=="pharmacy")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_photo_booth
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="photo_booth")
+      GROUP amenity
 
   TYPE amenity_post_office_building
     = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_post_office
     = NODE ("amenity"=="post_office")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_post_box
     = NODE ("amenity"=="post_box")
+      GROUP amenity
 
   TYPE amenity_restaurant_building
     = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_restaurant
     = NODE AREA ("amenity"=="restaurant")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_recycling // there are a number of sub types, not yet defined here...
     = NODE AREA ("amenity"=="recycling")
+      GROUP amenity
 
   TYPE amenity_school_building
     = AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity, building
       
   TYPE amenity_school
     = NODE AREA ("amenity"=="school")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP amenity
 
   TYPE amenity_taxi
     = NODE AREA ("amenity"=="taxi")
+      GROUP amenity
     
   TYPE amenity_toilets
     = NODE ("amenity"=="toilets")
+      GROUP amenity
     
   TYPE amenity_vending_machine
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="vending_machine")
       {Name, NameAlt}      
+      GROUP amenity
 
   TYPE amenity_waste_disposal
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="waste_disposal")
+      GROUP amenity
 
   TYPE amenity_watering_place IGNORE
     // Too many for mobile?
     = NODE ("amenity"=="watering_place")
+      GROUP amenity
 
   TYPE amenity_water_point
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="water_point")
+      GROUP amenity
 
   // Churches
   TYPE christian_church_building
@@ -1047,11 +1121,13 @@ TYPES
     = AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
+      GROUP amenity, building
     
   TYPE amenity
     = NODE (EXISTS "amenity")
       {Name, NameAlt}
       ADDRESS
+      GROUP amenity
 
   //
   // Shops
@@ -1071,140 +1147,168 @@ TYPES
     = NODE AREA ("tourism"=="aquarium")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
 
   TYPE tourism_attraction_building
     = NODE AREA ("tourism"=="attraction" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_attraction
     = NODE AREA ("tourism"=="attraction")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
 
   TYPE tourism_artwork
     = NODE WAY AREA ("tourism"=="artwork")
       {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_camp_site
     = NODE AREA ("tourism"=="camp_site")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_caravan_site
     = NODE AREA ("tourism"=="caravan_site")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_picnic_site
     = NODE AREA ("tourism"=="picnic_site")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_theme_park
     = NODE AREA ("tourism"=="theme_park")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_viewpoint
     = NODE ("tourism"=="viewpoint")
       {Name, NameAlt}
+      GROUP tourism
     
   TYPE tourism_zoo
     = NODE AREA ("tourism"=="zoo")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
 
   TYPE tourism_alpine_hut_building
     = AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
+      GROUP tourism, building
 
   TYPE tourism_alpine_hut
     = NODE AREA ("tourism"=="alpine_hut")
       {Name, NameAlt}
       ADDRESS
+      GROUP tourism
     
   TYPE tourism_chalet_building
     = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_chalet
     = NODE AREA ("tourism"=="chalet")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_guest_house_building
     = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_guest_house
     = NODE AREA ("tourism"=="guest_house")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_hostel_building
     = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_hostel
     = NODE AREA ("tourism"=="hostel")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_hotel_building
     = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_hotel
     = NODE AREA ("tourism"=="hotel")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_information_building
     = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_information
     = NODE AREA ("tourism"=="information")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_motel_building
     = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_motel
     = NODE AREA ("tourism"=="motel")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
     
   TYPE tourism_museum_building
     = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism_museum
     = NODE AREA ("tourism"=="museum")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
 
   TYPE tourism_building
     = AREA (EXISTS "tourism" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism, building
 
   TYPE tourism
     = NODE AREA (EXISTS "tourism")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP tourism
 
   //
   // Historic
@@ -1214,81 +1318,97 @@ TYPES
     = AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic, building
 
   TYPE historic_castle
     = NODE AREA ("historic"=="castle")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
 
   TYPE historic_manor_building
     = AREA ("historic"=="manor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic, building
     
   TYPE historic_manor
     = NODE AREA ("historic"=="manor")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
     
   TYPE historic_monument_building
     = AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic, building
 
   TYPE historic_monument
     = NODE AREA ("historic"=="monument")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
 
   TYPE historic_memorial_stolperstein
     IGNORE // only for "theme" maps?
     = NODE ("historic"=="memorial" AND "memorial:type"=="stolperstein")
       {Name, NameAlt}
+      GROUP historic
     
   TYPE historic_memorial_building
     = AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic, building
 
   TYPE historic_memorial
     = NODE AREA ("historic"=="memorial")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
     
   TYPE historic_ruins_building
     = AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic, building
 
   TYPE historic_ruins
     = NODE WAY AREA ("historic"=="ruins")
       {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}
       ADDRESS POI
+      GROUP historic
        
   TYPE historic_archaeological_site
     = NODE WAY AREA ("historic"=="archaeological_site")
       {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout}
       ADDRESS POI
+      GROUP historic
       
   TYPE historic_battlefield
     = NODE AREA ("historic"=="battlefield")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
       
   TYPE historic_wreck
     = NODE AREA ("historic"=="wreck")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
 
   TYPE historic_building
     = AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic, building
 
   TYPE historic
     = NODE AREA (EXISTS "historic")
       {Name, NameAlt}
       ADDRESS POI
+      GROUP historic
 
   //
   // Military

@@ -401,6 +401,41 @@ PRODUCTIONS
                    [
                      (. 
                        TypeInfoSet types;
+                       std::string groupName;
+                      .)
+                     "GROUP"
+                     IDENT<groupName>
+                     (.
+                       for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                          if (type->IsInGroup(groupName)) {
+                            if (filter.HasTypes() &&
+                                !filter.HasType(type)) {
+                              continue;
+                            }
+                          
+                            types.Set(type);
+                          }
+                       }
+                     .)
+                     {
+                       (. std::string groupName; .)
+                       ","
+                       IDENT<groupName>
+                       (.
+                         for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                          if (types.IsSet(type) &&
+                                !type->IsInGroup(groupName)) {
+                              types.Remove(type);
+                            }
+                         }
+                       .)
+                     }
+                     
+                     (. filter.SetTypes(types); .)
+                   ]
+                   [
+                     (. 
+                       TypeInfoSet types;
                        std::string featureName;
                       .)
                      "FEATURE"

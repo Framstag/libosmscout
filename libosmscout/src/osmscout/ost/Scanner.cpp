@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 52;
-	noSym = 52;
+	maxT = 53;
+	noSym = 53;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 106; ++i) start.set(i, 1);
@@ -202,6 +202,7 @@ void Scanner::Init() {
 	keywords.set("FOOT", 49);
 	keywords.set("BICYCLE", 50);
 	keywords.set("CAR", 51);
+	keywords.set("GROUP", 52);
 
 
   tvalLength = 128;

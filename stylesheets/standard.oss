@@ -47,11 +47,13 @@ OSS
 
      Filter are defined in "[" ... "]" brackets. The following filter
      criteria exist:
-     * FEATURE <featurename> "," <featurename> - matches all types
+     * GROUP <groupname> "," <groupname>... - matches all types
+       that are in all the given groups (AND semantic)
+     * FEATURE <featurename> "," <featurename>... - matches all types
        that have ALL the given features (AND semantic).
      * PATH - matches all types wihich are annotated as PATH in the
        OST file.  
-     * TYPE <typename> "," <typename> - the filter is valid only for
+     * TYPE <typename> "," <typename>... - the filter is valid only for
        objects that match one of the given types (OR semantic).
      * MAG <minLevel> - <maxLevel> - the filter is only valid for the
        given magnification interval. MinLevel or Maxlevel is optional
@@ -98,7 +100,7 @@ OSS
      with values ("<attributeName> ":" <value> ";") and a closing
      "}".
 
-     A line style for paths has the following attributes:
+     A line style for paths (Way#slot {...}) has the following attributes:
      * color: <COLOR> - Color of the line. if not set, color
        is transparent (a lines is not drawn)
      * dash: <dashWidth> ","... - Size of the dashes. If not set
@@ -122,7 +124,7 @@ OSS
      * priority <integer value> - Drawing priority in relation to other
        slots/pathes of the same object. Smaller values are drawn first.
 
-     An area style for areas has the following attributes:
+     An area style for areas (AREA {...}) has the following attributes:
      * color: <color> - The fill color. By default transparent so area will
        not be filled.
      * pattern: <patternName> - (File)name of an image that is repeately
@@ -137,7 +139,8 @@ OSS
      * borderDash:  <dashWidth> "," ... - Dash widths of the border. By
        default the border is solid.
 
-     An text style for nodes or areas has the following attributes:
+     An text style for nodes or areas (NODE.TEXT#slot {...} or
+     AREA.TEXT#slot {...}) has the following attributes:
      * label: <labelType> - Depending on the given type (label or ref)
        either the label value or the fref value of the object is used as
        label.
@@ -156,20 +159,20 @@ OSS
        will be ignored (so giant scaleMag labels will not "kill" all other
        labels beneeth).
 
-     A text style for a path has the following attributes:
+     A text style for a path (WAY.TEXT { ...}) has the following attributes:
      * label: <labelType> - Depending on the given type (label or ref)
        either the label value or the fref value of the object is used as label.
      * color: <COLOR> - The color of the text
      * size: <SIZE> - The size of the text relative to the standard text size.
        2.0 for example genrates a text twice as height as normal.
 
-     A icon style for a node has the following attributes:
+     A icon style for a node (NODE.ICON {...}) has the following attributes:
      * symbol: <symbolName> -  The name of the symbol to draw
      * name: <iconName>  - The name of the icon to draw. An icon name
        is normally mapped onto an external image. The supported image
        formats depend on the actual backend.
 
-     A shield style for a path has the following attributes:
+     A shield style for a path (WAY.SHIELD {...}) has the following attributes:
      * label: <labelType> - Depending on the given type (label or ref)
        either the label value or the fref value of the object is used as label.
      * color: <COLOR> - The color of the text
@@ -1184,19 +1187,8 @@ SYMBOL speed_camera
          historic_ruins,
          historic_wreck] AREA { color: @tourismColor; }
 
-   [TYPE tourism_attraction_building,
-         tourism_alpine_hut_building,
-         tourism_chalet_building,
-         tourism_guest_house_building,
-         tourism_hostel_building,
-         tourism_hotel_building,
-         tourism_information_building,
-         tourism_motel_building,
-         tourism_museum_building,
-         historic_castle_building,
-         historic_monument_building,
-         historic_memorial_building,
-         historic_ruins_building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
+   [GROUP tourism, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
+   [GROUP historic, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
  }
 
  [MAG city-] {
@@ -1374,29 +1366,7 @@ SYMBOL speed_camera
    [TYPE leisure_building,
          sport_building] AREA.TEXT { label: Name.name;  priority: @labelPrioSpecialBuilding;}
 
-   [TYPE tourism_theme_park,
-         tourism_zoo,
-         tourism_alpine_hut,
-         tourism_alpine_hut_building,
-         tourism_attraction,
-         tourism_artwork,
-         tourism_camp_site,
-         tourism_caravan_site,
-         tourism_chalet,
-         tourism_chalet_building,
-         tourism_guest_house,
-         tourism_guest_house_building,
-         tourism_hostel,
-         tourism_hostel_building,
-         tourism_hotel,
-         tourism_hotel_building,
-         tourism_information,
-         tourism_information_building,
-         tourism_motel,
-         tourism_motel_building,
-         tourism_museum,
-         tourism_museum_building,
-         tourism_picnic_site] {
+   [GROUP tourism] {
      NODE.TEXT {label: Name.name; style: emphasize;color: @tourismLabelColor; size: 0.9; priority: @labelPrioMajorBuilding;}
      AREA.TEXT { label: Name.name; style: emphasize; color: @tourismLabelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
    }

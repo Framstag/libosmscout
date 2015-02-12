@@ -253,6 +253,8 @@ namespace osmscout {
     bool                                 ignoreSeaLand;           //<! Ignore objects of this type for sea/land calculation
     bool                                 ignore;                  //<! Ignore objects of this type
 
+    OSMSCOUT_HASHSET<std::string>        groups;                  //<! Set of idents that server as categorizing groups
+
   private:
     TypeInfo(const TypeInfo& other);
 
@@ -292,6 +294,11 @@ namespace osmscout {
      * Add a feature to this type
      */
     TypeInfo& AddFeature(const FeatureRef& feature);
+
+    /**
+     * Add a categorizing group name to the type.
+     */
+    TypeInfo& AddGroup(const std::string& groupName);
 
     inline bool HasFeatures()
     {
@@ -709,6 +716,19 @@ namespace osmscout {
     inline bool GetIgnore() const
     {
       return ignore;
+    }
+
+    /**
+     * Return the set of groups the type is in.
+     */
+    inline const OSMSCOUT_HASHSET<std::string>& GetGroups() const
+    {
+      return groups;
+    }
+
+    inline bool IsInGroup(const std::string& groupName) const
+    {
+      return groups.find(groupName)!=groups.end();
     }
   };
 
