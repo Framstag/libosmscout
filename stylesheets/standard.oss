@@ -1,5 +1,8 @@
 OSS
- /*
+/*
+  SYNTAX
+  ======
+
    The OSS file defines how data is visualsized in a map. In constists of the
    following sections:
 
@@ -187,10 +190,42 @@ OSS
        other labels beneeth).
      * shieldSpace: <space>mm - Space between each shield on a path.
 
-     If you are interested in a more details syntax description please take a
-     look at the OSS.atg file, which contains (besides the actual AST building
-     code) the EBNF for the syntax.
+  If you are interested in a more details syntax description please take a
+  look at the OSS.atg file, which contains (besides the actual AST building
+  code) the EBNF for the syntax.
+
+  Label and icon placement
+  ========================
+
+  Icons and labels will we drawn vertically. Relative label positioning will be handled
+  by position numbers. A higher position number will get rendered further down the list,
+  a lower one furth to the top.
+
+  Given the following labels and their position (displaying an alternate name for the mountain):
+
+  3: 8848m
+  1: Mount Everest
+  2: Everest
+
+  The labels will be rendered:
+
+  Mount Everest
+    Everest
+     8848m
+
+  Gaps in the position sequence are possible. The default is 0. The order of labels
+  with the same position is undefined.
+
  */
+
+/*
+  Some general rules in the design of this specific style sheet:
+
+  Labels:
+  * A possible icon will always show on top
+  * The main label (the name of the object) will always be shown below the icon (else on top)
+  * A possible additional label (height of a peak) will be placed below the main label.
+*/
 
  ORDER WAYS
   GROUP _route

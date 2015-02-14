@@ -1035,7 +1035,13 @@ PRODUCTIONS
                     style.style->SetPriority((uint8_t)priority);
                     style.attributes.insert(TextStyle::attrPriority);
 	              .)
-                )
+	            | (. size_t position; .)
+	              "position" ":" UINT<position>
+                  (.
+                    style.style->SetPosition(position);
+                    style.attributes.insert(TextStyle::attrPosition);
+                  .)
+	            )  
                 .
 
   PATHSHIELDSTYLEATTR<PathShieldPartialStyle& style>
@@ -1170,6 +1176,12 @@ PRODUCTIONS
                   (.
                       style.style->SetIconName(name);
                       style.attributes.insert(IconStyle::attrIconName);
+                  .)
+                | (. size_t position; .)
+                  "position" ":" UINT<position>
+                  (.
+                    style.style->SetPosition(position);
+                    style.attributes.insert(IconStyle::attrPosition);
                   .)
                 )
                 .

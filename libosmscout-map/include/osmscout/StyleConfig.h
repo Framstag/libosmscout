@@ -614,6 +614,7 @@ namespace osmscout {
       attrPriority,
       attrSize,
       attrLabel,
+      attrPosition,
       attrTextColor,
       attrStyle,
       attrScaleAndFadeMag
@@ -621,10 +622,11 @@ namespace osmscout {
 
   private:
     std::string               slot;
+    DynamicFeatureLabelReader label;          //<! The label - a reference to a feature and its label index
+    size_t                    position;       //<! Relative vertical position of the label
+    Color                     textColor;
     Style                     style;
     Magnification             scaleAndFadeMag;
-    DynamicFeatureLabelReader label;
-    Color                     textColor;
 
   public:
     TextStyle();
@@ -635,6 +637,7 @@ namespace osmscout {
     TextStyle& SetPriority(uint8_t priority);
     TextStyle& SetSize(double size);
     TextStyle& SetLabel(const DynamicFeatureLabelReader& label);
+    TextStyle& SetPosition(size_t position);
     TextStyle& SetTextColor(const Color& color);
     TextStyle& SetStyle(Style style);
     TextStyle& SetScaleAndFadeMag(const Magnification& mag);
@@ -658,6 +661,11 @@ namespace osmscout {
     inline const DynamicFeatureLabelReader& GetLabel() const
     {
       return label;
+    }
+
+    inline size_t GetPosition() const
+    {
+      return position;
     }
 
     inline const Color& GetTextColor() const
@@ -1101,13 +1109,15 @@ namespace osmscout {
   public:
     enum Attribute {
       attrSymbol,
-      attrIconName
+      attrIconName,
+      attrPosition
     };
 
   private:
     SymbolRef   symbol;
-    std::string iconName; //! name of the icon as given in style
-    size_t      iconId;   //! Id for external resource binding
+    std::string iconName; //<! name of the icon as given in style
+    size_t      iconId;   //<! Id for external resource binding
+    size_t      position; //<! Relative vertical position of the label
 
   public:
     IconStyle();
@@ -1116,6 +1126,7 @@ namespace osmscout {
     IconStyle& SetSymbol(const SymbolRef& symbol);
     IconStyle& SetIconName(const std::string& iconName);
     IconStyle& SetIconId(size_t id);
+    IconStyle& SetPosition(size_t position);
 
     inline bool IsVisible() const
     {
@@ -1136,6 +1147,11 @@ namespace osmscout {
     inline size_t GetIconId() const
     {
       return iconId;
+    }
+
+    inline size_t GetPosition() const
+    {
+      return position;
     }
 
     void CopyAttributes(const IconStyle& other,

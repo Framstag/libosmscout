@@ -295,10 +295,8 @@ namespace osmscout {
   void LineStyle::CopyAttributes(const LineStyle& other,
                                  const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrLineColor:
         lineColor=other.lineColor;
         break;
@@ -499,10 +497,8 @@ namespace osmscout {
   void FillStyle::CopyAttributes(const FillStyle& other,
                                  const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrFillColor:
         fillColor=other.fillColor;
         break;
@@ -614,10 +610,10 @@ namespace osmscout {
   }
 
   TextStyle::TextStyle()
-   : style(normal),
-     scaleAndFadeMag(1000000),
-     textColor(0,0,0)
-
+   : position(0),
+     textColor(0,0,0),
+     style(normal),
+     scaleAndFadeMag(1000000)
   {
     // no code
   }
@@ -625,10 +621,11 @@ namespace osmscout {
   TextStyle::TextStyle(const TextStyle& style)
   : LabelStyle(style),
     slot(style.slot),
-    style(style.style),
-    scaleAndFadeMag(style.scaleAndFadeMag),
     label(style.label),
-    textColor(style.textColor)
+    position(style.position),
+    textColor(style.textColor),
+    style(style.style),
+    scaleAndFadeMag(style.scaleAndFadeMag)
   {
     // no code
   }
@@ -640,23 +637,9 @@ namespace osmscout {
     return *this;
   }
 
-  TextStyle& TextStyle::SetStyle(Style style)
-  {
-    this->style=style;
-
-    return *this;
-  }
-
   TextStyle& TextStyle::SetPriority(uint8_t priority)
   {
     LabelStyle::SetPriority(priority);
-
-    return *this;
-  }
-
-  TextStyle& TextStyle::SetScaleAndFadeMag(const Magnification& mag)
-  {
-    this->scaleAndFadeMag=mag;
 
     return *this;
   }
@@ -675,6 +658,13 @@ namespace osmscout {
     return *this;
   }
 
+  TextStyle& TextStyle::SetPosition(size_t position)
+  {
+    this->position=position;
+
+    return *this;
+  }
+
   TextStyle& TextStyle::SetTextColor(const Color& color)
   {
     this->textColor=color;
@@ -682,13 +672,25 @@ namespace osmscout {
     return *this;
   }
 
+  TextStyle& TextStyle::SetStyle(Style style)
+  {
+    this->style=style;
+
+    return *this;
+  }
+
+  TextStyle& TextStyle::SetScaleAndFadeMag(const Magnification& mag)
+  {
+    this->scaleAndFadeMag=mag;
+
+    return *this;
+  }
+
   void TextStyle::CopyAttributes(const TextStyle& other,
                                  const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrPriority:
         SetPriority(other.GetPriority());
         break;
@@ -697,6 +699,9 @@ namespace osmscout {
         break;
       case attrLabel:
         label=other.label;
+        break;
+      case attrPosition:
+        position=other.position;
         break;
       case attrTextColor:
         textColor=other.textColor;
@@ -725,19 +730,23 @@ namespace osmscout {
       return false;
     }
 
+    if (label!=other.label) {
+      return false;
+    }
+
+    if (position!=other.position) {
+      return false;
+    }
+
+    if (textColor!=other.textColor) {
+      return false;
+    }
+
     if (style!=other.style) {
       return false;
     }
 
     if (scaleAndFadeMag!=other.scaleAndFadeMag) {
-      return false;
-    }
-
-    if (label!=other.label) {
-      return false;
-    }
-
-    if (textColor!=other.textColor) {
       return false;
     }
 
@@ -763,19 +772,23 @@ namespace osmscout {
       return slot<other.slot;
     }
 
-    if (style!=other.style) {
-      return style<other.style;
-    }
-
-    if (scaleAndFadeMag!=other.scaleAndFadeMag) {
-      return scaleAndFadeMag<other.scaleAndFadeMag;
-    }
-
     if (label!=other.label) {
       return label<other.label;
     }
 
-    return textColor<other.textColor;
+    if (position!=other.position) {
+      return position<other.position;
+    }
+
+    if (textColor!=other.textColor) {
+      return textColor<other.textColor;
+    }
+
+    if (style!=other.style) {
+      return style<other.style;
+    }
+
+    return scaleAndFadeMag<other.scaleAndFadeMag;
   }
 
   ShieldStyle::ShieldStyle()
@@ -841,10 +854,8 @@ namespace osmscout {
   void ShieldStyle::CopyAttributes(const ShieldStyle& other,
                                    const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrPriority:
         SetPriority(other.GetPriority());
         break;
@@ -933,10 +944,8 @@ namespace osmscout {
   void PathShieldStyle::CopyAttributes(const PathShieldStyle& other,
                                    const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrPriority:
         SetPriority(other.GetPriority());
         break;
@@ -1001,10 +1010,8 @@ namespace osmscout {
   void PathTextStyle::CopyAttributes(const PathTextStyle& other,
                                      const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrLabel:
         label=other.label;
         break;
@@ -1136,15 +1143,18 @@ namespace osmscout {
   }
 
   IconStyle::IconStyle()
-   : iconId(0)
+   : iconId(0),
+     position(0)
   {
     // no code
   }
 
   IconStyle::IconStyle(const IconStyle& style)
+  : iconName(style.iconName),
+    iconId(style.iconId),
+    position(style.position)
   {
-    this->iconName=style.iconName;
-    this->iconId=style.iconId;
+    // no code
   }
 
   IconStyle& IconStyle::SetSymbol(const SymbolRef& symbol)
@@ -1168,19 +1178,27 @@ namespace osmscout {
     return *this;
   }
 
+  IconStyle& IconStyle::SetPosition(size_t position)
+  {
+    this->position=position;
+
+    return *this;
+  }
+
   void IconStyle::CopyAttributes(const IconStyle& other,
                                  const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrSymbol:
         symbol=other.symbol;
         break;
       case attrIconName:
         iconName=other.iconName;
         iconId=other.iconId;
+        break;
+      case attrPosition:
+        position=other.position;
         break;
       }
     }
@@ -1216,10 +1234,8 @@ namespace osmscout {
   void PathSymbolStyle::CopyAttributes(const PathSymbolStyle& other,
                                        const std::set<Attribute>& attributes)
   {
-    for (std::set<Attribute>::const_iterator a=attributes.begin();
-         a!=attributes.end();
-         ++a) {
-      switch (*a) {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
       case attrSymbol:
         symbol=other.symbol;
         break;
