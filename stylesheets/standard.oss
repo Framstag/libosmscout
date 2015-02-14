@@ -437,13 +437,18 @@ SYMBOL amenity
   RECTANGLE 0,0 1 x 1 { color: #b89c9c; }
 
 SYMBOL amenity_hospital
-  CIRCLE 0,0 1.5 {borderColor: @hospitalSymbolColor; borderWidth: 0.2mm; }
-  RECTANGLE -1,0.25 2 x 0.5 { color: @hospitalSymbolColor; }
-  RECTANGLE -0.25,1 0.5 x 2 { color: @hospitalSymbolColor; }
+  CIRCLE 0,0 1 {borderColor: @hospitalSymbolColor; borderWidth: 0.2mm; }
+  // Horizontal bar
+  RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @hospitalSymbolColor; }
+  // Vertical bar
+  RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @hospitalSymbolColor; }
 
 SYMBOL amenity_pharmacy
+  // Box
   RECTANGLE -1,1 2 x 2 {borderColor: @pharmacySymbolColor; borderWidth: 0.2mm; }
+  // Horizontal bar
   RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @pharmacySymbolColor; }
+  // Vertical bar
   RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @pharmacySymbolColor; }
 
 SYMBOL amenity_parking
@@ -1385,8 +1390,8 @@ SYMBOL speed_camera
 
  [MAG @labelBuildingMag-] {
    [FEATURE Address] {
-     NODE.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
-     AREA.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+     NODE.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; }
+     AREA.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; }
    }
 
    [TYPE building] {

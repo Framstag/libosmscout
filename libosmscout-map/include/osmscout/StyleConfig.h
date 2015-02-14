@@ -1225,17 +1225,17 @@ namespace osmscout {
   class OSMSCOUT_MAP_API StyleConfig : public Referencable
   {
   private:
-    TypeConfigRef                              typeConfig;
-    StyleResolveContext                        styleResolveContext;
+    TypeConfigRef                              typeConfig;             //<! Reference to the type configuration
+    StyleResolveContext                        styleResolveContext;    //<! Instance of helper class that can get passed around to templated helper methods
 
-    FeatureValueBuffer                         tileLandBuffer;
-    FeatureValueBuffer                         tileSeaBuffer;
-    FeatureValueBuffer                         tileCoastBuffer;
-    FeatureValueBuffer                         tileUnknownBuffer;
-    FeatureValueBuffer                         tileCoastlineBuffer;
+    FeatureValueBuffer                         tileLandBuffer;         //<! Fake FeatureValueBuffer for land tiles
+    FeatureValueBuffer                         tileSeaBuffer;          //<! Fake FeatureValueBuffer for sea tiles
+    FeatureValueBuffer                         tileCoastBuffer;        //<! Fake FeatureValueBuffer for coast tiles
+    FeatureValueBuffer                         tileUnknownBuffer;      //<! Fake FeatureValueBuffer for unknown tiles
+    FeatureValueBuffer                         tileCoastlineBuffer;    //<! Fake FeatureValueBuffer for coastlines
 
     // Symbol
-    OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
+    OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;                //<! Map of registered symbols by name
     SymbolRef                                  emptySymbol;
 
     // Node
@@ -1271,7 +1271,7 @@ namespace osmscout {
     std::list<IconConditionalStyle>            areaIconStyleConditionals;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
-    std::vector<TextStyleLookupTable>          areaTextStyleSelectors; // Vector entry for each slot
+    std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
     IconStyleLookupTable                       areaIconStyleSelectors;
 
     std::vector<TypeSet>                       areaTypeSets;

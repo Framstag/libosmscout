@@ -1092,6 +1092,11 @@ TYPES
     = NODE ("amenity"=="waste_disposal")
       GROUP amenity
 
+  TYPE amenity_waste_basket
+    IGNORE // Too many for mobile?
+    = NODE ("amenity"=="waste_basket")
+      GROUP amenity
+
   TYPE amenity_watering_place IGNORE
     // Too many for mobile?
     = NODE ("amenity"=="watering_place")
