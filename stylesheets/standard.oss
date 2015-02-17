@@ -525,7 +525,10 @@ SYMBOL speed_camera
          natural_land]
      AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; }
 
-   [TYPE natural_peak] NODE.TEXT { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; }
+   [TYPE natural_peak] {
+     NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+     NODE.TEXT#ele { label: Ele.inMeter; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.7; position: 2;}
+   }
  }
 
  [MAG city-] {

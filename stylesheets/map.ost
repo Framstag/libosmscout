@@ -713,7 +713,7 @@ TYPES
     
   TYPE natural_peak
     = NODE ("natural"=="peak")
-      {Name, NameAlt}
+      {Name, NameAlt, Ele}
     
   TYPE natural_sand
     = AREA ("natural"=="sand")
