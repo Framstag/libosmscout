@@ -941,7 +941,6 @@ namespace osmscout {
 
       value->SetWidth((uint8_t)floor(w+0.5));
     }
-
   }
 
   bool MaxSpeedFeatureValue::Read(FileScanner& scanner)
@@ -1372,6 +1371,125 @@ namespace osmscout {
     if (junction!=tags.end() &&
         junction->second=="roundabout") {
       buffer.AllocateValue(feature.GetIndex());
+    }
+  }
+
+  bool EleFeatureValue::Read(FileScanner& scanner)
+  {
+    return scanner.ReadNumber(ele);
+  }
+
+  bool EleFeatureValue::Write(FileWriter& writer)
+  {
+    return writer.WriteNumber(ele);
+  }
+
+  FeatureValue& EleFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const EleFeatureValue& otherValue=static_cast<const EleFeatureValue&>(other);
+
+      ele=otherValue.ele;
+    }
+
+    return *this;
+  }
+
+  bool EleFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const EleFeatureValue& otherValue=static_cast<const EleFeatureValue&>(other);
+
+    return ele==otherValue.ele;
+  }
+
+  const char* const EleFeature::NAME             = "Ele";
+  const char* const EleFeature::NAME_LABEL       = "inMeter";
+  const size_t      EleFeature::NAME_LABEL_INDEX = 0;
+
+  EleFeature::EleFeature()
+  : tagEle(0)
+  {
+    RegisterLabel(NAME_LABEL,
+                  NAME_LABEL_INDEX);
+  }
+
+  void EleFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagEle=typeConfig.RegisterTag("ele");
+  }
+
+  std::string EleFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t EleFeature::GetValueSize() const
+  {
+    return sizeof(EleFeatureValue);
+  }
+
+  FeatureValue* EleFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) EleFeatureValue();
+  }
+
+  void EleFeature::Parse(Progress& progress,
+                         const TypeConfig& /*typeConfig*/,
+                         const FeatureInstance& feature,
+                         const ObjectOSMRef& object,
+                         const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                         FeatureValueBuffer& buffer) const
+  {
+    auto ele=tags.find(tagEle);
+
+    if (ele==tags.end()) {
+      return;
+    }
+
+    std::string eleString=ele->second;
+    double      e;
+    size_t      pos=0;
+    size_t      count=0;
+
+    // We expect that float values use '.' as separator, but many values use ',' instead.
+    // Try try fix this if string looks reasonable
+    for (size_t i=0; i<eleString.length() && count<=1; i++) {
+      if (eleString[i]==',') {
+        pos=i;
+        count++;
+      }
+    }
+
+    if (count==1) {
+      eleString[pos]='.';
+    }
+
+    // Some ele tag values add an 'm' to hint that the unit is meter, remove it.
+    if (eleString.length()>=2) {
+      if (eleString[eleString.length()-1]=='m' &&
+          ((eleString[eleString.length()-2]>='0' &&
+            eleString[eleString.length()-2]<='9') ||
+            eleString[eleString.length()-2]<=' ')) {
+        eleString.erase(eleString.length()-1);
+      }
+
+      // Trim possible trailing spaces
+      while (eleString.length()>0 &&
+             eleString[eleString.length()-1]==' ') {
+        eleString.erase(eleString.length()-1);
+      }
+    }
+
+    if (!StringToNumber(eleString,e)) {
+      progress.Warning(std::string("Ele tag value '")+ele->second+"' for "+object.GetName()+" is no double!");
+    }
+    else if (e<0 && e>std::numeric_limits<uint32_t>::max()) {
+      progress.Warning(std::string("Ele tag value '")+ele->second+"' for "+object.GetName()+" value is too small or too big!");
+    }
+    else {
+      EleFeatureValue* value=static_cast<EleFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      value->SetEle((uint32_t)floor(e+0.5));
     }
   }
 

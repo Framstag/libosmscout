@@ -22,6 +22,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API NameFeatureValue : public FeatureValue
@@ -977,6 +979,78 @@ namespace osmscout {
     std::string GetName() const;
 
     size_t GetValueSize() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+
+  class OSMSCOUT_API EleFeatureValue : public FeatureValue
+  {
+  private:
+    uint32_t ele;
+
+  public:
+    inline EleFeatureValue()
+    : ele(0)
+    {
+
+    }
+
+    inline EleFeatureValue(uint32_t ele)
+    : ele(ele)
+    {
+      // no code
+    }
+
+    inline void SetEle(uint32_t ele)
+    {
+      this->ele=ele;
+    }
+
+    inline uint32_t GetEle() const
+    {
+      return ele;
+    }
+
+    inline std::string GetLabel() const
+    {
+      return NumberToString(ele)+"m";
+    }
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API EleFeature : public Feature
+  {
+  private:
+    TagId tagEle;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
+  public:
+    EleFeature();
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,

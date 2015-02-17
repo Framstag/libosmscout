@@ -744,6 +744,8 @@ namespace osmscout {
     featureRoundabout=new RoundaboutFeature();
     RegisterFeature(featureRoundabout);
 
+    RegisterFeature(new EleFeature());
+
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
     typeInfoIgnore=new TypeInfo();
