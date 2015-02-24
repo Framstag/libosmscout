@@ -41,6 +41,90 @@
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {
+
+  class OSMSCOUT_MAP_API DynamicFeatureLabelReader
+  {
+
+  private:
+    std::vector<size_t> lookupTable;
+    std::string         featureName;
+    std::string         labelName;
+    size_t              labelIndex;
+
+  public:
+    /**
+     * Default initialization assign to label to the reader
+     */
+    DynamicFeatureLabelReader();
+
+    /**
+     * Assigns a label to the reader
+     *
+     * @param typeConfig
+     *   Reference to the current type configuration
+     * @param featureName
+     *   Name of the feature which must be valid and must support labels
+     * @param labelIndex
+     *   The index of the labels to use (a feature might support multiple labels)
+     * @returns true, if the assignment was valid
+     *
+     * @note Calls #SetLabel
+     */
+    DynamicFeatureLabelReader(const TypeConfig& typeConfig,
+                              const std::string& featureName,
+                              const std::string& labelName);
+
+    /**
+     * Assigns a label to the reader
+     *
+     * @param typeConfig
+     *   Reference to the current type configuration
+     * @param featureName
+     *   Name of the feature which must be valid and must support labels
+     * @param labelIndex
+     *   The index of the labels to use (a feature might support multiple labels)
+     * @returns true, if the assignment was valid
+     */
+    bool Set(const TypeConfig& typeConfig,
+             const std::string& featureName,
+             const std::string& labelName);
+
+    /**
+     * Resets all information about a assigned feature label. HashLabel() will return
+     * false afterwards,
+     */
+    void Clear();
+
+    inline std::string GetFeatureName() const
+    {
+      return featureName;
+    }
+
+    inline std::string GetLabelName() const
+    {
+      return labelName;
+    }
+
+    /**
+     * Returns true, if the reader was assigned a feature and a label index
+     * and (both were valid). Else it returns false.
+     */
+    bool HasLabel() const;
+
+    /**
+     * Returns the label of the given object
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    The label, if the given feature has a value and a label or a empty string
+     */
+    std::string GetLabel(const FeatureValueBuffer& buffer) const;
+
+    bool operator==(const DynamicFeatureLabelReader& other) const;
+    bool operator!=(const DynamicFeatureLabelReader& other) const;
+    bool operator<(const DynamicFeatureLabelReader& other) const;
+  };
+
   class OSMSCOUT_MAP_API StyleResolveContext
   {
   private:
