@@ -92,6 +92,14 @@ namespace osmscout {
     return false;
   }
 
+  void MapPainterOpenGL::GetFontHeight(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       double fontSize,
+                                       double& height)
+  {
+    // TODO
+  }
+
   void MapPainterOpenGL::GetTextDimension(const Projection& projection,
                                           const MapParameter& parameter,
                                           double fontSize,

@@ -527,7 +527,7 @@ SYMBOL speed_camera
 
    [TYPE natural_peak] {
      NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
-     NODE.TEXT#ele { label: Ele.inMeter; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.7; position: 2;}
+     NODE.TEXT#ele { label: Ele.inMeter; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
    }
  }
 

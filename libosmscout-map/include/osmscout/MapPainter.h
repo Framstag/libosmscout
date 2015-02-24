@@ -482,6 +482,7 @@ namespace osmscout {
                             const LabelStyleRef& style,
                             const std::string& text,
                             double fontSize,
+                            double height,
                             double alpha,
                             double x,
                             double y);
@@ -600,6 +601,14 @@ namespace osmscout {
     virtual bool HasIcon(const StyleConfig& styleConfig,
                          const MapParameter& parameter,
                          IconStyle& style)= 0;
+
+    /**
+     * Returns the height of the font.
+     */
+    virtual void GetFontHeight(const Projection& projection,
+                               const MapParameter& parameter,
+                               double fontSize,
+                               double& height) = 0;
 
     /**
       Return the bounding box of the given text.

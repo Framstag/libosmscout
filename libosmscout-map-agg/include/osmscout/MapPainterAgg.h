@@ -101,6 +101,11 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style);
 
+    void GetFontHeight(const Projection& projection,
+                       const MapParameter& parameter,
+                       double fontSize,
+                       double& height);
+
     void GetTextDimension(const Projection& projection,
                           const MapParameter& parameter,
                           double fontSize,

@@ -788,6 +788,7 @@ namespace osmscout {
                          shieldStyle->GetShieldStyle(),
                          text,
                          shieldStyle->GetShieldStyle()->GetSize(),
+                         projection.ConvertWidthToPixel(parameter.GetFontSize()),
                          1.0,
                          wayScanlines[i].x+0.5,
                          wayScanlines[i].y+0.5);
@@ -801,6 +802,7 @@ namespace osmscout {
                                       const LabelStyleRef& style,
                                       const std::string& text,
                                       double fontSize,
+                                      double height,
                                       double alpha,
                                       double x,
                                       double y)
@@ -832,8 +834,8 @@ namespace osmscout {
 
     bx1=x-frameHoriz;
     bx2=x+frameHoriz;
-    by1=y-fontSize/2-frameVert;
-    by2=y+fontSize/2+frameVert;
+    by1=y-height/2-frameVert;
+    by2=y+height/2+frameVert;
 
     if (overlay) {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
@@ -853,7 +855,7 @@ namespace osmscout {
     // We passed the first intersection test, we now calculate the real bounding box
     // by measuring text dimensions
 
-    double xOff,yOff,width,height;
+    double xOff,yOff,width;
 
     GetTextDimension(projection,
                      parameter,
@@ -1031,6 +1033,7 @@ namespace osmscout {
                            data.textStyle,
                            data.label,
                            data.fontSize,
+                           data.height,
                            data.alpha,
                            x,offset);
 
@@ -1688,7 +1691,7 @@ namespace osmscout {
       vertical=shieldLabelSpace;
     }
     else {
-      horizontal=labelSpace;
+      horizontal=0;
       vertical=labelSpace;
     }
   }

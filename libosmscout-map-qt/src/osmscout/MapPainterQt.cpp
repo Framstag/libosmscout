@@ -164,6 +164,19 @@ namespace osmscout {
     return false;
   }
 
+  void MapPainterQt::GetFontHeight(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   double fontSize,
+                                   double& height)
+  {
+    QFont        font(GetFont(projection,
+                              parameter,
+                              fontSize));
+    QFontMetrics metrics=QFontMetrics(font);
+
+    height=metrics.height();
+  }
+
   void MapPainterQt::GetTextDimension(const Projection& projection,
                                       const MapParameter& parameter,
                                       double fontSize,

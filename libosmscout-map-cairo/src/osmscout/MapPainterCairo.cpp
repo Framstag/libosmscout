@@ -605,6 +605,33 @@ namespace osmscout {
     return false;
   }
 
+  void MapPainterCairo::GetFontHeight(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      double fontSize,
+                                      double& height)
+  {
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    Font           font;
+
+    font=GetFont(projection,
+                 parameter,
+                 fontSize);
+
+    height=pango_font_description_get_size(font)/PANGO_SCALE;
+#else
+    Font                 font;
+    cairo_font_extents_t fontExtents;
+
+    font=GetFont(projection,
+                 parameter,
+                 fontSize);
+
+    cairo_scaled_font_extents(font,&fontExtents);
+
+    height=fontExtents.height;
+#endif
+  }
+
   void MapPainterCairo::GetTextDimension(const Projection& projection,
                                          const MapParameter& parameter,
                                          double fontSize,

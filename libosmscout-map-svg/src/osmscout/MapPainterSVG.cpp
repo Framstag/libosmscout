@@ -280,6 +280,22 @@ namespace osmscout {
     return false;
   }
 
+  void MapPainterSVG::GetFontHeight(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    double fontSize,
+                                    double& height)
+  {
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    PangoFontDescription *font;
+
+    font=GetFont(projection,
+                 parameter,
+                 fontSize);
+
+    height=pango_font_description_get_size(font)/PANGO_SCALE;
+#endif
+  }
+
   void MapPainterSVG::GetTextDimension(const Projection& projection,
                                        const MapParameter& parameter,
                                        double fontSize,
