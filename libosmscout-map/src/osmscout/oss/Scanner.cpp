@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 85;
-	noSym = 85;
+	maxT = 84;
+	noSym = 84;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -234,9 +234,8 @@ void Scanner::Init() {
 	keywords.set("square", 77);
 	keywords.set("normal", 78);
 	keywords.set("emphasize", 79);
-	keywords.set("ref", 80);
-	keywords.set("lighten", 81);
-	keywords.set("darken", 84);
+	keywords.set("lighten", 80);
+	keywords.set("darken", 83);
 
 
   tvalLength = 128;
@@ -486,9 +485,9 @@ Token* Scanner::NextToken() {
 		case 29:
 			{t->kind = 42; break;}
 		case 30:
-			{t->kind = 82; break;}
+			{t->kind = 81; break;}
 		case 31:
-			{t->kind = 83; break;}
+			{t->kind = 82; break;}
 		case 32:
 			recEnd = pos; recKind = 44;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}

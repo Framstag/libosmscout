@@ -1046,8 +1046,8 @@ PRODUCTIONS
 
   PATHSHIELDSTYLEATTR<PathShieldPartialStyle& style>
               = (
-                  (. ShieldStyle::Label label; .)
-                  "label" ":" SHIELDLABEL<label>
+                  (. DynamicFeatureLabelReader label; .)
+                  "label" ":" TEXTLABEL<label>
                   (.
                      style.style->SetLabel(label);
                      style.attributes.insert(PathShieldStyle::attrLabel);
@@ -1101,8 +1101,8 @@ PRODUCTIONS
 
   PATHTEXTSTYLEATTR<PathTextPartialStyle& style>
               = (
-                  (. PathTextStyle::Label label; .)
-                  "label" ":" PATHTEXTLABEL<label>
+                  (. DynamicFeatureLabelReader label; .)
+                  "label" ":" TEXTLABEL<label>
                   (.
                      style.style->SetLabel(label);
                      style.attributes.insert(PathTextStyle::attrLabel);
@@ -1244,18 +1244,6 @@ PRODUCTIONS
                             labelName);
                 .)
                 .
-
-  SHIELDLABEL<ShieldStyle::Label& label>
-              = (
-                  "name" (. label=ShieldStyle::name; .)
-                | "ref"  (. label=ShieldStyle::ref; .)
-                ).
-
-  PATHTEXTLABEL<PathTextStyle::Label& label>
-              = (
-                  "name" (. label=PathTextStyle::name; .)
-                | "ref"  (. label=PathTextStyle::ref; .)
-                ).
 
   COLOR<Color& color>
               =   (. double factor; .)

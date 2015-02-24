@@ -792,8 +792,7 @@ namespace osmscout {
   }
 
   ShieldStyle::ShieldStyle()
-   : label(none),
-     textColor(0,0,0),
+   : textColor(0,0,0),
      bgColor(1,1,1),
      borderColor(0,0,0)
   {
@@ -809,7 +808,7 @@ namespace osmscout {
     this->borderColor=style.borderColor;
   }
 
-  ShieldStyle& ShieldStyle::SetLabel(Label label)
+  ShieldStyle& ShieldStyle::SetLabel(const DynamicFeatureLabelReader& label)
   {
     this->label=label;
 
@@ -892,7 +891,7 @@ namespace osmscout {
     // no code
   }
 
-  PathShieldStyle& PathShieldStyle::SetLabel(ShieldStyle::Label label)
+  PathShieldStyle& PathShieldStyle::SetLabel(const DynamicFeatureLabelReader& label)
   {
     shieldStyle->SetLabel(label);
 
@@ -972,8 +971,7 @@ namespace osmscout {
   }
 
   PathTextStyle::PathTextStyle()
-   : label(none),
-     size(1),
+   : size(1),
      textColor(0,0,0)
   {
     // no code
@@ -986,7 +984,7 @@ namespace osmscout {
     this->textColor=style.textColor;
   }
 
-  PathTextStyle& PathTextStyle::SetLabel(Label label)
+  PathTextStyle& PathTextStyle::SetLabel(const DynamicFeatureLabelReader& label)
   {
     this->label=label;
 

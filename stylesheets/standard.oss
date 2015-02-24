@@ -587,7 +587,7 @@ SYMBOL speed_camera
          waterway_drain,
          waterway_river,
          waterway_canal]
-     WAY.TEXT { label: name; }
+     WAY.TEXT { label: Name.name; }
  }
 
  // -------------------------------------------------------
@@ -991,19 +991,19 @@ SYMBOL speed_camera
  // WAY.SHIELD
 
  [MAG state-] {
-   [TYPE highway_motorway] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG proximity-] {
-   [TYPE highway_trunk] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #7ec87e; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #7ec87e; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG cityOver-] {
-   [TYPE highway_primary] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG detail-] {
-   [TYPE highway_motorway_junction] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway_junction] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
  }
 
  // Labels
@@ -1021,12 +1021,12 @@ SYMBOL speed_camera
          highway_primary_link,
          highway_secondary,
          highway_secondary_link,
-         route_ferry] WAY.TEXT{ label: name; size: 1.0; }
+         route_ferry] WAY.TEXT{ label: Name.name; size: 1.0; }
  }
 
  [MAG close-] {
    [TYPE highway_services] NODE.TEXT {label: Name.name; priority: @labelPrioHighwayServices; }
-   [TYPE highway_construction] WAY.TEXT { label: name;}
+   [TYPE highway_construction] WAY.TEXT { label: Name.name;}
 
    [TYPE railway_station] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
  }
@@ -1039,7 +1039,7 @@ SYMBOL speed_camera
          highway_living_street,
          highway_service,
          highway_track,
-         leisure_track] WAY.TEXT { label: name; size: 0.9; }
+         leisure_track] WAY.TEXT { label: Name.name; size: 0.9; }
 
    [TYPE highway_service] AREA.TEXT { label: Name.name; priority: @labelPrioHighwayServices; }
    
@@ -1055,13 +1055,13 @@ SYMBOL speed_camera
          highway_cycleway,
          highway_footway,
          highway_bridleway,
-         highway_steps] WAY.TEXT { label: name; size: 0.8;}
+         highway_steps] WAY.TEXT { label: Name.name; size: 0.8;}
 
    [TYPE railway_rail,
          railway_tram,
          railway_light_rail,
          railway_subway,
-         public_transport_platform] WAY.TEXT { label: name; size: 0.8; color: @railwayLabelColor; }
+         public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }
 
    [TYPE highway_pedestrian,
          highway_services,
@@ -1550,7 +1550,7 @@ SYMBOL speed_camera
 
  [MAG close-] {
    [TYPE aeroway_taxiway,
-         aeroway_runway] WAY.TEXT { label: name;}
+         aeroway_runway] WAY.TEXT { label: Name.name;}
 
    [TYPE aeroway_aerodrome,
          aeroway_terminal,

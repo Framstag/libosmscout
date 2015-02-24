@@ -231,8 +231,6 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STRING(std::string& value);
 	void TEXTLABEL(DynamicFeatureLabelReader& label);
 	void LABELSTYLE(TextStyle::Style& style);
-	void SHIELDLABEL(ShieldStyle::Label& label);
-	void PATHTEXTLABEL(PathTextStyle::Label& label);
 
   void Parse();
 

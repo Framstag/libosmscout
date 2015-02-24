@@ -704,12 +704,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API ShieldStyle : public LabelStyle
   {
   public:
-    enum Label {
-      none,
-      name,
-      ref
-    };
-
     enum Attribute {
       attrPriority,
       attrSize,
@@ -720,16 +714,16 @@ namespace osmscout {
     };
 
   private:
-    Label   label;
-    Color   textColor;
-    Color   bgColor;
-    Color   borderColor;
+    DynamicFeatureLabelReader label;          //<! The label - a reference to a feature and its label index
+    Color                     textColor;      //<! Color of the text
+    Color                     bgColor;        //<! Background of the text
+    Color                     borderColor;    //<! Color of the border
 
   public:
     ShieldStyle();
     ShieldStyle(const ShieldStyle& style);
 
-    ShieldStyle& SetLabel(Label label);
+    ShieldStyle& SetLabel(const DynamicFeatureLabelReader& label);
     ShieldStyle& SetPriority(uint8_t priority);
     ShieldStyle& SetSize(double size);
     ShieldStyle& SetTextColor(const Color& color);
@@ -738,7 +732,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return label!=none &&
+      return label.HasLabel() &&
              GetTextColor().IsVisible();
     }
 
@@ -747,7 +741,7 @@ namespace osmscout {
       return textColor.GetA();
     }
 
-    inline Label GetLabel() const
+    inline const DynamicFeatureLabelReader& GetLabel() const
     {
       return label;
     }
@@ -804,7 +798,7 @@ namespace osmscout {
     PathShieldStyle();
     PathShieldStyle(const PathShieldStyle& style);
 
-    PathShieldStyle& SetLabel(ShieldStyle::Label label);
+    PathShieldStyle& SetLabel(const DynamicFeatureLabelReader& label);
     PathShieldStyle& SetPriority(uint8_t priority);
     PathShieldStyle& SetSize(double size);
     PathShieldStyle& SetTextColor(const Color& color);
@@ -832,7 +826,7 @@ namespace osmscout {
       return shieldStyle->GetSize();
     }
 
-    inline ShieldStyle::Label GetLabel() const
+    inline const DynamicFeatureLabelReader& GetLabel() const
     {
       return shieldStyle->GetLabel();
     }
@@ -880,12 +874,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API PathTextStyle : public Referencable
   {
   public:
-    enum Label {
-      none,
-      name,
-      ref
-    };
-
     enum Attribute {
       attrLabel,
       attrSize,
@@ -893,25 +881,25 @@ namespace osmscout {
     };
 
   private:
-    Label   label;
-    double  size;
-    Color   textColor;
+    DynamicFeatureLabelReader label;
+    double                    size;
+    Color                     textColor;
 
   public:
     PathTextStyle();
     PathTextStyle(const PathTextStyle& style);
 
-    PathTextStyle& SetLabel(Label label);
+    PathTextStyle& SetLabel(const DynamicFeatureLabelReader& label);
     PathTextStyle& SetSize(double size);
     PathTextStyle& SetTextColor(const Color& color);
 
     inline bool IsVisible() const
     {
-      return label!=none &&
+      return label.HasLabel() &&
              textColor.IsVisible();
     }
 
-    inline Label GetLabel() const
+    inline const DynamicFeatureLabelReader& GetLabel() const
     {
       return label;
     }

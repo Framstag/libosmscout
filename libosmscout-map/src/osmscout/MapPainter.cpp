@@ -1092,7 +1092,7 @@ namespace osmscout {
   {
     labelLayoutData.clear();
 
-    IconStyleRef  iconStyle;
+    IconStyleRef iconStyle;
 
     styleConfig.GetAreaTextStyles(type,
                                   buffer,
@@ -1271,14 +1271,6 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const WayPathData& data)
   {
-    NameFeatureValue *nameValue=nameReader.GetValue(*data.buffer);
-    RefFeatureValue  *refValue=refReader.GetValue(*data.buffer);
-
-    if (nameValue== NULL &&
-        refValue==NULL) {
-      return;
-    }
-
     PathShieldStyleRef shieldStyle;
     PathTextStyleRef   pathTextStyle;
 
@@ -1290,60 +1282,30 @@ namespace osmscout {
                                     pathTextStyle);
 
     if (pathTextStyle.Valid()) {
-      switch (pathTextStyle->GetLabel()) {
-      case PathTextStyle::none:
-        break;
-      case PathTextStyle::name:
-        if (nameValue!=NULL) {
-          DrawContourLabel(projection,
-                           parameter,
-                           *pathTextStyle,
-                           nameValue->GetName(),
-                           data.transStart,
-                           data.transEnd);
-          waysLabelDrawn++;
-        }
-        break;
-      case PathTextStyle::ref:
-        if (refValue!=NULL) {
-          DrawContourLabel(projection,
-                           parameter,
-                           *pathTextStyle,
-                           refValue->GetRef(),
-                           data.transStart,
-                           data.transEnd);
-          waysLabelDrawn++;
-        }
-        break;
+      std::string textLabel=pathTextStyle->GetLabel().GetLabel(*data.buffer);
+
+      if (!textLabel.empty()) {
+        DrawContourLabel(projection,
+                         parameter,
+                         *pathTextStyle,
+                         textLabel,
+                         data.transStart,
+                         data.transEnd);
+        waysLabelDrawn++;
       }
     }
 
     if (shieldStyle.Valid()) {
-      switch(shieldStyle->GetLabel()) {
-      case ShieldStyle::none:
-        break;
-      case ShieldStyle::name:
-        if (nameValue!=NULL) {
-          RegisterPointWayLabel(projection,
-                                parameter,
-                                shieldStyle,
-                                nameValue->GetName(),
-                                data.transStart,
-                                data.transEnd);
-          waysLabelDrawn++;
-        }
-        break;
-      case ShieldStyle::ref:
-        if (refValue!=NULL) {
-          RegisterPointWayLabel(projection,
-                                parameter,
-                                shieldStyle,
-                                refValue->GetRef(),
-                                data.transStart,
-                                data.transEnd);
-          waysLabelDrawn++;
-        }
-        break;
+      std::string shieldLabel=shieldStyle->GetLabel().GetLabel(*data.buffer);
+
+      if (!shieldLabel.empty()) {
+        RegisterPointWayLabel(projection,
+                              parameter,
+                              shieldStyle,
+                              shieldLabel,
+                              data.transStart,
+                              data.transEnd);
+        waysLabelDrawn++;
       }
     }
   }
