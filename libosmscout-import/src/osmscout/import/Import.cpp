@@ -523,9 +523,7 @@ namespace osmscout {
     StopClock overAllTimer;
     size_t    currentStep=1;
 
-    for (std::list<ImportModule*>::const_iterator module=modules.begin();
-         module!=modules.end();
-         ++module) {
+    for (const auto& module : modules) {
       if (currentStep>=parameter.GetStartStep() &&
           currentStep<=parameter.GetEndStep()) {
         StopClock timer;
@@ -534,18 +532,18 @@ namespace osmscout {
         progress.SetStep(std::string("Step #")+
                          NumberToString(currentStep)+
                          " - "+
-                         (*module)->GetDescription());
+                         module->GetDescription());
 
-        success=(*module)->Import(typeConfig,
-                                  parameter,
-                                  progress);
+        success=module->Import(typeConfig,
+                               parameter,
+                               progress);
 
         timer.Stop();
 
         progress.Info(std::string("=> ")+timer.ResultString()+" second(s)");
 
         if (!success) {
-          progress.Error(std::string("Error while executing step '")+(*module)->GetDescription()+"'!");
+          progress.Error(std::string("Error while executing step '")+module->GetDescription()+"'!");
           return false;
         }
       }
@@ -585,6 +583,11 @@ namespace osmscout {
 
     typeConfig->RegisterNameTag("name",0);
     typeConfig->RegisterNameTag("place_name",1);
+
+    /*
+    typeConfig->RegisterNameAltTag("name:ru",0);
+    typeConfig->RegisterNameAltTag("place_name:ru",1);
+    */
 
     /* 1 */
     modules.push_back(new TypeDataGenerator());
@@ -696,10 +699,8 @@ namespace osmscout {
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
 
-    for (std::list<ImportModule*>::iterator module=modules.begin();
-         module!=modules.end();
-         ++module) {
-      delete *module;
+    for (const auto& module : modules) {
+      delete module;
     }
 
     return result;
