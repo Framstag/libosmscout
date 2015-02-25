@@ -1063,12 +1063,14 @@ void Parser::NODEICONSTYLE(StyleFilter filter) {
 void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 		switch (la->kind) {
 		case 65 /* "label" */: {
-			DynamicFeatureLabelReader label; 
+			LabelProviderRef label; 
 			Get();
 			Expect(38 /* ":" */);
 			TEXTLABEL(label);
-			style.style->SetLabel(label);
-			style.attributes.insert(TextStyle::attrLabel);
+			if (label.Valid()) {
+			 style.style->SetLabel(label);
+			 style.attributes.insert(TextStyle::attrLabel);
+			}
 			
 			break;
 		}
@@ -1376,12 +1378,14 @@ void Parser::LINESTYLEATTR(LinePartialStyle& style) {
 
 void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
 		if (la->kind == 65 /* "label" */) {
-			DynamicFeatureLabelReader label; 
+			LabelProviderRef label; 
 			Get();
 			Expect(38 /* ":" */);
 			TEXTLABEL(label);
-			style.style->SetLabel(label);
-			style.attributes.insert(PathTextStyle::attrLabel);
+			if (label.Valid()) {
+			 style.style->SetLabel(label);
+			 style.attributes.insert(PathTextStyle::attrLabel);
+			}
 			
 		} else if (la->kind == 49 /* "color" */) {
 			Color textColor; 
@@ -1436,12 +1440,14 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 		switch (la->kind) {
 		case 65 /* "label" */: {
-			DynamicFeatureLabelReader label; 
+			LabelProviderRef label; 
 			Get();
 			Expect(38 /* ":" */);
 			TEXTLABEL(label);
-			style.style->SetLabel(label);
-			style.attributes.insert(PathShieldStyle::attrLabel);
+			if (label.Valid()) {
+			 style.style->SetLabel(label);
+			 style.attributes.insert(PathShieldStyle::attrLabel);
+			}
 			
 			break;
 		}
@@ -1630,11 +1636,9 @@ void Parser::STRING(std::string& value) {
 		
 }
 
-void Parser::TEXTLABEL(DynamicFeatureLabelReader& label) {
+void Parser::TEXTLABEL(LabelProviderRef& label) {
 		std::string featureName;
 		std::string labelName;
-		
-		label.Clear();
 		
 		IDENT(featureName);
 		Expect(42 /* "." */);
@@ -1672,9 +1676,9 @@ void Parser::TEXTLABEL(DynamicFeatureLabelReader& label) {
 		 return;
 		}
 		
-		label.Set(config.GetTypeConfig(),
-		         featureName,
-		         labelName);
+		label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
+		                                   featureName,
+		                                   labelName);
 		
 }
 

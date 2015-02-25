@@ -196,7 +196,7 @@ namespace osmscout {
     xOff=extents.x();
     yOff=extents.y();
     width=extents.width();
-    height=extents.height();
+    height=metrics.height();
   }
 
   void MapPainterQt::DrawLabel(const Projection& projection,

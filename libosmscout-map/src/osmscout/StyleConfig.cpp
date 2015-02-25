@@ -35,43 +35,22 @@
 
 namespace osmscout {
 
-  DynamicFeatureLabelReader::DynamicFeatureLabelReader()
-  : labelIndex(std::numeric_limits<size_t>::max())
+  LabelProvider::~LabelProvider()
   {
-    // no code
+    // No code
   }
 
   DynamicFeatureLabelReader::DynamicFeatureLabelReader(const TypeConfig& typeConfig,
                                                        const std::string& featureName,
                                                        const std::string& labelName)
   {
-    Set(typeConfig,
-        featureName,
-        labelName);
-  }
-
-  bool DynamicFeatureLabelReader::Set(const TypeConfig& typeConfig,
-                                      const std::string& featureName,
-                                      const std::string& labelName)
-  {
-    // Reset state
-    Clear();
-
     FeatureRef feature=typeConfig.GetFeature(featureName);
     size_t     labelIndex;
 
-    if (feature.Invalid()) {
-      return false;
-    }
-
-    if (!feature->HasLabel()) {
-      return false;
-    }
-
-    if (!feature->GetLabelIndex(labelName,
-                                labelIndex)) {
-      return false;
-    }
+    assert(feature.Valid());
+    assert(feature->HasLabel());
+    assert(feature->GetLabelIndex(labelName,
+                                  labelIndex));
 
     this->featureName=featureName;
     this->labelName=labelName;
@@ -88,27 +67,10 @@ namespace osmscout {
         lookupTable[type->GetIndex()]=index;
       }
     }
-
-    return true;
-  }
-
-  void DynamicFeatureLabelReader::Clear()
-  {
-    labelIndex=std::numeric_limits<size_t>::max();
-    lookupTable.clear();
-  }
-
-  bool DynamicFeatureLabelReader::HasLabel() const
-  {
-    return labelIndex!=std::numeric_limits<size_t>::max();
   }
 
   std::string DynamicFeatureLabelReader::GetLabel(const FeatureValueBuffer& buffer) const
   {
-    if (!HasLabel()) {
-      return "";
-    }
-
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
@@ -121,27 +83,6 @@ namespace osmscout {
     }
 
     return "";
-  }
-
-  bool DynamicFeatureLabelReader::operator==(const DynamicFeatureLabelReader& other) const
-  {
-    return featureName==other.featureName &&
-           labelIndex==other.labelIndex;
-  }
-
-  bool DynamicFeatureLabelReader::operator!=(const DynamicFeatureLabelReader& other) const
-  {
-    return featureName!=other.featureName ||
-           labelIndex!=other.labelIndex;
-  }
-
-  bool DynamicFeatureLabelReader::operator<(const DynamicFeatureLabelReader& other) const
-  {
-    if (featureName!=other.featureName) {
-      return featureName<other.featureName;
-    }
-
-    return labelIndex<other.labelIndex;
   }
 
   StyleResolveContext::StyleResolveContext(const TypeConfigRef& typeConfig)
@@ -760,7 +701,7 @@ namespace osmscout {
     return *this;
   }
 
-  TextStyle& TextStyle::SetLabel(const DynamicFeatureLabelReader& label)
+  TextStyle& TextStyle::SetLabel(const LabelProviderRef& label)
   {
     this->label=label;
 
@@ -917,7 +858,7 @@ namespace osmscout {
     this->borderColor=style.borderColor;
   }
 
-  ShieldStyle& ShieldStyle::SetLabel(const DynamicFeatureLabelReader& label)
+  ShieldStyle& ShieldStyle::SetLabel(const LabelProviderRef& label)
   {
     this->label=label;
 
@@ -1000,7 +941,7 @@ namespace osmscout {
     // no code
   }
 
-  PathShieldStyle& PathShieldStyle::SetLabel(const DynamicFeatureLabelReader& label)
+  PathShieldStyle& PathShieldStyle::SetLabel(const LabelProviderRef& label)
   {
     shieldStyle->SetLabel(label);
 
@@ -1093,7 +1034,7 @@ namespace osmscout {
     this->textColor=style.textColor;
   }
 
-  PathTextStyle& PathTextStyle::SetLabel(const DynamicFeatureLabelReader& label)
+  PathTextStyle& PathTextStyle::SetLabel(const LabelProviderRef& label)
   {
     this->label=label;
 

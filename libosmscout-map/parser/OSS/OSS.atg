@@ -999,11 +999,13 @@ PRODUCTIONS
 
   TEXTSTYLEATTR<TextPartialStyle& style>
               = (
-                  (. DynamicFeatureLabelReader label; .)
+                  (. LabelProviderRef label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     style.style->SetLabel(label);
-                     style.attributes.insert(TextStyle::attrLabel);
+                     if (label.Valid()) {
+                       style.style->SetLabel(label);
+                       style.attributes.insert(TextStyle::attrLabel);
+                     }
                   .)
                 | (. TextStyle::Style labelStyle; .)
                   "style" ":" LABELSTYLE<labelStyle>
@@ -1046,11 +1048,13 @@ PRODUCTIONS
 
   PATHSHIELDSTYLEATTR<PathShieldPartialStyle& style>
               = (
-                  (. DynamicFeatureLabelReader label; .)
+                  (. LabelProviderRef label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     style.style->SetLabel(label);
-                     style.attributes.insert(PathShieldStyle::attrLabel);
+                     if (label.Valid()) {
+                       style.style->SetLabel(label);
+                       style.attributes.insert(PathShieldStyle::attrLabel);
+                     }
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor>
@@ -1101,11 +1105,13 @@ PRODUCTIONS
 
   PATHTEXTSTYLEATTR<PathTextPartialStyle& style>
               = (
-                  (. DynamicFeatureLabelReader label; .)
+                  (. LabelProviderRef label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     style.style->SetLabel(label);
-                     style.attributes.insert(PathTextStyle::attrLabel);
+                     if (label.Valid()) {
+                       style.style->SetLabel(label);
+                       style.attributes.insert(PathTextStyle::attrLabel);
+                     }
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor>
@@ -1199,12 +1205,10 @@ PRODUCTIONS
                 | "emphasize" (. style=TextStyle::emphasize; .)
                 ).
 
-  TEXTLABEL<DynamicFeatureLabelReader& label>
+  TEXTLABEL<LabelProviderRef& label>
               = (.
                   std::string featureName;
                   std::string labelName;
-                  
-                  label.Clear();
                  .)
                 IDENT<featureName>
                 "."
@@ -1239,9 +1243,9 @@ PRODUCTIONS
                     return;
                   }
                   
-                  label.Set(config.GetTypeConfig(),
-                            featureName,
-                            labelName);
+                  label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
+                                                      featureName,
+                                                      labelName);
                 .)
                 .
 

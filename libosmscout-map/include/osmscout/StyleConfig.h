@@ -42,7 +42,33 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_MAP_API DynamicFeatureLabelReader
+  /**
+   * Interface one must implement to provider a label for the map.
+   */
+  class OSMSCOUT_MAP_API LabelProvider : public Referencable
+  {
+  public:
+    virtual ~LabelProvider();
+
+    /**
+     * Returns the label based on the given feature value buffer
+     *
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    The label, if the given feature has a value and a label or a empty string
+     */
+    virtual std::string GetLabel(const FeatureValueBuffer& buffer) const = 0;
+
+    /**
+     * Returns the name of the label provider as it must get stated in the style sheet
+     */
+    virtual std::string GetName() const = 0;
+  };
+
+  typedef Ref<LabelProvider> LabelProviderRef;
+
+  class OSMSCOUT_MAP_API DynamicFeatureLabelReader : public LabelProvider
   {
 
   private:
@@ -53,11 +79,6 @@ namespace osmscout {
 
   public:
     /**
-     * Default initialization assign to label to the reader
-     */
-    DynamicFeatureLabelReader();
-
-    /**
      * Assigns a label to the reader
      *
      * @param typeConfig
@@ -66,63 +87,17 @@ namespace osmscout {
      *   Name of the feature which must be valid and must support labels
      * @param labelIndex
      *   The index of the labels to use (a feature might support multiple labels)
-     * @returns true, if the assignment was valid
-     *
-     * @note Calls #SetLabel
      */
     DynamicFeatureLabelReader(const TypeConfig& typeConfig,
                               const std::string& featureName,
                               const std::string& labelName);
 
-    /**
-     * Assigns a label to the reader
-     *
-     * @param typeConfig
-     *   Reference to the current type configuration
-     * @param featureName
-     *   Name of the feature which must be valid and must support labels
-     * @param labelIndex
-     *   The index of the labels to use (a feature might support multiple labels)
-     * @returns true, if the assignment was valid
-     */
-    bool Set(const TypeConfig& typeConfig,
-             const std::string& featureName,
-             const std::string& labelName);
-
-    /**
-     * Resets all information about a assigned feature label. HashLabel() will return
-     * false afterwards,
-     */
-    void Clear();
-
-    inline std::string GetFeatureName() const
-    {
-      return featureName;
-    }
-
-    inline std::string GetLabelName() const
-    {
-      return labelName;
-    }
-
-    /**
-     * Returns true, if the reader was assigned a feature and a label index
-     * and (both were valid). Else it returns false.
-     */
-    bool HasLabel() const;
-
-    /**
-     * Returns the label of the given object
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @return
-     *    The label, if the given feature has a value and a label or a empty string
-     */
     std::string GetLabel(const FeatureValueBuffer& buffer) const;
 
-    bool operator==(const DynamicFeatureLabelReader& other) const;
-    bool operator!=(const DynamicFeatureLabelReader& other) const;
-    bool operator<(const DynamicFeatureLabelReader& other) const;
+    inline std::string GetName() const
+    {
+      return featureName + "." + labelName;
+    }
   };
 
   class OSMSCOUT_MAP_API StyleResolveContext
@@ -705,12 +680,12 @@ namespace osmscout {
     };
 
   private:
-    std::string               slot;
-    DynamicFeatureLabelReader label;          //<! The label - a reference to a feature and its label index
-    size_t                    position;       //<! Relative vertical position of the label
-    Color                     textColor;
-    Style                     style;
-    Magnification             scaleAndFadeMag;
+    std::string      slot;
+    LabelProviderRef label;           //<! The label - a reference to a feature and its label index
+    size_t           position;        //<! Relative vertical position of the label
+    Color            textColor;       //<! Color of text
+    Style            style;           //<! Style of the text
+    Magnification    scaleAndFadeMag;
 
   public:
     TextStyle();
@@ -720,7 +695,7 @@ namespace osmscout {
 
     TextStyle& SetPriority(uint8_t priority);
     TextStyle& SetSize(double size);
-    TextStyle& SetLabel(const DynamicFeatureLabelReader& label);
+    TextStyle& SetLabel(const LabelProviderRef& label);
     TextStyle& SetPosition(size_t position);
     TextStyle& SetTextColor(const Color& color);
     TextStyle& SetStyle(Style style);
@@ -728,7 +703,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return label.HasLabel() &&
+      return label.Valid() &&
              GetTextColor().IsVisible();
     }
 
@@ -742,7 +717,7 @@ namespace osmscout {
       return slot;
     }
 
-    inline const DynamicFeatureLabelReader& GetLabel() const
+    inline const LabelProviderRef& GetLabel() const
     {
       return label;
     }
@@ -798,16 +773,16 @@ namespace osmscout {
     };
 
   private:
-    DynamicFeatureLabelReader label;          //<! The label - a reference to a feature and its label index
-    Color                     textColor;      //<! Color of the text
-    Color                     bgColor;        //<! Background of the text
-    Color                     borderColor;    //<! Color of the border
+    LabelProviderRef label;          //<! The label - a reference to a feature and its label index
+    Color            textColor;      //<! Color of the text
+    Color            bgColor;        //<! Background of the text
+    Color            borderColor;    //<! Color of the border
 
   public:
     ShieldStyle();
     ShieldStyle(const ShieldStyle& style);
 
-    ShieldStyle& SetLabel(const DynamicFeatureLabelReader& label);
+    ShieldStyle& SetLabel(const LabelProviderRef& label);
     ShieldStyle& SetPriority(uint8_t priority);
     ShieldStyle& SetSize(double size);
     ShieldStyle& SetTextColor(const Color& color);
@@ -816,7 +791,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return label.HasLabel() &&
+      return label.Valid() &&
              GetTextColor().IsVisible();
     }
 
@@ -825,7 +800,7 @@ namespace osmscout {
       return textColor.GetA();
     }
 
-    inline const DynamicFeatureLabelReader& GetLabel() const
+    inline const LabelProviderRef& GetLabel() const
     {
       return label;
     }
@@ -882,7 +857,7 @@ namespace osmscout {
     PathShieldStyle();
     PathShieldStyle(const PathShieldStyle& style);
 
-    PathShieldStyle& SetLabel(const DynamicFeatureLabelReader& label);
+    PathShieldStyle& SetLabel(const LabelProviderRef& label);
     PathShieldStyle& SetPriority(uint8_t priority);
     PathShieldStyle& SetSize(double size);
     PathShieldStyle& SetTextColor(const Color& color);
@@ -910,7 +885,7 @@ namespace osmscout {
       return shieldStyle->GetSize();
     }
 
-    inline const DynamicFeatureLabelReader& GetLabel() const
+    inline const LabelProviderRef& GetLabel() const
     {
       return shieldStyle->GetLabel();
     }
@@ -965,25 +940,25 @@ namespace osmscout {
     };
 
   private:
-    DynamicFeatureLabelReader label;
-    double                    size;
-    Color                     textColor;
+    LabelProviderRef label;
+    double           size;
+    Color            textColor;
 
   public:
     PathTextStyle();
     PathTextStyle(const PathTextStyle& style);
 
-    PathTextStyle& SetLabel(const DynamicFeatureLabelReader& label);
+    PathTextStyle& SetLabel(const LabelProviderRef& label);
     PathTextStyle& SetSize(double size);
     PathTextStyle& SetTextColor(const Color& color);
 
     inline bool IsVisible() const
     {
-      return label.HasLabel() &&
+      return label.Valid() &&
              textColor.IsVisible();
     }
 
-    inline const DynamicFeatureLabelReader& GetLabel() const
+    inline const LabelProviderRef& GetLabel() const
     {
       return label;
     }

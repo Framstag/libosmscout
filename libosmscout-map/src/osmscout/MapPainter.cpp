@@ -71,116 +71,6 @@ namespace osmscout {
     return a.position<b.position;
   }
 
-  MapParameter::MapParameter()
-  : fontName("sans-serif"),
-    fontSize(2.0),
-    lineMinWidthPixel(0.2),
-    optimizeWayNodes(TransPolygon::none),
-    optimizeAreaNodes(TransPolygon::none),
-    optimizeErrorToleranceMm(0.25),
-    drawFadings(true),
-    drawWaysWithFixedWidth(false),
-    labelSpace(1.0),
-    plateLabelSpace(5.0),
-    sameLabelSpace(40.0),
-    dropNotVisiblePointLabels(true),
-    renderSeaLand(false),
-    debugPerformance(false)
-  {
-    // no code
-  }
-
-  MapParameter::~MapParameter()
-  {
-    // no code
-  }
-
-  void MapParameter::SetFontName(const std::string& fontName)
-  {
-    this->fontName=fontName;
-  }
-
-  void MapParameter::SetFontSize(double fontSize)
-  {
-    this->fontSize=fontSize;
-  }
-
-  void MapParameter::SetIconPaths(const std::list<std::string>& paths)
-  {
-    this->iconPaths=paths;
-  }
-
-  void MapParameter::SetPatternPaths(const std::list<std::string>& paths)
-  {
-    this->patternPaths=paths;
-  }
-
-  void MapParameter::SetLineMinWidthPixel(double lineMinWidthPixel)
-  {
-    this->lineMinWidthPixel=lineMinWidthPixel;
-  }
-
-  void MapParameter::SetOptimizeWayNodes(TransPolygon::OptimizeMethod optimize)
-  {
-    optimizeWayNodes=optimize;
-  }
-
-  void MapParameter::SetOptimizeAreaNodes(TransPolygon::OptimizeMethod optimize)
-  {
-    optimizeAreaNodes=optimize;
-  }
-
-  void MapParameter::SetOptimizeErrorToleranceMm(double errorToleranceMm)
-  {
-    optimizeErrorToleranceMm=errorToleranceMm;
-  }
-
-  void MapParameter::SetDrawFadings(bool drawFadings)
-  {
-    this->drawFadings=drawFadings;
-  }
-
-  void MapParameter::SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth)
-  {
-    this->drawWaysWithFixedWidth=drawWaysWithFixedWidth;
-  }
-
-  void MapParameter::SetLabelSpace(double labelSpace)
-  {
-    this->labelSpace=labelSpace;
-  }
-
-  void MapParameter::SetPlateLabelSpace(double plateLabelSpace)
-  {
-    this->plateLabelSpace=plateLabelSpace;
-  }
-
-  void MapParameter::SetSameLabelSpace(double sameLabelSpace)
-  {
-    this->sameLabelSpace=sameLabelSpace;
-  }
-
-  void MapParameter::SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels)
-  {
-    this->dropNotVisiblePointLabels=dropNotVisiblePointLabels;
-  }
-
-
-  void MapParameter::SetRenderSeaLand(bool render)
-  {
-    this->renderSeaLand=render;
-  }
-
-  void MapParameter::SetDebugPerformance(bool debug)
-  {
-    debugPerformance=debug;
-  }
-
-  void MapParameter::SetBreaker(const BreakerRef& breaker)
-  {
-    this->breaker=breaker;
-  }
-
   MapPainter::MapPainter(const StyleConfigRef& styleConfig,
                          CoordBuffer *buffer)
   : coordBuffer(buffer),
@@ -354,10 +244,10 @@ namespace osmscout {
 
       // Check for labels that intersect (including space). If our priority is lower,
       // we stop processing, else we mark the other label (as to be deleted)
-      if (!(hx1>label.bx2 ||
-            hx2<label.bx1 ||
-            hy1>label.by2 ||
-            hy2<label.by1)) {
+      if (!(hx1>=label.bx2 ||
+            hx2<=label.bx1 ||
+            hy1>=label.by2 ||
+            hy2<=label.by1)) {
         if (label.style->GetPriority()<=style.GetPriority()) {
           return false;
         }
@@ -377,11 +267,7 @@ namespace osmscout {
                                                const std::string& text,
                                                std::list<LabelData>& labels)
   {
-    for (std::list<LabelData>::iterator l=labels.begin();
-        l!=labels.end();
-        ++l) {
-      LabelData& label=*l;
-
+    for (auto & label : labels) {
       if (label.mark) {
         continue;
       }
@@ -774,6 +660,12 @@ namespace osmscout {
                                          size_t transStart, size_t transEnd)
   {
     double stepSizeInPixel=projection.ConvertWidthToPixel(shieldStyle->GetShieldSpace());
+    double fontHeight;
+
+    GetFontHeight(projection,
+                  parameter,
+                  1.0,
+                  fontHeight);
 
     wayScanlines.clear();
 
@@ -788,7 +680,7 @@ namespace osmscout {
                          shieldStyle->GetShieldStyle(),
                          text,
                          shieldStyle->GetShieldStyle()->GetSize(),
-                         projection.ConvertWidthToPixel(parameter.GetFontSize()),
+                         fontHeight,
                          1.0,
                          wayScanlines[i].x+0.5,
                          wayScanlines[i].y+0.5);
@@ -836,6 +728,15 @@ namespace osmscout {
     bx2=x+frameHoriz;
     by1=y-height/2-frameVert;
     by2=y+height/2+frameVert;
+
+    // is box visible?
+    if (parameter.GetDropNotVisiblePointLabels()) {
+      if (bx1>=projection.GetWidth() ||
+          by1>=projection.GetHeight() ||
+          by2<0) {
+        return false;
+      }
+    }
 
     if (overlay) {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
@@ -990,9 +891,10 @@ namespace osmscout {
     }
 
     for (const auto textStyle : textStyles) {
-      std::string label=textStyle->GetLabel().GetLabel(buffer);
+      std::string label=textStyle->GetLabel()->GetLabel(buffer);
 
       if (!label.empty()) {
+
         LabelLayoutData data;
         double          fontSize=textStyle->GetSize();
         double          alpha=textStyle->GetAlpha();
@@ -1004,7 +906,12 @@ namespace osmscout {
                                      alpha);
 
         data.position=textStyle->GetPosition();
-        data.height=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+
+        GetFontHeight(projection,
+                      parameter,
+                      fontSize,
+                      data.height);
+
         data.label=label;
         data.fontSize=fontSize;
         data.alpha=alpha;
@@ -1050,7 +957,7 @@ namespace osmscout {
                    x,offset);
       }
 
-      offset+=data.height+labelSpace;
+      offset+=data.height;
     }
   }
 
@@ -1282,7 +1189,7 @@ namespace osmscout {
                                     pathTextStyle);
 
     if (pathTextStyle.Valid()) {
-      std::string textLabel=pathTextStyle->GetLabel().GetLabel(*data.buffer);
+      std::string textLabel=pathTextStyle->GetLabel()->GetLabel(*data.buffer);
 
       if (!textLabel.empty()) {
         DrawContourLabel(projection,
@@ -1296,7 +1203,7 @@ namespace osmscout {
     }
 
     if (shieldStyle.Valid()) {
-      std::string shieldLabel=shieldStyle->GetLabel().GetLabel(*data.buffer);
+      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(*data.buffer);
 
       if (!shieldLabel.empty()) {
         RegisterPointWayLabel(projection,
@@ -1653,8 +1560,8 @@ namespace osmscout {
       vertical=shieldLabelSpace;
     }
     else {
-      horizontal=0;
-      vertical=labelSpace;
+      horizontal=labelSpace;
+      vertical=0;
     }
   }
 

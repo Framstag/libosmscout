@@ -46,7 +46,7 @@ void DumpTextStyleAttributes(const std::set<osmscout::TextStyle::Attribute> attr
   for (const auto& attribute : attributes) {
     switch (attribute) {
     case osmscout::TextStyle::attrLabel:
-      std::cout << "label: " << style->GetLabel().GetFeatureName() << "." << style->GetLabel().GetLabelName() << ";";
+      std::cout << "label: " << style->GetLabel()->GetName() << ";";
       break;
     }
   }
