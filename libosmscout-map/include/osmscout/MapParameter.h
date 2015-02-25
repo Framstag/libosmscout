@@ -59,6 +59,8 @@ namespace osmscout {
 
     bool                         debugPerformance;          //<! Print out some performance information
 
+    bool                         showAltLanguage;           //<! if true, display alternative language (needs support by style sheet and import)
+
     BreakerRef                   breaker;                   //<! Breaker to abort processing on external request
 
   public:
@@ -88,6 +90,8 @@ namespace osmscout {
     void SetRenderSeaLand(bool render);
 
     void SetDebugPerformance(bool debug);
+
+    void SetShowAltLanguage(bool showAltLanguage);
 
     void SetBreaker(const BreakerRef& breaker);
 
@@ -170,6 +174,11 @@ namespace osmscout {
     inline bool IsDebugPerformance() const
     {
       return debugPerformance;
+    }
+
+    inline bool GetShowAltLanguage() const
+    {
+      return showAltLanguage;
     }
 
     bool IsAborted() const

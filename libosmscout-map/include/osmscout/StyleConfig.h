@@ -40,6 +40,8 @@
 #include <osmscout/util/Reference.h>
 #include <osmscout/util/Transformation.h>
 
+#include <osmscout/MapParameter.h>
+
 namespace osmscout {
 
   /**
@@ -58,7 +60,8 @@ namespace osmscout {
      * @return
      *    The label, if the given feature has a value and a label or a empty string
      */
-    virtual std::string GetLabel(const FeatureValueBuffer& buffer) const = 0;
+    virtual std::string GetLabel(const MapParameter& parameter,
+                                 const FeatureValueBuffer& buffer) const = 0;
 
     /**
      * Returns the name of the label provider as it must get stated in the style sheet
@@ -68,6 +71,50 @@ namespace osmscout {
 
   typedef Ref<LabelProvider> LabelProviderRef;
 
+  class OSMSCOUT_MAP_API LabelProviderFactory : public Referencable
+  {
+  public:
+    virtual ~LabelProviderFactory();
+
+    virtual LabelProviderRef Create(const TypeConfig& typeConfig) const = 0;
+  };
+
+  class OSMSCOUT_MAP_API INameLabelProviderFactory : public LabelProviderFactory
+  {
+  private:
+    class INameLabelProvider : public LabelProvider
+    {
+    private:
+      std::vector<size_t> nameLookupTable;
+      std::vector<size_t> nameAltLookupTable;
+
+    public:
+      INameLabelProvider(const TypeConfig& typeConfig);
+
+      std::string GetLabel(const MapParameter& parameter,
+                           const FeatureValueBuffer& buffer) const;
+
+      inline std::string GetName() const
+      {
+        return "IName";
+      }
+    };
+
+    private:
+      mutable LabelProviderRef instance;
+
+    public:
+      LabelProviderRef Create(const TypeConfig& typeConfig) const;
+  };
+
+  typedef Ref<LabelProviderFactory> LabelProviderFactoryRef;
+
+  /**
+   * Generates a label based on a given feature name and label name.
+   *
+   * Example:
+   *   Give me the label "inMeter" of the Ele-Feature.
+   */
   class OSMSCOUT_MAP_API DynamicFeatureLabelReader : public LabelProvider
   {
 
@@ -92,7 +139,8 @@ namespace osmscout {
                               const std::string& featureName,
                               const std::string& labelName);
 
-    std::string GetLabel(const FeatureValueBuffer& buffer) const;
+    std::string GetLabel(const MapParameter& parameter,
+                         const FeatureValueBuffer& buffer) const;
 
     inline std::string GetName() const
     {
@@ -1281,6 +1329,8 @@ namespace osmscout {
     FeatureValueBuffer                         tileUnknownBuffer;      //<! Fake FeatureValueBuffer for unknown tiles
     FeatureValueBuffer                         tileCoastlineBuffer;    //<! Fake FeatureValueBuffer for coastlines
 
+    OSMSCOUT_HASHMAP<std::string,LabelProviderFactoryRef> labelFactories; //<! Map of Label Factories
+
     // Symbol
     OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;                //<! Map of registered symbols by name
     SymbolRef                                  emptySymbol;
@@ -1342,6 +1392,16 @@ namespace osmscout {
   public:
     StyleConfig(const TypeConfigRef& typeConfig);
     virtual ~StyleConfig();
+
+    /**
+     * Methods for registering LabelProvider-factories and and retrieving label providers
+     */
+    //@{
+    bool RegisterLabelProviderFactory(const std::string& name,
+                                      const LabelProviderFactoryRef& factory);
+
+    LabelProviderRef GetLabelProvider(const std::string& name) const;
+    //@}
 
     StyleVariableRef GetVariableByName(const std::string& name) const;
     void AddVariable(const std::string& name,

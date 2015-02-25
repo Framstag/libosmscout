@@ -1641,44 +1641,58 @@ void Parser::TEXTLABEL(LabelProviderRef& label) {
 		std::string labelName;
 		
 		IDENT(featureName);
-		Expect(42 /* "." */);
-		if (la->kind == _ident) {
-			IDENT(labelName);
-		} else if (la->kind == 74 /* "name" */) {
+		if (la->kind == 42 /* "." */) {
 			Get();
-			labelName="name"; 
-		} else SynErr(141);
-		FeatureRef feature;
-		
-		feature=config.GetTypeConfig()->GetFeature(featureName);
-		
-		if (feature.Invalid()) {
-		 std::string e="'"+featureName+"' is not a registered feature";
-		
-		 SemErr(e.c_str());
-		 return;
+			if (la->kind == _ident) {
+				IDENT(labelName);
+			} else if (la->kind == 74 /* "name" */) {
+				Get();
+				labelName="name"; 
+			} else SynErr(141);
 		}
+		if (!labelName.empty()) {
+		 FeatureRef feature;
 		
-		if (!feature->HasLabel()) {
-		 std::string e="'"+featureName+"' does not support labels";
+		 feature=config.GetTypeConfig()->GetFeature(featureName);
 		
-		 SemErr(e.c_str());
-		 return;
+		 if (feature.Invalid()) {
+		   std::string e="'"+featureName+"' is not a registered feature";
+		
+		   SemErr(e.c_str());
+		   return;
+		 }
+		
+		 if (!feature->HasLabel()) {
+		   std::string e="'"+featureName+"' does not support labels";
+		
+		   SemErr(e.c_str());
+		   return;
+		 }
+		
+		 size_t labelIndex;
+		
+		 if (!feature->GetLabelIndex(labelName,
+		                             labelIndex)) {
+		   std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
+		
+		   SemErr(e.c_str());
+		   return;
+		 }
+		
+		 label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
+		                                     featureName,
+		                                     labelName);
 		}
+		else {
+		 label=config.GetLabelProvider(featureName);
+		 
+		 if (label.Invalid()) {
+		   std::string e="There is no label provider with name '"+featureName+"' registered";
 		
-		size_t labelIndex;
-		
-		if (!feature->GetLabelIndex(labelName,
-		                           labelIndex)) {
-		 std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
-		
-		 SemErr(e.c_str());
-		 return;
+		   SemErr(e.c_str());
+		   return;
+		 }
 		}
-		
-		label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
-		                                   featureName,
-		                                   labelName);
 		
 }
 

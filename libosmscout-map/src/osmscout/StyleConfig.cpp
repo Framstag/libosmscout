@@ -40,6 +40,11 @@ namespace osmscout {
     // No code
   }
 
+  LabelProviderFactory::~LabelProviderFactory()
+  {
+    // no code
+  }
+
   DynamicFeatureLabelReader::DynamicFeatureLabelReader(const TypeConfig& typeConfig,
                                                        const std::string& featureName,
                                                        const std::string& labelName)
@@ -69,7 +74,84 @@ namespace osmscout {
     }
   }
 
-  std::string DynamicFeatureLabelReader::GetLabel(const FeatureValueBuffer& buffer) const
+  INameLabelProviderFactory::INameLabelProvider::INameLabelProvider(const TypeConfig& typeConfig)
+  {
+    nameLookupTable.resize(typeConfig.GetTypeCount(),
+                           std::numeric_limits<size_t>::max());
+    nameAltLookupTable.resize(typeConfig.GetTypeCount(),
+                              std::numeric_limits<size_t>::max());
+
+    for (const auto &type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(NameFeature::NAME,
+                          index)) {
+        nameLookupTable[type->GetIndex()]=index;
+      }
+
+      if (type->GetFeature(NameAltFeature::NAME,
+                          index)) {
+        nameAltLookupTable[type->GetIndex()]=index;
+      }
+    }
+  }
+
+  std::string INameLabelProviderFactory::INameLabelProvider::GetLabel(const MapParameter& parameter,
+                                                                      const FeatureValueBuffer& buffer) const
+  {
+    if (parameter.GetShowAltLanguage()) {
+      size_t index=nameAltLookupTable[buffer.GetType()->GetIndex()];
+
+      if (index!=std::numeric_limits<size_t>::max() &&
+          buffer.HasValue(index)) {
+        FeatureValue *value=buffer.GetValue(index);
+
+        if (value!=NULL) {
+          return value->GetLabel();
+        }
+      }
+
+      index=nameLookupTable[buffer.GetType()->GetIndex()];
+
+      if (index!=std::numeric_limits<size_t>::max() &&
+          buffer.HasValue(index)) {
+        FeatureValue *value=buffer.GetValue(index);
+
+        if (value!=NULL) {
+          return value->GetLabel();
+        }
+      }
+
+      return "";
+    }
+    else {
+      size_t index=nameLookupTable[buffer.GetType()->GetIndex()];
+
+      if (index!=std::numeric_limits<size_t>::max() &&
+          buffer.HasValue(index)) {
+        FeatureValue *value=buffer.GetValue(index);
+
+        if (value!=NULL) {
+          return value->GetLabel();
+        }
+      }
+
+      return "";
+    }
+
+  }
+
+  LabelProviderRef INameLabelProviderFactory::Create(const TypeConfig& typeConfig) const
+  {
+    if (!instance.Valid()) {
+      instance= new INameLabelProvider(typeConfig);
+    }
+
+    return instance;
+  }
+
+  std::string DynamicFeatureLabelReader::GetLabel(const MapParameter& /*parameter*/,
+                                                  const FeatureValueBuffer& buffer) const
   {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
@@ -1464,6 +1546,8 @@ namespace osmscout {
     tileCoastBuffer.SetType(typeConfig->typeInfoTileCoast);
     tileUnknownBuffer.SetType(typeConfig->typeInfoTileUnknown);
     tileCoastlineBuffer.SetType(typeConfig->typeInfoTileCoastline);
+
+    RegisterLabelProviderFactory("IName",new INameLabelProviderFactory());
   }
 
   StyleConfig::~StyleConfig()
@@ -1502,6 +1586,33 @@ namespace osmscout {
     areaTypeSets.clear();
 
     variables.clear();
+  }
+
+  bool StyleConfig::RegisterLabelProviderFactory(const std::string& name,
+                                                 const LabelProviderFactoryRef& factory)
+  {
+    if (factory.Invalid()) {
+      return false;
+    }
+
+    if (labelFactories.find(name)!=labelFactories.end()) {
+      return false;
+    }
+
+    labelFactories[name]=factory;
+
+    return true;
+  }
+
+  LabelProviderRef StyleConfig::GetLabelProvider(const std::string& name) const
+  {
+    auto entry=labelFactories.find(name);
+
+    if (entry==labelFactories.end()) {
+      return NULL;
+    }
+
+    return entry->second->Create(*typeConfig);
   }
 
   StyleVariableRef StyleConfig::GetVariableByName(const std::string& name) const

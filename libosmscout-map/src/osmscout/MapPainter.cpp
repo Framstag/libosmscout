@@ -891,7 +891,8 @@ namespace osmscout {
     }
 
     for (const auto textStyle : textStyles) {
-      std::string label=textStyle->GetLabel()->GetLabel(buffer);
+      std::string label=textStyle->GetLabel()->GetLabel(parameter,
+                                                        buffer);
 
       if (!label.empty()) {
 
@@ -1189,7 +1190,8 @@ namespace osmscout {
                                     pathTextStyle);
 
     if (pathTextStyle.Valid()) {
-      std::string textLabel=pathTextStyle->GetLabel()->GetLabel(*data.buffer);
+      std::string textLabel=pathTextStyle->GetLabel()->GetLabel(parameter,
+                                                                *data.buffer);
 
       if (!textLabel.empty()) {
         DrawContourLabel(projection,
@@ -1203,7 +1205,8 @@ namespace osmscout {
     }
 
     if (shieldStyle.Valid()) {
-      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(*data.buffer);
+      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
+                                                                *data.buffer);
 
       if (!shieldLabel.empty()) {
         RegisterPointWayLabel(projection,

@@ -35,7 +35,8 @@ namespace osmscout {
     sameLabelSpace(40.0),
     dropNotVisiblePointLabels(true),
     renderSeaLand(false),
-    debugPerformance(false)
+    debugPerformance(false),
+    showAltLanguage(false)
   {
     // no code
   }

@@ -1460,28 +1460,28 @@ SYMBOL speed_camera
  //
 
  [MAG world-city] {
-   [TYPE place_continent] NODE.TEXT {label: Name.name; style: emphasize; priority: @labelPrioContinent; }
+   [TYPE place_continent] NODE.TEXT {label: IName; style: emphasize; priority: @labelPrioContinent; }
  }
 
  [MAG stateOver-city] {
-   [TYPE place_country] NODE.TEXT {label: Name.name; style: emphasize; priority: @labelPrioCounty; }
+   [TYPE place_country] NODE.TEXT {label: IName; style: emphasize; priority: @labelPrioCounty; }
  }
 
  [MAG state-county] {
-   [TYPE place_state] NODE.TEXT {label: Name.name; style: emphasize; size: 1.7; scaleMag: state; priority: @labelPrioState; }
+   [TYPE place_state] NODE.TEXT {label: IName; style: emphasize; size: 1.7; scaleMag: state; priority: @labelPrioState; }
  }
 
  [MAG region-city] {
-   [TYPE place_region] NODE.TEXT {label: Name.name; style: emphasize; priority: @labelPrioRegion; }
+   [TYPE place_region] NODE.TEXT {label: IName; style: emphasize; priority: @labelPrioRegion; }
  }
 
  [MAG county-city] {
-   [TYPE place_county] NODE.TEXT {label: Name.name; style: emphasize; priority: @labelPrioCounty;}
+   [TYPE place_county] NODE.TEXT {label: IName; style: emphasize; priority: @labelPrioCounty;}
  }
 
  [MAG stateOver-city] {
-   [TYPE place_millioncity] NODE.TEXT {label: Name.name; style: emphasize; size: 1.5; priority: @labelPrioMillionCity;}
-   [TYPE place_bigcity] NODE.TEXT {label: Name.name; style: emphasize; size: 1.4; priority: @labelPrioBigCity;}
+   [TYPE place_millioncity] NODE.TEXT {label: IName; style: emphasize; size: 1.5; priority: @labelPrioMillionCity;}
+   [TYPE place_bigcity] NODE.TEXT {label: IName; style: emphasize; size: 1.4; priority: @labelPrioBigCity;}
  }
 
 
@@ -1491,8 +1491,8 @@ SYMBOL speed_camera
  }
 
  [MAG region-city] {
-   [TYPE place_city] NODE.TEXT {label: Name.name; style: emphasize; size: 1.35; priority: @labelPrioCity;}
-   [TYPE place_town] NODE.TEXT {label: Name.name; style: emphasize; size: 1.3; priority: @labelPrioTown;}
+   [TYPE place_city] NODE.TEXT {label: IName; style: emphasize; size: 1.35; priority: @labelPrioCity;}
+   [TYPE place_town] NODE.TEXT {label: IName; style: emphasize; size: 1.3; priority: @labelPrioTown;}
  }
 
  [MAG proximity-city] {
@@ -1501,19 +1501,19 @@ SYMBOL speed_camera
 
  [MAG region-veryClose] {
    [TYPE place_island] {
-     NODE.TEXT {label: Name.name; style: emphasize; size: 1.3; priority: @labelPrioIsland;}
-     AREA.TEXT { label: Name.name; style: emphasize; size: 1.3; priority: @labelPrioIsland; }
+     NODE.TEXT {label: IName; style: emphasize; size: 1.3; priority: @labelPrioIsland;}
+     AREA.TEXT { label: IName; style: emphasize; size: 1.3; priority: @labelPrioIsland; }
      AREA {color: @landColor;}
    }
  }
 
  [MAG cityOver-veryClose] {
-   [TYPE place_village] NODE.TEXT {label: Name.name; style: emphasize; size: 1.2; priority: @labelPrioVillage;}
+   [TYPE place_village] NODE.TEXT {label: IName; style: emphasize; size: 1.2; priority: @labelPrioVillage;}
  }
 
  [MAG city-veryClose] {
    [TYPE place_town] NODE.TEXT {scaleMag: region;}
-   [TYPE place_hamlet] NODE.TEXT {label: Name.name; style: emphasize; size: 1.0; priority: @labelPrioHamlet;}
+   [TYPE place_hamlet] NODE.TEXT {label: IName; style: emphasize; size: 1.0; priority: @labelPrioHamlet;}
  }
 
  [MAG suburb-suburb] {
@@ -1522,11 +1522,11 @@ SYMBOL speed_camera
 
  [MAG cityOver-veryClose] {
    [TYPE place_hamlet] NODE.TEXT {scaleMag: city;}
-   [TYPE place_suburb] NODE.TEXT {label: Name.name; style: emphasize; size: 1.3; scaleMag: city; priority: @labelPrioSuburb;}
+   [TYPE place_suburb] NODE.TEXT {label: IName; style: emphasize; size: 1.3; scaleMag: city; priority: @labelPrioSuburb;}
  }
 
  [MAG close-] {
-   [TYPE place_locality] NODE.TEXT {label: Name.name; style: emphasize; size: 1.1; priority: @labelPrioLocality;}
+   [TYPE place_locality] NODE.TEXT {label: IName; style: emphasize; size: 1.1; priority: @labelPrioLocality;}
  }
 
  // -------------------------------------------------------

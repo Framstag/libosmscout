@@ -1211,41 +1211,55 @@ PRODUCTIONS
                   std::string labelName;
                  .)
                 IDENT<featureName>
-                "."
-                // This is a hack, since "name" is a reserved token, we could not have a IDENT name... 
-                ( IDENT<labelName> | "name" (. labelName="name"; .) )
+                [
+                  "."
+                  // This is a hack, since "name" is a reserved token, we could not have a IDENT name... 
+                  ( IDENT<labelName> | "name" (. labelName="name"; .) )
+                ]
                 (.
-                  FeatureRef feature;
+                  if (!labelName.empty()) {
+                    FeatureRef feature;
                   
-                  feature=config.GetTypeConfig()->GetFeature(featureName);
+                    feature=config.GetTypeConfig()->GetFeature(featureName);
                   
-                  if (feature.Invalid()) {
-                    std::string e="'"+featureName+"' is not a registered feature";
+                    if (feature.Invalid()) {
+                      std::string e="'"+featureName+"' is not a registered feature";
 
-                    SemErr(e.c_str());
-                    return;
+                      SemErr(e.c_str());
+                      return;
+                    }
+                  
+                    if (!feature->HasLabel()) {
+                      std::string e="'"+featureName+"' does not support labels";
+
+                      SemErr(e.c_str());
+                      return;
+                    }
+
+                    size_t labelIndex;
+                  
+                    if (!feature->GetLabelIndex(labelName,
+                                                labelIndex)) {
+                      std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
+
+                      SemErr(e.c_str());
+                      return;
+                    }
+                  
+                    label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
+                                                        featureName,
+                                                        labelName);
                   }
-                  
-                  if (!feature->HasLabel()) {
-                    std::string e="'"+featureName+"' does not support labels";
+                  else {
+                    label=config.GetLabelProvider(featureName);
+                    
+                    if (label.Invalid()) {
+                      std::string e="There is no label provider with name '"+featureName+"' registered";
 
-                    SemErr(e.c_str());
-                    return;
+                      SemErr(e.c_str());
+                      return;
+                    }
                   }
-
-                  size_t labelIndex;
-                  
-                  if (!feature->GetLabelIndex(labelName,
-                                              labelIndex)) {
-                    std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
-
-                    SemErr(e.c_str());
-                    return;
-                  }
-                  
-                  label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
-                                                      featureName,
-                                                      labelName);
                 .)
                 .
 
