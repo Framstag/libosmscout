@@ -944,8 +944,6 @@ namespace osmscout {
                            data.height,
                            data.alpha,
                            x,offset);
-
-        areasLabelDrawn++;
       }
       else if (data.icon) {
         DrawIcon(data.iconStyle,
@@ -1254,12 +1252,10 @@ namespace osmscout {
     // Draw normal
     //
 
-    for (std::list<LabelData>::const_iterator label=labels.begin();
-         label!=labels.end();
-         ++label) {
+    for (const auto& label : labels) {
       DrawLabel(projection,
                 parameter,
-                *label);
+                label);
       labelsDrawn++;
     }
 
@@ -1267,12 +1263,10 @@ namespace osmscout {
     // Draw overlays
     //
 
-    for (std::list<LabelData>::const_iterator label=overlayLabels.begin();
-         label!=overlayLabels.end();
-         ++label) {
+    for (const auto& label : overlayLabels) {
       DrawLabel(projection,
                 parameter,
-                *label);
+                label);
       labelsDrawn++;
     }
   }
@@ -1578,7 +1572,6 @@ namespace osmscout {
 
     areasSegments=0;
     areasDrawn=0;
-    areasLabelDrawn=0;
 
     nodesDrawn=0;
 
@@ -1807,7 +1800,7 @@ namespace osmscout {
       std::cout << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)" << std::endl;
 
       std::cout << "Areas: ";
-      std::cout << data.areas.size() << "/" << areasSegments << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs) ";
+      std::cout << data.areas.size() << "/" << areasSegments << "/" << areasDrawn << " (pcs) ";
       std::cout << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)" << std::endl;
 
       std::cout << "Nodes: ";

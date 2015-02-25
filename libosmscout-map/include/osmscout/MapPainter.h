@@ -226,7 +226,6 @@ namespace osmscout {
 
     size_t                       areasSegments;
     size_t                       areasDrawn;
-    size_t                       areasLabelDrawn;
 
     size_t                       nodesDrawn;
 

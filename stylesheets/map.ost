@@ -1424,6 +1424,11 @@ TYPES
       {Name, NameAlt}
       ADDRESS
     
+  TYPE military_bunker_building
+    = NODE AREA ("military"=="bunker" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS
+
   TYPE military_bunker
     = NODE AREA ("military"=="bunker")
       {Name, NameAlt}
