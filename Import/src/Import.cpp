@@ -210,18 +210,16 @@ bool CountDataSize(osmscout::Progress& progress,
 
   dataSize=0;
 
-  for (std::vector<std::string>:: const_iterator filename=files.begin();
-      filename!=files.end();
-      ++filename) {
+  for (const auto& filename : files) {
     std::string filePath=osmscout::AppendFileToDir(mapPath,
-                                                   *filename);
+                                                   filename);
 
     if (!GetFileSize(filePath,
                      fileSize)) {
       return false;
     }
 
-    progress.Info(std::string("File ")+*filename+": "+osmscout::ByteSizeToString(fileSize));
+    progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
 
     dataSize+=fileSize;
   }
