@@ -61,7 +61,7 @@ namespace osmscout {
       }
     };
 
-    typedef LazyRef<Page> PageRef;
+    typedef Ref<Page> PageRef;
 
     typedef Cache<N,PageRef> PageCache;
 
@@ -172,7 +172,13 @@ namespace osmscout {
   template <class N>
   inline bool NumericIndex<N>::ReadPage(FileOffset offset, PageRef& page) const
   {
-    page->entries.clear();
+    if (page.Invalid()) {
+      page=new Page();
+    }
+    else {
+      page->entries.clear();
+    }
+
     page->entries.reserve(pageSize);
 
     if (!scanner.IsOpen() &&

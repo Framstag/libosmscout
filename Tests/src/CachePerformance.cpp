@@ -63,12 +63,9 @@ private:
 
 };
 
-typedef osmscout::LazyRef<Data2> Data2Ref;
-
 static const size_t cacheSize=2000000;
 
 typedef osmscout::Cache<osmscout::Id,Data>     DataCache;
-typedef osmscout::Cache<osmscout::Id,Data2Ref> Data2Cache;
 
 void TestData()
 {
@@ -174,114 +171,9 @@ void TestData()
   std::cout << "Copy time: "  << copyTimer << std::endl;
 }
 
-void TestData2()
-{
-  std::cout << "*** Caching of Reference<struct> ***" << std::endl;
-
-  Data2Cache cache(cacheSize);
-
-  std::cout << "Inserting values into cache..." << std::endl;
-
-  osmscout::StopClock insertTimer;
-
-  for (size_t i=cacheSize; i<2*cacheSize; i++) {
-    Data2Ref data;
-    data->value=i;
-    data->value2.resize(10,i);
-
-    Data2Cache::CacheEntry entry(i,data);
-
-    Data2Cache::CacheRef ref(cache.SetEntry(entry));
-  }
-
-  insertTimer.Stop();
-
-  assert(cache.GetSize()==cacheSize);
-
-  std::cout << "Updating values in cache..." << std::endl;
-
-  osmscout::StopClock updateTimer;
-
-  for (size_t i=cacheSize; i<2*cacheSize; i++) {
-    Data2Cache::CacheEntry entry(i);
-
-    entry.value->value=i;
-    entry.value->value2.resize(10,i);
-
-    Data2Cache::CacheRef ref(cache.SetEntry(entry));
-  }
-
-  updateTimer.Stop();
-
-  assert(cache.GetSize()==cacheSize);
-
-  std::cout << "Searching for entries not in cache..." << std::endl;
-
-  osmscout::StopClock missTimer;
-
-  for (size_t i=0; i<cacheSize; i++) {
-    Data2Cache::CacheRef entry;
-
-    if (cache.GetEntry(i,entry)) {
-      assert(false);
-    }
-  }
-
-  for (size_t i=2*cacheSize; i<3*cacheSize; i++) {
-    Data2Cache::CacheRef entry;
-
-    if (cache.GetEntry(i,entry)) {
-      assert(false);
-    }
-  }
-
-  missTimer.Stop();
-
-  std::cout << "Searching for entries in cache..." << std::endl;
-
-  osmscout::StopClock hitTimer;
-
-  for (size_t t=1; t<=2; t++) {
-    for (size_t i=cacheSize; i<2*cacheSize; i++) {
-      Data2Cache::CacheRef entry;
-
-      if (!cache.GetEntry(i,entry)) {
-        assert(false);
-      }
-    }
-  }
-
-  hitTimer.Stop();
-
-  osmscout::StopClock copyTimer;
-
-  std::cout << "Copying entries from cache..." << std::endl;
-
-  for (size_t t=1; t<=2; t++) {
-    for (size_t i=cacheSize; i<2*cacheSize; i++) {
-      Data2Cache::CacheRef entry;
-
-      if (!cache.GetEntry(i,entry)) {
-        assert(false);
-      }
-
-      Data2Ref data=entry->value;
-    }
-  }
-
-  copyTimer.Stop();
-
-  std::cout << "Insert time: "  << insertTimer << std::endl;
-  std::cout << "Update time: "  << updateTimer << std::endl;
-  std::cout << "Miss time: "  << missTimer << std::endl;
-  std::cout << "Hit time: "  << hitTimer << std::endl;
-  std::cout << "Copy time: "  << copyTimer << std::endl;
-}
-
 int main(int argc, char* argv[])
 {
   TestData();
-  TestData2();
 
   return 0;
 }
