@@ -685,6 +685,42 @@ namespace osmscout {
     }
   }
 
+  const char* const AccessRestrictedFeature::NAME = "AccessRestricted";
+
+  void AccessRestrictedFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagAccess=typeConfig.RegisterTag("access");
+  }
+
+  std::string AccessRestrictedFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t AccessRestrictedFeature::GetValueSize() const
+  {
+    return 0;
+  }
+
+  void AccessRestrictedFeature::Parse(Progress& /*progress*/,
+                                      const TypeConfig& /*typeConfig*/,
+                                      const FeatureInstance& feature,
+                                      const ObjectOSMRef& /*object*/,
+                                      const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                                      FeatureValueBuffer& buffer) const
+  {
+    auto accessValue=tags.find(tagAccess);
+
+    if (accessValue!=tags.end() &&
+        accessValue->second!="no" &&
+        accessValue->second!="yes" &&
+        accessValue->second!="use_sidepath" &&
+        accessValue->second!="permissive" &&
+        accessValue->second!="designated") {
+      buffer.AllocateValue(feature.GetIndex());
+    }
+  }
+
   bool LayerFeatureValue::Read(FileScanner& scanner)
   {
     return scanner.Read(layer);

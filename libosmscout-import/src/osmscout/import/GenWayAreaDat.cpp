@@ -442,7 +442,7 @@ namespace osmscout {
         nodeIds.clear();
       }
 
-      progress.SetAction("Writing ways");
+      progress.SetAction("Writing areas");
 
       for (size_t type=0; type<areasByType.size(); type++) {
         for (const auto &rawWay : areasByType[type]) {

@@ -69,11 +69,14 @@ namespace osmscout {
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
-    AccessFeatureValueReader   *accessReader;
-    MaxSpeedFeatureValueReader *maxSpeedReader;
-    GradeFeatureValueReader    *gradeReader;
+    AccessFeatureValueReader      *accessReader;
+    AccessRestrictedFeatureReader *accessRestrictedReader;
+    MaxSpeedFeatureValueReader    *maxSpeedReader;
+    GradeFeatureValueReader       *gradeReader;
 
   private:
+    bool IsAccessRestricted(const FeatureValueBuffer& buffer) const;
+
     AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;
 
     inline AccessFeatureValue GetAccess(const Way& way) const
@@ -95,25 +98,34 @@ namespace osmscout {
                        Vehicle vehicle) const;
 
     /**
-     * Read turn restrictions and return a map of way ids together with their (set to 0) file offset
+     * Read turn restrictions and return a map of OSM way ids and OSM node ids together with their (set to 0) file offset
      */
-    bool ReadTurnRestrictionWayIds(const ImportParameter& parameter,
-                                   Progress& progress,
-                                   std::map<Id,FileOffset>& wayIdOffsetMap);
+    bool ReadTurnRestrictionIds(const ImportParameter& parameter,
+                                Progress& progress,
+                                std::map<OSMId,FileOffset>& wayIdOffsetMap,
+                                std::map<OSMId,Id>& nodeMap);
 
     /**
      * Resove the file offsets for the way ids given in the wayIdOffsetMap
      */
-    bool ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
-                                    Progress& progress,
-                                    std::map<Id,FileOffset>& wayIdOffsetMap);
+    bool ResolveWayIds(const ImportParameter& parameter,
+                       Progress& progress,
+                       std::map<OSMId,FileOffset>& wayIdOffsetMap);
+
+    /**
+     * Resove the node ids from the OSM node ids given in the nodeIdMap
+     */
+    bool ResolveNodeIds(const ImportParameter& parameter,
+                        Progress& progress,
+                        std::map<OSMId,Id>& nodeIdMap);
 
     /**
      * Red the turn restriction again using the "way id to file offset" map and create a ViaTurnRestrictionMap.
      */
     bool ReadTurnRestrictionData(const ImportParameter& parameter,
                                  Progress& progress,
-                                 const std::map<Id,FileOffset>& wayIdOffsetMap,
+                                 const std::map<OSMId,Id>& nodeIdMap,
+                                 const std::map<OSMId,FileOffset>& wayIdOffsetMap,
                                  ViaTurnRestrictionMap& restrictions);
 
     /**

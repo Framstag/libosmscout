@@ -573,6 +573,30 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API AccessRestrictedFeature : public Feature
+  {
+  private:
+    TagId tagAccess;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+
   class OSMSCOUT_API LayerFeatureValue : public FeatureValue
   {
   private:
@@ -1025,9 +1049,10 @@ namespace osmscout {
     }
   }
 
-  typedef FeatureReader<BridgeFeature>     BridgeFeatureReader;
-  typedef FeatureReader<TunnelFeature>     TunnelFeatureReader;
-  typedef FeatureReader<RoundaboutFeature> RoundaboutFeatureReader;
+  typedef FeatureReader<AccessRestrictedFeature> AccessRestrictedFeatureReader;
+  typedef FeatureReader<BridgeFeature>           BridgeFeatureReader;
+  typedef FeatureReader<TunnelFeature>           TunnelFeatureReader;
+  typedef FeatureReader<RoundaboutFeature>       RoundaboutFeatureReader;
 
   /**
    * Helper template class for easy access to the value of a certain feature for objects of any type.

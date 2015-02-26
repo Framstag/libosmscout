@@ -944,6 +944,7 @@ namespace osmscout {
     FeatureRef                                featureLocation;
     FeatureRef                                featureAddress;
     FeatureRef                                featureAccess;
+    FeatureRef                                featureAccessRestricted;
     FeatureRef                                featureLayer;
     FeatureRef                                featureWidth;
     FeatureRef                                featureMaxSpeed;

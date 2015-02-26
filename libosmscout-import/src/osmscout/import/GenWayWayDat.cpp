@@ -221,9 +221,9 @@ namespace osmscout {
   {
     std::list<TurnRestrictionRef> oldRestrictions;
 
-    std::pair<std::multimap<OSMId,TurnRestrictionRef>::iterator,
-              std::multimap<OSMId,TurnRestrictionRef>::iterator> hits=restrictions.equal_range(oldId);
-    for (std::multimap<OSMId,TurnRestrictionRef>::iterator hit=hits.first;
+    auto hits=restrictions.equal_range(oldId);
+
+    for (auto& hit=hits.first;
         hit!=hits.second;
         ++hit) {
       oldRestrictions.push_back(hit->second);
@@ -236,7 +236,7 @@ namespace osmscout {
         restriction->SetFrom(newId);
         restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
       }
-      else if (restriction->GetTo()==oldId) {
+      if (restriction->GetTo()==oldId) {
         restriction->SetTo(newId);
         restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
       }
@@ -313,6 +313,21 @@ namespace osmscout {
         continue;
       }
 
+      // If restrictions apply to the join point, we cannot merge
+      // because the restriction might be broken later (the restriction direction
+      // is undefined afterwards)
+      bool restricted=false;
+      {
+#pragma omp critical
+        restricted=IsRestricted(restrictions,
+                                way->GetId(),
+                                lastNodeId);
+      }
+
+      if (restricted) {
+        continue;
+      }
+
       while (lastNodeCandidate!=waysByNode.end()) {
         bool hasMerged=false;
 
@@ -326,20 +341,35 @@ namespace osmscout {
             continue;
           }
 
-          //Attributes do not match => No candidate
-          if (way->GetFeatureValueBuffer()!=candidate->GetFeatureValueBuffer()) {
+          // If restrictions apply to the join point, we cannot merge
+          // because the restriction might be broken later (the restriction direction
+          // is undefined afterwards)
+          bool restricted=false;
+          {
+#pragma omp critical
+            restricted=IsRestricted(restrictions,
+                                    candidate->GetId(),
+                                    lastNodeId);
+          }
+
+          if (restricted) {
             continue;
           }
 
-          if (IsRestricted(restrictions,
-                           way->GetId(),
-                           lastNodeId)) {
+          //Attributes do not match => No candidate
+          if (way->GetFeatureValueBuffer()!=candidate->GetFeatureValueBuffer()) {
             continue;
           }
 
           // This is a match
           hasMerged=true;
 
+          {
+#pragma omp critical
+            UpdateRestrictions(restrictions,
+                               candidate->GetId(),
+                               way->GetId());
+          }
           //
           // Append candidate nodes
           //

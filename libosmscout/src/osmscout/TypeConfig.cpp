@@ -687,6 +687,9 @@ namespace osmscout {
     featureAccess=new AccessFeature();
     RegisterFeature(featureAccess);
 
+    featureAccessRestricted=new AccessRestrictedFeature();
+    RegisterFeature(featureAccessRestricted);
+
     featureLayer=new LayerFeature();
     RegisterFeature(featureLayer);
 
@@ -912,6 +915,9 @@ namespace osmscout {
     if (typeInfo->CanRoute()) {
       if (!typeInfo->HasFeature(AccessFeature::NAME)) {
         typeInfo->AddFeature(featureAccess);
+      }
+      if (!typeInfo->HasFeature(AccessRestrictedFeature::NAME)) {
+        typeInfo->AddFeature(featureAccessRestricted);
       }
       if (!typeInfo->HasFeature(MaxSpeedFeature::NAME)) {
         typeInfo->AddFeature(featureMaxSpeed);
