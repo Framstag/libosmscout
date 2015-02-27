@@ -1791,37 +1791,33 @@ namespace osmscout {
         }
       }
 
-      for (std::map<Pixel,std::list<GroundTile> >::const_iterator coord=cellGroundTileMap.begin();
-          coord!=cellGroundTileMap.end();
-          ++coord) {
+      for (const auto& coord : cellGroundTileMap) {
         FileOffset startPos;
 
         writer.GetPos(startPos);
 
-        writer.WriteNumber((uint32_t)coord->second.size());
+        writer.WriteNumber((uint32_t)coord.second.size());
 
-        for (std::list<GroundTile>::const_iterator tile=coord->second.begin();
-             tile!=coord->second.end();
-             ++tile) {
-          writer.Write((uint8_t)tile->type);
+        for (const auto& tile : coord.second) {
+          writer.Write((uint8_t)tile.type);
 
-          writer.WriteNumber((uint32_t)tile->coords.size());
+          writer.WriteNumber((uint32_t)tile.coords.size());
 
-          for (size_t c=0; c<tile->coords.size(); c++) {
-            if (tile->coords[c].coast) {
-              uint16_t x=tile->coords[c].x | uint16_t(1 << 15);
+          for (size_t c=0; c<tile.coords.size(); c++) {
+            if (tile.coords[c].coast) {
+              uint16_t x=tile.coords[c].x | uint16_t(1 << 15);
 
               writer.Write(x);
             }
             else {
-              writer.Write(tile->coords[c].x);
+              writer.Write(tile.coords[c].x);
             }
-            writer.Write(tile->coords[c].y);
+            writer.Write(tile.coords[c].y);
           }
         }
 
         FileOffset endPos;
-        uint32_t cellId=coord->first.y*levels[level].cellXCount+coord->first.x;
+        uint32_t cellId=coord.first.y*levels[level].cellXCount+coord.first.x;
         size_t index=cellId*sizeof(FileOffset);
 
         writer.GetPos(endPos);
