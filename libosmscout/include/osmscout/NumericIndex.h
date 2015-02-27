@@ -361,12 +361,10 @@ namespace osmscout {
     offsets.clear();
     offsets.reserve(ids.size());
 
-    for (typename std::vector<N>::const_iterator id=ids.begin();
-         id!=ids.end();
-         ++id) {
+    for (const auto& id : ids) {
       FileOffset offset;
 
-      if (GetOffset(*id,
+      if (GetOffset(id,
                     offset)) {
         offsets.push_back(offset);
       }
@@ -382,12 +380,10 @@ namespace osmscout {
     offsets.clear();
     offsets.reserve(ids.size());
 
-    for (typename std::list<N>::const_iterator id=ids.begin();
-         id!=ids.end();
-         ++id) {
+    for (const auto& id : ids) {
       FileOffset offset;
 
-      if (GetOffset(*id,
+      if (GetOffset(id,
                     offset)) {
         offsets.push_back(offset);
       }
@@ -403,12 +399,10 @@ namespace osmscout {
     offsets.clear();
     offsets.reserve(ids.size());
 
-    for (typename std::set<N>::const_iterator id=ids.begin();
-         id!=ids.end();
-         ++id) {
+    for (const auto& id : ids) {
       FileOffset offset;
 
-      if (GetOffset(*id,
+      if (GetOffset(id,
                     offset)) {
         offsets.push_back(offset);
       }
