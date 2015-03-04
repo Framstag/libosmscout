@@ -23,6 +23,7 @@
 #include <osmscout/ImportFeatures.h>
 
 #include <map>
+#include <unordered_map>
 
 #include <osmscout/import/Import.h>
 
@@ -30,7 +31,6 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -40,7 +40,7 @@ namespace osmscout {
     static const char* FILE_AREASOPT_DAT;
 
   private:
-    typedef OSMSCOUT_HASHMAP<FileOffset,FileOffset> FileOffsetFileOffsetMap;
+    typedef std::unordered_map<FileOffset,FileOffset> FileOffsetFileOffsetMap;
 
     struct TypeData
     {

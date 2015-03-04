@@ -22,6 +22,7 @@
 
 #include <list>
 #include <set>
+#include <unordered_map>
 
 // Type and style sheet configuration
 #include <osmscout/TypeConfig.h>
@@ -50,7 +51,6 @@
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
-#include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Reference.h>
 
@@ -181,7 +181,7 @@ namespace osmscout {
     bool GetNodesByOffset(const std::list<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
     bool GetNodesByOffset(const std::set<FileOffset>& offsets,
-                          OSMSCOUT_HASHMAP<FileOffset,NodeRef>& dataMap) const;
+                          std::unordered_map<FileOffset,NodeRef>& dataMap) const;
 
     bool GetAreaByOffset(const FileOffset& offset,
                          AreaRef& area) const;
@@ -192,7 +192,7 @@ namespace osmscout {
     bool GetAreasByOffset(const std::list<FileOffset>& offsets,
                           std::vector<AreaRef>& areas) const;
     bool GetAreasByOffset(const std::set<FileOffset>& offsets,
-                          OSMSCOUT_HASHMAP<FileOffset,AreaRef>& dataMap) const;
+                          std::unordered_map<FileOffset,AreaRef>& dataMap) const;
 
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
@@ -203,7 +203,7 @@ namespace osmscout {
     bool GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::set<FileOffset>& offsets,
-                         OSMSCOUT_HASHMAP<FileOffset,WayRef>& dataMap) const;
+                         std::unordered_map<FileOffset,WayRef>& dataMap) const;
 
     void DumpStatistics();
   };

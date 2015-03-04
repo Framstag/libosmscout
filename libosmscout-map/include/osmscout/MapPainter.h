@@ -39,7 +39,6 @@
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Transformation.h>
 

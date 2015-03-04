@@ -71,13 +71,6 @@ AC_CHECK_TYPES([std::wstring],[AC_DEFINE([OSMSCOUT_HAVE_STD_WSTRING],[1],[std::w
 AC_CHECK_SIZEOF([wchar_t])
 
 AC_CHECK_HEADERS([fcntl.h sys/time.h])
-
-AS_IF([test "$enable_cpp0x_support" != "no"],
-      [AC_CHECK_HEADERS([unordered_map],
-                        [AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_MAP],[1],[system header <unordered_map> is available])])
-       AC_CHECK_HEADERS([unordered_set],
-                        [AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_SET],[1],[system header <unordered_set> is available])])
-      ])
       
 dnl c++ 11 extensions
       

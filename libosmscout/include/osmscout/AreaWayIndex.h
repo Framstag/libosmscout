@@ -20,12 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <unordered_set>
 #include <vector>
 
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -80,7 +80,7 @@ namespace osmscout {
                     double maxlon,
                     double maxlat,
                     size_t maxWayCount,
-                    OSMSCOUT_HASHSET<FileOffset>& offsets,
+                    std::unordered_set<FileOffset>& offsets,
                     size_t currentSize,
                     bool& sizeExceeded) const;
 

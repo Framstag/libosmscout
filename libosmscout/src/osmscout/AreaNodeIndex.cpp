@@ -127,7 +127,7 @@ namespace osmscout {
       return true;
     }
 
-    OSMSCOUT_HASHSET<FileOffset> newOffsets;
+    std::unordered_set<FileOffset> newOffsets;
 
     uint32_t             minxc=(uint32_t)floor((minlon+180.0)/typeData.cellWidth);
     uint32_t             maxxc=(uint32_t)floor((maxlon+180.0)/typeData.cellWidth);

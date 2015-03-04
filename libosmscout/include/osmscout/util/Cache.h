@@ -26,13 +26,12 @@
 
 #include <limits>
 #include <list>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/Types.h>
-
-#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -104,14 +103,9 @@ namespace osmscout {
       virtual unsigned long GetSize(const V& value) const = 0;
     };
 
-    typedef std::list<CacheEntry>                   OrderList;
-    typedef typename OrderList::iterator            CacheRef;
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-    typedef OSMSCOUT_HASHMAP<K,typename OrderList::iterator> Map;
-#else
-    typedef std::list<typename OrderList::iterator> CacheRefList;
-    typedef std::vector<CacheRefList>               Map;
-#endif
+    typedef std::list<CacheEntry>                              OrderList;
+    typedef typename OrderList::iterator                       CacheRef;
+    typedef std::unordered_map<K,typename OrderList::iterator> Map;
 
   private:
     unsigned long size;
@@ -139,27 +133,11 @@ namespace osmscout {
         // Get oldest entry
         typename std::list<CacheEntry>::reverse_iterator lastEntry=order.rbegin();
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
         typename Map::iterator iter=map.find(lastEntry->key);
 
         assert(iter!=map.end());
 
         map.erase(iter);
-#else
-        IK            lastEntryInternalKey=KeyToInternalKey(lastEntry->key);
-        unsigned long index=lastEntryInternalKey % map.size();
-
-        typename CacheRefList::iterator iter=map[index].begin();
-        while (iter!=map[index].end() &&
-               (*iter)->key!=lastEntry->key) {
-          ++iter;
-        }
-
-        assert(iter!=map[index].end());
-
-        // Remove it from map
-        map[index].erase(iter);
-#endif
         // Remove it from order list
         order.pop_back();
         size--;
@@ -174,18 +152,7 @@ namespace osmscout {
      : size(0),
        maxSize(maxSize)
     {
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-  #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
       map.reserve(maxSize);
-  #endif
-#else
-      if(maxSize>=10) {
-        map.resize(maxSize/5);
-      }
-      else {
-        map.resize(maxSize);
-      }
-#endif
     }
 
     /**
@@ -213,7 +180,6 @@ namespace osmscout {
         return false;
       }
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
       typename Map::iterator iter=map.find(key);
 
       if (iter!=map.end()) {
@@ -227,28 +193,7 @@ namespace osmscout {
 
         return true;
       }
-#else
-      IK            internalKey=KeyToInternalKey(key);
-      unsigned long index(internalKey % map.size());
-      CacheRefList  *refList=&map[index];
 
-      for (typename CacheRefList::iterator iter(refList->begin());
-           iter!=refList->end();
-           ++iter) {
-        if ((*iter)->key==key) {
-          // Move key/value to the start of the order list
-          order.splice(order.begin(),order,*iter);
-
-          // Update the map with the new iterator into the order list
-          refList->push_front(order.begin());
-          refList->erase(iter);
-
-          reference=order.begin();
-
-          return true;
-        }
-      }
-#endif
       return false;
     }
 
@@ -269,7 +214,6 @@ namespace osmscout {
         return order.begin();
       }
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
       typename Map::iterator iter=map.find(entry.key);
 
       if (iter!=map.end()) {
@@ -290,38 +234,7 @@ namespace osmscout {
 
         StripCache();
       }
-#else
-      IK                              internalKey=KeyToInternalKey(entry.key);
-      unsigned long                   index=internalKey % map.size();
-      CacheRefList                    *refList=&map[index];
-      typename CacheRefList::iterator iter=refList->begin();
 
-      while (iter!=refList->end() &&
-             (*iter)->key!=entry.key) {
-        ++iter;
-      }
-
-      if (iter!=refList->end()) {
-        // Move key/value to the start of the order list
-        order.splice(order.begin(),order,*iter);
-
-        // Update the map with the new iterator into the order list
-        refList->push_front(order.begin());
-        // Delete the old entry in the ref list
-        refList->erase(iter);
-
-        order.front().value=entry.value;
-      }
-      else {
-        // Place key/value to the start of the order list
-        order.push_front(entry);
-        size++;
-        // Update the map with the new iterator into the order list
-        refList->push_front(order.begin());
-
-        StripCache();
-      }
-#endif
       return order.begin();
     }
 
@@ -335,11 +248,7 @@ namespace osmscout {
 
       StripCache();
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-  #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
       map.reserve(maxSize);
-  #endif
-#endif
     }
 
     /**
@@ -350,15 +259,6 @@ namespace osmscout {
       order.clear();
       map.clear();
       size=0;
-
-#if !defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-      if(maxSize>=10) {
-        map.resize(maxSize/5);
-      }
-      else {
-        map.resize(maxSize);
-      }
-#endif
     }
 
     /**
@@ -373,7 +273,6 @@ namespace osmscout {
     {
       unsigned long memory=0;
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
       // Size of map
       memory+=map.size()*sizeof(CacheRef);
 
@@ -385,20 +284,6 @@ namespace osmscout {
            ++entry) {
         memory+=sizer.GetSize(entry->value);
       }
-#else
-      memory+=map.size()*sizeof(CacheRefList);
-      memory+=size*sizeof(CacheEntry);
-
-      for (unsigned long i=0; i<map.size(); i++) {
-        memory+=map[i].size()*sizeof(CacheRef);
-      }
-
-      for (typename std::list<CacheEntry>::const_iterator entry=order.begin();
-           entry!=order.end();
-           ++entry) {
-        memory+=sizer.GetSize(entry->value);
-      }
-#endif
 
       return memory;
     }

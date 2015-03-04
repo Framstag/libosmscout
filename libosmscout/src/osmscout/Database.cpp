@@ -496,7 +496,7 @@ namespace osmscout {
   }
 
   bool Database::GetNodesByOffset(const std::set<FileOffset>& offsets,
-                                  OSMSCOUT_HASHMAP<FileOffset,NodeRef>& dataMap) const
+                                  std::unordered_map<FileOffset,NodeRef>& dataMap) const
   {
     NodeDataFileRef nodeDataFile=GetNodeDataFile();
 
@@ -560,7 +560,7 @@ namespace osmscout {
   }
 
   bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
-                                  OSMSCOUT_HASHMAP<FileOffset,AreaRef>& dataMap) const
+                                  std::unordered_map<FileOffset,AreaRef>& dataMap) const
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
@@ -624,7 +624,7 @@ namespace osmscout {
   }
 
   bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
-                                 OSMSCOUT_HASHMAP<FileOffset,WayRef>& dataMap) const
+                                 std::unordered_map<FileOffset,WayRef>& dataMap) const
   {
     WayDataFileRef wayDataFile=GetWayDataFile();
 

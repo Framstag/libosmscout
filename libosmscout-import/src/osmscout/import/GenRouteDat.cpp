@@ -162,8 +162,8 @@ namespace osmscout {
 
   bool RouteDataGenerator::IsAnyRoutable(Progress& progress,
                                          const std::list<ObjectFileRef>& objects,
-                                         const OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap,
-                                         const OSMSCOUT_HASHMAP<FileOffset,AreaRef>&  areasMap,
+                                         const std::unordered_map<FileOffset,WayRef>& waysMap,
+                                         const std::unordered_map<FileOffset,AreaRef>&  areasMap,
                                          Vehicle vehicle) const
   {
     for (const auto& ref : objects) {
@@ -877,7 +877,7 @@ namespace osmscout {
                                     Progress& progress,
                                     FileScanner& scanner,
                                     const std::set<FileOffset>& fileOffsets,
-                                    OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap)
+                                    std::unordered_map<FileOffset,WayRef>& waysMap)
   {
     if (fileOffsets.empty()) {
       return true;
@@ -921,7 +921,7 @@ namespace osmscout {
                                      Progress& progress,
                                      FileScanner& scanner,
                                      const std::set<FileOffset>& fileOffsets,
-                                     OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap)
+                                     std::unordered_map<FileOffset,AreaRef>& areasMap)
   {
     if (fileOffsets.empty()) {
       return true;
@@ -1642,7 +1642,7 @@ namespace osmscout {
         }
       }
 
-      OSMSCOUT_HASHMAP<FileOffset,WayRef>  waysMap;
+      std::unordered_map<FileOffset,WayRef>  waysMap;
 
       if (!LoadWays(typeConfig,
                     progress,
@@ -1654,7 +1654,7 @@ namespace osmscout {
 
       wayOffsets.clear();
 
-      OSMSCOUT_HASHMAP<FileOffset,AreaRef> areasMap;
+      std::unordered_map<FileOffset,AreaRef> areasMap;
 
       if (!LoadAreas(typeConfig,
                      progress,

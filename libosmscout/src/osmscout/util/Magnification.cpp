@@ -42,8 +42,6 @@ namespace osmscout {
     this->level=level;
   }
 
-    OSMSCOUT_HASHMAP<std::string,Magnification::Mag> stringToMagMap;
-
   MagnificationConverter::MagnificationConverter()
   {
     stringToMagMap[std::string("world")]=Magnification::magWorld;
@@ -86,7 +84,7 @@ namespace osmscout {
   bool MagnificationConverter::Convert(const std::string& name,
                                        Magnification& magnification)
   {
-    OSMSCOUT_HASHMAP<std::string,Magnification::Mag>::const_iterator entry=stringToMagMap.find(name);
+    auto entry=stringToMagMap.find(name);
 
     if (entry==stringToMagMap.end()) {
       return false;
@@ -100,7 +98,7 @@ namespace osmscout {
   bool MagnificationConverter::Convert(size_t level,
                                        std::string& name)
   {
-    OSMSCOUT_HASHMAP<size_t,std::string>::const_iterator entry=levelToStringMap.find(level);
+    auto entry=levelToStringMap.find(level);
 
     if (entry==levelToStringMap.end()) {
       return false;

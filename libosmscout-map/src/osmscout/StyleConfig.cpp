@@ -1619,7 +1619,7 @@ namespace osmscout {
   {
     StyleVariableRef result;
 
-    OSMSCOUT_HASHMAP<std::string,StyleVariableRef>::const_iterator entry=variables.find(name);
+    auto entry=variables.find(name);
 
     if (entry!=variables.end()) {
       result=entry->second;
@@ -1636,7 +1636,7 @@ namespace osmscout {
 
   bool StyleConfig::RegisterSymbol(const SymbolRef& symbol)
   {
-    std::pair<OSMSCOUT_HASHMAP<std::string,SymbolRef>::iterator,bool> result;
+    std::pair<std::unordered_map<std::string,SymbolRef>::iterator,bool> result;
 
     result=symbols.insert(std::make_pair(symbol->GetName(),symbol));
 
@@ -1645,9 +1645,7 @@ namespace osmscout {
 
   const SymbolRef& StyleConfig::GetSymbol(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,SymbolRef>::const_iterator entry;
-
-    entry=symbols.find(name);
+    auto entry=symbols.find(name);
 
     if (entry!=symbols.end()) {
       return entry->second;
@@ -1824,7 +1822,7 @@ namespace osmscout {
     GetMaxLevelInConditionals(nodeIconStyleConditionals,
                               maxLevel);
 
-    OSMSCOUT_HASHMAP<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
+    std::unordered_map<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
 
     for (auto& conditional : nodeTextStyleConditionals) {
       textStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
@@ -1881,7 +1879,7 @@ namespace osmscout {
     GetMaxLevelInConditionals(wayPathShieldStyleConditionals,
                               maxLevel);
 
-    OSMSCOUT_HASHMAP<std::string,std::list<LineConditionalStyle> > lineStyleBySlot;
+    std::unordered_map<std::string,std::list<LineConditionalStyle> > lineStyleBySlot;
 
     for (auto& conditional : wayLineStyleConditionals) {
       lineStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
@@ -1978,7 +1976,7 @@ namespace osmscout {
                        maxLevel,
                        areaFillStyleSelectors);
 
-    OSMSCOUT_HASHMAP<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
+    std::unordered_map<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
 
     for (auto& conditional : areaTextStyleConditionals) {
       textStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
@@ -2030,14 +2028,14 @@ namespace osmscout {
 
   void StyleConfig::PostprocessIconId()
   {
-    OSMSCOUT_HASHMAP<std::string,size_t> symbolIdMap;
-    size_t                               nextId=1;
+    std::unordered_map<std::string,size_t> symbolIdMap;
+    size_t                                 nextId=1;
 
     for (auto& typeSelector : areaIconStyleSelectors) {
       for (auto& levelSelector : typeSelector) {
         for (auto& selector : levelSelector) {
           if (!selector.style->GetIconName().empty()) {
-            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector.style->GetIconName());
+            auto entry=symbolIdMap.find(selector.style->GetIconName());
 
             if (entry==symbolIdMap.end()) {
               symbolIdMap.insert(std::make_pair(selector.style->GetIconName(),nextId));
@@ -2058,7 +2056,7 @@ namespace osmscout {
       for (auto& levelSelector : typeSelector) {
         for (auto& selector : levelSelector) {
           if (!selector.style->GetIconName().empty()) {
-            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector.style->GetIconName());
+            auto entry=symbolIdMap.find(selector.style->GetIconName());
 
             if (entry==symbolIdMap.end()) {
               symbolIdMap.insert(std::make_pair(selector.style->GetIconName(),nextId));
@@ -2078,14 +2076,14 @@ namespace osmscout {
 
   void StyleConfig::PostprocessPatternId()
   {
-    OSMSCOUT_HASHMAP<std::string,size_t> symbolIdMap;
-    size_t                               nextId=1;
+    std::unordered_map<std::string,size_t> symbolIdMap;
+    size_t                                 nextId=1;
 
     for (auto& typeSelector : areaFillStyleSelectors) {
       for (auto& levelSelector: typeSelector) {
         for (auto& selector : levelSelector) {
           if (!selector.style->GetPatternName().empty()) {
-            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector.style->GetPatternName());
+            auto entry=symbolIdMap.find(selector.style->GetPatternName());
 
             if (entry==symbolIdMap.end()) {
               symbolIdMap.insert(std::make_pair(selector.style->GetPatternName(),nextId));

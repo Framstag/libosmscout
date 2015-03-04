@@ -22,6 +22,8 @@
 
 #include <osmscout/MapCairoFeatures.h>
 
+#include <unordered_map>
+
 #if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
   #include <cairo.h>
 #else
@@ -33,8 +35,6 @@
 #endif
 
 #include <osmscout/private/MapCairoImportExport.h>
-
-#include <osmscout/util/HashMap.h>
 
 #include <osmscout/MapPainter.h>
 
@@ -50,7 +50,7 @@ namespace osmscout {
 #else
     typedef cairo_scaled_font_t*           Font;
 #endif
-    typedef OSMSCOUT_HASHMAP<size_t,Font>  FontMap;          //! Map type for mapping  font sizes to font
+    typedef std::unordered_map<size_t,Font>  FontMap;          //! Map type for mapping  font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons

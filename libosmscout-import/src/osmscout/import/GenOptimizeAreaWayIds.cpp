@@ -19,9 +19,10 @@
 
 #include <osmscout/import/GenOptimizeAreaWayIds.h>
 
+#include <unordered_set>
+
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/HashSet.h>
 
 #include <osmscout/DataFile.h>
 
@@ -76,7 +77,7 @@ namespace osmscout {
       }
 
       for (const auto& ring: data.rings) {
-        OSMSCOUT_HASHSET<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         if (!ring.GetType()->CanRoute()) {
           continue;
@@ -148,7 +149,7 @@ namespace osmscout {
         continue;
       }
 
-      OSMSCOUT_HASHSET<Id> nodeIds;
+      std::unordered_set<Id> nodeIds;
 
       for (const auto& id : data.ids) {
         if (nodeIds.find(id)==nodeIds.end()) {
@@ -229,7 +230,7 @@ namespace osmscout {
       }
 
       for (auto& ring : data.rings) {
-        OSMSCOUT_HASHSET<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         for (auto& id : ring.ids) {
           if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {

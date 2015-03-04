@@ -26,7 +26,6 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/HashMap.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 

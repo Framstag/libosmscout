@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include <list>
+#include <unordered_map>
 
 #include <osmscout/import/Import.h>
 
@@ -29,7 +30,6 @@
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -37,7 +37,7 @@ namespace osmscout {
   class SortDataGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<Id,Id> IdMap;
+    typedef std::unordered_map<Id,Id> IdMap;
 
     struct Source
     {

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
@@ -96,14 +97,14 @@ bool CheckParseSuccess(bool canFoot,
                        bool canBicycle,
                        bool canCar,
                        uint8_t expectedAccessValue,
-                       const OSMSCOUT_HASHMAP<std::string,std::string>& stringTags)
+                       const std::unordered_map<std::string,std::string>& stringTags)
 {
-  osmscout::SilentProgress                      progress;
-  osmscout::TypeConfig                          typeConfig;
-  osmscout::TypeInfoRef                         testType=new osmscout::TypeInfo();
-  osmscout::FeatureRef                          accessFeature;
-  size_t                                        featureInstanceIndex;
-  OSMSCOUT_HASHMAP<osmscout::TagId,std::string> tags;
+  osmscout::SilentProgress                        progress;
+  osmscout::TypeConfig                            typeConfig;
+  osmscout::TypeInfoRef                           testType=new osmscout::TypeInfo();
+  osmscout::FeatureRef                            accessFeature;
+  size_t                                          featureInstanceIndex;
+  std::unordered_map<osmscout::TagId,std::string> tags;
 
   for (const auto &entry : stringTags) {
     osmscout::TagId tagId=typeConfig.RegisterTag(entry.first);
@@ -168,7 +169,7 @@ int main()
 {
   int errors=0;
 
-  OSMSCOUT_HASHMAP<std::string,std::string> tags;
+  std::unordered_map<std::string,std::string> tags;
 
   // Highway=path (FOOT, BICYCLE) with bicycle explicitly forbidden
 

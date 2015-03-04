@@ -22,13 +22,13 @@
 
 #include <set>
 #include <list>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/Point.h>
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/HashMap.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -39,7 +39,7 @@ namespace osmscout {
   class OSMSCOUT_API CoordDataFile
   {
   private:
-    typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
+    typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
 
   public:
     struct CoordEntry
@@ -55,7 +55,7 @@ namespace osmscout {
       }
     };
 
-    typedef OSMSCOUT_HASHMAP<OSMId,CoordEntry> CoordResultMap;
+    typedef std::unordered_map<OSMId,CoordEntry> CoordResultMap;
 
   private:
     bool                isOpen;             //! If true,the data file is opened

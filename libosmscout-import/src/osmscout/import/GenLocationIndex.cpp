@@ -40,7 +40,6 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {
@@ -89,8 +88,8 @@ namespace osmscout {
   }
 
   void LocationIndexGenerator::AnalyseStringForIgnoreTokens(const std::string& string,
-                                                            OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
-                                                            OSMSCOUT_HASHSET<std::string>& blacklist)
+                                                            std::unordered_map<std::string,size_t>& ignoreTokens,
+                                                            std::unordered_set<std::string>& blacklist)
   {
     if (string.empty()) {
       return;
@@ -149,8 +148,8 @@ namespace osmscout {
   }
 
   void LocationIndexGenerator::CalculateRegionNameIgnoreTokens(const Region& region,
-                                                               OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
-                                                               OSMSCOUT_HASHSET<std::string>& blacklist)
+                                                               std::unordered_map<std::string,size_t>& ignoreTokens,
+                                                               std::unordered_set<std::string>& blacklist)
   {
     AnalyseStringForIgnoreTokens(region.name,
                                  ignoreTokens,
@@ -183,8 +182,8 @@ namespace osmscout {
   }
 
   void LocationIndexGenerator::CalculateLocationNameIgnoreTokens(const Region& region,
-                                                                 OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
-                                                                 OSMSCOUT_HASHSET<std::string>& blacklist)
+                                                                 std::unordered_map<std::string,size_t>& ignoreTokens,
+                                                                 std::unordered_set<std::string>& blacklist)
   {
     for (const auto& poi : region.pois) {
       AnalyseStringForIgnoreTokens(poi.name,
@@ -211,8 +210,8 @@ namespace osmscout {
                                                      std::list<std::string>& regionTokens,
                                                      std::list<std::string>& locationTokens)
   {
-    OSMSCOUT_HASHMAP<std::string,size_t> ignoreTokens;
-    OSMSCOUT_HASHSET<std::string>        blacklist;
+    std::unordered_map<std::string,size_t> ignoreTokens;
+    std::unordered_set<std::string>        blacklist;
 
     regionTokens.clear();
     locationTokens.clear();

@@ -23,10 +23,9 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <bitset>
+#include <unordered_map>
 
 #include <osmscout/Types.h>
-
-#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -49,9 +48,9 @@ namespace osmscout {
   class OSMSCOUT_API NodeUseMap
   {
   private:
-    size_t                                  nodeCount;
-    typedef std::bitset<4096>               Bitset;
-    typedef OSMSCOUT_HASHMAP<PageId,Bitset> Map;
+    size_t                                    nodeCount;
+    typedef std::bitset<4096>                 Bitset;
+    typedef std::unordered_map<PageId,Bitset> Map;
 
   private:
     Map nodeUseMap;

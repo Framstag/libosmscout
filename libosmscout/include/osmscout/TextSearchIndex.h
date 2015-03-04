@@ -20,11 +20,12 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <unordered_map>
+
 #include <osmscout/TypeSet.h>
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/HashMap.h>
 
 #include <marisa.h>
 
@@ -53,10 +54,10 @@ namespace osmscout
     };
 
   public:
-    typedef OSMSCOUT_HASHMAP<std::string,std::vector<ObjectFileRef> > ResultsMap;
+    typedef std::unordered_map<std::string,std::vector<ObjectFileRef> > ResultsMap;
 
     TextSearchIndex();
-      
+
     ~TextSearchIndex();
 
     bool Load(const std::string &path);

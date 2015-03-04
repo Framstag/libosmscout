@@ -21,7 +21,6 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/HashSet.h>
 
 #include <osmscout/DataFile.h>
 
@@ -53,10 +52,10 @@ namespace osmscout {
   }
 
   void MergeAreasGenerator::EraseAreaInCache(const NodeUseMap& nodeUseMap,
-                                             OSMSCOUT_HASHMAP<Id,std::list<AreaRef> >& idAreaMap,
+                                             std::unordered_map<Id,std::list<AreaRef> >& idAreaMap,
                                              const AreaRef& area)
   {
-    OSMSCOUT_HASHSET<Id> nodeIds;
+    std::unordered_set<Id> nodeIds;
 
     for (const auto& ring: area->rings) {
       if (ring.ring==Area::outerRingId) {
@@ -126,7 +125,7 @@ namespace osmscout {
           continue;
         }
 
-        OSMSCOUT_HASHSET<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         for (const auto id : ring.ids) {
           if (nodeIds.find(id)==nodeIds.end()) {
@@ -264,14 +263,14 @@ namespace osmscout {
   void MergeAreasGenerator::MergeAreas(const NodeUseMap& nodeUseMap,
                                        std::list<AreaRef>& areas,
                                        std::list<AreaRef>& merges,
-                                       OSMSCOUT_HASHSET<FileOffset>& blacklist)
+                                       std::unordered_set<FileOffset>& blacklist)
   {
-    OSMSCOUT_HASHMAP<Id,std::list<AreaRef> > idAreaMap;
+    std::unordered_map<Id,std::list<AreaRef> > idAreaMap;
 
     for (auto& area : areas) {
       for (const auto& ring: area->rings) {
         if (ring.ring==Area::outerRingId) {
-          OSMSCOUT_HASHSET<Id> nodeIds;
+          std::unordered_set<Id> nodeIds;
 
           for (const auto id: ring.ids) {
             if (nodeIds.find(id)==nodeIds.end() &&
@@ -311,7 +310,7 @@ namespace osmscout {
             continue;
           }
 
-          OSMSCOUT_HASHSET<Id> nodeIds;
+          std::unordered_set<Id> nodeIds;
 
           for (const auto id : ring.ids) {
             if (nodeIds.find(id)==nodeIds.end()) {
@@ -393,10 +392,10 @@ namespace osmscout {
   {
     return true;
 
-    TypeInfoSet                  mergeTypes;
-    FileScanner                  scanner;
-    uint32_t                     areaCount;
-    OSMSCOUT_HASHSET<FileOffset> blacklist;
+    TypeInfoSet                    mergeTypes;
+    FileScanner                    scanner;
+    uint32_t                       areaCount;
+    std::unordered_set<FileOffset> blacklist;
 
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeArea() &&

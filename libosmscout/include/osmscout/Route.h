@@ -22,13 +22,13 @@
 
 #include <list>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
 #include <osmscout/GeoCoord.h>
 
-#include <osmscout/util/HashMap.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -451,15 +451,15 @@ namespace osmscout {
     class OSMSCOUT_API Node
     {
     private:
-      size_t                                       currentNodeIndex;
-      std::vector<ObjectFileRef>                   objects;
-      ObjectFileRef                                pathObject;
-      size_t                                       targetNodeIndex;
-      double                                       distance;
-      double                                       time;
-      GeoCoord                                     location;
-      OSMSCOUT_HASHMAP<std::string,DescriptionRef> descriptionMap;
-      std::list<DescriptionRef>                    descriptions;
+      size_t                                         currentNodeIndex;
+      std::vector<ObjectFileRef>                     objects;
+      ObjectFileRef                                  pathObject;
+      size_t                                         targetNodeIndex;
+      double                                         distance;
+      double                                         time;
+      GeoCoord                                       location;
+      std::unordered_map<std::string,DescriptionRef> descriptionMap;
+      std::list<DescriptionRef>                      descriptions;
 
     public:
       Node(size_t currentNodeIndex,

@@ -22,6 +22,8 @@
 
 #include <list>
 #include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <osmscout/CoreFeatures.h>
 
@@ -41,8 +43,6 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <osmscout/util/Cache.h>
-#include <osmscout/util/HashMap.h>
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -164,8 +164,8 @@ namespace osmscout {
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
-    typedef OSMSCOUT_HASHMAP<FileOffset,OpenListRef>      OpenMap;
-    typedef OSMSCOUT_HASHMAP<FileOffset,RNodeRef>         CloseMap;
+    typedef std::unordered_map<FileOffset,OpenListRef>    OpenMap;
+    typedef std::unordered_map<FileOffset,RNodeRef>       CloseMap;
 
   public:
     //! Relative filename of the intersection data file

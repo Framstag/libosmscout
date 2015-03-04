@@ -22,6 +22,7 @@
 
 #include <ostream>
 #include <map>
+#include <unordered_map>
 #include <set>
 
 #include <osmscout/MapSVGFeatures.h>
@@ -32,8 +33,6 @@
 
 #include <osmscout/private/MapSVGImportExport.h>
 
-#include <osmscout/util/HashMap.h>
-
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
@@ -43,7 +42,7 @@ namespace osmscout {
   private:
     CoordBufferImpl<Vertex2D>        *coordBuffer;
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-    typedef OSMSCOUT_HASHMAP<size_t,PangoFontDescription*>  FontMap;          //! Map type for mapping  font sizes to font
+    typedef std::unordered_map<size_t,PangoFontDescription*>  FontMap;          //! Map type for mapping  font sizes to font
 
     PangoFontMap                     *pangoFontMap;
     PangoContext                     *pangoContext;

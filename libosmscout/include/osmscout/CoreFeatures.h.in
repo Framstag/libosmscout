@@ -4,12 +4,6 @@
 /* system header <stdint.h> is available */
 #undef OSMSCOUT_HAVE_STDINT_H
 
-/* system header <unordered_map> is available */
-#undef OSMSCOUT_HAVE_UNORDERED_MAP
-
-/* system header <unordered_set> is available */
-#undef OSMSCOUT_HAVE_UNORDERED_SET
-
 /* std::wstring is available */
 #undef OSMSCOUT_HAVE_STD_WSTRING
 

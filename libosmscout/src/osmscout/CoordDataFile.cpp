@@ -128,9 +128,7 @@ namespace osmscout {
     assert(isOpen);
 
     coordsMap.clear();
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     coordsMap.reserve(ids.size());
-#endif
 
     for (std::set<OSMId>::const_iterator id=ids.begin();
          id!=ids.end();

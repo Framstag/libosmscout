@@ -23,10 +23,10 @@
 #include <list>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/util/HashMap.h>
 #include <osmscout/util/Parser.h>
 #include <osmscout/util/Reference.h>
 
@@ -53,7 +53,7 @@ namespace osmscout {
   public:
     virtual ~TagCondition();
 
-    virtual bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const = 0;
+    virtual bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const = 0;
   };
 
   /**
@@ -76,7 +76,7 @@ namespace osmscout {
   public:
     TagNotCondition(TagCondition* condition);
 
-    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -102,7 +102,7 @@ namespace osmscout {
 
     void AddCondition(TagCondition* condition);
 
-    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -118,7 +118,7 @@ namespace osmscout {
   public:
     TagExistsCondition(TagId tag);
 
-    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -150,7 +150,7 @@ namespace osmscout {
                        BinaryOperator binaryOperator,
                        const size_t& tagValue);
 
-    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
   };
 
   /**
@@ -170,7 +170,7 @@ namespace osmscout {
 
     void AddTagValue(const std::string& tagValue);
 
-    bool Evaluate(const OSMSCOUT_HASHMAP<TagId,std::string>& tagMap) const;
+    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
   };
 
   /**

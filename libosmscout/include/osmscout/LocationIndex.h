@@ -22,6 +22,7 @@
 
 #include <list>
 #include <set>
+#include <unordered_set>
 
 #include <osmscout/Location.h>
 #include <osmscout/TypeConfig.h>
@@ -47,13 +48,13 @@ namespace osmscout {
     static const char* const FILENAME_LOCATION_IDX;
 
   private:
-    std::string                   path;
-    mutable uint8_t               bytesForNodeFileOffset;
-    mutable uint8_t               bytesForAreaFileOffset;
-    mutable uint8_t               bytesForWayFileOffset;
-    OSMSCOUT_HASHSET<std::string> regionIgnoreTokens;
-    OSMSCOUT_HASHSET<std::string> locationIgnoreTokens;
-    FileOffset                    indexOffset;
+    std::string                     path;
+    mutable uint8_t                 bytesForNodeFileOffset;
+    mutable uint8_t                 bytesForAreaFileOffset;
+    mutable uint8_t                 bytesForWayFileOffset;
+    std::unordered_set<std::string> regionIgnoreTokens;
+    std::unordered_set<std::string> locationIgnoreTokens;
+    FileOffset                      indexOffset;
 
   private:
     bool Read(FileScanner& scanner,

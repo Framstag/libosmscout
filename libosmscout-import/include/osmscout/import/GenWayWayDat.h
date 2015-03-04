@@ -22,16 +22,13 @@
 
 #include <osmscout/ImportFeatures.h>
 
-#include <map>
+#include <unordered_map>
 
 #include <osmscout/Way.h>
 
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/TurnRestriction.h>
-
-#include <osmscout/util/HashMap.h>
-#include <osmscout/util/HashSet.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
@@ -41,10 +38,10 @@ namespace osmscout {
   class WayWayDataGenerator : public ImportModule
   {
   private:
-    typedef std::list<RawWayRef>                   WayList;
-    typedef WayList::iterator                      WayListPtr;
-    typedef std::list<WayListPtr>                  WayListPtrList;
-    typedef OSMSCOUT_HASHMAP<OSMId,WayListPtrList> WaysByNodeMap;
+    typedef std::list<RawWayRef>                     WayList;
+    typedef WayList::iterator                        WayListPtr;
+    typedef std::list<WayListPtr>                    WayListPtrList;
+    typedef std::unordered_map<OSMId,WayListPtrList> WaysByNodeMap;
 
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,

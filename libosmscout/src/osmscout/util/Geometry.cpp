@@ -551,7 +551,7 @@ namespace osmscout {
 
   void PolygonMerger::RemoveEliminatingEdges()
   {
-    OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
+    std::unordered_map<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
 
     // We first group edge by the sum of the from and to index. This way,
     // were can be sure, that a node(a=>b) is in the same list as a node(b=>a).
@@ -598,7 +598,7 @@ namespace osmscout {
 
     RemoveEliminatingEdges();
 
-    OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
+    std::unordered_map<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
 
     // We first group edge by the sum of the from and to index. This way,
     // were can be sure, that a node(a=>b) is in the same list as a node(b=>a).
@@ -622,7 +622,7 @@ namespace osmscout {
       polygons.back().push_back(*current);
 
       // Delete entry from the idEdgeMap
-      OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator > >::iterator mapEntry;
+      std::unordered_map<Id,std::list<std::list<Edge>::iterator > >::iterator mapEntry;
 
       mapEntry=idEdgeMap.find(current->fromIndex);
 

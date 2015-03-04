@@ -22,6 +22,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_map>
 
 #include <osmscout/CoreFeatures.h>
 
@@ -35,7 +36,6 @@
 #include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
 
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -233,12 +233,12 @@ namespace osmscout {
     };
 
   private:
-    OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
-    OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
-    NameFeatureValueReader               *nameReader;
-    RefFeatureValueReader                *refReader;
-    BridgeFeatureReader                  *bridgeReader;
-    RoundaboutFeatureReader              *roundaboutReader;
+    std::unordered_map<FileOffset,AreaRef> areaMap;
+    std::unordered_map<FileOffset,WayRef>  wayMap;
+    NameFeatureValueReader                 *nameReader;
+    RefFeatureValueReader                  *refReader;
+    BridgeFeatureReader                    *bridgeReader;
+    RoundaboutFeatureReader                *roundaboutReader;
 
   private:
     bool ResolveAllAreasAndWays(const RouteDescription& description,

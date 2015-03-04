@@ -23,7 +23,8 @@
 #include <osmscout/import/Import.h>
 
 #include <map>
-
+#include <unordered_map>
+#include <unordered_set>
 
 #include <osmscout/Area.h>
 
@@ -37,17 +38,14 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawWayIndexedDataFile.h>
 
-#include <osmscout/util/HashMap.h>
-#include <osmscout/util/HashSet.h>
-
 namespace osmscout {
 
   class RelAreaDataGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHSET<OSMId>           IdSet;
+    typedef std::unordered_set<OSMId>           IdSet;
 
-    typedef OSMSCOUT_HASHMAP<OSMId,RawWayRef> IdRawWayMap;
+    typedef std::unordered_map<OSMId,RawWayRef> IdRawWayMap;
 
   private:
     class GroupingState

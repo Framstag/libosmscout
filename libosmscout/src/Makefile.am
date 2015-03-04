@@ -18,8 +18,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/FileWriter.cpp \
                         osmscout/util/GeoBox.cpp \
                         osmscout/util/Geometry.cpp \
-                        osmscout/util/HashMap.cpp \
-                        osmscout/util/HashSet.cpp \
                         osmscout/util/Logger.cpp \
                         osmscout/util/Magnification.cpp \
                         osmscout/util/NodeUseMap.cpp \

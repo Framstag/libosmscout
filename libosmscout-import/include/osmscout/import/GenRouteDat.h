@@ -20,6 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
+#include <map>
+#include <unordered_map>
+#include <vector>
+
 #include <osmscout/NumericIndex.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/TurnRestriction.h>
@@ -33,8 +38,6 @@
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/HashMap.h>
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/NodeUseMap.h>
 
 #include <osmscout/import/Import.h>
@@ -64,7 +67,7 @@ namespace osmscout {
       size_t     index;
     };
 
-    typedef OSMSCOUT_HASHMAP<Id, FileOffset>               NodeIdOffsetMap;
+    typedef std::unordered_map<Id, FileOffset>             NodeIdOffsetMap;
     typedef std::map<Id,std::list<ObjectFileRef> >         NodeIdObjectsMap;
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
@@ -93,8 +96,8 @@ namespace osmscout {
 
     bool IsAnyRoutable(Progress& progress,
                        const std::list<ObjectFileRef>& objects,
-                       const OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap,
-                       const OSMSCOUT_HASHMAP<FileOffset,AreaRef>&  areasMap,
+                       const std::unordered_map<FileOffset,WayRef>& waysMap,
+                       const std::unordered_map<FileOffset,AreaRef>&  areasMap,
                        Vehicle vehicle) const;
 
     /**
@@ -172,7 +175,7 @@ namespace osmscout {
                   Progress& progress,
                   FileScanner& scanner,
                   const std::set<FileOffset>& fileOffsets,
-                  OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);
+                  std::unordered_map<FileOffset,WayRef>& waysMap);
 
     /**
      * Loads areas based on their file offset.
@@ -181,7 +184,7 @@ namespace osmscout {
                    Progress& progress,
                    FileScanner& scanner,
                    const std::set<FileOffset>& fileOffsets,
-                   OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap);
+                   std::unordered_map<FileOffset,AreaRef>& areasMap);
 
     /*
     uint8_t CalculateEncodedBearing(const Way& way,

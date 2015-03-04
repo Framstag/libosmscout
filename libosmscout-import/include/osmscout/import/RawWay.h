@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <unordered_map>
+
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
@@ -121,7 +123,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
-               const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
+               const std::unordered_map<TagId,std::string>& tags);
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     bool Write(const TypeConfig& typeConfig,

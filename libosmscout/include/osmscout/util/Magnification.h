@@ -23,10 +23,9 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <string>
+#include <unordered_map>
 
 #include <osmscout/system/Types.h>
-
-#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -135,8 +134,8 @@ namespace osmscout {
   class OSMSCOUT_API MagnificationConverter
   {
   private:
-    OSMSCOUT_HASHMAP<std::string,Magnification::Mag> stringToMagMap;
-    OSMSCOUT_HASHMAP<size_t,std::string>             levelToStringMap;
+    std::unordered_map<std::string,Magnification::Mag> stringToMagMap;
+    std::unordered_map<size_t,std::string>             levelToStringMap;
 
   public:
     MagnificationConverter();

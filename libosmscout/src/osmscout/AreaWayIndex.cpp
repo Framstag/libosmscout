@@ -115,7 +115,7 @@ namespace osmscout {
                                 double maxlon,
                                 double maxlat,
                                 size_t maxWayCount,
-                                OSMSCOUT_HASHSET<FileOffset>& offsets,
+                                std::unordered_set<FileOffset>& offsets,
                                 size_t currentSize,
                                 bool& sizeExceeded) const
   {
@@ -247,14 +247,11 @@ namespace osmscout {
       }
     }
 
-    bool                         sizeExceeded=false;
-    OSMSCOUT_HASHSET<FileOffset> newOffsets;
+    bool                           sizeExceeded=false;
+    std::unordered_set<FileOffset> newOffsets;
 
     offsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
-
-#if defined(OSMSCOUT_HASHSET_HAS_RESERVE)
     newOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
-#endif
 
     for (size_t i=0; i<wayTypes.size(); i++) {
       newOffsets.clear();

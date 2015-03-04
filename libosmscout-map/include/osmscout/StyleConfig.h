@@ -21,6 +21,7 @@
 */
 
 #include <limits>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/private/MapImportExport.h>
@@ -1329,10 +1330,10 @@ namespace osmscout {
     FeatureValueBuffer                         tileUnknownBuffer;      //<! Fake FeatureValueBuffer for unknown tiles
     FeatureValueBuffer                         tileCoastlineBuffer;    //<! Fake FeatureValueBuffer for coastlines
 
-    OSMSCOUT_HASHMAP<std::string,LabelProviderFactoryRef> labelFactories; //<! Map of Label Factories
+    std::unordered_map<std::string,LabelProviderFactoryRef> labelFactories; //<! Map of Label Factories
 
     // Symbol
-    OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;                //<! Map of registered symbols by name
+    std::unordered_map<std::string,SymbolRef>  symbols;
     SymbolRef                                  emptySymbol;
 
     // Node
@@ -1373,7 +1374,7 @@ namespace osmscout {
 
     std::vector<TypeSet>                       areaTypeSets;
 
-    OSMSCOUT_HASHMAP<std::string,StyleVariableRef> variables;
+    std::unordered_map<std::string,StyleVariableRef> variables;
 
 
   private:

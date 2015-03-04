@@ -439,19 +439,19 @@ namespace osmscout {
                                                 size_t targetNodeIndex,
                                                 RouteData& route)
   {
-    AreaDataFileRef                           areaDataFile(database->GetAreaDataFile());
-    WayDataFileRef                            wayDataFile(database->GetWayDataFile());
+    AreaDataFileRef                             areaDataFile(database->GetAreaDataFile());
+    WayDataFileRef                              wayDataFile(database->GetWayDataFile());
 
-    std::set<FileOffset>                      routeNodeOffsets;
-    std::set<FileOffset>                      wayOffsets;
-    std::set<FileOffset>                      areaOffsets;
+    std::set<FileOffset>                        routeNodeOffsets;
+    std::set<FileOffset>                        wayOffsets;
+    std::set<FileOffset>                        areaOffsets;
 
-    OSMSCOUT_HASHMAP<FileOffset,RouteNodeRef> routeNodeMap;
-    OSMSCOUT_HASHMAP<FileOffset,AreaRef>      areaMap;
-    OSMSCOUT_HASHMAP<FileOffset,WayRef>       wayMap;
+    std::unordered_map<FileOffset,RouteNodeRef> routeNodeMap;
+    std::unordered_map<FileOffset,AreaRef>      areaMap;
+    std::unordered_map<FileOffset,WayRef>       wayMap;
 
-    std::vector<Id>                           *ids=NULL;
-    bool                                      oneway=false;
+    std::vector<Id>                             *ids=NULL;
+    bool                                        oneway=false;
 
     if (areaDataFile.Invalid() ||
         wayDataFile.Invalid()) {
@@ -519,7 +519,7 @@ namespace osmscout {
     }
 
     if (startObject.GetType()==refArea) {
-      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(startObject.GetFileOffset());
+      std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(startObject.GetFileOffset());
 
       assert(entry!=areaMap.end());
 
@@ -527,7 +527,7 @@ namespace osmscout {
       oneway=false;
     }
     else if (startObject.GetType()==refWay) {
-      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(startObject.GetFileOffset());
+      std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(startObject.GetFileOffset());
 
       assert(entry!=wayMap.end());
 
@@ -600,7 +600,7 @@ namespace osmscout {
       //
       if (nn==nodes.end()) {
         if (targetObject.GetType()==refArea) {
-          OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(targetObject.GetFileOffset());
+          std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(targetObject.GetFileOffset());
 
           assert(entry!=areaMap.end());
 
@@ -608,7 +608,7 @@ namespace osmscout {
           oneway=false;
         }
         else if (targetObject.GetType()==refWay) {
-          OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(targetObject.GetFileOffset());
+          std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(targetObject.GetFileOffset());
 
           assert(entry!=wayMap.end());
 
@@ -648,7 +648,7 @@ namespace osmscout {
       RouteNodeRef nextNode=routeNodeMap.find((*nn)->nodeOffset)->second;
 
       if ((*nn)->object.GetType()==refArea) {
-        OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*nn)->object.GetFileOffset());
+        std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*nn)->object.GetFileOffset());
 
         assert(entry!=areaMap.end());
 
@@ -656,7 +656,7 @@ namespace osmscout {
         oneway=false;
       }
       else if ((*nn)->object.GetType()==refWay) {
-        OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find((*nn)->object.GetFileOffset());
+        std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find((*nn)->object.GetFileOffset());
 
         assert(entry!=wayMap.end());
 
@@ -725,7 +725,7 @@ namespace osmscout {
 
     nodeIds.clear();
 
-    OSMSCOUT_HASHMAP<Id,JunctionRef> junctionMap;
+    std::unordered_map<Id,JunctionRef> junctionMap;
 
     for (std::vector<JunctionRef>::const_iterator j=junctions.begin();
         j!=junctions.end();
@@ -741,7 +741,7 @@ namespace osmscout {
          routeEntry!=route.Entries().end();
          ++routeEntry) {
       if (routeEntry->GetCurrentNodeId()!=0) {
-        OSMSCOUT_HASHMAP<Id,JunctionRef>::const_iterator junction=junctionMap.find(routeEntry->GetCurrentNodeId());
+        std::unordered_map<Id,JunctionRef>::const_iterator junction=junctionMap.find(routeEntry->GetCurrentNodeId());
         if (junction!=junctionMap.end()) {
           routeEntry->SetObjects(junction->second->GetObjects());
         }
@@ -1090,10 +1090,8 @@ namespace osmscout {
 
     route.Clear();
 
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     openMap.reserve(10000);
     closeMap.reserve(300000);
-#endif
 
     if (!GetTargetNodes(profile,
                         targetObject,

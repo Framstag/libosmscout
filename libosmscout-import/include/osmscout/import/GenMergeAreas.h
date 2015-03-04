@@ -20,6 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include <osmscout/ImportFeatures.h>
 
 #include <osmscout/import/Import.h>
@@ -27,7 +30,6 @@
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/util/HashSet.h>
 #include <osmscout/util/NodeUseMap.h>
 
 namespace osmscout {
@@ -39,7 +41,7 @@ namespace osmscout {
                                    Id id) const;
 
     void EraseAreaInCache(const NodeUseMap& nodeUseMap,
-                          OSMSCOUT_HASHMAP<Id,std::list<AreaRef> >& idAreaMap,
+                          std::unordered_map<Id,std::list<AreaRef> >& idAreaMap,
                           const AreaRef& area);
 
     bool ScanAreaIds(const ImportParameter& parameter,
@@ -59,7 +61,7 @@ namespace osmscout {
     void MergeAreas(const NodeUseMap& nodeUseMap,
                     std::list<AreaRef>& areas,
                     std::list<AreaRef>& merges,
-                    OSMSCOUT_HASHSET<FileOffset>& blacklist);
+                    std::unordered_set<FileOffset>& blacklist);
 
   public:
     std::string GetDescription() const;

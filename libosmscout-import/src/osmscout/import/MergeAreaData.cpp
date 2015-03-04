@@ -21,7 +21,6 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/HashSet.h>
 
 #include <osmscout/DataFile.h>
 

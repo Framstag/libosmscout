@@ -22,16 +22,13 @@
 
 #include <osmscout/ImportFeatures.h>
 
-#include <map>
+#include <unordered_set>
 
 #include <osmscout/Area.h>
 
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/TurnRestriction.h>
-
-#include <osmscout/util/HashMap.h>
-#include <osmscout/util/HashSet.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
@@ -41,9 +38,9 @@ namespace osmscout {
   class WayAreaDataGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHSET<OSMId>                BlacklistSet;
+    typedef std::unordered_set<OSMId> BlacklistSet;
 
-    typedef std::list<RawWayRef>                   WayList;
+    typedef std::list<RawWayRef>      WayList;
 
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,

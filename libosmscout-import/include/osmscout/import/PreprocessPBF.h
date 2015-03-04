@@ -20,8 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/Types.h>
@@ -38,9 +38,9 @@ namespace osmscout {
   class PreprocessPBF : public Preprocess
   {
   private:
-    OSMSCOUT_HASHMAP<TagId,std::string> tagMap;
-    std::vector<OSMId>                  nodes;
-    std::vector<RawRelation::Member>    members;
+    std::unordered_map<TagId,std::string> tagMap;
+    std::vector<OSMId>                    nodes;
+    std::vector<RawRelation::Member>      members;
 
   private:
     void ReadNodes(const TypeConfig& typeConfig,

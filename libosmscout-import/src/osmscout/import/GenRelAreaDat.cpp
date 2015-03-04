@@ -741,9 +741,7 @@ namespace osmscout {
       return false;
     }
 
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     wayMap.reserve(ways.size());
-#endif
 
     for (std::vector<RawWayRef>::const_iterator w=ways.begin();
          w!=ways.end();

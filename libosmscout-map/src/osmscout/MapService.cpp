@@ -212,7 +212,7 @@ namespace osmscout {
       return false;
     }
 
-    OSMSCOUT_HASHMAP<FileOffset,AreaRef> cachedAreas;
+    std::unordered_map<FileOffset,AreaRef> cachedAreas;
 
     for (std::vector<AreaRef>::const_iterator area=areas.begin();
         area!=areas.end();
@@ -285,16 +285,14 @@ namespace osmscout {
 
     restOffsets.reserve(offsets.size());
 
-    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-        offset!=offsets.end();
-        ++offset) {
-      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=cachedAreas.find(*offset);
+    for (const auto& offset : offsets) {
+      auto entry=cachedAreas.find(offset);
 
       if (entry!=cachedAreas.end()) {
         areas.push_back(entry->second);
       }
       else {
-        restOffsets.push_back(*offset);
+        restOffsets.push_back(offset);
       }
     }
 
@@ -338,7 +336,7 @@ namespace osmscout {
       return false;
     }
 
-    OSMSCOUT_HASHMAP<FileOffset,WayRef> cachedWays;
+    std::unordered_map<FileOffset,WayRef> cachedWays;
 
     for (auto& way : ways) {
       if (way->GetFileOffset()!=0) {
@@ -406,16 +404,14 @@ namespace osmscout {
 
     restOffsets.reserve(offsets.size());
 
-    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-        offset!=offsets.end();
-        ++offset) {
-      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=cachedWays.find(*offset);
+    for (const auto& offset : offsets) {
+      auto entry=cachedWays.find(offset);
 
       if (entry!=cachedWays.end()) {
         ways.push_back(entry->second);
       }
       else {
-        restOffsets.push_back(*offset);
+        restOffsets.push_back(offset);
       }
     }
 

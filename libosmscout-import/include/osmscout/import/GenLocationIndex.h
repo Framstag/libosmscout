@@ -20,6 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
@@ -179,16 +182,16 @@ namespace osmscout {
                const ObjectFileRef& object);
 
     void AnalyseStringForIgnoreTokens(const std::string& string,
-                                      OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
-                                      OSMSCOUT_HASHSET<std::string>& blacklist);
+                                      std::unordered_map<std::string,size_t>& ignoreTokens,
+                                      std::unordered_set<std::string>& blacklist);
 
     void CalculateRegionNameIgnoreTokens(const Region& parent,
-                                         OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
-                                         OSMSCOUT_HASHSET<std::string>& blacklist);
+                                         std::unordered_map<std::string,size_t>& ignoreTokens,
+                                         std::unordered_set<std::string>& blacklist);
 
     void CalculateLocationNameIgnoreTokens(const Region& parent,
-                                           OSMSCOUT_HASHMAP<std::string,size_t>& ignoreTokens,
-                                           OSMSCOUT_HASHSET<std::string>& blacklist);
+                                           std::unordered_map<std::string,size_t>& ignoreTokens,
+                                           std::unordered_set<std::string>& blacklist);
 
     bool CalculateIgnoreTokens(const Region& rootRegion,
                                std::list<std::string>& regionTokens,

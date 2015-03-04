@@ -20,10 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <unordered_map>
+
 #include <osmscout/Coord.h>
 #include <osmscout/TurnRestriction.h>
 
-#include <osmscout/util/HashMap.h>
 #include <osmscout/util/FileWriter.h>
 
 #include <osmscout/import/Import.h>
@@ -34,7 +35,7 @@ namespace osmscout {
   class Preprocess : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
+    typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
 
   private:
     Progress              *progress;
@@ -81,18 +82,18 @@ namespace osmscout {
                     const GeoCoord& coord);
 
     bool IsTurnRestriction(const TypeConfig& typeConfig,
-                           const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                           const std::unordered_map<TagId,std::string>& tags,
                            TurnRestriction::Type& type) const;
 
     void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
                                 TurnRestriction::Type type);
 
     bool IsMultipolygon(const TypeConfig& typeConfig,
-                        const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                        const std::unordered_map<TagId,std::string>& tags,
                         TypeInfoRef& type);
 
     void ProcessMultipolygon(const TypeConfig& typeConfig,
-                             const OSMSCOUT_HASHMAP<TagId,std::string>& tags,
+                             const std::unordered_map<TagId,std::string>& tags,
                              const std::vector<RawRelation::Member>& members,
                              OSMId id,
                              const TypeInfoRef& type);
@@ -110,15 +111,15 @@ namespace osmscout {
     void ProcessNode(const TypeConfig& typeConfig,
                      const OSMId& id,
                      const double& lon, const double& lat,
-                     const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
+                     const std::unordered_map<TagId,std::string>& tags);
     void ProcessWay(const TypeConfig& typeConfig,
                     const OSMId& id,
                     std::vector<OSMId>& nodes,
-                    const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
+                    const std::unordered_map<TagId,std::string>& tags);
     void ProcessRelation(const TypeConfig& typeConfig,
                          const OSMId& id,
                          const std::vector<RawRelation::Member>& members,
-                         const OSMSCOUT_HASHMAP<TagId,std::string>& tags);
+                         const std::unordered_map<TagId,std::string>& tags);
 
     bool Cleanup(const TypeConfigRef& typeConfig,
                  const ImportParameter& parameter,

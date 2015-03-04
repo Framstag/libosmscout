@@ -21,6 +21,7 @@
 */
 
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/NumericIndex.h>
@@ -93,7 +94,7 @@ namespace osmscout {
                      std::vector<ValueType>& data) const;
 
     bool GetByOffset(const std::set<FileOffset>& offsets,
-                     OSMSCOUT_HASHMAP<FileOffset,ValueType>& dataMap) const;
+                     std::unordered_map<FileOffset,ValueType>& dataMap) const;
 
     bool GetByOffset(const FileOffset& offset,
                      ValueType& entry) const;
@@ -375,7 +376,7 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
-                                OSMSCOUT_HASHMAP<FileOffset,ValueType>& dataMap) const
+                                std::unordered_map<FileOffset,ValueType>& dataMap) const
   {
     std::vector<ValueType> data;
 

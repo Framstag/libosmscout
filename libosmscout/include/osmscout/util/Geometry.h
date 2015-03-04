@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <list>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -35,7 +36,6 @@
 #include <osmscout/Types.h>
 
 #include <osmscout/util/GeoBox.h>
-#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -793,10 +793,10 @@ namespace osmscout {
     };
 
   private:
-    OSMSCOUT_HASHMAP<Id,size_t>                               nodeIdIndexMap;
-    std::vector<Node>                                         nodes;
-    std::list<Edge>                                           edges;
-    OSMSCOUT_HASHMAP<Id,std::list<std::list<Edge>::iterator>> idEdgeMap;
+    std::unordered_map<Id,size_t>                               nodeIdIndexMap;
+    std::vector<Node>                                           nodes;
+    std::list<Edge>                                             edges;
+    std::unordered_map<Id,std::list<std::list<Edge>::iterator>> idEdgeMap;
 
   private:
     void RemoveEliminatingEdges();
