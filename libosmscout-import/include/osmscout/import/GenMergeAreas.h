@@ -34,6 +34,10 @@
 
 namespace osmscout {
 
+  /**
+   * Merges areas of the same type (and where the type is flag as mergable), which
+   * "touch" each other and share the same nodes (same node id).
+   */
   class MergeAreasGenerator : public ImportModule
   {
   private:
@@ -41,15 +45,57 @@ namespace osmscout {
                                    Id id) const;
 
     void EraseAreaInCache(const NodeUseMap& nodeUseMap,
-                          std::unordered_map<Id,std::list<AreaRef> >& idAreaMap,
-                          const AreaRef& area);
+                          const AreaRef& area,
+                          std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
 
-    bool ScanAreaIds(const ImportParameter& parameter,
-                     Progress& progress,
-                     const TypeConfig& typeConfig,
-                     const TypeInfoSet& mergeTypes,
-                     std::vector<NodeUseMap>& nodeUseMap);
+    /**
+     * Scan all areas for node ids that occur in more than one area. Only areas with
+     * nodes that are used in other areas, too, are candidates for merging.
+     *
+     * We only take nodes in the outer rings into account.
+     *
+     * @param parameter
+     *   ImportParameter
+     * @param progress
+     *   Progress
+     * @param typeConfig
+     *   TypeConfiguration
+     * @param mergeTypes
+     *   Set of types for which we do area merging
+     * @param nodeUseMap
+     *   special structure to track multiple use of the same node id. We have one map for each type.
+     * @return
+     *   if everything is fine, else false
+     */
+    bool ScanAreaNodeIds(const ImportParameter& parameter,
+                         Progress& progress,
+                         const TypeConfig& typeConfig,
+                         const TypeInfoSet& mergeTypes,
+                         std::vector<NodeUseMap>& nodeUseMap);
 
+    /**
+     * Load all areas which have at least one of the "used at least twice"
+     * nodes in its nodeUseMap for all given types. If the number of areas
+     * increases over a certain limit, data of some types is dropped
+     * (and reloaded in the next iteration)
+     *
+     * @param parameter
+     *   ImportParameter
+     * @param progress
+     *   Progress
+     * @param typeConfig
+     *   TypeConfiguration
+     * @param types
+     *   Set of types to load
+     * @param nodeUseMap
+     *   Array of NodeUseMaps
+     * @param scanner
+     *   File Scanner for the area data
+     * @param areas
+     *   actual area data returned
+     * @return
+     *   true, if everything is fine, else false
+     */
     bool GetAreas(const ImportParameter& parameter,
                   Progress& progress,
                   const TypeConfig& typeConfig,
@@ -58,6 +104,29 @@ namespace osmscout {
                   FileScanner& scanner,
                   std::vector<std::list<AreaRef> >& areas);
 
+    /**
+     * Index areas by their "at least used twice" nodes
+     * @param nodeUseMap
+     *    Node use map
+     * @param areas
+     *    List of areas
+     * @param idAreaMap
+     *    Resulting index structure, mammping a node id to the
+     *    list of areas that hold this node in on of their outer
+     *    rings.
+     */
+    void IndexAreasByNodeIds(const NodeUseMap& nodeUseMap,
+                             const std::list<AreaRef>& areas,
+                             std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
+
+    /**
+     * Merge area data of one type
+     *
+     * @param nodeUseMap
+     * @param areas
+     * @param merges
+     * @param blacklist
+     */
     void MergeAreas(const NodeUseMap& nodeUseMap,
                     std::list<AreaRef>& areas,
                     std::list<AreaRef>& merges,

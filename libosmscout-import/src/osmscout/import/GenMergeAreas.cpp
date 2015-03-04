@@ -52,8 +52,8 @@ namespace osmscout {
   }
 
   void MergeAreasGenerator::EraseAreaInCache(const NodeUseMap& nodeUseMap,
-                                             std::unordered_map<Id,std::list<AreaRef> >& idAreaMap,
-                                             const AreaRef& area)
+                                             const AreaRef& area,
+                                             std::unordered_map<Id,std::list<AreaRef> >& idAreaMap)
   {
     std::unordered_set<Id> nodeIds;
 
@@ -72,11 +72,11 @@ namespace osmscout {
     }
   }
 
-  bool MergeAreasGenerator::ScanAreaIds(const ImportParameter& parameter,
-                                        Progress& progress,
-                                        const TypeConfig& typeConfig,
-                                        const TypeInfoSet& mergeTypes,
-                                        std::vector<NodeUseMap>& nodeUseMap)
+  bool MergeAreasGenerator::ScanAreaNodeIds(const ImportParameter& parameter,
+                                            Progress& progress,
+                                            const TypeConfig& typeConfig,
+                                            const TypeInfoSet& mergeTypes,
+                                            std::vector<NodeUseMap>& nodeUseMap)
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
@@ -260,13 +260,10 @@ namespace osmscout {
     return true;
   }
 
-  void MergeAreasGenerator::MergeAreas(const NodeUseMap& nodeUseMap,
-                                       std::list<AreaRef>& areas,
-                                       std::list<AreaRef>& /*merges*/,
-                                       std::unordered_set<FileOffset>& blacklist)
+  void MergeAreasGenerator::IndexAreasByNodeIds(const NodeUseMap& nodeUseMap,
+                                                const std::list<AreaRef>& areas,
+                                                std::unordered_map<Id,std::list<AreaRef> >& idAreaMap)
   {
-    std::unordered_map<Id,std::list<AreaRef> > idAreaMap;
-
     for (auto& area : areas) {
       for (const auto& ring: area->rings) {
         if (ring.ring==Area::outerRingId) {
@@ -279,25 +276,38 @@ namespace osmscout {
               nodeIds.insert(id);
             }
           }
-
-          break;
         }
       }
     }
+  }
+
+  void MergeAreasGenerator::MergeAreas(const NodeUseMap& nodeUseMap,
+                                       std::list<AreaRef>& areas,
+                                       std::list<AreaRef>& merges,
+                                       std::unordered_set<FileOffset>& blacklist)
+  {
+    std::unordered_map<Id,std::list<AreaRef> > idAreaMap;
+
+    IndexAreasByNodeIds(nodeUseMap,
+                        areas,
+                        idAreaMap);
 
     while (!areas.empty()) {
       AreaRef area;
 
+      // Push a area from the list of "to be processed" areas
       area=areas.front();
       areas.pop_front();
 
+      // THis areas has already be "handled", ignore it
       if (blacklist.find(area->GetFileOffset())!=blacklist.end()) {
         continue;
       }
 
+      // Delete all mentioning of this area in the idAreaMap cache
       EraseAreaInCache(nodeUseMap,
-                       idAreaMap,
-                       area);
+                       area,
+                       idAreaMap);
       bool merged;
 
       do {
@@ -311,64 +321,70 @@ namespace osmscout {
           std::unordered_set<Id> nodeIds;
 
           for (const auto id : ring.ids) {
-            if (nodeIds.find(id)==nodeIds.end()) {
-              nodeIds.insert(id);
+            // node already occured
+            if (nodeIds.find(id)!=nodeIds.end()) {
+              continue;
+            }
 
-              if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            nodeIds.insert(id);
 
-                std::list<AreaRef>::iterator candidate=idAreaMap[id].begin();
+            if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+              continue;
+            }
 
-                while (!merged &&
-                    candidate!=idAreaMap[id].end()) {
-                  AreaRef candidateArea(*candidate);
+            std::list<AreaRef>::iterator candidate=idAreaMap[id].begin();
 
-                  size_t firstOuterRing=GetFirstOuterRingWithId(*area,
-                                                                id);
+            while (!merged &&
+                candidate!=idAreaMap[id].end()) {
+              AreaRef candidateArea(*candidate);
 
-                  size_t secondOuterRing=GetFirstOuterRingWithId(*candidateArea,
-                                                                 id);
+              size_t firstOuterRing=GetFirstOuterRingWithId(*area,
+                                                            id);
 
-                  if (area->rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {
-                    //std::cout << "CANNOT merge areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << " because of different feature values" << std::endl;
-                    candidate++;
-                    continue;
-                  }
+              size_t secondOuterRing=GetFirstOuterRingWithId(*candidateArea,
+                                                             id);
 
-                  PolygonMerger merger;
+              if (area->rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {
+                //std::cout << "CANNOT merge areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << " because of different feature values" << std::endl;
+                candidate++;
+                continue;
+              }
 
-                  merger.AddPolygon(area->rings[firstOuterRing].nodes,
-                                    area->rings[firstOuterRing].ids);
+              // Yes, we can merge!
 
-                  merger.AddPolygon(candidateArea->rings[secondOuterRing].nodes,
-                                    candidateArea->rings[secondOuterRing].ids);
+              PolygonMerger merger;
 
-                  std::list<PolygonMerger::Polygon> result;
+              merger.AddPolygon(area->rings[firstOuterRing].nodes,
+                                area->rings[firstOuterRing].ids);
 
-                  if (merger.Merge(result)) {
-                    if (result.size()==1) {
-                      std::cout << "MERGE areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
+              merger.AddPolygon(candidateArea->rings[secondOuterRing].nodes,
+                                candidateArea->rings[secondOuterRing].ids);
 
-                      area->rings[firstOuterRing].nodes=result.front().coords;
-                      area->rings[firstOuterRing].ids=result.front().ids;
+              std::list<PolygonMerger::Polygon> result;
 
-                      EraseAreaInCache(nodeUseMap,
-                                       idAreaMap,
-                                       candidateArea);
+              if (merger.Merge(result)) {
+                if (result.size()==1) {
+                  std::cout << "MERGE areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
 
-                      blacklist.insert(candidateArea->GetFileOffset());
+                  area->rings[firstOuterRing].nodes=result.front().coords;
+                  area->rings[firstOuterRing].ids=result.front().ids;
 
-                      merged=true;
-                    }
-                    else {
-                      std::cout << "COULD merge areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
-                      candidate++;
-                    }
-                  }
-                  else {
-                    std::cout << "CANNOT merge areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
-                    candidate++;
-                  }
+                  EraseAreaInCache(nodeUseMap,
+                                   candidateArea,
+                                   idAreaMap);
+
+                  blacklist.insert(candidateArea->GetFileOffset());
+
+                  merged=true;
                 }
+                else {
+                  std::cout << "COULD merge areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
+                  candidate++;
+                }
+              }
+              else {
+                std::cout << "CANNOT merge areas " << area->GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
+                candidate++;
               }
             }
           }
@@ -388,8 +404,6 @@ namespace osmscout {
                                    const ImportParameter& parameter,
                                    Progress& progress)
   {
-    return true;
-
     TypeInfoSet                    mergeTypes;
     FileScanner                    scanner;
     uint32_t                       areaCount;
@@ -406,11 +420,11 @@ namespace osmscout {
 
     nodeUseMap.resize(typeConfig->GetTypeCount());
 
-    if (!ScanAreaIds(parameter,
-                     progress,
-                     *typeConfig,
-                     mergeTypes,
-                     nodeUseMap)) {
+    if (!ScanAreaNodeIds(parameter,
+                         progress,
+                         *typeConfig,
+                         mergeTypes,
+                         nodeUseMap)) {
       return false;
     }
 
