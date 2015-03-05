@@ -276,7 +276,7 @@ void Parser::POLYGON(Symbol& symbol) {
 		polygon->AddCoord(coord); 
 		COORD(coord);
 		polygon->AddCoord(coord); 
-		while (la->kind == _number || la->kind == _double || la->kind == 30 /* "-" */) {
+		while (la->kind == _number || la->kind == _double || la->kind == 31 /* "-" */) {
 			COORD(coord);
 			polygon->AddCoord(coord); 
 		}
@@ -446,7 +446,7 @@ void Parser::UDOUBLE(double& value) {
 
 void Parser::DOUBLE(double& value) {
 		bool negate=false; 
-		if (la->kind == 30 /* "-" */) {
+		if (la->kind == 31 /* "-" */) {
 			Get();
 			negate=true; 
 		}
@@ -708,40 +708,105 @@ void Parser::UINT(size_t& value) {
 void Parser::STYLEFILTER(StyleFilter& filter) {
 		Expect(26 /* "[" */);
 		if (la->kind == 11 /* "GROUP" */) {
-			TypeInfoSet types;
-			std::string groupName;
-			
+			STYLEFILTER_GROUP(filter);
+		}
+		if (la->kind == 28 /* "FEATURE" */) {
+			STYLEFILTER_FEATURE(filter);
+		}
+		if (la->kind == 29 /* "PATH" */) {
+			STYLEFILTER_PATH(filter);
+		}
+		if (la->kind == 30 /* "TYPE" */) {
+			STYLEFILTER_TYPE(filter);
+		}
+		if (la->kind == 24 /* "MAG" */) {
+			STYLEFILTER_MAG(filter);
+		}
+		if (la->kind == 32 /* "ONEWAY" */) {
+			STYLEFILTER_ONEWAY(filter);
+		}
+		if (la->kind == 33 /* "BRIDGE" */) {
+			STYLEFILTER_BRIDGE(filter);
+		}
+		if (la->kind == 34 /* "TUNNE" */) {
+			STYLEFILTER_TUNNEL(filter);
+		}
+		if (la->kind == 35 /* "SIZE" */) {
+			STYLEFILTER_SIZE(filter);
+		}
+		Expect(27 /* "]" */);
+}
+
+void Parser::STYLEDEF(StyleFilter filter) {
+		if (la->kind == 41 /* "NODE" */) {
+			NODESTYLEDEF(filter);
+		} else if (la->kind == 46 /* "WAY" */) {
+			WAYSTYLEDEF(filter);
+		} else if (la->kind == 48 /* "AREA" */) {
+			AREASTYLEDEF(filter);
+		} else SynErr(100);
+}
+
+void Parser::STYLEFILTER_GROUP(StyleFilter& filter) {
+		TypeInfoSet types;
+		std::string groupName;
+		
+		Expect(11 /* "GROUP" */);
+		IDENT(groupName);
+		for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+		 if (type->IsInGroup(groupName)) {
+		   if (filter.HasTypes() &&
+		       !filter.HasType(type)) {
+		     continue;
+		   }
+		   
+		   types.Set(type);
+		 }
+		}
+		
+		while (la->kind == 12 /* "," */) {
+			std::string groupName; 
 			Get();
 			IDENT(groupName);
 			for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-			  if (type->IsInGroup(groupName)) {
-			    if (filter.HasTypes() &&
-			        !filter.HasType(type)) {
-			      continue;
-			    }
-			  
-			    types.Set(type);
-			  }
+			 if (types.IsSet(type) &&
+			     !type->IsInGroup(groupName)) {
+			   types.Remove(type);
+			 }
 			}
 			
-			while (la->kind == 12 /* "," */) {
-				std::string groupName; 
-				Get();
-				IDENT(groupName);
-				for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-				if (types.IsSet(type) &&
-				      !type->IsInGroup(groupName)) {
-				    types.Remove(type);
-				  }
-				}
-				
-			}
-			filter.SetTypes(types); 
 		}
-		if (la->kind == 27 /* "FEATURE" */) {
-			TypeInfoSet types;
-			std::string featureName;
-			
+		filter.SetTypes(types); 
+}
+
+void Parser::STYLEFILTER_FEATURE(StyleFilter& filter) {
+		TypeInfoSet types;
+		std::string featureName;
+		
+		Expect(28 /* "FEATURE" */);
+		IDENT(featureName);
+		FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
+		
+		if (feature.Invalid()) {
+		 std::string e="Unknown feature '"+featureName+"'";
+		
+		 SemErr(e.c_str());
+		}
+		else {
+		 for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+		    if (type->HasFeature(featureName)) {
+		      if (filter.HasTypes() &&
+		          !filter.HasType(type)) {
+		        continue;
+		      }
+		       
+		      types.Set(type);
+		    }
+		 }
+		}
+		
+		while (la->kind == 12 /* "," */) {
+			std::string featureName; 
 			Get();
 			IDENT(featureName);
 			FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
@@ -753,62 +818,61 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			}
 			else {
 			 for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-			    if (type->HasFeature(featureName)) {
-			      if (filter.HasTypes() &&
-			          !filter.HasType(type)) {
-			        continue;
-			      }
-			      
-			      types.Set(type);
+			    if (types.IsSet(type) &&
+			        !type->HasFeature(featureName)) {
+			      types.Remove(type);
 			    }
 			 }
 			}
 			
-			while (la->kind == 12 /* "," */) {
-				std::string featureName; 
-				Get();
-				IDENT(featureName);
-				FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
-				
-				if (feature.Invalid()) {
-				 std::string e="Unknown feature '"+featureName+"'";
-				
-				 SemErr(e.c_str());
-				}
-				else {
-				 for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-				    if (types.IsSet(type) &&
-				        !type->HasFeature(featureName)) {
-				      types.Remove(type);
-				    }
-				 }
-				}
-				
-			}
-			filter.SetTypes(types); 
 		}
-		if (la->kind == 28 /* "PATH" */) {
-			TypeInfoSet types;
-			
-			Get();
-			for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-			 if (type->IsPath()) {
-			   if (filter.HasTypes() &&
-			       !filter.HasType(type)) {
-			     continue;
-			   }
-			   
-			   types.Set(type);
-			 }
-			}
-			
-			filter.SetTypes(types);
-			
+		filter.SetTypes(types); 
+}
+
+void Parser::STYLEFILTER_PATH(StyleFilter& filter) {
+		TypeInfoSet types;
+		
+		Expect(29 /* "PATH" */);
+		for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+		 if (type->IsPath()) {
+		   if (filter.HasTypes() &&
+		       !filter.HasType(type)) {
+		     continue;
+		   }
+		    
+		   types.Set(type);
+		 }
 		}
-		if (la->kind == 29 /* "TYPE" */) {
-			TypeInfoSet types;
-			std::string name;
-			
+		
+		filter.SetTypes(types);
+		
+}
+
+void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
+		TypeInfoSet types;
+		std::string name;
+		
+		Expect(30 /* "TYPE" */);
+		IDENT(name);
+		TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
+		
+		if (type.Invalid()) {
+		 std::string e="Unknown type '"+name+"'";
+		
+		 SemErr(e.c_str());
+		}
+		else if (filter.HasTypes() &&
+		        !filter.HasType(type)) {
+		 std::string e="Type '"+name+"' is not included by parent filter";
+		
+		 SemErr(e.c_str());
+		}
+		else {
+		 types.Set(type);
+		}
+		
+		while (la->kind == 12 /* "," */) {
+			std::string name; 
 			Get();
 			IDENT(name);
 			TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
@@ -828,96 +892,68 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			 types.Set(type);
 			}
 			
-			while (la->kind == 12 /* "," */) {
-				std::string name; 
-				Get();
-				IDENT(name);
-				TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
-				
-				if (type.Invalid()) {
-				 std::string e="Unknown type '"+name+"'";
-				
-				 SemErr(e.c_str());
-				}
-				else if (filter.HasTypes() &&
-				        !filter.HasType(type)) {
-				 std::string e="Type '"+name+"' is not included by parent filter";
-				
-				 SemErr(e.c_str());
-				}
-				else {
-				 types.Set(type);
-				}
-				
-			}
-			filter.SetTypes(types); 
 		}
-		if (la->kind == 24 /* "MAG" */) {
-			Get();
-			if (la->kind == _ident || la->kind == _number || la->kind == _variable) {
-				Magnification magnification; 
-				MAG(magnification);
-				size_t level=magnification.GetLevel();
-				
-				if (level<filter.GetMinLevel()) {
-				std::string e="The magnification interval start is not within the parent magnification range";
-				
-				SemErr(e.c_str());
-				}
-				else {
-				 filter.SetMinLevel(level);
-				}
-				
-			}
-			Expect(30 /* "-" */);
-			if (la->kind == _ident || la->kind == _number || la->kind == _variable) {
-				Magnification magnification; 
-				MAG(magnification);
-				size_t level=magnification.GetLevel();
-				
-				if (level>filter.GetMaxLevel()) {
-				std::string e="The magnification interval end is not within the parent magnification range";
-				
-				SemErr(e.c_str());
-				}
-				else {
-				 filter.SetMaxLevel(level);
-				}
-				
-			}
-		}
-		if (la->kind == 31 /* "ONEWAY" */) {
-			Get();
-			filter.SetOneway(true);
-			
-		}
-		if (la->kind == 32 /* "BRIDGE" */) {
-			Get();
-			filter.SetBridge(true);
-			
-		}
-		if (la->kind == 33 /* "TUNNE" */) {
-			Get();
-			filter.SetTunnel(true);
-			
-		}
-		if (la->kind == 34 /* "SIZE" */) {
-			SizeCondition* sizeCondition; 
-			Get();
-			SIZECONDITION(sizeCondition);
-			filter.SetSizeCondition(sizeCondition); 
-		}
-		Expect(35 /* "]" */);
+		filter.SetTypes(types); 
 }
 
-void Parser::STYLEDEF(StyleFilter filter) {
-		if (la->kind == 41 /* "NODE" */) {
-			NODESTYLEDEF(filter);
-		} else if (la->kind == 46 /* "WAY" */) {
-			WAYSTYLEDEF(filter);
-		} else if (la->kind == 48 /* "AREA" */) {
-			AREASTYLEDEF(filter);
-		} else SynErr(100);
+void Parser::STYLEFILTER_MAG(StyleFilter& filter) {
+		Expect(24 /* "MAG" */);
+		if (la->kind == _ident || la->kind == _number || la->kind == _variable) {
+			Magnification magnification; 
+			MAG(magnification);
+			size_t level=magnification.GetLevel();
+			
+			if (level<filter.GetMinLevel()) {
+			std::string e="The magnification interval start is not within the parent magnification range";
+			
+			SemErr(e.c_str());
+			}
+			else {
+			 filter.SetMinLevel(level);
+			}
+			
+		}
+		Expect(31 /* "-" */);
+		if (la->kind == _ident || la->kind == _number || la->kind == _variable) {
+			Magnification magnification; 
+			MAG(magnification);
+			size_t level=magnification.GetLevel();
+			
+			if (level>filter.GetMaxLevel()) {
+			std::string e="The magnification interval end is not within the parent magnification range";
+			
+			SemErr(e.c_str());
+			}
+			else {
+			 filter.SetMaxLevel(level);
+			}
+			
+		}
+}
+
+void Parser::STYLEFILTER_ONEWAY(StyleFilter& filter) {
+		Expect(32 /* "ONEWAY" */);
+		filter.SetOneway(true);
+		
+}
+
+void Parser::STYLEFILTER_BRIDGE(StyleFilter& filter) {
+		Expect(33 /* "BRIDGE" */);
+		filter.SetBridge(true);
+		
+}
+
+void Parser::STYLEFILTER_TUNNEL(StyleFilter& filter) {
+		Expect(34 /* "TUNNE" */);
+		filter.SetTunnel(true);
+		
+}
+
+void Parser::STYLEFILTER_SIZE(StyleFilter& filter) {
+		SizeCondition* sizeCondition; 
+		Expect(35 /* "SIZE" */);
+		SIZECONDITION(sizeCondition);
+		filter.SetSizeCondition(sizeCondition); 
 }
 
 void Parser::SIZECONDITION(SizeCondition*& condition) {
@@ -1613,7 +1649,7 @@ void Parser::CAPSTYLE(LineStyle::CapStyle& style) {
 
 void Parser::INT(int& value) {
 		bool negate=false; 
-		if (la->kind == 30 /* "-" */) {
+		if (la->kind == 31 /* "-" */) {
 			Get();
 			negate=true; 
 		}
@@ -1800,15 +1836,15 @@ void Errors::SynErr(int line, int col, int n)
 			case 24: s = coco_string_create("\"MAG\" expected"); break;
 			case 25: s = coco_string_create("\"UINT\" expected"); break;
 			case 26: s = coco_string_create("\"[\" expected"); break;
-			case 27: s = coco_string_create("\"FEATURE\" expected"); break;
-			case 28: s = coco_string_create("\"PATH\" expected"); break;
-			case 29: s = coco_string_create("\"TYPE\" expected"); break;
-			case 30: s = coco_string_create("\"-\" expected"); break;
-			case 31: s = coco_string_create("\"ONEWAY\" expected"); break;
-			case 32: s = coco_string_create("\"BRIDGE\" expected"); break;
-			case 33: s = coco_string_create("\"TUNNEL\" expected"); break;
-			case 34: s = coco_string_create("\"SIZE\" expected"); break;
-			case 35: s = coco_string_create("\"]\" expected"); break;
+			case 27: s = coco_string_create("\"]\" expected"); break;
+			case 28: s = coco_string_create("\"FEATURE\" expected"); break;
+			case 29: s = coco_string_create("\"PATH\" expected"); break;
+			case 30: s = coco_string_create("\"TYPE\" expected"); break;
+			case 31: s = coco_string_create("\"-\" expected"); break;
+			case 32: s = coco_string_create("\"ONEWAY\" expected"); break;
+			case 33: s = coco_string_create("\"BRIDGE\" expected"); break;
+			case 34: s = coco_string_create("\"TUNNEL\" expected"); break;
+			case 35: s = coco_string_create("\"SIZE\" expected"); break;
 			case 36: s = coco_string_create("\"m\" expected"); break;
 			case 37: s = coco_string_create("\"mm\" expected"); break;
 			case 38: s = coco_string_create("\":\" expected"); break;

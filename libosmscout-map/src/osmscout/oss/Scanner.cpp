@@ -165,8 +165,8 @@ void Scanner::Init() {
 	start.set(125, 22);
 	start.set(61, 23);
 	start.set(91, 24);
-	start.set(45, 25);
-	start.set(93, 26);
+	start.set(93, 25);
+	start.set(45, 26);
 	start.set(58, 27);
 	start.set(60, 28);
 	start.set(46, 29);
@@ -187,13 +187,13 @@ void Scanner::Init() {
 	keywords.set("COLOR", 22);
 	keywords.set("MAG", 24);
 	keywords.set("UINT", 25);
-	keywords.set("FEATURE", 27);
-	keywords.set("PATH", 28);
-	keywords.set("TYPE", 29);
-	keywords.set("ONEWAY", 31);
-	keywords.set("BRIDGE", 32);
-	keywords.set("TUNNEL", 33);
-	keywords.set("SIZE", 34);
+	keywords.set("FEATURE", 28);
+	keywords.set("PATH", 29);
+	keywords.set("TYPE", 30);
+	keywords.set("ONEWAY", 32);
+	keywords.set("BRIDGE", 33);
+	keywords.set("TUNNEL", 34);
+	keywords.set("SIZE", 35);
 	keywords.set("m", 36);
 	keywords.set("mm", 37);
 	keywords.set("px", 39);
@@ -475,9 +475,9 @@ Token* Scanner::NextToken() {
 		case 24:
 			{t->kind = 26; break;}
 		case 25:
-			{t->kind = 30; break;}
+			{t->kind = 27; break;}
 		case 26:
-			{t->kind = 35; break;}
+			{t->kind = 31; break;}
 		case 27:
 			{t->kind = 38; break;}
 		case 28:

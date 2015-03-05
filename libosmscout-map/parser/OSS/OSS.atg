@@ -399,228 +399,264 @@ PRODUCTIONS
   STYLEFILTER<StyleFilter& filter>
               = "["
                    [
-                     (. 
-                       TypeInfoSet types;
-                       std::string groupName;
-                      .)
-                     "GROUP"
-                     IDENT<groupName>
-                     (.
-                       for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                          if (type->IsInGroup(groupName)) {
-                            if (filter.HasTypes() &&
-                                !filter.HasType(type)) {
-                              continue;
-                            }
-                          
-                            types.Set(type);
-                          }
-                       }
-                     .)
-                     {
-                       (. std::string groupName; .)
-                       ","
-                       IDENT<groupName>
-                       (.
-                         for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                          if (types.IsSet(type) &&
-                                !type->IsInGroup(groupName)) {
-                              types.Remove(type);
-                            }
-                         }
-                       .)
-                     }
-                     
-                     (. filter.SetTypes(types); .)
+                     STYLEFILTER_GROUP<filter>
                    ]
                    [
-                     (. 
-                       TypeInfoSet types;
-                       std::string featureName;
-                      .)
-                     "FEATURE"
-                     IDENT<featureName>
-                     (.
-                       FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
-
-                       if (feature.Invalid()) {
-                         std::string e="Unknown feature '"+featureName+"'";
-
-                         SemErr(e.c_str());
-                       }
-                       else {
-                         for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                            if (type->HasFeature(featureName)) {
-                              if (filter.HasTypes() &&
-                                  !filter.HasType(type)) {
-                                continue;
-                              }
-                              
-                              types.Set(type);
-                            }
-                         }
-                       }
-                     .)
-                     {
-                       (. std::string featureName; .)
-                       ","
-                       IDENT<featureName>
-                       (.
-                         FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
-
-                         if (feature.Invalid()) {
-                           std::string e="Unknown feature '"+featureName+"'";
-
-                           SemErr(e.c_str());
-                         }
-                         else {
-                           for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                              if (types.IsSet(type) &&
-                                  !type->HasFeature(featureName)) {
-                                types.Remove(type);
-                              }
-                           }
-                         }
-                       .)
-                     }
-                     
-                     (. filter.SetTypes(types); .)
+                     STYLEFILTER_FEATURE<filter>
                    ]
                    [
-                     (. 
-                       TypeInfoSet types;
-                      .)
-                     "PATH"
-                     (.
-                       for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                         if (type->IsPath()) {
-                           if (filter.HasTypes() &&
-                               !filter.HasType(type)) {
-                             continue;
-                           }
-                           
-                           types.Set(type);
-                         }
-                       }
-                       
-                       filter.SetTypes(types);
-                     .)
+                     STYLEFILTER_PATH<filter>
                    ]
                    [
-                     (.
-                       TypeInfoSet types;
-                       std::string name;
-                     .)
-
-                     "TYPE"
-                     IDENT<name>
-                     (.
-                       TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
-
-                       if (type.Invalid()) {
-                         std::string e="Unknown type '"+name+"'";
-
-                         SemErr(e.c_str());
-                       }
-                       else if (filter.HasTypes() &&
-                                !filter.HasType(type)) {
-                         std::string e="Type '"+name+"' is not included by parent filter";
-
-                         SemErr(e.c_str());
-                       }
-                       else {
-                         types.Set(type);
-                       }
-                     .)
-                     {
-                       (. std::string name; .)
-                       ","
-                       IDENT<name>
-                       (.
-                         TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
-
-                         if (type.Invalid()) {
-                           std::string e="Unknown type '"+name+"'";
-
-                           SemErr(e.c_str());
-                         }
-                         else if (filter.HasTypes() &&
-                                  !filter.HasType(type)) {
-                           std::string e="Type '"+name+"' is not included by parent filter";
-
-                           SemErr(e.c_str());
-                         }
-                         else {
-                           types.Set(type);
-                         }
-                       .)
-                     }
-
-                     (. filter.SetTypes(types); .)
+                     STYLEFILTER_TYPE<filter>
                    ]
                    [
-                     "MAG"
-                     [
-                       (. Magnification magnification; .)
-                       MAG<magnification>
-                       (.
-                          size_t level=magnification.GetLevel();
-
-                          if (level<filter.GetMinLevel()) {
-                           std::string e="The magnification interval start is not within the parent magnification range";
-
-                           SemErr(e.c_str());
-                          }
-                          else {
-                            filter.SetMinLevel(level);
-                          }
-                       .)
-                     ]
-                     "-"
-                     [
-                       (. Magnification magnification; .)
-                       MAG<magnification>
-                       (.
-                          size_t level=magnification.GetLevel();
-
-                          if (level>filter.GetMaxLevel()) {
-                           std::string e="The magnification interval end is not within the parent magnification range";
-
-                           SemErr(e.c_str());
-                          }
-                          else {
-                            filter.SetMaxLevel(level);
-                          }
-                       .)
-                     ]
+                     STYLEFILTER_MAG<filter>
                    ]
                    [
-                     "ONEWAY"
-                     (.
-                       filter.SetOneway(true);
-                     .)
+                     STYLEFILTER_ONEWAY<filter>
                    ]
                    [
-                     "BRIDGE"
-                     (.
-                       filter.SetBridge(true);
-                     .)
+                     STYLEFILTER_BRIDGE<filter>
                    ]
                    [
-                     "TUNNEL"
-                     (.
-                       filter.SetTunnel(true);
-                     .)
+                     STYLEFILTER_TUNNEL<filter>
                    ]
-
                    [
-                     (. SizeCondition* sizeCondition; .)
-                     "SIZE"
-                     SIZECONDITION<sizeCondition>   (. filter.SetSizeCondition(sizeCondition); .)
+                     STYLEFILTER_SIZE<filter>
                    ]
                 "]"
                 .
 
+  STYLEFILTER_GROUP<StyleFilter& filter>
+              = (. 
+                   TypeInfoSet types;
+                   std::string groupName;
+                .)
+                "GROUP"
+                IDENT<groupName>
+                (.
+                  for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                    if (type->IsInGroup(groupName)) {
+                      if (filter.HasTypes() &&
+                          !filter.HasType(type)) {
+                        continue;
+                      }
+                      
+                      types.Set(type);
+                    }
+                  }
+                .)
+                {
+                  (. std::string groupName; .)
+                  ","
+                  IDENT<groupName>
+                  (.
+                    for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                      if (types.IsSet(type) &&
+                          !type->IsInGroup(groupName)) {
+                        types.Remove(type);
+                      }
+                    }
+                  .)
+                }
+                 
+                (. filter.SetTypes(types); .)
+                .
+
+  STYLEFILTER_FEATURE<StyleFilter& filter>
+              = (. 
+                  TypeInfoSet types;
+                  std::string featureName;
+                .)
+                "FEATURE"
+                IDENT<featureName>
+                (.
+                  FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
+
+                  if (feature.Invalid()) {
+                    std::string e="Unknown feature '"+featureName+"'";
+
+                    SemErr(e.c_str());
+                  }
+                  else {
+                    for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                       if (type->HasFeature(featureName)) {
+                         if (filter.HasTypes() &&
+                             !filter.HasType(type)) {
+                           continue;
+                         }
+                          
+                         types.Set(type);
+                       }
+                    }
+                  }
+                .)
+                {
+                  (. std::string featureName; .)
+                  ","
+                  IDENT<featureName>
+                  (.
+                    FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
+
+                    if (feature.Invalid()) {
+                      std::string e="Unknown feature '"+featureName+"'";
+
+                      SemErr(e.c_str());
+                    }
+                    else {
+                      for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                         if (types.IsSet(type) &&
+                             !type->HasFeature(featureName)) {
+                           types.Remove(type);
+                         }
+                      }
+                    }
+                  .)
+                }
+                 
+                (. filter.SetTypes(types); .)
+                .
+
+  STYLEFILTER_PATH<StyleFilter& filter>
+              = (. 
+                  TypeInfoSet types;
+                 .)
+                "PATH"
+                (.
+                  for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+                    if (type->IsPath()) {
+                      if (filter.HasTypes() &&
+                          !filter.HasType(type)) {
+                        continue;
+                      }
+                       
+                      types.Set(type);
+                    }
+                  }
+                   
+                  filter.SetTypes(types);
+                .)
+                . 
+
+  STYLEFILTER_TYPE<StyleFilter& filter>
+              = (.
+                  TypeInfoSet types;
+                  std::string name;
+                .)
+
+                "TYPE"
+                IDENT<name>
+                (.
+                  TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
+
+                  if (type.Invalid()) {
+                    std::string e="Unknown type '"+name+"'";
+
+                    SemErr(e.c_str());
+                  }
+                  else if (filter.HasTypes() &&
+                           !filter.HasType(type)) {
+                    std::string e="Type '"+name+"' is not included by parent filter";
+
+                    SemErr(e.c_str());
+                  }
+                  else {
+                    types.Set(type);
+                  }
+                .)
+                {
+                  (. std::string name; .)
+                  ","
+                  IDENT<name>
+                  (.
+                    TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
+
+                    if (type.Invalid()) {
+                      std::string e="Unknown type '"+name+"'";
+
+                      SemErr(e.c_str());
+                    }
+                    else if (filter.HasTypes() &&
+                             !filter.HasType(type)) {
+                      std::string e="Type '"+name+"' is not included by parent filter";
+
+                      SemErr(e.c_str());
+                    }
+                    else {
+                      types.Set(type);
+                    }
+                  .)
+                }
+
+                (. filter.SetTypes(types); .)
+                . 
+
+  STYLEFILTER_MAG<StyleFilter& filter>
+              = "MAG"
+                [
+                  (. Magnification magnification; .)
+                  MAG<magnification>
+                  (.
+                     size_t level=magnification.GetLevel();
+
+                     if (level<filter.GetMinLevel()) {
+                      std::string e="The magnification interval start is not within the parent magnification range";
+
+                      SemErr(e.c_str());
+                     }
+                     else {
+                       filter.SetMinLevel(level);
+                     }
+                  .)
+                ]
+                "-"
+                [
+                  (. Magnification magnification; .)
+                  MAG<magnification>
+                  (.
+                     size_t level=magnification.GetLevel();
+
+                     if (level>filter.GetMaxLevel()) {
+                      std::string e="The magnification interval end is not within the parent magnification range";
+
+                      SemErr(e.c_str());
+                     }
+                     else {
+                       filter.SetMaxLevel(level);
+                     }
+                  .)
+                ]
+                .     
+
+  STYLEFILTER_ONEWAY<StyleFilter& filter>
+              = "ONEWAY"
+                (.
+                  filter.SetOneway(true);
+                .)
+                .
+
+  STYLEFILTER_BRIDGE<StyleFilter& filter>
+              = "BRIDGE"
+                (.
+                  filter.SetBridge(true);
+                .)
+                .
+
+  STYLEFILTER_TUNNEL<StyleFilter& filter>
+              = "TUNNEL"
+                (.
+                  filter.SetTunnel(true);
+                .)
+                .
+               
+  STYLEFILTER_SIZE<StyleFilter& filter>
+              = (. SizeCondition* sizeCondition; .)
+                "SIZE"
+                SIZECONDITION<sizeCondition>
+                (. filter.SetSizeCondition(sizeCondition); .)
+                .
+                
   SIZECONDITION<SizeCondition*& condition>
               = (.
                   condition=new SizeCondition();
