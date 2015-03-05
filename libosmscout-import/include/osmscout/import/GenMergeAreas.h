@@ -119,6 +119,11 @@ namespace osmscout {
                              const std::list<AreaRef>& areas,
                              std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
 
+    bool TryMerge(const NodeUseMap& nodeUseMap,
+                  Area& area,
+                  std::unordered_map<Id,std::list<AreaRef> >& idAreaMap,
+                  std::unordered_set<FileOffset>& blacklist);
+
     /**
      * Merge area data of one type
      *
