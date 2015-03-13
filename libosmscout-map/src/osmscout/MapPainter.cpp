@@ -1029,13 +1029,12 @@ namespace osmscout {
 
       for (size_t m=0; m<area->rings.size(); m++) {
         if (area->rings[m].ring==Area::masterRingId) {
-          double lat,lon;
-          double x,y;
+          GeoCoord center;
+          double   x,y;
 
-          area->GetCenter(lat,lon);
+          area->GetCenter(center);
 
-          projection.GeoToPixel(lon,
-                                lat,
+          projection.GeoToPixel(center,
                                 x,y);
 
           DrawAreaLabel(styleConfig,
@@ -1046,13 +1045,12 @@ namespace osmscout {
                         x,y);
         }
         else {
-          double lat,lon;
-          double x,y;
+          GeoCoord center;
+          double   x,y;
 
-          area->rings[m].GetCenter(lat,lon);
+          area->rings[m].GetCenter(center);
 
-          projection.GeoToPixel(lon,
-                                lat,
+          projection.GeoToPixel(center,
                                 x,y);
 
           DrawAreaLabel(styleConfig,

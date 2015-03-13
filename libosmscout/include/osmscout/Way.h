@@ -108,9 +108,6 @@ namespace osmscout {
                                maxLat);
     }
 
-    bool GetCenter(double& lat,
-                   double& lon) const;
-
     bool GetCenter(GeoCoord& center) const;
 
     void GetCoordinates(size_t nodeIndex,

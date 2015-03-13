@@ -212,6 +212,12 @@ namespace osmscout {
                             double& x, double& y) const = 0;
 
     /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual bool GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const = 0;
+
+    /**
      * Returns the bounding box of the area covered
      */
     virtual bool GetDimensions(double& lonMin, double& latMin,
@@ -380,6 +386,9 @@ namespace osmscout {
     bool GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
+    bool GeoToPixel(const GeoCoord& coord,
+                    double& x, double& y) const;
+
     bool GetDimensions(double& lonMin, double& latMin,
                        double& lonMax, double& latMax) const;
 
@@ -533,6 +542,9 @@ namespace osmscout {
                     double& lon, double& lat) const;
 
     bool GeoToPixel(double lon, double lat,
+                    double& x, double& y) const;
+
+    bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     bool GetDimensions(double& lonMin, double& latMin,

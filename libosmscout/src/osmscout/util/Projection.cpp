@@ -221,13 +221,37 @@ namespace osmscout {
   }
 
   bool MercatorProjection::GeoToPixel(double lon, double lat,
-                                       double& x, double& y) const
+                                      double& x, double& y) const
   {
     assert(valid);
 
     // Screen coordinate relative to center of image
     x=(lon-this->lon)*scaleGradtorad;
     y=(atanh(sin(lat*gradtorad))-latOffset)*scale;
+
+    if (angle!=0.0) {
+      double xn=x*angleNegCos-y*angleNegSin;
+      double yn=x*angleNegSin+y*angleNegCos;
+
+      x=xn;
+      y=yn;
+    }
+
+    // Transform to canvas coordinate
+    y=height/2-y;
+    x+=width/2;
+
+    return true;
+  }
+
+  bool MercatorProjection::GeoToPixel(const GeoCoord& coord,
+                                      double& x, double& y) const
+  {
+    assert(valid);
+
+    // Screen coordinate relative to center of image
+    x=(coord.GetLon()-this->lon)*scaleGradtorad;
+    y=(atanh(sin(coord.GetLat()*gradtorad))-latOffset)*scale;
 
     if (angle!=0.0) {
       double xn=x*angleNegCos-y*angleNegSin;
@@ -418,6 +442,17 @@ namespace osmscout {
       return true;
     }
 
+    bool TileProjection::GeoToPixel(const GeoCoord& coord,
+                                    double& x, double& y) const
+    {
+      assert(valid);
+
+      x=coord.GetLon()*scaleGradtorad-lonOffset;
+      y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
+
+      return true;
+    }
+
     //this basically transforms 2 coordinates in 1 call
     bool TileProjection::GeoToPixel(const BatchTransformer& transformData) const
     {
@@ -443,6 +478,17 @@ namespace osmscout {
 
       x=lon*scaleGradtorad-lonOffset;
       y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
+
+      return true;
+    }
+
+    bool TileProjection::GeoToPixel(const GeoCoord& coord,
+                                    double& x, double& y) const
+    {
+      assert(valid);
+
+      x=coord.GetLon()*scaleGradtorad-lonOffset;
+      y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
 
       return true;
     }

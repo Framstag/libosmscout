@@ -28,30 +28,6 @@
 
 namespace osmscout {
 
-  bool Way::GetCenter(double& lat, double& lon) const
-  {
-    if (nodes.empty()) {
-      return false;
-    }
-
-    double minLat=nodes[0].GetLat();
-    double minLon=nodes[0].GetLon();
-    double maxLat=nodes[0].GetLat();
-    double maxLon=nodes[0].GetLon();
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLat=std::min(minLat,nodes[i].GetLat());
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
-    }
-
-    lat=minLat+(maxLat-minLat)/2;
-    lon=minLon+(maxLon-minLon)/2;
-
-    return true;
-  }
-
   bool Way::GetCenter(GeoCoord& center) const
   {
     if (nodes.empty()) {
