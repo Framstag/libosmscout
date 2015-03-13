@@ -150,16 +150,12 @@ void DBThread::Initialize()
 
   DatabaseLoadedResponse response;
 
-  if (!database->GetBoundingBox(response.minLat,
-                               response.minLon,
-                               response.maxLat,
-                               response.maxLon)) {
+  if (!database->GetBoundingBox(response.boundingBox)) {
     std::cerr << "Cannot read initial bounding box" << std::endl;
     return;
   }
 
-  std::cout << "Initial bounding box [";
-  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
+  std::cout << "Initial bounding box " << response.boundingBox.GetDisplayText() << std::endl;
 
   emit InitialisationFinished(response);
 }

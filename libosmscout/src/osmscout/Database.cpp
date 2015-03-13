@@ -139,10 +139,11 @@ namespace osmscout {
       return false;
     }
 
-    if (!scanner.ReadCoord(minCoord) ||
-        !scanner.ReadCoord(maxCoord)) {
+    if (!scanner.ReadBox(boundingBox)) {
       std::cerr << "Error while reading from '" << file << "'" << std::endl;
     }
+
+    std::cout << "BoundingBox: " << boundingBox.GetDisplayText() << std::endl;
 
     if (scanner.HasError() || !scanner.Close()) {
       std::cerr << "Error while reading/closing '" << file << "'" << std::endl;
@@ -442,17 +443,13 @@ namespace osmscout {
     return optimizeWaysLowZoom;
   }
 
-  bool Database::GetBoundingBox(double& minLat,double& minLon,
-                                double& maxLat,double& maxLon) const
+  bool Database::GetBoundingBox(GeoBox& boundingBox) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    minLat=minCoord.GetLat();
-    minLon=minCoord.GetLon();
-    maxLat=maxCoord.GetLat();
-    maxLon=maxCoord.GetLon();
+    boundingBox=this->boundingBox;
 
     return true;
   }

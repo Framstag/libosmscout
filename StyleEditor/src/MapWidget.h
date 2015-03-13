@@ -22,6 +22,8 @@
 
 #include <QQuickPaintedItem>
 
+#include <osmscout/GeoCoord.h>
+
 #include "DBThread.h"
 #include "SearchLocationModel.h"
 
@@ -35,8 +37,7 @@ class MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString stylesheetFilename READ stylesheetFilename NOTIFY stylesheetFilenameChanged)
 
 private:
-  double                  lon;
-  double                  lat;
+  osmscout::GeoCoord      center;
   osmscout::Magnification magnification;
 
   // Drag and drop
@@ -79,12 +80,12 @@ public:
 
   inline double GetLat() const
   {
-      return lat;
+      return center.GetLat();
   }
 
   inline double GetLon() const
   {
-      return lon;
+      return center.GetLon();
   }
 
   inline double zoomLevel() const

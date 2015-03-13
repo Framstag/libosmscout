@@ -51,10 +51,7 @@ Q_DECLARE_METATYPE(RenderMapRequest)
 
 struct DatabaseLoadedResponse
 {
-  double minLat;
-  double minLon;
-  double maxLat;
-  double maxLon;
+    osmscout::GeoBox boundingBox;
 };
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)

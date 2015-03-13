@@ -24,6 +24,8 @@
 
 #include <osmscout/system/SSEMathPublic.h>
 
+#include <osmscout/GeoCoord.h>
+
 #include <osmscout/util/Magnification.h>
 
 namespace osmscout {
@@ -116,6 +118,8 @@ namespace osmscout {
     virtual ~Projection();
 
     virtual bool CanBatch() const = 0;
+
+    virtual GeoCoord GetCenter() const = 0;
 
     /**
      * Returns longitude coordinate of the region center.
@@ -295,6 +299,11 @@ namespace osmscout {
     inline bool CanBatch() const
     {
       return false;
+    }
+
+    inline GeoCoord GetCenter() const
+    {
+      return GeoCoord(lat,lon);
     }
 
     inline double GetLon() const
@@ -482,6 +491,11 @@ namespace osmscout {
     inline double GetLat() const
     {
       return lat;
+    }
+
+    inline GeoCoord GetCenter() const
+    {
+      return GeoCoord(lat,lon);
     }
 
     inline double GetAngle() const

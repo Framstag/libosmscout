@@ -32,6 +32,8 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/GeoBox.h>
+
 #if defined(__WIN32__) || defined(WIN32)
   #include <windows.h>
   #undef max
@@ -158,6 +160,8 @@ namespace osmscout {
     bool Read(std::vector<GeoCoord>& nodes);
     bool Read(std::vector<GeoCoord>& nodes,
               size_t count);
+
+    bool ReadBox(GeoBox& box);
 
     bool ReadTypeId(TypeId& id,
                     uint8_t maxBytes);

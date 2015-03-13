@@ -49,6 +49,7 @@
 #include <osmscout/Route.h>
 
 #include <osmscout/util/Breaker.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Reference.h>
@@ -130,8 +131,7 @@ namespace osmscout {
 
     TypeConfigRef                   typeConfig;           //! Type config for the currently opened map
 
-    GeoCoord                        minCoord;             //! Bounding box
-    GeoCoord                        maxCoord;             //! Bounding box
+    GeoBox                          boundingBox;          //! Bounding box in which data is available
 
     mutable NodeDataFileRef         nodeDataFile;         //! Cached access to the 'nodes.dat' file
     mutable AreaDataFileRef         areaDataFile;         //! Cached access to the 'areas.dat' file
@@ -176,8 +176,7 @@ namespace osmscout {
     OptimizeAreasLowZoomRef GetOptimizeAreasLowZoom() const;
     OptimizeWaysLowZoomRef GetOptimizeWaysLowZoom() const;
 
-    bool GetBoundingBox(double& minLat,double& minLon,
-                        double& maxLat,double& maxLon) const;
+    bool GetBoundingBox(GeoBox& boundingBox) const;
 
     bool GetNodeByOffset(const FileOffset& offset,
                          NodeRef& node) const;

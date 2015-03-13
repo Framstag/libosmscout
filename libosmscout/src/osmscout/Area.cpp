@@ -63,6 +63,42 @@ namespace osmscout {
     return true;
   }
 
+  bool Area::Ring::GetCenter(GeoCoord& center) const
+  {
+    double minLat=0.0;
+    double minLon=0.0;
+    double maxLat=0.0;
+    double maxLon=0.0;
+
+    bool start=true;
+
+    for (size_t j=0; j<nodes.size(); j++) {
+      if (start) {
+        minLat=nodes[j].GetLat();
+        minLon=nodes[j].GetLon();
+        maxLat=nodes[j].GetLat();
+        maxLon=nodes[j].GetLon();
+
+        start=false;
+      }
+      else {
+        minLat=std::min(minLat,nodes[j].GetLat());
+        minLon=std::min(minLon,nodes[j].GetLon());
+        maxLat=std::max(maxLat,nodes[j].GetLat());
+        maxLon=std::max(maxLon,nodes[j].GetLon());
+      }
+    }
+
+    if (start) {
+      return false;
+    }
+
+    center.Set(minLat+(maxLat-minLat)/2,
+               minLon+(maxLon-minLon)/2);
+
+    return true;
+  }
+
   void Area::Ring::GetBoundingBox(double& minLon,
                                   double& maxLon,
                                   double& minLat,
@@ -123,6 +159,50 @@ namespace osmscout {
 
     lat=minLat+(maxLat-minLat)/2;
     lon=minLon+(maxLon-minLon)/2;
+
+    return true;
+  }
+
+  bool Area::GetCenter(GeoCoord& center) const
+  {
+    assert(!rings.empty());
+
+    double minLat=0.0;
+    double minLon=0.0;
+    double maxLat=0.0;
+    double maxLon=0.0;
+
+    bool start=true;
+
+    for (size_t i=0; i<rings.size(); i++) {
+      if (rings[i].ring==Area::outerRingId) {
+        for (size_t j=0; j<rings[i].nodes.size(); j++) {
+          if (start) {
+            minLat=rings[i].nodes[j].GetLat();
+            maxLat=minLat;
+            minLon=rings[i].nodes[j].GetLon();
+            maxLon=minLon;
+
+            start=false;
+          }
+          else {
+            minLat=std::min(minLat,rings[i].nodes[j].GetLat());
+            minLon=std::min(minLon,rings[i].nodes[j].GetLon());
+            maxLat=std::max(maxLat,rings[i].nodes[j].GetLat());
+            maxLon=std::max(maxLon,rings[i].nodes[j].GetLon());
+          }
+        }
+      }
+    }
+
+    assert(!start);
+
+    if (start) {
+      return false;
+    }
+
+    center.Set(minLat+(maxLat-minLat)/2,
+               minLon+(maxLon-minLon)/2);
 
     return true;
   }

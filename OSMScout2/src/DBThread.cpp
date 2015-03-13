@@ -185,10 +185,7 @@ void DBThread::Initialize()
 
   DatabaseLoadedResponse response;
 
-  if (!database->GetBoundingBox(response.minLat,
-                                response.minLon,
-                                response.maxLat,
-                                response.maxLon)) {
+  if (!database->GetBoundingBox(response.boundingBox)) {
     qDebug() << "Cannot read initial bounding box";
     return;
   }

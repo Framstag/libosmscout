@@ -2353,6 +2353,26 @@ namespace osmscout {
     return !HasError();
   }
 
+  bool FileScanner::ReadBox(GeoBox& box)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    GeoCoord minCoord;
+    GeoCoord maxCoord;
+
+    if (!(ReadCoord(minCoord) &&
+          ReadCoord(maxCoord))) {
+      return false;
+    }
+
+    box.Set(minCoord,
+            maxCoord);
+
+    return !HasError();
+  }
+
   bool FileScanner::ReadTypeId(TypeId& id,
                                uint8_t maxBytes)
   {

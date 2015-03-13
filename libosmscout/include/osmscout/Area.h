@@ -94,6 +94,8 @@ namespace osmscout {
       bool GetCenter(double& lat,
                      double& lon) const;
 
+      bool GetCenter(GeoCoord& center) const;
+
       void GetBoundingBox(double& minLon,
                           double& maxLon,
                           double& minLat,
@@ -148,6 +150,8 @@ namespace osmscout {
 
     bool GetCenter(double& lat,
                    double& lon) const;
+    bool GetCenter(GeoCoord& center) const;
+
     void GetBoundingBox(double& minLon,
                         double& maxLon,
                         double& minLat,

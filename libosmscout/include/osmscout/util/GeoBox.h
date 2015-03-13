@@ -59,6 +59,12 @@ namespace osmscout {
            const GeoCoord& coordB);
 
     /**
+     * Assign a new rectangular area bases an two coordinates defining the bounds.
+     */
+    void Set(const GeoCoord& coordA,
+             const GeoCoord& coordB);
+
+    /**
      * Returns true, if the GeoBox instance is valid. This means there were
      * values assigned to the box. While being valid, the rectangle spanned by
      * the coordinate might still be degraded.
@@ -83,6 +89,8 @@ namespace osmscout {
     {
       return maxCoord;
     }
+
+    GeoCoord GetCenter() const;
 
     /**
      * Return the minimum latitude of the GeBox.
@@ -114,6 +122,22 @@ namespace osmscout {
     inline double GetMaxLon() const
     {
       return maxCoord.GetLon();
+    }
+
+    /**
+     * Returns the width of the bounding box (maxLon-minLon).
+     */
+    inline double GetWidth() const
+    {
+      return maxCoord.GetLon()-minCoord.GetLon();
+    }
+
+    /**
+     * Returns the height of the bounding box (maxLat-minLat).
+     */
+    inline double GetHeight() const
+    {
+      return maxCoord.GetLat()-minCoord.GetLat();
     }
 
     /**

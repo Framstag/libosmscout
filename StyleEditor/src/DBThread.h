@@ -36,6 +36,8 @@
 
 #include <osmscout/util/Breaker.h>
 
+#include <osmscout/util/GeoBox.h>
+
 #include "Settings.h"
 
 struct RenderMapRequest
@@ -51,10 +53,7 @@ Q_DECLARE_METATYPE(RenderMapRequest)
 
 struct DatabaseLoadedResponse
 {
-  double minLat;
-  double minLon;
-  double maxLat;
-  double maxLon;
+    osmscout::GeoBox boundingBox;
 };
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)

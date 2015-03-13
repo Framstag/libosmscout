@@ -53,11 +53,26 @@ namespace osmscout {
     // no code
   }
 
+  void GeoBox::Set(const GeoCoord& coordA,
+                   const GeoCoord& coordB)
+  {
+    minCoord.Set(std::min(coordA.GetLat(),coordB.GetLat()),
+                 std::min(coordA.GetLon(),coordB.GetLon()));
+    maxCoord.Set(std::max(coordA.GetLat(),coordB.GetLat()),
+                 std::max(coordA.GetLon(),coordB.GetLon()));
+  }
+
+  GeoCoord GeoBox::GetCenter() const
+  {
+    return GeoCoord((minCoord.GetLat()+maxCoord.GetLat())/2,
+                    (minCoord.GetLon()+maxCoord.GetLon())/2);
+  }
+
   /**
    * Return a string representation of the coordinate value in a human readable format.
    */
   std::string GeoBox::GetDisplayText() const
   {
-    return "[" + minCoord.GetDisplayText() + " - " + maxCoord.GetDisplayText();
+    return "[" + minCoord.GetDisplayText() + " - " + maxCoord.GetDisplayText() + "]";
   }
 }
