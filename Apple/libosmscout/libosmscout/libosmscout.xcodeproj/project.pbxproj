@@ -150,8 +150,6 @@
 		F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55A3ACD1A45E57A0010005B /* Tiling.cpp */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
-		F5A66AC91A46F5E7007AD752 /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
-		F5A66ACA1A46F5E8007AD752 /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -722,7 +720,6 @@
 				F54DAA611815DAFB00625DDA /* Parser.cpp in Sources */,
 				F54C1E5218F480AC008C5EB3 /* LocationService.cpp in Sources */,
 				F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */,
-				F5A66AC91A46F5E7007AD752 /* TextSearchIndex.cpp in Sources */,
 				F51E3F19161A5FEC00D51926 /* TypeConfig.cpp in Sources */,
 				F51E3F1B161A5FEC00D51926 /* Types.cpp in Sources */,
 				F55A3ACE1A45E57A0010005B /* Tiling.cpp in Sources */,
@@ -793,7 +790,6 @@
 				F54C1E5918F583BA008C5EB3 /* LocationService.cpp in Sources */,
 				F53BD1BF1638867D006C7AE1 /* Types.cpp in Sources */,
 				F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */,
-				F5A66ACA1A46F5E8007AD752 /* TextSearchIndex.cpp in Sources */,
 				F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */,
 				F53BD1C216388682006C7AE1 /* Way.cpp in Sources */,
 				F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */,

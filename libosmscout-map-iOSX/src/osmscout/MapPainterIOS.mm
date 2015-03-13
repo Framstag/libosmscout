@@ -215,6 +215,23 @@ namespace osmscout {
         return false;
     }
     
+    /**
+     * Returns the height of the font.
+     */
+    void MapPainterIOS::GetFontHeight(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      double fontSize,
+                                      double& height){
+        Font *font = GetFont(projection,parameter,fontSize);
+#if TARGET_OS_IPHONE
+        CGSize size = [@"Aj" sizeWithFont:font];
+#else
+        NSRect stringBounds = [@"Aj" boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+        CGSize size = stringBounds.size;
+#endif
+        height = size.height;
+    }
+    
     /*
      * GetTextDimension()
      */

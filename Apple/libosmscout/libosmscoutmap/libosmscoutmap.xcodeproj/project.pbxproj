@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E57A2E201AB07734009B323C /* MapParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57A2E1F1AB07734009B323C /* MapParameter.cpp */; };
+		E57A2E211AB07739009B323C /* MapParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57A2E1F1AB07734009B323C /* MapParameter.cpp */; };
+		E57A2E231AB0774D009B323C /* MapParameter.h in Headers */ = {isa = PBXBuildFile; fileRef = E57A2E221AB0774D009B323C /* MapParameter.h */; };
 		F51E3F85161A651F00D51926 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F51E3F84161A651F00D51926 /* Foundation.framework */; };
 		F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F94161A658300D51926 /* MapPainter.cpp */; };
 		F51E3F9E161A658300D51926 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F99161A658300D51926 /* Parser.cpp */; };
@@ -35,6 +38,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E57A2E1F1AB07734009B323C /* MapParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapParameter.cpp; path = "../../../../libosmscout-map/src/osmscout/MapParameter.cpp"; sourceTree = "<group>"; };
+		E57A2E221AB0774D009B323C /* MapParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapParameter.h; sourceTree = "<group>"; };
 		F51E3F81161A651F00D51926 /* libosmscoutmap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscoutmap.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51E3F84161A651F00D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F51E3F94161A658300D51926 /* MapPainter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapPainter.cpp; path = "../../../../libosmscout-map/src/osmscout/MapPainter.cpp"; sourceTree = "<group>"; };
@@ -117,6 +122,7 @@
 		F51E3F92161A653C00D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				E57A2E1F1AB07734009B323C /* MapParameter.cpp */,
 				F5A66ACB1A4A0782007AD752 /* MapService.cpp */,
 				F51E3F94161A658300D51926 /* MapPainter.cpp */,
 				F51E3F95161A658300D51926 /* oss */,
@@ -146,6 +152,7 @@
 		F51E3FA2161A65C000D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				E57A2E221AB0774D009B323C /* MapParameter.h */,
 				F5A66ACE1A4A07A1007AD752 /* MapService.h */,
 				F51E3FA3161A65C000D51926 /* MapFeatures.h */,
 				F51E3FA5161A65C000D51926 /* MapPainter.h */,
@@ -193,6 +200,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5A66ACF1A4A07A1007AD752 /* MapService.h in Headers */,
+				E57A2E231AB0774D009B323C /* MapParameter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +275,7 @@
 			files = (
 				F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */,
 				F5A66ACC1A4A0782007AD752 /* MapService.cpp in Sources */,
+				E57A2E201AB07734009B323C /* MapParameter.cpp in Sources */,
 				F51E3F9E161A658300D51926 /* Parser.cpp in Sources */,
 				F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */,
 				F51E3FA0161A658300D51926 /* StyleConfig.cpp in Sources */,
@@ -279,6 +288,7 @@
 			files = (
 				F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */,
 				F5A66ACD1A4A0782007AD752 /* MapService.cpp in Sources */,
+				E57A2E211AB07739009B323C /* MapParameter.cpp in Sources */,
 				F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */,
 				F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */,
 				F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */,
