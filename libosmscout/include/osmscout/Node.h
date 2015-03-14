@@ -65,16 +65,6 @@ namespace osmscout {
       return coords;
     }
 
-    inline double GetLat() const
-    {
-      return coords.GetLat();
-    }
-
-    inline double GetLon() const
-    {
-      return coords.GetLon();
-    }
-
     inline size_t GetFeatureCount() const
     {
       return featureValueBuffer.GetType()->GetFeatureCount();

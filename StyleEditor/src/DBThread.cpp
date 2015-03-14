@@ -612,8 +612,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
       return false;
     }
 
-    return router->GetClosestRoutableNode(node->GetLat(),
-                                          node->GetLon(),
+    return router->GetClosestRoutableNode(node->GetCoords().GetLat(),
+                                          node->GetCoords().GetLon(),
                                           vehicle,
                                           radius,
                                           object,

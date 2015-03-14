@@ -439,8 +439,8 @@ static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
 
   std::cout << std::endl;
 
-  std::cout << "  lat: " << node->GetLat() << std::endl;
-  std::cout << "  lon: " << node->GetLon() << std::endl;
+  std::cout << "  lat: " << node->GetCoords().GetLat() << std::endl;
+  std::cout << "  lon: " << node->GetCoords().GetLon() << std::endl;
 
   std::cout << "}" << std::endl;
 

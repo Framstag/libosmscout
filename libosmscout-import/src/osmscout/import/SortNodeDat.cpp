@@ -161,8 +161,8 @@ namespace osmscout {
                                                    double& maxLat,
                                                    double& minLon)
   {
-    maxLat=data.GetLat();
-    minLon=data.GetLon();
+    maxLat=data.GetCoords().GetLat();
+    minLon=data.GetCoords().GetLon();
   }
 
   SortNodeDataGenerator::SortNodeDataGenerator()

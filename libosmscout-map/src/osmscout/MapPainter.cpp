@@ -1085,8 +1085,8 @@ namespace osmscout {
 
     Transform(projection,
               parameter,
-              node->GetLon(),
-              node->GetLat(),
+              node->GetCoords().GetLon(),
+              node->GetCoords().GetLat(),
               x,y);
 
     LayoutPointLabels(projection,
