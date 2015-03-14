@@ -28,6 +28,7 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/String.h>
 
 #include <limits>
@@ -230,12 +231,9 @@ namespace osmscout {
 
           areas++;
 
-          double minLon;
-          double maxLon;
-          double minLat;
-          double maxLat;
+          GeoBox boundingBox;
 
-          area.GetBoundingBox(minLon,maxLon,minLat,maxLat);
+          area.GetBoundingBox(boundingBox);
 
           //
           // Calculate highest level where the bounding box completely
@@ -245,8 +243,8 @@ namespace osmscout {
 
           size_t level=parameter.GetAreaAreaIndexMaxMag();
           while (true) {
-            if (maxLon-minLon<=cellWidth[level] &&
-                maxLat-minLat<=cellHeight[level]) {
+            if (boundingBox.GetWidth()<=cellWidth[level] &&
+                boundingBox.GetHeight()<=cellHeight[level]) {
               break;
             }
 
@@ -259,22 +257,13 @@ namespace osmscout {
 
           if (level==l) {
             //
-            // Renormalized coordinate space (everything is >=0)
-            //
-
-            minLon+=180;
-            maxLon+=180;
-            minLat+=90;
-            maxLat+=90;
-
-            //
             // Calculate minimum and maximum tile ids that are covered
             // by the area
             //
-            uint32_t minyc=(uint32_t)floor(minLat/cellHeight[level]);
-            uint32_t maxyc=(uint32_t)ceil(maxLat/cellHeight[level]);
-            uint32_t minxc=(uint32_t)floor(minLon/cellWidth[level]);
-            uint32_t maxxc=(uint32_t)ceil(maxLon/cellWidth[level]);
+            uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight[level]);
+            uint32_t maxyc=(uint32_t)ceil((boundingBox.GetMaxLat()+90.0)/cellHeight[level]);
+            uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth[level]);
+            uint32_t maxxc=(uint32_t)ceil((boundingBox.GetMaxLon()+180.0)/cellWidth[level]);
 
             Entry entry;
 

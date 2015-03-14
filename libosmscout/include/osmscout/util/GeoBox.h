@@ -59,17 +59,32 @@ namespace osmscout {
            const GeoCoord& coordB);
 
     /**
+     * Invalidate the bounding Box
+     */
+    inline void Invalidate()
+    {
+      valid=false;
+      minCoord.Set(0.0,0.0);
+      maxCoord.Set(0.0,0.0);
+    }
+
+    /**
      * Assign a new rectangular area bases an two coordinates defining the bounds.
      */
     void Set(const GeoCoord& coordA,
              const GeoCoord& coordB);
 
     /**
+     * Resize the bounding box to include the original bounding box and the given bounding box
+     */
+    void Include(const GeoBox& other);
+
+    /**
      * Returns true, if the GeoBox instance is valid. This means there were
      * values assigned to the box. While being valid, the rectangle spanned by
      * the coordinate might still be degraded.
      */
-    inline bool IsValid()
+    inline bool IsValid() const
     {
       return valid;
     }

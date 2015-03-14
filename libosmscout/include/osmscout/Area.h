@@ -26,6 +26,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
@@ -93,10 +94,7 @@ namespace osmscout {
 
       bool GetCenter(GeoCoord& center) const;
 
-      void GetBoundingBox(double& minLon,
-                          double& maxLon,
-                          double& minLat,
-                          double& maxLat) const;
+      void GetBoundingBox(GeoBox& boundingBox) const;
 
       inline void SetType(const TypeInfoRef& type)
       {
@@ -147,10 +145,7 @@ namespace osmscout {
 
     bool GetCenter(GeoCoord& center) const;
 
-    void GetBoundingBox(double& minLon,
-                        double& maxLon,
-                        double& minLat,
-                        double& maxLat) const;
+    void GetBoundingBox(GeoBox& boundingBox) const;
 
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);

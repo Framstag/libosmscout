@@ -26,6 +26,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
@@ -270,23 +271,19 @@ namespace osmscout
           a!=areas.end();
           ++a) {
         AreaRef area=*a;
-        // Count number of entries per current type and coordinate
-        double minLon;
-        double maxLon;
-        double minLat;
-        double maxLat;
+        GeoBox  boundingBox;
 
-        area->GetBoundingBox(minLon,maxLon,minLat,maxLat);
+        area->GetBoundingBox(boundingBox);
 
         //
         // Calculate minimum and maximum tile ids that are covered
         // by the way
         // Renormated coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
+        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
+        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
+        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
@@ -383,28 +380,25 @@ namespace osmscout
     for (std::list<AreaRef>::const_iterator a=areas.begin();
         a!=areas.end();
         a++) {
-      AreaRef                         area(*a);
-      double                          minLon;
-      double                          maxLon;
-      double                          minLat;
-      double                          maxLat;
+      AreaRef                                 area(*a);
+      GeoBox                                  boundingBox;
       FileOffsetFileOffsetMap::const_iterator offset=offsets.find(area->GetFileOffset());
 
       if (offset==offsets.end()) {
         continue;
       }
 
-      area->GetBoundingBox(minLon,maxLon,minLat,maxLat);
+      area->GetBoundingBox(boundingBox);
 
       //
       // Calculate minimum and maximum tile ids that are covered
       // by the way
       // Renormated coordinate space (everything is >=0)
       //
-      uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
-      uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
-      uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
-      uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
+      uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
+      uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
+      uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
+      uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
 
       for (uint32_t y=minyc; y<=maxyc; y++) {
         for (uint32_t x=minxc; x<=maxxc; x++) {

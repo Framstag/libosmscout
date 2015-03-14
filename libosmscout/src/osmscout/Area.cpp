@@ -63,17 +63,14 @@ namespace osmscout {
     return true;
   }
 
-  void Area::Ring::GetBoundingBox(double& minLon,
-                                  double& maxLon,
-                                  double& minLat,
-                                  double& maxLat) const
+  void Area::Ring::GetBoundingBox(GeoBox& boundingBox) const
   {
     assert(!nodes.empty());
 
-    minLon=nodes[0].GetLon();
-    maxLon=minLon;
-    minLat=nodes[0].GetLat();
-    maxLat=minLat;
+    double minLon=nodes[0].GetLon();
+    double maxLon=minLon;
+    double minLat=nodes[0].GetLat();
+    double maxLat=minLat;
 
     for (size_t i=1; i<nodes.size(); i++) {
       minLon=std::min(minLon,nodes[i].GetLon());
@@ -81,6 +78,9 @@ namespace osmscout {
       minLat=std::min(minLat,nodes[i].GetLat());
       maxLat=std::max(maxLat,nodes[i].GetLat());
     }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
   }
 
   bool Area::GetCenter(GeoCoord& center) const
@@ -127,39 +127,21 @@ namespace osmscout {
     return true;
   }
 
-  void Area::GetBoundingBox(double& minLon,
-                            double& maxLon,
-                            double& minLat,
-                            double& maxLat) const
+  void Area::GetBoundingBox(GeoBox& boundingBox) const
   {
-    bool firstOuterRing=true;
-    assert(!rings.empty());
+    boundingBox.Invalidate();
 
     for (const auto& role : rings) {
       if (role.ring==Area::outerRingId) {
-        if (firstOuterRing) {
-          role.GetBoundingBox(minLon,
-                              maxLon,
-                              minLat,
-                              maxLat);
-
-          firstOuterRing=false;
+        if (!boundingBox.IsValid()) {
+          role.GetBoundingBox(boundingBox);
         }
         else {
-          double ringMinLon;
-          double ringMaxLon;
-          double ringMinLat;
-          double ringMaxLat;
+          GeoBox ringBoundingBox;
 
-          role.GetBoundingBox(ringMinLon,
-                              ringMaxLon,
-                              ringMinLat,
-                              ringMaxLat);
+          role.GetBoundingBox(ringBoundingBox);
 
-          minLon=std::min(minLon,ringMinLon);
-          minLat=std::min(minLat,ringMinLat);
-          maxLon=std::max(maxLon,ringMaxLon);
-          maxLat=std::max(maxLat,ringMaxLat);
+          boundingBox.Include(ringBoundingBox);
         }
       }
     }

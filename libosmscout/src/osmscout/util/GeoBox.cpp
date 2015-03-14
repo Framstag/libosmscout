@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <osmscout/system/Assert.h>
+
 namespace osmscout {
 
   /**
@@ -60,6 +62,22 @@ namespace osmscout {
                  std::min(coordA.GetLon(),coordB.GetLon()));
     maxCoord.Set(std::max(coordA.GetLat(),coordB.GetLat()),
                  std::max(coordA.GetLon(),coordB.GetLon()));
+  }
+
+  void GeoBox::Include(const GeoBox& other)
+  {
+    assert(valid);
+    assert(other.valid);
+
+    minCoord.Set(std::min(minCoord.GetLat(),
+                          other.GetMinCoord().GetLat()),
+                 std::min(minCoord.GetLon(),
+                          other.GetMinCoord().GetLon()));
+
+    maxCoord.Set(std::max(maxCoord.GetLat(),
+                          other.GetMaxCoord().GetLat()),
+                 std::max(maxCoord.GetLon(),
+                          other.GetMaxCoord().GetLon()));
   }
 
   GeoCoord GeoBox::GetCenter() const

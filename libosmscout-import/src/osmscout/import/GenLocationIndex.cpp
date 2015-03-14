@@ -752,45 +752,44 @@ namespace osmscout {
                                                        const std::string& name,
                                                        const RegionIndex& regionIndex)
   {
-    double minlon;
-    double maxlon;
-    double minlat;
-    double maxlat;
-
     if (ring.ring==Area::masterRingId &&
         ring.nodes.empty()) {
       for (const auto& r : area.rings) {
         if (r.ring==Area::outerRingId) {
-          r.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+          GeoBox boundingBox;
+
+          r.GetBoundingBox(boundingBox);
 
           RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                        GeoCoord(minlat,minlon));
+                                                        boundingBox.GetMinCoord());
 
           AddLocationAreaToRegion(region,
                                   area,
                                   r.nodes,
                                   name,
-                                  minlon,
-                                  minlat,
-                                  maxlon,
-                                  maxlat);
+                                  boundingBox.GetMinLon(),
+                                  boundingBox.GetMinLat(),
+                                  boundingBox.GetMaxLon(),
+                                  boundingBox.GetMaxLat());
         }
       }
     }
     else {
-      ring.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+      GeoBox boundingBox;
+
+      ring.GetBoundingBox(boundingBox);
 
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(minlat,minlon));
+                                                    boundingBox.GetMinCoord());
 
       AddLocationAreaToRegion(region,
                               area,
                               ring.nodes,
                               name,
-                              minlon,
-                              minlat,
-                              maxlon,
-                              maxlat);
+                              boundingBox.GetMinLon(),
+                              boundingBox.GetMinLat(),
+                              boundingBox.GetMaxLon(),
+                              boundingBox.GetMaxLat());
     }
   }
 
