@@ -34,6 +34,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/HashMap.h>
 
 namespace osmscout {
@@ -76,6 +77,39 @@ namespace osmscout {
       minLat=std::min(minLat,nodes[i].GetLat());
       maxLat=std::max(maxLat,nodes[i].GetLat());
     }
+  }
+
+  /**
+   * \ingroup Geometry
+   * Calculate the bounding box of the (non empty) vector of geo coords
+   *
+   * @param nodes
+   *    The geo coordinates
+   * @param minLon
+   * @param maxLon
+   * @param minLat
+   * @param maxLat
+   */
+  template<typename N>
+  void GetBoundingBox(const std::vector<N>& nodes,
+                      GeoBox& boundingBox)
+  {
+    assert(!nodes.empty());
+
+    double minLon=nodes[0].GetLon();
+    double maxLon=nodes[0].GetLon();
+    double minLat=nodes[0].GetLat();
+    double maxLat=nodes[0].GetLat();
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLon=std::min(minLon,nodes[i].GetLon());
+      maxLon=std::max(maxLon,nodes[i].GetLon());
+      minLat=std::min(minLat,nodes[i].GetLat());
+      maxLat=std::max(maxLat,nodes[i].GetLat());
+    }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
   }
 
   /**
