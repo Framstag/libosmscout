@@ -28,6 +28,7 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
@@ -224,22 +225,19 @@ namespace osmscout {
           continue;
         }
 
-        double minLon;
-        double maxLon;
-        double minLat;
-        double maxLat;
+        GeoBox boundingBox;
 
-        way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
+        way.GetBoundingBox(boundingBox);
 
         //
         // Calculate minimum and maximum tile ids that are covered
         // by the way
         // Renormalized coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
+        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
+        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
+        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
@@ -544,22 +542,19 @@ namespace osmscout {
           continue;
         }
 
-        double minLon;
-        double maxLon;
-        double minLat;
-        double maxLat;
+        GeoBox boundingBox;
 
-        way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
+        way.GetBoundingBox(boundingBox);
 
         //
         // Calculate minimum and maximum tile ids that are covered
         // by the way
         // Renormalized coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
+        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
+        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
+        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {

@@ -38,6 +38,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/String.h>
@@ -954,23 +955,20 @@ namespace osmscout {
         continue;
       }
 
-      double minlon;
-      double maxlon;
-      double minlat;
-      double maxlat;
+      GeoBox boundingBox;
 
-      way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+      way.GetBoundingBox(boundingBox);
 
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(minlat,minlon));
+                                                    boundingBox.GetMinCoord());
 
       AddLocationWayToRegion(region,
                              way,
                              nameValue->GetName(),
-                             minlon,
-                             minlat,
-                             maxlon,
-                             maxlat);
+                             boundingBox.GetMinLon(),
+                             boundingBox.GetMinLat(),
+                             boundingBox.GetMaxLon(),
+                             boundingBox.GetMaxLat());
 
       waysFound++;
     }

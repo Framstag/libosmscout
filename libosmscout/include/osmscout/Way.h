@@ -26,6 +26,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
@@ -96,16 +97,10 @@ namespace osmscout {
       return (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
-    inline void GetBoundingBox(double& minLon,
-                               double& maxLon,
-                               double& minLat,
-                               double& maxLat) const
+    inline void GetBoundingBox(GeoBox& boundingBox) const
     {
       osmscout::GetBoundingBox(nodes,
-                               minLon,
-                               maxLon,
-                               minLat,
-                               maxLat);
+                               boundingBox);
     }
 
     bool GetCenter(GeoCoord& center) const;
