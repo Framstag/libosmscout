@@ -19,11 +19,10 @@
 
 #include <osmscout/RoutePostprocessor.h>
 
-#include <iostream>
-
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -92,45 +91,43 @@ namespace osmscout {
     double        distance=0.0;
     double        time=0.0;
 
-    for (std::list<RouteDescription::Node>::iterator iter=description.Nodes().begin();
-         iter!=description.Nodes().end();
-         ++iter) {
+    for (auto& node : description.Nodes()) {
       // The last node does not have a pathWayId set, since we are not going anywhere!
-      if (iter->HasPathObject()) {
+      if (node.HasPathObject()) {
         // Only load the next way, if it is different from the old one
-        curObject=iter->GetPathObject();
+        curObject=node.GetPathObject();
 
         if (curObject!=prevObject) {
-          switch (iter->GetPathObject().GetType()) {
+          switch (node.GetPathObject().GetType()) {
           case refNone:
           case refNode:
             assert(false);
             break;
           case refArea:
             if (!database.GetAreaByOffset(curObject.GetFileOffset(),area)) {
-              std::cout << "Error while loading area with offset " << curObject.GetFileOffset() << std::endl;
+              log.Error() << "Error while loading area with offset " << curObject.GetFileOffset();
               return false;
             }
             break;
           case refWay:
             if (!database.GetWayByOffset(curObject.GetFileOffset(),way)) {
-              std::cout << "Error while loading way with offset " << curObject.GetFileOffset() << std::endl;
+              log.Error() << "Error while loading way with offset " << curObject.GetFileOffset();
               return false;
             }
             break;
           }
         }
 
-        switch (iter->GetPathObject().GetType()) {
+        switch (node.GetPathObject().GetType()) {
         case refNone:
         case refNode:
           assert(false);
           break;
         case refArea:
-          curCoord=area->rings.front().nodes[iter->GetCurrentNodeIndex()];
+          curCoord=area->rings.front().nodes[node.GetCurrentNodeIndex()];
           break;
         case refWay:
-          curCoord=way->nodes[iter->GetCurrentNodeIndex()];
+          curCoord=way->nodes[node.GetCurrentNodeIndex()];
         }
 
         // There is no delta for the first route node
@@ -142,11 +139,11 @@ namespace osmscout {
 
           double deltaTime=0.0;
 
-          if (iter->GetPathObject().GetType()==refArea) {
+          if (node.GetPathObject().GetType()==refArea) {
             deltaTime=profile.GetTime(area,
                                       deltaDistance);
           }
-          else if (iter->GetPathObject().GetType()==refWay) {
+          else if (node.GetPathObject().GetType()==refWay) {
             deltaTime=profile.GetTime(way,
                                       deltaDistance);
           }
@@ -156,9 +153,9 @@ namespace osmscout {
         }
       }
 
-      iter->SetDistance(distance);
-      iter->SetTime(time);
-      iter->SetLocation(curCoord);
+      node.SetDistance(distance);
+      node.SetTime(time);
+      node.SetLocation(curCoord);
 
       prevObject=curObject;
       prevCoord=curCoord;
@@ -182,8 +179,8 @@ namespace osmscout {
     //
 
     for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
+         node!=description.Nodes().end();
+         ++node) {
       // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
       if (!node->HasPathObject()) {
         break;
@@ -235,12 +232,10 @@ namespace osmscout {
                                                                                   const ObjectFileRef& originObject,
                                                                                   const ObjectFileRef& targetObject)
   {
-    for (std::vector<ObjectFileRef>::const_iterator object=node.GetObjects().begin();
-        object!=node.GetObjects().end();
-        ++object) {
+    for (const auto& object : node.GetObjects()) {
       // Way is origin way and starts or ends here so it is not an additional crossing way
       if (originObject.Valid() &&
-          *object==originObject &&
+          object==originObject &&
           postprocessor.IsNodeStartOrEndOfObject(node.GetPathObject(),
                                                  node.GetCurrentNodeIndex(),
                                                  originObject)) {
@@ -249,7 +244,7 @@ namespace osmscout {
 
       // Way is target way and starts or ends here so it is not an additional crossing way
       if (targetObject.Valid() &&
-          *object==targetObject &&
+          object==targetObject &&
           postprocessor.IsNodeStartOrEndOfObject(node.GetPathObject(),
                                                  node.GetCurrentNodeIndex(),
                                                  targetObject)) {
@@ -259,12 +254,12 @@ namespace osmscout {
       // ways is origin way and target way so it is not an additional crossing way
       if (originObject.Valid() &&
           targetObject.Valid() &&
-          *object==originObject &&
-          *object==targetObject) {
+          object==originObject &&
+          object==targetObject) {
         continue;
       }
 
-      description->AddDescription(postprocessor.GetNameDescription(*object));
+      description->AddDescription(postprocessor.GetNameDescription(object));
     }
   }
 
@@ -927,19 +922,17 @@ namespace osmscout {
     }
 
     if (!database.GetAreasByOffset(areaOffsets,areas)) {
-      std::cerr << "Cannot retrieve crossing areas" << std::endl;
+      log.Error() << "Cannot retrieve crossing areas";
       return false;
     }
 
     if (!database.GetWaysByOffset(wayOffsets,ways)) {
-      std::cerr << "Cannot retrieve crossing ways" << std::endl;
+      log.Error() << "Cannot retrieve crossing ways";
       return false;
     }
 
-    for (std::vector<WayRef>::const_iterator way=ways.begin();
-         way!=ways.end();
-         ++way) {
-      wayMap[(*way)->GetFileOffset()]=*way;
+    for (const auto& way : ways) {
+      wayMap[way->GetFileOffset()]=way;
     }
 
     wayOffsets.clear();
@@ -1315,16 +1308,12 @@ namespace osmscout {
     }
 
     size_t pos=1;
-    for (std::list<PostprocessorRef>::iterator p=processors.begin();
-        p!=processors.end();
-        ++p) {
-      PostprocessorRef processor=*p;
-
+    for (const auto& processor : processors) {
       if (!processor->Process(*this,
                               profile,
                               description,
                               database)) {
-        std::cerr << "Error during execution of postprocessor " << pos << std::endl;
+        log.Error() << "Error during execution of postprocessor " << pos;
         Cleanup();
 
         return false;

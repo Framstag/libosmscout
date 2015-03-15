@@ -20,7 +20,6 @@
 #include <osmscout/Database.h>
 
 #include <algorithm>
-#include <iostream>
 
 #if _OPENMP
 #include <omp.h>
@@ -30,6 +29,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -38,8 +38,7 @@ namespace osmscout {
     areaNodeIndexCacheSize(1000),
     nodeCacheSize(1000),
     wayCacheSize(4000),
-    areaCacheSize(4000),
-    debugPerformance(false)
+    areaCacheSize(4000)
   {
     // no code
   }
@@ -69,11 +68,6 @@ namespace osmscout {
     this->areaCacheSize=areaCacheSize;
   }
 
-  void DatabaseParameter::SetDebugPerformance(bool debug)
-  {
-    debugPerformance=debug;
-  }
-
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
@@ -99,11 +93,6 @@ namespace osmscout {
     return areaCacheSize;
   }
 
-  bool DatabaseParameter::IsDebugPerformance() const
-  {
-    return debugPerformance;
-  }
-
   Database::Database(const DatabaseParameter& parameter)
    : parameter(parameter),
      isOpen(false)
@@ -127,7 +116,7 @@ namespace osmscout {
     typeConfig=new TypeConfig();
 
     if (!typeConfig->LoadFromDataFile(path)) {
-      std::cerr << "Cannot load 'types.dat'!" << std::endl;
+      log.Error() << "Cannot load 'types.dat'!";
       return false;
     }
 
@@ -135,18 +124,18 @@ namespace osmscout {
     std::string file=AppendFileToDir(path,"bounding.dat");
 
     if (!scanner.Open(file,FileScanner::Normal,true)) {
-      std::cerr << "Cannot open 'bounding.dat'" << std::endl;
+      log.Error() << "Cannot open '" << scanner.GetFilename() << "'";
       return false;
     }
 
     if (!scanner.ReadBox(boundingBox)) {
-      std::cerr << "Error while reading from '" << file << "'" << std::endl;
+      log.Error() << "Error while reading '" << scanner.GetFilename() << "'";
     }
 
-    std::cout << "BoundingBox: " << boundingBox.GetDisplayText() << std::endl;
+    log.Debug() << "BoundingBox: " << boundingBox.GetDisplayText();
 
     if (scanner.HasError() || !scanner.Close()) {
-      std::cerr << "Error while reading/closing '" << file << "'" << std::endl;
+      log.Error() << "Cannot while reading/closing '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -248,7 +237,7 @@ namespace osmscout {
                               path,
                               FileScanner::LowMemRandom,
                               true)) {
-        std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
+        log.Error() << "Cannot open 'nodes.dat'!";
         return NULL;
       }
     }
@@ -272,7 +261,7 @@ namespace osmscout {
                               path,
                               FileScanner::LowMemRandom,
                               true)) {
-        std::cerr << "Cannot open 'areas.dat'!" << std::endl;
+        log.Error() << "Cannot open 'areas.dat'!";
         return NULL;
       }
     }
@@ -296,7 +285,7 @@ namespace osmscout {
                              path,
                              FileScanner::LowMemRandom,
                              true)) {
-        std::cerr << "Cannot open 'ways.dat'!" << std::endl;
+        log.Error() << "Cannot open 'ways.dat'!";
         return NULL;
       }
     }
@@ -314,7 +303,7 @@ namespace osmscout {
       areaNodeIndex=new AreaNodeIndex(/*parameter.GetAreaNodeIndexCacheSize()*/);
 
       if (!areaNodeIndex->Load(path)) {
-        std::cerr << "Cannot load area node index!" << std::endl;
+        log.Error() << "Cannot load area node index!";
         areaNodeIndex=NULL;
 
         return NULL;
@@ -334,7 +323,7 @@ namespace osmscout {
       areaAreaIndex=new AreaAreaIndex(parameter.GetAreaAreaIndexCacheSize());
 
       if (!areaAreaIndex->Load(path)) {
-        std::cerr << "Cannot load area area index!" << std::endl;
+        log.Error() << "Cannot load area area index!";
         areaAreaIndex=NULL;
 
         return NULL;
@@ -355,7 +344,7 @@ namespace osmscout {
 
       if (!areaWayIndex->Load(typeConfig,
                               path)) {
-        std::cerr << "Cannot load area way index!" << std::endl;
+        log.Error() << "Cannot load area way index!";
         areaWayIndex=NULL;
 
         return NULL;
@@ -375,7 +364,7 @@ namespace osmscout {
       locationIndex=new LocationIndex();
 
       if (!locationIndex->Load(path)) {
-        std::cerr << "Cannot load location index!" << std::endl;
+        log.Error() << "Cannot load location index!";
         locationIndex=NULL;
 
         return NULL;
@@ -395,7 +384,7 @@ namespace osmscout {
       waterIndex=new WaterIndex();
 
       if (!waterIndex->Load(path)) {
-        std::cerr << "Cannot load water index!" << std::endl;
+        log.Error() << "Cannot load water index!";
         waterIndex=NULL;
 
         return NULL;
@@ -416,7 +405,7 @@ namespace osmscout {
 
       if (!optimizeAreasLowZoom->Open(typeConfig,
                                       path)) {
-        std::cerr << "Cannot load optimize areas low zoom index!" << std::endl;
+        log.Error() << "Cannot load optimize areas low zoom index!";
         optimizeAreasLowZoom=NULL;
 
         return NULL;
@@ -433,7 +422,7 @@ namespace osmscout {
 
       if (!optimizeWaysLowZoom->Open(typeConfig,
                                      path)) {
-        std::cerr << "Cannot load optimize areas low zoom index!" << std::endl;
+        log.Error() << "Cannot load optimize areas low zoom index!";
         optimizeWaysLowZoom=NULL;
 
         return NULL;

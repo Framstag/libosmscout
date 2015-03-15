@@ -85,8 +85,6 @@ int main(int argc, char* argv[])
 
   osmscout::DatabaseParameter databaseParameter;
 
-  databaseParameter.SetDebugPerformance(true);
-
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
   osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
 

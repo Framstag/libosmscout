@@ -31,6 +31,8 @@
 
 #include <osmscout/SRTM.h>
 
+#include <osmscout/util/Logger.h>
+
 #include <osmscout/system/Math.h>
 #include <osmscout/system/Types.h>
 
@@ -114,12 +116,12 @@ namespace osmscout {
                 rows = SRTM1_GRID;
                 columns = SRTM1_GRID;
                 patchSize = SRTM1_FILESIZE;
-                std::cout << "Open SRTM1 hgt file : "<<(srtmPath+"/"+currentFilename).c_str() << std::endl;
+                log.Info() << "Open SRTM1 hgt file : "<<(srtmPath+"/"+currentFilename).c_str();
             } else if (length == SRTM3_FILESIZE){
                 rows = SRTM3_GRID;
                 columns = SRTM3_GRID;
                 patchSize = SRTM3_FILESIZE;
-                std::cout << "Open SRTM3 hgt file : "<<(srtmPath+"/"+currentFilename).c_str() << std::endl;
+                log.Info() << "Open SRTM3 hgt file : "<<(srtmPath+"/"+currentFilename).c_str();
             } else {
                 return SRTM::nodata;
             }

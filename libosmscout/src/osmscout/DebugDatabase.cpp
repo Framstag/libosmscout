@@ -20,7 +20,6 @@
 #include <osmscout/DebugDatabase.h>
 
 #include <algorithm>
-#include <iostream>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -28,6 +27,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/HashMap.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 #include "osmscout/ObjectRef.h"
@@ -59,7 +59,7 @@ namespace osmscout {
     typeConfig=new TypeConfig();
 
     if (!typeConfig->LoadFromDataFile(path)) {
-      std::cerr << "Cannot load 'types.dat'!" << std::endl;
+      log.Error() << "Cannot load 'types.dat'!";
       return false;
     }
 
@@ -114,7 +114,7 @@ namespace osmscout {
     std::string filename=AppendFileToDir(path,mapName);
 
     if (!scanner.Open(filename,FileScanner::LowMemRandom,false)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 

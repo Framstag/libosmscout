@@ -19,7 +19,7 @@
 
 #include <osmscout/AreaWayIndex.h>
 
-#include <iostream>
+#include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Math.h>
 
@@ -63,7 +63,7 @@ namespace osmscout {
     datafilename=path+"/"+filepart;
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -156,7 +156,7 @@ namespace osmscout {
                                    minxc-typeData.cellXStart)*(FileOffset)typeData.dataOffsetBytes;
 
       if (!scanner.SetPos(bitmapCellOffset)) {
-        std::cerr << "Cannot go to type cell index position " << bitmapCellOffset << std::endl;
+        log.Error() << "Cannot go to type cell index position " << bitmapCellOffset << " in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
@@ -166,7 +166,7 @@ namespace osmscout {
 
         if (!scanner.ReadFileOffset(cellDataOffset,
                                     typeData.dataOffsetBytes)) {
-          std::cerr << "Cannot read cell data position" << std::endl;
+          log.Error() << "Cannot read cell data position in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
@@ -194,7 +194,7 @@ namespace osmscout {
 
       // first data entry in the row
       if (!scanner.SetPos(initialCellDataOffset)) {
-        std::cerr << "Cannot go to cell data position " << initialCellDataOffset << std::endl;
+        log.Error() << "Cannot go to cell data position " << initialCellDataOffset  << " in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
@@ -205,7 +205,7 @@ namespace osmscout {
 
 
         if (!scanner.ReadNumber(dataCount)) {
-          std::cerr << "Cannot read cell data count" << std::endl;
+          log.Error() << "Cannot read cell data count"  << " in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
@@ -242,7 +242,7 @@ namespace osmscout {
   {
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        log.Error() << "Error while opening " << scanner.GetFilename() << " for reading!";
         return false;
       }
     }

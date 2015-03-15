@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include <osmscout/util/Logger.h>
+
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
@@ -53,7 +55,7 @@ namespace osmscout {
 
       if (!scanner.IsOpen()) {
         if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-          std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+          log.Error() << "Error while opening '" << scanner.GetFilename() << "' for reading!";
           return false;
         }
       }
@@ -65,7 +67,7 @@ namespace osmscout {
       if (level<maxLevel) {
         for (size_t c=0; c<4; c++) {
           if (!scanner.ReadNumber(cacheRef->value.children[c])) {
-            std::cerr << "Cannot read index data at offset " << offset << std::endl;
+            log.Error() << "Cannot read index data at offset " << offset << " in file '" << scanner.GetFilename() << "'";
             return false;
           }
         }
@@ -83,7 +85,7 @@ namespace osmscout {
       // Areas
 
       if (!scanner.ReadNumber(offsetCount)) {
-        std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+        log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
@@ -94,11 +96,12 @@ namespace osmscout {
       for (size_t c=0; c<offsetCount; c++) {
         if (!scanner.ReadTypeId(cacheRef->value.areas[c].type,
                                 typeConfig->GetAreaTypeIdBytes())) {
-          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
           return false;
         }
+
         if (!scanner.ReadNumber(cacheRef->value.areas[c].offset)) {
-          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
@@ -116,17 +119,17 @@ namespace osmscout {
     datafilename=path+"/"+filepart;
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
       return false;
     }
 
     if (!scanner.ReadNumber(maxLevel)) {
-      std::cerr << "Cannot read data" << std::endl;
+      log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
       return false;
     }
 
     if (!scanner.ReadFileOffset(topLevelOffset)) {
-      std::cerr << "Cannot read data" << std::endl;
+      log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -206,7 +209,7 @@ namespace osmscout {
                           level,
                           cellRefs[i].offset,
                           cell)) {
-          std::cerr << "Cannot find offset " << cellRefs[i].offset << " in level " << level << " => aborting!" << std::endl;
+          log.Error() << "Cannot find offset " << cellRefs[i].offset << " in level " << level << " in file '" << scanner.GetFilename() << "'";
           return false;
         }
 

@@ -22,6 +22,7 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -151,7 +152,7 @@ namespace osmscout {
 
         if (!scanner.ReadConditionalCoord(coord,
                                           isSet)) {
-          std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << datafilename << "!" << std::endl;
+          log.Error() << "Error while reading data from offset " << pageOffset->second << " of file '" << scanner.GetFilename() << "'!";
           scanner.Close();
           return false;
         }

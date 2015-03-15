@@ -20,7 +20,8 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <limits>
-#include <iostream>
+
+#include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -116,7 +117,7 @@ namespace osmscout {
         std::map<std::string,double>::const_iterator speed=speedMap.find(type->GetName());
 
         if (speed==speedMap.end()) {
-          std::cerr << "No speed for type '" << type->GetName() << "' defined!" << std::endl;
+          log.Error() << "No speed for type '" << type->GetName() << "' defined!";
           everythingResolved=false;
 
           continue;

@@ -31,8 +31,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Number.h>
-#include <iostream>
-#include <iomanip>
+
 namespace osmscout {
 
   FileWriter::FileWriter()
@@ -556,8 +555,6 @@ namespace osmscout {
     buffer[5]=((lonValue >> 16) & 0xff);
 
     buffer[6]=((latValue >> 24) & 0x07) | ((lonValue >> 20) & 0x70);
-
-    //std::cout << coord.GetLat() << "," << coord.GetLon() << " " << latValue << " " << lonValue << std::endl;
 
     hasError=fwrite(buffer,1,coordByteSize,file)!=coordByteSize;
 

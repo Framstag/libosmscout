@@ -1,6 +1,7 @@
-#include <iostream>
-#include <osmscout/util/String.h>
 #include <osmscout/TextSearchIndex.h>
+
+#include <osmscout/util/String.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout
 {
@@ -20,7 +21,7 @@ namespace osmscout
       }
     }
   }
-    
+
   bool TextSearchIndex::Load(const std::string& path)
   {
     std::string fixedPath=path;
@@ -54,8 +55,7 @@ namespace osmscout
         // We don't return false on a failed load attempt
         // since its possible that the user does not want
         // to include a specific trie (ie. textother)
-        std::cerr << "Warn, could not open " << tries[i].file << ":";
-        std::cerr << ex.what() << std::endl;
+        log.Error() << "Warn, could not open " << tries[i].file << ":"  << ex.what();
         delete tries[i].trie;
         tries[i].isAvail=false;
         triesAvail--;
@@ -63,7 +63,7 @@ namespace osmscout
     }
 
     if(triesAvail==0) {
-      std::cerr << "TextSearchIndex: No valid text data files is available" << std::endl;
+      log.Error() << "TextSearchIndex: No valid text data files is available";
       return false;
     }
 
@@ -85,13 +85,13 @@ namespace osmscout
           std::string result(agent.key().ptr(),agent.key().length());
           result.erase(0,1);  // get rid of the ASCII control char
           if(!StringToNumberUnsigned(result,offsetSizeBytes)) {
-            std::cerr << "Could not parse file offset size in text data" << std::endl;
+            log.Error() << "Could not parse file offset size in text data";
             return false;
           }
           break;
         }
         else {
-          std::cerr << "Could not find file offset size in text data" << std::endl;
+          log.Error() << "Could not find file offset size in text data";
           return false;
         }
       }
@@ -152,8 +152,7 @@ namespace osmscout
           }
         }
         catch(const marisa::Exception &ex) {
-          std::cerr << "Error searching for text: ";
-          std::cerr << ex.what() << std::endl;
+          log.Error() << "Error searching for text: " << ex.what();
           return false;
         }
       }

@@ -20,13 +20,13 @@
 #include <osmscout/RoutingService.h>
 
 #include <algorithm>
-#include <iostream>
 
 #include <osmscout/RoutingProfile.h>
 
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 //#define DEBUG_ROUTING
@@ -158,7 +158,7 @@ namespace osmscout {
                                 path,
                                 FileScanner::FastRandom,true,
                                 FileScanner::FastRandom,true)) {
-      std::cerr << "Cannot open 'route.dat'!" << std::endl;
+      log.Error() << "Cannot open 'route.dat'!";
       return false;
     }
 
@@ -502,19 +502,19 @@ namespace osmscout {
 
     if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,
                                        routeNodeMap)) {
-      std::cerr << "Cannot load route nodes" << std::endl;
+      log.Error() << "Cannot load route nodes";
       return false;
     }
 
     if (!areaDataFile->GetByOffset(areaOffsets,
                                    areaMap)) {
-      std::cerr << "Cannot load areas" << std::endl;
+      log.Error() << "Cannot load areas";
       return false;
     }
 
     if (!wayDataFile->GetByOffset(wayOffsets,
                                   wayMap)) {
-      std::cerr << "Cannot load ways" << std::endl;
+      log.Error() << "Cannot load ways";
       return false;
     }
 
@@ -720,7 +720,7 @@ namespace osmscout {
 
     if (!junctionDataFile.Get(nodeIds,
                               junctions)) {
-      std::cerr << "Error while resolving junction ids to junctions" << std::endl;
+      log.Error() << "Error while resolving junction ids to junctions";
     }
 
     nodeIds.clear();
@@ -784,12 +784,12 @@ namespace osmscout {
 
       if (!wayDataFile->GetByOffset(object.GetFileOffset(),
                                     way)) {
-        std::cerr << "Cannot get start way!" << std::endl;
+        log.Error() << "Cannot get start way!";
         return false;
       }
 
       if (nodeIndex>=way->nodes.size()) {
-        std::cerr << "Given start node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1 << std::endl;
+        log.Error() << "Given start node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1;
         return false;
       }
 
@@ -819,14 +819,14 @@ namespace osmscout {
 
       if (forwardRouteNode.Invalid() &&
           backwardRouteNode.Invalid()) {
-        std::cerr << "No route node found for start way" << std::endl;
+        log.Error() << "No route node found for start way";
         return false;
       }
 
       if (forwardRouteNode.Valid()) {
         if (!routeNodeDataFile.GetOffset(forwardRouteNode->id,
                                          forwardOffset)) {
-          std::cerr << "Cannot get offset of startForwardRouteNode" << std::endl;
+          log.Error() << "Cannot get offset of startForwardRouteNode";
 
           return false;
         }
@@ -852,7 +852,7 @@ namespace osmscout {
       if (backwardRouteNode.Valid()) {
         if (!routeNodeDataFile.GetOffset(backwardRouteNode->id,
                                          backwardOffset)) {
-          std::cerr << "Cannot get offset of startBackwardRouteNode" << std::endl;
+          log.Error() << "Cannot get offset of startBackwardRouteNode";
 
           return false;
         }
@@ -909,12 +909,12 @@ namespace osmscout {
 
       if (!wayDataFile->GetByOffset(object.GetFileOffset(),
                                     way)) {
-        std::cerr << "Cannot get end way!" << std::endl;
+        log.Error() << "Cannot get end way!";
         return false;
       }
 
       if (nodeIndex>=way->nodes.size()) {
-        std::cerr << "Given target node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1 << std::endl;
+        log.Error() << "Given target node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1;
         return false;
       }
 
@@ -943,7 +943,7 @@ namespace osmscout {
 
       if (forwardNode.Invalid() &&
           backwardNode.Invalid()) {
-        std::cerr << "No route node found for target way" << std::endl;
+        log.Error() << "No route node found for target way";
         return false;
       }
 
@@ -952,7 +952,7 @@ namespace osmscout {
 
         if (!routeNodeDataFile.GetOffset(forwardNode->id,
                                          forwardRouteNodeOffset)) {
-          std::cerr << "Cannot get offset of targetForwardRouteNode" << std::endl;
+          log.Error() << "Cannot get offset of targetForwardRouteNode";
         }
       }
 
@@ -961,7 +961,7 @@ namespace osmscout {
 
         if (!routeNodeDataFile.GetOffset(backwardNode->id,
                                          backwardRouteNodeOffset)) {
-          std::cerr << "Cannot get offset of targetBackwardRouteNode" << std::endl;
+          log.Error() << "Cannot get offset of targetBackwardRouteNode";
         }
       }
 
@@ -1145,7 +1145,7 @@ namespace osmscout {
 
       if (!routeNodeDataFile.GetByOffset(current->nodeOffset,
                                          currentRouteNode)) {
-        std::cerr << "Cannot load route node with id " << current->nodeOffset << std::endl;
+        log.Error() << "Cannot load route node with id " << current->nodeOffset;
         return false;
       }
 
@@ -1518,7 +1518,7 @@ namespace osmscout {
           if (a.Invalid() ||
               a->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
             if (!areaDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
-              std::cerr << "Cannot load area with id " << iter->GetPathObject().GetFileOffset() << std::endl;
+              log.Error() << "Cannot load area with id " << iter->GetPathObject().GetFileOffset();
               return false;
             }
           }
@@ -1543,7 +1543,7 @@ namespace osmscout {
           if (w.Invalid() ||
               w->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
             if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
-              std::cerr << "Cannot load way with id " << iter->GetPathObject().GetFileOffset() << std::endl;
+              log.Error() << "Cannot load way with id " << iter->GetPathObject().GetFileOffset();
               return false;
             }
           }
@@ -1653,7 +1653,7 @@ namespace osmscout {
         areaWayIndex.Invalid() ||
         areaDataFile.Invalid() ||
         wayDataFile.Invalid()) {
-      std::cerr << "At least one index file is invalid!" << std::endl;
+      log.Error() << "At least one index file is invalid!";
       return false;
     }
 
@@ -1708,7 +1708,7 @@ namespace osmscout {
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
-      std::cout << "Error getting ways and relations from area way index!" << std::endl;
+      log.Error() << "Error getting ways and relations from area way index!";
     }
 
     if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
@@ -1720,7 +1720,7 @@ namespace osmscout {
                                    areaRoutableTypes,
                                    std::numeric_limits<size_t>::max(),
                                    wayAreaOffsets)) {
-      std::cout << "Error getting ways and relations from area index!" << std::endl;
+      log.Error() << "Error getting ways and relations from area index!";
     }
 
     std::sort(wayWayOffsets.begin(),
@@ -1730,21 +1730,17 @@ namespace osmscout {
 
     if (!wayDataFile->GetByOffset(wayWayOffsets,
                                   ways)) {
-      std::cout << "Error reading ways in area!" << std::endl;
+      log.Error() << "Error reading ways in area!";
       return false;
     }
 
     if (!areaDataFile->GetByOffset(wayAreaOffsets,
                                    areas)) {
-      std::cout << "Error reading areas in area!" << std::endl;
+      log.Error() << "Error reading areas in area!";
       return false;
     }
 
-    for (std::vector<osmscout::AreaRef>::const_iterator a=areas.begin();
-        a!=areas.end();
-        ++a) {
-      osmscout::AreaRef area(*a);
-
+    for (const auto& area : areas) {
       for (size_t i=0; i<area->rings[0].nodes.size(); i++) {
         double distance=sqrt((area->rings[0].nodes[i].GetLat()-lat)*(area->rings[0].nodes[i].GetLat()-lat)+
                              (area->rings[0].nodes[i].GetLon()-lon)*(area->rings[0].nodes[i].GetLon()-lon));
@@ -1758,11 +1754,7 @@ namespace osmscout {
       }
     }
 
-    for (std::vector<osmscout::WayRef>::const_iterator w=ways.begin();
-        w!=ways.end();
-        ++w) {
-      osmscout::WayRef way(*w);
-
+    for (const auto& way : ways) {
       for (size_t i=0;  i<way->nodes.size(); i++) {
         double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
                              (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));

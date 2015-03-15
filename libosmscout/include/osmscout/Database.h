@@ -82,8 +82,6 @@ namespace osmscout {
 
     unsigned long areaCacheSize;
 
-    bool          debugPerformance;
-
   public:
     DatabaseParameter();
 
@@ -96,8 +94,6 @@ namespace osmscout {
 
     void SetAreaCacheSize(unsigned long relationCacheSize);
 
-    void SetDebugPerformance(bool debug);
-
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetAreaNodeIndexCacheSize() const;
 
@@ -106,8 +102,6 @@ namespace osmscout {
     unsigned long GetWayCacheSize() const;
 
     unsigned long GetAreaCacheSize() const;
-
-    bool IsDebugPerformance() const;
   };
 
   /**

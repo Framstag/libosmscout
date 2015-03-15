@@ -19,12 +19,12 @@
 
 #include <osmscout/MapPainter.h>
 
-#include <iostream>
 #include <limits>
 
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/HashSet.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 
@@ -1593,13 +1593,10 @@ namespace osmscout {
 
       projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
-      std::cout << "Draw: [";
-      std::cout << latMin <<",";
-      std::cout << lonMin << "-";
-      std::cout << latMax << ",";
-      std::cout << lonMax << "] ";
-      std::cout << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " ";
-      std::cout << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI" << std::endl;
+      log.Info()
+          << "Draw: [" << latMin <<"," << lonMin << "-" << latMax << "," << lonMax << "] "
+          << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " "
+          << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI";
     }
 
     //
@@ -1793,20 +1790,24 @@ namespace osmscout {
                  data);
 
     if (parameter.IsDebugPerformance()) {
-      std::cout << "Paths: ";
-      std::cout << data.ways.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysLabelDrawn << " (pcs) ";
-      std::cout << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)" << std::endl;
+      log.Info()
+          << "Paths: "
+          << data.ways.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysLabelDrawn << " (pcs) "
+          << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)";
 
-      std::cout << "Areas: ";
-      std::cout << data.areas.size() << "/" << areasSegments << "/" << areasDrawn << " (pcs) ";
-      std::cout << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)" << std::endl;
+      log.Info()
+          << "Areas: "
+          << data.areas.size() << "/" << areasSegments << "/" << areasDrawn << " (pcs) "
+          << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)";
 
-      std::cout << "Nodes: ";
-      std::cout << data.nodes.size() <<"+" << data.poiNodes.size() << "/" << nodesDrawn << " (pcs) ";
-      std::cout << nodesTimer << "/" << poisTimer << " (sec)" << std::endl;
+      log.Info()
+          << "Nodes: "
+          << data.nodes.size() <<"+" << data.poiNodes.size() << "/" << nodesDrawn << " (pcs) "
+          << nodesTimer << "/" << poisTimer << " (sec)";
 
-      std::cout << "Labels: " << labels.size() << "/" << overlayLabels.size() << "/" << labelsDrawn << " (pcs) ";
-      std::cout << labelsTimer << " (sec)" << std::endl;
+      log.Info()
+          << "Labels: " << labels.size() << "/" << overlayLabels.size() << "/" << labelsDrawn << " (pcs) "
+          << labelsTimer << " (sec)";
     }
 
     return true;

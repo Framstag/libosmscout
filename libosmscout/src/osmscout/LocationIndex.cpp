@@ -19,11 +19,10 @@
 
 #include <osmscout/LocationIndex.h>
 
-#include <iostream>
-
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {
@@ -50,7 +49,7 @@ namespace osmscout {
                                       FILENAME_LOCATION_IDX),
                       FileScanner::LowMemRandom,
                       true)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
@@ -475,7 +474,7 @@ namespace osmscout {
                                       FILENAME_LOCATION_IDX),
                       FileScanner::LowMemRandom,
                       false)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
@@ -529,7 +528,7 @@ namespace osmscout {
                                       FILENAME_LOCATION_IDX),
                       FileScanner::LowMemRandom,
                       true)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
@@ -562,7 +561,7 @@ namespace osmscout {
                                       FILENAME_LOCATION_IDX),
                       FileScanner::LowMemRandom,
                       true)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
@@ -590,7 +589,7 @@ namespace osmscout {
                                       FILENAME_LOCATION_IDX),
                       FileScanner::LowMemRandom,
                       true)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
@@ -645,7 +644,7 @@ namespace osmscout {
   {
     size_t memory=0;
 
-    std::cout << "CityStreetIndex: Memory " << memory << std::endl;
+    log.Info() << "CityStreetIndex: Memory " << memory;
   }
 }
 

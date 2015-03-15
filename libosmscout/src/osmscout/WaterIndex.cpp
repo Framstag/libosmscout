@@ -19,11 +19,10 @@
 
 #include <osmscout/WaterIndex.h>
 
-#include <iostream>
-
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -38,17 +37,17 @@ namespace osmscout {
     datafilename=path+"/"+filepart;
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
       return false;
     }
 
     if (!scanner.ReadNumber(waterIndexMinMag)) {
-      std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+      log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
       return false;
     }
 
     if (!scanner.ReadNumber(waterIndexMaxMag)) {
-      std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+      log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -84,7 +83,7 @@ namespace osmscout {
     }
 
     if (scanner.HasError()) {
-      std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+      log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -116,7 +115,7 @@ namespace osmscout {
 
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        log.Error() << "Error while opening " << scanner.GetFilename() << " for reading!";
         return false;
       }
     }
@@ -164,7 +163,7 @@ namespace osmscout {
           scanner.SetPos(levels[idx].offset+index);
 
           if (!scanner.Read(cell)) {
-            std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+            log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
             return false;
           }
 
@@ -227,7 +226,7 @@ namespace osmscout {
     size_t entries=0;
     size_t memeory=0;
 
-    std::cout << "WaterIndex size " << entries << ", memory " << memeory << std::endl;
+    log.Info() << "WaterIndex size " << entries << ", memory " << memeory;
   }
 }
 

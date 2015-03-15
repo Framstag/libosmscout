@@ -82,8 +82,6 @@ public:
   {
     osmscout::DatabaseParameter databaseParameter;
 
-    databaseParameter.SetDebugPerformance(true);
-
     database=new osmscout::Database(databaseParameter);
     mapService=new osmscout::MapService(database);
 

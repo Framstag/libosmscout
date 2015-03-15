@@ -25,12 +25,11 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
-
-#include <iostream>
 
 namespace osmscout
 {
@@ -82,19 +81,19 @@ namespace osmscout
     datafilename=AppendFileToDir(path,datafile);
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-      std::cout << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
     FileOffset indexOffset;
 
     if (!scanner.ReadFileOffset(indexOffset)) {
-      std::cout << "Cannot read index offset!" << std::endl;
+      log.Error() << "Cannot read index offset from file '" << scanner.GetFilename() << "'";
       return false;
     }
 
     if (!scanner.SetPos(indexOffset)) {
-      std::cout << "Cannot goto to start of index at position " << indexOffset << "!" << std::endl;
+      log.Error() << "Cannot goto to start of index at position " << indexOffset << " in file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -192,7 +191,7 @@ namespace osmscout
                                   minxc-typeData.cellXStart)*typeData.dataOffsetBytes;
 
       if (!scanner.SetPos(cellIndexOffset)) {
-        std::cerr << "Cannot go to type cell index position " << cellIndexOffset << std::endl;
+        log.Error() << "Cannot go to type cell index position " << cellIndexOffset << " in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
@@ -202,7 +201,7 @@ namespace osmscout
 
         if (!scanner.ReadFileOffset(cellDataOffset,
                                     typeData.dataOffsetBytes)) {
-          std::cerr << "Cannot read cell data position" << std::endl;
+          log.Error() << "Cannot read cell data position in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
@@ -224,7 +223,7 @@ namespace osmscout
       assert(initialCellDataOffset>=cellIndexOffset);
 
       if (!scanner.SetPos(initialCellDataOffset)) {
-        std::cerr << "Cannot go to cell data position " << initialCellDataOffset << std::endl;
+        log.Error() << "Cannot go to cell data position " << initialCellDataOffset << " in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
@@ -235,7 +234,7 @@ namespace osmscout
 
 
         if (!scanner.ReadNumber(dataCount)) {
-          std::cerr << "Cannot read cell data count" << std::endl;
+          log.Error() << "Cannot read cell data count from file '" << scanner.GetFilename() << "'";
           return false;
         }
 
@@ -273,7 +272,7 @@ namespace osmscout
 
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        log.Error() << "Error while opening file '" << scanner.GetFilename() << "' for reading!";
         return false;
       }
     }
@@ -306,11 +305,9 @@ namespace osmscout
                 return false;
               }
 
-              for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-                  offset!=offsets.end();
-                  ++offset) {
-                if (!scanner.SetPos(*offset)) {
-                  std::cerr << "Error while positioning in file " << datafilename  << std::endl;
+              for (const auto& offset : offsets) {
+                if (!scanner.SetPos(offset)) {
+                  log.Error() << "Error while positioning in file '" << scanner.GetFilename()  << "'";
                   type++;
                   continue;
                 }
@@ -319,7 +316,7 @@ namespace osmscout
 
                 if (!way->ReadOptimized(typeConfig,
                                         scanner)) {
-                  std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
+                  log.Error() << "Error while reading data entry of type " << type->first << " from file '" << scanner.GetFilename()  << "'";
                   continue;
                 }
 

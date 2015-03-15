@@ -20,6 +20,7 @@
 #include <osmscout/LocationService.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {
@@ -489,7 +490,7 @@ namespace osmscout {
 
     if (!VisitAdminRegionLocations(adminRegionResult.adminRegion,
                                    visitor)) {
-      std::cerr << "Error during traversal of region location list" << std::endl;
+      log.Error() << "Error during traversal of region location list";
       return false;
     }
 
@@ -506,7 +507,7 @@ namespace osmscout {
                                 adminRegionResult,
                                 poiResult,
                                 result)) {
-        std::cerr << "Error during traversal of region poi list" << std::endl;
+        log.Error() << "Error during traversal of region poi list";
         return false;
       }
     }
@@ -518,7 +519,7 @@ namespace osmscout {
                                      adminRegionResult,
                                      locationResult,
                                      result)) {
-        std::cerr << "Error during traversal of region location list" << std::endl;
+        log.Error() << "Error during traversal of region location list";
         return false;
       }
     }
@@ -569,7 +570,7 @@ namespace osmscout {
     if (!VisitLocationAddresses(locationResult.adminRegion,
                                 locationResult.location,
                                 visitor)) {
-      std::cerr << "Error during traversal of region location address list" << std::endl;
+      log.Error() << "Error during traversal of region location address list";
       return false;
     }
 
@@ -856,7 +857,7 @@ namespace osmscout {
                                                  search.limit);
 
       if (!VisitAdminRegions(adminRegionVisitor)) {
-        std::cerr << "Error during traversal of region tree" << std::endl;
+        log.Error() << "Error during traversal of region tree";
         return false;
       }
 

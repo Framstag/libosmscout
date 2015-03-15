@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <osmscout/util/Logger.h>
+
 #if _OPENMP
 #include <omp.h>
 #endif
@@ -62,7 +64,7 @@ namespace osmscout {
                                    types,
                                    std::numeric_limits<size_t>::max(),
                                    nodeOffsets)) {
-      std::cout << "Error getting nodes from area node index!" << std::endl;
+      log.Error() << "Error getting nodes from area node index!";
       return false;
     }
 
@@ -70,7 +72,7 @@ namespace osmscout {
 
     if (!nodeDataFile->GetByOffset(nodeOffsets,
                                    nodes)) {
-      std::cout << "Error reading nodes in area!" << std::endl;
+      log.Error() << "Error reading nodes in area!";
 
       return false;
     }
@@ -104,7 +106,7 @@ namespace osmscout {
                                    types,
                                    std::numeric_limits<size_t>::max(),
                                    wayAreaOffsets)) {
-      std::cout << "Error getting ways and relations from area index!" << std::endl;
+      log.Error() << "Error getting ways and relations from area index!";
 
       return false;
     }
@@ -113,7 +115,7 @@ namespace osmscout {
 
     if (!areaDataFile->GetByOffset(wayAreaOffsets,
                                    areas)) {
-      std::cout << "Error reading areas in area!" << std::endl;
+      log.Error() << "Error reading areas in area!";
 
       return false;
     }
@@ -150,7 +152,7 @@ namespace osmscout {
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
-      std::cout << "Error getting ways and relations from area way index!" << std::endl;
+      log.Error() << "Error getting ways and relations from area way index!";
 
       return false;
     }
@@ -159,7 +161,7 @@ namespace osmscout {
 
     if (!wayDataFile->GetByOffset(wayWayOffsets,
                                   ways)) {
-      std::cout << "Error reading ways in area!" << std::endl;
+      log.Error() << "Error reading ways in area!";
 
       return true;
     }

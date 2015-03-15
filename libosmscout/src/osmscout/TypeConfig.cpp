@@ -19,8 +19,6 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <iostream>
-
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/system/Assert.h>
@@ -29,6 +27,7 @@
 #include <osmscout/ost/Scanner.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
@@ -1272,20 +1271,20 @@ namespace osmscout {
 
     if (!GetFileSize(filename,
                      fileSize)) {
-      std::cerr << "Cannot get size of file '" << filename << "'" << std::endl;
+      log.Error() << "Cannot get size of file '" << filename << "'";
       return false;
     }
 
     file=fopen(filename.c_str(),"rb");
     if (file==NULL) {
-      std::cerr << "Cannot open file '" << filename << "'" << std::endl;
+      log.Error() << "Cannot open file '" << filename << "'";
       return false;
     }
 
     unsigned char* content=new unsigned char[fileSize];
 
     if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
-      std::cerr << "Cannot load file '" << filename << "'" << std::endl;
+      log.Error() << "Cannot load file '" << filename << "'";
       delete [] content;
       fclose(file);
       return false;
@@ -1331,7 +1330,7 @@ namespace osmscout {
                                       "types.dat"),
                       FileScanner::Sequential,
                       true)) {
-      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'" << std::endl;
+      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
      return false;
     }
 
@@ -1340,7 +1339,7 @@ namespace osmscout {
     uint32_t tagCount;
 
     if (!scanner.ReadNumber(tagCount)) {
-      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -1351,14 +1350,14 @@ namespace osmscout {
 
       if (!(scanner.ReadNumber(requestedId) &&
             scanner.Read(name))) {
-        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
       actualId=RegisterTag(name);
 
       if (actualId!=requestedId) {
-        std::cerr << "Requested and actual tag id do not match" << std::endl;
+        log.Error() << "Requested and actual tag id do not match";
         return false;
       }
     }
@@ -1368,7 +1367,7 @@ namespace osmscout {
     uint32_t nameTagCount;
 
     if (!scanner.ReadNumber(nameTagCount)) {
-      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -1381,13 +1380,13 @@ namespace osmscout {
       if (!(scanner.ReadNumber(requestedId) &&
             scanner.Read(name) &&
             scanner.ReadNumber(priority))) {
-        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
       }
 
       actualId=RegisterNameTag(name,priority);
 
       if (actualId!=requestedId) {
-        std::cerr << "Requested and actual name tag id do not match" << std::endl;
+        log.Error() << "Requested and actual name tag id do not match";
         return false;
       }
     }
@@ -1397,7 +1396,7 @@ namespace osmscout {
     uint32_t nameAltTagCount;
 
     if (!scanner.ReadNumber(nameAltTagCount)) {
-      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -1410,13 +1409,13 @@ namespace osmscout {
       if (!(scanner.ReadNumber(requestedId) &&
             scanner.Read(name) &&
             scanner.ReadNumber(priority))) {
-        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
       }
 
       actualId=RegisterNameAltTag(name,priority);
 
       if (actualId!=requestedId) {
-        std::cerr << "Requested and actual name alt tag id do not match" << std::endl;
+        log.Error() << "Requested and actual name alt tag id do not match";
         return false;
       }
     }
@@ -1426,7 +1425,7 @@ namespace osmscout {
     uint32_t typeCount;
 
     if (!scanner.ReadNumber(typeCount)) {
-      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
       return false;
     }
 
@@ -1471,7 +1470,7 @@ namespace osmscout {
             scanner.Read(ignoreSeaLand) &&
             scanner.Read(ignore))) {
 
-        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
@@ -1516,7 +1515,7 @@ namespace osmscout {
         FeatureRef feature=GetFeature(featureName);
 
         if (feature.Invalid()) {
-          std::cerr << "Feature '" << featureName << "' not found" << std::endl;
+          log.Error() << "Feature '" << featureName << "' not found";
           return false;
         }
 

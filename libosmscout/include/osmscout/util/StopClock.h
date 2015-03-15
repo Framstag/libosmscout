@@ -37,6 +37,10 @@ namespace osmscout {
 
     StopClockPIMPL *pimpl;
 
+  private:
+    // We do not want you to make copies of a stop clock
+    StopClock(const StopClock& other);
+
   public:
     StopClock();
     virtual ~StopClock();
