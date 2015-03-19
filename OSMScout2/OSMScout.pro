@@ -45,6 +45,7 @@ OTHER_FILES += \
     qml/custom/DialogActionButton.qml \
     qml/SearchLocationDialog.qml \
     qml/custom/LocationEdit.qml \
+    qml/custom/LocationEdit2.qml \
     qml/custom/ScrollIndicator.qml \
     qml/custom/MapDialog.qml \
     qml/RoutingDialog.qml \
@@ -58,4 +59,7 @@ ANDROID_EXTRA_LIBS = ../libosmscout/src/.libs/libosmscout.so \
                      ../libosmscout-map-qt/src/.libs/libosmscoutmapqt.so
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+DISTFILES += \
+    qml/custom/LocationEdit2.qml
 

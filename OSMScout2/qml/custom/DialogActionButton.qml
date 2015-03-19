@@ -8,6 +8,7 @@ Rectangle {
   property color contentColor: "lightblue"
   property color contentHoverColor: Qt.darker(contentColor, 1.1)
   property color borderColor: Qt.darker(contentColor, 1.1)
+  property color textColor: "black"
 
   property alias text: label.text
   
@@ -41,6 +42,6 @@ Rectangle {
     id: label
     font.pixelSize: Theme.textFontSize
     anchors.centerIn: parent
-    color: "black"
+    color: textColor
   }
 }

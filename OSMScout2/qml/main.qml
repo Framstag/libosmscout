@@ -1,14 +1,23 @@
-import QtQuick 2.2
-import QtPositioning 5.2
+import QtQuick 2.3
+
+import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
+import QtQuick.Controls.Styles 1.2
+import QtQuick.Window 2.0
+
+import QtPositioning 5.3
 
 import net.sf.libosmscout.map 1.0
 
 import "custom"
 
-Rectangle {
+Window {
     id: mainWindow
     objectName: "main"
-    color: "white"
+    title: "OSMScout"
+    visible: true
+    width: 480
+    height: 800
 
     function openSearchLocationDialog() {
         var component = Qt.createComponent("SearchLocationDialog.qml")
@@ -97,123 +106,163 @@ Rectangle {
         }
     }
 
-    Map {
-        id: map
+    GridLayout {
         anchors.fill: parent
 
-        focus: true
+        Map {
+            id: map
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            focus: true
 
-        Keys.onPressed: {
-            if (event.key === Qt.Key_Plus) {
-                map.zoomIn(2.0)
-            }
-            else if (event.key === Qt.Key_Minus) {
-                map.zoomOut(2.0)
-            }
-            else if (event.key === Qt.Key_Up) {
-                map.up()
-            }
-            else if (event.key === Qt.Key_Down) {
-                map.down()
-            }
-            else if (event.key === Qt.Key_Left) {
-                if (event.modifiers & Qt.ShiftModifier) {
-                    map.rotateLeft();
+            Keys.onPressed: {
+                if (event.key === Qt.Key_Plus) {
+                    map.zoomIn(2.0)
                 }
-                else {
-                    map.left();
+                else if (event.key === Qt.Key_Minus) {
+                    map.zoomOut(2.0)
+                }
+                else if (event.key === Qt.Key_Up) {
+                    map.up()
+                }
+                else if (event.key === Qt.Key_Down) {
+                    map.down()
+                }
+                else if (event.key === Qt.Key_Left) {
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        map.rotateLeft();
+                    }
+                    else {
+                        map.left();
+                    }
+                }
+                else if (event.key === Qt.Key_Right) {
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        map.rotateRight();
+                    }
+                    else {
+                        map.right();
+                    }
+                }
+                else if (event.modifiers===Qt.ControlModifier &&
+                         event.key === Qt.Key_F) {
+                    openSearchLocationDialog()
+                }
+                else if (event.modifiers===Qt.ControlModifier &&
+                         event.key === Qt.Key_R) {
+                    openRoutingDialog()
                 }
             }
-            else if (event.key === Qt.Key_Right) {
-                if (event.modifiers & Qt.ShiftModifier) {
-                    map.rotateRight();
+
+            // Use PinchArea for multipoint zoom in/out?
+
+
+            RowLayout {
+                id: topBar
+
+                anchors.top: parent.top;
+                anchors.topMargin: Theme.mapButtonSpace
+                anchors.left: parent.left;
+                anchors.leftMargin: Theme.mapButtonSpace
+                anchors.right: parent.right
+                anchors.rightMargin: Theme.mapButtonSpace
+
+                spacing: 0
+
+                LocationEdit2 {
+                    id: locationSearch
+
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: Theme.averageCharWidth*5
+                    Layout.preferredWidth: Theme.averageCharWidth*35
+                    Layout.maximumWidth: Theme.averageCharWidth*50
+
+                    dialogX: 0
+                    dialogY: locationSearch.height + Theme.mapButtonSpace
+                    dialogWidth: mainWindow.width - 2*Theme.mapButtonSpace
+                    dialogHeight: mainWindow.height-2*Theme.mapButtonSpace-(locationSearch.y + locationSearch.height)
                 }
-                else {
-                    map.right();
+
+                DialogActionButton {
+                    width: locationSearch.height
+                    height: locationSearch.height
+                    contentColor: "#0000ff"
+                    textColor: "white"
+                    text: "o"
                 }
             }
-            else if (event.modifiers===Qt.ControlModifier &&
-                     event.key === Qt.Key_F) {
-                openSearchLocationDialog()
+
+
+            ColumnLayout {
+                id: menu
+
+                x: Theme.mapButtonSpace
+                y: topBar.x+ topBar.height+Theme.mapButtonSpace
+
+                spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: searchLocation
+                    label: "l"
+
+                    onClicked: {
+                        openSearchLocationDialog()
+                    }
+                }
+
+                MapButton {
+                    id: route
+                    label: "#"
+
+                    onClicked: {
+                        openRoutingDialog()
+                    }
+                }
             }
-            else if (event.modifiers===Qt.ControlModifier &&
-                     event.key === Qt.Key_R) {
-                openRoutingDialog()
+
+            ColumnLayout {
+                id: info
+
+                x: Theme.mapButtonSpace
+                y: parent.height-height-Theme.mapButtonSpace
+
+                spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: about
+                    label: "?"
+
+                    onClicked: {
+                        openAboutDialog()
+                    }
+                }
             }
-        }
 
-        // Use PinchArea for multipoint zoom in/out?
-    }
+            ColumnLayout {
+                id: navigation
 
-    Column {
-        id: menu
-        anchors.top: parent.top
-        anchors.topMargin: Theme.mapButtonSpace
-        anchors.left: parent.left
-        anchors.leftMargin: Theme.mapButtonSpace
-        spacing: Theme.mapButtonSpace
+                x: parent.width-width-Theme.mapButtonSpace
+                y: parent.height-height-Theme.mapButtonSpace
 
-        MapButton {
-            id: searchLocation
-            label: "l"
+                spacing: Theme.mapButtonSpace
 
-            onClicked: {
-                openSearchLocationDialog()
-            }
-        }
+                MapButton {
+                    id: zoomIn
+                    label: "+"
 
-        MapButton {
-            id: route
-            label: "#"
+                    onClicked: {
+                        map.zoomIn(2.0)
+                    }
+                }
 
-            onClicked: {
-                openRoutingDialog()
-            }
-        }
-    }
+                MapButton {
+                    id: zoomOut
+                    label: "-"
 
-    Column {
-        id: info
-        anchors.left: parent.left
-        anchors.leftMargin: Theme.mapButtonSpace
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Theme.mapButtonSpace
-        spacing: Theme.mapButtonSpace
-
-
-        MapButton {
-            id: about
-            label: "?"
-
-            onClicked: {
-                openAboutDialog()
-            }
-        }
-    }
-
-    Column {
-        id: navigation
-        anchors.top: parent.top
-        anchors.topMargin: Theme.mapButtonSpace
-        anchors.right: parent.right
-        anchors.rightMargin: Theme.mapButtonSpace
-        spacing: Theme.mapButtonSpace
-
-        MapButton {
-            id: zoomIn
-            label: "+"
-
-            onClicked: {
-                map.zoomIn(2.0)
-            }
-        }
-
-        MapButton {
-            id: zoomOut
-            label: "-"
-
-            onClicked: {
-                map.zoomOut(2.0)
+                    onClicked: {
+                        map.zoomOut(2.0)
+                    }
+                }
             }
         }
     }

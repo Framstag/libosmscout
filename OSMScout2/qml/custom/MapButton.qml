@@ -9,7 +9,9 @@ Rectangle {
   property color defaultColor: "white"
   property color hoverColor: Qt.darker(defaultColor, 1.1)
   property string label
-  
+
+  property alias font: mapButtonLabel.font
+
   signal clicked
   
   width: Theme.mapButtonWidth
