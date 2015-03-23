@@ -28,29 +28,31 @@
 namespace osmscout {
 
   /** Constant for a description of the start node (StartDescription) */
-  const char* const RouteDescription::NODE_START_DESC       = "NodeStart";
+  const char* const RouteDescription::NODE_START_DESC        = "NodeStart";
   /** Constant for a description of the target node (TargetDescription) */
-  const char* const RouteDescription::NODE_TARGET_DESC      = "NodeTarget";
+  const char* const RouteDescription::NODE_TARGET_DESC       = "NodeTarget";
   /** Constant for a description of name of the way (NameDescription) */
-  const char* const RouteDescription::WAY_NAME_DESC         = "WayName";
+  const char* const RouteDescription::WAY_NAME_DESC          = "WayName";
   /** Constant for a description of a change of way name (NameChangedDescription) */
-  const char* const RouteDescription::WAY_NAME_CHANGED_DESC = "WayChangedName";
+  const char* const RouteDescription::WAY_NAME_CHANGED_DESC  = "WayChangedName";
   /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
-  const char* const RouteDescription::CROSSING_WAYS_DESC    = "CrossingWays";
+  const char* const RouteDescription::CROSSING_WAYS_DESC     = "CrossingWays";
   /** Constant for a description of a turn (TurnDescription) */
-  const char* const RouteDescription::DIRECTION_DESC        = "Direction";
+  const char* const RouteDescription::DIRECTION_DESC         = "Direction";
   /** Constant for doing description of an explicit turn (TurnDescription) */
-  const char* const RouteDescription::TURN_DESC             = "Turn";
+  const char* const RouteDescription::TURN_DESC              = "Turn";
   /** Constant for a description of entering a roundabout (RoundaboutEnterDescription) */
-  const char* const RouteDescription::ROUNDABOUT_ENTER_DESC = "RountaboutEnter";
+  const char* const RouteDescription::ROUNDABOUT_ENTER_DESC  = "RountaboutEnter";
   /** Constant for a description of entering a roundabout (RoundaboutLeaveDescription) */
-  const char* const RouteDescription::ROUNDABOUT_LEAVE_DESC = "RountaboutLeave";
+  const char* const RouteDescription::ROUNDABOUT_LEAVE_DESC  = "RountaboutLeave";
   /** Constant for a description of entering a motorway (MotorwayEnterDescription) */
-  const char* const RouteDescription::MOTORWAY_ENTER_DESC   = "MotorwayEnter";
+  const char* const RouteDescription::MOTORWAY_ENTER_DESC    = "MotorwayEnter";
   /** Constant for a description of changing a motorway (MotorwayChangeDescription) */
-  const char* const RouteDescription::MOTORWAY_CHANGE_DESC  = "MotorwayChange";
+  const char* const RouteDescription::MOTORWAY_CHANGE_DESC   = "MotorwayChange";
   /** Constant for a description of leaving a motorway (MotorwayLeaveDescription) */
-  const char* const RouteDescription::MOTORWAY_LEAVE_DESC   = "MotorwayLeave";
+  const char* const RouteDescription::MOTORWAY_LEAVE_DESC    = "MotorwayLeave";
+  /** Constant for a description of motorway junction (MotorwayJunctionDescription) */
+  const char* const RouteDescription::MOTORWAY_JUNCTION_DESC = "MotorwayJunction";
 
   RouteDescription::Description::~Description()
   {
@@ -372,6 +374,17 @@ namespace osmscout {
     return "Leave motorway";
   }
 
+  RouteDescription::MotorwayJunctionDescription::MotorwayJunctionDescription(NameDescription* junctionDescription)
+  : junctionDescription(junctionDescription)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::MotorwayJunctionDescription::GetDebugString() const
+  {
+    return "motorway junction";
+  }
+
   RouteDescription::Node::Node(size_t currentNodeIndex,
                                const std::vector<ObjectFileRef>& objects,
                                const ObjectFileRef& pathObject,
@@ -414,7 +427,7 @@ namespace osmscout {
   {
     this->distance=distance;
   }
-    
+
   void RouteDescription::Node::SetLocation(const GeoCoord &coord)
   {
     this->location=coord;

@@ -171,6 +171,21 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
+     * Adds driving hint based on motorway_junction tags
+     */
+    class OSMSCOUT_API MotorwayJunctionPostprocessor : public Postprocessor
+    {
+    public:
+      MotorwayJunctionPostprocessor();
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
+                   RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * \ingroup Routing
      * Generates drive instructions
      */
     class OSMSCOUT_API InstructionPostprocessor : public Postprocessor

@@ -333,9 +333,27 @@ static void DumpMotorwayEnterDescription(size_t& lineCount,
 }
 
 static void DumpMotorwayChangeDescription(size_t& lineCount,
-                                          const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription)
+                                          const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                                          const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription)
 {
   NextLine(lineCount);
+
+  if (motorwayJunctionDescription.Valid() &&
+      motorwayJunctionDescription->GetJunctionDescription().Valid()) {
+    std::cout << "At";
+
+    if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
+      std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
+
+      if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
+        std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
+      }
+    }
+
+    std::cout << std::endl;
+    NextLine(lineCount);
+  }
+
   std::cout << "Change motorway";
 
   if (motorwayChangeDescription->GetFromDescription().Valid() &&
@@ -353,10 +371,28 @@ static void DumpMotorwayChangeDescription(size_t& lineCount,
 
 static void DumpMotorwayLeaveDescription(size_t& lineCount,
                                          const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                                         const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                                          const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                                          const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
 {
   NextLine(lineCount);
+
+  if (motorwayJunctionDescription.Valid() &&
+      motorwayJunctionDescription->GetJunctionDescription().Valid()) {
+    std::cout << "At";
+
+    if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
+      std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
+
+      if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
+        std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
+      }
+    }
+
+    std::cout << std::endl;
+    NextLine(lineCount);
+  }
+
   std::cout << "Leave motorway";
 
   if (motorwayLeaveDescription->GetFromDescription().Valid() &&
@@ -585,6 +621,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::CrossingWaysPostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::DirectionPostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor());
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
 
@@ -646,6 +683,7 @@ int main(int argc, char* argv[])
   std::cout << "     At| After|  Time| After|" << std::endl;
   std::cout << "----------------------------------------------------" << std::endl;
   std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
+
   for (std::list<osmscout::RouteDescription::Node>::const_iterator node=description.Nodes().begin();
        node!=description.Nodes().end();
        ++node) {
@@ -663,6 +701,7 @@ int main(int argc, char* argv[])
     osmscout::RouteDescription::MotorwayEnterDescriptionRef    motorwayEnterDescription;
     osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
     osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
+    osmscout::RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
 
     desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
     if (desc.Valid()) {
@@ -723,6 +762,11 @@ int main(int argc, char* argv[])
     desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
     if (desc.Valid()) {
       motorwayLeaveDescription=dynamic_cast<osmscout::RouteDescription::MotorwayLeaveDescription*>(desc.Get());
+    }
+
+    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
+    if (desc.Valid()) {
+      motorwayJunctionDescription=dynamic_cast<osmscout::RouteDescription::MotorwayJunctionDescription*>(desc.Get());
     }
 
     if (crossingWaysDescription.Valid() &&
@@ -814,11 +858,13 @@ int main(int argc, char* argv[])
     }
     else if (motorwayChangeDescription.Valid()) {
       DumpMotorwayChangeDescription(lineCount,
-                                    motorwayChangeDescription);
+                                    motorwayChangeDescription,
+                                    motorwayJunctionDescription);
     }
     else if (motorwayLeaveDescription.Valid()) {
       DumpMotorwayLeaveDescription(lineCount,
                                    motorwayLeaveDescription,
+                                   motorwayJunctionDescription,
                                    directionDescription,
                                    nameDescription);
     }

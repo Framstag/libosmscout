@@ -484,6 +484,139 @@ namespace osmscout {
     return true;
   }
 
+  RoutePostprocessor::MotorwayJunctionPostprocessor::MotorwayJunctionPostprocessor()
+  {
+    // no code
+  }
+
+  bool RoutePostprocessor::MotorwayJunctionPostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
+                                                                  const RoutingProfile& /*profile*/,
+                                                                  RouteDescription& description,
+                                                                  Database& database)
+  {
+     ObjectFileRef           prevObject;
+     ObjectFileRef           curObject;
+     AreaRef                 area;
+     WayRef                  way;
+     double                  delta=1E-7;
+     std::string             junctionRef;
+     std::string             junctionName;
+     std::vector<FileOffset> nodeOffsets;
+     std::vector<NodeRef>    nodes;
+     AreaNodeIndexRef        areaNodeIndex=database.GetAreaNodeIndex();
+
+     if (areaNodeIndex.Invalid()) {
+       return false;
+     }
+
+     TypeInfoRef typeInfo=database.GetTypeConfig()->GetTypeInfo("highway_motorway_junction");
+     TypeSet     nodeTypes;
+
+     if (!typeInfo.Valid()) {
+       return false;
+     }
+
+     nodeTypes.SetType(typeInfo->GetNodeId());
+
+     RefFeatureValueReader  refReader(database.GetTypeConfig());
+     NameFeatureValueReader nameReader(database.GetTypeConfig());
+
+     for (auto& node: description.Nodes()) {
+       junctionName="";
+       junctionRef="";
+
+       // The last node does not have a pathWayId set, since we are not going anywhere!
+       if (!node.HasPathObject()) {
+         continue;
+       }
+
+       // Only load the next way, if it is different from the old one
+       curObject=node.GetPathObject();
+
+       if (curObject==prevObject) {
+         continue;
+       }
+
+       switch (node.GetPathObject().GetType()) {
+       case refNone:
+       case refNode:
+         assert(false);
+         break;
+       case refArea:
+         if (!database.GetAreaByOffset(curObject.GetFileOffset(),
+                                       area)) {
+           log.Error()<< "Error while loading area with offset " << curObject.GetFileOffset();
+           return false;
+         }
+         break;
+       case refWay:
+         if (!database.GetWayByOffset(curObject.GetFileOffset(),
+                                      way)) {
+           log.Error() << "Error while loading way with offset " << curObject.GetFileOffset();
+           return false;
+         }
+
+         double lat,lon;
+
+         way->GetCoordinates(node.GetCurrentNodeIndex(),
+                             lat,lon);
+
+         nodeOffsets.clear();
+         if (!areaNodeIndex->GetOffsets(lon-delta,lat-delta,lon+delta,lat+delta,
+                                        nodeTypes,
+                                        100,
+                                        nodeOffsets)) {
+           log.Error() << "Error getting nodes from area node index!";
+           return false;
+         }
+
+         if (nodeOffsets.empty()) {
+           continue;
+         }
+
+         nodes.clear();
+         std::sort(nodeOffsets.begin(),nodeOffsets.end());
+
+         if (!database.GetNodesByOffset(nodeOffsets,
+                                        nodes)) {
+           log.Error() << "Error reading nodes in area!";
+           return false;
+         }
+
+         for (size_t i=0; i<nodes.size(); i++) {
+           if (fabs(nodes[i]->GetCoords().GetLat() - lat) < delta &&
+               fabs(nodes[i]->GetCoords().GetLon() - lon) < delta) {
+             RefFeatureValue *refFeatureValue=refReader.GetValue(nodes[i]->GetFeatureValueBuffer());
+
+             if (refFeatureValue!=NULL) {
+               junctionRef=refFeatureValue->GetRef();
+             }
+
+             NameFeatureValue *nameFeatureValue=nameReader.GetValue(nodes[i]->GetFeatureValueBuffer());
+
+             if (nameFeatureValue!=NULL) {
+               junctionName = nameFeatureValue->GetName();
+             }
+
+             break;
+           }
+         }
+
+         break;
+       }
+
+       if (junctionName != "" || junctionRef != "") {
+         node.AddDescription(RouteDescription::MOTORWAY_JUNCTION_DESC,
+                             new RouteDescription::MotorwayJunctionDescription(new RouteDescription::NameDescription(junctionName,
+                                                                                                                     junctionRef)));
+       }
+
+       prevObject=curObject;
+     }
+
+     return true;
+  }
+
   RoutePostprocessor::InstructionPostprocessor::State RoutePostprocessor::InstructionPostprocessor::GetInitialState(const RoutePostprocessor& postprocessor,
                                                                                                                     RouteDescription::Node& node)
   {

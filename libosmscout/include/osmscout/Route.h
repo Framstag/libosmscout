@@ -74,6 +74,8 @@ namespace osmscout {
     static const char* const MOTORWAY_CHANGE_DESC;
     /** Constant for a description of leaving a motorway (MotorwayLeaveDescription) */
     static const char* const MOTORWAY_LEAVE_DESC;
+    /** Constant for a description of node describing a motorway junction */
+    static const char* const MOTORWAY_JUNCTION_DESC;
 
   public:
     /**
@@ -423,6 +425,28 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
+     * A motorway junction
+     */
+    class OSMSCOUT_API MotorwayJunctionDescription : public Description
+    {
+    private:
+      NameDescriptionRef junctionDescription;
+
+    public:
+      MotorwayJunctionDescription(NameDescription* junctionDescription);
+
+      std::string GetDebugString() const;
+
+      inline const NameDescriptionRef& GetJunctionDescription() const
+      {
+        return junctionDescription;
+      }
+    };
+
+    typedef Ref<MotorwayJunctionDescription> MotorwayJunctionDescriptionRef;
+
+    /**
+     * \ingroup Routing
      */
     class OSMSCOUT_API Node
     {
@@ -504,7 +528,7 @@ namespace osmscout {
       {
         return time;
       }
-        
+
       /**
        * Location (latitude,longitude) of the node
        */
