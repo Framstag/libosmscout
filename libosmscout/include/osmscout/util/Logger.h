@@ -31,6 +31,12 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Logging
+   * A logger is a special output stream. It can direct internal output to either the
+   * console, a file or some other (possibly OS specific) output sink. The actual
+   * destination is defined by passing a Destination instance to a Line instance.
+   */
   class OSMSCOUT_API Logger
   {
   public:
@@ -41,13 +47,29 @@ namespace osmscout {
       ERROR
     };
 
+    /**
+     * \ingroup Logging
+     * Abstract base class for printing log information to a specific
+     * output sink.
+     */
     class OSMSCOUT_API Destination
     {
     public:
       virtual ~Destination();
 
+      /**
+       * Print a std::string
+       */
       virtual void Print(const std::string& value) = 0;
+
+      /**
+       * Print a const char*
+       */
       virtual void Print(const char* value) = 0;
+
+      /**
+       * Print a boolean value (values are printed as "true" or "false")
+       */
       virtual void Print(bool value) = 0;
       virtual void Print(short value) = 0;
       virtual void Print(unsigned short value) = 0;
@@ -55,9 +77,21 @@ namespace osmscout {
       virtual void Print(unsigned int value) = 0;
       virtual void Print(long value) = 0;
       virtual void Print(unsigned long value) = 0;
+
+      /**
+       * Finish printing the line. Internally called by the Line instance on destruction
+       * of the Line.
+       */
       virtual void PrintLn() = 0;
     };
 
+    /**
+     * \ingroup Logging
+     * A log consists of a number of lines. A line is implicitly
+     * created by the logger if instructing it to start logging
+     * in a certain log level. The Logger at this point
+     * passes the Line a destination.
+     */
     class OSMSCOUT_API Line
     {
     private:
@@ -141,21 +175,49 @@ namespace osmscout {
       }
     };
 
+  protected:
+    /**
+     * The actual logging method, Debug(), Info(), Warn() and Error() are dispatching to.
+     */
+    virtual Line Log(Level level) = 0;
+
   public:
     Logger();
     virtual ~Logger();
 
-    virtual Line Log(Level level) = 0;
-
+    /**
+     * Start logging a line of debug output
+     */
     Line Debug();
+
+    /**
+     * Start logging a line of informational output
+     */
     Line Info();
+
+    /**
+     * Start logging a line of warning output (there is a potential problem, but
+     * the application could handle it)
+     */
     Line Warn();
+
+    /**
+     * Start logging a line of error output
+     */
     Line Error();
   };
 
+  /**
+   * \ingroup Logging
+   * Special Logger that just does *not* output the logged information.
+   */
   class OSMSCOUT_API NoOpLogger : public Logger
   {
   private:
+    /**
+     * \ingroup Logging
+     * Special "no operation" destination.
+     */
     class OSMSCOUT_API NoOpDestination : public Destination
     {
     public:
@@ -220,9 +282,20 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Logging
+   *  The StreamLogger allows to direct logging output to a standard library std::ostream.
+   *  IT allows to assign one stream for DEBUG and INFO logging and a different stream
+   *  for WARN and ERROR log output.
+   */
   class OSMSCOUT_API StreamLogger : public Logger
   {
   private:
+    /**
+     * \ingroup Logging
+     * Special Destination implementation that delegates printing to the assigned
+     * std::ostream.
+     */
     class OSMSCOUT_API StreamDestination : public Destination
     {
     private:
@@ -254,12 +327,22 @@ namespace osmscout {
     Line Log(Level level);
   };
 
+  /**
+   * \ingroup Logging
+   * The console logger extends the StreamLogger by assigning std::cout for normal
+   * loging output and std::cerr for error output.
+   */
   class OSMSCOUT_API ConsoleLogger : public StreamLogger
   {
   public:
     ConsoleLogger();
   };
 
+  /**
+   * \ingroup Logging
+   * Simple logging proxy object that encapsulates one exchangeable global
+   * logger instance. Log should behave as Logger in all other cases.
+   */
   class OSMSCOUT_API Log
   {
   private:
@@ -310,9 +393,27 @@ namespace osmscout {
     Logger::Line Error();
   };
 
+  /**
+   * \ingroup Logging
+   * The one an donly global instance of the logger that should get used
+   * for all logging output.
+   */
   extern OSMSCOUT_API Log log;
 }
 
-#define OSMSCOUT_L (osmscout::Logger::GetGlobalInstance())
+/**
+ * \defgroup Logging
+ *
+   * A logger is a special output stream, that is used by the library.
+   *
+   * The logger has a uniform interface independent of the actual
+   * data sink the information is stored to.
+   *
+   * This allows the application developer (and library user) to
+   * redirect logging output either to the console, to some special
+   * OS information sink, to "nowhere", to a file or any other location.
+   *
+   * The actual logger used can get exchanged by using Log::SetLogger.
+ */
 
 #endif
