@@ -151,6 +151,20 @@ namespace osmscout {
     stream << value;
   }
 
+#if defined(OSMSCOUT_HAVE_LONG_LONG)
+  void StreamLogger::StreamDestination::Print(long long value)
+  {
+    stream << value;
+  }
+#endif
+
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+  void StreamLogger::StreamDestination::Print(unsigned long long value)
+  {
+    stream << value;
+  }
+#endif
+
   void StreamLogger::StreamDestination::PrintLn()
   {
     stream << std::endl;

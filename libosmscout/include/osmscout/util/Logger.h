@@ -77,6 +77,12 @@ namespace osmscout {
       virtual void Print(unsigned int value) = 0;
       virtual void Print(long value) = 0;
       virtual void Print(unsigned long value) = 0;
+#if defined(OSMSCOUT_HAVE_LONG_LONG)
+      virtual void Print(long long value) = 0;
+#endif
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+      virtual void Print(unsigned long long value) = 0;
+#endif
 
       /**
        * Finish printing the line. Internally called by the Line instance on destruction
@@ -163,6 +169,24 @@ namespace osmscout {
 
         return *this;
       }
+
+#if defined(OSMSCOUT_HAVE_LONG_LONG)
+      inline Line& operator<<(long long value)
+      {
+        destination.Print(value);
+
+        return *this;
+      }
+#endif
+
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+      inline Line& operator<<(unsigned long long value)
+      {
+        destination.Print(value);
+
+        return *this;
+      }
+#endif
 
       Line& operator<<(float value);
       Line& operator<<(double value);
@@ -266,6 +290,20 @@ namespace osmscout {
         // no code
       }
 
+#if defined(OSMSCOUT_HAVE_LONG_LONG)
+      inline void Print(long long /*value*/)
+      {
+        // no code
+      }
+#endif
+
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+      inline void Print(unsigned long long /*value*/)
+      {
+        // no code
+      }
+#endif
+
       inline void PrintLn()
       {
         // no code
@@ -313,6 +351,12 @@ namespace osmscout {
       void Print(unsigned int value);
       void Print(long value);
       void Print(unsigned long value);
+#if defined(OSMSCOUT_HAVE_LONG_LONG)
+      void Print(long long value);
+#endif
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+      void Print(unsigned long long value);
+#endif
       void PrintLn();
     };
 
