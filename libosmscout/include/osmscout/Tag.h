@@ -36,6 +36,8 @@ namespace osmscout {
 
   typedef uint16_t TagId;
 
+  typedef std::unordered_map<TagId,std::string> TagMap;
+
   /**
    * \ingroup type
    *
@@ -53,7 +55,7 @@ namespace osmscout {
   public:
     virtual ~TagCondition();
 
-    virtual bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const = 0;
+    virtual bool Evaluate(const TagMap& tagMap) const = 0;
   };
 
   /**
@@ -76,7 +78,7 @@ namespace osmscout {
   public:
     TagNotCondition(TagCondition* condition);
 
-    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const;
   };
 
   /**
@@ -102,7 +104,7 @@ namespace osmscout {
 
     void AddCondition(TagCondition* condition);
 
-    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const;
   };
 
   /**
@@ -118,7 +120,7 @@ namespace osmscout {
   public:
     TagExistsCondition(TagId tag);
 
-    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const;
   };
 
   /**
@@ -150,7 +152,7 @@ namespace osmscout {
                        BinaryOperator binaryOperator,
                        const size_t& tagValue);
 
-    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const;
   };
 
   /**
@@ -170,7 +172,7 @@ namespace osmscout {
 
     void AddTagValue(const std::string& tagValue);
 
-    bool Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const;
   };
 
   /**

@@ -130,7 +130,7 @@ namespace osmscout {
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
-               const std::unordered_map<TagId,std::string>& tags);
+               const TagMap& tags);
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     bool Write(const TypeConfig& typeConfig,

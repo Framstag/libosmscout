@@ -233,7 +233,7 @@ namespace osmscout {
   void FeatureValueBuffer::Parse(Progress& progress,
                                  const TypeConfig& typeConfig,
                                  const ObjectOSMRef& object,
-                                 const std::unordered_map<TagId,std::string>& tags)
+                                 const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(progress,
@@ -1085,7 +1085,7 @@ namespace osmscout {
     return true;
   }
 
-  TypeInfoRef TypeConfig::GetNodeType(const std::unordered_map<TagId,std::string>& tagMap) const
+  TypeInfoRef TypeConfig::GetNodeType(const TagMap& tagMap) const
   {
     if (tagMap.empty()) {
       return typeInfoIgnore;
@@ -1111,7 +1111,7 @@ namespace osmscout {
     return typeInfoIgnore;
   }
 
-  bool TypeConfig::GetWayAreaType(const std::unordered_map<TagId,std::string>& tagMap,
+  bool TypeConfig::GetWayAreaType(const TagMap& tagMap,
                                   TypeInfoRef& wayType,
                                   TypeInfoRef& areaType) const
   {
@@ -1157,7 +1157,7 @@ namespace osmscout {
     return false;
   }
 
-  TypeInfoRef TypeConfig::GetRelationType(const std::unordered_map<TagId,std::string>& tagMap) const
+  TypeInfoRef TypeConfig::GetRelationType(const TagMap& tagMap) const
   {
     if (tagMap.empty()) {
       return typeInfoIgnore;

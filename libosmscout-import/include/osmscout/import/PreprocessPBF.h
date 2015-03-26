@@ -38,9 +38,9 @@ namespace osmscout {
   class PreprocessPBF : public Preprocess
   {
   private:
-    std::unordered_map<TagId,std::string> tagMap;
-    std::vector<OSMId>                    nodes;
-    std::vector<RawRelation::Member>      members;
+    TagMap                           tagMap;
+    std::vector<OSMId>               nodes;
+    std::vector<RawRelation::Member> members;
 
   private:
     void ReadNodes(const TypeConfig& typeConfig,

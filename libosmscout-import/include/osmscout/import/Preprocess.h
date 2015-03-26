@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include <osmscout/Coord.h>
+#include <osmscout/Tag.h>
 #include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/FileWriter.h>
@@ -82,18 +83,18 @@ namespace osmscout {
                     const GeoCoord& coord);
 
     bool IsTurnRestriction(const TypeConfig& typeConfig,
-                           const std::unordered_map<TagId,std::string>& tags,
+                           const TagMap& tags,
                            TurnRestriction::Type& type) const;
 
     void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
                                 TurnRestriction::Type type);
 
     bool IsMultipolygon(const TypeConfig& typeConfig,
-                        const std::unordered_map<TagId,std::string>& tags,
+                        const TagMap& tags,
                         TypeInfoRef& type);
 
     void ProcessMultipolygon(const TypeConfig& typeConfig,
-                             const std::unordered_map<TagId,std::string>& tags,
+                             const TagMap& tags,
                              const std::vector<RawRelation::Member>& members,
                              OSMId id,
                              const TypeInfoRef& type);
@@ -111,15 +112,15 @@ namespace osmscout {
     void ProcessNode(const TypeConfig& typeConfig,
                      const OSMId& id,
                      const double& lon, const double& lat,
-                     const std::unordered_map<TagId,std::string>& tags);
+                     const TagMap& tags);
     void ProcessWay(const TypeConfig& typeConfig,
                     const OSMId& id,
                     std::vector<OSMId>& nodes,
-                    const std::unordered_map<TagId,std::string>& tags);
+                    const TagMap& tags);
     void ProcessRelation(const TypeConfig& typeConfig,
                          const OSMId& id,
                          const std::vector<RawRelation::Member>& members,
-                         const std::unordered_map<TagId,std::string>& tags);
+                         const TagMap& tags);
 
     bool Cleanup(const TypeConfigRef& typeConfig,
                  const ImportParameter& parameter,

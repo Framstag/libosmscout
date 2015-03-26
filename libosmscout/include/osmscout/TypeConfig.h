@@ -135,7 +135,7 @@ namespace osmscout {
                        const TypeConfig& typeConfig,
                        const FeatureInstance& feature,
                        const ObjectOSMRef& object,
-                       const std::unordered_map<TagId,std::string>& tags,
+                       const TagMap& tags,
                        FeatureValueBuffer& buffer) const = 0;
   };
 
@@ -913,7 +913,7 @@ namespace osmscout {
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags);
+               const TagMap& tags);
 
     bool Read(FileScanner& scanner);
     bool Read(FileScanner& scanner,
@@ -1154,7 +1154,7 @@ namespace osmscout {
      * node type definitions, evaluates their conditions and returns the first matching
      * type.
      */
-    TypeInfoRef GetNodeType(const std::unordered_map<TagId,std::string>& tagMap) const;
+    TypeInfoRef GetNodeType(const TagMap& tagMap) const;
 
     /**
      * Return a way/area type (or an invalid reference if no type got detected)
@@ -1162,7 +1162,7 @@ namespace osmscout {
      * way/area type definitions, evaluates their conditions and returns the first matching
      * type.
      */
-    bool GetWayAreaType(const std::unordered_map<TagId,std::string>& tagMap,
+    bool GetWayAreaType(const TagMap& tagMap,
                         TypeInfoRef& wayType,
                         TypeInfoRef& areaType) const;
 
@@ -1172,7 +1172,7 @@ namespace osmscout {
      * relation type definitions, evaluates their conditions and returns the first matching
      * type.
      */
-    TypeInfoRef GetRelationType(const std::unordered_map<TagId,std::string>& tagMap) const;
+    TypeInfoRef GetRelationType(const TagMap& tagMap) const;
     //@}
 
     /**

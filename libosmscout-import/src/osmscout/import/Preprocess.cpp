@@ -114,7 +114,7 @@ namespace osmscout {
   }
 
   bool Preprocess::IsTurnRestriction(const TypeConfig& typeConfig,
-                                     const std::unordered_map<TagId,std::string>& tags,
+                                     const TagMap& tags,
                                      TurnRestriction::Type& type) const
   {
     auto typeValue=tags.find(typeConfig.tagType);
@@ -199,7 +199,7 @@ namespace osmscout {
   }
 
   bool Preprocess::IsMultipolygon(const TypeConfig& typeConfig,
-                                  const std::unordered_map<TagId,std::string>& tags,
+                                  const TagMap& tags,
                                   TypeInfoRef& type)
   {
     type=typeConfig.GetRelationType(tags);
@@ -222,7 +222,7 @@ namespace osmscout {
   }
 
   void Preprocess::ProcessMultipolygon(const TypeConfig& typeConfig,
-                                       const std::unordered_map<TagId,std::string>& tags,
+                                       const TagMap& tags,
                                        const std::vector<RawRelation::Member>& members,
                                        OSMId id,
                                        const TypeInfoRef& type)
@@ -373,7 +373,7 @@ namespace osmscout {
                                const OSMId& id,
                                const double& lon,
                                const double& lat,
-                               const std::unordered_map<TagId,std::string>& tagMap)
+                               const TagMap& tagMap)
   {
     RawNode      node;
     ObjectOSMRef object(id,
@@ -418,7 +418,7 @@ namespace osmscout {
   void Preprocess::ProcessWay(const TypeConfig& typeConfig,
                               const OSMId& id,
                               std::vector<OSMId>& nodes,
-                              const std::unordered_map<TagId,std::string>& tagMap)
+                              const TagMap& tagMap)
   {
     TypeInfoRef areaType;
     TypeInfoRef wayType;
@@ -583,7 +583,7 @@ namespace osmscout {
   void Preprocess::ProcessRelation(const TypeConfig& typeConfig,
                                    const OSMId& id,
                                    const std::vector<RawRelation::Member>& members,
-                                   const std::unordered_map<TagId,std::string>& tagMap)
+                                   const TagMap& tagMap)
   {
     if (id<lastRelationId) {
       relationSortingError=true;

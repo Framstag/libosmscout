@@ -58,7 +58,7 @@ namespace osmscout {
 
   void RawNode::Parse(Progress& progress,
                       const TypeConfig& typeConfig,
-                      const std::unordered_map<TagId,std::string>& tags)
+                      const TagMap& tags)
   {
     ObjectOSMRef object(id,
                         osmRefNode);

@@ -92,7 +92,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -160,7 +160,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -229,7 +229,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -289,7 +289,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -361,7 +361,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -589,7 +589,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -613,7 +613,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -673,7 +673,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -733,7 +733,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -793,7 +793,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -854,7 +854,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -914,7 +914,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -938,7 +938,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -962,7 +962,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -986,7 +986,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 
@@ -1058,7 +1058,7 @@ namespace osmscout {
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
-               const std::unordered_map<TagId,std::string>& tags,
+               const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
 

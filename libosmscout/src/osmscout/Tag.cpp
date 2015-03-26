@@ -36,7 +36,7 @@ namespace osmscout {
     // no code
   }
 
-  bool TagNotCondition::Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const
+  bool TagNotCondition::Evaluate(const TagMap& tagMap) const
   {
     return !condition->Evaluate(tagMap);
   }
@@ -52,7 +52,7 @@ namespace osmscout {
     conditions.push_back(condition);
   }
 
-  bool TagBoolCondition::Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const
+  bool TagBoolCondition::Evaluate(const TagMap& tagMap) const
   {
     switch (type) {
     case boolAnd:
@@ -84,7 +84,7 @@ namespace osmscout {
     // no code
   }
 
-  bool TagExistsCondition::Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const
+  bool TagExistsCondition::Evaluate(const TagMap& tagMap) const
   {
     return tagMap.find(tag)!=tagMap.end();
   }
@@ -112,7 +112,7 @@ namespace osmscout {
     // no code
   }
 
-  bool TagBinaryCondition::Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const
+  bool TagBinaryCondition::Evaluate(const TagMap& tagMap) const
   {
     auto t=tagMap.find(tag);
 
@@ -185,7 +185,7 @@ namespace osmscout {
     tagValues.insert(tagValue);
   }
 
-  bool TagIsInCondition::Evaluate(const std::unordered_map<TagId,std::string>& tagMap) const
+  bool TagIsInCondition::Evaluate(const TagMap& tagMap) const
   {
     auto t=tagMap.find(tag);
 
