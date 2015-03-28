@@ -26,6 +26,7 @@
 
 #include <osmscout/GeoCoord.h>
 
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
 
 namespace osmscout {
@@ -220,8 +221,7 @@ namespace osmscout {
     /**
      * Returns the bounding box of the area covered
      */
-    virtual bool GetDimensions(double& lonMin, double& latMin,
-                               double& lonMax, double& latMax) const = 0;
+    virtual bool GetDimensions(GeoBox& boundingBox) const = 0;
 
     /**
      * Returns the size of a pixel in meter
@@ -389,8 +389,7 @@ namespace osmscout {
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
-    bool GetDimensions(double& lonMin, double& latMin,
-                       double& lonMax, double& latMax) const;
+    bool GetDimensions(GeoBox& boundingBox) const;
 
     double GetPixelSize() const;
 
@@ -547,8 +546,7 @@ namespace osmscout {
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
-    bool GetDimensions(double& lonMin, double& latMin,
-                       double& lonMax, double& latMax) const;
+    bool GetDimensions(GeoBox& boundingBox) const;
 
   protected:
      bool GeoToPixel(const BatchTransformer& transformData) const;

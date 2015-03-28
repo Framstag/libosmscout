@@ -278,17 +278,17 @@ QString MapWidget::zoomLevelName() {
 void MapWidget::left()
 {
     osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    osmscout::GeoBox             boundingBox;
 
     projection.Set(center.GetLon(),
                    center.GetLat(),
                    magnification,
                    width(),height());
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.GetDimensions(boundingBox);
 
     center.Set(center.GetLat(),
-               center.GetLon()-(lonMax-lonMin)*0.3);
+               center.GetLon()-boundingBox.GetWidth()*0.3);
 
     TriggerMapRendering();
 }
@@ -296,17 +296,17 @@ void MapWidget::left()
 void MapWidget::right()
 {
     osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    osmscout::GeoBox             boundingBox;
 
     projection.Set(center.GetLon(),
                    center.GetLat(),
                    magnification,
                    width(),height());
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.GetDimensions(boundingBox);
 
     center.Set(center.GetLat(),
-               center.GetLon()+(lonMax-lonMin)*0.3);
+               center.GetLon()+boundingBox.GetWidth()*0.3);
 
     TriggerMapRendering();
 }
@@ -314,16 +314,16 @@ void MapWidget::right()
 void MapWidget::up()
 {
     osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    osmscout::GeoBox             boundingBox;
 
     projection.Set(center.GetLon(),
                    center.GetLat(),
                    magnification,
                    width(),height());
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.GetDimensions(boundingBox);
 
-    center.Set(center.GetLat()+(latMax-latMin)*0.3,
+    center.Set(center.GetLat()+boundingBox.GetHeight()*0.3,
                center.GetLon());
 
     TriggerMapRendering();
@@ -332,16 +332,16 @@ void MapWidget::up()
 void MapWidget::down()
 {
     osmscout::MercatorProjection projection;
-    double                       lonMin,latMin,lonMax,latMax;
+    osmscout::GeoBox             boundingBox;
 
     projection.Set(center.GetLon(),
                    center.GetLat(),
                    magnification,
                    width(),height());
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.GetDimensions(boundingBox);
 
-    center.Set(center.GetLat()-(latMax-latMin)*0.3,
+    center.Set(center.GetLat()-boundingBox.GetHeight()*0.3,
                center.GetLon());
 
     TriggerMapRendering();

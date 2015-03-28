@@ -205,33 +205,33 @@ int main(int argc, char* argv[])
 
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
       for (size_t x=xTileStart; x<=xTileEnd; x++) {
-        double              minLat2,minLat,lat,maxLat,maxLat2;
-        double              minLon2,minLon,lon,maxLon,maxLon2;
         agg::pixfmt_rgb24   pf(rbuf);
         osmscout::StopClock timer;
+        osmscout::GeoBox    boundingBox1;
+        osmscout::GeoBox    boundingBox2;
+        osmscout::GeoCoord  center;
 
-        minLat2=osmscout::TileYToLat(y+2,
-                                     magnification);
-        minLat=osmscout::TileYToLat(y+1,
-                                    magnification);
-        maxLat=osmscout::TileYToLat(y,
-                                    magnification);
-        maxLat2=osmscout::TileYToLat(y-1,
-                                     magnification);
+        boundingBox1.Set(osmscout::GeoCoord(osmscout::TileYToLat(y+1,
+                                                                 magnification),
+                                            osmscout::TileXToLon(x,
+                                                                 magnification)),
+                         osmscout::GeoCoord(osmscout::TileYToLat(y,
+                                                                 magnification),
+                                            osmscout::TileXToLon(x+1,
+                                                                 magnification)));
 
-        minLon2=osmscout::TileXToLon(x-1,
-                                     magnification);
-        minLon=osmscout::TileXToLon(x,
-                                    magnification);
-        maxLon=osmscout::TileXToLon(x+1,
-                                    magnification);
-        maxLon2=osmscout::TileXToLon(x+2,
-                                     magnification);
+        boundingBox2.Set(osmscout::GeoCoord(osmscout::TileYToLat(y+2,
+                                                                 magnification),
+                                            osmscout::TileXToLon(x-1,
+                                                                 magnification)),
+                         osmscout::GeoCoord(osmscout::TileYToLat(y-1,
+                                                                 magnification),
+                                            osmscout::TileXToLon(x+2,
+                                                                 magnification)));
 
-        lat=(minLat+maxLat)/2;
-        lon=(minLon+maxLon)/2;
+        center=boundingBox1.GetCenter();
 
-        std::cout << "Drawing tile [" << minLat << "," << lat << "," << maxLat << "]x[" << minLon << "," << lon << "," << maxLon << "]" << std::endl;
+        std::cout << "Drawing tile with bounding box " << boundingBox1.GetDisplayText() << " and center " << center.GetDisplayText() << std::endl;
         //std::cout << x << "," << y << "/";
         //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
 
@@ -245,22 +245,13 @@ int main(int argc, char* argv[])
         mapService->GetObjects(searchParameter,
                                projection.GetMagnification(),
                                nodeTypes,
-                               minLon2,
-                               minLat2,
-                               maxLon2,
-                               maxLat2,
+                               boundingBox2,
                                data.nodes,
                                wayTypes,
-                               minLon,
-                               minLat,
-                               maxLon,
-                               maxLat,
+                               boundingBox1,
                                data.ways,
                                areaTypes,
-                               minLon2,
-                               minLat2,
-                               maxLon2,
-                               maxLat2,
+                               boundingBox2,
                                data.areas);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+

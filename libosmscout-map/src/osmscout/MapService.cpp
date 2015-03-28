@@ -132,8 +132,7 @@ namespace osmscout {
 
   bool MapService::GetObjectsNodes(const AreaSearchParameter& parameter,
                                    const TypeSet &nodeTypes,
-                                   double lonMin, double latMin,
-                                   double lonMax, double latMax,
+                                   const GeoBox& boundingBox,
                                    std::string& nodeIndexTime,
                                    std::string& nodesTime,
                                    std::vector<NodeRef>& nodes) const
@@ -154,7 +153,10 @@ namespace osmscout {
     StopClock               nodeIndexTimer;
 
     if (nodeTypes.HasTypes()) {
-      if (!areaNodeIndex->GetOffsets(lonMin,latMin,lonMax,latMax,
+      if (!areaNodeIndex->GetOffsets(boundingBox.GetMinLon(),
+                                     boundingBox.GetMinLat(),
+                                     boundingBox.GetMaxLon(),
+                                     boundingBox.GetMaxLat(),
                                      nodeTypes,
                                      parameter.GetMaximumNodes(),
                                      nodeOffsets)) {
@@ -197,8 +199,7 @@ namespace osmscout {
   bool MapService::GetObjectsAreas(const AreaSearchParameter& parameter,
                                    const TypeSet& areaTypes,
                                    const Magnification& magnification,
-                                   double lonMin, double latMin,
-                                   double lonMax, double latMax,
+                                   const GeoBox& boundingBox,
                                    std::string& areaOptimizedTime,
                                    std::string& areaIndexTime,
                                    std::string& areasTime,
@@ -235,10 +236,10 @@ namespace osmscout {
     if (internalAreaTypes.HasTypes()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        optimizeAreasLowZoom->GetAreas(lonMin,
-                                       latMin,
-                                       lonMax,
-                                       latMax,
+        optimizeAreasLowZoom->GetAreas(boundingBox.GetMinLon(),
+                                       boundingBox.GetMinLat(),
+                                       boundingBox.GetMaxLon(),
+                                       boundingBox.GetMaxLat(),
                                        magnification,
                                        parameter.GetMaximumWays(),
                                        internalAreaTypes,
@@ -258,10 +259,10 @@ namespace osmscout {
 
     if (internalAreaTypes.HasTypes()) {
       if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                     lonMin,
-                                     latMin,
-                                     lonMax,
-                                     latMax,
+                                     boundingBox.GetMinLon(),
+                                     boundingBox.GetMinLat(),
+                                     boundingBox.GetMaxLon(),
+                                     boundingBox.GetMaxLat(),
                                      magnification.GetLevel()+
                                      parameter.GetMaximumAreaLevel(),
                                      internalAreaTypes,
@@ -321,8 +322,7 @@ namespace osmscout {
   bool MapService::GetObjectsWays(const AreaSearchParameter& parameter,
                                   const std::vector<TypeSet>& wayTypes,
                                   const Magnification& magnification,
-                                  double lonMin, double latMin,
-                                  double lonMax, double latMax,
+                                  const GeoBox& boundingBox,
                                   std::string& wayOptimizedTime,
                                   std::string& wayIndexTime,
                                   std::string& waysTime,
@@ -357,10 +357,10 @@ namespace osmscout {
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        optimizeWaysLowZoom->GetWays(lonMin,
-                                     latMin,
-                                     lonMax,
-                                     latMax,
+        optimizeWaysLowZoom->GetWays(boundingBox.GetMinLon(),
+                                     boundingBox.GetMinLat(),
+                                     boundingBox.GetMaxLon(),
+                                     boundingBox.GetMaxLat(),
                                      magnification,
                                      parameter.GetMaximumWays(),
                                      internalWayTypes,
@@ -379,10 +379,10 @@ namespace osmscout {
     StopClock               wayIndexTimer;
 
     if (!internalWayTypes.empty()) {
-      if (!areaWayIndex->GetOffsets(lonMin,
-                                    latMin,
-                                    lonMax,
-                                    latMax,
+      if (!areaWayIndex->GetOffsets(boundingBox.GetMinLon(),
+                                    boundingBox.GetMinLat(),
+                                    boundingBox.GetMaxLon(),
+                                    boundingBox.GetMaxLat(),
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
                                     offsets)) {
@@ -445,9 +445,9 @@ namespace osmscout {
     osmscout::TypeSet              nodeTypes;
     std::vector<osmscout::TypeSet> wayTypes;
     osmscout::TypeSet              areaTypes;
-    double                         lonMin,lonMax,latMin,latMax;
+    GeoBox                         boundingBox;
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.GetDimensions(boundingBox);
 
     styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
                                        nodeTypes);
@@ -461,22 +461,13 @@ namespace osmscout {
     return GetObjects(parameter,
                       projection.GetMagnification(),
                       nodeTypes,
-                      lonMin,
-                      latMin,
-                      lonMax,
-                      latMax,
+                      boundingBox,
                       data.nodes,
                       wayTypes,
-                      lonMin,
-                      latMin,
-                      lonMax,
-                      latMax,
+                      boundingBox,
                       data.ways,
                       areaTypes,
-                      lonMin,
-                      latMin,
-                      lonMax,
-                      latMax,
+                      boundingBox,
                       data.areas);
   }
 
@@ -560,16 +551,13 @@ namespace osmscout {
   bool MapService::GetObjects(const AreaSearchParameter& parameter,
                               const Magnification& magnification,
                               const TypeSet &nodeTypes,
-                              double nodeLonMin, double nodeLatMin,
-                              double nodeLonMax, double nodeLatMax,
+                              const GeoBox& nodeBoundingBox,
                               std::vector<NodeRef>& nodes,
                               const std::vector<TypeSet>& wayTypes,
-                              double wayLonMin, double wayLatMin,
-                              double wayLonMax, double wayLatMax,
+                              const GeoBox& wayBoundingBox,
                               std::vector<WayRef>& ways,
                               const TypeSet& areaTypes,
-                              double areaLonMin, double areaLatMin,
-                              double areaLonMax, double areaLatMax,
+                              const GeoBox& areaBoundingBox,
                               std::vector<AreaRef>& areas) const
   {
     std::string nodeIndexTime;
@@ -593,10 +581,7 @@ namespace osmscout {
 #pragma omp section
       nodesSuccess=GetObjectsNodes(parameter,
                                    nodeTypes,
-                                   nodeLonMin,
-                                   nodeLatMin,
-                                   nodeLonMax,
-                                   nodeLatMax,
+                                   nodeBoundingBox,
                                    nodeIndexTime,
                                    nodesTime,
                                    nodes);
@@ -605,10 +590,7 @@ namespace osmscout {
       waysSuccess=GetObjectsWays(parameter,
                                  wayTypes,
                                  magnification,
-                                 wayLonMin,
-                                 wayLatMin,
-                                 wayLonMax,
-                                 wayLatMax,
+                                 wayBoundingBox,
                                  wayOptimizedTime,
                                  wayIndexTime,
                                  waysTime,
@@ -618,10 +600,7 @@ namespace osmscout {
       areasSuccess=GetObjectsAreas(parameter,
                                    areaTypes,
                                    magnification,
-                                   areaLonMin,
-                                   areaLatMin,
-                                   areaLonMax,
-                                   areaLatMax,
+                                   areaBoundingBox,
                                    areaOptimizedTime,
                                    areaIndexTime,
                                    areasTime,
@@ -658,11 +637,11 @@ namespace osmscout {
   bool MapService::GetGroundTiles(const Projection& projection,
                                   std::list<GroundTile>& tiles) const
   {
-    double lonMin,lonMax,latMin,latMax;
+    GeoBox boundingBox;
 
-    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+    projection.GetDimensions(boundingBox);
 
-    return GetGroundTiles(lonMin,latMin,lonMax,latMax,
+    return GetGroundTiles(boundingBox,
                           projection.GetMagnification(),
                           tiles);
   }
@@ -687,8 +666,7 @@ namespace osmscout {
    * @return
    *    False, if there was an error, else true.
    */
-  bool MapService::GetGroundTiles(double lonMin, double latMin,
-                                  double lonMax, double latMax,
+  bool MapService::GetGroundTiles(const GeoBox& boundingBox,
                                   const Magnification& magnification,
                                   std::list<GroundTile>& tiles) const
   {
@@ -700,10 +678,10 @@ namespace osmscout {
 
     StopClock timer;
 
-    if (!waterIndex->GetRegions(lonMin,
-                                latMin,
-                                lonMax,
-                                latMax,
+    if (!waterIndex->GetRegions(boundingBox.GetMinLon(),
+                                boundingBox.GetMinLat(),
+                                boundingBox.GetMaxLon(),
+                                boundingBox.GetMaxLat(),
                                 magnification,
                                 tiles)) {
       std::cerr << "Error reading ground tiles in area!" << std::endl;

@@ -274,15 +274,12 @@ namespace osmscout {
     return false;
   }
 
-  bool MercatorProjection::GetDimensions(double& lonMin, double& latMin,
-                                          double& lonMax, double& latMax) const
+  bool MercatorProjection::GetDimensions(GeoBox& boundingBox) const
   {
     assert(valid);
 
-    lonMin=this->lonMin;
-    latMin=this->latMin;
-    lonMax=this->lonMax;
-    latMax=this->latMax;
+    boundingBox.Set(GeoCoord(latMin,lonMin),
+                    GeoCoord(latMax,lonMax));
 
     return true;
   }
@@ -501,15 +498,12 @@ namespace osmscout {
 
   #endif
 
-  bool TileProjection::GetDimensions(double& lonMin, double& latMin,
-                                     double& lonMax, double& latMax) const
+  bool TileProjection::GetDimensions(GeoBox& boundingBox) const
   {
     assert(valid);
 
-    lonMin=this->lonMin;
-    latMin=this->latMin;
-    lonMax=this->lonMax;
-    latMax=this->latMax;
+    boundingBox.Set(GeoCoord(latMin,lonMin),
+                    GeoCoord(latMax,lonMax));
 
     return true;
   }

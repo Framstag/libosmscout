@@ -33,6 +33,7 @@
 #include <osmscout/StyleConfig.h>
 
 #include <osmscout/util/Breaker.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Reference.h>
 
@@ -99,8 +100,7 @@ namespace osmscout {
   private:
     bool GetObjectsNodes(const AreaSearchParameter& parameter,
                          const TypeSet &nodeTypes,
-                         double lonMin, double latMin,
-                         double lonMax, double latMax,
+                         const GeoBox& boundingBox,
                          std::string& nodeIndexTime,
                          std::string& nodesTime,
                          std::vector<NodeRef>& nodes) const;
@@ -108,8 +108,7 @@ namespace osmscout {
     bool GetObjectsWays(const AreaSearchParameter& parameter,
                         const std::vector<TypeSet>& wayTypes,
                         const Magnification& magnification,
-                        double lonMin, double latMin,
-                        double lonMax, double latMax,
+                        const GeoBox& boundingBox,
                         std::string& wayOptimizedTime,
                         std::string& wayIndexTime,
                         std::string& waysTime,
@@ -118,8 +117,7 @@ namespace osmscout {
     bool GetObjectsAreas(const AreaSearchParameter& parameter,
                                const TypeSet& areaTypes,
                                const Magnification& magnification,
-                               double lonMin, double latMin,
-                               double lonMax, double latMax,
+                               const GeoBox& boundingBox,
                                std::string& areaOptimizedTime,
                                std::string& areaIndexTime,
                                std::string& areasTime,
@@ -137,23 +135,19 @@ namespace osmscout {
     bool GetObjects(const AreaSearchParameter& parameter,
                     const Magnification& magnification,
                     const TypeSet &nodeTypes,
-                    double nodeLonMin, double nodeLatMin,
-                    double nodeLonMax, double nodeLatMax,
+                    const GeoBox& nodeBoundingBox,
                     std::vector<NodeRef>& nodes,
                     const std::vector<TypeSet>& wayTypes,
-                    double wayLonMin, double wayLatMin,
-                    double wayLonMax, double wayLatMax,
+                    const GeoBox& wayBoundingBox,
                     std::vector<WayRef>& ways,
                     const TypeSet& areaTypes,
-                    double areaLonMin, double areaLatMin,
-                    double areaLonMax, double areaLatMax,
+                    const GeoBox& areaBoundingBox,
                     std::vector<AreaRef>& areas) const;
 
     bool GetGroundTiles(const Projection& projection,
                         std::list<GroundTile>& tiles) const;
 
-    bool GetGroundTiles(double lonMin, double latMin,
-                        double lonMax, double latMax,
+    bool GetGroundTiles(const GeoBox& boundingBox,
                         const Magnification& magnification,
                         std::list<GroundTile>& tiles) const;
   };

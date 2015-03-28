@@ -386,11 +386,11 @@ bool DBThread::RenderMap(QPainter& painter,
                  finishedImage->width(),
                  finishedImage->height());
 
-  double lonMin,lonMax,latMin,latMax;
+  osmscout::GeoBox boundingBox;
 
-  projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+  projection.GetDimensions(boundingBox);
 
-  double d=(lonMax-lonMin)*2*M_PI/360;
+  double d=boundingBox.GetWidth()*2*M_PI/360;
   double scaleSize;
   size_t minScaleWidth=request.width/20;
   size_t maxScaleWidth=request.width/10;

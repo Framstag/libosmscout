@@ -1588,13 +1588,13 @@ namespace osmscout {
     }
 
     if (parameter.IsDebugPerformance()) {
-      double lonMin,latMin,lonMax,latMax;
+      GeoBox boundingBox;
 
-      projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+      projection.GetDimensions(boundingBox);
 
       log.Info()
-          << "Draw: [" << latMin <<"," << lonMin << "-" << latMax << "," << lonMax << "] "
-          << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " "
+          << "Draw: " << boundingBox.GetDisplayText() << " "
+          << (int)projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " "
           << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI";
     }
 
