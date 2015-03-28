@@ -103,7 +103,7 @@ namespace osmscout {
         if (match || candidate) {
           AdminRegionResult result;
 
-          result.adminRegion=new AdminRegion(region);
+          result.adminRegion=std::make_shared<AdminRegion>(region);
           result.isMatch=match;
 
           result.adminRegion->aliasName=alias.name;
@@ -128,7 +128,7 @@ namespace osmscout {
       if (regionMatch || regionCandidate) {
         AdminRegionResult result;
 
-        result.adminRegion=new AdminRegion(region);
+        result.adminRegion=std::make_shared<AdminRegion>(region);
         result.isMatch=regionMatch;
 
         //std::cout << pattern << " => (region) " << result.adminRegion->name << " " << regionMatch << " " << regionCandidate << std::endl;
@@ -170,13 +170,13 @@ namespace osmscout {
       POIResult result;
 
       if (adminRegion.object==this->adminRegion->object) {
-        result.adminRegion=new AdminRegion(this->adminRegion);
+        result.adminRegion=this->adminRegion;
       }
       else {
-        result.adminRegion=new AdminRegion(adminRegion);
+        result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
       }
 
-      result.poi=new POI(poi);
+      result.poi=std::make_shared<POI>(poi);
       result.isMatch=match;
 
       poiResults.push_back(result);
@@ -201,13 +201,13 @@ namespace osmscout {
       LocationResult result;
 
       if (adminRegion.object==this->adminRegion->object) {
-        result.adminRegion=new AdminRegion(this->adminRegion);
+        result.adminRegion=this->adminRegion;
       }
       else {
-        result.adminRegion=new AdminRegion(adminRegion);
+        result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
       }
 
-      result.location=new Location(loc);
+      result.location=std::make_shared<Location>(loc);
       result.isMatch=match;
 
       locationResults.push_back(result);
@@ -243,9 +243,9 @@ namespace osmscout {
     if (match || candidate) {
       AddressResult result;
 
-      result.adminRegion=new AdminRegion(adminRegion);
-      result.location=new Location(location);
-      result.address=new Address(address);
+      result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
+      result.location=std::make_shared<Location>(location);
+      result.address=std::make_shared<Address>(address);
       result.isMatch=match;
 
       //std::cout << pattern << " =>  " << result.address->name << " " << location.name << " " << adminRegion.name << "/" << adminRegion.aliasName << " " << match << " " << candidate << " " << std::endl;
@@ -278,19 +278,19 @@ namespace osmscout {
     else if (poiMatchQuality!=other.poiMatchQuality) {
       return poiMatchQuality<other.poiMatchQuality;
     }
-    else if (adminRegion.Valid() && other.adminRegion.Valid() &&
+    else if (adminRegion && other.adminRegion &&
         adminRegion->name!=other.adminRegion->name) {
       return adminRegion->name<other.adminRegion->name;
     }
-    else if (location.Valid() && other.location.Valid() &&
+    else if (location && other.location &&
         location->name!=other.location->name) {
       return location->name<other.location->name;
     }
-    else if (address.Valid() && other.address.Valid() &&
+    else if (address && other.address &&
         address->name!=other.address->name) {
       return address->name<other.address->name;
     }
-    else if (poi.Valid() && other.poi.Valid() &&
+    else if (poi && other.poi &&
         poi->name!=other.poi->name) {
       return poi->name<other.poi->name;
     }
@@ -300,12 +300,12 @@ namespace osmscout {
 
   bool LocationSearchResult::Entry::operator==(const Entry& other) const
   {
-    if ((adminRegion.Valid() && !other.adminRegion.Valid()) ||
-        (!adminRegion.Valid() && other.adminRegion.Valid())) {
+    if ((adminRegion && !other.adminRegion) ||
+        (!adminRegion && other.adminRegion)) {
       return false;
     }
 
-    if (adminRegion.Valid() && other.adminRegion.Valid()) {
+    if (adminRegion && other.adminRegion) {
       if (adminRegion->aliasObject!=other.adminRegion->aliasObject) {
         return false;
       }
@@ -315,34 +315,34 @@ namespace osmscout {
       }
     }
 
-    if ((poi.Valid() && !other.poi.Valid()) ||
-        (!poi.Valid() && other.poi.Valid())) {
+    if ((poi && !other.poi) ||
+        (!poi && other.poi)) {
       return false;
     }
 
-    if (poi.Valid() && other.poi.Valid()) {
+    if (poi && other.poi) {
       if (poi->object!=other.poi->object) {
         return false;
       }
     }
 
-    if ((location.Valid() && !other.location.Valid()) ||
-        (!location.Valid() && other.location.Valid())) {
+    if ((location && !other.location) ||
+        (!location && other.location)) {
       return false;
     }
 
-    if (location.Valid() && other.location.Valid()) {
+    if (location && other.location) {
       if (location->locationOffset!=other.location->locationOffset) {
         return false;
       }
     }
 
-    if ((address.Valid() && !other.address.Valid()) ||
-        (!address.Valid() && other.address.Valid())) {
+    if ((address && !other.address) ||
+        (!address && other.address)) {
       return false;
     }
 
-    if (address.Valid() && other.address.Valid()) {
+    if (address && other.address) {
       if (address->addressOffset!=other.address->addressOffset) {
         return false;
       }
@@ -488,7 +488,7 @@ namespace osmscout {
                                  search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
 
-    if (!VisitAdminRegionLocations(adminRegionResult.adminRegion,
+    if (!VisitAdminRegionLocations(*adminRegionResult.adminRegion,
                                    visitor)) {
       log.Error() << "Error during traversal of region location list";
       return false;
@@ -567,8 +567,8 @@ namespace osmscout {
                                 search.limit>=result.results.size() ? search.limit-result.results.size() : 0);
 
 
-    if (!VisitLocationAddresses(locationResult.adminRegion,
-                                locationResult.location,
+    if (!VisitLocationAddresses(*locationResult.adminRegion,
+                                *locationResult.location,
                                 visitor)) {
       log.Error() << "Error during traversal of region location address list";
       return false;
@@ -940,7 +940,7 @@ namespace osmscout {
         LocationService::ReverseLookupResult result;
 
         result.object=entry->object;
-        result.adminRegion=new AdminRegion(region);
+        result.adminRegion=std::make_shared<AdminRegion>(region);
 
         results.push_back(result);
       }
@@ -979,7 +979,7 @@ namespace osmscout {
       if (candidate) {
         atLeastOneCandidate = true;
         adminRegions.insert(std::make_pair(region.regionOffset,
-                                           new AdminRegion(region)));
+                                           std::make_shared<AdminRegion>(region)));
       }
     }
 
@@ -1036,8 +1036,8 @@ namespace osmscout {
       LocationService::ReverseLookupResult result;
 
       result.object=poi.object;
-      result.adminRegion=new AdminRegion(adminRegion);
-      result.poi=new POI(poi);
+      result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
+      result.poi=std::make_shared<POI>(poi);
 
       results.push_back(result);
     }
@@ -1050,8 +1050,8 @@ namespace osmscout {
   {
     Loc l;
 
-    l.adminRegion=new AdminRegion(adminRegion);
-    l.location=new Location(location);
+    l.adminRegion=std::make_shared<AdminRegion>(adminRegion);
+    l.location=std::make_shared<Location>(location);
 
     locations.push_back(l);
 
@@ -1105,9 +1105,9 @@ namespace osmscout {
       LocationService::ReverseLookupResult result;
 
       result.object=address.object;
-      result.adminRegion=new AdminRegion(adminRegion);
-      result.location=new Location(location);
-      result.address=new Address(address);
+      result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
+      result.location=std::make_shared<Location>(location);
+      result.address=std::make_shared<Address>(address);
 
       results.push_back(result);
     }
@@ -1225,8 +1225,8 @@ namespace osmscout {
     }
 
     for (const auto& location : locationVisitor.locations) {
-      if (!locationIndex->VisitLocationAddresses(location.adminRegion,
-                                                 location.location,
+      if (!locationIndex->VisitLocationAddresses(*location.adminRegion,
+                                                 *location.location,
                                                  addressVisitor)) {
         return false;
       }

@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <vector>
 
 #include <osmscout/private/MapImportExport.h>
@@ -35,7 +36,6 @@
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -92,7 +92,7 @@ namespace osmscout {
    * limits on the resulting data (size of area, number of objects,
    * low zoom optimizations,...).
    */
-  class OSMSCOUT_MAP_API MapService : public Referencable
+  class OSMSCOUT_MAP_API MapService
   {
   private:
     DatabaseRef database;
@@ -154,7 +154,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to an Database instance
-  typedef Ref<MapService> MapServiceRef;
+  typedef std::shared_ptr<MapService> MapServiceRef;
 }
 
 #endif

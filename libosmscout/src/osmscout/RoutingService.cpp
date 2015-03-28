@@ -89,7 +89,7 @@ namespace osmscout {
                       0,
                       6000)
   {
-    assert(database.Valid());
+    assert(database);
   }
 
   RoutingService::~RoutingService()
@@ -827,9 +827,9 @@ namespace osmscout {
           return false;
         }
 
-        RNodeRef node=new RNode(forwardOffset,
-                                forwardRouteNode,
-                                object);
+        RNodeRef node=std::make_shared<RNode>(forwardOffset,
+                                              forwardRouteNode,
+                                              object);
 
         node->currentCost=profile.GetCosts(way,
                                            GetSphericalDistance(startLon,
@@ -854,9 +854,9 @@ namespace osmscout {
           return false;
         }
 
-        RNodeRef node=new RNode(backwardOffset,
-                                backwardRouteNode,
-                                object);
+        RNodeRef node=std::make_shared<RNode>(backwardOffset,
+                                              backwardRouteNode,
+                                              object);
 
         node->currentCost=profile.GetCosts(way,
                                            GetSphericalDistance(startLon,
@@ -1106,13 +1106,13 @@ namespace osmscout {
       return false;
     }
 
-    if (startForwardNode.Valid()) {
+    if (startForwardNode) {
       std::pair<OpenListRef,bool> result=openList.insert(startForwardNode);
 
       openMap[startForwardNode->nodeOffset]=result.first;
     }
 
-    if (startBackwardNode.Valid()) {
+    if (startBackwardNode) {
       std::pair<OpenListRef,bool> result=openList.insert(startBackwardNode);
 
       openMap[startBackwardNode->nodeOffset]=result.first;
@@ -1280,10 +1280,10 @@ namespace osmscout {
           openEntry->second=result.first;
         }
         else {
-          RNodeRef node=new RNode(path.offset,
-                                  nextNode,
-                                  currentRouteNode->objects[path.objectIndex].object,
-                                  current->nodeOffset);
+          RNodeRef node=std::make_shared<RNode>(path.offset,
+                                                nextNode,
+                                                currentRouteNode->objects[path.objectIndex].object,
+                                                current->nodeOffset);
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
@@ -1603,7 +1603,7 @@ namespace osmscout {
 
   void RoutingService::DumpStatistics()
   {
-    if (database.Valid()) {
+    if (database) {
       database->DumpStatistics();
     }
 

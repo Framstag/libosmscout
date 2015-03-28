@@ -94,18 +94,18 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
     return false;
   }
 
-  if (router.Invalid() ||
-      (router.Valid() && router->GetVehicle()!=vehicle)) {
-    if (router.Valid()) {
+  if (!router ||
+      (router && router->GetVehicle()!=vehicle)) {
+    if (router) {
       if (router->IsOpen()) {
         router->Close();
       }
       router=NULL;
     }
 
-    router=new osmscout::RoutingService(database,
-                                        routerParameter,
-                                        vehicle);
+    router=std::make_shared<osmscout::RoutingService>(database,
+                                                      routerParameter,
+                                                      vehicle);
 
     if (!router->Open()) {
       return false;
@@ -197,7 +197,7 @@ void DBThread::Finalize()
 {
   FreeMaps();
 
-  if (router.Valid() && router->IsOpen()) {
+  if (router && router->IsOpen()) {
     router->Close();
   }
 
@@ -589,7 +589,7 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
 
   if (!routePostprocessor.PostprocessRouteDescription(description,
                                                       routingProfile,
-                                                      database,
+                                                      *database,
                                                       postprocessors)) {
     return false;
   }

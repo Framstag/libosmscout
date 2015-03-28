@@ -21,11 +21,10 @@
 */
 
 #include <list>
+#include <memory>
 #include <vector>
 
 #include <osmscout/ObjectRef.h>
-
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
   /**
@@ -46,7 +45,7 @@ namespace osmscout {
    AdminRegions are currently returned by
    Database.GetMatchingAdminRegions() using the CityStreetIndex.
    */
-  class OSMSCOUT_API AdminRegion : public Referencable
+  class OSMSCOUT_API AdminRegion
   {
   public:
     class OSMSCOUT_API RegionAlias
@@ -69,7 +68,7 @@ namespace osmscout {
     bool Match(const ObjectFileRef& object) const;
   };
 
-  typedef Ref<AdminRegion> AdminRegionRef;
+  typedef std::shared_ptr<AdminRegion> AdminRegionRef;
 
   /**
    * \ingroup Location
@@ -101,7 +100,7 @@ namespace osmscout {
    * A POI is an object within an area, which has been indexed by
    * its name.
    */
-  class OSMSCOUT_API POI : public Referencable
+  class OSMSCOUT_API POI
   {
   public:
     FileOffset    regionOffset; //!< Offset of the region this location is in
@@ -109,7 +108,7 @@ namespace osmscout {
     ObjectFileRef object;       //!< Reference to the object
   };
 
-  typedef Ref<POI> POIRef;
+  typedef std::shared_ptr<POI> POIRef;
 
   /**
     \ingroup Location
@@ -118,7 +117,7 @@ namespace osmscout {
     by Database.GetMatchingLocations() which uses CityStreetIndex
     internally.
    */
-  class OSMSCOUT_API Location : public Referencable
+  class OSMSCOUT_API Location
   {
   public:
     FileOffset                 locationOffset;  //!< Offset to location
@@ -128,7 +127,7 @@ namespace osmscout {
     std::vector<ObjectFileRef> objects;         //!< List of objects that build up this location
   };
 
-  typedef Ref<Location> LocationRef;
+  typedef std::shared_ptr<Location> LocationRef;
 
   /**
    * \ingroup Location
@@ -151,7 +150,7 @@ namespace osmscout {
     An address is a unique place at a given location, normally a building that
     is address by its house number.
    */
-  class OSMSCOUT_API Address : public Referencable
+  class OSMSCOUT_API Address
   {
   public:
     FileOffset    addressOffset;  //!< Offset of the address entry
@@ -161,7 +160,7 @@ namespace osmscout {
     ObjectFileRef object;         //!< Object that represents the address
   };
 
-  typedef Ref<Address> AddressRef;
+  typedef std::shared_ptr<Address> AddressRef;
 
   /**
    * \ingroup Location

@@ -188,9 +188,9 @@ void LocationListModel::setPattern(const QString& pattern)
       ++entry) {
       Location *location=NULL;
 
-    if (entry->adminRegion.Valid() &&
-        entry->location.Valid() &&
-        entry->address.Valid()) {
+    if (entry->adminRegion &&
+        entry->location &&
+        entry->address) {
       QString label=QString::fromUtf8(entry->location->name.c_str());
 
       label+=" ";
@@ -205,8 +205,8 @@ void LocationListModel::setPattern(const QString& pattern)
       location=new Location(label);
       location->addReference(entry->address->object);
     }
-    else if (entry->adminRegion.Valid() &&
-             entry->location.Valid()) {
+    else if (entry->adminRegion &&
+             entry->location) {
       QString label=QString::fromUtf8(entry->location->name.c_str());
 
       label+=" ";
@@ -223,8 +223,8 @@ void LocationListModel::setPattern(const QString& pattern)
           location->addReference(*object);
       }
     }
-    else if (entry->adminRegion.Valid() &&
-             entry->poi.Valid()) {
+    else if (entry->adminRegion &&
+             entry->poi) {
       QString label=QString::fromUtf8(entry->poi->name.c_str());
 
       label+=" ";
@@ -236,7 +236,7 @@ void LocationListModel::setPattern(const QString& pattern)
       location=new Location(label);
       location->addReference(entry->poi->object);
     }
-    else if (entry->adminRegion.Valid()) {
+    else if (entry->adminRegion) {
         QString label=GetAdminRegionLabel(adminRegionMap,
                                           entry->adminRegion);
 

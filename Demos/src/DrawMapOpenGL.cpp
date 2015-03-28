@@ -82,8 +82,8 @@ public:
   {
     osmscout::DatabaseParameter databaseParameter;
 
-    database=new osmscout::Database(databaseParameter);
-    mapService=new osmscout::MapService(database);
+    database=std::make_shared<osmscout::Database>(databaseParameter);
+    mapService=std::make_shared<osmscout::MapService>(database);
 
     if (!database->Open(map.c_str())) {
       std::cerr << "Cannot open database" << std::endl;

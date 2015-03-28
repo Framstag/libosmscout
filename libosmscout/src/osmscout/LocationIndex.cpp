@@ -624,7 +624,7 @@ namespace osmscout {
           return false;
         }
 
-        refs[adminRegion.regionOffset]=new AdminRegion(adminRegion);
+        refs[adminRegion.regionOffset]=std::make_shared<AdminRegion>(adminRegion);
 
         if (adminRegion.parentRegionOffset!=0) {
           newOffsets.push_back(adminRegion.parentRegionOffset);

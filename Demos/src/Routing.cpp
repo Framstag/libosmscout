@@ -674,7 +674,7 @@ int main(int argc, char* argv[])
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  routingProfile,
-                                                 database,
+                                                 *database,
                                                  postprocessors)) {
     std::cerr << "Error during route postprocessing" << std::endl;
   }

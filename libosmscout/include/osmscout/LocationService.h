@@ -20,10 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
+#include <memory>
+
 #include <osmscout/Database.h>
 #include <osmscout/Location.h>
-
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -113,7 +114,7 @@ namespace osmscout {
    *   individual index traversals.
    * - Retrieve the addresses of one or more objects.
    */
-  class OSMSCOUT_API LocationService : public Referencable
+  class OSMSCOUT_API LocationService
   {
   private:
     /**
@@ -313,7 +314,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to a location service instance
-  typedef Ref<LocationService> LocationServiceRef;
+  typedef std::shared_ptr<LocationService> LocationServiceRef;
 }
 
 

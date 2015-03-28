@@ -94,19 +94,19 @@ int main(int argc, char* argv[])
          ++entry) {
       std::cout << entry->object.GetTypeName() << " " << entry->object.GetFileOffset() << " matches";
 
-      if (entry->adminRegion.Valid()) {
+      if (entry->adminRegion) {
         std::cout << " region '" << entry->adminRegion->name << "'";
       }
 
-      if (entry->poi.Valid()) {
+      if (entry->poi) {
         std::cout << " poi '" << entry->poi->name << "'";
       }
 
-      if (entry->location.Valid()) {
+      if (entry->location) {
         std::cout << " location '" << entry->location->name << "'";
       }
 
-      if (entry->address.Valid()) {
+      if (entry->address) {
         std::cout << " address '" << entry->address->name << "'";
       }
 

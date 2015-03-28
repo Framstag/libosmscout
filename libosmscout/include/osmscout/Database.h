@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <set>
 #include <unordered_map>
 
@@ -52,7 +53,6 @@
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -115,7 +115,7 @@ namespace osmscout {
    * The Database is opened by passing the directory that contains
    * all database files.
    */
-  class OSMSCOUT_API Database : public Referencable
+  class OSMSCOUT_API Database
   {
   private:
     DatabaseParameter               parameter;            //!< Parameterization of this database object
@@ -209,7 +209,7 @@ namespace osmscout {
   };
 
   //! Reference counted reference to an Database instance
-  typedef Ref<Database> DatabaseRef;
+  typedef std::shared_ptr<Database> DatabaseRef;
 
   /**
    * \defgroup Service High level services

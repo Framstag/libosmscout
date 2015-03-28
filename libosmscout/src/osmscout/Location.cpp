@@ -74,9 +74,9 @@ namespace osmscout {
   {
     AddressResult result;
 
-    result.adminRegion=new AdminRegion(adminRegion);
-    result.location=new Location(location);
-    result.address=new Address(address);
+    result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
+    result.location=std::make_shared<Location>(location);
+    result.address=std::make_shared<Address>(address);
 
     results.push_back(result);
 

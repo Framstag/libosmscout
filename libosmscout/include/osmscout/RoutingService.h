@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -43,7 +44,6 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <osmscout/util/Cache.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -82,14 +82,14 @@ namespace osmscout {
    * for further transformations to a textual or visual description of the route
    * - Returning the closest routeable node to  given geolocation
    */
-  class OSMSCOUT_API RoutingService : public Referencable
+  class OSMSCOUT_API RoutingService
   {
   private:
     /**
      * A path in the routing graph from one node to the next (expressed via the target object)
      * with additional information as required by the A* algorithm.
      */
-    struct RNode : public Referencable
+    struct RNode
     {
       FileOffset    nodeOffset;    //!< The file offset of the current route node
       RouteNodeRef  node;          //!< The current route node
@@ -150,7 +150,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<RNode> RNodeRef;
+    typedef std::shared_ptr<RNode> RNodeRef;
 
     struct RNodeCostCompare
     {
@@ -317,7 +317,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to an RoutingService instance
-  typedef Ref<RoutingService> RoutingServiceRef;
+  typedef std::shared_ptr<RoutingService> RoutingServiceRef;
 
   /**
    * \defgroup Routing Routing based data structures and services
