@@ -22,6 +22,8 @@
 
 #include <osmscout/Database.h>
 
+#include <osmscout/util/GeoBox.h>
+
 namespace osmscout {
 
   /**
@@ -37,18 +39,15 @@ namespace osmscout {
   private:
     DatabaseRef database;
 
-    bool GetNodesInArea(double lonMin, double latMin,
-                        double lonMax, double latMax,
+    bool GetNodesInArea(const GeoBox& boundingBox,
                         const TypeSet& types,
                         std::vector<NodeRef>& nodes) const;
 
-    bool GetAreasInArea(double lonMin, double latMin,
-                        double lonMax, double latMax,
+    bool GetAreasInArea(const GeoBox& boundingBox,
                         const TypeSet& types,
                         std::vector<AreaRef>& areas) const;
 
-    bool GetWaysInArea(double lonMin, double latMin,
-                       double lonMax, double latMax,
+    bool GetWaysInArea(const GeoBox& boundingBox,
                        const TypeSet& types,
                        std::vector<WayRef>& ways) const;
 
@@ -56,8 +55,7 @@ namespace osmscout {
     POIService(const DatabaseRef& database);
     virtual ~POIService();
 
-    bool GetPOIsInArea(double lonMin, double latMin,
-                       double lonMax, double latMax,
+    bool GetPOIsInArea(const GeoBox& boundingBox,
                        const TypeSet& nodeTypes,
                        std::vector<NodeRef>& nodes,
                        const TypeSet& wayTypes,

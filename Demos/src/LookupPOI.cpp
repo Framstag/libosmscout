@@ -24,6 +24,8 @@
 
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/util/GeoBox.h>
+
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
@@ -72,6 +74,8 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
   osmscout::POIServiceRef     poiService(new osmscout::POIService(database));
+  osmscout::GeoBox            boundingBox(osmscout::GeoCoord(latTop,lonLeft),
+                                          osmscout::GeoCoord(latBottom,lonRight));
 
   if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -79,10 +83,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  std::cout << "- Search area: ";
-  std::cout << "[" << std::min(latTop,latBottom) << "," << std::min(lonLeft,lonRight) << "]";
-  std::cout << "x";
-  std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
+  std::cout << "- Search area: " << boundingBox.GetDisplayText() << std::endl;
 
   osmscout::TypeConfigRef          typeConfig(database->GetTypeConfig());
   osmscout::TypeSet                nodeTypes(*typeConfig);
@@ -125,10 +126,7 @@ int main(int argc, char* argv[])
   std::vector<osmscout::WayRef>  ways;
   std::vector<osmscout::AreaRef> areas;
 
-  if (!poiService->GetPOIsInArea(std::min(lonLeft,lonRight),
-                                 std::min(latTop,latBottom),
-                                 std::max(lonLeft,lonRight),
-                                 std::max(latTop,latBottom),
+  if (!poiService->GetPOIsInArea(boundingBox,
                                  nodeTypes,
                                  nodes,
                                  wayTypes,

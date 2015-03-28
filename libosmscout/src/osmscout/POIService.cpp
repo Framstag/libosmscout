@@ -40,8 +40,7 @@ namespace osmscout {
     // no code
   }
 
-  bool POIService::GetNodesInArea(double lonMin, double latMin,
-                                  double lonMax, double latMax,
+  bool POIService::GetNodesInArea(const GeoBox& boundingBox,
                                   const TypeSet& types,
                                   std::vector<NodeRef>& nodes) const
   {
@@ -57,10 +56,10 @@ namespace osmscout {
 
     std::vector<FileOffset> nodeOffsets;
 
-    if (!areaNodeIndex->GetOffsets(lonMin,
-                                   latMin,
-                                   lonMax,
-                                   latMax,
+    if (!areaNodeIndex->GetOffsets(boundingBox.GetMinLon(),
+                                   boundingBox.GetMinLat(),
+                                   boundingBox.GetMaxLon(),
+                                   boundingBox.GetMaxLat(),
                                    types,
                                    std::numeric_limits<size_t>::max(),
                                    nodeOffsets)) {
@@ -80,8 +79,7 @@ namespace osmscout {
     return true;
   }
 
-  bool POIService::GetAreasInArea(double lonMin, double latMin,
-                                  double lonMax, double latMax,
+  bool POIService::GetAreasInArea(const GeoBox& boundingBox,
                                   const TypeSet& types,
                                   std::vector<AreaRef>& areas) const
   {
@@ -98,10 +96,10 @@ namespace osmscout {
     std::vector<FileOffset> wayAreaOffsets;
 
     if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                   lonMin,
-                                   latMin,
-                                   lonMax,
-                                   latMax,
+                                   boundingBox.GetMinLon(),
+                                   boundingBox.GetMinLat(),
+                                   boundingBox.GetMaxLon(),
+                                   boundingBox.GetMaxLat(),
                                    std::numeric_limits<size_t>::max(),
                                    types,
                                    std::numeric_limits<size_t>::max(),
@@ -123,8 +121,7 @@ namespace osmscout {
     return true;
   }
 
-  bool POIService::GetWaysInArea(double lonMin, double latMin,
-                                 double lonMax, double latMax,
+  bool POIService::GetWaysInArea(const GeoBox& boundingBox,
                                  const TypeSet& types,
                                  std::vector<WayRef>& ways) const
   {
@@ -145,10 +142,10 @@ namespace osmscout {
     wayTypes.push_back(types);
 
 
-    if (!areaWayIndex->GetOffsets(lonMin,
-                                  latMin,
-                                  lonMax,
-                                  latMax,
+    if (!areaWayIndex->GetOffsets(boundingBox.GetMinLon(),
+                                  boundingBox.GetMinLat(),
+                                  boundingBox.GetMaxLon(),
+                                  boundingBox.GetMaxLat(),
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
@@ -190,8 +187,7 @@ namespace osmscout {
    * @return
    *    True, if there was no error
    */
-  bool POIService::GetPOIsInArea(double lonMin, double latMin,
-                                 double lonMax, double latMax,
+  bool POIService::GetPOIsInArea(const GeoBox& boundingBox,
                                  const TypeSet& nodeTypes,
                                  std::vector<NodeRef>& nodes,
                                  const TypeSet& wayTypes,
@@ -207,27 +203,18 @@ namespace osmscout {
 #pragma omp sections
     {
 #pragma omp section
-      nodesSuccess=GetNodesInArea(lonMin,
-                                  latMin,
-                                  lonMax,
-                                  latMax,
+      nodesSuccess=GetNodesInArea(boundingBox,
                                   nodeTypes,
                                   nodes);
 
 #pragma omp section
 
-      areasSuccess=GetAreasInArea(lonMin,
-                                  latMin,
-                                  lonMax,
-                                  latMax,
+      areasSuccess=GetAreasInArea(boundingBox,
                                   areaTypes,
                                   areas);
 
 #pragma omp section
-      waysSuccess=GetWaysInArea(lonMin,
-                                latMin,
-                                lonMax,
-                                latMax,
+      waysSuccess=GetWaysInArea(boundingBox,
                                 wayTypes,
                                 ways);
     }
