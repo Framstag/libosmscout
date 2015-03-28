@@ -427,15 +427,15 @@ namespace osmscout {
   }
 
   bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
-                             const ImportParameter& parameter,
+                             const ImportParameter& /*parameter*/,
                              Progress& progress,
                              const std::string& filename)
   {
-    progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfiles().front()+"'");
+    progress.SetAction(std::string("Parsing *.osm.pbf file '")+filename+"'");
 
     FILE* file;
 
-    file=fopen(parameter.GetMapfiles().front().c_str(),"rb");
+    file=fopen(filename.c_str(),"rb");
 
     if (file==NULL) {
       progress.Error("Cannot open file!");

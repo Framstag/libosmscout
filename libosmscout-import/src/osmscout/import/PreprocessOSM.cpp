@@ -319,12 +319,12 @@ namespace osmscout {
 
   static void StartDocumentHandler(void */*data*/)
   {
-    std::cerr << "Starting document parsing..." << std::endl;
+    // no code, for temporary debugging purposes
   }
 
   static void EndDocumentHandler(void */*data*/)
   {
-    std::cerr << "Done." << std::endl;
+    // no code, for temporary debugging purposes
   }
 
   PreprocessOSM::PreprocessOSM(PreprocessorCallback& callback)
@@ -334,11 +334,11 @@ namespace osmscout {
   }
 
   bool PreprocessOSM::Import(const TypeConfigRef& typeConfig,
-                             const ImportParameter& parameter,
+                             const ImportParameter& /*parameter*/,
                              Progress& progress,
                              const std::string& filename)
   {
-    progress.SetAction(std::string("Parsing OSM file '")+parameter.GetMapfiles().front()+"'");
+    progress.SetAction(std::string("Parsing *.osm file '")+filename+"'");
 
     Parser        parser(typeConfig,
                          callback);
