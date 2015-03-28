@@ -48,9 +48,9 @@ namespace osmscout {
     };
 
   private:
-    Context                          context;
-    PreprocessOSM&                   pp;
     const TypeConfig&                typeConfig;
+    PreprocessorCallback&            callback;
+    Context                          context;
     OSMId                            id;
     double                           lon,lat;
     TagMap                           tags;
@@ -58,12 +58,13 @@ namespace osmscout {
     std::vector<RawRelation::Member> members;
 
   public:
-    Parser(PreprocessOSM& pp,
-           const TypeConfig& typeConfig)
-    : pp(pp),
-      typeConfig(typeConfig)
+    Parser(const TypeConfig& typeConfig,
+           PreprocessorCallback& callback)
+    : typeConfig(typeConfig),
+      callback(callback),
+      context(contextUnknown)
     {
-      context=contextUnknown;
+      // no code
     }
 
     void StartElement(const xmlChar *name, const xmlChar **atts)
@@ -258,28 +259,28 @@ namespace osmscout {
     void EndElement(const xmlChar *name)
     {
       if (strcmp((const char*)name,"node")==0) {
-        pp.ProcessNode(typeConfig,
-                       id,
-                       lon,
-                       lat,
-                       tags);
+        callback.ProcessNode(typeConfig,
+                             id,
+                             lon,
+                             lat,
+                             tags);
         tags.clear();
         context=contextUnknown;
       }
       else if (strcmp((const char*)name,"way")==0) {
-        pp.ProcessWay(typeConfig,
-                      id,
-                      nodes,
-                      tags);
+        callback.ProcessWay(typeConfig,
+                            id,
+                            nodes,
+                            tags);
         nodes.clear();
         tags.clear();
         context=contextUnknown;
       }
       else if (strcmp((const char*)name,"relation")==0) {
-        pp.ProcessRelation(typeConfig,
-                           id,
-                           members,
-                           tags);
+        callback.ProcessRelation(typeConfig,
+                                 id,
+                                 members,
+                                 tags);
         members.clear();
         tags.clear();
         context=contextUnknown;
@@ -311,36 +312,54 @@ namespace osmscout {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
   }
 
-  std::string PreprocessOSM::GetDescription() const
+  static void ErrorHandler(void */*data*/, const char* msg,...)
   {
-    return "Preprocess";
+    std::cerr << "XML error:" << msg << std::endl;
+  }
+
+  static void StartDocumentHandler(void */*data*/)
+  {
+    std::cerr << "Starting document parsing..." << std::endl;
+  }
+
+  static void EndDocumentHandler(void */*data*/)
+  {
+    std::cerr << "Done." << std::endl;
+  }
+
+  PreprocessOSM::PreprocessOSM(PreprocessorCallback& callback)
+  : callback(callback)
+  {
+    // no code
   }
 
   bool PreprocessOSM::Import(const TypeConfigRef& typeConfig,
                              const ImportParameter& parameter,
-                             Progress& progress)
+                             Progress& progress,
+                             const std::string& filename)
   {
-    Parser        parser(*this,typeConfig);
+    progress.SetAction(std::string("Parsing OSM file '")+parameter.GetMapfiles().front()+"'");
+
+    Parser        parser(typeConfig,
+                         callback);
     xmlSAXHandler saxParser;
 
-    if (!Initialize(typeConfig,
-                    parameter,
-                    progress)) {
-      return false;
-    }
-
     memset(&saxParser,0,sizeof(xmlSAXHandler));
+    saxParser.startDocument=StartDocumentHandler;
+    saxParser.endDocument=EndDocumentHandler;
     saxParser.initialized=XML_SAX2_MAGIC;
     saxParser.getEntity=GetEntity;
     saxParser.startElement=StartElement;
     saxParser.endElement=EndElement;
+    saxParser.error=ErrorHandler;
+    saxParser.fatalError=ErrorHandler;
     saxParser.serror=StructuredErrorHandler;
 
-    xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
+    xmlSAXUserParseFile(&saxParser,
+                        &parser,
+                        filename.c_str());
 
-    return Cleanup(typeConfig,
-                   parameter,
-                   progress);
+    return true;
   }
 }
 

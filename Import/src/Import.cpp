@@ -55,7 +55,7 @@ static const char* BoolToString(bool value)
 
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
-  std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]" << std::endl;
+  std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]..." << std::endl;
   std::cout << " -h|--help                            show this help" << std::endl;
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
 
-  std::string               mapfile=parameter.GetMapfile();
+  std::list<std::string>    mapfiles;
   std::string               typefile=parameter.GetTypefile();
   std::string               destinationDirectory=parameter.GetDestinationDirectory();
 
@@ -408,21 +408,21 @@ int main(int argc, char* argv[])
                                          i,
                                          routeNodeBlockSize);
     }
-    else if (mapfile.empty()) {
-      mapfile=argv[i];
-
-      i++;
-    }
-    else {
+    else if (strncmp(argv[i],"--",2)==0) {
       std::cerr << "Unknown option: " << argv[i] << std::endl;
 
       parameterError=true;
       i++;
     }
+    else {
+      mapfiles.push_back(argv[i]);
+
+      i++;
+    }
   }
 
   if (startStep==1 &&
-      mapfile.empty()) {
+      mapfiles.empty()) {
     parameterError=true;
   }
 
@@ -431,7 +431,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  parameter.SetMapfile(mapfile);
+  parameter.SetMapfiles(mapfiles);
   parameter.SetTypefile(typefile);
   parameter.SetDestinationDirectory(destinationDirectory);
   parameter.SetSteps(startStep,endStep);
@@ -464,7 +464,9 @@ int main(int argc, char* argv[])
   parameter.SetOptimizationWayMethod(osmscout::TransPolygon::quality);
 
   progress.SetStep("Dump parameter");
-  progress.Info(std::string("Mapfile: ")+parameter.GetMapfile());
+  for (const auto& filename : parameter.GetMapfiles()) {
+    progress.Info(std::string("Mapfile: ")+filename);
+  }
   progress.Info(std::string("typefile: ")+parameter.GetTypefile());
   progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
   progress.Info(std::string("Steps: ")+

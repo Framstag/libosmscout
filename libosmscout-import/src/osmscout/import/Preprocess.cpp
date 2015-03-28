@@ -44,7 +44,7 @@ namespace osmscout {
 
   static uint32_t coordPageSize=64;
 
-  bool Preprocess::StoreCurrentPage()
+  bool Preprocess::Callback::StoreCurrentPage()
   {
     if (!coordWriter.SetPos(currentPageOffset)) {
       return false;
@@ -64,8 +64,8 @@ namespace osmscout {
     return !coordWriter.HasError();
   }
 
-  bool Preprocess::StoreCoord(OSMId id,
-                              const GeoCoord& coord)
+  bool Preprocess::Callback::StoreCoord(OSMId id,
+                                        const GeoCoord& coord)
   {
     PageId     relatedId=id-std::numeric_limits<Id>::min();
     PageId     pageId=relatedId/coordPageSize;
@@ -113,9 +113,9 @@ namespace osmscout {
     return coordWriter.WriteCoord(coord);
   }
 
-  bool Preprocess::IsTurnRestriction(const TypeConfig& typeConfig,
-                                     const TagMap& tags,
-                                     TurnRestriction::Type& type) const
+  bool Preprocess::Callback::IsTurnRestriction(const TypeConfig& typeConfig,
+                                               const TagMap& tags,
+                                               TurnRestriction::Type& type) const
   {
     auto typeValue=tags.find(typeConfig.tagType);
 
@@ -154,8 +154,8 @@ namespace osmscout {
     return false;
   }
 
-  void Preprocess::ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
-                                          TurnRestriction::Type type)
+  void Preprocess::Callback::ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
+                                                    TurnRestriction::Type type)
   {
     Id from=0;
     Id via=0;
@@ -198,9 +198,9 @@ namespace osmscout {
     }
   }
 
-  bool Preprocess::IsMultipolygon(const TypeConfig& typeConfig,
-                                  const TagMap& tags,
-                                  TypeInfoRef& type)
+  bool Preprocess::Callback::IsMultipolygon(const TypeConfig& typeConfig,
+                                            const TagMap& tags,
+                                            TypeInfoRef& type)
   {
     type=typeConfig.GetRelationType(tags);
 
@@ -221,11 +221,11 @@ namespace osmscout {
     return isArea;
   }
 
-  void Preprocess::ProcessMultipolygon(const TypeConfig& typeConfig,
-                                       const TagMap& tags,
-                                       const std::vector<RawRelation::Member>& members,
-                                       OSMId id,
-                                       const TypeInfoRef& type)
+  void Preprocess::Callback::ProcessMultipolygon(const TypeConfig& typeConfig,
+                                                 const TagMap& tags,
+                                                 const std::vector<RawRelation::Member>& members,
+                                                 OSMId id,
+                                                 const TypeInfoRef& type)
   {
     RawRelation relation;
 
@@ -252,51 +252,9 @@ namespace osmscout {
   }
 
 
-  std::string Preprocess::GetDescription() const
-  {
-    return "Preprocess";
-  }
-
-  bool Preprocess::Import(const TypeConfigRef& typeConfig,
-                          const ImportParameter& parameter,
-                          Progress& progress)
-  {
-    if (parameter.GetMapfile().length()>=4 &&
-        parameter.GetMapfile().substr(parameter.GetMapfile().length()-4)==".osm")  {
-
-#if defined(HAVE_LIB_XML)
-      PreprocessOSM preprocess;
-
-      return preprocess.Import(typeConfig,
-                               parameter,
-                               progress);
-#else
-      progress.Error("Support for the OSM file format is not enabled!");
-#endif
-    }
-
-    if (parameter.GetMapfile().length()>=4 &&
-             parameter.GetMapfile().substr(parameter.GetMapfile().length()-4)==".pbf") {
-
-#if defined(HAVE_LIB_PROTOBUF)
-      PreprocessPBF preprocess;
-
-      return preprocess.Import(typeConfig,
-                               parameter,
-                               progress);
-#else
-      progress.Error("Support for the PBF file format is not enabled!");
-      return false;
-#endif
-    }
-
-    progress.Error("Sorry, this file type is not yet supported!");
-    return false;
-  }
-
-  bool Preprocess::Initialize(const TypeConfigRef& typeConfig,
-                              const ImportParameter& parameter,
-                              Progress& progress)
+  bool Preprocess::Callback::Initialize(const TypeConfigRef& typeConfig,
+                                        const ImportParameter& parameter,
+                                        Progress& progress)
   {
     // This is something I do not like
     this->progress=&progress;
@@ -369,11 +327,11 @@ namespace osmscout {
            !coordWriter.HasError();
   }
 
-  void Preprocess::ProcessNode(const TypeConfig& typeConfig,
-                               const OSMId& id,
-                               const double& lon,
-                               const double& lat,
-                               const TagMap& tagMap)
+  void Preprocess::Callback::ProcessNode(const TypeConfig& typeConfig,
+                                         const OSMId& id,
+                                         const double& lon,
+                                         const double& lat,
+                                         const TagMap& tagMap)
   {
     RawNode      node;
     ObjectOSMRef object(id,
@@ -415,10 +373,10 @@ namespace osmscout {
     lastNodeId=id;
   }
 
-  void Preprocess::ProcessWay(const TypeConfig& typeConfig,
-                              const OSMId& id,
-                              std::vector<OSMId>& nodes,
-                              const TagMap& tagMap)
+  void Preprocess::Callback::ProcessWay(const TypeConfig& typeConfig,
+                                        const OSMId& id,
+                                        std::vector<OSMId>& nodes,
+                                        const TagMap& tagMap)
   {
     TypeInfoRef areaType;
     TypeInfoRef wayType;
@@ -580,10 +538,10 @@ namespace osmscout {
     }
   }
 
-  void Preprocess::ProcessRelation(const TypeConfig& typeConfig,
-                                   const OSMId& id,
-                                   const std::vector<RawRelation::Member>& members,
-                                   const TagMap& tagMap)
+  void Preprocess::Callback::ProcessRelation(const TypeConfig& typeConfig,
+                                             const OSMId& id,
+                                             const std::vector<RawRelation::Member>& members,
+                                             const TagMap& tagMap)
   {
     if (id<lastRelationId) {
       relationSortingError=true;
@@ -635,9 +593,9 @@ namespace osmscout {
     lastRelationId=id;
   }
 
-  bool Preprocess::Cleanup(const TypeConfigRef& typeConfig,
-                           const ImportParameter& parameter,
-                           Progress& progress)
+  bool Preprocess::Callback::Cleanup(const TypeConfigRef& typeConfig,
+                                     const ImportParameter& parameter,
+                                     Progress& progress)
   {
     //Since I do not like take a pointer to a reference
     // I at least try to assure, that we do not misuse it.
@@ -752,6 +710,86 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  std::string Preprocess::GetDescription() const
+  {
+    return "Preprocess";
+  }
+
+  bool Preprocess::ProcessFiles(const TypeConfigRef& typeConfig,
+                                const ImportParameter& parameter,
+                                Progress& progress,
+                                Callback& callback)
+  {
+    for (const auto& filename : parameter.GetMapfiles()) {
+      if (filename.length()>=4 &&
+          filename.substr(filename.length()-4)==".osm")  {
+
+#if defined(HAVE_LIB_XML)
+        PreprocessOSM preprocess(callback);
+
+        if (!preprocess.Import(typeConfig,
+                               parameter,
+                               progress,
+                               filename)) {
+          return false;
+        }
+#else
+        progress.Error("Support for the OSM file format is not enabled!");
+#endif
+      }
+      else if (filename.length()>=4 &&
+            filename.substr(filename.length()-4)==".pbf") {
+
+#if defined(HAVE_LIB_PROTOBUF)
+        PreprocessPBF preprocess(callback);
+
+        if (!preprocess.Import(typeConfig,
+                               parameter,
+                               progress,
+                               filename)) {
+          return false;
+        }
+#else
+        progress.Error("Support for the PBF file format is not enabled!");
+        return false;
+#endif
+      }
+      else {
+        progress.Error("Sorry, this file type is not yet supported!");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool Preprocess::Import(const TypeConfigRef& typeConfig,
+                          const ImportParameter& parameter,
+                          Progress& progress)
+  {
+    bool     result=false;
+    Callback callback;
+
+    if (!callback.Initialize(typeConfig,
+                             parameter,
+                             progress)) {
+      return false;
+    }
+
+    result=ProcessFiles(typeConfig,
+                        parameter,
+                        progress,
+                        callback);
+
+    if (!callback.Cleanup(typeConfig,
+                          parameter,
+                          progress)) {
+      return false;
+    }
+
+    return result;
   }
 }
 

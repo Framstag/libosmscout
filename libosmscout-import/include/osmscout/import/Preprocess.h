@@ -29,6 +29,7 @@
 #include <osmscout/util/FileWriter.h>
 
 #include <osmscout/import/Import.h>
+#include <osmscout/import/Preprocessor.h>
 #include <osmscout/import/RawRelation.h>
 
 
@@ -38,93 +39,104 @@ namespace osmscout {
   private:
     typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
 
-  private:
-    Progress              *progress;
-    FileWriter            nodeWriter;
-    FileWriter            wayWriter;
-    FileWriter            coastlineWriter;
-    FileWriter            turnRestrictionWriter;
-    FileWriter            multipolygonWriter;
+    class Callback : public PreprocessorCallback
+    {
+    private:
+      Progress              *progress;
+      FileWriter            nodeWriter;
+      FileWriter            wayWriter;
+      FileWriter            coastlineWriter;
+      FileWriter            turnRestrictionWriter;
+      FileWriter            multipolygonWriter;
 
-    uint32_t              nodeCount;
-    uint32_t              wayCount;
-    uint32_t              areaCount;
-    uint32_t              relationCount;
-    uint32_t              coastlineCount;
-    uint32_t              turnRestrictionCount;
-    uint32_t              multipolygonCount;
+      uint32_t              nodeCount;
+      uint32_t              wayCount;
+      uint32_t              areaCount;
+      uint32_t              relationCount;
+      uint32_t              coastlineCount;
+      uint32_t              turnRestrictionCount;
+      uint32_t              multipolygonCount;
 
-    OSMId                 lastNodeId;
-    OSMId                 lastWayId;
-    OSMId                 lastRelationId;
+      OSMId                 lastNodeId;
+      OSMId                 lastWayId;
+      OSMId                 lastRelationId;
 
-    bool                  nodeSortingError;
-    bool                  waySortingError;
-    bool                  relationSortingError;
+      bool                  nodeSortingError;
+      bool                  waySortingError;
+      bool                  relationSortingError;
 
-    Id                    coordPageCount;
-    CoordPageOffsetMap    coordIndex;
-    FileWriter            coordWriter;
-    PageId                currentPageId;
-    FileOffset            currentPageOffset;
-    std::vector<GeoCoord> coords;
-    std::vector<bool>     isSet;
+      Id                    coordPageCount;
+      CoordPageOffsetMap    coordIndex;
+      FileWriter            coordWriter;
+      PageId                currentPageId;
+      FileOffset            currentPageOffset;
+      std::vector<GeoCoord> coords;
+      std::vector<bool>     isSet;
 
-    GeoCoord              minCoord;
-    GeoCoord              maxCoord;
+      GeoCoord              minCoord;
+      GeoCoord              maxCoord;
 
-    std::vector<size_t>   nodeStat;
-    std::vector<size_t>   areaStat;
-    std::vector<size_t>   wayStat;
+      std::vector<size_t>   nodeStat;
+      std::vector<size_t>   areaStat;
+      std::vector<size_t>   wayStat;
 
-  private:
-    bool StoreCurrentPage();
-    bool StoreCoord(OSMId id,
-                    const GeoCoord& coord);
+    private:
+      bool StoreCurrentPage();
+      bool StoreCoord(OSMId id,
+                      const GeoCoord& coord);
 
-    bool IsTurnRestriction(const TypeConfig& typeConfig,
-                           const TagMap& tags,
-                           TurnRestriction::Type& type) const;
-
-    void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
-                                TurnRestriction::Type type);
-
-    bool IsMultipolygon(const TypeConfig& typeConfig,
-                        const TagMap& tags,
-                        TypeInfoRef& type);
-
-    void ProcessMultipolygon(const TypeConfig& typeConfig,
+      bool IsTurnRestriction(const TypeConfig& typeConfig,
                              const TagMap& tags,
-                             const std::vector<RawRelation::Member>& members,
-                             OSMId id,
-                             const TypeInfoRef& type);
+                             TurnRestriction::Type& type) const;
+
+      void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
+                                  TurnRestriction::Type type);
+
+      bool IsMultipolygon(const TypeConfig& typeConfig,
+                          const TagMap& tags,
+                          TypeInfoRef& type);
+
+      void ProcessMultipolygon(const TypeConfig& typeConfig,
+                               const TagMap& tags,
+                               const std::vector<RawRelation::Member>& members,
+                               OSMId id,
+                               const TypeInfoRef& type);
+
+    public:
+      bool Initialize(const TypeConfigRef& typeConfig,
+                      const ImportParameter& parameter,
+                      Progress& progress);
+
+
+      bool Cleanup(const TypeConfigRef& typeConfig,
+                   const ImportParameter& parameter,
+                   Progress& progress);
+
+      void ProcessNode(const TypeConfig& typeConfig,
+                       const OSMId& id,
+                       const double& lon, const double& lat,
+                       const TagMap& tags);
+      void ProcessWay(const TypeConfig& typeConfig,
+                      const OSMId& id,
+                      std::vector<OSMId>& nodes,
+                      const TagMap& tags);
+      void ProcessRelation(const TypeConfig& typeConfig,
+                           const OSMId& id,
+                           const std::vector<RawRelation::Member>& members,
+                           const TagMap& tags);
+    };
+
+  private:
+    bool ProcessFiles(const TypeConfigRef& typeConfig,
+                      const ImportParameter& parameter,
+                      Progress& progress,
+                      Callback& callback);
 
   public:
     std::string GetDescription() const;
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);
-
-    bool Initialize(const TypeConfigRef& typeConfig,
-                    const ImportParameter& parameter,
-                    Progress& progress);
-
-    void ProcessNode(const TypeConfig& typeConfig,
-                     const OSMId& id,
-                     const double& lon, const double& lat,
-                     const TagMap& tags);
-    void ProcessWay(const TypeConfig& typeConfig,
-                    const OSMId& id,
-                    std::vector<OSMId>& nodes,
-                    const TagMap& tags);
-    void ProcessRelation(const TypeConfig& typeConfig,
-                         const OSMId& id,
-                         const std::vector<RawRelation::Member>& members,
-                         const TagMap& tags);
-
-    bool Cleanup(const TypeConfigRef& typeConfig,
-                 const ImportParameter& parameter,
-                 Progress& progress);
   };
 }
 

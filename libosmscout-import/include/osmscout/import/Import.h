@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
 #include <string>
 
 #include <osmscout/ImportFeatures.h>
@@ -44,7 +45,7 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API ImportParameter
   {
   private:
-    std::string                  mapfile;                  //! Name of the file containing the map (either *.osm or *.osm.pbf)
+    std::list<std::string>       mapfiles;                 //! Name of the files containing map data (either *.osm or *.osm.pbf)
     std::string                  typefile;                 //! Name and path ff type definition file (map.ost.xml)
     std::string                  destinationDirectory;     //! Name of the destination directory
     size_t                       startStep;                //! Starting step for import
@@ -102,7 +103,7 @@ namespace osmscout {
   public:
     ImportParameter();
 
-    std::string GetMapfile() const;
+    const std::list<std::string>& GetMapfiles() const;
     std::string GetTypefile() const;
     std::string GetDestinationDirectory() const;
 
@@ -157,7 +158,7 @@ namespace osmscout {
 
     bool GetAssumeLand() const;
 
-    void SetMapfile(const std::string& mapfile);
+    void SetMapfiles(const std::list<std::string>& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
 

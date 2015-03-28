@@ -270,11 +270,6 @@ namespace osmscout {
     return true;
   }
 
-  std::string PreprocessPBF::GetDescription() const
-  {
-    return "PreprocessPBF";
-  }
-
   void PreprocessPBF::ReadNodes(const TypeConfig& typeConfig,
                                 const PBF::PrimitiveBlock& block,
                                 const PBF::PrimitiveGroup& group)
@@ -292,11 +287,11 @@ namespace osmscout {
         }
       }
 
-      ProcessNode(typeConfig,
-                  inputNode.id(),
-                  (inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
-                  (inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
-                  tagMap);
+      callback.ProcessNode(typeConfig,
+                           inputNode.id(),
+                           (inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
+                           (inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
+                           tagMap);
     }
   }
 
@@ -336,11 +331,11 @@ namespace osmscout {
         t+=2;
       }
 
-      ProcessNode(typeConfig,
-                  dId,
-                  (dLon*block.granularity()+block.lon_offset())/NANO,
-                  (dLat*block.granularity()+block.lat_offset())/NANO,
-                  tagMap);
+      callback.ProcessNode(typeConfig,
+                           dId,
+                           (dLon*block.granularity()+block.lon_offset())/NANO,
+                           (dLat*block.granularity()+block.lat_offset())/NANO,
+                           tagMap);
     }
   }
 
@@ -369,10 +364,10 @@ namespace osmscout {
         nodes.push_back(ref);
       }
 
-      ProcessWay(typeConfig,
-                 inputWay.id(),
-                 nodes,
-                 tagMap);
+      callback.ProcessWay(typeConfig,
+                          inputWay.id(),
+                          nodes,
+                          tagMap);
     }
   }
 
@@ -418,31 +413,32 @@ namespace osmscout {
         members.push_back(member);
       }
 
-      ProcessRelation(typeConfig,
-                      inputRelation.id(),
-                      members,
-                      tagMap);
+      callback.ProcessRelation(typeConfig,
+                               inputRelation.id(),
+                               members,
+                               tagMap);
     }
+  }
+
+  PreprocessPBF::PreprocessPBF(PreprocessorCallback& callback)
+  : callback(callback)
+  {
+    // no code
   }
 
   bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
                              const ImportParameter& parameter,
-                             Progress& progress)
+                             Progress& progress,
+                             const std::string& filename)
   {
-    progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfile()+"'");
+    progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfiles().front()+"'");
 
     FILE* file;
 
-    file=fopen(parameter.GetMapfile().c_str(),"rb");
+    file=fopen(parameter.GetMapfiles().front().c_str(),"rb");
 
     if (file==NULL) {
       progress.Error("Cannot open file!");
-      return false;
-    }
-
-    if (!Initialize(typeConfig,
-                    parameter,
-                    progress)) {
       return false;
     }
 
@@ -539,9 +535,7 @@ namespace osmscout {
       }
     }
 
-    return Cleanup(typeConfig,
-                   parameter,
-                   progress);
+    return true;
   }
 }
 

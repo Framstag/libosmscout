@@ -125,9 +125,9 @@ namespace osmscout {
     // no code
   }
 
-  std::string ImportParameter::GetMapfile() const
+  const std::list<std::string>& ImportParameter::GetMapfiles() const
   {
-    return mapfile;
+    return mapfiles;
   }
 
   std::string ImportParameter::GetTypefile() const
@@ -315,9 +315,9 @@ namespace osmscout {
     return assumeLand;
   }
 
-  void ImportParameter::SetMapfile(const std::string& mapfile)
+  void ImportParameter::SetMapfiles(const std::list<std::string>& mapfiles)
   {
-    this->mapfile=mapfile;
+    this->mapfiles=mapfiles;
   }
 
   void ImportParameter::SetTypefile(const std::string& typefile)
@@ -697,7 +697,10 @@ namespace osmscout {
     modules.push_back(new TextIndexGenerator());
 #endif
 
-    bool result=ExecuteModules(modules,parameter,progress,typeConfig);
+    bool result=ExecuteModules(modules,
+                               parameter,
+                               progress,
+                               typeConfig);
 
     for (const auto& module : modules) {
       delete module;

@@ -28,16 +28,17 @@
 
 #include <osmscout/import/RawRelation.h>
 
-#include <osmscout/import/Preprocess.h>
+#include <osmscout/import/Preprocessor.h>
 
 #include <osmscout/import/pbf/fileformat.pb.h>
 #include <osmscout/import/pbf/osmformat.pb.h>
 
 namespace osmscout {
 
-  class PreprocessPBF : public Preprocess
+  class PreprocessPBF : public Preprocessor
   {
   private:
+    PreprocessorCallback&            callback;
     TagMap                           tagMap;
     std::vector<OSMId>               nodes;
     std::vector<RawRelation::Member> members;
@@ -60,10 +61,11 @@ namespace osmscout {
                        const PBF::PrimitiveGroup &group);
 
   public:
-    std::string GetDescription() const;
+    PreprocessPBF(PreprocessorCallback& callback);
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress,
+                const std::string& filename);
   };
 }
 

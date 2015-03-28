@@ -32,6 +32,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/SortNodeDat.h \
                         osmscout/import/SortWayDat.h \
                         osmscout/import/Import.h \
+                        osmscout/import/Preprocessor.h \
                         osmscout/import/Preprocess.h
 
 if HAVE_LIB_XML
