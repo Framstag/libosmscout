@@ -313,8 +313,8 @@ CONST
   COLOR unknownColor          = #c4dff6;*/
 
   // Contour
-  COLOR majorContourColor          = #888888;
-  COLOR minorContourColor          = #666666;
+  COLOR majorContourColor          = #9f9f9f;
+  COLOR minorContourColor          = #aaaaaa;
 
   // Landuse, water
   COLOR allotmentsColor            = #c8b084;
