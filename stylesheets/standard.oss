@@ -314,6 +314,7 @@ CONST
 
   // Contour
   COLOR majorContourColor          = #9f9f9f;
+  COLOR mediumContourColor         = #a5a5a5;
   COLOR minorContourColor          = #aaaaaa;
 
   // Landuse, water
@@ -502,7 +503,12 @@ SYMBOL speed_camera
 
 [MAG detail-] {
    [TYPE elevation_contour_major] {
-     WAY {color: @majorContourColor; displayWidth: 0.15mm; }
+     WAY {color: @majorContourColor; displayWidth: 0.150mm; }
+     WAY.TEXT { label: Ele.inMeter; }
+   }
+
+   [TYPE elevation_contour_medium] {
+     WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
      WAY.TEXT { label: Ele.inMeter; }
    }
 
