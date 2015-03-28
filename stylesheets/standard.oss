@@ -312,6 +312,10 @@ CONST
   COLOR landColor             = #fcfbe7;
   COLOR unknownColor          = #c4dff6;*/
 
+  // Contour
+  COLOR majorContourColor          = #888888;
+  COLOR minorContourColor          = #666666;
+
   // Landuse, water
   COLOR allotmentsColor            = #c8b084;
   COLOR beachColor                 = #eecc55;
@@ -491,6 +495,22 @@ SYMBOL speed_camera
    // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
+ // -------------------------------------------------------
+ //
+ // contour lines
+ //
+
+[MAG detail-] {
+   [TYPE elevation_contour_major] {
+     WAY {color: @majorContourColor; displayWidth: 0.15mm; }
+     WAY.TEXT { label: Ele.inMeter; }
+   }
+
+   [TYPE elevation_contour_minor] {
+     WAY {color: @minorContourColor; displayWidth: 0.075mm; }
+   }
+ }
+ 
  // -------------------------------------------------------
  //
  // natural_* (without coastline)

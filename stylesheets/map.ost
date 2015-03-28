@@ -130,6 +130,19 @@ GRADES
   }
 
 TYPES
+
+  //
+  // contour lines
+  //
+  
+  TYPE elevation_contour_major
+    = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_major")
+      {Ele}
+
+  TYPE elevation_contour_minor
+    = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_minor")
+      {Ele}
+    
   //
   // Motorways and motorways-like (only for cars)
   //
