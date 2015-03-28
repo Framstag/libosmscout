@@ -487,7 +487,7 @@ bool DBThread::SearchForLocations(const std::string& searchPattern,
   return locationService->SearchForLocations(search,
                                              result);
 }
-
+/*
 bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
                               const osmscout::RoutingProfile& routingProfile,
                               const osmscout::ObjectFileRef& startObject,
@@ -657,7 +657,7 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
   else {
     return true;
   }
-}
+}*/
 
 static DBThread* dbThreadInstance=NULL;
 

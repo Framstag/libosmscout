@@ -150,6 +150,7 @@ public:
                           size_t limit,
                           osmscout::LocationSearchResult& result) const;
 
+  /*
   bool CalculateRoute(osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,
                       const osmscout::ObjectFileRef& startObject,
@@ -175,7 +176,7 @@ public:
                               size_t& nodeIndex);
 
   void ClearRoute();
-  void AddRoute(const osmscout::Way& way);
+  void AddRoute(const osmscout::Way& way);*/
 
   static bool InitializeInstance(const SettingsRef& settings);
   static DBThread* GetInstance();

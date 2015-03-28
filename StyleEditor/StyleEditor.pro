@@ -31,7 +31,6 @@ SOURCES = \
           src/MainWindow.cpp \
           src/SettingsDialog.cpp \
           src/SearchLocationModel.cpp \
-          src/RoutingModel.cpp \
           src/FileIO.cpp \
           src/Highlighter.cpp \
     src/StyleEditor.cpp
@@ -42,7 +41,6 @@ HEADERS = src/Settings.h \
           src/MainWindow.h \
           src/SettingsDialog.h \
           src/SearchLocationModel.h \
-          src/RoutingModel.h \
           src/FileIO.h \
           src/Highlighter.h
 
@@ -56,7 +54,6 @@ OTHER_FILES += \
     qml/custom/LocationEdit.qml \
     qml/custom/ScrollIndicator.qml \
     qml/custom/MapDialog.qml \
-    qml/RoutingDialog.qml \
     qml/TextEditor.qml \
     qml/MapControl.qml
 

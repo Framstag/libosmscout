@@ -22,6 +22,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <unordered_map>
 
 #include <osmscout/CoreFeatures.h>
@@ -46,7 +47,7 @@ namespace osmscout {
   class OSMSCOUT_API RoutePostprocessor
   {
   public:
-    class OSMSCOUT_API Postprocessor : public Referencable
+    class OSMSCOUT_API Postprocessor
     {
     public:
       virtual ~Postprocessor();
@@ -57,7 +58,7 @@ namespace osmscout {
                            Database& database) = 0;
     };
 
-    typedef Ref<Postprocessor> PostprocessorRef;
+    typedef std::shared_ptr<Postprocessor> PostprocessorRef;
 
     /**
      * \ingroup Routing
@@ -231,6 +232,8 @@ namespace osmscout {
       void AddMotorwayType(const TypeInfoRef& type);
       void AddMotorwayLinkType(const TypeInfoRef& type);
     };
+
+    typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
 
   private:
     std::unordered_map<FileOffset,AreaRef> areaMap;

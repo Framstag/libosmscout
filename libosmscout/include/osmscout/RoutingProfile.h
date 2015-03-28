@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <vector>
 
 #include <osmscout/Types.h>
@@ -29,8 +30,6 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/RouteNode.h>
-
-#include <osmscout/util/Reference.h>
 
 #include "Area.h"
 
@@ -42,7 +41,7 @@ namespace osmscout {
    * of taking a certain way. It thus may hold information about how fast ways can be used,
    * maximum speed of the traveling device etc...
    */
-  class OSMSCOUT_API RoutingProfile : public Referencable
+  class OSMSCOUT_API RoutingProfile
   {
   public:
     virtual ~RoutingProfile();
@@ -68,7 +67,7 @@ namespace osmscout {
                            double distance) const = 0;
   };
 
-  typedef Ref<RoutingProfile> RoutingProfileRef;
+  typedef std::shared_ptr<RoutingProfile> RoutingProfileRef;
 
   /**
    * \ingroup Routing
@@ -180,7 +179,7 @@ namespace osmscout {
     }
   };
 
-  typedef Ref<ShortestPathRoutingProfile> ShortestPathRoutingProfileRef;
+  typedef std::shared_ptr<ShortestPathRoutingProfile> ShortestPathRoutingProfileRef;
 
   /**
    * \ingroup Routing
@@ -264,7 +263,7 @@ namespace osmscout {
     }
   };
 
-  typedef Ref<FastestPathRoutingProfile> FastestPathRoutingProfileRef;
+  typedef std::shared_ptr<FastestPathRoutingProfile> FastestPathRoutingProfileRef;
 }
 
 #endif
