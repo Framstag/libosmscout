@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <vector>
 
 #include <osmscout/Database.h>
@@ -37,7 +38,7 @@ namespace osmscout {
    * Currently this includes the following functionality:
    * - Locating POIs of given types in a given area
    */
-  class OSMSCOUT_API POIService : public Referencable
+  class OSMSCOUT_API POIService
   {
   private:
     DatabaseRef database;
@@ -69,7 +70,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to a POI service instance
-  typedef Ref<POIService> POIServiceRef;
+  typedef std::shared_ptr<POIService> POIServiceRef;
 }
 
 #endif
