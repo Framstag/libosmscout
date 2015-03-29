@@ -52,18 +52,18 @@ namespace osmscout {
     class OSMSCOUT_API RegionAlias
     {
     public:
-      std::string name;         //<! Alias
-      FileOffset  objectOffset; //<! Node data offset of the alias
+      std::string name;         //!< Alias
+      FileOffset  objectOffset; //!< Node data offset of the alias
     };
 
-    FileOffset               regionOffset;       //<! Offset of this entry in the index
-    FileOffset               dataOffset;         //<! Offset of the data part of this entry
-    FileOffset               parentRegionOffset; //<! Offset of the parent region index entry
-    std::string              name;               //<! name of the region
-    ObjectFileRef            object;             //<! The object that represents this region
-    std::string              aliasName;          //<! Additional optional alias name
-    ObjectFileRef            aliasObject;        //<! Additional optional alias reference
-    std::vector<RegionAlias> aliases;            //<! The list of alias for this region
+    FileOffset               regionOffset;       //!< Offset of this entry in the index
+    FileOffset               dataOffset;         //!< Offset of the data part of this entry
+    FileOffset               parentRegionOffset; //!< Offset of the parent region index entry
+    std::string              name;               //!< name of the region
+    ObjectFileRef            object;             //!< The object that represents this region
+    std::string              aliasName;          //!< Additional optional alias name
+    ObjectFileRef            aliasObject;        //!< Additional optional alias reference
+    std::vector<RegionAlias> aliases;            //!< The list of alias for this region
 
   public:
     bool Match(const ObjectFileRef& object) const;

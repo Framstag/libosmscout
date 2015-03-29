@@ -51,13 +51,13 @@ namespace osmscout {
    */
   struct OSMSCOUT_MAP_API MapData
   {
-    std::vector<NodeRef>     nodes;       //<! Nodes as retrieved from database
-    std::vector<AreaRef>     areas;       //<! Areas as retrieved from database
-    std::vector<WayRef>      ways;        //<! Ways as retrieved from database
-    std::list<NodeRef>       poiNodes;    //<! List of manually added nodes (not managed or changed by the database)
-    std::list<AreaRef>       poiAreas;    //<! List of manually added areas (not managed or changed by the database)
-    std::list<WayRef>        poiWays;     //<! List of manually added ways (not managed or changed by the database)
-    std::list<GroundTile>    groundTiles; //<! List of ground tiles (optional)
+    std::vector<NodeRef>     nodes;       //!< Nodes as retrieved from database
+    std::vector<AreaRef>     areas;       //!< Areas as retrieved from database
+    std::vector<WayRef>      ways;        //!< Ways as retrieved from database
+    std::list<NodeRef>       poiNodes;    //!< List of manually added nodes (not managed or changed by the database)
+    std::list<AreaRef>       poiAreas;    //!< List of manually added areas (not managed or changed by the database)
+    std::list<WayRef>        poiWays;     //!< List of manually added ways (not managed or changed by the database)
+    std::list<GroundTile>    groundTiles; //!< List of ground tiles (optional)
   };
 
   /**
@@ -73,15 +73,15 @@ namespace osmscout {
     struct OSMSCOUT_MAP_API WayData
     {
       ObjectFileRef            ref;
-      const FeatureValueBuffer *buffer;         //<! Features of the line segment
-      int8_t                   layer;           //<! Layer this way is in
-      LineStyleRef             lineStyle;       //<! Line style
-      size_t                   wayPriority;     //<! Priority of way (from style sheet)
-      size_t                   transStart;      //<! Start of coordinates in transformation buffer
-      size_t                   transEnd;        //<! End of coordinates in transformation buffer
-      double                   lineWidth;       //<! Line width
-      bool                     startIsClosed;   //<! The end of the way is closed, it does not lead to another way or area
-      bool                     endIsClosed;     //<! The end of the way is closed, it does not lead to another way or area
+      const FeatureValueBuffer *buffer;         //!< Features of the line segment
+      int8_t                   layer;           //!< Layer this way is in
+      LineStyleRef             lineStyle;       //!< Line style
+      size_t                   wayPriority;     //!< Priority of way (from style sheet)
+      size_t                   transStart;      //!< Start of coordinates in transformation buffer
+      size_t                   transEnd;        //!< End of coordinates in transformation buffer
+      double                   lineWidth;       //!< Line width
+      bool                     startIsClosed;   //!< The end of the way is closed, it does not lead to another way or area
+      bool                     endIsClosed;     //!< The end of the way is closed, it does not lead to another way or area
 
       /**
        * We then draw lines in order of layer (Smaller layers first)
@@ -114,68 +114,68 @@ namespace osmscout {
     struct OSMSCOUT_MAP_API WayPathData
     {
       ObjectFileRef            ref;
-      const FeatureValueBuffer *buffer;         //<! Features of the line segment
-      size_t                   transStart;      //<! Start of coordinates in transformation buffer
-      size_t                   transEnd;        //<! End of coordinates in transformation buffer
+      const FeatureValueBuffer *buffer;         //!< Features of the line segment
+      size_t                   transStart;      //!< Start of coordinates in transformation buffer
+      size_t                   transEnd;        //!< End of coordinates in transformation buffer
     };
 
     struct OSMSCOUT_MAP_API PolyData
     {
-      size_t                   transStart;      //<! Start of coordinates in transformation buffer
-      size_t                   transEnd;        //<! End of coordinates in transformation buffer
+      size_t                   transStart;      //!< Start of coordinates in transformation buffer
+      size_t                   transEnd;        //!< End of coordinates in transformation buffer
     };
 
     struct OSMSCOUT_MAP_API AreaData
     {
       ObjectFileRef            ref;
-      const FeatureValueBuffer *buffer;         //<! Features of the line segment
-      FillStyleRef             fillStyle;       //<! Fill style
+      const FeatureValueBuffer *buffer;         //!< Features of the line segment
+      FillStyleRef             fillStyle;       //!< Fill style
       double                   minLat;
       double                   maxLat;
       double                   minLon;
       double                   maxLon;
-      size_t                   transStart;      //<! Start of coordinates in transformation buffer
-      size_t                   transEnd;        //<! End of coordinates in transformation buffer
-      std::list<PolyData>      clippings;       //<! Clipping polygons to be used during drawing of this area
+      size_t                   transStart;      //!< Start of coordinates in transformation buffer
+      size_t                   transEnd;        //!< End of coordinates in transformation buffer
+      std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
     struct OSMSCOUT_MAP_API LabelData
     {
-      bool                     mark;     //<! Labels can temporary get marked during label coverage conflict resolution
-      double                   x;        //<! Coordinate of the left, top edge of the text
-      double                   y;        //<! Coordinate of the left, top edge of the text
-      double                   bx1;      //<! Dimensions of bounding box
-      double                   by1;      //<! Dimensions of bounding box
-      double                   bx2;      //<! Dimensions of bounding box
-      double                   by2;      //<! Dimensions of bounding box
-      double                   alpha;    //<! Alpha value of the label
-      double                   fontSize; //<! Font size to be used
-      LabelStyleRef            style;    //<! Style for drawing
-      std::string              text;     //<! The label text
+      bool                     mark;     //!< Labels can temporary get marked during label coverage conflict resolution
+      double                   x;        //!< Coordinate of the left, top edge of the text
+      double                   y;        //!< Coordinate of the left, top edge of the text
+      double                   bx1;      //!< Dimensions of bounding box
+      double                   by1;      //!< Dimensions of bounding box
+      double                   bx2;      //!< Dimensions of bounding box
+      double                   by2;      //!< Dimensions of bounding box
+      double                   alpha;    //!< Alpha value of the label
+      double                   fontSize; //!< Font size to be used
+      LabelStyleRef            style;    //!< Style for drawing
+      std::string              text;     //!< The label text
     };
 
     struct OSMSCOUT_MAP_API LabelLayoutData
     {
-      size_t       position;   //<! Relative position of the label
-      double       height;     //<! Height of the label
-      std::string  label;      //<! The text of the label (only used if TextStyle is set)
-      double       fontSize;   //<! The font size (only used if TextStyle is set)
-      double       alpha;      //<! The alpha value for rendering the text label (only used if TextStyle is set)
-      TextStyleRef textStyle;  //<! The text style for a textual label (optional)
-      bool         icon;       //<! Flag signaling that an icon is available, else a symbol will be rendered
-      IconStyleRef iconStyle;  //<! The icon style for a icon or symbol
+      size_t       position;   //!< Relative position of the label
+      double       height;     //!< Height of the label
+      std::string  label;      //!< The text of the label (only used if TextStyle is set)
+      double       fontSize;   //!< The font size (only used if TextStyle is set)
+      double       alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
+      TextStyleRef textStyle;  //!< The text style for a textual label (optional)
+      bool         icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
+      IconStyleRef iconStyle;  //!< The icon style for a icon or symbol
     };
 
   private:
-    CoordBuffer                  *coordBuffer;      //<! Reference to the coordinate buffer
+    CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
 
   protected:
-    StyleConfigRef               styleConfig;       //<! Reference to the style configuration to be used
+    StyleConfigRef               styleConfig;       //!< Reference to the style configuration to be used
     /**
        Scratch variables for path optimization algorithm
      */
     //@{
-    TransBuffer                  transBuffer;       //<! Static (avoid reallocation) buffer of transformed coordinates
+    TransBuffer                  transBuffer;       //!< Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
     /**
@@ -194,9 +194,9 @@ namespace osmscout {
       Presets and similar
      */
     //@{
-    std::vector<double>          emptyDash;         //<! Empty dash array
-    std::vector<double>          tunnelDash;        //<! Dash array for drawing tunnel border
-    FillStyle                    areaMarkStyle;     //<! Marker fill style for internal debugging
+    std::vector<double>          emptyDash;         //!< Empty dash array
+    std::vector<double>          tunnelDash;        //!< Dash array for drawing tunnel border
+    FillStyle                    areaMarkStyle;     //!< Marker fill style for internal debugging
     //@}
 
     std::list<AreaData>          areaData;
@@ -213,8 +213,8 @@ namespace osmscout {
     std::vector<LabelLayoutData> labelLayoutData;
     //@}
 
-    std::vector<TextStyleRef>    textStyles;     //<! Temporary storage for StyleConfig return value
-    std::vector<LineStyleRef>    lineStyles;     //<! Temporary storage for StyleConfig return value
+    std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
+    std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
     /**
       Statistics counter
      */

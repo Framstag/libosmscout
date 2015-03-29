@@ -28,6 +28,8 @@
 namespace osmscout {
 
   /**
+   * \ingroup Location
+   *
    * Object holding a search request for to lookup one
    * or more locations based on search patterns for the
    * region, the location and a address.
@@ -35,21 +37,31 @@ namespace osmscout {
   class OSMSCOUT_API LocationSearch
   {
   public:
+    /**
+     * \ingroup Location
+     *
+     * One singular name pattern match query
+     */
     class OSMSCOUT_API Entry
     {
     public:
-      std::string adminRegionPattern;
-      std::string locationPattern;
-      std::string addressPattern;
+      std::string adminRegionPattern; //!< name pattern, the admin region must match, empty if no filtering by admin region requested
+      std::string locationPattern;    //!< name pattern, the location must match, empty if no filtering by location requested
+      std::string addressPattern;     //!< name pattern, the address must match, empty if no filtering by address requested
     };
 
   public:
-    std::list<Entry> searches;
-    size_t           limit;
+    std::list<Entry> searches; //!< List of search entries, the queries are OR'ed
+    size_t           limit;    //!< The maximum number of results over all sub searches requested
 
     LocationSearch();
   };
 
+  /**
+   * \ingroup Location
+   *
+   * The result of a location query
+   */
   class OSMSCOUT_API LocationSearchResult
   {
   public:
@@ -155,6 +167,8 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Location
+     *
      * Visitor that gets called for every location found in the given region.
      * It is the task of the visitor to decide if a location matches the given criteria.
      */
@@ -197,6 +211,10 @@ namespace osmscout {
                  const Location &location);
     };
 
+    /**
+     * \ingroup Location
+     *
+     */
     class AddressMatchVisitor : public AddressVisitor, public VisitorMatcher
     {
     public:
@@ -227,6 +245,8 @@ namespace osmscout {
 
   public:
     /**
+     * \ingroup Location
+     *
      * Result of a location reverse lookup
      */
     struct OSMSCOUT_API ReverseLookupResult

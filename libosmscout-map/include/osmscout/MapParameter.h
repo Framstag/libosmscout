@@ -36,32 +36,32 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
-    std::string                  fontName;                  //<! Name of the font to use
-    double                       fontSize;                  //<! Metric size of base font (aka font size 100%) in millimeter
+    std::string                  fontName;                  //!< Name of the font to use
+    double                       fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
 
-    std::list<std::string>       iconPaths;                 //<! List of paths to search for images for icons
-    std::list<std::string>       patternPaths;              //<! List of paths to search for images for patterns
+    std::list<std::string>       iconPaths;                 //!< List of paths to search for images for icons
+    std::list<std::string>       patternPaths;              //!< List of paths to search for images for patterns
 
-    double                       lineMinWidthPixel;         //<! Minimum width of an line to be drawn
+    double                       lineMinWidthPixel;         //!< Minimum width of an line to be drawn
 
-    TransPolygon::OptimizeMethod optimizeWayNodes;          //<! Try to reduce the number of nodes for
-    TransPolygon::OptimizeMethod optimizeAreaNodes;         //<! Try to reduce the number of nodes for
-    double                       optimizeErrorToleranceMm;  //<! The maximum error to allow when optimizing lines, in mm
-    bool                         drawFadings;               //<! Draw label fadings (default: true)
-    bool                         drawWaysWithFixedWidth;    //<! Draw ways using the size of the style sheet, if if the way has a width explicitly given
+    TransPolygon::OptimizeMethod optimizeWayNodes;          //!< Try to reduce the number of nodes for
+    TransPolygon::OptimizeMethod optimizeAreaNodes;         //!< Try to reduce the number of nodes for
+    double                       optimizeErrorToleranceMm;  //!< The maximum error to allow when optimizing lines, in mm
+    bool                         drawFadings;               //!< Draw label fadings (default: true)
+    bool                         drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
-    double                       labelSpace;                //<! Space between point labels in mm (default 3).
-    double                       plateLabelSpace;           //<! Space between plates in mm (default 5).
-    double                       sameLabelSpace;            //<! Space between labels with the same value in mm (default 40)
-    bool                         dropNotVisiblePointLabels; //<! Point labels that are not visible, are clipped during label positioning phase
+    double                       labelSpace;                //!< Space between point labels in mm (default 3).
+    double                       plateLabelSpace;           //!< Space between plates in mm (default 5).
+    double                       sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
+    bool                         dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
-    bool                         renderSeaLand;             //<! Rendering of sea/land tiles
+    bool                         renderSeaLand;             //!< Rendering of sea/land tiles
 
-    bool                         debugPerformance;          //<! Print out some performance information
+    bool                         debugPerformance;          //!< Print out some performance information
 
-    bool                         showAltLanguage;           //<! if true, display alternative language (needs support by style sheet and import)
+    bool                         showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
 
-    BreakerRef                   breaker;                   //<! Breaker to abort processing on external request
+    BreakerRef                   breaker;                   //!< Breaker to abort processing on external request
 
   public:
     MapParameter();

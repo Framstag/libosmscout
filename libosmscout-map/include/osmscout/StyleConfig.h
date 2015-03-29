@@ -730,10 +730,10 @@ namespace osmscout {
 
   private:
     std::string      slot;
-    LabelProviderRef label;           //<! The label - a reference to a feature and its label index
-    size_t           position;        //<! Relative vertical position of the label
-    Color            textColor;       //<! Color of text
-    Style            style;           //<! Style of the text
+    LabelProviderRef label;           //!< The label - a reference to a feature and its label index
+    size_t           position;        //!< Relative vertical position of the label
+    Color            textColor;       //!< Color of text
+    Style            style;           //!< Style of the text
     Magnification    scaleAndFadeMag;
 
   public:
@@ -822,10 +822,10 @@ namespace osmscout {
     };
 
   private:
-    LabelProviderRef label;          //<! The label - a reference to a feature and its label index
-    Color            textColor;      //<! Color of the text
-    Color            bgColor;        //<! Background of the text
-    Color            borderColor;    //<! Color of the border
+    LabelProviderRef label;          //!< The label - a reference to a feature and its label index
+    Color            textColor;      //!< Color of the text
+    Color            bgColor;        //!< Background of the text
+    Color            borderColor;    //!< Color of the border
 
   public:
     ShieldStyle();
@@ -1211,9 +1211,9 @@ namespace osmscout {
 
   private:
     SymbolRef   symbol;
-    std::string iconName; //<! name of the icon as given in style
-    size_t      iconId;   //<! Id for external resource binding
-    size_t      position; //<! Relative vertical position of the label
+    std::string iconName; //!< name of the icon as given in style
+    size_t      iconId;   //!< Id for external resource binding
+    size_t      position; //!< Relative vertical position of the label
 
   public:
     IconStyle();
@@ -1321,16 +1321,16 @@ namespace osmscout {
   class OSMSCOUT_MAP_API StyleConfig : public Referencable
   {
   private:
-    TypeConfigRef                              typeConfig;             //<! Reference to the type configuration
-    StyleResolveContext                        styleResolveContext;    //<! Instance of helper class that can get passed around to templated helper methods
+    TypeConfigRef                              typeConfig;             //!< Reference to the type configuration
+    StyleResolveContext                        styleResolveContext;    //!< Instance of helper class that can get passed around to templated helper methods
 
-    FeatureValueBuffer                         tileLandBuffer;         //<! Fake FeatureValueBuffer for land tiles
-    FeatureValueBuffer                         tileSeaBuffer;          //<! Fake FeatureValueBuffer for sea tiles
-    FeatureValueBuffer                         tileCoastBuffer;        //<! Fake FeatureValueBuffer for coast tiles
-    FeatureValueBuffer                         tileUnknownBuffer;      //<! Fake FeatureValueBuffer for unknown tiles
-    FeatureValueBuffer                         tileCoastlineBuffer;    //<! Fake FeatureValueBuffer for coastlines
+    FeatureValueBuffer                         tileLandBuffer;         //!< Fake FeatureValueBuffer for land tiles
+    FeatureValueBuffer                         tileSeaBuffer;          //!< Fake FeatureValueBuffer for sea tiles
+    FeatureValueBuffer                         tileCoastBuffer;        //!< Fake FeatureValueBuffer for coast tiles
+    FeatureValueBuffer                         tileUnknownBuffer;      //!< Fake FeatureValueBuffer for unknown tiles
+    FeatureValueBuffer                         tileCoastlineBuffer;    //!< Fake FeatureValueBuffer for coastlines
 
-    std::unordered_map<std::string,LabelProviderFactoryRef> labelFactories; //<! Map of Label Factories
+    std::unordered_map<std::string,LabelProviderFactoryRef> labelFactories; //!< Map of Label Factories
 
     // Symbol
     std::unordered_map<std::string,SymbolRef>  symbols;

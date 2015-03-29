@@ -147,10 +147,10 @@ namespace osmscout {
   class OSMSCOUT_API FeatureInstance
   {
   private:
-    FeatureRef     feature; //<! The feature we are an instance of
-    const TypeInfo *type;   //<! The type we are assigned to (we are no Ref type to avoid circular references)
-    size_t         index;   //<! The index we have in the list of features
-    size_t         offset;  //<! Our offset into the value buffer for our data
+    FeatureRef     feature; //!< The feature we are an instance of
+    const TypeInfo *type;   //!< The type we are assigned to (we are no Ref type to avoid circular references)
+    size_t         index;   //!< The index we have in the list of features
+    size_t         offset;  //!< Our offset into the value buffer for our data
 
   public:
     FeatureInstance(const FeatureRef& feature,
@@ -201,10 +201,10 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfo : public Referencable
   {
   public:
-    static const unsigned char typeNode     = 1 << 0; //<! Condition applies to nodes
-    static const unsigned char typeWay      = 1 << 1; //<! Condition applies to ways
-    static const unsigned char typeArea     = 1 << 2; //<! Condition applies to areas
-    static const unsigned char typeRelation = 1 << 3; //<! Condition applies to releations
+    static const unsigned char typeNode     = 1 << 0; //!< Condition applies to nodes
+    static const unsigned char typeWay      = 1 << 1; //!< Condition applies to ways
+    static const unsigned char typeArea     = 1 << 2; //!< Condition applies to areas
+    static const unsigned char typeRelation = 1 << 3; //!< Condition applies to releations
 
   public:
     /**
@@ -216,44 +216,44 @@ namespace osmscout {
      */
     struct TypeCondition
     {
-      unsigned char    types;     //<! Bitset of types the condition can be applied to
-      TagConditionRef  condition; //<! The root condition
+      unsigned char    types;     //!< Bitset of types the condition can be applied to
+      TagConditionRef  condition; //!< The root condition
     };
 
   private:
-    TypeId                                 nodeId;                  //<! Type if in case the object is a node
-    TypeId                                 wayId;                   //<! Type if in case the object is a way
-    TypeId                                 areaId;                  //<! Type if in case the object is a area
-    std::string                            name;                    //<! Name of the type
-    size_t                                 index;                   //<! Internal unique index of the type
+    TypeId                                 nodeId;                  //!< Type if in case the object is a node
+    TypeId                                 wayId;                   //!< Type if in case the object is a way
+    TypeId                                 areaId;                  //!< Type if in case the object is a area
+    std::string                            name;                    //!< Name of the type
+    size_t                                 index;                   //!< Internal unique index of the type
 
-    std::list<TypeCondition>               conditions;              //<! One of this conditions must be fulfilled for a object to match this type
+    std::list<TypeCondition>               conditions;              //!< One of this conditions must be fulfilled for a object to match this type
     std::unordered_map<std::string,size_t> nameToFeatureMap;
-    std::vector<FeatureInstance>           features;                //<! List of feature this type has
-    size_t                                 featureMaskBytes;        //<! Size of the feature bitmask in bytes
-    size_t                                 specialFeatureMaskBytes; //<! Size of the feature bitmask in bytes
-    size_t                                 valueBufferSize;         //<! Size of the value buffer holding values for all feature of the type
+    std::vector<FeatureInstance>           features;                //!< List of feature this type has
+    size_t                                 featureMaskBytes;        //!< Size of the feature bitmask in bytes
+    size_t                                 specialFeatureMaskBytes; //!< Size of the feature bitmask in bytes
+    size_t                                 valueBufferSize;         //!< Size of the value buffer holding values for all feature of the type
 
-    bool                                   canBeNode;               //<! Type can be a node
-    bool                                   canBeWay;                //<! Type can be a way
-    bool                                   canBeArea;               //<! Type can be a area
+    bool                                   canBeNode;               //!< Type can be a node
+    bool                                   canBeWay;                //!< Type can be a way
+    bool                                   canBeArea;               //!< Type can be a area
     bool                                   canBeRelation;
-    bool                                   isPath;                  //<! Type has path characteristics (features like bridges, tunnels, names,...)
-    bool                                   canRouteFoot;            //<! Object of this type are by default routable for foot
-    bool                                   canRouteBicycle;         //<! Object of this type are by default routable for bicylce
-    bool                                   canRouteCar;             //<! Object of this type are by default routable for car
-    bool                                   indexAsAddress;          //<! Objects of this type are addressable
-    bool                                   indexAsLocation;         //<! Objects of this type are defining a location (e.g. street)
-    bool                                   indexAsRegion;           //<! Objects of this type are defining a administrative region (e.g. city, county,...)
-    bool                                   indexAsPOI;              //<! Objects of this type are defining a POI
-    bool                                   optimizeLowZoom;         //<! Optimize objects of this type for low zoom rendering
+    bool                                   isPath;                  //!< Type has path characteristics (features like bridges, tunnels, names,...)
+    bool                                   canRouteFoot;            //!< Object of this type are by default routable for foot
+    bool                                   canRouteBicycle;         //!< Object of this type are by default routable for bicylce
+    bool                                   canRouteCar;             //!< Object of this type are by default routable for car
+    bool                                   indexAsAddress;          //!< Objects of this type are addressable
+    bool                                   indexAsLocation;         //!< Objects of this type are defining a location (e.g. street)
+    bool                                   indexAsRegion;           //!< Objects of this type are defining a administrative region (e.g. city, county,...)
+    bool                                   indexAsPOI;              //!< Objects of this type are defining a POI
+    bool                                   optimizeLowZoom;         //!< Optimize objects of this type for low zoom rendering
     bool                                   multipolygon;
-    bool                                   pinWay;                  //<! If there is no way/area information treat this object as way even it the way is closed
-    bool                                   mergeAreas;              //<! Areas of this type are merged under certain conditions
-    bool                                   ignoreSeaLand;           //<! Ignore objects of this type for sea/land calculation
-    bool                                   ignore;                  //<! Ignore objects of this type
+    bool                                   pinWay;                  //!< If there is no way/area information treat this object as way even it the way is closed
+    bool                                   mergeAreas;              //!< Areas of this type are merged under certain conditions
+    bool                                   ignoreSeaLand;           //!< Ignore objects of this type for sea/land calculation
+    bool                                   ignore;                  //!< Ignore objects of this type
 
-    std::unordered_set<std::string>        groups;                  //<! Set of idents that server as categorizing groups
+    std::unordered_set<std::string>        groups;                  //!< Set of idents that server as categorizing groups
 
   private:
     TypeInfo(const TypeInfo& other);
