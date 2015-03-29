@@ -40,6 +40,18 @@ namespace osmscout {
     // no code
   }
 
+  /**
+   * Return all nodes in the given bounding box with the given type
+   * @param boundingBox
+   *    Bounding box, objects must be in
+   * @param types
+   *    The resulting nodes must be of one of these types
+   * @param nodes
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
+   * @return
+   *    True, if success, else false
+   */
   bool POIService::GetNodesInArea(const GeoBox& boundingBox,
                                   const TypeSet& types,
                                   std::vector<NodeRef>& nodes) const
@@ -79,6 +91,18 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Return all areas in the given bounding box with the given type
+   * @param boundingBox
+   *    Bounding box, objects must be in
+   * @param types
+   *    The resulting areas must be of one of these types
+   * @param nodes
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
+   * @return
+   *    True, if success, else false
+   */
   bool POIService::GetAreasInArea(const GeoBox& boundingBox,
                                   const TypeSet& types,
                                   std::vector<AreaRef>& areas) const
@@ -121,6 +145,18 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Return all ways in the given bounding box with the given type
+   * @param boundingBox
+   *    Bounding box, objects must be in
+   * @param types
+   *    The resulting ways must be of one of these types
+   * @param nodes
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
+   * @return
+   *    True, if success, else false
+   */
   bool POIService::GetWaysInArea(const GeoBox& boundingBox,
                                  const TypeSet& types,
                                  std::vector<WayRef>& ways) const
@@ -168,24 +204,22 @@ namespace osmscout {
 
   /**
    * Returns all objects in the given boundary that have one of the given types.
-   * @param lonMin
-   *    Boundary coordinate
-   * @param latMin
-   *    Boundary coordinate
-   * @param lonMax
-   *    Boundary coordinate
-   * @param latMax
-   *    Boundary coordinate
+   *
+   * @param boundingBox
+   *    Bounding box, objects must be in
    * @param types
-   *    Requested object types
+   *    The resulting nodes, ways and areas must be of one of these types
    * @param nodes
-   *    Returns list of nodes
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
    * @param ways
-   *    Returns list of ways
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
    * @param areas
-   *    Returns list of areas
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
    * @return
-   *    True, if there was no error
+   *    True, if success, else false
    */
   bool POIService::GetPOIsInArea(const GeoBox& boundingBox,
                                  const TypeSet& nodeTypes,
