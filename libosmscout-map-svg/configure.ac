@@ -24,19 +24,12 @@ if test "$GXX" = yes; then
   CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
-dnl Selfmade tests
+gl_VISIBILITY
 
-AC_MSG_CHECKING([for gcc symbol visibility support])
-OLDCXXFLAGS="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-AC_TRY_COMPILE([],
-               [],
-               [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
-                AC_SUBST(LIB_CXXFLAGS)
-                AC_MSG_RESULT(yes)
-                AC_DEFINE(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
-               [AC_MSG_RESULT(no)])
-CXXFLAGS="$OLDCXXFLAGS"
+AS_IF([test "$HAVE_VISIBILITY" == "1"],
+      [AC_DEFINE([OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
+
+dnl Selfmade tests
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([

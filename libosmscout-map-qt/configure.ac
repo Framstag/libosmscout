@@ -23,17 +23,12 @@ AC_SEARCH_LIBS([sqrt],[m],[])
 AS_IF([test "x$GXX" = xyes],
       [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
 
-dnl Selfmade tests
+gl_VISIBILITY
 
-AC_MSG_CHECKING([for gcc symbol visibility support])
-OLDCXXFLAGS="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-AC_TRY_COMPILE([],
-               [],
-               [AC_DEFINE(OSMSCOUT_MAP_QT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])
-                AC_MSG_RESULT(yes)],
-               [CXXFLAGS="$OLDCXXFLAGS"
-                AC_MSG_RESULT(no)])
+AS_IF([test "$HAVE_VISIBILITY" == "1"],
+      [AC_DEFINE([OSMSCOUT_MAP_QT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
+
+dnl Selfmade tests
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([

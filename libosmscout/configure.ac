@@ -79,34 +79,42 @@ AS_IF([test "$enable_thread_support" != "no"],
                         [AC_DEFINE([OSMSCOUT_HAVE_THREAD],[1],[system header <thread> is available])])])
 
 AC_MSG_CHECKING([if C++ include <atomic> is usable])
-AC_TRY_COMPILE([#include <atomic>],
-               [std::atomic_bool atomBoolValue;],
-               [AC_MSG_RESULT(yes)],
-               [AC_DEFINE([OSMSCOUT_HAVE_ATOMIC],[1],[standard library has support for atomic])
-                AC_MSG_RESULT(no)])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <atomic>]],
+    [[std::atomic_bool atomBoolValue;]])],
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE([OSMSCOUT_HAVE_ATOMIC],[1],[standard library has support for atomic])],
+  [AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING([if C++ include <mutex> is usable])
-AC_TRY_COMPILE([#include <mutex>],
-               [std::mutex mutexValue;],
-               [AC_MSG_RESULT(yes)],
-               [AC_DEFINE([OSMSCOUT_HAVE_MUTEX],[1],[standard library has support for mutex])
-                AC_MSG_RESULT(no)])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <mutex>]],
+    [[std::mutex mutexValue;]])],
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE([OSMSCOUT_HAVE_MUTEX],[1],[standard library has support for mutex])],
+  [AC_MSG_RESULT(no)])
 
 AC_SEARCH_LIBS([sqrt],[m],[])
 
 AC_MSG_CHECKING([if C++ include <cassert> defines assert() without namespace])
-AC_TRY_COMPILE([#include <cassert>],
-               [assert(true);],
-               [AC_MSG_RESULT(yes)],
-               [AC_DEFINE([OSMSCOUT_REQUIRES_ASSERTH],[1],[libosmscout needs to include <assert.h>])
-                AC_MSG_RESULT(no)])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <cassert>]],
+    [[assert(true);]])],
+  [AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)
+   AC_DEFINE([OSMSCOUT_REQUIRES_ASSERTH],[1],[libosmscout needs to include <assert.h>])])
 
 AC_MSG_CHECKING([if C++ include <cmath> defines C math symbols, too])
-AC_TRY_COMPILE([#include <cmath>],
-               [sin(1);],
-               [AC_MSG_RESULT(yes)],
-               [AC_DEFINE([OSMSCOUT_REQUIRES_MATHH],[1],[libosmscout needs to include <math.h>])
-                AC_MSG_RESULT(no)])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <cmath>]],
+     [[sin(1);]])],
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE([OSMSCOUT_REQUIRES_MATHH],[1],[libosmscout needs to include <math.h>])],
+  [AC_MSG_RESULT(no)])
 
 AC_CHECK_DECL([log2(double)],
               [AC_DEFINE([OSMSCOUT_HAVE_LOG2],[1],[math function log2(double) is available])],
@@ -163,18 +171,10 @@ AS_IF([test "x$ax_cv_have_sse2_ext" = xyes],
 
 AM_CONDITIONAL(OSMSCOUT_HAVE_SSE2,[test "x$ax_cv_have_sse2_ext" = xyes])
 
-AS_IF([test "$build_os" != "mingw32"],
-      [AC_MSG_CHECKING([for gcc symbol visibility support])
-       OLDCXXFLAGS="$CXXFLAGS"
-       CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-       AC_TRY_COMPILE([],
-                      [],
-                      [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
-                       AC_SUBST(LIB_CXXFLAGS)
-                       AC_MSG_RESULT(yes)
-                       AC_DEFINE([OSMSCOUT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])],
-                      [AC_MSG_RESULT(no)])
-       CXXFLAGS="$OLDCXXFLAGS"])
+gl_VISIBILITY
+
+AS_IF([test "$HAVE_VISIBILITY" == "1"],
+      [AC_DEFINE([OSMSCOUT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
 
 AS_IF([test "$enable_marisa_support" != "no"],
       [PKG_CHECK_MODULES(MARISA,

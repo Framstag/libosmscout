@@ -17,7 +17,7 @@ AC_PROG_INSTALL
 AX_CXXFLAGS_WARN_ALL
 
 AC_ARG_WITH([protoc],
-            [AC_HELP_STRING([--with-protoc=PATH],
+            [AS_HELP_STRING([--with-protoc=PATH],
                             [Specify a specific path to protoc])],
             [protoc=$with_protoc])
 
@@ -47,19 +47,10 @@ PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
 
-if test "$build_os" != "mingw32"; then
-  AC_MSG_CHECKING([for gcc symbol visibility support])
-  OLDCXXFLAGS="$CXXFLAGS"
-  CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-  AC_TRY_COMPILE([],
-                 [],
-                 [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
-                  AC_SUBST(LIB_CXXFLAGS)
-                  AC_MSG_RESULT(yes)
-                  AC_DEFINE([OSMSCOUT_IMPORT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])],
-                 [AC_MSG_RESULT(no)])
-  CXXFLAGS="$OLDCXXFLAGS"
-fi
+gl_VISIBILITY
+
+AS_IF([test "$HAVE_VISIBILITY" == "1"],
+      [AC_DEFINE([OSMSCOUT_IMPORT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([
