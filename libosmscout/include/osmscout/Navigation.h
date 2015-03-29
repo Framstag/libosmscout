@@ -4,29 +4,32 @@
 /*
  This source is part of the libosmscout library
  Copyright (C) 2014  Tim Teulings, Vladimir Vyskocil
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include "util/Geometry.h"
-#include "GeoCoord.h"
-#include "Route.h"
+#include <limits>
+
+#include <GeoCoord.h>
+#include <Route.h>
+
+#include <util/Geometry.h>
 
 namespace osmscout {
     static double one_degree_at_equator = 111320.0;
-    
+
     template<class NodeDescriptionTmpl> class OSMSCOUT_API OutputDescription {
     public:
         virtual void NextDescription(double distance,
@@ -37,7 +40,7 @@ namespace osmscout {
     private:
         NodeDescriptionTmpl description;
     };
-    
+
     template<class NodeDescriptionTmpl> class OSMSCOUT_API Navigation {
     private:
         /**
@@ -53,7 +56,7 @@ namespace osmscout {
             double abscissa = 0.0;
             bool found = false;
             double qx, qy;
-            minDistance = MAXFLOAT;
+            minDistance = std::numeric_limits<double>::max();
             for(std::list<RouteDescription::Node>::const_iterator node = nextNode++; node != route->Nodes().end(); node++){
                 if(nextNode == route->Nodes().end()){
                     break;
@@ -77,17 +80,17 @@ namespace osmscout {
             }
             return found;
         }
-        
-        
+
+
     public:
         Navigation(OutputDescription<NodeDescriptionTmpl> *outputDescr) : route(0), outputDescription(outputDescr),snapDistanceInMeters(25.0)        {
         }
-        
+
         static inline double distanceInDegrees(double d, double latitude)
         {
             return d / (one_degree_at_equator * cos(M_PI * latitude / 180));
         }
-        
+
         void SetRoute(RouteDescription *newRoute)
         {
             route = newRoute;
@@ -101,46 +104,46 @@ namespace osmscout {
             duration = lastWaypoint->GetTime();
             distance = lastWaypoint->GetDistance();
         }
-        
+
         void SetSnapDistance(double distance)
         {
             snapDistanceInMeters = distance;
         }
-        
+
         double GetDistanceFromStart()
         {
             return distanceFromStart;
         }
-        
+
         double GetDurationFromStart()
         {
             return durationFromStart;
         }
-        
+
         double GetDistance()
         {
             return distance;
         }
-        
+
         double GetDuration()
         {
             return duration;
         }
-        
+
         NodeDescriptionTmpl nextWaypointDescription()
         {
             return outputDescription->GetDescription();
         }
-        
+
         const RouteDescription::Node &GetCurrentNode(){
             return *locationOnRoute;
         }
-        
+
         bool UpdateCurrentLocation(const GeoCoord &location, double &minDistance)
         {
             std::list<RouteDescription::Node>::const_iterator foundNode = locationOnRoute;
             double foundAbscissa = 0.0;
-            
+
             bool found = SearchClosestSegment(location, foundNode, foundAbscissa, minDistance);
             if(found){
                 locationOnRoute = foundNode;
@@ -159,7 +162,7 @@ namespace osmscout {
                 return false;
             }
         };
-        
+
     private:
         RouteDescription*                                   route;                 // current route description
         std::list<RouteDescription::Node>::const_iterator   locationOnRoute;       // last passed node on the route
@@ -171,7 +174,7 @@ namespace osmscout {
         double                                              duration;              // whole estimated duration of the route (in fraction of hours)
         double                                              snapDistanceInMeters;  // max distance in meters from the route path to consider being on route
     };
-    
+
 }
 
 #endif
