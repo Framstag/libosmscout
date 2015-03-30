@@ -217,13 +217,11 @@ namespace osmscout {
     void GetTargetForwardRouteNode(const RoutingProfile& profile,
                                    const WayRef& way,
                                    size_t nodeIndex,
-                                   RouteNodeRef& routeNode,
-                                   size_t& routeNodeIndex);
+                                   RouteNodeRef& routeNode);
     void GetTargetBackwardRouteNode(const RoutingProfile& profile,
                                     const WayRef& way,
                                     size_t nodeIndex,
-                                    RouteNodeRef& routeNode,
-                                    size_t& routeNodeIndex);
+                                    RouteNodeRef& routeNode);
 
     bool GetStartNodes(const RoutingProfile& profile,
                        const ObjectFileRef& object,

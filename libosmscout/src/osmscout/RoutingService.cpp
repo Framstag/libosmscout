@@ -263,8 +263,7 @@ namespace osmscout {
   void RoutingService::GetTargetForwardRouteNode(const RoutingProfile& profile,
                                                  const WayRef& way,
                                                  size_t nodeIndex,
-                                                 RouteNodeRef& routeNode,
-                                                 size_t& routeNodeIndex)
+                                                 RouteNodeRef& routeNode)
   {
     routeNode=NULL;
 
@@ -280,7 +279,6 @@ namespace osmscout {
       routeNodeDataFile.Get(way->ids[i],routeNode);
 
       if (routeNode.Valid()) {
-        routeNodeIndex=i;
         return;
       }
     }
@@ -289,8 +287,7 @@ namespace osmscout {
   void RoutingService::GetTargetBackwardRouteNode(const RoutingProfile& profile,
                                                   const WayRef& way,
                                                   size_t nodeIndex,
-                                                  RouteNodeRef& routeNode,
-                                                  size_t& routeNodeIndex)
+                                                  RouteNodeRef& routeNode)
   {
     routeNode=NULL;
 
@@ -305,7 +302,6 @@ namespace osmscout {
                             routeNode);
 
       if (routeNode.Valid()) {
-        routeNodeIndex=i;
         return;
       }
     }
@@ -904,8 +900,6 @@ namespace osmscout {
     }
     else if (object.GetType()==refWay) {
       WayRef way;
-      size_t forwardNodePos;
-      size_t backwardNodePos;
 
       if (!wayDataFile->GetByOffset(object.GetFileOffset(),
                                     way)) {
@@ -925,20 +919,15 @@ namespace osmscout {
       routeNodeDataFile.Get(way->ids[nodeIndex],
                             forwardNode);
 
-      if (forwardNode.Valid()) {
-        forwardNodePos=nodeIndex;
-      }
-      else {
+      if (forwardNode.Invalid()) {
         GetTargetForwardRouteNode(profile,
                                   way,
                                   nodeIndex,
-                                  forwardNode,
-                                  forwardNodePos);
+                                  forwardNode);
         GetTargetBackwardRouteNode(profile,
                                    way,
                                    nodeIndex,
-                                   backwardNode,
-                                   backwardNodePos);
+                                   backwardNode);
       }
 
       if (forwardNode.Invalid() &&
