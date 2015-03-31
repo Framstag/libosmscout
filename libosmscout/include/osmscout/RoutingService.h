@@ -91,15 +91,16 @@ namespace osmscout {
      */
     struct RNode : public Referencable
     {
-      FileOffset    nodeOffset;    //! The file offset of the current route node
-      FileOffset    prev;          //! The file offset of the previous route node
-      ObjectFileRef object;        //! The object (way/area) visited from the current route node
+      FileOffset    nodeOffset;    //!< The file offset of the current route node
+      RouteNodeRef  node;          //!< The current route node
+      FileOffset    prev;          //!< The file offset of the previous route node
+      ObjectFileRef object;        //!< The object (way/area) visited from the current route node
 
-      double        currentCost;   //! The cost of the current up to the current node
-      double        estimateCost;  //! The estimated cost from here to the target
-      double        overallCost;   //! The overall costs (currentCost+estimateCost)
+      double        currentCost;   //!< The cost of the current up to the current node
+      double        estimateCost;  //!< The estimated cost from here to the target
+      double        overallCost;   //!< The overall costs (currentCost+estimateCost)
 
-      bool          access;        //! Flags to signal, if we had access ("access restrictions") to this node
+      bool          access;        //!< Flags to signal, if we had access ("access restrictions") to this node
 
       RNode()
       : nodeOffset(0)
@@ -108,8 +109,10 @@ namespace osmscout {
       }
 
       RNode(FileOffset nodeOffset,
+            const RouteNodeRef& node,
             const ObjectFileRef& object)
       : nodeOffset(nodeOffset),
+        node(node),
         prev(0),
         object(object),
         currentCost(0),
@@ -121,9 +124,11 @@ namespace osmscout {
       }
 
       RNode(FileOffset nodeOffset,
+            const RouteNodeRef& node,
             const ObjectFileRef& object,
             FileOffset prev)
       : nodeOffset(nodeOffset),
+        node(node),
         prev(prev),
         object(object),
         currentCost(0),

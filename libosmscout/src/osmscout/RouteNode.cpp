@@ -66,6 +66,10 @@ namespace osmscout {
 
     scanner.ReadNumber(id);
 
+    if (!scanner.ReadCoord(coord)) {
+      return false;
+    }
+
     scanner.ReadNumber(objectCount);
     scanner.ReadNumber(pathCount);
     scanner.ReadNumber(excludesCount);
@@ -109,15 +113,9 @@ namespace osmscout {
     if (pathCount>0) {
       GeoCoord minCoord;
 
-      if (!scanner.ReadCoord(minCoord)) {
-        return false;
-      }
-
       paths.resize(pathCount);
 
       for (size_t i=0; i<pathCount; i++) {
-        uint32_t latValue;
-        uint32_t lonValue;
         uint32_t distanceValue;
 
         scanner.ReadFileOffset(paths[i].offset);
@@ -125,12 +123,8 @@ namespace osmscout {
         //scanner.Read(paths[i].bearing);
         scanner.Read(paths[i].flags);
         scanner.ReadNumber(distanceValue);
-        scanner.ReadNumber(latValue);
-        scanner.ReadNumber(lonValue);
 
         paths[i].distance=distanceValue/(1000.0*100.0);
-        paths[i].lat=minCoord.GetLat()+latValue/latConversionFactor;
-        paths[i].lon=minCoord.GetLon()+lonValue/lonConversionFactor;
       }
     }
 
@@ -152,6 +146,7 @@ namespace osmscout {
   bool RouteNode::Write(FileWriter& writer) const
   {
     writer.WriteNumber(id);
+    writer.WriteCoord(coord);
 
     writer.WriteNumber((uint32_t)objects.size());
     writer.WriteNumber((uint32_t)paths.size());
@@ -181,14 +176,6 @@ namespace osmscout {
     }
 
     if (!paths.empty()) {
-      GeoCoord minCoord(paths[0].lat,paths[0].lon);
-
-      for (size_t i=1; i<paths.size(); i++) {
-        minCoord.Set(std::min(minCoord.GetLat(),paths[i].lat),
-                     std::min(minCoord.GetLon(),paths[i].lon));
-      }
-
-      writer.WriteCoord(minCoord);
 
       for (const auto& path : paths) {
         writer.WriteFileOffset(path.offset);
@@ -196,8 +183,6 @@ namespace osmscout {
         //writer.Write(paths[i].bearing);
         writer.Write(path.flags);
         writer.WriteNumber((uint32_t)floor(path.distance*(1000.0*100.0)+0.5));
-        writer.WriteNumber((uint32_t)round((path.lat-minCoord.GetLat())*latConversionFactor));
-        writer.WriteNumber((uint32_t)round((path.lon-minCoord.GetLon())*lonConversionFactor));
       }
     }
 

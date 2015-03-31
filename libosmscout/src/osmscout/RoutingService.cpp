@@ -828,6 +828,7 @@ namespace osmscout {
         }
 
         RNodeRef node=new RNode(forwardOffset,
+                                forwardRouteNode,
                                 object);
 
         node->currentCost=profile.GetCosts(way,
@@ -854,6 +855,7 @@ namespace osmscout {
         }
 
         RNodeRef node=new RNode(backwardOffset,
+                                backwardRouteNode,
                                 object);
 
         node->currentCost=profile.GetCosts(way,
@@ -1130,11 +1132,7 @@ namespace osmscout {
       openMap.erase(current->nodeOffset);
       openList.erase(openList.begin());
 
-      if (!routeNodeDataFile.GetByOffset(current->nodeOffset,
-                                         currentRouteNode)) {
-        log.Error() << "Cannot load route node with id " << current->nodeOffset;
-        return false;
-      }
+      currentRouteNode=current->node;
 
       nodesLoadedCount++;
 
@@ -1238,8 +1236,21 @@ namespace osmscout {
           continue;
         }
 
-        double distanceToTarget=GetSphericalDistance(path.lon,
-                                                     path.lat,
+        RouteNodeRef nextNode;
+
+        if (openEntry!=openMap.end()) {
+          nextNode=(*openEntry->second)->node;
+        }
+        else {
+          if (!routeNodeDataFile.GetByOffset(path.offset,
+                                             nextNode)) {
+            log.Error() << "Cannot load route node with id " << path.offset;
+            return false;
+          }
+        }
+
+        double distanceToTarget=GetSphericalDistance(nextNode->coord.GetLon(),
+                                                     nextNode->coord.GetLat(),
                                                      targetLon,
                                                      targetLat);
         // Estimate costs for the rest of the distance to the target
@@ -1270,6 +1281,7 @@ namespace osmscout {
         }
         else {
           RNodeRef node=new RNode(path.offset,
+                                  nextNode,
                                   currentRouteNode->objects[path.objectIndex].object,
                                   current->nodeOffset);
 
@@ -1296,6 +1308,7 @@ namespace osmscout {
       //
 
       closeMap[current->nodeOffset]=current;
+      current->node=NULL;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
       maxCloseMap=std::max(maxCloseMap,closeMap.size());

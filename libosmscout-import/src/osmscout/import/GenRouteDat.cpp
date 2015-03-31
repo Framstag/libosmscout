@@ -961,6 +961,71 @@ namespace osmscout {
     return true;
   }
 
+  bool RouteDataGenerator::GetRouteNodeCoord(Progress& progress,
+                                             Id id,
+                                             const std::list<ObjectFileRef>& objects,
+                                             std::unordered_map<FileOffset,WayRef>& waysMap,
+                                             std::unordered_map<FileOffset,AreaRef>& areasMap,
+                                             GeoCoord& coord) const
+  {
+    for (const auto& ref : objects) {
+      if (ref.GetType()==refWay) {
+        const WayRef& way=waysMap[ref.GetFileOffset()];
+
+        if (!way.Valid()) {
+          progress.Error("Error while loading way at offset "+
+                         NumberToString(ref.GetFileOffset()) +
+                         " (Internal error?)");
+          continue;
+        }
+
+        int currentNode=0;
+
+        // Find current route node in area
+        while (currentNode<(int)way->nodes.size() &&
+              way->ids[currentNode]!=id) {
+          currentNode++;
+        }
+
+        // Make sure we found it
+        assert(currentNode<(int)way->nodes.size());
+
+        coord=way->nodes[currentNode];
+
+        return true;
+      }
+      else if (ref.GetType()==refArea) {
+        const AreaRef& area=areasMap[ref.GetFileOffset()];
+
+        if (!area.Valid()) {
+          progress.Error("Error while loading area at offset "+
+                         NumberToString(ref.GetFileOffset()) +
+                         " (Internal error?)");
+          continue;
+        }
+
+        int               currentNode=0;
+        const Area::Ring& ring=area->rings.front();
+
+        // Find current route node in area
+        while (currentNode<(int)ring.nodes.size() &&
+              ring.ids[currentNode]!=id) {
+          currentNode++;
+        }
+
+        // Make sure we found it
+        assert(currentNode<(int)ring.nodes.size());
+
+        coord=ring.nodes[currentNode];
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
   /*
   uint8_t RouteDataGenerator::CalculateEncodedBearing(const Way& way,
                                                       size_t currentNode,
@@ -1072,8 +1137,6 @@ namespace osmscout {
                                            1);
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
       path.flags=CopyFlags(ring);
-      path.lat=ring.nodes[nextNode].GetLat();
-      path.lon=ring.nodes[nextNode].GetLon();
       path.distance=distance;
 
       routeNode.paths.push_back(path);
@@ -1135,8 +1198,6 @@ namespace osmscout {
                                            1);
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
       path.flags=CopyFlags(ring);
-      path.lat=ring.nodes[prevNode].GetLat();
-      path.lon=ring.nodes[prevNode].GetLon();
       path.distance=distance;
 
       routeNode.paths.push_back(path);
@@ -1216,8 +1277,6 @@ namespace osmscout {
                                              GetGrade(way));
         //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
         path.flags=CopyFlagsForward(way);
-        path.lat=way.nodes[nextNode].GetLat();
-        path.lon=way.nodes[nextNode].GetLon();
         path.distance=distance;
 
         routeNode.paths.push_back(path);
@@ -1279,8 +1338,6 @@ namespace osmscout {
                                              GetGrade(way));
         //path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
         path.flags=CopyFlagsBackward(way);
-        path.lat=way.nodes[prevNode].GetLat();
-        path.lon=way.nodes[prevNode].GetLon();
         path.distance=distance;
 
         routeNode.paths.push_back(path);
@@ -1336,8 +1393,6 @@ namespace osmscout {
                                                  GetGrade(way));
             //path.bearing=CalculateEncodedBearing(way,i,j,false);
             path.flags=CopyFlagsBackward(way);
-            path.lat=way.nodes[j].GetLat();
-            path.lon=way.nodes[j].GetLon();
 
             path.distance=0.0;
             for (size_t d=j;d<i; d++) {
@@ -1391,8 +1446,6 @@ namespace osmscout {
                                                  GetGrade(way));
             //path.bearing=CalculateEncodedBearing(way,i,j,true);
             path.flags=CopyFlagsForward(way);
-            path.lat=way.nodes[j].GetLat();
-            path.lon=way.nodes[j].GetLon();
 
             path.distance=0.0;
             for (size_t d=i;d<j; d++) {
@@ -1670,14 +1723,11 @@ namespace osmscout {
 
       for (size_t b=0; b<blockCount; b++) {
         NodeIdObjectsMap::const_iterator node=block[b];
-        RouteNode                        routeNode;
         FileOffset                       routeNodeOffset;
 
         if (!writer.GetPos(routeNodeOffset)) {
           return false;
         }
-
-        routeNode.id=node->first;
 
         handledRouteNodeCount++;
         progress.SetProgress(handledRouteNodeCount,
@@ -1699,12 +1749,24 @@ namespace osmscout {
           continue;
         }
 
+        RouteNode routeNode;
+
+        routeNode.id=node->first;
+
+        if (!GetRouteNodeCoord(progress,
+                               node->first,
+                               node->second,
+                               waysMap,
+                               areasMap,
+                               routeNode.coord)) {
+          continue;
+        }
+
         //
         // Calculate all outgoing paths
         //
 
         for (const auto& ref : node->second) {
-
           if (ref.GetType()==refWay) {
             const WayRef& way=waysMap[ref.GetFileOffset()];
 
