@@ -44,11 +44,11 @@ namespace osmscout {
     class OSMSCOUT_API Ring
     {
     public:
-      FeatureValueBuffer    featureValueBuffer; //! List of features
+      FeatureValueBuffer    featureValueBuffer; //!< List of features
 
-      uint8_t               ring;               //! The ring hierarchy number (0...n)
-      std::vector<Id>       ids;                //! The array of ids for a coordinate
-      std::vector<GeoCoord> nodes;              //! The array of coordinates
+      uint8_t               ring;               //!< The ring hierarchy number (0...n)
+      std::vector<Id>       ids;                //!< The array of ids for a coordinate
+      std::vector<GeoCoord> nodes;              //!< The array of coordinates
 
     public:
       inline Ring()

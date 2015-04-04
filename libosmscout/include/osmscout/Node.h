@@ -36,11 +36,11 @@ namespace osmscout {
   class OSMSCOUT_API Node : public Referencable
   {
   private:
-    FeatureValueBuffer featureValueBuffer; //! List of features
+    FeatureValueBuffer featureValueBuffer; //!< List of features
 
-    FileOffset         fileOffset;         //! File offset in the data file, use as unique id
+    FileOffset         fileOffset;         //!< File offset in the data file, use as unique id
 
-    GeoCoord           coords;             //! Coordinates of node
+    GeoCoord           coords;             //!< Coordinates of node
 
   public:
     inline Node()

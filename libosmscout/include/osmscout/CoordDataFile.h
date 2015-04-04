@@ -58,10 +58,10 @@ namespace osmscout {
     typedef std::unordered_map<OSMId,CoordEntry> CoordResultMap;
 
   private:
-    bool                isOpen;             //! If true,the data file is opened
-    std::string         datafile;           //! Basename part of the data file name
-    std::string         datafilename;       //! complete filename for data file
-    mutable FileScanner scanner;            //! File stream to the data file
+    bool                isOpen;             //!< If true,the data file is opened
+    std::string         datafile;           //!< Basename part of the data file name
+    std::string         datafilename;       //!< complete filename for data file
+    mutable FileScanner scanner;            //!< File stream to the data file
     uint32_t            coordPageSize;
     CoordPageOffsetMap  coordPageOffsetMap;
 

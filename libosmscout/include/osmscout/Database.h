@@ -118,29 +118,29 @@ namespace osmscout {
   class OSMSCOUT_API Database : public Referencable
   {
   private:
-    DatabaseParameter               parameter;            //! Parameterization of this database object
+    DatabaseParameter               parameter;            //!< Parameterization of this database object
 
-    std::string                     path;                 //! Path to the directory containing all files
-    bool                            isOpen;               //! true, if opened
+    std::string                     path;                 //!< Path to the directory containing all files
+    bool                            isOpen;               //!< true, if opened
 
-    TypeConfigRef                   typeConfig;           //! Type config for the currently opened map
+    TypeConfigRef                   typeConfig;           //!< Type config for the currently opened map
 
-    GeoBox                          boundingBox;          //! Bounding box in which data is available
+    GeoBox                          boundingBox;          //!< Bounding box in which data is available
 
-    mutable NodeDataFileRef         nodeDataFile;         //! Cached access to the 'nodes.dat' file
-    mutable AreaDataFileRef         areaDataFile;         //! Cached access to the 'areas.dat' file
-    mutable WayDataFileRef          wayDataFile;          //! Cached access to the 'ways.dat' file
+    mutable NodeDataFileRef         nodeDataFile;         //!< Cached access to the 'nodes.dat' file
+    mutable AreaDataFileRef         areaDataFile;         //!< Cached access to the 'areas.dat' file
+    mutable WayDataFileRef          wayDataFile;          //!< Cached access to the 'ways.dat' file
 
-    mutable AreaNodeIndexRef        areaNodeIndex;        //! Index of nodes by containing area
-    mutable AreaWayIndexRef         areaWayIndex;         //! Index of areas by containing area
-    mutable AreaAreaIndexRef        areaAreaIndex;        //! Index of ways by containing area
+    mutable AreaNodeIndexRef        areaNodeIndex;        //!< Index of nodes by containing area
+    mutable AreaWayIndexRef         areaWayIndex;         //!< Index of areas by containing area
+    mutable AreaAreaIndexRef        areaAreaIndex;        //!< Index of ways by containing area
 
-    mutable LocationIndexRef        locationIndex;        //! Location-based index
+    mutable LocationIndexRef        locationIndex;        //!< Location-based index
 
-    mutable WaterIndexRef           waterIndex;           //! Index of land/sea tiles
+    mutable WaterIndexRef           waterIndex;           //!< Index of land/sea tiles
 
-    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom; //! Optimized data for low zoom situations
-    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;  //! Optimized data for low zoom situations
+    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom; //!< Optimized data for low zoom situations
+    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;  //!< Optimized data for low zoom situations
 
   public:
     Database(const DatabaseParameter& parameter);

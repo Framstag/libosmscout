@@ -57,15 +57,15 @@ namespace osmscout {
     };
 
   private:
-    std::string         datafile;        //! Basename part fo the data file name
-    std::string         datafilename;    //! complete filename for data file
-    FileScanner::Mode   modeData;        //! Type of file access
-    bool                memoryMapedData; //! Use memory mapped files for data access
-    mutable DataCache   cache;           //! Entry cache
-    mutable FileScanner scanner;         //! File stream to the data file
+    std::string         datafile;        //!< Basename part of the data file name
+    std::string         datafilename;    //!< complete filename for data file
+    FileScanner::Mode   modeData;        //!< Type of file access
+    bool                memoryMapedData; //!< Use memory mapped files for data access
+    mutable DataCache   cache;           //!< Entry cache
+    mutable FileScanner scanner;         //!< File stream to the data file
 
   protected:
-    bool                isOpen;          //! If true,the data file is opened
+    bool                isOpen;          //!< If true,the data file is opened
     TypeConfigRef       typeConfig;
 
   private:

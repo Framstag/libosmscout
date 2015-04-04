@@ -36,7 +36,7 @@ namespace osmscout {
   class OSMSCOUT_API Way : public Referencable
   {
   private:
-    FeatureValueBuffer    featureValueBuffer; //! List of features
+    FeatureValueBuffer    featureValueBuffer; //!< List of features
 
     FileOffset            fileOffset;
 

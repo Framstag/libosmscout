@@ -42,15 +42,15 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      uint32_t   optLevel;       //! The display level this data was optimized for
-      uint32_t   indexLevel;     //! Magnification level of index
+      uint32_t   optLevel;       //!< The display level this data was optimized for
+      uint32_t   indexLevel;     //!< Magnification level of index
 
       uint32_t   cellXStart;
       uint32_t   cellXEnd;
       uint32_t   cellYStart;
       uint32_t   cellYEnd;
 
-      FileOffset bitmapOffset;   //! Position in file where the offset of the bitmap is written
+      FileOffset bitmapOffset;   //!< Position in file where the offset of the bitmap is written
       uint8_t    dataOffsetBytes;
 
       uint32_t   cellXCount;
@@ -66,13 +66,13 @@ namespace osmscout {
     };
 
   private:
-    TypeConfigRef                         typeConfig;    //! Metadata information for loading thr actual obejcts
-    std::string                           datafile;      //! Basename part for the data file name
-    std::string                           datafilename;  //! complete filename for data file
-    mutable FileScanner                   scanner;       //! File stream to the data file
+    TypeConfigRef                         typeConfig;    //!< Metadata information for loading the actual obejcts
+    std::string                           datafile;      //!< Basename part for the data file name
+    std::string                           datafilename;  //!< complete filename for data file
+    mutable FileScanner                   scanner;       //!< File stream to the data file
 
-    double                                magnification; //! Magnification, upto which we support optimization
-    std::map<TypeId,std::list<TypeData> > areaTypesData; //! Index information for all area types
+    double                                magnification; //!< Magnification, up to which we support optimization
+    std::map<TypeId,std::list<TypeData> > areaTypesData; //!< Index information for all area types
 
   private:
     bool ReadTypeData(FileScanner& scanner,

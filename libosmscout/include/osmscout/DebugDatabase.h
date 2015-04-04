@@ -35,7 +35,7 @@ namespace osmscout {
 
   /**
     \ingroup Database
-    Database instance initialisation parameter to influence the behaviour of the database
+    Database instance initialization parameter to influence the behavior of the database
     instance.
 
     The following groups attributes are currently available:
@@ -50,14 +50,19 @@ namespace osmscout {
 
   };
 
+  /**
+    \ingroup Database
+   * Secondary Database class for accessing debug information not normally available
+   * on the target device.
+   */
   class OSMSCOUT_API DebugDatabase
   {
   private:
-    bool                      isOpen;     //! true, if opened
+    bool                      isOpen;     //!< true, if opened
 
-    std::string               path;       //! Path to the directory containing all files
+    std::string               path;       //!< Path to the directory containing all files
 
-    TypeConfigRef             typeConfig; //! Type config for the currently opened map
+    TypeConfigRef             typeConfig; //!< Type config for the currently opened map
 
   private:
     bool ResolveReferences(const std::string& mapName,

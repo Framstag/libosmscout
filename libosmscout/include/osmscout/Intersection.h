@@ -39,8 +39,8 @@ namespace osmscout {
   class OSMSCOUT_API Intersection : public Referencable
   {
   private:
-    Id                         nodeId;  //! The id/file offset of the node where the ways meet
-    std::vector<ObjectFileRef> objects; //! The objects that meet at the given node
+    Id                         nodeId;  //!< The id/file offset of the node where the ways meet
+    std::vector<ObjectFileRef> objects; //!< The objects that meet at the given node
 
   public:
     Intersection();

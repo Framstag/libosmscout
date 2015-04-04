@@ -61,7 +61,7 @@ namespace osmscout {
       */
     struct IndexCell
     {
-      FileOffset              children[4]; //! File index of each of the four children, or 0 if there is no child
+      FileOffset              children[4]; //!< File index of each of the four children, or 0 if there is no child
       std::vector<IndexEntry> areas;
     };
 
@@ -100,16 +100,16 @@ namespace osmscout {
     };
 
   private:
-    std::string                     filepart;       //! name of the data file
-    std::string                     datafilename;   //! Fullpath and name of the data file
-    mutable FileScanner             scanner;        //! Scanner instance for reading this file
+    std::string                     filepart;       //!< name of the data file
+    std::string                     datafilename;   //!< Fullpath and name of the data file
+    mutable FileScanner             scanner;        //!< Scanner instance for reading this file
 
-    std::vector<double>             cellWidth;      //! Precalculated cellWidth for each level of the quadtree
-    std::vector<double>             cellHeight;     //! Precalculated cellHeight for each level of the quadtree
-    uint32_t                        maxLevel;       //! Maximum level in index
-    FileOffset                      topLevelOffset; //! File offset of the top level index entry
+    std::vector<double>             cellWidth;      //!< Precalculated cellWidth for each level of the quadtree
+    std::vector<double>             cellHeight;     //!< Precalculated cellHeight for each level of the quadtree
+    uint32_t                        maxLevel;       //!< Maximum level in index
+    FileOffset                      topLevelOffset; //!< File offset of the top level index entry
 
-    mutable IndexCache              indexCache;     //! Cached map of all index entries by file offset
+    mutable IndexCache              indexCache;     //!< Cached map of all index entries by file offset
 
   private:
     bool GetIndexCell(const TypeConfigRef& typeConfig,
