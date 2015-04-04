@@ -41,6 +41,14 @@ namespace osmscout {
     return a->GetNodeCount()>b->GetNodeCount();
   }
 
+  WayWayDataGenerator::Distribution::Distribution()
+  : nodeCount(0),
+    wayCount(0),
+    areaCount(0)
+  {
+    // no code
+  }
+
   std::string WayWayDataGenerator::GetDescription() const
   {
     return "Generate 'wayway.tmp'";
@@ -128,6 +136,35 @@ namespace osmscout {
     progress.Info(std::string("Wrote back ")+NumberToString(restrictionsSet.size())+" restrictions");
 
     return true;
+  }
+
+  bool WayWayDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
+                                                 const ImportParameter& parameter,
+                                                 Progress& progress,
+                                                 std::vector<Distribution>& typeDistribution) const
+  {
+    typeDistribution.clear();
+    typeDistribution.resize(typeConfig->GetTypeCount());
+
+    FileScanner scanner;
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "distribution.dat"),
+                      FileScanner::Sequential,
+                      true)) {
+      progress.Error("Cannot open '" + scanner.GetFilename() + "'");
+      return false;
+    }
+
+    for (const auto &type : typeConfig->GetTypes()) {
+      if (!scanner.Read(typeDistribution[type->GetIndex()].nodeCount) ||
+          !scanner.Read(typeDistribution[type->GetIndex()].wayCount) ||
+          !scanner.Read(typeDistribution[type->GetIndex()].areaCount)) {
+        return false;
+      }
+    }
+
+    return scanner.Close();
   }
 
   bool WayWayDataGenerator::GetWays(const ImportParameter& parameter,
@@ -468,13 +505,99 @@ namespace osmscout {
     return true;
   }
 
+  bool WayWayDataGenerator::HandleLowMemoryFallback(Progress& progress,
+                                                    const TypeConfig& typeConfig,
+                                                    FileScanner& scanner,
+                                                    const TypeInfoSet& types,
+                                                    FileWriter& writer,
+                                                    uint32_t& writtenWayCount,
+                                                    const CoordDataFile& coordDataFile)
+  {
+    uint32_t areaCount=0;
+    size_t   collectedAreasCount=0;
+
+    if (!scanner.GotoBegin()) {
+      progress.Error("Error while positioning at start of file");
+      return false;
+    }
+
+    if (!scanner.Read(areaCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=areaCount; w++) {
+      RawWayRef way=new RawWay();
+
+      progress.SetProgress(w,areaCount);
+
+      if (!way->Read(typeConfig,
+                     scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+            NumberToString(w)+" of "+
+            NumberToString(areaCount)+
+            " in file '"+
+            scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (way->IsArea()) {
+        continue;
+      }
+
+      if (way->GetType()->GetIgnore()) {
+        continue;
+      }
+
+      if (!types.IsSet(way->GetType())) {
+        continue;
+      }
+
+      if (way->GetNodeCount()<2) {
+        continue;
+      }
+
+      collectedAreasCount++;
+
+      std::set<OSMId>               nodeIds;
+      CoordDataFile::CoordResultMap coordsMap;
+
+      for (size_t n=0; n<way->GetNodeCount(); n++) {
+        nodeIds.insert(way->GetNodeId(n));
+      }
+
+      if (!coordDataFile.Get(nodeIds,coordsMap)) {
+        std::cerr << "Cannot read nodes!" << std::endl;
+        return false;
+      }
+
+      nodeIds.clear();
+
+      if (!WriteWay(progress,
+                    typeConfig,
+                    writer,
+                    writtenWayCount,
+                    coordsMap,
+                    way)) {
+        return false;
+      }
+    }
+
+    progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(types.Size())+" types");
+
+    return true;
+  }
+
   bool WayWayDataGenerator::Import(const TypeConfigRef& typeConfig,
                                    const ImportParameter& parameter,
                                    Progress& progress)
   {
     progress.SetAction("Generate wayway.tmp");
 
+    std::vector<Distribution>               typeDistribution;
+
     TypeInfoSet                             wayTypes;
+    TypeInfoSet                             slowFallbackTypes;
 
     // List of restrictions for a way
     std::multimap<OSMId,TurnRestrictionRef> restrictions; //! Map of restrictions
@@ -486,7 +609,23 @@ namespace osmscout {
     uint32_t                                writtenWayCount=0;
     uint32_t                                mergeCount=0;
 
-    wayTypes.Set(typeConfig->GetWayTypes());
+    progress.SetAction("Reading type distribution");
+
+    if (!ReadTypeDistribution(typeConfig,
+                              parameter,
+                              progress,
+                              typeDistribution)) {
+      return false;
+    }
+
+    for (const auto &type : typeConfig->GetTypes()) {
+      if (typeDistribution[type->GetIndex()].wayCount>=parameter.GetRawWayBlockSize()) {
+        slowFallbackTypes.Set(type);
+      }
+      else {
+        wayTypes.Set(type);
+      }
+    }
 
     //
     // handling of restriction relations
@@ -605,6 +744,24 @@ namespace osmscout {
 
         waysByType[type].clear();
       }
+    }
+
+    /* -------*/
+
+    if (!slowFallbackTypes.Empty()) {
+      progress.Info("Handling low memory fall back (no merging) for the following types");
+
+      for (auto type : slowFallbackTypes) {
+        progress.Info("* "+type->GetName());
+      }
+
+      HandleLowMemoryFallback(progress,
+                              typeConfig,
+                              scanner,
+                              slowFallbackTypes,
+                              wayWriter,
+                              writtenWayCount,
+                              coordDataFile);
     }
 
     /* -------*/

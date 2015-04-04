@@ -38,13 +38,27 @@ namespace osmscout {
   class WayAreaDataGenerator : public ImportModule
   {
   private:
+    struct Distribution
+    {
+      size_t nodeCount;
+      size_t wayCount;
+      size_t areaCount;
+
+      Distribution();
+    };
+
     typedef std::unordered_set<OSMId> BlacklistSet;
 
     typedef std::list<RawWayRef>      WayList;
 
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
-                          BlacklistSet& wayBlacklist);
+                          BlacklistSet& wayBlacklist) const;
+
+    bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
+                              const ImportParameter& parameter,
+                              Progress& progress,
+                              std::vector<Distribution>& typeDistribution) const;
 
     bool GetAreas(const ImportParameter& parameter,
                  Progress& progress,

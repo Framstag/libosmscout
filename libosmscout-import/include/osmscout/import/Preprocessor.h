@@ -37,18 +37,15 @@ namespace osmscout {
   public:
     virtual ~PreprocessorCallback();
 
-    virtual void ProcessNode(const TypeConfig& typeConfig,
-                             const OSMId& id,
+    virtual void ProcessNode(const OSMId& id,
                              const double& lon, const double& lat,
                              const TagMap& tags) = 0;
 
-    virtual void ProcessWay(const TypeConfig& typeConfig,
-                            const OSMId& id,
+    virtual void ProcessWay(const OSMId& id,
                             std::vector<OSMId>& nodes,
                             const TagMap& tags) = 0;
 
-    virtual void ProcessRelation(const TypeConfig& typeConfig,
-                                 const OSMId& id,
+    virtual void ProcessRelation(const OSMId& id,
                                  const std::vector<RawRelation::Member>& members,
                                  const TagMap& tags) = 0;
 

@@ -38,6 +38,15 @@ namespace osmscout {
   class WayWayDataGenerator : public ImportModule
   {
   private:
+    struct Distribution
+    {
+      size_t nodeCount;
+      size_t wayCount;
+      size_t areaCount;
+
+      Distribution();
+    };
+
     typedef std::list<RawWayRef>                     WayList;
     typedef WayList::iterator                        WayListPtr;
     typedef std::list<WayListPtr>                    WayListPtrList;
@@ -50,6 +59,11 @@ namespace osmscout {
     bool WriteTurnRestrictions(const ImportParameter& parameter,
                                Progress& progress,
                                std::multimap<OSMId,TurnRestrictionRef>& restrictions);
+
+    bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
+                              const ImportParameter& parameter,
+                              Progress& progress,
+                              std::vector<Distribution>& typeDistribution) const;
 
     bool GetWays(const ImportParameter& parameter,
                  Progress& progress,
@@ -76,6 +90,14 @@ namespace osmscout {
                   uint32_t& writtenWayCount,
                   const CoordDataFile::CoordResultMap& coordsMap,
                   const RawWay& rawWay);
+
+    bool HandleLowMemoryFallback(Progress& progress,
+                                 const TypeConfig& typeConfig,
+                                 FileScanner& scanner,
+                                 const TypeInfoSet& types,
+                                 FileWriter& writer,
+                                 uint32_t& writtenWayCount,
+                                 const CoordDataFile& coordDataFile);
 
   public:
     std::string GetDescription() const;

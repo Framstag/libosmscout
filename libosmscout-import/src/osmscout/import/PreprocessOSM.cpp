@@ -259,8 +259,7 @@ namespace osmscout {
     void EndElement(const xmlChar *name)
     {
       if (strcmp((const char*)name,"node")==0) {
-        callback.ProcessNode(typeConfig,
-                             id,
+        callback.ProcessNode(id,
                              lon,
                              lat,
                              tags);
@@ -268,8 +267,7 @@ namespace osmscout {
         context=contextUnknown;
       }
       else if (strcmp((const char*)name,"way")==0) {
-        callback.ProcessWay(typeConfig,
-                            id,
+        callback.ProcessWay(id,
                             nodes,
                             tags);
         nodes.clear();
@@ -277,8 +275,7 @@ namespace osmscout {
         context=contextUnknown;
       }
       else if (strcmp((const char*)name,"relation")==0) {
-        callback.ProcessRelation(typeConfig,
-                                 id,
+        callback.ProcessRelation(id,
                                  members,
                                  tags);
         members.clear();

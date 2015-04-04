@@ -35,6 +35,14 @@
 
 namespace osmscout {
 
+  WayAreaDataGenerator::Distribution::Distribution()
+  : nodeCount(0),
+    wayCount(0),
+    areaCount(0)
+  {
+    // no code
+  }
+
   std::string WayAreaDataGenerator::GetDescription() const
   {
     return "Generate 'wayarea.tmp'";
@@ -42,7 +50,7 @@ namespace osmscout {
 
   bool WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
                                               Progress& progress,
-                                              BlacklistSet& wayBlacklist)
+                                              BlacklistSet& wayBlacklist) const
   {
     FileScanner scanner;
 
@@ -64,6 +72,35 @@ namespace osmscout {
       }
 
       wayBlacklist.insert(id);
+    }
+
+    return scanner.Close();
+  }
+
+  bool WayAreaDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
+                                                  const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  std::vector<Distribution>& typeDistribution) const
+  {
+    typeDistribution.clear();
+    typeDistribution.resize(typeConfig->GetTypeCount());
+
+    FileScanner scanner;
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "distribution.dat"),
+                      FileScanner::Sequential,
+                      true)) {
+      progress.Error("Cannot open '" + scanner.GetFilename() + "'");
+      return false;
+    }
+
+    for (const auto &type : typeConfig->GetTypes()) {
+      if (!scanner.Read(typeDistribution[type->GetIndex()].nodeCount) ||
+          !scanner.Read(typeDistribution[type->GetIndex()].wayCount) ||
+          !scanner.Read(typeDistribution[type->GetIndex()].areaCount)) {
+        return false;
+      }
     }
 
     return scanner.Close();
@@ -131,28 +168,6 @@ namespace osmscout {
       areas[way->GetType()->GetIndex()].push_back(way);
 
       collectedWaysCount++;
-
-      if (collectedWaysCount>parameter.GetRawWayBlockSize()) {
-        for (auto &type : currentTypes) {
-          if (!areas[type->GetIndex()].empty() &&
-              areas[type->GetIndex()].size()>parameter.GetRawWayBlockSize()) {
-            progress.Warning("Too many objects for type "+
-                             type->GetName()+
-                             " ("+NumberToString(areas[type->GetIndex()].size())+
-                             "), mark it for low memory fall back");
-
-            collectedWaysCount-=areas[type->GetIndex()].size();
-            areas[type->GetIndex()].clear();
-
-            typesWithWays--;
-            types.Remove(type);
-            slowFallbackTypes.Set(type);
-            currentTypes.Remove(type);
-
-            break;
-          }
-        }
-      }
 
       while (collectedWaysCount>parameter.GetRawWayBlockSize() &&
           typesWithWays>1) {
@@ -344,19 +359,37 @@ namespace osmscout {
   {
     progress.SetAction("Generate wayarea.tmp");
 
-    TypeInfoSet   areaTypes;
-    TypeInfoSet   slowFallbackTypes;
+    std::vector<Distribution> typeDistribution;
 
-    BlacklistSet  wayBlacklist; //! Set of ways that should not be handled
+    TypeInfoSet               areaTypes;
+    TypeInfoSet               slowFallbackTypes;
 
-    CoordDataFile coordDataFile("coord.dat");
-    FileScanner   scanner;
-    FileWriter    areaWriter;
-    uint32_t      rawWayCount=0;
+    BlacklistSet              wayBlacklist; //! Set of ways that should not be handled
 
-    uint32_t      writtenWayCount=0;
+    CoordDataFile             coordDataFile("coord.dat");
+    FileScanner               scanner;
+    FileWriter                areaWriter;
+    uint32_t                  rawWayCount=0;
 
-    areaTypes.Set(typeConfig->GetAreaTypes());
+    uint32_t                  writtenWayCount=0;
+
+    progress.SetAction("Reading type distribution");
+
+    if (!ReadTypeDistribution(typeConfig,
+                              parameter,
+                              progress,
+                              typeDistribution)) {
+      return false;
+    }
+
+    for (const auto &type : typeConfig->GetTypes()) {
+      if (typeDistribution[type->GetIndex()].areaCount>=parameter.GetRawWayBlockSize()) {
+        slowFallbackTypes.Set(type);
+      }
+      else {
+        areaTypes.Set(type);
+      }
+    }
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing
@@ -463,10 +496,10 @@ namespace osmscout {
                   NumberToString(writtenWayCount) + " areas(s) written");
 
     if (!slowFallbackTypes.Empty()) {
-      progress.SetAction("Handling low memory fall back for the following types");
+      progress.Info("Handling low memory fall back for the following types");
 
       for (auto type : slowFallbackTypes) {
-        progress.SetAction("* "+type->GetName());
+        progress.Info("* "+type->GetName());
       }
 
       HandleLowMemoryFallback(parameter,

@@ -287,8 +287,7 @@ namespace osmscout {
         }
       }
 
-      callback.ProcessNode(typeConfig,
-                           inputNode.id(),
+      callback.ProcessNode(inputNode.id(),
                            (inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
                            (inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
                            tagMap);
@@ -331,8 +330,7 @@ namespace osmscout {
         t+=2;
       }
 
-      callback.ProcessNode(typeConfig,
-                           dId,
+      callback.ProcessNode(dId,
                            (dLon*block.granularity()+block.lon_offset())/NANO,
                            (dLat*block.granularity()+block.lat_offset())/NANO,
                            tagMap);
@@ -364,8 +362,7 @@ namespace osmscout {
         nodes.push_back(ref);
       }
 
-      callback.ProcessWay(typeConfig,
-                          inputWay.id(),
+      callback.ProcessWay(inputWay.id(),
                           nodes,
                           tagMap);
     }
@@ -413,8 +410,7 @@ namespace osmscout {
         members.push_back(member);
       }
 
-      callback.ProcessRelation(typeConfig,
-                               inputRelation.id(),
+      callback.ProcessRelation(inputRelation.id(),
                                members,
                                tagMap);
     }
