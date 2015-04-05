@@ -81,6 +81,11 @@ wayareablack.dat (import only):
  * List of areas ids that get blacklisted during relation
    parsing.
 
+distribution.dat (import only)
+ * Contains information regarding number of nodes, ways and areas
+   per type. USed during import for triggering import variants (depending
+   on data size => low memeory fallbacks).
+
 Debugging information:
 ======================
 
