@@ -64,7 +64,6 @@ namespace osmscout {
                  Progress& progress,
                  const TypeConfig& typeConfig,
                  TypeInfoSet& types,
-                 TypeInfoSet& slowFallbackTypes,
                  const BlacklistSet& blacklist,
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& areas);
