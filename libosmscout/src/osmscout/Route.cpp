@@ -167,13 +167,13 @@ namespace osmscout {
   {
     std::string result="Name Change: ";
 
-    if (originDescription.Valid()) {
+    if (originDescription) {
       result+="'"+originDescription->GetDescription()+"'";
     }
 
     result+=" => ";
 
-    if (targetDescription.Valid()) {
+    if (targetDescription) {
       result+="'"+targetDescription->GetDescription()+"'";
     }
 
@@ -201,7 +201,7 @@ namespace osmscout {
 
     result+="Crossing";
 
-    if (originDescription.Valid()) {
+    if (originDescription) {
       if (!result.empty()) {
         result+=" ";
       }
@@ -209,7 +209,7 @@ namespace osmscout {
       result+="from '"+originDescription->GetDescription()+"'";
     }
 
-    if (targetDescription.Valid()) {
+    if (targetDescription) {
       if (!result.empty()) {
         result+=" ";
       }
@@ -342,7 +342,7 @@ namespace osmscout {
   {
     std::string result="Enter motorway";
 
-    if (toDescription.Valid() &&
+    if (toDescription &&
         toDescription->HasName()) {
       result+=" '"+toDescription->GetDescription()+"'";
     }
@@ -406,7 +406,7 @@ namespace osmscout {
 
     entry=descriptionMap.find(name);
 
-    return entry!=descriptionMap.end() && entry->second.Valid();
+    return entry!=descriptionMap.end() && entry->second;
   }
 
   RouteDescription::Description* RouteDescription::Node::GetDescription(const char* name) const

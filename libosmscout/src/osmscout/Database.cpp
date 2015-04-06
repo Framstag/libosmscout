@@ -151,45 +151,45 @@ namespace osmscout {
 
   void Database::Close()
   {
-    if (nodeDataFile.Valid() &&
+    if (nodeDataFile &&
         nodeDataFile->IsOpen()) {
       nodeDataFile->Close();
       nodeDataFile=NULL;
     }
 
-    if (areaDataFile.Valid() &&
+    if (areaDataFile &&
         areaDataFile->IsOpen()) {
       areaDataFile->Close();
       areaDataFile=NULL;
     }
 
-    if (wayDataFile.Valid() &&
+    if (wayDataFile &&
         wayDataFile->IsOpen()) {
       wayDataFile->Close();
       wayDataFile=NULL;
     }
 
-    if (areaNodeIndex.Valid()) {
+    if (areaNodeIndex) {
       areaNodeIndex->Close();
       areaNodeIndex=NULL;
     }
 
-    if (areaAreaIndex.Valid()) {
+    if (areaAreaIndex) {
       areaAreaIndex->Close();
       areaAreaIndex=NULL;
     }
 
-    if (areaWayIndex.Valid()) {
+    if (areaWayIndex) {
       areaWayIndex->Close();
       areaWayIndex=NULL;
     }
 
-    if (optimizeWaysLowZoom.Valid()) {
+    if (optimizeWaysLowZoom) {
       optimizeWaysLowZoom->Close();
       optimizeWaysLowZoom=NULL;
     }
 
-    if (optimizeAreasLowZoom.Valid()) {
+    if (optimizeAreasLowZoom) {
       optimizeAreasLowZoom->Close();
       optimizeAreasLowZoom=NULL;
     }
@@ -199,15 +199,15 @@ namespace osmscout {
 
   void Database::FlushCache()
   {
-    if (nodeDataFile.Valid()) {
+    if (nodeDataFile) {
       nodeDataFile->FlushCache();
     }
 
-    if (areaDataFile.Valid()) {
+    if (areaDataFile) {
       areaDataFile->FlushCache();
     }
 
-    if (wayDataFile.Valid()) {
+    if (wayDataFile) {
       wayDataFile->FlushCache();
     }
   }
@@ -637,35 +637,35 @@ namespace osmscout {
 
   void Database::DumpStatistics()
   {
-    if (nodeDataFile.Valid()) {
+    if (nodeDataFile) {
       nodeDataFile->DumpStatistics();
     }
 
-    if (areaDataFile.Valid()) {
+    if (areaDataFile) {
       areaDataFile->DumpStatistics();
     }
 
-    if (wayDataFile.Valid()) {
+    if (wayDataFile) {
       wayDataFile->DumpStatistics();
     }
 
-    if (areaNodeIndex.Valid()) {
+    if (areaNodeIndex) {
       areaNodeIndex->DumpStatistics();
     }
 
-    if (areaAreaIndex.Valid()) {
+    if (areaAreaIndex) {
       areaAreaIndex->DumpStatistics();
     }
 
-    if (areaWayIndex.Valid()) {
+    if (areaWayIndex) {
       areaWayIndex->DumpStatistics();
     }
 
-    if (locationIndex.Valid()) {
+    if (locationIndex) {
       locationIndex->DumpStatistics();
     }
 
-    if (waterIndex.Valid()) {
+    if (waterIndex) {
       waterIndex->DumpStatistics();
     }
   }

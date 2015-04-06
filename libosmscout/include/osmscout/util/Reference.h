@@ -281,6 +281,14 @@ namespace osmscout {
       return *ptr;
     }
 
+    /**
+     * Conversion to bool operator. Returns true, if the pointer is valid, else false
+    */
+    operator bool() const
+    {
+      return ptr!=NULL;
+    }
+
     bool operator==(const Ref<T>& other) const
     {
       return ptr==other.ptr;
