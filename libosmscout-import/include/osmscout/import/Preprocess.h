@@ -79,9 +79,9 @@ namespace osmscout {
       GeoCoord               minCoord;
       GeoCoord               maxCoord;
 
-      std::vector<size_t>    nodeStat;
-      std::vector<size_t>    areaStat;
-      std::vector<size_t>    wayStat;
+      std::vector<uint32_t>  nodeStat;
+      std::vector<uint32_t>  areaStat;
+      std::vector<uint32_t>  wayStat;
 
     private:
       bool StoreCurrentPage();

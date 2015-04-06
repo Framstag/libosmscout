@@ -40,9 +40,9 @@ namespace osmscout {
   private:
     struct Distribution
     {
-      size_t nodeCount;
-      size_t wayCount;
-      size_t areaCount;
+      uint32_t nodeCount;
+      uint32_t wayCount;
+      uint32_t areaCount;
 
       Distribution();
     };
