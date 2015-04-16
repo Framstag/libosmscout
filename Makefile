@@ -19,7 +19,7 @@ programs = libosmscout \
 all:
 	@for x in $(programs); do \
 	  if [ -d $$x ]; then \
-	    (cd $$x && $(MAKE) -j); \
+	    (cd $$x && $(MAKE)); \
 	  fi \
 	done
 
@@ -27,7 +27,7 @@ full:
 	@for x in $(programs); do \
 	  if [ -d $$x ]; then \
 	    echo Building $$x...; \
-	    (cd $$x && ./autogen.sh && ./configure && $(MAKE) -j); \
+	    (cd $$x && ./autogen.sh && ./configure && $(MAKE)); \
 	  fi \
 	done
 
