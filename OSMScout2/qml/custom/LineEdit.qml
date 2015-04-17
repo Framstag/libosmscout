@@ -3,8 +3,6 @@ import QtQuick 2.2
 import net.sf.libosmscout.map 1.0
 
 Item {
-    id: lineEdit
-
     property color defaultBackgroundColor: "white"
 
     property color backgroundColor: defaultBackgroundColor

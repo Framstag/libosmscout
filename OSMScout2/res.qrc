@@ -7,9 +7,9 @@
         <file>qml/custom/DialogActionButton.qml</file>
         <file>qml/custom/LineEdit.qml</file>
         <file>qml/custom/LocationEdit.qml</file>
-        <file>qml/custom/LocationEdit2.qml</file>
         <file>qml/custom/MapButton.qml</file>
         <file>qml/custom/MapDialog.qml</file>
         <file>qml/custom/ScrollIndicator.qml</file>
+        <file>qml/custom/LocationSearch.qml</file>
     </qresource>
 </RCC>

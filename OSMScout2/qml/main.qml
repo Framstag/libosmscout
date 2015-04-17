@@ -107,6 +107,7 @@ Window {
     }
 
     GridLayout {
+        id: content
         anchors.fill: parent
 
         Map {
@@ -114,6 +115,21 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
             focus: true
+
+            function updateFreeRect() {
+                searchDialog.desktopFreeSpace =  Qt.rect(Theme.horizSpace,
+                                                         Theme.vertSpace+searchDialog.height+Theme.vertSpace,
+                                                         map.width-2*Theme.horizSpace,
+                                                         map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
+            }
+
+            onWidthChanged: {
+                updateFreeRect()
+            }
+
+            onHeightChanged: {
+                updateFreeRect()
+            }
 
             Keys.onPressed: {
                 if (event.key === Qt.Key_Plus) {
@@ -157,47 +173,36 @@ Window {
             // Use PinchArea for multipoint zoom in/out?
 
 
+            // Top row
             RowLayout {
                 id: topBar
 
+                z: 1
+
                 anchors.top: parent.top;
-                anchors.topMargin: Theme.mapButtonSpace
+                anchors.topMargin: Theme.vertSpace
                 anchors.left: parent.left;
-                anchors.leftMargin: Theme.mapButtonSpace
+                anchors.leftMargin: Theme.horizSpace
                 anchors.right: parent.right
-                anchors.rightMargin: Theme.mapButtonSpace
+                anchors.rightMargin: Theme.horizSpace
 
-                spacing: 0
+                SearchDialog {
+                    id: searchDialog
 
-                LocationEdit2 {
-                    id: locationSearch
+                    desktop: map
 
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: Theme.averageCharWidth*5
-                    Layout.preferredWidth: Theme.averageCharWidth*35
-                    Layout.maximumWidth: Theme.averageCharWidth*50
-
-                    dialogX: 0
-                    dialogY: locationSearch.height + Theme.mapButtonSpace
-                    dialogWidth: mainWindow.width - 2*Theme.mapButtonSpace
-                    dialogHeight: mainWindow.height-2*Theme.mapButtonSpace-(locationSearch.y + locationSearch.height)
-                }
-
-                DialogActionButton {
-                    width: locationSearch.height
-                    height: locationSearch.height
-                    contentColor: "#0000ff"
-                    textColor: "white"
-                    text: "o"
+                    onShowLocation: {
+                        map.showLocation(location)
+                    }
                 }
             }
 
-
+            // Top left column
             ColumnLayout {
                 id: menu
 
-                x: Theme.mapButtonSpace
-                y: topBar.x+ topBar.height+Theme.mapButtonSpace
+                x: Theme.horizSpace
+                y: topBar.y+ topBar.height+Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
 
@@ -220,11 +225,12 @@ Window {
                 }
             }
 
+            // Bottom left column
             ColumnLayout {
                 id: info
 
-                x: Theme.mapButtonSpace
-                y: parent.height-height-Theme.mapButtonSpace
+                x: Theme.horizSpace
+                y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
 
@@ -238,11 +244,12 @@ Window {
                 }
             }
 
+            // Bottom right column
             ColumnLayout {
                 id: navigation
 
-                x: parent.width-width-Theme.mapButtonSpace
-                y: parent.height-height-Theme.mapButtonSpace
+                x: parent.width-width-Theme.horizSpace
+                y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
 

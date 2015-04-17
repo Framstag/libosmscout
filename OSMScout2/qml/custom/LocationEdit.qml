@@ -77,6 +77,7 @@ LineEdit {
     }
 
     Keys.onReturnPressed: {
+        console.log("LineEdit::return()")
         suggestionTimer.stop()
 
         if (popup.visible) {
