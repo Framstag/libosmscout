@@ -625,7 +625,7 @@ namespace osmscout {
     return writer.Close();
   }
 
-  bool Preprocess::Callback::Cleanup()
+  bool Preprocess::Callback::Cleanup(bool success)
   {
     if (currentPageId!=0) {
       StoreCurrentPage();
@@ -671,31 +671,33 @@ namespace osmscout {
     turnRestrictionWriter.Close();
     multipolygonWriter.Close();
 
-    progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
-    progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
-                  NumberToString(areaCount)+" "+
-                  NumberToString(wayCount+areaCount));
-    progress.Info(std::string("Relations:        ")+NumberToString(relationCount));
-    progress.Info(std::string("Coastlines:       ")+NumberToString(coastlineCount));
-    progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
-    progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
-    progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
+    if (success) {
+      progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
+      progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
+                    NumberToString(areaCount)+" "+
+                    NumberToString(wayCount+areaCount));
+      progress.Info(std::string("Relations:        ")+NumberToString(relationCount));
+      progress.Info(std::string("Coastlines:       ")+NumberToString(coastlineCount));
+      progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
+      progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
+      progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
-    for (const auto &type : typeConfig->GetTypes()) {
-      size_t      i=type->GetIndex();
-      bool        isEmpty=(type->CanBeNode() && nodeStat[i]==0) ||
-                          (type->CanBeArea() && areaStat[i]==0) ||
-                          (type->CanBeWay() && wayStat[i]==0);
-      bool        isImportant=!type->GetIgnore() &&
-                              !type->GetName().empty() &&
-                              type->GetName()[0]!='_';
+      for (const auto &type : typeConfig->GetTypes()) {
+        size_t      i=type->GetIndex();
+        bool        isEmpty=(type->CanBeNode() && nodeStat[i]==0) ||
+                            (type->CanBeArea() && areaStat[i]==0) ||
+                            (type->CanBeWay() && wayStat[i]==0);
+        bool        isImportant=!type->GetIgnore() &&
+                                !type->GetName().empty() &&
+                                type->GetName()[0]!='_';
 
-      if (isEmpty &&
-          isImportant) {
-        progress.Warning("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
-      }
-      else {
-        progress.Info("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+        if (isEmpty &&
+            isImportant) {
+          progress.Warning("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+        }
+        else {
+          progress.Info("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+        }
       }
     }
 
@@ -717,12 +719,14 @@ namespace osmscout {
       return false;
     }
 
-    if (!DumpDistribution()) {
-      return false;
-    }
+    if (success) {
+      if (!DumpDistribution()) {
+        return false;
+      }
 
-    if (!DumpBoundingBox()) {
-      return false;
+      if (!DumpBoundingBox()) {
+        return false;
+      }
     }
 
     return true;
@@ -753,6 +757,7 @@ namespace osmscout {
         }
 #else
         progress.Error("Support for the OSM file format is not enabled!");
+        return false;
 #endif
       }
       else if (filename.length()>=4 &&
@@ -799,7 +804,7 @@ namespace osmscout {
                         progress,
                         callback);
 
-    if (!callback.Cleanup()) {
+    if (!callback.Cleanup(result)) {
       return false;
     }
 

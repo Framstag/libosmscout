@@ -112,7 +112,7 @@ namespace osmscout {
 
       bool Initialize();
 
-      bool Cleanup();
+      bool Cleanup(bool success);
 
       void ProcessNode(const OSMId& id,
                        const double& lon, const double& lat,
