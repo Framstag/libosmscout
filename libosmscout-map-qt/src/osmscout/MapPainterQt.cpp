@@ -383,21 +383,26 @@ namespace osmscout {
   void MapPainterQt::FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                                      bool isClosed, bool keepOrientation) {
       hnd.i = 0;
-      hnd.nVertex = labs(transEnd - transStart);
+      hnd.nVertex = transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
       bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
-      if(isClosed && !isReallyClosed){
+      if (isClosed && !isReallyClosed) {
           hnd.nVertex++;
           hnd.closeWay = true;
-      } else {
+      }
+      else {
           hnd.closeWay = false;
       }
-      if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
+
+      if (keepOrientation ||
+          coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
           hnd.transStart = transStart;
           hnd.transEnd = transEnd;
-      } else {
+      }
+      else {
           hnd.transStart = transEnd;
           hnd.transEnd = transStart;
       }
+
       hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
       origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
   }
