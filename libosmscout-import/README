@@ -1,0 +1,12 @@
+
+You can find detailed instruction how to get libraries and applications
+build and working in the openstreetmap wiki:
+
+http://wiki.openstreetmap.org/wiki/Libosmscout
+
+To enable support for parsing *.osm files you need libxml as an
+external dependency.
+
+To enable support for parsing *.osm.pbf files you need the google
+protobuffer library, the protobuffer compiler and libz as a
+external dependencies.
