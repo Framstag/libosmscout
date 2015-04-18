@@ -2553,7 +2553,7 @@ namespace osmscout {
       delete [] content;
       fclose(file);
 
-      return NULL;
+      return false;
     }
 
     fclose(file);
