@@ -262,7 +262,7 @@ namespace osmscout {
 
   void MergeAreasGenerator::MergeAreas(const NodeUseMap& nodeUseMap,
                                        std::list<AreaRef>& areas,
-                                       std::list<AreaRef>& merges,
+                                       std::list<AreaRef>& /*merges*/,
                                        std::unordered_set<FileOffset>& blacklist)
   {
     std::unordered_map<Id,std::list<AreaRef> > idAreaMap;
@@ -284,8 +284,6 @@ namespace osmscout {
         }
       }
     }
-
-    std::list<AreaRef>::iterator current=areas.begin();
 
     while (!areas.empty()) {
       AreaRef area;
