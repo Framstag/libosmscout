@@ -27,7 +27,6 @@ namespace osmscout {
   private:
     FileWriter                 writer;
     uint32_t                   overallDataCount;
-    TagId                      tagAddrStreet;
     NameFeatureValueReader     *nameReader;
     LocationFeatureValueReader *locationReader;
     AddressFeatureValueReader  *addressReader;
