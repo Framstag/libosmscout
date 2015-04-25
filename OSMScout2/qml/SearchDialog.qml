@@ -5,53 +5,65 @@ import net.sf.libosmscout.map 1.0
 
 import "custom"
 
-Rectangle {
-    id: searchRectangle;
+/*FocusScope {
+    x: searchRectangle.x
+    y: searchRectangle.x
+    width: searchRectangle.width
+    height: searchRectangle.height*/
 
-    property Item desktop;
-    property rect desktopFreeSpace;
-    property Location location
 
-    width: searchContent.width;
-    height: searchContent.height;
+    Rectangle {
+        id: searchRectangle;
 
-    RowLayout {
-        id: searchContent
-        Layout.fillWidth: true
-        height: searchEdit.height
-        spacing: 0
+        property alias desktop : searchEdit.desktop;
+        property alias desktopFreeSpace: searchEdit.desktopFreeSpace;
+        property alias location: searchEdit.location;
 
-        LocationSearch {
-            id: searchEdit;
+        signal showLocation(Location location)
 
-            Layout.fillWidth: true
-            Layout.minimumWidth: Theme.averageCharWidth*5
-            Layout.preferredWidth: Theme.averageCharWidth*35
-            Layout.maximumWidth: Theme.averageCharWidth*50
+        width: searchContent.width;
+        height: searchContent.height;
 
-            desktop: searchRectangle.desktop
-            desktopFreeSpace: searchRectangle.desktopFreeSpace
-            location: location
+        color: "green"
 
-            onShowLocation: {
-                searchRectangle.showLocation(location)
-            }
-        }
-
-        DialogActionButton {
-            width: searchEdit.height
+        RowLayout {
+            id: searchContent
             height: searchEdit.height
-            contentColor: "#0000ff"
-            textColor: "white"
-            text: "o"
+            spacing: 0
 
-            onClicked: {
-                if (searchEdit.location !== null) {
-                    showLocation(searchEdit.location);
+            LocationSearch {
+                id: searchEdit;
+
+                Layout.minimumWidth: Theme.averageCharWidth*5
+                Layout.preferredWidth: Theme.averageCharWidth*45
+                Layout.maximumWidth: Theme.averageCharWidth*60
+
+                focus: true
+
+                desktop: searchRectangle.desktop
+                desktopFreeSpace: searchRectangle.desktopFreeSpace
+                location: location
+
+                onShowLocation: {
+                    searchRectangle.showLocation(location)
+                }
+            }
+
+            DialogActionButton {
+                width: searchEdit.height
+                height: searchEdit.height
+                contentColor: "#0000ff"
+                textColor: "white"
+                text: "o"
+
+                onClicked: {
+                    searchEdit.enforceLocationValue();
+
+                    if (searchEdit.location !== null) {
+                        showLocation(searchEdit.location);
+                    }
                 }
             }
         }
     }
-
-    signal showLocation(Location location)
-}
+//}

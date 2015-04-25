@@ -19,16 +19,6 @@ Window {
     width: 480
     height: 800
 
-    function openSearchLocationDialog() {
-        var component = Qt.createComponent("SearchLocationDialog.qml")
-        var dialog = component.createObject(mainWindow, {})
-
-        dialog.showLocation.connect(showLocation)
-        dialog.opened.connect(onDialogOpened)
-        dialog.closed.connect(onDialogClosed)
-        dialog.open()
-    }
-
     function openRoutingDialog() {
         var component = Qt.createComponent("RoutingDialog.qml")
         var dialog = component.createObject(mainWindow, {})
@@ -134,15 +124,19 @@ Window {
             Keys.onPressed: {
                 if (event.key === Qt.Key_Plus) {
                     map.zoomIn(2.0)
+                    event.accepted = true
                 }
                 else if (event.key === Qt.Key_Minus) {
                     map.zoomOut(2.0)
+                    event.accepted = true
                 }
                 else if (event.key === Qt.Key_Up) {
                     map.up()
+                    event.accepted = true
                 }
                 else if (event.key === Qt.Key_Down) {
                     map.down()
+                    event.accepted = true
                 }
                 else if (event.key === Qt.Key_Left) {
                     if (event.modifiers & Qt.ShiftModifier) {
@@ -151,6 +145,7 @@ Window {
                     else {
                         map.left();
                     }
+                    event.accepted = true
                 }
                 else if (event.key === Qt.Key_Right) {
                     if (event.modifiers & Qt.ShiftModifier) {
@@ -159,41 +154,35 @@ Window {
                     else {
                         map.right();
                     }
+                    event.accepted = true
                 }
                 else if (event.modifiers===Qt.ControlModifier &&
                          event.key === Qt.Key_F) {
-                    openSearchLocationDialog()
+                    searchDialog.focus = true
+                    //openSearchLocationDialog()
+                    event.accepted = true
                 }
                 else if (event.modifiers===Qt.ControlModifier &&
                          event.key === Qt.Key_R) {
                     openRoutingDialog()
+                    event.accepted = true
                 }
             }
 
             // Use PinchArea for multipoint zoom in/out?
 
 
-            // Top row
-            RowLayout {
-                id: topBar
+            SearchDialog {
+                id: searchDialog
 
-                z: 1
+                y: Theme.vertSpace
 
-                anchors.top: parent.top;
-                anchors.topMargin: Theme.vertSpace
-                anchors.left: parent.left;
-                anchors.leftMargin: Theme.horizSpace
-                anchors.right: parent.right
-                anchors.rightMargin: Theme.horizSpace
+                anchors.horizontalCenter: parent.horizontalCenter
 
-                SearchDialog {
-                    id: searchDialog
+                desktop: map
 
-                    desktop: map
-
-                    onShowLocation: {
-                        map.showLocation(location)
-                    }
+                onShowLocation: {
+                    map.showLocation(location)
                 }
             }
 
@@ -202,18 +191,9 @@ Window {
                 id: menu
 
                 x: Theme.horizSpace
-                y: topBar.y+ topBar.height+Theme.vertSpace
+                y: searchDialog.y+ searchDialog.height+Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
-
-                MapButton {
-                    id: searchLocation
-                    label: "l"
-
-                    onClicked: {
-                        openSearchLocationDialog()
-                    }
-                }
 
                 MapButton {
                     id: route

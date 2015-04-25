@@ -71,7 +71,7 @@ int Theme::GetTextFontSize() const
         }
 
 #endif
-        qDebug() << "TextFontSize: " << textFontSize << "px";
+        qDebug() << "TextFontSize:" << textFontSize << "px";
     }
 
     return textFontSize;
@@ -118,7 +118,7 @@ int Theme::GetAverageCharWidth() const
 
         averageCharWidth=metrics.averageCharWidth();
 
-        qDebug() << "Average char width: " << averageCharWidth << "px";
+        qDebug() << "Average char width:" << averageCharWidth << "px";
     }
 
     return averageCharWidth;

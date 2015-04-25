@@ -40,10 +40,8 @@ HEADERS = src/Settings.h \
 DISTFILES += \
     qml/custom/MapButton.qml \
     qml/main.qml \
-    qml/SearchLocationDialog.qml \
     qml/custom/LineEdit.qml \
     qml/custom/DialogActionButton.qml \
-    qml/SearchLocationDialog.qml \
     qml/custom/LocationEdit.qml \
     qml/custom/ScrollIndicator.qml \
     qml/custom/LocationSearch.qml \

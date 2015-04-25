@@ -6,8 +6,6 @@ import net.sf.libosmscout.map 1.0
 LineEdit {
     id: searchEdit;
 
-    focus: true
-
     property Item desktop;
     property rect desktopFreeSpace;
     property Location location;
@@ -17,12 +15,27 @@ LineEdit {
 
     signal showLocation(Location location)
 
-    function updateSuggestions() {
-        console.log("Updating suggestions...");
+    // Public
+
+    function enforceLocationValue() {
+        if (location != null) {
+            return;
+        }
 
         suggestionModel.setPattern(searchEdit.text)
 
-        console.log("Suggestion count: " + suggestionModel.count)
+        if (suggestionModel.count>0) {
+            location=suggestionModel.get(0)
+            searchEdit.text = location.name
+        }
+
+        hidePopup()
+    }
+
+    // Private
+
+    function updateSuggestions() {
+        suggestionModel.setPattern(searchEdit.text)
 
         if (suggestionModel.count>=1 &&
             searchEdit.text===suggestionModel.get(0).name) {
@@ -75,53 +88,52 @@ LineEdit {
     }
 
     function handleFocusGained() {
-        console.log("Focus gained")
         updatePopup()
     }
 
     function handleFocusLost() {
-        console.log("Focus lost")
         suggestionTimer.stop()
 
         hidePopup()
     }
 
+    function delegateFocus() {
+        desktop.focus = true
+    }
+
+    function selectLocation(selectedLocation) {
+        searchEdit.location = selectedLocation
+        searchEdit.text = selectedLocation.name
+        showLocation(searchEdit.location)
+        delegateFocus();
+
+        hidePopup()
+
+        suggestionModel.setPattern(searchEdit.text)
+    }
+
     function handleOK()  {
-        console.log("handleOK")
         suggestionTimer.stop()
 
         if (popup.visible) {
-            console.log("Selected from popup...")
             var index = suggestionView.currentIndex
             var selectedLocation = suggestionModel.get(index)
 
-            console.log("Selected " + selectedLocation + " / " + selectedLocation.name)
-
             // the else case should never happen
             if (selectedLocation !== null) {
-                searchEdit.location = selectedLocation
-                searchEdit.text = selectedLocation.name
-                console.log("Signaling selection of '"+selectedLocation.name+"'")
-                showLocation(searchEdit.location)
-                nextItemInFocusChain(true)
-
-                hidePopup()
-
-                suggestionModel.setPattern(searchEdit.text)
+                selectLocation(selectedLocation);
             }
 
         }
         else if (searchEdit.location !== null) {
-            console.log("Selected from LineEdit...")
-            console.log("Signaling selection of '"+searchEdit.location.name+"'")
             showLocation(searchEdit.location)
-            nextItemInFocusChain(true)
+            delegateFocus();
         }
     }
 
     function handleCancel() {
         hidePopup();
-        nextItemInFocusChain(true)
+        delegateFocus();
     }
 
     function gotoPrevious() {
@@ -144,8 +156,6 @@ LineEdit {
     }
 
     function showPopup() {
-        console.log("Free space: "+desktopFreeSpace.x+","+desktopFreeSpace.y +" "+desktopFreeSpace.width+"x"+desktopFreeSpace.height)
-
         popup.x = desktopFreeSpace.x;
         popup.y = desktopFreeSpace.y;
         suggestionBox.width = desktopFreeSpace.width;
@@ -169,7 +179,6 @@ LineEdit {
     }
 
     onFocusChanged: {
-        console.log("Focus changed")
         if (focus) {
             handleFocusGained();
         }
@@ -195,13 +204,6 @@ LineEdit {
     }
 
     onLocationChanged: {
-        if (location !== null) {
-            console.log("Location changed to " + location + " / " + location.name)
-        }
-        else {
-            console.log("Location changed to null")
-        }
-
         if (location == null) {
             searchEdit.backgroundColor = searchEdit.defaultBackgroundColor
         }
@@ -257,38 +259,26 @@ LineEdit {
 
                 model: suggestionModel
 
-                delegate: Component {
-                    Item {
-                        width: suggestionView.width
-                        height: listCellHeight
+                delegate: Text {
+                    id: text
 
-                        Text {
-                            id: text
+                    width: suggestionView.width
 
-                            anchors.fill: parent
+                    text: label
+                    font.pixelSize: Theme.textFontSize
 
-                            text: label
-                            font.pixelSize: Theme.textFontSize
-                        }
+                    MouseArea {
+                        anchors.fill: parent
 
-                        MouseArea {
-                            anchors.fill: parent
+                        onClicked: {
+                            suggestionView.currentIndex = index;
 
-                            onClicked: {
-                                suggestionView.currentIndex = index;
+                            var selectedLocation = suggestionModel.get(index)
 
-                                var location = suggestionModel.get(index)
-
-                                searchEdit.text = location.name
-                                searchEdit.location = location
-
-                                hidePopup()
-
-                                showLocation(location)
-                            }
+                            selectLocation(selectedLocation);
                         }
                     }
-               }
+                }
 
                highlight: Rectangle {
                        color: "lightblue"

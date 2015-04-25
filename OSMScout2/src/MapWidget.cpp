@@ -120,6 +120,8 @@ void MapWidget::mousePressEvent(QMouseEvent* event)
 
         startX=event->x();
         startY=event->y();
+
+        setFocus(true);
     }
 }
 
