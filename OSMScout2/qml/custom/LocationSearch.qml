@@ -138,7 +138,10 @@ LineEdit {
         overlay.parent = desktop
         overlay.visible = true
 
-        popup.x = desktopFreeSpace.x;
+        var mappedPosition = desktop.mapFromItem(searchEdit, searchEdit.x, searchEdit.y)
+
+        popup.x = mappedPosition.x;
+        //popup.x = desktopFreeSpace.x;
         popup.y = desktopFreeSpace.y;
 
         var popupHeight = suggestionView.contentHeight
@@ -147,7 +150,8 @@ LineEdit {
             popupHeight = desktopFreeSpace.height
         }
 
-        suggestionBox.width = desktopFreeSpace.width;
+        suggestionBox.width = searchEdit.width;
+        //suggestionBox.width = desktopFreeSpace.width;
         suggestionBox.height = popupHeight
 
         // If nothing is selected, select first line

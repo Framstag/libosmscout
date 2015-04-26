@@ -8,15 +8,15 @@ import "custom"
 FocusScope {
     id: searchDialog
 
-    width: searchRectangle.width
-    height: searchRectangle.height
-
     property Item desktop;
     property rect desktopFreeSpace;
 
     property alias location: searchEdit.location;
 
     signal showLocation(Location location)
+
+    width: searchRectangle.width
+    height: searchRectangle.height
 
     Rectangle {
         id: searchRectangle;
