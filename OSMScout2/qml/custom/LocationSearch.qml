@@ -46,28 +46,7 @@ LineEdit {
     }
 
     function updatePopup() {
-        if (suggestionView.count>0) {
-            /*
-            // Set size of popup content
-
-            console.log("Updating suggestionBox size:");
-            console.log("  Number of entries: " + suggestionView.count);
-            console.log("  Height of one entry: " + listCellHeight);
-
-            var visibleEntries = suggestionView.count;
-
-            if (visibleEntries > 10) {
-                visibleEntries = 10;
-            }
-
-            console.log("  Visible entries: " + visibleEntries);
-
-            var resultingHeight = visibleEntries*listCellHeight+2*suggestionBox.border.width
-
-            console.log("  Resulting height: " + resultingHeight);
-
-            suggestionBox.height = resultingHeight*/
-
+        if (suggestionModel.count>0) {
             showPopup()
         }
         else {
@@ -156,10 +135,20 @@ LineEdit {
     }
 
     function showPopup() {
+        overlay.parent = desktop
+        overlay.visible = true
+
         popup.x = desktopFreeSpace.x;
         popup.y = desktopFreeSpace.y;
+
+        var popupHeight = suggestionView.contentHeight
+
+        if (popupHeight > desktopFreeSpace.height) {
+            popupHeight = desktopFreeSpace.height
+        }
+
         suggestionBox.width = desktopFreeSpace.width;
-        suggestionBox.height = desktopFreeSpace.height;
+        suggestionBox.height = popupHeight
 
         // If nothing is selected, select first line
         if (suggestionView.currentIndex < 0 || suggestionView.currentIndex >= suggestionView.count) {
@@ -171,6 +160,7 @@ LineEdit {
     }
 
     function hidePopup() {
+        overlay.visible = false
         popup.visible = false
     }
 
@@ -226,23 +216,29 @@ LineEdit {
         id: suggestionModel
     }
 
-    Item {
-        id: popup
+    MouseArea {
+        id: overlay
+
         visible: false
         z: 1
 
+        anchors.fill: parent
+
+        onClicked: {
+            overlay.visible = false
+            popup.visible = false
+        }
+    }
+
+
+    Item {
+        id: popup
+
+        visible: false
+        z: 2
+
         width: suggestionBox.width
         height: suggestionBox.height
-
-        /*
-        MouseArea {
-            id: overlay
-            anchors.fill: popup.parent
-
-            onClicked: {
-                popup.visible = false
-            }
-        }*/
 
         Rectangle {
             id: suggestionBox
@@ -281,7 +277,7 @@ LineEdit {
                 }
 
                highlight: Rectangle {
-                       color: "lightblue"
+                    color: "lightblue"
                }
             }
 
