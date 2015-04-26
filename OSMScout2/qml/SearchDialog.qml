@@ -5,51 +5,52 @@ import net.sf.libosmscout.map 1.0
 
 import "custom"
 
-/*FocusScope {
-    x: searchRectangle.x
-    y: searchRectangle.x
-    width: searchRectangle.width
-    height: searchRectangle.height*/
+FocusScope {
+    id: searchDialog
 
+    width: searchRectangle.width
+    height: searchRectangle.height
+
+    property Item desktop;
+    property rect desktopFreeSpace;
+
+    property alias location: searchEdit.location;
+
+    signal showLocation(Location location)
 
     Rectangle {
         id: searchRectangle;
 
-        property alias desktop : searchEdit.desktop;
-        property alias desktopFreeSpace: searchEdit.desktopFreeSpace;
-        property alias location: searchEdit.location;
-
-        signal showLocation(Location location)
-
         width: searchContent.width;
         height: searchContent.height;
 
-        color: "green"
-
         RowLayout {
             id: searchContent
-            height: searchEdit.height
+
             spacing: 0
 
             LocationSearch {
                 id: searchEdit;
 
+                focus: true
+
+                Layout.fillWidth: true
                 Layout.minimumWidth: Theme.averageCharWidth*5
                 Layout.preferredWidth: Theme.averageCharWidth*45
                 Layout.maximumWidth: Theme.averageCharWidth*60
 
-                focus: true
-
-                desktop: searchRectangle.desktop
-                desktopFreeSpace: searchRectangle.desktopFreeSpace
+                desktop: searchDialog.desktop
+                desktopFreeSpace: searchDialog.desktopFreeSpace
                 location: location
 
                 onShowLocation: {
-                    searchRectangle.showLocation(location)
+                    searchDialog.showLocation(location)
                 }
             }
 
             DialogActionButton {
+                id: searchButton
+
                 width: searchEdit.height
                 height: searchEdit.height
                 contentColor: "#0000ff"
@@ -66,4 +67,4 @@ import "custom"
             }
         }
     }
-//}
+}

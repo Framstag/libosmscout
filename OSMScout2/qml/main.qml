@@ -159,7 +159,6 @@ Window {
                 else if (event.modifiers===Qt.ControlModifier &&
                          event.key === Qt.Key_F) {
                     searchDialog.focus = true
-                    //openSearchLocationDialog()
                     event.accepted = true
                 }
                 else if (event.modifiers===Qt.ControlModifier &&
@@ -170,7 +169,6 @@ Window {
             }
 
             // Use PinchArea for multipoint zoom in/out?
-
 
             SearchDialog {
                 id: searchDialog
