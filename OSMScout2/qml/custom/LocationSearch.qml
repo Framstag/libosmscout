@@ -24,12 +24,18 @@ LineEdit {
 
         suggestionModel.setPattern(searchEdit.text)
 
-        if (suggestionModel.count>0) {
-            location=suggestionModel.get(0)
-            searchEdit.text = location.name
+        if (suggestionModel.count>=1) {
+            if (searchEdit.text===suggestionModel.get(0).name) {
+              location=suggestionModel.get(0)
+              hidePopup()
+            }
+            else  {
+              showPopup()
+            }
         }
-
-        hidePopup()
+        else {
+            hidePopup()
+        }
     }
 
     // Private
@@ -141,7 +147,6 @@ LineEdit {
         var mappedPosition = desktop.mapFromItem(searchEdit, searchEdit.x, searchEdit.y)
 
         popup.x = mappedPosition.x;
-        //popup.x = desktopFreeSpace.x;
         popup.y = desktopFreeSpace.y;
 
         var popupHeight = suggestionView.contentHeight
@@ -151,7 +156,6 @@ LineEdit {
         }
 
         suggestionBox.width = searchEdit.width;
-        //suggestionBox.width = desktopFreeSpace.width;
         suggestionBox.height = popupHeight
 
         // If nothing is selected, select first line
