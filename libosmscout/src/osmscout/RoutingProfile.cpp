@@ -34,8 +34,8 @@ namespace osmscout {
 
   AbstractRoutingProfile::AbstractRoutingProfile(const TypeConfigRef& typeConfig)
    : typeConfig(typeConfig),
-     accessReader(typeConfig),
-     maxSpeedReader(typeConfig),
+     accessReader(*typeConfig),
+     maxSpeedReader(*typeConfig),
      vehicle(vehicleCar),
      vehicleRouteNodeBit(RouteNode::usableByCar),
      minSpeed(0),

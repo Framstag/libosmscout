@@ -175,13 +175,13 @@ namespace osmscout {
         // Find the type with the smallest amount of ways loaded
         for (auto &type : currentTypes) {
           if (!areas[type->GetIndex()].empty() &&
-              (victimType.Invalid() ||
+              (!victimType ||
                (areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size()))) {
             victimType=type;
           }
         }
 
-        if (victimType.Valid()) {
+        if (victimType) {
           collectedWaysCount-=areas[victimType->GetIndex()].size();
           areas[victimType->GetIndex()].clear();
 
@@ -442,7 +442,7 @@ namespace osmscout {
 
       if (!GetAreas(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     areaTypes,
                     wayBlacklist,
                     scanner,
@@ -479,7 +479,7 @@ namespace osmscout {
         for (const auto &rawWay : areasByType[type]) {
           WriteArea(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     areaWriter,
                     writtenWayCount,
                     coordsMap,
@@ -502,7 +502,7 @@ namespace osmscout {
 
       HandleLowMemoryFallback(parameter,
                               progress,
-                              typeConfig,
+                              *typeConfig,
                               scanner,
                               slowFallbackTypes,
                               wayBlacklist,

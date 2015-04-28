@@ -150,7 +150,7 @@ PRODUCTIONS
                   (.
                       wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 
-                      if (wayType.Invalid()) {
+                      if (!wayType) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
                         SemErr(e.c_str());
                       }
@@ -174,7 +174,7 @@ PRODUCTIONS
                   (.
                       wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 
-                      if (wayType.Invalid()) {
+                      if (!wayType) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
                         SemErr(e.c_str());
                       }
@@ -550,7 +550,7 @@ PRODUCTIONS
                 (.
                   TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 
-                  if (type.Invalid()) {
+                  if (!type) {
                     std::string e="Unknown type '"+name+"'";
 
                     SemErr(e.c_str());
@@ -572,7 +572,7 @@ PRODUCTIONS
                   (.
                     TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 
-                    if (type.Invalid()) {
+                    if (!type) {
                       std::string e="Unknown type '"+name+"'";
 
                       SemErr(e.c_str());
@@ -1282,7 +1282,7 @@ PRODUCTIONS
                       return;
                     }
                   
-                    label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
+                    label=new DynamicFeatureLabelReader(*config.GetTypeConfig(),
                                                         featureName,
                                                         labelName);
                   }

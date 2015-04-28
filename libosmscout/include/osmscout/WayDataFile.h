@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
+
 #include <osmscout/DataFile.h>
 #include <osmscout/Way.h>
 
@@ -28,8 +30,8 @@ namespace osmscout {
     \ingroup Database
     Abstraction for getting cached access to the 'ways.dat' file.
     */
-  typedef DataFile<Way>    WayDataFile;
-  typedef Ref<WayDataFile> WayDataFileRef;
+  typedef DataFile<Way>                WayDataFile;
+  typedef std::shared_ptr<WayDataFile> WayDataFileRef;
 }
 
 #endif

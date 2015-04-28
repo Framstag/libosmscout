@@ -1900,10 +1900,10 @@ namespace osmscout {
 
     NodeUseMap                    nodeUseMap;
     NodeIdObjectsMap              nodeObjectsMap;
-    AccessRestrictedFeatureReader accessRestrictedReader(typeConfig);
-    AccessFeatureValueReader      accessReader(typeConfig);
-    MaxSpeedFeatureValueReader    maxSpeedReader(typeConfig);
-    GradeFeatureValueReader       gradeReader(typeConfig);
+    AccessRestrictedFeatureReader accessRestrictedReader(*typeConfig);
+    AccessFeatureValueReader      accessReader(*typeConfig);
+    MaxSpeedFeatureValueReader    maxSpeedReader(*typeConfig);
+    GradeFeatureValueReader       gradeReader(*typeConfig);
 
     this->accessRestrictedReader=&accessRestrictedReader;
     this->accessReader=&accessReader;
@@ -1932,7 +1932,7 @@ namespace osmscout {
 
     if (!ReadIntersections(parameter,
                            progress,
-                           typeConfig,
+                           *typeConfig,
                            nodeUseMap)) {
       return false;
     }
@@ -1945,7 +1945,7 @@ namespace osmscout {
 
     if (!ReadObjectsAtIntersections(parameter,
                                     progress,
-                                    typeConfig,
+                                    *typeConfig,
                                     nodeUseMap,
                                     nodeObjectsMap)) {
       return false;
@@ -1979,7 +1979,7 @@ namespace osmscout {
 
     WriteRouteGraph(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     nodeObjectsMap,
                     restrictions,
                     vehicleFoot,
@@ -1990,7 +1990,7 @@ namespace osmscout {
 
     WriteRouteGraph(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     nodeObjectsMap,
                     restrictions,
                     vehicleBicycle,
@@ -2001,7 +2001,7 @@ namespace osmscout {
 
     WriteRouteGraph(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     nodeObjectsMap,
                     restrictions,
                     vehicleCar,

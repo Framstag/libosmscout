@@ -20,13 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -37,7 +37,7 @@ namespace osmscout {
 
     Ways can be limited by type and result count.
     */
-  class OSMSCOUT_API AreaWayIndex : public Referencable
+  class OSMSCOUT_API AreaWayIndex
   {
   private:
     struct TypeData
@@ -102,7 +102,7 @@ namespace osmscout {
     void DumpStatistics();
   };
 
-  typedef Ref<AreaWayIndex> AreaWayIndexRef;
+  typedef std::shared_ptr<AreaWayIndex> AreaWayIndexRef;
 }
 
 #endif

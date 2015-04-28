@@ -175,7 +175,7 @@ namespace osmscout {
   {
     if (!MergeAreas(parameter,
                     progress,
-                    typeConfig)) {
+                    *typeConfig)) {
       return false;
     }
 

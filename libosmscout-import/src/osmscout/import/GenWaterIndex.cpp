@@ -1771,7 +1771,7 @@ namespace osmscout {
       if (parameter.GetAssumeLand()) {
         AssumeLand(parameter,
                    progress,
-                   typeConfig,
+                   *typeConfig,
                    levels[level]);
       }
 

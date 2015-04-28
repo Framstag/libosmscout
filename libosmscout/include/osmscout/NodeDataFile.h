@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
+
 #include <osmscout/Node.h>
 #include <osmscout/DataFile.h>
 
@@ -34,7 +36,7 @@ namespace osmscout {
     NodeDataFile(unsigned long dataCacheSize);
   };
 
-  typedef Ref<NodeDataFile> NodeDataFileRef;
+  typedef std::shared_ptr<NodeDataFile> NodeDataFileRef;
 }
 
 #endif

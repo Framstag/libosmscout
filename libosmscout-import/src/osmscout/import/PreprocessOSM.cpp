@@ -337,7 +337,7 @@ namespace osmscout {
   {
     progress.SetAction(std::string("Parsing *.osm file '")+filename+"'");
 
-    Parser        parser(typeConfig,
+    Parser        parser(*typeConfig,
                          callback);
     xmlSAXHandler saxParser;
 

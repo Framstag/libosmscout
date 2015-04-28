@@ -125,14 +125,14 @@ namespace osmscout {
 
   FeatureValueBuffer::~FeatureValueBuffer()
   {
-    if (type.Valid()) {
+    if (type) {
       DeleteData();
     }
   }
 
   void FeatureValueBuffer::Set(const FeatureValueBuffer& other)
   {
-    if (other.GetType().Valid()) {
+    if (other.GetType()) {
       SetType(other.GetType());
 
       for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
@@ -151,14 +151,14 @@ namespace osmscout {
         }
       }
     }
-    else if (type.Valid()) {
+    else if (type) {
       DeleteData();
     }
   }
 
   void FeatureValueBuffer::SetType(const TypeInfoRef& type)
   {
-    if (this->type.Valid()) {
+    if (this->type) {
       DeleteData();
     }
 
@@ -640,13 +640,13 @@ namespace osmscout {
 
   void TypeInfoSet::Set(const TypeInfoRef& type)
   {
-    assert(type.Valid());
+    assert(type);
 
     if (type->GetIndex()>=types.size()) {
       types.resize(type->GetIndex()+1);
     }
 
-    if (types[type->GetIndex()].Invalid()) {
+    if (!types[type->GetIndex()]) {
       types[type->GetIndex()]=type;
       count++;
     }
@@ -663,10 +663,10 @@ namespace osmscout {
 
   void TypeInfoSet::Remove(const TypeInfoRef& type)
   {
-    assert(type.Valid());
+    assert(type);
 
     if (type->GetIndex()<types.size() &&
-        types[type->GetIndex()].Valid()) {
+        types[type->GetIndex()]) {
       types[type->GetIndex()]=NULL;
       count--;
     }
@@ -676,9 +676,9 @@ namespace osmscout {
   {
     for (const auto &type : otherTypes.types)
     {
-      if (type.Valid() &&
+      if (type &&
           type->GetIndex()<types.size() &&
-          types[type->GetIndex()].Valid()) {
+          types[type->GetIndex()]) {
         types[type->GetIndex()]=NULL;
         count--;
       }
@@ -747,7 +747,7 @@ namespace osmscout {
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
-    typeInfoIgnore=new TypeInfo();
+    typeInfoIgnore=std::make_shared<TypeInfo>();
     typeInfoIgnore->SetType("");
     typeInfoIgnore->SetIgnore(true);
 
@@ -769,7 +769,7 @@ namespace osmscout {
     // Internal types for the land/sea/coast tiles building the base layer for map drawing
     //
 
-    typeInfoTileLand=new TypeInfo();
+    typeInfoTileLand=std::make_shared<TypeInfo>();
 
     typeInfoTileLand->SetType("_tile_land")
               .CanBeArea(true);
@@ -777,7 +777,7 @@ namespace osmscout {
     RegisterType(typeInfoTileLand);
 
 
-    typeInfoTileSea=new TypeInfo();
+    typeInfoTileSea=std::make_shared<TypeInfo>();
 
     typeInfoTileSea->SetType("_tile_sea")
              .CanBeArea(true);
@@ -785,7 +785,7 @@ namespace osmscout {
     RegisterType(typeInfoTileSea);
 
 
-    typeInfoTileCoast=new TypeInfo();
+    typeInfoTileCoast=std::make_shared<TypeInfo>();
 
     typeInfoTileCoast->SetType("_tile_coast")
                .CanBeArea(true);
@@ -793,7 +793,7 @@ namespace osmscout {
     RegisterType(typeInfoTileCoast);
 
 
-    typeInfoTileUnknown=new TypeInfo();
+    typeInfoTileUnknown=std::make_shared<TypeInfo>();
 
     typeInfoTileUnknown->SetType("_tile_unknown")
                 .CanBeArea(true);
@@ -801,7 +801,7 @@ namespace osmscout {
     RegisterType(typeInfoTileUnknown);
 
 
-    typeInfoTileCoastline=new TypeInfo();
+    typeInfoTileCoastline=std::make_shared<TypeInfo>();
 
     typeInfoTileCoastline->SetType("_tile_coastline")
                    .CanBeWay(true);
@@ -897,7 +897,7 @@ namespace osmscout {
 
   TypeInfoRef TypeConfig::RegisterType(const TypeInfoRef& typeInfo)
   {
-    assert(typeInfo.Valid());
+    assert(typeInfo);
 
     auto existingType=nameToTypeMap.find(typeInfo->GetName());
 
@@ -1474,7 +1474,7 @@ namespace osmscout {
         return false;
       }
 
-      TypeInfoRef typeInfo=new TypeInfo();
+      TypeInfoRef typeInfo=std::make_shared<TypeInfo>();
 
       typeInfo->SetType(name);
 

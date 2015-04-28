@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   osmscout::TypeSet                nodeTypes(*typeConfig);
   osmscout::TypeSet                wayTypes(*typeConfig);
   osmscout::TypeSet                areaTypes(*typeConfig);
-  osmscout::NameFeatureLabelReader nameLabelReader(typeConfig);
+  osmscout::NameFeatureLabelReader nameLabelReader(*typeConfig);
 
   for (const auto &name : typeNames) {
     osmscout::TypeInfoRef type=typeConfig->GetTypeInfo(name);

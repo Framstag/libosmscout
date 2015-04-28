@@ -77,7 +77,7 @@ namespace osmscout
   bool OptimizeWaysLowZoomGenerator::WriteTypeData(FileWriter& writer,
                                                    const TypeData& data)
   {
-    assert(data.type.Valid());
+    assert(data.type);
 
     writer.Write(data.type->GetWayId());
     writer.Write(data.optLevel);
@@ -171,13 +171,13 @@ namespace osmscout
 
         for (auto &type : currentTypes) {
           if (ways[type->GetIndex()].size()>0 &&
-              (victimType.Invalid() ||
+              (!victimType ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
             victimType=type;
           }
         }
 
-        assert(victimType.Valid());
+        assert(victimType);
 
         collectedWaysCount-=ways[victimType->GetIndex()].size();
         ways[victimType->GetIndex()].clear();
@@ -844,7 +844,7 @@ namespace osmscout
     std::set<TypeInfoRef> wayTypes;         // Types we optimize
     std::list<TypeData>   wayTypesData;
 
-    GetWayTypesToOptimize(typeConfig,
+    GetWayTypesToOptimize(*typeConfig,
                           wayTypes);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -861,7 +861,7 @@ namespace osmscout
 
     if (!HandleWays(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     writer,
                     wayTypes,
                     wayTypesData)) {

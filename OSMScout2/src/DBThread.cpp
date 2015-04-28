@@ -158,7 +158,7 @@ void DBThread::Initialize()
   if (database->Open(databaseDirectory.toLocal8Bit().data())) {
     osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
-    if (typeConfig.Valid()) {
+    if (typeConfig) {
       styleConfig=new osmscout::StyleConfig(typeConfig);
 
       delete painter;

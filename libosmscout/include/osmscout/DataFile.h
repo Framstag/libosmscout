@@ -28,7 +28,6 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -40,7 +39,7 @@ namespace osmscout {
    * Allows to load data objects by offset using various standard library data structures.
    */
   template <class N>
-  class DataFile : public Referencable
+  class DataFile
   {
   public:
     typedef Ref<N> ValueType;
@@ -199,7 +198,7 @@ namespace osmscout {
 
         scanner.SetPos(*offset);
 
-        if (!ReadData(typeConfig,
+        if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -225,7 +224,7 @@ namespace osmscout {
           scanner.SetPos(*offset);
           cacheRef->value=new N();
 
-          if (!ReadData(typeConfig,
+          if (!ReadData(*typeConfig,
                         scanner,
                         *cacheRef->value)) {
             std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -265,7 +264,7 @@ namespace osmscout {
 
         scanner.SetPos(*offset);
 
-        if (!ReadData(typeConfig,
+        if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -291,7 +290,7 @@ namespace osmscout {
           scanner.SetPos(*offset);
           cacheRef->value=new N();
 
-          if (!ReadData(typeConfig,
+          if (!ReadData(*typeConfig,
                         scanner,
                         *cacheRef->value)) {
             std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -331,7 +330,7 @@ namespace osmscout {
 
         scanner.SetPos(*offset);
 
-        if (!ReadData(typeConfig,
+        if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -357,7 +356,7 @@ namespace osmscout {
           scanner.SetPos(*offset);
           cacheRef->value=new N();
 
-          if (!ReadData(typeConfig,
+          if (!ReadData(*typeConfig,
                         scanner,
                         *cacheRef->value)) {
             std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -411,7 +410,7 @@ namespace osmscout {
 
       scanner.SetPos(offset);
 
-      if (!ReadData(typeConfig,
+      if (!ReadData(*typeConfig,
                     scanner,
                     *value)) {
         std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
@@ -433,7 +432,7 @@ namespace osmscout {
         scanner.SetPos(offset);
         cacheRef->value=new N();
 
-        if (!ReadData(typeConfig,
+        if (!ReadData(*typeConfig,
                       scanner,
                       *cacheRef->value)) {
           std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
@@ -536,9 +535,9 @@ namespace osmscout {
                                   bool memoryMapedData)
   {
     if (!DataFile<N>::Open(typeConfig,
-                               path,
-                               modeData,
-                               memoryMapedData)) {
+                           path,
+                           modeData,
+                           memoryMapedData)) {
       return false;
     }
 

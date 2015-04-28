@@ -51,7 +51,7 @@ namespace osmscout {
      std::map<FillStyle,std::string> fillStyleNameMap;
      std::map<LineStyle,std::string> lineStyleNameMap;
      std::ostream                    stream;
-     const TypeConfig                *typeConfig;
+     TypeConfigRef                   typeConfig;
 
   private:
     std::string GetColorValue(const Color& color);

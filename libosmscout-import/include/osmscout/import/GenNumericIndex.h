@@ -163,7 +163,7 @@ namespace osmscout {
 
       T data;
 
-      if (!ReadData(typeConfig,
+      if (!ReadData(*typeConfig,
                     scanner,
                     data)) {
         progress.Error(std::string("Error while reading data entry ")+

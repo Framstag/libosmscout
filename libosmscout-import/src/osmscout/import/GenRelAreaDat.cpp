@@ -627,7 +627,7 @@ namespace osmscout {
                (member->role=="inner" ||
                 member->role=="outer" ||
                 member->role.empty())) {
-        if (boundaryType.Valid() &&
+        if (boundaryType &&
             rawRelation.GetType()==boundaryType) {
           if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
@@ -693,7 +693,7 @@ namespace osmscout {
                    (member->role=="inner" ||
                     member->role=="outer" ||
                     member->role.empty())) {
-            if (boundaryType.Valid() &&
+            if (boundaryType &&
                 rawRelation.GetType()==boundaryType) {
               if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
@@ -775,7 +775,7 @@ namespace osmscout {
 
     // Now build together everything
 
-    if (boundaryType.Valid() &&
+    if (boundaryType &&
         rawRelation.GetType()==boundaryType) {
       return ComposeBoundaryMembers(typeConfig,
                                     progress,
@@ -1093,7 +1093,7 @@ namespace osmscout {
 
       RawRelation rawRel;
 
-      if (!rawRel.Read(typeConfig,
+      if (!rawRel.Read(*typeConfig,
                        scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
@@ -1115,7 +1115,7 @@ namespace osmscout {
 
       if (!HandleMultipolygonRelation(parameter,
                                       progress,
-                                      typeConfig,
+                                      *typeConfig,
                                       wayAreaIndexBlacklist,
                                       coordDataFile,
                                       wayDataFile,
@@ -1150,7 +1150,7 @@ namespace osmscout {
 
       if (!writer.Write((uint8_t)osmRefRelation) ||
           !writer.Write(rawRel.GetId()) ||
-          !rel.Write(typeConfig,
+          !rel.Write(*typeConfig,
                      writer)) {
         return false;
       }

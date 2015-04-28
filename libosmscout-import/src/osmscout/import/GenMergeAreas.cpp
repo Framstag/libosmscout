@@ -235,14 +235,14 @@ namespace osmscout {
         // Find the type with the smallest amount of ways loaded
         for (auto &type : currentTypes) {
           if (!areas[type->GetIndex()].empty() &&
-              (victimType.Invalid() ||
+              (!victimType ||
                areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
             victimType=type;
           }
         }
 
         // If there is more then one type of way, we always must find a "victim" type.
-        assert(victimType.Valid());
+        assert(victimType);
 
         collectedAreasCount-=areas[victimType->GetIndex()].size();
         areas[victimType->GetIndex()].clear();
@@ -408,7 +408,7 @@ namespace osmscout {
 
     if (!ScanAreaIds(parameter,
                      progress,
-                     typeConfig,
+                     *typeConfig,
                      mergeTypes,
                      nodeUseMap)) {
       return false;
@@ -446,7 +446,7 @@ namespace osmscout {
 
       if (!GetAreas(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     mergeTypes,
                     nodeUseMap,
                     scanner,

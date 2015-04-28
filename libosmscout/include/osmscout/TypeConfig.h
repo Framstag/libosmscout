@@ -22,6 +22,7 @@
 
 #include <limits>
 #include <list>
+#include <memory>
 #include <map>
 #include <set>
 #include <string>
@@ -198,7 +199,7 @@ namespace osmscout {
    *
    *  \see TypeConfig
    */
-  class OSMSCOUT_API TypeInfo : public Referencable
+  class OSMSCOUT_API TypeInfo
   {
   public:
     static const unsigned char typeNode     = 1 << 0; //!< Condition applies to nodes
@@ -732,7 +733,7 @@ namespace osmscout {
     }
   };
 
-  typedef Ref<TypeInfo> TypeInfoRef;
+  typedef std::shared_ptr<TypeInfo> TypeInfoRef;
 
   class OSMSCOUT_API TypeInfoSetConstIterator : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
   {
@@ -747,7 +748,7 @@ namespace osmscout {
       iterEnd(iterEnd)
     {
       while (this->iterCurrent!=this->iterEnd &&
-            this->iterCurrent->Invalid()) {
+            !*this->iterCurrent) {
         ++this->iterCurrent;
       }
     }
@@ -764,7 +765,7 @@ namespace osmscout {
       ++iterCurrent;
 
       while (iterCurrent!=iterEnd &&
-            iterCurrent->Invalid()) {
+            !*iterCurrent) {
         ++iterCurrent;
       }
 
@@ -823,10 +824,10 @@ namespace osmscout {
 
     bool IsSet(const TypeInfoRef& type) const
     {
-      assert(type.Valid());
+      assert(type);
 
       return type->GetIndex()<types.size() &&
-             types[type->GetIndex()].Valid();
+             types[type->GetIndex()];
     }
 
     inline bool Empty() const
@@ -933,7 +934,7 @@ namespace osmscout {
    * The TypeConfig class holds information about object types
    * defined by a database instance.
    */
-  class OSMSCOUT_API TypeConfig : public Referencable
+  class OSMSCOUT_API TypeConfig
   {
   private:
 
@@ -1231,7 +1232,7 @@ namespace osmscout {
 
   //! \ingroup type
   //! Reference counted reference to a TypeConfig instance
-  typedef Ref<TypeConfig> TypeConfigRef;
+  typedef std::shared_ptr<TypeConfig> TypeConfigRef;
 
   /**
    * \defgroup type Object type related data structures and services

@@ -72,7 +72,7 @@ namespace osmscout
   bool OptimizeAreasLowZoomGenerator::WriteTypeData(FileWriter& writer,
                                                     const TypeData& data)
   {
-    assert(data.type.Valid());
+    assert(data.type);
 
     writer.Write(data.type->GetAreaId());
     writer.Write(data.optLevel);
@@ -154,13 +154,13 @@ namespace osmscout
 
           for (auto &type : currentTypes) {
             if (areas[type->GetIndex()].size()>0 &&
-                (victimType.Invalid() ||
+                (!victimType ||
                  areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
               victimType=type;
             }
           }
 
-          assert(victimType.Valid());
+          assert(victimType);
 
           collectedAreasCount-=areas[victimType->GetIndex()].size();
           areas[victimType->GetIndex()].clear();
@@ -669,7 +669,7 @@ namespace osmscout
     std::set<TypeInfoRef> areaTypes;     // Types we optimize
     std::list<TypeData>   areaTypesData;
 
-    GetAreaTypesToOptimize(typeConfig,
+    GetAreaTypesToOptimize(*typeConfig,
                            areaTypes);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -686,7 +686,7 @@ namespace osmscout
 
     if (!HandleAreas(parameter,
                      progress,
-                     typeConfig,
+                     *typeConfig,
                      writer,
                      areaTypes,
                      areaTypesData)) {

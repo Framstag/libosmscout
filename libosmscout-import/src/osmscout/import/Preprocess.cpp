@@ -240,9 +240,9 @@ namespace osmscout {
     relation.members=members;
 
     relation.Parse(progress,
-                   typeConfig,
+                   *typeConfig,
                    tags);
-    relation.Write(typeConfig,
+    relation.Write(*typeConfig,
                    multipolygonWriter);
 
     multipolygonCount++;
@@ -357,10 +357,10 @@ namespace osmscout {
       node.SetCoords(lon,lat);
 
       node.Parse(progress,
-                 typeConfig,
+                 *typeConfig,
                  tagMap);
 
-      node.Write(typeConfig,
+      node.Write(*typeConfig,
                  nodeWriter);
 
       nodeCount++;
@@ -512,10 +512,10 @@ namespace osmscout {
     way.SetNodes(nodes);
 
     way.Parse(progress,
-              typeConfig,
+              *typeConfig,
               tagMap);
 
-    way.Write(typeConfig,
+    way.Write(*typeConfig,
               wayWriter);
 
     lastWayId=id;

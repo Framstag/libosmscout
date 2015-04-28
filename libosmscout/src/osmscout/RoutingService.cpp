@@ -77,7 +77,7 @@ namespace osmscout {
                                  Vehicle vehicle)
    : database(database),
      vehicle(vehicle),
-     accessReader(database->GetTypeConfig()),
+     accessReader(*database->GetTypeConfig()),
      isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
      routeNodeDataFile(GetDataFilename(vehicle),
@@ -449,8 +449,8 @@ namespace osmscout {
     std::vector<Id>                             *ids=NULL;
     bool                                        oneway=false;
 
-    if (areaDataFile.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!areaDataFile ||
+        !wayDataFile) {
       return false;
     }
 
@@ -760,8 +760,8 @@ namespace osmscout {
     AreaDataFileRef areaDataFile(database->GetAreaDataFile());
     WayDataFileRef  wayDataFile(database->GetWayDataFile());
 
-    if (areaDataFile.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!areaDataFile ||
+        !wayDataFile) {
       return false;
     }
 
@@ -891,8 +891,8 @@ namespace osmscout {
     AreaDataFileRef areaDataFile(database->GetAreaDataFile());
     WayDataFileRef  wayDataFile(database->GetWayDataFile());
 
-    if (areaDataFile.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!areaDataFile ||
+        !wayDataFile) {
       return false;
     }
 
@@ -1411,9 +1411,9 @@ namespace osmscout {
 
     Way             tmp;
 
-    if (typeConfig.Invalid() ||
-        areaDataFile.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!typeConfig ||
+        !areaDataFile ||
+        !wayDataFile) {
       return false;
     }
 
@@ -1496,8 +1496,8 @@ namespace osmscout {
     AreaDataFileRef areaDataFile(database->GetAreaDataFile());
     WayDataFileRef  wayDataFile(database->GetWayDataFile());
 
-    if (areaDataFile.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!areaDataFile ||
+        !wayDataFile) {
       return false;
     }
 
@@ -1648,11 +1648,11 @@ namespace osmscout {
     AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
     WayDataFileRef   wayDataFile=database->GetWayDataFile();
 
-    if (typeConfig.Invalid() ||
-        areaAreaIndex.Invalid() ||
-        areaWayIndex.Invalid() ||
-        areaDataFile.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!typeConfig ||
+        !areaAreaIndex ||
+        !areaWayIndex ||
+        !areaDataFile ||
+        !wayDataFile) {
       log.Error() << "At least one index file is invalid!";
       return false;
     }

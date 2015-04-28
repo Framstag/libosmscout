@@ -509,22 +509,22 @@ namespace osmscout {
         const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
 
         if (group.nodes_size()>0) {
-          ReadNodes(typeConfig,
+          ReadNodes(*typeConfig,
                     block,
                     group);
         }
         else if (group.ways_size()>0) {
-          ReadWays(typeConfig,
+          ReadWays(*typeConfig,
                    block,
                    group);
         }
         else if (group.relations_size()>0) {
-          ReadRelations(typeConfig,
+          ReadRelations(*typeConfig,
                         block,
                         group);
         }
         else if (group.has_dense()) {
-          ReadDenseNodes(typeConfig,
+          ReadDenseNodes(*typeConfig,
                          block,
                          group);
         }

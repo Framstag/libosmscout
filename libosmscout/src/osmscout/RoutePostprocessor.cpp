@@ -505,21 +505,21 @@ namespace osmscout {
      std::vector<NodeRef>    nodes;
      AreaNodeIndexRef        areaNodeIndex=database.GetAreaNodeIndex();
 
-     if (areaNodeIndex.Invalid()) {
+     if (!areaNodeIndex) {
        return false;
      }
 
      TypeInfoRef typeInfo=database.GetTypeConfig()->GetTypeInfo("highway_motorway_junction");
      TypeSet     nodeTypes;
 
-     if (!typeInfo.Valid()) {
+     if (!typeInfo) {
        return false;
      }
 
      nodeTypes.SetType(typeInfo->GetNodeId());
 
-     RefFeatureValueReader  refReader(database.GetTypeConfig());
-     NameFeatureValueReader nameReader(database.GetTypeConfig());
+     RefFeatureValueReader  refReader(*database.GetTypeConfig());
+     NameFeatureValueReader nameReader(*database.GetTypeConfig());
 
      for (auto& node: description.Nodes()) {
        junctionName="";
@@ -1428,10 +1428,10 @@ namespace osmscout {
   {
     Cleanup(); // We do not trust ourself ;-)
 
-    nameReader=new NameFeatureValueReader(database.GetTypeConfig());
-    refReader=new RefFeatureValueReader(database.GetTypeConfig());
-    bridgeReader=new BridgeFeatureReader(database.GetTypeConfig());
-    roundaboutReader=new RoundaboutFeatureReader(database.GetTypeConfig());
+    nameReader=new NameFeatureValueReader(*database.GetTypeConfig());
+    refReader=new RefFeatureValueReader(*database.GetTypeConfig());
+    bridgeReader=new BridgeFeatureReader(*database.GetTypeConfig());
+    roundaboutReader=new RoundaboutFeatureReader(*database.GetTypeConfig());
 
     if (!ResolveAllAreasAndWays(description,
                                 database)) {

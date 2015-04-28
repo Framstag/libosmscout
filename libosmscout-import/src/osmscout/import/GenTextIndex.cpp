@@ -61,17 +61,17 @@ namespace osmscout
     // add node text data
     if(!this->AddNodeTextToKeysets(parameter,
                                    progress,
-                                   typeConfig)) {
+                                   *typeConfig)) {
       return false;
     }
     if(!this->AddWayTextToKeysets(parameter,
                                   progress,
-                                  typeConfig)) {
+                                  *typeConfig)) {
       return false;
     }
     if(!this->AddAreaTextToKeysets(parameter,
                                    progress,
-                                   typeConfig)) {
+                                   *typeConfig)) {
       return false;
     }
 

@@ -317,7 +317,7 @@ namespace osmscout
 
               AreaRef area=new Area();
 
-              if (!area->ReadOptimized(typeConfig,
+              if (!area->ReadOptimized(*typeConfig,
                                        scanner)) {
                 log.Error() << "Error while reading data entry of type " << type->first << " from file '" << scanner.GetFilename()  << "'";
                 continue;

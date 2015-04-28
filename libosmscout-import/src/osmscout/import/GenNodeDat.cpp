@@ -88,7 +88,7 @@ namespace osmscout {
       RawNode rawNode;
       Node    node;
 
-      if (!rawNode.Read(typeConfig,
+      if (!rawNode.Read(*typeConfig,
                         scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
@@ -117,7 +117,7 @@ namespace osmscout {
 
       if (!writer.Write((uint8_t)osmRefNode) ||
           !writer.Write(rawNode.GetId()) ||
-          !node.Write(typeConfig,
+          !node.Write(*typeConfig,
                       writer)) {
         return false;
       }

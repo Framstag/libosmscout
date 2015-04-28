@@ -113,7 +113,7 @@ namespace osmscout {
 
         nodeScanner.GetPos(offset);
 
-        if (!node.Read(typeConfig,
+        if (!node.Read(*typeConfig,
                        nodeScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+
@@ -303,7 +303,7 @@ namespace osmscout {
 
         nodeScanner.GetPos(offset);
 
-        if (!node.Read(typeConfig,
+        if (!node.Read(*typeConfig,
                        nodeScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+

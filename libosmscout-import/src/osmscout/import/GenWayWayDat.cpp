@@ -227,14 +227,14 @@ namespace osmscout {
         // Find the type with the smallest amount of ways loaded
         for (auto &type : currentTypes) {
           if (!ways[type->GetIndex()].empty() &&
-              (victimType.Invalid() ||
+              (!victimType ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
             victimType=type;
           }
         }
 
         // If there is more then one type of way, we always must find a "victim" type.
-        assert(victimType.Valid());
+        assert(victimType);
 
         collectedWaysCount-=ways[victimType->GetIndex()].size();
         ways[victimType->GetIndex()].clear();
@@ -681,7 +681,7 @@ namespace osmscout {
 
       if (!GetWays(parameter,
                    progress,
-                   typeConfig,
+                   *typeConfig,
                    wayTypes,
                    scanner,
                    waysByType)) {
@@ -735,7 +735,7 @@ namespace osmscout {
       for (size_t type=0; type<waysByType.size(); type++) {
         for (const auto &rawWay : waysByType[type]) {
           WriteWay(progress,
-                   typeConfig,
+                   *typeConfig,
                    wayWriter,
                    writtenWayCount,
                    coordsMap,
@@ -756,7 +756,7 @@ namespace osmscout {
       }
 
       HandleLowMemoryFallback(progress,
-                              typeConfig,
+                              *typeConfig,
                               scanner,
                               slowFallbackTypes,
                               wayWriter,

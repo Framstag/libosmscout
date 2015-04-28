@@ -55,7 +55,7 @@ namespace osmscout {
 
     this->path=path;
 
-    typeConfig=new TypeConfig();
+    typeConfig=std::make_shared<TypeConfig>();
 
     if (!typeConfig->LoadFromDataFile(path)) {
       log.Error() << "Cannot load 'types.dat'!";

@@ -221,7 +221,7 @@ void Parser::WAYGROUP(size_t priority) {
 			IDENT(wayTypeName);
 			wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 			
-			if (wayType.Invalid()) {
+			if (!wayType) {
 			 std::string e="Unknown way type '"+wayTypeName+"'";
 			 SemErr(e.c_str());
 			}
@@ -243,7 +243,7 @@ void Parser::WAYGROUP(size_t priority) {
 			IDENT(wayTypeName);
 			wayType=config.GetTypeConfig()->GetTypeInfo(wayTypeName);
 			
-			if (wayType.Invalid()) {
+			if (!wayType) {
 			 std::string e="Unknown way type '"+wayTypeName+"'";
 			 SemErr(e.c_str());
 			}
@@ -856,7 +856,7 @@ void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
 		IDENT(name);
 		TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 		
-		if (type.Invalid()) {
+		if (!type) {
 		 std::string e="Unknown type '"+name+"'";
 		
 		 SemErr(e.c_str());
@@ -877,7 +877,7 @@ void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
 			IDENT(name);
 			TypeInfoRef type=config.GetTypeConfig()->GetTypeInfo(name);
 			
-			if (type.Invalid()) {
+			if (!type) {
 			 std::string e="Unknown type '"+name+"'";
 			
 			 SemErr(e.c_str());
@@ -1715,7 +1715,7 @@ void Parser::TEXTLABEL(LabelProviderRef& label) {
 		   return;
 		 }
 		
-		 label=new DynamicFeatureLabelReader(config.GetTypeConfig(),
+		 label=new DynamicFeatureLabelReader(*config.GetTypeConfig(),
 		                                     featureName,
 		                                     labelName);
 		}

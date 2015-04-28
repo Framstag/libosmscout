@@ -370,8 +370,8 @@ namespace osmscout {
   {
     FileScanner                  scanner;
     uint32_t                     areaCount;
-    NameFeatureValueReader       nameReader(typeConfig);
-    AdminLevelFeatureValueReader adminLevelReader(typeConfig);
+    NameFeatureValueReader       nameReader(*typeConfig);
+    AdminLevelFeatureValueReader adminLevelReader(*typeConfig);
 
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -392,7 +392,7 @@ namespace osmscout {
 
       Area area;
 
-      if (!area.Read(typeConfig,
+      if (!area.Read(*typeConfig,
                      scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
@@ -635,7 +635,7 @@ namespace osmscout {
     FileScanner            scanner;
     uint32_t               nodeCount;
     size_t                 citiesFound=0;
-    NameFeatureValueReader nameReader(typeConfig);
+    NameFeatureValueReader nameReader(*typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "nodes.dat"),
@@ -655,7 +655,7 @@ namespace osmscout {
 
       Node node;
 
-      if (!node.Read(typeConfig,
+      if (!node.Read(*typeConfig,
                      scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(n)+" of "+
@@ -912,7 +912,7 @@ namespace osmscout {
     FileScanner            scanner;
     uint32_t               wayCount;
     size_t                 waysFound=0;
-    NameFeatureValueReader nameReader(typeConfig);
+    NameFeatureValueReader nameReader(*typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
@@ -933,7 +933,7 @@ namespace osmscout {
 
       Way way;
 
-      if (!way.Read(typeConfig,
+      if (!way.Read(*typeConfig,
                     scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
@@ -1884,7 +1884,7 @@ namespace osmscout {
     rootRegion->dataOffset=0;
 
     boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
-    assert(boundaryType.Valid());
+    assert(boundaryType);
 
     //
     // Getting all areas of type 'administrative boundary'.
@@ -1919,7 +1919,7 @@ namespace osmscout {
 
     progress.SetAction("Indexing regions of type 'area'");
 
-    if (!IndexRegionAreas(typeConfig,
+    if (!IndexRegionAreas(*typeConfig,
                           parameter,
                           progress,
                           *rootRegion)) {
@@ -1966,7 +1966,7 @@ namespace osmscout {
 
     progress.SetAction("Index location areas");
 
-    if (!IndexLocationAreas(typeConfig,
+    if (!IndexLocationAreas(*typeConfig,
                             parameter,
                             progress,
                             rootRegion,
@@ -1998,7 +1998,7 @@ namespace osmscout {
 
     progress.SetAction("Index address areas");
 
-    if (!IndexAddressAreas(typeConfig,
+    if (!IndexAddressAreas(*typeConfig,
                            parameter,
                            progress,
                            rootRegion,
@@ -2008,7 +2008,7 @@ namespace osmscout {
 
     progress.SetAction("Index address ways");
 
-    if (!IndexAddressWays(typeConfig,
+    if (!IndexAddressWays(*typeConfig,
                           parameter,
                           progress,
                           rootRegion,
@@ -2018,7 +2018,7 @@ namespace osmscout {
 
     progress.SetAction("Index address nodes");
 
-    if (!IndexAddressNodes(typeConfig,
+    if (!IndexAddressNodes(*typeConfig,
                            parameter,
                            progress,
                            rootRegion,

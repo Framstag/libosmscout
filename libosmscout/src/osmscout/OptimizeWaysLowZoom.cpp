@@ -314,7 +314,7 @@ namespace osmscout
 
                 WayRef way=new Way();
 
-                if (!way->ReadOptimized(typeConfig,
+                if (!way->ReadOptimized(*typeConfig,
                                         scanner)) {
                   log.Error() << "Error while reading data entry of type " << type->first << " from file '" << scanner.GetFilename()  << "'";
                   continue;

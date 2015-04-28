@@ -20,13 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <vector>
 
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -44,7 +44,7 @@ namespace osmscout {
     Internally the index is implemented as quadtree. As a result each index entry
     has 4 children (besides entries in the lowest level).
     */
-  class OSMSCOUT_API AreaAreaIndex : public Referencable
+  class OSMSCOUT_API AreaAreaIndex
   {
   private:
     /**
@@ -136,7 +136,7 @@ namespace osmscout {
     void DumpStatistics();
   };
 
-  typedef Ref<AreaAreaIndex> AreaAreaIndexRef;
+  typedef std::shared_ptr<AreaAreaIndex> AreaAreaIndexRef;
 }
 
 #endif

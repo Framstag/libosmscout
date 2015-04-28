@@ -430,7 +430,7 @@ bool DBThread::RenderMap(QPainter& painter,
          finishedMagnification==request.magnification;
 }
 
-osmscout::TypeConfig* DBThread::GetTypeConfig() const
+osmscout::TypeConfigRef DBThread::GetTypeConfig() const
 {
   return database->GetTypeConfig();
 }

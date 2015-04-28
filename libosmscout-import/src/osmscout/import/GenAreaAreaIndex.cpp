@@ -219,7 +219,7 @@ namespace osmscout {
 
           scanner.GetPos(offset);
 
-          if (!area.Read(typeConfig,
+          if (!area.Read(*typeConfig,
                          scanner)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(a)+" of "+

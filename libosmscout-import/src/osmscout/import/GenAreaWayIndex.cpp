@@ -210,7 +210,7 @@ namespace osmscout {
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
-        if (!way.Read(typeConfig,
+        if (!way.Read(*typeConfig,
                       wayScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
@@ -256,7 +256,7 @@ namespace osmscout {
 
         if (!FitsIndexCriteria(parameter,
                                progress,
-                               typeConfig->GetTypeInfo(i),
+                               *typeConfig->GetTypeInfo(i),
                                wayTypeData[i],
                                cellFillCount[i])) {
           currentWayTypes.Remove(type);
@@ -492,7 +492,7 @@ namespace osmscout {
     }
 
     for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
-      TypeInfoSet indexTypes(typeConfig);
+      TypeInfoSet indexTypes(*typeConfig);
       uint32_t    wayCount;
       double      cellWidth=360.0/pow(2.0,(int)l);
       double      cellHeight=180.0/pow(2.0,(int)l);
@@ -528,7 +528,7 @@ namespace osmscout {
 
         wayScanner.GetPos(offset);
 
-        if (!way.Read(typeConfig,
+        if (!way.Read(*typeConfig,
                       wayScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
@@ -568,7 +568,7 @@ namespace osmscout {
 
         if (!WriteBitmap(progress,
                          writer,
-                         typeConfig->GetTypeInfo(index),
+                         *typeConfig->GetTypeInfo(index),
                          wayTypeData[index],
                          typeCellOffsets[index])) {
           return false;

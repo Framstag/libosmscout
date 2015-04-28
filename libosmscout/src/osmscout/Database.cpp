@@ -113,7 +113,7 @@ namespace osmscout {
 
     this->path=path;
 
-    typeConfig=new TypeConfig();
+    typeConfig=std::make_shared<TypeConfig>();
 
     if (!typeConfig->LoadFromDataFile(path)) {
       log.Error() << "Cannot load 'types.dat'!";
@@ -228,8 +228,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (nodeDataFile.Invalid()) {
-      nodeDataFile=new NodeDataFile(parameter.GetNodeCacheSize());
+    if (!nodeDataFile) {
+      nodeDataFile=std::make_shared<NodeDataFile>(parameter.GetNodeCacheSize());
     }
 
     if (!nodeDataFile->IsOpen()) {
@@ -251,9 +251,9 @@ namespace osmscout {
       return NULL;
     }
 
-    if (areaDataFile.Invalid()) {
-      areaDataFile=new AreaDataFile("areas.dat",
-                                    parameter.GetAreaCacheSize());
+    if (!areaDataFile) {
+      areaDataFile=std::make_shared<AreaDataFile>("areas.dat",
+                                                  parameter.GetAreaCacheSize());
     }
 
     if (!areaDataFile->IsOpen()) {
@@ -275,9 +275,9 @@ namespace osmscout {
       return NULL;
     }
 
-    if (wayDataFile.Invalid()) {
-      wayDataFile=new WayDataFile("ways.dat",
-                                  parameter.GetWayCacheSize());
+    if (!wayDataFile) {
+      wayDataFile=std::make_shared<WayDataFile>("ways.dat",
+                                                parameter.GetWayCacheSize());
     }
 
     if (!wayDataFile->IsOpen()) {
@@ -299,8 +299,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (areaNodeIndex.Invalid()) {
-      areaNodeIndex=new AreaNodeIndex(/*parameter.GetAreaNodeIndexCacheSize()*/);
+    if (!areaNodeIndex) {
+      areaNodeIndex=std::make_shared<AreaNodeIndex>(/*parameter.GetAreaNodeIndexCacheSize()*/);
 
       if (!areaNodeIndex->Load(path)) {
         log.Error() << "Cannot load area node index!";
@@ -319,8 +319,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (areaAreaIndex.Invalid()) {
-      areaAreaIndex=new AreaAreaIndex(parameter.GetAreaAreaIndexCacheSize());
+    if (!areaAreaIndex) {
+      areaAreaIndex=std::make_shared<AreaAreaIndex>(parameter.GetAreaAreaIndexCacheSize());
 
       if (!areaAreaIndex->Load(path)) {
         log.Error() << "Cannot load area area index!";
@@ -339,8 +339,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (areaWayIndex.Invalid()) {
-      areaWayIndex=new AreaWayIndex();
+    if (!areaWayIndex) {
+      areaWayIndex=std::make_shared<AreaWayIndex>();
 
       if (!areaWayIndex->Load(typeConfig,
                               path)) {
@@ -448,7 +448,7 @@ namespace osmscout {
   {
     NodeDataFileRef nodeDataFile=GetNodeDataFile();
 
-    if (nodeDataFile.Invalid()) {
+    if (!nodeDataFile) {
       return false;
     }
 
@@ -464,7 +464,7 @@ namespace osmscout {
   {
     NodeDataFileRef nodeDataFile=GetNodeDataFile();
 
-    if (nodeDataFile.Invalid()) {
+    if (!nodeDataFile) {
       return false;
     }
 
@@ -476,7 +476,7 @@ namespace osmscout {
   {
     NodeDataFileRef nodeDataFile=GetNodeDataFile();
 
-    if (nodeDataFile.Invalid()) {
+    if (!nodeDataFile) {
       return false;
     }
 
@@ -488,7 +488,7 @@ namespace osmscout {
   {
     NodeDataFileRef nodeDataFile=GetNodeDataFile();
 
-    if (nodeDataFile.Invalid()) {
+    if (!nodeDataFile) {
       return false;
     }
 
@@ -500,7 +500,7 @@ namespace osmscout {
   {
     NodeDataFileRef nodeDataFile=GetNodeDataFile();
 
-    if (nodeDataFile.Invalid()) {
+    if (!nodeDataFile) {
       return false;
     }
 
@@ -512,7 +512,7 @@ namespace osmscout {
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
-    if (areaDataFile.Invalid()) {
+    if (!areaDataFile) {
       return false;
     }
 
@@ -528,7 +528,7 @@ namespace osmscout {
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
-    if (areaDataFile.Invalid()) {
+    if (!areaDataFile) {
       return false;
     }
 
@@ -540,7 +540,7 @@ namespace osmscout {
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
-    if (areaDataFile.Invalid()) {
+    if (!areaDataFile) {
       return false;
     }
 
@@ -552,7 +552,7 @@ namespace osmscout {
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
-    if (areaDataFile.Invalid()) {
+    if (!areaDataFile) {
       return false;
     }
 
@@ -564,7 +564,7 @@ namespace osmscout {
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
-    if (areaDataFile.Invalid()) {
+    if (!areaDataFile) {
       return false;
     }
 
@@ -576,7 +576,7 @@ namespace osmscout {
   {
     WayDataFileRef wayDataFile=GetWayDataFile();
 
-    if (wayDataFile.Invalid()) {
+    if (!wayDataFile) {
       return false;
     }
 
@@ -592,7 +592,7 @@ namespace osmscout {
   {
     WayDataFileRef wayDataFile=GetWayDataFile();
 
-    if (wayDataFile.Invalid()) {
+    if (!wayDataFile) {
       return false;
     }
 
@@ -604,7 +604,7 @@ namespace osmscout {
   {
     WayDataFileRef wayDataFile=GetWayDataFile();
 
-    if (wayDataFile.Invalid()) {
+    if (!wayDataFile) {
       return false;
     }
 
@@ -616,7 +616,7 @@ namespace osmscout {
   {
     WayDataFileRef wayDataFile=GetWayDataFile();
 
-    if (wayDataFile.Invalid()) {
+    if (!wayDataFile) {
       return false;
     }
 
@@ -628,7 +628,7 @@ namespace osmscout {
   {
     WayDataFileRef wayDataFile=GetWayDataFile();
 
-    if (wayDataFile.Invalid()) {
+    if (!wayDataFile) {
       return false;
     }
 

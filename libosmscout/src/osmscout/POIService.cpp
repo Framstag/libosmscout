@@ -61,8 +61,8 @@ namespace osmscout {
 
     nodes.clear();
 
-    if (areaNodeIndex.Invalid() ||
-        nodeDataFile.Invalid()) {
+    if (!areaNodeIndex ||
+        !nodeDataFile) {
       return false;
     }
 
@@ -79,7 +79,8 @@ namespace osmscout {
       return false;
     }
 
-    std::sort(nodeOffsets.begin(),nodeOffsets.end());
+    std::sort(nodeOffsets.begin(),
+              nodeOffsets.end());
 
     if (!nodeDataFile->GetByOffset(nodeOffsets,
                                    nodes)) {
@@ -112,8 +113,8 @@ namespace osmscout {
 
     areas.clear();
 
-    if (areaAreaIndex.Invalid() ||
-        areaDataFile.Invalid()) {
+    if (!areaAreaIndex ||
+        !areaDataFile) {
       return false;
     }
 
@@ -166,8 +167,8 @@ namespace osmscout {
 
     ways.clear();
 
-    if (areaWayIndex.Invalid() ||
-        wayDataFile.Invalid()) {
+    if (!areaWayIndex ||
+        !wayDataFile) {
       return false;
     }
 

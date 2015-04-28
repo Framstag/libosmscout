@@ -139,7 +139,7 @@ namespace osmscout {
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
 
-    if (areaNodeIndex.Invalid()) {
+    if (!areaNodeIndex) {
       return false;
     }
 
@@ -208,8 +208,8 @@ namespace osmscout {
     AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
 
-    if (areaAreaIndex.Invalid() ||
-        optimizeAreasLowZoom.Invalid()) {
+    if (!areaAreaIndex ||
+        !optimizeAreasLowZoom) {
       return false;
     }
 
@@ -331,8 +331,8 @@ namespace osmscout {
     AreaWayIndexRef        areaWayIndex=database->GetAreaWayIndex();
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
-    if (areaWayIndex.Invalid() ||
-        optimizeWaysLowZoom.Invalid()) {
+    if (!areaWayIndex ||
+        !optimizeWaysLowZoom) {
       return false;
     }
 

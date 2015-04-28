@@ -41,7 +41,7 @@ namespace osmscout {
 
   void RawNode::SetType(const TypeInfoRef& type)
   {
-    assert(type.Valid());
+    assert(type);
 
     featureValueBuffer.SetType(type);
   }

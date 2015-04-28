@@ -367,28 +367,28 @@ namespace osmscout {
 
     if (!ScanAreaIds(parameter,
                         progress,
-                        typeConfig,
+                        *typeConfig,
                         nodeUseMap)) {
       return false;
     }
 
     if (!ScanWayIds(parameter,
                        progress,
-                       typeConfig,
+                       *typeConfig,
                        nodeUseMap)) {
       return false;
     }
 
     if (!CopyAreas(parameter,
                    progress,
-                   typeConfig,
+                   *typeConfig,
                    nodeUseMap)) {
       return false;
     }
 
     if (!CopyWays(parameter,
                     progress,
-                    typeConfig,
+                    *typeConfig,
                     nodeUseMap)) {
       return false;
     }

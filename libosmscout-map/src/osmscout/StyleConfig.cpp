@@ -168,9 +168,9 @@ namespace osmscout {
   }
 
   StyleResolveContext::StyleResolveContext(const TypeConfigRef& typeConfig)
-  : bridgeReader(typeConfig),
-    tunnelReader(typeConfig),
-    accessReader(typeConfig)
+  : bridgeReader(*typeConfig),
+    tunnelReader(*typeConfig),
+    accessReader(*typeConfig)
   {
     // no code
   }

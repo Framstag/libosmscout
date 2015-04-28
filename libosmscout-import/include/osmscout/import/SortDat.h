@@ -567,14 +567,10 @@ namespace osmscout {
   {
     bool error=false;
 
-    for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
-        f!=filters.end();
-        ++f) {
-      ProcessingFilterRef filter(*f);
-
+    for (auto& filter : filters) {
       if (!filter->BeforeProcessingStart(parameter,
                                          progress,
-                                         typeConfig)) {
+                                         *typeConfig)) {
         progress.Error("Cannot initialize processor filter");
 
         error=true;
@@ -583,14 +579,14 @@ namespace osmscout {
 
     if (!error) {
       if (parameter.GetSortObjects()) {
-        if (!Renumber(typeConfig,
+        if (!Renumber(*typeConfig,
                       parameter,
                       progress)) {
           error=true;
         }
       }
       else {
-        if (!Copy(typeConfig,
+        if (!Copy(*typeConfig,
                   parameter,
                   progress)) {
           error=true;
@@ -598,14 +594,10 @@ namespace osmscout {
       }
     }
 
-    for (typename std::list<ProcessingFilterRef>::iterator f=filters.begin();
-        f!=filters.end();
-        ++f) {
-      ProcessingFilterRef filter(*f);
-
+    for (auto& filter : filters) {
       if (!filter->AfterProcessingEnd(parameter,
                                       progress,
-                                      typeConfig)) {
+                                      *typeConfig)) {
         progress.Error("Cannot deinitialize processor filter");
 
         error=true;
