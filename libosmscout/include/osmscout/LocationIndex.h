@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <set>
 #include <unordered_set>
 
@@ -28,7 +29,6 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -42,7 +42,7 @@ namespace osmscout {
    * location. Areas are currently build by scanning administrative boundaries and the
    * various sized city typed locations and areas.
    */
-  class OSMSCOUT_API LocationIndex : public Referencable
+  class OSMSCOUT_API LocationIndex
   {
   public:
     static const char* const FILENAME_LOCATION_IDX;
@@ -116,7 +116,7 @@ namespace osmscout {
     void DumpStatistics();
   };
 
-  typedef Ref<LocationIndex> LocationIndexRef;
+  typedef std::shared_ptr<LocationIndex> LocationIndexRef;
 }
 
 #endif

@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -29,14 +30,13 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   /**
    * \ingroup Database
    */
-  class OSMSCOUT_API WaterIndex : public Referencable
+  class OSMSCOUT_API WaterIndex
   {
   private:
     struct Level
@@ -80,7 +80,7 @@ namespace osmscout {
     void DumpStatistics();
   };
 
-  typedef Ref<WaterIndex> WaterIndexRef;
+  typedef std::shared_ptr<WaterIndex> WaterIndexRef;
 }
 
 #endif

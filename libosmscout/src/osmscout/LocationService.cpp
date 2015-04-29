@@ -375,7 +375,7 @@ namespace osmscout {
   {
     LocationIndexRef locationIndex=database->GetLocationIndex();
 
-    if (locationIndex.Invalid()) {
+    if (!locationIndex) {
       return false;
     }
 
@@ -396,7 +396,7 @@ namespace osmscout {
   {
     LocationIndexRef locationIndex=database->GetLocationIndex();
 
-    if (locationIndex.Invalid()) {
+    if (!locationIndex) {
       return false;
     }
 
@@ -421,7 +421,7 @@ namespace osmscout {
   {
     LocationIndexRef locationIndex=database->GetLocationIndex();
 
-    if (locationIndex.Invalid()) {
+    if (!locationIndex) {
       return false;
     }
 
@@ -447,7 +447,7 @@ namespace osmscout {
   {
     LocationIndexRef locationIndex=database->GetLocationIndex();
 
-    if (locationIndex.Invalid()) {
+    if (!locationIndex) {
       return false;
     }
 
@@ -703,7 +703,7 @@ namespace osmscout {
   {
     LocationIndexRef locationIndex=database->GetLocationIndex();
 
-    if (locationIndex.Invalid()) {
+    if (!locationIndex) {
       return false;
     }
 
@@ -1132,7 +1132,7 @@ namespace osmscout {
 
     LocationIndexRef locationIndex=database->GetLocationIndex();
 
-    if (locationIndex.Invalid()) {
+    if (!locationIndex) {
       return false;
     }
 

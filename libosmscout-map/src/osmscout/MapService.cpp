@@ -672,7 +672,7 @@ namespace osmscout {
   {
     WaterIndexRef waterIndex=database->GetWaterIndex();
 
-    if (waterIndex.Invalid()) {
+    if (!waterIndex) {
       return false;
     }
 

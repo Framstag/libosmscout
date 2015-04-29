@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -30,11 +31,10 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API OptimizeWaysLowZoom : public Referencable
+  class OSMSCOUT_API OptimizeWaysLowZoom
   {
   private:
     struct TypeData
@@ -100,7 +100,7 @@ namespace osmscout {
                  std::vector<WayRef>& ways) const;
   };
 
-  typedef Ref<OptimizeWaysLowZoom> OptimizeWaysLowZoomRef;
+  typedef std::shared_ptr<OptimizeWaysLowZoom> OptimizeWaysLowZoomRef;
 }
 
 #endif

@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -30,14 +31,13 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   /**
    * \ingroup Database
    */
-  class OSMSCOUT_API OptimizeAreasLowZoom : public Referencable
+  class OSMSCOUT_API OptimizeAreasLowZoom
   {
   private:
     struct TypeData
@@ -103,7 +103,7 @@ namespace osmscout {
                   std::vector<AreaRef>& areas) const;
   };
 
-  typedef Ref<OptimizeAreasLowZoom> OptimizeAreasLowZoomRef;
+  typedef std::shared_ptr<OptimizeAreasLowZoom> OptimizeAreasLowZoomRef;
 }
 
 #endif

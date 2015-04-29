@@ -360,8 +360,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (locationIndex.Invalid()) {
-      locationIndex=new LocationIndex();
+    if (!locationIndex) {
+      locationIndex=std::make_shared<LocationIndex>();
 
       if (!locationIndex->Load(path)) {
         log.Error() << "Cannot load location index!";
@@ -380,8 +380,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (waterIndex.Invalid()) {
-      waterIndex=new WaterIndex();
+    if (!waterIndex) {
+      waterIndex=std::make_shared<WaterIndex>();
 
       if (!waterIndex->Load(path)) {
         log.Error() << "Cannot load water index!";
@@ -400,8 +400,8 @@ namespace osmscout {
       return NULL;
     }
 
-    if (optimizeAreasLowZoom.Invalid()) {
-      optimizeAreasLowZoom=new OptimizeAreasLowZoom();
+    if (!optimizeAreasLowZoom) {
+      optimizeAreasLowZoom=std::make_shared<OptimizeAreasLowZoom>();
 
       if (!optimizeAreasLowZoom->Open(typeConfig,
                                       path)) {
@@ -417,8 +417,8 @@ namespace osmscout {
 
   OptimizeWaysLowZoomRef Database::GetOptimizeWaysLowZoom() const
   {
-    if (optimizeWaysLowZoom.Invalid()) {
-      optimizeWaysLowZoom=new OptimizeWaysLowZoom();
+    if (!optimizeWaysLowZoom) {
+      optimizeWaysLowZoom=std::make_shared<OptimizeWaysLowZoom>();
 
       if (!optimizeWaysLowZoom->Open(typeConfig,
                                      path)) {
