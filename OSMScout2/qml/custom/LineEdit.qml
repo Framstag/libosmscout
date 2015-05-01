@@ -2,8 +2,8 @@ import QtQuick 2.2
 
 import net.sf.libosmscout.map 1.0
 
-Item {
-    id: item
+FocusScope {
+    id: control
 
     property color defaultBackgroundColor: "white"
 
@@ -17,36 +17,40 @@ Item {
     property alias maximumLength: input.maximumLength
     property alias inputMethodHints: input.inputMethodHints
 
-    width: input.width+4
-    height: input.implicitHeight+4
-
     signal accepted()
+
+    height: background.height
 
     Rectangle {
         id: background
-        anchors.fill: parent
 
         color: backgroundColor
         border.color: focusColor
         border.width: 1
-    }
 
-    TextInput {
-        id: input
 
         anchors.fill: parent
-        anchors.margins: 2
 
-        font.pixelSize: Theme.textFontSize
-        selectByMouse: true
-        clip: true
+        height: input.implicitHeight+4
 
-        onFocusChanged: {
-            background.border.color = focus ? selectedFocusColor : focusColor
-        }
+        TextInput {
+            id: input
 
-        onAccepted: {
-            item.accepted()
+            anchors.fill: parent
+            anchors.margins: 2
+
+            font.pixelSize: Theme.textFontSize
+            selectByMouse: true
+            clip: true
+            focus: true
+
+            onFocusChanged: {
+                background.border.color = focus ? selectedFocusColor : focusColor
+            }
+
+            onAccepted: {
+                control.accepted()
+            }
         }
     }
 }
