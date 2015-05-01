@@ -4,7 +4,7 @@ QT_CONFIG -= no-pkg-config
 
 CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
 
-QT += core gui widgets qml quick positioning
+QT += core gui widgets qml quick svg positioning
 
 PKGCONFIG += libosmscout-map-qt
 
@@ -49,6 +49,7 @@ DISTFILES += \
     qml/RoutingDialog.qml \
     qml/AboutDialog.qml \
     qml/SearchDialog.qml
+    pics/DeleteText.svg
 
 RESOURCES += \
     res.qrc

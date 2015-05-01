@@ -1,4 +1,5 @@
-import QtQuick 2.2
+import QtQuick 2.3
+import QtQuick.Layouts 1.1
 
 import net.sf.libosmscout.map 1.0
 
@@ -33,23 +34,58 @@ FocusScope {
 
         height: input.implicitHeight+4
 
-        TextInput {
-            id: input
+        RowLayout {
 
             anchors.fill: parent
-            anchors.margins: 2
 
-            font.pixelSize: Theme.textFontSize
-            selectByMouse: true
-            clip: true
-            focus: true
+            spacing: 0
 
-            onFocusChanged: {
-                background.border.color = focus ? selectedFocusColor : focusColor
+            TextInput {
+                id: input
+
+                Layout.fillWidth: true
+                Layout.fillHeight: false
+                Layout.alignment: Qt.AlignVCenter
+
+                font.pixelSize: Theme.textFontSize
+                selectByMouse: true
+                clip: true
+                focus: true
+
+                onFocusChanged: {
+                    background.border.color = focus ? selectedFocusColor : focusColor
+                }
+
+                onAccepted: {
+                    control.accepted()
+                }
+
+                onTextChanged: {
+                    deleteButton.visible = text.length>0
+                }
             }
 
-            onAccepted: {
-                control.accepted()
+            Image {
+                id: deleteButton
+
+                width: input.height
+                height: input.height
+                visible: false
+
+                source: "qrc:///pics/DeleteText.svg"
+                fillMode: Image.PreserveAspectFit
+                horizontalAlignment: Image.AlignHCenter
+                verticalAlignment: Image.AlignVCenter
+                sourceSize.width: input.height
+                sourceSize.height: input.height
+
+                MouseArea {
+                    anchors.fill: deleteButton
+
+                    onClicked: {
+                        input.text = ""
+                    }
+                }
             }
         }
     }

@@ -11,5 +11,6 @@
         <file>qml/custom/MapButton.qml</file>
         <file>qml/custom/MapDialog.qml</file>
         <file>qml/custom/ScrollIndicator.qml</file>
+        <file>pics/DeleteText.svg</file>
     </qresource>
 </RCC>
