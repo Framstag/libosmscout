@@ -3,6 +3,8 @@ import QtQuick 2.2
 import net.sf.libosmscout.map 1.0
 
 Item {
+    id: item
+
     property color defaultBackgroundColor: "white"
 
     property color backgroundColor: defaultBackgroundColor
@@ -17,6 +19,8 @@ Item {
 
     width: input.width+4
     height: input.implicitHeight+4
+
+    signal accepted()
 
     Rectangle {
         id: background
@@ -34,10 +38,15 @@ Item {
         anchors.margins: 2
 
         font.pixelSize: Theme.textFontSize
+        selectByMouse: true
         clip: true
 
         onFocusChanged: {
             background.border.color = focus ? selectedFocusColor : focusColor
+        }
+
+        onAccepted: {
+            item.accepted()
         }
     }
 }

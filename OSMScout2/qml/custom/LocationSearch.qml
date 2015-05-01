@@ -114,6 +114,9 @@ LineEdit {
             showLocation(searchEdit.location)
             delegateFocus();
         }
+        else {
+            updateSuggestions()
+        }
     }
 
     function handleCancel() {
@@ -185,7 +188,7 @@ LineEdit {
         }
     }
 
-    Keys.onReturnPressed: {
+    onAccepted: {
         handleOK();
     }
 
