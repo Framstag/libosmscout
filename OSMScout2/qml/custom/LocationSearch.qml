@@ -152,7 +152,7 @@ LineEdit {
         popup.x = mappedPosition.x;
         popup.y = desktopFreeSpace.y;
 
-        var popupHeight = suggestionView.contentHeight
+        var popupHeight = suggestionView.contentHeight+2
 
         if (popupHeight > desktopFreeSpace.height) {
             popupHeight = desktopFreeSpace.height
