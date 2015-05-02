@@ -233,6 +233,8 @@ namespace osmscout {
     }
 
     if (!nodeDataFile->IsOpen()) {
+      StopClock timer;
+
       if (!nodeDataFile->Open(typeConfig,
                               path,
                               FileScanner::LowMemRandom,
@@ -240,6 +242,10 @@ namespace osmscout {
         log.Error() << "Cannot open 'nodes.dat'!";
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening NodeDataFile: " << timer.ResultString();
     }
 
     return nodeDataFile;
@@ -257,6 +263,8 @@ namespace osmscout {
     }
 
     if (!areaDataFile->IsOpen()) {
+      StopClock timer;
+
       if (!areaDataFile->Open(typeConfig,
                               path,
                               FileScanner::LowMemRandom,
@@ -264,6 +272,10 @@ namespace osmscout {
         log.Error() << "Cannot open 'areas.dat'!";
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening AreaDataFile: " << timer.ResultString();
     }
 
     return areaDataFile;
@@ -281,6 +293,8 @@ namespace osmscout {
     }
 
     if (!wayDataFile->IsOpen()) {
+      StopClock timer;
+
       if (!wayDataFile->Open(typeConfig,
                              path,
                              FileScanner::LowMemRandom,
@@ -288,6 +302,10 @@ namespace osmscout {
         log.Error() << "Cannot open 'ways.dat'!";
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening WayDataFile: " << timer.ResultString();
     }
 
     return wayDataFile;
@@ -302,12 +320,18 @@ namespace osmscout {
     if (!areaNodeIndex) {
       areaNodeIndex=std::make_shared<AreaNodeIndex>(/*parameter.GetAreaNodeIndexCacheSize()*/);
 
+      StopClock timer;
+
       if (!areaNodeIndex->Load(path)) {
         log.Error() << "Cannot load area node index!";
         areaNodeIndex=NULL;
 
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening AreaNodeIndex: " << timer.ResultString();
     }
 
     return areaNodeIndex;
@@ -322,12 +346,18 @@ namespace osmscout {
     if (!areaAreaIndex) {
       areaAreaIndex=std::make_shared<AreaAreaIndex>(parameter.GetAreaAreaIndexCacheSize());
 
+      StopClock timer;
+
       if (!areaAreaIndex->Load(path)) {
         log.Error() << "Cannot load area area index!";
         areaAreaIndex=NULL;
 
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening AreaAreaIndex: " << timer.ResultString();
     }
 
     return areaAreaIndex;
@@ -342,6 +372,8 @@ namespace osmscout {
     if (!areaWayIndex) {
       areaWayIndex=std::make_shared<AreaWayIndex>();
 
+      StopClock timer;
+
       if (!areaWayIndex->Load(typeConfig,
                               path)) {
         log.Error() << "Cannot load area way index!";
@@ -349,6 +381,10 @@ namespace osmscout {
 
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening AreaWayIndex: " << timer.ResultString();
     }
 
     return areaWayIndex;
@@ -363,12 +399,18 @@ namespace osmscout {
     if (!locationIndex) {
       locationIndex=std::make_shared<LocationIndex>();
 
+      StopClock timer;
+
       if (!locationIndex->Load(path)) {
         log.Error() << "Cannot load location index!";
         locationIndex=NULL;
 
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening LocationIndex: " << timer.ResultString();
     }
 
     return locationIndex;
@@ -383,12 +425,18 @@ namespace osmscout {
     if (!waterIndex) {
       waterIndex=std::make_shared<WaterIndex>();
 
+      StopClock timer;
+
       if (!waterIndex->Load(path)) {
         log.Error() << "Cannot load water index!";
         waterIndex=NULL;
 
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening WaterIndex: " << timer.ResultString();
     }
 
     return waterIndex;
@@ -403,6 +451,8 @@ namespace osmscout {
     if (!optimizeAreasLowZoom) {
       optimizeAreasLowZoom=std::make_shared<OptimizeAreasLowZoom>();
 
+      StopClock timer;
+
       if (!optimizeAreasLowZoom->Open(typeConfig,
                                       path)) {
         log.Error() << "Cannot load optimize areas low zoom index!";
@@ -410,6 +460,11 @@ namespace osmscout {
 
         return NULL;
       }
+
+
+      timer.Stop();
+
+      log.Debug() << "Opening OptimizeAreasLowZoom: " << timer.ResultString();
     }
 
     return optimizeAreasLowZoom;
@@ -420,6 +475,8 @@ namespace osmscout {
     if (!optimizeWaysLowZoom) {
       optimizeWaysLowZoom=std::make_shared<OptimizeWaysLowZoom>();
 
+      StopClock timer;
+
       if (!optimizeWaysLowZoom->Open(typeConfig,
                                      path)) {
         log.Error() << "Cannot load optimize areas low zoom index!";
@@ -427,6 +484,10 @@ namespace osmscout {
 
         return NULL;
       }
+
+      timer.Stop();
+
+      log.Debug() << "Opening OptimizeWaysLowZoom: " << timer.ResultString();
     }
 
     return optimizeWaysLowZoom;

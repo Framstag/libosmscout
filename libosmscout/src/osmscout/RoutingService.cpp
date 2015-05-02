@@ -154,6 +154,8 @@ namespace osmscout {
 
     assert(!path.empty());
 
+    StopClock timer;
+
     if (!routeNodeDataFile.Open(database->GetTypeConfig(),
                                 path,
                                 FileScanner::FastRandom,true,
@@ -161,6 +163,10 @@ namespace osmscout {
       log.Error() << "Cannot open 'route.dat'!";
       return false;
     }
+
+    timer.Stop();
+
+    log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
 
     isOpen=true;
 
@@ -703,13 +709,21 @@ namespace osmscout {
       }
     }
 
-    if (!junctionDataFile.Open(database->GetTypeConfig(),
-                               path,
-                               FileScanner::FastRandom,
-                               false,
-                               FileScanner::FastRandom,
-                               false)) {
-      return false;
+    if (!junctionDataFile.IsOpen()) {
+      StopClock timer;
+
+      if (!junctionDataFile.Open(database->GetTypeConfig(),
+                                 path,
+                                 FileScanner::FastRandom,
+                                 false,
+                                 FileScanner::FastRandom,
+                                 false)) {
+        return false;
+      }
+
+      timer.Stop();
+
+      log.Debug() << "Opening JunctionDataFile: " << timer.ResultString();
     }
 
     std::vector<JunctionRef> junctions;
