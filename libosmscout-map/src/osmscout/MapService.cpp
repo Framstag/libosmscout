@@ -437,6 +437,21 @@ namespace osmscout {
     return !parameter.IsAborted();
   }
 
+  /**
+   * Returns all objects conforming to the given restrictions.
+   *
+   * @param parameter
+   *    Further restrictions
+   * @param styleConfig
+   *    Style configuration, defining which types are loaded for the
+   *    magnification defined by the projection
+   * @param projection
+   *    Projection defining the area and the magnification
+   * @param data
+   *    the returned data
+   * @return
+   *    true, if loading of data was successfull else false
+   */
   bool MapService::GetObjects(const AreaSearchParameter& parameter,
                               const StyleConfig& styleConfig,
                               const Projection& projection,
@@ -474,75 +489,26 @@ namespace osmscout {
   /**
    * Returns all objects conforming to the given restrictions.
    *
-   * @param nodeTypes
-   *    Allowed node types
-   * @param wayTypes
-   *    Allowed way types
-   * @param areaTypes
-   *    Allowed area types
-   * @param lonMin
-   *    Boundary coordinate
-   * @param latMin
-   *    Boundary coordinate
-   * @param lonMax
-   *    Boundary coordinate
-   * @param latMax
-   *    Boundary coordinate
-   * @param magnification
-   *    Magnification
-   * @param parameter
-   *    Further restrictions
-   * @param nodes
-   *    Found nodes
-   * @param ways
-   *    Found ways
-   * @param areas
-   *    Found area
-   * @return
-   *    False, if there was an error, else true.
-   */
-
-  /**
-   * Returns all objects conforming to the given restrictions.
-   *
    * @param parameter
    *    Further restrictions
    * @param magnification
    *    Magnification
    * @param nodeTypes
    *    Allowed node types
-   * @param nodeLonMin
-   *    Boundary coordinate
-   * @param nodeLatMin
-   *    Boundary coordinate
-   * @param nodeLonMax
-   *    Boundary coordinate
-   * @param nodeLatMax
-   *    Boundary coordinate
+   * @param nodeBoundingBox
+   *    Boundary coordinates for loading nodes
    * @param nodes
    *    Found nodes
    * @param wayTypes
    *    Allowed way types
-   * @param wayLonMin
-   *    Boundary coordinate
-   * @param wayLatMin
-   *    Boundary coordinate
-   * @param wayLonMax
-   *    Boundary coordinate
-   * @param wayLatMax
-   *    Boundary coordinate
+   * @param wayBoundingBox
+   *    Boundary coordinates for loading ways
    * @param ways
    *    Found ways
    * @param areaTypes
    *    Allowed area types
-   * @param areaLonMin
-   *    Boundary coordinate
-   * @param areaLatMin
-   *    Boundary coordinate
-   * @param areaLonMax
-   *    Boundary coordinate
-   * @param areaLatMax
-   *    Boundary coordinate
+   * @param areaBoundingBox
+   *    Boundary coordinates for loading areas
    * @param areas
    *    Found areas
    * @return
@@ -634,6 +600,19 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Return all ground tiles for the given projection data
+   * (bounding box and magnification).
+   *
+   * \note The returned ground tiles may result in a bigger area than given.
+   *
+   * @param projection
+   *    projection defining bounding box and magnification
+   * @param tiles
+   *    List of returned tiles
+   * @return
+   *    False, if there was an error, else true.
+   */
   bool MapService::GetGroundTiles(const Projection& projection,
                                   std::list<GroundTile>& tiles) const
   {
@@ -651,14 +630,8 @@ namespace osmscout {
    *
    * \note The returned ground tiles may result in a bigger area than given.
    *
-   * @param lonMin
-   *    Boundary coordinate
-   * @param latMin
-   *    Boundary coordinate
-   * @param lonMax
-   *    Boundary coordinate
-   * @param latMax
-   *    Boundary coordinate
+   * @param boundingBox
+   *    Boundary coordinates
    * @param magnification
    *    Magnification
    * @param tiles
