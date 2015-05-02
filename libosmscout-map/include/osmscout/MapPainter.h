@@ -362,8 +362,7 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const TypeInfoRef& type,
                        const FeatureValueBuffer& buffer,
-                       double x,
-                       double y);
+                       const GeoBox& boundingBox);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,

@@ -863,6 +863,8 @@ namespace osmscout {
                                      const IconStyleRef iconStyle,
                                      const std::vector<TextStyleRef>& textStyles)
   {
+    labelLayoutData.clear();
+
     if (iconStyle.Valid()) {
       if (!iconStyle->GetIconName().empty() &&
           HasIcon(styleConfig,
@@ -894,7 +896,6 @@ namespace osmscout {
                                                         buffer);
 
       if (!label.empty()) {
-
         LabelLayoutData data;
         double          fontSize=textStyle->GetSize();
         double          alpha=textStyle->GetAlpha();
@@ -992,11 +993,8 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const TypeInfoRef& type,
                                  const FeatureValueBuffer& buffer,
-                                 double x,
-                                 double y)
+                                 const GeoBox& boundingBox)
   {
-    labelLayoutData.clear();
-
     IconStyleRef iconStyle;
 
     styleConfig.GetAreaTextStyles(type,
@@ -1008,10 +1006,22 @@ namespace osmscout {
                                  projection,
                                  iconStyle);
 
+    double minX;
+    double maxX;
+    double minY;
+    double maxY;
+
+    projection.GeoToPixel(boundingBox.GetMinCoord(),
+                          minX,minY);
+
+    projection.GeoToPixel(boundingBox.GetMaxCoord(),
+                          maxX,maxY);
+
     LayoutPointLabels(projection,
                       parameter,
                       buffer,
-                      x,y,
+                      (minX+maxX)/2,
+                      (minY+maxY)/2,
                       iconStyle,
                       textStyles);
   }
@@ -1021,43 +1031,31 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
-    for (std::vector<AreaRef>::const_iterator r=data.areas.begin();
-         r!=data.areas.end();
-         ++r) {
-      const AreaRef& area=*r;
-
+    for (const auto& area : data.areas) {
       for (size_t m=0; m<area->rings.size(); m++) {
         if (area->rings[m].ring==Area::masterRingId) {
-          GeoCoord center;
-          double   x,y;
+          GeoBox   boundingBox;
 
-          area->GetCenter(center);
-
-          projection.GeoToPixel(center,
-                                x,y);
+          area->GetBoundingBox(boundingBox);
 
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
                         area->GetType(),
                         area->rings[m].GetFeatureValueBuffer(),
-                        x,y);
+                        boundingBox);
         }
         else {
-          GeoCoord center;
-          double   x,y;
+          GeoBox boundingBox;
 
-          area->rings[m].GetCenter(center);
-
-          projection.GeoToPixel(center,
-                                x,y);
+          area->rings[m].GetBoundingBox(boundingBox);
 
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
                         area->rings[m].GetType(),
                         area->rings[m].GetFeatureValueBuffer(),
-                        x,y);
+                        boundingBox);
         }
       }
     }
@@ -1070,15 +1068,12 @@ namespace osmscout {
   {
     IconStyleRef iconStyle;
 
-    labelLayoutData.clear();
-
     styleConfig.GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                  projection,
                                  textStyles);
     styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                  projection,
                                  iconStyle);
-
 
     double x,y;
 
