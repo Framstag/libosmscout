@@ -148,7 +148,7 @@ OSS
        either the label value or the fref value of the object is used as
        label.
      * style: <styleValue> - Depending on the value (normal or emphasize) the
-       label is eitehr drawn normal or (depending on the backend the
+       label is either drawn normal or (depending on the backend the
        visualisation may be different) somehow emphasized.
      * color: <COLOR> - The color of the text
      * size: <SIZE> - The size of the text relative to the standard text size.
