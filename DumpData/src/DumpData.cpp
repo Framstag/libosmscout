@@ -482,11 +482,18 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
                      const osmscout::AreaRef area,
                      osmscout::Id id)
 {
+  osmscout::GeoBox   boundingBox;
+  osmscout::GeoCoord center;
+
+  area->GetBoundingBox(boundingBox);
+
   std::cout << "Area {" << std::endl;
 
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
   std::cout << "  type: " << area->GetType()->GetName() << std::endl;
+  std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
+  std::cout << "  center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
 
   std::cout << std::endl;
 
