@@ -667,9 +667,7 @@ namespace osmscout {
 
     // is box visible?
     if (parameter.GetDropNotVisiblePointLabels()) {
-      if (bx1>=projection.GetWidth() ||
-          by1>=projection.GetHeight() ||
-          by2<0) {
+      if (by2<0 || by1>=projection.GetHeight()) {
         return false;
       }
     }
@@ -678,6 +676,7 @@ namespace osmscout {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
                                 *style,
                                 overlayLabels)) {
+
         return false;
       }
     }
@@ -842,7 +841,6 @@ namespace osmscout {
       }
 
       LabelLayoutData data;
-      double          alpha=textStyle->GetAlpha();
 
       if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
           parameter.GetDrawFadings()) {
@@ -854,7 +852,7 @@ namespace osmscout {
                       data.fontSize,
                       data.height);
 
-        alpha=alpha/factor;
+        double alpha=textStyle->GetAlpha()/factor;
 
         if (alpha>1.0) {
           alpha=1.0;
@@ -875,6 +873,7 @@ namespace osmscout {
 
         data.fontSize=height/standardFontSize;
         data.height=height;
+        data.alpha=textStyle->GetAlpha();
       }
       else {
         data.fontSize=textStyle->GetSize();
@@ -883,11 +882,12 @@ namespace osmscout {
                       parameter,
                       data.fontSize,
                       data.height);
+
+        data.alpha=textStyle->GetAlpha();
       }
 
       data.position=textStyle->GetPosition();
       data.label=label;
-      data.alpha=alpha;
       data.textStyle=textStyle;
       data.icon=false;
 
