@@ -248,15 +248,10 @@ namespace osmscout {
     double                       labelSpace;
     double                       shieldLabelSpace;
     double                       sameLabelSpace;
+    double                       standardFontSize;
     //@}
 
   private:
-    void CalculateEffectiveLabelStyle(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const TextStyle& style,
-                                      double& fontSize,
-                                      double& alpha);
-
     /**
      Ground tile drawing
      */
@@ -337,8 +332,10 @@ namespace osmscout {
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const FeatureValueBuffer& buffer,
-                           double x,
-                           double y,
+                           double minX,
+                           double minY,
+                           double maxX,
+                           double maxY,
                            const IconStyleRef iconStyle,
                            const std::vector<TextStyleRef>& textStyles);
 
@@ -394,14 +391,14 @@ namespace osmscout {
                    double lat,
                    double& x,
                    double& y);
-
+    /*
     bool GetBoundingBox(const std::vector<GeoCoord>& nodes,
                         double& xmin, double& ymin,
                         double& xmax, double& ymax) const;
     bool GetCenterPixel(const Projection& projection,
                         const std::vector<GeoCoord>& nodes,
                         double& cx,
-                        double& cy) const;
+                        double& cy) const;*/
 
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,

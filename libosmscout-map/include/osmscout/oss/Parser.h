@@ -240,6 +240,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STRING(std::string& value);
 	void TEXTLABEL(LabelProviderRef& label);
 	void LABELSTYLE(TextStyle::Style& style);
+	void BOOL(bool& value);
 
   void Parse();
 

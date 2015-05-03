@@ -725,7 +725,8 @@ namespace osmscout {
       attrPosition,
       attrTextColor,
       attrStyle,
-      attrScaleAndFadeMag
+      attrScaleAndFadeMag,
+      attrAutoSize
     };
 
   private:
@@ -734,7 +735,8 @@ namespace osmscout {
     size_t           position;        //!< Relative vertical position of the label
     Color            textColor;       //!< Color of text
     Style            style;           //!< Style of the text
-    Magnification    scaleAndFadeMag;
+    Magnification    scaleAndFadeMag; //!< Automatic pseudo-autoSize scaling for nodes
+    bool             autoSize;        //!< Calculate the size of the label base don the height of the area
 
   public:
     TextStyle();
@@ -749,6 +751,7 @@ namespace osmscout {
     TextStyle& SetTextColor(const Color& color);
     TextStyle& SetStyle(Style style);
     TextStyle& SetScaleAndFadeMag(const Magnification& mag);
+    TextStyle& SetAutoSize(bool autoSize);
 
     inline bool IsVisible() const
     {
@@ -789,6 +792,11 @@ namespace osmscout {
     inline Magnification GetScaleAndFadeMag() const
     {
       return scaleAndFadeMag;
+    }
+
+    inline bool GetAutoSize() const
+    {
+      return autoSize;
     }
 
     void CopyAttributes(const TextStyle& other,

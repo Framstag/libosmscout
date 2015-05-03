@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 84;
-	noSym = 84;
+	maxT = 85;
+	noSym = 85;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -223,19 +223,20 @@ void Scanner::Init() {
 	keywords.set("style", 66);
 	keywords.set("size", 67);
 	keywords.set("scaleMag", 68);
-	keywords.set("position", 69);
-	keywords.set("backgroundColor", 70);
-	keywords.set("shieldSpace", 71);
-	keywords.set("symbol", 72);
-	keywords.set("symbolSpace", 73);
-	keywords.set("name", 74);
-	keywords.set("butt", 75);
-	keywords.set("round", 76);
-	keywords.set("square", 77);
-	keywords.set("normal", 78);
-	keywords.set("emphasize", 79);
-	keywords.set("lighten", 80);
-	keywords.set("darken", 83);
+	keywords.set("autoSize", 69);
+	keywords.set("position", 70);
+	keywords.set("backgroundColor", 71);
+	keywords.set("shieldSpace", 72);
+	keywords.set("symbol", 73);
+	keywords.set("symbolSpace", 74);
+	keywords.set("name", 75);
+	keywords.set("butt", 76);
+	keywords.set("round", 77);
+	keywords.set("square", 78);
+	keywords.set("normal", 79);
+	keywords.set("emphasize", 80);
+	keywords.set("lighten", 81);
+	keywords.set("darken", 84);
 
 
   tvalLength = 128;
@@ -485,9 +486,9 @@ Token* Scanner::NextToken() {
 		case 29:
 			{t->kind = 42; break;}
 		case 30:
-			{t->kind = 81; break;}
-		case 31:
 			{t->kind = 82; break;}
+		case 31:
+			{t->kind = 83; break;}
 		case 32:
 			recEnd = pos; recKind = 44;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}

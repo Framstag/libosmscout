@@ -745,7 +745,8 @@ namespace osmscout {
    : position(0),
      textColor(0,0,0),
      style(normal),
-     scaleAndFadeMag(1000000)
+     scaleAndFadeMag(1000000),
+     autoSize(false)
   {
     // no code
   }
@@ -757,7 +758,8 @@ namespace osmscout {
     position(style.position),
     textColor(style.textColor),
     style(style.style),
-    scaleAndFadeMag(style.scaleAndFadeMag)
+    scaleAndFadeMag(style.scaleAndFadeMag),
+    autoSize(style.autoSize)
   {
     // no code
   }
@@ -818,6 +820,13 @@ namespace osmscout {
     return *this;
   }
 
+  TextStyle& TextStyle::SetAutoSize(bool autoSize)
+  {
+    this->autoSize=autoSize;
+
+    return *this;
+  }
+
   void TextStyle::CopyAttributes(const TextStyle& other,
                                  const std::set<Attribute>& attributes)
   {
@@ -843,6 +852,9 @@ namespace osmscout {
         break;
       case attrScaleAndFadeMag:
         scaleAndFadeMag=other.scaleAndFadeMag;
+        break;
+      case attrAutoSize:
+        autoSize=other.autoSize;
         break;
       }
     }
@@ -879,6 +891,10 @@ namespace osmscout {
     }
 
     if (scaleAndFadeMag!=other.scaleAndFadeMag) {
+      return false;
+    }
+
+    if (autoSize!=other.autoSize) {
       return false;
     }
 
@@ -920,7 +936,11 @@ namespace osmscout {
       return style<other.style;
     }
 
-    return scaleAndFadeMag<other.scaleAndFadeMag;
+    if (scaleAndFadeMag!=other.scaleAndFadeMag) {
+      return scaleAndFadeMag<other.scaleAndFadeMag;
+    }
+
+    return autoSize<other.autoSize;
   }
 
   ShieldStyle::ShieldStyle()

@@ -168,25 +168,6 @@ namespace osmscout {
              yMax<0);
   }
 
-  void MapPainter::CalculateEffectiveLabelStyle(const Projection& projection,
-                                                const MapParameter& parameter,
-                                                const TextStyle& style,
-                                                double& fontSize,
-                                                double& alpha)
-  {
-    // Calculate effective font size and alpha value
-    if (projection.GetMagnification()>style.GetScaleAndFadeMag() &&
-        parameter.GetDrawFadings()) {
-      double factor=projection.GetMagnification().GetLevel()-style.GetScaleAndFadeMag().GetLevel();
-      fontSize=fontSize*pow(1.5,factor);
-      alpha=alpha/factor;
-
-      if (alpha>1.0) {
-        alpha=1.0;
-      }
-    }
-  }
-
   void MapPainter::ClearLabelMarks(std::list<LabelData>& labels)
   {
     for (std::list<LabelData>::iterator label=labels.begin();
@@ -306,7 +287,7 @@ namespace osmscout {
     projection.GeoToPixel(lon,lat,
                           x,y);
   }
-
+/*
   bool MapPainter::GetBoundingBox(const std::vector<GeoCoord>& nodes,
                                   double& xmin, double& ymin,
                                   double& xmax, double& ymax) const
@@ -349,7 +330,7 @@ namespace osmscout {
                           cx,cy);
 
     return true;
-  }
+  }*/
 
   double MapPainter::GetProjectedWidth(const Projection& projection,
                                        double minPixel,
@@ -858,12 +839,17 @@ namespace osmscout {
   void MapPainter::LayoutPointLabels(const Projection& projection,
                                      const MapParameter& parameter,
                                      const FeatureValueBuffer& buffer,
-                                     double x,
-                                     double y,
+                                     double minX,
+                                     double minY,
+                                     double maxX,
+                                     double maxY,
                                      const IconStyleRef iconStyle,
                                      const std::vector<TextStyleRef>& textStyles)
   {
     labelLayoutData.clear();
+
+    double centerX=(minX+maxX)/2;
+    double centerY=(minY+maxY)/2;
 
     if (iconStyle.Valid()) {
       if (!iconStyle->GetIconName().empty() &&
@@ -895,32 +881,61 @@ namespace osmscout {
       std::string label=textStyle->GetLabel()->GetLabel(parameter,
                                                         buffer);
 
-      if (!label.empty()) {
-        LabelLayoutData data;
-        double          fontSize=textStyle->GetSize();
-        double          alpha=textStyle->GetAlpha();
+      if (label.empty()) {
+        continue;
+      }
 
-        CalculateEffectiveLabelStyle(projection,
-                                     parameter,
-                                     *textStyle,
-                                     fontSize,
-                                     alpha);
+      LabelLayoutData data;
+      double          alpha=textStyle->GetAlpha();
 
-        data.position=textStyle->GetPosition();
+      if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
+          parameter.GetDrawFadings()) {
+        double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
+        data.fontSize=textStyle->GetSize()*pow(1.5,factor);
 
         GetFontHeight(projection,
                       parameter,
-                      fontSize,
+                      data.fontSize,
                       data.height);
 
-        data.label=label;
-        data.fontSize=fontSize;
-        data.alpha=alpha;
-        data.textStyle=textStyle;
-        data.icon=false;
+        alpha=alpha/factor;
 
-        labelLayoutData.push_back(data);
+        if (alpha>1.0) {
+          alpha=1.0;
+        }
+
+        data.alpha=alpha;
       }
+      else if (textStyle->GetAutoSize()) {
+        double height=std::abs((maxY-minY)*0.1);
+
+        if (height==0) {
+          continue;
+        }
+
+        if (height<standardFontSize) {
+          continue;
+        }
+
+        data.fontSize=height/standardFontSize;
+        data.height=height;
+      }
+      else {
+        data.fontSize=textStyle->GetSize();
+
+        GetFontHeight(projection,
+                      parameter,
+                      data.fontSize,
+                      data.height);
+      }
+
+      data.position=textStyle->GetPosition();
+      data.label=label;
+      data.alpha=alpha;
+      data.textStyle=textStyle;
+      data.icon=false;
+
+      labelLayoutData.push_back(data);
     }
 
     if (labelLayoutData.empty()) {
@@ -931,7 +946,7 @@ namespace osmscout {
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
-    double offset=y;
+    double offset=centerY;
 
     for (const auto& data : labelLayoutData) {
       if (data.textStyle.Valid()) {
@@ -943,17 +958,17 @@ namespace osmscout {
                            data.fontSize,
                            data.height,
                            data.alpha,
-                           x,offset);
+                           centerX,offset);
       }
       else if (data.icon) {
         DrawIcon(data.iconStyle,
-                 x,offset);
+                 centerX,offset);
       }
       else {
         DrawSymbol(projection,
                    parameter,
                    data.iconStyle->GetSymbol(),
-                   x,offset);
+                   centerX,offset);
       }
 
       offset+=data.height;
@@ -1020,8 +1035,8 @@ namespace osmscout {
     LayoutPointLabels(projection,
                       parameter,
                       buffer,
-                      (minX+maxX)/2,
-                      (minY+maxY)/2,
+                      minX,minY,
+                      maxX,maxY,
                       iconStyle,
                       textStyles);
   }
@@ -1086,6 +1101,7 @@ namespace osmscout {
     LayoutPointLabels(projection,
                       parameter,
                       node->GetFeatureValueBuffer(),
+                      x,y,
                       x,y,
                       iconStyle,
                       textStyles);
@@ -1273,11 +1289,7 @@ namespace osmscout {
     areaData.clear();
 
     //Areas
-    for (std::vector<AreaRef>::const_iterator a=data.areas.begin();
-         a!=data.areas.end();
-         ++a) {
-      const AreaRef& area=*a;
-
+    for (const auto& area : data.areas) {
       std::vector<PolyData> data(area->rings.size());
 
       for (size_t i=0; i<area->rings.size(); i++) {
@@ -1317,8 +1329,7 @@ namespace osmscout {
                                            fillStyle);
             }
 
-            if (fillStyle.Invalid())
-            {
+            if (fillStyle.Invalid()) {
               continue;
             }
 
@@ -1577,6 +1588,11 @@ namespace osmscout {
     labelSpace=projection.ConvertWidthToPixel(parameter.GetLabelSpace());
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
     sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
+
+    GetFontHeight(projection,
+                  parameter,
+                  1.0,
+                  standardFontSize);
 
     if (parameter.IsAborted()) {
       return false;

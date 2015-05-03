@@ -1067,6 +1067,12 @@ PRODUCTIONS
                      style.style->SetScaleAndFadeMag(scaleMag);
                      style.attributes.insert(TextStyle::attrScaleAndFadeMag);
                   .)
+                | (. bool autoSize; .)
+                  "autoSize" ":" BOOL<autoSize>
+                  (.
+                     style.style->SetAutoSize(autoSize);
+                     style.attributes.insert(TextStyle::attrAutoSize);
+                  .)
                 | (. size_t priority; .)
                   "priority" ":" UINT<priority>
 	              (.
@@ -1432,6 +1438,28 @@ PRODUCTIONS
               = ident
                 (.
                   value=t->val;
+                .)
+                .
+
+  BOOL<bool& value>
+              = (. std::string ident; .)
+                ident
+                (.
+                  ident=t->val;
+
+                  if (ident=="true") {
+                    value=true;
+                  }
+                  else if (ident=="false") {
+                    value=false;
+                  }
+                  else {
+                    std::string e="'"+std::string(t->val)+"' is not a valid boolean value, only 'true' and 'false' are allowed";
+
+                    SemErr(e.c_str());
+
+                    value=false;
+                  }
                 .)
                 .
 
