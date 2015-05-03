@@ -287,50 +287,6 @@ namespace osmscout {
     projection.GeoToPixel(lon,lat,
                           x,y);
   }
-/*
-  bool MapPainter::GetBoundingBox(const std::vector<GeoCoord>& nodes,
-                                  double& xmin, double& ymin,
-                                  double& xmax, double& ymax) const
-  {
-    if (nodes.empty()) {
-      return false;
-    }
-
-    xmin=nodes[0].GetLon();
-    xmax=nodes[0].GetLon();
-    ymin=nodes[0].GetLat();
-    ymax=nodes[0].GetLat();
-
-    for (size_t j=1; j<nodes.size(); j++) {
-      xmin=std::min(xmin,nodes[j].GetLon());
-      xmax=std::max(xmax,nodes[j].GetLon());
-      ymin=std::min(ymin,nodes[j].GetLat());
-      ymax=std::max(ymax,nodes[j].GetLat());
-    }
-
-    return true;
-  }
-
-  bool MapPainter::GetCenterPixel(const Projection& projection,
-                                  const std::vector<GeoCoord>& nodes,
-                                  double& cx,
-                                  double& cy) const
-  {
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    if (!GetBoundingBox(nodes,xmin,ymin,xmax,ymax)) {
-      return false;
-    }
-
-    projection.GeoToPixel(xmin+(xmax-xmin)/2,
-                          ymin+(ymax-ymin)/2,
-                          cx,cy);
-
-    return true;
-  }*/
 
   double MapPainter::GetProjectedWidth(const Projection& projection,
                                        double minPixel,
