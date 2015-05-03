@@ -1802,6 +1802,10 @@ TYPES
     = NODE AREA ("place"=="island")
       {Name, NameAlt}
 
+  TYPE place_islet
+    = NODE AREA ("place"=="islet")
+      {Name, NameAlt}
+
   //
   // Buildings
   //
