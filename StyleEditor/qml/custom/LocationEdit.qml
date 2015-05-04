@@ -14,7 +14,7 @@ LineEdit {
         console.log("Suggestion count: " + suggestionModel.count)
 
         if (suggestionModel.count>=1 &&
-            locationEdit.text==suggestionModel.get(0).name) {
+            locationEdit.text === suggestionModel.get(0).name) {
             location=suggestionModel.get(0)
 
             return
