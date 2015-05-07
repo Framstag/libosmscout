@@ -253,7 +253,7 @@ void DBThread::TriggerMapRendering()
   currentMagnification=request.magnification;
 
   if (database->IsOpen() &&
-      styleConfig.Valid()) {
+      styleConfig) {
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
 
@@ -365,7 +365,7 @@ bool DBThread::RenderMap(QPainter& painter,
 {
   QMutexLocker locker(&mutex);
 
-  if (finishedImage==NULL) {
+  if (finishedImage==NULL || !styleConfig) {
     painter.fillRect(0,0,request.width,request.height,
                      QColor::fromRgbF(0.0,0.0,0.0,1.0));
 

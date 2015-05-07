@@ -304,6 +304,8 @@ CONST
   // Ground tiles
 
   COLOR waterColor                 = #9acffd;
+  COLOR waterLabelColor            = darken(@waterColor, 0.5);
+
   COLOR landColor                  = #f1eee9;
   COLOR unknownColor               = @waterColor;
 
@@ -320,14 +322,20 @@ CONST
   // Landuse, water
   COLOR allotmentsColor            = #c8b084;
   COLOR beachColor                 = #eecc55;
-  COLOR brownFieldColor            = #ebd7fe;
+
+  COLOR brownFieldColor            = #b6b592;//#ebd7fe;
+  COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
+
   COLOR cemeteryColor              = #a9caae;
   COLOR commercialColor            = #efc8c8;
   COLOR constructionColor          = #9d9d6c;
   COLOR farmColor                  = #ead8bd;
   COLOR farmyardColor              = #dcbe92;
   COLOR fellColor                  = #f9f9f9;
+
   COLOR forestColor                = #8dc56c;
+  COLOR forestLabelColor           = darken(@forestColor, 0.5);
+
   COLOR glacierColor               = #ddecec;
   COLOR grassColor                 = #cfeca8;
   COLOR greenFieldColor            = #dcdcc8;
@@ -335,16 +343,25 @@ CONST
   COLOR industrialColor            = #dfd1d6;
   COLOR landFillColor              = #b6b591;
   COLOR marshColor                 = #efe8ff;
+
   COLOR militaryColor              = #fe989822;
+  COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
+
   COLOR quarryColor                = #b3b3b3;
   COLOR recreationColor            = #bce2ca;
+
   COLOR residentialColor           = #ebebeb;
+  COLOR residentialLabelColor      = darken(@residentialColor, 0.5);
+
   COLOR retailColor                = #feeaea;
+  COLOR retailLabelColor           = darken(@retailColor, 0.5);
+
   COLOR scrubColor                 = #b5e2b5;
   COLOR vineyardColor              = #b3e2a8;
   COLOR wetlandColor               = #bdd8d8;
-  COLOR woodColor                  = #aed1a0;
 
+  COLOR woodColor                  = #aed1a0;
+  COLOR woodLabelColor             = darken(@woodColor, 0.5);
 
   COLOR peakSymbolColor            = #9c5e29;
   COLOR peakLabelColor             = #9c5329;
@@ -361,6 +378,7 @@ CONST
   COLOR roadBColor                 = #bfbfbf;
   COLOR livingStreetColor          = #bababa; // grey
 
+  // Buildings
   COLOR buildingColor              = #d9d9d9;
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
   COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
@@ -376,6 +394,11 @@ CONST
   COLOR railwayStationColor        = @railwayColor;
 
   // Leisure
+
+  COLOR natureReserveColor         = #abde9622;
+  COLOR natureReserveLabelColor    = darken(@natureReserveColor, 0.5);
+  COLOR natureReserveBorderColor   = darken(@natureReserveColor, 0.3);
+
   COLOR playgroundColor            = #ccffff;
   COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
 
@@ -541,15 +564,15 @@ SYMBOL speed_camera
          natural_fell,
          natural_grassland,
          natural_heath,
-         natural_wood,
          natural_scrub,
          natural_wetland,
          natural_wetland_marsh,
          natural_wetland_tidalflat,
-         natural_water,
          natural_beach,
-         natural_land]
-     AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; }
+         natural_land] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; autoSize: true;}
+
+   [TYPE natural_wood] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
+   [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
 
    [TYPE natural_peak] {
      NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
@@ -590,10 +613,7 @@ SYMBOL speed_camera
    }
 
    [TYPE waterway_dock,
-         waterway_riverbank] {
-     AREA { color: @waterColor; }
-     AREA.TEXT { label: Name.name; priority: 25; }
-   }
+         waterway_riverbank] AREA { color: @waterColor; }
  }
 
  [MAG cityOver-] {
@@ -608,12 +628,20 @@ SYMBOL speed_camera
    }
  }
 
+ // Labels
+
+ [MAG proximity-] {
+   [TYPE waterway_dock] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor; autoSize: true;}
+ }
+
  [MAG veryClose-] {
    [TYPE waterway_stream,
          waterway_drain,
          waterway_river,
          waterway_canal]
-     WAY.TEXT { label: Name.name; }
+     WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+
+   [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}
  }
 
  // -------------------------------------------------------
@@ -1149,19 +1177,20 @@ SYMBOL speed_camera
  }
 
  // Labels
- [MAG detail-] {
-   [TYPE landuse_residential,
-         landuse_retail,
-         landuse_brownfield,
-         landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
+ [MAG cityOver-] {
+   [TYPE landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @militaryLabelColor; autoSize: true;}
+   [TYPE landuse_brownfield] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @brownFieldLabelColor; autoSize: true;}
+   [TYPE landuse_residential] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @residentialLabelColor; autoSize: true;}
+   [TYPE landuse_forest] AREA.TEXT { label: Name.name; style: emphasize; priority: @labelPrioNatural; color: @forestLabelColor; autoSize: true;}
+   [TYPE landuse_retail] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @retailLabelColor; autoSize: true;}
+ }
 
-   [TYPE landuse_forest] AREA.TEXT { label: Name.name; style: emphasize; priority: @labelPrioNatural; }
+ [MAG detail-] {
  }
 
  [MAG close-] {
    [TYPE landuse_farm,
          landuse_farmland,
-         landuse_farmyard_building,
          landuse_farmyard,
          landuse_quarry,
          landuse_landfill,
@@ -1174,22 +1203,24 @@ SYMBOL speed_camera
          landuse_cemetery,
          landuse_commercial,
          landuse_meadow,
-         landuse_recreation_ground] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
+         landuse_recreation_ground] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; autoSize: true;}
+
+   [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
 
    [TYPE landuse_industrial,
-         landuse_allotments] AREA.TEXT { label: Name.name; style: emphasize; priority: @labelPrioLanduse;}
+         landuse_allotments] AREA.TEXT { label: Name.name; style: emphasize; priority: @labelPrioLanduse; autoSize: true;}
  }
 
  [MAG veryClose-] {
    [TYPE landuse_railway,
          landuse_construction,
-         landuse_village_green] AREA.TEXT { label: Name.name;  priority: @labelPrioLanduse;}
+         landuse_village_green] AREA.TEXT { label: Name.name;  priority: @labelPrioLanduse; autoSize: true; }
  }
 
  // -------------------------------------------------------
  //
  // Man made:
- // amenity, tourism, history,Leisure, military, buildings, power, barrier
+ // amenity, tourism, history, leisure, military, buildings, power, barrier
  //
 
  [MAG county-] {
@@ -1207,7 +1238,7 @@ SYMBOL speed_camera
 
  [MAG cityOver-] {
    // Semiransparent overlay
-   [TYPE leisure_nature_reserve] AREA { color: #abde9622; borderColor: #abde96; borderWidth: 0.2mm;}
+   [TYPE leisure_nature_reserve] AREA { color: @natureReserveColor; borderColor: @natureReserveBorderColor; borderWidth: 0.2mm;}
 
    [TYPE military_airfield,
          military_danger_area,
@@ -1351,10 +1382,14 @@ SYMBOL speed_camera
 
    // Amenities without special color
    [TYPE amenity,
+         amenity_bank,
          amenity_cafe,
+         amenity_fast_food,
          amenity_fuel,
-         amenity_school,
-         amenity_recycling] {
+         amenity_kindergarten,
+         amenity_recycling,
+         amenity_restaurant,
+         amenity_school] {
          NODE.ICON { symbol: amenity; }
    }
 
@@ -1366,7 +1401,7 @@ SYMBOL speed_camera
   // Labels
 
  [MAG cityOver-] {
-   [TYPE leisure_nature_reserve] AREA.TEXT { label: Name.name; priority: @labelPrioNatural; }
+   [TYPE leisure_nature_reserve] AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
  }
 
  [MAG close-] {
@@ -1385,7 +1420,7 @@ SYMBOL speed_camera
          military_airfield,
          military_danger_area,
          military_range,
-         military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; }
+         military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; autoSize: true; }
 
    [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor;}
  }
@@ -1460,12 +1495,21 @@ SYMBOL speed_camera
 
    [TYPE amenity,
          amenity_building,
+         amenity_bank_building,
+         amenity_bank,
+         amenity_building,
          amenity_cafe_building,
          amenity_cafe,
+         amenity_fast_food_building,
+         amenity_fast_food,
          amenity_fuel,
          amenity_fuel_building,
-         amenity_kindergarten,
          amenity_kindergarten_building,
+         amenity_kindergarten,
+         amenity_restaurant_building,
+         amenity_restaurant,
+         amenity_school_building,         
+         amenity_school,         
          amenity_taxi] {
      NODE.TEXT {label: Name.name; style: emphasize;color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
      AREA.TEXT { label: Name.name; style: emphasize; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
@@ -1532,9 +1576,10 @@ SYMBOL speed_camera
  }
 
  [MAG region-veryClose] {
-   [TYPE place_island] {
+   [TYPE place_island,
+         place_islet] {
      NODE.TEXT {label: IName; style: emphasize; size: 1.3; priority: @labelPrioIsland;}
-     AREA.TEXT { label: IName; style: emphasize; size: 1.3; priority: @labelPrioIsland; }
+     AREA.TEXT { label: IName; style: emphasize; priority: @labelPrioIsland; autoSize: true; }
      AREA {color: @landColor;}
    }
  }

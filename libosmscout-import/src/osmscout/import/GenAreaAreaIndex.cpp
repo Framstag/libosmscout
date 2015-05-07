@@ -235,6 +235,8 @@ namespace osmscout {
 
           area.GetBoundingBox(boundingBox);
 
+          GeoCoord center=boundingBox.GetCenter();
+
           //
           // Calculate highest level where the bounding box completely
           // fits in the cell size and assign area to the tiles that
@@ -256,22 +258,16 @@ namespace osmscout {
           }
 
           if (level==l) {
-            //
-            // Calculate minimum and maximum tile ids that are covered
-            // by the area
-            //
-            uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight[level]);
-            uint32_t maxyc=(uint32_t)ceil((boundingBox.GetMaxLat()+90.0)/cellHeight[level]);
-            uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth[level]);
-            uint32_t maxxc=(uint32_t)ceil((boundingBox.GetMaxLon()+180.0)/cellWidth[level]);
+            // Calculate index of tile that contains the geometric center of the area
+            uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellWidth[level]);
+            uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellHeight[level]);
 
             Entry entry;
 
             entry.type=area.GetType()->GetAreaId();
             entry.offset=offset;
 
-            // Add this area to the tile where the center of the area lies in.
-            leafs[Pixel((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(entry);
+            leafs[Pixel(x,y)].areas.push_back(entry);
             areaLevelEntries++;
 
             areasConsumed++;

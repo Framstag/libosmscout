@@ -112,7 +112,7 @@ namespace osmscout {
     mutable IndexCache              indexCache;     //!< Cached map of all index entries by file offset
 
   private:
-    bool GetIndexCell(const TypeConfigRef& typeConfig,
+    bool GetIndexCell(const TypeConfig& typeConfig,
                       uint32_t level,
                       FileOffset offset,
                       IndexCache::CacheRef& cacheRef) const;

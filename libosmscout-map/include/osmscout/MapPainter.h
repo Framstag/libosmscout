@@ -248,15 +248,10 @@ namespace osmscout {
     double                       labelSpace;
     double                       shieldLabelSpace;
     double                       sameLabelSpace;
+    double                       standardFontSize;
     //@}
 
   private:
-    void CalculateEffectiveLabelStyle(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const TextStyle& style,
-                                      double& fontSize,
-                                      double& alpha);
-
     /**
      Ground tile drawing
      */
@@ -292,14 +287,6 @@ namespace osmscout {
       Private draw algorithm implementation routines.
      */
     //@{
-    /*
-    bool PrepareAreaSegment(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const ObjectFileRef& ref,
-                            const AreaAttributes& attributes,
-                            const std::vector<GeoCoord>& nodes);*/
-
     void PrepareAreas(const StyleConfig& styleConfig,
                       const Projection& projection,
                       const MapParameter& parameter,
@@ -337,8 +324,10 @@ namespace osmscout {
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const FeatureValueBuffer& buffer,
-                           double x,
-                           double y,
+                           double minX,
+                           double minY,
+                           double maxX,
+                           double maxY,
                            const IconStyleRef iconStyle,
                            const std::vector<TextStyleRef>& textStyles);
 
@@ -362,8 +351,7 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const TypeInfoRef& type,
                        const FeatureValueBuffer& buffer,
-                       double x,
-                       double y);
+                       const GeoBox& boundingBox);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
@@ -396,14 +384,6 @@ namespace osmscout {
                    double& x,
                    double& y);
 
-    bool GetBoundingBox(const std::vector<GeoCoord>& nodes,
-                        double& xmin, double& ymin,
-                        double& xmax, double& ymax) const;
-    bool GetCenterPixel(const Projection& projection,
-                        const std::vector<GeoCoord>& nodes,
-                        double& cx,
-                        double& cy) const;
-
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,
                              double width) const;
@@ -413,7 +393,6 @@ namespace osmscout {
     {
       return width/projection.GetPixelSize();
     }
-
     //@}
 
     /**
@@ -571,11 +550,6 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const MapData& data);
 
-    /**
-      Med level drawing routines that are already implemented by the base class, but which can be overwritten
-      by the driver if necessary.
-     */
-    //@{
     virtual void DrawNode(const StyleConfig& styleConfig,
                           const Projection& projection,
                           const MapParameter& parameter,
