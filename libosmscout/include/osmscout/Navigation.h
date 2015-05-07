@@ -22,10 +22,10 @@
 
 #include <limits>
 
-#include "GeoCoord.h"
-#include "Route.h"
+#include <GeoCoord.h>
+#include <Route.h>
 
-#include "util/Geometry.h"
+#include <util/Geometry.h>
 
 namespace osmscout {
     static double one_degree_at_equator = 111320.0;
