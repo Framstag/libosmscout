@@ -28,7 +28,9 @@
 #include <sstream>
 
 #include <osmscout/util/StopClock.h>
-
+#ifdef DEBUG
+#undef DEBUG
+#endif
 namespace osmscout {
 
   /**
