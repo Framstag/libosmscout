@@ -161,6 +161,9 @@ OSS
        with a higher priority value. Note that labels with a certain alpha value
        will be ignored (so giant scaleMag labels will not "kill" all other
        labels beneeth).
+     * autoSize: <true|false> - The size of the label is automatically scaled
+       to fit the height of the area itself. Thus bigger areas will get bigger
+       labels, label with not be higher than the actual area.
 
      A text style for a path (WAY.TEXT { ...}) has the following attributes:
      * label: <labelType> - Depending on the given type (label or ref)
