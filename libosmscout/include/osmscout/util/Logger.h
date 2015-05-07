@@ -28,9 +28,12 @@
 #include <sstream>
 
 #include <osmscout/util/StopClock.h>
+
+// Since we have a DEBUG enumeration member
 #ifdef DEBUG
 #undef DEBUG
 #endif
+
 namespace osmscout {
 
   /**
