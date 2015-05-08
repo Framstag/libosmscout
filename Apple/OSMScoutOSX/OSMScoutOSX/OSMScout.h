@@ -46,7 +46,7 @@ namespace osmscout {
         TypeSet             types;
         RoutingProfile      *routingProfile;
         DatabaseParameter   databaseParameter;
-        Database            database;
+        DatabaseRef         database;
         bool                isDatabaseOpened;
         StyleConfig         *styleConfig;
         MapPainterIOS       *mapPainter;
@@ -60,7 +60,7 @@ namespace osmscout {
         Magnification       loadedMagnification;
         double              dpi;
         AreaSearchParameter searchParameter;
-        MapService          mapService;
+        MapServiceRef       mapService;
         MapData             data;
         bool                isMapPainterConfigured;
 

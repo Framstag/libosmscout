@@ -39,8 +39,6 @@
 		F51E3F21161A5FEC00D51926 /* FileScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EEF161A5FEC00D51926 /* FileScanner.cpp */; };
 		F51E3F22161A5FEC00D51926 /* FileWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF0161A5FEC00D51926 /* FileWriter.cpp */; };
 		F51E3F23161A5FEC00D51926 /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF1161A5FEC00D51926 /* Geometry.cpp */; };
-		F51E3F24161A5FEC00D51926 /* HashMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF2161A5FEC00D51926 /* HashMap.cpp */; };
-		F51E3F25161A5FEC00D51926 /* HashSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF3161A5FEC00D51926 /* HashSet.cpp */; };
 		F51E3F26161A5FEC00D51926 /* Number.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF4161A5FEC00D51926 /* Number.cpp */; };
 		F51E3F27161A5FEC00D51926 /* NumberSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */; };
 		F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF6161A5FEC00D51926 /* Progress.cpp */; };
@@ -88,8 +86,6 @@
 		F53BD1CA163886B2006C7AE1 /* FileScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EEF161A5FEC00D51926 /* FileScanner.cpp */; };
 		F53BD1CB163886B2006C7AE1 /* FileWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF0161A5FEC00D51926 /* FileWriter.cpp */; };
 		F53BD1CC163886B2006C7AE1 /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF1161A5FEC00D51926 /* Geometry.cpp */; };
-		F53BD1CD163886B2006C7AE1 /* HashMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF2161A5FEC00D51926 /* HashMap.cpp */; };
-		F53BD1CE163886B2006C7AE1 /* HashSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF3161A5FEC00D51926 /* HashSet.cpp */; };
 		F53BD1CF163886B2006C7AE1 /* Number.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF4161A5FEC00D51926 /* Number.cpp */; };
 		F53BD1D0163886B2006C7AE1 /* NumberSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */; };
 		F53BD1D1163886B2006C7AE1 /* Progress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF6161A5FEC00D51926 /* Progress.cpp */; };
@@ -150,6 +146,15 @@
 		F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55A3ACD1A45E57A0010005B /* Tiling.cpp */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
+		F583993E1AF6E19B00F79DFF /* GeoBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F583993C1AF6E19B00F79DFF /* GeoBox.cpp */; };
+		F583993F1AF6E19B00F79DFF /* GeoBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F583993C1AF6E19B00F79DFF /* GeoBox.cpp */; };
+		F58399401AF6E19B00F79DFF /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F583993D1AF6E19B00F79DFF /* Logger.cpp */; };
+		F58399411AF6E19B00F79DFF /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F583993D1AF6E19B00F79DFF /* Logger.cpp */; };
+		F58399451AF6E1C400F79DFF /* GeoBox.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399421AF6E1C400F79DFF /* GeoBox.h */; };
+		F58399461AF6E1C400F79DFF /* Logger.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399431AF6E1C400F79DFF /* Logger.h */; };
+		F58399471AF6E1C400F79DFF /* Tiling.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399441AF6E1C400F79DFF /* Tiling.h */; };
+		F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
+		F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -198,8 +203,6 @@
 		F51E3EEF161A5FEC00D51926 /* FileScanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileScanner.cpp; sourceTree = "<group>"; };
 		F51E3EF0161A5FEC00D51926 /* FileWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileWriter.cpp; sourceTree = "<group>"; };
 		F51E3EF1161A5FEC00D51926 /* Geometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Geometry.cpp; sourceTree = "<group>"; };
-		F51E3EF2161A5FEC00D51926 /* HashMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HashMap.cpp; sourceTree = "<group>"; };
-		F51E3EF3161A5FEC00D51926 /* HashSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HashSet.cpp; sourceTree = "<group>"; };
 		F51E3EF4161A5FEC00D51926 /* Number.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Number.cpp; sourceTree = "<group>"; };
 		F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NumberSet.cpp; sourceTree = "<group>"; };
 		F51E3EF6161A5FEC00D51926 /* Progress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Progress.cpp; sourceTree = "<group>"; };
@@ -246,8 +249,6 @@
 		F51E3F66161A604300D51926 /* FileScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileScanner.h; sourceTree = "<group>"; };
 		F51E3F67161A604300D51926 /* FileWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileWriter.h; sourceTree = "<group>"; };
 		F51E3F68161A604300D51926 /* Geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
-		F51E3F69161A604300D51926 /* HashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HashMap.h; sourceTree = "<group>"; };
-		F51E3F6A161A604300D51926 /* HashSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HashSet.h; sourceTree = "<group>"; };
 		F51E3F6B161A604300D51926 /* Number.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Number.h; sourceTree = "<group>"; };
 		F51E3F6C161A604300D51926 /* NumberSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NumberSet.h; sourceTree = "<group>"; };
 		F51E3F6D161A604300D51926 /* Progress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Progress.h; sourceTree = "<group>"; };
@@ -303,6 +304,11 @@
 		F55A3ACD1A45E57A0010005B /* Tiling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tiling.cpp; path = ../../../../libosmscout/src/osmscout/util/Tiling.cpp; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
+		F583993C1AF6E19B00F79DFF /* GeoBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeoBox.cpp; sourceTree = "<group>"; };
+		F583993D1AF6E19B00F79DFF /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
+		F58399421AF6E1C400F79DFF /* GeoBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeoBox.h; sourceTree = "<group>"; };
+		F58399431AF6E1C400F79DFF /* Logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
+		F58399441AF6E1C400F79DFF /* Tiling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tiling.h; sourceTree = "<group>"; };
 		F5A66AC71A46F5BF007AD752 /* TextSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSearchIndex.h; sourceTree = "<group>"; };
 		F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextSearchIndex.cpp; path = ../../../../libosmscout/src/osmscout/TextSearchIndex.cpp; sourceTree = "<group>"; };
 		F5EDD5441891556D00646B92 /* LocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationIndex.h; sourceTree = "<group>"; };
@@ -448,6 +454,8 @@
 		F51E3ED8161A5FEC00D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F583993C1AF6E19B00F79DFF /* GeoBox.cpp */,
+				F583993D1AF6E19B00F79DFF /* Logger.cpp */,
 				F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */,
 				F54DAA5E1815DAFB00625DDA /* Parser.cpp */,
 				F57B4945169341C7008E1B2C /* Magnification.cpp */,
@@ -458,8 +466,6 @@
 				F51E3EEF161A5FEC00D51926 /* FileScanner.cpp */,
 				F51E3EF0161A5FEC00D51926 /* FileWriter.cpp */,
 				F51E3EF1161A5FEC00D51926 /* Geometry.cpp */,
-				F51E3EF2161A5FEC00D51926 /* HashMap.cpp */,
-				F51E3EF3161A5FEC00D51926 /* HashSet.cpp */,
 				F51E3EF4161A5FEC00D51926 /* Number.cpp */,
 				F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */,
 				F51E3EF6161A5FEC00D51926 /* Progress.cpp */,
@@ -561,6 +567,9 @@
 		F51E3F61161A604300D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F58399421AF6E1C400F79DFF /* GeoBox.h */,
+				F58399431AF6E1C400F79DFF /* Logger.h */,
+				F58399441AF6E1C400F79DFF /* Tiling.h */,
 				F54DAA791815DB7D00625DDA /* NodeUseMap.h */,
 				F54DAA7A1815DB7D00625DDA /* Parser.h */,
 				F57B4943169341A3008E1B2C /* Magnification.h */,
@@ -571,8 +580,6 @@
 				F51E3F66161A604300D51926 /* FileScanner.h */,
 				F51E3F67161A604300D51926 /* FileWriter.h */,
 				F51E3F68161A604300D51926 /* Geometry.h */,
-				F51E3F69161A604300D51926 /* HashMap.h */,
-				F51E3F6A161A604300D51926 /* HashSet.h */,
 				F51E3F6B161A604300D51926 /* Number.h */,
 				F51E3F6C161A604300D51926 /* NumberSet.h */,
 				F51E3F6D161A604300D51926 /* Progress.h */,
@@ -604,13 +611,16 @@
 			files = (
 				F54DAA751815DB3F00625DDA /* OptimizeAreasLowZoom.h in Headers */,
 				F54DAA761815DB3F00625DDA /* OptimizeWaysLowZoom.h in Headers */,
+				F58399451AF6E1C400F79DFF /* GeoBox.h in Headers */,
 				F54DAA711815DB3F00625DDA /* Coord.h in Headers */,
+				F58399461AF6E1C400F79DFF /* Logger.h in Headers */,
 				F550E56319B085C700CB6072 /* Navigation.h in Headers */,
 				F556F00319C9D00700EAAA8B /* TypeFeatures.h in Headers */,
 				F54DAA731815DB3F00625DDA /* DebugDatabase.h in Headers */,
 				F54DAA721815DB3F00625DDA /* CoordDataFile.h in Headers */,
 				F534FB9B1823E8BD0039CEE4 /* Intersection.h in Headers */,
 				F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */,
+				F58399471AF6E1C400F79DFF /* Tiling.h in Headers */,
 				F54DAA741815DB3F00625DDA /* GeoCoord.h in Headers */,
 				F54DAA7B1815DB7D00625DDA /* NodeUseMap.h in Headers */,
 				F54DAA6E1815DB3F00625DDA /* Area.h in Headers */,
@@ -690,6 +700,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F51E3EFF161A5FEC00D51926 /* AreaAreaIndex.cpp in Sources */,
+				F58399401AF6E19B00F79DFF /* Logger.cpp in Sources */,
 				F556EFFE19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */,
 				F51E3F00161A5FEC00D51926 /* AreaNodeIndex.cpp in Sources */,
 				F51E3F01161A5FEC00D51926 /* AreaWayIndex.cpp in Sources */,
@@ -718,6 +729,7 @@
 				F51E3F16161A5FEC00D51926 /* SSEMath.cpp in Sources */,
 				F51E3F17161A5FEC00D51926 /* Tag.cpp in Sources */,
 				F54DAA611815DAFB00625DDA /* Parser.cpp in Sources */,
+				F583993E1AF6E19B00F79DFF /* GeoBox.cpp in Sources */,
 				F54C1E5218F480AC008C5EB3 /* LocationService.cpp in Sources */,
 				F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */,
 				F51E3F19161A5FEC00D51926 /* TypeConfig.cpp in Sources */,
@@ -733,8 +745,6 @@
 				F51E3F22161A5FEC00D51926 /* FileWriter.cpp in Sources */,
 				F54DAA4F1815DA6500625DDA /* OptimizeAreasLowZoom.cpp in Sources */,
 				F51E3F23161A5FEC00D51926 /* Geometry.cpp in Sources */,
-				F51E3F24161A5FEC00D51926 /* HashMap.cpp in Sources */,
-				F51E3F25161A5FEC00D51926 /* HashSet.cpp in Sources */,
 				F51E3F26161A5FEC00D51926 /* Number.cpp in Sources */,
 				F51E3F27161A5FEC00D51926 /* NumberSet.cpp in Sources */,
 				F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */,
@@ -744,6 +754,7 @@
 				F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */,
 				F54DAA491815DA6500625DDA /* Area.cpp in Sources */,
 				F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */,
+				F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */,
 				F54FD00C186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */,
 				F54DAA4C1815DA6500625DDA /* CoordDataFile.cpp in Sources */,
@@ -760,6 +771,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F53BD1A61638866B006C7AE1 /* AreaAreaIndex.cpp in Sources */,
+				F58399411AF6E19B00F79DFF /* Logger.cpp in Sources */,
 				F556EFFF19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */,
 				F53BD1A71638866B006C7AE1 /* AreaNodeIndex.cpp in Sources */,
 				F53BD1A81638866B006C7AE1 /* AreaWayIndex.cpp in Sources */,
@@ -788,6 +800,7 @@
 				F53BD1BD1638867D006C7AE1 /* TypeConfig.cpp in Sources */,
 				F54DAA621815DAFB00625DDA /* Parser.cpp in Sources */,
 				F54C1E5918F583BA008C5EB3 /* LocationService.cpp in Sources */,
+				F583993F1AF6E19B00F79DFF /* GeoBox.cpp in Sources */,
 				F53BD1BF1638867D006C7AE1 /* Types.cpp in Sources */,
 				F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */,
 				F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */,
@@ -805,8 +818,6 @@
 				F53BD1CA163886B2006C7AE1 /* FileScanner.cpp in Sources */,
 				F53BD1CB163886B2006C7AE1 /* FileWriter.cpp in Sources */,
 				F53BD1CC163886B2006C7AE1 /* Geometry.cpp in Sources */,
-				F53BD1CD163886B2006C7AE1 /* HashMap.cpp in Sources */,
-				F53BD1CE163886B2006C7AE1 /* HashSet.cpp in Sources */,
 				F53BD1CF163886B2006C7AE1 /* Number.cpp in Sources */,
 				F54DAA5A1815DA9400625DDA /* OptimizeWaysLowZoom.cpp in Sources */,
 				F53BD1D0163886B2006C7AE1 /* NumberSet.cpp in Sources */,
@@ -814,6 +825,7 @@
 				F54DAA551815DA8000625DDA /* Coord.cpp in Sources */,
 				F54DAA531815DA7800625DDA /* Area.cpp in Sources */,
 				F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */,
+				F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */,
 				F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F53BD1D3163886B2006C7AE1 /* Reference.cpp in Sources */,
 				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
