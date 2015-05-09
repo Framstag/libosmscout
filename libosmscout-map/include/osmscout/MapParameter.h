@@ -55,6 +55,7 @@ namespace osmscout {
     double                       sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
     bool                         dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
+    bool                         renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                         renderSeaLand;             //!< Rendering of sea/land tiles
 
     bool                         debugPerformance;          //!< Print out some performance information
@@ -87,6 +88,7 @@ namespace osmscout {
     void SetSameLabelSpace(double sameLabelSpace);
     void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
 
+    void SetRenderBackground(bool render);
     void SetRenderSeaLand(bool render);
 
     void SetDebugPerformance(bool debug);
@@ -164,6 +166,11 @@ namespace osmscout {
     inline bool GetDropNotVisiblePointLabels() const
     {
       return dropNotVisiblePointLabels;
+    }
+
+    inline double GetRenderBackground() const
+    {
+      return renderBackground;
     }
 
     inline double GetRenderSeaLand() const

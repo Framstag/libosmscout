@@ -344,9 +344,11 @@ namespace osmscout {
       landFill=this->landFill;
     }
 
-    DrawGround(projection,
-               parameter,
-               *landFill);
+    if (parameter.GetRenderBackground()) {
+      DrawGround(projection,
+                 parameter,
+                 *landFill);
+    }
 
     if (!parameter.GetRenderSeaLand()) {
       return;

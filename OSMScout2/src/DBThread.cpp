@@ -270,6 +270,7 @@ void DBThread::TriggerMapRendering()
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
+    drawParameter.SetRenderBackground(true);
     drawParameter.SetRenderSeaLand(true);
     drawParameter.SetBreaker(renderBreakerRef);
 

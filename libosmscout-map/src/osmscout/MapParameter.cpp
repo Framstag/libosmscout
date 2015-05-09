@@ -34,6 +34,7 @@ namespace osmscout {
     plateLabelSpace(5.0),
     sameLabelSpace(40.0),
     dropNotVisiblePointLabels(true),
+    renderBackground(true),
     renderSeaLand(false),
     debugPerformance(false),
     showAltLanguage(false)
@@ -116,6 +117,10 @@ namespace osmscout {
     this->dropNotVisiblePointLabels=dropNotVisiblePointLabels;
   }
 
+  void MapParameter::SetRenderBackground(bool render)
+  {
+    this->renderBackground=render;
+  }
 
   void MapParameter::SetRenderSeaLand(bool render)
   {
