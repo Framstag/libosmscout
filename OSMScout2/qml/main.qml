@@ -19,15 +19,6 @@ Window {
     width: 480
     height: 800
 
-    function openRoutingDialog() {
-        var component = Qt.createComponent("RoutingDialog.qml")
-        var dialog = component.createObject(mainWindow, {})
-
-        dialog.opened.connect(onDialogOpened)
-        dialog.closed.connect(onDialogClosed)
-        dialog.open()
-    }
-
     function openAboutDialog() {
         var component = Qt.createComponent("AboutDialog.qml")
         var dialog = component.createObject(mainWindow, {})
@@ -42,12 +33,12 @@ Window {
     }
 
     function onDialogOpened() {
-        menu.visible = false
+        info.visible = false
         navigation.visible = false
     }
 
     function onDialogClosed() {
-        menu.visible = true
+        info.visible = true
         navigation.visible = true
 
         map.focus = true
@@ -106,19 +97,11 @@ Window {
             Layout.fillHeight: true
             focus: true
 
-            function updateFreeRect() {
-                searchDialog.desktopFreeSpace =  Qt.rect(Theme.horizSpace,
-                                                         Theme.vertSpace+searchDialog.height+Theme.vertSpace,
-                                                         map.width-2*Theme.horizSpace,
-                                                         map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
-            }
-
-            onWidthChanged: {
-                updateFreeRect()
-            }
-
-            onHeightChanged: {
-                updateFreeRect()
+            function getFreeRect() {
+                return Qt.rect(Theme.horizSpace,
+                               Theme.vertSpace+searchDialog.height+Theme.vertSpace,
+                               map.width-2*Theme.horizSpace,
+                               map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
             }
 
             Keys.onPressed: {
@@ -161,11 +144,6 @@ Window {
                     searchDialog.focus = true
                     event.accepted = true
                 }
-                else if (event.modifiers===Qt.ControlModifier &&
-                         event.key === Qt.Key_R) {
-                    openRoutingDialog()
-                    event.accepted = true
-                }
             }
 
             // Use PinchArea for multipoint zoom in/out?
@@ -182,23 +160,13 @@ Window {
                 onShowLocation: {
                     map.showLocation(location)
                 }
-            }
 
-            // Top left column
-            ColumnLayout {
-                id: menu
-
-                x: Theme.horizSpace
-                y: searchDialog.y+ searchDialog.height+Theme.vertSpace
-
-                spacing: Theme.mapButtonSpace
-
-                MapButton {
-                    id: route
-                    label: "#"
-
-                    onClicked: {
-                        openRoutingDialog()
+                onStateChanged: {
+                    if (state==="NORMAL") {
+                        onDialogClosed()
+                    }
+                    else {
+                        onDialogOpened()
                     }
                 }
             }

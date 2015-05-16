@@ -87,6 +87,7 @@ class RoutingListModel : public QAbstractListModel
 public slots:
     void setStartAndTarget(Location* start,
                            Location* target);
+    void clear();
 
 private:
     struct RouteSelection

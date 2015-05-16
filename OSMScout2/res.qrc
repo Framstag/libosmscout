@@ -2,15 +2,17 @@
     <qresource prefix="/">
         <file>qml/main.qml</file>
         <file>qml/AboutDialog.qml</file>
-        <file>qml/RoutingDialog.qml</file>
         <file>qml/SearchDialog.qml</file>
         <file>qml/custom/DialogActionButton.qml</file>
         <file>qml/custom/LineEdit.qml</file>
-        <file>qml/custom/LocationEdit.qml</file>
         <file>qml/custom/LocationSearch.qml</file>
         <file>qml/custom/MapButton.qml</file>
         <file>qml/custom/MapDialog.qml</file>
         <file>qml/custom/ScrollIndicator.qml</file>
         <file>pics/DeleteText.svg</file>
+        <file>pics/Minus.svg</file>
+        <file>pics/Search.svg</file>
+        <file>pics/Route.svg</file>
+        <file>pics/Plus.svg</file>
     </qresource>
 </RCC>

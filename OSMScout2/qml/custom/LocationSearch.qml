@@ -7,7 +7,6 @@ LineEdit {
     id: searchEdit;
 
     property Item desktop;
-    property rect desktopFreeSpace;
     property Location location;
 
     // Internal constant
@@ -73,7 +72,7 @@ LineEdit {
     }
 
     function handleFocusGained() {
-        updatePopup()
+        //updatePopup()
     }
 
     function handleFocusLost() {
@@ -82,15 +81,10 @@ LineEdit {
         hidePopup()
     }
 
-    function delegateFocus() {
-        desktop.focus = true
-    }
-
     function selectLocation(selectedLocation) {
         searchEdit.location = selectedLocation
         searchEdit.text = selectedLocation.name
         showLocation(searchEdit.location)
-        delegateFocus();
 
         hidePopup()
 
@@ -112,7 +106,6 @@ LineEdit {
         }
         else if (searchEdit.location !== null) {
             showLocation(searchEdit.location)
-            delegateFocus();
         }
         else {
             updateSuggestions()
@@ -121,7 +114,6 @@ LineEdit {
 
     function handleCancel() {
         hidePopup();
-        delegateFocus();
     }
 
     function gotoPrevious() {
@@ -147,10 +139,11 @@ LineEdit {
         overlay.parent = desktop
         overlay.visible = true
 
-        var mappedPosition = desktop.mapFromItem(searchEdit, searchEdit.x, searchEdit.y)
+        var mappedPosition = desktop.mapFromItem(searchEdit, 0, 0)
+        var desktopFreeSpace = desktop.getFreeRect()
 
-        popup.x = mappedPosition.x;
-        popup.y = desktopFreeSpace.y;
+        popup.x = mappedPosition.x
+        popup.y = desktopFreeSpace.y
 
         var popupHeight = suggestionView.contentHeight+2
 
@@ -240,7 +233,6 @@ LineEdit {
             popup.visible = false
         }
     }
-
 
     Item {
         id: popup

@@ -42,14 +42,15 @@ DISTFILES += \
     qml/main.qml \
     qml/custom/LineEdit.qml \
     qml/custom/DialogActionButton.qml \
-    qml/custom/LocationEdit.qml \
     qml/custom/LocationSearch.qml \
     qml/custom/ScrollIndicator.qml \
     qml/custom/MapDialog.qml \
-    qml/RoutingDialog.qml \
     qml/AboutDialog.qml \
-    qml/SearchDialog.qml
-    pics/DeleteText.svg
+    qml/SearchDialog.qml \
+    pics/DeleteText.svg \
+    pics/Minus.svg \
+    pics/Plus.svg \
+    pics/Search.svg
 
 RESOURCES += \
     res.qrc

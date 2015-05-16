@@ -650,6 +650,15 @@ void RoutingListModel::setStartAndTarget(Location* start,
   endResetModel();
 }
 
+void RoutingListModel::clear()
+{
+  beginResetModel();
+
+  route.routeSteps.clear();
+
+  endResetModel();
+}
+
 int RoutingListModel::rowCount(const QModelIndex& ) const
 {
     return route.routeSteps.size();
