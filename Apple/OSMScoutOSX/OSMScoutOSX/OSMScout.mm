@@ -16,16 +16,16 @@
 
 namespace osmscout {
     
-    OSMScoutCpp::OSMScoutCpp(const char *cDir) : database(databaseParameter),map(cDir),styleConfig(NULL),isMapPainterConfigured(false),loadedMagnification(0),loadedLatMax(0),loadedLonMax(0),loadedLatMin(0),loadedLonMin(0),
-        mapService(&database),dpi(96.0){
+    OSMScoutCpp::OSMScoutCpp(const char *cDir) : database(new Database(databaseParameter)),map(cDir),styleConfig(NULL),isMapPainterConfigured(false),loadedMagnification(0),loadedLatMax(0),loadedLonMax(0),loadedLatMin(0),loadedLonMin(0),
+        mapService(new MapService(database)),dpi(96.0){
     }
     
     OSMScoutCpp::~OSMScoutCpp(){
-        database.Close();
+        database->Close();
     }
 
     bool OSMScoutCpp::initDraw(double initDpi) {
-        if (!database.IsOpen() && !database.Open(map.c_str())) {
+        if (!database->IsOpen() && !database->Open(map.c_str())) {
             std::cerr << "Cannot open database" << std::endl;
             
             return false;
@@ -34,7 +34,7 @@ namespace osmscout {
         if (!styleConfig){
             std::string style = map.c_str();
             style += "/standard.oss";
-            styleConfig=new StyleConfig(database.GetTypeConfig());
+            styleConfig=new StyleConfig(database->GetTypeConfig());
             if (!styleConfig->Load(style)) {
                 std::cerr << "Cannot open style" << std::endl;
                 return false;
@@ -77,7 +77,12 @@ namespace osmscout {
         styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(), areaTypes);
         
         double lon1,lat1,lon2,lat2;
-        projection.GetDimensions(lon1, lat1, lon2, lat2);
+        GeoBox boundingBox;
+        projection.GetDimensions(boundingBox);
+        lon1 = boundingBox.GetMinLon();
+        lat1 = boundingBox.GetMinLat();
+        lon2 = boundingBox.GetMaxLon();
+        lat2 = boundingBox.GetMaxLat();
         if(projection.GetMagnification() == loadedMagnification &&
            !(lon2>loadedLonMax ||
              lon1<loadedLonMin ||
@@ -97,39 +102,29 @@ namespace osmscout {
                loadedLatMax += 2*deltaLat;
                loadedMagnification = projection.GetMagnification();
                std::cout<<"DrawMap tile ("<<x<<","<<y<<") loading data for ("<<loadedLonMin<<","<<loadedLatMin<<"),(" <<loadedLonMax<<","<<loadedLatMax<<")"<<std::endl;
-               database.FlushCache();
+               database->FlushCache();
                
-               mapService.GetObjects(searchParameter,
-                                     loadedMagnification,
-                                     
-                                     nodeTypes,
-                                     loadedLonMin,
-                                     loadedLatMin,
-                                     loadedLonMax,
-                                     loadedLatMax,
-                                     data.nodes,
-                                     
-                                     wayTypes,
-                                     loadedLonMin,
-                                     loadedLatMin,
-                                     loadedLonMax,
-                                     loadedLatMax,
-                                     data.ways,
-                                     
-                                     areaTypes,
-                                     loadedLonMin,
-                                     loadedLatMin,
-                                     loadedLonMax,
-                                     loadedLatMax,
-                                     data.areas);
+               boundingBox.Set(GeoCoord(loadedLatMin, loadedLonMin), GeoCoord(loadedLatMax, loadedLonMax));
+               mapService->GetObjects(searchParameter,
+                                      loadedMagnification,
+                                      
+                                      nodeTypes,
+                                      boundingBox,
+                                      data.nodes,
+                                      
+                                      wayTypes,
+                                      boundingBox,
+                                      data.ways,
+                                      
+                                      areaTypes,
+                                      boundingBox,
+                                      data.areas);
                
                if (drawParameter.GetRenderSeaLand()) {
-                   mapService.GetGroundTiles(loadedLonMin,
-                                           loadedLatMin,
-                                           loadedLonMax,
-                                           loadedLatMax,
-                                           loadedMagnification,
-                                           data.groundTiles);
+                   mapService->GetGroundTiles(boundingBox,
+                                              loadedMagnification,
+                                              data.groundTiles);
+                   
                }
            }
         mapPainter->DrawMap(*styleConfig, projection, drawParameter, data, paintCG);

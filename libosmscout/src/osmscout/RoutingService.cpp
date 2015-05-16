@@ -1034,7 +1034,9 @@ namespace osmscout {
           return false;
         }
 
-        if (index<nodeIndexes.size()-1) {
+        /* In intermediary via points the end of the previous part is the start of the */
+        /* next part, we need to remove the duplicate point in the calculated route */
+        if (index<nodeIndexes.size()-2) {
           routePart->PopEntry();
         }
 
