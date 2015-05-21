@@ -150,6 +150,7 @@ namespace osmscout {
   }
 
   bool AbstractRoutingProfile::CanUse(const RouteNode& currentNode,
+                                      const std::vector<ObjectVariantData>& objectVariantData,
                                       size_t pathIndex) const
   {
     if (!(currentNode.paths[pathIndex].flags & vehicleRouteNodeBit)) {
@@ -157,20 +158,8 @@ namespace osmscout {
     }
 
 
-    size_t        index=currentNode.paths[pathIndex].objectIndex;
-    ObjectFileRef object=currentNode.objects[index].object;
-    TypeId        typeId=currentNode.objects[index].type;
-    TypeInfoRef   type;
-
-    if (object.GetType()==refWay) {
-      type=typeConfig->GetWayTypeInfo(typeId);
-    }
-    else if (object.GetType()==refArea) {
-      type=typeConfig->GetAreaTypeInfo(typeId);
-    }
-    else {
-      assert(false);
-    }
+    size_t      index=currentNode.paths[pathIndex].objectIndex;
+    TypeInfoRef type=objectVariantData[currentNode.objects[index].objectVariantIndex].type;
 
     size_t typeIndex=type->GetIndex();
 
@@ -320,4 +309,3 @@ namespace osmscout {
     // no code
   }
 }
-

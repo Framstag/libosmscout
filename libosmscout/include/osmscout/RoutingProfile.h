@@ -47,6 +47,7 @@ namespace osmscout {
     virtual ~RoutingProfile();
 
     virtual bool CanUse(const RouteNode& currentNode,
+                        const std::vector<ObjectVariantData>& objectVariantData,
                         size_t pathIndex) const = 0;
     virtual bool CanUse(const Area& area) const = 0;
     virtual bool CanUse(const Way& way) const = 0;
@@ -54,6 +55,7 @@ namespace osmscout {
     virtual bool CanUseBackward(const Way& way) const = 0;
 
     virtual double GetCosts(const RouteNode& currentNode,
+                            const std::vector<ObjectVariantData>& objectVariantData,
                             size_t pathIndex) const = 0;
     virtual double GetCosts(const Area& area,
                             double distance) const = 0;
@@ -109,6 +111,7 @@ namespace osmscout {
     void AddType(const TypeInfoRef& type, double speed);
 
     bool CanUse(const RouteNode& currentNode,
+                const std::vector<ObjectVariantData>& objectVariantData,
                 size_t pathIndex) const;
     bool CanUse(const Area& area) const;
     bool CanUse(const Way& way) const;
@@ -156,6 +159,7 @@ namespace osmscout {
     ShortestPathRoutingProfile(const TypeConfigRef& typeConfig);
 
     inline double GetCosts(const RouteNode& currentNode,
+                           const std::vector<ObjectVariantData>& /*objectVariantData*/,
                            size_t pathIndex) const
     {
       return currentNode.paths[pathIndex].distance;
@@ -192,28 +196,17 @@ namespace osmscout {
     FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
 
     inline double GetCosts(const RouteNode& currentNode,
+                           const std::vector<ObjectVariantData>& objectVariantData,
                            size_t pathIndex) const
     {
       double speed;
       size_t index=currentNode.paths[pathIndex].objectIndex;
 
-      if (currentNode.objects[index].maxSpeed>0) {
-        speed=currentNode.objects[index].maxSpeed;
+      if (objectVariantData[currentNode.objects[index].objectVariantIndex].maxSpeed>0) {
+        speed=objectVariantData[currentNode.objects[index].objectVariantIndex].maxSpeed;
       }
       else {
-        ObjectFileRef object=currentNode.objects[index].object;
-        TypeId        typeId=currentNode.objects[index].type;
-        TypeInfoRef   type;
-
-        if (object.GetType()==refWay) {
-          type=typeConfig->GetWayTypeInfo(typeId);
-        }
-        else if (object.GetType()==refArea) {
-          type=typeConfig->GetAreaTypeInfo(typeId);
-        }
-        else {
-          assert(false);
-        }
+        TypeInfoRef type=objectVariantData[currentNode.objects[index].objectVariantIndex].type;
 
         speed=speeds[type->GetIndex()];
       }

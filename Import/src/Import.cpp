@@ -202,10 +202,13 @@ bool CountDataSize(osmscout::Progress& progress,
   files.push_back("intersections.dat");
   files.push_back("intersections.idx");
   files.push_back("routefoot.dat");
+  files.push_back("routefoot2.dat");
   files.push_back("routefoot.idx");
   files.push_back("routebicycle.dat");
+  files.push_back("routebicycle2.dat");
   files.push_back("routebicycle.idx");
   files.push_back("routecar.dat");
+  files.push_back("routecar2.dat");
   files.push_back("routecar.idx");
 
   dataSize=0;

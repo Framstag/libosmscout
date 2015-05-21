@@ -94,6 +94,11 @@ namespace osmscout {
     uint8_t CopyFlagsForward(const Way& way) const;
     uint8_t CopyFlagsBackward(const Way& way) const;
 
+    uint16_t RegisterOrUseObjectVariantData(std::map<ObjectVariantData,uint16_t>& routeDataMap,
+                                            const TypeInfoRef& type,
+                                            uint8_t maxSpeed,
+                                            uint8_t grade);
+
     bool IsAnyRoutable(Progress& progress,
                        const std::list<ObjectFileRef>& objects,
                        const std::unordered_map<FileOffset,WayRef>& waysMap,
@@ -204,6 +209,7 @@ namespace osmscout {
      */
     void CalculateAreaPaths(RouteNode& routeNode,
                             const Area& area,
+                            uint16_t objectVariantIndex,
                             FileOffset routeNodeOffset,
                             const NodeIdObjectsMap& nodeObjectsMap,
                             const NodeIdOffsetMap& nodeIdOffsetMap,
@@ -214,6 +220,7 @@ namespace osmscout {
      */
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
+                                   uint16_t objectVariantIndex,
                                    FileOffset routeNodeOffset,
                                    const NodeIdObjectsMap& nodeObjectsMap,
                                    const NodeIdOffsetMap& nodeIdOffsetMap,
@@ -224,6 +231,7 @@ namespace osmscout {
      */
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
+                           uint16_t objectVariantIndex,
                            FileOffset routeNodeOffset,
                            const NodeIdObjectsMap& nodeObjectsMap,
                            const NodeIdOffsetMap& nodeIdOffsetMap,
@@ -247,13 +255,19 @@ namespace osmscout {
                               const std::vector<NodeIdObjectsMap::const_iterator>& block,
                               size_t blockCount);
 
+    bool WriteObjectVariantData(const ImportParameter& parameter,
+                                Progress& progress,
+                                const std::string& variantFilename,
+                                const std::map<ObjectVariantData,uint16_t>& routeDataMap);
+
     bool WriteRouteGraph(const ImportParameter& parameter,
                          Progress& progress,
                          const TypeConfig& typeConfig,
                          const NodeIdObjectsMap& nodeObjectsMap,
                          const ViaTurnRestrictionMap& restrictions,
                          Vehicle vehicle,
-                         const std::string& filename);
+                         const std::string& dataFilename,
+                         const std::string& variantFilename);
 
   public:
     RouteDataGenerator();

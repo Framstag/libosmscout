@@ -33,6 +33,21 @@
 
 namespace osmscout {
 
+  struct OSMSCOUT_API ObjectVariantData
+  {
+  public:
+    TypeInfoRef type;     //!< The type of the object
+    uint8_t     maxSpeed; //!< Maximum speed allowed on the way
+    uint8_t     grade;    //!< Quality of road/track 1 (good)...5 (bad)
+
+    bool operator==(const ObjectVariantData& other) const;
+    bool operator<(const ObjectVariantData& other) const;
+
+    bool Read(const TypeConfig& typeConfig,
+              FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+  };
+
   /**
    * \ingroup Routing
    * A route node is the representation of a node in the routing graph.
@@ -51,10 +66,8 @@ namespace osmscout {
      */
     struct OSMSCOUT_API ObjectData
     {
-      ObjectFileRef object;   //!< Reference to the object
-      TypeId        type;     //!< The type of the way
-      uint8_t       maxSpeed; //!< Maximum speed allowed on the way
-      uint8_t       grade;    //!< Quality of road/track 1 (good)...5 (bad)
+      ObjectFileRef object;             //!< Reference to the object
+      uint16_t      objectVariantIndex; //! Index into the lookup table, holding object specific routing data
     };
 
     /**
@@ -106,9 +119,7 @@ namespace osmscout {
     }
 
     uint32_t AddObject(const ObjectFileRef& object,
-                       TypeId type,
-                       uint8_t maxSpeed,
-                       uint8_t grade);
+                       uint16_t objectVariantIndex);
 
     bool Read(FileScanner& scanner);
     bool Read(const TypeConfig& typeConfig,

@@ -180,34 +180,46 @@ namespace osmscout {
 
     //! Relative filename of the routing graph data file for foot
     static const char* const FILENAME_FOOT_DAT;
+    //! Relative filename of the routing graph data file for foot
+    static const char* const FILENAME_FOOT_VARIANT_DAT;
     //! Relative filename of the routing graph index file for foot
     static const char* const FILENAME_FOOT_IDX;
 
     //! Relative filename of the routing graph data file for bicycle
     static const char* const FILENAME_BICYCLE_DAT;
+    //! Relative filename of the routing graph data file for bicycle
+    static const char* const FILENAME_BICYCLE_VARIANT_DAT;
     //! Relative filename of the routing graph index file for bicycle
     static const char* const FILENAME_BICYCLE_IDX;
 
     //! Relative filename of the routing graph data file for car
     static const char* const FILENAME_CAR_DAT;
+    //! Relative filename of the routing graph data file for car
+    static const char* const FILENAME_CAR_VARIANT_DAT;
     //! Relative filename of the routing graph index file for car
     static const char* const FILENAME_CAR_IDX;
 
   private:
-    DatabaseRef                          database;          //! Database object, holding all index and data files
-    Vehicle                              vehicle;           //! We are a router for this vehicle
-    AccessFeatureValueReader             accessReader;      //! Read access information from objects
-    bool                                 isOpen;            //! true, if opened
+    DatabaseRef                          database;              //!< Database object, holding all index and data files
+    Vehicle                              vehicle;               //!< We are a router for this vehicle
+    AccessFeatureValueReader             accessReader;          //!< Read access information from objects
+    bool                                 isOpen;                //!< true, if opened
     bool                                 debugPerformance;
 
-    std::string                          path;              //! Path to the directory containing all files
+    std::string                          path;                  //!< Path to the directory containing all files
 
-    IndexedDataFile<Id,RouteNode>        routeNodeDataFile; //! Cached access to the 'route.dat' file
-    IndexedDataFile<Id,Intersection>     junctionDataFile;  //! Cached access to the 'junctions.dat' file
+    IndexedDataFile<Id,RouteNode>        routeNodeDataFile;     //!< Cached access to the 'route.dat' file
+    IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
+
+    std::vector<ObjectVariantData>       objectVariantData;     //!< Cached data regarding object variants
 
   private:
     std::string GetDataFilename(Vehicle vehicle) const;
+    std::string GetData2Filename(Vehicle vehicle) const;
     std::string GetIndexFilename(Vehicle vehicle) const;
+
+    bool LoadObjectVariantData(Vehicle vehicle,
+                               std::vector<ObjectVariantData>& objectVariantData) const;
 
     void GetStartForwardRouteNode(const RoutingProfile& profile,
                                   const WayRef& way,

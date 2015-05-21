@@ -25,10 +25,48 @@
 
 namespace osmscout {
 
+  bool ObjectVariantData::operator==(const ObjectVariantData& other) const
+  {
+    return type==other.type && maxSpeed==other.maxSpeed && grade==other.grade;
+  }
+
+  bool ObjectVariantData::operator<(const ObjectVariantData& other) const
+  {
+    if (type->GetIndex()!=other.type->GetIndex()) {
+      return type->GetIndex()<other.type->GetIndex();
+    }
+
+    if (maxSpeed!=other.maxSpeed) {
+      return maxSpeed<other.maxSpeed;
+    }
+
+    return grade<other.grade;
+  }
+
+  bool ObjectVariantData::Read(const TypeConfig& typeConfig,
+                               FileScanner& scanner)
+  {
+    size_t typeIndex;
+
+    if (!scanner.ReadNumber(typeIndex)) {
+      return false;
+    }
+
+    type=typeConfig.GetTypeInfo(typeIndex);
+
+    return scanner.Read(maxSpeed) &&
+           scanner.Read(grade);
+  }
+
+  bool ObjectVariantData::Write(FileWriter& writer) const
+  {
+    return writer.WriteNumber(type->GetIndex()) &&
+           writer.Write(maxSpeed) &&
+           writer.Write(grade);
+  }
+
   uint32_t RouteNode::AddObject(const ObjectFileRef& object,
-                                TypeId type,
-                                uint8_t maxSpeed,
-                                uint8_t grade)
+                                uint16_t objectVariantIndex)
   {
     uint32_t index=0;
 
@@ -44,9 +82,7 @@ namespace osmscout {
     ObjectData data;
 
     data.object=object;
-    data.type=type;
-    data.maxSpeed=maxSpeed;
-    data.grade=grade;
+    data.objectVariantIndex=objectVariantIndex;
 
     objects.push_back(data);
 
@@ -103,9 +139,7 @@ namespace osmscout {
 
       objects[i].object.Set(fileOffset,type);
 
-      scanner.ReadNumber(objects[i].type);
-      scanner.Read(objects[i].maxSpeed);
-      scanner.Read(objects[i].grade);
+      scanner.Read(objects[i].objectVariantIndex);
 
       previousFileOffset=fileOffset;
     }
@@ -168,9 +202,7 @@ namespace osmscout {
       }
 
       writer.WriteNumber(offset);
-      writer.WriteNumber(object.type);
-      writer.Write(object.maxSpeed);
-      writer.Write(object.grade);
+      writer.Write(object.objectVariantIndex);
 
       lastFileOffset=object.object.GetFileOffset();
     }

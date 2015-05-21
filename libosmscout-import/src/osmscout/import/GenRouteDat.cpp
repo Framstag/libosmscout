@@ -160,6 +160,31 @@ namespace osmscout {
     return flags;
   }
 
+  uint16_t RouteDataGenerator::RegisterOrUseObjectVariantData(std::map<ObjectVariantData,uint16_t>& routeDataMap,
+                                                              const TypeInfoRef& type,
+                                                              uint8_t maxSpeed,
+                                                              uint8_t grade)
+  {
+    ObjectVariantData routeData;
+    uint16_t          objectVariantIndex;
+
+    routeData.type=type;
+    routeData.maxSpeed=maxSpeed;
+    routeData.grade=grade;
+
+    const auto entry=routeDataMap.find(routeData);
+
+    if (entry==routeDataMap.end()) {
+      objectVariantIndex=routeDataMap.size();
+      routeDataMap.insert(std::make_pair(routeData,objectVariantIndex));
+    }
+    else {
+      objectVariantIndex=entry->second;
+    }
+
+    return objectVariantIndex;
+  }
+
   bool RouteDataGenerator::IsAnyRoutable(Progress& progress,
                                          const std::list<ObjectFileRef>& objects,
                                          const std::unordered_map<FileOffset,WayRef>& waysMap,
@@ -1065,6 +1090,7 @@ namespace osmscout {
 
   void RouteDataGenerator::CalculateAreaPaths(RouteNode& routeNode,
                                               const Area& area,
+                                              uint16_t objectVariantIndex,
                                               FileOffset routeNodeOffset,
                                               const NodeIdObjectsMap& nodeObjectsMap,
                                               const NodeIdOffsetMap& nodeIdOffsetMap,
@@ -1132,9 +1158,7 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea),
-                                           area.GetType()->GetAreaId(),
-                                           0,
-                                           1);
+                                           objectVariantIndex);
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
       path.flags=CopyFlags(ring);
       path.distance=distance;
@@ -1193,9 +1217,7 @@ namespace osmscout {
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea),
-                                           ring.GetType()->GetAreaId(),
-                                           0,
-                                           1);
+                                           objectVariantIndex);
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
       path.flags=CopyFlags(ring);
       path.distance=distance;
@@ -1206,6 +1228,7 @@ namespace osmscout {
 
   void RouteDataGenerator::CalculateCircularWayPaths(RouteNode& routeNode,
                                                      const Way& way,
+                                                     uint16_t objectVariantIndex,
                                                      FileOffset routeNodeOffset,
                                                      const NodeIdObjectsMap& nodeObjectsMap,
                                                      const NodeIdOffsetMap& nodeIdOffsetMap,
@@ -1272,9 +1295,7 @@ namespace osmscout {
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
-                                             way.GetType()->GetWayId(),
-                                             GetMaxSpeed(way),
-                                             GetGrade(way));
+                                             objectVariantIndex);
         //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
         path.flags=CopyFlagsForward(way);
         path.distance=distance;
@@ -1333,9 +1354,7 @@ namespace osmscout {
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
-                                             way.GetType()->GetWayId(),
-                                             GetMaxSpeed(way),
-                                             GetGrade(way));
+                                             objectVariantIndex);
         //path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
         path.flags=CopyFlagsBackward(way);
         path.distance=distance;
@@ -1347,6 +1366,7 @@ namespace osmscout {
 
   void RouteDataGenerator::CalculateWayPaths(RouteNode& routeNode,
                                              const Way& way,
+                                             uint16_t objectVariantIndex,
                                              FileOffset routeNodeOffset,
                                              const NodeIdObjectsMap& nodeObjectsMap,
                                              const NodeIdOffsetMap& nodeIdOffsetMap,
@@ -1388,9 +1408,7 @@ namespace osmscout {
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
-                                                 way.GetType()->GetWayId(),
-                                                 GetMaxSpeed(way),
-                                                 GetGrade(way));
+                                                 objectVariantIndex);
             //path.bearing=CalculateEncodedBearing(way,i,j,false);
             path.flags=CopyFlagsBackward(way);
 
@@ -1441,9 +1459,7 @@ namespace osmscout {
             }
 
             path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
-                                                 way.GetType()->GetWayId(),
-                                                 GetMaxSpeed(way),
-                                                 GetGrade(way));
+                                                 objectVariantIndex);
             //path.bearing=CalculateEncodedBearing(way,i,j,true);
             path.flags=CopyFlagsForward(way);
 
@@ -1601,13 +1617,54 @@ namespace osmscout {
     return !routeNodeWriter.HasError();
   }
 
+  bool RouteDataGenerator::WriteObjectVariantData(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  const std::string& variantFilename,
+                                                  const std::map<ObjectVariantData,uint16_t>& routeDataMap)
+  {
+    FileWriter writer;
+
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     variantFilename))) {
+      progress.Error("Cannot create '"+variantFilename+"'");
+      return false;
+    }
+
+    std::vector<ObjectVariantData> objectVariantData;
+
+    objectVariantData.resize(routeDataMap.size());
+
+    for (const auto& entry : routeDataMap) {
+      objectVariantData[entry.second]=entry.first;
+    }
+
+    writer.Write((uint32_t)objectVariantData.size());
+
+    for (const auto& entry : objectVariantData) {
+      if (!entry.Write(writer)) {
+        progress.Error(std::string("Error while writing object variant data to file '")+
+                       writer.GetFilename()+"'");
+        return false;
+      }
+    }
+
+    progress.Info(NumberToString(objectVariantData.size()) + " object variant(s)");
+
+    if (!writer.Close()) {
+      return false;
+    }
+
+    return true;
+  }
+
   bool RouteDataGenerator::WriteRouteGraph(const ImportParameter& parameter,
                                            Progress& progress,
                                            const TypeConfig& typeConfig,
                                            const NodeIdObjectsMap& nodeObjectsMap,
                                            const ViaTurnRestrictionMap& restrictions,
                                            Vehicle vehicle,
-                                           const std::string& filename)
+                                           const std::string& dataFilename,
+                                           const std::string& variantFilename)
   {
     FileScanner                wayScanner;
     FileScanner                areaScanner;
@@ -1623,13 +1680,15 @@ namespace osmscout {
     NodeIdOffsetMap            routeNodeIdOffsetMap;
     PendingRouteNodeOffsetsMap pendingOffsetsMap;
 
+    std::map<ObjectVariantData,uint16_t> routeDataMap;
+
     //
     // Writing route nodes
     //
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     filename))) {
-      progress.Error("Cannot create '"+filename+"'");
+                                     dataFilename))) {
+      progress.Error("Cannot create '"+dataFilename+"'");
       return false;
     }
 
@@ -1781,10 +1840,16 @@ namespace osmscout {
               continue;
             }
 
+            uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
+                                                                       way->GetType(),
+                                                                       GetMaxSpeed(way),
+                                                                       GetGrade(way));
+
             if (way->IsCircular()) {
               // Circular way routing (similar to current area routing, but respecting isOneway())
               CalculateCircularWayPaths(routeNode,
                                         *way,
+                                        objectVariantIndex,
                                         routeNodeOffset,
                                         nodeObjectsMap,
                                         routeNodeIdOffsetMap,
@@ -1794,6 +1859,7 @@ namespace osmscout {
               // Normal way routing
               CalculateWayPaths(routeNode,
                                 *way,
+                                objectVariantIndex,
                                 routeNodeOffset,
                                 nodeObjectsMap,
                                 routeNodeIdOffsetMap,
@@ -1814,13 +1880,17 @@ namespace osmscout {
               continue;
             }
 
+            uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
+                                                                       area->GetType(),
+                                                                       0,
+                                                                       1);
+
             routeNode.AddObject(ref,
-                                area->GetType()->GetAreaId(),
-                                0,
-                                1);
+                                objectVariantIndex);
 
             CalculateAreaPaths(routeNode,
                                *area,
+                               objectVariantIndex,
                                routeNodeOffset,
                                nodeObjectsMap,
                                routeNodeIdOffsetMap,
@@ -1882,9 +1952,18 @@ namespace osmscout {
 
     progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) written");
     progress.Info(NumberToString(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
-    progress.Info(NumberToString(objectCount)+ " object(s), " + NumberToString(pathCount) + " path(s), " + NumberToString(excludeCount) + " exclude(s)");
+    progress.Info(NumberToString(objectCount)+ " object(s)");
+    progress.Info(NumberToString(pathCount) + " path(s)");
+    progress.Info(NumberToString(excludeCount) + " exclude(s)");
 
     if (!writer.Close()) {
+      return false;
+    }
+
+    if (!WriteObjectVariantData(parameter,
+                                progress,
+                                variantFilename,
+                                routeDataMap)) {
       return false;
     }
 
@@ -1983,7 +2062,8 @@ namespace osmscout {
                     nodeObjectsMap,
                     restrictions,
                     vehicleFoot,
-                    RoutingService::FILENAME_FOOT_DAT);
+                    RoutingService::FILENAME_FOOT_DAT,
+                    RoutingService::FILENAME_FOOT_VARIANT_DAT);
 
     progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_BICYCLE_DAT+"'");
 
@@ -1994,7 +2074,8 @@ namespace osmscout {
                     nodeObjectsMap,
                     restrictions,
                     vehicleBicycle,
-                    RoutingService::FILENAME_BICYCLE_DAT);
+                    RoutingService::FILENAME_BICYCLE_DAT,
+                    RoutingService::FILENAME_BICYCLE_VARIANT_DAT);
 
     progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_CAR_DAT+"'");
 
@@ -2005,7 +2086,8 @@ namespace osmscout {
                     nodeObjectsMap,
                     restrictions,
                     vehicleCar,
-                    RoutingService::FILENAME_CAR_DAT);
+                    RoutingService::FILENAME_CAR_DAT,
+                    RoutingService::FILENAME_CAR_VARIANT_DAT);
 
     // Cleaning up...
 

@@ -49,16 +49,19 @@ namespace osmscout {
     return debugPerformance;
   }
 
-  const char* const RoutingService::FILENAME_INTERSECTIONS_DAT = "intersections.dat";
-  const char* const RoutingService::FILENAME_INTERSECTIONS_IDX = "intersections.idx";
+  const char* const RoutingService::FILENAME_INTERSECTIONS_DAT   = "intersections.dat";
+  const char* const RoutingService::FILENAME_INTERSECTIONS_IDX   = "intersections.idx";
 
-  const char* const RoutingService::FILENAME_FOOT_DAT          = "routefoot.dat";
-  const char* const RoutingService::FILENAME_FOOT_IDX          = "routefoot.idx";
+  const char* const RoutingService::FILENAME_FOOT_DAT            = "routefoot.dat";
+  const char* const RoutingService::FILENAME_FOOT_VARIANT_DAT    = "routefoot2.dat";
+  const char* const RoutingService::FILENAME_FOOT_IDX            = "routefoot.idx";
 
-  const char* const RoutingService::FILENAME_BICYCLE_DAT       = "routebicycle.dat";
-  const char* const RoutingService::FILENAME_BICYCLE_IDX       = "routebicycle.idx";
+  const char* const RoutingService::FILENAME_BICYCLE_DAT         = "routebicycle.dat";
+  const char* const RoutingService::FILENAME_BICYCLE_VARIANT_DAT = "routebicycle2.dat";
+  const char* const RoutingService::FILENAME_BICYCLE_IDX         = "routebicycle.idx";
 
   const char* const RoutingService::FILENAME_CAR_DAT           = "routecar.dat";
+  const char* const RoutingService::FILENAME_CAR_VARIANT_DAT   = "routecar2.dat";
   const char* const RoutingService::FILENAME_CAR_IDX           = "routecar.idx";
 
   /**
@@ -115,6 +118,22 @@ namespace osmscout {
     return ""; // make the compiler happy
   }
 
+  std::string RoutingService::GetData2Filename(Vehicle vehicle) const
+  {
+    switch (vehicle) {
+    case vehicleFoot:
+      return FILENAME_FOOT_VARIANT_DAT;
+    case vehicleBicycle:
+      return FILENAME_BICYCLE_VARIANT_DAT;
+    case vehicleCar:
+      return FILENAME_CAR_VARIANT_DAT;
+    default:
+      assert(false);
+    }
+
+    return ""; // make the compiler happy
+  }
+
   std::string RoutingService::GetIndexFilename(Vehicle vehicle) const
   {
     switch (vehicle) {
@@ -142,6 +161,41 @@ namespace osmscout {
     return vehicle;
   }
 
+  bool RoutingService::LoadObjectVariantData(Vehicle vehicle,
+                                             std::vector<ObjectVariantData>& objectVariantData) const
+  {
+    FileScanner scanner;
+
+    if (!scanner.Open(AppendFileToDir(path,
+                                      GetData2Filename(vehicle)),
+                      FileScanner::FastRandom,true)) {
+      log.Error() << "Cannot open '" << scanner.GetFilename() << "'!";
+      return false;
+    }
+
+    uint32_t objectVariantDataCount;
+
+    if (!scanner.Read(objectVariantDataCount)) {
+      return false;
+    }
+
+    objectVariantData.resize(objectVariantDataCount);
+
+    for (size_t i=0; i<objectVariantDataCount; i++) {
+      if (!objectVariantData[i].Read(*database->GetTypeConfig(),
+                                     scanner)) {
+        log.Error() << "Cannot read data entry " << i+1 << " from file '" << scanner.GetFilename() << "'!";
+      }
+    }
+
+    if (!scanner.Close()) {
+      log.Error() << "Cannot close '" << scanner.GetFilename() << "'!";
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Opens the routing service. This loads the routing graph for the given vehicle
    *
@@ -160,13 +214,18 @@ namespace osmscout {
                                 path,
                                 FileScanner::FastRandom,true,
                                 FileScanner::FastRandom,true)) {
-      log.Error() << "Cannot open 'route.dat'!";
+      log.Error() << "Cannot open '" <<  path << "'!";
       return false;
     }
 
     timer.Stop();
 
     log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
+
+    if (!LoadObjectVariantData(vehicle,
+                               objectVariantData)) {
+      return false;
+    }
 
     isOpen=true;
 
@@ -1186,7 +1245,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!profile.CanUse(*currentRouteNode,i)) {
+        if (!profile.CanUse(*currentRouteNode,objectVariantData,i)) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path->offset;
@@ -1234,7 +1293,7 @@ namespace osmscout {
         }
 
         double currentCost=current->currentCost+
-                           profile.GetCosts(*currentRouteNode,i);
+                           profile.GetCosts(*currentRouteNode,objectVariantData,i);
 
         OpenMap::iterator openEntry=openMap.find(path.offset);
 
