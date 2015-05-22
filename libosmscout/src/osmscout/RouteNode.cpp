@@ -46,7 +46,7 @@ namespace osmscout {
   bool ObjectVariantData::Read(const TypeConfig& typeConfig,
                                FileScanner& scanner)
   {
-    size_t typeIndex;
+    uint32_t typeIndex;
 
     if (!scanner.ReadNumber(typeIndex)) {
       return false;
@@ -60,7 +60,7 @@ namespace osmscout {
 
   bool ObjectVariantData::Write(FileWriter& writer) const
   {
-    return writer.WriteNumber(type->GetIndex()) &&
+    return writer.WriteNumber((uint32_t)type->GetIndex()) &&
            writer.Write(maxSpeed) &&
            writer.Write(grade);
   }

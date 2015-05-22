@@ -33,6 +33,12 @@
 
 namespace osmscout {
 
+  /**
+   * \ingroup Routing
+   *
+   * For every unique combination of object attributes that are routing
+   * relevant we store an ObjectvariantData entry.
+   */
   struct OSMSCOUT_API ObjectVariantData
   {
   public:
@@ -67,7 +73,7 @@ namespace osmscout {
     struct OSMSCOUT_API ObjectData
     {
       ObjectFileRef object;             //!< Reference to the object
-      uint16_t      objectVariantIndex; //! Index into the lookup table, holding object specific routing data
+      uint16_t      objectVariantIndex; //!< Index into the lookup table, holding object specific routing data
     };
 
     /**
