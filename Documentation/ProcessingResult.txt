@@ -163,8 +163,15 @@ waysopt.dat (export)
 Routing:
 ========
 
+(if you create vehicle-specific routing data - which is the
+default - actual file names follow the pattern routeXXX.*,
+where XXX is the vehicle name)
+
 route.dat (export)
  * Contains the route graph.
+
+route2.dat (export)
+ * Contains additional data for the route graph.
 
 route.idx (export)
  * Contains the index over the route graph to load individual
