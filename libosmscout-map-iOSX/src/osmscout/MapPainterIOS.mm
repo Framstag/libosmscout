@@ -535,7 +535,8 @@ namespace osmscout {
         Vertex2D *coords = new Vertex2D[charsCount];
         double *slopes = new double[charsCount];
         double nww,nhh,xOff,yOff;
-        for(int i=0;i<charsCount;i++) {
+        int i = 0;
+        while(i<charsCount){
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
@@ -548,12 +549,17 @@ namespace osmscout {
             x2 = charOrigin.GetX();
             y2 = charOrigin.GetY();
             slope = atan2(y2-y1, x2-x1);
+            if(i>0 && fabs(slope - slopes[i-1])>=M_PI_4){
+                i=0;
+                continue;
+            }
             coords[i].Set(x1, y1);
             slopes[i] = slope;
             
             if(!followPath(followPathHnd, 2, charOrigin)){
                 goto exit;
             }
+            i++;
         }
         CGAffineTransform ct;
         for(int i=0;i<charsCount;i++) {
