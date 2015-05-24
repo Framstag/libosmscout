@@ -283,9 +283,8 @@ namespace osmscout {
                    const LabelData& label){
         
         if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
-            
-            if(label.y <= MAP_PAINTER_Y_LABEL_MARGIN ||
-               label.y >= projection.GetHeight() - MAP_PAINTER_Y_LABEL_MARGIN){
+            if(label.y <= MapPainterIOS::yLabelMargin ||
+               label.y >= projection.GetHeight() - MapPainterIOS::yLabelMargin){
                 return;
             }
             
@@ -333,10 +332,10 @@ namespace osmscout {
             const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
             
             
-            if(label.bx1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
-               label.by1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
-               label.bx2 >= projection.GetWidth()-MAP_PAINTER_PLATE_LABEL_MARGIN ||
-               label.by2 >= projection.GetHeight()-MAP_PAINTER_PLATE_LABEL_MARGIN
+            if(label.bx1 <= MapPainterIOS::plateLabelMargin ||
+               label.by1 <= MapPainterIOS::plateLabelMargin ||
+               label.bx2 >= projection.GetWidth() - MapPainterIOS::plateLabelMargin ||
+               label.by2 >= projection.GetHeight() - MapPainterIOS::plateLabelMargin
                ){
                 return;
             }
@@ -497,6 +496,12 @@ namespace osmscout {
         CGContextRestoreGState(cg);
     }
 
+    static inline double distSq(const Vertex2D &v1, const Vertex2D &v2){
+        double dx = v1.GetX() - v2.GetX();
+        double dy = v1.GetY() - v2.GetY();
+        return dx*dx+dy*dy;
+    }
+    
     /*
      * DrawContourLabel(const Projection& projection,
      *                  const MapParameter& parameter,
@@ -505,18 +510,27 @@ namespace osmscout {
      *                  size_t transStart, size_t transEnd)
      */
     void MapPainterIOS::DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd){
+                                         const MapParameter& parameter,
+                                         const PathTextStyle& style,
+                                         const std::string& text,
+                                         size_t transStart, size_t transEnd){
         Font *font = GetFont(projection, parameter, style.GetSize());
         Vertex2D charOrigin;
         FollowPathHandle followPathHnd;
         followPathInit(followPathHnd, charOrigin, transStart, transEnd, false, false);
-        if(!followPath(followPathHnd, MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN, charOrigin)){
+        if(!followPath(followPathHnd, contourLabelMargin, charOrigin)){
             return;
         }
-
+        
+        // check if the same label has been drawn near this one
+        Vertex2D textOrigin(charOrigin);
+        auto its = wayLabels.equal_range(text);
+        for (auto it = its.first; it != its.second; ++it) {
+            if(distSq(textOrigin, *it->second) < MapPainterIOS::sameLabelMinDistanceSq){
+                return;
+            }
+        }
+        
         CGContextSaveGState(cg);
 #if TARGET_OS_IPHONE
         CGContextSetTextDrawingMode(cg, kCGTextFill);
@@ -528,9 +542,9 @@ namespace osmscout {
         NSColor *color = [NSColor colorWithSRGBRed:style.GetTextColor().GetR() green:style.GetTextColor().GetG() blue:style.GetTextColor().GetB() alpha:style.GetTextColor().GetA()];
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #endif
-
+        
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-                double x1,y1,x2,y2,slope;
+        double x1,y1,x2,y2,slope;
         NSUInteger charsCount = [nsText length];
         Vertex2D *coords = new Vertex2D[charsCount];
         double *slopes = new double[charsCount];
@@ -575,6 +589,8 @@ namespace osmscout {
 #endif
             CGContextRestoreGState(cg);
         }
+        // insert this label with its start point in the map
+        wayLabels.insert(WayLabelsMap::value_type(text,new Vertex2D(textOrigin)));
     exit:
         delete[] coords;
         delete[] slopes;
