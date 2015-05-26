@@ -23,6 +23,9 @@
 #include "TargetConditionals.h"
 #endif
 
+#include <string>
+#include <unordered_map>
+
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #define Font UIFont
@@ -35,10 +38,6 @@
 #endif
 
 #include <osmscout/MapPainter.h>
-
-#define MAP_PAINTER_PLATE_LABEL_MARGIN 10
-#define MAP_PAINTER_Y_LABEL_MARGIN 10
-#define MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN 50
 
 namespace osmscout {
     typedef struct {
@@ -60,6 +59,13 @@ namespace osmscout {
         std::vector<Image>          patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
         
+        static constexpr double plateLabelMargin = 10.0;
+        static constexpr double yLabelMargin = 10.0;
+        static constexpr double contourLabelMargin = 50.0;
+        static constexpr double sameLabelMinDistanceSq = 1600.0;
+        typedef std::unordered_multimap<std::string,Vertex2D *> WayLabelsMap;
+        WayLabelsMap wayLabels;
+
     public:
         MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();
