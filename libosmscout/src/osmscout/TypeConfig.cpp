@@ -1324,6 +1324,8 @@ namespace osmscout {
    */
   bool TypeConfig::LoadFromDataFile(const std::string& directory)
   {
+    StopClock timer;
+
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(directory,
@@ -1543,7 +1545,13 @@ namespace osmscout {
       typeInfo=RegisterType(typeInfo);
     }
 
-    return !scanner.HasError() && scanner.Close();
+    bool result=!scanner.HasError() && scanner.Close();
+
+    timer.Stop();
+
+    log.Debug() << "Opening TypeConfig: " << timer.ResultString();
+
+    return result;
   }
 
   /**
