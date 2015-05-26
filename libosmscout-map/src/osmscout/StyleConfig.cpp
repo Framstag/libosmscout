@@ -29,6 +29,7 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Logger.h>
 
 #include <osmscout/oss/Parser.h>
 #include <osmscout/oss/Scanner.h>
@@ -2549,6 +2550,7 @@ namespace osmscout {
 
   bool StyleConfig::Load(const std::string& styleFile)
   {
+    StopClock  timer;
     FileOffset fileSize;
     FILE*      file;
     bool       success=false;
@@ -2595,6 +2597,10 @@ namespace osmscout {
     delete scanner;
 
     Postprocess();
+
+    timer.Stop();
+
+    log.Debug() << "Opening StyleConfig: " << timer.ResultString();
 
     return success;
   }
