@@ -774,8 +774,8 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
       double           r=style->GetTextColor().GetR();
       double           g=style->GetTextColor().GetG();
       double           b=style->GetTextColor().GetB();
@@ -844,8 +844,8 @@ namespace osmscout {
       }
 #endif
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
-      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
+      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
 
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,1);
@@ -1069,7 +1069,7 @@ namespace osmscout {
                                           double maxX,
                                           double maxY)
   {
-    DrawPrimitive* primitive=p.Get();
+    DrawPrimitive* primitive=p.get();
     double         centerX=maxX-minX;
     double         centerY=maxY-minY;
 

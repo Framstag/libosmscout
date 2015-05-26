@@ -52,7 +52,7 @@ namespace osmscout {
     FeatureRef feature=typeConfig.GetFeature(featureName);
     size_t     labelIndex;
 
-    assert(feature.Valid());
+    assert(feature);
     assert(feature->HasLabel());
     assert(feature->GetLabelIndex(labelName,
                                   labelIndex));
@@ -143,8 +143,8 @@ namespace osmscout {
 
   LabelProviderRef INameLabelProviderFactory::Create(const TypeConfig& typeConfig) const
   {
-    if (!instance.Valid()) {
-      instance= new INameLabelProvider(typeConfig);
+    if (!instance) {
+      instance=std::make_shared<INameLabelProvider>(typeConfig);
     }
 
     return instance;
@@ -1030,14 +1030,14 @@ namespace osmscout {
   }
 
   PathShieldStyle::PathShieldStyle()
-   : shieldStyle(new ShieldStyle()),
+   : shieldStyle(std::make_shared<ShieldStyle>()),
      shieldSpace(3.0)
   {
     // no code
   }
 
   PathShieldStyle::PathShieldStyle(const PathShieldStyle& style)
-   : shieldStyle(new ShieldStyle(*style.GetShieldStyle().Get())),
+   : shieldStyle(std::make_shared<ShieldStyle>(*style.GetShieldStyle())),
      shieldSpace(style.shieldSpace)
   {
     // no code
@@ -1457,7 +1457,7 @@ namespace osmscout {
     return *this;
   }
 
-  StyleFilter& StyleFilter::SetSizeCondition(SizeCondition* condition)
+  StyleFilter& StyleFilter::SetSizeCondition(const SizeConditionRef& condition)
   {
     this->sizeCondition=condition;
 
@@ -1519,7 +1519,7 @@ namespace osmscout {
       return false;
     }
 
-    if (sizeCondition.Valid()) {
+    if (sizeCondition) {
       if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
         return false;
       }
@@ -1548,7 +1548,7 @@ namespace osmscout {
       return false;
     }
 
-    if (sizeCondition.Valid()) {
+    if (sizeCondition) {
       if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
         return false;
       }
@@ -1567,7 +1567,9 @@ namespace osmscout {
     tileUnknownBuffer.SetType(typeConfig->typeInfoTileUnknown);
     tileCoastlineBuffer.SetType(typeConfig->typeInfoTileCoastline);
 
-    RegisterLabelProviderFactory("IName",new INameLabelProviderFactory());
+    LabelProviderFactoryRef labelProviderFactory=std::make_shared<INameLabelProviderFactory>();
+
+    RegisterLabelProviderFactory("IName",labelProviderFactory);
   }
 
   StyleConfig::~StyleConfig()
@@ -1611,7 +1613,7 @@ namespace osmscout {
   bool StyleConfig::RegisterLabelProviderFactory(const std::string& name,
                                                  const LabelProviderFactoryRef& factory)
   {
-    if (factory.Invalid()) {
+    if (!factory) {
       return false;
     }
 
@@ -1811,8 +1813,8 @@ namespace osmscout {
             if (prevSelector->criteria==curSelector->criteria) {
               prevSelector->attributes.insert(curSelector->attributes.begin(),
                                               curSelector->attributes.end());
-              prevSelector->style=new S(*prevSelector->style);
-              prevSelector->style->CopyAttributes(curSelector->style,
+              prevSelector->style=std::make_shared<S>(*prevSelector->style);
+              prevSelector->style->CopyAttributes(*curSelector->style,
                                                   curSelector->attributes);
 
               curSelector=selector[level].erase(curSelector);
@@ -2254,7 +2256,7 @@ namespace osmscout {
                        const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                        const FeatureValueBuffer& buffer,
                        const Projection& projection,
-                       Ref<S>& style)
+                       std::shared_ptr<S>& style)
   {
     bool   fastpath=false;
     bool   composed=false;
@@ -2276,7 +2278,7 @@ namespace osmscout {
         continue;
       }
 
-      if (style.Invalid()) {
+      if (!style) {
         style=selector.style;
         fastpath=true;
 
@@ -2284,7 +2286,7 @@ namespace osmscout {
       }
 
       if (fastpath) {
-        style=new S(style);
+        style=std::make_shared<S>(*style);
         fastpath=false;
       }
 
@@ -2317,7 +2319,7 @@ namespace osmscout {
                       projection,
                       style);
 
-      if (style.Valid()) {
+      if (style) {
         textStyles.push_back(style);
       }
     }
@@ -2352,7 +2354,7 @@ namespace osmscout {
                       projection,
                       style);
 
-      if (style.Valid()) {
+      if (style) {
         lineStyles.push_back(style);
       }
     }
@@ -2422,7 +2424,7 @@ namespace osmscout {
                       projection,
                       style);
 
-      if (style.Valid()) {
+      if (style) {
         textStyles.push_back(style);
       }
     }

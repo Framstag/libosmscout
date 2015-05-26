@@ -27,13 +27,13 @@
 #include <thread>
 #endif
 
-#include <osmscout/private/CoreImportExport.h>
+#include <memory>
 
-#include <osmscout/util/Reference.h>
+#include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API Breaker : public Referencable
+  class OSMSCOUT_API Breaker
   {
   public:
     Breaker();
@@ -43,7 +43,7 @@ namespace osmscout {
     virtual bool IsAborted() const = 0;
   };
 
-  typedef Ref<Breaker> BreakerRef;
+  typedef std::shared_ptr<Breaker> BreakerRef;
 
   class OSMSCOUT_API DummyBreaker : public Breaker
   {

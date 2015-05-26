@@ -56,7 +56,6 @@ void QBreaker::Reset()
 
 DBThread::DBThread(const SettingsRef& settings)
  : settings(settings),
-   styleConfig(NULL),
    painter(NULL),
    database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
@@ -129,13 +128,12 @@ void DBThread::Initialize()
         delete painter;
         painter = NULL;
       }
-      styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
+      styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
       if (!styleConfig->Load(m_stylesheetFilename.toLocal8Bit().data())) {
-        delete styleConfig;
         styleConfig=NULL;
       } else {
-          painter = new osmscout::MapPainterQt(styleConfig);
+          painter=new osmscout::MapPainterQt(styleConfig);
       }
     }
     else {
@@ -168,15 +166,14 @@ void DBThread::ReloadStyle(const QString &suffix){
     if(m_stylesheetFilename.isNull()){
         return;
     }
-    if(styleConfig.Invalid()){
-        styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
+    if (!styleConfig) {
+        styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     }
     if (!styleConfig->Load((m_stylesheetFilename+suffix).toLocal8Bit().data())) {
-        delete styleConfig;
         styleConfig=NULL;
 
     } else {
-        painter = new osmscout::MapPainterQt(styleConfig);
+        painter=new osmscout::MapPainterQt(styleConfig);
     }
 }
 
@@ -231,7 +228,7 @@ void DBThread::TriggerMapRendering()
   currentLat=request.lat;
   currentMagnification=request.magnification;
 
-  if (database->IsOpen() && styleConfig.Valid()) {
+  if (database->IsOpen() && styleConfig) {
     osmscout::MercatorProjection  projection;
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
@@ -266,7 +263,7 @@ void DBThread::TriggerMapRendering()
     osmscout::StopClock dataRetrievalTimer;
 
     mapService->GetObjects(searchParameter,
-                           styleConfig,
+                           *styleConfig,
                            projection,
                            data);
 
@@ -299,7 +296,7 @@ void DBThread::TriggerMapRendering()
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
   }
   else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig.Valid() << std::endl;
+    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig << std::endl;
 
     QPainter p;
 

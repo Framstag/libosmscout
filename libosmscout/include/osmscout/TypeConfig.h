@@ -91,7 +91,7 @@ namespace osmscout {
    * A feature could just be an alias for one tag (like "name") but it could also combine
    * a number of attributes (e.g. access and all its variations).
    */
-  class OSMSCOUT_API Feature : public Referencable
+  class OSMSCOUT_API Feature
   {
   private:
     std::unordered_map<std::string,size_t> labels;
@@ -140,7 +140,7 @@ namespace osmscout {
                        FeatureValueBuffer& buffer) const = 0;
   };
 
-  typedef Ref<Feature> FeatureRef;
+  typedef std::shared_ptr<Feature> FeatureRef;
 
   /**
    * An instantiation of a feature for a certain type.
@@ -289,7 +289,7 @@ namespace osmscout {
     TypeInfo& SetType(const std::string& name);
 
     TypeInfo& AddCondition(unsigned char types,
-                           TagCondition* condition);
+                           const TagConditionRef& condition);
 
     /**
      * Add a feature to this type

@@ -51,7 +51,7 @@ namespace osmscout {
       FileOffset fileOffset;
     };
 
-    struct Page : public Referencable
+    struct Page
     {
       std::vector<Entry> entries;
 
@@ -61,7 +61,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<Page> PageRef;
+    typedef std::shared_ptr<Page> PageRef;
 
     typedef Cache<N,PageRef> PageCache;
 
@@ -172,8 +172,8 @@ namespace osmscout {
   template <class N>
   inline bool NumericIndex<N>::ReadPage(FileOffset offset, PageRef& page) const
   {
-    if (page.Invalid()) {
-      page=new Page();
+    if (!page) {
+      page=std::make_shared<Page>();
     }
     else {
       page->entries.clear();

@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     osmscout::StopClock dbTimer;
 
     mapService->GetObjects(searchParameter,
-                           styleConfig,
+                           *styleConfig,
                            projection,
                            data);
 

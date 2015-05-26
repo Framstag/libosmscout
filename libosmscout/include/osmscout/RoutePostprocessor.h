@@ -37,8 +37,6 @@
 #include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
 
-#include <osmscout/util/Reference.h>
-
 namespace osmscout {
 
   /**
@@ -134,7 +132,7 @@ namespace osmscout {
     {
     private:
       void AddCrossingWaysDescriptions(const RoutePostprocessor& postprocessor,
-                                       RouteDescription::CrossingWaysDescription* description,
+                                       const RouteDescription::CrossingWaysDescriptionRef& description,
                                        const RouteDescription::Node& node,
                                        const ObjectFileRef& originObject,
                                        const ObjectFileRef& targetObject);

@@ -209,7 +209,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 void Parser::Parse()
 {
   t = NULL;
-  la = dummyToken = new Token();
+  la = dummyToken = std::make_shared<Token>();
   la->val = coco_string_create("Dummy Token");
   Get();
 -->parseRoot

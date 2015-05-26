@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   searchParameter.SetMaximumAreaLevel(6);
 
   mapService->GetObjects(searchParameter,
-                         styleConfig,
+                         *styleConfig,
                          projection,
                          data);
 

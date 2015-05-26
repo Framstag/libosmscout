@@ -44,7 +44,7 @@ namespace osmscout {
   {
     if (!description.Nodes().empty()) {
       description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
-                                                 new RouteDescription::StartDescription(startDescription));
+                                                 std::make_shared<RouteDescription::StartDescription>(startDescription));
     }
 
     return true;
@@ -63,7 +63,7 @@ namespace osmscout {
   {
     if (!description.Nodes().empty()) {
       description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
-                                                new RouteDescription::TargetDescription(targetDescription));
+                                                std::make_shared<RouteDescription::TargetDescription>(targetDescription));
     }
 
     return true;
@@ -203,10 +203,11 @@ namespace osmscout {
 
           lastNode--;
 
-          RouteDescription::NameDescriptionRef lastDesc=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+          RouteDescription::DescriptionRef lastDescription=lastNode->GetDescription(RouteDescription::WAY_NAME_DESC);
+          RouteDescription::NameDescriptionRef lastDesc=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastDescription);
 
 
-          if (lastDesc.Valid() &&
+          if (lastDesc &&
               lastDesc->GetRef()==nameDesc->GetRef() &&
               lastDesc->GetName()!=nameDesc->GetName()) {
             nameDesc=lastDesc;
@@ -227,7 +228,7 @@ namespace osmscout {
   }
 
   void RoutePostprocessor::CrossingWaysPostprocessor::AddCrossingWaysDescriptions(const RoutePostprocessor& postprocessor,
-                                                                                  RouteDescription::CrossingWaysDescription* description,
+                                                                                  const RouteDescription::CrossingWaysDescriptionRef& description,
                                                                                   const RouteDescription::Node& node,
                                                                                   const ObjectFileRef& originObject,
                                                                                   const ObjectFileRef& targetObject)
@@ -338,9 +339,9 @@ namespace osmscout {
         }
       }
 
-      RouteDescription::CrossingWaysDescriptionRef desc=new RouteDescription::CrossingWaysDescription(exitCount,
-                                                                                                      postprocessor.GetNameDescription(lastNode->GetPathObject()),
-                                                                                                      postprocessor.GetNameDescription(node->GetPathObject()));
+      RouteDescription::CrossingWaysDescriptionRef desc=std::make_shared<RouteDescription::CrossingWaysDescription>(exitCount,
+                                                                                                                    postprocessor.GetNameDescription(lastNode->GetPathObject()),
+                                                                                                                    postprocessor.GetNameDescription(node->GetPathObject()));
       AddCrossingWaysDescriptions(postprocessor,
                                   desc,
                                   *node,
@@ -477,7 +478,7 @@ namespace osmscout {
         }
 
         node->AddDescription(RouteDescription::DIRECTION_DESC,
-                             new RouteDescription::DirectionDescription(turnAngle,curveAngle));
+                             std::make_shared<RouteDescription::DirectionDescription>(turnAngle,curveAngle));
       }
     }
 
@@ -606,9 +607,10 @@ namespace osmscout {
        }
 
        if (junctionName != "" || junctionRef != "") {
+         RouteDescription::NameDescriptionRef nameDescription=std::make_shared<RouteDescription::NameDescription>(junctionName,
+                                                                                                                  junctionRef);
          node.AddDescription(RouteDescription::MOTORWAY_JUNCTION_DESC,
-                             new RouteDescription::MotorwayJunctionDescription(new RouteDescription::NameDescription(junctionName,
-                                                                                                                     junctionRef)));
+                             std::make_shared<RouteDescription::MotorwayJunctionDescription>(nameDescription));
        }
 
        prevObject=curObject;
@@ -657,7 +659,7 @@ namespace osmscout {
 
   void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutEnter(RouteDescription::Node& node)
   {
-    RouteDescription::RoundaboutEnterDescriptionRef desc=new RouteDescription::RoundaboutEnterDescription();
+    RouteDescription::RoundaboutEnterDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutEnterDescription>();
 
     node.AddDescription(RouteDescription::ROUNDABOUT_ENTER_DESC,
                         desc);
@@ -666,7 +668,7 @@ namespace osmscout {
   void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutNode(RouteDescription::Node& node)
   {
     if (node.HasDescription(RouteDescription::CROSSING_WAYS_DESC)) {
-      RouteDescription::CrossingWaysDescriptionRef crossing=dynamic_cast<RouteDescription::CrossingWaysDescription*>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
+      RouteDescription::CrossingWaysDescriptionRef crossing=std::dynamic_pointer_cast<RouteDescription::CrossingWaysDescription>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
       if (crossing->GetExitCount()>1) {
         roundaboutCrossingCounter+=crossing->GetExitCount()-1;
       }
@@ -675,7 +677,7 @@ namespace osmscout {
 
   void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutLeave(RouteDescription::Node& node)
   {
-    RouteDescription::RoundaboutLeaveDescriptionRef desc=new RouteDescription::RoundaboutLeaveDescription(roundaboutCrossingCounter);
+    RouteDescription::RoundaboutLeaveDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutLeaveDescription>(roundaboutCrossingCounter);
 
     node.AddDescription(RouteDescription::ROUNDABOUT_LEAVE_DESC,
                         desc);
@@ -684,7 +686,7 @@ namespace osmscout {
   void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayEnter(RouteDescription::Node& node,
                                                                                const RouteDescription::NameDescriptionRef& toName)
   {
-    RouteDescription::MotorwayEnterDescriptionRef desc=new RouteDescription::MotorwayEnterDescription(toName);
+    RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(toName);
 
     node.AddDescription(RouteDescription::MOTORWAY_ENTER_DESC,
                         desc);
@@ -693,7 +695,7 @@ namespace osmscout {
   void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayLeave(RouteDescription::Node& node,
                                                                                const RouteDescription::NameDescriptionRef& fromName)
   {
-    RouteDescription::MotorwayLeaveDescriptionRef desc=new RouteDescription::MotorwayLeaveDescription(fromName);
+    RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(fromName);
 
     node.AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
                         desc);
@@ -710,8 +712,8 @@ namespace osmscout {
       return false;
     }
 
-    lastName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-    nextName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+    lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+    nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
 
     // Nothing changed
     if (lastName->GetName()==nextName->GetName() &&
@@ -740,8 +742,8 @@ namespace osmscout {
     }
 
     node->AddDescription(RouteDescription::WAY_NAME_CHANGED_DESC,
-                         new RouteDescription::NameChangedDescription(lastName,
-                                                                      nextName));
+                         std::make_shared<RouteDescription::NameChangedDescription>(lastName,
+                                                                                    nextName));
 
     return true;
   }
@@ -763,15 +765,15 @@ namespace osmscout {
       return false;
     }
 
-    lastName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-    nextName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+    lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+    nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
 
     RouteDescription::DescriptionRef          desc=node->GetDescription(RouteDescription::DIRECTION_DESC);
-    RouteDescription::DirectionDescriptionRef directionDesc=dynamic_cast<RouteDescription::DirectionDescription*>(desc.Get());
+    RouteDescription::DirectionDescriptionRef directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(desc);
 
-    if (lastName.Valid() &&
-        nextName.Valid() &&
-        directionDesc.Valid() &&
+    if (lastName &&
+        nextName &&
+        directionDesc &&
         lastName->GetName()==nextName->GetName() &&
         lastName->GetRef()==nextName->GetRef()) {
       if (directionDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyLeft &&
@@ -779,16 +781,16 @@ namespace osmscout {
           directionDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyRight) {
 
           node->AddDescription(RouteDescription::TURN_DESC,
-                               new RouteDescription::TurnDescription());
+                               std::make_shared<RouteDescription::TurnDescription>());
 
           return true;
       }
     }
-    else if (directionDesc.Valid() &&
+    else if (directionDesc &&
         directionDesc->GetCurve()!=RouteDescription::DirectionDescription::straightOn) {
 
       node->AddDescription(RouteDescription::TURN_DESC,
-                           new RouteDescription::TurnDescription());
+                           std::make_shared<RouteDescription::TurnDescription>());
 
       return true;
     }
@@ -843,10 +845,10 @@ namespace osmscout {
         continue;
       }
 
-      originName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+      originName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
 
       if (node->HasPathObject()) {
-        targetName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+        targetName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
       }
 
       if (!postprocessor.IsRoundabout(lastNode->GetPathObject()) &&
@@ -918,7 +920,7 @@ namespace osmscout {
         while (next!=description.Nodes().end() &&
                next->HasPathObject()) {
 
-          nextName=dynamic_cast<RouteDescription::NameDescription*>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
+          nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
 
           if (!postprocessor.IsOfType(next->GetPathObject(),
                                       motorwayLinkTypes)) {
@@ -934,8 +936,8 @@ namespace osmscout {
         }
 
         if (originIsMotorway && targetIsMotorway) {
-          RouteDescription::MotorwayChangeDescriptionRef desc=new RouteDescription::MotorwayChangeDescription(originName,
-                                                                                                              nextName);
+          RouteDescription::MotorwayChangeDescriptionRef desc=std::make_shared<RouteDescription::MotorwayChangeDescription>(originName,
+                                                                                                                            nextName);
 
           node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
                                desc);
@@ -948,7 +950,7 @@ namespace osmscout {
         }
 
         if (originIsMotorway && !targetIsMotorway) {
-          RouteDescription::MotorwayLeaveDescriptionRef desc=new RouteDescription::MotorwayLeaveDescription(originName);
+          RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(originName);
 
           node->AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
                                desc);
@@ -963,7 +965,7 @@ namespace osmscout {
         }
 
         if (!originIsMotorway && targetIsMotorway) {
-          RouteDescription::MotorwayEnterDescriptionRef desc=new RouteDescription::MotorwayEnterDescription(nextName);
+          RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(nextName);
 
           node->AddDescription(RouteDescription::MOTORWAY_ENTER_DESC,
                                desc);
@@ -1150,7 +1152,7 @@ namespace osmscout {
       name=nameValue->GetName();
     }
 
-    return new RouteDescription::NameDescription(name);
+    return std::make_shared<RouteDescription::NameDescription>(name);
   }
 
   RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const Way& way) const
@@ -1168,8 +1170,8 @@ namespace osmscout {
       ref=refValue->GetRef();
     }
 
-    return new RouteDescription::NameDescription(name,
-                                                 ref);
+    return std::make_shared<RouteDescription::NameDescription>(name,
+                                                               ref);
   }
 
   bool RoutePostprocessor::IsRoundabout(const ObjectFileRef& object) const

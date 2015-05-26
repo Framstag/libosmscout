@@ -175,7 +175,7 @@ namespace osmscout {
     // recursion...
 
     for (const auto& childRegion : region.regions) {
-      CalculateRegionNameIgnoreTokens(childRegion,
+      CalculateRegionNameIgnoreTokens(*childRegion,
                                       ignoreTokens,
                                       blacklist);
     }
@@ -200,7 +200,7 @@ namespace osmscout {
     // recursion...
 
     for (const auto& childRegion : region.regions) {
-      CalculateLocationNameIgnoreTokens(childRegion,
+      CalculateLocationNameIgnoreTokens(*childRegion,
                                         ignoreTokens,
                                         blacklist);
     }
@@ -347,7 +347,7 @@ namespace osmscout {
               // If we already have the same name and are a "minor" reference, we skip...
               if (!(region->name==childRegion->name &&
                     region->reference.type<childRegion->reference.type)) {
-                AddRegion(childRegion,region);
+                AddRegion(*childRegion,region);
               }
               return;
             }
@@ -531,7 +531,7 @@ namespace osmscout {
       }
 
 
-      RegionRef region=new Region();
+      RegionRef region=std::make_shared<Region>();
 
       region->reference.Set(area.GetFileOffset(),refArea);
       region->name=nameValue->GetName();
@@ -681,7 +681,7 @@ namespace osmscout {
         RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                       node.GetCoords());
 
-        AddAliasToRegion(region,
+        AddAliasToRegion(*region,
                          alias,
                          node.GetCoords());
 
@@ -714,7 +714,7 @@ namespace osmscout {
           bool match=IsCoordInArea(nodes[0],childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationAreaToRegion(childRegion,area,nodes,name,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddLocationAreaToRegion(*childRegion,area,nodes,name,minlon,minlat,maxlon,maxlat);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -762,7 +762,7 @@ namespace osmscout {
           RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                         boundingBox.GetMinCoord());
 
-          AddLocationAreaToRegion(region,
+          AddLocationAreaToRegion(*region,
                                   area,
                                   r.nodes,
                                   name,
@@ -781,7 +781,7 @@ namespace osmscout {
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                     boundingBox.GetMinCoord());
 
-      AddLocationAreaToRegion(region,
+      AddLocationAreaToRegion(*region,
                               area,
                               ring.nodes,
                               name,
@@ -879,7 +879,7 @@ namespace osmscout {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationWayToRegion(childRegion,way,name,minlon,minlat,maxlon,maxlat);
+            bool completeMatch=AddLocationWayToRegion(*childRegion,way,name,minlon,minlat,maxlon,maxlat);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -960,7 +960,7 @@ namespace osmscout {
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                     boundingBox.GetMinCoord());
 
-      AddLocationWayToRegion(region,
+      AddLocationWayToRegion(*region,
                              way,
                              nameValue->GetName(),
                              boundingBox.GetMinLon(),
@@ -997,7 +997,7 @@ namespace osmscout {
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
             AddAddressAreaToRegion(progress,
-                                   childRegion,
+                                   *childRegion,
                                    fileOffset,
                                    location,
                                    address,
@@ -1054,7 +1054,7 @@ namespace osmscout {
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
             AddPOIAreaToRegion(progress,
-                               childRegion,
+                               *childRegion,
                                fileOffset,
                                name,
                                nodes,
@@ -1156,7 +1156,7 @@ namespace osmscout {
         bool added=false;
 
         AddAddressAreaToRegion(progress,
-                               region,
+                               *region,
                                fileOffset,
                                location,
                                address,
@@ -1176,7 +1176,7 @@ namespace osmscout {
         bool added=false;
 
         AddPOIAreaToRegion(progress,
-                           region,
+                           *region,
                            fileOffset,
                            name,
                            nodes,
@@ -1221,7 +1221,7 @@ namespace osmscout {
 
           if (match) {
             bool completeMatch=AddAddressWayToRegion(progress,
-                                                     childRegion,
+                                                     *childRegion,
                                                      fileOffset,
                                                      location,
                                                      address,
@@ -1283,11 +1283,7 @@ namespace osmscout {
                                                  double maxlat,
                                                  bool& added)
   {
-    for (std::list<RegionRef>::iterator r=region.regions.begin();
-         r!=region.regions.end();
-         r++) {
-      RegionRef childRegion(*r);
-
+    for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
       if (!(maxlon<childRegion->minlon) &&
           !(minlon>childRegion->maxlon) &&
@@ -1299,7 +1295,7 @@ namespace osmscout {
 
           if (match) {
             bool completeMatch=AddPOIWayToRegion(progress,
-                                                 *r,
+                                                 *childRegion,
                                                  fileOffset,
                                                  name,
                                                  nodes,
@@ -1437,7 +1433,7 @@ namespace osmscout {
         bool added=false;
 
         AddPOIWayToRegion(progress,
-                          region,
+                          *region,
                           fileOffset,
                           name,
                           nodes,
@@ -1568,7 +1564,7 @@ namespace osmscout {
       RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                     coord);
 
-      if (!region.Valid()) {
+      if (!region) {
         continue;
       }
 
@@ -1576,7 +1572,7 @@ namespace osmscout {
         bool added=false;
 
         AddAddressNodeToRegion(progress,
-                               region,
+                               *region,
                                fileOffset,
                                location,
                                address,
@@ -1589,7 +1585,7 @@ namespace osmscout {
       if (isPOI) {
         bool added=false;
 
-        AddPOINodeToRegion(region,
+        AddPOINodeToRegion(*region,
                            fileOffset,
                            name,
                            added);
@@ -1878,7 +1874,7 @@ namespace osmscout {
       return false;
     }
 
-    rootRegion=new Region();
+    rootRegion=std::make_shared<Region>();
     rootRegion->name="<root>";
     rootRegion->indexOffset=0;
     rootRegion->dataOffset=0;
@@ -1928,7 +1924,7 @@ namespace osmscout {
 
     progress.SetAction("Calculating region tree depth");
 
-    regionTree.resize(GetRegionTreeDepth(rootRegion));
+    regionTree.resize(GetRegionTreeDepth(*rootRegion));
 
     progress.Info(std::string("Area tree depth: ")+NumberToString(regionTree.size()));
 

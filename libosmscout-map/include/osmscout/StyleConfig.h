@@ -21,6 +21,7 @@
 */
 
 #include <limits>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -38,7 +39,6 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/util/Color.h>
-#include <osmscout/util/Reference.h>
 #include <osmscout/util/Transformation.h>
 
 #include <osmscout/MapParameter.h>
@@ -48,7 +48,7 @@ namespace osmscout {
   /**
    * Interface one must implement to provider a label for the map.
    */
-  class OSMSCOUT_MAP_API LabelProvider : public Referencable
+  class OSMSCOUT_MAP_API LabelProvider
   {
   public:
     virtual ~LabelProvider();
@@ -70,15 +70,17 @@ namespace osmscout {
     virtual std::string GetName() const = 0;
   };
 
-  typedef Ref<LabelProvider> LabelProviderRef;
+  typedef std::shared_ptr<LabelProvider> LabelProviderRef;
 
-  class OSMSCOUT_MAP_API LabelProviderFactory : public Referencable
+  class OSMSCOUT_MAP_API LabelProviderFactory
   {
   public:
     virtual ~LabelProviderFactory();
 
     virtual LabelProviderRef Create(const TypeConfig& typeConfig) const = 0;
   };
+
+  typedef std::shared_ptr<LabelProviderFactory> LabelProviderFactoryRef;
 
   class OSMSCOUT_MAP_API INameLabelProviderFactory : public LabelProviderFactory
   {
@@ -107,8 +109,6 @@ namespace osmscout {
     public:
       LabelProviderRef Create(const TypeConfig& typeConfig) const;
   };
-
-  typedef Ref<LabelProviderFactory> LabelProviderFactoryRef;
 
   /**
    * Generates a label based on a given feature name and label name.
@@ -164,14 +164,14 @@ namespace osmscout {
     bool IsOneway(const FeatureValueBuffer& buffer) const;
   };
 
-  class OSMSCOUT_MAP_API StyleVariable : public Referencable
+  class OSMSCOUT_MAP_API StyleVariable
   {
   public:
     StyleVariable();
     virtual ~StyleVariable();
   };
 
-  typedef Ref<StyleVariable> StyleVariableRef;
+  typedef std::shared_ptr<StyleVariable> StyleVariableRef;
 
   class OSMSCOUT_MAP_API StyleVariableColor : public StyleVariable
   {
@@ -215,7 +215,7 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_MAP_API SizeCondition : public Referencable
+  class OSMSCOUT_MAP_API SizeCondition
   {
   private:
     double minMM;
@@ -242,7 +242,7 @@ namespace osmscout {
     bool Evaluate(double meterInPixel, double meterInMM) const;
   };
 
-  typedef Ref<SizeCondition> SizeConditionRef;
+  typedef std::shared_ptr<SizeCondition> SizeConditionRef;
 
   /**
    * Holds the all accumulated filter conditions as defined in the style sheet
@@ -273,7 +273,7 @@ namespace osmscout {
     StyleFilter& SetTunnel(bool tunnel);
     StyleFilter& SetOneway(bool oneway);
 
-    StyleFilter& SetSizeCondition(SizeCondition* condition);
+    StyleFilter& SetSizeCondition(const SizeConditionRef& condition);
 
     inline bool HasTypes() const
     {
@@ -349,7 +349,7 @@ namespace osmscout {
       return bridge ||
              tunnel ||
              oneway ||
-             sizeCondition.Valid();
+             sizeCondition;
     }
 
     inline bool GetBridge() const
@@ -376,14 +376,14 @@ namespace osmscout {
   };
 
   /**
-   * A Style together with a set of the attributes that are explicitely
+   * A Style together with a set of the attributes that are explicitly
    * set in the stye.
    */
   template<class S, class A>
   struct PartialStyle
   {
-    std::set<A>    attributes;
-    Ref<S>         style;
+    std::set<A>        attributes;
+    std::shared_ptr<S> style;
 
     PartialStyle()
     : style(new S())
@@ -419,9 +419,9 @@ namespace osmscout {
   template<class S, class A>
   struct StyleSelector
   {
-    StyleCriteria  criteria;
-    std::set<A>    attributes;
-    Ref<S>         style;
+    StyleCriteria      criteria;
+    std::set<A>        attributes;
+    std::shared_ptr<S> style;
 
     StyleSelector(const StyleFilter& filter,
                   const PartialStyle<S,A>& style)
@@ -436,7 +436,7 @@ namespace osmscout {
   /**
    * Style options for a line.
    */
-  class OSMSCOUT_MAP_API LineStyle : public Referencable
+  class OSMSCOUT_MAP_API LineStyle
   {
   public:
     enum CapStyle {
@@ -563,7 +563,7 @@ namespace osmscout {
     bool operator<(const LineStyle& other) const;
   };
 
-  typedef Ref<LineStyle>                                   LineStyleRef;
+  typedef std::shared_ptr<LineStyle>                       LineStyleRef;
   typedef PartialStyle<LineStyle,LineStyle::Attribute>     LinePartialStyle;
   typedef ConditionalStyle<LineStyle,LineStyle::Attribute> LineConditionalStyle;
   typedef StyleSelector<LineStyle,LineStyle::Attribute>    LineStyleSelector;
@@ -573,7 +573,7 @@ namespace osmscout {
   /**
    * Style options for filling an area.
    */
-  class OSMSCOUT_MAP_API FillStyle : public Referencable
+  class OSMSCOUT_MAP_API FillStyle
   {
   public:
     enum Attribute {
@@ -666,7 +666,7 @@ namespace osmscout {
     bool operator<(const FillStyle& other) const;
   };
 
-  typedef Ref<FillStyle>                                   FillStyleRef;
+  typedef std::shared_ptr<FillStyle>                       FillStyleRef;
   typedef PartialStyle<FillStyle,FillStyle::Attribute>     FillPartialStyle;
   typedef ConditionalStyle<FillStyle,FillStyle::Attribute> FillConditionalStyle;
   typedef StyleSelector<FillStyle,FillStyle::Attribute>    FillStyleSelector;
@@ -677,7 +677,7 @@ namespace osmscout {
    * Abstract base class for all (point) labels. All point labels have priority
    * and a alpha value.
    */
-  class OSMSCOUT_MAP_API LabelStyle : public Referencable
+  class OSMSCOUT_MAP_API LabelStyle
   {
   private:
     size_t priority;
@@ -705,7 +705,7 @@ namespace osmscout {
     }
   };
 
-  typedef Ref<LabelStyle> LabelStyleRef;
+  typedef std::shared_ptr<LabelStyle> LabelStyleRef;
 
   /**
    * A textual label.
@@ -755,7 +755,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return label.Valid() &&
+      return label &&
              GetTextColor().IsVisible();
     }
 
@@ -807,7 +807,7 @@ namespace osmscout {
     bool operator<(const TextStyle& other) const;
   };
 
-  typedef Ref<TextStyle>                                   TextStyleRef;
+  typedef std::shared_ptr<TextStyle>                       TextStyleRef;
   typedef PartialStyle<TextStyle,TextStyle::Attribute>     TextPartialStyle;
   typedef ConditionalStyle<TextStyle,TextStyle::Attribute> TextConditionalStyle;
   typedef StyleSelector<TextStyle,TextStyle::Attribute>    TextStyleSelector;
@@ -848,7 +848,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return label.Valid() &&
+      return label &&
              GetTextColor().IsVisible();
     }
 
@@ -881,7 +881,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<ShieldStyle>                                     ShieldStyleRef;
+  typedef std::shared_ptr<ShieldStyle>                         ShieldStyleRef;
   typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>     ShieldPartialStyle;
   typedef ConditionalStyle<ShieldStyle,ShieldStyle::Attribute> ShieldConditionalStyle;
   typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>    ShieldStyleSelector;
@@ -893,7 +893,7 @@ namespace osmscout {
    * mainly of the attributes of the shield itself (it internally holds a shield
    * label for this) and some more attributes defining the way of repetition.
    */
-  class OSMSCOUT_MAP_API PathShieldStyle : public Referencable
+  class OSMSCOUT_MAP_API PathShieldStyle
   {
   public:
     enum Attribute {
@@ -976,7 +976,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<PathShieldStyle>                                         PathShieldStyleRef;
+  typedef std::shared_ptr<PathShieldStyle>                             PathShieldStyleRef;
   typedef PartialStyle<PathShieldStyle,PathShieldStyle::Attribute>     PathShieldPartialStyle;
   typedef ConditionalStyle<PathShieldStyle,PathShieldStyle::Attribute> PathShieldConditionalStyle;
   typedef StyleSelector<PathShieldStyle,PathShieldStyle::Attribute>    PathShieldStyleSelector;
@@ -987,7 +987,7 @@ namespace osmscout {
    * A style for drawing text onto a path, the text following the
    * contour of the path.
    */
-  class OSMSCOUT_MAP_API PathTextStyle : public Referencable
+  class OSMSCOUT_MAP_API PathTextStyle
   {
   public:
     enum Attribute {
@@ -1011,7 +1011,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return label.Valid() &&
+      return label &&
              textColor.IsVisible();
     }
 
@@ -1034,14 +1034,14 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<PathTextStyle>                                       PathTextStyleRef;
+  typedef std::shared_ptr<PathTextStyle>                           PathTextStyleRef;
   typedef PartialStyle<PathTextStyle,PathTextStyle::Attribute>     PathTextPartialStyle;
   typedef ConditionalStyle<PathTextStyle,PathTextStyle::Attribute> PathTextConditionalStyle;
   typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute>    PathTextStyleSelector;
   typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList; //! List of selectors
   typedef std::vector<std::vector<PathTextStyleSelectorList> >     PathTextStyleLookupTable;  //!Index selectors by type and level
 
-  class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
+  class OSMSCOUT_MAP_API DrawPrimitive
   {
   private:
     FillStyleRef fillStyle;
@@ -1061,7 +1061,7 @@ namespace osmscout {
                                 double& maxY) const = 0;
   };
 
-  typedef Ref<DrawPrimitive> DrawPrimitiveRef;
+  typedef std::shared_ptr<DrawPrimitive> DrawPrimitiveRef;
 
   class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
   {
@@ -1084,7 +1084,7 @@ namespace osmscout {
                         double& maxY) const;
   };
 
-  typedef Ref<PolygonPrimitive> PolygonPrimitiveRef;
+  typedef std::shared_ptr<PolygonPrimitive> PolygonPrimitiveRef;
 
   class OSMSCOUT_MAP_API RectanglePrimitive : public DrawPrimitive
   {
@@ -1120,7 +1120,7 @@ namespace osmscout {
                         double& maxY) const;
   };
 
-  typedef Ref<RectanglePrimitive> RectanglePrimitiveRef;
+  typedef std::shared_ptr<RectanglePrimitive> RectanglePrimitiveRef;
 
   class OSMSCOUT_MAP_API CirclePrimitive : public DrawPrimitive
   {
@@ -1149,7 +1149,7 @@ namespace osmscout {
                         double& maxY) const;
   };
 
-  typedef Ref<CirclePrimitive> CirclePrimitiveRef;
+  typedef std::shared_ptr<CirclePrimitive> CirclePrimitiveRef;
 
   /**
    * Definition of a symbol. A symbol consists of a list of DrawPrimitives
@@ -1203,12 +1203,12 @@ namespace osmscout {
     }
   };
 
-  typedef Ref<Symbol> SymbolRef;
+  typedef std::shared_ptr<Symbol> SymbolRef;
 
   /**
    * The icon style allow the rendering of external images or internal symbols.
    */
-  class OSMSCOUT_MAP_API IconStyle : public Referencable
+  class OSMSCOUT_MAP_API IconStyle
   {
   public:
     enum Attribute {
@@ -1235,7 +1235,7 @@ namespace osmscout {
     inline bool IsVisible() const
     {
       return !iconName.empty() ||
-              symbol.Valid();
+              symbol;
     }
 
     inline const SymbolRef& GetSymbol() const
@@ -1262,7 +1262,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<IconStyle>                                   IconStyleRef;
+  typedef std::shared_ptr<IconStyle>                       IconStyleRef;
   typedef PartialStyle<IconStyle,IconStyle::Attribute>     IconPartialStyle;
   typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
   typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
@@ -1270,9 +1270,9 @@ namespace osmscout {
   typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;  //!Index selectors by type and level
 
   /**
-   * Style for repretive drawing of symbols on top of a path.
+   * Style for repetive drawing of symbols on top of a path.
    */
-  class OSMSCOUT_MAP_API PathSymbolStyle : public Referencable
+  class OSMSCOUT_MAP_API PathSymbolStyle
   {
   public:
 
@@ -1294,7 +1294,7 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return symbol.Valid();
+      return (bool)symbol;
     }
 
     inline const SymbolRef& GetSymbol() const
@@ -1311,7 +1311,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<PathSymbolStyle>                                         PathSymbolStyleRef;
+  typedef std::shared_ptr<PathSymbolStyle>                             PathSymbolStyleRef;
   typedef PartialStyle<PathSymbolStyle,PathSymbolStyle::Attribute>     PathSymbolPartialStyle;
   typedef ConditionalStyle<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolConditionalStyle;
   typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute>    PathSymbolStyleSelector;
@@ -1326,7 +1326,7 @@ namespace osmscout {
    * the case, if there is excactly one match in the style sheet. If there are multiple matches a new style has to be
    * allocated and composed from all matches.
    */
-  class OSMSCOUT_MAP_API StyleConfig : public Referencable
+  class OSMSCOUT_MAP_API StyleConfig
   {
   private:
     TypeConfigRef                              typeConfig;             //!< Reference to the type configuration
@@ -1539,7 +1539,7 @@ namespace osmscout {
     //@}
   };
 
-  typedef Ref<StyleConfig> StyleConfigRef;
+  typedef std::shared_ptr<StyleConfig> StyleConfigRef;
 }
 
 #endif

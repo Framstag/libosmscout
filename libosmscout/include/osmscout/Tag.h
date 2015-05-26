@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -28,7 +29,6 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/util/Parser.h>
-#include <osmscout/util/Reference.h>
 
 #include <osmscout/system/Types.h>
 
@@ -50,7 +50,7 @@ namespace osmscout {
    *
    * Abstract base class for all tag based conditions
    */
-  class OSMSCOUT_API TagCondition : public Referencable
+  class OSMSCOUT_API TagCondition
   {
   public:
     virtual ~TagCondition();
@@ -63,7 +63,7 @@ namespace osmscout {
    *
    * Reference counted reference to a tag condition
    */
-  typedef Ref<TagCondition> TagConditionRef;
+  typedef std::shared_ptr<TagCondition> TagConditionRef;
 
   /**
    * \ingroup type
@@ -76,7 +76,7 @@ namespace osmscout {
     TagConditionRef condition;
 
   public:
-    TagNotCondition(TagCondition* condition);
+    TagNotCondition(const TagConditionRef& condition);
 
     bool Evaluate(const TagMap& tagMap) const;
   };
@@ -102,10 +102,17 @@ namespace osmscout {
   public:
     TagBoolCondition(Type type);
 
-    void AddCondition(TagCondition* condition);
+    void AddCondition(const TagConditionRef& condition);
 
     bool Evaluate(const TagMap& tagMap) const;
   };
+
+  /**
+   * \ingroup type
+   *
+   * Reference counted reference to a tag condition
+   */
+  typedef std::shared_ptr<TagBoolCondition> TagBoolConditionRef;
 
   /**
    * \ingroup type
@@ -174,6 +181,13 @@ namespace osmscout {
 
     bool Evaluate(const TagMap& tagMap) const;
   };
+
+  /**
+   * \ingroup type
+   *
+   * Reference counted reference to a tag condition
+   */
+  typedef std::shared_ptr<TagIsInCondition> TagIsInConditionRef;
 
   /**
    * \ingroup type

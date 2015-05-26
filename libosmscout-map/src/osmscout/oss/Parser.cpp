@@ -179,7 +179,7 @@ void Parser::SYMBOL() {
 		std::string name;
 		
 		IDENT(name);
-		SymbolRef symbol=new Symbol(name);
+		SymbolRef symbol=std::make_shared<Symbol>(name);
 		
 		while (la->kind == 14 /* "POLYGON" */ || la->kind == 18 /* "RECTANGLE" */ || la->kind == 20 /* "CIRCLE" */) {
 			if (la->kind == 14 /* "POLYGON" */) {
@@ -269,7 +269,7 @@ void Parser::POLYGON(Symbol& symbol) {
 		Expect(14 /* "POLYGON" */);
 		StyleFilter         filter;
 		FillPartialStyle    style;
-		PolygonPrimitiveRef polygon(new PolygonPrimitive(style.style));
+		PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(style.style);
 		Coord               coord;
 		
 		COORD(coord);
@@ -311,9 +311,9 @@ void Parser::RECTANGLE(Symbol& symbol) {
 		}
 		while (!(la->kind == _EOF || la->kind == 17 /* "}" */)) {SynErr(91); Get();}
 		Expect(17 /* "}" */);
-		symbol.AddPrimitive(new RectanglePrimitive(topLeft,
-		                                          width,height,
-		                                          style.style));
+		symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
+		                                                        width,height,
+		                                                        style.style));
 		
 }
 
@@ -334,9 +334,9 @@ void Parser::CIRCLE(Symbol& symbol) {
 		}
 		while (!(la->kind == _EOF || la->kind == 17 /* "}" */)) {SynErr(93); Get();}
 		Expect(17 /* "}" */);
-		symbol.AddPrimitive(new CirclePrimitive(center,
-		                                       radius,
-		                                       style.style));
+		symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
+		                                                     radius,
+		                                                     style.style));
 		
 }
 
@@ -492,7 +492,7 @@ void Parser::COLORCONSTDEF() {
 		IDENT(name);
 		variable=config.GetVariableByName(name);
 		
-		if (variable.Valid()) {
+		if (variable) {
 		 std::string e="Constant already defined";
 		
 		 SemErr(e.c_str());
@@ -501,7 +501,7 @@ void Parser::COLORCONSTDEF() {
 		Expect(23 /* "=" */);
 		COLOR(color);
 		if (!errors->hasErrors) {
-		 config.AddVariable(name,new StyleVariableColor(color));
+		 config.AddVariable(name,std::make_shared<StyleVariableColor>(color));
 		}
 		
 }
@@ -515,7 +515,7 @@ void Parser::MAGCONSTDEF() {
 		IDENT(name);
 		variable=config.GetVariableByName(name);
 		
-		if (variable.Valid()) {
+		if (variable) {
 		 std::string e="Constant already defined";
 		
 		 SemErr(e.c_str());
@@ -524,7 +524,7 @@ void Parser::MAGCONSTDEF() {
 		Expect(23 /* "=" */);
 		MAG(magnification);
 		if (!errors->hasErrors) {
-		 config.AddVariable(name,new StyleVariableMag(magnification));
+		 config.AddVariable(name,std::make_shared<StyleVariableMag>(magnification));
 		}
 		
 }
@@ -538,7 +538,7 @@ void Parser::UINTCONSTDEF() {
 		IDENT(name);
 		variable=config.GetVariableByName(name);
 		
-		if (variable.Valid()) {
+		if (variable) {
 		 std::string e="Constant already defined";
 		
 		 SemErr(e.c_str());
@@ -547,7 +547,7 @@ void Parser::UINTCONSTDEF() {
 		Expect(23 /* "=" */);
 		UINT(value);
 		if (!errors->hasErrors) {
-		 config.AddVariable(name,new StyleVariableUInt(value));
+		 config.AddVariable(name,std::make_shared<StyleVariableUInt>(value));
 		}
 		
 }
@@ -606,19 +606,19 @@ void Parser::COLOR(Color& color) {
 			Get();
 			StyleVariableRef variable=config.GetVariableByName(t->val+1);
 			
-			if (!variable.Valid()) {
+			if (!variable) {
 			 std::string e="Variable not defined";
 			
 			 SemErr(e.c_str());
 			}
-			else if (dynamic_cast<StyleVariableColor*>(variable.Get())==NULL) {
+			else if (dynamic_cast<StyleVariableColor*>(variable.get())==NULL) {
 			 std::string e="Variable is not of type 'COLOR'";
 			
 			 SemErr(e.c_str());
 			}
 			
 			if (!errors->hasErrors) {
-			 StyleVariableColor* colorVariable=dynamic_cast<StyleVariableColor*>(variable.Get());
+			 StyleVariableColor* colorVariable=dynamic_cast<StyleVariableColor*>(variable.get());
 			
 			 color=colorVariable->GetColor();
 			}
@@ -652,19 +652,19 @@ void Parser::MAG(Magnification& magnification) {
 			Get();
 			StyleVariableRef variable=config.GetVariableByName(t->val+1);
 			
-			if (!variable.Valid()) {
+			if (!variable) {
 			 std::string e="Variable not defined";
 			
 			 SemErr(e.c_str());
 			}
-			else if (dynamic_cast<StyleVariableMag*>(variable.Get())==NULL) {
+			else if (dynamic_cast<StyleVariableMag*>(variable.get())==NULL) {
 			 std::string e="Variable is not of type 'MAG'";
 			
 			 SemErr(e.c_str());
 			}
 			
 			if (!errors->hasErrors) {
-			 StyleVariableMag* magVariable=dynamic_cast<StyleVariableMag*>(variable.Get());
+			 StyleVariableMag* magVariable=dynamic_cast<StyleVariableMag*>(variable.get());
 			
 			 magnification=magVariable->GetMag();
 			}
@@ -685,19 +685,19 @@ void Parser::UINT(size_t& value) {
 			Get();
 			StyleVariableRef variable=config.GetVariableByName(t->val+1);
 			
-			if (!variable.Valid()) {
+			if (!variable) {
 			 std::string e="Variable not defined";
 			
 			 SemErr(e.c_str());
 			}
-			else if (dynamic_cast<StyleVariableUInt*>(variable.Get())==NULL) {
+			else if (dynamic_cast<StyleVariableUInt*>(variable.get())==NULL) {
 			 std::string e="Variable is not of type 'UINT'";
 			
 			 SemErr(e.c_str());
 			}
 			
 			if (!errors->hasErrors) {
-			 StyleVariableUInt* uintVariable=dynamic_cast<StyleVariableUInt*>(variable.Get());
+			 StyleVariableUInt* uintVariable=dynamic_cast<StyleVariableUInt*>(variable.get());
 			
 			 value=uintVariable->GetUInt();
 			}
@@ -787,7 +787,7 @@ void Parser::STYLEFILTER_FEATURE(StyleFilter& filter) {
 		IDENT(featureName);
 		FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 		
-		if (feature.Invalid()) {
+		if (!feature) {
 		 std::string e="Unknown feature '"+featureName+"'";
 		
 		 SemErr(e.c_str());
@@ -811,7 +811,7 @@ void Parser::STYLEFILTER_FEATURE(StyleFilter& filter) {
 			IDENT(featureName);
 			FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 			
-			if (feature.Invalid()) {
+			if (!feature) {
 			 std::string e="Unknown feature '"+featureName+"'";
 			
 			 SemErr(e.c_str());
@@ -950,14 +950,14 @@ void Parser::STYLEFILTER_TUNNEL(StyleFilter& filter) {
 }
 
 void Parser::STYLEFILTER_SIZE(StyleFilter& filter) {
-		SizeCondition* sizeCondition; 
+		SizeConditionRef sizeCondition; 
 		Expect(35 /* "SIZE" */);
 		SIZECONDITION(sizeCondition);
 		filter.SetSizeCondition(sizeCondition); 
 }
 
-void Parser::SIZECONDITION(SizeCondition*& condition) {
-		condition=new SizeCondition();
+void Parser::SIZECONDITION(SizeConditionRef& condition) {
+		condition=std::make_shared<SizeCondition>();
 		double widthInMeter;
 		
 		UDOUBLE(widthInMeter);
@@ -1103,7 +1103,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			Get();
 			Expect(38 /* ":" */);
 			TEXTLABEL(label);
-			if (label.Valid()) {
+			if (label) {
 			 style.style->SetLabel(label);
 			 style.attributes.insert(TextStyle::attrLabel);
 			}
@@ -1194,7 +1194,7 @@ void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
 			IDENT(name);
 			symbol=config.GetSymbol(name);
 			
-			if (symbol.Invalid()) {
+			if (!symbol) {
 			 std::string e="Map symbol '"+name+"' is not defined";
 			
 			 SemErr(e.c_str());
@@ -1428,7 +1428,7 @@ void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
 			Get();
 			Expect(38 /* ":" */);
 			TEXTLABEL(label);
-			if (label.Valid()) {
+			if (label) {
 			 style.style->SetLabel(label);
 			 style.attributes.insert(PathTextStyle::attrLabel);
 			}
@@ -1462,7 +1462,7 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 			IDENT(name);
 			symbol=config.GetSymbol(name);
 			
-			if (symbol.Invalid()) {
+			if (!symbol) {
 			 std::string e="Map symbol '"+name+"' is not defined";
 			
 			 SemErr(e.c_str());
@@ -1490,7 +1490,7 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			Get();
 			Expect(38 /* ":" */);
 			TEXTLABEL(label);
-			if (label.Valid()) {
+			if (label) {
 			 style.style->SetLabel(label);
 			 style.attributes.insert(PathShieldStyle::attrLabel);
 			}
@@ -1701,7 +1701,7 @@ void Parser::TEXTLABEL(LabelProviderRef& label) {
 		
 		 feature=config.GetTypeConfig()->GetFeature(featureName);
 		
-		 if (feature.Invalid()) {
+		 if (!feature) {
 		   std::string e="'"+featureName+"' is not a registered feature";
 		
 		   SemErr(e.c_str());
@@ -1725,14 +1725,14 @@ void Parser::TEXTLABEL(LabelProviderRef& label) {
 		   return;
 		 }
 		
-		 label=new DynamicFeatureLabelReader(*config.GetTypeConfig(),
-		                                     featureName,
-		                                     labelName);
+		 label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
+		                                                   featureName,
+		                                                   labelName);
 		}
 		else {
 		 label=config.GetLabelProvider(featureName);
 		 
-		 if (label.Invalid()) {
+		 if (!label) {
 		   std::string e="There is no label provider with name '"+featureName+"' registered";
 		
 		   SemErr(e.c_str());
@@ -1778,7 +1778,7 @@ void Parser::BOOL(bool& value) {
 void Parser::Parse()
 {
   t = NULL;
-  la = dummyToken = new Token();
+  la = dummyToken = std::make_shared<Token>();
   la->val = coco_string_create("Dummy Token");
   Get();
 	OSS();

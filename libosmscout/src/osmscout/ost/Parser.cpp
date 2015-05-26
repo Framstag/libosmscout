@@ -238,10 +238,10 @@ void Parser::GRADE() {
 }
 
 void Parser::TYPE() {
-		std::string   name;
-		TagCondition  *condition=NULL;
-		TypeInfoRef   typeInfo(new TypeInfo());
-		unsigned char types;
+		std::string     name;
+		TagConditionRef condition=NULL;
+		TypeInfoRef     typeInfo(new TypeInfo());
+		unsigned char   types;
 		
 		while (!(la->kind == _EOF || la->kind == 17 /* "TYPE" */)) {SynErr(60); Get();}
 		Expect(17 /* "TYPE" */);
@@ -304,9 +304,9 @@ void Parser::TYPEKINDS(unsigned char& types) {
 		}
 }
 
-void Parser::TAGCONDITION(TagCondition*& condition) {
-		std::list<TagCondition*> conditions;
-		TagCondition             *subCond;
+void Parser::TAGCONDITION(TagConditionRef& condition) {
+		std::list<TagConditionRef> conditions;
+		TagConditionRef            subCond;
 		
 		TAGANDCOND(subCond);
 		conditions.push_back(subCond); 
@@ -319,9 +319,9 @@ void Parser::TAGCONDITION(TagCondition*& condition) {
 		 condition=conditions.front();
 		}
 		else {
-		 TagBoolCondition *orCondition=new TagBoolCondition(TagBoolCondition::boolOr);
+		 TagBoolConditionRef orCondition=std::make_shared<TagBoolCondition>(TagBoolCondition::boolOr);
 		
-		 for (std::list<TagCondition*>::const_iterator c=conditions.begin();
+		 for (std::list<TagConditionRef>::const_iterator c=conditions.begin();
 		      c!=conditions.end();
 		      ++c) {
 		   orCondition->AddCondition(*c);
@@ -337,7 +337,7 @@ void Parser::FEATURE(TypeInfo& typeInfo) {
 		IDENT(name);
 		FeatureRef feature=config.GetFeature(name);
 		
-		if (feature.Valid()) {
+		if (feature) {
 		 if (!typeInfo.HasFeature(name)) {
 		   typeInfo.AddFeature(feature);
 		 }
@@ -374,9 +374,9 @@ void Parser::GROUPS(TypeInfo& typeInfo) {
 		}
 }
 
-void Parser::TAGANDCOND(TagCondition*& condition) {
-		std::list<TagCondition*> conditions;
-		TagCondition             *subCond;
+void Parser::TAGANDCOND(TagConditionRef& condition) {
+		std::list<TagConditionRef> conditions;
+		TagConditionRef            subCond;
 		
 		TAGBOOLCOND(subCond);
 		conditions.push_back(subCond); 
@@ -389,9 +389,9 @@ void Parser::TAGANDCOND(TagCondition*& condition) {
 		 condition=conditions.front();
 		}
 		else {
-		 TagBoolCondition *andCondition=new TagBoolCondition(TagBoolCondition::boolAnd);
+		 TagBoolConditionRef andCondition=std::make_shared<TagBoolCondition>(TagBoolCondition::boolAnd);
 		
-		 for (std::list<TagCondition*>::const_iterator c=conditions.begin();
+		 for (std::list<TagConditionRef>::const_iterator c=conditions.begin();
 		      c!=conditions.end();
 		      ++c) {
 		   andCondition->AddCondition(*c);
@@ -402,7 +402,7 @@ void Parser::TAGANDCOND(TagCondition*& condition) {
 		
 }
 
-void Parser::TAGBOOLCOND(TagCondition*& condition) {
+void Parser::TAGBOOLCOND(TagConditionRef& condition) {
 		if (la->kind == _string) {
 			TAGBINCOND(condition);
 		} else if (la->kind == 34 /* "EXISTS" */) {
@@ -414,11 +414,11 @@ void Parser::TAGBOOLCOND(TagCondition*& condition) {
 		} else if (la->kind == 24 /* "!" */) {
 			Get();
 			TAGBOOLCOND(condition);
-			condition=new TagNotCondition(condition); 
+			condition=std::make_shared<TagNotCondition>(condition); 
 		} else SynErr(61);
 }
 
-void Parser::TAGBINCOND(TagCondition*& condition) {
+void Parser::TAGBINCOND(TagConditionRef& condition) {
 		std::string nameValue;
 		
 		Expect(_string);
@@ -456,14 +456,14 @@ void Parser::TAGBINCOND(TagCondition*& condition) {
 		}
 }
 
-void Parser::TAGEXISTSCOND(TagCondition*& condition) {
+void Parser::TAGEXISTSCOND(TagConditionRef& condition) {
 		Expect(34 /* "EXISTS" */);
 		Expect(_string);
-		condition=new TagExistsCondition(config.RegisterTag(Destring(t->val)));
+		condition=std::make_shared<TagExistsCondition>(config.RegisterTag(Destring(t->val)));
 		
 }
 
-void Parser::TAGLESSCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGLESSCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
@@ -472,18 +472,18 @@ void Parser::TAGLESSCOND(const std::string& tagName,TagCondition*& condition) {
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorLess,stringValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,sizeValue);
 			
 		} else SynErr(63);
 }
 
-void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
@@ -492,18 +492,18 @@ void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagCondition*& conditio
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorLessEqual,stringValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,sizeValue);
 			
 		} else SynErr(64);
 }
 
-void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGEQUALSCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
@@ -512,18 +512,18 @@ void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) 
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorEqual,stringValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,sizeValue);
 			
 		} else SynErr(65);
 }
 
-void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
@@ -532,18 +532,18 @@ void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& conditio
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorNotEqual,stringValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,sizeValue);
 			
 		} else SynErr(66);
 }
 
-void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGGREATERCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
@@ -552,18 +552,18 @@ void Parser::TAGGREATERCOND(const std::string& tagName,TagCondition*& condition)
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorGreater,stringValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,sizeValue);
 			
 		} else SynErr(67);
 }
 
-void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::string stringValue;
 		size_t      sizeValue;
 		
@@ -572,18 +572,18 @@ void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagCondition*& condi
 			STRING(stringValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorGreaterEqual,stringValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
 			TagId tagId=config.RegisterTag(tagName);
 			
-			condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
+			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,sizeValue);
 			
 		} else SynErr(68);
 }
 
-void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGISINCOND(const std::string& tagName,TagConditionRef& condition) {
 		std::list<std::string> values;
 		
 		Expect(31 /* "IN" */);
@@ -599,10 +599,10 @@ void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
 		TagId tagId=config.RegisterTag(tagName);
 		
 		if (values.size()==1) {
-		 condition=new TagBinaryCondition(tagId,operatorEqual,values.front());
+		 condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,values.front());
 		}
 		else {
-		 TagIsInCondition *isInCondition=new TagIsInCondition(tagId);
+		 TagIsInConditionRef isInCondition=std::make_shared<TagIsInCondition>(tagId);
 		
 		 for (std::list<std::string>::const_iterator s=values.begin();
 		      s!=values.end();
@@ -715,7 +715,7 @@ void Parser::PATH(TypeInfo& typeInfo) {
 void Parser::Parse()
 {
   t = NULL;
-  la = dummyToken = new Token();
+  la = dummyToken = std::make_shared<Token>();
   la->val = coco_string_create("Dummy Token");
   Get();
 	OST();

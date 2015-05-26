@@ -200,7 +200,7 @@ namespace osmscout {
 
       rawCoastlines.pop_front();
 
-      CoastRef coast=new Coast();
+      CoastRef coast=std::make_shared<Coast>();
 
       coast->id=coastline->GetId();
       coast->isArea=coastline->IsArea();

@@ -332,8 +332,8 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
   #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
       PangoFontDescription* font=GetFont(projection,
                                          parameter,
@@ -362,8 +362,8 @@ namespace osmscout {
       stream << "<rect x=\"" << label.bx1 << "\"" << " y=\"" << label.by1 << "\"" <<" width=\"" << label.bx2-label.bx1 << "\"" << " height=\"" << label.by2-label.by1 << "\""
               << " fill=\"none\" stroke=\"blue\"/>" << std::endl;*/
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
-      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
+      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
      PangoFontDescription* font=GetFont(projection,
                                         parameter,

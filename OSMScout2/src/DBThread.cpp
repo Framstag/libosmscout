@@ -159,7 +159,7 @@ void DBThread::Initialize()
     osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
     if (typeConfig) {
-      styleConfig=new osmscout::StyleConfig(typeConfig);
+      styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
       delete painter;
       painter=NULL;
@@ -289,7 +289,7 @@ void DBThread::TriggerMapRendering()
     osmscout::StopClock dataRetrievalTimer;
 
     mapService->GetObjects(searchParameter,
-                           styleConfig,
+                           *styleConfig,
                            projection,
                            data);
 
@@ -322,7 +322,7 @@ void DBThread::TriggerMapRendering()
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
   }
   else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig.Valid() << std::endl;
+    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig << std::endl;
 
     QPainter p;
 
@@ -443,7 +443,7 @@ bool DBThread::RenderMap(QPainter& painter,
     styleConfig->GetUnknownFillStyle(projection,
                                      unknownFillStyle);
 
-    if (unknownFillStyle.Valid()) {
+    if (unknownFillStyle) {
       backgroundColor=unknownFillStyle->GetFillColor();
     }
     else {

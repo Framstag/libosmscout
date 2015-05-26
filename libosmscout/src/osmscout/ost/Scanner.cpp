@@ -308,15 +308,13 @@ bool Scanner::Comment1() {
 }
 
 
-Token* Scanner::CreateToken() {
-  Token *t;
-
-  t = new Token();
+TokenRef Scanner::CreateToken() {
+  TokenRef t=std::make_shared<Token>();
 
   return t;
 }
 
-void Scanner::AppendVal(Token *t) {
+void Scanner::AppendVal(TokenRef& t) {
   delete [] t->val;
   t->val = new char[tlen+1];
 
@@ -324,7 +322,7 @@ void Scanner::AppendVal(Token *t) {
   t->val[tlen] = '\0';
 }
 
-Token* Scanner::NextToken() {
+TokenRef Scanner::NextToken() {
   while (ch == ' ' ||
 			(ch >= 9 && ch <= 10) || ch == 13
   ) NextCh();
@@ -448,10 +446,11 @@ Token* Scanner::NextToken() {
 }
 
 // get the next token (possibly a token already seen during peeking)
-Token* Scanner::Scan() {
-  if (tokens->next.Invalid()) {
+TokenRef Scanner::Scan() {
+  if (!tokens->next) {
     return pt = tokens = NextToken();
-  } else {
+  }
+  else {
     pt = tokens = tokens->next;
     return tokens;
   }
@@ -467,9 +466,9 @@ void Scanner::SetScannerBehindT()
 
 
 // peek for the next token, ignore pragmas
-Token* Scanner::Peek() {
+TokenRef Scanner::Peek() {
   do {
-    if (pt->next.Invalid()) {
+    if (!pt->next) {
       pt->next = NextToken();
     }
     pt = pt->next;

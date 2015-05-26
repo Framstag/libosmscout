@@ -474,8 +474,8 @@ namespace osmscout {
   {
     AddSource("areas2.tmp");
 
-    AddFilter(new AreaLocationProcessorFilter());
-    AddFilter(new AreaNodeReductionProcessorFilter());
+    AddFilter(std::make_shared<AreaLocationProcessorFilter>());
+    AddFilter(std::make_shared<AreaNodeReductionProcessorFilter>());
   }
 
   std::string SortAreaDataGenerator::GetDescription() const

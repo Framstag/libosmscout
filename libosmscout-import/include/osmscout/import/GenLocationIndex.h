@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -81,7 +82,7 @@ namespace osmscout {
 
     struct Region;
 
-    typedef Ref<Region> RegionRef;
+    typedef std::shared_ptr<Region> RegionRef;
 
     /**
       An area. An area is a administrative region, a city, a country, ...
@@ -89,7 +90,7 @@ namespace osmscout {
       An area has a name and also a number of locations, which are possibly
       within the area but area currently also represented by this area.
       */
-    struct Region : public Referencable
+    struct Region
     {
       FileOffset                           indexOffset; //!< Offset into the index file
       FileOffset                           dataOffset;  //!< Offset into the index file

@@ -90,20 +90,20 @@ namespace osmscout {
 
     areaMarkStyle.SetFillColor(Color(1.0,0,0.0,0.5));
 
-    landFill=new FillStyle();
+    landFill=std::make_shared<FillStyle>();
     landFill->SetFillColor(Color(241.0/255,238.0/255,233.0/255));
 
-    seaFill=new FillStyle();
+    seaFill=std::make_shared<FillStyle>();
     seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0/255));
 
-    TextStyleRef textStyle=new TextStyle();
+    TextStyleRef textStyle=std::make_shared<TextStyle>();
 
     textStyle->SetStyle(TextStyle::normal);
     textStyle->SetPriority(0);
     textStyle->SetTextColor(Color(0,0,0,0.5));
     textStyle->SetSize(1.2);
 
-    debugLabel=textStyle.Get();
+    debugLabel=textStyle;
   }
 
   MapPainter::~MapPainter()
@@ -253,7 +253,7 @@ namespace osmscout {
       }
 
       if (dynamic_cast<const ShieldStyle*>(&style)!=NULL &&
-          dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
+          dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
         double hx1=bx1-sameLabelSpace;
         double hx2=bx2+sameLabelSpace;
         double hy1=by1-sameLabelSpace;
@@ -340,7 +340,7 @@ namespace osmscout {
     styleConfig.GetLandFillStyle(projection,
                                  landFill);
 
-    if (landFill.Invalid()) {
+    if (!landFill) {
       landFill=this->landFill;
     }
 
@@ -372,15 +372,15 @@ namespace osmscout {
     styleConfig.GetCoastlineLineStyle(projection,
                                       coastlineLine);
 
-    if (seaFill.Invalid()) {
+    if (!seaFill) {
       seaFill=this->seaFill;
     }
 
-    if (coastFill.Invalid()) {
+    if (!coastFill) {
       coastFill=this->seaFill;
     }
 
-    if (unknownFill.Invalid()) {
+    if (!unknownFill) {
       unknownFill=this->seaFill;
     }
 
@@ -500,7 +500,7 @@ namespace osmscout {
           }
         }
 
-        if (coastlineLine.Valid()) {
+        if (coastlineLine) {
           size_t lineStart=0;
           size_t lineEnd;
 
@@ -808,9 +808,9 @@ namespace osmscout {
     double centerX=(minX+maxX)/2;
     double centerY=(minY+maxY)/2;
 
-    if (iconStyle.Valid()) {
+    if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
-          HasIcon(styleConfig,
+          HasIcon(*styleConfig,
                   parameter,
                   *iconStyle)) {
         LabelLayoutData data;
@@ -822,7 +822,7 @@ namespace osmscout {
 
         labelLayoutData.push_back(data);
       }
-      else if (iconStyle->GetSymbol().Valid()) {
+      else if (iconStyle->GetSymbol()) {
         LabelLayoutData data;
 
         data.position=iconStyle->GetPosition();
@@ -907,7 +907,7 @@ namespace osmscout {
     double offset=centerY;
 
     for (const auto& data : labelLayoutData) {
-      if (data.textStyle.Valid()) {
+      if (data.textStyle) {
 
         RegisterPointLabel(projection,
                            parameter,
@@ -919,13 +919,13 @@ namespace osmscout {
                            centerX,offset);
       }
       else if (data.icon) {
-        DrawIcon(data.iconStyle,
+        DrawIcon(data.iconStyle.get(),
                  centerX,offset);
       }
       else {
         DrawSymbol(projection,
                    parameter,
-                   data.iconStyle->GetSymbol(),
+                   *data.iconStyle->GetSymbol(),
                    centerX,offset);
       }
 
@@ -1126,12 +1126,12 @@ namespace osmscout {
                                         projection,
                                         pathSymbolStyle);
 
-      if (pathSymbolStyle.Valid()) {
+      if (pathSymbolStyle) {
         double symbolSpace=projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
 
         DrawContourSymbol(projection,
                           parameter,
-                          pathSymbolStyle->GetSymbol(),
+                          *pathSymbolStyle->GetSymbol(),
                           symbolSpace,
                           way->transStart, way->transEnd);
       }
@@ -1153,7 +1153,7 @@ namespace osmscout {
                                     projection,
                                     pathTextStyle);
 
-    if (pathTextStyle.Valid()) {
+    if (pathTextStyle) {
       std::string textLabel=pathTextStyle->GetLabel()->GetLabel(parameter,
                                                                 *data.buffer);
 
@@ -1168,7 +1168,7 @@ namespace osmscout {
       }
     }
 
-    if (shieldStyle.Valid()) {
+    if (shieldStyle) {
       std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
                                                                 *data.buffer);
 
@@ -1287,7 +1287,7 @@ namespace osmscout {
                                            fillStyle);
             }
 
-            if (fillStyle.Invalid()) {
+            if (!fillStyle) {
               continue;
             }
 
@@ -1573,7 +1573,7 @@ namespace osmscout {
 
     StopClock prepareAreasTimer;
 
-    PrepareAreas(styleConfig,
+    PrepareAreas(*styleConfig,
                  projection,
                  parameter,
                  data);
@@ -1586,7 +1586,7 @@ namespace osmscout {
 
     StopClock prepareWaysTimer;
 
-    PrepareWays(styleConfig,
+    PrepareWays(*styleConfig,
                 projection,
                 parameter,
                 data);
@@ -1598,13 +1598,13 @@ namespace osmscout {
     }
 
     // Optional callback after preprocessing data
-    AfterPreprocessing(styleConfig,
+    AfterPreprocessing(*styleConfig,
                        projection,
                        parameter,
                        data);
 
     // Optional callback after preprocessing data
-    BeforeDrawing(styleConfig,
+    BeforeDrawing(*styleConfig,
                   projection,
                   parameter,
                   data);
@@ -1613,7 +1613,7 @@ namespace osmscout {
     // Clear area with background color
     //
 
-    DrawGroundTiles(styleConfig,
+    DrawGroundTiles(*styleConfig,
                     projection,
                     parameter,
                     data);
@@ -1628,7 +1628,7 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    DrawAreas(styleConfig,
+    DrawAreas(*styleConfig,
               projection,
               parameter,
               data);
@@ -1645,7 +1645,7 @@ namespace osmscout {
 
     StopClock pathsTimer;
 
-    DrawWays(styleConfig,
+    DrawWays(*styleConfig,
              projection,
              parameter,
              data);
@@ -1662,7 +1662,7 @@ namespace osmscout {
 
     StopClock pathDecorationsTimer;
 
-    DrawWayDecorations(styleConfig,
+    DrawWayDecorations(*styleConfig,
                        projection,
                        parameter,
                        data);
@@ -1682,7 +1682,7 @@ namespace osmscout {
 
     StopClock pathLabelsTimer;
 
-    DrawWayLabels(styleConfig,
+    DrawWayLabels(*styleConfig,
                   projection,
                   parameter,
                   data);
@@ -1699,7 +1699,7 @@ namespace osmscout {
 
     StopClock nodesTimer;
 
-    DrawNodes(styleConfig,
+    DrawNodes(*styleConfig,
               projection,
               parameter,
               data);
@@ -1716,7 +1716,7 @@ namespace osmscout {
 
     StopClock areaLabelsTimer;
 
-    DrawAreaLabels(styleConfig,
+    DrawAreaLabels(*styleConfig,
                    projection,
                    parameter,
                    data);
@@ -1733,7 +1733,7 @@ namespace osmscout {
 
     StopClock poisTimer;
 
-    DrawPOINodes(styleConfig,
+    DrawPOINodes(*styleConfig,
                  projection,
                  parameter,
                  data);
@@ -1746,13 +1746,13 @@ namespace osmscout {
 
     StopClock labelsTimer;
 
-    DrawLabels(styleConfig,
+    DrawLabels(*styleConfig,
                projection,
                parameter);
 
     labelsTimer.Stop();
 
-    AfterDrawing(styleConfig,
+    AfterDrawing(*styleConfig,
                  projection,
                  parameter,
                  data);
