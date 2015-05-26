@@ -55,7 +55,7 @@ namespace osmscout {
     {
       std::vector<Entry> entries;
 
-      bool IndexIsValid(size_t index)
+      inline bool IndexIsValid(size_t index) const
       {
         return index<entries.size();
       }
@@ -183,43 +183,44 @@ namespace osmscout {
 
     if (!scanner.IsOpen() &&
         !scanner.Open(filename,mode,memoryMaped)) {
-      std::cerr << "Cannot open '" << filename << "'!" << std::endl;
+      std::cerr << "Cannot open '" << scanner.GetFilename() << "'!" << std::endl;
       return false;
     }
 
     scanner.SetPos(offset);
 
-    if (!scanner.Read(buffer,pageSize)) {
-      std::cerr << "Cannot read index page from file '" << filename << "'!" << std::endl;
+    if (!scanner.Read(buffer,
+                      pageSize)) {
+      std::cerr << "Cannot read index page from file '" << scanner.GetFilename() << "'!" << std::endl;
       return false;
     }
 
     size_t     currentPos=0;
-    N          sio=0;
-    FileOffset poo=0;
+    N          prevId=0;
+    FileOffset prefFileOffset=0;
 
     while (currentPos<pageSize &&
            buffer[currentPos]!=0) {
       unsigned int bytes;
-      N            si;
-      FileOffset   po;
+      N            curId;
+      FileOffset   curFileOffset;
       Entry        entry;
 
       bytes=DecodeNumber(&buffer[currentPos],
-                         si);
+                         curId);
 
       currentPos+=bytes;
 
       bytes=DecodeNumber(&buffer[currentPos],
-                         po);
+                         curFileOffset);
 
       currentPos+=bytes;
 
-      sio+=si;
-      poo+=po;
+      prevId+=curId;
+      prefFileOffset+=curFileOffset;
 
-      entry.startId=sio;
-      entry.fileOffset=poo;
+      entry.startId=prevId;
+      entry.fileOffset=prefFileOffset;
 
       page->entries.push_back(entry);
     }
@@ -260,8 +261,8 @@ namespace osmscout {
     pageCounts.resize(levels);
 
     scanner.SetPos(indexPageCountsOffset);
-    for (size_t i=0; i<levels; i++) {
-      scanner.ReadNumber(pageCounts[pageCounts.size()-1-i]);
+    for (size_t level=0; level<levels; level++) {
+      scanner.ReadNumber(pageCounts[level]);
     }
 
     delete [] buffer;
@@ -271,11 +272,11 @@ namespace osmscout {
 
     ReadPage(lastLevelPageStart,root);
 
-    unsigned long currentCacheSize=cacheSize;
-    unsigned long requiredCacheSize=0;
+    unsigned long currentCacheSize=cacheSize; // Available free space in cache
+    unsigned long requiredCacheSize=0;        // Space needed for caching everything
 
     for (size_t i=1; i<pageCounts.size(); i++) {
-      unsigned long resultingCacheSize;
+      unsigned long resultingCacheSize; // Cache size we actually use for this level
 
       requiredCacheSize+=pageCounts[i];
 
@@ -291,8 +292,6 @@ namespace osmscout {
       if (requiredCacheSize>cacheSize) {
         std::cerr << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!" << std::endl;
       }
-
-      //std::cout << "Setting cache size for level " << i+1 << " with " << pageCounts[i] << " entries to " << resultingCacheSize << std::endl;
 
       leafs.push_back(PageCache(resultingCacheSize));
     }
