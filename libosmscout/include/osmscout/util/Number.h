@@ -26,6 +26,8 @@
 
 #include <stddef.h>
 
+#include <osmscout/system/Types.h>
+
 namespace osmscout {
 
   /**
@@ -271,6 +273,24 @@ namespace osmscout {
   {
     return bits%8==0 ? bits/8 : bits/8+1;
   }
+
+  template<typename N>
+  uint8_t BytesNeededToEncodeNumber(N number)
+  {
+    uint8_t bytes=0;
+
+    while (number!=0) {
+      number=number/256;
+      bytes++;
+    }
+
+    if (bytes==0) {
+      bytes=1;
+    }
+
+    return bytes;
+  }
+
 }
 
 #endif

@@ -594,7 +594,7 @@ namespace osmscout
       }
     }
 
-    data.dataOffsetBytes=BytesNeededToAddressFileData(dataSize);
+    data.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
     progress.Info("Writing map for level "+
                   NumberToString(data.optLevel)+", index level "+

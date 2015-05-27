@@ -69,13 +69,6 @@ namespace osmscout {
   /**
    * \ingroup File
    *
-   * Number of bytes needed to address the given size.
-   */
-  extern OSMSCOUT_API uint8_t BytesNeededToAddressFileData(FileOffset size);
-
-  /**
-   * \ingroup File
-   *
    * Number of bytes needed to address the complete content of the given file.
    */
   extern OSMSCOUT_API bool BytesNeededToAddressFileData(const std::string& filename,
