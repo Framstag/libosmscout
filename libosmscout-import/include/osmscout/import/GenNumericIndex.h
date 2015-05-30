@@ -305,9 +305,8 @@ namespace osmscout {
     }
 
     progress.Info(std::string("Index for ")+NumberToString(dataCount)+" data elements will be stored in "+NumberToString(indexPageCounts.size())+ " levels");
-    for (size_t i=0; i<indexPageCounts.size(); i++) {
-      size_t level=i;
-      size_t levelIndex=indexPageCounts.size()-i-1;
+    for (size_t level=0; level<indexPageCounts.size(); level++) {
+      size_t levelIndex=indexPageCounts.size()-level-1;
 
       progress.Info(std::string("Page count for level ")+NumberToString(level)+" is "+NumberToString(indexPageCounts[levelIndex]));
       writer.WriteNumber(indexPageCounts[levelIndex]);
