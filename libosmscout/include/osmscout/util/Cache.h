@@ -109,10 +109,10 @@ namespace osmscout {
     typedef std::unordered_map<K,typename OrderList::iterator> Map;
 
   private:
-    unsigned long size;
-    unsigned long maxSize;
-    OrderList     order;
-    Map           map;
+    size_t    size;
+    size_t    maxSize;
+    OrderList order;
+    Map       map;
 
   private:
 
@@ -243,7 +243,7 @@ namespace osmscout {
       Set a new cache max size, possible striping the oldest entries
       from cache if the new size is smaller than the old one.
       */
-    void SetMaxSize(unsigned long maxSize)
+    void SetMaxSize(size_t maxSize)
     {
       this->maxSize=maxSize;
 
@@ -265,14 +265,14 @@ namespace osmscout {
     /**
       Returns the current size of the cache.
       */
-    unsigned long GetSize() const
+    size_t GetSize() const
     {
       return size;
     }
 
-    unsigned long GetMemory(const ValueSizer& sizer) const
+    size_t GetMemory(const ValueSizer& sizer) const
     {
-      unsigned long memory=0;
+      size_t memory=0;
 
       // Size of map
       memory+=map.size()*sizeof(CacheRef);
