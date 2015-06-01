@@ -41,6 +41,8 @@
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
+#include <osmscout/system/Assert.h>
+
 namespace osmscout {
 
   /**
