@@ -93,14 +93,15 @@ namespace osmscout {
       An implementation of ValueSizer has to be passed in the constructor of the cache
       to implement the GetSize() method.
       */
-    struct ValueSizer
+    class ValueSizer
     {
+    public:
       virtual ~ValueSizer()
       {
-
+        // no code
       }
 
-      virtual unsigned long GetSize(const V& value) const = 0;
+      virtual size_t GetSize(const V& value) const = 0;
     };
 
     typedef std::list<CacheEntry>                              OrderList;

@@ -70,7 +70,7 @@ namespace osmscout {
       */
     struct NumericIndexCacheValueSizer : public PageCache::ValueSizer
     {
-      unsigned long GetSize(const PageRef& value) const
+      size_t GetSize(const PageRef& value) const
       {
         return sizeof(value)+sizeof(Page)+sizeof(Entry)*value->entries.size();
       }

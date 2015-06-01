@@ -49,7 +49,7 @@ namespace osmscout {
 
     struct DataCacheValueSizer : public DataCache::ValueSizer
     {
-      unsigned long GetSize(const ValueType& value) const
+      size_t GetSize(const ValueType& value) const
       {
         return sizeof(value);
       }
