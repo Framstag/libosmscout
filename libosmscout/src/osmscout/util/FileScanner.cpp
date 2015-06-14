@@ -155,7 +155,7 @@ namespace osmscout {
     this->size=(FileOffset)size;
 
     if (fseek(file,0L,SEEK_SET)!=0) {
-      log.Error() << "Cannot seek to start of file '" << filename "'";
+      log.Error() << "Cannot seek to start of file '" << filename << "'";
       hasError=true;
       return false;
     }
