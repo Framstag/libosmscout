@@ -34,6 +34,11 @@
 #undef DEBUG
 #endif
 
+// Since we have a ERROR enumeration member
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace osmscout {
 
   /**
