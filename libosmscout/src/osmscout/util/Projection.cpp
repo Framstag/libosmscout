@@ -19,6 +19,8 @@
 
 #include <osmscout/util/Projection.h>
 
+#include <algorithm>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 

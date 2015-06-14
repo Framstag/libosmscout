@@ -19,6 +19,8 @@
 
 #include <osmscout/WaterIndex.h>
 
+#include <algorithm>
+
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/FileScanner.h>

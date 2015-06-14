@@ -19,6 +19,7 @@
 
 #include <osmscout/util/String.h>
 
+#include <cctype>
 #include <iomanip>
 #include <locale>
 

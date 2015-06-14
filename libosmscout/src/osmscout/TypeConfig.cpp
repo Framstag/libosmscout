@@ -19,6 +19,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <algorithm>
+
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/system/Assert.h>

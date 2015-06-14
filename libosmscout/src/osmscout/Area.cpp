@@ -19,6 +19,7 @@
 
 #include <osmscout/Area.h>
 
+#include <algorithm>
 #include <limits>
 
 #include <osmscout/util/String.h>
