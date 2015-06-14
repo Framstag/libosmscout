@@ -58,7 +58,7 @@ namespace osmscout {
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:
-    std::atomic_bool aborted;
+    std::atomic<bool> aborted;
   public:
     ThreadedBreaker();
 
