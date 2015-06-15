@@ -1070,7 +1070,7 @@ namespace osmscout {
    * in O(1) - without iterating of all feature(values) of an object.
    */
   template<class F>
-  class OSMSCOUT_API FeatureReader
+  class FeatureReader
   {
   private:
     std::vector<size_t> lookupTable;
@@ -1154,7 +1154,7 @@ namespace osmscout {
    * in O(1) - without iterating of all feature(values) of an object.
    */
   template<class F, class V>
-  class OSMSCOUT_API FeatureValueReader
+  class FeatureValueReader
   {
   private:
     std::vector<size_t> lookupTable;
@@ -1242,7 +1242,7 @@ namespace osmscout {
   typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue> AdminLevelFeatureValueReader;
 
   template <class F, class V>
-  class OSMSCOUT_API FeatureLabelReader
+  class FeatureLabelReader
   {
   private:
     std::vector<size_t> lookupTable;

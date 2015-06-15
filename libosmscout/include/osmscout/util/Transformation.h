@@ -141,7 +141,7 @@ namespace osmscout {
    * \ingroup Geometry
    */
   template<class P>
-  class OSMSCOUT_API CoordBufferImpl : public CoordBuffer
+  class CoordBufferImpl : public CoordBuffer
   {
   private:
     size_t bufferSize;
