@@ -45,6 +45,13 @@ namespace osmscout {
     // no code
   }
 
+  FeatureValue& FeatureValue::operator=(const FeatureValue& other)
+  {
+	assert(false);
+
+	return *this;
+  }
+
   bool FeatureValue::Read(FileScanner& /*scanner*/)
   {
     assert(false);
@@ -281,7 +288,7 @@ namespace osmscout {
     }
 
     if (type->GetFeatureCount()%8!=0) {
-      specialFlag=featureBits[type->GetFeatureMaskBytes()-1] & 0x80;
+      specialFlag=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
     }
     else {
       uint8_t addByte;
@@ -290,7 +297,7 @@ namespace osmscout {
         return false;
       }
 
-      specialFlag=addByte & 0x80;
+      specialFlag=(addByte & 0x80)!=0;
     }
 
     for (const auto &feature : type->GetFeatures()) {

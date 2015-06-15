@@ -75,7 +75,7 @@ namespace osmscout {
     virtual bool Read(FileScanner& scanner);
     virtual bool Write(FileWriter& writer);
 
-    virtual FeatureValue& operator=(const FeatureValue& other) = 0;
+    virtual FeatureValue& operator=(const FeatureValue& other);
     virtual bool operator==(const FeatureValue& other) const = 0;
 
     virtual inline bool operator!=(const FeatureValue& other) const
@@ -902,7 +902,7 @@ namespace osmscout {
 
     inline bool HasValue(size_t idx) const
     {
-      return featureBits[idx/8] & (1 << idx%8);
+      return (featureBits[idx/8] & (1 << idx%8))!=0;
     }
 
     inline FeatureValue* GetValue(size_t idx) const
