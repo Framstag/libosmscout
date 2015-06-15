@@ -45,7 +45,7 @@ namespace osmscout {
     // no code
   }
 
-  FeatureValue& FeatureValue::operator=(const FeatureValue& other)
+  FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/)
   {
 	assert(false);
 
