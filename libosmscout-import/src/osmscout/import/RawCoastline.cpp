@@ -19,6 +19,7 @@
 
 #include <osmscout/import/RawCoastline.h>
 
+#include <algorithm>
 #include <limits>
 
 #include <osmscout/system/Math.h>

@@ -19,6 +19,7 @@
 
 #include <osmscout/import/RawWay.h>
 
+#include <algorithm>
 #include <limits>
 
 #include <osmscout/TypeFeatures.h>
