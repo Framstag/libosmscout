@@ -51,7 +51,7 @@ namespace osmscout {
    * \ingroup Util
    * Number of bytes needed to store a lat,lon coordinate pair.
    */
-  extern OSMSCOUT_API const size_t coordByteSize;
+  const size_t coordByteSize=7;
 
   /**
    * \ingroup Geometry
