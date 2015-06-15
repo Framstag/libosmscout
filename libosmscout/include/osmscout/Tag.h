@@ -28,7 +28,7 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/util/Parser.h>
+#include <osmscout/util/Parsing.h>
 
 #include <osmscout/system/Types.h>
 
