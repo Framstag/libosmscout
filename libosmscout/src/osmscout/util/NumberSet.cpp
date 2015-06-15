@@ -128,6 +128,6 @@ namespace osmscout {
     size_t by=byte/32;
     size_t bi=byte%8;
 
-    return l->values[by] & (1 << bi);
+    return (l->values[by] & (1 << bi))!=0;
   }
 }

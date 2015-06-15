@@ -284,7 +284,7 @@ namespace osmscout {
     }
 #endif
 
-    return feof(file);
+    return feof(file)!=0;
   }
 
   std::string FileScanner::GetFilename() const

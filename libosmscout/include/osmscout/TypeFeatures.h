@@ -407,7 +407,7 @@ namespace osmscout {
 
     inline bool CanRoute() const
     {
-      return access & (footForward|footBackward|bicycleForward|bicycleBackward|carForward|carBackward);
+      return (access & (footForward|footBackward|bicycleForward|bicycleBackward|carForward|carBackward))!=0;
     }
 
     inline bool CanRoute(Vehicle vehicle) const
@@ -415,11 +415,11 @@ namespace osmscout {
       switch (vehicle)
       {
       case vehicleFoot:
-        return access & (footForward|footBackward);
+        return (access & (footForward|footBackward))!=0;
       case vehicleBicycle:
-        return access & (bicycleForward|bicycleBackward);
+        return (access & (bicycleForward|bicycleBackward))!=0;
       case vehicleCar:
-        return access & (carForward|carBackward);
+        return (access & (carForward|carBackward))!=0;
       }
 
       return false;
@@ -427,7 +427,7 @@ namespace osmscout {
 
     inline bool CanRouteForward() const
     {
-      return access & (footForward|bicycleForward|carForward);
+      return (access & (footForward|bicycleForward|carForward))!=0;
     }
 
     inline bool CanRouteForward(Vehicle vehicle) const
@@ -435,11 +435,11 @@ namespace osmscout {
       switch (vehicle)
       {
       case vehicleFoot:
-        return access & footForward;
+        return (access & footForward)!=0;
       case vehicleBicycle:
-        return access & bicycleForward;
+        return (access & bicycleForward)!=0;
       case vehicleCar:
-        return access & carForward;
+        return (access & carForward)!=0;
       }
 
       return false;
@@ -447,7 +447,7 @@ namespace osmscout {
 
     inline bool CanRouteBackward() const
     {
-      return access & (footBackward|bicycleBackward|carBackward);
+      return (access & (footBackward|bicycleBackward|carBackward))!=0;
     }
 
     inline bool CanRouteBackward(Vehicle vehicle) const
@@ -455,11 +455,11 @@ namespace osmscout {
       switch (vehicle)
       {
       case vehicleFoot:
-        return access & footBackward;
+        return (access & footBackward)!=0;
       case vehicleBicycle:
-        return access & bicycleBackward;
+        return (access & bicycleBackward)!=0;
       case vehicleCar:
-        return access & carBackward;
+        return (access & carBackward)!=0;
       }
 
       return false;
@@ -467,65 +467,65 @@ namespace osmscout {
 
     inline bool CanRouteFoot() const
     {
-      return (access & footForward) &&
-             (access & footBackward);
+      return (access & footForward)!=0 &&
+             (access & footBackward)!=0;
     }
 
     inline bool CanRouteFootForward() const
     {
-      return access & footForward;
+      return (access & footForward)!=0;
     }
 
     inline bool CanRouteFootBackward() const
     {
-      return access & footBackward;
+      return (access & footBackward)!=0;
     }
 
     inline bool CanRouteBicycle() const
     {
-      return (access & bicycleForward) &&
-             (access & bicycleBackward);
+      return (access & bicycleForward)!=0 &&
+             (access & bicycleBackward)!=0;
     }
 
     inline bool CanRouteBicycleForward() const
     {
-      return access & bicycleForward;
+      return (access & bicycleForward)!=0;
     }
 
     inline bool CanRouteBicycleBackward() const
     {
-      return access & bicycleBackward;
+      return (access & bicycleBackward)!=0;
     }
 
     inline bool CanRouteCar() const
     {
-      return (access & carForward) &&
-             (access & carBackward);
+      return (access & carForward)!=0 &&
+             (access & carBackward)!=0;
     }
 
     inline bool CanRouteCarForward() const
     {
-      return access & carForward;
+      return (access & carForward)!=0;
     }
 
     inline bool CanRouteCarBackward() const
     {
-      return access & carBackward;
+      return (access & carBackward)!=0;
     }
 
     inline bool IsOneway() const
     {
-      return access & (onewayForward|onewayBackward);
+      return (access & (onewayForward|onewayBackward))!=0;
     }
 
     inline bool IsOnewayForward() const
     {
-      return access & onewayForward;
+      return (access & onewayForward)!=0;
     }
 
     inline bool IsOnewayBackward() const
     {
-      return access & onewayBackward;
+      return (access & onewayBackward)!=0;
     }
 
     bool Read(FileScanner& scanner);
