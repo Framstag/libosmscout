@@ -29,14 +29,11 @@
 #include <osmscout/LocationService.h>
 #include <osmscout/MapService.h>
 #include <osmscout/RoutingService.h>
-
 #include <osmscout/RoutePostprocessor.h>
 
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/util/Breaker.h>
-
-#include <osmscout/util/GeoBox.h>
 
 #include "Settings.h"
 
@@ -44,6 +41,7 @@ struct RenderMapRequest
 {
   double                  lon;
   double                  lat;
+  double                  angle;
   osmscout::Magnification magnification;
   size_t                  width;
   size_t                  height;
@@ -75,6 +73,7 @@ public:
 class DBThread : public QObject
 {
   Q_OBJECT
+  Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename)
 
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
@@ -89,45 +88,51 @@ public slots:
   void ReloadStyle(const QString &suffix="");
 
 private:
-  SettingsRef                  settings;
-  mutable QMutex               mutex;
-  osmscout::DatabaseParameter  databaseParameter;
-  osmscout::StyleConfigRef     styleConfig;
-  osmscout::MapData            data;
-  osmscout::MapPainterQt       *painter;
+  double                        dpi;
 
-  osmscout::DatabaseRef        database;
-  osmscout::LocationServiceRef locationService;
-  osmscout::MapServiceRef      mapService;
-  osmscout::RouterParameter    routerParameter;
-  osmscout::RoutingServiceRef  router;
+  mutable QMutex                mutex;
 
-  osmscout::RoutePostprocessor routePostprocessor;
-  QString                      iconDirectory;
-  QString                      m_stylesheetFilename;
+  osmscout::DatabaseParameter   databaseParameter;
+  osmscout::DatabaseRef         database;
+  osmscout::LocationServiceRef  locationService;
+  osmscout::MapServiceRef       mapService;
+  osmscout::MercatorProjection  projection;
+  osmscout::RouterParameter     routerParameter;
+  osmscout::RoutingServiceRef   router;
+  osmscout::RoutePostprocessor  routePostprocessor;
 
-  QImage                       *currentImage;
-  double                       currentLat;
-  double                       currentLon;
-  osmscout::Magnification      currentMagnification;
+  osmscout::StyleConfigRef      styleConfig;
+  osmscout::MapData             data;
+  osmscout::MapPainterQt        *painter;
+  QString                       iconDirectory;
+  QString                       stylesheetFilename;
 
-  QImage                       *finishedImage;
-  double                       finishedLat;
-  double                       finishedLon;
-  osmscout::Magnification      finishedMagnification;
+  QImage                        *currentImage;
+  double                        currentLat;
+  double                        currentLon;
+  double                        currentAngle;
+  osmscout::Magnification       currentMagnification;
 
-  RenderMapRequest             currentRenderRequest;
-  bool                         doRender;
-  QBreaker*                    renderBreaker;
-  osmscout::BreakerRef         renderBreakerRef;
+  QImage                        *finishedImage;
+  double                        finishedLat;
+  double                        finishedLon;
+  double                        finishedAngle;
+  osmscout::Magnification       finishedMagnification;
+
+  RenderMapRequest              currentRenderRequest;
+  bool                          doRender;
+  QBreaker*                     renderBreaker;
+  osmscout::BreakerRef          renderBreakerRef;
 
 private:
-  DBThread(const SettingsRef& settings);
+  DBThread();
 
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
 public:
-  QString stylesheetFilename();
+  QString GetStylesheetFilename() const;
+
+  void GetProjection(osmscout::MercatorProjection& projection);
 
   void UpdateRenderRequest(const RenderMapRequest& request);
 
@@ -150,7 +155,6 @@ public:
                           size_t limit,
                           osmscout::LocationSearchResult& result) const;
 
-  /*
   bool CalculateRoute(osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,
                       const osmscout::ObjectFileRef& startObject,
@@ -176,9 +180,9 @@ public:
                               size_t& nodeIndex);
 
   void ClearRoute();
-  void AddRoute(const osmscout::Way& way);*/
+  void AddRoute(const osmscout::Way& way);
 
-  static bool InitializeInstance(const SettingsRef& settings);
+  static bool InitializeInstance();
   static DBThread* GetInstance();
   static void FreeInstance();
 };

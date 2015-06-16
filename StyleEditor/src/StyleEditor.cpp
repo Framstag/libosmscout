@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
   QThread thread;
 
-  if (!DBThread::InitializeInstance(settings)) {
+  if (!DBThread::InitializeInstance(/*settings*/)) {
     std::cerr << "Cannot initialize DBThread" << std::endl;
   }
 
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
   delete window;
 
-  QString tmpStylesheet(dbThread->stylesheetFilename()+TMP_SUFFIX);
+  QString tmpStylesheet(dbThread->GetStylesheetFilename()+TMP_SUFFIX);
   if(QFile::exists(tmpStylesheet)){
       QFile::remove(tmpStylesheet);
   }

@@ -24,8 +24,8 @@
 
 #include <QApplication>
 #include <QMutexLocker>
-
-#include <osmscout/StyleConfig.h>
+#include <QDebug>
+#include <QDir>
 
 #include <osmscout/util/StopClock.h>
 
@@ -54,17 +54,16 @@ void QBreaker::Reset()
 }
 
 
-DBThread::DBThread(const SettingsRef& settings)
- : settings(settings),
-   styleConfig(NULL),
-   painter(NULL),
-   database(new osmscout::Database(databaseParameter)),
+DBThread::DBThread()
+ : database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
+   painter(NULL),
    iconDirectory(),
    currentImage(NULL),
    currentLat(0.0),
    currentLon(0.0),
+   currentAngle(0.0),
    currentMagnification(0),
    finishedImage(NULL),
    finishedLat(0.0),
@@ -75,6 +74,9 @@ DBThread::DBThread(const SettingsRef& settings)
    renderBreaker(new QBreaker()),
    renderBreakerRef(renderBreaker)
 {
+    QScreen *srn = QApplication::screens().at(0);
+
+    dpi = (double)srn->physicalDotsPerInch();
 }
 
 void DBThread::FreeMaps()
@@ -105,11 +107,9 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
                                                       routerParameter,
                                                       vehicle);
 
-    std::cout << "Opening routing database..." << std::endl;
     if (!router->Open()) {
       return false;
     }
-    std::cout << "done." << std::endl;
   }
 
   return true;
@@ -117,33 +117,69 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
 
 void DBThread::Initialize()
 {
+#ifdef __ANDROID__
+    QStringList docPaths=QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+
+    QString databaseDirectory;
+
+    // look for standard.oss in each directory
+    for(int i=0; i < docPaths.size(); i++) {
+        QStringList list_filters;
+        list_filters << "osmscout";
+
+        QDir path(docPaths[i]);
+        QStringList list_files = path.entryList(list_filters,QDir::NoDotAndDotDot | QDir::Dirs);
+
+        if(!(list_files.size() == 1)) {
+            continue;
+        }
+
+        databaseDirectory=path.canonicalPath()+"/osmscout";
+    }
+
+    if(databaseDirectory.length() == 0) {
+        qDebug() << "ERROR: map database directory not found";
+    }
+    else {
+        qDebug() << "Loading database from " << databaseDirectory;
+    }
+
+    QString stylesheetFilename=databaseDirectory+"/standard.oss";
+
+    qDebug() << "Loading style sheet from " << stylesheetFilename;
+
+#else
   QStringList cmdLineArgs = QApplication::arguments();
   QString databaseDirectory = cmdLineArgs.size() > 1 ? cmdLineArgs.at(1) : QDir::currentPath();
-  m_stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
+  stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons" + QDir::separator();
   emit stylesheetFilenameChanged();
+#endif
 
   if (database->Open(databaseDirectory.toLocal8Bit().data())) {
-    if (database->GetTypeConfig()) {
-      if(painter) {
-        delete painter;
-        painter = NULL;
-      }
-      styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
+    osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
-      if (!styleConfig->Load(m_stylesheetFilename.toLocal8Bit().data())) {
-        delete styleConfig;
+    if (typeConfig) {
+      styleConfig=new osmscout::StyleConfig(typeConfig);
+
+      delete painter;
+      painter=NULL;
+
+      if (styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+          painter=new osmscout::MapPainterQt(styleConfig);
+      }
+      else {
+        qDebug() << "Cannot load style sheet!";
         styleConfig=NULL;
-      } else {
-          painter = new osmscout::MapPainterQt(styleConfig);
       }
     }
     else {
+      qDebug() << "TypeConfig invalid!";
       styleConfig=NULL;
     }
   }
   else {
-    std::cerr << "Cannot open database!" << std::endl;
+    qDebug() << "Cannot open database!";
     return;
   }
 
@@ -151,27 +187,21 @@ void DBThread::Initialize()
   DatabaseLoadedResponse response;
 
   if (!database->GetBoundingBox(response.boundingBox)) {
-    std::cerr << "Cannot read initial bounding box" << std::endl;
+    qDebug() << "Cannot read initial bounding box";
     return;
   }
-
-  std::cout << "Initial bounding box " << response.boundingBox.GetDisplayText() << std::endl;
 
   emit InitialisationFinished(response);
 }
 
-QString DBThread::stylesheetFilename(){
-    return m_stylesheetFilename;
-}
-
 void DBThread::ReloadStyle(const QString &suffix){
-    if(m_stylesheetFilename.isNull()){
+    if(stylesheetFilename.isNull()){
         return;
     }
     if(styleConfig.Invalid()){
         styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
     }
-    if (!styleConfig->Load((m_stylesheetFilename+suffix).toLocal8Bit().data())) {
+    if (!styleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
         delete styleConfig;
         styleConfig=NULL;
 
@@ -191,6 +221,17 @@ void DBThread::Finalize()
   if (database->IsOpen()) {
     database->Close();
   }
+}
+
+QString DBThread::GetStylesheetFilename() const {
+    return stylesheetFilename;
+}
+
+void DBThread::GetProjection(osmscout::MercatorProjection& projection)
+{
+    QMutexLocker locker(&mutex);
+
+    projection=this->projection;
 }
 
 void DBThread::UpdateRenderRequest(const RenderMapRequest& request)
@@ -229,15 +270,16 @@ void DBThread::TriggerMapRendering()
 
   currentLon=request.lon;
   currentLat=request.lat;
+  currentAngle=request.angle;
   currentMagnification=request.magnification;
 
-  if (database->IsOpen() && styleConfig.Valid()) {
-    osmscout::MercatorProjection  projection;
+  if (database->IsOpen() &&
+      styleConfig) {
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
 
     searchParameter.SetBreaker(renderBreakerRef);
-
+    searchParameter.SetMaximumAreaLevel(4);
     searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
 
     std::list<std::string>        paths;
@@ -258,8 +300,9 @@ void DBThread::TriggerMapRendering()
 
     projection.Set(currentLon,
                    currentLat,
+                   currentAngle,
                    currentMagnification,
-                   settings->GetDPI(),
+                   dpi,
                    request.width,
                    request.height);
 
@@ -271,8 +314,8 @@ void DBThread::TriggerMapRendering()
                            data);
 
     if (drawParameter.GetRenderSeaLand()) {
-        mapService->GetGroundTiles(projection,
-                                   data.groundTiles);
+      mapService->GetGroundTiles(projection,
+                                 data.groundTiles);
     }
 
     dataRetrievalTimer.Stop();
@@ -287,9 +330,9 @@ void DBThread::TriggerMapRendering()
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
     painter->DrawMap(projection,
-                    drawParameter,
-                    data,
-                    &p);
+                     drawParameter,
+                     data,
+                     &p);
 
     p.end();
 
@@ -332,6 +375,7 @@ void DBThread::TriggerMapRendering()
   std::swap(currentImage,finishedImage);
   std::swap(currentLon,finishedLon);
   std::swap(currentLat,finishedLat);
+  std::swap(currentAngle,finishedAngle);
   std::swap(currentMagnification,finishedMagnification);
 
   emit HandleMapRenderingResult();
@@ -342,7 +386,7 @@ bool DBThread::RenderMap(QPainter& painter,
 {
   QMutexLocker locker(&mutex);
 
-  if (finishedImage==NULL) {
+  if (finishedImage==NULL || !styleConfig) {
     painter.fillRect(0,0,request.width,request.height,
                      QColor::fromRgbF(0.0,0.0,0.0,1.0));
 
@@ -357,9 +401,8 @@ bool DBThread::RenderMap(QPainter& painter,
     return false;
   }
 
-  osmscout::MercatorProjection projection;
-
   projection.Set(finishedLon,finishedLat,
+                 finishedAngle,
                  finishedMagnification,
                  finishedImage->width(),
                  finishedImage->height());
@@ -397,8 +440,19 @@ bool DBThread::RenderMap(QPainter& painter,
   double dx=0;
   double dy=0;
   if (request.lon!=finishedLon || request.lat!=finishedLat) {
-    dx-=(request.lon-finishedLon)*request.width/boundingBox.GetWidth();
-    dy+=(request.lat-finishedLat)*request.height/boundingBox.GetHeight();
+      double rx,ry,fx,fy;
+
+      if (projection.GeoToPixel(request.lon,
+                                request.lat,
+                                rx,
+                                ry) &&
+          projection.GeoToPixel(finishedLon,
+                                finishedLat,
+                                fx,
+                                fy)) {
+          dx=fx-rx;
+          dy=fy-ry;
+      }
   }
 
   if (dx!=0 ||
@@ -409,12 +463,17 @@ bool DBThread::RenderMap(QPainter& painter,
     styleConfig->GetUnknownFillStyle(projection,
                                      unknownFillStyle);
 
-    backgroundColor=unknownFillStyle->GetFillColor();
+    if (unknownFillStyle.Valid()) {
+      backgroundColor=unknownFillStyle->GetFillColor();
+    }
+    else {
+        backgroundColor=osmscout::Color(0,0,0);
+    }
 
     painter.fillRect(0,
                      0,
-                     request.width,
-                     request.height,
+                     projection.GetWidth(),
+                     projection.GetHeight(),
                      QColor::fromRgbF(backgroundColor.GetR(),
                                       backgroundColor.GetG(),
                                       backgroundColor.GetB(),
@@ -427,6 +486,7 @@ bool DBThread::RenderMap(QPainter& painter,
          finishedImage->height()==(int)request.height &&
          finishedLon==request.lon &&
          finishedLat==request.lat &&
+         finishedAngle==request.angle &&
          finishedMagnification==request.magnification;
 }
 
@@ -487,7 +547,7 @@ bool DBThread::SearchForLocations(const std::string& searchPattern,
   return locationService->SearchForLocations(search,
                                              result);
 }
-/*
+
 bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
                               const osmscout::RoutingProfile& routingProfile,
                               const osmscout::ObjectFileRef& startObject,
@@ -527,18 +587,18 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
     return false;
   }
 
-  osmscout::TypeConfig *typeConfig=router->GetTypeConfig();
+  osmscout::TypeConfigRef typeConfig=router->GetTypeConfig();
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
-  postprocessors.push_back(new osmscout::RoutePostprocessor::DistanceAndTimePostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor(start));
-  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor(target));
-  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::CrossingWaysPostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::DirectionPostprocessor());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>(start));
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>(target));
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayNamePostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
 
-  osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
+  osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
 
   instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
@@ -602,13 +662,17 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 {
   QMutexLocker locker(&mutex);
 
+  if (!AssureRouter(vehicle)) {
+    return false;
+  }
+
   object.Invalidate();
 
   if (refObject.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
 
     if (!database->GetNodeByOffset(refObject.GetFileOffset(),
-                                  node)) {
+                                   node)) {
       return false;
     }
 
@@ -623,7 +687,7 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
     osmscout::AreaRef area;
 
     if (!database->GetAreaByOffset(refObject.GetFileOffset(),
-                                  area)) {
+                                   area)) {
       return false;
     }
 
@@ -637,13 +701,12 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
                                           radius,
                                           object,
                                           nodeIndex);
-
   }
   else if (refObject.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
 
     if (!database->GetWayByOffset(refObject.GetFileOffset(),
-                                 way)) {
+                                  way)) {
       return false;
     }
 
@@ -657,17 +720,17 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
   else {
     return true;
   }
-}*/
+}
 
 static DBThread* dbThreadInstance=NULL;
 
-bool DBThread::InitializeInstance(const SettingsRef& settings)
+bool DBThread::InitializeInstance()
 {
   if (dbThreadInstance!=NULL) {
     return false;
   }
 
-  dbThreadInstance=new DBThread(settings);
+  dbThreadInstance=new DBThread();
 
   return true;
 }

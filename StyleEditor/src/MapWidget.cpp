@@ -58,7 +58,7 @@ MapWidget::~MapWidget()
 
 QString MapWidget::stylesheetFilename() {
     DBThread *dbThread=DBThread::GetInstance();
-    return dbThread->stylesheetFilename();
+    return dbThread->GetStylesheetFilename();
 }
 
 void MapWidget::redraw()
