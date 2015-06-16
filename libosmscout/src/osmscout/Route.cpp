@@ -155,8 +155,8 @@ namespace osmscout {
     return stream.str();
   }
 
-  RouteDescription::NameChangedDescription::NameChangedDescription(NameDescription* originDescription,
-                                                                   NameDescription* targetDescription)
+  RouteDescription::NameChangedDescription::NameChangedDescription(const NameDescriptionRef& originDescription,
+                                                                   const NameDescriptionRef& targetDescription)
   : originDescription(originDescription),
     targetDescription(targetDescription)
   {
@@ -181,8 +181,8 @@ namespace osmscout {
   }
 
   RouteDescription::CrossingWaysDescription::CrossingWaysDescription(size_t exitCount,
-                                                                     NameDescription* originDescription,
-                                                                     NameDescription* targetDescription)
+                                                                     const NameDescriptionRef& originDescription,
+                                                                     const NameDescriptionRef& targetDescription)
   : exitCount(exitCount),
     originDescription(originDescription),
     targetDescription(targetDescription)
@@ -190,7 +190,7 @@ namespace osmscout {
     // no code
   }
 
-  void RouteDescription::CrossingWaysDescription::AddDescription(NameDescription* description)
+  void RouteDescription::CrossingWaysDescription::AddDescription(const NameDescriptionRef& description)
   {
     descriptions.push_back(description);
   }
@@ -332,7 +332,7 @@ namespace osmscout {
     return "Leave roundabout";
   }
 
-  RouteDescription::MotorwayEnterDescription::MotorwayEnterDescription(NameDescription* targetDescription)
+  RouteDescription::MotorwayEnterDescription::MotorwayEnterDescription(const NameDescriptionRef& targetDescription)
   : toDescription(targetDescription)
   {
     // no code
@@ -350,8 +350,8 @@ namespace osmscout {
     return result;
   }
 
-  RouteDescription::MotorwayChangeDescription::MotorwayChangeDescription(NameDescription* fromDescription,
-                                                                         NameDescription* toDescription)
+  RouteDescription::MotorwayChangeDescription::MotorwayChangeDescription(const NameDescriptionRef& fromDescription,
+                                                                         const NameDescriptionRef& toDescription)
   : fromDescription(fromDescription),
     toDescription(toDescription)
   {
@@ -363,7 +363,7 @@ namespace osmscout {
     return "Change motorway";
   }
 
-  RouteDescription::MotorwayLeaveDescription::MotorwayLeaveDescription(NameDescription* fromDescription)
+  RouteDescription::MotorwayLeaveDescription::MotorwayLeaveDescription(const NameDescriptionRef& fromDescription)
   : fromDescription(fromDescription)
   {
     // no code
@@ -374,7 +374,7 @@ namespace osmscout {
     return "Leave motorway";
   }
 
-  RouteDescription::MotorwayJunctionDescription::MotorwayJunctionDescription(NameDescription* junctionDescription)
+  RouteDescription::MotorwayJunctionDescription::MotorwayJunctionDescription(const NameDescriptionRef& junctionDescription)
   : junctionDescription(junctionDescription)
   {
     // no code
@@ -409,7 +409,7 @@ namespace osmscout {
     return entry!=descriptionMap.end() && entry->second;
   }
 
-  RouteDescription::Description* RouteDescription::Node::GetDescription(const char* name) const
+  RouteDescription::DescriptionRef RouteDescription::Node::GetDescription(const char* name) const
   {
     std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
 
@@ -440,7 +440,7 @@ namespace osmscout {
   }
 
   void RouteDescription::Node::AddDescription(const char* name,
-                                              Description* description)
+                                              const DescriptionRef& description)
   {
     descriptions.push_back(description);
     descriptionMap[name]=description;

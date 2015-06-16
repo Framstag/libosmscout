@@ -1077,7 +1077,7 @@ namespace osmscout {
         value->SetMaxSpeed(std::numeric_limits<uint8_t>::max());
       }
       else {
-        value->SetMaxSpeed(valueNumeric);
+        value->SetMaxSpeed((uint8_t)valueNumeric);
       }
     }
   }

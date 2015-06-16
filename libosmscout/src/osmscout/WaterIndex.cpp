@@ -19,6 +19,8 @@
 
 #include <osmscout/WaterIndex.h>
 
+#include <algorithm>
+
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/FileScanner.h>
@@ -208,7 +210,7 @@ namespace osmscout {
 
                 tile.coords[n].Set(x & ~(1 << 15),
                                    y,
-                                   x & (1 << 15));
+                                   (x & (1 << 15))!=0);
               }
 
               tiles.push_back(tile);

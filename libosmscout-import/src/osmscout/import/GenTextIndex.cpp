@@ -28,6 +28,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/GenTextIndex.h>
@@ -184,9 +185,9 @@ namespace osmscout
     }
 
     // Determine the number of bytes needed to store offsets
-    uint8_t minNodeOffsetSizeBytes = BytesNeededToAddressFileData(nodesFileSize);
-    uint8_t minWayOffsetSizeBytes  = BytesNeededToAddressFileData(waysFileSize);
-    uint8_t minAreaOffsetSizeBytes = BytesNeededToAddressFileData(areasFileSize);
+    uint8_t minNodeOffsetSizeBytes = BytesNeededToEncodeNumber(nodesFileSize);
+    uint8_t minWayOffsetSizeBytes  = BytesNeededToEncodeNumber(waysFileSize);
+    uint8_t minAreaOffsetSizeBytes = BytesNeededToEncodeNumber(areasFileSize);
 
     progress.Info("Node filesize is " + NumberToString(nodesFileSize) + " bytes, "+
                   "req. " + NumberToString(minNodeOffsetSizeBytes) +" bytes");

@@ -41,6 +41,8 @@
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
+#include <osmscout/system/Assert.h>
+
 namespace osmscout {
 
   /**
@@ -73,7 +75,7 @@ namespace osmscout {
     virtual bool Read(FileScanner& scanner);
     virtual bool Write(FileWriter& writer);
 
-    virtual FeatureValue& operator=(const FeatureValue& other) = 0;
+    virtual FeatureValue& operator=(const FeatureValue& other);
     virtual bool operator==(const FeatureValue& other) const = 0;
 
     virtual inline bool operator!=(const FeatureValue& other) const
@@ -91,7 +93,7 @@ namespace osmscout {
    * A feature could just be an alias for one tag (like "name") but it could also combine
    * a number of attributes (e.g. access and all its variations).
    */
-  class OSMSCOUT_API Feature : public Referencable
+  class OSMSCOUT_API Feature
   {
   private:
     std::unordered_map<std::string,size_t> labels;
@@ -140,7 +142,7 @@ namespace osmscout {
                        FeatureValueBuffer& buffer) const = 0;
   };
 
-  typedef Ref<Feature> FeatureRef;
+  typedef std::shared_ptr<Feature> FeatureRef;
 
   /**
    * An instantiation of a feature for a certain type.
@@ -289,7 +291,7 @@ namespace osmscout {
     TypeInfo& SetType(const std::string& name);
 
     TypeInfo& AddCondition(unsigned char types,
-                           TagCondition* condition);
+                           const TagConditionRef& condition);
 
     /**
      * Add a feature to this type
@@ -900,7 +902,7 @@ namespace osmscout {
 
     inline bool HasValue(size_t idx) const
     {
-      return featureBits[idx/8] & (1 << idx%8);
+      return (featureBits[idx/8] & (1 << idx%8))!=0;
     }
 
     inline FeatureValue* GetValue(size_t idx) const

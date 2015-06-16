@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -28,8 +29,6 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
 #include <osmscout/GeoCoord.h>
-
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -82,7 +81,7 @@ namespace osmscout {
      * \ingroup Routing
      * Base class of all descriptions.
      */
-    class OSMSCOUT_API Description : public Referencable
+    class OSMSCOUT_API Description
     {
     public:
       virtual ~Description();
@@ -90,7 +89,7 @@ namespace osmscout {
       virtual std::string GetDebugString() const = 0;
     };
 
-    typedef Ref<Description> DescriptionRef;
+    typedef std::shared_ptr<Description> DescriptionRef;
 
     /**
      * \ingroup Routing
@@ -109,7 +108,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef Ref<StartDescription> StartDescriptionRef;
+    typedef std::shared_ptr<StartDescription> StartDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -128,7 +127,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef Ref<TargetDescription> TargetDescriptionRef;
+    typedef std::shared_ptr<TargetDescription> TargetDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -157,7 +156,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef Ref<NameDescription> NameDescriptionRef;
+    typedef std::shared_ptr<NameDescription> NameDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -170,8 +169,8 @@ namespace osmscout {
       NameDescriptionRef targetDescription;
 
     public:
-      NameChangedDescription(NameDescription* originDescription,
-                             NameDescription* targetDescription);
+      NameChangedDescription(const NameDescriptionRef& originDescription,
+                             const NameDescriptionRef& targetDescription);
 
       std::string GetDebugString() const;
 
@@ -186,7 +185,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<NameChangedDescription> NameChangedDescriptionRef;
+    typedef std::shared_ptr<NameChangedDescription> NameChangedDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -202,10 +201,10 @@ namespace osmscout {
 
     public:
       CrossingWaysDescription(size_t exitCount,
-                              NameDescription* originDescription,
-                              NameDescription* targetDescription);
+                              const NameDescriptionRef& originDescription,
+                              const NameDescriptionRef& targetDescription);
 
-      void AddDescription(NameDescription* description);
+      void AddDescription(const NameDescriptionRef& description);
 
       std::string GetDebugString() const;
 
@@ -235,7 +234,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<CrossingWaysDescription> CrossingWaysDescriptionRef;
+    typedef std::shared_ptr<CrossingWaysDescription> CrossingWaysDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -298,7 +297,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<DirectionDescription> DirectionDescriptionRef;
+    typedef std::shared_ptr<DirectionDescription> DirectionDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -312,7 +311,7 @@ namespace osmscout {
       std::string GetDebugString() const;
     };
 
-    typedef Ref<TurnDescription> TurnDescriptionRef;
+    typedef std::shared_ptr<TurnDescription> TurnDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -326,7 +325,7 @@ namespace osmscout {
       std::string GetDebugString() const;
     };
 
-    typedef Ref<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
+    typedef std::shared_ptr<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -348,7 +347,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<RoundaboutLeaveDescription> RoundaboutLeaveDescriptionRef;
+    typedef std::shared_ptr<RoundaboutLeaveDescription> RoundaboutLeaveDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -360,7 +359,7 @@ namespace osmscout {
       NameDescriptionRef toDescription;
 
     public:
-      MotorwayEnterDescription(NameDescription* toDescription);
+      MotorwayEnterDescription(const NameDescriptionRef& toDescription);
 
       std::string GetDebugString() const;
 
@@ -370,7 +369,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<MotorwayEnterDescription> MotorwayEnterDescriptionRef;
+    typedef std::shared_ptr<MotorwayEnterDescription> MotorwayEnterDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -383,8 +382,8 @@ namespace osmscout {
       NameDescriptionRef toDescription;
 
     public:
-      MotorwayChangeDescription(NameDescription* fromDescription,
-                                NameDescription* toDescription);
+      MotorwayChangeDescription(const NameDescriptionRef& fromDescription,
+                                const NameDescriptionRef& toDescription);
 
       std::string GetDebugString() const;
 
@@ -399,7 +398,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<MotorwayChangeDescription> MotorwayChangeDescriptionRef;
+    typedef std::shared_ptr<MotorwayChangeDescription> MotorwayChangeDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -411,7 +410,7 @@ namespace osmscout {
       NameDescriptionRef fromDescription;
 
     public:
-      MotorwayLeaveDescription(NameDescription* fromDescription);
+      MotorwayLeaveDescription(const NameDescriptionRef& fromDescription);
 
       std::string GetDebugString() const;
 
@@ -421,7 +420,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<MotorwayLeaveDescription> MotorwayLeaveDescriptionRef;
+    typedef std::shared_ptr<MotorwayLeaveDescription> MotorwayLeaveDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -433,7 +432,7 @@ namespace osmscout {
       NameDescriptionRef junctionDescription;
 
     public:
-      MotorwayJunctionDescription(NameDescription* junctionDescription);
+      MotorwayJunctionDescription(const NameDescriptionRef& junctionDescription);
 
       std::string GetDebugString() const;
 
@@ -443,7 +442,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<MotorwayJunctionDescription> MotorwayJunctionDescriptionRef;
+    typedef std::shared_ptr<MotorwayJunctionDescription> MotorwayJunctionDescriptionRef;
 
     /**
      * \ingroup Routing
@@ -538,13 +537,14 @@ namespace osmscout {
       }
 
       bool HasDescription(const char* name) const;
-      Description* GetDescription(const char* name) const;
+      DescriptionRef GetDescription(const char* name) const;
 
       void SetDistance(double distance);
       void SetTime(double time);
       void SetLocation(const GeoCoord &coord);
 
-      void AddDescription(const char* name, Description* description);
+      void AddDescription(const char* name,
+                          const DescriptionRef& description);
     };
 
   private:

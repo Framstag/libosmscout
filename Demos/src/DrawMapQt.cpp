@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
                      height);
 
       mapService->GetObjects(searchParameter,
-                             styleConfig,
+                             *styleConfig,
                              projection,
                              data);
 

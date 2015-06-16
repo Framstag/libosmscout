@@ -158,12 +158,10 @@ namespace osmscout {
       progress.SetProgress(d,dataCount);
 
       FileOffset readPos;
+      T          data;
 
-      scanner.GetPos(readPos);
-
-      T data;
-
-      if (!ReadData(*typeConfig,
+      if (!scanner.GetPos(readPos) ||
+          !ReadData(*typeConfig,
                     scanner,
                     data)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -307,9 +305,11 @@ namespace osmscout {
     }
 
     progress.Info(std::string("Index for ")+NumberToString(dataCount)+" data elements will be stored in "+NumberToString(indexPageCounts.size())+ " levels");
-    for (size_t i=0; i<indexPageCounts.size(); i++) {
-      progress.Info(std::string("Page count for level ")+NumberToString(indexPageCounts.size()-i)+" is "+NumberToString(indexPageCounts[i]));
-      writer.WriteNumber(indexPageCounts[i]);
+    for (size_t level=0; level<indexPageCounts.size(); level++) {
+      size_t levelIndex=indexPageCounts.size()-level-1;
+
+      progress.Info(std::string("Page count for level ")+NumberToString(level)+" is "+NumberToString(indexPageCounts[levelIndex]));
+      writer.WriteNumber(indexPageCounts[levelIndex]);
     }
 
     return !scanner.HasError() &&

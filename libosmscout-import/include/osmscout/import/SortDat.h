@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include <list>
+#include <memory>
 #include <unordered_map>
 
 #include <osmscout/import/Import.h>
@@ -82,7 +83,7 @@ namespace osmscout {
     };
 
   public:
-    class ProcessingFilter : public Referencable
+    class ProcessingFilter
     {
     public:
       virtual ~ProcessingFilter();
@@ -107,7 +108,7 @@ namespace osmscout {
       }
     };
 
-    typedef Ref<ProcessingFilter> ProcessingFilterRef;
+    typedef std::shared_ptr<ProcessingFilter> ProcessingFilterRef;
 
   private:
     std::list<Source>              sources;

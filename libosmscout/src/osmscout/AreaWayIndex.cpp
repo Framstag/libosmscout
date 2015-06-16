@@ -19,6 +19,8 @@
 
 #include <osmscout/AreaWayIndex.h>
 
+#include <algorithm>
+
 #include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Math.h>

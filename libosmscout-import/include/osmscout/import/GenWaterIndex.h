@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <vector>
 
 #include <osmscout/GeoCoord.h>
@@ -31,7 +32,6 @@
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -136,7 +136,7 @@ namespace osmscout {
     /**
      * A individual coastline
      */
-    struct Coast : public Referencable
+    struct Coast
     {
       Id                    id;
       bool                  isArea;
@@ -146,7 +146,7 @@ namespace osmscout {
       std::vector<GeoCoord> coast;
     };
 
-    typedef Ref<Coast> CoastRef;
+    typedef std::shared_ptr<Coast> CoastRef;
 
     struct GeoBoundingBox
     {

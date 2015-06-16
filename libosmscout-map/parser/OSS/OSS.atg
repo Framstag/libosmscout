@@ -196,7 +196,7 @@ PRODUCTIONS
                 .)
                 IDENT<name>
                 (.
-                  SymbolRef symbol=new Symbol(name);
+                  SymbolRef symbol=std::make_shared<Symbol>(name);
                 .)
                 {
                   POLYGON<*symbol>
@@ -216,7 +216,7 @@ PRODUCTIONS
                 (.
                   StyleFilter         filter;
                   FillPartialStyle    style;
-                  PolygonPrimitiveRef polygon(new PolygonPrimitive(style.style));
+                  PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(style.style);
                   Coord               coord;
                 .)
                 COORD<coord>   (. polygon->AddCoord(coord); .)
@@ -252,9 +252,9 @@ PRODUCTIONS
                 }
                 SYNC "}"
                 (.
-                  symbol.AddPrimitive(new RectanglePrimitive(topLeft,
-                                                             width,height,
-                                                             style.style));
+                  symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
+                                                                           width,height,
+                                                                           style.style));
                 .)
                 .
 
@@ -274,9 +274,9 @@ PRODUCTIONS
                 }
                 SYNC "}"
                 (.
-                  symbol.AddPrimitive(new CirclePrimitive(center,
-                                                          radius,
-                                                          style.style));
+                  symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
+                                                                        radius,
+                                                                        style.style));
                 .)
                 .
 
@@ -313,7 +313,7 @@ PRODUCTIONS
                 (.
                   variable=config.GetVariableByName(name);
 
-                  if (variable.Valid()) {
+                  if (variable) {
                     std::string e="Constant already defined";
 
                     SemErr(e.c_str());
@@ -323,7 +323,7 @@ PRODUCTIONS
                 COLOR<color>
                 (.
                   if (!errors->hasErrors) {
-                    config.AddVariable(name,new StyleVariableColor(color));
+                    config.AddVariable(name,std::make_shared<StyleVariableColor>(color));
                   }
                 .)
                 .
@@ -339,7 +339,7 @@ PRODUCTIONS
                 (.
                   variable=config.GetVariableByName(name);
 
-                  if (variable.Valid()) {
+                  if (variable) {
                     std::string e="Constant already defined";
 
                     SemErr(e.c_str());
@@ -349,7 +349,7 @@ PRODUCTIONS
                 MAG<magnification>
                 (.
                   if (!errors->hasErrors) {
-                    config.AddVariable(name,new StyleVariableMag(magnification));
+                    config.AddVariable(name,std::make_shared<StyleVariableMag>(magnification));
                   }
                 .)
                 .
@@ -365,7 +365,7 @@ PRODUCTIONS
                 (.
                   variable=config.GetVariableByName(name);
 
-                  if (variable.Valid()) {
+                  if (variable) {
                     std::string e="Constant already defined";
 
                     SemErr(e.c_str());
@@ -375,7 +375,7 @@ PRODUCTIONS
                 UINT<value>
                 (.
                   if (!errors->hasErrors) {
-                    config.AddVariable(name,new StyleVariableUInt(value));
+                    config.AddVariable(name,std::make_shared<StyleVariableUInt>(value));
                   }
                 .)
                 .
@@ -474,7 +474,7 @@ PRODUCTIONS
                 (.
                   FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
-                  if (feature.Invalid()) {
+                  if (!feature) {
                     std::string e="Unknown feature '"+featureName+"'";
 
                     SemErr(e.c_str());
@@ -499,7 +499,7 @@ PRODUCTIONS
                   (.
                     FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
-                    if (feature.Invalid()) {
+                    if (!feature) {
                       std::string e="Unknown feature '"+featureName+"'";
 
                       SemErr(e.c_str());
@@ -651,15 +651,15 @@ PRODUCTIONS
                 .
                
   STYLEFILTER_SIZE<StyleFilter& filter>
-              = (. SizeCondition* sizeCondition; .)
+              = (. SizeConditionRef sizeCondition; .)
                 "SIZE"
                 SIZECONDITION<sizeCondition>
                 (. filter.SetSizeCondition(sizeCondition); .)
                 .
                 
-  SIZECONDITION<SizeCondition*& condition>
+  SIZECONDITION<SizeConditionRef& condition>
               = (.
-                  condition=new SizeCondition();
+                  condition=std::make_shared<SizeCondition>();
                   double widthInMeter;
                 .)
 
@@ -1038,7 +1038,7 @@ PRODUCTIONS
                   (. LabelProviderRef label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     if (label.Valid()) {
+                     if (label) {
                        style.style->SetLabel(label);
                        style.attributes.insert(TextStyle::attrLabel);
                      }
@@ -1093,7 +1093,7 @@ PRODUCTIONS
                   (. LabelProviderRef label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     if (label.Valid()) {
+                     if (label) {
                        style.style->SetLabel(label);
                        style.attributes.insert(PathShieldStyle::attrLabel);
                      }
@@ -1150,7 +1150,7 @@ PRODUCTIONS
                   (. LabelProviderRef label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     if (label.Valid()) {
+                     if (label) {
                        style.style->SetLabel(label);
                        style.attributes.insert(PathTextStyle::attrLabel);
                      }
@@ -1180,7 +1180,7 @@ PRODUCTIONS
                   (.
                      symbol=config.GetSymbol(name);
 
-                     if (symbol.Invalid()) {
+                     if (!symbol) {
                        std::string e="Map symbol '"+name+"' is not defined";
 
                        SemErr(e.c_str());
@@ -1209,7 +1209,7 @@ PRODUCTIONS
                   (.
                      symbol=config.GetSymbol(name);
 
-                     if (symbol.Invalid()) {
+                     if (!symbol) {
                        std::string e="Map symbol '"+name+"' is not defined";
 
                        SemErr(e.c_str());
@@ -1264,7 +1264,7 @@ PRODUCTIONS
                   
                     feature=config.GetTypeConfig()->GetFeature(featureName);
                   
-                    if (feature.Invalid()) {
+                    if (!feature) {
                       std::string e="'"+featureName+"' is not a registered feature";
 
                       SemErr(e.c_str());
@@ -1288,14 +1288,14 @@ PRODUCTIONS
                       return;
                     }
                   
-                    label=new DynamicFeatureLabelReader(*config.GetTypeConfig(),
-                                                        featureName,
-                                                        labelName);
+                    label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
+                                                                      featureName,
+                                                                      labelName);
                   }
                   else {
                     label=config.GetLabelProvider(featureName);
                     
-                    if (label.Invalid()) {
+                    if (!label) {
                       std::string e="There is no label provider with name '"+featureName+"' registered";
 
                       SemErr(e.c_str());
@@ -1349,19 +1349,19 @@ PRODUCTIONS
                   (.
                     StyleVariableRef variable=config.GetVariableByName(t->val+1);
 
-                    if (!variable.Valid()) {
+                    if (!variable) {
                       std::string e="Variable not defined";
 
                       SemErr(e.c_str());
                     }
-                    else if (dynamic_cast<StyleVariableColor*>(variable.Get())==NULL) {
+                    else if (dynamic_cast<StyleVariableColor*>(variable.get())==NULL) {
                       std::string e="Variable is not of type 'COLOR'";
 
                       SemErr(e.c_str());
                     }
 
                     if (!errors->hasErrors) {
-                      StyleVariableColor* colorVariable=dynamic_cast<StyleVariableColor*>(variable.Get());
+                      StyleVariableColor* colorVariable=dynamic_cast<StyleVariableColor*>(variable.get());
 
                       color=colorVariable->GetColor();
                     }
@@ -1399,19 +1399,19 @@ PRODUCTIONS
                   (.
                     StyleVariableRef variable=config.GetVariableByName(t->val+1);
 
-                    if (!variable.Valid()) {
+                    if (!variable) {
                       std::string e="Variable not defined";
 
                       SemErr(e.c_str());
                     }
-                    else if (dynamic_cast<StyleVariableMag*>(variable.Get())==NULL) {
+                    else if (dynamic_cast<StyleVariableMag*>(variable.get())==NULL) {
                       std::string e="Variable is not of type 'MAG'";
 
                       SemErr(e.c_str());
                     }
 
                     if (!errors->hasErrors) {
-                      StyleVariableMag* magVariable=dynamic_cast<StyleVariableMag*>(variable.Get());
+                      StyleVariableMag* magVariable=dynamic_cast<StyleVariableMag*>(variable.get());
 
                       magnification=magVariable->GetMag();
                     }
@@ -1553,19 +1553,19 @@ PRODUCTIONS
                   (.
                     StyleVariableRef variable=config.GetVariableByName(t->val+1);
 
-                    if (!variable.Valid()) {
+                    if (!variable) {
                       std::string e="Variable not defined";
 
                       SemErr(e.c_str());
                     }
-                    else if (dynamic_cast<StyleVariableUInt*>(variable.Get())==NULL) {
+                    else if (dynamic_cast<StyleVariableUInt*>(variable.get())==NULL) {
                       std::string e="Variable is not of type 'UINT'";
 
                       SemErr(e.c_str());
                     }
 
                     if (!errors->hasErrors) {
-                      StyleVariableUInt* uintVariable=dynamic_cast<StyleVariableUInt*>(variable.Get());
+                      StyleVariableUInt* uintVariable=dynamic_cast<StyleVariableUInt*>(variable.get());
 
                       value=uintVariable->GetUInt();
                     }

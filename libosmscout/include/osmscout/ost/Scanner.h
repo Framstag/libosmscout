@@ -23,10 +23,9 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include <osmscout/system/Types.h>
-
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 namespace ost {
@@ -41,9 +40,9 @@ extern void  coco_string_delete(char* &data);
 
 class Token;
 
-typedef osmscout::Ref<Token> TokenRef;
+typedef std::shared_ptr<Token> TokenRef;
 
-class Token : public osmscout::Referencable
+class Token
 {
 public:
   int      kind;    // token kind
@@ -177,8 +176,8 @@ private:
   int           col;        // column number of current character
   int           oldEols;    // EOLs that appeared in a comment;
 
-  Token* CreateToken();
-  void AppendVal(Token *t);
+  TokenRef CreateToken();
+  void AppendVal(TokenRef& t);
 
   void Init();
   void NextCh();
@@ -186,16 +185,16 @@ private:
 	bool Comment0();
 	bool Comment1();
 
-  Token* NextToken();
+  TokenRef NextToken();
 
 public:
   Buffer *buffer;   // scanner buffer
 
   Scanner(const unsigned char* buf, size_t len);
   ~Scanner();
-  Token* Scan();
+  TokenRef Scan();
   void SetScannerBehindT();
-  Token* Peek();
+  TokenRef Peek();
   void ResetPeek();
 
 }; // end Scanner

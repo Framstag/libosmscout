@@ -3,6 +3,7 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Number.h>
 
 #include <osmscout/system/Math.h>
 
@@ -18,7 +19,7 @@ int main(int argc, char* argv[])
 
     unsigned int minValue=0;
     unsigned int maxValue=pow(2,i)-1;
-    unsigned int bytesNeeded=osmscout::BytesNeededToAddressFileData(maxValue);
+    unsigned int bytesNeeded=osmscout::BytesNeededToEncodeNumber(maxValue);
 
     std::cout << "Range: " << minValue << "-" << maxValue << " (" << bytesNeeded << " bytes)" << std::endl;
 

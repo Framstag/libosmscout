@@ -20,6 +20,7 @@
 #include <osmscout/private/Config.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Number.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,22 +117,6 @@ namespace osmscout {
 #endif
   }
 
-  uint8_t BytesNeededToAddressFileData(FileOffset size)
-  {
-    uint8_t bytes=0;
-
-    while (size>0) {
-      size=size/256;
-      bytes++;
-    }
-
-    if (bytes==0) {
-      bytes=1;
-    }
-
-    return bytes;
-  }
-
   bool BytesNeededToAddressFileData(const std::string& filename,
                                     uint8_t& bytes)
   {
@@ -142,7 +127,7 @@ namespace osmscout {
       return false;
     }
 
-    bytes=BytesNeededToAddressFileData(fileSize);
+    bytes=BytesNeededToEncodeNumber(fileSize);
 
     return true;
   }

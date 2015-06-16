@@ -107,10 +107,10 @@ PRODUCTIONS
                 .
 
   TYPE        = (.
-                  std::string   name;
-                  TagCondition  *condition=NULL;
-                  TypeInfoRef   typeInfo(new TypeInfo());
-                  unsigned char types;
+                  std::string     name;
+                  TagConditionRef condition=NULL;
+                  TypeInfoRef     typeInfo(new TypeInfo());
+                  unsigned char   types;
                 .)
                 SYNC "TYPE"
                 IDENT<name>                       (. typeInfo->SetType(name); .)
@@ -152,10 +152,10 @@ PRODUCTIONS
                 .)
                 .
 
-  TAGCONDITION<TagCondition*& condition>
+  TAGCONDITION<TagConditionRef& condition>
               = (.
-                  std::list<TagCondition*> conditions;
-                  TagCondition             *subCond;
+                  std::list<TagConditionRef> conditions;
+                  TagConditionRef            subCond;
                 .)
                 TAGANDCOND<subCond>   (. conditions.push_back(subCond); .)
                 {
@@ -167,9 +167,9 @@ PRODUCTIONS
                     condition=conditions.front();
                   }
                   else {
-                    TagBoolCondition *orCondition=new TagBoolCondition(TagBoolCondition::boolOr);
+                    TagBoolConditionRef orCondition=std::make_shared<TagBoolCondition>(TagBoolCondition::boolOr);
 
-                    for (std::list<TagCondition*>::const_iterator c=conditions.begin();
+                    for (std::list<TagConditionRef>::const_iterator c=conditions.begin();
                          c!=conditions.end();
                          ++c) {
                       orCondition->AddCondition(*c);
@@ -179,10 +179,10 @@ PRODUCTIONS
                   }
                 .)
                 .
-  TAGANDCOND<TagCondition*& condition>
+  TAGANDCOND<TagConditionRef& condition>
               = (.
-                  std::list<TagCondition*> conditions;
-                  TagCondition             *subCond;
+                  std::list<TagConditionRef> conditions;
+                  TagConditionRef            subCond;
                 .)
                 TAGBOOLCOND<subCond>     (. conditions.push_back(subCond); .)
                 {
@@ -194,9 +194,9 @@ PRODUCTIONS
                     condition=conditions.front();
                   }
                   else {
-                    TagBoolCondition *andCondition=new TagBoolCondition(TagBoolCondition::boolAnd);
+                    TagBoolConditionRef andCondition=std::make_shared<TagBoolCondition>(TagBoolCondition::boolAnd);
 
-                    for (std::list<TagCondition*>::const_iterator c=conditions.begin();
+                    for (std::list<TagConditionRef>::const_iterator c=conditions.begin();
                          c!=conditions.end();
                          ++c) {
                       andCondition->AddCondition(*c);
@@ -206,14 +206,14 @@ PRODUCTIONS
                   }
                 .)
                 .
-  TAGBOOLCOND<TagCondition*& condition>
+  TAGBOOLCOND<TagConditionRef& condition>
               =   TAGBINCOND<condition>
                 | TAGEXISTSCOND<condition>
                 | "(" TAGCONDITION<condition> ")"
-                | "!" TAGBOOLCOND<condition> (. condition=new TagNotCondition(condition); .)
+                | "!" TAGBOOLCOND<condition> (. condition=std::make_shared<TagNotCondition>(condition); .)
                 .
 
-  TAGBINCOND<TagCondition*& condition>
+  TAGBINCOND<TagConditionRef& condition>
               = (.
                   std::string nameValue;
                 .)
@@ -229,7 +229,7 @@ PRODUCTIONS
                 )
                 .
 
-  TAGLESSCOND<const std::string& tagName,TagCondition*& condition>
+  TAGLESSCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                   std::string stringValue;
                   size_t      sizeValue;
@@ -240,19 +240,19 @@ PRODUCTIONS
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorLess,stringValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorLess,sizeValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,sizeValue);
                   .)
                 )
                 .
 
-  TAGLESSEQUALCOND<const std::string& tagName,TagCondition*& condition>
+  TAGLESSEQUALCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                   std::string stringValue;
                   size_t      sizeValue;
@@ -263,19 +263,19 @@ PRODUCTIONS
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorLessEqual,stringValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorLessEqual,sizeValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,sizeValue);
                   .)
                 )
                 .
 
-  TAGEQUALSCOND<const std::string& tagName,TagCondition*& condition>
+  TAGEQUALSCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                   std::string stringValue;
                   size_t      sizeValue;
@@ -286,19 +286,19 @@ PRODUCTIONS
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorEqual,stringValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorEqual,sizeValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,sizeValue);
                   .)
                 )
                 .
 
-  TAGNOTEQUALSCOND<const std::string& tagName,TagCondition*& condition>
+  TAGNOTEQUALSCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                   std::string stringValue;
                   size_t      sizeValue;
@@ -309,19 +309,19 @@ PRODUCTIONS
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorNotEqual,stringValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorNotEqual,sizeValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,sizeValue);
                   .)
                 )
                 .
 
-  TAGGREATEREQUALCOND<const std::string& tagName,TagCondition*& condition>
+  TAGGREATEREQUALCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                   std::string stringValue;
                   size_t      sizeValue;
@@ -332,19 +332,19 @@ PRODUCTIONS
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorGreaterEqual,stringValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorGreaterEqual,sizeValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,sizeValue);
                   .)
                 )
                 .
 
-  TAGGREATERCOND<const std::string& tagName,TagCondition*& condition>
+  TAGGREATERCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                   std::string stringValue;
                   size_t      sizeValue;
@@ -355,19 +355,19 @@ PRODUCTIONS
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorGreater,stringValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
                     TagId tagId=config.RegisterTag(tagName);
 
-                    condition=new TagBinaryCondition(tagId,operatorGreater,sizeValue);
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,sizeValue);
                   .)
                 )
                 .
 
-  TAGISINCOND<const std::string& tagName,TagCondition*& condition>
+  TAGISINCOND<const std::string& tagName,TagConditionRef& condition>
               = (.
                  std::list<std::string> values;
                 .)
@@ -383,10 +383,10 @@ PRODUCTIONS
                   TagId tagId=config.RegisterTag(tagName);
 
                   if (values.size()==1) {
-                    condition=new TagBinaryCondition(tagId,operatorEqual,values.front());
+                    condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,values.front());
                   }
                   else {
-                    TagIsInCondition *isInCondition=new TagIsInCondition(tagId);
+                    TagIsInConditionRef isInCondition=std::make_shared<TagIsInCondition>(tagId);
 
                     for (std::list<std::string>::const_iterator s=values.begin();
                          s!=values.end();
@@ -399,11 +399,11 @@ PRODUCTIONS
                 .)
                 .
 
-  TAGEXISTSCOND<TagCondition*& condition>
+  TAGEXISTSCOND<TagConditionRef& condition>
               = "EXISTS"
                  string
                  (.
-                   condition=new TagExistsCondition(config.RegisterTag(Destring(t->val)));
+                   condition=std::make_shared<TagExistsCondition>(config.RegisterTag(Destring(t->val)));
                  .)
                  .
 
@@ -435,7 +435,7 @@ PRODUCTIONS
                 (.
                   FeatureRef feature=config.GetFeature(name);
                   
-                  if (feature.Valid()) {
+                  if (feature) {
                     if (!typeInfo.HasFeature(name)) {
                       typeInfo.AddFeature(feature);
                     }

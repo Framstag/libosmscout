@@ -19,6 +19,7 @@
 
 #include <osmscout/Area.h>
 
+#include <algorithm>
 #include <limits>
 
 #include <osmscout/util/String.h>
@@ -391,7 +392,7 @@ namespace osmscout {
 
       while (idCurrent<ids.size()) {
         uint8_t bitset=0;
-        size_t  bitMask=1;
+        uint8_t bitMask=1;
         size_t  idEnd=std::min(idCurrent+8,ids.size());
 
         for (size_t i=idCurrent; i<idEnd; i++) {

@@ -5,10 +5,9 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include <osmscout/system/Types.h>
-
-#include <osmscout/util/Reference.h>
 
 -->namespace_open
 
@@ -21,9 +20,9 @@ extern void  coco_string_delete(char* &data);
 
 class Token;
 
-typedef osmscout::Ref<Token> TokenRef;
+typedef std::shared_ptr<Token> TokenRef;
 
-class Token : public osmscout::Referencable
+class Token
 {
 public:
   int      kind;    // token kind
@@ -157,23 +156,23 @@ private:
   int           col;        // column number of current character
   int           oldEols;    // EOLs that appeared in a comment;
 
-  Token* CreateToken();
-  void AppendVal(Token *t);
+  TokenRef CreateToken();
+  void AppendVal(TokenRef& t);
 
   void Init();
   void NextCh();
   void AddCh();
 -->commentsheader
-  Token* NextToken();
+  TokenRef NextToken();
 
 public:
   Buffer *buffer;   // scanner buffer
 
   Scanner(const unsigned char* buf, size_t len);
   ~Scanner();
-  Token* Scan();
+  TokenRef Scan();
   void SetScannerBehindT();
-  Token* Peek();
+  TokenRef Peek();
   void ResetPeek();
 
 }; // end Scanner
@@ -372,15 +371,13 @@ void Scanner::AddCh() {
 }
 
 -->comments
-Token* Scanner::CreateToken() {
-  Token *t;
-
-  t = new Token();
+TokenRef Scanner::CreateToken() {
+  TokenRef t = std::make_shared<Token>();
 
   return t;
 }
 
-void Scanner::AppendVal(Token *t) {
+void Scanner::AppendVal(TokenRef& t) {
   delete [] t->val;
   t->val = new char[tlen+1];
 
@@ -388,7 +385,7 @@ void Scanner::AppendVal(Token *t) {
   t->val[tlen] = L'\0';
 }
 
-Token* Scanner::NextToken() {
+TokenRef Scanner::NextToken() {
   while (ch == ' ' ||
 -->scan1
   ) NextCh();
@@ -420,8 +417,8 @@ Token* Scanner::NextToken() {
 }
 
 // get the next token (possibly a token already seen during peeking)
-Token* Scanner::Scan() {
-  if (tokens->next.Invalid()) {
+TokenRef Scanner::Scan() {
+  if (!tokens->next) {
     return pt = tokens = NextToken();
   } else {
     pt = tokens = tokens->next;
@@ -438,9 +435,9 @@ void Scanner::SetScannerBehindT()
 }
 
 // peek for the next token, ignore pragmas
-Token* Scanner::Peek() {
+TokenRef Scanner::Peek() {
   do {
-    if (pt->next.Invalid()) {
+    if (!pt->next) {
       pt->next = NextToken();
     }
     pt = pt->next;

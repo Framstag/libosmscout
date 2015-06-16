@@ -23,7 +23,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/NodeUseMap.cpp \
                         osmscout/util/Number.cpp \
                         osmscout/util/NumberSet.cpp \
-                        osmscout/util/Parser.cpp \
+                        osmscout/util/Parsing.cpp \
                         osmscout/util/Progress.cpp \
                         osmscout/util/Projection.cpp \
                         osmscout/util/Reference.cpp \

@@ -30,7 +30,7 @@ namespace osmscout {
     // no code
   }
 
-  TagNotCondition::TagNotCondition(TagCondition* condition)
+  TagNotCondition::TagNotCondition(const TagConditionRef& condition)
   : condition(condition)
   {
     // no code
@@ -47,7 +47,7 @@ namespace osmscout {
     // no code
   }
 
-  void TagBoolCondition::AddCondition(TagCondition* condition)
+  void TagBoolCondition::AddCondition(const TagConditionRef& condition)
   {
     conditions.push_back(condition);
   }

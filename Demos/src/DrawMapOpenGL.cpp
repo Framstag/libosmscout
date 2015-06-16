@@ -91,7 +91,7 @@ public:
       return false;
     }
 
-    styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
+    styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
     if (!styleConfig->Load(style)) {
       std::cerr << "Cannot open style" << std::endl;
@@ -110,7 +110,7 @@ public:
     painter=NULL;
   }
 
-  const osmscout::StyleConfig* GetStyleConfig() const
+  const osmscout::StyleConfigRef GetStyleConfig() const
   {
     return styleConfig;
   }
@@ -121,7 +121,7 @@ public:
     painter = new osmscout::MapPainterOpenGL(styleConfig);
 
     return mapService->GetObjects(searchParameter,
-                                  styleConfig,
+                                  *styleConfig,
                                   projection,
                                   data);
   }

@@ -19,6 +19,7 @@
 
 #include <osmscout/import/RawRelation.h>
 
+#include <algorithm>
 #include <limits>
 
 namespace osmscout {

@@ -203,8 +203,8 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
       double           r=style->GetTextColor().GetR();
       double           g=style->GetTextColor().GetG();
       double           b=style->GetTextColor().GetB();
@@ -241,8 +241,8 @@ namespace osmscout {
         painter->fillPath(path,QBrush(QColor::fromRgbF(r,g,b,label.alpha)));
       }
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
-      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
+      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
       QFont              font(GetFont(projection,
                                       parameter,
                                       label.fontSize));
@@ -524,7 +524,7 @@ namespace osmscout {
     for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
          p!=symbol.GetPrimitives().end();
          ++p) {
-      DrawPrimitive* primitive=p->Get();
+      DrawPrimitive* primitive=p->get();
 
       if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
         PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);

@@ -23,6 +23,8 @@
 
 #include <osmscout/util/FileWriter.h>
 
+#include <algorithm>
+
 #include <string.h>
 
 #include <stdio.h>

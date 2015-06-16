@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Parser.h>
+#include <osmscout/util/Parsing.h>
 
 namespace osmscout {
 

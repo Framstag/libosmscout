@@ -169,7 +169,7 @@ namespace osmscout {
   {
     AddSource("nodes.tmp");
 
-    AddFilter(new NodeLocationProcessorFilter());
+    AddFilter(std::make_shared<NodeLocationProcessorFilter>());
   }
 
   std::string SortNodeDataGenerator::GetDescription() const

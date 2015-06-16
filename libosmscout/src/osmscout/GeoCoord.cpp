@@ -25,7 +25,6 @@ namespace osmscout {
 
   const double latConversionFactor=134217727.0/180.0; // 27 Bit
   const double lonConversionFactor=134217727.0/360.0; // 27 Bit
-  const size_t coordByteSize=7;
 
   std::string GeoCoord::GetDisplayText() const
   {

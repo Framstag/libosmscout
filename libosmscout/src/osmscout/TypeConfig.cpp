@@ -19,6 +19,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <algorithm>
+
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/system/Assert.h>
@@ -41,6 +43,13 @@ namespace osmscout {
   FeatureValue::~FeatureValue()
   {
     // no code
+  }
+
+  FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/)
+  {
+	assert(false);
+
+	return *this;
   }
 
   bool FeatureValue::Read(FileScanner& /*scanner*/)
@@ -106,7 +115,7 @@ namespace osmscout {
     index(index),
     offset(offset)
   {
-    assert(feature.Valid());
+    assert(feature);
   }
 
   FeatureValueBuffer::FeatureValueBuffer()
@@ -279,7 +288,7 @@ namespace osmscout {
     }
 
     if (type->GetFeatureCount()%8!=0) {
-      specialFlag=featureBits[type->GetFeatureMaskBytes()-1] & 0x80;
+      specialFlag=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
     }
     else {
       uint8_t addByte;
@@ -288,7 +297,7 @@ namespace osmscout {
         return false;
       }
 
-      specialFlag=addByte & 0x80;
+      specialFlag=(addByte & 0x80)!=0;
     }
 
     for (const auto &feature : type->GetFeatures()) {
@@ -498,7 +507,7 @@ namespace osmscout {
   }
 
   TypeInfo& TypeInfo::AddCondition(unsigned char types,
-                                   TagCondition* condition)
+                                   const TagConditionRef& condition)
   {
     TypeCondition typeCondition;
 
@@ -528,7 +537,7 @@ namespace osmscout {
 
   TypeInfo& TypeInfo::AddFeature(const FeatureRef& feature)
   {
-    assert(feature.Valid());
+    assert(feature);
     assert(nameToFeatureMap.find(feature->GetName())==nameToFeatureMap.end());
 
     size_t index=0;
@@ -700,50 +709,50 @@ namespace osmscout {
     RegisterTag("type");
     RegisterTag("restriction");
 
-    featureName=new NameFeature();
+    featureName=std::make_shared<NameFeature>();
     RegisterFeature(featureName);
 
-    RegisterFeature(new NameAltFeature());
+    RegisterFeature(std::make_shared<NameAltFeature>());
 
-    featureRef=new RefFeature();
+    featureRef=std::make_shared<RefFeature>();
     RegisterFeature(featureRef);
 
-    featureLocation=new LocationFeature();
+    featureLocation=std::make_shared<LocationFeature>();
     RegisterFeature(featureLocation);
 
-    featureAddress=new AddressFeature();
+    featureAddress=std::make_shared<AddressFeature>();
     RegisterFeature(featureAddress);
 
-    featureAccess=new AccessFeature();
+    featureAccess=std::make_shared<AccessFeature>();
     RegisterFeature(featureAccess);
 
-    featureAccessRestricted=new AccessRestrictedFeature();
+    featureAccessRestricted=std::make_shared<AccessRestrictedFeature>();
     RegisterFeature(featureAccessRestricted);
 
-    featureLayer=new LayerFeature();
+    featureLayer=std::make_shared<LayerFeature>();
     RegisterFeature(featureLayer);
 
-    featureWidth=new WidthFeature();
+    featureWidth=std::make_shared<WidthFeature>();
     RegisterFeature(featureWidth);
 
-    featureMaxSpeed=new MaxSpeedFeature();
+    featureMaxSpeed=std::make_shared<MaxSpeedFeature>();
     RegisterFeature(featureMaxSpeed);
 
-    featureGrade=new GradeFeature();
+    featureGrade=std::make_shared<GradeFeature>();
     RegisterFeature(featureGrade);
 
-    RegisterFeature(new AdminLevelFeature());
+    RegisterFeature(std::make_shared<AdminLevelFeature>());
 
-    featureBridge=new BridgeFeature();
+    featureBridge=std::make_shared<BridgeFeature>();
     RegisterFeature(featureBridge);
 
-    featureTunnel=new TunnelFeature();
+    featureTunnel=std::make_shared<TunnelFeature>();
     RegisterFeature(featureTunnel);
 
-    featureRoundabout=new RoundaboutFeature();
+    featureRoundabout=std::make_shared<RoundaboutFeature>();
     RegisterFeature(featureRoundabout);
 
-    RegisterFeature(new EleFeature());
+    RegisterFeature(std::make_shared<EleFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
@@ -870,7 +879,7 @@ namespace osmscout {
 
   void TypeConfig::RegisterFeature(const FeatureRef& feature)
   {
-    assert(feature.Valid());
+    assert(feature);
     assert(!feature->GetName().empty());
 
     if (nameToFeatureMap.find(feature->GetName())!=nameToFeatureMap.end()) {
@@ -1324,6 +1333,8 @@ namespace osmscout {
    */
   bool TypeConfig::LoadFromDataFile(const std::string& directory)
   {
+    StopClock timer;
+
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(directory,
@@ -1514,7 +1525,7 @@ namespace osmscout {
 
         FeatureRef feature=GetFeature(featureName);
 
-        if (feature.Invalid()) {
+        if (!feature) {
           log.Error() << "Feature '" << featureName << "' not found";
           return false;
         }
@@ -1543,7 +1554,13 @@ namespace osmscout {
       typeInfo=RegisterType(typeInfo);
     }
 
-    return !scanner.HasError() && scanner.Close();
+    bool result=!scanner.HasError() && scanner.Close();
+
+    timer.Stop();
+
+    log.Debug() << "Opening TypeConfig: " << timer.ResultString();
+
+    return result;
   }
 
   /**

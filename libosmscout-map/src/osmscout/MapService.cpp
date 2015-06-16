@@ -111,7 +111,7 @@ namespace osmscout {
 
   bool AreaSearchParameter::IsAborted() const
   {
-    if (breaker.Valid()) {
+    if (breaker) {
       return breaker->IsAborted();
     }
     else {

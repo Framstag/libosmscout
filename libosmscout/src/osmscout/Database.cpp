@@ -121,9 +121,10 @@ namespace osmscout {
     }
 
     FileScanner scanner;
-    std::string file=AppendFileToDir(path,"bounding.dat");
 
-    if (!scanner.Open(file,FileScanner::Normal,true)) {
+    if (!scanner.Open(AppendFileToDir(path,"bounding.dat"),
+                      FileScanner::Normal,
+                      false)) {
       log.Error() << "Cannot open '" << scanner.GetFilename() << "'";
       return false;
     }

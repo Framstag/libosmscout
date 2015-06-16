@@ -39,7 +39,7 @@ namespace osmscout {
     GeoCoord minCoord;
     GeoCoord maxCoord;
 
-    double valid;
+    bool     valid;
 
     /**
      * The default constructor creates an invalid instance.
@@ -159,7 +159,6 @@ namespace osmscout {
      * Return a string representation of the coordinate value in a human readable format.
      */
     std::string GetDisplayText() const;
-
   };
 }
 

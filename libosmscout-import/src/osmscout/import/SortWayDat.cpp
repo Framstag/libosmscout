@@ -382,8 +382,8 @@ namespace osmscout {
   {
     AddSource("ways.tmp");
 
-    AddFilter(new WayLocationProcessorFilter());
-    AddFilter(new WayNodeReductionProcessorFilter());
+    AddFilter(std::make_shared<WayLocationProcessorFilter>());
+    AddFilter(std::make_shared<WayNodeReductionProcessorFilter>());
   }
 
   std::string SortWayDataGenerator::GetDescription() const

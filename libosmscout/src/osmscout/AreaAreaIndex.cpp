@@ -19,6 +19,7 @@
 
 #include <osmscout/AreaAreaIndex.h>
 
+#include <algorithm>
 #include <iostream>
 
 #include <osmscout/util/Logger.h>
