@@ -246,7 +246,7 @@ namespace osmscout {
 
     bool sizeExceeded=false;
 
-    for (size_t i=0; i<nodeTypeData.size(); i++) {
+    for (TypeId i=0; i<nodeTypeData.size(); i++) {
       if (nodeTypes.IsTypeSet(i)) {
         if (!GetOffsets(nodeTypeData[i],
                         minlon,
