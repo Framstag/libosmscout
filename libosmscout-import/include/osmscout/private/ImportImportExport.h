@@ -24,7 +24,7 @@
 
 // Shared library support
 #if defined(__WIN32__) || defined(WIN32)
-  #if defined(OSMSCOUTIMPORTDLL) 
+  #if defined(LIBOSMSCOUTIMPORT_EXPORTS)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
       #define OSMSCOUT_IMPORT_EXPTEMPL
       #define OSMSCOUT_IMPORT_API __declspec(dllexport)

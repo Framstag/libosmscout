@@ -1,15 +1,17 @@
 Build Files for visual studio can be found in the windows directory.
 
+
 The build files currently make the following assumptions:
-1: zlib, libxml2 and google protocol buffers (pbf) are compiled 
-   and installed somewhere.
-2: protoc.exe (pbf) compiler) can be found in the path
-3: QTDIR environment variable is set to the current Qt dir.
-4: Directory to headers for zlib, libxml2 and pbf are in 
-   environment variable EXTRALIBS_HEADERS
-5: Directory to debug builds of zlib, libxml2 and pbf are in 
-   environment variable EXTRALIBS_DEBUGLIBS
-6: Directory to release builds of zlib, libxml2 and pbf are in 
-   environment variable EXTRALIBS_DEBUGLIBS
-   
-Happy building!
+
+* zlib, libxml2 and iconv are compiled and places within the libsosmcout
+  top-level directory (in parallel to the libosmscout, libosmscout-import,...
+  directories). You can find the binaries for exmaple here:
+  http://www.zlatkovic.com/libxml.en.html
+  You need to either download the 32 or 64 bit builds. I tested with the
+  64bit binaries.
+  Include and library search pathes in thw projects are configured
+  relative to these directories.
+* protobuf is not yet configured and tested but should in priciple 
+  work similar. You should use protobuf since it offers an dramatic
+  performance boost.
+* libosmscout-map will follow.

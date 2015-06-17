@@ -258,7 +258,7 @@ namespace osmscout {
     for (size_t i=0; i<wayTypes.size(); i++) {
       newOffsets.clear();
 
-      for (size_t type=0;
+      for (TypeId type=0;
           type<wayTypeData.size();
           ++type) {
         if (wayTypes[i].IsTypeSet(type)) {

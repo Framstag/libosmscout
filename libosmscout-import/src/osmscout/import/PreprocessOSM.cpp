@@ -304,22 +304,22 @@ namespace osmscout {
     parser->EndElement(name);
   }
 
-  static void StructuredErrorHandler(void */*data*/, xmlErrorPtr error)
+  static void StructuredErrorHandler(void* /*data*/, xmlErrorPtr error)
   {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
   }
 
-  static void ErrorHandler(void */*data*/, const char* msg,...)
+  static void ErrorHandler(void* /*data*/, const char* msg,...)
   {
     std::cerr << "XML error:" << msg << std::endl;
   }
 
-  static void StartDocumentHandler(void */*data*/)
+  static void StartDocumentHandler(void* /*data*/)
   {
     // no code, for temporary debugging purposes
   }
 
-  static void EndDocumentHandler(void */*data*/)
+  static void EndDocumentHandler(void* /*data*/)
   {
     // no code, for temporary debugging purposes
   }
