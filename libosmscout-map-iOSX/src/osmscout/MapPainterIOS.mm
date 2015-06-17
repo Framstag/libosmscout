@@ -282,13 +282,13 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const LabelData& label){
         
-        if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
+        if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
             if(label.y <= MapPainterIOS::yLabelMargin ||
                label.y >= projection.GetHeight() - MapPainterIOS::yLabelMargin){
                 return;
             }
             
-            const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+            const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
             double           r=style->GetTextColor().GetR();
             double           g=style->GetTextColor().GetG();
             double           b=style->GetTextColor().GetB();
@@ -328,8 +328,8 @@ namespace osmscout {
             CGContextRestoreGState(cg);
         }
         
-        else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
-            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+        else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
+            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
             
             
             if(label.bx1 <= MapPainterIOS::plateLabelMargin ||
@@ -394,7 +394,7 @@ namespace osmscout {
     void MapPainterIOS::followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                                        bool isClosed, bool keepOrientation) {
         hnd.i = 0;
-        hnd.nVertex = labs(transEnd - transStart);
+        hnd.nVertex = transEnd - transStart;
         bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
         if(isClosed && !isReallyClosed){
             hnd.nVertex++;
@@ -645,7 +645,7 @@ namespace osmscout {
                           parameter,
                           *fillStyle);
   
-            DrawPrimitive* primitive=p->Get();
+            DrawPrimitive* primitive=p->get();
             double         centerX=maxX-minX;
             double         centerY=maxY-minY;
             
