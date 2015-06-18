@@ -9,6 +9,10 @@
 
 #include <osmscout/StyleConfig.h>
 
+#ifdef CONST
+  #undef CONST
+#endif
+
 -->namespace_open
 
 class Errors

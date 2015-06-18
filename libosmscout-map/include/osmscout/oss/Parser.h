@@ -38,6 +38,10 @@
 
 #include <osmscout/StyleConfig.h>
 
+#ifdef CONST
+  #undef CONST
+#endif
+
 namespace osmscout {
 namespace oss {
 
