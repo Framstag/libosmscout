@@ -134,7 +134,7 @@ void DBThread::Initialize()
     osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
     if (typeConfig) {
-      styleConfig=new osmscout::StyleConfig(typeConfig);
+      styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
       delete painter;
       painter=NULL;
@@ -189,7 +189,6 @@ void DBThread::ReloadStyle(const QString &suffix){
         styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     }
     if (!styleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
-        delete styleConfig;
 /*
     if (!styleConfig->Load((m_stylesheetFilename+suffix).toLocal8Bit().data())) {
 */
@@ -457,7 +456,7 @@ bool DBThread::RenderMap(QPainter& painter,
     styleConfig->GetUnknownFillStyle(projection,
                                      unknownFillStyle);
 
-    if (unknownFillStyle.Valid()) {
+    if (unknownFillStyle) {
       backgroundColor=unknownFillStyle->GetFillColor();
     }
     else {
