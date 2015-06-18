@@ -64,7 +64,7 @@ namespace osmscout {
 
     while (value!=0) {
       res++;
-      value=value/base;
+      value=value/(N)base;
     }
 
     return res;
@@ -189,7 +189,8 @@ namespace osmscout {
     else {
       size_t digitValue;
 
-      if (!GetDigitValue(string[pos],digitValue)) {
+      if (!GetDigitValue(string[pos],
+		  digitValue)) {
         return false;
       }
 
@@ -203,10 +204,10 @@ namespace osmscout {
       if (digitValue==base-1 &&
           string.length()==NumberDigits(std::numeric_limits<N>::max())) {
         minus=true;
-        number=base/2;
+        number=(N)(base/2);
       }
       else {
-        number=digitValue;
+        number=(N)digitValue;
       }
 
       pos=1;
@@ -227,7 +228,7 @@ namespace osmscout {
         return false;
       }
 
-      number=number*base+digitValue;
+      number=(N)(number*base+digitValue);
 
       pos++;
     }
@@ -271,14 +272,15 @@ namespace osmscout {
       return false;
     }
 
-    number=digitValue;
+    number=(N)digitValue;
 
     pos=1;
 
     while (pos<string.length()) {
       size_t digitValue;
 
-      if (!GetDigitValue(string[pos],digitValue)) {
+      if (!GetDigitValue(string[pos],
+		  digitValue)) {
         return false;
       }
 
@@ -290,7 +292,7 @@ namespace osmscout {
         return false;
       }
 
-      number=number*base+digitValue;
+      number=(N)(number*base+digitValue);
 
       pos++;
     }
