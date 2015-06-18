@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#if defined(OSMSCOUT_HAVE_THREAD)
+#if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
 #include <atomic>
 #include <thread>
 #endif
@@ -54,7 +54,7 @@ namespace osmscout {
     virtual bool IsAborted() const;
   };
 
-#if defined(OSMSCOUT_HAVE_THREAD)
+#if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:

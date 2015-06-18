@@ -46,7 +46,7 @@ namespace osmscout {
     return false;
   }
 
-#if defined(OSMSCOUT_HAVE_THREAD)
+#if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
   ThreadedBreaker::ThreadedBreaker()
   : aborted(false)
   {
