@@ -471,12 +471,12 @@ namespace osmscout {
       return true;
     }
 
-    inline double GetTileX() const
+    inline size_t GetTileX() const
     {
       return tileX;
     }
 
-    inline double GetTileY() const
+    inline size_t GetTileY() const
     {
       return tileY;
     }
