@@ -1,3 +1,7 @@
+You need VisualStudio2013 or higher (C++11 support!).
+
+The build has been tested with VisualStudio 2013.
+
 Build Files for visual studio can be found in the windows directory.
 
 
