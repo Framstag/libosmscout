@@ -986,7 +986,7 @@ namespace osmscout {
          typeInfo->CanBeWay() ||
          typeInfo->CanBeArea())) {
       if (typeInfo->CanBeNode()) {
-        typeInfo->SetNodeId(nodeTypes.size()+1);
+        typeInfo->SetNodeId((TypeId)(nodeTypes.size()+1));
         nodeTypes.push_back(typeInfo);
 
         if (nodeTypes.size()<256) {
@@ -998,7 +998,7 @@ namespace osmscout {
       }
 
       if (typeInfo->CanBeWay()) {
-        typeInfo->SetWayId(wayTypes.size()+1);
+        typeInfo->SetWayId((TypeId)(wayTypes.size()+1));
         wayTypes.push_back(typeInfo);
 
         if (wayTypes.size()<256) {
@@ -1010,7 +1010,7 @@ namespace osmscout {
       }
 
       if (typeInfo->CanBeArea()) {
-        typeInfo->SetAreaId(areaTypes.size()+1);
+        typeInfo->SetAreaId((TypeId)(areaTypes.size()+1));
         areaTypes.push_back(typeInfo);
 
         if (areaTypes.size()<256) {
@@ -1033,7 +1033,7 @@ namespace osmscout {
       return 0;
     }
     else {
-      return types.size();
+      return (TypeId)types.size();
     }
   }
 
