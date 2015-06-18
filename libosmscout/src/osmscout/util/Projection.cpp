@@ -78,10 +78,10 @@ namespace osmscout {
   }
 
   bool MercatorProjection::Set(double lon, double lat,
-                                double angle,
-                                const Magnification& magnification,
-                                double dpi,
-                                size_t width, size_t height)
+                               double angle,
+                               const Magnification& magnification,
+                               double dpi,
+                               size_t width, size_t height)
   {
     if (valid &&
         this->lon==lon &&
