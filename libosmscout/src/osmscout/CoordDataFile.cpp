@@ -130,10 +130,8 @@ namespace osmscout {
     coordsMap.clear();
     coordsMap.reserve(ids.size());
 
-    for (std::set<OSMId>::const_iterator id=ids.begin();
-         id!=ids.end();
-         ++id) {
-      PageId relatedId=*id-std::numeric_limits<Id>::min();
+    for (const auto& id : ids) {
+      PageId relatedId=id-std::numeric_limits<Id>::min();
       PageId pageId=relatedId/coordPageSize;
 
       CoordPageOffsetMap::const_iterator pageOffset=coordPageOffsetMap.find(pageId);
@@ -159,7 +157,7 @@ namespace osmscout {
           continue;
         }
 
-        coordsMap.insert(std::make_pair(*id,
+        coordsMap.insert(std::make_pair(id,
                                         CoordEntry(substituteId,
                                                    coord.GetLat(),
                                                    coord.GetLon())));
