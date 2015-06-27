@@ -235,10 +235,13 @@ namespace osmscout {
     }
 
     if (nodesCount>0) {
-      if (!ReadIds(scanner,
-                   nodesCount,
-                   rings[0].ids)) {
-        return false;
+      if (rings[0].GetType()->CanRoute() ||
+          rings[0].GetType()->GetOptimizeLowZoom()) {
+        if (!ReadIds(scanner,
+                     nodesCount,
+                     rings[0].ids)) {
+          return false;
+        }
       }
 
       if (!scanner.Read(rings[0].nodes,
@@ -255,7 +258,7 @@ namespace osmscout {
 
       rings[i].SetType(type);
 
-      if (rings[i].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
+      if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
         if (!rings[i].featureValueBuffer.Read(scanner)) {
           return false;
         }
@@ -265,16 +268,17 @@ namespace osmscout {
 
       scanner.ReadNumber(nodesCount);
 
-      if (nodesCount>0 &&
-          rings[i].GetType()->GetAreaId()!=typeIgnore) {
-        if (!ReadIds(scanner,
-                     nodesCount,
-                     rings[i].ids)) {
-          return false;
-        }
-      }
-
       if (nodesCount>0) {
+        if (rings[i].GetType()->GetAreaId()!=typeIgnore &&
+            (rings[i].GetType()->CanRoute() ||
+             rings[i].GetType()->GetOptimizeLowZoom())) {
+          if (!ReadIds(scanner,
+                       nodesCount,
+                       rings[i].ids)) {
+            return false;
+          }
+        }
+
         if (!scanner.Read(rings[i].nodes,
                           nodesCount)) {
           return false;
@@ -443,9 +447,12 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)ring->nodes.size());
 
     if (!ring->nodes.empty()) {
-      if (!WriteIds(writer,
-                    ring->ids)) {
-        return false;
+      if (ring->GetType()->CanRoute() ||
+          ring->GetType()->GetOptimizeLowZoom()) {
+        if (!WriteIds(writer,
+                      ring->ids)) {
+          return false;
+        }
       }
 
       if (!writer.Write(ring->nodes,
@@ -472,15 +479,16 @@ namespace osmscout {
 
       writer.WriteNumber((uint32_t)ring->nodes.size());
 
-      if (!ring->nodes.empty() &&
-          ring->featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-        if (!WriteIds(writer,
-                      ring->ids)) {
-          return false;
-        }
-      }
-
       if (!ring->nodes.empty()) {
+        if (ring->GetType()->GetAreaId()!=typeIgnore &&
+            (ring->GetType()->CanRoute() ||
+             ring->GetType()->GetOptimizeLowZoom())) {
+          if (!WriteIds(writer,
+                        ring->ids)) {
+            return false;
+          }
+        }
+
         if (!writer.Write(ring->nodes,
                           ring->nodes.size())) {
           return false;
