@@ -254,6 +254,7 @@ namespace osmscout {
   : typeConfig(typeConfig),
     parameter(parameter),
     progress(progress),
+    coordCount(0),
     nodeCount(0),
     wayCount(0),
     areaCount(0),
@@ -342,6 +343,8 @@ namespace osmscout {
 
     maxCoord.Set(std::max(maxCoord.GetLat(),lat),
                  std::max(maxCoord.GetLon(),lon));
+
+    coordCount++;
 
     StoreCoord(id,
                GeoCoord(lat,
@@ -672,6 +675,8 @@ namespace osmscout {
     multipolygonWriter.Close();
 
     if (success) {
+      progress.Info(std::string("Coords:           ")+NumberToString(coordCount));
+      progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
       progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
       progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
                     NumberToString(areaCount)+" "+
@@ -680,7 +685,6 @@ namespace osmscout {
       progress.Info(std::string("Coastlines:       ")+NumberToString(coastlineCount));
       progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
       progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
-      progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
 
       for (const auto &type : typeConfig->GetTypes()) {
         size_t      i=type->GetIndex();

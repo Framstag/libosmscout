@@ -52,6 +52,7 @@ namespace osmscout {
       FileWriter             turnRestrictionWriter;
       FileWriter             multipolygonWriter;
 
+      uint32_t               coordCount;
       uint32_t               nodeCount;
       uint32_t               wayCount;
       uint32_t               areaCount;
