@@ -45,6 +45,10 @@ namespace osmscout {
     std::vector<Id>       ids;
     std::vector<GeoCoord> nodes;
 
+  private:
+    bool ReadIds(FileScanner& scanner);
+    bool WriteIds(FileWriter& writer) const;
+
   public:
     inline Way()
     : fileOffset(0)

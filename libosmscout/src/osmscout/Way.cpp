@@ -82,30 +82,8 @@ namespace osmscout {
     return false;
   }
 
-  bool Way::Read(const TypeConfig& typeConfig,
-                 FileScanner& scanner)
+  bool Way::ReadIds(FileScanner& scanner)
   {
-    if (!scanner.GetPos(fileOffset)) {
-      return false;
-    }
-
-    TypeId typeId;
-
-    scanner.ReadTypeId(typeId,
-                       typeConfig.GetWayTypeIdBytes());
-
-    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
-
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner)) {
-      return false;
-    }
-
-    if (!scanner.Read(nodes)) {
-      return false;
-    }
-
     ids.resize(nodes.size());
 
     Id minId;
@@ -140,6 +118,40 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Way::Read(const TypeConfig& typeConfig,
+                 FileScanner& scanner)
+  {
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
+
+    TypeId typeId;
+
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetWayTypeIdBytes());
+
+    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
+
+    featureValueBuffer.SetType(type);
+
+    if (!featureValueBuffer.Read(scanner)) {
+      return false;
+    }
+
+    if (!scanner.Read(nodes)) {
+      return false;
+    }
+
+    if (featureValueBuffer.GetType()->CanRoute() ||
+        featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
+      if (!ReadIds(scanner)) {
+        return false;
+      }
+    }
+
+    return !scanner.HasError();
+  }
+
   bool Way::ReadOptimized(const TypeConfig& typeConfig,
                           FileScanner& scanner)
   {
@@ -167,22 +179,8 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Way::Write(const TypeConfig& typeConfig,
-                  FileWriter& writer) const
+  bool Way::WriteIds(FileWriter& writer) const
   {
-    assert(!nodes.empty());
-
-    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
-                       typeConfig.GetWayTypeIdBytes());
-
-    if (!featureValueBuffer.Write(writer)) {
-      return false;
-    }
-
-    if (!writer.Write(nodes)) {
-      return false;
-    }
-
     Id minId=0;
 
     for (size_t i=0; i<ids.size(); i++) {
@@ -225,6 +223,32 @@ namespace osmscout {
         }
 
         idCurrent+=8;
+      }
+    }
+
+    return !writer.HasError();
+  }
+
+  bool Way::Write(const TypeConfig& typeConfig,
+                  FileWriter& writer) const
+  {
+    assert(!nodes.empty());
+
+    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                       typeConfig.GetWayTypeIdBytes());
+
+    if (!featureValueBuffer.Write(writer)) {
+      return false;
+    }
+
+    if (!writer.Write(nodes)) {
+      return false;
+    }
+
+    if (featureValueBuffer.GetType()->CanRoute() ||
+        featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
+      if (!WriteIds(writer)) {
+        return false;
       }
     }
 
