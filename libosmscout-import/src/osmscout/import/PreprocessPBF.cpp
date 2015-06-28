@@ -50,9 +50,9 @@ namespace osmscout {
                        PBF::BlockHeader& blockHeader,
                        bool silent)
   {
-    char blockHeaderLength[4];
+    uint32_t blockHeaderLength;
 
-    if (fread(blockHeaderLength,sizeof(char),4,file)!=4) {
+    if (fread(&blockHeaderLength,4,1,file)!=1) {
       if (!silent) {
         progress.Error("Cannot read block header length!");
       }
@@ -60,7 +60,7 @@ namespace osmscout {
     }
 
     // ugly!
-    uint32_t length=ntohl(*((uint32_t*)&blockHeaderLength));
+    uint32_t length=ntohl(blockHeaderLength);
 
     if (length==0 || length>MAX_BLOCK_HEADER_SIZE) {
       progress.Error("Block header size invalid!");
