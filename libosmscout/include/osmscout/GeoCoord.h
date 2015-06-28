@@ -140,13 +140,15 @@ namespace osmscout {
       uint64_t lonValue=(uint64_t)round((lon+180.0)*lonConversionFactor);
       uint64_t number;
 
-      number =(((latValue >>  0) & 0xff) <<  0);
-      number+=(((latValue >>  8) & 0xff) <<  8);
-      number+=(((latValue >> 16) & 0xff) << 16);
 
-      number+=(((lonValue >>  0) & 0xff) << 24);
-      number+=(((lonValue >>  8) & 0xff) << 32);
-      number+=(((lonValue >> 16) & 0xff) << 40);
+      number =(((lonValue >>  0) & 0xff) <<  0);
+      number+=(((latValue >>  0) & 0xff) <<  8);
+
+      number+=(((lonValue >>  8) & 0xff) << 16);
+      number+=(((latValue >>  8) & 0xff) << 24);
+
+      number+=(((lonValue >> 16) & 0xff) << 32);
+      number+=(((latValue >> 16) & 0xff) << 40);
 
       number+=(((latValue >> 24) & 0x07) | ((lonValue >> 20) & 0x70) << 48);
 
