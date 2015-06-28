@@ -23,6 +23,10 @@
 
 #include <cstdio>
 
+#if defined(HAVE_FCNTL_H)
+  #include <fcntl.h>
+#endif
+
 // We should try to get rid of this!
 #if defined(__WIN32__) || defined(WIN32)
   #include <winsock.h>
@@ -45,10 +49,49 @@
 
 namespace osmscout {
 
-  bool ReadBlockHeader(Progress& progress,
-                       FILE* file,
-                       PBF::BlockHeader& blockHeader,
-                       bool silent)
+  bool PreprocessPBF::GetPos(FILE* file,
+                             FileOffset& pos) const
+  {
+#if defined(HAVE_FSEEKO)
+    off_t filepos=ftello(file);
+
+    if (filepos==-1) {
+      return false;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
+#else
+    long filepos=ftell(file);
+
+    if (filepos==-1) {
+      return false;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
+#endif
+
+    return true;
+  }
+
+  void PreprocessPBF::AssureBlockSize(uint32_t length)
+  {
+    if (buffer==NULL) {
+      buffer=new char[length];
+      bufferSize=length;
+    }
+    else if (bufferSize<length) {
+      delete buffer;
+      buffer=new char[length];
+      bufferSize=length;
+    }
+  }
+
+  bool PreprocessPBF::ReadBlockHeader(Progress& progress,
+                                      FILE* file,
+                                      PBF::BlockHeader& blockHeader,
+                                      bool silent)
   {
     uint32_t blockHeaderLength;
 
@@ -59,7 +102,6 @@ namespace osmscout {
       return false;
     }
 
-    // ugly!
     uint32_t length=ntohl(blockHeaderLength);
 
     if (length==0 || length>MAX_BLOCK_HEADER_SIZE) {
@@ -67,7 +109,7 @@ namespace osmscout {
       return false;
     }
 
-    char *buffer=new char[length];
+    AssureBlockSize(length);
 
     if (fread(buffer,sizeof(char),length,file)!=length) {
       progress.Error("Cannot read block header!");
@@ -77,19 +119,16 @@ namespace osmscout {
 
     if (!blockHeader.ParseFromArray(buffer,length)) {
       progress.Error("Cannot parse block header!");
-      delete[] buffer;
       return false;
     }
-
-    delete[] buffer;
 
     return true;
   }
 
-  bool ReadHeaderBlock(Progress& progress,
-                       FILE* file,
-                       const PBF::BlockHeader& blockHeader,
-                       PBF::HeaderBlock& headerBlock)
+  bool PreprocessPBF::ReadHeaderBlock(Progress& progress,
+                                      FILE* file,
+                                      const PBF::BlockHeader& blockHeader,
+                                      PBF::HeaderBlock& headerBlock)
   {
     PBF::Blob blob;
 
@@ -100,31 +139,27 @@ namespace osmscout {
       return false;
     }
 
-    char *buffer=new char[length];
+    AssureBlockSize(length);
 
     if (fread(buffer,sizeof(char),length,file)!=length) {
       progress.Error("Cannot read blob!");
-      delete[] buffer;
       return false;
     }
 
     if (!blob.ParseFromArray(buffer,length)) {
       progress.Error("Cannot parse blob!");
-      delete[] buffer;
       return false;
     }
 
-    delete [] buffer;
-
     if (blob.has_raw()) {
       length=(uint32_t)blob.raw().length();
-      buffer = new char[length];
+      AssureBlockSize(length);
       memcpy(buffer,blob.raw().data(),length);
     }
     else if (blob.has_zlib_data()){
 #if defined(HAVE_LIB_ZLIB)
       length=blob.raw_size();
-      buffer=new char[length];
+      AssureBlockSize(length);
 
       z_stream compressedStream;
 
@@ -138,19 +173,16 @@ namespace osmscout {
 
       if (inflateInit( &compressedStream)!=Z_OK) {
         progress.Error("Cannot decode zlib compressed blob data!");
-        delete[] buffer;
         return false;
       }
 
       if (inflate(&compressedStream,Z_FINISH)!=Z_STREAM_END) {
         progress.Error("Cannot decode zlib compressed blob data!");
-        delete[] buffer;
         return false;
       }
 
       if (inflateEnd(&compressedStream)!=Z_OK) {
         progress.Error("Cannot decode zlib compressed blob data!");
-        delete[] buffer;
         return false;
       }
 #else
@@ -169,19 +201,16 @@ namespace osmscout {
 
     if (!headerBlock.ParseFromArray(buffer,length)) {
       progress.Error("Cannot parse header block!");
-      delete[] buffer;
       return false;
     }
-
-    delete[] buffer;
 
     return true;
   }
 
-  bool ReadPrimitiveBlock(Progress& progress,
-                          FILE* file,
-                          const PBF::BlockHeader& blockHeader,
-                          PBF::PrimitiveBlock& primitiveBlock)
+  bool PreprocessPBF::ReadPrimitiveBlock(Progress& progress,
+                                         FILE* file,
+                                         const PBF::BlockHeader& blockHeader,
+                                         PBF::PrimitiveBlock& primitiveBlock)
   {
     PBF::Blob blob;
 
@@ -192,31 +221,27 @@ namespace osmscout {
       return false;
     }
 
-    char *buffer=new char[length];
+    AssureBlockSize(length);
 
     if (fread(buffer,sizeof(char),length,file)!=length) {
       progress.Error("Cannot read blob!");
-      delete[] buffer;
       return false;
     }
 
     if (!blob.ParseFromArray(buffer,length)) {
       progress.Error("Cannot parse blob!");
-      delete[] buffer;
       return false;
     }
 
-    delete [] buffer;
-
     if (blob.has_raw()) {
       length=(uint32_t)blob.raw().length();
-      buffer = new char[length];
+      AssureBlockSize(length);
       memcpy(buffer,blob.raw().data(),length);
     }
     else if (blob.has_zlib_data()){
 #if defined(HAVE_LIB_ZLIB)
       length=blob.raw_size();
-      buffer=new char[length];
+      AssureBlockSize(length);
 
       z_stream compressedStream;
 
@@ -230,19 +255,16 @@ namespace osmscout {
 
       if (inflateInit( &compressedStream)!=Z_OK) {
         progress.Error("Cannot decode zlib compressed blob data!");
-        delete[] buffer;
         return false;
       }
 
       if (inflate(&compressedStream,Z_FINISH)!=Z_STREAM_END) {
         progress.Error("Cannot decode zlib compressed blob data!");
-        delete[] buffer;
         return false;
       }
 
       if (inflateEnd(&compressedStream)!=Z_OK) {
         progress.Error("Cannot decode zlib compressed blob data!");
-        delete[] buffer;
         return false;
       }
 #else
@@ -261,11 +283,8 @@ namespace osmscout {
 
     if (!primitiveBlock.ParseFromArray(buffer,length)) {
       progress.Error("Cannot parse primitive block!");
-      delete[] buffer;
       return false;
     }
-
-    delete[] buffer;
 
     return true;
   }
@@ -417,9 +436,16 @@ namespace osmscout {
   }
 
   PreprocessPBF::PreprocessPBF(PreprocessorCallback& callback)
-  : callback(callback)
+  : buffer(NULL),
+    bufferSize(0),
+    callback(callback)
   {
     // no code
+  }
+
+  PreprocessPBF::~PreprocessPBF()
+  {
+    delete buffer;
   }
 
   bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
@@ -427,7 +453,16 @@ namespace osmscout {
                              Progress& progress,
                              const std::string& filename)
   {
+    FileOffset fileSize;
+    FileOffset currentPosition;
+
     progress.SetAction(std::string("Parsing *.osm.pbf file '")+filename+"'");
+
+    if (!GetFileSize(filename,
+                     fileSize)) {
+      progress.Error("Cannot get size of file '"+filename+"'!");
+      return false;
+    }
 
     FILE* file;
 
@@ -448,7 +483,7 @@ namespace osmscout {
     }
 
     if (blockHeader.type()!="OSMHeader") {
-      progress.Error("File is not an OSM PBF file!");
+      progress.Error("File '"+filename+"' is not an OSM PBF file!");
       fclose(file);
       return false;
     }
@@ -479,6 +514,16 @@ namespace osmscout {
     while (true) {
       PBF::BlockHeader blockHeader;
 
+      if (!GetPos(file,
+                  currentPosition)) {
+        progress.Error("Cannot read current position in '"+filename+"'!");
+        fclose(file);
+        return false;
+      }
+
+      progress.SetProgress(currentPosition,
+                           fileSize);
+
       if (!ReadBlockHeader(progress,
                            file,
                            blockHeader,
@@ -488,7 +533,7 @@ namespace osmscout {
       }
 
       if (blockHeader.type()!="OSMData") {
-        progress.Error("File is not an OSM PBF file!");
+        progress.Error("File '"+filename+"' is not an OSM PBF file!");
         fclose(file);
         return false;
       }

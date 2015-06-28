@@ -38,12 +38,34 @@ namespace osmscout {
   class PreprocessPBF : public Preprocessor
   {
   private:
+    char                             *buffer;
+    uint32_t                         bufferSize;
     PreprocessorCallback&            callback;
     TagMap                           tagMap;
     std::vector<OSMId>               nodes;
     std::vector<RawRelation::Member> members;
 
   private:
+    bool GetPos(FILE* file,
+                FileOffset& pos) const;
+
+    void AssureBlockSize(uint32_t length);
+
+    bool ReadBlockHeader(Progress& progress,
+                         FILE* file,
+                         PBF::BlockHeader& blockHeader,
+                         bool silent);
+
+    bool ReadHeaderBlock(Progress& progress,
+                         FILE* file,
+                         const PBF::BlockHeader& blockHeader,
+                         PBF::HeaderBlock& headerBlock);
+
+    bool ReadPrimitiveBlock(Progress& progress,
+                            FILE* file,
+                            const PBF::BlockHeader& blockHeader,
+                            PBF::PrimitiveBlock& primitiveBlock);
+
     void ReadNodes(const TypeConfig& typeConfig,
                    const PBF::PrimitiveBlock& block,
                    const PBF::PrimitiveGroup &group);
@@ -62,6 +84,7 @@ namespace osmscout {
 
   public:
     PreprocessPBF(PreprocessorCallback& callback);
+    ~PreprocessPBF();
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress,
