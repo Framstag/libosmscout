@@ -272,11 +272,11 @@ namespace osmscout {
       return false;
 #endif
     }
-    else if (blob.has_bzip2_data()){
+    else if (blob.has_bzip2_data()) {
       progress.Error("Data is bzip2 encoded but bzip2 support is not enabled!");
       return false;
     }
-    else if (blob.has_lzma_data()){
+    else if (blob.has_lzma_data()) {
       progress.Error("Data is lzma encoded but lzma support is not enabled!");
       return false;
     }
@@ -299,7 +299,7 @@ namespace osmscout {
       tagMap.clear();
 
       for (int t=0; t<inputNode.keys_size(); t++) {
-        TagId id=typeConfig.GetTagId(block.stringtable().s(inputNode.keys(t)).c_str());
+        TagId id=typeConfig.GetTagId(block.stringtable().s(inputNode.keys(t)));
 
         if (id!=tagIgnore) {
           tagMap[id]=block.stringtable().s(inputNode.vals(t));
@@ -340,7 +340,7 @@ namespace osmscout {
           break;
         }
 
-        TagId id=typeConfig.GetTagId(block.stringtable().s(dense.keys_vals(t)).c_str());
+        TagId id=typeConfig.GetTagId(block.stringtable().s(dense.keys_vals(t)));
 
         if (id!=tagIgnore) {
           tagMap[id]=block.stringtable().s(dense.keys_vals(t+1));
@@ -367,7 +367,7 @@ namespace osmscout {
       tagMap.clear();
 
       for (int t=0; t<inputWay.keys_size(); t++) {
-        TagId id=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)).c_str());
+        TagId id=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)));
 
         if (id!=tagIgnore) {
           tagMap[id]=block.stringtable().s(inputWay.vals(t));
@@ -398,7 +398,7 @@ namespace osmscout {
       tagMap.clear();
 
       for (int t=0; t<inputRelation.keys_size(); t++) {
-        TagId id=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)).c_str());
+        TagId id=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)));
 
         if (id!=tagIgnore) {
           tagMap[id]=block.stringtable().s(inputRelation.vals(t));
