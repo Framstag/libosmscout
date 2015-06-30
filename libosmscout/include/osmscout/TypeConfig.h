@@ -1016,6 +1016,7 @@ namespace osmscout {
                              uint32_t priority);
 
     TagId GetTagId(const char* name) const;
+    TagId GetTagId(const std::string& name) const;
 
     bool IsNameTag(TagId tag,
                    uint32_t& priority) const;

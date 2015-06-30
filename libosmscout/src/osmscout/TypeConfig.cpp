@@ -1049,6 +1049,18 @@ namespace osmscout {
     }
   }
 
+  TagId TypeConfig::GetTagId(const std::string& name) const
+  {
+    auto iter=stringToTagMap.find(name);
+
+    if (iter!=stringToTagMap.end()) {
+      return iter->second;
+    }
+    else {
+      return tagIgnore;
+    }
+  }
+
   const TypeInfoRef TypeConfig::GetTypeInfo(const std::string& name) const
   {
     auto typeEntry=nameToTypeMap.find(name);
