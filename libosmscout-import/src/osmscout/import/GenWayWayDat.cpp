@@ -77,7 +77,7 @@ namespace osmscout {
     for (uint32_t r=1; r<=restrictionCount; r++) {
       progress.SetProgress(r,restrictionCount);
 
-      TurnRestrictionRef restriction=new TurnRestriction();
+      TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
 
       if (!restriction->Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -190,7 +190,7 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
-      RawWayRef way=new RawWay();
+      RawWayRef way=std::make_shared<RawWay>();
 
       progress.SetProgress(w,wayCount);
 
@@ -527,7 +527,7 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=areaCount; w++) {
-      RawWayRef way=new RawWay();
+      RawWayRef way=std::make_shared<RawWay>();
 
       progress.SetProgress(w,areaCount);
 
@@ -578,7 +578,7 @@ namespace osmscout {
                     writer,
                     writtenWayCount,
                     coordsMap,
-                    way)) {
+                    *way)) {
         return false;
       }
     }
@@ -739,7 +739,7 @@ namespace osmscout {
                    wayWriter,
                    writtenWayCount,
                    coordsMap,
-                   rawWay);
+                   *rawWay);
         }
 
         waysByType[type].clear();

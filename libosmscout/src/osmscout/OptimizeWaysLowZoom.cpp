@@ -312,7 +312,7 @@ namespace osmscout
                   continue;
                 }
 
-                WayRef way=new Way();
+                WayRef way=std::make_shared<Way>();
 
                 if (!way->ReadOptimized(*typeConfig,
                                         scanner)) {

@@ -20,15 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
+
 #include <osmscout/Types.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API TurnRestriction : public Referencable
+  class OSMSCOUT_API TurnRestriction
   {
   public:
     enum Type
@@ -95,7 +96,7 @@ namespace osmscout {
     bool Write(FileWriter& writer) const;
   };
 
-  typedef Ref<TurnRestriction> TurnRestrictionRef;
+  typedef std::shared_ptr<TurnRestriction> TurnRestrictionRef;
 }
 
 #endif

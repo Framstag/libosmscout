@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
+
 #include <osmscout/GeoCoord.h>
 
 #include <osmscout/TypeConfig.h>
@@ -28,13 +30,12 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
   /**
     Representation of an (complex/multipolygon) area
     */
-  class OSMSCOUT_API Area : public Referencable
+  class OSMSCOUT_API Area
   {
   public:
     static const size_t masterRingId = 0;
@@ -158,7 +159,7 @@ namespace osmscout {
                         FileWriter& writer) const;
   };
 
-  typedef Ref<Area> AreaRef;
+  typedef std::shared_ptr<Area> AreaRef;
 }
 
 #endif

@@ -129,7 +129,7 @@ namespace osmscout
     }
 
     for (uint32_t a=1; a<=areaCount; a++) {
-      AreaRef area=new Area();
+      AreaRef area=std::make_shared<Area>();
 
       progress.SetProgress(a,areaCount);
 
@@ -247,7 +247,7 @@ namespace osmscout
         continue;
       }
 
-      AreaRef copiedArea=new Area(*area);
+      AreaRef copiedArea=std::make_shared<Area>(*area);
 
       copiedArea->rings=newRings;
 

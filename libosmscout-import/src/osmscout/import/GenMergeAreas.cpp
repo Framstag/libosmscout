@@ -172,7 +172,7 @@ namespace osmscout {
     for (uint32_t a=1; a<=areaCount; a++) {
       uint8_t type;
       Id      id;
-      AreaRef area=new Area();
+      AreaRef area=std::make_shared<Area>();
 
       progress.SetProgress(a,areaCount);
 
@@ -322,10 +322,10 @@ namespace osmscout {
                     candidate!=idAreaMap[id].end()) {
                   AreaRef candidateArea(*candidate);
 
-                  size_t firstOuterRing=GetFirstOuterRingWithId(area,
+                  size_t firstOuterRing=GetFirstOuterRingWithId(*area,
                                                                 id);
 
-                  size_t secondOuterRing=GetFirstOuterRingWithId(candidateArea,
+                  size_t secondOuterRing=GetFirstOuterRingWithId(*candidateArea,
                                                                  id);
 
                   if (area->rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {

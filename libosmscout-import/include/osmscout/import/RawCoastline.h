@@ -20,16 +20,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
+
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class RawCoastline : public Referencable
+  class RawCoastline
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
@@ -83,7 +84,7 @@ namespace osmscout {
     bool Write(FileWriter& writer) const;
   };
 
-  typedef Ref<RawCoastline> RawCoastlineRef;
+  typedef std::shared_ptr<RawCoastline> RawCoastlineRef;
 }
 
 #endif

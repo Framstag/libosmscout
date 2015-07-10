@@ -130,7 +130,7 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
-      RawWayRef way=new RawWay();
+      RawWayRef way=std::make_shared<RawWay>();
 
       progress.SetProgress(w,wayCount);
 
@@ -286,7 +286,7 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
-      RawWayRef way=new RawWay();
+      RawWayRef way=std::make_shared<RawWay>();
 
       progress.SetProgress(w,wayCount);
 
@@ -342,7 +342,7 @@ namespace osmscout {
                     writer,
                     writtenWayCount,
                     coordsMap,
-                    way)) {
+                    *way)) {
         return false;
       }
     }

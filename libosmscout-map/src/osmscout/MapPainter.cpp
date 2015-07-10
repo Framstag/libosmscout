@@ -533,6 +533,8 @@ namespace osmscout {
               data.lineWidth=GetProjectedWidth(projection,
                                                projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
                                                coastlineLine->GetWidth());
+              data.startIsClosed=false;
+              data.endIsClosed=false;
               wayData.push_back(data);
             }
 

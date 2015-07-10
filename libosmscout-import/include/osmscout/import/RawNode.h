@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -29,11 +30,10 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class RawNode : public Referencable
+  class RawNode
   {
   private:
     OSMId              id;
@@ -137,7 +137,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef Ref<RawNode> RawNodeRef;
+  typedef std::shared_ptr<RawNode> RawNodeRef;
 }
 
 #endif

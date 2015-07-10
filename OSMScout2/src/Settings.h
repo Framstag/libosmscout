@@ -20,11 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <memory>
+
 #include <QSettings>
 
 #include <osmscout/RoutingProfile.h>
 
-class Settings : public osmscout::Referencable
+class Settings
 {
 private:
   QSettings settings;
@@ -40,6 +42,6 @@ public:
   void SetRoutingVehicle(const osmscout::Vehicle& vehicle);
 };
 
-typedef osmscout::Ref<Settings> SettingsRef;
+typedef std::shared_ptr<Settings> SettingsRef;
 
 #endif

@@ -202,7 +202,7 @@ namespace osmscout {
           continue;
         }
 
-        if (GetAccess(wayEntry->second).CanRoute(vehicle)) {
+        if (GetAccess(*wayEntry->second).CanRoute(vehicle)) {
           return true;
         }
 
@@ -252,7 +252,7 @@ namespace osmscout {
     for (uint32_t r=1; r<=restrictionCount; r++) {
       progress.SetProgress(r,restrictionCount);
 
-      TurnRestrictionRef restriction=new TurnRestriction();
+      TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
 
       if (!restriction->Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -420,7 +420,7 @@ namespace osmscout {
     for (uint32_t r=1; r<=restrictionCount; r++) {
       progress.SetProgress(r,restrictionCount);
 
-      TurnRestrictionRef restriction=new TurnRestriction();
+      TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
 
       if (!restriction->Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -921,7 +921,7 @@ namespace osmscout {
         return false;
       }
 
-      WayRef way=new Way();
+      WayRef way=std::make_shared<Way>();
 
       way->Read(typeConfig,
                 scanner);
@@ -965,7 +965,7 @@ namespace osmscout {
         return false;
       }
 
-      AreaRef area=new Area();
+      AreaRef area=std::make_shared<Area>();
 
       area->Read(typeConfig,
                  scanner);
@@ -997,7 +997,7 @@ namespace osmscout {
       if (ref.GetType()==refWay) {
         const WayRef& way=waysMap[ref.GetFileOffset()];
 
-        if (!way.Valid()) {
+        if (!way) {
           progress.Error("Error while loading way at offset "+
                          NumberToString(ref.GetFileOffset()) +
                          " (Internal error?)");
@@ -1022,7 +1022,7 @@ namespace osmscout {
       else if (ref.GetType()==refArea) {
         const AreaRef& area=areasMap[ref.GetFileOffset()];
 
-        if (!area.Valid()) {
+        if (!area) {
           progress.Error("Error while loading area at offset "+
                          NumberToString(ref.GetFileOffset()) +
                          " (Internal error?)");
@@ -1569,7 +1569,7 @@ namespace osmscout {
           routeNode=routeNodeIter->second;
         }
         else {
-          routeNode=new RouteNode();
+          routeNode=std::make_shared<RouteNode>();
 
           if (!routeScanner.SetPos(pendingOffset.routeNodeOffset)) {
             return false;
@@ -1829,21 +1829,21 @@ namespace osmscout {
           if (ref.GetType()==refWay) {
             const WayRef& way=waysMap[ref.GetFileOffset()];
 
-            if (!way.Valid()) {
+            if (!way) {
               progress.Error("Error while loading way at offset "+
                              NumberToString(ref.GetFileOffset()) +
                              " (Internal error?)");
               continue;
             }
 
-            if (!GetAccess(way).CanRoute(vehicle)) {
+            if (!GetAccess(*way).CanRoute(vehicle)) {
               continue;
             }
 
             uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
                                                                        way->GetType(),
-                                                                       GetMaxSpeed(way),
-                                                                       GetGrade(way));
+                                                                       GetMaxSpeed(*way),
+                                                                       GetGrade(*way));
 
             if (way->IsCircular()) {
               // Circular way routing (similar to current area routing, but respecting isOneway())
@@ -1869,7 +1869,7 @@ namespace osmscout {
           else if (ref.GetType()==refArea) {
             const AreaRef& area=areasMap[ref.GetFileOffset()];
 
-            if (!area.Valid()) {
+            if (!area) {
               progress.Error("Error while loading area at offset "+
                              NumberToString(ref.GetFileOffset()) +
                              " (Internal error?)");

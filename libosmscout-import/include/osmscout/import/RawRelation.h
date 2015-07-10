@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <unordered_map>
 
 #include <osmscout/Tag.h>
@@ -27,11 +28,10 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class RawRelation : public Referencable
+  class RawRelation
   {
   public:
     enum MemberType {
@@ -108,7 +108,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef Ref<RawRelation> RawRelationRef;
+  typedef std::shared_ptr<RawRelation> RawRelationRef;
 }
 
 #endif

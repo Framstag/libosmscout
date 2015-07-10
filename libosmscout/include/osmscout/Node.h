@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <vector>
 
 #include <osmscout/GeoCoord.h>
@@ -29,11 +30,10 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API Node : public Referencable
+  class OSMSCOUT_API Node
   {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features
@@ -105,7 +105,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef Ref<Node> NodeRef;
+  typedef std::shared_ptr<Node> NodeRef;
 }
 
 #endif

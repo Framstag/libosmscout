@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -42,7 +43,7 @@ namespace osmscout {
   class DataFile
   {
   public:
-    typedef Ref<N> ValueType;
+    typedef std::shared_ptr<N> ValueType;
 
   private:
     typedef Cache<FileOffset,ValueType> DataCache;
@@ -194,7 +195,7 @@ namespace osmscout {
       for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
            offset!=offsets.end();
            ++offset) {
-        N *value=new N();
+        ValueType value=std::make_shared<N>();
 
         scanner.SetPos(*offset);
 
@@ -222,7 +223,7 @@ namespace osmscout {
           cacheRef=cache.SetEntry(cacheEntry);
 
           scanner.SetPos(*offset);
-          cacheRef->value=new N();
+          cacheRef->value=std::make_shared<N>();
 
           if (!ReadData(*typeConfig,
                         scanner,
@@ -260,7 +261,7 @@ namespace osmscout {
       for (std::list<FileOffset>::const_iterator offset=offsets.begin();
            offset!=offsets.end();
            ++offset) {
-        N *value=new N();
+        ValueType value=std::make_shared<N>();
 
         scanner.SetPos(*offset);
 
@@ -288,7 +289,7 @@ namespace osmscout {
           cacheRef=cache.SetEntry(cacheEntry);
 
           scanner.SetPos(*offset);
-          cacheRef->value=new N();
+          cacheRef->value=std::make_shared<N>();
 
           if (!ReadData(*typeConfig,
                         scanner,
@@ -326,7 +327,7 @@ namespace osmscout {
       for (std::set<FileOffset>::const_iterator offset=offsets.begin();
            offset!=offsets.end();
            ++offset) {
-        N *value=new N();
+        ValueType value=std::make_shared<N>();
 
         scanner.SetPos(*offset);
 
@@ -354,7 +355,7 @@ namespace osmscout {
           cacheRef=cache.SetEntry(cacheEntry);
 
           scanner.SetPos(*offset);
-          cacheRef->value=new N();
+          cacheRef->value=std::make_shared<N>();
 
           if (!ReadData(*typeConfig,
                         scanner,
@@ -406,7 +407,7 @@ namespace osmscout {
     }
 
     if (!cache.IsActive()) {
-      N *value=new N();
+      ValueType value=std::make_shared<N>();
 
       scanner.SetPos(offset);
 
@@ -430,7 +431,7 @@ namespace osmscout {
         cacheRef=cache.SetEntry(cacheEntry);
 
         scanner.SetPos(offset);
-        cacheRef->value=new N();
+        cacheRef->value=std::make_shared<N>();
 
         if (!ReadData(*typeConfig,
                       scanner,
@@ -472,7 +473,7 @@ namespace osmscout {
   class IndexedDataFile : public DataFile<N>
   {
   public:
-    typedef Ref<N> ValueType;
+    typedef std::shared_ptr<N> ValueType;
 
   private:
     typedef NumericIndex<I> DataIndex;

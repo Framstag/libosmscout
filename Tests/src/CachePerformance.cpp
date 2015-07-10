@@ -23,7 +23,6 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/Reference.h>
 #include <osmscout/util/StopClock.h>
 
 /**
@@ -42,7 +41,7 @@ struct Data
   std::vector<size_t> value2;
 };
 
-struct Data2 : public osmscout::Referencable
+struct Data2
 {
   size_t              value;
   std::vector<size_t> value2;

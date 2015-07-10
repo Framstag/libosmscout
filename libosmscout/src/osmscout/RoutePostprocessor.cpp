@@ -140,11 +140,11 @@ namespace osmscout {
           double deltaTime=0.0;
 
           if (node.GetPathObject().GetType()==refArea) {
-            deltaTime=profile.GetTime(area,
+            deltaTime=profile.GetTime(*area,
                                       deltaDistance);
           }
           else if (node.GetPathObject().GetType()==refWay) {
-            deltaTime=profile.GetTime(way,
+            deltaTime=profile.GetTime(*way,
                                       deltaDistance);
           }
 
@@ -188,16 +188,16 @@ namespace osmscout {
 
       if (node->GetPathObject().GetType()==refArea) {
         AreaRef                              area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
-        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(area);
+        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(*area);
 
         node->AddDescription(RouteDescription::WAY_NAME_DESC,
                              nameDesc);
       }
       else if (node->GetPathObject().GetType()==refWay) {
         WayRef                               way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
-        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(way);
+        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(*way);
 
-        if (postprocessor.IsBridge(way) &&
+        if (postprocessor.IsBridge(*way) &&
             node!=description.Nodes().begin()) {
           std::list<RouteDescription::Node>::iterator lastNode=node;
 
@@ -1129,12 +1129,12 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return GetNameDescription(area);
+      return GetNameDescription(*area);
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      return GetNameDescription(way);
+      return GetNameDescription(*way);
     }
     else {
       assert(false);
@@ -1279,7 +1279,7 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return profile.CanUse(area);
+      return profile.CanUse(*area);
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
@@ -1292,7 +1292,7 @@ namespace osmscout {
       }
 
       return fromNodeIndex>0 &&
-             profile.CanUseBackward(way);
+             profile.CanUseBackward(*way);
     }
     else {
       assert(false);
@@ -1308,7 +1308,7 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return profile.CanUse(area);
+      return profile.CanUse(*area);
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
@@ -1321,7 +1321,7 @@ namespace osmscout {
       }
 
       return fromNodeIndex!=way->nodes.size()-1 &&
-             profile.CanUseForward(way);
+             profile.CanUseForward(*way);
     }
     else {
       assert(false);

@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <vector>
 
 #include <osmscout/ObjectRef.h>
@@ -29,7 +30,6 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -58,7 +58,7 @@ namespace osmscout {
    * \ingroup Routing
    * A route node is the representation of a node in the routing graph.
    */
-  class OSMSCOUT_API RouteNode : public Referencable
+  class OSMSCOUT_API RouteNode
   {
   public:
     static const uint8_t hasAccess            = 1 << 0; //!< We do have access rights to this way/area
@@ -133,7 +133,7 @@ namespace osmscout {
     bool Write(FileWriter& writer) const;
   };
 
-  typedef Ref<RouteNode> RouteNodeRef;
+  typedef std::shared_ptr<RouteNode> RouteNodeRef;
 }
 
 #endif

@@ -135,7 +135,7 @@ namespace osmscout
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
-      WayRef way=new Way();
+      WayRef way=std::make_shared<Way>();
 
       progress.SetProgress(w,
                            wayCount);
@@ -363,7 +363,7 @@ namespace osmscout
           break;
         }
 
-        newWays.push_back(new Way(*way));
+        newWays.push_back(std::make_shared<Way>(*way));
       }
     }
 
@@ -500,7 +500,7 @@ namespace osmscout
         }
       }
 
-      WayRef copiedWay=new Way(*way);
+      WayRef copiedWay=std::make_shared<Way>(*way);
 
       copiedWay->nodes=newNodes;
 

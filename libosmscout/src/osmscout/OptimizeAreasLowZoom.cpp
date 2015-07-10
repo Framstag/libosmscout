@@ -315,7 +315,7 @@ namespace osmscout
                 continue;
               }
 
-              AreaRef area=new Area();
+              AreaRef area=std::make_shared<Area>();
 
               if (!area->ReadOptimized(*typeConfig,
                                        scanner)) {

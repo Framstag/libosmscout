@@ -29,7 +29,6 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 

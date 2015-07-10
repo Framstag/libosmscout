@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   app.setOrganizationDomain("libosmscout.sf.net");
   app.setApplicationName("OSMScout");
 
-  settings=new Settings();
+  settings=std::make_shared<Settings>();
 
   //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();

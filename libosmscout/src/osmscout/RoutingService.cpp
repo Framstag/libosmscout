@@ -282,7 +282,7 @@ namespace osmscout {
   {
     routeNode=NULL;
 
-    if (!profile.CanUseForward(way)) {
+    if (!profile.CanUseForward(*way)) {
       return;
     }
 
@@ -292,7 +292,7 @@ namespace osmscout {
       routeNodeDataFile.Get(way->ids[i],
                             routeNode);
 
-      if (routeNode.Valid()) {
+      if (routeNode) {
         routeNodeIndex=i;
         return;
       }
@@ -311,14 +311,15 @@ namespace osmscout {
       return;
     }
 
-    if (!profile.CanUseBackward(way)) {
+    if (!profile.CanUseBackward(*way)) {
       return;
     }
 
     for (long i=nodeIndex-1; i>=0; i--) {
-      routeNodeDataFile.Get(way->ids[i],routeNode);
+      routeNodeDataFile.Get(way->ids[i],
+                            routeNode);
 
-      if (routeNode.Valid()) {
+      if (routeNode) {
         routeNodeIndex=i;
         return;
       }
@@ -336,14 +337,15 @@ namespace osmscout {
       return;
     }
 
-    if (!profile.CanUseForward(way)) {
+    if (!profile.CanUseForward(*way)) {
       return;
     }
 
     for (long i=nodeIndex-1; i>=0; i--) {
-      routeNodeDataFile.Get(way->ids[i],routeNode);
+      routeNodeDataFile.Get(way->ids[i],
+                            routeNode);
 
-      if (routeNode.Valid()) {
+      if (routeNode) {
         return;
       }
     }
@@ -356,7 +358,7 @@ namespace osmscout {
   {
     routeNode=NULL;
 
-    if (!profile.CanUseBackward(way)) {
+    if (!profile.CanUseBackward(*way)) {
       return;
     }
 
@@ -366,7 +368,7 @@ namespace osmscout {
       routeNodeDataFile.Get(way->ids[i],
                             routeNode);
 
-      if (routeNode.Valid()) {
+      if (routeNode) {
         return;
       }
     }
@@ -593,7 +595,7 @@ namespace osmscout {
       assert(entry!=wayMap.end());
 
       ids=&entry->second->ids;
-      oneway=!profile.CanUseBackward(entry->second);
+      oneway=!profile.CanUseBackward(*entry->second);
     }
     else {
       assert(false);
@@ -674,7 +676,7 @@ namespace osmscout {
           assert(entry!=wayMap.end());
 
           ids=&entry->second->ids;
-          oneway=!profile.CanUseBackward(entry->second);
+          oneway=!profile.CanUseBackward(*entry->second);
         }
         else {
           assert(false);
@@ -722,7 +724,7 @@ namespace osmscout {
         assert(entry!=wayMap.end());
 
         ids=&entry->second->ids;
-        oneway=!profile.CanUseBackward(entry->second);
+        oneway=!profile.CanUseBackward(*entry->second);
       }
       else {
         assert(false);
@@ -869,7 +871,7 @@ namespace osmscout {
       routeNodeDataFile.Get(way->ids[nodeIndex],
                             forwardRouteNode);
 
-      if (forwardRouteNode.Valid()) {
+      if (forwardRouteNode) {
         forwardNodePos=nodeIndex;
       }
       else {
@@ -886,13 +888,13 @@ namespace osmscout {
                                   backwardNodePos);
       }
 
-      if (forwardRouteNode.Invalid() &&
-          backwardRouteNode.Invalid()) {
+      if (!forwardRouteNode &&
+          !backwardRouteNode) {
         log.Error() << "No route node found for start way";
         return false;
       }
 
-      if (forwardRouteNode.Valid()) {
+      if (forwardRouteNode) {
         if (!routeNodeDataFile.GetOffset(forwardRouteNode->id,
                                          forwardOffset)) {
           log.Error() << "Cannot get offset of startForwardRouteNode";
@@ -904,7 +906,7 @@ namespace osmscout {
                                               forwardRouteNode,
                                               object);
 
-        node->currentCost=profile.GetCosts(way,
+        node->currentCost=profile.GetCosts(*way,
                                            GetSphericalDistance(startLon,
                                                                 startLat,
                                                                 way->nodes[forwardNodePos].GetLon(),
@@ -919,7 +921,7 @@ namespace osmscout {
         forwardRNode=node;
       }
 
-      if (backwardRouteNode.Valid()) {
+      if (backwardRouteNode) {
         if (!routeNodeDataFile.GetOffset(backwardRouteNode->id,
                                          backwardOffset)) {
           log.Error() << "Cannot get offset of startBackwardRouteNode";
@@ -931,7 +933,7 @@ namespace osmscout {
                                               backwardRouteNode,
                                               object);
 
-        node->currentCost=profile.GetCosts(way,
+        node->currentCost=profile.GetCosts(*way,
                                            GetSphericalDistance(startLon,
                                                                 startLat,
                                                                 way->nodes[backwardNodePos].GetLon(),
@@ -994,7 +996,7 @@ namespace osmscout {
       routeNodeDataFile.Get(way->ids[nodeIndex],
                             forwardNode);
 
-      if (forwardNode.Invalid()) {
+      if (!forwardNode) {
         GetTargetForwardRouteNode(profile,
                                   way,
                                   nodeIndex,
@@ -1005,13 +1007,13 @@ namespace osmscout {
                                    backwardNode);
       }
 
-      if (forwardNode.Invalid() &&
-          backwardNode.Invalid()) {
+      if (!forwardNode &&
+          !backwardNode) {
         log.Error() << "No route node found for target way";
         return false;
       }
 
-      if (forwardNode.Valid()) {
+      if (forwardNode) {
         FileOffset forwardRouteNodeOffset;
 
         if (!routeNodeDataFile.GetOffset(forwardNode->id,
@@ -1020,7 +1022,7 @@ namespace osmscout {
         }
       }
 
-      if (backwardNode.Valid()) {
+      if (backwardNode) {
         FileOffset backwardRouteNodeOffset;
 
         if (!routeNodeDataFile.GetOffset(backwardNode->id,
@@ -1393,39 +1395,39 @@ namespace osmscout {
         std::cout << "No more alternatives, stopping" << std::endl;
       }
 
-      if ((targetForwardRouteNode.Valid() && current->nodeOffset==targetForwardRouteNode->fileOffset)) {
+      if ((targetForwardRouteNode && current->nodeOffset==targetForwardRouteNode->fileOffset)) {
         std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->fileOffset << " (forward)" << std::endl;
       }
 
-      if (targetBackwardRouteNode.Valid() && current->nodeOffset==targetBackwardRouteNode->fileOffset) {
+      if (targetBackwardRouteNode && current->nodeOffset==targetBackwardRouteNode->fileOffset) {
         std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->fileOffset << " (backward)" << std::endl;
       }
 #endif
     } while (!openList.empty() &&
-             (targetForwardRouteNode.Invalid() || current->nodeOffset!=targetForwardRouteNode->fileOffset) &&
-             (targetBackwardRouteNode.Invalid() || current->nodeOffset!=targetBackwardRouteNode->fileOffset));
+             (!targetForwardRouteNode || current->nodeOffset!=targetForwardRouteNode->fileOffset) &&
+             (!targetBackwardRouteNode || current->nodeOffset!=targetBackwardRouteNode->fileOffset));
 
     clock.Stop();
 
     if (debugPerformance) {
       std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset();
       std::cout << "[";
-      if (startBackwardRouteNode.Valid()) {
+      if (startBackwardRouteNode) {
         std::cout << startBackwardRouteNode->GetId() << " >* ";
       }
       std::cout << startNodeIndex;
-      if (startForwardRouteNode.Valid()) {
+      if (startForwardRouteNode) {
         std::cout << " *> " << startForwardRouteNode->GetId();
       }
       std::cout << "]" << std::endl;
 
       std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
       std::cout << "[";
-      if (targetForwardRouteNode.Valid()) {
+      if (targetForwardRouteNode) {
         std::cout << targetForwardRouteNode->GetId() << " >* ";
       }
       std::cout << targetNodeIndex;
-      if (targetBackwardRouteNode.Valid()) {
+      if (targetBackwardRouteNode) {
         std::cout << " *> " << targetBackwardRouteNode->GetId();
       }
       std::cout << "]" << std::endl;
@@ -1438,8 +1440,8 @@ namespace osmscout {
       std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
     }
 
-    if (!((targetForwardRouteNode.Valid() && currentRouteNode->GetId()==targetForwardRouteNode->id) ||
-          (targetBackwardRouteNode.Valid() && currentRouteNode->GetId()==targetBackwardRouteNode->id))) {
+    if (!((targetForwardRouteNode && currentRouteNode->GetId()==targetForwardRouteNode->id) ||
+          (targetBackwardRouteNode && currentRouteNode->GetId()==targetBackwardRouteNode->id))) {
       std::cout << "No route found!" << std::endl;
       route.Clear();
 
@@ -1590,7 +1592,7 @@ namespace osmscout {
          ++iter) {
       if (iter->GetPathObject().Valid()) {
         if (iter->GetPathObject().GetType()==refArea) {
-          if (a.Invalid() ||
+          if (!a ||
               a->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
             if (!areaDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
               log.Error() << "Cannot load area with id " << iter->GetPathObject().GetFileOffset();
@@ -1615,7 +1617,7 @@ namespace osmscout {
                                  a->rings.front().nodes[index].GetLon()));
         }
         else if (iter->GetPathObject().GetType()==refWay) {
-          if (w.Invalid() ||
+          if (!w ||
               w->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
             if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
               log.Error() << "Cannot load way with id " << iter->GetPathObject().GetFileOffset();

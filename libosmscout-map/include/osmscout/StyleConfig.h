@@ -1155,7 +1155,7 @@ namespace osmscout {
    * Definition of a symbol. A symbol consists of a list of DrawPrimitives
    * with with assigned rendeirng styes.
    */
-  class OSMSCOUT_MAP_API Symbol : public Referencable
+  class OSMSCOUT_MAP_API Symbol
   {
   private:
     std::string                 name;

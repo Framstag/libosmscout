@@ -39,7 +39,6 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/Reference.h>
 
 #include <osmscout/system/Assert.h>
 

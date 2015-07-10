@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <unordered_map>
 
 #include <osmscout/Tag.h>
@@ -27,11 +28,10 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class RawWay : public Referencable
+  class RawWay
   {
   private:
     OSMId              id;
@@ -130,7 +130,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef Ref<RawWay> RawWayRef;
+  typedef std::shared_ptr<RawWay> RawWayRef;
 }
 
 #endif
