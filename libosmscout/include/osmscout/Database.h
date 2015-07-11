@@ -24,8 +24,10 @@
 #include <memory>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 // Type and style sheet configuration
+#include <osmscout/Types.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
