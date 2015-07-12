@@ -1082,7 +1082,7 @@ namespace osmscout {
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "relarea.tmp"))) {
-      progress.Error("Cannot create 'relarea.dat'");
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -1150,8 +1150,8 @@ namespace osmscout {
 
       if (!writer.Write((uint8_t)osmRefRelation) ||
           !writer.Write(rawRel.GetId()) ||
-          !rel.Write(*typeConfig,
-                     writer)) {
+          !rel.WriteImport(*typeConfig,
+                           writer)) {
         return false;
       }
 
@@ -1179,10 +1179,8 @@ namespace osmscout {
       return false;
     }
 
-    for (IdSet::const_iterator id=wayAreaIndexBlacklist.begin();
-         id!=wayAreaIndexBlacklist.end();
-         ++id) {
-      writer.WriteNumber(*id);
+    for (const auto& id : wayAreaIndexBlacklist) {
+      writer.WriteNumber(id);
     }
 
     progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");

@@ -100,7 +100,7 @@ namespace osmscout {
                   Progress& progress,
                   const TypeConfig& typeConfig,
                   TypeInfoSet& types,
-                  std::vector<NodeUseMap>& nodeUseMap,
+                  const std::vector<NodeUseMap>& nodeUseMap,
                   FileScanner& scanner,
                   std::vector<std::list<AreaRef> >& areas);
 

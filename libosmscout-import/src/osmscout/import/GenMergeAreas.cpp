@@ -31,6 +31,9 @@ namespace osmscout {
     return "Merge areas";
   }
 
+  /**
+   * Returns the index of the first outer ring that contains the given id.
+   */
   size_t MergeAreasGenerator::GetFirstOuterRingWithId(const Area& area,
                                                       Id id) const
   {
@@ -72,6 +75,10 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Scans all areas. If an areas is of one of the given merge types, index all node ids
+   * into the given NodeUseMap for all outer rings of the given area.
+   */
   bool MergeAreasGenerator::ScanAreaNodeIds(const ImportParameter& parameter,
                                             Progress& progress,
                                             const TypeConfig& typeConfig,
@@ -105,8 +112,8 @@ namespace osmscout {
 
       if (!scanner.Read(type) ||
           !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
+          !data.ReadImport(typeConfig,
+                           scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -146,11 +153,19 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Load areas which has a one for the types given by types. If at leats one node
+   * in one of the outer rings of the areas is marked in nodeUseMap as "used at least twice",
+   * index it into the areas map.
+   *
+   * If the number of indexed areas is bigger than parameter.GetRawWayBlockSize() types are
+   * dropped form areas until the number is again below the lmit.
+   */
   bool MergeAreasGenerator::GetAreas(const ImportParameter& parameter,
                                      Progress& progress,
                                      const TypeConfig& typeConfig,
                                      TypeInfoSet& types,
-                                     std::vector<NodeUseMap>& nodeUseMap,
+                                     const std::vector<NodeUseMap>& nodeUseMap,
                                      FileScanner& scanner,
                                      std::vector<std::list<AreaRef> >& areas)
   {
@@ -178,8 +193,8 @@ namespace osmscout {
 
       if (!scanner.Read(type) ||
           !scanner.Read(id) ||
-          !area->Read(typeConfig,
-                      scanner)) {
+          !area->ReadImport(typeConfig,
+                            scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(a)+" of "+
                        NumberToString(areaCount)+
@@ -300,43 +315,51 @@ namespace osmscout {
           continue;
         }
 
-        // Track that we visited this node
+        // Track, that we visited this node
         nodeIds.insert(id);
 
+        // Uninteresting node
         if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
           continue;
         }
 
-        // We now have an node id other areas with the same node id exist for,
-        // we now take a look at all these candidates
+        // We now have an node id other areas with the same node id exist for.
+        // Let's take a look at all these candidates
 
         std::list<AreaRef>::iterator candidate=idAreaMap[id].begin();
 
         while (candidate!=idAreaMap[id].end()) {
           AreaRef candidateArea(*candidate);
 
+          // The area itself => skip
           if (area.GetFileOffset()==candidateArea->GetFileOffset()) {
             candidate++;
             continue;
           }
 
+          // Already visited during this merge => skip
           if (visitedAreas.find(candidateArea)!=visitedAreas.end()) {
             candidate++;
             continue;
           }
 
+          // Area was already merged before => skip
           if (blacklist.find(candidateArea->GetFileOffset())!=blacklist.end()) {
+            // TODO: Should not happen?
             candidate++;
             continue;
           }
 
+          // Flag as visited (the areas might be registered for other
+          // nodes shared by both areas, too) and we not want to
+          // analyze it again
           visitedAreas.insert(candidateArea);
 
-              size_t firstOuterRing=GetFirstOuterRingWithId(area,
-                                                            id);
+          size_t firstOuterRing=GetFirstOuterRingWithId(area,
+                                                        id);
 
-              size_t secondOuterRing=GetFirstOuterRingWithId(*candidateArea,
-                                                             id);
+          size_t secondOuterRing=GetFirstOuterRingWithId(*candidateArea,
+                                                         id);
 
           if (area.rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {
             std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " because of different feature values" << std::endl;
@@ -401,7 +424,7 @@ namespace osmscout {
     while (!areas.empty()) {
       AreaRef area;
 
-      // Push a area from the list of "to be processed" areas
+      // Pop a area from the list of "to be processed" areas
       area=areas.front();
       areas.pop_front();
 
@@ -415,6 +438,7 @@ namespace osmscout {
                        area,
                        idAreaMap);
 
+      // Now try to merge it against candidates that share the same ids.
       while (TryMerge(nodeUseMap,
                       *area,
                       idAreaMap,

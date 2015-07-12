@@ -148,13 +148,43 @@ namespace osmscout {
 
     void GetBoundingBox(GeoBox& boundingBox) const;
 
+    /**
+     * Read the area as written by Write().
+     */
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
+
+    /**
+     * Read the area as written by WriteImport().
+     */
+    bool ReadImport(const TypeConfig& typeConfig,
+                    FileScanner& scanner);
+
+    /**
+     * Read the area as stored by WriteOptimized().
+     */
     bool ReadOptimized(const TypeConfig& typeConfig,
                        FileScanner& scanner);
 
+    /**
+     * Write the area with all data required in the
+     * standard database.
+     */
     bool Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;
+
+    /**
+     * Write the area with all data required during import,
+     * certain optimizations done on the final data
+     * are not done here to not loose information.
+     */
+    bool WriteImport(const TypeConfig& typeConfig,
+                     FileWriter& writer) const;
+
+    /**
+     * Write the area with all data required by the OptimizeLowZoom
+     * index, dropping all ids.
+     */
     bool WriteOptimized(const TypeConfig& typeConfig,
                         FileWriter& writer) const;
   };

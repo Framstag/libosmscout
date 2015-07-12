@@ -287,6 +287,104 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Area::ReadImport(const TypeConfig& typeConfig,
+                        FileScanner& scanner)
+  {
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
+
+    TypeId   ringType;
+    bool     multipleRings;
+    uint32_t ringCount=1;
+    uint32_t nodesCount;
+    FeatureValueBuffer featureValueBuffer;
+
+    scanner.ReadTypeId(ringType,
+                       typeConfig.GetAreaTypeIdBytes());
+
+    TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
+
+    featureValueBuffer.SetType(type);
+
+    if (!featureValueBuffer.Read(scanner,
+                                 multipleRings)) {
+      return false;
+    }
+
+    if (multipleRings) {
+      if (!scanner.ReadNumber(ringCount)) {
+        return false;
+      }
+
+      ringCount++;
+    }
+
+    rings.resize(ringCount);
+
+    rings[0].featureValueBuffer=featureValueBuffer;
+
+    if (ringCount>1) {
+      rings[0].ring=masterRingId;
+    }
+    else {
+      rings[0].ring=outerRingId;
+    }
+
+    if (!scanner.ReadNumber(nodesCount)) {
+      return false;
+    }
+
+    if (nodesCount>0) {
+      if (!ReadIds(scanner,
+                   nodesCount,
+                   rings[0].ids)) {
+        return false;
+      }
+
+      if (!scanner.Read(rings[0].nodes,
+                        nodesCount)) {
+        return false;
+      }
+    }
+
+    for (size_t i=1; i<ringCount; i++) {
+      scanner.ReadTypeId(ringType,
+                         typeConfig.GetAreaTypeIdBytes());
+
+      type=typeConfig.GetAreaTypeInfo(ringType);
+
+      rings[i].SetType(type);
+
+      if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
+        if (!rings[i].featureValueBuffer.Read(scanner)) {
+          return false;
+        }
+      }
+
+      scanner.Read(rings[i].ring);
+
+      scanner.ReadNumber(nodesCount);
+
+      if (nodesCount>0) {
+        if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
+          if (!ReadIds(scanner,
+                       nodesCount,
+                       rings[i].ids)) {
+            return false;
+          }
+        }
+
+        if (!scanner.Read(rings[i].nodes,
+                          nodesCount)) {
+          return false;
+        }
+      }
+    }
+
+    return !scanner.HasError();
+  }
+
   bool Area::ReadOptimized(const TypeConfig& typeConfig,
                            FileScanner& scanner)
   {
@@ -479,6 +577,79 @@ namespace osmscout {
       if (!ring->nodes.empty()) {
         if (ring->GetType()->GetAreaId()!=typeIgnore &&
             ring->GetType()->CanRoute()) {
+          if (!WriteIds(writer,
+                        ring->ids)) {
+            return false;
+          }
+        }
+
+        if (!writer.Write(ring->nodes,
+                          ring->nodes.size())) {
+          return false;
+        }
+      }
+
+      ++ring;
+    }
+
+    return !writer.HasError();
+  }
+
+  bool Area::WriteImport(const TypeConfig& typeConfig,
+                         FileWriter& writer) const
+  {
+    std::vector<Ring>::const_iterator ring=rings.begin();
+    bool                              multipleRings=rings.size()>1;
+
+    // Outer ring
+
+    writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                       typeConfig.GetAreaTypeIdBytes());
+
+    if (!ring->featureValueBuffer.Write(writer,
+                                        multipleRings)) {
+      return false;
+    }
+
+    if (multipleRings) {
+      writer.WriteNumber((uint32_t)(rings.size()-1));
+    }
+
+    writer.WriteNumber((uint32_t)ring->nodes.size());
+
+    if (!ring->nodes.empty()) {
+      if (!WriteIds(writer,
+                    ring->ids)) {
+        return false;
+      }
+
+
+      if (!writer.Write(ring->nodes,
+                        ring->nodes.size())) {
+        return false;
+      }
+    }
+
+    ++ring;
+
+    // Potential additional rings
+
+    while (ring!=rings.end()) {
+      writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                         typeConfig.GetAreaTypeIdBytes());
+
+      if (ring->GetType()->GetAreaId()!=typeIgnore) {
+        if (!ring->featureValueBuffer.Write(writer)) {
+          return false;
+        }
+      }
+
+      writer.Write(ring->ring);
+
+      writer.WriteNumber((uint32_t)ring->nodes.size());
+
+      if (!ring->nodes.empty()) {
+        if (ring->GetType()->GetAreaId()!=typeIgnore) {
           if (!WriteIds(writer,
                         ring->ids)) {
             return false;

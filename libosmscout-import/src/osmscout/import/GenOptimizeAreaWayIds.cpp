@@ -65,8 +65,8 @@ namespace osmscout {
 
       if (!scanner.Read(type) ||
           !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
+          !data.ReadImport(typeConfig,
+                           scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(dataCount)+
@@ -218,8 +218,8 @@ namespace osmscout {
 
       if (!scanner.Read(type) ||
           !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
+          !data.ReadImport(typeConfig,
+                           scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(areaCount)+

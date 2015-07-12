@@ -252,8 +252,8 @@ namespace osmscout {
 
     if (!writer.Write((uint8_t)osmRefWay) ||
         !writer.Write(wayId) ||
-        !area.Write(typeConfig,
-                    writer)) {
+        !area.WriteImport(typeConfig,
+                          writer)) {
       return false;
     }
 
