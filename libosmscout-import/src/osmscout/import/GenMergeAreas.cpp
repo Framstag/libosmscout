@@ -38,13 +38,11 @@ namespace osmscout {
                                                       Id id) const
   {
     for (size_t r = 0; r<area.rings.size(); r++) {
-      if (area.rings[r].ring!=Area::outerRingId) {
-        continue;
-      }
-
-      for (const auto& ringId : area.rings[r].ids) {
-        if (ringId==id) {
-          return r;
+      if (area.rings[r].ring==Area::outerRingId) {
+        for (const auto& ringId : area.rings[r].ids) {
+          if (ringId==id) {
+            return r;
+          }
         }
       }
     }
@@ -58,19 +56,37 @@ namespace osmscout {
                                              const AreaRef& area,
                                              std::unordered_map<Id,std::list<AreaRef> >& idAreaMap)
   {
-    std::unordered_set<Id> nodeIds;
-
     for (const auto& ring: area->rings) {
       if (ring.ring==Area::outerRingId) {
-        for (const auto id: ring.ids) {
+        for (const auto id : ring.ids) {
           if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
             std::remove(idAreaMap[id].begin(),
                         idAreaMap[id].end(),
                         area);
           }
         }
+      }
+    }
+  }
 
-        break;
+  void MergeAreasGenerator::EraseAreaInCache(Id currentId,
+                                             const NodeUseMap& nodeUseMap,
+                                             const AreaRef& area,
+                                             std::unordered_map<Id,std::list<AreaRef> >& idAreaMap)
+  {
+    for (const auto& ring: area->rings) {
+      if (ring.ring==Area::outerRingId) {
+        for (const auto id : ring.ids) {
+          if (id==currentId) {
+            continue;
+          }
+
+          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            std::remove(idAreaMap[id].begin(),
+                        idAreaMap[id].end(),
+                        area);
+          }
+        }
       }
     }
   }
@@ -127,17 +143,18 @@ namespace osmscout {
         continue;
       }
 
+      // We insert every node id only once per area, because we want to
+      // find nodes that are shared by *different* areas.
+
+      std::unordered_set<Id> nodeIds;
+
       for (const auto& ring: data.rings) {
-        if (ring.ring!=Area::outerRingId) {
-          continue;
-        }
-
-        std::unordered_set<Id> nodeIds;
-
-        for (const auto id : ring.ids) {
-          if (nodeIds.find(id)==nodeIds.end()) {
-            nodeUseMap[data.GetType()->GetIndex()].SetNodeUsed(id);
-            nodeIds.insert(id);
+        if (ring.ring==Area::outerRingId) {
+          for (const auto id : ring.ids) {
+            if (nodeIds.find(id)==nodeIds.end()) {
+              nodeUseMap[data.GetType()->GetIndex()].SetNodeUsed(id);
+              nodeIds.insert(id);
+            }
           }
         }
       }
@@ -280,10 +297,10 @@ namespace osmscout {
                                                 std::unordered_map<Id,std::list<AreaRef> >& idAreaMap)
   {
     for (auto& area : areas) {
+      std::unordered_set<Id> nodeIds;
+
       for (const auto& ring: area->rings) {
         if (ring.ring==Area::outerRingId) {
-          std::unordered_set<Id> nodeIds;
-
           for (const auto id: ring.ids) {
             if (nodeIds.find(id)==nodeIds.end() &&
                 nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
@@ -386,7 +403,8 @@ namespace osmscout {
               area.rings[firstOuterRing].nodes=result.front().coords;
               area.rings[firstOuterRing].ids=result.front().ids;
 
-              EraseAreaInCache(nodeUseMap,
+              EraseAreaInCache(id,
+                               nodeUseMap,
                                candidateArea,
                                idAreaMap);
 
@@ -521,7 +539,7 @@ namespace osmscout {
         if (!areasByType[type->GetIndex()].empty()) {
           std::list<AreaRef> merges;
 
-          std::cout << "Type " << type->GetName() << ": " << areasByType[type->GetIndex()].size() << " merge candidates" << std::endl;
+          std::cout << "Type " << type->GetName() << " " << areasByType[type->GetIndex()].size() << " merge candidates" << std::endl;
           MergeAreas(nodeUseMap[type->GetIndex()],
                      areasByType[type->GetIndex()],
                      merges,

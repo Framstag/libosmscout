@@ -47,6 +47,10 @@ namespace osmscout {
     void EraseAreaInCache(const NodeUseMap& nodeUseMap,
                           const AreaRef& area,
                           std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
+    void EraseAreaInCache(Id currentId,
+                          const NodeUseMap& nodeUseMap,
+                          const AreaRef& area,
+                          std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
 
     /**
      * Scan all areas for node ids that occur in more than one area. Only areas with
