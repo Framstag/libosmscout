@@ -46,11 +46,11 @@ namespace osmscout {
 
     void EraseAreaInCache(const NodeUseMap& nodeUseMap,
                           const AreaRef& area,
-                          std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
+                          std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
     void EraseAreaInCache(Id currentId,
                           const NodeUseMap& nodeUseMap,
                           const AreaRef& area,
-                          std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
+                          std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
 
     /**
      * Scan all areas for node ids that occur in more than one area. Only areas with
@@ -121,12 +121,13 @@ namespace osmscout {
      */
     void IndexAreasByNodeIds(const NodeUseMap& nodeUseMap,
                              const std::list<AreaRef>& areas,
-                             std::unordered_map<Id,std::list<AreaRef> >& idAreaMap);
+                             std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
 
     bool TryMerge(const NodeUseMap& nodeUseMap,
                   Area& area,
-                  std::unordered_map<Id,std::list<AreaRef> >& idAreaMap,
-                  std::unordered_set<FileOffset>& blacklist);
+                  std::unordered_map<Id,std::set<AreaRef> >& idAreaMap,
+                  std::set<Id>& finishedIds,
+                  std::unordered_set<FileOffset>& mergedAway);
 
     /**
      * Merge area data of one type
@@ -136,10 +137,11 @@ namespace osmscout {
      * @param merges
      * @param blacklist
      */
-    void MergeAreas(const NodeUseMap& nodeUseMap,
+    void MergeAreas(Progress& progress,
+                    const NodeUseMap& nodeUseMap,
                     std::list<AreaRef>& areas,
                     std::list<AreaRef>& merges,
-                    std::unordered_set<FileOffset>& blacklist);
+                    std::unordered_set<FileOffset>& mergedAway);
 
   public:
     std::string GetDescription() const;

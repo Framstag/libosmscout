@@ -333,11 +333,11 @@ TYPES
   TYPE waterway_river
     = WAY ("waterway"=="river")
       {Name, NameAlt, Width, Tunnel}
-      OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND 
       
   TYPE waterway_riverbank
     = AREA ("waterway"=="riverbank")
-      {Name, NameAlt, Width}
+      {Name, NameAlt, Width} MERGE_AREAS
     
   TYPE waterway_canal
     = WAY ("waterway"=="canal")
@@ -357,7 +357,7 @@ TYPES
   TYPE waterway_dock
     = NODE AREA ("waterway"=="dock")
       {Name, NameAlt, Width}
-      ADDRESS
+      ADDRESS MERGE_AREAS
     
   TYPE waterway_lock_gate
     = NODE ("waterway"=="lock_gate")
@@ -511,7 +511,7 @@ TYPES
   TYPE landuse_basin
     = NODE AREA ("landuse"=="basin")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
        
   TYPE landuse_brownfield
@@ -545,7 +545,7 @@ TYPES
   TYPE landuse_farm
     = AREA ("landuse"=="farm")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
       
   TYPE landuse_farmland
@@ -611,7 +611,7 @@ TYPES
   TYPE landuse_military
     = NODE AREA ("landuse"=="military")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
       
   TYPE landuse_orchard
@@ -644,7 +644,7 @@ TYPES
   TYPE landuse_reservoir
     = NODE AREA ("landuse"=="reservoir")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
       
   TYPE landuse_residential
@@ -654,22 +654,26 @@ TYPES
       GROUP landuse
       
   TYPE landuse_retail
-    = NODE AREA ("landuse"=="retail") MERGE_AREAS
+    = NODE AREA ("landuse"=="retail")
+      MERGE_AREAS
       GROUP landuse
     
   TYPE landuse_salt_pond
     = AREA ("landuse"=="salt_pond")
       {Name, NameAlt}
+      MERGE_AREAS
       GROUP landuse
     
   TYPE landuse_village_green
     = NODE AREA ("landuse"=="village_green")
-      {Name, NameAlt} MERGE_AREAS
+      {Name, NameAlt}
+      MERGE_AREAS
       GROUP landuse
     
   TYPE landuse_vineyard
     = AREA ("landuse"=="vineyard")
-      {Name, NameAlt} MERGE_AREAS
+      {Name, NameAlt}
+      MERGE_AREAS
       GROUP landuse
     
   //
@@ -679,6 +683,7 @@ TYPES
   TYPE natural_bay
     = NODE AREA ("natural"=="bay")
       {Name, NameAlt}
+      MERGE_AREAS
     
   TYPE natural_beach
     = NODE AREA ("natural"=="beach")
@@ -789,10 +794,12 @@ TYPES
   TYPE man_made_wastewater_plant
     = NODE AREA ("man_made"=="wastewater_plant")
       {Name, NameAlt}
+      MERGE_AREAS
     
   TYPE man_made_pier
     = WAY AREA ("man_made"=="pier")
       {Name, NameAlt, Width}
+      MERGE_AREAS
 
   //
   // Leisure 
@@ -802,6 +809,7 @@ TYPES
     = AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
      POI
+     MERGE_AREAS
      
   TYPE leisure_sports_centre
     = NODE AREA ("leisure"=="sports_centre")
@@ -850,16 +858,17 @@ TYPES
   TYPE leisure_fishing
     = NODE AREA ("leisure"=="fishing")
       {Name, NameAlt}
-      ADDRESS OPTIMIZE_LOW_ZOOM
+      ADDRESS OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE leisure_nature_reserve
     = NODE AREA ("leisure"=="nature_reserve")
       {Name, NameAlt}
+      MERGE_AREAS
     
   TYPE leisure_park
     = NODE AREA ("leisure"=="park")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM POI
+      OPTIMIZE_LOW_ZOOM POI MERGE_AREAS
       
   TYPE leisure_playground
     = NODE AREA ("leisure"=="playground")
@@ -868,11 +877,12 @@ TYPES
   TYPE leisure_garden
     = NODE AREA ("leisure"=="garden")
       {Name, NameAlt}
+      MERGE_AREAS
     
   TYPE leisure_common
     = NODE AREA ("leisure"=="common")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE leisure_ice_rink
     = NODE AREA ("leisure"=="ice_rink")
@@ -1411,7 +1421,7 @@ TYPES
   TYPE historic_battlefield
     = NODE AREA ("historic"=="battlefield")
       {Name, NameAlt}
-      ADDRESS POI
+      ADDRESS POI MERGE_AREAS
       GROUP historic
       
   TYPE historic_wreck
@@ -1459,10 +1469,12 @@ TYPES
   TYPE military_danger_area
     = NODE AREA ("military"=="danger_area")
       {Name, NameAlt}
+      MERGE_AREAS
     
   TYPE military_range
     = NODE AREA ("military"=="range")
       {Name, NameAlt}
+      MERGE_AREAS
     
   TYPE military_naval_base
     = NODE AREA ("military"=="naval_base")
