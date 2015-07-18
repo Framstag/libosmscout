@@ -91,36 +91,32 @@ namespace osmscout {
    * Scans all areas. If an areas is of one of the given merge types, index all node ids
    * into the given NodeUseMap for all outer rings of the given area.
    */
-  bool MergeAreasGenerator::ScanAreaNodeIds(const ImportParameter& parameter,
-                                            Progress& progress,
+  bool MergeAreasGenerator::ScanAreaNodeIds(Progress& progress,
                                             const TypeConfig& typeConfig,
+                                            FileScanner& scanner,
                                             const TypeInfoSet& mergeTypes,
                                             std::vector<NodeUseMap>& nodeUseMap)
   {
-    FileScanner scanner;
-    uint32_t    dataCount=0;
+    uint32_t    areaCount=0;
 
-    progress.SetAction("Scanning for possible node joining multiple areas from 'areas.tmp'");
+    progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.tmp"),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
+    if (!scanner.GotoBegin()) {
+      progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
       return false;
     }
 
-    if (!scanner.Read(dataCount)) {
+    if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (size_t current=1; current<=dataCount; current++) {
+    for (size_t current=1; current<=areaCount; current++) {
       uint8_t type;
       Id      id;
       Area    data;
 
-      progress.SetProgress(current,dataCount);
+      progress.SetProgress(current,areaCount);
 
       if (!scanner.Read(type) ||
           !scanner.Read(id) ||
@@ -128,7 +124,7 @@ namespace osmscout {
                            scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
+                       NumberToString(areaCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
 
@@ -156,13 +152,6 @@ namespace osmscout {
       }
     }
 
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
-      return false;
-    }
-
-
     return true;
   }
 
@@ -188,7 +177,7 @@ namespace osmscout {
     TypeInfoSet currentTypes(types);
 
     if (!scanner.GotoBegin()) {
-      progress.Error("Error while positioning at start of file");
+      progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -488,7 +477,6 @@ namespace osmscout {
   {
     TypeInfoSet                    mergeTypes;
     FileScanner                    scanner;
-    uint32_t                       areaCount;
     std::unordered_set<FileOffset> blacklist;
 
     for (const auto& type : typeConfig->GetTypes()) {
@@ -502,24 +490,19 @@ namespace osmscout {
 
     nodeUseMap.resize(typeConfig->GetTypeCount());
 
-    if (!ScanAreaNodeIds(parameter,
-                         progress,
-                         *typeConfig,
-                         mergeTypes,
-                         nodeUseMap)) {
-      return false;
-    }
-
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                             "wayarea.tmp"),
+                                      "areas.tmp"),
                              FileScanner::Sequential,
                              parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
+    if (!ScanAreaNodeIds(progress,
+                         *typeConfig,
+                         scanner,
+                         mergeTypes,
+                         nodeUseMap)) {
       return false;
     }
 
@@ -560,6 +543,12 @@ namespace osmscout {
           areasByType[type->GetIndex()].clear();
         }
       }
+    }
+
+    if (!scanner.Close()) {
+      progress.Error(std::string("Error while closing file '")+
+                     scanner.GetFilename()+"'");
+      return false;
     }
 
     return true;

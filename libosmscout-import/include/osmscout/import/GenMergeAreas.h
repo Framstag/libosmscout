@@ -71,9 +71,9 @@ namespace osmscout {
      * @return
      *   if everything is fine, else false
      */
-    bool ScanAreaNodeIds(const ImportParameter& parameter,
-                         Progress& progress,
+    bool ScanAreaNodeIds(Progress& progress,
                          const TypeConfig& typeConfig,
+                         FileScanner& scanner,
                          const TypeInfoSet& mergeTypes,
                          std::vector<NodeUseMap>& nodeUseMap);
 
