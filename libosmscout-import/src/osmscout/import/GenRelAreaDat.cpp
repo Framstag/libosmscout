@@ -1126,11 +1126,24 @@ namespace osmscout {
         continue;
       }
 
-      if (progress.OutputDebug()) {
-        progress.Debug("Storing relation "+
-                       NumberToString(rawRel.GetId())+" "+
-                       rel.GetType()->GetName()+" "+
-                       name);
+      bool valid=true;
+
+      for (size_t i=0; i<rel.rings.size(); i++) {
+        if (rel.rings[i].ring!=Area::masterRingId) {
+          if (rel.rings[i].nodes.size()<3) {
+            valid=false;
+
+            break;
+          }
+        }
+      }
+
+      if (!valid) {
+        progress.Warning("Relation "+
+                         NumberToString(rawRel.GetId())+" "+
+                         rel.GetType()->GetName()+" "+
+                         name+" has ring with less than three nodes, skipping");
+        continue;
       }
 
       areaTypeCount[rel.GetType()->GetIndex()]++;
@@ -1138,14 +1151,6 @@ namespace osmscout {
         if (rel.rings[i].ring==Area::outerRingId) {
           areaNodeTypeCount[rel.GetType()->GetIndex()]+=rel.rings[i].nodes.size();
         }
-      }
-
-      FileOffset fileOffset;
-
-      if (!writer.GetPos(fileOffset)) {
-        progress.Error(std::string("Error while reading current fileOffset in file '")+
-                       writer.GetFilename()+"'");
-        return false;
       }
 
       if (!writer.Write((uint8_t)osmRefRelation) ||
