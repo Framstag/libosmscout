@@ -129,6 +129,11 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::GotoBegin()
+  {
+    return SetPos(0);
+  }
+
   bool FileWriter::Write(const char* buffer, size_t bytes)
   {
     hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;

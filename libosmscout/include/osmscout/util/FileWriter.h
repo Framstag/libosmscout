@@ -68,6 +68,7 @@ namespace osmscout {
 
     bool GetPos(FileOffset &pos);
     bool SetPos(FileOffset pos);
+    bool GotoBegin();
 
     bool Write(const char* buffer, size_t bytes);
 
