@@ -508,12 +508,12 @@ namespace osmscout {
 
     nodes.reserve(nodes.size()+coords.size());
 
-    // Optimize: index retrieval (next is current in the next iteration
+    // Optimize: index retrieval (next is current in the next iteration)
     // Optimize: No need to reverse the arrays, if we just traverse the other way round as second case
 
     for (size_t i=0; i<coords.size(); i++) {
       size_t current=i;
-      size_t next=i+1==coords.size() ? 0 : i+1;
+      size_t next=(i+1==coords.size()) ? 0 : i+1;
 
       auto currentNode=nodeIdIndexMap.find(ids[current]);
       auto nextNode=nodeIdIndexMap.find(ids[next]);
@@ -600,8 +600,7 @@ namespace osmscout {
 
     std::unordered_map<Id,std::list<std::list<Edge>::iterator > > idEdgeMap;
 
-    // We first group edge by the sum of the from and to index. This way,
-    // were can be sure, that a node(a=>b) is in the same list as a node(b=>a).
+    // We first group edge by from index.
     for (std::list<Edge>::iterator edge=edges.begin();
         edge!=edges.end();
         ++edge) {
