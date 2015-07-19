@@ -336,8 +336,9 @@ TYPES
       OPTIMIZE_LOW_ZOOM IGNORESEALAND 
       
   TYPE waterway_riverbank
-    = AREA ("waterway"=="riverbank")
-      {Name, NameAlt, Width} MERGE_AREAS
+    = AREA ("waterway"=="riverbank" OR ("natural"=="water" AND  "water"=="river"))
+      {Name, NameAlt, Width}
+      MERGE_AREAS
     
   TYPE waterway_canal
     = WAY ("waterway"=="canal")
