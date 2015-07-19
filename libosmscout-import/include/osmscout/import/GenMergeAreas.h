@@ -42,22 +42,26 @@ namespace osmscout {
   class MergeAreasGenerator : public ImportModule
   {
   private:
-    struct MergeJob
+    /**
+     * Data structure holding all information for merging
+     * areas of one type
+     */
+    struct AreaMergeData
     {
-      std::list<AreaRef>             areas;
-      std::list<AreaRef>             merges;
-      std::unordered_set<FileOffset> mergedAway;
+      size_t                         areaCount;  //!< Number of areas of this type
+      std::list<AreaRef>             areas;      //!< List of areas that are candidates for merging
+      std::list<AreaRef>             merges;     //!< List of areas that got merged
+      std::unordered_set<FileOffset> mergedAway; //!< List of file offsets of areas, that were merged into another area
     };
 
   private:
+    /**
+     * Return the index of the first outer ring that contains the given node id.
+     */
     size_t GetFirstOuterRingWithId(const Area& area,
                                    Id id) const;
 
     void EraseAreaInCache(const NodeUseMap& nodeUseMap,
-                          const AreaRef& area,
-                          std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
-    void EraseAreaInCache(Id currentId,
-                          const NodeUseMap& nodeUseMap,
                           const AreaRef& area,
                           std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
 
@@ -126,7 +130,7 @@ namespace osmscout {
                   const std::vector<NodeUseMap>& nodeUseMap,
                   FileScanner& scanner,
                   FileWriter& writer,
-                  std::vector<MergeJob>& mergeJob,
+                  std::vector<AreaMergeData>& mergeJob,
                   uint32_t& areasWritten);
 
     /**
@@ -160,14 +164,14 @@ namespace osmscout {
      */
     void MergeAreas(Progress& progress,
                     const NodeUseMap& nodeUseMap,
-                    MergeJob& job);
+                    AreaMergeData& job);
 
     bool WriteMergeResult(Progress& progress,
                           const TypeConfig& typeConfig,
                           FileScanner& scanner,
                           FileWriter& writer,
                           const TypeInfoSet& loadedTypes,
-                          std::vector<MergeJob>& mergeJob,
+                          std::vector<AreaMergeData>& mergeJob,
                           uint32_t& areasWritten);
 
   public:

@@ -67,26 +67,6 @@ namespace osmscout {
     }
   }
 
-  void MergeAreasGenerator::EraseAreaInCache(Id currentId,
-                                             const NodeUseMap& nodeUseMap,
-                                             const AreaRef& area,
-                                             std::unordered_map<Id,std::set<AreaRef> >& idAreaMap)
-  {
-    for (const auto& ring: area->rings) {
-      if (ring.ring==Area::outerRingId) {
-        for (const auto id : ring.ids) {
-          if (id==currentId) {
-            continue;
-          }
-
-          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-            idAreaMap[id].erase(area);
-          }
-        }
-      }
-    }
-  }
-
   /**
    * Scans all areas. If an areas is of one of the given merge types, index all node ids
    * into the given NodeUseMap for all outer rings of the given area.
@@ -97,7 +77,7 @@ namespace osmscout {
                                             const TypeInfoSet& mergeTypes,
                                             std::vector<NodeUseMap>& nodeUseMap)
   {
-    uint32_t    areaCount=0;
+    uint32_t areaCount=0;
 
     progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
 
@@ -171,12 +151,17 @@ namespace osmscout {
                                      const std::vector<NodeUseMap>& nodeUseMap,
                                      FileScanner& scanner,
                                      FileWriter& writer,
-                                     std::vector<MergeJob>& mergeJob,
+                                     std::vector<AreaMergeData>& mergeJob,
                                      uint32_t& areasWritten)
   {
+    bool        firstCall=areasWritten==0; // We are called for the first time
     uint32_t    areaCount=0;
     size_t      collectedAreasCount=0;
     size_t      typesWithAreas=0;
+
+    for (auto& data : mergeJob) {
+      data.areaCount=0;
+    }
 
     loadedTypes=candidateTypes;
 
@@ -210,16 +195,22 @@ namespace osmscout {
         return false;
       }
 
-      if (!loadedTypes.IsSet(area->GetType())) {
-        if (!(writer.Write(type) &&
-              writer.Write(id) &&
-              area->WriteImport(typeConfig,
-                                writer))) {
-          progress.Error(std::string("Error while writing ")+
-                         " area to file '"+
-                         writer.GetFilename()+"'");
+      mergeJob[area->GetType()->GetIndex()].areaCount++;
 
-          return false;
+      // This is an area of a type that does not get merged,
+      // we directly store it in the target file.
+      if (!loadedTypes.IsSet(area->GetType())) {
+        if (firstCall) {
+          if (!(writer.Write(type) &&
+                writer.Write(id) &&
+                area->WriteImport(typeConfig,
+                                  writer))) {
+            progress.Error(std::string("Error while writing ")+
+                           " area to file '"+
+                           writer.GetFilename()+"'");
+
+            return false;
+          }
         }
 
         areasWritten++;
@@ -406,8 +397,7 @@ namespace osmscout {
               area.rings[firstOuterRing].nodes=result.front().coords;
               area.rings[firstOuterRing].ids=result.front().ids;
 
-              EraseAreaInCache(id,
-                               nodeUseMap,
+              EraseAreaInCache(nodeUseMap,
                                candidateArea,
                                idAreaMap);
 
@@ -417,13 +407,13 @@ namespace osmscout {
             }
             else {
               //std::cout << "COULD merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
-              candidate++;
             }
           }
           else {
             //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
-            candidate++;
           }
+
+          candidate++;
         }
 
         finishedIds.insert(id);
@@ -435,7 +425,7 @@ namespace osmscout {
 
   void MergeAreasGenerator::MergeAreas(Progress& progress,
                                        const NodeUseMap& nodeUseMap,
-                                       MergeJob& job)
+                                       AreaMergeData& job)
   {
     std::unordered_map<Id,std::set<AreaRef> > idAreaMap;
     size_t                                    overallCount=job.areas.size();
@@ -490,7 +480,7 @@ namespace osmscout {
                                              FileScanner& scanner,
                                              FileWriter& writer,
                                              const TypeInfoSet& loadedTypes,
-                                             std::vector<MergeJob>& mergeJob,
+                                             std::vector<AreaMergeData>& mergeJob,
                                              uint32_t& areasWritten)
   {
     uint32_t                               areaCount=0;
@@ -619,7 +609,7 @@ namespace osmscout {
 
     while (!mergeTypes.Empty()) {
       TypeInfoSet           loadedTypes;
-      std::vector<MergeJob> mergeJob(typeConfig->GetTypeCount());
+      std::vector<AreaMergeData> mergeJob(typeConfig->GetTypeCount());
 
       //
       // Load type data
@@ -642,15 +632,14 @@ namespace osmscout {
 
       // Merge
 
+      progress.SetAction("Merging areas");
+
       for (const auto& type : loadedTypes) {
         if (!mergeJob[type->GetIndex()].areas.empty()) {
-          size_t                          candidateCount=mergeJob[type->GetIndex()].areas.size();
-
-          progress.SetAction("Merging Type "+type->GetName());
           MergeAreas(progress,
                      nodeUseMap[type->GetIndex()],
                      mergeJob[type->GetIndex()]);
-          progress.Info(NumberToString(candidateCount)+" candidate(s), "+NumberToString(mergeJob[type->GetIndex()].merges.size())+" merges");
+          progress.Info("Reduced areas of '"+type->GetName()+"' from "+NumberToString(mergeJob[type->GetIndex()].areaCount)+" to "+NumberToString(mergeJob[type->GetIndex()].areaCount-mergeJob[type->GetIndex()].mergedAway.size()));
 
           mergeJob[type->GetIndex()].areas.clear();
         }
