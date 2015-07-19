@@ -166,15 +166,19 @@ namespace osmscout {
   bool MergeAreasGenerator::GetAreas(const ImportParameter& parameter,
                                      Progress& progress,
                                      const TypeConfig& typeConfig,
-                                     TypeInfoSet& types,
+                                     const TypeInfoSet& candidateTypes,
+                                     TypeInfoSet& loadedTypes,
                                      const std::vector<NodeUseMap>& nodeUseMap,
                                      FileScanner& scanner,
-                                     std::vector<std::list<AreaRef> >& areas)
+                                     FileWriter& writer,
+                                     std::vector<MergeJob>& mergeJob,
+                                     uint32_t& areasWritten)
   {
     uint32_t    areaCount=0;
     size_t      collectedAreasCount=0;
     size_t      typesWithAreas=0;
-    TypeInfoSet currentTypes(types);
+
+    loadedTypes=candidateTypes;
 
     if (!scanner.GotoBegin()) {
       progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
@@ -206,7 +210,20 @@ namespace osmscout {
         return false;
       }
 
-      if (!currentTypes.IsSet(area->GetType())) {
+      if (!loadedTypes.IsSet(area->GetType())) {
+        if (!(writer.Write(type) &&
+              writer.Write(id) &&
+              area->WriteImport(typeConfig,
+                                writer))) {
+          progress.Error(std::string("Error while writing ")+
+                         " area to file '"+
+                         writer.GetFilename()+"'");
+
+          return false;
+        }
+
+        areasWritten++;
+
         continue;
       }
 
@@ -233,11 +250,11 @@ namespace osmscout {
         continue;
       }
 
-      if (areas[area->GetType()->GetIndex()].empty()) {
+      if (mergeJob[area->GetType()->GetIndex()].areas.empty()) {
         typesWithAreas++;
       }
 
-      areas[area->GetType()->GetIndex()].push_back(area);
+      mergeJob[area->GetType()->GetIndex()].areas.push_back(area);
 
       collectedAreasCount++;
 
@@ -246,10 +263,10 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto &type : currentTypes) {
-          if (!areas[type->GetIndex()].empty() &&
+        for (auto &type : loadedTypes) {
+          if (!mergeJob[type->GetIndex()].areas.empty() &&
               (!victimType ||
-               areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
+               mergeJob[type->GetIndex()].areas.size()<mergeJob[victimType->GetIndex()].areas.size())) {
             victimType=type;
           }
         }
@@ -257,18 +274,17 @@ namespace osmscout {
         // If there is more then one type of way, we always must find a "victim" type.
         assert(victimType);
 
-        collectedAreasCount-=areas[victimType->GetIndex()].size();
-        areas[victimType->GetIndex()].clear();
+        // Correct the statistics
+        collectedAreasCount-=mergeJob[victimType->GetIndex()].areas.size();
+        // Clear already loaded data of th victim type
+        mergeJob[victimType->GetIndex()].areas.clear();
 
         typesWithAreas--;
-        currentTypes.Remove(victimType);
+        loadedTypes.Remove(victimType);
       }
     }
 
-    // If we are done, remove all successfully collected types from our list of "not yet collected" types.
-    types.Remove(currentTypes);
-
-    progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(currentTypes.Size())+" types");
+    progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(loadedTypes.Size())+" types");
 
     return true;
   }
@@ -419,28 +435,26 @@ namespace osmscout {
 
   void MergeAreasGenerator::MergeAreas(Progress& progress,
                                        const NodeUseMap& nodeUseMap,
-                                       std::list<AreaRef>& areas,
-                                       std::list<AreaRef>& merges,
-                                       std::unordered_set<FileOffset>& mergedAway)
+                                       MergeJob& job)
   {
     std::unordered_map<Id,std::set<AreaRef> > idAreaMap;
-    size_t                                    overallCount=areas.size();
+    size_t                                    overallCount=job.areas.size();
 
     IndexAreasByNodeIds(nodeUseMap,
-                        areas,
+                        job.areas,
                         idAreaMap);
 
-    while (!areas.empty()) {
+    while (!job.areas.empty()) {
       AreaRef area;
 
-      progress.SetProgress(overallCount-areas.size(),overallCount);
+      progress.SetProgress(overallCount-job.areas.size(),overallCount);
 
       // Pop a area from the list of "to be processed" areas
-      area=areas.front();
-      areas.pop_front();
+      area=job.areas.front();
+      job.areas.pop_front();
 
       // This areas has already be "handled", ignore it
-      if (mergedAway.find(area->GetFileOffset())!=mergedAway.end()) {
+      if (job.mergedAway.find(area->GetFileOffset())!=job.mergedAway.end()) {
         continue;
       }
 
@@ -456,19 +470,105 @@ namespace osmscout {
                    *area,
                    idAreaMap,
                    finishedIds,
-                   mergedAway)) {
-        merges.push_back(area);
+                   job.mergedAway)) {
+        job.merges.push_back(area);
 
         while (TryMerge(nodeUseMap,
                         *area,
                         idAreaMap,
                         finishedIds,
-                        mergedAway)) {
+                        job.mergedAway)) {
           // no code
         }
       }
 
     }
+  }
+
+  bool MergeAreasGenerator::WriteMergeResult(Progress& progress,
+                                             const TypeConfig& typeConfig,
+                                             FileScanner& scanner,
+                                             FileWriter& writer,
+                                             const TypeInfoSet& loadedTypes,
+                                             std::vector<MergeJob>& mergeJob,
+                                             uint32_t& areasWritten)
+  {
+    uint32_t                               areaCount=0;
+    std::unordered_map<FileOffset,AreaRef> merges;
+    std::unordered_set<FileOffset>         ignores;
+    /*
+    size_t      collectedAreasCount=0;
+    size_t      typesWithAreas=0;*/
+
+    for (const auto& type : loadedTypes) {
+      for (const auto& area : mergeJob[type->GetIndex()].areas) {
+        merges[area->GetFileOffset()]=area;
+      }
+
+      ignores.insert(mergeJob[type->GetIndex()].mergedAway.begin(),
+                     mergeJob[type->GetIndex()].mergedAway.end());
+    }
+
+    if (!scanner.GotoBegin()) {
+      progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
+      return false;
+    }
+
+    if (!scanner.Read(areaCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t a=1; a<=areaCount; a++) {
+      uint8_t type;
+      Id      id;
+      AreaRef area=std::make_shared<Area>();
+
+      progress.SetProgress(a,areaCount);
+
+      if (!scanner.Read(type) ||
+          !scanner.Read(id) ||
+          !area->ReadImport(typeConfig,
+                            scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(a)+" of "+
+                       NumberToString(areaCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+
+        return false;
+      }
+
+      if (loadedTypes.IsSet(area->GetType())) {
+        if (ignores.find(area->GetFileOffset())!=ignores.end()) {
+          continue;
+        }
+
+        if (!(writer.Write(type) &&
+              writer.Write(id))) {
+          return false;
+        }
+
+        const auto& merge=merges.find(area->GetFileOffset()) ;
+
+        if (merge!=merges.end()) {
+          area=merge->second;
+        }
+
+        if (!area->WriteImport(typeConfig,
+                                writer)) {
+          progress.Error(std::string("Error while writing ")+
+                         " area to file '"+
+                         writer.GetFilename()+"'");
+
+          return false;
+        }
+
+        areasWritten++;
+      }
+    }
+
+    return true;
   }
 
   bool MergeAreasGenerator::Import(const TypeConfigRef& typeConfig,
@@ -477,7 +577,8 @@ namespace osmscout {
   {
     TypeInfoSet                    mergeTypes;
     FileScanner                    scanner;
-    std::unordered_set<FileOffset> blacklist;
+    FileWriter                     writer;
+    uint32_t                       areasWritten=0;
 
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeArea() &&
@@ -498,6 +599,14 @@ namespace osmscout {
       return false;
     }
 
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "areas2.tmp"))) {
+      progress.Error("Cannot create '" + writer.GetFilename() + "'");
+      return false;
+    }
+
+    writer.Write(areasWritten);
+
     if (!ScanAreaNodeIds(progress,
                          *typeConfig,
                          scanner,
@@ -509,7 +618,8 @@ namespace osmscout {
     /* ------ */
 
     while (!mergeTypes.Empty()) {
-      std::vector<std::list<AreaRef> > areasByType(typeConfig->GetTypeCount());
+      TypeInfoSet           loadedTypes;
+      std::vector<MergeJob> mergeJob(typeConfig->GetTypeCount());
 
       //
       // Load type data
@@ -521,28 +631,57 @@ namespace osmscout {
                     progress,
                     *typeConfig,
                     mergeTypes,
+                    loadedTypes,
                     nodeUseMap,
                     scanner,
-                    areasByType)) {
+                    writer,
+                    mergeJob,
+                    areasWritten)) {
         return false;
       }
 
-      for (const auto& type : typeConfig->GetTypes()) {
-        if (!areasByType[type->GetIndex()].empty()) {
-          std::list<AreaRef> merges;
-          size_t             candidateCount=areasByType[type->GetIndex()].size();
+      // Merge
+
+      for (const auto& type : loadedTypes) {
+        if (!mergeJob[type->GetIndex()].areas.empty()) {
+          size_t                          candidateCount=mergeJob[type->GetIndex()].areas.size();
 
           progress.SetAction("Merging Type "+type->GetName());
           MergeAreas(progress,
                      nodeUseMap[type->GetIndex()],
-                     areasByType[type->GetIndex()],
-                     merges,
-                     blacklist);
-          progress.Info(NumberToString(candidateCount)+" candidate(s), "+NumberToString(merges.size())+" merges");
+                     mergeJob[type->GetIndex()]);
+          progress.Info(NumberToString(candidateCount)+" candidate(s), "+NumberToString(mergeJob[type->GetIndex()].merges.size())+" merges");
 
-          areasByType[type->GetIndex()].clear();
+          mergeJob[type->GetIndex()].areas.clear();
         }
       }
+
+      // Store back merge result
+
+      if (!WriteMergeResult(progress,
+                            *typeConfig,
+                            scanner,
+                            writer,
+                            loadedTypes,
+                            mergeJob,
+                            areasWritten)) {
+        return false;
+      }
+
+      mergeTypes.Remove(loadedTypes);
+    }
+
+    if (!(writer.GotoBegin() &&
+          writer.Write(areasWritten))) {
+      progress.Error(std::string("Error while writing number of entries to file '")+
+                     writer.GetFilename()+"'");
+      return false;
+    }
+
+    if (!writer.Close()) {
+      progress.Error(std::string("Error while closing file '")+
+                     writer.GetFilename()+"'");
+      return false;
     }
 
     if (!scanner.Close()) {

@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -40,6 +41,14 @@ namespace osmscout {
    */
   class MergeAreasGenerator : public ImportModule
   {
+  private:
+    struct MergeJob
+    {
+      std::list<AreaRef>             areas;
+      std::list<AreaRef>             merges;
+      std::unordered_set<FileOffset> mergedAway;
+    };
+
   private:
     size_t GetFirstOuterRingWithId(const Area& area,
                                    Id id) const;
@@ -89,24 +98,36 @@ namespace osmscout {
      *   Progress
      * @param typeConfig
      *   TypeConfiguration
-     * @param types
-     *   Set of types to load
+     * @param candidateTypes
+     *   Set of types which should be loaded
+     * @param loadedTypes
+     *   Set of types which have been loaded
      * @param nodeUseMap
      *   Array of NodeUseMaps
      * @param scanner
-     *   File Scanner for the area data
-     * @param areas
-     *   actual area data returned
+     *   File Scanner for reading the area data
+     * @param writer
+     *   File writer for the writing area data which
+     *   are of a type that is not marked as mergable
+     * @param mergeJob
+     * data structure for merging areas of one type, here passed to return
+     * all merge candidates in 'areas'
+     * @param areasWritten
+     *   Number of areas directly written, because they
+     *   are of a type that is not marked as mergable
      * @return
      *   true, if everything is fine, else false
      */
     bool GetAreas(const ImportParameter& parameter,
                   Progress& progress,
                   const TypeConfig& typeConfig,
-                  TypeInfoSet& types,
+                  const TypeInfoSet& candidateTypes,
+                  TypeInfoSet& loadedTypes,
                   const std::vector<NodeUseMap>& nodeUseMap,
                   FileScanner& scanner,
-                  std::vector<std::list<AreaRef> >& areas);
+                  FileWriter& writer,
+                  std::vector<MergeJob>& mergeJob,
+                  uint32_t& areasWritten);
 
     /**
      * Index areas by their "at least used twice" nodes
@@ -139,9 +160,15 @@ namespace osmscout {
      */
     void MergeAreas(Progress& progress,
                     const NodeUseMap& nodeUseMap,
-                    std::list<AreaRef>& areas,
-                    std::list<AreaRef>& merges,
-                    std::unordered_set<FileOffset>& mergedAway);
+                    MergeJob& job);
+
+    bool WriteMergeResult(Progress& progress,
+                          const TypeConfig& typeConfig,
+                          FileScanner& scanner,
+                          FileWriter& writer,
+                          const TypeInfoSet& loadedTypes,
+                          std::vector<MergeJob>& mergeJob,
+                          uint32_t& areasWritten);
 
   public:
     std::string GetDescription() const;

@@ -41,10 +41,10 @@ namespace osmscout {
     FileScanner scanner;
     uint32_t    dataCount=0;
 
-    progress.SetAction("Scanning ids from 'areas.tmp'");
+    progress.SetAction("Scanning ids from 'areas2.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.tmp"),
+                                      "areas2.tmp"),
                       FileScanner::Sequential,
                       parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
@@ -187,17 +187,17 @@ namespace osmscout {
     uint32_t    areaCount=0;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areas2.tmp"))) {
+                                     "areas3.tmp"))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
       return false;
     }
 
     writer.Write(areaCount);
 
-    progress.SetAction("Copy data from 'areas.tmp' to 'areas2.tmp'");
+    progress.SetAction("Copy data from 'areas2.tmp' to 'areas3.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.tmp"),
+                                      "areas2.tmp"),
                       FileScanner::Sequential,
                       parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
