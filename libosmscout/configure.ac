@@ -73,10 +73,14 @@ AC_CHECK_SIZEOF([wchar_t])
 AC_CHECK_HEADERS([fcntl.h sys/time.h])
       
 dnl c++ 11 extensions
+
+AC_CHECK_HEADERS([chrono],
+	             [AC_DEFINE([OSMSCOUT_HAVE_CHRONO_H],[1],[system header <chrono> is available])])
       
 AS_IF([test "$enable_thread_support" != "no"],
       [AC_CHECK_HEADERS([thread],
                         [AC_DEFINE([OSMSCOUT_HAVE_THREAD],[1],[system header <thread> is available])])])
+
 
 AC_MSG_CHECKING([if C++ include <atomic> is usable])
 AC_COMPILE_IFELSE(
