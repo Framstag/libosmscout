@@ -451,14 +451,12 @@ namespace osmscout {
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
 
-        for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
-             id!=way->GetNodes().end();
-             ++id) {
-          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(*id);
+        for (const auto& osmId : way->GetNodes()) {
+          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
-                           NumberToString(*id)+
+                           NumberToString(osmId)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
                            rawRelation.GetType()->GetName()+" "+
@@ -491,17 +489,15 @@ namespace osmscout {
                                                     IdSet& resolvedRelations,
                                                     std::list<MultipolygonPart>& parts)
   {
-    for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
-         member!=rawRelation.members.end();
-         member++) {
-      if (member->type==RawRelation::memberRelation) {
-        if (member->role=="inner" ||
-            member->role=="outer") {
-          std::map<OSMId,RawRelationRef>::const_iterator relationEntry=relationMap.find(member->id);
+    for (const auto& member : rawRelation.members) {
+      if (member.type==RawRelation::memberRelation) {
+        if (member.role=="inner" ||
+            member.role=="outer") {
+          std::map<OSMId,RawRelationRef>::const_iterator relationEntry=relationMap.find(member.id);
 
           if (relationEntry==relationMap.end()) {
             progress.Error("Cannot resolve relation member "+
-                           NumberToString(member->id)+
+                           NumberToString(member.id)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
                            rawRelation.GetType()->GetName()+" "+
@@ -512,7 +508,7 @@ namespace osmscout {
 
           RawRelationRef childRelation(relationEntry->second);
 
-          resolvedRelations.insert(member->id);
+          resolvedRelations.insert(member.id);
 
           if (!ComposeBoundaryMembers(typeConfig,
                                       progress,
@@ -528,21 +524,21 @@ namespace osmscout {
           }
         }
         else {
-          progress.Warning("Ignored boundary relation role '"+member->role+"' in relation "+
+          progress.Warning("Ignored boundary relation role '"+member.role+"' in relation "+
                            NumberToString(rawRelation.GetId())+" "+
                            rawRelation.GetType()->GetName()+" "+
                            name);
         }
       }
-      else if (member->type==RawRelation::memberWay &&
-               (member->role=="inner" ||
-                member->role=="outer" ||
-                member->role.empty())) {
-        IdRawWayMap::const_iterator wayEntry=wayMap.find(member->id);
+      else if (member.type==RawRelation::memberWay &&
+               (member.role=="inner" ||
+                member.role=="outer" ||
+                member.role.empty())) {
+        IdRawWayMap::const_iterator wayEntry=wayMap.find(member.id);
 
         if (wayEntry==wayMap.end()) {
           progress.Error("Cannot resolve way member "+
-                         NumberToString(member->id)+
+                         NumberToString(member.id)+
                          " for relation "+
                          NumberToString(rawRelation.GetId())+" "+
                          rawRelation.GetType()->GetName()+" "+
@@ -560,14 +556,12 @@ namespace osmscout {
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
 
-        for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
-             id!=way->GetNodes().end();
-             ++id) {
-          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(*id);
+        for (const auto& osmId : way->GetNodes()) {
+          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
-                           NumberToString(*id)+
+                           NumberToString(osmId)+
                            " for relation "+
                            NumberToString(rawRelation.GetId())+" "+
                            rawRelation.GetType()->GetName()+" "+
@@ -614,38 +608,36 @@ namespace osmscout {
 
     // Initial collection of all relation and way ids of the top level relation
 
-    for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
-         member!=rawRelation.members.end();
-         member++) {
-      if (member->type==RawRelation::memberWay &&
-          (member->role=="inner" ||
-           member->role=="outer" ||
-           member->role.empty())) {
-        wayIds.insert(member->id);
+    for (const auto& member : rawRelation.members) {
+      if (member.type==RawRelation::memberWay &&
+          (member.role=="inner" ||
+           member.role=="outer" ||
+           member.role.empty())) {
+        wayIds.insert(member.id);
       }
-      else if (member->type==RawRelation::memberRelation &&
-               (member->role=="inner" ||
-                member->role=="outer" ||
-                member->role.empty())) {
+      else if (member.type==RawRelation::memberRelation &&
+               (member.role=="inner" ||
+                member.role=="outer" ||
+                member.role.empty())) {
         if (boundaryType &&
             rawRelation.GetType()==boundaryType) {
-          if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
+          if (visitedRelationIds.find(member.id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
-                             NumberToString(member->id)+
+                             NumberToString(member.id)+
                              " is referenced multiple times within relation "+
                              NumberToString(rawRelation.GetId())+" "+name);
             continue;
           }
 
-          if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
+          if (resolvedRelations.find(member.id)!=resolvedRelations.end()) {
             progress.Error("Found self referencing relation "+
-                           NumberToString(member->id)+
+                           NumberToString(member.id)+
                            " during resolving of members of relation "+
                            NumberToString(rawRelation.GetId())+" "+name);
             return false;
           }
 
-          pendingRelationIds.insert(member->id);
+          pendingRelationIds.insert(member.id);
         }
         else {
           progress.Warning("Unsupported relation reference in relation "+
@@ -672,40 +664,34 @@ namespace osmscout {
 
       pendingRelationIds.clear();
 
-      for (std::vector<RawRelationRef>::const_iterator cr=childRelations.begin();
-           cr!=childRelations.end();
-           ++cr) {
-        RawRelationRef childRelation(*cr);
-
+      for (const auto& childRelation : childRelations) {
         visitedRelationIds.insert(childRelation->GetId());
         relationMap[childRelation->GetId()]=childRelation;
 
-        for (std::vector<RawRelation::Member>::const_iterator member=childRelation->members.begin();
-             member!=childRelation->members.end();
-             member++) {
-          if (member->type==RawRelation::memberWay &&
-              (member->role=="inner" ||
-               member->role=="outer" ||
-               member->role.empty())) {
-            wayIds.insert(member->id);
+        for (const auto& member : childRelation->members) {
+          if (member.type==RawRelation::memberWay &&
+              (member.role=="inner" ||
+               member.role=="outer" ||
+               member.role.empty())) {
+            wayIds.insert(member.id);
           }
-          else if (member->type==RawRelation::memberRelation &&
-                   (member->role=="inner" ||
-                    member->role=="outer" ||
-                    member->role.empty())) {
+          else if (member.type==RawRelation::memberRelation &&
+                   (member.role=="inner" ||
+                    member.role=="outer" ||
+                    member.role.empty())) {
             if (boundaryType &&
                 rawRelation.GetType()==boundaryType) {
-              if (visitedRelationIds.find(member->id)!=visitedRelationIds.end()) {
+              if (visitedRelationIds.find(member.id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
-                                 NumberToString(member->id)+
+                                 NumberToString(member.id)+
                                  " is referenced multiple times within relation "+
                                  NumberToString(rawRelation.GetId())+" "+name);
                 continue;;
               }
 
-              if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
+              if (resolvedRelations.find(member.id)!=resolvedRelations.end()) {
                 progress.Error("Found self referencing relation "+
-                               NumberToString(member->id)+
+                               NumberToString(member.id)+
                                " during resolving of members of relation "+
                                NumberToString(rawRelation.GetId())+" "+
                                rawRelation.GetType()->GetName()+" "+
@@ -713,7 +699,7 @@ namespace osmscout {
                 return false;
               }
 
-              pendingRelationIds.insert(member->id);
+              pendingRelationIds.insert(member.id);
             }
             else {
               progress.Warning("Unsupported relation reference in relation "+
@@ -743,15 +729,9 @@ namespace osmscout {
 
     wayMap.reserve(ways.size());
 
-    for (std::vector<RawWayRef>::const_iterator w=ways.begin();
-         w!=ways.end();
-         ++w) {
-      RawWayRef way(*w);
-
-      for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
-           id!=way->GetNodes().end();
-           ++id) {
-        nodeIds.insert(*id);
+    for (const auto& way : ways) {
+      for (const auto& osmId : way->GetNodes()) {
+        nodeIds.insert(osmId);
       }
 
       wayMap[way->GetId()]=way;
@@ -866,12 +846,10 @@ namespace osmscout {
 
     // Resolve SegmentAttributes for each ring
 
-    for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-         ring!=parts.end();
-         ring++) {
-      if (ring->IsArea() &&
-          ring->ways.front()->GetType()!=typeConfig.typeInfoIgnore) {
-        ring->role.SetFeatures(ring->ways.front()->GetFeatureValueBuffer());
+    for (auto& ring : parts) {
+      if (ring.IsArea() &&
+          ring.ways.front()->GetType()!=typeConfig.typeInfoIgnore) {
+        ring.role.SetFeatures(ring.ways.front()->GetFeatureValueBuffer());
       }
     }
 
@@ -879,8 +857,8 @@ namespace osmscout {
     // the child ring being a clip region. We set the type of the child to typeIgnore then...
 
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-         ring!=parts.end();
-         ring++) {
+        ring!=parts.end();
+        ++ring) {
       if (ring->IsArea()) {
         std::list<MultipolygonPart>::iterator childRing=ring;
 
@@ -920,27 +898,25 @@ namespace osmscout {
     masterRing.ring=Area::masterRingId;
 
     if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
-      for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-           ring!=parts.end();
-           ring++) {
-        if (ring->role.ring==Area::outerRingId &&
-            ring->IsArea() &&
-            ring->role.GetType()!=typeConfig.typeInfoIgnore) {
+      for (auto& ring : parts) {
+        if (ring.role.ring==Area::outerRingId &&
+            ring.IsArea() &&
+            ring.role.GetType()!=typeConfig.typeInfoIgnore) {
           if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
             if (progress.OutputDebug()) {
               progress.Debug("Autodetecting type of multipolygon relation "+
                              NumberToString(rawRelation.GetId())+" as "+
-                             ring->role.GetType()->GetName());
+                             ring.role.GetType()->GetName());
             }
 
-            masterRing.SetFeatures(ring->role.GetFeatureValueBuffer());
-            ring->role.SetType(typeConfig.typeInfoIgnore);
+            masterRing.SetFeatures(ring.role.GetFeatureValueBuffer());
+            ring.role.SetType(typeConfig.typeInfoIgnore);
           }
-          else if (masterRing.GetType()!=ring->role.GetType()) {
+          else if (masterRing.GetType()!=ring.role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
                              " has conflicting types for outer boundary ("+
                              masterRing.GetType()->GetName()+
-                             " vs. "+ring->ways.front()->GetType()->GetName()+")");
+                             " vs. "+ring.ways.front()->GetType()->GetName()+")");
           }
         }
       }
@@ -957,16 +933,14 @@ namespace osmscout {
 
     // Blacklisting areas
 
-    for (std::list<MultipolygonPart>::const_iterator ring=parts.begin();
-         ring!=parts.end();
-         ring++) {
-      if (ring->IsArea()) {
+    for (const auto& ring : parts) {
+      if (ring.IsArea()) {
         // TODO: We currently blacklist all areas, we only should blacklist all
         // areas that have a type. Because areas without a type are implicitly blacklisted anyway later on.
         // However because we change the type of area rings to typeIgnore above we need some bookkeeping for this
         // to work here.
         // On the other hand do not fill the blacklist until you are sure that the relation will not be rejected.
-        wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
+        wayAreaIndexBlacklist.insert(ring.ways.front()->GetId());
       }
     }
 
@@ -975,12 +949,10 @@ namespace osmscout {
     relation.rings.push_back(masterRing);
 
     relation.rings.reserve(parts.size());
-    for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-         ring!=parts.end();
-         ring++) {
-      assert(!ring->role.nodes.empty());
+    for (const auto& ring : parts) {
+      assert(!ring.role.nodes.empty());
 
-      relation.rings.push_back(ring->role);
+      relation.rings.push_back(ring.role);
     }
 
     assert(!relation.rings.empty());
@@ -1128,9 +1100,9 @@ namespace osmscout {
 
       bool valid=true;
 
-      for (size_t i=0; i<rel.rings.size(); i++) {
-        if (rel.rings[i].ring!=Area::masterRingId) {
-          if (rel.rings[i].nodes.size()<3) {
+      for (const auto& ring : rel.rings) {
+        if (ring.ring!=Area::masterRingId) {
+          if (ring.nodes.size()<3) {
             valid=false;
 
             break;
@@ -1147,9 +1119,9 @@ namespace osmscout {
       }
 
       areaTypeCount[rel.GetType()->GetIndex()]++;
-      for (size_t i=0; i<rel.rings.size(); i++) {
-        if (rel.rings[i].ring==Area::outerRingId) {
-          areaNodeTypeCount[rel.GetType()->GetIndex()]+=rel.rings[i].nodes.size();
+      for (const auto& ring: rel.rings) {
+        if (ring.ring==Area::outerRingId) {
+          areaNodeTypeCount[rel.GetType()->GetIndex()]+=ring.nodes.size();
         }
       }
 
