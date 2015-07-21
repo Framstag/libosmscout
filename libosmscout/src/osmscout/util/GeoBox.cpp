@@ -62,6 +62,7 @@ namespace osmscout {
                  std::min(coordA.GetLon(),coordB.GetLon()));
     maxCoord.Set(std::max(coordA.GetLat(),coordB.GetLat()),
                  std::max(coordA.GetLon(),coordB.GetLon()));
+    valid=true;
   }
 
   void GeoBox::Include(const GeoBox& other)
