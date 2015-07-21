@@ -409,8 +409,6 @@ namespace osmscout {
       areaData.minLon=tile->xAbs*tile->cellWidth-180.0;
       areaData.maxLon=areaData.minLon+tile->cellWidth;
 
-      // std::cout << "* " << areaData.minLat << " - " << areaData.minLon << " x " << areaData.maxLat << " - " << areaData.maxLon << std::endl;
-
       if (tile->coords.empty()) {
         points.resize(5);
 
@@ -442,12 +440,6 @@ namespace osmscout {
 
         end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
                                           ceil(transBuffer.transPolygon.points[s+4].y));
-
-        /*
-        std::cout << "--" << std::endl;
-        for (size_t i=s; i<=s+4; i++) {
-          std::cout << transBuffer.transPolygon.points[i].x << "," << transBuffer.transPolygon.points[i].y << std::endl;
-        }*/
       }
       else {
         points.resize(tile->coords.size());
