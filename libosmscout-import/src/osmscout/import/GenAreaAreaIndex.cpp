@@ -31,7 +31,6 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/String.h>
 
-#include <limits>
 namespace osmscout {
 
   std::string AreaAreaIndexGenerator::GetDescription() const
