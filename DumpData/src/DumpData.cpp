@@ -516,6 +516,8 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
   }
 
   for (size_t r=1; r<area->rings.size(); r++) {
+    area->rings[r].GetBoundingBox(boundingBox);
+
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
 
@@ -526,6 +528,8 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
       std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
     }
     std::cout << "    type: " << area->rings[r].GetType()->GetName() << std::endl;
+    std::cout << "    boundingBox: " << boundingBox.GetDisplayText() << std::endl;
+    std::cout << "    center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
 
     DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
                            IDENT+2);
