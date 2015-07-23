@@ -467,7 +467,8 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
     for (size_t n=0; n<way->nodes.size(); n++) {
       std::cout << "  node[" << n << "] {";
 
-      if (way->ids[n]!=0) {
+      if (n<way->ids.size() &&
+          way->ids[n]!=0) {
         std::cout << " id: " << way->ids[n];
       }
 
