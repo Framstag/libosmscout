@@ -591,7 +591,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!way.GetType()->GetIgnoreSeaLand()) {
+      if (way.GetType()!=typeConfig.typeInfoIgnore &&
+          !way.GetType()->GetIgnoreSeaLand()) {
         if (way.nodes.size()>=2) {
           std::set<Pixel> coords;
 
@@ -603,7 +604,7 @@ namespace osmscout {
             if (level.IsInAbsolute(coord->x,coord->y)) {
               if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-          std::cout << "Assume land: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << " Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
+          std::cout << "Assume land: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
                 level.SetStateAbsolute(coord->x,coord->y,land);
               }
