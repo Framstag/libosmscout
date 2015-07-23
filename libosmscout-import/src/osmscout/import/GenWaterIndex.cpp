@@ -172,11 +172,7 @@ namespace osmscout {
 
     std::set<OSMId> nodeIds;
 
-    for (std::list<RawCoastlineRef>::const_iterator c=rawCoastlines.begin();
-         c!=rawCoastlines.end();
-         ++c) {
-      RawCoastlineRef coastline(*c);
-
+    for (const auto& coastline : rawCoastlines) {
       for (size_t n=0; n<coastline->GetNodeCount(); n++) {
         nodeIds.insert(coastline->GetNodeId(n));
       }
@@ -287,14 +283,10 @@ namespace osmscout {
     while (merged) {
       merged=false;
 
-      for (std::list<CoastRef>::iterator c=coastlines.begin();
-          c!=coastlines.end();
-          ++c) {
-        if (blacklist.find((*c)->id)!=blacklist.end()) {
+      for (const auto& coast : coastlines) {
+        if (blacklist.find(coast->id)!=blacklist.end()) {
           continue;
         }
-
-        CoastRef coast=*c;
 
         std::map<Id,CoastRef>::iterator other=coastStartMap.find(coast->backNodeId);
 
@@ -317,11 +309,7 @@ namespace osmscout {
     }
 
     // Gather merged coastlines
-    for (std::list<CoastRef>::iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      CoastRef coastline(*c);
-
+    for (const auto& coastline : coastlines) {
       if (blacklist.find(coastline->id)!=blacklist.end()) {
         continue;
       }
@@ -355,26 +343,20 @@ namespace osmscout {
   {
     progress.Info("Marking cells containing coastlines");
 
-    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      const CoastRef& coastline=*c;
-
+    for (const auto& coastline : coastlines) {
       // Marks cells on the path as coast
 
       std::set<Pixel> coords;
 
       GetCells(level,coastline->coast,coords);
 
-      for (std::set<Pixel>::const_iterator coord=coords.begin();
-          coord!=coords.end();
-          ++coord) {
-        if (level.IsInAbsolute(coord->x,coord->y)) {
-          if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
+      for (const auto& coord : coords) {
+        if (level.IsInAbsolute(coord.x,coord.y)) {
+          if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-            std::cout << "Coastline: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << std::endl;
+            std::cout << "Coastline: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << std::endl;
 #endif
-            level.SetStateAbsolute(coord->x,coord->y,coast);
+            level.SetStateAbsolute(coord.x,coord.y,coast);
           }
         }
       }
@@ -418,24 +400,22 @@ namespace osmscout {
         state[3]=level.GetState(coord->first.x-1,coord->first.y);
       }
 
-      for (std::list<GroundTile>::const_iterator tile=coord->second.begin();
-           tile!=coord->second.end();
-           ++tile) {
-        for (size_t c=0; c<tile->coords.size()-1;c++) {
+      for (const auto& tile : coord->second) {
+        for (size_t c=0; c<tile.coords.size()-1;c++) {
           // Top
-          if (tile->coords[c].x==0 &&
-              tile->coords[c].y==GroundTile::Coord::CELL_MAX &&
-              tile->coords[c+1].x==GroundTile::Coord::CELL_MAX &&
-              tile->coords[c+1].y==GroundTile::Coord::CELL_MAX) {
+          if (tile.coords[c].x==0 &&
+              tile.coords[c].y==GroundTile::Coord::CELL_MAX &&
+              tile.coords[c+1].x==GroundTile::Coord::CELL_MAX &&
+              tile.coords[c+1].y==GroundTile::Coord::CELL_MAX) {
             if (state[0]!=unknown) {
               continue;
             }
 
             state[0]=land;
           }
-          else if (tile->coords[c].y==GroundTile::Coord::CELL_MAX &&
-                   tile->coords[c].x!=0 &&
-                   tile->coords[c].x!=GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[c].y==GroundTile::Coord::CELL_MAX &&
+                   tile.coords[c].x!=0 &&
+                   tile.coords[c].x!=GroundTile::Coord::CELL_MAX) {
             if (state[0]!=unknown) {
               continue;
             }
@@ -444,19 +424,19 @@ namespace osmscout {
           }
 
           // Right
-          if (tile->coords[c].x==GroundTile::Coord::CELL_MAX &&
-              tile->coords[c].y==GroundTile::Coord::CELL_MAX &&
-              tile->coords[c+1].x==GroundTile::Coord::CELL_MAX &&
-              tile->coords[c+1].y==0) {
+          if (tile.coords[c].x==GroundTile::Coord::CELL_MAX &&
+              tile.coords[c].y==GroundTile::Coord::CELL_MAX &&
+              tile.coords[c+1].x==GroundTile::Coord::CELL_MAX &&
+              tile.coords[c+1].y==0) {
             if (state[1]!=unknown) {
               continue;
             }
 
             state[1]=land;
           }
-          else if (tile->coords[c].x==GroundTile::Coord::CELL_MAX &&
-                   tile->coords[c].y!=0 &&
-                   tile->coords[c].y!=GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[c].x==GroundTile::Coord::CELL_MAX &&
+                   tile.coords[c].y!=0 &&
+                   tile.coords[c].y!=GroundTile::Coord::CELL_MAX) {
             if (state[1]!=unknown) {
               continue;
             }
@@ -465,19 +445,19 @@ namespace osmscout {
           }
 
           // Below
-          if (tile->coords[c].x==GroundTile::Coord::CELL_MAX &&
-              tile->coords[c].y==0 &&
-              tile->coords[c+1].x==0 &&
-              tile->coords[c+1].y==0) {
+          if (tile.coords[c].x==GroundTile::Coord::CELL_MAX &&
+              tile.coords[c].y==0 &&
+              tile.coords[c+1].x==0 &&
+              tile.coords[c+1].y==0) {
             if (state[2]!=unknown) {
               continue;
             }
 
             state[2]=land;
           }
-          else if (tile->coords[c].y==0 &&
-                   tile->coords[c].x!=0 &&
-                   tile->coords[c].x!=GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[c].y==0 &&
+                   tile.coords[c].x!=0 &&
+                   tile.coords[c].x!=GroundTile::Coord::CELL_MAX) {
             if (state[2]!=unknown) {
               continue;
             }
@@ -486,19 +466,19 @@ namespace osmscout {
           }
 
           // left
-          if (tile->coords[c].x==0 &&
-              tile->coords[c].y==0 &&
-              tile->coords[c+1].x==0 &&
-              tile->coords[c+1].y==GroundTile::Coord::CELL_MAX) {
+          if (tile.coords[c].x==0 &&
+              tile.coords[c].y==0 &&
+              tile.coords[c+1].x==0 &&
+              tile.coords[c+1].y==GroundTile::Coord::CELL_MAX) {
             if (state[3]!=unknown) {
               continue;
             }
 
             state[3]=land;
           }
-          else if (tile->coords[c].x==0 &&
-                   tile->coords[c].y!=0 &&
-                   tile->coords[c].y!=GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[c].x==0 &&
+                   tile.coords[c].y!=0 &&
+                   tile.coords[c].y!=GroundTile::Coord::CELL_MAX) {
             if (state[3]!=unknown) {
               continue;
             }
@@ -598,15 +578,13 @@ namespace osmscout {
 
           GetCells(level,way.nodes,coords);
 
-          for (std::set<Pixel>::const_iterator coord=coords.begin();
-              coord!=coords.end();
-              ++coord) {
-            if (level.IsInAbsolute(coord->x,coord->y)) {
-              if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
+          for (const auto& coord : coords) {
+            if (level.IsInAbsolute(coord.x,coord.y)) {
+              if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-          std::cout << "Assume land: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
+          std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
-                level.SetStateAbsolute(coord->x,coord->y,land);
+                level.SetStateAbsolute(coord.x,coord.y,land);
               }
             }
           }
@@ -628,7 +606,6 @@ namespace osmscout {
     progress.Info("Filling water");
 
     for (size_t i=1; i<=tileCount; i++) {
-
       Level newLevel(level);
 
       for (uint32_t y=0; y<level.cellYCount; y++) {
@@ -804,14 +781,14 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)(parameter.GetWaterIndexMinMag()));
     writer.WriteNumber((uint32_t)(parameter.GetWaterIndexMaxMag()));
 
-    for (size_t level=0; level<levels.size(); level++) {
+    for (auto& level : levels) {
       FileOffset offset=0;
-      writer.GetPos(levels[level].indexEntryOffset);
+      writer.GetPos(level.indexEntryOffset);
       writer.WriteFileOffset(offset);
-      writer.WriteNumber(levels[level].cellXStart);
-      writer.WriteNumber(levels[level].cellXEnd);
-      writer.WriteNumber(levels[level].cellYStart);
-      writer.WriteNumber(levels[level].cellYEnd);
+      writer.WriteNumber(level.cellXStart);
+      writer.WriteNumber(level.cellXEnd);
+      writer.WriteNumber(level.cellYStart);
+      writer.WriteNumber(level.cellYEnd);
     }
   }
 
@@ -823,31 +800,29 @@ namespace osmscout {
     progress.Info("Handle area coastline completely in a cell");
 
     size_t currentCoastline=1;
-    for (std::vector<CoastlineData>::iterator coastline=data.coastlines.begin();
-         coastline!=data.coastlines.end();
-         ++coastline) {
+    for (const auto& coastline : data.coastlines) {
       progress.SetProgress(currentCoastline,data.coastlines.size());
 
       currentCoastline++;
 
-      if (coastline->isArea &&
-          coastline->isCompletelyInCell &&
-          coastline->pixelWidth>=1.0 &&
-          coastline->pixelHeight>=1.0) {
-        if (!level.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
+      if (coastline.isArea &&
+          coastline.isCompletelyInCell &&
+          coastline.pixelWidth>=1.0 &&
+          coastline.pixelHeight>=1.0) {
+        if (!level.IsInAbsolute(coastline.cell.x,coastline.cell.y)) {
           continue;
         }
 
-        Pixel      coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
+        Pixel      coord(coastline.cell.x-level.cellXStart,coastline.cell.y-level.cellYStart);
         GroundTile groundTile(GroundTile::land);
 
-        double cellMinLat=level.cellHeight*coastline->cell.y-90.0;
-        double cellMinLon=level.cellWidth*coastline->cell.x-180.0;
+        double cellMinLat=level.cellHeight*coastline.cell.y-90.0;
+        double cellMinLon=level.cellWidth*coastline.cell.x-180.0;
 
-        groundTile.coords.reserve(coastline->points.size());
+        groundTile.coords.reserve(coastline.points.size());
 
-        for (size_t p=0; p<coastline->points.size(); p++) {
-          groundTile.coords.push_back(Transform(coastline->points[p],level,cellMinLat,cellMinLon,true));
+        for (size_t p=0; p<coastline.points.size(); p++) {
+          groundTile.coords.push_back(Transform(coastline.points[p],level,cellMinLat,cellMinLon,true));
         }
 
         if (!groundTile.coords.empty()) {
@@ -1141,10 +1116,7 @@ namespace osmscout {
     data.coastlines.resize(coastlines.size());
 
     size_t curCoast=0;
-    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      const  CoastRef& coast=*c;
+    for (const auto& coast : coastlines) {
       GeoBoundingBox   boundingBox;
 
       progress.SetProgress(curCoast,coastlines.size());
@@ -1401,12 +1373,10 @@ namespace osmscout {
 
       intersectionsPathOrder.resize(coastlines.size());
 
-      for (std::list<size_t>::const_iterator currentCoastline=cell->second.begin();
-          currentCoastline!=cell->second.end();
-          ++currentCoastline) {
-        std::map<Pixel,std::list<Intersection> >::iterator cellData=data.coastlines[*currentCoastline].cellIntersections.find(cell->first);
+      for (const auto& currentCoastline : cell->second) {
+        std::map<Pixel,std::list<Intersection> >::iterator cellData=data.coastlines[currentCoastline].cellIntersections.find(cell->first);
 
-        if (cellData==data.coastlines[*currentCoastline].cellIntersections.end()) {
+        if (cellData==data.coastlines[currentCoastline].cellIntersections.end()) {
           continue;
         }
 
@@ -1416,21 +1386,21 @@ namespace osmscout {
             ++inter) {
           const IntersectionPtr intersection=&(*inter);
 
-          intersectionsPathOrder[*currentCoastline].push_back(intersection);
+          intersectionsPathOrder[currentCoastline].push_back(intersection);
           intersectionsCW.push_back(intersection);
         }
 
-        intersectionsPathOrder[*currentCoastline].sort(IntersectionByPathComparator());
+        intersectionsPathOrder[currentCoastline].sort(IntersectionByPathComparator());
 
         // Fix intersection order for areas
-        if (data.coastlines[*currentCoastline].isArea &&
-            intersectionsPathOrder[*currentCoastline].front()->direction==-1) {
-          intersectionsPathOrder[*currentCoastline].push_back(intersectionsPathOrder[*currentCoastline].front());
-          intersectionsPathOrder[*currentCoastline].pop_front();
+        if (data.coastlines[currentCoastline].isArea &&
+            intersectionsPathOrder[currentCoastline].front()->direction==-1) {
+          intersectionsPathOrder[currentCoastline].push_back(intersectionsPathOrder[currentCoastline].front());
+          intersectionsPathOrder[currentCoastline].pop_front();
         }
 
-        for (std::list<IntersectionPtr>::reverse_iterator inter=intersectionsPathOrder[*currentCoastline].rbegin();
-            inter!=intersectionsPathOrder[*currentCoastline].rend();
+        for (std::list<IntersectionPtr>::reverse_iterator inter=intersectionsPathOrder[currentCoastline].rbegin();
+            inter!=intersectionsPathOrder[currentCoastline].rend();
             inter++) {
           if ((*inter)->direction==-1) {
             intersectionsOuter.push_back(*inter);
