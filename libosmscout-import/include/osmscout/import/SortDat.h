@@ -340,6 +340,8 @@ namespace osmscout {
         for (auto& entry : iter->second) {
           progress.SetProgress(copyCount,currentEntries);
 
+          copyCount++;
+
           N data;
 
           if (!entry.source->scanner.SetPos(entry.fileOffset)) {
@@ -378,6 +380,10 @@ namespace osmscout {
 
               return false;
             }
+
+            if (!save) {
+              break;
+            }
           }
 
           if (!save) {
@@ -395,7 +401,6 @@ namespace osmscout {
           mapWriter.Write(entry.type);
           mapWriter.WriteFileOffset(fileOffset);
 
-          copyCount++;
           dataCopiedCount++;
         }
       }
@@ -522,6 +527,10 @@ namespace osmscout {
                            dataWriter.GetFilename()+"'");
 
             return false;
+          }
+
+          if (!save) {
+            break;
           }
         }
 
