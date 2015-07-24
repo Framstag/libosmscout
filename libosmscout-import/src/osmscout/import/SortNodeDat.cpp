@@ -156,6 +156,59 @@ namespace osmscout {
     return writer.Close();
   }
 
+  class NodeTypeIgnoreProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
+  {
+  private:
+    uint32_t    removedNodesCount;
+    TypeInfoRef typeInfoIgnore;
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Node& Node,
+                 bool& save);
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
+  };
+
+  bool NodeTypeIgnoreProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                            Progress& /*progress*/,
+                                                            const TypeConfig& typeConfig)
+  {
+    removedNodesCount=0;
+    typeInfoIgnore=typeConfig.typeInfoIgnore;
+
+    return true;
+  }
+
+  bool NodeTypeIgnoreProcessorFilter::Process(Progress& /*progress*/,
+                                              const FileOffset& /*offset*/,
+                                              Node& node,
+                                              bool& save)
+  {
+    save=node.GetType()!=NULL &&
+         node.GetType()!=typeInfoIgnore;
+
+    if (!save) {
+      removedNodesCount++;
+    }
+
+    return true;
+  }
+
+  bool NodeTypeIgnoreProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                         Progress& progress,
+                                                         const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Nodes without a type removed: " + NumberToString(removedNodesCount));
+
+    return true;
+  }
+
   void SortNodeDataGenerator::GetTopLeftCoordinate(const Node& data,
                                                    double& maxLat,
                                                    double& minLon)
@@ -170,6 +223,7 @@ namespace osmscout {
     AddSource("nodes.tmp");
 
     AddFilter(std::make_shared<NodeLocationProcessorFilter>());
+    AddFilter(std::make_shared<NodeTypeIgnoreProcessorFilter>());
   }
 
   std::string SortNodeDataGenerator::GetDescription() const

@@ -364,6 +364,59 @@ namespace osmscout {
     return true;
   }
 
+  class WayTypeIgnoreProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
+  {
+  private:
+    uint32_t    removedWaysCount;
+    TypeInfoRef typeInfoIgnore;
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Way& way,
+                 bool& save);
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
+  };
+
+  bool WayTypeIgnoreProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                           Progress& /*progress*/,
+                                                           const TypeConfig& typeConfig)
+  {
+    removedWaysCount=0;
+    typeInfoIgnore=typeConfig.typeInfoIgnore;
+
+    return true;
+  }
+
+  bool WayTypeIgnoreProcessorFilter::Process(Progress& /*progress*/,
+                                             const FileOffset& /*offset*/,
+                                             Way& way,
+                                             bool& save)
+  {
+    save=way.GetType()!=NULL &&
+         way.GetType()!=typeInfoIgnore;
+
+    if (!save) {
+      removedWaysCount++;
+    }
+
+    return true;
+  }
+
+  bool WayTypeIgnoreProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                        Progress& progress,
+                                                        const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Ways without a type removed: " + NumberToString(removedWaysCount));
+
+    return true;
+  }
+
   void SortWayDataGenerator::GetTopLeftCoordinate(const Way& data,
                                                   double& maxLat,
                                                   double& minLon)
@@ -384,6 +437,7 @@ namespace osmscout {
 
     AddFilter(std::make_shared<WayLocationProcessorFilter>());
     AddFilter(std::make_shared<WayNodeReductionProcessorFilter>());
+    AddFilter(std::make_shared<WayTypeIgnoreProcessorFilter>());
   }
 
   std::string SortWayDataGenerator::GetDescription() const

@@ -331,7 +331,7 @@ namespace osmscout {
 
           if (area.rings.size()==0 ||
               (area.rings.size()==1 &&
-               area.rings[0].ring==Area::masterRingId   )) {
+               area.rings[0].ring==Area::masterRingId)) {
               save=false;
               return true;
           }
@@ -400,6 +400,10 @@ namespace osmscout {
         idBuffer.push_back(ring.ids[current]);
       }
 
+      if (reduced && nodeBuffer.size()<3) {
+        reduced=false;
+      }
+
       if (reduced) {
         ring.nodes=nodeBuffer;
         ring.ids=idBuffer;
@@ -425,6 +429,10 @@ namespace osmscout {
       return false;
     }
 
+    if (!save) {
+      return true;
+    }
+
     if (!RemoveRedundantNodes(progress,
                               offset,
                               area,
@@ -442,6 +450,59 @@ namespace osmscout {
     progress.Info("Duplicate nodes removed: " + NumberToString(duplicateCount));
     progress.Info("Redundant nodes removed: " + NumberToString(redundantCount));
     progress.Info("Overall nodes: " + NumberToString(overallCount));
+
+    return true;
+  }
+
+  class AreaTypeIgnoreProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
+  {
+  private:
+    uint32_t    removedAreasCount;
+    TypeInfoRef typeInfoIgnore;
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Area& area,
+                 bool& save);
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
+  };
+
+  bool AreaTypeIgnoreProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                            Progress& /*progress*/,
+                                                            const TypeConfig& typeConfig)
+  {
+    removedAreasCount=0;
+    typeInfoIgnore=typeConfig.typeInfoIgnore;
+
+    return true;
+  }
+
+  bool AreaTypeIgnoreProcessorFilter::Process(Progress& /*progress*/,
+                                              const FileOffset& /*offset*/,
+                                              Area& area,
+                                              bool& save)
+  {
+    save=area.GetType()!=NULL &&
+         area.GetType()!=typeInfoIgnore;
+
+    if (!save) {
+      removedAreasCount++;
+    }
+
+    return true;
+  }
+
+  bool AreaTypeIgnoreProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                         Progress& progress,
+                                                         const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Areas without a type removed: " + NumberToString(removedAreasCount));
 
     return true;
   }
@@ -476,6 +537,7 @@ namespace osmscout {
 
     AddFilter(std::make_shared<AreaLocationProcessorFilter>());
     AddFilter(std::make_shared<AreaNodeReductionProcessorFilter>());
+    AddFilter(std::make_shared<AreaTypeIgnoreProcessorFilter>());
   }
 
   std::string SortAreaDataGenerator::GetDescription() const
