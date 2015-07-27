@@ -652,16 +652,20 @@ namespace osmscout {
     double frameHoriz;
     double frameVert;
 
+    // Get the amount of delta to add to the frame, depending on the actual style
     GetLabelFrame(*style,
                   frameHoriz,
                   frameVert);
 
+    // The bounding box of the label including some optional border
     bx1=x-frameHoriz;
     bx2=x+frameHoriz;
     by1=y-height/2-frameVert;
     by2=y+height/2+frameVert;
 
     // is box visible?
+    // We do not check the horizontal extends, since the width is
+    // not yet calculated
     if (parameter.GetDropNotVisiblePointLabels()) {
       if (by2<0 || by1>=projection.GetHeight()) {
         return false;
@@ -700,7 +704,7 @@ namespace osmscout {
     by1=y-height/2-frameVert;
     by2=y+height/2+frameVert;
 
-    // is box visible?
+    // Again - is box visible? No also checking horizontal extends
     if (parameter.GetDropNotVisiblePointLabels()) {
       if (bx1>=projection.GetWidth() ||
           bx2<0 ||
