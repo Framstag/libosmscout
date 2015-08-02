@@ -27,8 +27,6 @@
 
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
 #include <chrono>
-#elif defined (__WIN32__) || defined (WIN32)
-#include <windows.h>
 #elif defined(HAVE_SYS_TIME_H)
   #include <sys/time.h>
 #endif
@@ -37,8 +35,6 @@ namespace osmscout {
 
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
   typedef std::chrono::duration<double,std::milli> MilliDouble;
-#elif defined (__WIN32__) || defined (WIN32)
-  // no code
 #elif defined(HAVE_SYS_TIME_H)
   #ifndef timersub
       # define timersub(a, b, result) \
@@ -58,10 +54,6 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
     std::chrono::steady_clock::time_point start;
     std::chrono::steady_clock::time_point stop;
-#elif defined (__WIN32__) || defined (WIN32)
-	LARGE_INTEGER start;
-	LARGE_INTEGER stop;
-	LARGE_INTEGER freq;
 #elif defined(HAVE_SYS_TIME_H)
     timeval start;
     timeval stop;
@@ -73,9 +65,6 @@ namespace osmscout {
   {
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
     pimpl->start=std::chrono::steady_clock::now();
-#elif defined (__WIN32__) || defined (WIN32)
-	QueryPerformanceFrequency(&pimpl->freq);
-	QueryPerformanceCounter(&pimpl->start);
 #elif defined(HAVE_SYS_TIME_H)
     gettimeofday(&pimpl->start,NULL);
 #endif
@@ -90,8 +79,6 @@ namespace osmscout {
   {
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
     pimpl->stop=std::chrono::steady_clock::now();
-#elif defined (__WIN32__) || defined (WIN32)
-	QueryPerformanceCounter(&pimpl->stop);
 #elif defined(HAVE_SYS_TIME_H)
     gettimeofday(&pimpl->stop,NULL);
 #endif
@@ -101,8 +88,6 @@ namespace osmscout {
   {
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
     return std::chrono::duration_cast<MilliDouble>(pimpl->stop-pimpl->start).count();
-#elif defined (__WIN32__) || defined (WIN32)
-	return (pimpl->stop.QuadPart-pimpl->start.QuadPart) / (pimpl->freq.QuadPart/1000.0);
 #elif defined(HAVE_SYS_TIME_H)
     timeval diff;
     size_t  result;
@@ -121,12 +106,10 @@ namespace osmscout {
   {
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
     double deltaMilli=clock.GetMilliseconds();
-    size_t seconds=deltaMilli/1000;
-    size_t milliseconds=deltaMilli-seconds*1000;
+    size_t seconds=(size_t)deltaMilli/1000;
+    size_t milliseconds=(size_t)deltaMilli-seconds*1000;
 
     stream << seconds << "." << std::setw(3) << std::setfill('0') << milliseconds;
-#elif defined (__WIN32__) || defined (WIN32)
-    stream << std::setprecision (6) << static_cast<double>(clock.pimpl->stop.QuadPart-clock.pimpl->start.QuadPart) / clock.pimpl->freq.QuadPart;
 #elif defined(HAVE_SYS_TIME_H)
     timeval diff;
 
@@ -144,8 +127,8 @@ namespace osmscout {
   {
 #if defined(OSMSCOUT_HAVE_CHRONO_H)
     double deltaMilli=GetMilliseconds();
-    size_t seconds=deltaMilli/1000;
-    size_t milliseconds=deltaMilli-seconds*1000;
+    size_t seconds=(size_t)deltaMilli/1000;
+	size_t milliseconds = (size_t)deltaMilli - seconds * 1000;
 
     std::string result;
     std::string millisString;
@@ -162,10 +145,6 @@ namespace osmscout {
     result+=millisString;
 
     return result;
-#elif defined (__WIN32__) || defined (WIN32)
-	  std::stringstream ss;
-	  ss << std::setprecision (6) << static_cast<double>(pimpl->stop.QuadPart-pimpl->start.QuadPart) / pimpl->freq.QuadPart;
-	  return ss.str();
 #elif defined(HAVE_SYS_TIME_H)
     timeval     diff;
     std::string result;
