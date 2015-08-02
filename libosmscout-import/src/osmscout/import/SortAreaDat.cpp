@@ -508,22 +508,20 @@ namespace osmscout {
   }
 
   void SortAreaDataGenerator::GetTopLeftCoordinate(const Area& data,
-                                                   double& maxLat,
-                                                   double& minLon)
+                                                   GeoCoord& coord)
   {
     bool start=true;
     for (size_t r=0; r<data.rings.size(); r++) {
       if (data.rings[r].ring==Area::outerRingId) {
         for (size_t n=0; n<data.rings[r].nodes.size(); n++) {
           if (start) {
-            maxLat=data.rings[r].nodes[n].GetLat();
-            minLon=data.rings[r].nodes[n].GetLon();
+            coord=data.rings[r].nodes[n];
 
             start=false;
           }
           else {
-            maxLat=std::max(maxLat,data.rings[r].nodes[n].GetLat());
-            minLon=std::min(minLon,data.rings[r].nodes[n].GetLon());
+            coord.Set(std::max(coord.GetLat(),data.rings[r].nodes[n].GetLat()),
+                      std::min(coord.GetLon(),data.rings[r].nodes[n].GetLon()));
           }
         }
       }

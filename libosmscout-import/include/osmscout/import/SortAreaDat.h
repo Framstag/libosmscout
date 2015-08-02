@@ -32,8 +32,7 @@ namespace osmscout {
   {
   private:
     void GetTopLeftCoordinate(const Area& data,
-                              double& maxLat,
-                              double& minLon);
+                              GeoCoord& coord);
 
   public:
     SortAreaDataGenerator();

@@ -30,8 +30,7 @@ namespace osmscout {
   {
   private:
     void GetTopLeftCoordinate(const Node& data,
-                              double& maxLat,
-                              double& minLon);
+                              GeoCoord& coord);
 
   public:
     SortNodeDataGenerator();

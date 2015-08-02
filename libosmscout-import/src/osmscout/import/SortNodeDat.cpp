@@ -210,11 +210,9 @@ namespace osmscout {
   }
 
   void SortNodeDataGenerator::GetTopLeftCoordinate(const Node& data,
-                                                   double& maxLat,
-                                                   double& minLon)
+                                                   GeoCoord& coord)
   {
-    maxLat=data.GetCoords().GetLat();
-    minLon=data.GetCoords().GetLon();
+    coord=data.GetCoords();
   }
 
   SortNodeDataGenerator::SortNodeDataGenerator()

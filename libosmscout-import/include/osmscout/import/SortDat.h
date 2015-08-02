@@ -52,33 +52,25 @@ namespace osmscout {
       Id                                   id;
       typename std::list<Source>::iterator source;
       FileOffset                           fileOffset;
-      double                               lat;
-      double                               lon;
+      Id                                   sortId;
 
       inline CellEntry(uint8_t type,
                        Id id,
                        const typename std::list<Source>::iterator source,
                        FileOffset fileOffset,
-                       double lat,
-                       double lon)
+                       Id sortId)
       : type(type),
         id(id),
         source(source),
         fileOffset(fileOffset),
-        lat(lat),
-        lon(lon)
+        sortId(sortId)
       {
         // no code
       }
 
       inline bool operator<(const CellEntry& other) const
       {
-        if (lon==other.lon) {
-          return lat>other.lat;
-        }
-        else {
-          return lon<other.lon;
-        }
+        return sortId<other.sortId;
       }
     };
 
@@ -127,8 +119,7 @@ namespace osmscout {
 
   protected:
     virtual void GetTopLeftCoordinate(const N& data,
-                                      double& maxLat,
-                                      double& minLon) = 0;
+                                      GeoCoord& coord) = 0;
 
     SortDataGenerator(const std::string& mapFilename,
                       const std::string& tmpFilename);
@@ -183,7 +174,7 @@ namespace osmscout {
     FileWriter mapWriter;
     uint32_t   overallDataCount=0;
     uint32_t   dataCopiedCount=0;
-    double     zoomLevel=pow(2.0,(double)parameter.GetSortTileMag());
+    size_t     zoomLevel=Pow(2,parameter.GetSortTileMag());
     size_t     cellCount=zoomLevel*zoomLevel;
     size_t     minIndex=0;
     size_t     maxIndex=cellCount-1;
@@ -272,13 +263,13 @@ namespace osmscout {
             return false;
           }
 
-          double maxLat;
-          double minLon;
+          GeoCoord coord;;
 
-          GetTopLeftCoordinate(data,maxLat,minLon);
+          GetTopLeftCoordinate(data,
+                               coord);
 
-          size_t cellY=(size_t)((maxLat+90.0)/180.0*zoomLevel);
-          size_t cellX=(size_t)((minLon+180.0)/360.0*zoomLevel);
+          size_t cellY=(size_t)((coord.GetLat()+90.0)/180.0*zoomLevel);
+          size_t cellX=(size_t)((coord.GetLon()+180.0)/360.0*zoomLevel);
           size_t cellIndex=cellY*zoomLevel+cellX;
 
           if (cellIndex>=minIndex &&
@@ -287,8 +278,7 @@ namespace osmscout {
                                                          id,
                                                          source,
                                                          data.GetFileOffset(),
-                                                         maxLat,
-                                                         minLon));
+                                                         coord.ToNumber()));
             currentEntries++;
           }
 

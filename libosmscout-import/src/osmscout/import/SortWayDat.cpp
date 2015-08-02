@@ -418,15 +418,13 @@ namespace osmscout {
   }
 
   void SortWayDataGenerator::GetTopLeftCoordinate(const Way& data,
-                                                  double& maxLat,
-                                                  double& minLon)
+                                                  GeoCoord& coord)
   {
-    maxLat=data.nodes[0].GetLat();
-    minLon=data.nodes[0].GetLon();
+    coord=data.nodes[0];
 
     for (size_t n=1; n<data.nodes.size(); n++) {
-      maxLat=std::max(maxLat,data.nodes[n].GetLat());
-      minLon=std::min(minLon,data.nodes[n].GetLon());
+      coord.Set(std::max(coord.GetLat(),data.nodes[n].GetLat()),
+                std::min(coord.GetLon(),data.nodes[n].GetLon()));
     }
   }
 
