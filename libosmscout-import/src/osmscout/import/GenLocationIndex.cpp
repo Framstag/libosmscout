@@ -49,8 +49,8 @@ namespace osmscout {
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
                                                                                           const GeoCoord& coord) const
   {
-    size_t minX=(coord.GetLon()+180.0)/cellWidth;
-    size_t minY=(coord.GetLat()+90.0)/cellHeight;
+    uint32_t minX=(uint32_t)((coord.GetLon()+180.0)/cellWidth);
+    uint32_t minY=(uint32_t)((coord.GetLat()+90.0)/cellHeight);
 
     std::map<Pixel,std::list<RegionRef> >::const_iterator indexCell=index.find(Pixel(minX,minY));
 
@@ -585,13 +585,13 @@ namespace osmscout {
   {
     for (size_t level=regionTree.size()-1; level>=1; level--) {
       for (const auto& region : regionTree[level]) {
-        size_t cellMinX=(region->minlon+180.0)/regionIndex.cellWidth;
-        size_t cellMaxX=(region->maxlon+180.0)/regionIndex.cellWidth;
-        size_t cellMinY=(region->minlat+90.0)/regionIndex.cellHeight;
-        size_t cellMaxY=(region->maxlat+90.0)/regionIndex.cellHeight;
+        uint32_t cellMinX=(uint32_t)((region->minlon+180.0)/regionIndex.cellWidth);
+		uint32_t cellMaxX=(uint32_t)((region->maxlon + 180.0) / regionIndex.cellWidth);
+		uint32_t cellMinY=(uint32_t)((region->minlat + 90.0) / regionIndex.cellHeight);
+		uint32_t cellMaxY=(uint32_t)((region->maxlat + 90.0) / regionIndex.cellHeight);
 
-        for (size_t y=cellMinY; y<=cellMaxY; y++) {
-          for (size_t x=cellMinX; x<=cellMaxX; x++) {
+		for (uint32_t y = cellMinY; y <= cellMaxY; y++) {
+			for (uint32_t x = cellMinX; x <= cellMaxX; x++) {
             Pixel pixel(x,y);
 
             regionIndex.index[pixel].push_back(region);
@@ -1981,7 +1981,7 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<regionTree.size(); i++) {
-      unsigned long count=0;
+      size_t count=0;
 
       for (std::list<RegionRef>::const_iterator iter=regionTree[i].begin();
            iter!=regionTree[i].end();
