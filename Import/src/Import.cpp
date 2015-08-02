@@ -87,7 +87,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
 
-  std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << BoolToString(parameter.GetRouteNodeBlockSize()) << ")" << std::endl;
+  std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
 }
 
 bool ParseBoolArgument(int argc,

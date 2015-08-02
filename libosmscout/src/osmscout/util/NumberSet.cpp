@@ -75,7 +75,7 @@ namespace osmscout {
     for (size_t i=2; i<sizeof(Number)-1; i++) {
       r=static_cast<Refs*>(r->refs[byte]);
 
-      byte=value >> (sizeof(Number)-i)*8;
+      byte=(unsigned char)(value >> (sizeof(Number)-i)*8);
 
       if (r->refs[byte]==NULL) {
         r->refs[byte]=new Refs();
@@ -84,7 +84,7 @@ namespace osmscout {
 
     r=static_cast<Refs*>(r->refs[byte]);
 
-    byte=value >> 1*8;
+    byte=(unsigned char)(value >> 1*8);
 
     if (r->refs[byte]==NULL) {
       r->refs[byte]=new Leaf();
@@ -114,7 +114,7 @@ namespace osmscout {
     for (size_t i=2; i<sizeof(Number); i++) {
       r=dynamic_cast<const Refs*>(r->refs[byte]);
 
-      byte=value >> (sizeof(Number)-i)*8;
+      byte=(unsigned char)(value >> (sizeof(Number)-i)*8);
 
       if (r->refs[byte]==NULL) {
         return false;

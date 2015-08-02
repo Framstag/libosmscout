@@ -31,10 +31,10 @@ namespace osmscout {
   static char GetHexChar(size_t value)
   {
     if (value<=9) {
-      return '0'+value;
+      return '0'+(char)value;
     }
     else {
-      return 'a'+value-10;
+      return 'a'+(char)value-10;
     }
   }
 
