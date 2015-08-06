@@ -75,10 +75,12 @@ namespace osmscout {
 
   enum Vehicle
   {
-    vehicleFoot     = 1,
-    vehicleBicycle  = 2,
-    vehicleCar      = 3
+    vehicleFoot     = 1 << 1,
+    vehicleBicycle  = 1 << 2,
+    vehicleCar      = 1 << 3
   };
+
+  typedef uint8_t VehicleMask;
 }
 
 #endif
