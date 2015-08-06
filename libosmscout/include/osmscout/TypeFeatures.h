@@ -425,6 +425,26 @@ namespace osmscout {
       return false;
     }
 
+    inline bool CanRoute(VehicleMask vehicleMask) const
+    {
+      if ((vehicleMask & vehicleFoot)!=0 &&
+          (access & (footForward|footBackward))!=0) {
+        return true;
+      }
+
+      if ((vehicleMask & vehicleBicycle)!=0 &&
+          (access & (bicycleForward|bicycleBackward))!=0) {
+        return true;
+      }
+
+      if ((vehicleMask & vehicleCar)!=0 &&
+          (access & (carForward|carBackward))!=0) {
+        return true;
+      }
+
+      return false;
+    }
+
     inline bool CanRouteForward() const
     {
       return (access & (footForward|bicycleForward|carForward))!=0;
