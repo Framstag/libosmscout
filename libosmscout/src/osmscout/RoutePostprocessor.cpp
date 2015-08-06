@@ -1040,7 +1040,6 @@ namespace osmscout {
       }
 
       for (const auto &object : node.GetObjects()) {
-
         switch (object.GetType()) {
         case refNone:
         case refNode:
@@ -1056,30 +1055,30 @@ namespace osmscout {
       }
     }
 
-    if (!database.GetAreasByOffset(areaOffsets,areas)) {
-      log.Error() << "Cannot retrieve crossing areas";
-      return false;
-    }
-
     if (!database.GetWaysByOffset(wayOffsets,ways)) {
       log.Error() << "Cannot retrieve crossing ways";
       return false;
     }
 
+    wayOffsets.clear();
+
     for (const auto& way : ways) {
       wayMap[way->GetFileOffset()]=way;
     }
 
-    wayOffsets.clear();
     ways.clear();
 
-    for (std::vector<AreaRef>::const_iterator area=areas.begin();
-         area!=areas.end();
-         ++area) {
-      areaMap[(*area)->GetFileOffset()]=*area;
+    if (!database.GetAreasByOffset(areaOffsets,areas)) {
+      log.Error() << "Cannot retrieve crossing areas";
+      return false;
     }
 
     areaOffsets.clear();
+
+    for (const auto& area : areas) {
+      areaMap[area->GetFileOffset()]=area;
+    }
+
     areas.clear();
 
     return true;
@@ -1370,12 +1369,12 @@ namespace osmscout {
   {
     Id nodeId;
 
-    if (object.GetType()==refArea) {
+    if (nodeObject.GetType()==refArea) {
       AreaRef area=GetArea(nodeObject.GetFileOffset());
 
       nodeId=area->rings.front().ids[nodeIndex];
     }
-    else if (object.GetType()==refWay) {
+    else if (nodeObject.GetType()==refWay) {
       WayRef way=GetWay(nodeObject.GetFileOffset());
 
       nodeId=way->ids[nodeIndex];
