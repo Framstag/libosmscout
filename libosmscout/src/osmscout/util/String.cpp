@@ -22,6 +22,7 @@
 #include <cctype>
 #include <iomanip>
 #include <locale>
+#include <sstream>
 
 #include <osmscout/system/Math.h>
 

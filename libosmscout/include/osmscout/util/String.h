@@ -22,7 +22,6 @@
 
 #include <limits>
 #include <list>
-#include <sstream>
 #include <string>
 
 #include <osmscout/CoreFeatures.h>

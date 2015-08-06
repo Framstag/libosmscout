@@ -22,6 +22,7 @@
 #include <iostream>
 #include <iomanip>
 #include <list>
+#include <sstream>
 
 #include <osmscout/Database.h>
 #include <osmscout/RoutingService.h>

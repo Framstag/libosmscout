@@ -20,6 +20,7 @@
 #include <osmscout/util/StopClock.h>
 
 #include <iomanip>
+#include <sstream>
 
 #include <osmscout/private/Config.h>
 
