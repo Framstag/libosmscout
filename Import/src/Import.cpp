@@ -272,7 +272,6 @@ bool GetFileSize(const std::string& filename,
 
 bool CountDataSize(const osmscout::ImportParameter& parameter,
                    osmscout::Progress& progress,
-                   const std::string& mapPath,
                    double& dataSize)
 {
   std::string              fileName;
@@ -311,7 +310,7 @@ bool CountDataSize(const osmscout::ImportParameter& parameter,
   dataSize=0;
 
   for (const auto& filename : files) {
-    std::string filePath=osmscout::AppendFileToDir(mapPath,
+    std::string filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
                                                    filename);
 
     if (!GetFileSize(filePath,
@@ -335,25 +334,13 @@ int main(int argc, char* argv[])
   bool                      firstRouterOption=true;
 
   std::list<std::string>    mapfiles;
-  std::string               typefile=parameter.GetTypefile();
-  std::string               destinationDirectory=parameter.GetDestinationDirectory();
-
-  size_t                    rawWayDataCacheSize=parameter.GetRawWayDataCacheSize();
-  size_t                    rawWayIndexCacheSize=parameter.GetRawWayIndexCacheSize();
-  size_t                    rawWayBlockSize=parameter.GetRawWayBlockSize();
-
-  bool                      areaDataMemoryMaped=parameter.GetAreaDataMemoryMaped();
-  size_t                    areaDataCacheSize=parameter.GetAreaDataCacheSize();
-
-  bool                      wayDataMemoryMaped=parameter.GetWayDataMemoryMaped();
-  size_t                    wayDataCacheSize=parameter.GetWayDataCacheSize();
 
   osmscout::VehicleMask     defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
 
   parameter.AddRouter(osmscout::ImportParameter::Router(defaultVehicleMask,
                                                         "router"));
 
-  // Simple way to analyse command line parameters, but enough for now...
+  // Simple way to analyze command line parameters, but enough for now...
   int i=1;
   while (i<argc) {
     if (strcmp(argv[i],"-h")==0 ||
@@ -398,16 +385,30 @@ int main(int argc, char* argv[])
       i++;
     }
     else if (strcmp(argv[i],"--typefile")==0) {
-      parameterError=!ParseStringArgument(argc,
-                                          argv,
-                                          i,
-                                          typefile);
+      std::string typefile;
+
+      if (ParseStringArgument(argc,
+                              argv,
+                              i,
+                              typefile)) {
+        parameter.SetTypefile(typefile);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--destinationDirectory")==0) {
-      parameterError=!ParseStringArgument(argc,
-                                          argv,
-                                          i,
-                                          destinationDirectory);
+      std::string destinationDirectory;
+
+      if (ParseStringArgument(argc,
+                              argv,
+                              i,
+                              destinationDirectory)) {
+        parameter.SetDestinationDirectory(destinationDirectory);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--router")==0) {
       if (firstRouterOption) {
@@ -518,22 +519,43 @@ int main(int argc, char* argv[])
       }
     }
     else if (strcmp(argv[i],"--rawWayDataCacheSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         rawWayDataCacheSize);
+      size_t rawWayDataCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             rawWayDataCacheSize)) {
+        parameter.SetRawWayDataCacheSize(rawWayDataCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawWayIndexCacheSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         rawWayIndexCacheSize);
+      size_t rawWayIndexCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             rawWayIndexCacheSize)) {
+        parameter.SetRawWayIndexCacheSize(rawWayIndexCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawWayBlockSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         rawWayBlockSize);
+      size_t rawWayBlockSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             rawWayBlockSize)) {
+        parameter.SetRawWayBlockSize(rawWayBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"-noSort")==0) {
       parameter.SetSortObjects(false);
@@ -554,28 +576,56 @@ int main(int argc, char* argv[])
       }
     }
     else if (strcmp(argv[i],"--areaDataMemoryMaped")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        areaDataMemoryMaped);
+      bool areaDataMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            areaDataMemoryMaped)) {
+        parameter.SetAreaDataMemoryMaped(areaDataMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--areaDataCacheSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         areaDataCacheSize);
+      size_t areaDataCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             areaDataCacheSize)) {
+        parameter.SetAreaDataCacheSize(areaDataCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--wayDataMemoryMaped")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        wayDataMemoryMaped);
+      bool wayDataMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            wayDataMemoryMaped)) {
+        parameter.SetWayDataMemoryMaped(wayDataMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--wayDataCacheSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         wayDataCacheSize);
+      size_t wayDataCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             wayDataCacheSize)) {
+        parameter.SetWayDataCacheSize(wayDataCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--routeNodeBlockSize")==0) {
       size_t routeNodeBlockSize;
@@ -614,18 +664,6 @@ int main(int argc, char* argv[])
   }
 
   parameter.SetMapfiles(mapfiles);
-  parameter.SetTypefile(typefile);
-  parameter.SetDestinationDirectory(destinationDirectory);
-
-  parameter.SetRawWayDataCacheSize(rawWayDataCacheSize);
-  parameter.SetRawWayIndexCacheSize(rawWayIndexCacheSize);
-  parameter.SetRawWayBlockSize(rawWayBlockSize);
-
-  parameter.SetAreaDataMemoryMaped(areaDataMemoryMaped);
-  parameter.SetAreaDataCacheSize(areaDataCacheSize);
-
-  parameter.SetWayDataMemoryMaped(wayDataMemoryMaped);
-  parameter.SetWayDataCacheSize(wayDataCacheSize);
 
   parameter.SetOptimizationWayMethod(osmscout::TransPolygon::quality);
 
@@ -700,7 +738,6 @@ int main(int argc, char* argv[])
 
     if (!CountDataSize(parameter,
                        progress,
-                       destinationDirectory,
                        dataSize)) {
       progress.Error("Error while retrieving data size");
     }
