@@ -591,7 +591,7 @@ namespace osmscout {
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    double stepSizeInPixel=projection.ConvertWidthToPixel(shieldStyle->GetShieldSpace());
+    size_t stepSizeInPixel = (size_t)projection.ConvertWidthToPixel(shieldStyle->GetShieldSpace());
     double fontHeight;
 
     GetFontHeight(projection,
