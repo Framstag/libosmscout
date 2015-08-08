@@ -52,17 +52,7 @@ namespace osmscout {
   const char* const RoutingService::FILENAME_INTERSECTIONS_DAT   = "intersections.dat";
   const char* const RoutingService::FILENAME_INTERSECTIONS_IDX   = "intersections.idx";
 
-  const char* const RoutingService::FILENAME_FOOT_DAT            = "routefoot.dat";
-  const char* const RoutingService::FILENAME_FOOT_VARIANT_DAT    = "routefoot2.dat";
-  const char* const RoutingService::FILENAME_FOOT_IDX            = "routefoot.idx";
-
-  const char* const RoutingService::FILENAME_BICYCLE_DAT         = "routebicycle.dat";
-  const char* const RoutingService::FILENAME_BICYCLE_VARIANT_DAT = "routebicycle2.dat";
-  const char* const RoutingService::FILENAME_BICYCLE_IDX         = "routebicycle.idx";
-
-  const char* const RoutingService::FILENAME_CAR_DAT           = "routecar.dat";
-  const char* const RoutingService::FILENAME_CAR_VARIANT_DAT   = "routecar2.dat";
-  const char* const RoutingService::FILENAME_CAR_IDX           = "routecar.idx";
+  const char* const RoutingService::DEFAULT_FILENAME_BASE        = "router";
 
   /**
    * Create a new instance of the routing service.
@@ -77,14 +67,14 @@ namespace osmscout {
    */
   RoutingService::RoutingService(const DatabaseRef& database,
                                  const RouterParameter& parameter,
-                                 Vehicle vehicle)
+                                 const std::string& filenamebase)
    : database(database),
-     vehicle(vehicle),
+     filenamebase(filenamebase),
      accessReader(*database->GetTypeConfig()),
      isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
-     routeNodeDataFile(GetDataFilename(vehicle),
-                       GetIndexFilename(vehicle),
+     routeNodeDataFile(GetDataFilename(filenamebase),
+                       GetIndexFilename(filenamebase),
                        0,
                        6000),
      junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
@@ -102,72 +92,27 @@ namespace osmscout {
     }
   }
 
-  std::string RoutingService::GetDataFilename(Vehicle vehicle) const
+  std::string RoutingService::GetDataFilename(const std::string& filenamebase) const
   {
-    switch (vehicle) {
-    case vehicleFoot:
-      return FILENAME_FOOT_DAT;
-    case vehicleBicycle:
-      return FILENAME_BICYCLE_DAT;
-    case vehicleCar:
-      return FILENAME_CAR_DAT;
-    default:
-      assert(false);
-    }
-
-    return ""; // make the compiler happy
+    return filenamebase+".dat";
   }
 
-  std::string RoutingService::GetData2Filename(Vehicle vehicle) const
+  std::string RoutingService::GetData2Filename(const std::string& filenamebase) const
   {
-    switch (vehicle) {
-    case vehicleFoot:
-      return FILENAME_FOOT_VARIANT_DAT;
-    case vehicleBicycle:
-      return FILENAME_BICYCLE_VARIANT_DAT;
-    case vehicleCar:
-      return FILENAME_CAR_VARIANT_DAT;
-    default:
-      assert(false);
-    }
-
-    return ""; // make the compiler happy
+    return filenamebase+"2.dat";
   }
 
-  std::string RoutingService::GetIndexFilename(Vehicle vehicle) const
+  std::string RoutingService::GetIndexFilename(const std::string& filenamebase) const
   {
-    switch (vehicle) {
-    case vehicleFoot:
-      return FILENAME_FOOT_IDX;
-    case vehicleBicycle:
-      return FILENAME_BICYCLE_IDX;
-    case vehicleCar:
-      return FILENAME_CAR_IDX;
-    default:
-      assert(false);
-    }
-
-    return ""; // make the compiler happy
+    return filenamebase+".idx";
   }
 
-  /**
-   * Returns the vehicle this routing service instance was created for
-   *
-   * @return
-   *    The vehicle
-   */
-  Vehicle RoutingService::GetVehicle() const
-  {
-    return vehicle;
-  }
-
-  bool RoutingService::LoadObjectVariantData(Vehicle vehicle,
+  bool RoutingService::LoadObjectVariantData(const std::string& filename,
                                              std::vector<ObjectVariantData>& objectVariantData) const
   {
     FileScanner scanner;
 
-    if (!scanner.Open(AppendFileToDir(path,
-                                      GetData2Filename(vehicle)),
+    if (!scanner.Open(filename,
                       FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open '" << scanner.GetFilename() << "'!";
       return false;
@@ -222,7 +167,8 @@ namespace osmscout {
 
     log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
 
-    if (!LoadObjectVariantData(vehicle,
+    if (!LoadObjectVariantData(AppendFileToDir(path,
+                                               GetData2Filename(filenamebase)),
                                objectVariantData)) {
       return false;
     }

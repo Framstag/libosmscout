@@ -79,10 +79,18 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=28;
+  static const size_t defaultEndStep=25;
 #else
-  static const size_t defaultEndStep=27;
+  static const size_t defaultEndStep=24;
 #endif
+
+  ImportParameter::Router::Router(uint8_t vehicleMask,
+                                  const std::string& filenamebase)
+  : vehicleMask(vehicleMask),
+    filenamebase(filenamebase)
+  {
+     // no code
+  }
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -92,7 +100,7 @@ namespace osmscout {
      sortObjects(true),
      sortBlockSize(40000000),
      sortTileMag(14),
-     numericIndexPageSize(1024/*4096*/),
+     numericIndexPageSize(1024),
      coordDataMemoryMaped(false),
      rawNodeDataMemoryMaped(false),
      rawNodeDataCacheSize(10000),
@@ -148,6 +156,11 @@ namespace osmscout {
   size_t ImportParameter::GetEndStep() const
   {
     return endStep;
+  }
+
+  const std::list<ImportParameter::Router>& ImportParameter::GetRouter() const
+  {
+    return router;
   }
 
   bool ImportParameter::GetStrictAreas() const
@@ -340,6 +353,16 @@ namespace osmscout {
   {
     this->startStep=startStep;
     this->endStep=endStep;
+  }
+
+  void ImportParameter::ClearRouter()
+  {
+    router.clear();
+  }
+
+  void ImportParameter::AddRouter(const Router& router)
+  {
+    this->router.push_back(router);
   }
 
   void ImportParameter::SetStrictAreas(bool strictAreas)
@@ -671,29 +694,8 @@ namespace osmscout {
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                  RoutingService::FILENAME_INTERSECTIONS_IDX)));
 
-    /* 25 */
-    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_FOOT_IDX+"'",
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              RoutingService::FILENAME_FOOT_DAT),
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              RoutingService::FILENAME_FOOT_IDX)));
-
-    /* 26 */
-    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_BICYCLE_IDX+"'",
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              RoutingService::FILENAME_BICYCLE_DAT),
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              RoutingService::FILENAME_BICYCLE_IDX)));
-
-    /* 27 */
-    modules.push_back(new NumericIndexGenerator<Id,RouteNode>(std::string("Generating '")+RoutingService::FILENAME_CAR_IDX+"'",
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              RoutingService::FILENAME_CAR_DAT),
-                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              RoutingService::FILENAME_CAR_IDX)));
-
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 28 */
+    /* 25 */
     modules.push_back(new TextIndexGenerator());
 #endif
 

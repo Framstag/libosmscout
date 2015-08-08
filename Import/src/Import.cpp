@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <memory>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
@@ -53,6 +54,34 @@ static const char* BoolToString(bool value)
   }
 }
 
+static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
+{
+  std::string result;
+
+  if (vehicleMask & osmscout::vehicleFoot) {
+    if (!result.empty()) {
+      result+="+";
+    }
+    result+="foot";
+  }
+
+  if (vehicleMask & osmscout::vehicleBicycle) {
+    if (!result.empty()) {
+      result+="+";
+    }
+    result+="bicycle";
+  }
+
+  if (vehicleMask & osmscout::vehicleCar) {
+    if (!result.empty()) {
+      result+="+";
+    }
+    result+="car";
+  }
+
+  return result;
+}
+
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]..." << std::endl;
@@ -62,6 +91,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -s <end step>                        set final step" << std::endl;
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
+
+  std::cout << " --router <router description>        definition of a router (default: car,bicycle,foot:router)" << std::endl;
 
   std::cout << " --strictAreas true|false             assure that areas are simple (default: " << BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
 
@@ -100,15 +131,14 @@ bool ParseBoolArgument(int argc,
 
   currentIndex+=2;
 
-  if (argumentIndex<argc) {
-    if (!StringToBool(argv[argumentIndex],
-                      value)) {
-      std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-      return false;
-    }
-  }
-  else {
+  if (argumentIndex>=argc) {
     std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+    return false;
+  }
+
+  if (!StringToBool(argv[argumentIndex],
+                    value)) {
+    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
     return false;
   }
 
@@ -125,13 +155,12 @@ bool ParseStringArgument(int argc,
 
   currentIndex+=2;
 
-  if (argumentIndex<argc) {
-    value=argv[argumentIndex];
-  }
-  else {
+  if (argumentIndex>=argc) {
     std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
     return false;
   }
+
+  value=argv[argumentIndex];
 
   return true;
 }
@@ -146,19 +175,87 @@ bool ParseSizeTArgument(int argc,
 
   currentIndex+=2;
 
-  if (argumentIndex<argc) {
-    if (!osmscout::StringToNumber(argv[argumentIndex],
-                                  value)) {
-      std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-      return false;
-    }
-  }
-  else {
+  if (argumentIndex>=argc) {
     std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
     return false;
   }
 
+  if (!osmscout::StringToNumber(argv[argumentIndex],
+                                value)) {
+    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
+    return false;
+  }
+
   return true;
+}
+
+osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
+                                                         char* argv[],
+                                                         int& currentIndex)
+{
+  int                   parameterIndex=currentIndex;
+  int                   argumentIndex=currentIndex+1;
+  osmscout::VehicleMask vehicleMask=0;
+  std::string           filenamebase;
+
+  currentIndex+=2;
+
+  if (argumentIndex>=argc) {
+    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+    return false;
+  }
+
+  std::string argument=argv[argumentIndex];
+  size_t      pos=argument.rfind(':');
+
+  if (pos==std::string::npos) {
+    std::cerr << "Cannot separate vehicles from filename base in router definition '" << argument << "'" << std::endl;
+    return NULL;
+  }
+
+  filenamebase=argument.substr(pos+1);
+
+  if (filenamebase.empty()) {
+    std::cerr << "Empty filename base in router definition '" << argument << "'" << std::endl;
+    return NULL;
+  }
+
+  std::string vehicles=argument.substr(0,pos);
+
+  if (vehicles.empty()) {
+    std::cerr << "Empty vehicle list in router definition '" << argument << "'" << std::endl;
+    return NULL;
+  }
+
+  size_t start=0;
+  size_t devider=vehicles.find(',',start);
+
+  while (start<vehicles.length()) {
+    if (devider==std::string::npos) {
+      devider=vehicles.length();
+    }
+
+    std::string vehicle=vehicles.substr(start,devider-start);
+
+    if (vehicle=="car") {
+      vehicleMask = vehicleMask | osmscout::vehicleCar;
+    }
+    else if (vehicle=="bicycle") {
+      vehicleMask = vehicleMask | osmscout::vehicleBicycle;
+    }
+    else if (vehicle=="foot") {
+      vehicleMask = vehicleMask | osmscout::vehicleFoot;
+    }
+    else {
+      std::cerr << "Empty vehicle '" << vehicle << "' in router definition '" << argument << "'" << std::endl;
+      return NULL;
+    }
+
+    start=devider+1;
+    devider=vehicles.find(',',start);
+  }
+
+  return std::make_shared<osmscout::ImportParameter::Router>(vehicleMask,filenamebase);
 }
 
 bool GetFileSize(const std::string& filename,
@@ -173,7 +270,8 @@ bool GetFileSize(const std::string& filename,
   return true;
 }
 
-bool CountDataSize(osmscout::Progress& progress,
+bool CountDataSize(const osmscout::ImportParameter& parameter,
+                   osmscout::Progress& progress,
                    const std::string& mapPath,
                    double& dataSize)
 {
@@ -199,17 +297,16 @@ bool CountDataSize(osmscout::Progress& progress,
 
   files.push_back("water.idx");
 
-  files.push_back("intersections.dat");
-  files.push_back("intersections.idx");
-  files.push_back("routefoot.dat");
-  files.push_back("routefoot2.dat");
-  files.push_back("routefoot.idx");
-  files.push_back("routebicycle.dat");
-  files.push_back("routebicycle2.dat");
-  files.push_back("routebicycle.idx");
-  files.push_back("routecar.dat");
-  files.push_back("routecar2.dat");
-  files.push_back("routecar.idx");
+  if (!parameter.GetRouter().empty()) {
+    files.push_back("intersections.dat");
+    files.push_back("intersections.idx");
+
+    for (const auto& router : parameter.GetRouter()) {
+      files.push_back(router.GetDataFilename());
+      files.push_back(router.GetVariantFilename());
+      files.push_back(router.GetIndexFilename());
+    }
+  }
 
   dataSize=0;
 
@@ -235,27 +332,12 @@ int main(int argc, char* argv[])
   osmscout::ImportParameter parameter;
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
+  bool                      firstRouterOption=true;
 
   std::list<std::string>    mapfiles;
   std::string               typefile=parameter.GetTypefile();
   std::string               destinationDirectory=parameter.GetDestinationDirectory();
 
-  size_t                    startStep=parameter.GetStartStep();
-  size_t                    endStep=parameter.GetEndStep();
-
-  bool                      strictAreas=parameter.GetStrictAreas();
-
-  size_t                    numericIndexPageSize=parameter.GetNumericIndexPageSize();
-
-  size_t                    sortBlockSize=parameter.GetSortBlockSize();
-
-  bool                      coordDataMemoryMaped=parameter.GetCoordDataMemoryMaped();
-
-  bool                      rawNodeDataMemoryMaped=parameter.GetRawNodeDataMemoryMaped();
-  size_t                    rawNodeDataCacheSize=parameter.GetRawNodeDataCacheSize();
-
-  bool                      rawWayIndexMemoryMaped=parameter.GetRawWayIndexMemoryMaped();
-  bool                      rawWayDataMemoryMaped=parameter.GetRawWayDataMemoryMaped();
   size_t                    rawWayDataCacheSize=parameter.GetRawWayDataCacheSize();
   size_t                    rawWayIndexCacheSize=parameter.GetRawWayIndexCacheSize();
   size_t                    rawWayBlockSize=parameter.GetRawWayBlockSize();
@@ -266,37 +348,54 @@ int main(int argc, char* argv[])
   bool                      wayDataMemoryMaped=parameter.GetWayDataMemoryMaped();
   size_t                    wayDataCacheSize=parameter.GetWayDataCacheSize();
 
-  size_t                    routeNodeBlockSize=parameter.GetRouteNodeBlockSize();
+  osmscout::VehicleMask     defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
+
+  parameter.AddRouter(osmscout::ImportParameter::Router(defaultVehicleMask,
+                                                        "router"));
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
   while (i<argc) {
-    if (strcmp(argv[i],"-s")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         startStep);
+    if (strcmp(argv[i],"-h")==0 ||
+        strcmp(argv[i],"-?")==0 ||
+        strcmp(argv[i],"--help")==0) {
+      DumpHelp(parameter);
+
+      return 0;
+    }
+    else if (strcmp(argv[i],"-s")==0) {
+      size_t startStep;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             startStep)) {
+        parameter.SetSteps(startStep,
+                           parameter.GetEndStep());
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"-e")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         endStep);
+      size_t endStep;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             endStep)) {
+        parameter.SetSteps(parameter.GetStartStep(),
+                           endStep);
+
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"-d")==0) {
       progress.SetOutputDebug(true);
 
       i++;
-    }
-    else if (strcmp(argv[i],"-h")==0) {
-      DumpHelp(parameter);
-
-      return 0;
-    }
-    else if (strcmp(argv[i],"--help")==0) {
-      DumpHelp(parameter);
-
-      return 0;
     }
     else if (strcmp(argv[i],"--typefile")==0) {
       parameterError=!ParseStringArgument(argc,
@@ -310,47 +409,113 @@ int main(int argc, char* argv[])
                                           i,
                                           destinationDirectory);
     }
+    else if (strcmp(argv[i],"--router")==0) {
+      if (firstRouterOption) {
+        parameter.ClearRouter();
+        firstRouterOption=false;
+      }
+
+      osmscout::ImportParameter::RouterRef router=ParseRouterArgument(argc,
+                                                                      argv,
+                                                                      i);
+      if (router) {
+        parameter.AddRouter(*router);
+      }
+      else {
+        parameterError=true;
+      }
+
+    }
     else if (strcmp(argv[i],"--strictAreas")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        strictAreas);
+      bool strictAreas;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            strictAreas)) {
+        parameter.SetStrictAreas(strictAreas);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--numericIndexPageSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         numericIndexPageSize);
+      size_t numericIndexPageSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             numericIndexPageSize)) {
+        parameter.SetNumericIndexPageSize(numericIndexPageSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--coordDataMemoryMaped")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        coordDataMemoryMaped);
+      bool coordDataMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            coordDataMemoryMaped)) {
+        parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawNodeDataMemoryMaped")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        rawNodeDataMemoryMaped);
+      bool rawNodeDataMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            rawNodeDataMemoryMaped)) {
+        parameter.SetRawNodeDataMemoryMaped(rawNodeDataMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawNodeDataCacheSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         rawNodeDataCacheSize);
+      size_t rawNodeDataCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             rawNodeDataCacheSize)) {
+        parameter.SetRawNodeDataCacheSize(rawNodeDataCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawWayIndexMemoryMaped")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        rawWayIndexMemoryMaped);
+      bool rawWayIndexMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            rawWayIndexMemoryMaped)) {
+        parameter.SetRawWayIndexMemoryMaped(rawWayIndexMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawWayDataMemoryMaped")==0) {
-      parameterError=!ParseBoolArgument(argc,
-                                        argv,
-                                        i,
-                                        rawWayDataMemoryMaped);
+      bool rawWayDataMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            rawWayDataMemoryMaped)) {
+        parameter.SetRawWayDataMemoryMaped(rawWayDataMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--rawWayDataCacheSize")==0) {
       parameterError=!ParseSizeTArgument(argc,
@@ -376,10 +541,17 @@ int main(int argc, char* argv[])
       i++;
     }
     else if (strcmp(argv[i],"--sortBlockSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         sortBlockSize);
+      size_t sortBlockSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             sortBlockSize)) {
+        parameter.SetSortBlockSize(sortBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--areaDataMemoryMaped")==0) {
       parameterError=!ParseBoolArgument(argc,
@@ -406,10 +578,17 @@ int main(int argc, char* argv[])
                                          wayDataCacheSize);
     }
     else if (strcmp(argv[i],"--routeNodeBlockSize")==0) {
-      parameterError=!ParseSizeTArgument(argc,
-                                         argv,
-                                         i,
-                                         routeNodeBlockSize);
+      size_t routeNodeBlockSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             routeNodeBlockSize)) {
+        parameter.SetRouteNodeBlockSize(routeNodeBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strncmp(argv[i],"--",2)==0) {
       std::cerr << "Unknown option: " << argv[i] << std::endl;
@@ -424,7 +603,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (startStep==1 &&
+  if (parameter.GetStartStep()==1 &&
       mapfiles.empty()) {
     parameterError=true;
   }
@@ -437,21 +616,7 @@ int main(int argc, char* argv[])
   parameter.SetMapfiles(mapfiles);
   parameter.SetTypefile(typefile);
   parameter.SetDestinationDirectory(destinationDirectory);
-  parameter.SetSteps(startStep,endStep);
 
-  parameter.SetStrictAreas(strictAreas);
-
-  parameter.SetNumericIndexPageSize(numericIndexPageSize);
-
-  parameter.SetSortBlockSize(sortBlockSize);
-
-  parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
-
-  parameter.SetRawNodeDataMemoryMaped(rawNodeDataMemoryMaped);
-  parameter.SetRawNodeDataCacheSize(rawNodeDataCacheSize);
-
-  parameter.SetRawWayIndexMemoryMaped(rawWayIndexMemoryMaped);
-  parameter.SetRawWayDataMemoryMaped(rawWayDataMemoryMaped);
   parameter.SetRawWayDataCacheSize(rawWayDataCacheSize);
   parameter.SetRawWayIndexCacheSize(rawWayIndexCacheSize);
   parameter.SetRawWayBlockSize(rawWayBlockSize);
@@ -462,20 +627,23 @@ int main(int argc, char* argv[])
   parameter.SetWayDataMemoryMaped(wayDataMemoryMaped);
   parameter.SetWayDataCacheSize(wayDataCacheSize);
 
-  parameter.SetRouteNodeBlockSize(routeNodeBlockSize);
-
   parameter.SetOptimizationWayMethod(osmscout::TransPolygon::quality);
 
   progress.SetStep("Dump parameter");
   for (const auto& filename : parameter.GetMapfiles()) {
     progress.Info(std::string("Mapfile: ")+filename);
   }
+
   progress.Info(std::string("typefile: ")+parameter.GetTypefile());
   progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
   progress.Info(std::string("Steps: ")+
                 osmscout::NumberToString(parameter.GetStartStep())+
                 " - "+
                 osmscout::NumberToString(parameter.GetEndStep()));
+
+  for (const auto& router : parameter.GetRouter()) {
+    progress.Info(std::string("Router: ")+VehcileMaskToString(router.GetVehicleMask())+ " - '"+router.GetFilenamebase()+"'");
+  }
 
   progress.Info(std::string("StrictAreas: ")+
                 (parameter.GetStrictAreas() ? "true" : "false"));
@@ -530,7 +698,8 @@ int main(int argc, char* argv[])
 
     double dataSize=0;
 
-    if (!CountDataSize(progress,
+    if (!CountDataSize(parameter,
+                       progress,
                        destinationDirectory,
                        dataSize)) {
       progress.Error("Error while retrieving data size");

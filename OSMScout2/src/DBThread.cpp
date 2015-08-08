@@ -88,14 +88,14 @@ void DBThread::FreeMaps()
   finishedImage=NULL;
 }
 
-bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
+bool DBThread::AssureRouter(osmscout::Vehicle /*vehicle*/)
 {
   if (!database->IsOpen()) {
     return false;
   }
 
-  if (!router ||
-      (router && router->GetVehicle()!=vehicle)) {
+  if (!router/* ||
+      (router && router->GetVehicle()!=vehicle)*/) {
     if (router) {
       if (router->IsOpen()) {
         router->Close();
@@ -105,7 +105,7 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
 
     router=std::make_shared<osmscout::RoutingService>(database,
                                                       routerParameter,
-                                                      vehicle);
+                                                      osmscout::RoutingService::DEFAULT_FILENAME_BASE);
 
     if (!router->Open()) {
       return false;

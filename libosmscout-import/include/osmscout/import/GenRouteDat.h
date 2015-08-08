@@ -103,7 +103,7 @@ namespace osmscout {
                        const std::list<ObjectFileRef>& objects,
                        const std::unordered_map<FileOffset,WayRef>& waysMap,
                        const std::unordered_map<FileOffset,AreaRef>&  areasMap,
-                       Vehicle vehicle) const;
+                       VehicleMask vehicles) const;
 
     /**
      * Read turn restrictions and return a map of OSM way ids and OSM node ids together with their (set to 0) file offset
@@ -255,8 +255,7 @@ namespace osmscout {
                               const std::vector<NodeIdObjectsMap::const_iterator>& block,
                               size_t blockCount);
 
-    bool WriteObjectVariantData(const ImportParameter& parameter,
-                                Progress& progress,
+    bool WriteObjectVariantData(Progress& progress,
                                 const std::string& variantFilename,
                                 const std::map<ObjectVariantData,uint16_t>& routeDataMap);
 
@@ -265,7 +264,7 @@ namespace osmscout {
                          const TypeConfig& typeConfig,
                          const NodeIdObjectsMap& nodeObjectsMap,
                          const ViaTurnRestrictionMap& restrictions,
-                         Vehicle vehicle,
+                         VehicleMask vehicles,
                          const std::string& dataFilename,
                          const std::string& variantFilename);
 

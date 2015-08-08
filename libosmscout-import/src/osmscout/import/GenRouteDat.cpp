@@ -34,6 +34,8 @@
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 
+#include <osmscout/import/GenNumericIndex.h>
+
 namespace osmscout {
 
   RouteDataGenerator::RouteDataGenerator()
@@ -189,7 +191,7 @@ namespace osmscout {
                                          const std::list<ObjectFileRef>& objects,
                                          const std::unordered_map<FileOffset,WayRef>& waysMap,
                                          const std::unordered_map<FileOffset,AreaRef>&  areasMap,
-                                         Vehicle vehicle) const
+                                         VehicleMask vehicles) const
   {
     for (const auto& ref : objects) {
       if (ref.GetType()==refWay) {
@@ -202,7 +204,7 @@ namespace osmscout {
           continue;
         }
 
-        if (GetAccess(*wayEntry->second).CanRoute(vehicle)) {
+        if (GetAccess(*wayEntry->second).CanRoute(vehicles)) {
           return true;
         }
 
@@ -1617,15 +1619,13 @@ namespace osmscout {
     return !routeNodeWriter.HasError();
   }
 
-  bool RouteDataGenerator::WriteObjectVariantData(const ImportParameter& parameter,
-                                                  Progress& progress,
+  bool RouteDataGenerator::WriteObjectVariantData(Progress& progress,
                                                   const std::string& variantFilename,
                                                   const std::map<ObjectVariantData,uint16_t>& routeDataMap)
   {
     FileWriter writer;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     variantFilename))) {
+    if (!writer.Open(variantFilename)) {
       progress.Error("Cannot create '"+variantFilename+"'");
       return false;
     }
@@ -1662,7 +1662,7 @@ namespace osmscout {
                                            const TypeConfig& typeConfig,
                                            const NodeIdObjectsMap& nodeObjectsMap,
                                            const ViaTurnRestrictionMap& restrictions,
-                                           Vehicle vehicle,
+                                           VehicleMask vehicles,
                                            const std::string& dataFilename,
                                            const std::string& variantFilename)
   {
@@ -1686,8 +1686,7 @@ namespace osmscout {
     // Writing route nodes
     //
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     dataFilename))) {
+    if (!writer.Open(dataFilename)) {
       progress.Error("Cannot create '"+dataFilename+"'");
       return false;
     }
@@ -1804,7 +1803,7 @@ namespace osmscout {
                            node->second,
                            waysMap,
                            areasMap,
-                           vehicle)) {
+                           vehicles)) {
           continue;
         }
 
@@ -1836,7 +1835,7 @@ namespace osmscout {
               continue;
             }
 
-            if (!GetAccess(*way).CanRoute(vehicle)) {
+            if (!GetAccess(*way).CanRoute(vehicles)) {
               continue;
             }
 
@@ -1960,8 +1959,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!WriteObjectVariantData(parameter,
-                                progress,
+    if (!WriteObjectVariantData(progress,
                                 variantFilename,
                                 routeDataMap)) {
       return false;
@@ -2052,42 +2050,35 @@ namespace osmscout {
       return false;
     }
 
+    for (const auto& router : parameter.GetRouter()) {
+      std::string dataFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
+                                               router.GetDataFilename());
+      std::string variantFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                  router.GetVariantFilename());
+      std::string indexFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                router.GetIndexFilename());
 
-    progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_FOOT_DAT+"'");
+      progress.SetAction(std::string("Writing route graph '")+dataFilename+"'");
 
+      WriteRouteGraph(parameter,
+                      progress,
+                      *typeConfig,
+                      nodeObjectsMap,
+                      restrictions,
+                      router.GetVehicleMask(),
+                      dataFilename,
+                      variantFilename);
 
-    WriteRouteGraph(parameter,
-                    progress,
-                    *typeConfig,
-                    nodeObjectsMap,
-                    restrictions,
-                    vehicleFoot,
-                    RoutingService::FILENAME_FOOT_DAT,
-                    RoutingService::FILENAME_FOOT_VARIANT_DAT);
+      NumericIndexGenerator<Id,RouteNode> indexGenerator(std::string("Generating '")+indexFilename+"'",
+                                                         dataFilename,
+                                                         indexFilename);
 
-    progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_BICYCLE_DAT+"'");
-
-
-    WriteRouteGraph(parameter,
-                    progress,
-                    *typeConfig,
-                    nodeObjectsMap,
-                    restrictions,
-                    vehicleBicycle,
-                    RoutingService::FILENAME_BICYCLE_DAT,
-                    RoutingService::FILENAME_BICYCLE_VARIANT_DAT);
-
-    progress.SetAction(std::string("Writing route graph '")+RoutingService::FILENAME_CAR_DAT+"'");
-
-
-    WriteRouteGraph(parameter,
-                    progress,
-                    *typeConfig,
-                    nodeObjectsMap,
-                    restrictions,
-                    vehicleCar,
-                    RoutingService::FILENAME_CAR_DAT,
-                    RoutingService::FILENAME_CAR_VARIANT_DAT);
+      if (!indexGenerator.Import(typeConfig,
+                                 parameter,
+                                 progress)) {
+        return false;
+      }
+    }
 
     // Cleaning up...
 

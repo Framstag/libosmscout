@@ -434,8 +434,11 @@ static void DumpNameChangedDescription(size_t& lineCount,
 
 int main(int argc, char* argv[])
 {
+  std::string                               routerFilenamebase=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
   osmscout::Vehicle                         vehicle=osmscout::vehicleCar;
-  std::string                               map;
+  std::string                               mapDirectory;
+  bool                                      outputGPX=false;
+  bool                                      argumentError=false;
 
   double                                    startLat;
   double                                    startLon;
@@ -443,19 +446,21 @@ int main(int argc, char* argv[])
   double                                    targetLat;
   double                                    targetLon;
 
-  osmscout::ObjectFileRef                   startObject;
-  size_t                                    startNodeIndex;
-
-  osmscout::ObjectFileRef                   targetObject;
-  size_t                                    targetNodeIndex;
-
-  bool                                      outputGPX = false;
-
   int currentArg=1;
   while (currentArg<argc) {
-    if (strcmp(argv[currentArg],"--foot")==0) {
-      vehicle=osmscout::vehicleFoot;
+    if (strcmp(argv[currentArg],"--router")==0) {
+      currentArg++;
 
+      if (currentArg>=argc) {
+        argumentError=true;
+      }
+      else {
+        routerFilenamebase=argv[currentArg];
+        currentArg++;
+      }
+    }
+    else if (strcmp(argv[currentArg],"--foot")==0) {
+      vehicle=osmscout::vehicleFoot;
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--bicycle")==0) {
@@ -476,14 +481,19 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (argc-currentArg!=5) {
-    std::cout << "Routing <map directory>" <<std::endl;
-    std::cout << "        <start lat> <start lon>" << std::endl;
-    std::cout << "        <target lat> <target lon>" << std::endl;
+  if (argumentError ||
+      argc-currentArg!=5) {
+    std::cout << "Routing" << std::endl;
+    std::cout << "  [--router <router filename base>]" << std::endl;
+    std::cout << "  [--foot | --bicycle | --car]" << std::endl;
+    std::cout << "  [--gpx]" << std::endl;
+    std::cout << "  <map directory>" << std::endl;
+    std::cout << "  <start lat> <start lon>" << std::endl;
+    std::cout << "  <target lat> <target lon>" << std::endl;
     return 1;
   }
 
-  map=argv[currentArg];
+  mapDirectory=argv[currentArg];
   currentArg++;
 
   if (sscanf(argv[currentArg],"%lf",&startLat)!=1) {
@@ -511,9 +521,9 @@ int main(int argc, char* argv[])
   currentArg++;
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(mapDirectory.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -526,9 +536,9 @@ int main(int argc, char* argv[])
     routerParameter.SetDebugPerformance(true);
   }
 
-  osmscout::RoutingServiceRef router(new osmscout::RoutingService(database,
-                                                                  routerParameter,
-                                                                  vehicle));
+  osmscout::RoutingServiceRef router=std::make_shared<osmscout::RoutingService>(database,
+                                                                                routerParameter,
+                                                                                routerFilenamebase);
 
   if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;
@@ -558,6 +568,9 @@ int main(int argc, char* argv[])
     break;
   }
 
+  osmscout::ObjectFileRef startObject;
+  size_t                  startNodeIndex;
+
   if (!router->GetClosestRoutableNode(startLat,
                                       startLon,
                                       vehicle,
@@ -571,6 +584,9 @@ int main(int argc, char* argv[])
   if (startObject.Invalid() || startObject.GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
+
+  osmscout::ObjectFileRef targetObject;
+  size_t                  targetNodeIndex;
 
   if (!router->GetClosestRoutableNode(targetLat,
                                       targetLon,
