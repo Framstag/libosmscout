@@ -642,11 +642,7 @@ namespace osmscout {
       return false;
     }
 
-    if (wayDataFile->GetByOffset(offset,way)) {
-      return true;
-    }
-
-    return false;
+    return wayDataFile->GetByOffset(offset,way);
   }
 
   bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,

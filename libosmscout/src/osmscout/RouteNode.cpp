@@ -145,8 +145,6 @@ namespace osmscout {
     }
 
     if (pathCount>0) {
-      GeoCoord minCoord;
-
       paths.resize(pathCount);
 
       for (size_t i=0; i<pathCount; i++) {

@@ -555,7 +555,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 8;
       number|=add;
-      dataPtr++;
 
       offset+=2;
 
@@ -583,7 +582,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 8;
     number|=add;
-    dataPtr++;
 
     return true;
   }
@@ -625,7 +623,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 24;
       number|=add;
-      dataPtr++;
 
       offset+=4;
 
@@ -663,7 +660,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 24;
     number|=add;
-    dataPtr++;
 
     return true;
   }
@@ -726,7 +722,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 56;
       number|=add;
-      dataPtr++;
 
       offset+=8;
 
@@ -784,7 +779,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     number|=add;
-    dataPtr++;
 
     return true;
   }
@@ -851,7 +845,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 8;
       number|=add;
-      dataPtr++;
 
       offset+=2;
 
@@ -879,7 +872,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 8;
     number|=add;
-    dataPtr++;
 
     return true;
   }
@@ -921,7 +913,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 24;
       number|=add;
-      dataPtr++;
 
       offset+=4;
 
@@ -959,7 +950,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 24;
     number|=add;
-    dataPtr++;
 
     return true;
   }
@@ -1022,7 +1012,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 56;
       number|=add;
-      dataPtr++;
 
       offset+=8;
 
@@ -1080,7 +1069,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     number|=add;
-    dataPtr++;
 
     return true;
   }
@@ -1115,7 +1103,6 @@ namespace osmscout {
         add=(unsigned char)(*dataPtr);
         add=add << 8;
         number|=add;
-        dataPtr++;
       }
 
       offset+=bytes;
@@ -1145,7 +1132,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 8;
       number|=add;
-      dataPtr++;
     }
 
     return true;
@@ -1192,7 +1178,6 @@ namespace osmscout {
             add=(unsigned char)(*dataPtr);
             add=add << 24;
             number|=add;
-            dataPtr++;
           }
         }
       }
@@ -1236,7 +1221,6 @@ namespace osmscout {
           add=(unsigned char)(*dataPtr);
           add=add << 24;
           number|=add;
-          dataPtr++;
         }
       }
     }
@@ -1310,7 +1294,6 @@ namespace osmscout {
                     add=(unsigned char)(*dataPtr);
                     add=add << 56;
                     number|=add;
-                    dataPtr++;
                   }
                 }
               }
@@ -1382,7 +1365,6 @@ namespace osmscout {
                   add=(unsigned char)(*dataPtr);
                   add=add << 56;
                   number|=add;
-                  dataPtr++;
                 }
               }
             }
@@ -1467,7 +1449,6 @@ namespace osmscout {
       add=(unsigned char)(*dataPtr);
       add=add << 56;
       fileOffset|=add;
-      dataPtr++;
 
       offset+=8;
 
@@ -1525,7 +1506,6 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     fileOffset|=add;
-    dataPtr++;
 
     return true;
   }
@@ -1597,7 +1577,6 @@ namespace osmscout {
                     add=(unsigned char)(*dataPtr);
                     add=add << 56;
                     fileOffset|=add;
-                    dataPtr++;
                   }
                 }
               }
@@ -1669,7 +1648,6 @@ namespace osmscout {
                   add=(unsigned char)(*dataPtr);
                   add=add << 56;
                   fileOffset|=add;
-                  dataPtr++;
                 }
               }
             }

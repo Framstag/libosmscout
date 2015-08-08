@@ -1288,7 +1288,6 @@ namespace osmscout {
   {
     FileOffset fileSize;
     FILE*      file;
-    bool       success=false;
 
     if (!GetFileSize(filename,
                      fileSize)) {
@@ -1322,7 +1321,7 @@ namespace osmscout {
 
     parser->Parse();
 
-    success=!parser->errors->hasErrors;
+    bool success=!parser->errors->hasErrors;
 
     delete parser;
     delete scanner;
@@ -1563,7 +1562,7 @@ namespace osmscout {
         typeInfo->AddGroup(groupName);
       }
 
-      typeInfo=RegisterType(typeInfo);
+      RegisterType(typeInfo);
     }
 
     bool result=!scanner.HasError() && scanner.Close();

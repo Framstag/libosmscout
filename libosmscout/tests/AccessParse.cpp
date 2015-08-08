@@ -101,7 +101,7 @@ bool CheckParseSuccess(bool canFoot,
 {
   osmscout::SilentProgress                        progress;
   osmscout::TypeConfig                            typeConfig;
-  osmscout::TypeInfoRef                           testType=new osmscout::TypeInfo();
+  osmscout::TypeInfoRef                           testType=std::make_shared<osmscout::TypeInfo>();
   osmscout::FeatureRef                            accessFeature;
   size_t                                          featureInstanceIndex;
   std::unordered_map<osmscout::TagId,std::string> tags;
