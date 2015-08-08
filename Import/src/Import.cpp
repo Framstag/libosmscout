@@ -202,7 +202,7 @@ osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
 
   if (argumentIndex>=argc) {
     std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
+    return NULL;
   }
 
   std::string argument=argv[argumentIndex];
