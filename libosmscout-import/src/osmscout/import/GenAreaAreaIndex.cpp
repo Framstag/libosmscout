@@ -85,26 +85,42 @@ namespace osmscout {
                                                std::map<Pixel,AreaLeaf>& leafs)
   {
     for (auto& leaf : leafs) {
-      writer.GetPos(leaf.second.offset);
+      if (!writer.GetPos(leaf.second.offset)) {
+        return false;
+      }
 
+      // There must be a reason to store this index cell: either we have children or data
       assert(!leaf.second.areas.empty() ||
              leaf.second.children[0]!=0 ||
              leaf.second.children[1]!=0 ||
              leaf.second.children[2]!=0 ||
              leaf.second.children[3]!=0);
 
+      // We only store the ids of the children, if we are not the final
+      // layer. The file offset of our children will always we smaller
+      // our own file offset, and both index values will be different
       if (level<parameter.GetAreaAreaIndexMaxMag()) {
         for (size_t c=0; c<4; c++) {
-          writer.WriteNumber(leaf.second.children[c]);
+          FileOffset childOffset;
+
+          if (leaf.second.children[c]==0) {
+            childOffset=0;
+          }
+          else {
+            assert(leaf.second.offset>leaf.second.children[c]);
+            childOffset=leaf.second.offset-leaf.second.children[c];
+          }
+
+          if (!writer.WriteNumber(childOffset)) {
+            return false;
+          }
         }
       }
 
-      FileOffset lastOffset;
-
-      // Areas
+      // Number of areas
       writer.WriteNumber((uint32_t)leaf.second.areas.size());
 
-      lastOffset=0;
+      FileOffset lastOffset=0;
       for (const auto& entry : leaf.second.areas) {
         writer.WriteTypeId(entry.type,
                            typeConfig->GetAreaTypeIdBytes());
@@ -173,6 +189,7 @@ namespace osmscout {
       return false;
     }
 
+    // This is not the final value, that will be written later on
     if (!writer.WriteFileOffset(topLevelOffset)) {
       progress.Error("Cannot write top level entry offset");
       return false;
@@ -183,7 +200,7 @@ namespace osmscout {
     while (true) {
       size_t areaLevelEntries=0;
 
-      progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
+      progress.Info(std::string("Processing level ")+NumberToString(l)+"...");
 
       newAreaLeafs.clear();
 
@@ -197,8 +214,6 @@ namespace osmscout {
       if (areas==0 ||
           (areas>0 && areas>areasConsumed)) {
         uint32_t areaCount=0;
-
-        progress.Info(std::string("Scanning areas.dat for areas of index level ")+NumberToString(l)+"...");
 
         if (!scanner.GotoBegin()) {
           progress.Error("Cannot go to begin of way file");
@@ -278,7 +293,7 @@ namespace osmscout {
                      NumberToString(areaLevelEntries)+") "+
                      "to index of level "+NumberToString(l)+"...");
 
-      // Remember the offset of one cell in level '0'
+      // Remember the offset of one/the cell in level '0'
       if (l==0) {
         if (!writer.GetPos(topLevelOffset)) {
           progress.Error("Cannot read top level entry offset");
@@ -340,8 +355,10 @@ namespace osmscout {
       l--;
     }
 
-    writer.SetPos(topLevelOffsetOffset);
-    writer.WriteFileOffset(topLevelOffset);
+    if (!writer.SetPos(topLevelOffsetOffset) ||
+        !writer.WriteFileOffset(topLevelOffset)) {
+      return false;
+    }
 
     return !writer.HasError() && writer.Close();
   }

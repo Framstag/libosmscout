@@ -47,7 +47,7 @@ namespace osmscout {
       std::list<Entry> areas;
       FileOffset       children[4];
 
-      AreaLeaf()
+      inline AreaLeaf()
       {
         offset=0;
         children[0]=0;

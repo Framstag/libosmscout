@@ -61,15 +61,26 @@ namespace osmscout {
         }
       }
 
-      scanner.SetPos(offset);
+      if (!scanner.SetPos(offset)) {
+        log.Error() << "Cannot navigate to offset " << offset << " in file '" << scanner.GetFilename() << "'";
+      }
 
       // Read offsets of children if not in the bottom level
 
       if (level<maxLevel) {
         for (size_t c=0; c<4; c++) {
-          if (!scanner.ReadNumber(cacheRef->value.children[c])) {
+          FileOffset childOffset;
+
+          if (!scanner.ReadNumber(childOffset)) {
             log.Error() << "Cannot read index data at offset " << offset << " in file '" << scanner.GetFilename() << "'";
             return false;
+          }
+
+          if (childOffset==0) {
+            cacheRef->value.children[c]=0;
+          }
+          else {
+            cacheRef->value.children[c]=offset-childOffset;
           }
         }
       }
@@ -79,7 +90,7 @@ namespace osmscout {
         }
       }
 
-      // Now read the way offsets by type in this index entry
+      // Now read the area offsets by type in this index entry
 
       uint32_t offsetCount;
 
