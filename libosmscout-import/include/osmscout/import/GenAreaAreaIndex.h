@@ -43,30 +43,22 @@ namespace osmscout {
 
     struct AreaLeaf
     {
-      FileOffset       offset;
       std::list<Entry> areas;
-      FileOffset       children[4];
-
-      inline AreaLeaf()
-      {
-        offset=0;
-        children[0]=0;
-        children[1]=0;
-        children[2]=0;
-        children[3]=0;
-      }
     };
 
+    typedef std::map<Pixel,AreaLeaf> Level;
+
   private:
-    void SetOffsetOfChildren(const std::map<Pixel,AreaLeaf>& leafs,
-                             std::map<Pixel,AreaLeaf>& newAreaLeafs);
+    void EnrichLevels(std::vector<Level>& levels);
 
-    bool WriteIndexLevel(const TypeConfigRef& typeConfig,
-                         const ImportParameter& parameter,
-                         FileWriter& writer,
-                         size_t level,
-                         std::map<Pixel,AreaLeaf>& leafs);
-
+    bool WriteCell(const TypeConfigRef& typeConfig,
+                   const ImportParameter& parameter,
+                   FileWriter& writer,
+                   const std::vector<Level>& levels,
+                   size_t level,
+                   const Pixel& pixel,
+                   const AreaLeaf& leaf,
+                   FileOffset& offset);
 
   public:
     std::string GetDescription() const;
