@@ -336,8 +336,8 @@ CONST
   COLOR farmyardColor              = #dcbe92;
   COLOR fellColor                  = #f9f9f9;
 
-  COLOR forestColor                = #8dc56c;
-  COLOR forestLabelColor           = darken(@forestColor, 0.5);
+  COLOR woodColor                  = #aed1a0;
+  COLOR woodLabelColor             = darken(@woodColor, 0.5);
 
   COLOR glacierColor               = #ddecec;
   COLOR grassColor                 = #cfeca8;
@@ -362,9 +362,6 @@ CONST
   COLOR scrubColor                 = #b5e2b5;
   COLOR vineyardColor              = #b3e2a8;
   COLOR wetlandColor               = #bdd8d8;
-
-  COLOR woodColor                  = #aed1a0;
-  COLOR woodLabelColor             = darken(@woodColor, 0.5);
 
   COLOR peakSymbolColor            = #9c5e29;
   COLOR peakLabelColor             = #9c5329;
@@ -553,7 +550,7 @@ SYMBOL speed_camera
    [TYPE natural_grassland] AREA { color: @grassColor; }
    [TYPE natural_fell] AREA { color: @fellColor; }
    [TYPE natural_heath] AREA { color: @heathColor; }
-   [TYPE natural_wood] AREA { color: @woodColor; }
+   [TYPE wood] AREA { color: @woodColor; }
    [TYPE natural_wetland_marsh] AREA { color: @marshColor; }
    [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
    [TYPE natural_water] AREA { color: @waterColor; }
@@ -574,7 +571,7 @@ SYMBOL speed_camera
          natural_beach,
          natural_land] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; autoSize: true;}
 
-   [TYPE natural_wood] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
+   [TYPE wood] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
    [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
 
    [TYPE natural_peak] {
@@ -1144,7 +1141,6 @@ SYMBOL speed_camera
    [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
    [TYPE landuse_farm,
          landuse_farmland] AREA { color: @farmColor; }
-   [TYPE landuse_forest] AREA { color: @forestColor; pattern: "forest"; patternMinMag: cityOver; }
    [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
    [TYPE landuse_industrial] AREA { color: @industrialColor; }
    [TYPE landuse_landfill] AREA { color: @landFillColor; }
@@ -1184,7 +1180,6 @@ SYMBOL speed_camera
    [TYPE landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @militaryLabelColor; autoSize: true;}
    [TYPE landuse_brownfield] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @brownFieldLabelColor; autoSize: true;}
    [TYPE landuse_residential] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @residentialLabelColor; autoSize: true;}
-   [TYPE landuse_forest] AREA.TEXT { label: Name.name; style: emphasize; priority: @labelPrioNatural; color: @forestLabelColor; autoSize: true;}
    [TYPE landuse_retail] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @retailLabelColor; autoSize: true;}
  }
 

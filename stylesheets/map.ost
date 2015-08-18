@@ -565,12 +565,12 @@ TYPES
       {Name, NameAlt} MERGE_AREAS
       GROUP landuse
     
-  TYPE landuse_forest
-    = NODE AREA ("landuse"=="forest")
+  TYPE wood
+    = NODE AREA ("landuse"=="forest" OR "natural"=="wood" OR "landcover"=="trees")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
-    
+
   TYPE landuse_garages
     = AREA ("landuse"=="garages")
       {Name, NameAlt}
@@ -783,11 +783,6 @@ TYPES
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
-  TYPE natural_wood
-    = NODE AREA ("natural"=="wood")
-      {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM MERGE_AREAS
-
   //
   // Man made
   //
