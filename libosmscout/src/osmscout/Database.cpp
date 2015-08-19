@@ -97,11 +97,13 @@ namespace osmscout {
    : parameter(parameter),
      isOpen(false)
   {
-    // no code
+    log.Debug() << "Database::Database()";
   }
 
   Database::~Database()
   {
+    log.Debug() << "Database::~Database()";
+
     if (IsOpen()) {
       Close();
     }
