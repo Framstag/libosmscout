@@ -85,6 +85,8 @@ namespace osmscout {
     shieldLabelSpace(1.0),
     sameLabelSpace(1.0)
   {
+    log.Debug() << "MapPainter::MapPainter()";
+
     tunnelDash.push_back(0.4);
     tunnelDash.push_back(0.4);
 
@@ -108,7 +110,7 @@ namespace osmscout {
 
   MapPainter::~MapPainter()
   {
-    // no code
+    log.Debug() << "MapPainter::~MapPainter()";
   }
 
   bool MapPainter::IsVisible(const Projection& projection,
