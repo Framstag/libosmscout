@@ -1562,6 +1562,8 @@ namespace osmscout {
    : typeConfig(typeConfig),
      styleResolveContext(typeConfig)
   {
+    log.Debug() << "StyleConfig::StyleConfig()";
+
     tileLandBuffer.SetType(typeConfig->typeInfoTileLand);
     tileSeaBuffer.SetType(typeConfig->typeInfoTileSea);
     tileCoastBuffer.SetType(typeConfig->typeInfoTileCoast);
@@ -1575,7 +1577,7 @@ namespace osmscout {
 
   StyleConfig::~StyleConfig()
   {
-    // no code
+    log.Debug() << "StyleConfig::~StyleConfig()";
   }
 
   void StyleConfig::Reset()
@@ -1742,7 +1744,7 @@ namespace osmscout {
   };
 
   template <class S, class A>
-  void CalculateUsedTypes(const TypeConfig typeConfig,
+  void CalculateUsedTypes(const TypeConfig& typeConfig,
                           const std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
                           std::vector<TypeSet>& typeSets,
@@ -1773,7 +1775,7 @@ namespace osmscout {
   }
 
   template <class S, class A>
-  void SortInConditionals(const TypeConfig typeConfig,
+  void SortInConditionals(const TypeConfig& typeConfig,
                           const std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
                           std::vector<std::vector<std::list<StyleSelector<S,A> > > >& selectors)
