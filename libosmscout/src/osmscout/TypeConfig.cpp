@@ -199,7 +199,7 @@ namespace osmscout {
 
   void FeatureValueBuffer::AllocateData()
   {
-    if (type->HasFeatures()) {
+    if (type && type->HasFeatures()) {
       featureBits=new uint8_t[type->GetFeatureMaskBytes()]();
       featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
     }
@@ -700,6 +700,8 @@ namespace osmscout {
      wayTypIdBytes(1),
      areaTypIdBytes(1)
   {
+    log.Debug() << "TypeConfig::TypeConfig()";
+
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
     RegisterTag("");
@@ -767,7 +769,7 @@ namespace osmscout {
     // Internal type for showing routes
     //
 
-    TypeInfoRef route(new TypeInfo());
+    TypeInfoRef route=std::make_shared<TypeInfo>();
 
     route->SetType("_route")
           .CanBeWay(true);
@@ -831,7 +833,7 @@ namespace osmscout {
 
   TypeConfig::~TypeConfig()
   {
-    // no code
+    log.Debug() << "TypeConfig::~TypeConfig()";
   }
 
   TagId TypeConfig::RegisterTag(const std::string& tagName)
