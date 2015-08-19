@@ -122,6 +122,7 @@ private:
 
 private:
   DBThread();
+  virtual ~DBThread();
 
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);

@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QDir>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 QBreaker::QBreaker()
@@ -74,9 +75,20 @@ DBThread::DBThread()
    renderBreaker(new QBreaker()),
    renderBreakerRef(renderBreaker)
 {
-    QScreen *srn = QApplication::screens().at(0);
+  osmscout::log.Debug() << "DBThread::DBThread()";
 
-    dpi = (double)srn->physicalDotsPerInch();
+  QScreen *srn=QApplication::screens().at(0);
+
+  dpi=(double)srn->physicalDotsPerInch();
+}
+
+DBThread::~DBThread()
+{
+  osmscout::log.Debug() << "DBThread::~DBThread()";
+
+  if (painter!=NULL) {
+    delete painter;
+  }
 }
 
 void DBThread::FreeMaps()
