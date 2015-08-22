@@ -213,7 +213,7 @@ namespace osmscout {
     if (file!=NULL && useMmap && this->size>0) {
       FreeBuffer();
 
-      mmfHandle=CreateFileMapping((HANDLE)_get_osfhandle(_fileno(file)),
+      mmfHandle=CreateFileMapping((HANDLE)_get_osfhandle(fileno(file)),
                                   (LPSECURITY_ATTRIBUTES)NULL,
                                   PAGE_READONLY,
                                   0,0,
