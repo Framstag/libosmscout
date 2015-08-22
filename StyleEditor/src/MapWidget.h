@@ -37,15 +37,16 @@ class MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString stylesheetFilename READ stylesheetFilename NOTIFY stylesheetFilenameChanged)
 
 private:
-  osmscout::GeoCoord      center;
-  osmscout::Magnification magnification;
+  osmscout::GeoCoord            center;
+  double                        angle;
+  osmscout::Magnification       magnification;
 
   // Drag and drop
-  double                  startLon,startLat;
-  int                     startX,startY;
+  int                           startX,startY;
+  osmscout::MercatorProjection  startProjection;
 
   // Controlling rerendering...
-  bool                    requestNewMap;
+  bool                          requestNewMap;
 
 signals:
   void TriggerMapRenderingSignal();
