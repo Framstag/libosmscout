@@ -11,3 +11,5 @@ copy ..\libosmscout-map\include\osmscout\private\Config.h libosmscout-map\includ
 copy ..\libosmscout-map\libosmscout-map.vcxproj libosmscout-map\msvc2015_libosmscout-map.vcxproj
 
 copy ..\Import\Import.vcxproj Import\msvc2015_Import.vcxproj
+
+copy ..\libosmscout\libosmscout.sln msvc2015_libosmscout.sln
