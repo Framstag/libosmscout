@@ -1,20 +1,29 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
 AC_INIT([libosmscout-import],[0.1],[tim@teulings.org],[libosmscout-import])
+AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 
 AC_CONFIG_SRCDIR(src/osmscout/import/Import.cpp)
 AC_CONFIG_MACRO_DIR([m4])
-
 AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/ImportFeatures.h])
-AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
+
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PROG_CXX
-AC_LANG(C++)
-LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
+LT_INIT([win32-dll])
+gl_VISIBILITY
+AS_IF([test "$HAVE_VISIBILITY" == "1"],
+      [AC_DEFINE([OSMSCOUT_IMPORT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
+
+
+AC_LANG(C++)
+AX_CXX_COMPILE_STDCXX_11([],[mandatory])
+
 AX_CXXFLAGS_WARN_ALL
+AS_IF([test "x$GXX" = xyes],
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
 
 AC_ARG_WITH([protoc],
             [AS_HELP_STRING([--with-protoc=PATH],
@@ -23,7 +32,6 @@ AC_ARG_WITH([protoc],
 
 AC_SUBST(protoc)
 
-AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([wchar_t])
 
 AC_SEARCH_LIBS([sqrt],[m],[])
@@ -32,9 +40,6 @@ AC_CHECK_FUNCS([mmap])
 
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
-
-AS_IF([test "x$GXX" = xyes],
-      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
 
 dnl Selfmade tests
 
@@ -46,11 +51,6 @@ dnl Check for libosmscout
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
-
-gl_VISIBILITY
-
-AS_IF([test "$HAVE_VISIBILITY" == "1"],
-      [AC_DEFINE([OSMSCOUT_IMPORT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([
