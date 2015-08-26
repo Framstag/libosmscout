@@ -109,7 +109,11 @@ namespace osmscout {
       lastProgressDump=now;
       std::cout << "   % " << std::setiosflags(std::ios::fixed) << std::setprecision(2) << current/total*100 << " (" << std::setprecision(0) << current << "/" << std::setprecision(0) << total << ")" << std::endl;
     }
+  }
 
+  void ConsoleProgress::SetProgress(uint64_t current, uint64_t total)
+  {
+    SetProgress((double)current,(double)total);
   }
 
   void ConsoleProgress::Debug(const std::string& text)
