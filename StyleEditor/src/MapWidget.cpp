@@ -26,6 +26,7 @@
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
       center(0.0,0.0),
+      angle(0.0),
       magnification(64),
       requestNewMap(true)
 {
@@ -97,6 +98,7 @@ void MapWidget::TriggerMapRendering()
 
     request.lat=center.GetLat();
     request.lon=center.GetLon();
+    request.angle=angle;
     request.magnification=magnification;
     request.width=width();
     request.height=height();
@@ -109,35 +111,27 @@ void MapWidget::TriggerMapRendering()
 
 void MapWidget::HandleMouseMove(QMouseEvent* event)
 {
-    double                       olon, olat;
-    double                       tlon, tlat;
-    osmscout::MercatorProjection projection;
+    osmscout::MercatorProjection projection=startProjection;
 
-    projection.Set(center.GetLon(),
-                   center.GetLat(),
-                   magnification,
-                   width(),height());
+    if (!projection.Move(startX-event->x(),
+                         event->y()-startY)) {
+        return;
+    }
 
-    // Get origin coordinates
-    projection.PixelToGeo(0,0,
-                          olon,olat);
-
-    // Get current mouse pos coordinates (relative to drag start)
-    projection.PixelToGeo(event->x()-startX,
-                          event->y()-startY,
-                          tlon,tlat);
-
-    center.Set(startLat-(tlat-olat),
-               startLon-(tlon-olon));
+    center=projection.GetCenter();
 }
 
 void MapWidget::mousePressEvent(QMouseEvent* event)
 {
     if (event->button()==1) {
-        startLon=center.GetLon();
-        startLat=center.GetLat();
+        DBThread *dbThread=DBThread::GetInstance();
+
+        dbThread->GetProjection(startProjection);
+
         startX=event->x();
         startY=event->y();
+
+        setFocus(true);
     }
 }
 

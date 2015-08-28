@@ -264,10 +264,6 @@ void DBThread::TriggerMapRendering()
 
   if (database->IsOpen() &&
       styleConfig) {
-/*
-  if (database->IsOpen() && styleConfig) {
-    osmscout::MercatorProjection  projection;
-*/
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
 
