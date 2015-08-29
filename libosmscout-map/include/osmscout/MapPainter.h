@@ -70,6 +70,33 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   public:
+    /**
+     * Structure used for internal statistic collection
+     */
+    struct OSMSCOUT_MAP_API DataStatistic
+    {
+      TypeInfoRef type;        //!< Type
+      size_t      objectCount; //!< Sum of nodeCount, wayCount, areaCont
+      size_t      nodeCount;   //!< Number of Node objects
+      size_t      wayCount;    //!< Number of Way objects
+      size_t      areaCount;   //!< Number of Area objects
+      size_t      coordCount;  //!< Number of coordinates
+      size_t      labelCount;  //!< Number of labels
+      size_t      iconCount;   //!< Number of icons
+
+      DataStatistic()
+      : objectCount(0),
+        nodeCount(0),
+        wayCount(0),
+        areaCount(0),
+        coordCount(0),
+        labelCount(0),
+        iconCount(0)
+      {
+        // no code
+      }
+    };
+
     struct OSMSCOUT_MAP_API WayData
     {
       ObjectFileRef            ref;
@@ -252,6 +279,14 @@ namespace osmscout {
     //@}
 
   private:
+    /**
+     Debuggn
+     */
+    //@{
+    void DumpDataStatistics(const Projection& projection,
+                            const MapData& data);
+    //@}
+
     /**
      Ground tile drawing
      */
