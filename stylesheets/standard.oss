@@ -370,8 +370,12 @@ CONST
   COLOR bridgeColor                = #000000; // black
 
   COLOR motorwayColor              = #4440ec; // dark blue
+  COLOR motorwayShieldColor        = @motorwayColor;
+  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
   COLOR trunkColor                 = #7674ec; // lighther blue
+  COLOR trunkShieldColor           = @trunkColor;
   COLOR primaryColor               = #ec4044; // red
+  COLOR primaryShieldColor         = @primaryColor;
   COLOR secondaryColor             = #fdac44; // orange
   COLOR tertiaryColor              = #fef271; // yelow
   COLOR roadColor                  = #ffffff; // white
@@ -762,6 +766,13 @@ SYMBOL speed_camera
 
    [TYPE highway_services] AREA { color: #cb9999; }
 
+    [TYPE route_ferry] {
+     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; cap: butt; }
+     WAY {color: #0000ff; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
+   }
+ }
+
+ [MAG suburb-] {
    [TYPE railway_rail] {
      [SIZE 5m 0.25mm:3px<] {
        WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
@@ -771,11 +782,6 @@ SYMBOL speed_camera
    }
 
    [TYPE railway_station] AREA { color: @railwayStationColor; }
-
-   [TYPE route_ferry] {
-     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; cap: butt; }
-     WAY {color: #0000ff; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
-   }
  }
 
  [MAG close-] {
@@ -1045,25 +1051,21 @@ SYMBOL speed_camera
  // WAY.SHIELD
 
  [MAG state-] {
-   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @motorwayShieldColor; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG proximity-] {
-   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #7ec87e; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @trunkShieldColor; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG cityOver-] {
-   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
- }
-
- [MAG detail-] {
-   [TYPE highway_motorway_junction] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @primaryShieldColor; borderColor: #ffffff; priority: 20;}
  }
 
  // Labels
 
- [MAG city-] {
-   [TYPE highway_motorway_junction] NODE.TEXT { label: Name.name; style: emphasize; color: #809bc0; priority: @labelPrioHighwayJunction;}
+ [MAG suburb-] {
+   [TYPE highway_motorway_junction] NODE.TEXT { label: Name.name; style: emphasize; color: @motorwayJunctionLabelColor; priority: @labelPrioHighwayJunction;}
  }
 
  [MAG detail-] {
@@ -1176,14 +1178,11 @@ SYMBOL speed_camera
  }
 
  // Labels
- [MAG cityOver-] {
+ [MAG suburb-] {
    [TYPE landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @militaryLabelColor; autoSize: true;}
    [TYPE landuse_brownfield] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @brownFieldLabelColor; autoSize: true;}
    [TYPE landuse_residential] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @residentialLabelColor; autoSize: true;}
    [TYPE landuse_retail] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @retailLabelColor; autoSize: true;}
- }
-
- [MAG detail-] {
  }
 
  [MAG close-] {
@@ -1558,19 +1557,15 @@ SYMBOL speed_camera
    [TYPE place_bigcity] NODE.TEXT {label: IName; style: emphasize; size: 1.4; priority: @labelPrioBigCity;}
  }
 
-
  [MAG proximity-city] {
    [TYPE place_millioncity] NODE.TEXT {size: 1.0; scaleMag: county;}
    [TYPE place_bigcity] NODE.TEXT {size: 1.0; scaleMag: county;}
+   [TYPE place_city] NODE.TEXT {scaleMag: region;}
+   [TYPE place_town] NODE.TEXT {label: IName; style: emphasize; size: 1.3; priority: @labelPrioTown;}
  }
 
  [MAG region-city] {
    [TYPE place_city] NODE.TEXT {label: IName; style: emphasize; size: 1.35; priority: @labelPrioCity; }
-   [TYPE place_town] NODE.TEXT {label: IName; style: emphasize; size: 1.3; priority: @labelPrioTown;}
- }
-
- [MAG proximity-city] {
-   [TYPE place_city] NODE.TEXT {scaleMag: region;}
  }
 
  [MAG region-veryClose] {
