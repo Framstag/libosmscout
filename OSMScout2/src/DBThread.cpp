@@ -279,6 +279,7 @@ void DBThread::TriggerMapRendering()
 
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
+    drawParameter.SetDebugData(false);
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
