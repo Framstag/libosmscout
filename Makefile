@@ -15,7 +15,7 @@ programs = libosmscout \
            StyleEditor \
            Tests
 
-.PHONY: all full clean dist distclean \
+.PHONY: all autogen configure full clean dist distclean \
         libosmscout \
         libosmscout-import \
         libosmscout-map \
@@ -47,14 +47,28 @@ all: libosmscout \
      Tests
 
 full:
+	$(MAKE) autogen
+	$(MAKE) configure 
+	$(MAKE) all
+
+autogen:
 	@for x in $(programs); do\
-	  if [ -d $$x ]; then \
-	    echo Configuring $$x...; \
-	    (cd $$x && ./autogen.sh && ./configure && $(MAKE)); \
+	  if [ -d $$x ] && [ -f $$x/autogen.sh ]; then \
+	    echo Preparing $$x...; \
+	    (cd $$x && ./autogen.sh); \
 	  fi \
 	done
-	@$(MAKE) all
 
+configure:
+	@for x in $(programs); do\
+	  if [ -d $$x ] && [ -f $$x/configure ]; then \
+	    echo Configuring $$x...; \
+	    (cd $$x && ./configure); \
+	  elif [ -d $$x ] && [ -f $$x/*.pro ]; then \
+	    echo Configuring $$x...; \
+	    (cd $$x && ./qmake); \
+	  fi \
+	done
 
 clean:
 	@for x in $(programs); do\
