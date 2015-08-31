@@ -1789,7 +1789,7 @@ namespace osmscout {
 
         handledRouteNodeCount++;
         progress.SetProgress(handledRouteNodeCount,
-                             nodeObjectsMap.size());
+                             (uint32_t)nodeObjectsMap.size());
 
         //
         // Find out if any of the areas/ways at the intersection is routable
