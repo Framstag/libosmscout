@@ -24,11 +24,9 @@ int main()
   uint32_t              out32u2=std::numeric_limits<uint32_t>::max()/2;
   uint32_t              out32u3=std::numeric_limits<uint32_t>::max();
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   uint64_t              out64u1=std::numeric_limits<uint64_t>::min();
   uint64_t              out64u2=std::numeric_limits<uint64_t>::max()/2;
   uint64_t              out64u3=std::numeric_limits<uint64_t>::max();
-#endif
 
   osmscout::FileOffset  outfo1=std::numeric_limits<osmscout::FileOffset>::min();
   osmscout::FileOffset  outfo2=std::numeric_limits<osmscout::FileOffset>::max()/2;
@@ -37,9 +35,7 @@ int main()
   bool                  inBool;
   uint16_t              in16u;
   uint32_t              in32u;
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   uint64_t              in64u;
-#endif
 
   osmscout::FileOffset  info;
 
@@ -67,11 +63,9 @@ int main()
     writer.WriteNumber(out32u2);
     writer.WriteNumber(out32u3);
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     writer.WriteNumber(out64u1);
     writer.WriteNumber(out64u2);
     writer.WriteNumber(out64u3);
-#endif
 
     writer.WriteFileOffset(outfo1);
     writer.WriteFileOffset(outfo2);
@@ -131,7 +125,6 @@ int main()
         errors++;
       }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
       scanner.Read(in64u);
       if (in64u!=out64u1) {
         std::cerr << "Read/Write(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
@@ -149,7 +142,6 @@ int main()
         std::cerr << "Read/Write(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
         errors++;
       }
-#endif
 
       // Read/WriteNumber
 
@@ -189,7 +181,6 @@ int main()
         errors++;
       }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
       scanner.ReadNumber(in64u);
       if (in64u!=out64u1) {
         std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
@@ -207,7 +198,6 @@ int main()
         std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
         errors++;
       }
-#endif
 
       // Read/WriteFileOffset
 

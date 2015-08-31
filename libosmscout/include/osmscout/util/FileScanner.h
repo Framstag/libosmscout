@@ -118,22 +118,16 @@ namespace osmscout {
     bool Read(int8_t& number);
     bool Read(int16_t& number);
     bool Read(int32_t& number);
-#if defined(OSMSCOUT_HAVE_INT64_T)
     bool Read(int64_t& number);
-#endif
 
     bool Read(uint8_t& number);
     bool Read(uint16_t& number);
     bool Read(uint32_t& number);
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Read(uint64_t& number);
-#endif
 
     bool Read(uint16_t& number, size_t bytes);
     bool Read(uint32_t& number, size_t bytes);
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Read(uint64_t& number, size_t bytes);
-#endif
 
     bool Read(ObjectFileRef& ref);
 
@@ -143,15 +137,11 @@ namespace osmscout {
 
     bool ReadNumber(int16_t& number);
     bool ReadNumber(int32_t& number);
-#if defined(OSMSCOUT_HAVE_INT64_T)
     bool ReadNumber(int64_t& number);
-#endif
 
     bool ReadNumber(uint16_t& number);
     bool ReadNumber(uint32_t& number);
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     bool ReadNumber(uint64_t& number);
-#endif
 
     bool ReadCoord(GeoCoord& coord);
     bool ReadConditionalCoord(GeoCoord& coord,

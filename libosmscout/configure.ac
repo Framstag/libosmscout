@@ -51,14 +51,8 @@ AS_IF([test "x$GXX" = xyes],
 
 dnl Support for XintXX_T constants
 
-AC_CHECK_TYPES([int8_t],[AC_DEFINE([OSMSCOUT_HAVE_INT8_T],[1],[int8_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([uint8_t],[AC_DEFINE([OSMSCOUT_HAVE_UINT8_T],[1],[uint8_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([int16_t],[AC_DEFINE([OSMSCOUT_HAVE_INT16_T],[1],[int16_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([uint16_t],[AC_DEFINE([OSMSCOUT_HAVE_UINT16_T],[1],[uint16_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([int32_t],[AC_DEFINE([OSMSCOUT_HAVE_INT32_T],[1],[int32_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([uint32_t],[AC_DEFINE([OSMSCOUT_HAVE_UINT32_T],[1],[uint32_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([int64_t],[AC_DEFINE([OSMSCOUT_HAVE_INT64_T],[1],[int64_t is available])],,[#include <stdint.h>])
-AC_CHECK_TYPES([uint64_t],[AC_DEFINE([OSMSCOUT_HAVE_UINT64_T],[1],[uint64_t is available])],,[#include <stdint.h>])
+AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t],[],[AC_MSG_ERROR("required type is not available")])
+
 AC_CHECK_TYPES([long long],[AC_DEFINE([OSMSCOUT_HAVE_LONG_LONG],[1],[long long is available])],,)
 AC_CHECK_TYPES([unsigned long long],[AC_DEFINE([OSMSCOUT_HAVE_ULONG_LONG],[1],[unsigned long long is available])],,)
 

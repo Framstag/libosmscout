@@ -664,7 +664,6 @@ namespace osmscout {
     return true;
   }
 
-#if defined(OSMSCOUT_HAVE_INT64_T)
   bool FileScanner::Read(int64_t& number)
   {
     if (HasError()) {
@@ -782,7 +781,6 @@ namespace osmscout {
 
     return true;
   }
-#endif
 
   bool FileScanner::Read(uint8_t& number)
   {
@@ -954,7 +952,6 @@ namespace osmscout {
     return true;
   }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileScanner::Read(uint64_t& number)
   {
     if (HasError()) {
@@ -1017,7 +1014,6 @@ namespace osmscout {
 
       return true;
     }
-#endif
 
     unsigned char buffer[8];
 
@@ -1228,7 +1224,6 @@ namespace osmscout {
     return true;
   }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileScanner::Read(uint64_t& number,
                          size_t bytes)
   {
@@ -1375,7 +1370,6 @@ namespace osmscout {
 
     return true;
   }
-#endif
 
   bool FileScanner::Read(ObjectFileRef& ref)
   {
@@ -1832,7 +1826,6 @@ namespace osmscout {
     return true;
   }
 
-#if defined(OSMSCOUT_HAVE_INT64_T)
   bool FileScanner::ReadNumber(int64_t& number)
   {
     if (HasError()) {
@@ -1918,7 +1911,6 @@ namespace osmscout {
 
     return true;
   }
-#endif
 
   bool FileScanner::ReadNumber(uint16_t& number)
   {
@@ -2062,7 +2054,6 @@ namespace osmscout {
     return true;
   }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileScanner::ReadNumber(uint64_t& number)
   {
     if (HasError()) {
@@ -2133,7 +2124,6 @@ namespace osmscout {
 
     return true;
   }
-#endif
 
   bool FileScanner::ReadCoord(GeoCoord& coord)
   {

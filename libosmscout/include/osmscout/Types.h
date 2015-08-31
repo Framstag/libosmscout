@@ -27,8 +27,6 @@
 #include <osmscout/system/Types.h>
 
 namespace osmscout {
-
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   /**
    * \ingroup Util
    * Type to be used for OSM ids (signed numbers with 64 bit size).
@@ -47,25 +45,6 @@ namespace osmscout {
    * Type for describing the position of data within a file.
    */
   typedef uint64_t FileOffset;
-#else
-  /**
-   * \ingroup Util
-   * Type to be used for OSM ids (signed numbers with 64 bit size).
-   */
-  typedef int32_t  OSMId;
-  /**
-   * \ingroup Util
-   * Type to be used for libosmscout internal ids (unsigned numbers with 64 bit
-   * size).
-   */
-  typedef uint32_t Id;
-  typedef uint32_t PageId;
-  /**
-   * \ingroup Util
-   * Type for describing the position of data within a file.
-   */
-  typedef uint32_t FileOffset;
-#endif
 
   /**
    * \ingroup Util
