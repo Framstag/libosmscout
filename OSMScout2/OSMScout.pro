@@ -15,6 +15,15 @@ INCLUDEPATH = src
 release: DESTDIR = release
 debug:   DESTDIR = debug
 
+windows {
+    PKGCONFIG -= libosmscout-map-qt
+    INCLUDEPATH += ../libosmscout-map/include ../libosmscout/include ../libosmscout-map-qt/include
+    CONFIG(debug, debug|release): LIBS += -L"$$PWD/../windows/Debug/" -llibosmscout -llibosmscout-map -llibosmscout-map-qt
+    CONFIG(debug, debug|release): DESTDIR = $$PWD/../windows/Debug
+    CONFIG(release, debug|release): LIBS += -L"$$PWD/../windows/Release/" -llibosmscout -llibosmscout-map -llibosmscout-map-qt
+    CONFIG(release, debug|release): DESTDIR = $$PWD/../windows/Release
+}
+
 OBJECTS_DIR = $$DESTDIR/
 MOC_DIR = $$DESTDIR/
 RCC_DIR = $$DESTDIR/
