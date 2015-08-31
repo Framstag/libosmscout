@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Math.h>
@@ -145,18 +146,6 @@ namespace osmscout {
       return false;
     }
 
-    // Calculate the size of a cell in each index level
-    cellWidth.resize(maxLevel+1);
-    cellHeight.resize(maxLevel+1);
-
-    for (size_t i=0; i<cellWidth.size(); i++) {
-      cellWidth[i]=360.0/pow(2.0,(int)i);
-    }
-
-    for (size_t i=0; i<cellHeight.size(); i++) {
-      cellHeight[i]=180.0/pow(2.0,(int)i);
-    }
-
     return !scanner.HasError() && scanner.Close();
   }
 
@@ -241,52 +230,52 @@ namespace osmscout {
 
         if (cell->value.children[0]!=0) {
           // top left
-          double x=cx*cellWidth[level+1];
-          double y=(cy+1)*cellHeight[level+1];
+          double x=cx*cellDimension[level+1].width;
+          double y=(cy+1)*cellDimension[level+1].height;
 
-          if (!(x>maxlon+cellWidth[level+1]/2 ||
-                y>maxlat+cellHeight[level+1]/2 ||
-                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
-                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+          if (!(x>maxlon+cellDimension[level+1].width/2 ||
+                y>maxlat+cellDimension[level+1].height/2 ||
+                x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
+                y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
             nextCellRefs.push_back(CellRef(cell->value.children[0],cx,cy+1));
           }
         }
 
         if (cell->value.children[1]!=0) {
           // top right
-          double x=(cx+1)*cellWidth[level+1];
-          double y=(cy+1)*cellHeight[level+1];
+          double x=(cx+1)*cellDimension[level+1].width;
+          double y=(cy+1)*cellDimension[level+1].height;
 
-          if (!(x>maxlon+cellWidth[level+1]/2 ||
-                y>maxlat+cellHeight[level+1]/2 ||
-                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
-                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+          if (!(x>maxlon+cellDimension[level+1].width/2 ||
+                y>maxlat+cellDimension[level+1].height/2 ||
+                x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
+                y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
             nextCellRefs.push_back(CellRef(cell->value.children[1],cx+1,cy+1));
           }
         }
 
         if (cell->value.children[2]!=0) {
           // bottom left
-          double x=cx*cellWidth[level+1];
-          double y=cy*cellHeight[level+1];
+          double x=cx*cellDimension[level+1].width;
+          double y=cy*cellDimension[level+1].height;
 
-          if (!(x>maxlon+cellWidth[level+1]/2 ||
-                y>maxlat+cellHeight[level+1]/2 ||
-                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
-                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+          if (!(x>maxlon+cellDimension[level+1].width/2 ||
+                y>maxlat+cellDimension[level+1].height/2 ||
+                x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
+                y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
             nextCellRefs.push_back(CellRef(cell->value.children[2],cx,cy));
           }
         }
 
         if (cell->value.children[3]!=0) {
           // bottom right
-          double x=(cx+1)*cellWidth[level+1];
-          double y=cy*cellHeight[level+1];
+          double x=(cx+1)*cellDimension[level+1].width;
+          double y=cy*cellDimension[level+1].height;
 
-          if (!(x>maxlon+cellWidth[level+1]/2 ||
-                y>maxlat+cellHeight[level+1]/2 ||
-                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
-                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+          if (!(x>maxlon+cellDimension[level+1].width/2 ||
+                y>maxlat+cellDimension[level+1].height/2 ||
+                x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
+                y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
             nextCellRefs.push_back(CellRef(cell->value.children[3],cx+1,cy));
           }
         }

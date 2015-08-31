@@ -807,6 +807,14 @@ namespace osmscout {
 
     bool Merge(std::list<Polygon>& result);
   };
+
+  struct OSMSCOUT_API CellDimension
+  {
+    double width;
+    double height;
+  };
+
+  extern OSMSCOUT_API CellDimension cellDimension[26];
 }
 
 #endif

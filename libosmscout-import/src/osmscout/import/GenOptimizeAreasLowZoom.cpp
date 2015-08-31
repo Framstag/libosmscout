@@ -263,14 +263,9 @@ namespace osmscout
     size_t level=5;//parameter.GetOptimizationMinMag();
 
     while (true) {
-      double                 cellWidth=360.0/pow(2.0,(int)level);
-      double                 cellHeight=180.0/pow(2.0,(int)level);
       std::map<Pixel,size_t> cellFillCount;
 
-      for (std::list<AreaRef>::const_iterator a=areas.begin();
-          a!=areas.end();
-          ++a) {
-        AreaRef area=*a;
+      for (const auto& area : areas) {
         GeoBox  boundingBox;
 
         area->GetBoundingBox(boundingBox);
@@ -280,10 +275,10 @@ namespace osmscout
         // by the way
         // Renormated coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
+        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
+        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
+        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
@@ -373,14 +368,11 @@ namespace osmscout
       return true;
     }
 
-    double                                 cellWidth=360.0/pow(2.0,(int)data.indexLevel);
-    double                                 cellHeight=180.0/pow(2.0,(int)data.indexLevel);
+    double                                 cellWidth=cellDimension[data.indexLevel].width;
+    double                                 cellHeight=cellDimension[data.indexLevel].height;
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
-    for (std::list<AreaRef>::const_iterator a=areas.begin();
-        a!=areas.end();
-        a++) {
-      AreaRef                                 area(*a);
+    for (const auto& area : areas) {
       GeoBox                                  boundingBox;
       FileOffsetFileOffsetMap::const_iterator offset=offsets.find(area->GetFileOffset());
 

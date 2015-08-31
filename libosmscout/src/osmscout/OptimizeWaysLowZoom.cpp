@@ -25,6 +25,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
@@ -63,8 +64,8 @@ namespace osmscout
     data.cellXCount=data.cellXEnd-data.cellXStart+1;
     data.cellYCount=data.cellYEnd-data.cellYStart+1;
 
-    data.cellWidth=360.0/pow(2.0,(int)data.indexLevel);
-    data.cellHeight=180.0/pow(2.0,(int)data.indexLevel);
+    data.cellWidth=cellDimension[data.indexLevel].width;
+    data.cellHeight=cellDimension[data.indexLevel].height;
 
     data.minLon=data.cellXStart*data.cellWidth-180.0;
     data.maxLon=(data.cellXEnd+1)*data.cellWidth-180.0;

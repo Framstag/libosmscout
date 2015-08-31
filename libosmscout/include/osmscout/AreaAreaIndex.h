@@ -104,8 +104,6 @@ namespace osmscout {
     std::string                     datafilename;   //!< Fullpath and name of the data file
     mutable FileScanner             scanner;        //!< Scanner instance for reading this file
 
-    std::vector<double>             cellWidth;      //!< Precalculated cellWidth for each level of the quadtree
-    std::vector<double>             cellHeight;     //!< Precalculated cellHeight for each level of the quadtree
     uint32_t                        maxLevel;       //!< Maximum level in index
     FileOffset                      topLevelOffset; //!< File offset of the top level index entry
 

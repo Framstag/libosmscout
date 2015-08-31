@@ -29,6 +29,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/GeoBox.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {
@@ -199,20 +200,7 @@ namespace osmscout {
                                       Progress& progress)
   {
     FileScanner         scanner;
-    std::vector<double> cellWidth;
-    std::vector<double> cellHeight;
     std::vector<Level>  levels;
-
-    cellWidth.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-    cellHeight.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-
-    for (size_t i=0; i<cellWidth.size(); i++) {
-      cellWidth[i]=360.0/pow(2.0,(int)i);
-    }
-
-    for (size_t i=0; i<cellHeight.size(); i++) {
-      cellHeight[i]=180.0/pow(2.0,(int)i);
-    }
 
     //
     // Writing index file
@@ -304,8 +292,8 @@ namespace osmscout {
 
       size_t level=parameter.GetAreaAreaIndexMaxMag();
       while (true) {
-        if (boundingBox.GetWidth()<=cellWidth[level] &&
-            boundingBox.GetHeight()<=cellHeight[level]) {
+        if (boundingBox.GetWidth()<=cellDimension[level].width &&
+            boundingBox.GetHeight()<=cellDimension[level].height) {
           break;
         }
 
@@ -317,8 +305,8 @@ namespace osmscout {
       }
 
       // Calculate index of tile that contains the geometric center of the area
-      uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellWidth[level]);
-      uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellHeight[level]);
+      uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellDimension[level].width);
+      uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellDimension[level].height);
 
       Entry entry;
 
