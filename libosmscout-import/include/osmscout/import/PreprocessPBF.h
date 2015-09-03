@@ -39,7 +39,7 @@ namespace osmscout {
   {
   private:
     char                             *buffer;
-    uint32_t                         bufferSize;
+    google::protobuf::int32          bufferSize;
     PreprocessorCallback&            callback;
     TagMap                           tagMap;
     std::vector<OSMId>               nodes;
@@ -49,7 +49,7 @@ namespace osmscout {
     bool GetPos(FILE* file,
                 FileOffset& pos) const;
 
-    void AssureBlockSize(uint32_t length);
+    void AssureBlockSize(google::protobuf::int32 length);
 
     bool ReadBlockHeader(Progress& progress,
                          FILE* file,
