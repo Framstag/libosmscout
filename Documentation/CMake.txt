@@ -1,0 +1,7 @@
+libosmscout offers CMakeLists.txt for the overall project and some of the sub
+projects. These files are currently not meant to actuall build the libraries
+and executables but are mainly used to make the projects available to Clion
+(see: https://www.jetbrains.com/clion/).
+
+However if you can add changes to the files so that (part sof) libosmscout
+actually build with these files, patches are welcomed!
