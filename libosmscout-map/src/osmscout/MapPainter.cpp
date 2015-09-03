@@ -1506,11 +1506,11 @@ namespace osmscout {
             a.maxLon=ring.nodes[0].GetLon();
             a.minLon=ring.nodes[0].GetLon();
 
-            for (size_t i=1; i<ring.nodes.size(); i++) {
-              a.minLat=std::min(a.minLat,ring.nodes[i].GetLat());
-              a.maxLat=std::min(a.maxLat,ring.nodes[i].GetLat());
-              a.minLon=std::min(a.minLon,ring.nodes[i].GetLon());
-              a.maxLon=std::min(a.maxLon,ring.nodes[i].GetLon());
+            for (size_t r=1; r<ring.nodes.size(); r++) {
+              a.minLat=std::min(a.minLat,ring.nodes[r].GetLat());
+              a.maxLat=std::min(a.maxLat,ring.nodes[r].GetLat());
+              a.minLon=std::min(a.minLon,ring.nodes[r].GetLon());
+              a.maxLon=std::min(a.maxLon,ring.nodes[r].GetLon());
             }
 
             areaData.push_back(a);
