@@ -192,17 +192,15 @@ namespace osmscout {
     data.reserve(data.size()+offsets.size());
 
     if (!cache.IsActive()) {
-      for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-           offset!=offsets.end();
-           ++offset) {
+      for (const auto& offset : offsets) {
         ValueType value=std::make_shared<N>();
 
-        scanner.SetPos(*offset);
+        scanner.SetPos(offset);
 
         if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
-          std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+          std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
           return false;
@@ -214,21 +212,19 @@ namespace osmscout {
     else {
       typename DataCache::CacheRef cacheRef;
 
-      for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-           offset!=offsets.end();
-           ++offset) {
-        if (!cache.GetEntry(*offset,cacheRef)) {
-          typename DataCache::CacheEntry cacheEntry(*offset);
+      for (const auto& offset : offsets) {
+        if (!cache.GetEntry(offset,cacheRef)) {
+          typename DataCache::CacheEntry cacheEntry(offset);
 
           cacheRef=cache.SetEntry(cacheEntry);
 
-          scanner.SetPos(*offset);
+          scanner.SetPos(offset);
           cacheRef->value=std::make_shared<N>();
 
           if (!ReadData(*typeConfig,
                         scanner,
                         *cacheRef->value)) {
-            std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+            std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
             // TODO: Remove broken entry from cache
             scanner.Close();
             return false;
@@ -258,17 +254,15 @@ namespace osmscout {
     data.reserve(data.size()+offsets.size());
 
     if (!cache.IsActive()) {
-      for (std::list<FileOffset>::const_iterator offset=offsets.begin();
-           offset!=offsets.end();
-           ++offset) {
+      for (const auto& offset : offsets) {
         ValueType value=std::make_shared<N>();
 
-        scanner.SetPos(*offset);
+        scanner.SetPos(offset);
 
         if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
-          std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+          std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
           return false;
@@ -280,21 +274,19 @@ namespace osmscout {
     else {
       typename DataCache::CacheRef cacheRef;
 
-      for (std::list<FileOffset>::const_iterator offset=offsets.begin();
-           offset!=offsets.end();
-           ++offset) {
-        if (!cache.GetEntry(*offset,cacheRef)) {
-          typename DataCache::CacheEntry cacheEntry(*offset);
+      for (const auto& offset : offsets) {
+        if (!cache.GetEntry(offset,cacheRef)) {
+          typename DataCache::CacheEntry cacheEntry(offset);
 
           cacheRef=cache.SetEntry(cacheEntry);
 
-          scanner.SetPos(*offset);
+          scanner.SetPos(offset);
           cacheRef->value=std::make_shared<N>();
 
           if (!ReadData(*typeConfig,
                         scanner,
                         *cacheRef->value)) {
-            std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+            std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
             // TODO: Remove broken entry from cache
             scanner.Close();
             return false;
@@ -324,17 +316,15 @@ namespace osmscout {
     data.reserve(data.size()+offsets.size());
 
     if (!cache.IsActive()) {
-      for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-           offset!=offsets.end();
-           ++offset) {
+      for (const auto& offset : offsets) {
         ValueType value=std::make_shared<N>();
 
-        scanner.SetPos(*offset);
+        scanner.SetPos(offset);
 
         if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
-          std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+          std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
           return false;
@@ -346,21 +336,19 @@ namespace osmscout {
     else {
       typename DataCache::CacheRef cacheRef;
 
-      for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-           offset!=offsets.end();
-           ++offset) {
-        if (!cache.GetEntry(*offset,cacheRef)) {
-          typename DataCache::CacheEntry cacheEntry(*offset);
+      for (const auto& offset : offsets) {
+        if (!cache.GetEntry(offset,cacheRef)) {
+          typename DataCache::CacheEntry cacheEntry(offset);
 
           cacheRef=cache.SetEntry(cacheEntry);
 
-          scanner.SetPos(*offset);
+          scanner.SetPos(offset);
           cacheRef->value=std::make_shared<N>();
 
           if (!ReadData(*typeConfig,
                         scanner,
                         *cacheRef->value)) {
-            std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
+            std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
             // TODO: Remove broken entry from cache
             scanner.Close();
             return false;
@@ -384,10 +372,8 @@ namespace osmscout {
       return false;
     }
 
-    for (typename std::vector<ValueType>::const_iterator v=data.begin();
-            v!=data.end();
-            ++v) {
-      dataMap.insert(std::make_pair((*v)->GetFileOffset(),*v));
+    for (const auto entry : data) {
+      dataMap.insert(std::make_pair(entry->GetFileOffset(),entry));
     }
 
     return true;
