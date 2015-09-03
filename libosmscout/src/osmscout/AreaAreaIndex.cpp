@@ -20,12 +20,9 @@
 #include <osmscout/AreaAreaIndex.h>
 
 #include <algorithm>
-#include <iostream>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
-
-#include <osmscout/system/Math.h>
 
 namespace osmscout {
 
@@ -48,27 +45,30 @@ namespace osmscout {
   bool AreaAreaIndex::GetIndexCell(const TypeConfig& typeConfig,
                                    uint32_t level,
                                    FileOffset offset,
-                                   IndexCache::CacheRef& cacheRef) const
+                                   IndexCell& indexCell,
+                                   std::vector<DataEntry>& data) const
   {
-    if (!indexCache.GetEntry(offset,cacheRef)) {
-      IndexCache::CacheEntry cacheEntry(offset);
+    if (level<maxLevel) {
+      IndexCache::CacheRef cacheRef;
 
-      cacheRef=indexCache.SetEntry(cacheEntry);
+      if (!indexCache.GetEntry(offset,cacheRef)) {
+        IndexCache::CacheEntry cacheEntry(offset);
 
-      if (!scanner.IsOpen()) {
-        if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-          log.Error() << "Error while opening '" << scanner.GetFilename() << "' for reading!";
-          return false;
+        cacheRef=indexCache.SetEntry(cacheEntry);
+
+        if (!scanner.IsOpen()) {
+          if (!scanner.Open(datafilename,
+                            FileScanner::LowMemRandom,
+                            true)) {
+            log.Error() << "Error while opening '" << scanner.GetFilename() << "' for reading!";
+            return false;
+          }
         }
-      }
 
-      if (!scanner.SetPos(offset)) {
-        log.Error() << "Cannot navigate to offset " << offset << " in file '" << scanner.GetFilename() << "'";
-      }
+        if (!scanner.SetPos(offset)) {
+          log.Error() << "Cannot navigate to offset " << offset << " in file '" << scanner.GetFilename() << "'";
+        }
 
-      // Read offsets of children if not in the bottom level
-
-      if (level<maxLevel) {
         for (size_t c=0; c<4; c++) {
           FileOffset childOffset;
 
@@ -84,44 +84,58 @@ namespace osmscout {
             cacheRef->value.children[c]=offset-childOffset;
           }
         }
+
+        if (!scanner.GetPos(cacheRef->value.data)) {
+          log.Error() << "Cannot get current file position in file '" << scanner.GetFilename() << "'";
+          return false;
+        }
+
+        indexCell=cacheRef->value;
       }
       else {
-        for (size_t c=0; c<4; c++) {
-          cacheRef->value.children[c]=0;
-        }
+        indexCell=cacheRef->value;
       }
+    }
+    else {
+      indexCell.data=offset;
 
-      // Now read the area offsets by type in this index entry
+      for (size_t c=0; c<4; c++) {
+        indexCell.children[c]=0;
+      }
+    }
 
-      uint32_t offsetCount;
+    // Now read the area offsets by type in this index entry
 
-      // Areas
+    if (!scanner.SetPos(indexCell.data)) {
+      return false;
+    }
 
-      if (!scanner.ReadNumber(offsetCount)) {
+    uint32_t offsetCount;
+
+    if (!scanner.ReadNumber(offsetCount)) {
+      log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
+      return false;
+    }
+
+    data.resize(offsetCount);
+
+    FileOffset prevOffset=0;
+
+    for (size_t c=0; c<offsetCount; c++) {
+      if (!scanner.ReadTypeId(data[c].type,
+                              typeConfig.GetAreaTypeIdBytes())) {
         log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
-      cacheRef->value.areas.resize(offsetCount);
-
-      FileOffset prevOffset=0;
-
-      for (size_t c=0; c<offsetCount; c++) {
-        if (!scanner.ReadTypeId(cacheRef->value.areas[c].type,
-                                typeConfig.GetAreaTypeIdBytes())) {
-          log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
-
-        if (!scanner.ReadNumber(cacheRef->value.areas[c].offset)) {
-          log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
-
-        cacheRef->value.areas[c].offset+=prevOffset;
-
-        prevOffset=cacheRef->value.areas[c].offset;
+      if (!scanner.ReadNumber(data[c].offset)) {
+        log.Error() << "Cannot read index data for level " << level << " at offset " << offset << " in file '" << scanner.GetFilename() << "'";
+        return false;
       }
+
+      data[c].offset+=prevOffset;
+
+      prevOffset=data[c].offset;
     }
 
     return true;
@@ -162,23 +176,24 @@ namespace osmscout {
     std::vector<CellRef>    cellRefs;     // cells to scan in this level
     std::vector<CellRef>    nextCellRefs; // cells to scan for the next level
     std::vector<FileOffset> newOffsets;   // offsets collected in the current level
+    std::vector<DataEntry>  data;
 
     minlon+=180;
     maxlon+=180;
     minlat+=90;
     maxlat+=90;
 
-    // Clear result datastructures
+    // Clear result data structures
     offsets.clear();
 
     // Make the vector preallocate memory for the expected data size
     // This should void reallocation
-    offsets.reserve(std::min(100000u,(uint32_t)maxCount));
-    newOffsets.reserve(std::min(100000u,(uint32_t)maxCount));
+    offsets.reserve(std::min(20000u,(uint32_t)maxCount));
+    newOffsets.reserve(std::min(20000u,(uint32_t)maxCount));
 
-    cellRefs.reserve(1000);
-
-    nextCellRefs.reserve(1000);
+    cellRefs.reserve(2000);
+    nextCellRefs.reserve(2000);
+    data.reserve(2000);
 
     cellRefs.push_back(CellRef(topLevelOffset,0,0));
 
@@ -196,39 +211,43 @@ namespace osmscout {
          !cellRefs.empty();
          level++) {
       nextCellRefs.clear();
-
       newOffsets.clear();
 
       for (size_t i=0; !stopArea && i<cellRefs.size(); i++) {
-        size_t               cx;
-        size_t               cy;
-        IndexCache::CacheRef cell;
+        size_t    cx;
+        size_t    cy;
+        IndexCell cell;
 
         if (!GetIndexCell(*typeConfig,
                           level,
                           cellRefs[i].offset,
-                          cell)) {
+                          cell,
+                          data)) {
           log.Error() << "Cannot find offset " << cellRefs[i].offset << " in level " << level << " in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
-        if (offsets.size()+
-            newOffsets.size()+
-            cell->value.areas.size()>=maxCount) {
-          stopArea=true;
-          continue;
-        }
+        size_t spaceLeft=maxCount-offsets.size();
 
-        for (const auto entry : cell->value.areas) {
+        for (const auto entry : data) {
           if (types.IsTypeSet(entry.type)) {
             newOffsets.push_back(entry.offset);
+
+            if (offsets.size()>spaceLeft) {
+              stopArea=true;
+              break;
+            }
           }
+        }
+
+        if (stopArea) {
+          continue;
         }
 
         cx=cellRefs[i].x*2;
         cy=cellRefs[i].y*2;
 
-        if (cell->value.children[0]!=0) {
+        if (cell.children[0]!=0) {
           // top left
           double x=cx*cellDimension[level+1].width;
           double y=(cy+1)*cellDimension[level+1].height;
@@ -237,11 +256,11 @@ namespace osmscout {
                 y>maxlat+cellDimension[level+1].height/2 ||
                 x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
                 y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
-            nextCellRefs.push_back(CellRef(cell->value.children[0],cx,cy+1));
+            nextCellRefs.push_back(CellRef(cell.children[0],cx,cy+1));
           }
         }
 
-        if (cell->value.children[1]!=0) {
+        if (cell.children[1]!=0) {
           // top right
           double x=(cx+1)*cellDimension[level+1].width;
           double y=(cy+1)*cellDimension[level+1].height;
@@ -250,11 +269,11 @@ namespace osmscout {
                 y>maxlat+cellDimension[level+1].height/2 ||
                 x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
                 y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
-            nextCellRefs.push_back(CellRef(cell->value.children[1],cx+1,cy+1));
+            nextCellRefs.push_back(CellRef(cell.children[1],cx+1,cy+1));
           }
         }
 
-        if (cell->value.children[2]!=0) {
+        if (cell.children[2]!=0) {
           // bottom left
           double x=cx*cellDimension[level+1].width;
           double y=cy*cellDimension[level+1].height;
@@ -263,11 +282,11 @@ namespace osmscout {
                 y>maxlat+cellDimension[level+1].height/2 ||
                 x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
                 y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
-            nextCellRefs.push_back(CellRef(cell->value.children[2],cx,cy));
+            nextCellRefs.push_back(CellRef(cell.children[2],cx,cy));
           }
         }
 
-        if (cell->value.children[3]!=0) {
+        if (cell.children[3]!=0) {
           // bottom right
           double x=(cx+1)*cellDimension[level+1].width;
           double y=cy*cellDimension[level+1].height;
@@ -276,7 +295,7 @@ namespace osmscout {
                 y>maxlat+cellDimension[level+1].height/2 ||
                 x+cellDimension[level+1].width<minlon-cellDimension[level+1].width/2 ||
                 y+cellDimension[level+1].height<minlat-cellDimension[level+1].height/2)) {
-            nextCellRefs.push_back(CellRef(cell->value.children[3],cx+1,cy));
+            nextCellRefs.push_back(CellRef(cell.children[3],cx+1,cy));
           }
         }
       }

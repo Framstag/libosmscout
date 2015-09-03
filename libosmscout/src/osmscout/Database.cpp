@@ -34,7 +34,7 @@
 namespace osmscout {
 
   DatabaseParameter::DatabaseParameter()
-  : areaAreaIndexCacheSize(1000),
+  : areaAreaIndexCacheSize(5000),
     areaNodeIndexCacheSize(1000),
     nodeCacheSize(1000),
     wayCacheSize(4000),

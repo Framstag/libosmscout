@@ -48,12 +48,12 @@ namespace osmscout {
   {
   private:
     /**
-      An individual index entry in a index cell
+      An individual entry for an area in a quadtree cell
       */
-    struct IndexEntry
+    struct DataEntry
     {
-      TypeId     type;
-      FileOffset offset;
+      TypeId     type;   //!< The type of the area
+      FileOffset offset; //!< The file offset of the area
     };
 
     /**
@@ -61,8 +61,8 @@ namespace osmscout {
       */
     struct IndexCell
     {
-      FileOffset              children[4]; //!< File index of each of the four children, or 0 if there is no child
-      std::vector<IndexEntry> areas;
+      FileOffset children[4]; //!< File index of each of the four children, or 0 if there is no child
+      FileOffset data;        //!< The file index at which the data payload starts
     };
 
     typedef Cache<FileOffset,IndexCell> IndexCache;
@@ -74,9 +74,6 @@ namespace osmscout {
         size_t memory=0;
 
         memory+=sizeof(value);
-
-        // Areas
-        memory+=value.areas.size()*sizeof(IndexEntry);
 
         return memory;
       }
@@ -113,7 +110,8 @@ namespace osmscout {
     bool GetIndexCell(const TypeConfig& typeConfig,
                       uint32_t level,
                       FileOffset offset,
-                      IndexCache::CacheRef& cacheRef) const;
+                      IndexCell& indexCell,
+                      std::vector<DataEntry>& data) const;
 
   public:
     AreaAreaIndex(size_t cacheSize);
