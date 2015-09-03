@@ -26,6 +26,7 @@
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
@@ -107,11 +108,27 @@ namespace osmscout {
     mutable IndexCache              indexCache;     //!< Cached map of all index entries by file offset
 
   private:
-    bool GetIndexCell(const TypeConfig& typeConfig,
-                      uint32_t level,
+    bool GetIndexCell(uint32_t level,
                       FileOffset offset,
                       IndexCell& indexCell,
-                      std::vector<DataEntry>& data) const;
+                      FileOffset& dataOffset) const;
+
+    bool ReadCellData(TypeConfig& typeConfig,
+                      const TypeSet& types,
+                      FileOffset dataOffset,
+                      size_t spaceLeft,
+                      std::vector<FileOffset>& offsets,
+                      bool& stopArea) const;
+
+    void PushCellsForNextLevel(double minlon,
+                               double minlat,
+                               double maxlon,
+                               double maxlat,
+                               const IndexCell & cellIndexData,
+                               const CellDimension& cellDimension,
+                               size_t cx,
+                               size_t cy,
+                               std::vector<CellRef>& nextCellRefs) const;
 
   public:
     AreaAreaIndex(size_t cacheSize);
