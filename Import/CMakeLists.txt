@@ -18,7 +18,6 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/Import.cpp)
 
-
 add_executable(Import ${SOURCE_FILES} ${HEADER_FILES})
 
 target_link_libraries(Import

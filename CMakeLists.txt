@@ -13,3 +13,5 @@ add_subdirectory(libosmscout-map-qt)
 add_subdirectory(libosmscout-map-svg)
 
 add_subdirectory(Import)
+add_subdirectory(Demos)
+add_subdirectory(DumpData)
