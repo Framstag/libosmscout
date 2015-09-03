@@ -13,7 +13,7 @@ include_directories(include
                     ${LIBOSMSCOUT_INCLUDE_DIRS}
                     ${LIBOSMSCOUTMAP_INCLUDE_DIRS}
                     ${LIBCAIRO_INCLUDE_DIRS}
-              q      ${LIBPANGO_INCLUDE_DIRS}
+                    ${LIBPANGO_INCLUDE_DIRS}
                     ${LIBPNG_INCLUDE_DIRS})
 
 set(HEADER_FILES
