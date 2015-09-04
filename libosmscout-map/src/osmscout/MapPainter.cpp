@@ -302,9 +302,9 @@ namespace osmscout {
 
     // Bounding box
     double lonMin=nodes[0].GetLon();
-    double lonMax=nodes[0].GetLon();
+    double lonMax=lonMin;
     double latMin=nodes[0].GetLat();
-    double latMax=nodes[0].GetLat();
+    double latMax=latMin;
 
     for (size_t i=1; i<nodes.size(); i++) {
       lonMin=std::min(lonMin,nodes[i].GetLon());
