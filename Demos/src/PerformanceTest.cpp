@@ -29,6 +29,15 @@
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
 #include <osmscout/MapPainterCairo.h>
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QPixmap>
+#include <QScreen>
+#include <osmscout/MapPainterQt.h>
+#endif
+
+#include <osmscout/MapPainterNoOp.h>
 
 #include <osmscout/system/Math.h>
 
@@ -39,7 +48,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory), drawing the "Ruhrgebiet":
 
-  src/PerformanceTest ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 10 13
+  src/PerformanceTest ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.2 6.5 51.7 8 10 13 480 800 cairo
 */
 
 // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
@@ -61,14 +70,12 @@ int main(int argc, char* argv[])
   std::string   driver;
 
   if (argc!=12) {
-    std::cerr << "DrawMap ";
-    std::cerr << "<map directory> <style-file> ";
-    std::cerr << "<lat_top> <lon_left> <lat_bottom> <lon_right> ";
-    std::cerr << "<start zoom>" << std::endl;
-    std::cerr << "<end zoom>" << std::endl;
-    std::cerr << "<tile width>" << std::endl;
-    std::cerr << "<tile height>" << std::endl;
-    std::cerr << "<driver>" << std::endl;
+    std::cerr << "DrawMap " << std::endl;
+    std::cerr << "  <map directory> <style-file> " << std::endl;
+    std::cerr << "  <lat_top> <lon_left> <lat_bottom> <lon_right> " << std::endl;
+    std::cerr << "  <start zoom> <end zoom>" << std::endl;
+    std::cerr << "  <tile width> <tile height>" << std::endl;
+    std::cerr << "  <cairo|Qt|noop>" << std::endl;
     return 1;
   }
 
@@ -118,30 +125,60 @@ int main(int argc, char* argv[])
   driver=argv[11];
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  cairo_surface_t *surface=NULL;
+  cairo_surface_t * cairoSurface=NULL;
   cairo_t         *cairo=NULL;
+#endif
+
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+  QPixmap         *qtPixmap=NULL;
+  QPainter        *qtPainter=NULL;
+  QApplication    application(argc,argv,true);
 #endif
 
   if (driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
+    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
 
-    if (surface==NULL) {
-      std::cerr << "Cannot create cairo image surface" << std::endl;
+    if (cairoSurface==NULL) {
+      std::cerr << "Cannot create cairo image cairoSurface" << std::endl;
       return 1;
     }
 
-    cairo=cairo_create(surface);
+    cairo=cairo_create(cairoSurface);
 
     if (cairo==NULL) {
-      std::cerr << "Cannot create cairo_t for image surface" << std::endl;
+      std::cerr << "Cannot create cairo_t for image cairoSurface" << std::endl;
       return 1;
     }
 #else
     std::cerr << "Driver 'cairo' is not enabled" << std::endl;
     return 1;
 #endif
+  }
+  else if (driver=="Qt") {
+    std::cout << "Using driver 'Qt'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+    qtPixmap=new QPixmap(tileWidth,tileHeight);
+
+    if (qtPixmap==NULL) {
+      std::cerr << "Cannot create QPixmap" << std::endl;
+      return 1;
+    }
+
+    qtPainter=new QPainter(qtPixmap);
+
+    if (qtPainter==NULL) {
+      std::cerr << "Cannot create QPainter image cairoSurface" << std::endl;
+      return 1;
+    }
+#else
+    std::cerr << "Driver 'Qt' is not enabled" << std::endl;
+  return 1;
+#endif
+  }
+  else if (driver=="noop") {
+    std::cout << "Using driver 'noop'..." << std::endl;
   }
   else {
     std::cerr << "Unsupported driver '" << driver << "'" << std::endl;
@@ -152,15 +189,15 @@ int main(int argc, char* argv[])
 
   //databaseParameter.SetDebugPerformance(true);
 
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
+  osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
   if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
+  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
   if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
@@ -186,8 +223,12 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    osmscout::MapPainterCairo cairoPainter(styleConfig);
+    osmscout::MapPainterCairo cairoMapPainter(styleConfig);
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+    osmscout::MapPainterQt    qtMapPainter(styleConfig);
+#endif
+    osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
 
     osmscout::Magnification   magnification;
 
@@ -240,12 +281,26 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
         if (driver=="cairo") {
           //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-          cairoPainter.DrawMap(projection,
-                               drawParameter,
-                               data,
-                               cairo);
+          cairoMapPainter.DrawMap(projection,
+                                  drawParameter,
+                                  data,
+                                  cairo);
         }
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+        if (driver=="Qt") {
+          //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
+          qtMapPainter.DrawMap(projection,
+                               drawParameter,
+                               data,
+                               qtPainter);
+        }
+#endif
+        if (driver=="noop") {
+          noOpMapPainter.DrawMap(projection,
+                                 drawParameter,
+                                 data);
+        }
 
         drawTimer.Stop();
 
@@ -275,8 +330,9 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
   if (driver=="cairo") {
     cairo_destroy(cairo);
-    cairo_surface_destroy(surface);
+    cairo_surface_destroy(cairoSurface);
   }
 #endif
+
   return 0;
 }

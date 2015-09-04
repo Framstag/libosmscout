@@ -61,6 +61,17 @@ target_link_libraries(LookupText
 
 set_property(TARGET LookupText PROPERTY CXX_STANDARD 11)
 
+#---- PerformanceTest
+
+add_executable(PerformanceTest src/PerformanceTest.cpp)
+
+target_link_libraries(PerformanceTest
+        ${LIBOSMSCOUT_LIBRARIES}
+        ${LIBOSMSCOUTMAP_LIBRARIES}
+        ${LIBOSMSCOUTMAPCAIRO_LIBRARIES})
+
+set_property(TARGET PerformanceTest PROPERTY CXX_STANDARD 11)
+
 #---- Routing
 
 add_executable(Routing src/Routing.cpp)
