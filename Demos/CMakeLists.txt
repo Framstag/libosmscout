@@ -68,7 +68,8 @@ add_executable(PerformanceTest src/PerformanceTest.cpp)
 target_link_libraries(PerformanceTest
         ${LIBOSMSCOUT_LIBRARIES}
         ${LIBOSMSCOUTMAP_LIBRARIES}
-        ${LIBOSMSCOUTMAPCAIRO_LIBRARIES})
+        ${LIBOSMSCOUTMAPCAIRO_LIBRARIES}
+        ${LIBOSMSCOUTMAPQT_LIBRARIES})
 
 set_property(TARGET PerformanceTest PROPERTY CXX_STANDARD 11)
 
