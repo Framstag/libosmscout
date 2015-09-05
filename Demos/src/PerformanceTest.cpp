@@ -258,25 +258,19 @@ int main(int argc, char* argv[])
         osmscout::GeoBox   boundingBox;
         osmscout::GeoCoord center;
 
-        // 3x3 tiles bounding box to make sure, that labels are rendered correctly
-        boundingBox.Set(osmscout::GeoCoord(osmscout::TileYToLat(y,
-                                                                magnification),
-                                           osmscout::TileXToLon(x,
-                                                                magnification)),
-                        osmscout::GeoCoord(osmscout::TileYToLat(y+1,
-                                                                magnification),
-                                           osmscout::TileXToLon(x+1,
-                                                                magnification)));
+        projection.Set(x-1,y-1,
+                       x+1,y+1,
+                       magnification,
+                       DPI,
+                       tileWidth,
+                       tileHeight);
+
+        projection.GetDimensions(boundingBox);
 
         center=boundingBox.GetCenter();
 
         std::cout << "Drawing tile with bounding box " << boundingBox.GetDisplayText() << " and center " << center.GetDisplayText() << std::endl;
 
-        projection.Set(x,y,
-                       magnification,
-                       DPI,
-                       tileWidth,
-                       tileHeight);
 
         osmscout::StopClock dbTimer;
 
