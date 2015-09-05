@@ -38,7 +38,7 @@ namespace osmscout {
 
   void Magnification::SetLevel(uint32_t level)
   {
-    this->magnification=Pow(2,level);
+    this->magnification=pow(2.0,level);
     this->level=level;
   }
 
