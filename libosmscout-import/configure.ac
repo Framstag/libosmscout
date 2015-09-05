@@ -41,12 +41,6 @@ AC_CHECK_FUNCS([mmap])
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-dnl Selfmade tests
-
-dnl if test "x$ac_cv_header_stdint_h" = xyes; then
-dnl   AC_DEFINE([OSMSCOUT_HAVE_STDINT_H],[1],[system header stdint.h is available])
-dnl fi
-
 dnl Check for libosmscout
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)

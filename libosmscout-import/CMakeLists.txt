@@ -10,6 +10,7 @@ pkg_check_modules(ZLIB zlib)
 pkg_check_modules(MARISA maris)
 
 include_directories(include
+                    include/osmscout/import/pbf
                     ${LIBOSMSCOUT_INCLUDE_DIRS}
                     ${XML2_INCLUDE_DIRS}
                     ${PROTOBUF_INCLUDE_DIRS}
@@ -98,11 +99,7 @@ set(SOURCE_FILES
     src/osmscout/import/SortAreaDat.cpp
     src/osmscout/import/SortDat.cpp
     src/osmscout/import/SortNodeDat.cpp
-    src/osmscout/import/SortWayDat.cpp
-    src/protobuf/fileformat.pb.cc
-    src/protobuf/fileformat.pb.h
-    src/protobuf/osmformat.pb.cc
-    src/protobuf/osmformat.pb.h)
+    src/osmscout/import/SortWayDat.cpp)
 
 add_library(libosmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout_import PROPERTY CXX_STANDARD 11)
