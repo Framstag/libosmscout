@@ -144,7 +144,7 @@ namespace osmscout {
     /**
      Create a new cache object with the given max size.
       */
-    Cache(unsigned long maxSize)
+    Cache(size_t maxSize)
      : size(0),
        maxSize(maxSize)
     {
