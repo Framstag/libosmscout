@@ -347,9 +347,9 @@ namespace osmscout {
       return dpi;
     }
 
-    inline bool Set(double lon, double lat,
-             const Magnification& magnification,
-             size_t width, size_t height)
+    inline bool Set(double lon,double lat,
+                    const Magnification& magnification,
+                    size_t width,size_t height)
     {
       return Set(lon,lat,0,magnification,GetDPI(),width,height);
     }
@@ -431,8 +431,6 @@ namespace osmscout {
   protected:
     bool                valid;         //! projection is valid
 
-    size_t              tileX;         //! X coordinate of tile
-    size_t              tileY;         //! Y coordinate of tile
     double              lon;           //! Longitude coordinate of the center of the image
     double              lat;           //! Latitude coordinate of the center of the image
     Magnification       magnification; //! Current magnification
@@ -461,7 +459,11 @@ namespace osmscout {
 #endif
 
   private:
-
+    bool SetInternal(double lonMin,double latMin,
+                     double lonMax,double latMax,
+                     const Magnification& magnification,
+                     double dpi,
+                     size_t width,size_t height);
 
   public:
     TileProjection();
@@ -469,16 +471,6 @@ namespace osmscout {
     inline bool CanBatch() const
     {
       return true;
-    }
-
-    inline size_t GetTileX() const
-    {
-      return tileX;
-    }
-
-    inline size_t GetTileY() const
-    {
-      return tileY;
     }
 
     inline size_t GetWidth() const
@@ -529,6 +521,12 @@ namespace osmscout {
     }
 
     bool Set(size_t tileX, size_t tileY,
+             const Magnification& magnification,
+             double dpi,
+             size_t width, size_t height);
+
+    bool Set(size_t tileAX, size_t tileAY,
+             size_t tileBX, size_t tileBY,
              const Magnification& magnification,
              double dpi,
              size_t width, size_t height);

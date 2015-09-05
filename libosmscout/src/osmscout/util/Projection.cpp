@@ -323,8 +323,6 @@ namespace osmscout {
 
   TileProjection::TileProjection()
   : valid(false),
-    tileX(0),
-    tileY(0),
     magnification(0),
     dpi(96),
     width(256),
@@ -342,14 +340,17 @@ namespace osmscout {
     // no code
   }
 
-  bool TileProjection::Set(size_t tileX, size_t tileY,
-                           const Magnification& magnification,
-                           double dpi,
-                           size_t width, size_t height)
+  bool TileProjection::SetInternal(double lonMin,double latMin,
+                                   double lonMax,double latMax,
+                                   const Magnification& magnification,
+                                   double dpi,
+                                   size_t width,size_t height)
   {
     if (valid &&
-        this->tileX==tileY &&
-        this->tileY==tileY &&
+        this->latMin==latMin &&
+        this->latMax==latMax &&
+        this->lonMin==lonMin &&
+        this->lonMax==lonMax &&
         this->magnification==magnification &&
         this->dpi==dpi &&
         this->width==width &&
@@ -360,22 +361,15 @@ namespace osmscout {
     valid=true;
 
     // Make a copy of the context information
-    this->tileX=tileX;
-    this->tileY=tileY;
     this->magnification=magnification;
     this->dpi=dpi;
     this->width=width;
     this->height=height;
 
-    latMin=TileYToLat(tileY+1,
-                      magnification);
-    latMax=TileYToLat(tileY,
-                      magnification);
-
-    lonMin=TileXToLon(tileX,
-                      magnification);
-    lonMax=TileXToLon(tileX+1,
-                      magnification);
+    this->latMin=latMin;
+    this->latMax=latMax;
+    this->lonMin=lonMin;
+    this->lonMax=lonMax;
 
     lat=(latMin+latMax)/2;
     lon=(lonMin+lonMax)/2;
@@ -397,6 +391,43 @@ namespace osmscout {
 #endif
 
     return true;
+}
+
+  bool TileProjection::Set(size_t tileX, size_t tileY,
+                           const Magnification& magnification,
+                           double dpi,
+                           size_t width, size_t height)
+  {
+    double latMin=TileYToLat(tileY+1,
+                      magnification);
+    double latMax=TileYToLat(tileY,
+                      magnification);
+
+    double lonMin=TileXToLon(tileX,
+                      magnification);
+    double lonMax=TileXToLon(tileX+1,
+                      magnification);
+
+    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
+  }
+
+  bool TileProjection::Set(size_t tileAX, size_t tileAY,
+                           size_t tileBX, size_t tileBY,
+                           const Magnification& magnification,
+                           double dpi,
+                           size_t width,size_t height)
+  {
+    double latMin=TileYToLat(std::max(tileAY,tileBY)+1,
+                             magnification);
+    double latMax=TileYToLat(std::min(tileAY,tileBY),
+                             magnification);
+
+    double lonMin=TileXToLon(std::min(tileAX,tileBX),
+                             magnification);
+    double lonMax=TileXToLon(std::max(tileAX,tileBX)+1,
+                             magnification);
+
+    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
   }
 
   bool TileProjection::GeoIsIn(double lon, double lat) const
