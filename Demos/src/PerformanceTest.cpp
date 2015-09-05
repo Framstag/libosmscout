@@ -62,11 +62,10 @@ int main(int argc, char* argv[])
   std::string   map;
   std::string   style;
   double        latTop,latBottom,lonLeft,lonRight;
-  unsigned long xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
-  unsigned long startZoom;
-  unsigned long endZoom;
-  unsigned long tileWidth;
-  unsigned long tileHeight;
+  unsigned int  startZoom;
+  unsigned int  endZoom;
+  unsigned int  tileWidth;
+  unsigned int  tileHeight;
   std::string   driver;
 
   if (argc!=12) {
@@ -102,22 +101,22 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (sscanf(argv[7],"%lu",&startZoom)!=1) {
+  if (sscanf(argv[7],"%u",&startZoom)!=1) {
     std::cerr << "start zoom is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[8],"%lu",&endZoom)!=1) {
+  if (sscanf(argv[8],"%u",&endZoom)!=1) {
     std::cerr << "end zoom is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[9],"%lu",&tileWidth)!=1) {
+  if (sscanf(argv[9],"%u",&tileWidth)!=1) {
     std::cerr << "tile width is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[10],"%lu",&tileHeight)!=1) {
+  if (sscanf(argv[10],"%u",&tileHeight)!=1) {
     std::cerr << "tile height is not numeric!" << std::endl;
     return 1;
   }
@@ -207,20 +206,39 @@ int main(int argc, char* argv[])
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
 
-  for (size_t zoom=std::min(startZoom,endZoom);
-       zoom<=std::max(startZoom,endZoom);
-       zoom++) {
-    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),zoom);
-    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),zoom);
+  double dbMinTime=std::numeric_limits<double>::max();
+  double dbMaxTime=0.0;
+  double dbTotalTime=0.0;
+
+  double drawMinTime=std::numeric_limits<double>::max();
+  double drawMaxTime=0.0;
+  double drawTotalTime=0.0;
+
+  size_t tilesDrawn=0;
+
+  for (uint32_t level=std::min(startZoom,endZoom);
+       level<=std::max(startZoom,endZoom);
+       level++) {
+    osmscout::Magnification magnification;
+    int                     xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
+
+    magnification.SetLevel(level);
+
+    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),
+                                    magnification);
+    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),
+                                  magnification);
     xTileCount=xTileEnd-xTileStart+1;
 
-    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),zoom);
-    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),zoom);
+    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),
+                                    magnification);
+    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),
+                                  magnification);
+
     yTileCount=yTileEnd-yTileStart+1;
 
-    std::cout << "Drawing zoom " << zoom;
-    //<< ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]";
-    std::cout << std::endl;
+    std::cout << "----------" << std::endl;
+    std::cout << "Drawing level " << level << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
     osmscout::MapPainterCairo cairoMapPainter(styleConfig);
@@ -230,32 +248,27 @@ int main(int argc, char* argv[])
 #endif
     osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
 
-    osmscout::Magnification   magnification;
+    for (int y=yTileStart; y<=yTileEnd; y++) {
+      for (int x=xTileStart; x<=xTileEnd; x++) {
+        osmscout::MapData  data;
+        osmscout::GeoBox   boundingBox;
+        osmscout::GeoCoord center;
 
-    magnification.SetLevel(zoom);
+        // 3x3 tiles bounding box to make sure, that labels are rendered correctly
+        boundingBox.Set(osmscout::GeoCoord(osmscout::TileYToLat(y,
+                                                                magnification),
+                                           osmscout::TileXToLon(x,
+                                                                magnification)),
+                        osmscout::GeoCoord(osmscout::TileYToLat(y+1,
+                                                                magnification),
+                                           osmscout::TileXToLon(x+1,
+                                                                magnification)));
 
-    double dbMinTime=std::numeric_limits<double>::max();
-    double dbMaxTime=0.0;
-    double dbTotalTime=0.0;
+        center=boundingBox.GetCenter();
 
-    double drawMinTime=std::numeric_limits<double>::max();
-    double drawMaxTime=0.0;
-    double drawTotalTime=0.0;
+        std::cout << "Drawing tile with bounding box " << boundingBox.GetDisplayText() << " and center " << center.GetDisplayText() << std::endl;
 
-    for (size_t y=yTileStart; y<=yTileEnd; y++) {
-      for (size_t x=xTileStart; x<=xTileEnd; x++) {
-        double            lat,lon;
-        osmscout::MapData data;
-
-        lat=(osmscout::TileYToLat(y,zoom)+osmscout::TileYToLat(y+1,zoom))/2;
-        lon=(osmscout::TileXToLon(x,zoom)+osmscout::TileXToLon(x+1,zoom))/2;
-
-        //std::cout << "Drawing tile at " << lat << "," << lon << "/";
-        //std::cout << x << "," << y << "/";
-        //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
-
-        projection.Set(lon,
-                       lat,
+        projection.Set(x,y,
                        magnification,
                        DPI,
                        tileWidth,
@@ -304,6 +317,8 @@ int main(int argc, char* argv[])
 
         drawTimer.Stop();
 
+        tilesDrawn++;
+
         double drawTime=drawTimer.GetMilliseconds();
 
         drawMinTime=std::min(drawMinTime,drawTime);
@@ -311,19 +326,21 @@ int main(int argc, char* argv[])
         drawTotalTime+=drawTime;
       }
     }
-
-    std::cout << "GetObjects: ";
-    std::cout << "total: " << dbTotalTime << " msec ";
-    std::cout << "min: " << dbMinTime << " msec ";
-    std::cout << "avg: " << dbTotalTime/(xTileCount*yTileCount) << " msec ";
-    std::cout << "max: " << dbMaxTime << " msec" << std::endl;
-
-    std::cout << "DrawMap: ";
-    std::cout << "total: " << drawTotalTime << " msec ";
-    std::cout << "min: " << drawMinTime << " msec ";
-    std::cout << "avg: " << drawTotalTime/(xTileCount*yTileCount) << " msec ";
-    std::cout << "max: " << drawMaxTime << " msec" << std::endl;
   }
+
+  std::cout << "==========" << std::endl;
+
+  std::cout << "GetObjects: ";
+  std::cout << "total: " << dbTotalTime << " msec ";
+  std::cout << "min: " << dbMinTime << " msec ";
+  std::cout << "avg: " << dbTotalTime/tilesDrawn << " msec ";
+  std::cout << "max: " << dbMaxTime << " msec" << std::endl;
+
+  std::cout << "DrawMap: ";
+  std::cout << "total: " << drawTotalTime << " msec ";
+  std::cout << "min: " << drawMinTime << " msec ";
+  std::cout << "avg: " << drawTotalTime/tilesDrawn << " msec ";
+  std::cout << "max: " << drawMaxTime << " msec" << std::endl;
 
   database->Close();
 
