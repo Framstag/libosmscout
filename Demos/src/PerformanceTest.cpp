@@ -214,6 +214,10 @@ int main(int argc, char* argv[])
   double drawMaxTime=0.0;
   double drawTotalTime=0.0;
 
+  size_t nodeCountTotal=0;
+  size_t wayCountTotal=0;
+  size_t areaCountTotal=0;
+
   size_t tilesDrawn=0;
 
   for (uint32_t level=std::min(startZoom,endZoom);
@@ -281,6 +285,10 @@ int main(int argc, char* argv[])
                                projection,
                                data);
 
+        nodeCountTotal+=data.nodes.size();
+        wayCountTotal+=data.ways.size();
+        areaCountTotal+=data.areas.size();
+
         dbTimer.Stop();
 
         double dbTime=dbTimer.GetMilliseconds();
@@ -329,6 +337,11 @@ int main(int argc, char* argv[])
   }
 
   std::cout << "==========" << std::endl;
+
+  std::cout << "Data: ";
+  std::cout << "nodes: " << nodeCountTotal << " ";
+  std::cout << "way: " << wayCountTotal << " ";
+  std::cout << "areas: " << areaCountTotal << std::endl;
 
   std::cout << "GetObjects: ";
   std::cout << "total: " << dbTotalTime << " msec ";
