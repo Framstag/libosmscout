@@ -73,6 +73,34 @@ target_link_libraries(PerformanceTest
 
 set_property(TARGET PerformanceTest PROPERTY CXX_STANDARD 11)
 
+#---- ResourceConsumption
+
+add_executable(ResourceConsumption src/ResourceConsumption.cpp)
+
+target_link_libraries(ResourceConsumption
+        ${LIBOSMSCOUT_LIBRARIES})
+
+set_property(TARGET ResourceConsumption PROPERTY CXX_STANDARD 11)
+
+#---- ResourceConsumptionQt
+
+add_executable(ResourceConsumptionQt src/ResourceConsumptionQt.cpp)
+
+target_link_libraries(ResourceConsumptionQt
+        ${LIBOSMSCOUT_LIBRARIES}
+        ${LIBOSMSCOUTMAPQT_LIBRARIES})
+
+set_property(TARGET ResourceConsumptionQt PROPERTY CXX_STANDARD 11)
+
+#---- ReverseLocationLookup
+
+add_executable(ReverseLocationLookup src/ReverseLocationLookup.cpp)
+
+target_link_libraries(ReverseLocationLookup
+        ${LIBOSMSCOUT_LIBRARIES})
+
+set_property(TARGET ReverseLocationLookup PROPERTY CXX_STANDARD 11)
+
 #---- Routing
 
 add_executable(Routing src/Routing.cpp)
