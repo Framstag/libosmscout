@@ -49,7 +49,7 @@ namespace osmscout {
     class BatchTransformer
     {
     public:
-      //this should be private, but that would exclude future projection
+      // this should be private, but that would exclude future projection
       // implementors. I don't know a nice way to handle this
       const Projection&  projection;
 #ifdef OSMSCOUT_HAVE_SSE2
@@ -74,7 +74,7 @@ namespace osmscout {
         Flush();
       }
 
-      inline bool GeoToPixel(double lon,
+      inline void GeoToPixel(double lon,
                              double lat,
                              double& x,
                              double& y)
@@ -98,7 +98,7 @@ namespace osmscout {
           return projection.GeoToPixel(lon,lat,x,y);
         }
 #else
-        return projection.GeoToPixel(lon,lat,x,y);
+        projection.GeoToPixel(lon,lat,x,y);
 #endif
       }
 
@@ -209,13 +209,13 @@ namespace osmscout {
     /**
      * Converts a geo coordinate to a pixel coordinate
      */
-    virtual bool GeoToPixel(double lon, double lat,
+    virtual void GeoToPixel(double lon, double lat,
                             double& x, double& y) const = 0;
 
     /**
      * Converts a geo coordinate to a pixel coordinate
      */
-    virtual bool GeoToPixel(const GeoCoord& coord,
+    virtual void GeoToPixel(const GeoCoord& coord,
                             double& x, double& y) const = 0;
 
     /**
@@ -227,6 +227,16 @@ namespace osmscout {
      * Returns the size of a pixel in meter
      */
     virtual double GetPixelSize() const = 0;
+
+    /**
+     * Returns the number of on screen pixel for one meter on the ground
+     */
+    virtual double GetMeterInPixel() const = 0;
+
+    /**
+     * Returns the number of on screen millimeters for one meter on the ground
+     */
+    virtual double GetMeterInMM() const = 0;
 
     /**
      * Convert a width in mm into the equivalent pixel size based on the given DPI
@@ -256,7 +266,7 @@ namespace osmscout {
 
 
   protected:
-    virtual bool GeoToPixel(const BatchTransformer& transformData) const = 0;
+    virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
 
     friend class BatchTransformer;
   };
@@ -274,30 +284,32 @@ namespace osmscout {
   class OSMSCOUT_API MercatorProjection : public Projection
   {
   protected:
-    bool                valid;          //! projection is valid
+    bool                valid;          //!< projection is valid
 
-    double              lon;            //! Longitude coordinate of the center of the image
-    double              lat;            //! Latitude coordinate of the center of the image
-    double              angle;          //! Display rotation angle
-    Magnification       magnification;  //! Current magnification
-    double              dpi;            //! Screen DPI
-    size_t              width;          //! Width of image
-    size_t              height;         //! Height of image
+    double              lon;            //!< Longitude coordinate of the center of the image
+    double              lat;            //!< Latitude coordinate of the center of the image
+    double              angle;          //!< Display rotation angle
+    Magnification       magnification;  //!< Current magnification
+    double              dpi;            //!< Screen DPI
+    size_t              width;          //!< Width of image
+    size_t              height;         //!< Height of image
 
-    double              lonMin;         //! Longitude of the upper left corner of the image
-    double              latMin;         //! Latitude of the upper left corner of the image
-    double              lonMax;         //! Longitude of the lower right corner of the image
-    double              latMax;         //! Latitude of the lower right corner of the image
+    double              lonMin;         //!< Longitude of the upper left corner of the image
+    double              latMin;         //!< Latitude of the upper left corner of the image
+    double              lonMax;         //!< Longitude of the lower right corner of the image
+    double              latMax;         //!< Latitude of the lower right corner of the image
 
-    double              latOffset;      //! Absolute and untransformed screen position of lat coordinate
+    double              latOffset;      //!< Absolute and untransformed screen position of lat coordinate
     double              angleSin;
     double              angleCos;
     double              angleNegSin;
     double              angleNegCos;
 
     double              scale;
-    double              scaleGradtorad; //! Precalculated scale*Gradtorad
-    double              pixelSize;      //! Size of a pixel in meter
+    double              scaleGradtorad; //!< Precalculated scale*Gradtorad
+    double              pixelSize;      //!< Size of a pixel in meter
+    double              meterInPixel;   //!< Number of on screen pixel for one meter on the ground
+    double              meterInMM;      //!< Number of on screen millimeters for one meter on the ground
 
   public:
     MercatorProjection();
@@ -383,15 +395,28 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    bool GeoToPixel(double lon, double lat,
+    void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    bool GeoToPixel(const GeoCoord& coord,
+    void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     bool GetDimensions(GeoBox& boundingBox) const;
 
-    double GetPixelSize() const;
+    inline double GetPixelSize() const
+    {
+      return pixelSize;
+    }
+
+    inline double GetMeterInPixel() const
+    {
+      return meterInPixel;
+    }
+
+    inline double GetMeterInMM() const
+    {
+      return meterInMM;
+    }
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -417,7 +442,7 @@ namespace osmscout {
     }
 
   protected:
-     bool GeoToPixel(const BatchTransformer& transformData) const;
+     void GeoToPixel(const BatchTransformer& transformData) const;
   };
 
   /**
@@ -429,25 +454,27 @@ namespace osmscout {
   class OSMSCOUT_API TileProjection : public Projection
   {
   protected:
-    bool                valid;         //! projection is valid
+    bool                valid;          //!< projection is valid
 
-    double              lon;           //! Longitude coordinate of the center of the image
-    double              lat;           //! Latitude coordinate of the center of the image
-    Magnification       magnification; //! Current magnification
-    double              dpi;           //! Screen DPI
-    size_t              width;         //! Width of image
-    size_t              height;        //! Height of image
+    double              lon;            //!< Longitude coordinate of the center of the image
+    double              lat;            //!< Latitude coordinate of the center of the image
+    Magnification       magnification;  //!< Current magnification
+    double              dpi;            //!< Screen DPI
+    size_t              width;          //!< Width of image
+    size_t              height;         //!< Height of image
 
-    double              lonMin;        //! Longitude of the upper left corner of the image
-    double              latMin;        //! Latitude of the upper left corner of the image
-    double              lonMax;        //! Longitude of the lower right corner of the image
-    double              latMax;        //! Latitude of the lower right corner of the image
+    double              lonMin;         //!< Longitude of the upper left corner of the image
+    double              latMin;         //!< Latitude of the upper left corner of the image
+    double              lonMax;         //!< Longitude of the lower right corner of the image
+    double              latMax;         //!< Latitude of the lower right corner of the image
 
     double              lonOffset;
     double              latOffset;
     double              scale;
-    double              scaleGradtorad; //!Precalculated scale*Gradtorad
-    double              pixelSize;     //! Size of a pixel in meter
+    double              scaleGradtorad; //!< Precalculated scale*Gradtorad
+    double              pixelSize;      //!< Size of a pixel in meter
+    double              meterInPixel;   //!< Number of on screen pixel for one meter on the ground
+    double              meterInMM;      //!< Number of on screen millimeters for one meter on the ground
 
 #ifdef OSMSCOUT_HAVE_SSE2
       //some extra vars for special sse needs
@@ -538,18 +565,32 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    bool GeoToPixel(double lon, double lat,
+    void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    bool GeoToPixel(const GeoCoord& coord,
+    void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     bool GetDimensions(GeoBox& boundingBox) const;
 
-  protected:
-     bool GeoToPixel(const BatchTransformer& transformData) const;
+    inline double GetPixelSize() const
+    {
+      return pixelSize;
+    }
 
-     double GetPixelSize() const;
+    inline double GetMeterInPixel() const
+    {
+      return meterInPixel;
+    }
+
+    inline double GetMeterInMM() const
+    {
+      return meterInMM;
+    }
+
+  protected:
+
+     void GeoToPixel(const BatchTransformer& transformData) const;
   };
 }
 

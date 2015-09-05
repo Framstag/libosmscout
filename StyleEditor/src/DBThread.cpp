@@ -429,19 +429,18 @@ bool DBThread::RenderMap(QPainter& painter,
   double dx=0;
   double dy=0;
   if (request.lon!=finishedLon || request.lat!=finishedLat) {
-      double rx,ry,fx,fy;
+    double rx,ry,fx,fy;
 
-      if (projection.GeoToPixel(request.lon,
-                                request.lat,
-                                rx,
-                                ry) &&
-          projection.GeoToPixel(finishedLon,
-                                finishedLat,
-                                fx,
-                                fy)) {
-          dx=fx-rx;
-          dy=fy-ry;
-      }
+    projection.GeoToPixel(request.lon,
+                          request.lat,
+                          rx,
+                          ry);
+    projection.GeoToPixel(finishedLon,
+                          finishedLat,
+                          fx,
+                          fy);
+    dx=fx-rx;
+    dy=fy-ry;
   }
 
   if (dx!=0 ||

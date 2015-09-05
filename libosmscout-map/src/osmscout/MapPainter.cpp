@@ -318,24 +318,21 @@ namespace osmscout {
     double y1;
     double y2;
 
-    if (!projection.GeoToPixel(lonMin,
-                               latMin,
-                               x1,
-                               y1)) {
-      return false;
-    }
+    projection.GeoToPixel(lonMin,
+                          latMin,
+                          x1,
+                          y1);
 
-    if (!projection.GeoToPixel(lonMax,
-                               latMax,
-                               x2,
-                               y2)) {
-      return false;
-    }
+    projection.GeoToPixel(lonMax,
+                          latMax,
+                          x2,
+                          y2);
 
     double xMin=std::min(x1,x2);
     double xMax=std::max(x1,x2);
     double yMin=std::min(y1,y2);
     double yMax=std::max(y1,y2);
+
 
     xMin-=pixelOffset;
     yMin-=pixelOffset;

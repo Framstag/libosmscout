@@ -221,7 +221,7 @@ namespace osmscout {
 
     rings.resize(ringCount);
 
-    rings[0].featureValueBuffer=featureValueBuffer;
+    rings[0].featureValueBuffer=std::move(featureValueBuffer);
 
     if (ringCount>1) {
       rings[0].ring=masterRingId;

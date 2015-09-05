@@ -256,7 +256,6 @@ int main(int argc, char* argv[])
       for (int x=xTileStart; x<=xTileEnd; x++) {
         osmscout::MapData  data;
         osmscout::GeoBox   boundingBox;
-        osmscout::GeoCoord center;
 
         projection.Set(x-1,y-1,
                        x+1,y+1,
@@ -267,9 +266,7 @@ int main(int argc, char* argv[])
 
         projection.GetDimensions(boundingBox);
 
-        center=boundingBox.GetCenter();
-
-        std::cout << "Drawing tile with bounding box " << boundingBox.GetDisplayText() << " and center " << center.GetDisplayText() << std::endl;
+        std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
 
 
         osmscout::StopClock dbTimer;
