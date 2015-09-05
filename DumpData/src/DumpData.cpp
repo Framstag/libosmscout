@@ -225,6 +225,25 @@ static bool ParseArguments(int argc,
   return true;
 }
 
+static uint32_t CalculateCellLevel(const osmscout::GeoBox& boundingBox)
+{
+  size_t level=25;
+  while (true) {
+    if (boundingBox.GetWidth()<=osmscout::cellDimension[level].width &&
+        boundingBox.GetHeight()<=osmscout::cellDimension[level].height) {
+      break;
+    }
+
+    if (level==0) {
+      break;
+    }
+
+    level--;
+  }
+
+  return level;
+}
+
 static void DumpIndent(size_t indent)
 {
   for (size_t i=1; i<=indent; i++) {
@@ -450,11 +469,19 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
                     const osmscout::WayRef way,
                     osmscout::Id id)
 {
+  osmscout::GeoBox   boundingBox;
+  osmscout::GeoCoord center;
+
+  way->GetBoundingBox(boundingBox);
+
   std::cout << "Way {" << std::endl;
 
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
   std::cout << "  type: " << way->GetType()->GetName() << std::endl;
+  std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
+  std::cout << "  center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
+  std::cout << "  cell level: " << CalculateCellLevel(boundingBox) << std::endl;
 
   std::cout << std::endl;
 
@@ -495,6 +522,7 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
   std::cout << "  type: " << area->GetType()->GetName() << std::endl;
   std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
   std::cout << "  center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
+  std::cout << "  cell level: " << CalculateCellLevel(boundingBox) << std::endl;
 
   std::cout << std::endl;
 
