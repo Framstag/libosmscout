@@ -1139,7 +1139,6 @@ SYMBOL speed_camera
 
  [MAG state-] {
    [TYPE landuse_commercial] AREA { color: @commercialColor; }
-   [TYPE landuse_basin] AREA { color: @waterColor; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
    [TYPE landuse_farm,
          landuse_farmland] AREA { color: @farmColor; }
@@ -1158,6 +1157,7 @@ SYMBOL speed_camera
  }
 
  [MAG city-] {
+   [TYPE landuse_basin] AREA { color: @waterColor; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE landuse_farmyard] AREA { color: @farmyardColor; }
    [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
    [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
