@@ -401,16 +401,12 @@ namespace osmscout {
 
   bool TileProjection::GeoIsIn(double lon, double lat) const
   {
-    assert(valid);
-
     return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
   }
 
   bool TileProjection::GeoIsIn(double lonMin, double latMin,
                                double lonMax, double latMax) const
   {
-    assert(valid);
-
     return !(lonMin>this->lonMax ||
              lonMax<this->lonMin ||
              latMin>this->latMax ||
@@ -420,8 +416,6 @@ namespace osmscout {
   bool TileProjection::PixelToGeo(double x, double y,
                                   double& lon, double& lat) const
   {
-    assert(valid);
-
     lon=(x+lonOffset)/(scale*gradtorad);
     lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
 
@@ -433,8 +427,6 @@ namespace osmscout {
     bool TileProjection::GeoToPixel(double lon, double lat,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=lon*scaleGradtorad-lonOffset;
       y=height-(scale*atanh_sin_pd(lat*gradtorad)-latOffset);
 
@@ -444,8 +436,6 @@ namespace osmscout {
     bool TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=coord.GetLon()*scaleGradtorad-lonOffset;
       y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
 
@@ -473,8 +463,6 @@ namespace osmscout {
     bool TileProjection::GeoToPixel(double lon, double lat,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=lon*scaleGradtorad-lonOffset;
       y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
 
@@ -484,8 +472,6 @@ namespace osmscout {
     bool TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=coord.GetLon()*scaleGradtorad-lonOffset;
       y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
 
