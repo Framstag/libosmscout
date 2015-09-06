@@ -292,9 +292,9 @@ namespace osmscout {
     }
   }
 
-  bool MapPainter::IsVisible(const Projection& projection,
-                             const std::vector<GeoCoord>& nodes,
-                             double pixelOffset) const
+  bool MapPainter::IsVisibleArea(const Projection& projection,
+                                 const std::vector<GeoCoord>& nodes,
+                                 double pixelOffset) const
   {
     if (nodes.empty()) {
       return false;
@@ -333,6 +333,63 @@ namespace osmscout {
     double yMin=std::min(y1,y2);
     double yMax=std::max(y1,y2);
 
+    if (x2-x1<=oneMMInPixel &&
+        y2-y1<=oneMMInPixel) {
+      return false;
+    }
+
+    xMin-=pixelOffset;
+    yMin-=pixelOffset;
+
+    xMax+=pixelOffset;
+    yMax+=pixelOffset;
+
+    return !(xMin>=projection.GetWidth() ||
+             yMin>=projection.GetHeight() ||
+             xMax<0 ||
+             yMax<0);
+  }
+
+  bool MapPainter::IsVisibleWay(const Projection& projection,
+                                const std::vector<GeoCoord>& nodes,
+                                double pixelOffset) const
+  {
+    if (nodes.empty()) {
+      return false;
+    }
+
+    // Bounding box
+    double lonMin=nodes[0].GetLon();
+    double lonMax=lonMin;
+    double latMin=nodes[0].GetLat();
+    double latMax=latMin;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      lonMin=std::min(lonMin,nodes[i].GetLon());
+      lonMax=std::max(lonMax,nodes[i].GetLon());
+      latMin=std::min(latMin,nodes[i].GetLat());
+      latMax=std::max(latMax,nodes[i].GetLat());
+    }
+
+    double x1;
+    double x2;
+    double y1;
+    double y2;
+
+    projection.GeoToPixel(lonMin,
+                          latMin,
+                          x1,
+                          y1);
+
+    projection.GeoToPixel(lonMax,
+                          latMax,
+                          x2,
+                          y2);
+
+    double xMin=std::min(x1,x2);
+    double xMax=std::max(x1,x2);
+    double yMin=std::min(y1,y2);
+    double yMax=std::max(y1,y2);
 
     xMin-=pixelOffset;
     yMin-=pixelOffset;
@@ -1469,9 +1526,9 @@ namespace osmscout {
 
             foundRing=true;
 
-            if (!IsVisible(projection,
-                           ring.nodes,
-                           fillStyle->GetBorderWidth()/2)) {
+            if (!IsVisibleArea(projection,
+                               ring.nodes,
+                               fillStyle->GetBorderWidth()/2)) {
               continue;
             }
 
@@ -1584,9 +1641,9 @@ namespace osmscout {
       data.ref=ref;
       data.lineWidth=lineWidth;
 
-      if (!IsVisible(projection,
-                    nodes,
-                    lineWidth/2)) {
+      if (!IsVisibleWay(projection,
+                        nodes,
+                        lineWidth/2)) {
         continue;
       }
 
@@ -1722,6 +1779,7 @@ namespace osmscout {
     labelSpace=projection.ConvertWidthToPixel(parameter.GetLabelSpace());
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
     sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
+    oneMMInPixel=projection.ConvertWidthToPixel(1);
 
     GetFontHeight(projection,
                   parameter,

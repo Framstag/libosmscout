@@ -276,6 +276,7 @@ namespace osmscout {
     double                       shieldLabelSpace;
     double                       sameLabelSpace;
     double                       standardFontSize;
+    double                       oneMMInPixel;
     //@}
 
   private:
@@ -408,9 +409,13 @@ namespace osmscout {
        Useful global helper functions.
      */
     //@{
-    bool IsVisible(const Projection& projection,
-                   const std::vector<GeoCoord>& nodes,
-                   double pixelOffset) const;
+    bool IsVisibleArea(const Projection& projection,
+                       const std::vector<GeoCoord>& nodes,
+                       double pixelOffset) const;
+
+    bool IsVisibleWay(const Projection& projection,
+                      const std::vector<GeoCoord>& nodes,
+                      double pixelOffset) const;
 
     void Transform(const Projection& projection,
                    const MapParameter& parameter,
