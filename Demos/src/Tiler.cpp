@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
         projection.GetDimensions(boundingBox1);
         center=boundingBox1.GetCenter();
 
-        std::cout << "Drawing tile with bounding box " << boundingBox1.GetDisplayText() << " and center " << center.GetDisplayText() << std::endl;
+        std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox1.GetDisplayText() << std::endl;
 
         mapService->GetObjects(searchParameter,
                                projection.GetMagnification(),
