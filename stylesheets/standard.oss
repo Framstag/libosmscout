@@ -806,6 +806,14 @@ SYMBOL speed_camera
      [SIZE 8m <0.1mm:3px] WAY { color: #999999; displayWidth: 0.1mm;}
    }
 
+   [TYPE highway_living_street] {
+     [SIZE 8m 0.1mm:3px<] {
+       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @livingStreetColor; width: 8m;}
+     }
+     [SIZE 8m <0.1mm:3px] WAY { color: @livingStreetColor; displayWidth: 0.1mm;}
+   }
+
    [TYPE highway_service] AREA { color: @roadColor; borderColor: @roadBColor; borderWidth: 0.1mm; }
 
    [TYPE highway_construction] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
@@ -828,14 +836,6 @@ SYMBOL speed_camera
    [TYPE highway_pedestrian] {
      [SIZE 8m 0.1mm:3px<] WAY {color: #ebeaea; width: 8m; }
      [SIZE 8m <0.1mm:3px] WAY {color: #ebeaea; displayWidth: 0.1mm; }
-   }
-
-   [TYPE highway_living_street] {
-     [SIZE 8m 0.1mm:3px<] {
-       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-       WAY { color: @livingStreetColor; width: 8m;}
-     }
-     [SIZE 8m <0.1mm:3px] WAY { color: @livingStreetColor; displayWidth: 0.1mm;}
    }
 
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
