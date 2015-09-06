@@ -757,6 +757,7 @@ namespace osmscout {
     RegisterFeature(featureRoundabout);
 
     RegisterFeature(std::make_shared<EleFeature>());
+    RegisterFeature(std::make_shared<BuildingFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
@@ -1553,6 +1554,8 @@ namespace osmscout {
       }
 
       RegisterType(typeInfo);
+
+      std::cout << typeInfo->GetName() << " " << typeInfo->GetAreaId() << std::endl;
     }
 
     bool result=!scanner.HasError() && scanner.Close();
