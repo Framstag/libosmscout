@@ -41,6 +41,24 @@ namespace osmscout {
    */
   class OSMSCOUT_API Projection
   {
+  protected:
+    double        lon;            //!< Longitude coordinate of the center of the image
+    double        lat;            //!< Latitude coordinate of the center of the image
+    double        angle;          //!< Display rotation angle
+    Magnification magnification;  //!< Current magnification
+    double        dpi;            //!< Screen DPI
+    size_t        width;          //!< Width of image
+    size_t        height;         //!< Height of image
+
+    double        lonMin;         //!< Longitude of the upper left corner of the image
+    double        latMin;         //!< Latitude of the upper left corner of the image
+    double        lonMax;         //!< Longitude of the lower right corner of the image
+    double        latMax;         //!< Latitude of the lower right corner of the image
+
+    double        pixelSize;      //!< Size of a pixel in meter
+    double        meterInPixel;   //!< Number of on screen pixel for one meter on the ground
+    double        meterInMM;      //!< Number of on screen millimeters for one meter on the ground
+
   public:
 
     /**
@@ -116,127 +134,127 @@ namespace osmscout {
       }
     };
 
+    Projection();
     virtual ~Projection();
 
     virtual bool CanBatch() const = 0;
 
-    virtual GeoCoord GetCenter() const = 0;
+    inline GeoCoord GetCenter() const
+    {
+      return GeoCoord(lat,lon);
+    }
 
     /**
      * Returns longitude coordinate of the region center.
      *
      */
-    virtual double GetLon() const = 0;
+    inline double GetLon() const
+    {
+      return lon;
+    }
 
     /**
      * Returns latitude coordinate of the region center.
      *
      */
-    virtual double GetLat() const = 0;
+    inline double GetLat() const
+    {
+      return lat;
+    }
 
     /**
      * Returns the angle ([0..2*PI[) of the display in relation to the north. A degree of 0 means
      * north is to the top, a degree of PI, renders with the south to the top of the display).
      */
-    virtual double GetAngle() const = 0;
+    inline double GetAngle() const
+    {
+      return angle;
+    }
 
     /**
      * Returns the width of the screen
      */
-    virtual size_t GetWidth() const = 0;
+    inline size_t GetWidth() const
+    {
+      return width;
+    }
+
     /**
      * Returns the height of the screen
      */
-    virtual size_t GetHeight() const = 0;
+    inline size_t GetHeight() const
+    {
+      return height;
+    }
 
     /**
      * Return the magnification as part of the projection.
      */
-    virtual Magnification GetMagnification() const = 0;
+    inline Magnification GetMagnification() const
+    {
+      return magnification;
+    }
 
     /**
      * Return the DPI as part of the projection.
      */
-    virtual double GetDPI() const = 0;
-
-    /**
-     * Set the "screen" for the projection.
-     *
-     * @param lon Longitude coordinate of the center of the screen/image
-     * @param lat Latitude coordinate of the center of the screen/image
-     * @param magnification Magnification to apply
-     * @param width Width of screen/image
-     * @param height Height of screen/image
-     */
-    /*
-    virtual bool Set(double lon, double lat,
-                     const Magnification& magnification,
-                     size_t width, size_t height) = 0;*/
-
-    /**
-     * Set the "screen" for the projection.
-     *
-     * @param lon Longitude coordinate of the center of the screen/image
-     * @param lat Latitude coordinate of the center of the screen/image
-     * @param magnification Magnification to apply
-     * @param dpi DPI of the screen/image
-     * @param width Width of screen/image
-     * @param height Height of screen/image
-     */
-    /*
-    virtual bool Set(double lon, double lat,
-                     const Magnification& magnification,
-                     double dpi,
-                     size_t width, size_t height) = 0;*/
+    inline double GetDPI() const
+    {
+      return dpi;
+    }
 
     /**
      * Returns true, if the given geo coordinate is in the bounding box
      */
-    virtual bool GeoIsIn(double lon, double lat) const = 0;
+    inline bool GeoIsIn(double lon, double lat) const
+    {
+      return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
+    }
 
     /**
      * Returns true, if the given bounding box is completely within the projection bounding box
      */
-    virtual bool GeoIsIn(double lonMin, double latMin,
-                         double lonMax, double latMax) const = 0;
-
-    /**
-     * Converts a pixel coordinate to a geo coordinate
-     */
-    virtual bool PixelToGeo(double x, double y,
-                            double& lon, double& lat) const = 0;
-
-    /**
-     * Converts a geo coordinate to a pixel coordinate
-     */
-    virtual void GeoToPixel(double lon, double lat,
-                            double& x, double& y) const = 0;
-
-    /**
-     * Converts a geo coordinate to a pixel coordinate
-     */
-    virtual void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const = 0;
+    inline bool GeoIsIn(double lonMin, double latMin,
+                         double lonMax, double latMax) const
+    {
+      return !(lonMin>this->lonMax ||
+               lonMax<this->lonMin ||
+               latMin>this->latMax ||
+               latMax<this->latMin);
+    }
 
     /**
      * Returns the bounding box of the area covered
      */
-    virtual bool GetDimensions(GeoBox& boundingBox) const = 0;
+    inline void GetDimensions(GeoBox& boundingBox) const
+    {
+      boundingBox.Set(GeoCoord(latMin,lonMin),
+                      GeoCoord(latMax,lonMax));
+    }
 
     /**
      * Returns the size of a pixel in meter
      */
-    virtual double GetPixelSize() const = 0;
+    inline double GetPixelSize() const
+    {
+      return pixelSize;
+    }
 
     /**
      * Returns the number of on screen pixel for one meter on the ground
      */
-    virtual double GetMeterInPixel() const = 0;
+    inline double GetMeterInPixel() const
+    {
+      return meterInPixel;
+    }
 
     /**
      * Returns the number of on screen millimeters for one meter on the ground
      */
-    virtual double GetMeterInMM() const = 0;
+    inline double GetMeterInMM() const
+    {
+      return meterInMM;
+    }
 
     /**
      * Convert a width in mm into the equivalent pixel size based on the given DPI
@@ -264,6 +282,23 @@ namespace osmscout {
       return pixel*25.4/GetDPI();
     }
 
+    /**
+     * Converts a pixel coordinate to a geo coordinate
+     */
+    virtual bool PixelToGeo(double x, double y,
+                            double& lon, double& lat) const = 0;
+
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual void GeoToPixel(double lon, double lat,
+                            double& x, double& y) const = 0;
+
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const = 0;
 
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
@@ -286,19 +321,6 @@ namespace osmscout {
   protected:
     bool                valid;          //!< projection is valid
 
-    double              lon;            //!< Longitude coordinate of the center of the image
-    double              lat;            //!< Latitude coordinate of the center of the image
-    double              angle;          //!< Display rotation angle
-    Magnification       magnification;  //!< Current magnification
-    double              dpi;            //!< Screen DPI
-    size_t              width;          //!< Width of image
-    size_t              height;         //!< Height of image
-
-    double              lonMin;         //!< Longitude of the upper left corner of the image
-    double              latMin;         //!< Latitude of the upper left corner of the image
-    double              lonMax;         //!< Longitude of the lower right corner of the image
-    double              latMax;         //!< Latitude of the lower right corner of the image
-
     double              latOffset;      //!< Absolute and untransformed screen position of lat coordinate
     double              angleSin;
     double              angleCos;
@@ -307,9 +329,6 @@ namespace osmscout {
 
     double              scale;
     double              scaleGradtorad; //!< Precalculated scale*Gradtorad
-    double              pixelSize;      //!< Size of a pixel in meter
-    double              meterInPixel;   //!< Number of on screen pixel for one meter on the ground
-    double              meterInMM;      //!< Number of on screen millimeters for one meter on the ground
 
   public:
     MercatorProjection();
@@ -317,46 +336,6 @@ namespace osmscout {
     inline bool CanBatch() const
     {
       return false;
-    }
-
-    inline GeoCoord GetCenter() const
-    {
-      return GeoCoord(lat,lon);
-    }
-
-    inline double GetLon() const
-    {
-      return lon;
-    }
-
-    inline double GetLat() const
-    {
-      return lat;
-    }
-
-    inline double GetAngle() const
-    {
-      return angle;
-    }
-
-    inline size_t GetWidth() const
-    {
-      return width;
-    }
-
-    inline size_t GetHeight() const
-    {
-      return height;
-    }
-
-    inline Magnification GetMagnification() const
-    {
-      return magnification;
-    }
-
-    inline double GetDPI() const
-    {
-      return dpi;
     }
 
     inline bool Set(double lon,double lat,
@@ -388,10 +367,6 @@ namespace osmscout {
              double dpi,
              size_t width, size_t height);
 
-    bool GeoIsIn(double lon, double lat) const;
-    bool GeoIsIn(double lonMin, double latMin,
-                 double lonMax, double latMax) const;
-
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
@@ -400,23 +375,6 @@ namespace osmscout {
 
     void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
-
-    bool GetDimensions(GeoBox& boundingBox) const;
-
-    inline double GetPixelSize() const
-    {
-      return pixelSize;
-    }
-
-    inline double GetMeterInPixel() const
-    {
-      return meterInPixel;
-    }
-
-    inline double GetMeterInMM() const
-    {
-      return meterInMM;
-    }
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -456,25 +414,10 @@ namespace osmscout {
   protected:
     bool                valid;          //!< projection is valid
 
-    double              lon;            //!< Longitude coordinate of the center of the image
-    double              lat;            //!< Latitude coordinate of the center of the image
-    Magnification       magnification;  //!< Current magnification
-    double              dpi;            //!< Screen DPI
-    size_t              width;          //!< Width of image
-    size_t              height;         //!< Height of image
-
-    double              lonMin;         //!< Longitude of the upper left corner of the image
-    double              latMin;         //!< Latitude of the upper left corner of the image
-    double              lonMax;         //!< Longitude of the lower right corner of the image
-    double              latMax;         //!< Latitude of the lower right corner of the image
-
     double              lonOffset;
     double              latOffset;
     double              scale;
     double              scaleGradtorad; //!< Precalculated scale*Gradtorad
-    double              pixelSize;      //!< Size of a pixel in meter
-    double              meterInPixel;   //!< Number of on screen pixel for one meter on the ground
-    double              meterInMM;      //!< Number of on screen millimeters for one meter on the ground
 
 #ifdef OSMSCOUT_HAVE_SSE2
       //some extra vars for special sse needs
@@ -500,46 +443,6 @@ namespace osmscout {
       return true;
     }
 
-    inline size_t GetWidth() const
-    {
-      return width;
-    }
-
-    inline size_t GetHeight() const
-    {
-      return height;
-    }
-
-    inline double GetLon() const
-    {
-      return lon;
-    }
-
-    inline double GetLat() const
-    {
-      return lat;
-    }
-
-    inline GeoCoord GetCenter() const
-    {
-      return GeoCoord(lat,lon);
-    }
-
-    inline double GetAngle() const
-    {
-      return 0;
-    }
-
-    inline Magnification GetMagnification() const
-    {
-      return magnification;
-    }
-
-    inline double GetDPI() const
-    {
-      return dpi;
-    }
-
     bool Set(size_t tileX, size_t tileY,
              const Magnification& magnification,
              size_t width, size_t height)
@@ -558,10 +461,6 @@ namespace osmscout {
              double dpi,
              size_t width, size_t height);
 
-    bool GeoIsIn(double lon, double lat) const;
-    bool GeoIsIn(double lonMin, double latMin,
-                 double lonMax, double latMax) const;
-
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
@@ -570,23 +469,6 @@ namespace osmscout {
 
     void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
-
-    bool GetDimensions(GeoBox& boundingBox) const;
-
-    inline double GetPixelSize() const
-    {
-      return pixelSize;
-    }
-
-    inline double GetMeterInPixel() const
-    {
-      return meterInPixel;
-    }
-
-    inline double GetMeterInMM() const
-    {
-      return meterInMM;
-    }
 
   protected:
 

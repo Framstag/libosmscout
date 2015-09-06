@@ -51,6 +51,25 @@ namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
+  Projection::Projection()
+  : lon(0),
+    lat(0),
+    angle(0),
+    magnification(0),
+    dpi(0),
+    width(0),
+    height(0),
+    lonMin(0.0),
+    latMin(0.0),
+    lonMax(0.0),
+    latMax(0.0),
+    pixelSize(0.0),
+    meterInPixel(0.0),
+    meterInMM(0.0)
+  {
+    // no code
+  }
+
   Projection::~Projection()
   {
     // no code
@@ -58,21 +77,9 @@ namespace osmscout {
 
   MercatorProjection::MercatorProjection()
   : valid(false),
-    lon(0),
-    lat(0),
-    angle(0),
-    magnification(0),
-    dpi(96),
-    width(256),
-    height(256),
-    lonMin(0.0),
-    latMin(0.0),
-    lonMax(0.0),
-    latMax(0.0),
     latOffset(0.0),
     scale(1),
-    scaleGradtorad(0),
-    pixelSize(1)
+    scaleGradtorad(0)
   {
     // no code
   }
@@ -182,24 +189,6 @@ namespace osmscout {
     return true;
   }
 
-  bool MercatorProjection::GeoIsIn(double lon, double lat) const
-  {
-    assert(valid);
-
-    return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
-  }
-
-  bool MercatorProjection::GeoIsIn(double lonMin, double latMin,
-                                    double lonMax, double latMax) const
-  {
-    assert(valid);
-
-    return !(lonMin>this->lonMax ||
-             lonMax<this->lonMin ||
-             latMin>this->latMax ||
-             latMax<this->latMin);
-  }
-
   bool MercatorProjection::PixelToGeo(double x, double y,
                                        double& lon, double& lat) const
   {
@@ -273,16 +262,6 @@ namespace osmscout {
     assert(false); //should not be called
   }
 
-  bool MercatorProjection::GetDimensions(GeoBox& boundingBox) const
-  {
-    assert(valid);
-
-    boundingBox.Set(GeoCoord(latMin,lonMin),
-                    GeoCoord(latMax,lonMax));
-
-    return true;
-  }
-
   bool MercatorProjection::Move(double horizPixel,
                                  double vertPixel)
   {
@@ -311,19 +290,10 @@ namespace osmscout {
 
   TileProjection::TileProjection()
   : valid(false),
-    magnification(0),
-    dpi(96),
-    width(256),
-    height(256),
-    lonMin(0.0),
-    latMin(0.0),
-    lonMax(0.0),
-    latMax(0.0),
     lonOffset(0.0),
     latOffset(0.0),
     scale(1),
-    scaleGradtorad(0),
-    pixelSize(1)
+    scaleGradtorad(0)
   {
     // no code
   }
@@ -420,20 +390,6 @@ namespace osmscout {
     return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
   }
 
-  bool TileProjection::GeoIsIn(double lon, double lat) const
-  {
-    return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
-  }
-
-  bool TileProjection::GeoIsIn(double lonMin, double latMin,
-                               double lonMax, double latMax) const
-  {
-    return !(lonMin>this->lonMax ||
-             lonMax<this->lonMin ||
-             latMin>this->latMax ||
-             latMax<this->latMin);
-  }
-
   bool TileProjection::PixelToGeo(double x, double y,
                                   double& lon, double& lat) const
   {
@@ -495,14 +451,4 @@ namespace osmscout {
     }
 
   #endif
-
-  bool TileProjection::GetDimensions(GeoBox& boundingBox) const
-  {
-    assert(valid);
-
-    boundingBox.Set(GeoCoord(latMin,lonMin),
-                    GeoCoord(latMax,lonMax));
-
-    return true;
-  }
 }
