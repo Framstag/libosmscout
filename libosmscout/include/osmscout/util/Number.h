@@ -303,6 +303,29 @@ namespace osmscout {
 
   /**
    * \ingroup Util
+   * Returns the number of bytes needed to encode the number. The function calculates
+   * the number of bytes that contain information, dropping leading bytes that only
+   * contain zero.
+   */
+  template<typename N>
+  uint8_t BitsNeededToEncodeNumber(N number)
+  {
+    uint8_t bits=0;
+
+    while (number!=0) {
+      number=number/2;
+      bits++;
+    }
+
+    if (bits==0) {
+      bits=1;
+    }
+
+    return bits;
+  }
+
+  /**
+   * \ingroup Util
    * Encodes the given numbers into a new number of twice the size that has
    * the bits of each nunber alternating interleaved.
    *
