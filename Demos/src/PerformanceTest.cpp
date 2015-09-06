@@ -240,8 +240,9 @@ int main(int argc, char* argv[])
   osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
-
   std::list<LevelStats>         statistics;
+
+  searchParameter.SetUseMultithreading(true);
 
   for (uint32_t level=std::min(startZoom,endZoom);
        level<=std::max(startZoom,endZoom);
