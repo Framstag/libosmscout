@@ -80,7 +80,7 @@ OSS
      be used once in a filter and criteria must be written in the order
      above.
 
-     A filter operations on a directl following sryle object, It can
+     A filter operates on a directly following style object, It can
      also be followed by a block ("{"..."}") which then can recursively
      contain additional filters and or style definitions.
 
