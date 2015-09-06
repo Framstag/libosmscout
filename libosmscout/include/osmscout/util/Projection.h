@@ -215,7 +215,7 @@ namespace osmscout {
      * Returns true, if the given bounding box is completely within the projection bounding box
      */
     inline bool GeoIsIn(double lonMin, double latMin,
-                         double lonMax, double latMax) const
+                        double lonMax, double latMax) const
     {
       return !(lonMin>this->lonMax ||
                lonMax<this->lonMin ||
@@ -266,7 +266,7 @@ namespace osmscout {
      */
     inline double ConvertWidthToPixel(double width) const
     {
-      return width*GetDPI()/25.4;
+      return width*dpi/25.4;
     }
 
     /**
@@ -279,7 +279,7 @@ namespace osmscout {
      */
     inline double ConvertPixelToWidth(double pixel) const
     {
-      return pixel*25.4/GetDPI();
+      return pixel*25.4/dpi;
     }
 
     /**
@@ -319,16 +319,16 @@ namespace osmscout {
   class OSMSCOUT_API MercatorProjection : public Projection
   {
   protected:
-    bool                valid;          //!< projection is valid
+    bool   valid;          //!< projection is valid
 
-    double              latOffset;      //!< Absolute and untransformed screen position of lat coordinate
-    double              angleSin;
-    double              angleCos;
-    double              angleNegSin;
-    double              angleNegCos;
+    double latOffset;      //!< Absolute and untransformed screen position of lat coordinate
+    double angleSin;
+    double angleCos;
+    double angleNegSin;
+    double angleNegCos;
 
-    double              scale;
-    double              scaleGradtorad; //!< Precalculated scale*Gradtorad
+    double scale;
+    double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
   public:
     MercatorProjection();
@@ -412,12 +412,12 @@ namespace osmscout {
   class OSMSCOUT_API TileProjection : public Projection
   {
   protected:
-    bool                valid;          //!< projection is valid
+    bool   valid;          //!< projection is valid
 
-    double              lonOffset;
-    double              latOffset;
-    double              scale;
-    double              scaleGradtorad; //!< Precalculated scale*Gradtorad
+    double lonOffset;
+    double latOffset;
+    double scale;
+    double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
 #ifdef OSMSCOUT_HAVE_SSE2
       //some extra vars for special sse needs
@@ -443,7 +443,7 @@ namespace osmscout {
       return true;
     }
 
-    bool Set(size_t tileX, size_t tileY,
+    inline bool Set(size_t tileX, size_t tileY,
              const Magnification& magnification,
              size_t width, size_t height)
     {
