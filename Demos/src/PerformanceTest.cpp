@@ -48,7 +48,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory), drawing the "Ruhrgebiet":
 
-  src/PerformanceTest ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.2 6.5 51.7 8 10 13 480 800 cairo
+  src/PerformanceTest ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.4 7.3 51.6 7.7 10 15 256 256 cairo
 */
 
 // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
@@ -56,6 +56,40 @@
 
 static const double DPI=96.0;
 
+struct LevelStats
+{
+  size_t level;
+
+  double dbMinTime;
+  double dbMaxTime;
+  double dbTotalTime;
+
+  double drawMinTime;
+  double drawMaxTime;
+  double drawTotalTime;
+
+  size_t nodeCount;
+  size_t wayCount;
+  size_t areaCount;
+
+  size_t tileCount;
+
+  LevelStats(size_t level)
+  : level(level),
+    dbMinTime(std::numeric_limits<double>::max()),
+    dbMaxTime(0.0),
+    dbTotalTime(0.0),
+    drawMinTime(std::numeric_limits<double>::max()),
+    drawMaxTime(0.0),
+    drawTotalTime(0.0),
+    nodeCount(0),
+    wayCount(0),
+    areaCount(0),
+    tileCount(0)
+  {
+    // no code
+  }
+};
 
 int main(int argc, char* argv[])
 {
@@ -200,29 +234,19 @@ int main(int argc, char* argv[])
 
   if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
+    return 1;
   }
 
   osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
 
-  double dbMinTime=std::numeric_limits<double>::max();
-  double dbMaxTime=0.0;
-  double dbTotalTime=0.0;
-
-  double drawMinTime=std::numeric_limits<double>::max();
-  double drawMaxTime=0.0;
-  double drawTotalTime=0.0;
-
-  size_t nodeCountTotal=0;
-  size_t wayCountTotal=0;
-  size_t areaCountTotal=0;
-
-  size_t tilesDrawn=0;
+  std::list<LevelStats>         statistics;
 
   for (uint32_t level=std::min(startZoom,endZoom);
        level<=std::max(startZoom,endZoom);
        level++) {
+    LevelStats              stats(level);
     osmscout::Magnification magnification;
     int                     xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
 
@@ -252,10 +276,22 @@ int main(int argc, char* argv[])
 #endif
     osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
 
+    size_t current=1;
+    size_t tileCount=(yTileEnd-yTileStart+1)*(xTileEnd-xTileStart+1);
+    size_t delta=tileCount/20;
+
+    if (delta==0) {
+      delta=1;
+    }
+
     for (int y=yTileStart; y<=yTileEnd; y++) {
       for (int x=xTileStart; x<=xTileEnd; x++) {
         osmscout::MapData  data;
         osmscout::GeoBox   boundingBox;
+
+        if ((current % delta)==0) {
+          std::cout << current*100/tileCount << "% " << current << "/" << tileCount << std::endl;
+        }
 
         projection.Set(x-1,y-1,
                        x+1,y+1,
@@ -266,9 +302,6 @@ int main(int argc, char* argv[])
 
         projection.GetDimensions(boundingBox);
 
-        std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
-
-
         osmscout::StopClock dbTimer;
 
         mapService->GetObjects(searchParameter,
@@ -276,17 +309,17 @@ int main(int argc, char* argv[])
                                projection,
                                data);
 
-        nodeCountTotal+=data.nodes.size();
-        wayCountTotal+=data.ways.size();
-        areaCountTotal+=data.areas.size();
+        stats.nodeCount+=data.nodes.size();
+        stats.wayCount+=data.ways.size();
+        stats.areaCount+=data.areas.size();
 
         dbTimer.Stop();
 
         double dbTime=dbTimer.GetMilliseconds();
 
-        dbMinTime=std::min(dbMinTime,dbTime);
-        dbMaxTime=std::max(dbMaxTime,dbTime);
-        dbTotalTime+=dbTime;
+        stats.dbMinTime=std::min(stats.dbMinTime,dbTime);
+        stats.dbMaxTime=std::max(stats.dbMaxTime,dbTime);
+        stats.dbTotalTime+=dbTime;
 
         osmscout::StopClock drawTimer;
 
@@ -316,35 +349,48 @@ int main(int argc, char* argv[])
 
         drawTimer.Stop();
 
-        tilesDrawn++;
+        stats.tileCount++;
 
         double drawTime=drawTimer.GetMilliseconds();
 
-        drawMinTime=std::min(drawMinTime,drawTime);
-        drawMaxTime=std::max(drawMaxTime,drawTime);
-        drawTotalTime+=drawTime;
+        stats.drawMinTime=std::min(stats.drawMinTime,drawTime);
+        stats.drawMaxTime=std::max(stats.drawMaxTime,drawTime);
+        stats.drawTotalTime+=drawTime;
+
+        current++;
       }
     }
+
+    statistics.push_back(stats);
   }
 
   std::cout << "==========" << std::endl;
 
-  std::cout << "Data: ";
-  std::cout << "nodes: " << nodeCountTotal << " ";
-  std::cout << "way: " << wayCountTotal << " ";
-  std::cout << "areas: " << areaCountTotal << std::endl;
+  for (const auto& stats : statistics) {
+    std::cout << "Level: " << stats.level << std::endl;
 
-  std::cout << "GetObjects: ";
-  std::cout << "total: " << dbTotalTime << " msec ";
-  std::cout << "min: " << dbMinTime << " msec ";
-  std::cout << "avg: " << dbTotalTime/tilesDrawn << " msec ";
-  std::cout << "max: " << dbMaxTime << " msec" << std::endl;
+    std::cout << " Tot. data: ";
+    std::cout << "nodes: " << stats.nodeCount << " ";
+    std::cout << "way: " << stats.wayCount << " ";
+    std::cout << "areas: " << stats.areaCount << std::endl;
 
-  std::cout << "DrawMap: ";
-  std::cout << "total: " << drawTotalTime << " msec ";
-  std::cout << "min: " << drawMinTime << " msec ";
-  std::cout << "avg: " << drawTotalTime/tilesDrawn << " msec ";
-  std::cout << "max: " << drawMaxTime << " msec" << std::endl;
+    std::cout << " Avg. data: ";
+    std::cout << "nodes: " << stats.nodeCount/stats.tileCount << " ";
+    std::cout << "way: " << stats.wayCount/stats.tileCount << " ";
+    std::cout << "areas: " << stats.areaCount/stats.tileCount << std::endl;
+
+    std::cout << " DB       : ";
+    std::cout << "total: " << stats.dbTotalTime << " ";
+    std::cout << "min: " << stats.dbMinTime << " ";
+    std::cout << "avg: " << stats.dbTotalTime/stats.tileCount << " ";
+    std::cout << "max: " << stats.dbMaxTime << " " << std::endl;
+
+    std::cout << " Map      : ";
+    std::cout << "total: " << stats.drawTotalTime << " ";
+    std::cout << "min: " << stats.drawMinTime << " ";
+    std::cout << "avg: " << stats.drawTotalTime/stats.tileCount << " ";
+    std::cout << "max: " << stats.drawMaxTime << std::endl;
+  }
 
   database->Close();
 
