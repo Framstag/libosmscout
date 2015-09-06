@@ -1046,7 +1046,7 @@ namespace osmscout {
       return nodeTypes;
     }
 
-    uint8_t GetNodeTypeIdBytes() const
+    inline uint8_t GetNodeTypeIdBytes() const
     {
       return nodeTypeIdBytes;
     }
@@ -1059,7 +1059,7 @@ namespace osmscout {
       return wayTypes;
     }
 
-    uint8_t GetWayTypeIdBytes() const
+    inline uint8_t GetWayTypeIdBytes() const
     {
       return wayTypeIdBytes;
     }
@@ -1072,12 +1072,12 @@ namespace osmscout {
       return areaTypes;
     }
 
-    uint8_t GetAreaTypeIdBits() const
+    inline uint8_t GetAreaTypeIdBits() const
     {
       return areaTypeIdBits;
     }
 
-    uint8_t GetAreaTypeIdBytes() const
+    inline uint8_t GetAreaTypeIdBytes() const
     {
       return areaTypeIdBytes;
     }
