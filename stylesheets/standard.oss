@@ -249,14 +249,20 @@ OSS
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
         highway_footway, highway_bridleway, highway_construction,
         leisure_track,
-	    waterway_stream, route_ferry
+        waterway_stream, route_ferry
   GROUP highway_steps, barrier_fence
 
 CONST
   MAG stepsMag                     = veryClose;
   MAG labelPathsMag                = veryClose;
+
+  MAG specialBuildingMag           = close;
   MAG labelSpecialBuildingMag      = closer;
+
+  MAG buildingMag                  = closer;
   MAG labelBuildingMag             = veryClose;
+
+  MAG minorBuildingMag             = veryClose;
 
   // Label priorities
   UINT labelPrioContinent           = 1;
@@ -620,12 +626,14 @@ SYMBOL speed_camera
          waterway_riverbank] AREA { color: @waterColor; }
  }
 
- [MAG cityOver-] {
+ [MAG suburb-] {
    [TYPE waterway_stream] {
      [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
      [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
    }
+  }
 
+  [MAG detail-] {
    [TYPE waterway_drain] {
      [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
      [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
@@ -694,15 +702,31 @@ SYMBOL speed_camera
  }
 
  [MAG cityOver-] {
-   [TYPE highway_motorway_link] {
-     [SIZE 20m 0.45mm:3px<] {
-       WAY#outline { color: darken(@motorwayColor,0.4); width: 20m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-       WAY { color: @motorwayColor; width: 20m;}
+   [TYPE highway_tertiary] {
+     [SIZE 10m 0.25mm:3px<] {
+       WAY#outline { color: darken(@tertiaryColor,0.4); width: 10m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @tertiaryColor; width: 10m;}
      }
-     [SIZE 20m <0.45mm:3px] WAY { color: lighten(@motorwayColor,0.3); displayWidth: 0.45mm;}
+     [SIZE 10m <0.25mm:3px] WAY { color: #fefe73; displayWidth: 0.25mm;}
    }
+ }
 
+ [MAG city-] {
+    [TYPE highway_motorway_link] {
+      [SIZE 20m 0.45mm:3px<] {
+        WAY#outline { color: darken(@motorwayColor,0.4); width: 20m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+        WAY { color: @motorwayColor; width: 20m;}
+      }
+      [SIZE 20m <0.45mm:3px] WAY { color: lighten(@motorwayColor,0.3); displayWidth: 0.45mm;}
+    }
 
+   [TYPE route_ferry] {
+     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; cap: butt; }
+     WAY {color: #0000ff; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
+   }
+ }
+
+ [MAG suburb-] {
    [TYPE highway_trunk_link] {
      [SIZE 18m 0.4mm:3px<] {
        WAY#outline { color: darken(@trunkColor,0.4); width: 18m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
@@ -711,24 +735,6 @@ SYMBOL speed_camera
      [SIZE 18m <0.4mm:3px] WAY { color: lighten(@trunkColor,0.3); displayWidth: 0.4mm;}
    }
 
-   [TYPE highway_tertiary] {
-     [SIZE 10m 0.25mm:3px<] {
-       WAY#outline { color: darken(@tertiaryColor,0.4); width: 10m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-       WAY { color: @tertiaryColor; width: 10m;}
-     }
-     [SIZE 10m <0.25mm:3px] WAY { color: #fefe73; displayWidth: 0.25mm;}
-   }
-
-   [TYPE highway_road] {
-     [SIZE 8m 0.1mm:3px<] {
-       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-       WAY { color: @roadColor; width: 8m;}
-     }
-     [SIZE 8m <0.1mm:3px] WAY { color: #888888; displayWidth: 0.1mm;}
-   }
- }
-
- [MAG city-] {
    [TYPE highway_primary_link] {
      [SIZE 14m 0.4mm:3px<] {
        WAY#outline { color: darken(@primaryColor,0.4); width: 14m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
@@ -753,6 +759,22 @@ SYMBOL speed_camera
      [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
    }
 
+   [TYPE railway_rail] {
+     [SIZE 5m 0.25mm:3px<] {
+       WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
+       WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
+     }
+     [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
+   }
+
+   [TYPE highway_road] {
+     [SIZE 8m 0.1mm:3px<] {
+       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @roadColor; width: 8m;}
+     }
+     [SIZE 8m <0.1mm:3px] WAY { color: #888888; displayWidth: 0.1mm;}
+   }
+
    [TYPE highway_unclassified,
          highway_residential] {
      [SIZE 8m 0.1mm:3px<] {
@@ -763,34 +785,49 @@ SYMBOL speed_camera
 
      AREA { color: #999999; }
    }
-
-   [TYPE highway_services] AREA { color: #cb9999; }
-
-    [TYPE route_ferry] {
-     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; cap: butt; }
-     WAY {color: #0000ff; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
-   }
- }
-
- [MAG suburb-] {
-   [TYPE railway_rail] {
-     [SIZE 5m 0.25mm:3px<] {
-       WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
-       WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
-     }
-     [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
-   }
-
-   [TYPE railway_station] AREA { color: @railwayStationColor; }
  }
 
  [MAG close-] {
+   [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; cap: butt; displayWidth: 0.2mm; width: 4m;}
+
+   [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
+   [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
+
+   [TYPE railway_subway] {
+     WAY#outline { color: #ffffff50; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+     WAY {color: #b3b3b3; width: 5m;}
+   }
+
    [TYPE highway_service] {
      [SIZE 8m 0.1mm:3px<] {
        WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
        WAY { color: @roadColor; width: 8m;}
      }
      [SIZE 8m <0.1mm:3px] WAY { color: #999999; displayWidth: 0.1mm;}
+   }
+
+   [TYPE highway_service] AREA { color: @roadColor; borderColor: @roadBColor; borderWidth: 0.1mm; }
+
+   [TYPE highway_construction] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
+
+   [TYPE highway_pedestrian] {
+     AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
+   }
+
+   [TYPE public_transport_platform] {
+     WAY#outline {color: #887b7b; width: 2m; displayWidth: 0.2mm;}
+     WAY {color: #9b9b9c; width: 2m; }
+
+     AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+   }
+
+   [TYPE highway_footway] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
+ }
+
+ [MAG closer-] {
+   [TYPE highway_pedestrian] {
+     [SIZE 8m 0.1mm:3px<] WAY {color: #ebeaea; width: 8m; }
+     [SIZE 8m <0.1mm:3px] WAY {color: #ebeaea; displayWidth: 0.1mm; }
    }
 
    [TYPE highway_living_street] {
@@ -803,39 +840,6 @@ SYMBOL speed_camera
 
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
 
-   [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; cap: butt; displayWidth: 0.2mm; width: 4m;}
-
-   [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
-   [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
-
-   [TYPE railway_subway] {
-     WAY#outline { color: #ffffff50; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-     WAY {color: #b3b3b3; width: 5m;}
-   }
-
-   [TYPE highway_construction] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
-
-   [TYPE highway_pedestrian] {
-     [SIZE 8m 0.1mm:3px<] WAY {color: #ebeaea; width: 8m; }
-     [SIZE 8m <0.1mm:3px] WAY {color: #ebeaea; displayWidth: 0.1mm; }
-
-     AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
-   }
-
-   [TYPE public_transport_platform] {
-     WAY#outline {color: #887b7b; width: 2m; displayWidth: 0.2mm;}
-     WAY {color: #9b9b9c; width: 2m; }
-
-     AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
-   }
-
-   [TYPE highway_service] AREA { color: @roadColor; borderColor: @roadBColor; borderWidth: 0.1mm; }
-   [TYPE highway_footway] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
- }
-
- [MAG closer-] {
-   [TYPE railway_station] NODE.ICON { symbol: railway_station; }
- 
    [TYPE highway_motorway, highway_motorway_link SIZE 20m 0.45mm:3px<] {
      [TUNNEL] {
        WAY#outline { dash: 0.5,0.5; }
@@ -1058,7 +1062,7 @@ SYMBOL speed_camera
    [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @trunkShieldColor; borderColor: #ffffff; priority: 20;}
  }
 
- [MAG cityOver-] {
+ [MAG city-] {
    [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @primaryShieldColor; borderColor: #ffffff; priority: 20;}
  }
 
@@ -1138,8 +1142,6 @@ SYMBOL speed_camera
  //
 
  [MAG state-] {
-   [TYPE landuse_commercial] AREA { color: @commercialColor; }
-   [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
    [TYPE landuse_farm,
          landuse_farmland] AREA { color: @farmColor; }
    [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
@@ -1161,10 +1163,15 @@ SYMBOL speed_camera
    [TYPE landuse_farmyard] AREA { color: @farmyardColor; }
    [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
    [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
-   [TYPE landuse_retail] AREA { color: @retailColor; borderColor: #c5a0a0; borderWidth: 0.1mm; }
    [TYPE landuse_railway] AREA { color: #dcdcc8; }
-   [TYPE landuse_construction] AREA { color: @constructionColor; }
    [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
+ }
+
+ [MAG suburb-] {
+   [TYPE landuse_commercial] AREA { color: @commercialColor; }
+   [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
+   [TYPE landuse_construction] AREA { color: @constructionColor; }
+   [TYPE landuse_retail] AREA { color: @retailColor; borderColor: #c5a0a0; borderWidth: 0.1mm; }
  }
 
  [MAG close-] {
@@ -1173,8 +1180,6 @@ SYMBOL speed_camera
    [TYPE landuse_orchard,
          landuse_meadow,
          landuse_village_green] AREA { color: #cfeca8; }
-
-   [TYPE landuse_farmyard_building] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
  }
 
  // Labels
@@ -1202,8 +1207,6 @@ SYMBOL speed_camera
          landuse_meadow,
          landuse_recreation_ground] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; autoSize: true;}
 
-   [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
-
    [TYPE landuse_industrial,
          landuse_allotments] AREA.TEXT { label: Name.name; style: emphasize; priority: @labelPrioLanduse; autoSize: true;}
  }
@@ -1217,7 +1220,7 @@ SYMBOL speed_camera
  // -------------------------------------------------------
  //
  // Man made:
- // amenity, tourism, history, leisure, military, buildings, power, barrier
+ // amenity, tourism, history, leisure, military, power, barrier
  //
 
  [MAG county-] {
@@ -1234,14 +1237,6 @@ SYMBOL speed_camera
  }
 
  [MAG cityOver-] {
-   // Semiransparent overlay
-   [TYPE leisure_nature_reserve] AREA { color: @natureReserveColor; borderColor: @natureReserveBorderColor; borderWidth: 0.2mm;}
-
-   [TYPE military_airfield,
-         military_danger_area,
-         military_range,
-         military_naval_base] AREA { color: #f59897; }
-
    [TYPE tourism_theme_park,
          tourism_zoo,
          historic_archaeological_site,
@@ -1249,24 +1244,23 @@ SYMBOL speed_camera
  }
 
  [MAG city-] {
-   [TYPE leisure_stadium] AREA { color: #33cb98; }
+   // Semiransparent overlay
+   [TYPE leisure_nature_reserve] AREA { color: @natureReserveColor; borderColor: @natureReserveBorderColor; borderWidth: 0.2mm;}
+   [TYPE leisure_nature_reserve] AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
+
+   [TYPE military_airfield,
+         military_danger_area,
+         military_range,
+         military_naval_base] AREA { color: #f59897; }
+
    [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
-   [TYPE sport_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
-
-   [TYPE military_bunker,
-         military_barracks] AREA { color: #f59897; }
-
-   [TYPE power_station,
-         power_sub_station] AREA { color: #bca9a9; }
  }
 
  [MAG detail-] {
-   [TYPE shop] AREA { color: @shopColor; borderColor: @shopBorderColor; borderWidth: 0.1mm; }
-   
-   [TYPE military_bunker_building] AREA { color: #f59897; }
+   [TYPE amenity_grave_yard] AREA.TEXT { label: Name.name; style: emphasize; color: #000000; size: 0.8;}
  }
 
- [MAG suburb-] {
+ [MAG detail-] {
    [TYPE tourism_alpine_hut,
          tourism_camp_site,
          tourism_caravan_site,
@@ -1285,14 +1279,7 @@ SYMBOL speed_camera
          historic_memorial,
          historic_ruins,
          historic_wreck] AREA { color: @tourismColor; }
- }
 
- [MAG detail-] {
-   [GROUP tourism, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
-   [GROUP historic, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
- }
-
- [MAG city-] {
    [TYPE power_generator] AREA { color: #bca9a9; }
 
    // Special amenities
@@ -1315,56 +1302,36 @@ SYMBOL speed_camera
    [TYPE leisure_playground] AREA { color: @playgroundColor; borderColor: @playgroundBorderColor; borderWidth: 0.1mm;}
    [TYPE leisure_garden] AREA { color: #ceeca8; }
 
-   // Buildings
-   [TYPE leisure_sports_centre,
-         leisure_building,
-         building] AREA { color: @buildingColor; borderColor: @buildingBorderColor; borderWidth: 0.1mm; }
-
-   [TYPE christian_church_building] AREA { color: @churchBuildingColor;  borderColor: @churchBuildingBorderColor; borderWidth: 0.1mm;}
-
-   [TYPE amenity_hospital_building] AREA { color: @hospitalBuildingColor; borderColor: @hospitalBuildingBorderColor; borderWidth: 0.1mm; }
-   [TYPE amenity_post_office_building] AREA { color: @postBuildingColor; borderColor: @postBuildingBorderColor; borderWidth: 0.1mm; }
 
    // (Minor) Amenities without special color
    [TYPE amenity_atm,
          amenity_recycling] AREA { color: @amenityColor; }
-
-   // Amenity buildings
-   [TYPE amenity_building,
-         amenity_bank_building,
-         amenity_cafe_building,
-         amenity_fast_food_building,
-         amenity_fuel_building,
-         amenity_kindergarten_building,
-         amenity_restaurant_building,
-         amenity_school_building] AREA { color: @amenityBuildingColor; borderColor: @amenityBuildingBorderColor; borderWidth: 0.1mm;}
-
-   [TYPE amenity_parking] {
-     AREA { color: #f6eeb6; borderColor: #887b7b;borderWidth: 0.1mm; }
-   }
-
-   [TYPE amenity_parking_building] {
-     AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
-   }
 
    [TYPE man_made_pier] {
      [SIZE 5m 0.1mm:3px<] WAY {color: #ffffff; width: 5.0m;}
      [SIZE 5m <0.1mm:3px] WAY {color: #ffffff; displayWidth: 0.1mm;}
      AREA { color: #ffffff; }
    }
- }
 
- [MAG closer-] {
+   [TYPE railway_station] NODE.ICON { symbol: railway_station; }
+
    [TYPE amenity_hospital,
          amenity_hospital_building] AREA.ICON { symbol: amenity_hospital;}
 
+   [TYPE amenity_parking_building] {
+     NODE.ICON { symbol: amenity_parking; name: parking; }
+     AREA.ICON { name: parking;}
+   }
+ }
+
+ [MAG closer-] {
    [TYPE amenity_parking] {
      NODE.ICON { symbol: amenity_parking; name: parking; }
      AREA.ICON { name: parking;}
    }
 
-   [TYPE amenity_parking_building] {
-     AREA.ICON { name: parking;}
+   [TYPE amenity_parking] {
+     AREA { color: #f6eeb6; borderColor: #887b7b;borderWidth: 0.1mm; }
    }
 
    [TYPE railway_station] AREA.ICON { symbol: railway_station; }
@@ -1391,15 +1358,62 @@ SYMBOL speed_camera
    }
 
    [TYPE barrier_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+ }
 
+ // Buildings
+ [MAG @specialBuildingMag-] {
+   [TYPE christian_church_building] AREA { color: @churchBuildingColor;  borderColor: @churchBuildingBorderColor; borderWidth: 0.1mm;}
+   [TYPE amenity_hospital_building] AREA { color: @hospitalBuildingColor; borderColor: @hospitalBuildingBorderColor; borderWidth: 0.1mm; }
+   [TYPE railway_station] AREA { color: @railwayStationColor; }
+   [TYPE leisure_stadium] AREA { color: #33cb98; }
+ }
+
+ [MAG @buildingMag-] {
+   [TYPE landuse_farmyard_building] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE military_bunker,
+         military_barracks] AREA { color: #f59897; }
+
+   [TYPE military_bunker_building] AREA { color: #f59897; }
+
+   [TYPE power_sub_station] AREA { color: #bca9a9; }
+
+   [TYPE shop] AREA { color: @shopColor; borderColor: @shopBorderColor; borderWidth: 0.1mm; }
+
+   [TYPE sport_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE leisure_sports_centre,
+         leisure_building] AREA { color: @buildingColor; borderColor: @buildingBorderColor; borderWidth: 0.1mm; }
+
+   // Amenity buildings
+
+   [TYPE amenity_post_office_building] AREA { color: @postBuildingColor; borderColor: @postBuildingBorderColor; borderWidth: 0.1mm; }
+
+   [TYPE amenity_building,
+         amenity_bank_building,
+         amenity_cafe_building,
+         amenity_fast_food_building,
+         amenity_fuel_building,
+         amenity_kindergarten_building,
+         amenity_restaurant_building,
+         amenity_school_building] AREA { color: @amenityBuildingColor; borderColor: @amenityBuildingBorderColor; borderWidth: 0.1mm;}
+
+   [TYPE amenity_parking_building] {
+     AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
+   }
+
+   [GROUP tourism, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
+
+   [GROUP historic, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
+
+   [TYPE building] AREA { color: @buildingColor; borderColor: @buildingBorderColor; borderWidth: 0.1mm; }
+ }
+
+ [MAG @minorBuildingMag-] {
    [TYPE building_garage] AREA { color: #bcbcbc; }
  }
 
-  // Labels
-
- [MAG cityOver-] {
-   [TYPE leisure_nature_reserve] AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
- }
+ // Labels
 
  [MAG close-] {
    [TYPE leisure_sports_centre,
@@ -1419,10 +1433,11 @@ SYMBOL speed_camera
          military_range,
          military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; autoSize: true; }
 
-   [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor;}
  }
 
  [MAG @labelSpecialBuildingMag-] {
+   [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor;}
+
    [TYPE christian_church_building,
          christian_church] {
      AREA.TEXT { label: Name.name; style: emphasize; color: @churchLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
@@ -1432,25 +1447,11 @@ SYMBOL speed_camera
      NODE.ICON {symbol: christian_church_cross; }
    }
 
-   [TYPE leisure_building,
-         sport_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; }
-
-   [TYPE leisure_pitch] AREA.TEXT { label: Name.name; style: emphasize; color: @pitchLabelColor; size: 0.9;}
-
-   [TYPE amenity_school_building,
-         amenity_school] AREA.TEXT { label: Name.name; style: emphasize; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
-
    [TYPE amenity_hospital_building,
          amenity_hospital] {
      NODE.TEXT {label: Name.name; style: emphasize; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
      AREA.TEXT { label: Name.name; style: emphasize; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
    }
-
-   [TYPE amenity_grave_yard] AREA.TEXT { label: Name.name; style: emphasize; color: #000000; size: 0.8;}
-   
-   [TYPE military_bunker,
-         military_barracks] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; }
-   
  }
 
  [MAG @labelBuildingMag-] {
@@ -1463,10 +1464,24 @@ SYMBOL speed_camera
      AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
    }
 
+   [TYPE military_bunker,
+         military_barracks] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; }
+
+   [TYPE leisure_building,
+         sport_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; }
+
+   [TYPE leisure_pitch] AREA.TEXT { label: Name.name; style: emphasize; color: @pitchLabelColor; size: 0.9;}
+
+   [TYPE amenity_school_building,
+         amenity_school] AREA.TEXT { label: Name.name; style: emphasize; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
+
+
    [TYPE shop] {
      NODE.TEXT { label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
      AREA.TEXT { label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
    }
+
+   [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
 
    [TYPE leisure_building,
          sport_building] AREA.TEXT { label: Name.name;  priority: @labelPrioSpecialBuilding;}
@@ -1476,8 +1491,7 @@ SYMBOL speed_camera
      AREA.TEXT { label: Name.name; style: emphasize; color: @tourismLabelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
    }
 
-   [TYPE power_station,
-         power_sub_station,
+   [TYPE power_sub_station,
          power_generator,
          historic_archaeological_site,
          historic_battlefield,
@@ -1505,8 +1519,8 @@ SYMBOL speed_camera
          amenity_kindergarten,
          amenity_restaurant_building,
          amenity_restaurant,
-         amenity_school_building,         
-         amenity_school,         
+         amenity_school_building,
+         amenity_school,
          amenity_taxi] {
      NODE.TEXT {label: Name.name; style: emphasize;color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
      AREA.TEXT { label: Name.name; style: emphasize; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
@@ -1523,7 +1537,6 @@ SYMBOL speed_camera
    [TYPE amenity_parking,
          amenity_parking_building] AREA.TEXT { label: Name.name; style: emphasize; color: #4bb2da; size: 0.9; priority: @labelPrioMajorBuilding; }
  }
-
 
  // -------------------------------------------------------
  //
@@ -1576,23 +1589,18 @@ SYMBOL speed_camera
      AREA {color: @landColor;}
    }
  }
-
- [MAG city-veryClose] {
-   [TYPE place_village] NODE.TEXT {label: IName; style: emphasize; size: 1.2; priority: @labelPrioVillage;}
+ [MAG cityOver-veryClose] {
+   [TYPE place_suburb] NODE.TEXT {label: IName; style: emphasize; size: 1.3; scaleMag: city; priority: @labelPrioSuburb;}
  }
 
  [MAG city-veryClose] {
+   [TYPE place_village] NODE.TEXT {label: IName; style: emphasize; size: 1.2; priority: @labelPrioVillage;}
    [TYPE place_town] NODE.TEXT {scaleMag: region;}
    [TYPE place_hamlet] NODE.TEXT {label: IName; style: emphasize; size: 1.0; priority: @labelPrioHamlet;}
  }
 
  [MAG suburb-suburb] {
    [TYPE place_village] NODE.TEXT {scaleMag: suburb;}
- }
-
- [MAG cityOver-veryClose] {
-   [TYPE place_hamlet] NODE.TEXT {scaleMag: city;}
-   [TYPE place_suburb] NODE.TEXT {label: IName; style: emphasize; size: 1.3; scaleMag: city; priority: @labelPrioSuburb;}
  }
 
  [MAG close-] {
