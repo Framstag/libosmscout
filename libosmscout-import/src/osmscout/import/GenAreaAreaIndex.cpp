@@ -181,13 +181,22 @@ namespace osmscout {
     // Number of areas
     writer.WriteNumber((uint32_t)leaf.areas.size());
 
+    // Since objects are inserted in file position order, we do not need
+    // to sort objects by file offset at this place
+
     FileOffset prevOffset=0;
     for (const auto& entry : leaf.areas) {
-      writer.WriteTypeId(entry.type,
-                         typeConfig->GetAreaTypeIdBytes());
-      // Since objects are inserted in file position order, we do not need
-      // to sort objects by file offset at this place
-      writer.WriteNumber(entry.offset-prevOffset);
+      uint64_t value=entry.offset-prevOffset;
+
+      value=value << typeConfig->GetAreaTypeIdBits();
+      value=value | entry.type;
+
+      if (level==parameter.GetAreaAreaIndexMaxMag()) {
+        value=value << 3;
+        value=value | (uint8_t)(entry.level-parameter.GetAreaAreaIndexMaxMag());
+      }
+
+      writer.WriteNumber(value);
 
       prevOffset=entry.offset;
     }
@@ -290,30 +299,37 @@ namespace osmscout {
       // hold the geometric center of the tile.
       //
 
-      size_t level=parameter.GetAreaAreaIndexMaxMag();
+      size_t sizeLevel=std::min(parameter.GetAreaAreaIndexMaxMag()+7,CELL_DIMENSION_MAX);//parameter.GetAreaAreaIndexMaxMag();
       while (true) {
-        if (boundingBox.GetWidth()<=cellDimension[level].width &&
-            boundingBox.GetHeight()<=cellDimension[level].height) {
+        if (boundingBox.GetWidth()<=cellDimension[sizeLevel].width &&
+            boundingBox.GetHeight()<=cellDimension[sizeLevel].height) {
           break;
         }
 
-        if (level==0) {
+        if (sizeLevel==0) {
           break;
         }
 
-        level--;
+        sizeLevel--;
+      }
+
+      size_t indexLevel=sizeLevel;
+
+      if (indexLevel>parameter.GetAreaAreaIndexMaxMag()) {
+        indexLevel=parameter.GetAreaAreaIndexMaxMag();
       }
 
       // Calculate index of tile that contains the geometric center of the area
-      uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellDimension[level].width);
-      uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellDimension[level].height);
+      uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellDimension[indexLevel].width);
+      uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellDimension[indexLevel].height);
 
       Entry entry;
 
-      entry.type=area.GetType()->GetAreaId();
       entry.offset=offset;
+      entry.type=area.GetType()->GetAreaId();
+      entry.level=sizeLevel;
 
-      levels[level][Pixel(x,y)].areas.push_back(entry);
+      levels[indexLevel][Pixel(x,y)].areas.push_back(entry);
     }
 
     progress.SetAction("Enriching index tree");

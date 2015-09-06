@@ -37,8 +37,9 @@ namespace osmscout {
   private:
     struct Entry
     {
-      TypeId     type;
       FileOffset offset;
+      TypeId     type;
+      uint8_t    level;
     };
 
     struct AreaLeaf

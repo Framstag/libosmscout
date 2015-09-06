@@ -111,6 +111,8 @@ namespace osmscout {
                                    const TypeSet& types,
                                    FileOffset dataOffset,
                                    size_t spaceLeft,
+                                   size_t currentLevel,
+                                   size_t maxSizeLevel,
                                    std::vector<FileOffset>& offsets,
                                    bool& stopArea) const
   {
@@ -127,22 +129,29 @@ namespace osmscout {
     FileOffset prevOffset=0;
 
     for (size_t c=0; c<offsetCount; c++) {
+      uint64_t   value;
       TypeId     typeId;
+      uint8_t    sizeLevel=currentLevel;
       FileOffset areaOffset;
-      if (!scanner.ReadTypeId(typeId,
-                              typeConfig.GetAreaTypeIdBytes())) {
+
+      if (!scanner.ReadNumber(value)) {
         return false;
       }
 
-      if (!scanner.ReadNumber(areaOffset)) {
-        return false;
+      if (currentLevel==maxLevel) {
+        sizeLevel=value & 7;
+        sizeLevel+=maxLevel;
+        value=value >> 3;
       }
 
-      areaOffset+=prevOffset;
+      typeId=value & areaTypeIdMask;
+      value=value >> typeConfig.GetAreaTypeIdBits();
+      areaOffset=value+prevOffset;
 
       prevOffset=areaOffset;
 
-      if (types.IsTypeSet(typeId)) {
+      if (sizeLevel<=maxSizeLevel &&
+          types.IsTypeSet(typeId)) {
         offsets.push_back(areaOffset);
 
         if (offsets.size()>spaceLeft) {
@@ -254,6 +263,8 @@ namespace osmscout {
     std::vector<CellRef>    nextCellRefs; // cells to scan for the next level
     std::vector<FileOffset> newOffsets;   // offsets collected in the current level
 
+    areaTypeIdMask=Pow(2,typeConfig->GetAreaTypeIdBits())-1;
+
     minlon+=180;
     maxlon+=180;
     minlat+=90;
@@ -308,6 +319,8 @@ namespace osmscout {
                           types,
                           cellDataOffset,
                           spaceLeft,
+                          level,
+                          maxLevel,
                           newOffsets,
                           stopArea)) {
           log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";

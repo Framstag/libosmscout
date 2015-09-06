@@ -105,6 +105,7 @@ namespace osmscout {
     uint32_t                        maxLevel;       //!< Maximum level in index
     FileOffset                      topLevelOffset; //!< File offset of the top level index entry
 
+    mutable TypeId                  areaTypeIdMask; //!< Bit mask to mask out type id
     mutable IndexCache              indexCache;     //!< Cached map of all index entries by file offset
 
   private:
@@ -117,6 +118,8 @@ namespace osmscout {
                       const TypeSet& types,
                       FileOffset dataOffset,
                       size_t spaceLeft,
+                      size_t currentLevel,
+                      size_t maxSizeLevel,
                       std::vector<FileOffset>& offsets,
                       bool& stopArea) const;
 
