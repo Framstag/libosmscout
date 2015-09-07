@@ -253,8 +253,8 @@ namespace osmscout {
     bool                           sizeExceeded=false;
     std::unordered_set<FileOffset> newOffsets;
 
-    offsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
-    newOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    offsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
+    newOffsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
 
     for (size_t i=0; i<wayTypes.size(); i++) {
       newOffsets.clear();
