@@ -120,15 +120,15 @@ namespace osmscout {
 
     std::vector<DataBlockSpan> spans;
 
-    if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                   boundingBox.GetMinLon(),
-                                   boundingBox.GetMinLat(),
-                                   boundingBox.GetMaxLon(),
-                                   boundingBox.GetMaxLat(),
-                                   std::numeric_limits<size_t>::max(),
-                                   types,
-                                   std::numeric_limits<size_t>::max(),
-                                   spans)) {
+    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+                                       boundingBox.GetMinLon(),
+                                       boundingBox.GetMinLat(),
+                                       boundingBox.GetMaxLon(),
+                                       boundingBox.GetMaxLat(),
+                                       std::numeric_limits<size_t>::max(),
+                                       types,
+                                       std::numeric_limits<size_t>::max(),
+                                       spans)) {
       log.Error() << "Error getting ways and relations from area index!";
 
       return false;

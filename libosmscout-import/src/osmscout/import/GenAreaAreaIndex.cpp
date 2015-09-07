@@ -310,6 +310,10 @@ namespace osmscout {
               ring->ids[n-1]=ring->ids[n];
               reduced=true;
             }
+            else if (n<ring->ids.size() &&
+                     ring->ids[n-1]==ring->ids[n]) {
+              reduced=true;
+            }
             else {
               nodeBuffer.push_back(ring->nodes[n]);
               if (n<ring->ids.size()) {
@@ -636,6 +640,150 @@ namespace osmscout {
     return true;
   }
 
+  bool AreaAreaIndexGenerator::WriteChildCells(const TypeConfig& typeConfig,
+                                               Progress& progress,
+                                               const ImportParameter& parameter,
+                                               FileScanner& scanner,
+                                               FileWriter& indexWriter,
+                                               FileWriter& dataWriter,
+                                               FileWriter& mapWriter,
+                                               const std::vector<Level>& levels,
+                                               size_t level,
+                                               const Pixel& pixel,
+                                               FileOffset& offset,
+                                               uint32_t& dataWrittenCount)
+  {
+    Pixel      topLeftPixel(pixel.x*2,pixel.y*2+1);
+    FileOffset topLeftOffset=0;
+
+    auto topLeftCell=levels[level+1].find(topLeftPixel);
+
+    if (topLeftCell!=levels[level+1].end()) {
+      if (!WriteCell(typeConfig,
+                     progress,
+                     parameter,
+                     scanner,
+                     indexWriter,
+                     dataWriter,
+                     mapWriter,
+                     levels,
+                     level+1,
+                     topLeftPixel,
+                     topLeftCell->second,
+                     topLeftOffset,
+                     dataWrittenCount)) {
+        return false;
+      }
+    }
+
+    Pixel      topRightPixel(pixel.x*2+1,pixel.y*2+1);
+    FileOffset topRightOffset=0;
+
+    auto topRightCell=levels[level+1].find(topRightPixel);
+
+    if (topRightCell!=levels[level+1].end()) {
+      if (!WriteCell(typeConfig,
+                     progress,
+                     parameter,
+                     scanner,
+                     indexWriter,
+                     dataWriter,
+                     mapWriter,
+                     levels,
+                     level+1,
+                     topRightPixel,
+                     topRightCell->second,
+                     topRightOffset,
+                     dataWrittenCount)) {
+        return false;
+      }
+    }
+
+    Pixel      bottomLeftPixel(pixel.x*2,pixel.y*2);
+    FileOffset bottomLeftOffset=0;
+
+    auto bottomLeftCell=levels[level+1].find(bottomLeftPixel);
+
+    if (bottomLeftCell!=levels[level+1].end()) {
+      if (!WriteCell(typeConfig,
+                     progress,
+                     parameter,
+                     scanner,
+                     indexWriter,
+                     dataWriter,
+                     mapWriter,
+                     levels,
+                     level+1,
+                     bottomLeftPixel,
+                     bottomLeftCell->second,
+                     bottomLeftOffset,
+                     dataWrittenCount)) {
+        return false;
+      }
+    }
+
+    Pixel      bottomRightPixel(pixel.x*2+1,pixel.y*2);
+    FileOffset bottomRightOffset=0;
+
+    auto bottomRightCell=levels[level+1].find(bottomRightPixel);
+
+    if (bottomRightCell!=levels[level+1].end()) {
+      if (!WriteCell(typeConfig,
+                     progress,
+                     parameter,
+                     scanner,
+                     indexWriter,
+                     dataWriter,
+                     mapWriter,
+                     levels,
+                     level+1,
+                     bottomRightPixel,
+                     bottomRightCell->second,
+                     bottomRightOffset,
+                     dataWrittenCount)) {
+        return false;
+      }
+    }
+
+    if (!indexWriter.GetPos(offset)) {
+      return false;
+    }
+
+    if (topLeftOffset!=0) {
+      topLeftOffset=offset-topLeftOffset;
+    }
+
+    if (!indexWriter.WriteNumber(topLeftOffset)) {
+      return false;
+    }
+
+    if (topRightOffset!=0) {
+      topRightOffset=offset-topRightOffset;
+    }
+
+    if (!indexWriter.WriteNumber(topRightOffset)) {
+      return false;
+    }
+
+    if (bottomLeftOffset!=0) {
+      bottomLeftOffset=offset-bottomLeftOffset;
+    }
+
+    if (!indexWriter.WriteNumber(bottomLeftOffset)) {
+      return false;
+    }
+
+    if (bottomRightOffset!=0) {
+      bottomRightOffset=offset-bottomRightOffset;
+    }
+
+    if (!indexWriter.WriteNumber(bottomRightOffset)) {
+      return false;
+    }
+
+    return true;
+  }
+
   bool AreaAreaIndexGenerator::WriteCell(const TypeConfig& typeConfig,
                                          Progress& progress,
                                          const ImportParameter& parameter,
@@ -647,140 +795,27 @@ namespace osmscout {
                                          size_t level,
                                          const Pixel& pixel,
                                          const AreaLeaf& leaf,
-                                         FileOffset& offset,
+                                         FileOffset& dataStartOffset,
                                          uint32_t& dataWrittenCount)
   {
     if (level<parameter.GetAreaAreaIndexMaxMag()) {
-      Pixel      topLeftPixel(pixel.x*2,pixel.y*2+1);
-      FileOffset topLeftOffset=0;
-
-      auto topLeftCell=levels[level+1].find(topLeftPixel);
-
-      if (topLeftCell!=levels[level+1].end()) {
-        if (!WriteCell(typeConfig,
-                       progress,
-                       parameter,
-                       scanner,
-                       indexWriter,
-                       dataWriter,
-                       mapWriter,
-                       levels,
-                       level+1,
-                       topLeftPixel,
-                       topLeftCell->second,
-                       topLeftOffset,
-                       dataWrittenCount)) {
-          return false;
-        }
-      }
-
-      Pixel      topRightPixel(pixel.x*2+1,pixel.y*2+1);
-      FileOffset topRightOffset=0;
-
-      auto topRightCell=levels[level+1].find(topRightPixel);
-
-      if (topRightCell!=levels[level+1].end()) {
-        if (!WriteCell(typeConfig,
-                       progress,
-                       parameter,
-                       scanner,
-                       indexWriter,
-                       dataWriter,
-                       mapWriter,
-                       levels,
-                       level+1,
-                       topRightPixel,
-                       topRightCell->second,
-                       topRightOffset,
-                       dataWrittenCount)) {
-          return false;
-        }
-      }
-
-      Pixel      bottomLeftPixel(pixel.x*2,pixel.y*2);
-      FileOffset bottomLeftOffset=0;
-
-      auto bottomLeftCell=levels[level+1].find(bottomLeftPixel);
-
-      if (bottomLeftCell!=levels[level+1].end()) {
-        if (!WriteCell(typeConfig,
-                       progress,
-                       parameter,
-                       scanner,
-                       indexWriter,
-                       dataWriter,
-                       mapWriter,
-                       levels,
-                       level+1,
-                       bottomLeftPixel,
-                       bottomLeftCell->second,
-                       bottomLeftOffset,
-                       dataWrittenCount)) {
-          return false;
-        }
-      }
-
-      Pixel      bottomRightPixel(pixel.x*2+1,pixel.y*2);
-      FileOffset bottomRightOffset=0;
-
-      auto bottomRightCell=levels[level+1].find(bottomRightPixel);
-
-      if (bottomRightCell!=levels[level+1].end()) {
-        if (!WriteCell(typeConfig,
-                       progress,
-                       parameter,
-                       scanner,
-                       indexWriter,
-                       dataWriter,
-                       mapWriter,
-                       levels,
-                       level+1,
-                       bottomRightPixel,
-                       bottomRightCell->second,
-                       bottomRightOffset,
-                       dataWrittenCount)) {
-          return false;
-        }
-      }
-
-      if (!indexWriter.GetPos(offset)) {
-        return false;
-      }
-
-      if (topLeftOffset!=0) {
-        topLeftOffset=offset-topLeftOffset;
-      }
-
-      if (!indexWriter.WriteNumber(topLeftOffset)) {
-        return false;
-      }
-
-      if (topRightOffset!=0) {
-        topRightOffset=offset-topRightOffset;
-      }
-
-      if (!indexWriter.WriteNumber(topRightOffset)) {
-        return false;
-      }
-
-      if (bottomLeftOffset!=0) {
-        bottomLeftOffset=offset-bottomLeftOffset;
-      }
-
-      if (!indexWriter.WriteNumber(bottomLeftOffset)) {
-        return false;
-      }
-
-      if (bottomRightOffset!=0) {
-        bottomRightOffset=offset-bottomRightOffset;
-      }
-
-      if (!indexWriter.WriteNumber(bottomRightOffset)) {
+      if (!WriteChildCells(typeConfig,
+                           progress,
+                           parameter,
+                           scanner,
+                           indexWriter,
+                           dataWriter,
+                           mapWriter,
+                           levels,
+                           level,
+                           pixel,
+                           dataStartOffset,
+                           dataWrittenCount)) {
         return false;
       }
     }
     else {
-      if (!indexWriter.GetPos(offset)) {
+      if (!indexWriter.GetPos(dataStartOffset)) {
         return false;
       }
     }
@@ -792,59 +827,40 @@ namespace osmscout {
     }
 
     // Number of types
-    // TODO: Since objects may get filtered, this may not be correct
     indexWriter.WriteNumber((uint32_t)offsetsTypeMap.size());
 
-    for (const auto& entry : offsetsTypeMap) {
-      FileOffset dataStartOffset=0;
+    FileOffset prevObjectStartOffset=0;
 
+    for (const auto& entry : offsetsTypeMap) {
+      FileOffset objectStartOffset=0;
+
+      // Note, that of we optimize evrything away, we are left here with objectStartOffset==0
+      // The index reading code has to handle this!
       CopyData(typeConfig,
                progress,
                scanner,
                dataWriter,
                mapWriter,
                entry.second,
-               dataStartOffset,
+               objectStartOffset,
                dataWrittenCount);
 
       indexWriter.WriteTypeId(entry.first,typeConfig.GetAreaTypeIdBytes());
       indexWriter.WriteNumber(entry.second.size());
-      indexWriter.WriteFileOffset(dataStartOffset,4); //TODO: Optimize
+      indexWriter.WriteNumber(objectStartOffset-prevObjectStartOffset);
+
+      prevObjectStartOffset=objectStartOffset;
     }
 
     return !indexWriter.HasError();
   }
 
-  bool AreaAreaIndexGenerator::Import(const TypeConfigRef& typeConfig,
-                                      const ImportParameter& parameter,
-                                      Progress& progress)
+  bool AreaAreaIndexGenerator::BuildInMemoryIndex(const TypeConfigRef& typeConfig,
+                                                  const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  FileScanner& scanner,
+                                                  std::vector<Level>& levels)
   {
-    FileScanner         scanner;
-    std::vector<Level>  levels;
-
-    for (auto& filter : filters) {
-      if (!filter->BeforeProcessingStart(parameter,
-                                         progress,
-                                         *typeConfig)) {
-        progress.Error("Cannot initialize processor filter");
-
-        return false;
-      }
-    }
-
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas3.tmp"),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'areas.dat'");
-      return false;
-    }
-
-    progress.SetAction("Building in memory area index from '"+scanner.GetFilename()+"'");
-
-    levels.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-
     uint32_t areaCount=0;
 
     if (!scanner.GotoBegin()) {
@@ -901,6 +917,36 @@ namespace osmscout {
       entry.offset=offset;
 
       levels[level][Pixel(x,y)].areas.push_back(entry);
+    }
+
+    return true;
+  }
+
+  bool AreaAreaIndexGenerator::ImportInternal(const TypeConfigRef& typeConfig,
+                                              const ImportParameter& parameter,
+                                              Progress& progress)
+  {
+    FileScanner         scanner;
+    std::vector<Level>  levels;
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "areas3.tmp"),
+                      FileScanner::Sequential,
+                      parameter.GetWayDataMemoryMaped())) {
+      progress.Error("Cannot open 'areas.dat'");
+      return false;
+    }
+
+    progress.SetAction("Building in memory area index from '"+scanner.GetFilename()+"'");
+
+    levels.resize(parameter.GetAreaAreaIndexMaxMag()+1);
+
+    if (!BuildInMemoryIndex(typeConfig,
+                            parameter,
+                            progress,
+                            scanner,
+                            levels)) {
+      return false;
     }
 
     progress.SetAction("Enriching index tree");
@@ -963,8 +1009,7 @@ namespace osmscout {
     mapWriter.Write(overallDataCount);
 
     progress.SetAction("Writing files '"+indexWriter.GetFilename()+"', '"+dataWriter.GetFilename()+"' and '"+
-                       mapWriter.GetFilename()+
-                       "'");
+                       mapWriter.GetFilename()+"'");
 
     if (!WriteCell(*typeConfig,
                    progress,
@@ -982,19 +1027,19 @@ namespace osmscout {
       return false;
     }
 
-    // Index file
+    // Finishing index file
 
     if (!indexWriter.SetPos(topLevelOffsetOffset) ||
         !indexWriter.WriteFileOffset(topLevelOffset)) {
       return false;
     }
 
-    // Data file
+    // Finishing data file
 
     dataWriter.SetPos(0);
     dataWriter.Write(overallDataCount);
 
-    // Id map file
+    // Finishing id map file
 
     mapWriter.SetPos(0);
     mapWriter.Write(overallDataCount);
@@ -1007,6 +1052,26 @@ namespace osmscout {
            indexWriter.Close() &&
            dataWriter.Close() &&
            mapWriter.Close();
+  }
+
+  bool AreaAreaIndexGenerator::Import(const TypeConfigRef& typeConfig,
+                                      const ImportParameter& parameter,
+                                      Progress& progress)
+  {
+
+    for (auto& filter : filters) {
+      if (!filter->BeforeProcessingStart(parameter,
+                                         progress,
+                                         *typeConfig)) {
+        progress.Error("Cannot initialize processor filter");
+
+        return false;
+      }
+    }
+
+    bool result=ImportInternal(typeConfig,
+                               parameter,
+                               progress);
 
     for (auto& filter : filters) {
       if (!filter->AfterProcessingEnd(parameter,
@@ -1016,6 +1081,8 @@ namespace osmscout {
         return false;
       }
     }
+
+    return result;
   }
 
   AreaAreaIndexGenerator::AreaAreaIndexGenerator()

@@ -248,16 +248,16 @@ namespace osmscout {
     StopClock                  areaIndexTimer;
 
     if (internalAreaTypes.HasTypes()) {
-      if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                     boundingBox.GetMinLon(),
-                                     boundingBox.GetMinLat(),
-                                     boundingBox.GetMaxLon(),
-                                     boundingBox.GetMaxLat(),
-                                     magnification.GetLevel()+
-                                     parameter.GetMaximumAreaLevel(),
-                                     internalAreaTypes,
-                                     parameter.GetMaximumAreas(),
-                                     spans)) {
+      if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+                                         boundingBox.GetMinLon(),
+                                         boundingBox.GetMinLat(),
+                                         boundingBox.GetMaxLon(),
+                                         boundingBox.GetMaxLat(),
+                                         magnification.GetLevel()+
+                                         parameter.GetMaximumAreaLevel(),
+                                         internalAreaTypes,
+                                         parameter.GetMaximumAreas(),
+                                         spans)) {
         std::cout << "Error getting areas from area index!" << std::endl;
         return false;
       }

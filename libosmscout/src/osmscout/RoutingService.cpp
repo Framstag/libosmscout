@@ -1734,15 +1734,15 @@ namespace osmscout {
       log.Error() << "Error getting ways and relations from area way index!";
     }
 
-    if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                   leftLon,
-                                   botLat,
-                                   rightLon,
-                                   topLat,
-                                   std::numeric_limits<size_t>::max(),
-                                   areaRoutableTypes,
-                                   std::numeric_limits<size_t>::max(),
-                                   wayAreaSpans)) {
+    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+                                       leftLon,
+                                       botLat,
+                                       rightLon,
+                                       topLat,
+                                       std::numeric_limits<size_t>::max(),
+                                       areaRoutableTypes,
+                                       std::numeric_limits<size_t>::max(),
+                                       wayAreaSpans)) {
       log.Error() << "Error getting ways and relations from area index!";
     }
 

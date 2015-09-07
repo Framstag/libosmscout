@@ -119,11 +119,14 @@ namespace osmscout {
     }
 
     uint32_t typeCount;
+    uint32_t dataCount;
 
 
     if (!scanner.ReadNumber(typeCount)) {
       return false;
     }
+
+    FileOffset prevDataFileOffset=0;
 
     for (size_t t=0; t<typeCount; t++) {
       TypeId     typeId;
@@ -138,19 +141,27 @@ namespace osmscout {
         return false;
       }
 
-      if (!scanner.ReadFileOffset(dataFileOffset,4)) {
+      if (!scanner.ReadNumber(dataFileOffset)) {
         return false;
       }
 
-      // TODO: Handle spaceLeft!
+      dataFileOffset+=prevDataFileOffset;
+      prevDataFileOffset=dataFileOffset;
 
-      if (types.IsTypeSet(typeId)) {
+      if (dataFileOffset!=0 &&
+          types.IsTypeSet(typeId)) {
         DataBlockSpan span;
 
         span.startOffset=dataFileOffset;
         span.count=dataCount;
 
         spans.push_back(span);
+
+        dataCount++;
+
+        if (dataCount>spaceLeft) {
+          stopArea=true;
+        }
       }
     }
 
@@ -242,15 +253,30 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool AreaAreaIndex::GetOffsets(const TypeConfigRef& typeConfig,
-                                 double minlon,
-                                 double minlat,
-                                 double maxlon,
-                                 double maxlat,
-                                 size_t maxLevel,
-                                 const TypeSet& types,
-                                 size_t maxCount,
-                                 std::vector<DataBlockSpan>& spans) const
+  /**
+   * Returns references in form of DataBlockSpans to all areas within the
+   * given area,
+   *
+   * @param typeConfig
+   *    Type configuration
+   * @param maxLevel
+   *    The maximum index level to load areas from
+   * @param types
+   *    Set of types to load data for
+   * @param maxCount
+   *    Maximum number of elements to return
+   * @param spans
+   *    List of DataBlockSpans referencing the the found areas
+   */
+  bool AreaAreaIndex::GetAreasInArea(const TypeConfigRef& typeConfig,
+                                     double minlon,
+                                     double minlat,
+                                     double maxlon,
+                                     double maxlat,
+                                     size_t maxLevel,
+                                     const TypeSet& types,
+                                     size_t maxCount,
+                                     std::vector<DataBlockSpan>& spans) const
   {
     std::vector<CellRef>       cellRefs;     // cells to scan in this level
     std::vector<CellRef>       nextCellRefs; // cells to scan for the next level

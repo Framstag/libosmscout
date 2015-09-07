@@ -69,6 +69,19 @@ namespace osmscout {
                   FileOffset& dataStartOffset,
                   uint32_t& dataWrittenCount);
 
+    bool WriteChildCells(const TypeConfig& typeConfig,
+                         Progress& progress,
+                         const ImportParameter& parameter,
+                         FileScanner& scanner,
+                         FileWriter& indexWriter,
+                         FileWriter& dataWriter,
+                         FileWriter& mapWriter,
+                         const std::vector<Level>& levels,
+                         size_t level,
+                         const Pixel& pixel,
+                         FileOffset& offset,
+                         uint32_t& dataWrittenCount);
+
     bool WriteCell(const TypeConfig& typeConfig,
                    Progress& progress,
                    const ImportParameter& parameter,
@@ -80,8 +93,18 @@ namespace osmscout {
                    size_t level,
                    const Pixel& pixel,
                    const AreaLeaf& leaf,
-                   FileOffset& offset,
+                   FileOffset& dataStartOffset,
                    uint32_t& dataWrittenCount);
+
+    bool BuildInMemoryIndex(const TypeConfigRef& typeConfig,
+                            const ImportParameter& parameter,
+                            Progress& progress,
+                            FileScanner& scanner,
+                            std::vector<Level>& levels);
+
+    bool ImportInternal(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress);
 
   public:
     AreaAreaIndexGenerator();

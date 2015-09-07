@@ -128,15 +128,15 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetOffsets(const TypeConfigRef& typeConfig,
-                    double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
-                    size_t maxLevel,
-                    const TypeSet& types,
-                    size_t maxCount,
-                    std::vector<DataBlockSpan>& spans) const;
+    bool GetAreasInArea(const TypeConfigRef& typeConfig,
+                        double minlon,
+                        double minlat,
+                        double maxlon,
+                        double maxlat,
+                        size_t maxLevel,
+                        const TypeSet& types,
+                        size_t maxCount,
+                        std::vector<DataBlockSpan>& spans) const;
 
     void DumpStatistics();
   };
