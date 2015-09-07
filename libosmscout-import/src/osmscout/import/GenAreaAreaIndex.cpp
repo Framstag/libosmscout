@@ -834,7 +834,7 @@ namespace osmscout {
     for (const auto& entry : offsetsTypeMap) {
       FileOffset objectStartOffset=0;
 
-      // Note, that of we optimize evrything away, we are left here with objectStartOffset==0
+      // Note, that if we optimize everything away, we are left here with objectStartOffset==0
       // The index reading code has to handle this!
       CopyData(typeConfig,
                progress,
