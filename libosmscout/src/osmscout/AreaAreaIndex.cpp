@@ -119,8 +119,6 @@ namespace osmscout {
     }
 
     uint32_t typeCount;
-    uint32_t dataCount;
-
 
     if (!scanner.ReadNumber(typeCount)) {
       return false;
