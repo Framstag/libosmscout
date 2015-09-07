@@ -119,6 +119,7 @@ namespace osmscout {
     }
 
     uint32_t typeCount;
+    uint32_t overallDataCount=0;
 
     if (!scanner.ReadNumber(typeCount)) {
       return false;
@@ -155,9 +156,9 @@ namespace osmscout {
 
         spans.push_back(span);
 
-        dataCount++;
+        overallDataCount++;
 
-        if (dataCount>spaceLeft) {
+        if (overallDataCount>spaceLeft) {
           stopArea=true;
         }
       }
@@ -311,8 +312,8 @@ namespace osmscout {
          level<=maxLevel &&
          !cellRefs.empty();
          level++) {
-      nextCellRefs.clear();
       newSpans.clear();
+      nextCellRefs.clear();
 
       for (const auto& cellRef : cellRefs) {
         IndexCell  cellIndexData;

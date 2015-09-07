@@ -50,7 +50,7 @@ namespace osmscout {
   {
   private:
     /**
-      Datastructure for every index cell of our index.
+      Data structure for every index cell of our index.
       */
     struct IndexCell
     {
