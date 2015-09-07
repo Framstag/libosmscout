@@ -118,7 +118,7 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset> wayAreaOffsets;
+    std::vector<DataBlockSpan> spans;
 
     if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
                                    boundingBox.GetMinLon(),
@@ -128,19 +128,21 @@ namespace osmscout {
                                    std::numeric_limits<size_t>::max(),
                                    types,
                                    std::numeric_limits<size_t>::max(),
-                                   wayAreaOffsets)) {
+                                   spans)) {
       log.Error() << "Error getting ways and relations from area index!";
 
       return false;
     }
 
-    std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
+    if (!spans.empty()) {
+      std::sort(spans.begin(),spans.end());
 
-    if (!areaDataFile->GetByOffset(wayAreaOffsets,
-                                   areas)) {
-      log.Error() << "Error reading areas in area!";
+      if (!areaDataFile->GetByBlockSpans(spans,
+                                         areas)) {
+        log.Error() << "Error reading areas in area!";
 
-      return false;
+        return false;
+      }
     }
 
     return true;

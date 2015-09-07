@@ -52,7 +52,6 @@ set(HEADER_FILES
     include/osmscout/import/RawRelIndexedDataFile.h
     include/osmscout/import/RawWay.h
     include/osmscout/import/RawWayIndexedDataFile.h
-    include/osmscout/import/SortAreaDat.h
     include/osmscout/import/SortDat.h
     include/osmscout/import/SortNodeDat.h
     include/osmscout/import/SortWayDat.h
@@ -96,7 +95,6 @@ set(SOURCE_FILES
     src/osmscout/import/RawRelIndexedDataFile.cpp
     src/osmscout/import/RawWay.cpp
     src/osmscout/import/RawWayIndexedDataFile.cpp
-    src/osmscout/import/SortAreaDat.cpp
     src/osmscout/import/SortDat.cpp
     src/osmscout/import/SortNodeDat.cpp
     src/osmscout/import/SortWayDat.cpp)

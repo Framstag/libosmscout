@@ -47,7 +47,6 @@
 #include <osmscout/import/GenWayAreaDat.h>
 #include <osmscout/import/MergeAreaData.h>
 #include <osmscout/import/GenMergeAreas.h>
-#include <osmscout/import/SortAreaDat.h>
 
 #include <osmscout/import/GenWayWayDat.h>
 #include <osmscout/import/SortWayDat.h>
@@ -79,9 +78,9 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=25;
-#else
   static const size_t defaultEndStep=24;
+#else
+  static const size_t defaultEndStep=23;
 #endif
 
   ImportParameter::Router::Router(uint8_t vehicleMask,
@@ -113,7 +112,7 @@ namespace osmscout {
      areaDataCacheSize(0),
      wayDataMemoryMaped(false),
      wayDataCacheSize(0),
-     areaAreaIndexMaxMag(15),
+     areaAreaIndexMaxMag(17),
      areaWayMinMag(11), // Should not be >= than optimizationMaxMag
      areaNodeMinMag(8),
      areaNodeIndexMinFillRate(0.1),
@@ -658,36 +657,33 @@ namespace osmscout {
     modules.push_back(new SortNodeDataGenerator());
 
     /* 14 */
-    modules.push_back(new SortAreaDataGenerator());
-
-    /* 15 */
     modules.push_back(new SortWayDataGenerator());
 
-    /* 16 */
+    /* 15 */
     modules.push_back(new AreaNodeIndexGenerator());
 
-    /* 17 */
+    /* 16 */
     modules.push_back(new AreaWayIndexGenerator());
 
-    /* 18 */
+    /* 17 */
     modules.push_back(new AreaAreaIndexGenerator());
 
-    /* 19 */
+    /* 18 */
     modules.push_back(new WaterIndexGenerator());
 
-    /* 20 */
+    /* 19 */
     modules.push_back(new OptimizeAreasLowZoomGenerator());
 
-    /* 21 */
+    /* 20 */
     modules.push_back(new OptimizeWaysLowZoomGenerator());
 
-    /* 22 */
+    /* 21 */
     modules.push_back(new LocationIndexGenerator());
 
-    /* 23 */
+    /* 22 */
     modules.push_back(new RouteDataGenerator());
 
-    /* 24 */
+    /* 23 */
     modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+RoutingService::FILENAME_INTERSECTIONS_IDX+"'",
                                                                  AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                  RoutingService::FILENAME_INTERSECTIONS_DAT),
@@ -695,7 +691,7 @@ namespace osmscout {
                                                                                  RoutingService::FILENAME_INTERSECTIONS_IDX)));
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 25 */
+    /* 24 */
     modules.push_back(new TextIndexGenerator());
 #endif
 

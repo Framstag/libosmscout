@@ -111,53 +111,46 @@ namespace osmscout {
                                    const TypeSet& types,
                                    FileOffset dataOffset,
                                    size_t spaceLeft,
-                                   size_t currentLevel,
-                                   size_t maxSizeLevel,
-                                   std::vector<FileOffset>& offsets,
+                                   std::vector<DataBlockSpan>& spans,
                                    bool& stopArea) const
   {
     if (!scanner.SetPos(dataOffset)) {
       return false;
     }
 
-    uint32_t offsetCount;
+    uint32_t typeCount;
 
-    if (!scanner.ReadNumber(offsetCount)) {
+
+    if (!scanner.ReadNumber(typeCount)) {
       return false;
     }
 
-    FileOffset prevOffset=0;
-
-    for (size_t c=0; c<offsetCount; c++) {
-      uint64_t   value;
+    for (size_t t=0; t<typeCount; t++) {
       TypeId     typeId;
-      uint8_t    sizeLevel=currentLevel;
-      FileOffset areaOffset;
+      uint32_t   dataCount;
+      FileOffset dataFileOffset;
 
-      if (!scanner.ReadNumber(value)) {
+      if (!scanner.ReadTypeId(typeId,typeConfig.GetAreaTypeIdBytes())) {
         return false;
       }
 
-      if (currentLevel==maxLevel) {
-        sizeLevel=value & 7;
-        sizeLevel+=maxLevel;
-        value=value >> 3;
+      if (!scanner.ReadNumber(dataCount)) {
+        return false;
       }
 
-      typeId=value & areaTypeIdMask;
-      value=value >> typeConfig.GetAreaTypeIdBits();
-      areaOffset=value+prevOffset;
+      if (!scanner.ReadFileOffset(dataFileOffset,4)) {
+        return false;
+      }
 
-      prevOffset=areaOffset;
+      // TODO: Handle spaceLeft!
 
-      if (sizeLevel<=maxSizeLevel &&
-          types.IsTypeSet(typeId)) {
-        offsets.push_back(areaOffset);
+      if (types.IsTypeSet(typeId)) {
+        DataBlockSpan span;
 
-        if (offsets.size()>spaceLeft) {
-          stopArea=true;
-          break;
-        }
+        span.startOffset=dataFileOffset;
+        span.count=dataCount;
+
+        spans.push_back(span);
       }
     }
 
@@ -257,13 +250,11 @@ namespace osmscout {
                                  size_t maxLevel,
                                  const TypeSet& types,
                                  size_t maxCount,
-                                 std::vector<FileOffset>& offsets) const
+                                 std::vector<DataBlockSpan>& spans) const
   {
-    std::vector<CellRef>    cellRefs;     // cells to scan in this level
-    std::vector<CellRef>    nextCellRefs; // cells to scan for the next level
-    std::vector<FileOffset> newOffsets;   // offsets collected in the current level
-
-    areaTypeIdMask=Pow(2,typeConfig->GetAreaTypeIdBits())-1;
+    std::vector<CellRef>       cellRefs;     // cells to scan in this level
+    std::vector<CellRef>       nextCellRefs; // cells to scan for the next level
+    std::vector<DataBlockSpan> newSpans;     // offsets collected in the current level
 
     minlon+=180;
     maxlon+=180;
@@ -271,12 +262,12 @@ namespace osmscout {
     maxlat+=90;
 
     // Clear result data structures
-    offsets.clear();
+    spans.clear();
 
     // Make the vector preallocate memory for the expected data size
     // This should void reallocation
-    offsets.reserve(std::min(20000u,(uint32_t)maxCount));
-    newOffsets.reserve(std::min(20000u,(uint32_t)maxCount));
+    spans.reserve(std::min(1000u,(uint32_t)maxCount));
+    newSpans.reserve(std::min(1000u,(uint32_t)maxCount));
 
     cellRefs.reserve(2000);
     nextCellRefs.reserve(2000);
@@ -297,7 +288,7 @@ namespace osmscout {
          !cellRefs.empty();
          level++) {
       nextCellRefs.clear();
-      newOffsets.clear();
+      newSpans.clear();
 
       for (const auto& cellRef : cellRefs) {
         IndexCell  cellIndexData;
@@ -311,7 +302,7 @@ namespace osmscout {
           return false;
         }
 
-        size_t spaceLeft=maxCount-offsets.size();
+        size_t spaceLeft=maxCount-spans.size();
 
         // Now read the area offsets by type in this index entry
 
@@ -319,9 +310,7 @@ namespace osmscout {
                           types,
                           cellDataOffset,
                           spaceLeft,
-                          level,
-                          maxLevel,
-                          newOffsets,
+                          newSpans,
                           stopArea)) {
           log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";
         }
@@ -346,7 +335,7 @@ namespace osmscout {
       }
 
       if (!stopArea) {
-        offsets.insert(offsets.end(),newOffsets.begin(),newOffsets.end());
+        spans.insert(spans.end(),newSpans.begin(),newSpans.end());
       }
 
       std::swap(cellRefs,nextCellRefs);

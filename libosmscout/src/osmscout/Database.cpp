@@ -635,6 +635,30 @@ namespace osmscout {
     return areaDataFile->GetByOffset(offsets,dataMap);
   }
 
+  bool Database::GetAreasByBlockSpan(const DataBlockSpan& span,
+                           std::vector<AreaRef>& area) const
+  {
+    AreaDataFileRef areaDataFile=GetAreaDataFile();
+
+    if (!areaDataFile) {
+      return false;
+    }
+
+    return areaDataFile->GetByBlockSpan(span,area);
+  }
+
+  bool Database::GetAreasByBlockSpans(const std::vector<DataBlockSpan>& spans,
+                            std::vector<AreaRef>& areas) const
+  {
+    AreaDataFileRef areaDataFile=GetAreaDataFile();
+
+    if (!areaDataFile) {
+      return false;
+    }
+
+    return areaDataFile->GetByBlockSpans(spans,areas);
+  }
+
   bool Database::GetWayByOffset(const FileOffset& offset,
                                 WayRef& way) const
   {

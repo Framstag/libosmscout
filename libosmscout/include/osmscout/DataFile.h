@@ -34,6 +34,22 @@ namespace osmscout {
 
   /**
    * \ingroup Database
+   * Reference a range of data entries by giving the offset of the first entry in the file
+   * and the number of data elements.
+   */
+  struct DataBlockSpan
+  {
+    FileOffset startOffset; //!< Offset for the first data entry referenced in the file. Data will be read starting from this position
+    uint32_t   count;       //!< Number of entries to read.
+
+    inline bool operator<(const DataBlockSpan& other)
+    {
+      return startOffset<other.startOffset;
+    }
+  };
+
+  /**
+   * \ingroup Database
    *
    * Access to standard format data files.
    *
@@ -98,6 +114,11 @@ namespace osmscout {
 
     bool GetByOffset(const FileOffset& offset,
                      ValueType& entry) const;
+
+    bool GetByBlockSpan(const DataBlockSpan& span,
+                        std::vector<ValueType>& data) const;
+    bool GetByBlockSpans(const std::vector<DataBlockSpan>& spans,
+                         std::vector<ValueType>& data) const;
 
     void FlushCache();
     void DumpStatistics() const;
@@ -430,6 +451,100 @@ namespace osmscout {
       }
 
       entry=cacheRef->value;
+    }
+
+    return true;
+  }
+
+  template <class N>
+  bool DataFile<N>::GetByBlockSpan(const DataBlockSpan& span,
+                                   std::vector<ValueType>& area) const
+  {
+    assert(isOpen);
+
+    if (span.count==0) {
+      return true;
+    }
+
+    if (!scanner.IsOpen()) {
+      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
+        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        return false;
+      }
+    }
+
+    if (!scanner.SetPos(span.startOffset)) {
+      std::cerr << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!" << std::endl;
+      scanner.Close();
+      return false;
+    }
+
+    area.reserve(area.size()+span.count);
+
+    for (uint32_t i=1; i<=span.count; i++) {
+      ValueType value=std::make_shared<N>();
+
+      if (!ReadData(*typeConfig,
+                    scanner,
+                    *value)) {
+        std::cerr << "Error while reading data #" << i << " starting from offset " << span.startOffset << " of file " << datafilename << "!" << std::endl;
+        scanner.Close();
+        return false;
+      }
+
+      area.push_back(value);
+    }
+
+    return true;
+  }
+
+  template <class N>
+  bool DataFile<N>::GetByBlockSpans(const std::vector<DataBlockSpan>& spans,
+                                    std::vector<ValueType>& data) const
+  {
+    assert(isOpen);
+
+    if (!scanner.IsOpen()) {
+      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
+        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        return false;
+      }
+    }
+
+    uint32_t overallCount=0;
+
+    for (const auto& span : spans) {
+      overallCount+=span.count;
+    }
+
+    data.reserve(data.size()+overallCount);
+
+    for (const auto& span : spans) {
+      if (span.count==0) {
+        continue;
+      }
+
+      if (!scanner.SetPos(span.startOffset)) {
+        std::cerr << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!" <<
+        std::endl;
+        scanner.Close();
+        return false;
+      }
+
+      for (uint32_t i=1; i<=span.count; i++) {
+        ValueType value=std::make_shared<N>();
+
+        if (!ReadData(*typeConfig,
+                      scanner,
+                      *value)) {
+          std::cerr << "Error while reading data #" << i << " starting from offset " << span.startOffset <<
+          " of file " << datafilename << "!" << std::endl;
+          scanner.Close();
+          return false;
+        }
+
+        data.push_back(value);
+      }
     }
 
     return true;

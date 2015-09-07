@@ -195,6 +195,11 @@ namespace osmscout {
                           std::vector<AreaRef>& areas) const;
     bool GetAreasByOffset(const std::set<FileOffset>& offsets,
                           std::unordered_map<FileOffset,AreaRef>& dataMap) const;
+    bool GetAreasByBlockSpan(const DataBlockSpan& span,
+                             std::vector<AreaRef>& area) const;
+    bool GetAreasByBlockSpans(const std::vector<DataBlockSpan>& spans,
+                              std::vector<AreaRef>& areas) const;
+
 
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;

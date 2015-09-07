@@ -44,7 +44,6 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenWayWayDat.cpp \
                                osmscout/import/MergeAreaData.cpp \
                                osmscout/import/SortDat.cpp \
-                               osmscout/import/SortAreaDat.cpp \
                                osmscout/import/SortNodeDat.cpp \
                                osmscout/import/SortWayDat.cpp \
                                osmscout/import/Import.cpp \

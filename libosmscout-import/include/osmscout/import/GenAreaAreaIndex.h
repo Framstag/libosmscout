@@ -23,12 +23,14 @@
 #include <map>
 #include <set>
 
+#include <osmscout/Area.h>
 #include <osmscout/Pixel.h>
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 
 #include <osmscout/import/Import.h>
+#include <osmscout/import/SortDat.h>
 
 namespace osmscout {
 
@@ -39,7 +41,6 @@ namespace osmscout {
     {
       FileOffset offset;
       TypeId     type;
-      uint8_t    level;
     };
 
     struct AreaLeaf
@@ -50,18 +51,40 @@ namespace osmscout {
     typedef std::map<Pixel,AreaLeaf> Level;
 
   private:
+
+    std::list<SortDataGenerator<Area>::ProcessingFilterRef> filters;
+
+  private:
+    size_t CalculateLevel(const ImportParameter& parameter,
+                          const GeoBox& boundingBox) const;
+
     void EnrichLevels(std::vector<Level>& levels);
 
-    bool WriteCell(const TypeConfigRef& typeConfig,
+    bool CopyData(const TypeConfig& typeConfig,
+                  Progress& progress,
+                  FileScanner& scanner,
+                  FileWriter& dataWriter,
+                  FileWriter& mapWriter,
+                  const std::list<FileOffset>& srcOffsets,
+                  FileOffset& dataStartOffset,
+                  uint32_t& dataWrittenCount);
+
+    bool WriteCell(const TypeConfig& typeConfig,
+                   Progress& progress,
                    const ImportParameter& parameter,
-                   FileWriter& writer,
+                   FileScanner& scanner,
+                   FileWriter& indexWriter,
+                   FileWriter& dataWriter,
+                   FileWriter& mapWriter,
                    const std::vector<Level>& levels,
                    size_t level,
                    const Pixel& pixel,
                    const AreaLeaf& leaf,
-                   FileOffset& offset);
+                   FileOffset& offset,
+                   uint32_t& dataWrittenCount);
 
   public:
+    AreaAreaIndexGenerator();
     std::string GetDescription() const;
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,

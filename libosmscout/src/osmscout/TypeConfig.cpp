@@ -1554,8 +1554,6 @@ namespace osmscout {
       }
 
       RegisterType(typeInfo);
-
-      std::cout << typeInfo->GetName() << " " << typeInfo->GetAreaId() << std::endl;
     }
 
     bool result=!scanner.HasError() && scanner.Close();

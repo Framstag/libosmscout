@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include <osmscout/Area.h>
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -34,11 +34,517 @@
 
 namespace osmscout {
 
+  class AreaLocationProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
+  {
+  private:
+    FileWriter                 writer;
+    uint32_t                   overallDataCount;
+    NameFeatureValueReader     *nameReader;
+    LocationFeatureValueReader *locationReader;
+    AddressFeatureValueReader  *addressReader;
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Area& area,
+                 bool& save);
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
+  };
+
+  bool AreaLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
+                                                          Progress& progress,
+                                                          const TypeConfig& typeConfig)
+  {
+    overallDataCount=0;
+
+    nameReader=new NameFeatureValueReader(typeConfig);
+    locationReader=new LocationFeatureValueReader(typeConfig);
+    addressReader=new AddressFeatureValueReader(typeConfig);
+
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "areaaddress.dat"))) {
+      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
+
+      return false;
+    }
+
+    writer.Write(overallDataCount);
+
+    return true;
+  }
+
+  bool AreaLocationProcessorFilter::Process(Progress& /*progress*/,
+                                            const FileOffset& offset,
+                                            Area& area,
+                                            bool& /*save*/)
+  {
+    for (std::vector<Area::Ring>::iterator ring=area.rings.begin();
+         ring!=area.rings.end();
+         ++ring) {
+      NameFeatureValue     *nameValue=nameReader->GetValue(ring->GetFeatureValueBuffer());
+      LocationFeatureValue *locationValue=locationReader->GetValue(ring->GetFeatureValueBuffer());
+      AddressFeatureValue  *addressValue=addressReader->GetValue(ring->GetFeatureValueBuffer());
+
+      std::string          name;
+      std::string          location;
+      std::string          address;
+
+      if (nameValue!=NULL) {
+        name=nameValue->GetName();
+      }
+
+      if (locationValue!=NULL) {
+        location=locationValue->GetLocation();
+      }
+
+      if (addressValue!=NULL) {
+        address=addressValue->GetAddress();
+      }
+
+      bool isAddress=!ring->GetType()->GetIgnore() &&
+                     !location.empty() &&
+                     !address.empty();
+
+      bool isPoi=!name.empty() && ring->GetType()->GetIndexAsPOI();
+
+      size_t locationIndex;
+
+      if (locationReader->GetIndex(ring->GetFeatureValueBuffer(),
+                                   locationIndex) &&
+          ring->GetFeatureValueBuffer().HasValue(locationIndex)) {
+        ring->UnsetFeature(locationIndex);
+      }
+
+      if (!isAddress && !isPoi) {
+        continue;
+      }
+
+      if (ring->ring==Area::masterRingId &&
+          ring->nodes.empty()) {
+        for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
+             r!=area.rings.end();
+             ++r) {
+          if (r->ring==Area::outerRingId) {
+            if (!writer.WriteFileOffset(offset)) {
+              return false;
+            }
+
+            if (!writer.WriteNumber(ring->GetType()->GetAreaId())) {
+              return false;
+            }
+
+            if (!writer.Write(name)) {
+              return false;
+            }
+
+            if (!writer.Write(location)) {
+              return false;
+            }
+
+            if (!writer.Write(address)) {
+              return false;
+            }
+
+            if (!writer.Write(r->nodes)) {
+              return false;
+            }
+
+            overallDataCount++;
+          }
+        }
+      }
+      else {
+        if (!writer.WriteFileOffset(offset)) {
+          return false;
+        }
+
+        if (!writer.WriteNumber(ring->GetType()->GetAreaId())) {
+          return false;
+        }
+
+        if (!writer.Write(name)) {
+          return false;
+        }
+
+        if (!writer.Write(location)) {
+          return false;
+        }
+
+        if (!writer.Write(address)) {
+          return false;
+        }
+
+        if (!writer.Write(ring->nodes)) {
+          return false;
+        }
+
+        overallDataCount++;
+      }
+    }
+
+    return true;
+  }
+
+  bool AreaLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                       Progress& /*progress*/,
+                                                       const TypeConfig& /*typeConfig*/)
+  {
+    delete nameReader;
+    nameReader=NULL;
+
+    delete locationReader;
+    locationReader=NULL;
+
+    delete addressReader;
+    addressReader=NULL;
+
+    writer.SetPos(0);
+    writer.Write(overallDataCount);
+
+    return writer.Close();
+  }
+
+  class AreaNodeReductionProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
+  {
+  private:
+    std::vector<GeoCoord> nodeBuffer;
+    std::vector<Id>       idBuffer;
+    size_t                duplicateCount;
+    size_t                redundantCount;
+    size_t                overallCount;
+
+  private:
+    bool IsEqual(const unsigned char buffer1[],
+                 const unsigned char buffer2[]);
+
+    bool RemoveDuplicateNodes(Progress& progress,
+                              const FileOffset& offset,
+                              Area& area,
+                              bool& save);
+
+    bool RemoveRedundantNodes(Progress& progress,
+                              const FileOffset& offset,
+                              Area& area,
+                              bool& save);
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Area& area,
+                 bool& save);
+
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
+  };
+
+  bool AreaNodeReductionProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                               Progress& /*progress*/,
+                                                               const TypeConfig& /*typeConfig*/)
+  {
+    duplicateCount=0;
+    redundantCount=0;
+    overallCount=0;
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::IsEqual(const unsigned char buffer1[],
+                                                 const unsigned char buffer2[])
+  {
+    for (size_t i=0; i<coordByteSize; i++) {
+      if (buffer1[i]!=buffer2[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::RemoveDuplicateNodes(Progress& progress,
+                                                              const FileOffset& offset,
+                                                              Area& area,
+                                                              bool& save)
+  {
+    unsigned char buffers[2][coordByteSize];
+
+    std::vector<Area::Ring>::iterator ring=area.rings.begin();
+
+    while (ring!=area.rings.end()) {
+      bool reduced=false;
+
+      if (ring->nodes.size()>=2) {
+        size_t lastIndex=0;
+        size_t currentIndex=1;
+
+        nodeBuffer.clear();
+        idBuffer.clear();
+
+        ring->nodes[0].EncodeToBuffer(buffers[0]);
+
+        nodeBuffer.push_back(ring->nodes[0]);
+        if (!ring->ids.empty()) {
+          idBuffer.push_back(ring->ids[0]);
+        }
+
+        for (size_t n=1; n<ring->nodes.size(); n++) {
+          ring->nodes[n].EncodeToBuffer(buffers[currentIndex]);
+
+          if (IsEqual(buffers[lastIndex],
+                      buffers[currentIndex])) {
+            if (n>=ring->ids.size() ||
+                ring->ids[n]==0) {
+              reduced=true;
+            }
+            else if ((n-1)>=ring->ids.size() ||
+                     ring->ids[n-1]==0) {
+              ring->ids[n-1]=ring->ids[n];
+              reduced=true;
+            }
+            else {
+              nodeBuffer.push_back(ring->nodes[n]);
+              if (n<ring->ids.size()) {
+                idBuffer.push_back(ring->ids[n]);
+              }
+
+              lastIndex=currentIndex;
+              currentIndex=(lastIndex+1)%2;
+            }
+          }
+          else {
+            nodeBuffer.push_back(ring->nodes[n]);
+            if (n<ring->ids.size()) {
+              idBuffer.push_back(ring->ids[n]);
+            }
+
+            lastIndex=currentIndex;
+            currentIndex=(lastIndex+1)%2;
+          }
+        }
+      }
+
+      if (reduced) {
+        if (nodeBuffer.size()<3) {
+          progress.Debug("Area " + NumberToString(offset) + " empty/invalid ring removed after node reduction");
+          ring=area.rings.erase(ring);
+
+          if (area.rings.size()==0 ||
+              (area.rings.size()==1 &&
+               area.rings[0].ring==Area::masterRingId)) {
+            save=false;
+            return true;
+          }
+        }
+        else {
+          ring->nodes=nodeBuffer;
+          ring->ids=idBuffer;
+          ++ring;
+        }
+      }
+      else {
+        ++ring;
+      }
+    }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::RemoveRedundantNodes(Progress& /*progress*/,
+                                                              const FileOffset& /*offset*/,
+                                                              Area& area,
+                                                              bool& /*save*/)
+  {
+    for (auto &ring : area.rings) {
+      // In this case there is nothing to optimize
+      if (ring.nodes.size()<3) {
+        continue;
+      }
+
+      nodeBuffer.clear();
+      idBuffer.clear();
+
+      size_t last=0;
+      size_t current=1;
+      bool   reduced=false;
+
+      nodeBuffer.push_back(ring.nodes[0]);
+      if (!ring.ids.empty()) {
+        idBuffer.push_back(ring.ids[0]);
+      }
+
+      while (current+1<ring.nodes.size()) {
+        double distance=CalculateDistancePointToLineSegment(ring.nodes[current],
+                                                            nodeBuffer[last],
+                                                            ring.nodes[current+1]);
+
+        if (distance<1/latConversionFactor &&
+            (current>=ring.ids.size() || ring.ids[current]==0)) {
+          reduced=true;
+          redundantCount++;
+          current++;
+        }
+        else {
+          nodeBuffer.push_back(ring.nodes[current]);
+          if (!ring.ids.empty()) {
+            idBuffer.push_back(ring.ids[current]);
+          }
+
+          last++;
+          current++;
+        }
+      }
+
+      nodeBuffer.push_back(ring.nodes[current]);
+      if (!ring.ids.empty()) {
+        idBuffer.push_back(ring.ids[current]);
+      }
+
+      if (reduced && nodeBuffer.size()<3) {
+        reduced=false;
+      }
+
+      if (reduced) {
+        ring.nodes=nodeBuffer;
+        ring.ids=idBuffer;
+      }
+    }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::Process(Progress& progress,
+                                                 const FileOffset& offset,
+                                                 Area& area,
+                                                 bool& save)
+  {
+    for (const auto &ring : area.rings) {
+      overallCount+=ring.nodes.size();
+    }
+
+    if (!RemoveDuplicateNodes(progress,
+                              offset,
+                              area,
+                              save)) {
+      return false;
+    }
+
+    if (!save) {
+      return true;
+    }
+
+    if (!RemoveRedundantNodes(progress,
+                              offset,
+                              area,
+                              save)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool AreaNodeReductionProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                            Progress& progress,
+                                                            const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Duplicate nodes removed: " + NumberToString(duplicateCount));
+    progress.Info("Redundant nodes removed: " + NumberToString(redundantCount));
+    progress.Info("Overall nodes: " + NumberToString(overallCount));
+
+    return true;
+  }
+
+  class AreaTypeIgnoreProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
+  {
+  private:
+    uint32_t    removedAreasCount;
+    TypeInfoRef typeInfoIgnore;
+
+  public:
+    bool BeforeProcessingStart(const ImportParameter& parameter,
+                               Progress& progress,
+                               const TypeConfig& typeConfig);
+    bool Process(Progress& progress,
+                 const FileOffset& offset,
+                 Area& area,
+                 bool& save);
+    bool AfterProcessingEnd(const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig);
+  };
+
+  bool AreaTypeIgnoreProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
+                                                            Progress& /*progress*/,
+                                                            const TypeConfig& typeConfig)
+  {
+    removedAreasCount=0;
+    typeInfoIgnore=typeConfig.typeInfoIgnore;
+
+    return true;
+  }
+
+  bool AreaTypeIgnoreProcessorFilter::Process(Progress& /*progress*/,
+                                              const FileOffset& /*offset*/,
+                                              Area& area,
+                                              bool& save)
+  {
+    save=area.GetType()!=NULL &&
+         area.GetType()!=typeInfoIgnore;
+
+    if (!save) {
+      removedAreasCount++;
+    }
+
+    return true;
+  }
+
+  bool AreaTypeIgnoreProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
+                                                         Progress& progress,
+                                                         const TypeConfig& /*typeConfig*/)
+  {
+    progress.Info("Areas without a type removed: " + NumberToString(removedAreasCount));
+
+    return true;
+  }
+
   std::string AreaAreaIndexGenerator::GetDescription() const
   {
     return "Generate 'areaarea.idx'";
   }
 
+  size_t AreaAreaIndexGenerator::CalculateLevel(const ImportParameter& parameter,
+                                                const GeoBox& boundingBox) const
+  {
+    size_t indexLevel=parameter.GetAreaAreaIndexMaxMag();
+
+    while (true) {
+      if (boundingBox.GetWidth()<=cellDimension[indexLevel].width &&
+          boundingBox.GetHeight()<=cellDimension[indexLevel].height) {
+        break;
+      }
+
+      if (indexLevel==0) {
+        break;
+      }
+
+      indexLevel--;
+    }
+
+    return indexLevel;
+  }
+
+  /**
+   * Assure that there is a parent cell in the parent level for
+   * each cell in a given level.
+   */
   void AreaAreaIndexGenerator::EnrichLevels(std::vector<Level>& levels)
   {
     for (size_t l=0; l<levels.size()-1; l++) {
@@ -54,14 +560,95 @@ namespace osmscout {
     }
   }
 
-  bool AreaAreaIndexGenerator::WriteCell(const TypeConfigRef& typeConfig,
+  bool AreaAreaIndexGenerator::CopyData(const TypeConfig& typeConfig,
+                                        Progress& progress,
+                                        FileScanner& scanner,
+                                        FileWriter& dataWriter,
+                                        FileWriter& mapWriter,
+                                        const std::list<FileOffset>& srcOffsets,
+                                        FileOffset& dataStartOffset,
+                                        uint32_t& dataWrittenCount)
+  {
+    dataStartOffset=0;
+
+    for (FileOffset srcOffset : srcOffsets) {
+      uint8_t    objectType;
+      Id         id;
+      Area       area;
+      FileOffset dstOffset;
+      bool       save=true;
+
+      if (!scanner.SetPos(srcOffset)) {
+        return false;
+      }
+
+      if (!scanner.Read(objectType) ||
+          !scanner.Read(id) ||
+          !area.Read(typeConfig,
+                     scanner)) {
+        return false;
+      }
+
+      //  std::cout << (size_t)objectType << " " << id << " " << area.GetType()->GetName() << " " << area.GetType()->GetIndex() << std::endl;
+
+      if (!dataWriter.GetPos(dstOffset)) {
+        return false;
+      }
+
+      for (const auto& filter : filters) {
+        if (!filter->Process(progress,
+                             dstOffset,
+                             area,
+                             save)) {
+          progress.Error(std::string("Error while processing data entry to file '")+
+                         dataWriter.GetFilename()+"'");
+
+          return false;
+        }
+
+        if (!save) {
+          break;
+        }
+      }
+
+      if (!save) {
+        continue;
+      }
+
+      if (dataStartOffset==0) {
+        dataStartOffset=dstOffset;
+      }
+
+      if (!area.Write(typeConfig,
+                      dataWriter)) {
+        return false;
+      }
+
+      if (!mapWriter.Write(id) ||
+          !mapWriter.Write(objectType) ||
+          !mapWriter.WriteFileOffset(dstOffset)) {
+        return false;
+      }
+
+      dataWrittenCount++;
+    }
+
+    return true;
+  }
+
+  bool AreaAreaIndexGenerator::WriteCell(const TypeConfig& typeConfig,
+                                         Progress& progress,
                                          const ImportParameter& parameter,
-                                         FileWriter& writer,
+                                         FileScanner& scanner,
+                                         FileWriter& indexWriter,
+                                         FileWriter& dataWriter,
+                                         FileWriter& mapWriter,
                                          const std::vector<Level>& levels,
                                          size_t level,
                                          const Pixel& pixel,
                                          const AreaLeaf& leaf,
-                                         FileOffset& offset)
+                                         FileOffset& offset,
+                                         uint32_t& dataWrittenCount)
   {
     if (level<parameter.GetAreaAreaIndexMaxMag()) {
       Pixel      topLeftPixel(pixel.x*2,pixel.y*2+1);
@@ -71,13 +658,18 @@ namespace osmscout {
 
       if (topLeftCell!=levels[level+1].end()) {
         if (!WriteCell(typeConfig,
+                       progress,
                        parameter,
-                       writer,
+                       scanner,
+                       indexWriter,
+                       dataWriter,
+                       mapWriter,
                        levels,
                        level+1,
                        topLeftPixel,
                        topLeftCell->second,
-                       topLeftOffset)) {
+                       topLeftOffset,
+                       dataWrittenCount)) {
           return false;
         }
       }
@@ -89,13 +681,18 @@ namespace osmscout {
 
       if (topRightCell!=levels[level+1].end()) {
         if (!WriteCell(typeConfig,
+                       progress,
                        parameter,
-                       writer,
+                       scanner,
+                       indexWriter,
+                       dataWriter,
+                       mapWriter,
                        levels,
                        level+1,
                        topRightPixel,
                        topRightCell->second,
-                       topRightOffset)) {
+                       topRightOffset,
+                       dataWrittenCount)) {
           return false;
         }
       }
@@ -107,13 +704,18 @@ namespace osmscout {
 
       if (bottomLeftCell!=levels[level+1].end()) {
         if (!WriteCell(typeConfig,
+                       progress,
                        parameter,
-                       writer,
+                       scanner,
+                       indexWriter,
+                       dataWriter,
+                       mapWriter,
                        levels,
                        level+1,
                        bottomLeftPixel,
                        bottomLeftCell->second,
-                       bottomLeftOffset)) {
+                       bottomLeftOffset,
+                       dataWrittenCount)) {
           return false;
         }
       }
@@ -125,18 +727,23 @@ namespace osmscout {
 
       if (bottomRightCell!=levels[level+1].end()) {
         if (!WriteCell(typeConfig,
+                       progress,
                        parameter,
-                       writer,
+                       scanner,
+                       indexWriter,
+                       dataWriter,
+                       mapWriter,
                        levels,
                        level+1,
                        bottomRightPixel,
                        bottomRightCell->second,
-                       bottomRightOffset)) {
+                       bottomRightOffset,
+                       dataWrittenCount)) {
           return false;
         }
       }
 
-      if (!writer.GetPos(offset)) {
+      if (!indexWriter.GetPos(offset)) {
         return false;
       }
 
@@ -144,7 +751,7 @@ namespace osmscout {
         topLeftOffset=offset-topLeftOffset;
       }
 
-      if (!writer.WriteNumber(topLeftOffset)) {
+      if (!indexWriter.WriteNumber(topLeftOffset)) {
         return false;
       }
 
@@ -152,7 +759,7 @@ namespace osmscout {
         topRightOffset=offset-topRightOffset;
       }
 
-      if (!writer.WriteNumber(topRightOffset)) {
+      if (!indexWriter.WriteNumber(topRightOffset)) {
         return false;
       }
 
@@ -160,7 +767,7 @@ namespace osmscout {
         bottomLeftOffset=offset-bottomLeftOffset;
       }
 
-      if (!writer.WriteNumber(bottomLeftOffset)) {
+      if (!indexWriter.WriteNumber(bottomLeftOffset)) {
         return false;
       }
 
@@ -168,40 +775,44 @@ namespace osmscout {
         bottomRightOffset=offset-bottomRightOffset;
       }
 
-      if (!writer.WriteNumber(bottomRightOffset)) {
+      if (!indexWriter.WriteNumber(bottomRightOffset)) {
         return false;
       }
     }
     else {
-      if (!writer.GetPos(offset)) {
+      if (!indexWriter.GetPos(offset)) {
         return false;
       }
     }
 
-    // Number of areas
-    writer.WriteNumber((uint32_t)leaf.areas.size());
+    std::unordered_map<TypeId,std::list<FileOffset>> offsetsTypeMap;
 
-    // Since objects are inserted in file position order, we do not need
-    // to sort objects by file offset at this place
-
-    FileOffset prevOffset=0;
     for (const auto& entry : leaf.areas) {
-      uint64_t value=entry.offset-prevOffset;
-
-      value=value << typeConfig->GetAreaTypeIdBits();
-      value=value | entry.type;
-
-      if (level==parameter.GetAreaAreaIndexMaxMag()) {
-        value=value << 3;
-        value=value | (uint8_t)(entry.level-parameter.GetAreaAreaIndexMaxMag());
-      }
-
-      writer.WriteNumber(value);
-
-      prevOffset=entry.offset;
+      offsetsTypeMap[entry.type].push_back(entry.offset);
     }
 
-    return !writer.HasError();
+    // Number of types
+    // TODO: Since objects may get filtered, this may not be correct
+    indexWriter.WriteNumber((uint32_t)offsetsTypeMap.size());
+
+    for (const auto& entry : offsetsTypeMap) {
+      FileOffset dataStartOffset=0;
+
+      CopyData(typeConfig,
+               progress,
+               scanner,
+               dataWriter,
+               mapWriter,
+               entry.second,
+               dataStartOffset,
+               dataWrittenCount);
+
+      indexWriter.WriteTypeId(entry.first,typeConfig.GetAreaTypeIdBytes());
+      indexWriter.WriteNumber(entry.second.size());
+      indexWriter.WriteFileOffset(dataStartOffset,4); //TODO: Optimize
+    }
+
+    return !indexWriter.HasError();
   }
 
   bool AreaAreaIndexGenerator::Import(const TypeConfigRef& typeConfig,
@@ -211,52 +822,28 @@ namespace osmscout {
     FileScanner         scanner;
     std::vector<Level>  levels;
 
-    //
-    // Writing index file
-    //
+    for (auto& filter : filters) {
+      if (!filter->BeforeProcessingStart(parameter,
+                                         progress,
+                                         *typeConfig)) {
+        progress.Error("Cannot initialize processor filter");
 
-    FileWriter writer;
-    FileOffset topLevelOffset=0;
-    FileOffset topLevelOffsetOffset; // Offset of the top level entry
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areaarea.idx"))) {
-      progress.Error("Cannot create 'areaarea.idx'");
-      return false;
+        return false;
+      }
     }
 
+
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
-                         FileScanner::Sequential,
-                         parameter.GetWayDataMemoryMaped())) {
+                                      "areas3.tmp"),
+                      FileScanner::Sequential,
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'areas.dat'");
       return false;
     }
 
     progress.SetAction("Building in memory area index from '"+scanner.GetFilename()+"'");
 
-    writer.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
-
-    if (!writer.GetPos(topLevelOffsetOffset)) {
-      progress.Error("Cannot read current file position");
-      return false;
-    }
-
-    // This is not the final value, that will be written later on
-    if (!writer.WriteFileOffset(topLevelOffset)) {
-      progress.Error("Cannot write top level entry offset");
-      return false;
-    }
-
     levels.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-
-    /*
-    SetOffsetOfChildren(leafs,
-                        newAreaLeafs);
-
-    leafs=newAreaLeafs;*/
-
-    // Areas
 
     uint32_t areaCount=0;
 
@@ -270,15 +857,18 @@ namespace osmscout {
     }
 
     for (uint32_t a=1; a<=areaCount; a++) {
-      progress.SetProgress(a,areaCount);
-
+      uint8_t    objectType;
+      Id         id;
       FileOffset offset;
       Area       area;
 
+      progress.SetProgress(a,areaCount);
+
       scanner.GetPos(offset);
 
-      if (!area.Read(*typeConfig,
-                     scanner)) {
+      if (!scanner.Read(objectType) ||
+          !scanner.Read(id)||
+          !area.Read(*typeConfig,scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(a)+" of "+
                        NumberToString(areaCount)+
@@ -299,37 +889,18 @@ namespace osmscout {
       // hold the geometric center of the tile.
       //
 
-      size_t sizeLevel=std::min(parameter.GetAreaAreaIndexMaxMag()+7,CELL_DIMENSION_MAX);//parameter.GetAreaAreaIndexMaxMag();
-      while (true) {
-        if (boundingBox.GetWidth()<=cellDimension[sizeLevel].width &&
-            boundingBox.GetHeight()<=cellDimension[sizeLevel].height) {
-          break;
-        }
-
-        if (sizeLevel==0) {
-          break;
-        }
-
-        sizeLevel--;
-      }
-
-      size_t indexLevel=sizeLevel;
-
-      if (indexLevel>parameter.GetAreaAreaIndexMaxMag()) {
-        indexLevel=parameter.GetAreaAreaIndexMaxMag();
-      }
+      size_t level=CalculateLevel(parameter,boundingBox);
 
       // Calculate index of tile that contains the geometric center of the area
-      uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellDimension[indexLevel].width);
-      uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellDimension[indexLevel].height);
+      uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellDimension[level].width);
+      uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellDimension[level].height);
 
       Entry entry;
 
-      entry.offset=offset;
       entry.type=area.GetType()->GetAreaId();
-      entry.level=sizeLevel;
+      entry.offset=offset;
 
-      levels[indexLevel][Pixel(x,y)].areas.push_back(entry);
+      levels[level][Pixel(x,y)].areas.push_back(entry);
     }
 
     progress.SetAction("Enriching index tree");
@@ -338,76 +909,119 @@ namespace osmscout {
 
     assert(levels[0].size()==1);
 
-    progress.SetAction("Writing index '" + writer.GetFilename()+"'");
+    //
+    // Writing index, data and idmap files
+    //
 
-    if (!WriteCell(typeConfig,
+    FileWriter indexWriter;
+    FileWriter  dataWriter;
+    FileWriter  mapWriter;
+    uint32_t    overallDataCount=0;
+
+    FileOffset topLevelOffset=0;
+    FileOffset topLevelOffsetOffset; // Offset of the top level entry
+
+    // Index file
+
+    if (!indexWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                          "areaarea.idx"))) {
+      progress.Error("Cannot create 'areaarea.idx'");
+      return false;
+    }
+
+    indexWriter.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
+
+    if (!indexWriter.GetPos(topLevelOffsetOffset)) {
+      progress.Error("Cannot read current file position");
+      return false;
+    }
+
+    // This is not the final value, that will be written later on
+    if (!indexWriter.WriteFileOffset(topLevelOffset)) {
+      progress.Error("Cannot write top level entry offset");
+      return false;
+    }
+
+    // Data file
+
+    if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                         "areas.dat"))) {
+      progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
+      return false;
+    }
+
+    dataWriter.Write(overallDataCount);
+
+    // Id map file
+
+    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "areas.idmap"))) {
+      progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
+      return false;
+    }
+
+    mapWriter.Write(overallDataCount);
+
+    progress.SetAction("Writing files '"+indexWriter.GetFilename()+"', '"+dataWriter.GetFilename()+"' and '"+
+                       mapWriter.GetFilename()+
+                       "'");
+
+    if (!WriteCell(*typeConfig,
+                   progress,
                    parameter,
-                   writer,
+                   scanner,
+                   indexWriter,
+                   dataWriter,
+                   mapWriter,
                    levels,
                    0,
                    Pixel(0,0),
                    levels[0][Pixel(0,0)],
-                   topLevelOffset)) {
+                   topLevelOffset,
+                   overallDataCount)) {
       return false;
     }
 
-    /*
-    progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" leafs ("+
-                   NumberToString(areaLevelEntries)+") "+
-                   "to index of level "+NumberToString(l)+"...");
+    // Index file
 
-    // Remember the offset of one/the cell in level '0'
-    if (l==0) {
-      if (!writer.GetPos(topLevelOffset)) {
-        progress.Error("Cannot read top level entry offset");
+    if (!indexWriter.SetPos(topLevelOffsetOffset) ||
+        !indexWriter.WriteFileOffset(topLevelOffset)) {
+      return false;
+    }
+
+    // Data file
+
+    dataWriter.SetPos(0);
+    dataWriter.Write(overallDataCount);
+
+    // Id map file
+
+    mapWriter.SetPos(0);
+    mapWriter.Write(overallDataCount);
+
+    progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+
+    return !indexWriter.HasError() &&
+           !dataWriter.HasError() &&
+           !mapWriter.HasError() &&
+           indexWriter.Close() &&
+           dataWriter.Close() &&
+           mapWriter.Close();
+
+    for (auto& filter : filters) {
+      if (!filter->AfterProcessingEnd(parameter,
+                                      progress,
+                                      *typeConfig)) {
+        progress.Error("Cannot deinitialize processor filter");
         return false;
       }
-    }*/
-
-    /*
-    uint32_t minX=std::numeric_limits<uint32_t>::max();
-    uint32_t minY=std::numeric_limits<uint32_t>::max();
-    uint32_t maxX=std::numeric_limits<uint32_t>::min();
-    uint32_t maxY=std::numeric_limits<uint32_t>::min();
-
-    std::map<TypeId,size_t> useMap;
-
-    for (std::map<Pixel,AreaLeaf>::const_iterator leaf=leafs.begin();
-         leaf!=leafs.end();
-         ++leaf) {
-      minX=std::min(minX,leaf->first.x);
-      maxX=std::max(maxX,leaf->first.x);
-      minY=std::min(minY,leaf->first.y);
-      maxY=std::max(maxY,leaf->first.y);
-
-      for (std::list<Entry>::const_iterator entry=leaf->second.areas.begin();
-           entry!=leaf->second.areas.end();
-           entry++) {
-        std::map<TypeId,size_t>::iterator u=useMap.find(entry->type);
-
-        if (u==useMap.end()) {
-          useMap[entry->type]=1;
-        }
-        else {
-          u->second++;
-        }
-      }
-    }*/
-
-    /*
-    std::cout << "[" << minX << "-" << maxX << "]x[" << minY << "-" << maxY << "] => " << leafs.size() << "/" << (maxX-minX+1)*(maxY-minY+1) << " " << (int)BytesNeededToAddressFileData(leafs.size()) << " " << ByteSizeToString(BytesNeededToAddressFileData(leafs.size())*(maxX-minX+1)*(maxY-minY+1)) << std::endl;
-
-    for (std::map<TypeId,size_t>::const_iterator u=useMap.begin();
-        u!=useMap.end();
-        ++u) {
-      std::cout << "* " << u->first << " " << typeConfig.GetTypeInfo(u->first).GetName() << " " << u->second << std::endl;
-    }*/
-
-    if (!writer.SetPos(topLevelOffsetOffset) ||
-        !writer.WriteFileOffset(topLevelOffset)) {
-      return false;
     }
+  }
 
-    return !writer.HasError() && writer.Close();
+  AreaAreaIndexGenerator::AreaAreaIndexGenerator()
+  {
+    filters.push_back(std::make_shared<AreaLocationProcessorFilter>());
+    filters.push_back(std::make_shared<AreaNodeReductionProcessorFilter>());
+    filters.push_back(std::make_shared<AreaTypeIgnoreProcessorFilter>());
   }
 }
