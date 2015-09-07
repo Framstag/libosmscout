@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     std::cerr << "  <lat_top> <lon_left> <lat_bottom> <lon_right> " << std::endl;
     std::cerr << "  <start zoom> <end zoom>" << std::endl;
     std::cerr << "  <tile width> <tile height>" << std::endl;
-    std::cerr << "  <cairo|Qt|noop>" << std::endl;
+    std::cerr << "  <cairo|Qt|noop|none>" << std::endl;
     return 1;
   }
 
@@ -213,6 +213,9 @@ int main(int argc, char* argv[])
   else if (driver=="noop") {
     std::cout << "Using driver 'noop'..." << std::endl;
   }
+  else if (driver=="none") {
+    std::cout << "Using driver 'none'..." << std::endl;
+  }
   else {
     std::cerr << "Unsupported driver '" << driver << "'" << std::endl;
     return 1;
@@ -291,7 +294,14 @@ int main(int argc, char* argv[])
         osmscout::GeoBox   boundingBox;
 
         if ((current % delta)==0) {
-          std::cout << current*100/tileCount << "% " << current << "/" << tileCount << std::endl;
+          std::cout << current*100/tileCount << "% " << current;
+
+          if (stats.tileCount>0) {
+            std::cout << " " << stats.dbTotalTime/stats.tileCount;
+            std::cout << " " << stats.drawTotalTime/stats.tileCount;
+          }
+
+          std::cout << std::endl;
         }
 
         projection.Set(x-1,y-1,
@@ -346,6 +356,9 @@ int main(int argc, char* argv[])
           noOpMapPainter.DrawMap(projection,
                                  drawParameter,
                                  data);
+        }
+        if (driver=="none") {
+          // Do nothing
         }
 
         drawTimer.Stop();
