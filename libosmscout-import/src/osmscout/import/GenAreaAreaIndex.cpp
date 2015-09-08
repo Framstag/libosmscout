@@ -846,7 +846,7 @@ namespace osmscout {
                dataWrittenCount);
 
       indexWriter.WriteTypeId(entry.first,typeConfig.GetAreaTypeIdBytes());
-      indexWriter.WriteNumber(entry.second.size());
+      indexWriter.WriteNumber((uint32_t)entry.second.size());
       indexWriter.WriteNumber(objectStartOffset-prevObjectStartOffset);
 
       prevObjectStartOffset=objectStartOffset;
