@@ -149,10 +149,7 @@ namespace osmscout
   }
 
   bool OptimizeAreasLowZoom::GetOffsets(const TypeData& typeData,
-                                        double minlon,
-                                        double minlat,
-                                        double maxlon,
-                                        double maxlat,
+                                        const GeoBox& boundingBox,
                                         std::vector<FileOffset>& offsets) const
   {
     std::set<FileOffset> newOffsets;
@@ -162,19 +159,19 @@ namespace osmscout
       return true;
     }
 
-    if (maxlon<typeData.minLon ||
-        minlon>=typeData.maxLon ||
-        maxlat<typeData.minLat ||
-        minlat>=typeData.maxLat) {
+    if (boundingBox.GetMaxLon()<typeData.minLon ||
+        boundingBox.GetMinLon()>=typeData.maxLon ||
+        boundingBox.GetMaxLat()<typeData.minLat ||
+        boundingBox.GetMinLat()>=typeData.maxLat) {
       // No data available in given bounding box
       return true;
     }
 
-    uint32_t minxc=(uint32_t)floor((minlon+180.0)/typeData.cellWidth);
-    uint32_t maxxc=(uint32_t)floor((maxlon+180.0)/typeData.cellWidth);
+    uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
+    uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
 
-    uint32_t minyc=(uint32_t)floor((minlat+90.0)/typeData.cellHeight);
-    uint32_t maxyc=(uint32_t)floor((maxlat+90.0)/typeData.cellHeight);
+    uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
+    uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
 
     minxc=std::max(minxc,typeData.cellXStart);
     maxxc=std::min(maxxc,typeData.cellXEnd);
@@ -264,13 +261,14 @@ namespace osmscout
     return true;
   }
 
-  bool OptimizeAreasLowZoom::GetAreas(double lonMin, double latMin,
-                                      double lonMax, double latMax,
+  bool OptimizeAreasLowZoom::GetAreas(const GeoBox& boundingBox,
                                       const Magnification& magnification,
                                       size_t /*maxAreaCount*/,
                                       TypeSet& areaTypes,
                                       std::vector<AreaRef>& areas) const
   {
+    StopClock time;
+
     std::vector<FileOffset> offsets;
 
     if (!scanner.IsOpen()) {
@@ -299,29 +297,23 @@ namespace osmscout
         if (match!=type->second.end()) {
           if (match->bitmapOffset!=0) {
             if (!GetOffsets(*match,
-                            lonMin,
-                            latMin,
-                            lonMax,
-                            latMax,
+                            boundingBox,
                             offsets)) {
               return false;
             }
 
-            for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-                offset!=offsets.end();
-                ++offset) {
-              if (!scanner.SetPos(*offset)) {
+            for (const auto& offset : offsets) {
+              if (!scanner.SetPos(offset)) {
                 log.Error() << "Error while positioning in file '" << scanner.GetFilename()  << "'";
-                type++;
-                continue;
+                return false;
               }
 
               AreaRef area=std::make_shared<Area>();
 
               if (!area->ReadOptimized(*typeConfig,
                                        scanner)) {
-                log.Error() << "Error while reading data entry of type " << type->first << " from file '" << scanner.GetFilename()  << "'";
-                continue;
+                log.Error() << "Error while reading area at offset " << offset << " from file '" << scanner.GetFilename()  << "'";
+                return false;
               }
 
               areas.push_back(area);
@@ -335,6 +327,12 @@ namespace osmscout
           areaTypes.UnsetType(type->first);
         }
       }
+    }
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving " << areas.size() << " optimized areas from area index took " << time.ResultString();
     }
 
     return true;

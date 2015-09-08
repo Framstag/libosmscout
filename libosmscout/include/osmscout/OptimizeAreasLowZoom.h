@@ -79,10 +79,7 @@ namespace osmscout {
                       TypeData& data);
 
     bool GetOffsets(const TypeData& typeData,
-                    double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
+                    const GeoBox& boundingBox,
                     std::vector<FileOffset>& offsets) const;
 
   public:
@@ -95,8 +92,7 @@ namespace osmscout {
 
     bool HasOptimizations(double magnification) const;
 
-    bool GetAreas(double lonMin, double latMin,
-                  double lonMax, double latMax,
+    bool GetAreas(const GeoBox& boundingBox,
                   const Magnification& magnification,
                   size_t maxAreaCount,
                   TypeSet& areaTypes,

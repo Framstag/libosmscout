@@ -223,10 +223,7 @@ namespace osmscout {
     if (internalAreaTypes.HasTypes()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        optimizeAreasLowZoom->GetAreas(boundingBox.GetMinLon(),
-                                       boundingBox.GetMinLat(),
-                                       boundingBox.GetMaxLon(),
-                                       boundingBox.GetMaxLat(),
+        optimizeAreasLowZoom->GetAreas(boundingBox,
                                        magnification,
                                        parameter.GetMaximumWays(),
                                        internalAreaTypes,
