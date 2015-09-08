@@ -22,7 +22,6 @@
 
 #include <unordered_map>
 
-#include <osmscout/TypeSet.h>
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/util/FileScanner.h>
