@@ -200,6 +200,7 @@ namespace osmscout {
 
       Line& operator<<(float value);
       Line& operator<<(double value);
+      Line& operator<<(void* value);
 
       inline Line& operator<<(const StopClock& value)
       {
