@@ -797,6 +797,14 @@ namespace osmscout {
     }
   };
 
+  /**
+   * Custom data structure to efficiently handle a set of TypeInfoRef.
+   *
+   * All operations on the set are O(1) using the fact, that TypeInfo internally
+   * have a continuously running index variable (Set may be slower if the
+   * internal array was not preinitialized to it maximum size by passing a
+   * TypeConfig or another TypeInfoSet in the constructor.
+   */
   class OSMSCOUT_API TypeInfoSet
   {
   private:
@@ -811,19 +819,25 @@ namespace osmscout {
 
     void Adapt(const TypeConfig& typeConfig);
 
-    void Clear()
+    inline void Clear()
     {
-      types.clear();
+      if (count>0) {
+        types.clear();
+      }
+
       count=0;
     }
 
     void Set(const TypeInfoRef& type);
     void Set(const std::vector<TypeInfoRef>& types);
+    void Set(const TypeInfoSet& types);
+
+    void Add(const TypeInfoSet& types);
 
     void Remove(const TypeInfoRef& type);
     void Remove(const TypeInfoSet& otherTypes);
 
-    bool IsSet(const TypeInfoRef& type) const
+    inline bool IsSet(const TypeInfoRef& type) const
     {
       assert(type);
 
@@ -841,7 +855,7 @@ namespace osmscout {
       return count;
     }
 
-    TypeInfoSet& operator=(const TypeInfoSet& other)
+    inline TypeInfoSet& operator=(const TypeInfoSet& other)
     {
       if (&other!=this) {
         this->types=other.types;
@@ -850,6 +864,9 @@ namespace osmscout {
 
       return *this;
     }
+
+    bool operator==(const TypeInfoSet& other) const;
+    bool operator!=(const TypeInfoSet& other) const;
 
     inline TypeInfoSetConstIterator begin() const
     {
