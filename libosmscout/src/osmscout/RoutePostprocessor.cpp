@@ -562,8 +562,11 @@ namespace osmscout {
          way->GetCoordinates(node.GetCurrentNodeIndex(),
                              lat,lon);
 
+         GeoBox boundingBox(GeoCoord(lat-delta,lon-delta),
+                            GeoCoord(lat+delta,lon+delta));
+
          nodeOffsets.clear();
-         if (!areaNodeIndex->GetOffsets(lon-delta,lat-delta,lon+delta,lat+delta,
+         if (!areaNodeIndex->GetOffsets(boundingBox,
                                         nodeTypes,
                                         100,
                                         nodeOffsets)) {

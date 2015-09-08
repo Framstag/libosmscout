@@ -74,10 +74,7 @@ namespace osmscout {
 
   private:
     bool GetOffsets(const TypeData& typeData,
-                    double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
+                    const GeoBox& boundingBox,
                     size_t maxNodeCount,
                     std::vector<FileOffset>& offsets,
                     size_t currentSize,
@@ -89,10 +86,7 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetOffsets(double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
+    bool GetOffsets(const GeoBox& boundingBox,
                     const TypeSet& nodeTypes,
                     size_t maxNodeCount,
                     std::vector<FileOffset>& nodeOffsets) const;

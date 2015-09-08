@@ -153,10 +153,7 @@ namespace osmscout {
     StopClock               nodeIndexTimer;
 
     if (nodeTypes.HasTypes()) {
-      if (!areaNodeIndex->GetOffsets(boundingBox.GetMinLon(),
-                                     boundingBox.GetMinLat(),
-                                     boundingBox.GetMaxLon(),
-                                     boundingBox.GetMaxLat(),
+      if (!areaNodeIndex->GetOffsets(boundingBox,
                                      nodeTypes,
                                      parameter.GetMaximumNodes(),
                                      nodeOffsets)) {

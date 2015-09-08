@@ -68,10 +68,7 @@ namespace osmscout {
 
     std::vector<FileOffset> nodeOffsets;
 
-    if (!areaNodeIndex->GetOffsets(boundingBox.GetMinLon(),
-                                   boundingBox.GetMinLat(),
-                                   boundingBox.GetMaxLon(),
-                                   boundingBox.GetMaxLat(),
+    if (!areaNodeIndex->GetOffsets(boundingBox,
                                    types,
                                    std::numeric_limits<size_t>::max(),
                                    nodeOffsets)) {
