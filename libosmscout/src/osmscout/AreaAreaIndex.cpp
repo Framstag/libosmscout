@@ -22,6 +22,9 @@
 #include <algorithm>
 
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/StopClock.h>
+
+//#define ANALYZE_CACHE
 
 namespace osmscout {
 
@@ -48,6 +51,13 @@ namespace osmscout {
   {
     if (level<maxLevel) {
       IndexCache::CacheRef cacheRef;
+
+#if defined(ANALYZE_CACHE)
+      if (indexCache.GetSize()==indexCache.GetMaxSize()) {
+        log.Warn() << "areaarea.index cache of " << indexCache.GetSize() << "/" << indexCache.GetMaxSize()<< " is too small";
+        indexCache.DumpStatistics("areaarea.idx",IndexCacheValueSizer());
+      }
+#endif
 
       if (!indexCache.GetEntry(offset,cacheRef)) {
         IndexCache::CacheEntry cacheEntry(offset);
@@ -147,8 +157,11 @@ namespace osmscout {
       dataFileOffset+=prevDataFileOffset;
       prevDataFileOffset=dataFileOffset;
 
-      if (dataFileOffset!=0 &&
-          types.IsTypeSet(typeId)) {
+      if (dataFileOffset==0) {
+        continue;
+      }
+
+      if (types.IsTypeSet(typeId)) {
         DataBlockSpan span;
 
         span.startOffset=dataFileOffset;
@@ -281,6 +294,8 @@ namespace osmscout {
     double                     maxlon=boundingBox.GetMaxLon()+180.0;
     double                     minlat=boundingBox.GetMinLat()+90.0;
     double                     maxlat=boundingBox.GetMaxLat()+90.0;
+    StopClock                  time;
+
     // Clear result data structures
     spans.clear();
 
@@ -359,6 +374,12 @@ namespace osmscout {
       }
 
       std::swap(cellRefs,nextCellRefs);
+    }
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving " << spans.size() << " spans from area index took " << time.ResultString();
     }
 
     return true;
