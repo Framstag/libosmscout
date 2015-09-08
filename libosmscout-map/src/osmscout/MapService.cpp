@@ -317,10 +317,7 @@ namespace osmscout {
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        optimizeWaysLowZoom->GetWays(boundingBox.GetMinLon(),
-                                     boundingBox.GetMinLat(),
-                                     boundingBox.GetMaxLon(),
-                                     boundingBox.GetMaxLat(),
+        optimizeWaysLowZoom->GetWays(boundingBox,
                                      magnification,
                                      parameter.GetMaximumWays(),
                                      internalWayTypes,
