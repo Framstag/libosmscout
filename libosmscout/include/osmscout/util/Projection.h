@@ -107,13 +107,11 @@ namespace osmscout {
 
           if (count==2) {
             count=0;
-            return projection.GeoToPixel(*this);
+            projection.GeoToPixel(*this);
           }
-
-          return true;
         }
         else {
-          return projection.GeoToPixel(lon,lat,x,y);
+          projection.GeoToPixel(lon,lat,x,y);
         }
 #else
         projection.GeoToPixel(lon,lat,x,y);
