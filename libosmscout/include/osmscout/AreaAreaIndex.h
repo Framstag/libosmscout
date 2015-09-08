@@ -129,10 +129,7 @@ namespace osmscout {
     bool Load(const std::string& path);
 
     bool GetAreasInArea(const TypeConfigRef& typeConfig,
-                        double minlon,
-                        double minlat,
-                        double maxlon,
-                        double maxlat,
+                        const GeoBox& boundingBox,
                         size_t maxLevel,
                         const TypeSet& types,
                         size_t maxCount,

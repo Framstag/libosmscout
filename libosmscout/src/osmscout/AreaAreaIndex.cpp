@@ -268,10 +268,7 @@ namespace osmscout {
    *    List of DataBlockSpans referencing the the found areas
    */
   bool AreaAreaIndex::GetAreasInArea(const TypeConfigRef& typeConfig,
-                                     double minlon,
-                                     double minlat,
-                                     double maxlon,
-                                     double maxlat,
+                                     const GeoBox& boundingBox,
                                      size_t maxLevel,
                                      const TypeSet& types,
                                      size_t maxCount,
@@ -280,12 +277,10 @@ namespace osmscout {
     std::vector<CellRef>       cellRefs;     // cells to scan in this level
     std::vector<CellRef>       nextCellRefs; // cells to scan for the next level
     std::vector<DataBlockSpan> newSpans;     // offsets collected in the current level
-
-    minlon+=180;
-    maxlon+=180;
-    minlat+=90;
-    maxlat+=90;
-
+    double                     minlon=boundingBox.GetMinLon()+180.0;
+    double                     maxlon=boundingBox.GetMaxLon()+180.0;
+    double                     minlat=boundingBox.GetMinLat()+90.0;
+    double                     maxlat=boundingBox.GetMaxLat()+90.0;
     // Clear result data structures
     spans.clear();
 

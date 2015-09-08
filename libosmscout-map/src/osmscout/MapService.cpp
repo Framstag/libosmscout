@@ -249,10 +249,7 @@ namespace osmscout {
 
     if (internalAreaTypes.HasTypes()) {
       if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
-                                         boundingBox.GetMinLon(),
-                                         boundingBox.GetMinLat(),
-                                         boundingBox.GetMaxLon(),
-                                         boundingBox.GetMaxLat(),
+                                         boundingBox,
                                          magnification.GetLevel()+
                                          parameter.GetMaximumAreaLevel(),
                                          internalAreaTypes,
