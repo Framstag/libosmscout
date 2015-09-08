@@ -263,7 +263,6 @@ namespace osmscout
 
   bool OptimizeAreasLowZoom::GetAreas(const GeoBox& boundingBox,
                                       const Magnification& magnification,
-                                      size_t /*maxAreaCount*/,
                                       TypeSet& areaTypes,
                                       std::vector<AreaRef>& areas) const
   {

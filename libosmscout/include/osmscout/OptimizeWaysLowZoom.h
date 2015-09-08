@@ -91,7 +91,6 @@ namespace osmscout {
 
     bool GetWays(const GeoBox& boundingBox,
                  const Magnification& magnification,
-                 size_t maxWayCount,
                  std::vector<TypeSet>& wayTypes,
                  std::vector<WayRef>& ways) const;
   };

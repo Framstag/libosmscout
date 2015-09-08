@@ -225,7 +225,6 @@ namespace osmscout {
           optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
         optimizeAreasLowZoom->GetAreas(boundingBox,
                                        magnification,
-                                       parameter.GetMaximumWays(),
                                        internalAreaTypes,
                                        areas);
       }
@@ -319,7 +318,6 @@ namespace osmscout {
           optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
         optimizeWaysLowZoom->GetWays(boundingBox,
                                      magnification,
-                                     parameter.GetMaximumWays(),
                                      internalWayTypes,
                                      ways);
       }
