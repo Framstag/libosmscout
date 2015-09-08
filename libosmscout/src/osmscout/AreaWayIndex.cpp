@@ -23,6 +23,7 @@
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/StopClock.h>
 
 #include <osmscout/system/Math.h>
 
@@ -113,10 +114,7 @@ namespace osmscout {
   }
 
   bool AreaWayIndex::GetOffsets(const TypeData& typeData,
-                                double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat,
+                                const GeoBox& boundingBox,
                                 size_t maxWayCount,
                                 std::unordered_set<FileOffset>& offsets,
                                 size_t currentSize,
@@ -127,19 +125,19 @@ namespace osmscout {
       return true;
     }
 
-    if (maxlon<typeData.minLon ||
-        minlon>=typeData.maxLon ||
-        maxlat<typeData.minLat ||
-        minlat>=typeData.maxLat) {
+    if (boundingBox.GetMaxLon()<typeData.minLon ||
+        boundingBox.GetMinLon()>=typeData.maxLon ||
+        boundingBox.GetMaxLat()<typeData.minLat ||
+        boundingBox.GetMinLat()>=typeData.maxLat) {
       // No data available in given bounding box
       return true;
     }
 
-    uint32_t minxc=(uint32_t)floor((minlon+180.0)/typeData.cellWidth);
-    uint32_t maxxc=(uint32_t)floor((maxlon+180.0)/typeData.cellWidth);
+    uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
+    uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
 
-    uint32_t minyc=(uint32_t)floor((minlat+90.0)/typeData.cellHeight);
-    uint32_t maxyc=(uint32_t)floor((maxlat+90.0)/typeData.cellHeight);
+    uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
+    uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
 
     minxc=std::max(minxc,typeData.cellXStart);
     maxxc=std::min(maxxc,typeData.cellXEnd);
@@ -235,14 +233,13 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaWayIndex::GetOffsets(double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat,
+  bool AreaWayIndex::GetOffsets(const GeoBox& boundingBox,
                                 const std::vector<TypeSet>& wayTypes,
                                 size_t maxWayCount,
                                 std::vector<FileOffset>& offsets) const
   {
+    StopClock time;
+
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
         log.Error() << "Error while opening " << scanner.GetFilename() << " for reading!";
@@ -264,10 +261,7 @@ namespace osmscout {
           ++type) {
         if (wayTypes[i].IsTypeSet(type)) {
           if (!GetOffsets(wayTypeData[type],
-                          minlon,
-                          minlat,
-                          maxlon,
-                          maxlat,
+                          boundingBox,
                           maxWayCount,
                           newOffsets,
                           offsets.size(),
@@ -287,6 +281,12 @@ namespace osmscout {
     }
 
     //std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving " << offsets.size() << " way offsets from area index took " << time.ResultString();
+    }
 
     return true;
   }

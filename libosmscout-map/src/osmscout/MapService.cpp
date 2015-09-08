@@ -345,10 +345,7 @@ namespace osmscout {
     StopClock               wayIndexTimer;
 
     if (!internalWayTypes.empty()) {
-      if (!areaWayIndex->GetOffsets(boundingBox.GetMinLon(),
-                                    boundingBox.GetMinLat(),
-                                    boundingBox.GetMaxLon(),
-                                    boundingBox.GetMaxLat(),
+      if (!areaWayIndex->GetOffsets(boundingBox,
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
                                     offsets)) {

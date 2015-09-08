@@ -1726,10 +1726,7 @@ namespace osmscout {
 
     wayTypes.push_back(wayRoutableTypes);
 
-    if (!areaWayIndex->GetOffsets(leftLon,
-                                  botLat,
-                                  rightLon,
-                                  topLat,
+    if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {

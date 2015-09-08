@@ -178,10 +178,7 @@ namespace osmscout {
     wayTypes.push_back(types);
 
 
-    if (!areaWayIndex->GetOffsets(boundingBox.GetMinLon(),
-                                  boundingBox.GetMinLat(),
-                                  boundingBox.GetMaxLon(),
-                                  boundingBox.GetMaxLat(),
+    if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
