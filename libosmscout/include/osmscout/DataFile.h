@@ -42,7 +42,7 @@ namespace osmscout {
     FileOffset startOffset; //!< Offset for the first data entry referenced in the file. Data will be read starting from this position
     uint32_t   count;       //!< Number of entries to read.
 
-    inline bool operator<(const DataBlockSpan& other)
+    inline bool operator<(const DataBlockSpan& other) const
     {
       return startOffset<other.startOffset;
     }
