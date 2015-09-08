@@ -248,6 +248,14 @@ namespace osmscout {
     }
 
     /**
+     * Returns the maximum size of the cache
+     */
+    size_t GetMaxSize() const
+    {
+      return maxSize;
+    }
+
+    /**
       Completely flush the cache removing all entries from it.
       */
     void Flush()
