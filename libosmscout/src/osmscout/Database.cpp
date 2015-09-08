@@ -30,6 +30,7 @@
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
@@ -516,11 +517,17 @@ namespace osmscout {
       return false;
     }
 
-    if (nodeDataFile->GetByOffset(offset,node)) {
-      return true;
+    StopClock time;
+
+    bool result=nodeDataFile->GetByOffset(offset,node);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
     }
 
-    return false;
+    return result;
   }
 
   bool Database::GetNodesByOffset(const std::vector<FileOffset>& offsets,
@@ -532,7 +539,17 @@ namespace osmscout {
       return false;
     }
 
-    return nodeDataFile->GetByOffset(offsets,nodes);
+    StopClock time;
+
+    bool result=nodeDataFile->GetByOffset(offsets,nodes);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetNodesByOffset(const std::set<FileOffset>& offsets,
@@ -544,7 +561,17 @@ namespace osmscout {
       return false;
     }
 
-    return nodeDataFile->GetByOffset(offsets,nodes);
+    StopClock time;
+
+    bool result=nodeDataFile->GetByOffset(offsets,nodes);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetNodesByOffset(const std::list<FileOffset>& offsets,
@@ -556,7 +583,17 @@ namespace osmscout {
       return false;
     }
 
-    return nodeDataFile->GetByOffset(offsets,nodes);
+    StopClock time;
+
+    bool result=nodeDataFile->GetByOffset(offsets,nodes);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetNodesByOffset(const std::set<FileOffset>& offsets,
@@ -568,7 +605,17 @@ namespace osmscout {
       return false;
     }
 
-    return nodeDataFile->GetByOffset(offsets,dataMap);
+    StopClock time;
+
+    bool result=nodeDataFile->GetByOffset(offsets,dataMap);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetAreaByOffset(const FileOffset& offset,
@@ -580,11 +627,17 @@ namespace osmscout {
       return false;
     }
 
-    if (areaDataFile->GetByOffset(offset,area)) {
-      return true;
+    StopClock time;
+
+    bool result=areaDataFile->GetByOffset(offset,area);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
     }
 
-    return false;
+    return result;
   }
 
   bool Database::GetAreasByOffset(const std::vector<FileOffset>& offsets,
@@ -596,7 +649,15 @@ namespace osmscout {
       return false;
     }
 
-    return areaDataFile->GetByOffset(offsets,areas);
+    StopClock time;
+
+    bool result=areaDataFile->GetByOffset(offsets,areas);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
@@ -608,7 +669,15 @@ namespace osmscout {
       return false;
     }
 
-    return areaDataFile->GetByOffset(offsets,areas);
+    StopClock time;
+
+    bool result=areaDataFile->GetByOffset(offsets,areas);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetAreasByOffset(const std::list<FileOffset>& offsets,
@@ -620,7 +689,15 @@ namespace osmscout {
       return false;
     }
 
-    return areaDataFile->GetByOffset(offsets,areas);
+    StopClock time;
+
+    bool result=areaDataFile->GetByOffset(offsets,areas);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
@@ -632,7 +709,15 @@ namespace osmscout {
       return false;
     }
 
-    return areaDataFile->GetByOffset(offsets,dataMap);
+    StopClock time;
+
+    bool result=areaDataFile->GetByOffset(offsets,dataMap);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetAreasByBlockSpan(const DataBlockSpan& span,
@@ -668,7 +753,15 @@ namespace osmscout {
       return false;
     }
 
-    return wayDataFile->GetByOffset(offset,way);
+    StopClock time;
+
+    bool result=wayDataFile->GetByOffset(offset,way);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,
@@ -680,7 +773,15 @@ namespace osmscout {
       return false;
     }
 
-    return wayDataFile->GetByOffset(offsets,ways);
+    StopClock time;
+
+    bool result=wayDataFile->GetByOffset(offsets,ways);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
@@ -692,7 +793,15 @@ namespace osmscout {
       return false;
     }
 
-    return wayDataFile->GetByOffset(offsets,ways);
+    StopClock time;
+
+    bool result=wayDataFile->GetByOffset(offsets,ways);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetWaysByOffset(const std::list<FileOffset>& offsets,
@@ -704,7 +813,15 @@ namespace osmscout {
       return false;
     }
 
-    return wayDataFile->GetByOffset(offsets,ways);
+    StopClock time;
+
+    bool result=wayDataFile->GetByOffset(offsets,ways);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
@@ -716,7 +833,15 @@ namespace osmscout {
       return false;
     }
 
-    return wayDataFile->GetByOffset(offsets,dataMap);
+    StopClock time;
+
+    bool result=wayDataFile->GetByOffset(offsets,dataMap);
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+    }
+
+    return result;
   }
 
   void Database::DumpStatistics()
