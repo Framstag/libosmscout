@@ -1082,6 +1082,30 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API BuildingFeature : public Feature
+  {
+  private:
+    TagId tagBuilding;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+
   /**
    * Helper template class for easy access to flag-like Features.
    *

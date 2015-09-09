@@ -63,7 +63,7 @@ namespace osmscout {
       return false;
     }
 
-    for (size_t current=1; current<=dataCount; current++) {
+    for (uint32_t current=1; current<=dataCount; current++) {
       uint8_t type;
       Id      id;
       Area    data;
@@ -118,7 +118,7 @@ namespace osmscout {
       return false;
     }
 
-    for (size_t current=1; current<=dataCount; current++) {
+    for (uint32_t current=1; current<=dataCount; current++) {
       uint8_t type;
       Id      id;
       Area    data;

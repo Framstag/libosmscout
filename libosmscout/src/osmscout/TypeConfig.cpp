@@ -33,6 +33,7 @@
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
+#include <iostream>
 namespace osmscout {
 
   FeatureValue::FeatureValue()
@@ -47,9 +48,9 @@ namespace osmscout {
 
   FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/)
   {
-	assert(false);
+    assert(false);
 
-	return *this;
+    return *this;
   }
 
   bool FeatureValue::Read(FileScanner& /*scanner*/)
@@ -696,9 +697,10 @@ namespace osmscout {
 
   TypeConfig::TypeConfig()
    : nextTagId(0),
-     nodeTypIdBytes(1),
-     wayTypIdBytes(1),
-     areaTypIdBytes(1)
+     nodeTypeIdBytes(1),
+     wayTypeIdBytes(1),
+     areaTypeIdBits(1),
+     areaTypeIdBytes(1)
   {
     log.Debug() << "TypeConfig::TypeConfig()";
 
@@ -755,6 +757,7 @@ namespace osmscout {
     RegisterFeature(featureRoundabout);
 
     RegisterFeature(std::make_shared<EleFeature>());
+    RegisterFeature(std::make_shared<BuildingFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
@@ -991,36 +994,22 @@ namespace osmscout {
         typeInfo->SetNodeId((TypeId)(nodeTypes.size()+1));
         nodeTypes.push_back(typeInfo);
 
-        if (nodeTypes.size()<256) {
-          nodeTypIdBytes=1;
-        }
-        else {
-          nodeTypIdBytes=2;
-        }
+        nodeTypeIdBytes=BytesNeededToEncodeNumber(typeInfo->GetNodeId());
       }
 
       if (typeInfo->CanBeWay()) {
         typeInfo->SetWayId((TypeId)(wayTypes.size()+1));
         wayTypes.push_back(typeInfo);
 
-        if (wayTypes.size()<256) {
-          wayTypIdBytes=1;
-        }
-        else {
-          wayTypIdBytes=2;
-        }
+        wayTypeIdBytes=BytesNeededToEncodeNumber(typeInfo->GetWayId());
       }
 
       if (typeInfo->CanBeArea()) {
         typeInfo->SetAreaId((TypeId)(areaTypes.size()+1));
         areaTypes.push_back(typeInfo);
 
-        if (areaTypes.size()<256) {
-          areaTypIdBytes=1;
-        }
-        else {
-          areaTypIdBytes=2;
-        }
+        areaTypeIdBytes=BytesNeededToEncodeNumber(typeInfo->GetAreaId());
+        areaTypeIdBits=BitsNeededToEncodeNumber(typeInfo->GetAreaId());
       }
     }
 
@@ -1529,7 +1518,7 @@ namespace osmscout {
         return false;
       }
 
-      for (size_t i=0; i<featureCount; i++) {
+      for (size_t f=0; f<featureCount; f++) {
         std::string featureName;
 
         if (!scanner.Read(featureName)) {
@@ -1554,7 +1543,7 @@ namespace osmscout {
         return false;
       }
 
-      for (size_t i=0; i<groupCount; i++) {
+      for (size_t g=0; g<groupCount; g++) {
         std::string groupName;
 
         if (!scanner.Read(groupName)) {

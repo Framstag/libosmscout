@@ -51,6 +51,25 @@ namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
+  Projection::Projection()
+  : lon(0),
+    lat(0),
+    angle(0),
+    magnification(0),
+    dpi(0),
+    width(0),
+    height(0),
+    lonMin(0.0),
+    latMin(0.0),
+    lonMax(0.0),
+    latMax(0.0),
+    pixelSize(0.0),
+    meterInPixel(0.0),
+    meterInMM(0.0)
+  {
+    // no code
+  }
+
   Projection::~Projection()
   {
     // no code
@@ -58,21 +77,9 @@ namespace osmscout {
 
   MercatorProjection::MercatorProjection()
   : valid(false),
-    lon(0),
-    lat(0),
-    angle(0),
-    magnification(0),
-    dpi(96),
-    width(256),
-    height(256),
-    lonMin(0.0),
-    latMin(0.0),
-    lonMax(0.0),
-    latMax(0.0),
     latOffset(0.0),
     scale(1),
-    scaleGradtorad(0),
-    pixelSize(1)
+    scaleGradtorad(0)
   {
     // no code
   }
@@ -138,6 +145,8 @@ namespace osmscout {
     scaleGradtorad = scale * gradtorad;
 
     pixelSize=groundWidthMeter/width;
+    meterInPixel=1/pixelSize;
+    meterInMM=meterInPixel*25.4/pixelSize;
 
     // Absolute Y mercator coordinate for latitude
     latOffset=atanh(sin(lat*gradtorad));
@@ -180,24 +189,6 @@ namespace osmscout {
     return true;
   }
 
-  bool MercatorProjection::GeoIsIn(double lon, double lat) const
-  {
-    assert(valid);
-
-    return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
-  }
-
-  bool MercatorProjection::GeoIsIn(double lonMin, double latMin,
-                                    double lonMax, double latMax) const
-  {
-    assert(valid);
-
-    return !(lonMin>this->lonMax ||
-             lonMax<this->lonMin ||
-             latMin>this->latMax ||
-             latMax<this->latMin);
-  }
-
   bool MercatorProjection::PixelToGeo(double x, double y,
                                        double& lon, double& lat) const
   {
@@ -222,7 +213,7 @@ namespace osmscout {
     return true;
   }
 
-  bool MercatorProjection::GeoToPixel(double lon, double lat,
+  void MercatorProjection::GeoToPixel(double lon, double lat,
                                       double& x, double& y) const
   {
     assert(valid);
@@ -242,11 +233,9 @@ namespace osmscout {
     // Transform to canvas coordinate
     y=height/2-y;
     x+=width/2;
-
-    return true;
   }
 
-  bool MercatorProjection::GeoToPixel(const GeoCoord& coord,
+  void MercatorProjection::GeoToPixel(const GeoCoord& coord,
                                       double& x, double& y) const
   {
     assert(valid);
@@ -266,31 +255,11 @@ namespace osmscout {
     // Transform to canvas coordinate
     y=height/2-y;
     x+=width/2;
-
-    return true;
   }
 
-  bool MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
+  void MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
   {
     assert(false); //should not be called
-    return false;
-  }
-
-  bool MercatorProjection::GetDimensions(GeoBox& boundingBox) const
-  {
-    assert(valid);
-
-    boundingBox.Set(GeoCoord(latMin,lonMin),
-                    GeoCoord(latMax,lonMax));
-
-    return true;
-  }
-
-  double MercatorProjection::GetPixelSize() const
-  {
-    assert(valid);
-
-    return pixelSize;
   }
 
   bool MercatorProjection::Move(double horizPixel,
@@ -299,10 +268,8 @@ namespace osmscout {
     double x;
     double y;
 
-    if (!GeoToPixel(GetLon(),GetLat(),
-                    x,y)) {
-      return false;
-    }
+    GeoToPixel(lon,lat,
+               x,y);
 
     double lat;
     double lon;
@@ -323,33 +290,25 @@ namespace osmscout {
 
   TileProjection::TileProjection()
   : valid(false),
-    tileX(0),
-    tileY(0),
-    magnification(0),
-    dpi(96),
-    width(256),
-    height(256),
-    lonMin(0.0),
-    latMin(0.0),
-    lonMax(0.0),
-    latMax(0.0),
     lonOffset(0.0),
     latOffset(0.0),
     scale(1),
-    scaleGradtorad(0),
-    pixelSize(1)
+    scaleGradtorad(0)
   {
     // no code
   }
 
-  bool TileProjection::Set(size_t tileX, size_t tileY,
-                           const Magnification& magnification,
-                           double dpi,
-                           size_t width, size_t height)
+  bool TileProjection::SetInternal(double lonMin,double latMin,
+                                   double lonMax,double latMax,
+                                   const Magnification& magnification,
+                                   double dpi,
+                                   size_t width,size_t height)
   {
     if (valid &&
-        this->tileX==tileY &&
-        this->tileY==tileY &&
+        this->latMin==latMin &&
+        this->latMax==latMax &&
+        this->lonMin==lonMin &&
+        this->lonMax==lonMax &&
         this->magnification==magnification &&
         this->dpi==dpi &&
         this->width==width &&
@@ -360,22 +319,15 @@ namespace osmscout {
     valid=true;
 
     // Make a copy of the context information
-    this->tileX=tileX;
-    this->tileY=tileY;
     this->magnification=magnification;
     this->dpi=dpi;
     this->width=width;
     this->height=height;
 
-    latMin=TileYToLat(tileY+1,
-                      magnification);
-    latMax=TileYToLat(tileY,
-                      magnification);
-
-    lonMin=TileXToLon(tileX,
-                      magnification);
-    lonMax=TileXToLon(tileX+1,
-                      magnification);
+    this->latMin=latMin;
+    this->latMax=latMax;
+    this->lonMin=lonMin;
+    this->lonMax=lonMax;
 
     lat=(latMin+latMax)/2;
     lon=(lonMin+lonMax)/2;
@@ -387,6 +339,8 @@ namespace osmscout {
     latOffset=scale*atanh(sin(latMin*gradtorad));
 
     pixelSize=earthExtent/magnification.GetMagnification()/256;
+    meterInPixel=1/pixelSize;
+    meterInMM=meterInPixel*25.4/pixelSize;
 
 #ifdef OSMSCOUT_HAVE_SSE2
     sse2LonOffset      = _mm_set1_pd(lonOffset);
@@ -397,31 +351,48 @@ namespace osmscout {
 #endif
 
     return true;
+}
+
+  bool TileProjection::Set(size_t tileX, size_t tileY,
+                           const Magnification& magnification,
+                           double dpi,
+                           size_t width, size_t height)
+  {
+    double latMin=TileYToLat(tileY+1,
+                      magnification);
+    double latMax=TileYToLat(tileY,
+                      magnification);
+
+    double lonMin=TileXToLon(tileX,
+                      magnification);
+    double lonMax=TileXToLon(tileX+1,
+                      magnification);
+
+    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
   }
 
-  bool TileProjection::GeoIsIn(double lon, double lat) const
+  bool TileProjection::Set(size_t tileAX, size_t tileAY,
+                           size_t tileBX, size_t tileBY,
+                           const Magnification& magnification,
+                           double dpi,
+                           size_t width,size_t height)
   {
-    assert(valid);
+    double latMin=TileYToLat(std::max(tileAY,tileBY)+1,
+                             magnification);
+    double latMax=TileYToLat(std::min(tileAY,tileBY),
+                             magnification);
 
-    return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
-  }
+    double lonMin=TileXToLon(std::min(tileAX,tileBX),
+                             magnification);
+    double lonMax=TileXToLon(std::max(tileAX,tileBX)+1,
+                             magnification);
 
-  bool TileProjection::GeoIsIn(double lonMin, double latMin,
-                               double lonMax, double latMax) const
-  {
-    assert(valid);
-
-    return !(lonMin>this->lonMax ||
-             lonMax<this->lonMin ||
-             latMin>this->latMax ||
-             latMax<this->latMin);
+    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
   }
 
   bool TileProjection::PixelToGeo(double x, double y,
                                   double& lon, double& lat) const
   {
-    assert(valid);
-
     lon=(x+lonOffset)/(scale*gradtorad);
     lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
 
@@ -430,30 +401,22 @@ namespace osmscout {
 
   #ifdef OSMSCOUT_HAVE_SSE2
 
-    bool TileProjection::GeoToPixel(double lon, double lat,
+    void TileProjection::GeoToPixel(double lon, double lat,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=lon*scaleGradtorad-lonOffset;
       y=height-(scale*atanh_sin_pd(lat*gradtorad)-latOffset);
-
-      return true;
     }
 
-    bool TileProjection::GeoToPixel(const GeoCoord& coord,
+    void TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=coord.GetLon()*scaleGradtorad-lonOffset;
       y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
-
-      return true;
     }
 
     //this basically transforms 2 coordinates in 1 call
-    bool TileProjection::GeoToPixel(const BatchTransformer& transformData) const
+    void TileProjection::GeoToPixel(const BatchTransformer& transformData) const
     {
       v2df x = _mm_sub_pd(_mm_mul_pd( ARRAY2V2DF(transformData.lon), sse2ScaleGradtorad), sse2LonOffset);
       __m128d test = ARRAY2V2DF(transformData.lat);
@@ -464,56 +427,28 @@ namespace osmscout {
       _mm_storeh_pd (transformData.xPointer[1], x);
       _mm_storel_pd (transformData.yPointer[0], y);
       _mm_storeh_pd (transformData.yPointer[1], y);
-
-      return true;
     }
 
   #else
 
-    bool TileProjection::GeoToPixel(double lon, double lat,
+    void TileProjection::GeoToPixel(double lon, double lat,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=lon*scaleGradtorad-lonOffset;
       y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
-
-      return true;
     }
 
-    bool TileProjection::GeoToPixel(const GeoCoord& coord,
+    void TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
-      assert(valid);
-
       x=coord.GetLon()*scaleGradtorad-lonOffset;
       y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
-
-      return true;
     }
 
-    bool TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
+    void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
     {
       assert(false); //should not be called
-      return false;
     }
 
   #endif
-
-  bool TileProjection::GetDimensions(GeoBox& boundingBox) const
-  {
-    assert(valid);
-
-    boundingBox.Set(GeoCoord(latMin,lonMin),
-                    GeoCoord(latMax,lonMax));
-
-    return true;
-  }
-
-  double TileProjection::GetPixelSize() const
-  {
-    assert(valid);
-
-    return pixelSize;
-  }
 }

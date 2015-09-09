@@ -28,7 +28,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenWayWayDat.h \
                         osmscout/import/MergeAreaData.h \
                         osmscout/import/SortDat.h \
-                        osmscout/import/SortAreaDat.h \
                         osmscout/import/SortNodeDat.h \
                         osmscout/import/SortWayDat.h \
                         osmscout/import/Import.h \

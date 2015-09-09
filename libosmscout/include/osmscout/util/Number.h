@@ -268,12 +268,22 @@ namespace osmscout {
       ::f(buffer,number);
   }
 
+  /**
+   * \ingroup Util
+   * Returns the number of bytes needed to encode the given number of bits.
+   */
   template<typename N>
   inline N BitsToBytes(N bits)
   {
     return bits%8==0 ? bits/8 : bits/8+1;
   }
 
+  /**
+   * \ingroup Util
+   * Returns the number of bytes needed to encode the number. The function calculates
+   * the number of bytes that contain information, dropping leading bytes that only
+   * contain zero.
+   */
   template<typename N>
   uint8_t BytesNeededToEncodeNumber(N number)
   {
@@ -291,6 +301,40 @@ namespace osmscout {
     return bytes;
   }
 
+  /**
+   * \ingroup Util
+   * Returns the number of bytes needed to encode the number. The function calculates
+   * the number of bytes that contain information, dropping leading bytes that only
+   * contain zero.
+   */
+  template<typename N>
+  uint8_t BitsNeededToEncodeNumber(N number)
+  {
+    uint8_t bits=0;
+
+    while (number!=0) {
+      number=number/2;
+      bits++;
+    }
+
+    if (bits==0) {
+      bits=1;
+    }
+
+    return bits;
+  }
+
+  /**
+   * \ingroup Util
+   * Encodes the given numbers into a new number of twice the size that has
+   * the bits of each nunber alternating interleaved.
+   *
+   * This can be used to convert two dimensional coordinates into
+   * one number, where coordinates close in 2D are close in the
+   * one dimensional projection, too.
+   */
+  extern uint64_t InterleaveNumbers(uint32_t a,
+                                    uint32_t b);
 }
 
 #endif

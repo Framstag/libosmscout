@@ -159,8 +159,16 @@ namespace osmscout {
   public:
     StyleResolveContext(const TypeConfigRef& typeConfig);
 
-    bool IsBridge(const FeatureValueBuffer& buffer) const;
-    bool IsTunnel(const FeatureValueBuffer& buffer) const;
+    inline bool IsBridge(const FeatureValueBuffer& buffer) const
+    {
+      return bridgeReader.IsSet(buffer);
+    }
+
+    inline bool IsTunnel(const FeatureValueBuffer& buffer) const
+    {
+      return tunnelReader.IsSet(buffer);
+    }
+
     bool IsOneway(const FeatureValueBuffer& buffer) const;
   };
 

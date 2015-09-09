@@ -959,9 +959,10 @@ namespace osmscout {
     std::vector<TypeInfoRef>                    wayTypes;
     std::vector<TypeInfoRef>                    areaTypes;
 
-    uint8_t                                     nodeTypIdBytes;
-    uint8_t                                     wayTypIdBytes;
-    uint8_t                                     areaTypIdBytes;
+    uint8_t                                     nodeTypeIdBytes;
+    uint8_t                                     wayTypeIdBytes;
+    uint8_t                                     areaTypeIdBits;
+    uint8_t                                     areaTypeIdBytes;
 
     std::unordered_map<std::string,TypeInfoRef> nameToTypeMap;
 
@@ -1045,9 +1046,9 @@ namespace osmscout {
       return nodeTypes;
     }
 
-    uint8_t GetNodeTypeIdBytes() const
+    inline uint8_t GetNodeTypeIdBytes() const
     {
-      return nodeTypIdBytes;
+      return nodeTypeIdBytes;
     }
 
     /**
@@ -1058,9 +1059,9 @@ namespace osmscout {
       return wayTypes;
     }
 
-    uint8_t GetWayTypeIdBytes() const
+    inline uint8_t GetWayTypeIdBytes() const
     {
-      return wayTypIdBytes;
+      return wayTypeIdBytes;
     }
 
     /**
@@ -1071,9 +1072,14 @@ namespace osmscout {
       return areaTypes;
     }
 
-    uint8_t GetAreaTypeIdBytes() const
+    inline uint8_t GetAreaTypeIdBits() const
     {
-      return areaTypIdBytes;
+      return areaTypeIdBits;
+    }
+
+    inline uint8_t GetAreaTypeIdBytes() const
+    {
+      return areaTypeIdBytes;
     }
 
     /**

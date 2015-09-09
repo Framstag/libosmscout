@@ -90,8 +90,6 @@ namespace osmscout {
     while (!remainingNodeTypes.Empty()) {
       uint32_t              nodeCount=0;
       TypeInfoSet           currentNodeTypes(remainingNodeTypes);
-      double                cellWidth=360.0/pow(2.0,(int)level);
-      double                cellHeight=180.0/pow(2.0,(int)level);
       std::vector<std::map<Pixel,size_t> > cellFillCount;
 
       cellFillCount.resize(typeConfig->GetTypeCount());
@@ -126,8 +124,8 @@ namespace osmscout {
         // If we still need to handle this type,
         // count number of entries per type and tile cell
         if (currentNodeTypes.IsSet(node.GetType())) {
-          uint32_t xc=(uint32_t)floor((node.GetCoords().GetLon()+180.0)/cellWidth);
-          uint32_t yc=(uint32_t)floor((node.GetCoords().GetLat()+90.0)/cellHeight);
+          uint32_t xc=(uint32_t)floor((node.GetCoords().GetLon()+180.0)/cellDimension[level].width);
+          uint32_t yc=(uint32_t)floor((node.GetCoords().GetLat()+90.0)/cellDimension[level].height);
 
           cellFillCount[node.GetType()->GetIndex()][Pixel(xc,yc)]++;
         }
@@ -265,8 +263,6 @@ namespace osmscout {
     for (size_t l=0; l<=maxLevel; l++) {
       std::set<TypeInfoRef> indexTypes;
       uint32_t              nodeCount;
-      double                cellWidth=360.0/pow(2.0,(int)l);
-      double                cellHeight=180.0/pow(2.0,(int)l);
 
       for (auto &type : typeConfig->GetNodeTypes()) {
         if (nodeTypeData[type->GetIndex()].HasEntries() &&
@@ -314,8 +310,8 @@ namespace osmscout {
         }
 
         if (indexTypes.find(node.GetType())!=indexTypes.end()) {
-          uint32_t xc=(uint32_t)floor((node.GetCoords().GetLon()+180.0)/cellWidth);
-          uint32_t yc=(uint32_t)floor((node.GetCoords().GetLat()+90.0)/cellHeight);
+          uint32_t xc=(uint32_t)floor((node.GetCoords().GetLon()+180.0)/cellDimension[l].width);
+          uint32_t yc=(uint32_t)floor((node.GetCoords().GetLat()+90.0)/cellDimension[l].height);
 
           typeCellOffsets[node.GetType()->GetIndex()][Pixel(xc,yc)].push_back(offset);
         }

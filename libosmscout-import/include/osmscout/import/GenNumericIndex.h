@@ -221,7 +221,7 @@ namespace osmscout {
     }
 
     writer.FlushCurrentBlockWithZeros(pageSize);
-    indexPageCounts.push_back(pageStarts.size());
+    indexPageCounts.push_back((uint32_t)pageStarts.size());
 
     while (pageStarts.size()>1) {
       std::vector<N>          si(startingIds);
@@ -281,7 +281,7 @@ namespace osmscout {
       }
 
       writer.FlushCurrentBlockWithZeros(pageSize);
-      indexPageCounts.push_back(pageStarts.size());
+      indexPageCounts.push_back((uint32_t)pageStarts.size());
     }
 
     // If we have data to index, we should have at least one root level index page

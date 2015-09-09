@@ -64,6 +64,7 @@ namespace osmscout {
     void SetStep(const std::string& step);
     void SetAction(const std::string& action);
     void SetProgress(double current, double total);
+    void SetProgress(uint64_t current, uint64_t total);
 
     void Debug(const std::string& text);
     void Info(const std::string& text);

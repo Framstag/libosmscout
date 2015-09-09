@@ -121,7 +121,6 @@ namespace osmscout {
       return key - std::numeric_limits<K>::min();
     }
 
-
     /**
       Clear the cache deleting the oldest cache entries
       until it has the given max size.
@@ -131,16 +130,12 @@ namespace osmscout {
       while (size>maxSize) {
         // Remove oldest entry from cache...
 
-        // Get oldest entry
-        typename std::list<CacheEntry>::reverse_iterator lastEntry=order.rbegin();
+        // Get oldest entry an dremove it from the map
+        map.erase(map.find(order.back().key));
 
-        typename Map::iterator iter=map.find(lastEntry->key);
-
-        assert(iter!=map.end());
-
-        map.erase(iter);
         // Remove it from order list
         order.pop_back();
+
         size--;
       }
     }
@@ -149,7 +144,7 @@ namespace osmscout {
     /**
      Create a new cache object with the given max size.
       */
-    Cache(unsigned long maxSize)
+    Cache(size_t maxSize)
      : size(0),
        maxSize(maxSize)
     {

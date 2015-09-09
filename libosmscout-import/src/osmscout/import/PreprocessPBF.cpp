@@ -41,8 +41,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
-#include "osmscout/import/Preprocess.h"
-
 #define MAX_BLOCK_HEADER_SIZE (64*1024)
 #define MAX_BLOB_SIZE         (32*1024*1024)
 #define NANO                  (1000.0*1000.0*1000.0)
@@ -75,7 +73,7 @@ namespace osmscout {
     return true;
   }
 
-  void PreprocessPBF::AssureBlockSize(uint32_t length)
+  void PreprocessPBF::AssureBlockSize(google::protobuf::int32 length)
   {
     if (buffer==NULL) {
       buffer=new char[length];
@@ -130,9 +128,8 @@ namespace osmscout {
                                       const PBF::BlockHeader& blockHeader,
                                       PBF::HeaderBlock& headerBlock)
   {
-    PBF::Blob blob;
-
-    uint32_t length = blockHeader.datasize();
+    PBF::Blob               blob;
+    google::protobuf::int32 length=blockHeader.datasize();
 
     if (length==0 || length>MAX_BLOB_SIZE) {
       progress.Error("Blob size invalid!");
@@ -141,7 +138,7 @@ namespace osmscout {
 
     AssureBlockSize(length);
 
-    if (fread(buffer,sizeof(char),length,file)!=length) {
+    if (fread(buffer,sizeof(char),length,file)!=(size_t)length) {
       progress.Error("Cannot read blob!");
       return false;
     }
@@ -154,9 +151,9 @@ namespace osmscout {
     if (blob.has_raw()) {
       length=(uint32_t)blob.raw().length();
       AssureBlockSize(length);
-      memcpy(buffer,blob.raw().data(),length);
+      memcpy(buffer,blob.raw().data(),(size_t)length);
     }
-    else if (blob.has_zlib_data()){
+    else if (blob.has_zlib_data()) {
 #if defined(HAVE_LIB_ZLIB)
       length=blob.raw_size();
       AssureBlockSize(length);
@@ -166,7 +163,7 @@ namespace osmscout {
       compressedStream.next_in=(Bytef*)const_cast<char*>(blob.zlib_data().data());
       compressedStream.avail_in=(uint32_t)blob.zlib_data().size();
       compressedStream.next_out=(Bytef*)buffer;
-      compressedStream.avail_out=length;
+      compressedStream.avail_out=(uInt)length;
       compressedStream.zalloc=Z_NULL;
       compressedStream.zfree=Z_NULL;
       compressedStream.opaque=Z_NULL;
@@ -190,11 +187,11 @@ namespace osmscout {
       return false;
 #endif
     }
-    else if (blob.has_bzip2_data()){
+    else if (blob.has_bzip2_data()) {
       progress.Error("Data is bzip2 encoded but bzip2 support is not enabled!");
       return false;
     }
-    else if (blob.has_lzma_data()){
+    else if (blob.has_lzma_data()) {
       progress.Error("Data is lzma encoded but lzma support is not enabled!");
       return false;
     }
@@ -212,9 +209,8 @@ namespace osmscout {
                                          const PBF::BlockHeader& blockHeader,
                                          PBF::PrimitiveBlock& primitiveBlock)
   {
-    PBF::Blob blob;
-
-    uint32_t length = blockHeader.datasize();
+    PBF::Blob               blob;
+    google::protobuf::int32 length=blockHeader.datasize();
 
     if (length==0 || length>MAX_BLOB_SIZE) {
       progress.Error("Blob size invalid!");
@@ -223,7 +219,7 @@ namespace osmscout {
 
     AssureBlockSize(length);
 
-    if (fread(buffer,sizeof(char),length,file)!=length) {
+    if (fread(buffer,sizeof(char),length,file)!=(size_t)length) {
       progress.Error("Cannot read blob!");
       return false;
     }
@@ -236,9 +232,9 @@ namespace osmscout {
     if (blob.has_raw()) {
       length=(uint32_t)blob.raw().length();
       AssureBlockSize(length);
-      memcpy(buffer,blob.raw().data(),length);
+      memcpy(buffer,blob.raw().data(),(size_t)length);
     }
-    else if (blob.has_zlib_data()){
+    else if (blob.has_zlib_data()) {
 #if defined(HAVE_LIB_ZLIB)
       length=blob.raw_size();
       AssureBlockSize(length);
@@ -248,7 +244,7 @@ namespace osmscout {
       compressedStream.next_in=(Bytef*)const_cast<char*>(blob.zlib_data().data());
       compressedStream.avail_in=(uint32_t)blob.zlib_data().size();
       compressedStream.next_out=(Bytef*)buffer;
-      compressedStream.avail_out=length;
+      compressedStream.avail_out=(uInt)length;
       compressedStream.zalloc=Z_NULL;
       compressedStream.zfree=Z_NULL;
       compressedStream.opaque=Z_NULL;
@@ -317,11 +313,11 @@ namespace osmscout {
                                      const PBF::PrimitiveBlock& block,
                                      const PBF::PrimitiveGroup& group)
   {
-    const PBF::DenseNodes &dense=group.dense();
-    Id     dId=0;
-    double dLat=0;
-    double dLon=0;
-    int    t=0;
+    const PBF::DenseNodes& dense=group.dense();
+    Id                     dId=0;
+    double                 dLat=0;
+    double                 dLon=0;
+    int                    t=0;
 
     for (int d=0; d<dense.id_size();d++) {
       dId+=dense.id(d);
@@ -406,10 +402,10 @@ namespace osmscout {
       }
 
       Id ref=0;
-      for (int r=0; r<inputRelation.types_size();r++) {
+      for (int m=0; m<inputRelation.types_size(); m++) {
         RawRelation::Member member;
 
-        switch (inputRelation.types(r)) {
+        switch (inputRelation.types(m)) {
         case PBF::Relation::NODE:
           member.type=RawRelation::memberNode;
           break;
@@ -421,10 +417,10 @@ namespace osmscout {
           break;
         }
 
-        ref+=inputRelation.memids(r);
+        ref+=inputRelation.memids(m);
 
         member.id=ref;
-        member.role=block.stringtable().s(inputRelation.roles_sid(r));
+        member.role=block.stringtable().s(inputRelation.roles_sid(m));
 
         members.push_back(member);
       }

@@ -79,22 +79,16 @@ namespace osmscout {
     bool Write(int8_t number);
     bool Write(int16_t number);
     bool Write(int32_t number);
-#if defined(OSMSCOUT_HAVE_INT64_T)
     bool Write(int64_t number);
-#endif
 
     bool Write(uint8_t number);
     bool Write(uint16_t number);
     bool Write(uint32_t number);
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Write(uint64_t number);
-#endif
 
     bool Write(uint16_t number, size_t bytes);
     bool Write(uint32_t number, size_t bytes);
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Write(uint64_t number, size_t bytes);
-#endif
 
     bool Write(const ObjectFileRef& ref);
 
@@ -104,15 +98,11 @@ namespace osmscout {
 
     bool WriteNumber(int16_t number);
     bool WriteNumber(int32_t number);
-#if defined(OSMSCOUT_HAVE_INT64_T)
     bool WriteNumber(int64_t number);
-#endif
 
     bool WriteNumber(uint16_t number);
     bool WriteNumber(uint32_t number);
-#if defined(OSMSCOUT_HAVE_UINT64_T)
     bool WriteNumber(uint64_t number);
-#endif
 
     bool WriteCoord(const GeoCoord& coord);
     bool WriteInvalidCoord();

@@ -619,11 +619,13 @@ namespace osmscout {
     }
 
     for (const auto &type : typeConfig->GetTypes()) {
-      if (typeDistribution[type->GetIndex()].wayCount>=parameter.GetRawWayBlockSize()) {
-        slowFallbackTypes.Set(type);
-      }
-      else {
-        wayTypes.Set(type);
+      if (!type->GetIgnore()) {
+        if (typeDistribution[type->GetIndex()].wayCount>=parameter.GetRawWayBlockSize()) {
+          slowFallbackTypes.Set(type);
+        }
+        else {
+          wayTypes.Set(type);
+        }
       }
     }
 

@@ -227,7 +227,7 @@ namespace osmscout {
       if (coord==coordsMap.end()) {
         progress.Error("Cannot resolve node with id "+
                        NumberToString(rawWay.GetNodeId(n))+
-                       " for Way "+
+                       " for area "+
                        NumberToString(wayId));
         success=false;
         break;
@@ -382,11 +382,13 @@ namespace osmscout {
     }
 
     for (const auto &type : typeConfig->GetTypes()) {
-      if (typeDistribution[type->GetIndex()].areaCount>=parameter.GetRawWayBlockSize()) {
-        slowFallbackTypes.Set(type);
-      }
-      else {
-        areaTypes.Set(type);
+      if (!type->GetIgnore()) {
+        if (typeDistribution[type->GetIndex()].areaCount>=parameter.GetRawWayBlockSize()) {
+          slowFallbackTypes.Set(type);
+        }
+        else {
+          areaTypes.Set(type);
+        }
       }
     }
 
@@ -438,7 +440,7 @@ namespace osmscout {
       // Load type data
       //
 
-      progress.SetAction("Collecting way data by type");
+      progress.SetAction("Collecting area data by type");
 
       if (!GetAreas(parameter,
                     progress,

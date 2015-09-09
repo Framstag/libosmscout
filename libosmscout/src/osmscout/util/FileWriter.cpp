@@ -208,7 +208,6 @@ namespace osmscout {
     return !hasError;
   }
 
-#if defined(OSMSCOUT_HAVE_INT64_T)
   bool FileWriter::Write(int64_t number)
   {
     if (HasError()) {
@@ -230,7 +229,6 @@ namespace osmscout {
 
     return !hasError;
   }
-#endif
 
   bool FileWriter::Write(uint8_t number)
   {
@@ -277,7 +275,6 @@ namespace osmscout {
     return !hasError;
   }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileWriter::Write(uint64_t number)
   {
     if (HasError()) {
@@ -299,7 +296,6 @@ namespace osmscout {
 
     return !hasError;
   }
-#endif
 
   bool FileWriter::Write(uint16_t number, size_t bytes)
   {
@@ -335,7 +331,6 @@ namespace osmscout {
     return !hasError;
   }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileWriter::Write(uint64_t number, size_t bytes)
   {
     if (HasError()) {
@@ -357,7 +352,6 @@ namespace osmscout {
 
     return !hasError;
   }
-#endif
 
   bool FileWriter::Write(const ObjectFileRef& ref)
   {
@@ -454,7 +448,6 @@ namespace osmscout {
     return !hasError;
   }
 
-#if defined(OSMSCOUT_HAVE_INT64_T)
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number
@@ -475,7 +468,6 @@ namespace osmscout {
 
     return !hasError;
   }
-#endif
 
   /**
     Write a numeric value to the file using some internal encoding
@@ -519,7 +511,6 @@ namespace osmscout {
     return !hasError;
   }
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number
@@ -540,7 +531,6 @@ namespace osmscout {
 
     return !hasError;
   }
-#endif
 
   bool FileWriter::WriteCoord(const GeoCoord& coord)
   {

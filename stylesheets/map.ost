@@ -1719,20 +1719,18 @@ TYPES
     
   TYPE power_minor_line
     = WAY ("power"=="minor_line")
-    
-  TYPE power_station
-    = NODE AREA ("power"=="station")
-      {Name, NameAlt}
-      ADDRESS
-    
+
+  // See http://wiki.openstreetmap.org/wiki/Tag:power%3Dstation
   TYPE power_sub_station
-    = NODE AREA ("power"=="sub_station")
+    = NODE AREA ("power"=="station" OR "power"=="sub_station")
       {Name, NameAlt}
       ADDRESS
-    
+
   TYPE power_generator
     = NODE AREA ("power"=="generator")
       ADDRESS
+
+  // TODO: power_plant, see: http://wiki.openstreetmap.org/wiki/Tag:power%3Dplant
 
   //
   // Regions, locations, cities stuff

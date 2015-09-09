@@ -1492,4 +1492,38 @@ namespace osmscout {
       value->SetEle((uint32_t)floor(e+0.5));
     }
   }
+
+  const char* const BuildingFeature::NAME = "Building";
+
+  void BuildingFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagBuilding=typeConfig.RegisterTag("building");
+  }
+
+  std::string BuildingFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t BuildingFeature::GetValueSize() const
+  {
+    return 0;
+  }
+
+  void BuildingFeature::Parse(Progress& /*progress*/,
+                            const TypeConfig& /*typeConfig*/,
+                            const FeatureInstance& feature,
+                            const ObjectOSMRef& /*object*/,
+                            const TagMap& tags,
+                            FeatureValueBuffer& buffer) const
+  {
+    auto building=tags.find(tagBuilding);
+
+    if (building!=tags.end() &&
+        !(building->second=="no" ||
+          building->second=="false" ||
+          building->second=="0")) {
+      buffer.AllocateValue(feature.GetIndex());
+    }
+  }
 }

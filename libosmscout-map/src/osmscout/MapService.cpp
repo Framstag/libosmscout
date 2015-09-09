@@ -213,16 +213,6 @@ namespace osmscout {
       return false;
     }
 
-    std::unordered_map<FileOffset,AreaRef> cachedAreas;
-
-    for (std::vector<AreaRef>::const_iterator area=areas.begin();
-        area!=areas.end();
-        ++area) {
-      if ((*area)->GetFileOffset()!=0) {
-        cachedAreas[(*area)->GetFileOffset()]=*area;
-      }
-    }
-
     areas.clear();
 
     TypeSet internalAreaTypes(areaTypes);
@@ -254,20 +244,20 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset> offsets;
-    StopClock               areaIndexTimer;
+    std::vector<DataBlockSpan> spans;
+    StopClock                  areaIndexTimer;
 
     if (internalAreaTypes.HasTypes()) {
-      if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                     boundingBox.GetMinLon(),
-                                     boundingBox.GetMinLat(),
-                                     boundingBox.GetMaxLon(),
-                                     boundingBox.GetMaxLat(),
-                                     magnification.GetLevel()+
-                                     parameter.GetMaximumAreaLevel(),
-                                     internalAreaTypes,
-                                     parameter.GetMaximumAreas(),
-                                     offsets)) {
+      if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+                                         boundingBox.GetMinLon(),
+                                         boundingBox.GetMinLat(),
+                                         boundingBox.GetMaxLon(),
+                                         boundingBox.GetMaxLat(),
+                                         magnification.GetLevel()+
+                                         parameter.GetMaximumAreaLevel(),
+                                         internalAreaTypes,
+                                         parameter.GetMaximumAreas(),
+                                         spans)) {
         std::cout << "Error getting areas from area index!" << std::endl;
         return false;
       }
@@ -280,34 +270,13 @@ namespace osmscout {
       return false;
     }
 
-    areas.reserve(offsets.size());
-
-    std::vector<FileOffset> restOffsets;
-
-    restOffsets.reserve(offsets.size());
-
-    for (const auto& offset : offsets) {
-      auto entry=cachedAreas.find(offset);
-
-      if (entry!=cachedAreas.end()) {
-        areas.push_back(entry->second);
-      }
-      else {
-        restOffsets.push_back(offset);
-      }
-    }
-
-    std::sort(restOffsets.begin(),restOffsets.end());
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
     StopClock areasTimer;
 
-    if (!restOffsets.empty()) {
-      if (!database->GetAreasByOffset(restOffsets,
-                                      areas)) {
+    if (!spans.empty()) {
+      std::sort(spans.begin(),spans.end());
+
+      if (!database->GetAreasByBlockSpans(spans,
+                                          areas)) {
         std::cout << "Error reading areas in area!" << std::endl;
         return false;
       }

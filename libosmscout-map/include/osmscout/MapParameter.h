@@ -58,6 +58,7 @@ namespace osmscout {
     bool                         renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                         renderSeaLand;             //!< Rendering of sea/land tiles
 
+    bool                         debugData;                 //!< Print out some performance relvant information about the data
     bool                         debugPerformance;          //!< Print out some performance information
 
     bool                         showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
@@ -91,6 +92,7 @@ namespace osmscout {
     void SetRenderBackground(bool render);
     void SetRenderSeaLand(bool render);
 
+    void SetDebugData(bool debug);
     void SetDebugPerformance(bool debug);
 
     void SetShowAltLanguage(bool showAltLanguage);
@@ -181,6 +183,11 @@ namespace osmscout {
     inline bool IsDebugPerformance() const
     {
       return debugPerformance;
+    }
+
+    inline bool IsDebugData() const
+    {
+      return debugData;
     }
 
     inline bool GetShowAltLanguage() const

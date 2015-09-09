@@ -1718,7 +1718,7 @@ namespace osmscout {
 
     std::vector<TypeSet>           wayTypes;
     std::vector<FileOffset>        wayWayOffsets;
-    std::vector<FileOffset>        wayAreaOffsets;
+    std::vector<DataBlockSpan> wayAreaSpans;
     std::vector<osmscout::AreaRef> areas;
     std::vector<osmscout::WayRef>  ways;
 
@@ -1734,22 +1734,20 @@ namespace osmscout {
       log.Error() << "Error getting ways and relations from area way index!";
     }
 
-    if (!areaAreaIndex->GetOffsets(database->GetTypeConfig(),
-                                   leftLon,
-                                   botLat,
-                                   rightLon,
-                                   topLat,
-                                   std::numeric_limits<size_t>::max(),
-                                   areaRoutableTypes,
-                                   std::numeric_limits<size_t>::max(),
-                                   wayAreaOffsets)) {
+    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+                                       leftLon,
+                                       botLat,
+                                       rightLon,
+                                       topLat,
+                                       std::numeric_limits<size_t>::max(),
+                                       areaRoutableTypes,
+                                       std::numeric_limits<size_t>::max(),
+                                       wayAreaSpans)) {
       log.Error() << "Error getting ways and relations from area index!";
     }
 
     std::sort(wayWayOffsets.begin(),
               wayWayOffsets.end());
-    std::sort(wayAreaOffsets.begin(),
-              wayAreaOffsets.end());
 
     if (!wayDataFile->GetByOffset(wayWayOffsets,
                                   ways)) {
@@ -1757,8 +1755,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!areaDataFile->GetByOffset(wayAreaOffsets,
-                                   areas)) {
+    if (!areaDataFile->GetByBlockSpans(wayAreaSpans,
+                                       areas)) {
       log.Error() << "Error reading areas in area!";
       return false;
     }

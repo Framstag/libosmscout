@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Math.h>
@@ -94,8 +95,8 @@ namespace osmscout {
       nodeTypeData[type].cellXCount=nodeTypeData[type].cellXEnd-nodeTypeData[type].cellXStart+1;
       nodeTypeData[type].cellYCount=nodeTypeData[type].cellYEnd-nodeTypeData[type].cellYStart+1;
 
-      nodeTypeData[type].cellWidth=360.0/pow(2.0,(int)nodeTypeData[type].indexLevel);
-      nodeTypeData[type].cellHeight=180.0/pow(2.0,(int)nodeTypeData[type].indexLevel);
+      nodeTypeData[type].cellWidth=cellDimension[nodeTypeData[type].indexLevel].width;
+      nodeTypeData[type].cellHeight=cellDimension[nodeTypeData[type].indexLevel].height;
 
       nodeTypeData[type].minLon=nodeTypeData[type].cellXStart*nodeTypeData[type].cellWidth-180.0;
       nodeTypeData[type].maxLon=(nodeTypeData[type].cellXEnd+1)*nodeTypeData[type].cellWidth-180.0;

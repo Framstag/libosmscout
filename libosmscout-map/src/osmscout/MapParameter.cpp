@@ -36,6 +36,7 @@ namespace osmscout {
     dropNotVisiblePointLabels(true),
     renderBackground(true),
     renderSeaLand(false),
+    debugData(false),
     debugPerformance(false),
     showAltLanguage(false)
   {
@@ -125,6 +126,11 @@ namespace osmscout {
   void MapParameter::SetRenderSeaLand(bool render)
   {
     this->renderSeaLand=render;
+  }
+
+  void MapParameter::SetDebugData(bool debug)
+  {
+    debugData=debug;
   }
 
   void MapParameter::SetDebugPerformance(bool debug)

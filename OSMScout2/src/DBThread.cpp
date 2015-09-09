@@ -270,8 +270,13 @@ void DBThread::TriggerMapRendering()
     osmscout::AreaSearchParameter searchParameter;
 
     searchParameter.SetBreaker(renderBreakerRef);
-    searchParameter.SetMaximumAreaLevel(4);
-    searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
+    if (currentMagnification.GetLevel()>=15) {
+      searchParameter.SetMaximumAreaLevel(6);
+    }
+    else {
+      searchParameter.SetMaximumAreaLevel(4);
+    }
+    searchParameter.SetUseMultithreading(true/*currentMagnification.GetMagnification()<=osmscout::Magnification::magCity*/);
 
     std::list<std::string>        paths;
 
@@ -279,6 +284,7 @@ void DBThread::TriggerMapRendering()
 
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
+    drawParameter.SetDebugData(false);
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
@@ -432,19 +438,18 @@ bool DBThread::RenderMap(QPainter& painter,
   double dx=0;
   double dy=0;
   if (request.lon!=finishedLon || request.lat!=finishedLat) {
-      double rx,ry,fx,fy;
+    double rx,ry,fx,fy;
 
-      if (projection.GeoToPixel(request.lon,
-                                request.lat,
-                                rx,
-                                ry) &&
-          projection.GeoToPixel(finishedLon,
-                                finishedLat,
-                                fx,
-                                fy)) {
-          dx=fx-rx;
-          dy=fy-ry;
-      }
+    projection.GeoToPixel(request.lon,
+                          request.lat,
+                          rx,
+                          ry);
+    projection.GeoToPixel(finishedLon,
+                          finishedLat,
+                          fx,
+                          fy);
+    dx=fx-rx;
+    dy=fy-ry;
   }
 
   if (dx!=0 ||

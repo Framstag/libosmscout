@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Math.h>
@@ -98,8 +99,8 @@ namespace osmscout {
         wayTypeData[type].cellXCount=wayTypeData[type].cellXEnd-wayTypeData[type].cellXStart+1;
         wayTypeData[type].cellYCount=wayTypeData[type].cellYEnd-wayTypeData[type].cellYStart+1;
 
-        wayTypeData[type].cellWidth=360.0/pow(2.0,(int)wayTypeData[type].indexLevel);
-        wayTypeData[type].cellHeight=180.0/pow(2.0,(int)wayTypeData[type].indexLevel);
+        wayTypeData[type].cellWidth=cellDimension[wayTypeData[type].indexLevel].width;
+        wayTypeData[type].cellHeight=cellDimension[wayTypeData[type].indexLevel].height;
 
         wayTypeData[type].minLon=wayTypeData[type].cellXStart*wayTypeData[type].cellWidth-180.0;
         wayTypeData[type].maxLon=(wayTypeData[type].cellXEnd+1)*wayTypeData[type].cellWidth-180.0;
@@ -252,8 +253,8 @@ namespace osmscout {
     bool                           sizeExceeded=false;
     std::unordered_set<FileOffset> newOffsets;
 
-    offsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
-    newOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    offsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
+    newOffsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
 
     for (size_t i=0; i<wayTypes.size(); i++) {
       newOffsets.clear();

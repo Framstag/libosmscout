@@ -21,4 +21,21 @@
 
 namespace osmscout {
 
+  uint64_t InterleaveNumbers(uint32_t a,
+                             uint32_t b)
+  {
+    uint64_t number=0;
+
+    for (size_t i=0; i<32; i++) {
+      size_t bit=31-i;
+
+      number=number << 1;
+      number=number+((a >> bit) & 0x01);
+
+      number=number << 1;
+      number=number+((b >> bit) & 0x01);
+    }
+
+    return number;
+  }
 }

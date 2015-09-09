@@ -34,7 +34,7 @@ namespace osmscout {
       return '0'+(char)value;
     }
     else {
-      return 'a'+(char)value-10;
+      return (char)('a'+(char)value-10);
     }
   }
 

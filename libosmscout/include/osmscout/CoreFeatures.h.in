@@ -7,30 +7,6 @@
 /* std::wstring is available */
 #undef OSMSCOUT_HAVE_STD_WSTRING
 
-/* int8_t is available */
-#undef OSMSCOUT_HAVE_INT8_T
-
-/* uint8_t is available */
-#undef OSMSCOUT_HAVE_UINT8_T
-
-/* int16_t is available */
-#undef OSMSCOUT_HAVE_INT16_T
-
-/* uint16_t is available */
-#undef OSMSCOUT_HAVE_UINT16_T
-
-/* int32_t is available */
-#undef OSMSCOUT_HAVE_INT32_T
-
-/* uint32_t is available */
-#undef OSMSCOUT_HAVE_UINT32_T
-
-/* int64_t is available */
-#undef OSMSCOUT_HAVE_INT64_T
-
-/* uint64_t is available */
-#undef OSMSCOUT_HAVE_UINT64_T
-
 /* SSE2 processor extension available */
 #undef OSMSCOUT_HAVE_SSE2
 

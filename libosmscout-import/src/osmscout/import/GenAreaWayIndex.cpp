@@ -29,6 +29,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/GeoBox.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
@@ -192,8 +193,6 @@ namespace osmscout {
     while (!remainingWayTypes.Empty()) {
       uint32_t                   wayCount=0;
       TypeInfoSet                currentWayTypes(remainingWayTypes);
-      double                     cellWidth=360.0/pow(2.0,(int)level);
-      double                     cellHeight=180.0/pow(2.0,(int)level);
       std::vector<CoordCountMap> cellFillCount(typeConfig->GetTypeCount());
 
       progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
@@ -234,10 +233,10 @@ namespace osmscout {
         // by the way
         // Renormalized coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
+        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
+        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
+        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {
@@ -494,8 +493,6 @@ namespace osmscout {
     for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
       TypeInfoSet indexTypes(*typeConfig);
       uint32_t    wayCount;
-      double      cellWidth=360.0/pow(2.0,(int)l);
-      double      cellHeight=180.0/pow(2.0,(int)l);
 
       wayScanner.GotoBegin();
 
@@ -551,10 +548,10 @@ namespace osmscout {
         // by the way
         // Renormalized coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[l].width);
+        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[l].width);
+        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[l].height);
+        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[l].height);
 
         for (uint32_t y=minyc; y<=maxyc; y++) {
           for (uint32_t x=minxc; x<=maxxc; x++) {

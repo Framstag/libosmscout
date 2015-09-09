@@ -91,7 +91,7 @@ namespace osmscout {
       return false;
     }
 
-    for (size_t current=1; current<=areaCount; current++) {
+    for (uint32_t current=1; current<=areaCount; current++) {
       uint8_t type;
       Id      id;
       Area    data;
@@ -486,9 +486,6 @@ namespace osmscout {
     uint32_t                               areaCount=0;
     std::unordered_map<FileOffset,AreaRef> merges;
     std::unordered_set<FileOffset>         ignores;
-    /*
-    size_t      collectedAreasCount=0;
-    size_t      typesWithAreas=0;*/
 
     for (const auto& type : loadedTypes) {
       for (const auto& area : mergeJob[type->GetIndex()].areas) {
@@ -607,7 +604,7 @@ namespace osmscout {
 
     /* ------ */
 
-    while (!mergeTypes.Empty()) {
+    while (true) {
       TypeInfoSet           loadedTypes;
       std::vector<AreaMergeData> mergeJob(typeConfig->GetTypeCount());
 
@@ -647,17 +644,24 @@ namespace osmscout {
 
       // Store back merge result
 
-      if (!WriteMergeResult(progress,
-                            *typeConfig,
-                            scanner,
-                            writer,
-                            loadedTypes,
-                            mergeJob,
-                            areasWritten)) {
-        return false;
+      if (!loadedTypes.Empty()) {
+        if (!WriteMergeResult(progress,
+                              *typeConfig,
+                              scanner,
+                              writer,
+                              loadedTypes,
+                              mergeJob,
+                              areasWritten)) {
+          return false;
+        }
+
+        mergeTypes.Remove(loadedTypes);
       }
 
-      mergeTypes.Remove(loadedTypes);
+
+      if (mergeTypes.Empty()) {
+        break;
+      }
     }
 
     if (!(writer.GotoBegin() &&

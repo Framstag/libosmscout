@@ -29,6 +29,15 @@
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
 #include <osmscout/MapPainterCairo.h>
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QPixmap>
+#include <QScreen>
+#include <osmscout/MapPainterQt.h>
+#endif
+
+#include <osmscout/MapPainterNoOp.h>
 
 #include <osmscout/system/Math.h>
 
@@ -39,7 +48,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory), drawing the "Ruhrgebiet":
 
-  src/PerformanceTest ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 10 13
+  src/PerformanceTest ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.4 7.3 51.6 7.7 10 15 256 256 cairo
 */
 
 // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
@@ -47,28 +56,59 @@
 
 static const double DPI=96.0;
 
+struct LevelStats
+{
+  size_t level;
+
+  double dbMinTime;
+  double dbMaxTime;
+  double dbTotalTime;
+
+  double drawMinTime;
+  double drawMaxTime;
+  double drawTotalTime;
+
+  size_t nodeCount;
+  size_t wayCount;
+  size_t areaCount;
+
+  size_t tileCount;
+
+  LevelStats(size_t level)
+  : level(level),
+    dbMinTime(std::numeric_limits<double>::max()),
+    dbMaxTime(0.0),
+    dbTotalTime(0.0),
+    drawMinTime(std::numeric_limits<double>::max()),
+    drawMaxTime(0.0),
+    drawTotalTime(0.0),
+    nodeCount(0),
+    wayCount(0),
+    areaCount(0),
+    tileCount(0)
+  {
+    // no code
+  }
+};
 
 int main(int argc, char* argv[])
 {
   std::string   map;
   std::string   style;
   double        latTop,latBottom,lonLeft,lonRight;
-  unsigned long xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
-  unsigned long startZoom;
-  unsigned long endZoom;
-  unsigned long tileWidth;
-  unsigned long tileHeight;
+  unsigned int  startZoom;
+  unsigned int  endZoom;
+  unsigned int  tileWidth;
+  unsigned int  tileHeight;
   std::string   driver;
 
   if (argc!=12) {
-    std::cerr << "DrawMap ";
-    std::cerr << "<map directory> <style-file> ";
-    std::cerr << "<lat_top> <lon_left> <lat_bottom> <lon_right> ";
-    std::cerr << "<start zoom>" << std::endl;
-    std::cerr << "<end zoom>" << std::endl;
-    std::cerr << "<tile width>" << std::endl;
-    std::cerr << "<tile height>" << std::endl;
-    std::cerr << "<driver>" << std::endl;
+    std::cerr << "DrawMap " << std::endl;
+    std::cerr << "  <map directory> <style-file> " << std::endl;
+    std::cerr << "  <lat_top> <lon_left> <lat_bottom> <lon_right> " << std::endl;
+    std::cerr << "  <start zoom> <end zoom>" << std::endl;
+    std::cerr << "  <tile width> <tile height>" << std::endl;
+    std::cerr << "  <cairo|Qt|noop|none>" << std::endl;
     return 1;
   }
 
@@ -95,22 +135,22 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (sscanf(argv[7],"%lu",&startZoom)!=1) {
+  if (sscanf(argv[7],"%u",&startZoom)!=1) {
     std::cerr << "start zoom is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[8],"%lu",&endZoom)!=1) {
+  if (sscanf(argv[8],"%u",&endZoom)!=1) {
     std::cerr << "end zoom is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[9],"%lu",&tileWidth)!=1) {
+  if (sscanf(argv[9],"%u",&tileWidth)!=1) {
     std::cerr << "tile width is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[10],"%lu",&tileHeight)!=1) {
+  if (sscanf(argv[10],"%u",&tileHeight)!=1) {
     std::cerr << "tile height is not numeric!" << std::endl;
     return 1;
   }
@@ -118,30 +158,63 @@ int main(int argc, char* argv[])
   driver=argv[11];
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  cairo_surface_t *surface=NULL;
+  cairo_surface_t * cairoSurface=NULL;
   cairo_t         *cairo=NULL;
+#endif
+
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+  QPixmap         *qtPixmap=NULL;
+  QPainter        *qtPainter=NULL;
+  QApplication    application(argc,argv,true);
 #endif
 
   if (driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
+    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
 
-    if (surface==NULL) {
-      std::cerr << "Cannot create cairo image surface" << std::endl;
+    if (cairoSurface==NULL) {
+      std::cerr << "Cannot create cairo image cairoSurface" << std::endl;
       return 1;
     }
 
-    cairo=cairo_create(surface);
+    cairo=cairo_create(cairoSurface);
 
     if (cairo==NULL) {
-      std::cerr << "Cannot create cairo_t for image surface" << std::endl;
+      std::cerr << "Cannot create cairo_t for image cairoSurface" << std::endl;
       return 1;
     }
 #else
     std::cerr << "Driver 'cairo' is not enabled" << std::endl;
     return 1;
 #endif
+  }
+  else if (driver=="Qt") {
+    std::cout << "Using driver 'Qt'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+    qtPixmap=new QPixmap(tileWidth,tileHeight);
+
+    if (qtPixmap==NULL) {
+      std::cerr << "Cannot create QPixmap" << std::endl;
+      return 1;
+    }
+
+    qtPainter=new QPainter(qtPixmap);
+
+    if (qtPainter==NULL) {
+      std::cerr << "Cannot create QPainter image cairoSurface" << std::endl;
+      return 1;
+    }
+#else
+    std::cerr << "Driver 'Qt' is not enabled" << std::endl;
+  return 1;
+#endif
+  }
+  else if (driver=="noop") {
+    std::cout << "Using driver 'noop'..." << std::endl;
+  }
+  else if (driver=="none") {
+    std::cout << "Using driver 'none'..." << std::endl;
   }
   else {
     std::cerr << "Unsupported driver '" << driver << "'" << std::endl;
@@ -152,73 +225,93 @@ int main(int argc, char* argv[])
 
   //databaseParameter.SetDebugPerformance(true);
 
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
+  osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
   if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
+  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
   if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
+    return 1;
   }
 
   osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
+  std::list<LevelStats>         statistics;
 
-  for (size_t zoom=std::min(startZoom,endZoom);
-       zoom<=std::max(startZoom,endZoom);
-       zoom++) {
-    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),zoom);
-    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),zoom);
+  searchParameter.SetUseMultithreading(true);
+
+  for (uint32_t level=std::min(startZoom,endZoom);
+       level<=std::max(startZoom,endZoom);
+       level++) {
+    LevelStats              stats(level);
+    osmscout::Magnification magnification;
+    int                     xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
+
+    magnification.SetLevel(level);
+
+    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),
+                                    magnification);
+    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),
+                                  magnification);
     xTileCount=xTileEnd-xTileStart+1;
 
-    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),zoom);
-    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),zoom);
+    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),
+                                    magnification);
+    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),
+                                  magnification);
+
     yTileCount=yTileEnd-yTileStart+1;
 
-    std::cout << "Drawing zoom " << zoom;
-    //<< ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]";
-    std::cout << std::endl;
+    std::cout << "----------" << std::endl;
+    std::cout << "Drawing level " << level << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    osmscout::MapPainterCairo cairoPainter(styleConfig);
+    osmscout::MapPainterCairo cairoMapPainter(styleConfig);
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+    osmscout::MapPainterQt    qtMapPainter(styleConfig);
+#endif
+    osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
 
-    osmscout::Magnification   magnification;
+    size_t current=1;
+    size_t tileCount=(yTileEnd-yTileStart+1)*(xTileEnd-xTileStart+1);
+    size_t delta=tileCount/20;
 
-    magnification.SetLevel(zoom);
+    if (delta==0) {
+      delta=1;
+    }
 
-    double dbMinTime=std::numeric_limits<double>::max();
-    double dbMaxTime=0.0;
-    double dbTotalTime=0.0;
+    for (int y=yTileStart; y<=yTileEnd; y++) {
+      for (int x=xTileStart; x<=xTileEnd; x++) {
+        osmscout::MapData  data;
+        osmscout::GeoBox   boundingBox;
 
-    double drawMinTime=std::numeric_limits<double>::max();
-    double drawMaxTime=0.0;
-    double drawTotalTime=0.0;
+        if ((current % delta)==0) {
+          std::cout << current*100/tileCount << "% " << current;
 
-    for (size_t y=yTileStart; y<=yTileEnd; y++) {
-      for (size_t x=xTileStart; x<=xTileEnd; x++) {
-        double            lat,lon;
-        osmscout::MapData data;
+          if (stats.tileCount>0) {
+            std::cout << " " << stats.dbTotalTime/stats.tileCount;
+            std::cout << " " << stats.drawTotalTime/stats.tileCount;
+          }
 
-        lat=(osmscout::TileYToLat(y,zoom)+osmscout::TileYToLat(y+1,zoom))/2;
-        lon=(osmscout::TileXToLon(x,zoom)+osmscout::TileXToLon(x+1,zoom))/2;
+          std::cout << std::endl;
+        }
 
-        //std::cout << "Drawing tile at " << lat << "," << lon << "/";
-        //std::cout << x << "," << y << "/";
-        //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
-
-        projection.Set(lon,
-                       lat,
+        projection.Set(x-1,y-1,
+                       x+1,y+1,
                        magnification,
                        DPI,
                        tileWidth,
                        tileHeight);
+
+        projection.GetDimensions(boundingBox);
 
         osmscout::StopClock dbTimer;
 
@@ -227,47 +320,90 @@ int main(int argc, char* argv[])
                                projection,
                                data);
 
+        stats.nodeCount+=data.nodes.size();
+        stats.wayCount+=data.ways.size();
+        stats.areaCount+=data.areas.size();
+
         dbTimer.Stop();
 
         double dbTime=dbTimer.GetMilliseconds();
 
-        dbMinTime=std::min(dbMinTime,dbTime);
-        dbMaxTime=std::max(dbMaxTime,dbTime);
-        dbTotalTime+=dbTime;
+        stats.dbMinTime=std::min(stats.dbMinTime,dbTime);
+        stats.dbMaxTime=std::max(stats.dbMaxTime,dbTime);
+        stats.dbTotalTime+=dbTime;
 
         osmscout::StopClock drawTimer;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
         if (driver=="cairo") {
           //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-          cairoPainter.DrawMap(projection,
-                               drawParameter,
-                               data,
-                               cairo);
+          cairoMapPainter.DrawMap(projection,
+                                  drawParameter,
+                                  data,
+                                  cairo);
         }
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+        if (driver=="Qt") {
+          //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
+          qtMapPainter.DrawMap(projection,
+                               drawParameter,
+                               data,
+                               qtPainter);
+        }
+#endif
+        if (driver=="noop") {
+          noOpMapPainter.DrawMap(projection,
+                                 drawParameter,
+                                 data);
+        }
+        if (driver=="none") {
+          // Do nothing
+        }
 
         drawTimer.Stop();
 
+        stats.tileCount++;
+
         double drawTime=drawTimer.GetMilliseconds();
 
-        drawMinTime=std::min(drawMinTime,drawTime);
-        drawMaxTime=std::max(drawMaxTime,drawTime);
-        drawTotalTime+=drawTime;
+        stats.drawMinTime=std::min(stats.drawMinTime,drawTime);
+        stats.drawMaxTime=std::max(stats.drawMaxTime,drawTime);
+        stats.drawTotalTime+=drawTime;
+
+        current++;
       }
     }
 
-    std::cout << "GetObjects: ";
-    std::cout << "total: " << dbTotalTime << " msec ";
-    std::cout << "min: " << dbMinTime << " msec ";
-    std::cout << "avg: " << dbTotalTime/(xTileCount*yTileCount) << " msec ";
-    std::cout << "max: " << dbMaxTime << " msec" << std::endl;
+    statistics.push_back(stats);
+  }
 
-    std::cout << "DrawMap: ";
-    std::cout << "total: " << drawTotalTime << " msec ";
-    std::cout << "min: " << drawMinTime << " msec ";
-    std::cout << "avg: " << drawTotalTime/(xTileCount*yTileCount) << " msec ";
-    std::cout << "max: " << drawMaxTime << " msec" << std::endl;
+  std::cout << "==========" << std::endl;
+
+  for (const auto& stats : statistics) {
+    std::cout << "Level: " << stats.level << std::endl;
+
+    std::cout << " Tot. data: ";
+    std::cout << "nodes: " << stats.nodeCount << " ";
+    std::cout << "way: " << stats.wayCount << " ";
+    std::cout << "areas: " << stats.areaCount << std::endl;
+
+    std::cout << " Avg. data: ";
+    std::cout << "nodes: " << stats.nodeCount/stats.tileCount << " ";
+    std::cout << "way: " << stats.wayCount/stats.tileCount << " ";
+    std::cout << "areas: " << stats.areaCount/stats.tileCount << std::endl;
+
+    std::cout << " DB       : ";
+    std::cout << "total: " << stats.dbTotalTime << " ";
+    std::cout << "min: " << stats.dbMinTime << " ";
+    std::cout << "avg: " << stats.dbTotalTime/stats.tileCount << " ";
+    std::cout << "max: " << stats.dbMaxTime << " " << std::endl;
+
+    std::cout << " Map      : ";
+    std::cout << "total: " << stats.drawTotalTime << " ";
+    std::cout << "min: " << stats.drawMinTime << " ";
+    std::cout << "avg: " << stats.drawTotalTime/stats.tileCount << " ";
+    std::cout << "max: " << stats.drawMaxTime << std::endl;
   }
 
   database->Close();
@@ -275,8 +411,9 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
   if (driver=="cairo") {
     cairo_destroy(cairo);
-    cairo_surface_destroy(surface);
+    cairo_surface_destroy(cairoSurface);
   }
 #endif
+
   return 0;
 }

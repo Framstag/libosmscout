@@ -23,9 +23,11 @@
 #include <memory>
 #include <vector>
 
+#include <osmscout/DataFile.h>
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
@@ -48,21 +50,12 @@ namespace osmscout {
   {
   private:
     /**
-      An individual index entry in a index cell
-      */
-    struct IndexEntry
-    {
-      TypeId     type;
-      FileOffset offset;
-    };
-
-    /**
-      Datastructure for every index cell of our index.
+      Data structure for every index cell of our index.
       */
     struct IndexCell
     {
-      FileOffset              children[4]; //!< File index of each of the four children, or 0 if there is no child
-      std::vector<IndexEntry> areas;
+      FileOffset children[4]; //!< File index of each of the four children, or 0 if there is no child
+      FileOffset data;        //!< The file index at which the data payload starts
     };
 
     typedef Cache<FileOffset,IndexCell> IndexCache;
@@ -74,9 +67,6 @@ namespace osmscout {
         size_t memory=0;
 
         memory+=sizeof(value);
-
-        // Areas
-        memory+=value.areas.size()*sizeof(IndexEntry);
 
         return memory;
       }
@@ -104,18 +94,33 @@ namespace osmscout {
     std::string                     datafilename;   //!< Fullpath and name of the data file
     mutable FileScanner             scanner;        //!< Scanner instance for reading this file
 
-    std::vector<double>             cellWidth;      //!< Precalculated cellWidth for each level of the quadtree
-    std::vector<double>             cellHeight;     //!< Precalculated cellHeight for each level of the quadtree
     uint32_t                        maxLevel;       //!< Maximum level in index
     FileOffset                      topLevelOffset; //!< File offset of the top level index entry
 
     mutable IndexCache              indexCache;     //!< Cached map of all index entries by file offset
 
   private:
-    bool GetIndexCell(const TypeConfig& typeConfig,
-                      uint32_t level,
+    bool GetIndexCell(uint32_t level,
                       FileOffset offset,
-                      IndexCache::CacheRef& cacheRef) const;
+                      IndexCell& indexCell,
+                      FileOffset& dataOffset) const;
+
+    bool ReadCellData(TypeConfig& typeConfig,
+                      const TypeSet& types,
+                      FileOffset dataOffset,
+                      size_t spaceLeft,
+                      std::vector<DataBlockSpan>& spans,
+                      bool& stopArea) const;
+
+    void PushCellsForNextLevel(double minlon,
+                               double minlat,
+                               double maxlon,
+                               double maxlat,
+                               const IndexCell & cellIndexData,
+                               const CellDimension& cellDimension,
+                               size_t cx,
+                               size_t cy,
+                               std::vector<CellRef>& nextCellRefs) const;
 
   public:
     AreaAreaIndex(size_t cacheSize);
@@ -123,15 +128,15 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetOffsets(const TypeConfigRef& typeConfig,
-                    double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
-                    size_t maxLevel,
-                    const TypeSet& types,
-                    size_t maxCount,
-                    std::vector<FileOffset>& offsets) const;
+    bool GetAreasInArea(const TypeConfigRef& typeConfig,
+                        double minlon,
+                        double minlat,
+                        double maxlon,
+                        double maxlat,
+                        size_t maxLevel,
+                        const TypeSet& types,
+                        size_t maxCount,
+                        std::vector<DataBlockSpan>& spans) const;
 
     void DumpStatistics();
   };

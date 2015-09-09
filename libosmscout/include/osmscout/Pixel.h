@@ -24,6 +24,8 @@
 
 #include <osmscout/system/Types.h>
 
+#include <osmscout/util/Number.h>
+
 namespace osmscout {
 
   /**
@@ -60,6 +62,16 @@ namespace osmscout {
     {
       return y<other.y ||
       (y==other.y && x<other.x);
+    }
+
+    /**
+     * Returns a unique number based on the coordinates of the pixel. The bits of the coordinates
+     * are projected onto one number by interleaving the bits of the coordinates. Coordinates close
+     * in 2D space are thus likely clos ein one dimensional space, too.
+     */
+    inline uint64_t GetId() const
+    {
+      return InterleaveNumbers(x,y);
     }
   };
 

@@ -113,9 +113,188 @@ namespace osmscout {
     log.Debug() << "MapPainter::~MapPainter()";
   }
 
-  bool MapPainter::IsVisible(const Projection& projection,
-                             const std::vector<GeoCoord>& nodes,
-                             double pixelOffset) const
+  void MapPainter::DumpDataStatistics(const Projection& projection,
+                                      const MapData& data)
+  {
+    std::map<TypeInfoRef,DataStatistic> statistics;
+
+    for (const auto& node : data.nodes) {
+      DataStatistic& entry=statistics[node->GetType()];
+
+      entry.nodeCount++;
+      entry.coordCount++;
+
+      IconStyleRef iconStyle;
+
+      styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
+                                     projection,
+                                     textStyles);
+      styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                    projection,
+                                    iconStyle);
+
+      entry.labelCount+=textStyles.size();
+
+      if (iconStyle) {
+        entry.iconCount++;
+      }
+    }
+
+    for (const auto& node : data.poiNodes) {
+      DataStatistic& entry=statistics[node->GetType()];
+
+      entry.nodeCount++;
+      entry.coordCount++;
+
+      IconStyleRef iconStyle;
+
+      styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
+                                     projection,
+                                     textStyles);
+      styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                    projection,
+                                    iconStyle);
+
+      entry.labelCount+=textStyles.size();
+
+      if (iconStyle) {
+        entry.iconCount++;
+      }
+    }
+
+    for (const auto& way : data.ways) {
+      DataStatistic& entry=statistics[way->GetType()];
+
+      entry.wayCount++;
+      entry.coordCount+=way->nodes.size();
+
+      PathShieldStyleRef shieldStyle;
+      PathTextStyleRef   pathTextStyle;
+
+      styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+                                         projection,
+                                         shieldStyle);
+      styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
+                                       projection,
+                                       pathTextStyle);
+
+      if (shieldStyle) {
+        entry.labelCount++;
+      }
+
+      if (pathTextStyle) {
+        entry.labelCount++;
+      }
+    }
+
+    for (const auto& way : data.poiWays) {
+      DataStatistic& entry=statistics[way->GetType()];
+
+      entry.wayCount++;
+      entry.coordCount+=way->nodes.size();
+
+      PathShieldStyleRef shieldStyle;
+      PathTextStyleRef   pathTextStyle;
+
+      styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+                                         projection,
+                                         shieldStyle);
+      styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
+                                       projection,
+                                       pathTextStyle);
+
+      if (shieldStyle) {
+        entry.labelCount++;
+      }
+
+      if (pathTextStyle) {
+        entry.labelCount++;
+      }
+    }
+
+    for (const auto& area : data.areas) {
+      DataStatistic& entry=statistics[area->GetType()];
+
+      entry.areaCount++;
+
+      for (const auto& ring : area->rings) {
+        entry.coordCount+=ring.nodes.size();
+
+        if (ring.ring==Area::masterRingId) {
+          IconStyleRef iconStyle;
+
+          styleConfig->GetAreaTextStyles(area->GetType(),
+                                         ring.GetFeatureValueBuffer(),
+                                         projection,
+                                         textStyles);
+          styleConfig->GetAreaIconStyle(area->GetType(),
+                                        ring.GetFeatureValueBuffer(),
+                                        projection,
+                                        iconStyle);
+
+          if (iconStyle) {
+            entry.iconCount++;
+          }
+
+          entry.labelCount+=textStyles.size();
+        }
+      }
+    }
+
+    for (const auto& area : data.poiAreas) {
+      DataStatistic& entry=statistics[area->GetType()];
+
+      entry.areaCount++;
+
+      for (const auto& ring : area->rings) {
+        entry.coordCount+=ring.nodes.size();
+
+        if (ring.ring==Area::masterRingId) {
+          IconStyleRef iconStyle;
+
+          styleConfig->GetAreaTextStyles(area->GetType(),
+                                         ring.GetFeatureValueBuffer(),
+                                         projection,
+                                         textStyles);
+          styleConfig->GetAreaIconStyle(area->GetType(),
+                                        ring.GetFeatureValueBuffer(),
+                                        projection,
+                                        iconStyle);
+
+          if (iconStyle) {
+            entry.iconCount++;
+          }
+
+          entry.labelCount+=textStyles.size();
+        }
+      }
+    }
+
+    std::list<DataStatistic> statisticList;
+
+    for (auto& entry : statistics) {
+      entry.second.type=entry.first;
+
+      entry.second.objectCount=entry.second.nodeCount+entry.second.wayCount+entry.second.areaCount;
+
+      statisticList.push_back(entry.second);
+    }
+
+    statistics.clear();
+
+    statisticList.sort([](const DataStatistic& a, const DataStatistic& b)->bool{return a.objectCount>b.objectCount;});
+
+    log.Info() << "Type|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
+    for (const auto& entry : statisticList) {
+      log.Info() << entry.type->GetName() << " "
+          << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " " << entry.coordCount << " "
+          << entry.labelCount << " " << entry.iconCount;
+    }
+  }
+
+  bool MapPainter::IsVisibleArea(const Projection& projection,
+                                 const std::vector<GeoCoord>& nodes,
+                                 double pixelOffset) const
   {
     if (nodes.empty()) {
       return false;
@@ -123,9 +302,9 @@ namespace osmscout {
 
     // Bounding box
     double lonMin=nodes[0].GetLon();
-    double lonMax=nodes[0].GetLon();
+    double lonMax=lonMin;
     double latMin=nodes[0].GetLat();
-    double latMax=nodes[0].GetLat();
+    double latMax=latMin;
 
     for (size_t i=1; i<nodes.size(); i++) {
       lonMin=std::min(lonMin,nodes[i].GetLon());
@@ -139,19 +318,73 @@ namespace osmscout {
     double y1;
     double y2;
 
-    if (!projection.GeoToPixel(lonMin,
-                               latMin,
-                               x1,
-                               y1)) {
+    projection.GeoToPixel(lonMin,
+                          latMin,
+                          x1,
+                          y1);
+
+    projection.GeoToPixel(lonMax,
+                          latMax,
+                          x2,
+                          y2);
+
+    double xMin=std::min(x1,x2);
+    double xMax=std::max(x1,x2);
+    double yMin=std::min(y1,y2);
+    double yMax=std::max(y1,y2);
+
+    if (x2-x1<=oneMMInPixel &&
+        y2-y1<=oneMMInPixel) {
       return false;
     }
 
-    if (!projection.GeoToPixel(lonMax,
-                               latMax,
-                               x2,
-                               y2)) {
+    xMin-=pixelOffset;
+    yMin-=pixelOffset;
+
+    xMax+=pixelOffset;
+    yMax+=pixelOffset;
+
+    return !(xMin>=projection.GetWidth() ||
+             yMin>=projection.GetHeight() ||
+             xMax<0 ||
+             yMax<0);
+  }
+
+  bool MapPainter::IsVisibleWay(const Projection& projection,
+                                const std::vector<GeoCoord>& nodes,
+                                double pixelOffset) const
+  {
+    if (nodes.empty()) {
       return false;
     }
+
+    // Bounding box
+    double lonMin=nodes[0].GetLon();
+    double lonMax=lonMin;
+    double latMin=nodes[0].GetLat();
+    double latMax=latMin;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      lonMin=std::min(lonMin,nodes[i].GetLon());
+      lonMax=std::max(lonMax,nodes[i].GetLon());
+      latMin=std::min(latMin,nodes[i].GetLat());
+      latMax=std::max(latMax,nodes[i].GetLat());
+    }
+
+    double x1;
+    double x2;
+    double y1;
+    double y2;
+
+    projection.GeoToPixel(lonMin,
+                          latMin,
+                          x1,
+                          y1);
+
+    projection.GeoToPixel(lonMax,
+                          latMax,
+                          x2,
+                          y2);
 
     double xMin=std::min(x1,x2);
     double xMax=std::max(x1,x2);
@@ -1005,8 +1238,8 @@ namespace osmscout {
                                   const MapData& data)
   {
     for (const auto& area : data.areas) {
-      for (size_t m=0; m<area->rings.size(); m++) {
-        if (area->rings[m].ring==Area::masterRingId) {
+      for (const auto& ring :area->rings) {
+        if (ring.ring==Area::masterRingId) {
           GeoBox   boundingBox;
 
           area->GetBoundingBox(boundingBox);
@@ -1015,19 +1248,19 @@ namespace osmscout {
                         projection,
                         parameter,
                         area->GetType(),
-                        area->rings[m].GetFeatureValueBuffer(),
+                        ring.GetFeatureValueBuffer(),
                         boundingBox);
         }
         else {
           GeoBox boundingBox;
 
-          area->rings[m].GetBoundingBox(boundingBox);
+          ring.GetBoundingBox(boundingBox);
 
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->rings[m].GetType(),
-                        area->rings[m].GetFeatureValueBuffer(),
+                        ring.GetType(),
+                        ring.GetFeatureValueBuffer(),
                         boundingBox);
         }
       }
@@ -1293,9 +1526,9 @@ namespace osmscout {
 
             foundRing=true;
 
-            if (!IsVisible(projection,
-                           ring.nodes,
-                           fillStyle->GetBorderWidth()/2)) {
+            if (!IsVisibleArea(projection,
+                               ring.nodes,
+                               fillStyle->GetBorderWidth()/2)) {
               continue;
             }
 
@@ -1327,11 +1560,11 @@ namespace osmscout {
             a.maxLon=ring.nodes[0].GetLon();
             a.minLon=ring.nodes[0].GetLon();
 
-            for (size_t i=1; i<ring.nodes.size(); i++) {
-              a.minLat=std::min(a.minLat,ring.nodes[i].GetLat());
-              a.maxLat=std::min(a.maxLat,ring.nodes[i].GetLat());
-              a.minLon=std::min(a.minLon,ring.nodes[i].GetLon());
-              a.maxLon=std::min(a.maxLon,ring.nodes[i].GetLon());
+            for (size_t r=1; r<ring.nodes.size(); r++) {
+              a.minLat=std::min(a.minLat,ring.nodes[r].GetLat());
+              a.maxLat=std::min(a.maxLat,ring.nodes[r].GetLat());
+              a.minLon=std::min(a.minLon,ring.nodes[r].GetLon());
+              a.maxLon=std::min(a.maxLon,ring.nodes[r].GetLon());
             }
 
             areaData.push_back(a);
@@ -1408,9 +1641,9 @@ namespace osmscout {
       data.ref=ref;
       data.lineWidth=lineWidth;
 
-      if (!IsVisible(projection,
-                    nodes,
-                    lineWidth/2)) {
+      if (!IsVisibleWay(projection,
+                        nodes,
+                        lineWidth/2)) {
         continue;
       }
 
@@ -1546,6 +1779,7 @@ namespace osmscout {
     labelSpace=projection.ConvertWidthToPixel(parameter.GetLabelSpace());
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
     sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
+    oneMMInPixel=projection.ConvertWidthToPixel(1);
 
     GetFontHeight(projection,
                   parameter,
@@ -1565,6 +1799,11 @@ namespace osmscout {
           << "Draw: " << boundingBox.GetDisplayText() << " "
           << (int)projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " "
           << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI";
+    }
+
+    if (parameter.IsDebugData()) {
+      DumpDataStatistics(projection,
+                         data);
     }
 
     //

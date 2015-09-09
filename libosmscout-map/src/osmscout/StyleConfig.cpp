@@ -176,16 +176,6 @@ namespace osmscout {
     // no code
   }
 
-  bool StyleResolveContext::IsBridge(const FeatureValueBuffer& buffer) const
-  {
-    return bridgeReader.IsSet(buffer);
-  }
-
-  bool StyleResolveContext::IsTunnel(const FeatureValueBuffer& buffer) const
-  {
-    return tunnelReader.IsSet(buffer);
-  }
-
   bool StyleResolveContext::IsOneway(const FeatureValueBuffer& buffer) const
   {
     AccessFeatureValue *accessValue=accessReader.GetValue(buffer);
@@ -311,11 +301,7 @@ namespace osmscout {
       matchesMaxPx=true;
     }
 
-    if (!matchesMaxMM && !matchesMaxPx) {
-      return false;
-    }
-
-    return true;
+    return matchesMaxMM || matchesMaxPx;
   }
 
   LineStyle::LineStyle()
@@ -2264,8 +2250,8 @@ namespace osmscout {
     bool   fastpath=false;
     bool   composed=false;
     size_t level=projection.GetMagnification().GetLevel();
-    double meterInPixel=1/projection.GetPixelSize();
-    double meterInMM=meterInPixel*25.4/projection.GetDPI();
+    double meterInPixel=projection.GetMeterInPixel();
+    double meterInMM=projection.GetMeterInMM();
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;

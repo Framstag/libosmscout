@@ -211,15 +211,6 @@ int main(int argc, char* argv[])
         osmscout::GeoBox    boundingBox2;
         osmscout::GeoCoord  center;
 
-        boundingBox1.Set(osmscout::GeoCoord(osmscout::TileYToLat(y+1,
-                                                                 magnification),
-                                            osmscout::TileXToLon(x,
-                                                                 magnification)),
-                         osmscout::GeoCoord(osmscout::TileYToLat(y,
-                                                                 magnification),
-                                            osmscout::TileXToLon(x+1,
-                                                                 magnification)));
-
         boundingBox2.Set(osmscout::GeoCoord(osmscout::TileYToLat(y+2,
                                                                  magnification),
                                             osmscout::TileXToLon(x-1,
@@ -229,9 +220,6 @@ int main(int argc, char* argv[])
                                             osmscout::TileXToLon(x+2,
                                                                  magnification)));
 
-        center=boundingBox1.GetCenter();
-
-        std::cout << "Drawing tile with bounding box " << boundingBox1.GetDisplayText() << " and center " << center.GetDisplayText() << std::endl;
         //std::cout << x << "," << y << "/";
         //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
 
@@ -241,6 +229,11 @@ int main(int argc, char* argv[])
                        tileWidth,
                        tileHeight);
 
+
+        projection.GetDimensions(boundingBox1);
+        center=boundingBox1.GetCenter();
+
+        std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox1.GetDisplayText() << std::endl;
 
         mapService->GetObjects(searchParameter,
                                projection.GetMagnification(),

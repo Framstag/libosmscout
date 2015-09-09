@@ -388,7 +388,7 @@ namespace osmscout {
 #else
     FontMap::const_iterator f;
 
-    fontSize=fontSize*ConvertWidthToPixel(projection,parameter.GetFontSize());
+    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
     f=fonts.find(fontSize);
 
