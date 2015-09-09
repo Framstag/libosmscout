@@ -68,7 +68,8 @@ namespace osmscout
                                                            std::set<TypeInfoRef>& types)
   {
     for (auto &type : typeConfig.GetWayTypes()) {
-      if (type->GetOptimizeLowZoom()) {
+      if (!type->GetIgnore() &&
+          type->GetOptimizeLowZoom()) {
         types.insert(type);
       }
     }

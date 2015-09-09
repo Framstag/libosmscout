@@ -24,6 +24,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/util/FileScanner.h>
@@ -42,6 +43,7 @@ namespace osmscout {
   private:
     struct TypeData
     {
+      TypeInfoRef type;
       uint32_t   indexLevel;
 
       uint8_t    dataOffsetBytes;
@@ -61,7 +63,6 @@ namespace osmscout {
       double     maxLon;
       double     minLat;
       double     maxLat;
-
 
       TypeData();
     };

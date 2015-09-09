@@ -75,39 +75,43 @@ namespace osmscout {
 
     scanner.Read(indexEntries);
 
-    for (size_t i=0; i<indexEntries; i++) {
-      TypeId type;
+    wayTypeData.reserve(indexEntries);
 
-      scanner.ReadTypeId(type,
+    for (size_t i=0; i<indexEntries; i++) {
+      TypeId typeId;
+
+      scanner.ReadTypeId(typeId,
                          typeConfig->GetWayTypeIdBytes());
 
-      if (type>=wayTypeData.size()) {
-        wayTypeData.resize(type+1);
+      TypeData data;
+
+      data.type=typeConfig->GetWayTypeInfo(typeId);
+
+      scanner.ReadFileOffset(data.bitmapOffset);
+
+      if (data.bitmapOffset>0) {
+        scanner.Read(data.dataOffsetBytes);
+
+        scanner.ReadNumber(data.indexLevel);
+
+        scanner.ReadNumber(data.cellXStart);
+        scanner.ReadNumber(data.cellXEnd);
+        scanner.ReadNumber(data.cellYStart);
+        scanner.ReadNumber(data.cellYEnd);
+
+        data.cellXCount=data.cellXEnd-data.cellXStart+1;
+        data.cellYCount=data.cellYEnd-data.cellYStart+1;
+
+        data.cellWidth=cellDimension[data.indexLevel].width;
+        data.cellHeight=cellDimension[data.indexLevel].height;
+
+        data.minLon=data.cellXStart*data.cellWidth-180.0;
+        data.maxLon=(data.cellXEnd+1)*data.cellWidth-180.0;
+        data.minLat=data.cellYStart*data.cellHeight-90.0;
+        data.maxLat=(data.cellYEnd+1)*data.cellHeight-90.0;
       }
 
-      scanner.ReadFileOffset(wayTypeData[type].bitmapOffset);
-
-      if (wayTypeData[type].bitmapOffset>0) {
-        scanner.Read(wayTypeData[type].dataOffsetBytes);
-
-        scanner.ReadNumber(wayTypeData[type].indexLevel);
-
-        scanner.ReadNumber(wayTypeData[type].cellXStart);
-        scanner.ReadNumber(wayTypeData[type].cellXEnd);
-        scanner.ReadNumber(wayTypeData[type].cellYStart);
-        scanner.ReadNumber(wayTypeData[type].cellYEnd);
-
-        wayTypeData[type].cellXCount=wayTypeData[type].cellXEnd-wayTypeData[type].cellXStart+1;
-        wayTypeData[type].cellYCount=wayTypeData[type].cellYEnd-wayTypeData[type].cellYStart+1;
-
-        wayTypeData[type].cellWidth=cellDimension[wayTypeData[type].indexLevel].width;
-        wayTypeData[type].cellHeight=cellDimension[wayTypeData[type].indexLevel].height;
-
-        wayTypeData[type].minLon=wayTypeData[type].cellXStart*wayTypeData[type].cellWidth-180.0;
-        wayTypeData[type].maxLon=(wayTypeData[type].cellXEnd+1)*wayTypeData[type].cellWidth-180.0;
-        wayTypeData[type].minLat=wayTypeData[type].cellYStart*wayTypeData[type].cellHeight-90.0;
-        wayTypeData[type].maxLat=(wayTypeData[type].cellYEnd+1)*wayTypeData[type].cellHeight-90.0;
-      }
+      wayTypeData.push_back(data);
     }
 
     return !scanner.HasError() && scanner.Close();
