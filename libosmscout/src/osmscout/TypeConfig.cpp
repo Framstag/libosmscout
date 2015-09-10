@@ -662,10 +662,26 @@ namespace osmscout {
     }
   }
 
+  void TypeInfoSet::Set(const TypeInfoSet& types)
+  {
+    Clear();
+
+    for (const auto& type : types) {
+      Set(type);
+    }
+  }
+
   void TypeInfoSet::Set(const std::vector<TypeInfoRef>& types)
   {
     Clear();
 
+    for (const auto& type : types) {
+      Set(type);
+    }
+  }
+
+  void TypeInfoSet::Add(const TypeInfoSet& types)
+  {
     for (const auto& type : types) {
       Set(type);
     }
@@ -693,6 +709,68 @@ namespace osmscout {
         count--;
       }
     }
+  }
+
+  bool TypeInfoSet::operator==(const TypeInfoSet& other) const
+  {
+    if (this==&other) {
+      return true;
+    }
+
+    if (count!=other.count) {
+      return false;
+    }
+
+    for (size_t i=0; i<std::max(types.size(),other.types.size()); i++) {
+      if (i<types.size() && i<other.types.size()) {
+        if (types[i]!=other.types[i]) {
+          return false;
+        }
+      }
+      else if (i<types.size()) {
+        if (types[i]) {
+          return false;
+        }
+      }
+      else if (i<other.types.size()) {
+        if (other.types[i]) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  bool TypeInfoSet::operator!=(const TypeInfoSet& other) const
+  {
+    if (this==&other) {
+      return false;
+    }
+
+    if (count!=other.count) {
+      return true;
+    }
+
+    for (size_t i=0; i<std::max(types.size(),other.types.size()); i++) {
+      if (i<types.size() && i<other.types.size()) {
+        if (types[i]!=other.types[i]) {
+          return true;
+        }
+      }
+      else if (i<types.size()) {
+        if (types[i]) {
+          return true;
+        }
+      }
+      else if (i<other.types.size()) {
+        if (other.types[i]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   TypeConfig::TypeConfig()

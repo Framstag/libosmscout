@@ -73,7 +73,7 @@ namespace osmscout {
 
   private:
     void GetAreaTypesToOptimize(const TypeConfig& typeConfig,
-                                std::set<TypeInfoRef>& types);
+                                TypeInfoSet& types);
 
     bool WriteTypeData(FileWriter& writer,
                        const TypeData& data);
@@ -86,8 +86,9 @@ namespace osmscout {
                   const ImportParameter& parameter,
                   Progress& progress,
                   FileScanner& scanner,
-                  std::set<TypeInfoRef>& types,
-                  std::vector<std::list<AreaRef> >& areas);
+                  const TypeInfoSet& types,
+                  std::vector<std::list<AreaRef> >& areas,
+                  TypeInfoSet& loadedTypes);
 
     void GetAreaIndexLevel(const ImportParameter& parameter,
                            const std::list<AreaRef>& areas,
@@ -108,7 +109,7 @@ namespace osmscout {
                      Progress& progress,
                      const TypeConfig& typeConfig,
                      FileWriter& writer,
-                     const std::set<TypeInfoRef>& types,
+                     const TypeInfoSet& types,
                      std::list<TypeData>& typesData);
 
     void OptimizeAreas(const std::list<AreaRef>& areas,

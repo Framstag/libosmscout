@@ -1700,6 +1700,8 @@ namespace osmscout {
                                      botLat,
                                      rightLon);
 
+    GeoBox                 boundingBox(GeoCoord(topLat,leftLon),
+                                       GeoCoord(botLat,rightLon));
     osmscout::TypeSet      wayRoutableTypes;
     osmscout::TypeSet      areaRoutableTypes;
 
@@ -1724,10 +1726,7 @@ namespace osmscout {
 
     wayTypes.push_back(wayRoutableTypes);
 
-    if (!areaWayIndex->GetOffsets(leftLon,
-                                  botLat,
-                                  rightLon,
-                                  topLat,
+    if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
@@ -1735,10 +1734,7 @@ namespace osmscout {
     }
 
     if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
-                                       leftLon,
-                                       botLat,
-                                       rightLon,
-                                       topLat,
+                                       boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        areaRoutableTypes,
                                        std::numeric_limits<size_t>::max(),

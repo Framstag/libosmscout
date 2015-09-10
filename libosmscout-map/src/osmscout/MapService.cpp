@@ -153,10 +153,7 @@ namespace osmscout {
     StopClock               nodeIndexTimer;
 
     if (nodeTypes.HasTypes()) {
-      if (!areaNodeIndex->GetOffsets(boundingBox.GetMinLon(),
-                                     boundingBox.GetMinLat(),
-                                     boundingBox.GetMaxLon(),
-                                     boundingBox.GetMaxLat(),
+      if (!areaNodeIndex->GetOffsets(boundingBox,
                                      nodeTypes,
                                      parameter.GetMaximumNodes(),
                                      nodeOffsets)) {
@@ -226,12 +223,8 @@ namespace osmscout {
     if (internalAreaTypes.HasTypes()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        optimizeAreasLowZoom->GetAreas(boundingBox.GetMinLon(),
-                                       boundingBox.GetMinLat(),
-                                       boundingBox.GetMaxLon(),
-                                       boundingBox.GetMaxLat(),
+        optimizeAreasLowZoom->GetAreas(boundingBox,
                                        magnification,
-                                       parameter.GetMaximumWays(),
                                        internalAreaTypes,
                                        areas);
       }
@@ -249,10 +242,7 @@ namespace osmscout {
 
     if (internalAreaTypes.HasTypes()) {
       if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
-                                         boundingBox.GetMinLon(),
-                                         boundingBox.GetMinLat(),
-                                         boundingBox.GetMaxLon(),
-                                         boundingBox.GetMaxLat(),
+                                         boundingBox,
                                          magnification.GetLevel()+
                                          parameter.GetMaximumAreaLevel(),
                                          internalAreaTypes,
@@ -326,12 +316,8 @@ namespace osmscout {
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        optimizeWaysLowZoom->GetWays(boundingBox.GetMinLon(),
-                                     boundingBox.GetMinLat(),
-                                     boundingBox.GetMaxLon(),
-                                     boundingBox.GetMaxLat(),
+        optimizeWaysLowZoom->GetWays(boundingBox,
                                      magnification,
-                                     parameter.GetMaximumWays(),
                                      internalWayTypes,
                                      ways);
       }
@@ -348,10 +334,7 @@ namespace osmscout {
     StopClock               wayIndexTimer;
 
     if (!internalWayTypes.empty()) {
-      if (!areaWayIndex->GetOffsets(boundingBox.GetMinLon(),
-                                    boundingBox.GetMinLat(),
-                                    boundingBox.GetMaxLon(),
-                                    boundingBox.GetMaxLat(),
+      if (!areaWayIndex->GetOffsets(boundingBox,
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
                                     offsets)) {

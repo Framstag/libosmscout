@@ -70,6 +70,17 @@ namespace osmscout {
     return *this;
   }
 
+  Logger::Line& Logger::Line::operator<<(void* value)
+  {
+    std::stringstream strstream;
+
+    strstream << value;
+
+    destination.Print(strstream.str());
+
+    return *this;
+  }
+
   Logger::Logger()
   {
     // no code

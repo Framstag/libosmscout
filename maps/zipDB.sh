@@ -33,10 +33,7 @@ zip -u -9 -du \
     "$mapDirectory/water.idx" \
     "$mapDirectory/intersections.dat" \
     "$mapDirectory/intersections.idx" \
-    "$mapDirectory/routefoot.dat" \
-    "$mapDirectory/routefoot.idx" \
-    "$mapDirectory/routebicycle.dat" \
-    "$mapDirectory/routebicycle.idx" \
-    "$mapDirectory/routecar.dat" \
-    "$mapDirectory/routecar.idx"
+    "$mapDirectory/router.dat" \
+    "$mapDirectory/router2.dat" \
+    "$mapDirectory/router.idx"
     

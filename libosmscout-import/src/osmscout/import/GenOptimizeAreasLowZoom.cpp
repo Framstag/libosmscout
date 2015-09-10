@@ -60,11 +60,14 @@ namespace osmscout
   }
 
   void OptimizeAreasLowZoomGenerator::GetAreaTypesToOptimize(const TypeConfig& typeConfig,
-                                                             std::set<TypeInfoRef>& types)
+                                                             TypeInfoSet& types)
   {
+    types.Clear();
+
     for (auto &type : typeConfig.GetAreaTypes()) {
-      if (type->GetOptimizeLowZoom()) {
-        types.insert(type);
+      if (!type->GetIgnore() &&
+          type->GetOptimizeLowZoom()) {
+        types.Set(type);
       }
     }
   }
@@ -109,12 +112,14 @@ namespace osmscout
                                                const ImportParameter& parameter,
                                                Progress& progress,
                                                FileScanner& scanner,
-                                               std::set<TypeInfoRef>& types,
-                                               std::vector<std::list<AreaRef> >& areas)
+                                               const TypeInfoSet& types,
+                                               std::vector<std::list<AreaRef> >& areas,
+                                               TypeInfoSet& loadedTypes)
   {
     uint32_t              areaCount=0;
     size_t                collectedAreasCount=0;
-    std::set<TypeInfoRef> currentTypes(types);
+
+    loadedTypes=types;
 
     progress.SetAction("Collecting area data to optimize");
 
@@ -143,16 +148,16 @@ namespace osmscout
         return false;
       }
 
-      if (currentTypes.find(area->GetType())!=currentTypes.end()) {
+      if (loadedTypes.IsSet(area->GetType())) {
         areas[area->GetType()->GetIndex()].push_back(area);
 
         collectedAreasCount++;
 
         while (collectedAreasCount>parameter.GetOptimizationMaxWayCount() &&
-               currentTypes.size()>1) {
+               loadedTypes.Size()>1) {
           TypeInfoRef victimType;
 
-          for (auto &type : currentTypes) {
+          for (auto &type : loadedTypes) {
             if (areas[type->GetIndex()].size()>0 &&
                 (!victimType ||
                  areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
@@ -164,16 +169,12 @@ namespace osmscout
 
           collectedAreasCount-=areas[victimType->GetIndex()].size();
           areas[victimType->GetIndex()].clear();
-          currentTypes.erase(victimType);
+          loadedTypes.Remove(victimType);
         }
       }
     }
 
-    for (auto &type : currentTypes) {
-      types.erase(type);
-    }
-
-    progress.Info("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(currentTypes.size())+" types");
+    progress.Info("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(loadedTypes.Size())+" types");
 
     return true;
   }
@@ -499,7 +500,7 @@ namespace osmscout
                                                   Progress& progress,
                                                   const TypeConfig& typeConfig,
                                                   FileWriter& writer,
-                                                  const std::set<TypeInfoRef>& types,
+                                                  const TypeInfoSet& types,
                                                   std::list<TypeData>& typesData)
   {
     FileScanner scanner;
@@ -517,7 +518,7 @@ namespace osmscout
       return false;
     }
 
-    std::set<TypeInfoRef>            typesToProcess(types);
+    TypeInfoSet                      typesToProcess(types);
     std::vector<std::list<AreaRef> > allAreas(typeConfig.GetTypeCount());
 
     while (true) {
@@ -525,38 +526,22 @@ namespace osmscout
       // Load type data
       //
 
+      TypeInfoSet loadedTypes;
+
       if (!GetAreas(typeConfig,
                     parameter,
                     progress,
                     scanner,
                     typesToProcess,
-                    allAreas)) {
+                    allAreas,
+                    loadedTypes)) {
         return false;
       }
 
-      for (size_t type=0; type<allAreas.size(); type++) {
-        if (allAreas[type].empty()) {
-          continue;
-        }
+      typesToProcess.Remove(loadedTypes);
 
-        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName());
-
-        /*
-        size_t origAreas=allAreas[type].size();
-        size_t origRoles=0;
-        size_t origNodes=0;
-
-        for (std::list<AreaRef>::const_iterator a=allAreas[type].begin();
-            a!=allAreas[type].end();
-            ++a) {
-          AreaRef area(*a);
-
-          origRoles+=area->rings.size();
-
-          for (size_t r=0; r<area->rings.size(); r++) {
-            origNodes+=area->rings[r].nodes.size();
-          }
-        }*/
+      for (const auto& type : loadedTypes) {
+        progress.SetAction("Optimizing type "+ type->GetName());
 
         for (uint32_t level=parameter.GetOptimizationMinMag();
              level<=parameter.GetOptimizationMaxMag();
@@ -566,7 +551,7 @@ namespace osmscout
 
           magnification.SetLevel(level);
 
-          OptimizeAreas(allAreas[type],
+          OptimizeAreas(allAreas[type->GetIndex()],
                         optimizedAreas,
                         1280,768,
                         dpi,
@@ -579,7 +564,7 @@ namespace osmscout
 
             TypeData typeData;
 
-            typeData.type=typeConfig.GetTypeInfo(type);
+            typeData.type=type;
             typeData.optLevel=level;
 
             typesData.push_back(typeData);
@@ -611,7 +596,7 @@ namespace osmscout
 
           TypeData typeData;
 
-          typeData.type=typeConfig.GetTypeInfo(type);
+          typeData.type=type;
           typeData.optLevel=level;
 
           GetAreaIndexLevel(parameter,
@@ -640,10 +625,10 @@ namespace osmscout
           typesData.push_back(typeData);
         }
 
-        allAreas[type].clear();
+        allAreas[type->GetIndex()].clear();
       }
 
-      if (typesToProcess.empty()) {
+      if (typesToProcess.Empty()) {
         break;
       }
     }
@@ -655,11 +640,11 @@ namespace osmscout
                                              const ImportParameter& parameter,
                                              Progress& progress)
   {
-    FileOffset            indexOffset=0;
-    FileWriter            writer;
-    Magnification         magnification; // Magnification, we optimize for
-    std::set<TypeInfoRef> areaTypes;     // Types we optimize
-    std::list<TypeData>   areaTypesData;
+    FileOffset          indexOffset=0;
+    FileWriter          writer;
+    Magnification       magnification; // Magnification, we optimize for
+    TypeInfoSet         areaTypes;     // Types we optimize
+    std::list<TypeData> areaTypesData;
 
     GetAreaTypesToOptimize(*typeConfig,
                            areaTypes);

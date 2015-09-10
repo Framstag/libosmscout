@@ -1014,6 +1014,7 @@ namespace osmscout {
 
       return true;
     }
+#endif
 
     unsigned char buffer[8];
 
@@ -1068,7 +1069,6 @@ namespace osmscout {
 
     return true;
   }
-#endif
 
   bool FileScanner::Read(uint16_t& number,
                          size_t bytes)

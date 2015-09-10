@@ -27,7 +27,6 @@
 
 // Type and style sheet configuration
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeSet.h>
 
 #include <osmscout/CoordDataFile.h>
 

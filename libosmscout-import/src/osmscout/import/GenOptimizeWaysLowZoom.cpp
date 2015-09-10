@@ -68,7 +68,8 @@ namespace osmscout
                                                            std::set<TypeInfoRef>& types)
   {
     for (auto &type : typeConfig.GetWayTypes()) {
-      if (type->GetOptimizeLowZoom()) {
+      if (!type->GetIgnore() &&
+          type->GetOptimizeLowZoom()) {
         types.insert(type);
       }
     }
@@ -650,12 +651,10 @@ namespace osmscout
 
       writer.WriteNumber((uint32_t)cell->second.size());
 
-      for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
-           offset!=cell->second.end();
-           ++offset) {
-        writer.WriteNumber((FileOffset)(*offset-previousOffset));
+      for (const auto& offset : cell->second) {
+        writer.WriteNumber((FileOffset)(offset-previousOffset));
 
-        previousOffset=*offset;
+        previousOffset=offset;
       }
     }
 
@@ -758,24 +757,8 @@ namespace osmscout
                        magnification,
                        parameter.GetOptimizationWayMethod());
 
-          /*
-          size_t optWays=optimizedWays.size();
-          size_t optNodes=0;
-
-          for (std::list<WayRef>::const_iterator w=optimizedWays.begin();
-              w!=optimizedWays.end();
-              ++w) {
-            WayRef way(*w);
-
-            optNodes+=way->nodes.size();
-          }*/
-
-          /*
-          std::cout << "Ways: " << origWays << " => " << optWays << std::endl;
-          std::cout << "Nodes: " << origNodes << " => " << optNodes << std::endl;*/
-
           if (optimizedWays.empty()) {
-            progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index generated");
+            progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index bitmap generated");
 
             TypeData typeData;
 

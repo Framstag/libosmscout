@@ -68,10 +68,7 @@ namespace osmscout {
 
     std::vector<FileOffset> nodeOffsets;
 
-    if (!areaNodeIndex->GetOffsets(boundingBox.GetMinLon(),
-                                   boundingBox.GetMinLat(),
-                                   boundingBox.GetMaxLon(),
-                                   boundingBox.GetMaxLat(),
+    if (!areaNodeIndex->GetOffsets(boundingBox,
                                    types,
                                    std::numeric_limits<size_t>::max(),
                                    nodeOffsets)) {
@@ -121,10 +118,7 @@ namespace osmscout {
     std::vector<DataBlockSpan> spans;
 
     if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
-                                       boundingBox.GetMinLon(),
-                                       boundingBox.GetMinLat(),
-                                       boundingBox.GetMaxLon(),
-                                       boundingBox.GetMaxLat(),
+                                       boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        types,
                                        std::numeric_limits<size_t>::max(),
@@ -181,10 +175,7 @@ namespace osmscout {
     wayTypes.push_back(types);
 
 
-    if (!areaWayIndex->GetOffsets(boundingBox.GetMinLon(),
-                                  boundingBox.GetMinLat(),
-                                  boundingBox.GetMaxLon(),
-                                  boundingBox.GetMaxLat(),
+    if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
