@@ -260,11 +260,9 @@ namespace osmscout {
     for (size_t i=0; i<wayTypes.size(); i++) {
       newOffsets.clear();
 
-      for (TypeId type=0;
-          type<wayTypeData.size();
-          ++type) {
-        if (wayTypes[i].IsTypeSet(type)) {
-          if (!GetOffsets(wayTypeData[type],
+      for (const auto& data : wayTypeData) {
+        if (wayTypes[i].IsTypeSet(data.type->GetWayId())) {
+          if (!GetOffsets(data,
                           boundingBox,
                           maxWayCount,
                           newOffsets,
@@ -299,4 +297,3 @@ namespace osmscout {
   {
   }
 }
-
