@@ -107,6 +107,17 @@ namespace osmscout {
     return filenamebase+".idx";
   }
 
+  bool RoutingService::HasNodeWithId(const std::vector<Id>& ids) const
+  {
+    for (const auto id : ids) {
+      if (id!=0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool RoutingService::LoadObjectVariantData(const std::string& filename,
                                              std::vector<ObjectVariantData>& objectVariantData) const
   {
@@ -1720,7 +1731,7 @@ namespace osmscout {
 
     std::vector<TypeSet>           wayTypes;
     std::vector<FileOffset>        wayWayOffsets;
-    std::vector<DataBlockSpan> wayAreaSpans;
+    std::vector<DataBlockSpan>     wayAreaSpans;
     std::vector<osmscout::AreaRef> areas;
     std::vector<osmscout::WayRef>  ways;
 
@@ -1730,7 +1741,7 @@ namespace osmscout {
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets)) {
-      log.Error() << "Error getting ways and relations from area way index!";
+      log.Error() << "Error getting ways from area way index!";
     }
 
     if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
@@ -1739,7 +1750,7 @@ namespace osmscout {
                                        areaRoutableTypes,
                                        std::numeric_limits<size_t>::max(),
                                        wayAreaSpans)) {
-      log.Error() << "Error getting ways and relations from area index!";
+      log.Error() << "Error getting areas from area area index!";
     }
 
     std::sort(wayWayOffsets.begin(),
@@ -1758,6 +1769,10 @@ namespace osmscout {
     }
 
     for (const auto& area : areas) {
+      if (!HasNodeWithId(area->rings[0].ids)) {
+        continue;
+      }
+
       for (size_t i=0; i<area->rings[0].nodes.size(); i++) {
         double distance=sqrt((area->rings[0].nodes[i].GetLat()-lat)*(area->rings[0].nodes[i].GetLat()-lat)+
                              (area->rings[0].nodes[i].GetLon()-lon)*(area->rings[0].nodes[i].GetLon()-lon));
@@ -1772,7 +1787,12 @@ namespace osmscout {
     }
 
     for (const auto& way : ways) {
+      if (!HasNodeWithId(way->ids)) {
+        continue;
+      }
+
       for (size_t i=0;  i<way->nodes.size(); i++) {
+
         double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
                              (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));
         if (distance<minDistance) {
