@@ -200,6 +200,8 @@ namespace osmscout {
     std::string GetData2Filename(const std::string& filenamebase) const;
     std::string GetIndexFilename(const std::string& filenamebase) const;
 
+    bool HasNodeWithId(const std::vector<Id>& ids) const;
+
     bool LoadObjectVariantData(const std::string& filename,
                                std::vector<ObjectVariantData>& objectVariantData) const;
 
