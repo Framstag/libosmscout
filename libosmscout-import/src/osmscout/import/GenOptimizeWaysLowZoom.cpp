@@ -724,18 +724,6 @@ namespace osmscout
           continue;
         }
 
-        /*
-        size_t origWays=newWays.size();
-        size_t origNodes=0;
-
-        for (std::list<WayRef>::const_iterator w=newWays.begin();
-            w!=newWays.end();
-            ++w) {
-          WayRef way(*w);
-
-          origNodes+=way->nodes.size();
-        }*/
-
         //
         // Transform/Optimize the way and store it
         //

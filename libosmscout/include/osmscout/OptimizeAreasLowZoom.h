@@ -66,7 +66,7 @@ namespace osmscout {
     };
 
   private:
-    TypeConfigRef                         typeConfig;    //!< Metadata information for loading the actual obejcts
+    TypeConfigRef                              typeConfig;    //!< Metadata information for loading the actual objects
     std::string                           datafile;      //!< Basename part for the data file name
     std::string                           datafilename;  //!< complete filename for data file
     mutable FileScanner                   scanner;       //!< File stream to the data file
@@ -95,7 +95,8 @@ namespace osmscout {
     bool GetAreas(const GeoBox& boundingBox,
                   const Magnification& magnification,
                   TypeSet& areaTypes,
-                  std::vector<AreaRef>& areas) const;
+                  std::vector<AreaRef>& areas,
+                  TypeInfoSet& loadedAreaTypes) const;
   };
 
   typedef std::shared_ptr<OptimizeAreasLowZoom> OptimizeAreasLowZoomRef;

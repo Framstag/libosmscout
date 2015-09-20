@@ -240,9 +240,12 @@ namespace osmscout {
   bool AreaWayIndex::GetOffsets(const GeoBox& boundingBox,
                                 const std::vector<TypeSet>& wayTypes,
                                 size_t maxWayCount,
-                                std::vector<FileOffset>& offsets) const
+                                std::vector<FileOffset>& offsets,
+                                TypeInfoSet& loadedTypes) const
   {
     StopClock time;
+
+    loadedTypes.Clear();
 
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
@@ -257,11 +260,11 @@ namespace osmscout {
     offsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
     newOffsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
 
-    for (size_t i=0; i<wayTypes.size(); i++) {
+    for (const auto typeSet : wayTypes) {
       newOffsets.clear();
 
       for (const auto& data : wayTypeData) {
-        if (wayTypes[i].IsTypeSet(data.type->GetWayId())) {
+        if (typeSet.IsTypeSet(data.type->GetWayId())) {
           if (!GetOffsets(data,
                           boundingBox,
                           maxWayCount,
@@ -274,6 +277,13 @@ namespace osmscout {
           if (sizeExceeded) {
             return true;
           }
+        }
+      }
+
+      // Mark types as loaded
+      for (const auto& data : wayTypeData) {
+        if (typeSet.IsTypeSet(data.type->GetWayId())) {
+          loadedTypes.Set(data.type);
         }
       }
 

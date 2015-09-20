@@ -264,11 +264,14 @@ namespace osmscout
   bool OptimizeAreasLowZoom::GetAreas(const GeoBox& boundingBox,
                                       const Magnification& magnification,
                                       TypeSet& areaTypes,
-                                      std::vector<AreaRef>& areas) const
+                                      std::vector<AreaRef>& areas,
+                                      TypeInfoSet& loadedAreaTypes) const
   {
     StopClock time;
 
     std::vector<FileOffset> offsets;
+
+    loadedAreaTypes.Clear();
 
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
@@ -300,6 +303,8 @@ namespace osmscout
                             offsets)) {
               return false;
             }
+
+            loadedAreaTypes.Set(typeConfig->GetAreaTypeInfo(type->first));
 
             for (const auto& offset : offsets) {
               if (!scanner.SetPos(offset)) {

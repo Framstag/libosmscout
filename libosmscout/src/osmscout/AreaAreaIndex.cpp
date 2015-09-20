@@ -117,7 +117,7 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaAreaIndex::ReadCellData(TypeConfig& typeConfig,
+  bool AreaAreaIndex::ReadCellData(const TypeConfig& typeConfig,
                                    const TypeSet& types,
                                    FileOffset dataOffset,
                                    size_t spaceLeft,
@@ -280,12 +280,13 @@ namespace osmscout {
    * @param spans
    *    List of DataBlockSpans referencing the the found areas
    */
-  bool AreaAreaIndex::GetAreasInArea(const TypeConfigRef& typeConfig,
+  bool AreaAreaIndex::GetAreasInArea(const TypeConfig& typeConfig,
                                      const GeoBox& boundingBox,
                                      size_t maxLevel,
                                      const TypeSet& types,
                                      size_t maxCount,
-                                     std::vector<DataBlockSpan>& spans) const
+                                     std::vector<DataBlockSpan>& spans,
+                                     TypeInfoSet& loadedTypes) const
   {
     std::vector<CellRef>       cellRefs;     // cells to scan in this level
     std::vector<CellRef>       nextCellRefs; // cells to scan for the next level
@@ -298,6 +299,7 @@ namespace osmscout {
 
     // Clear result data structures
     spans.clear();
+    loadedTypes.Clear();
 
     // Make the vector preallocate memory for the expected data size
     // This should void reallocation
@@ -341,7 +343,7 @@ namespace osmscout {
 
         // Now read the area offsets by type in this index entry
 
-        if (!ReadCellData(*typeConfig,
+        if (!ReadCellData(typeConfig,
                           types,
                           cellDataOffset,
                           spaceLeft,
@@ -380,6 +382,12 @@ namespace osmscout {
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << spans.size() << " spans from area index took " << time.ResultString();
+    }
+
+    for (const auto& type : typeConfig.GetTypes()) {
+      if (types.IsTypeSet(type->GetAreaId())) {
+        loadedTypes.Set(type);
+      }
     }
 
     return true;

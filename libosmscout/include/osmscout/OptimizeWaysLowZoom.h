@@ -91,8 +91,9 @@ namespace osmscout {
 
     bool GetWays(const GeoBox& boundingBox,
                  const Magnification& magnification,
-                 std::vector<TypeSet>& wayTypes,
-                 std::vector<WayRef>& ways) const;
+                 const std::vector<TypeSet>& wayTypes,
+                 std::vector<WayRef>& ways,
+                 TypeInfoSet& loadedWayTypes) const;
   };
 
   typedef std::shared_ptr<OptimizeWaysLowZoom> OptimizeWaysLowZoomRef;

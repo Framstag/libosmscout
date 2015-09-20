@@ -20,7 +20,6 @@
 #include <osmscout/MapService.h>
 
 #include <algorithm>
-#include <iostream>
 
 #if _OPENMP
 #include <omp.h>
@@ -30,6 +29,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -131,19 +131,20 @@ namespace osmscout {
   }
 
   bool MapService::GetObjectsNodes(const AreaSearchParameter& parameter,
-                                   const TypeSet &nodeTypes,
+                                   const TypeSet &requestedNodeTypes,
                                    const GeoBox& boundingBox,
                                    std::string& nodeIndexTime,
                                    std::string& nodesTime,
                                    std::vector<NodeRef>& nodes) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
+    TypeInfoSet      loadedNodeTypes;
+
+    nodes.clear();
 
     if (!areaNodeIndex) {
       return false;
     }
-
-    nodes.clear();
 
     if (parameter.IsAborted()) {
       return false;
@@ -152,12 +153,14 @@ namespace osmscout {
     std::vector<FileOffset> nodeOffsets;
     StopClock               nodeIndexTimer;
 
-    if (nodeTypes.HasTypes()) {
-      if (!areaNodeIndex->GetOffsets(boundingBox,
-                                     nodeTypes,
+    if (requestedNodeTypes.HasTypes()) {
+      if (!areaNodeIndex->GetOffsets(*database->GetTypeConfig(),
+                                     boundingBox,
+                                     requestedNodeTypes,
                                      parameter.GetMaximumNodes(),
-                                     nodeOffsets)) {
-        std::cout << "Error getting nodes from area node index!" << std::endl;
+                                     nodeOffsets,
+                                     loadedNodeTypes)) {
+        log.Error() << "Error getting nodes from area node index!";
         return false;
       }
     }
@@ -169,6 +172,7 @@ namespace osmscout {
       return false;
     }
 
+    // Sort offsets before loading to optimize disk access
     std::sort(nodeOffsets.begin(),nodeOffsets.end());
 
     if (parameter.IsAborted()) {
@@ -179,7 +183,7 @@ namespace osmscout {
 
     if (!database->GetNodesByOffset(nodeOffsets,
                                     nodes)) {
-      std::cout << "Error reading nodes in area!" << std::endl;
+      log.Error() << "Error reading nodes in area!";
       return false;
     }
 
@@ -194,7 +198,7 @@ namespace osmscout {
   }
 
   bool MapService::GetObjectsAreas(const AreaSearchParameter& parameter,
-                                   const TypeSet& areaTypes,
+                                   const TypeSet& requestedAreaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
                                    std::string& areaOptimizedTime,
@@ -204,15 +208,16 @@ namespace osmscout {
   {
     AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
+    TypeInfoSet             loadedAreaTypes;
+
+    areas.clear();
 
     if (!areaAreaIndex ||
         !optimizeAreasLowZoom) {
       return false;
     }
 
-    areas.clear();
-
-    TypeSet internalAreaTypes(areaTypes);
+    TypeSet internalAreaTypes(requestedAreaTypes);
 
     if (parameter.IsAborted()) {
       return false;
@@ -226,8 +231,13 @@ namespace osmscout {
         optimizeAreasLowZoom->GetAreas(boundingBox,
                                        magnification,
                                        internalAreaTypes,
-                                       areas);
+                                       areas,
+                                       loadedAreaTypes);
       }
+    }
+
+    for (const auto& type : loadedAreaTypes) {
+      internalAreaTypes.UnsetType(type->GetAreaId());
     }
 
     areaOptimizedTimer.Stop();
@@ -241,14 +251,15 @@ namespace osmscout {
     StopClock                  areaIndexTimer;
 
     if (internalAreaTypes.HasTypes()) {
-      if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+      if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                          boundingBox,
                                          magnification.GetLevel()+
                                          parameter.GetMaximumAreaLevel(),
                                          internalAreaTypes,
                                          parameter.GetMaximumAreas(),
-                                         spans)) {
-        std::cout << "Error getting areas from area index!" << std::endl;
+                                         spans,
+                                         loadedAreaTypes)) {
+        log.Error() << "Error getting areas from area index!";
         return false;
       }
     }
@@ -267,7 +278,7 @@ namespace osmscout {
 
       if (!database->GetAreasByBlockSpans(spans,
                                           areas)) {
-        std::cout << "Error reading areas in area!" << std::endl;
+        log.Error() << "Error reading areas in area!";
         return false;
       }
     }
@@ -289,6 +300,9 @@ namespace osmscout {
   {
     AreaWayIndexRef        areaWayIndex=database->GetAreaWayIndex();
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
+    TypeInfoSet            loadedWayTypes;
+
+    ways.clear();
 
     if (!areaWayIndex ||
         !optimizeWaysLowZoom) {
@@ -319,7 +333,14 @@ namespace osmscout {
         optimizeWaysLowZoom->GetWays(boundingBox,
                                      magnification,
                                      internalWayTypes,
-                                     ways);
+                                     ways,
+                                     loadedWayTypes);
+      }
+    }
+
+    for (auto& typeSet : internalWayTypes) {
+      for (const auto& type : loadedWayTypes) {
+        typeSet.UnsetType(type->GetWayId());
       }
     }
 
@@ -337,8 +358,9 @@ namespace osmscout {
       if (!areaWayIndex->GetOffsets(boundingBox,
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
-                                    offsets)) {
-        std::cout << "Error getting ways from area way index!" << std::endl;
+                                    offsets,
+                                    loadedWayTypes)) {
+        log.Error() << "Error getting ways from area way index!";
         return false;
       }
     }
@@ -378,7 +400,7 @@ namespace osmscout {
     if (!restOffsets.empty()) {
       if (!database->GetWaysByOffset(restOffsets,
                                      ways)) {
-        std::cout << "Error reading ways in area!" << std::endl;
+        log.Error() << "Error reading ways in area!";
         return false;
       }
     }

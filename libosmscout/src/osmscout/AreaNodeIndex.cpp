@@ -228,10 +228,12 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaNodeIndex::GetOffsets(const GeoBox& boundingBox,
+  bool AreaNodeIndex::GetOffsets(const TypeConfig& typeConfig,
+                                 const GeoBox& boundingBox,
                                  const TypeSet& nodeTypes,
                                  size_t maxNodeCount,
-                                 std::vector<FileOffset>& offsets) const
+                                 std::vector<FileOffset>& offsets,
+                                 TypeInfoSet& loadedTypes) const
   {
     StopClock time;
 
@@ -243,6 +245,8 @@ namespace osmscout {
     }
 
     bool sizeExceeded=false;
+
+    loadedTypes.Clear();
 
     for (TypeId i=0; i<nodeTypeData.size(); i++) {
       if (nodeTypes.IsTypeSet(i)) {
@@ -258,6 +262,8 @@ namespace osmscout {
         if (sizeExceeded) {
           break;
         }
+
+        loadedTypes.Set(typeConfig.GetNodeTypeInfo(i));
       }
     }
 

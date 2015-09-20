@@ -558,6 +558,7 @@ namespace osmscout {
          }
 
          double lat,lon;
+         TypeInfoSet loadedTypes;
 
          way->GetCoordinates(node.GetCurrentNodeIndex(),
                              lat,lon);
@@ -566,10 +567,12 @@ namespace osmscout {
                             GeoCoord(lat+delta,lon+delta));
 
          nodeOffsets.clear();
-         if (!areaNodeIndex->GetOffsets(boundingBox,
+         if (!areaNodeIndex->GetOffsets(*database.GetTypeConfig(),
+                                        boundingBox,
                                         nodeTypes,
                                         100,
-                                        nodeOffsets)) {
+                                        nodeOffsets,
+                                        loadedTypes)) {
            log.Error() << "Error getting nodes from area node index!";
            return false;
          }

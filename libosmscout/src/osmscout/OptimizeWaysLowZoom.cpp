@@ -261,12 +261,15 @@ namespace osmscout
 
   bool OptimizeWaysLowZoom::GetWays(const GeoBox& boundingBox,
                                     const Magnification& magnification,
-                                    std::vector<TypeSet>& wayTypes,
-                                    std::vector<WayRef>& ways) const
+                                    const std::vector<TypeSet>& wayTypes,
+                                    std::vector<WayRef>& ways,
+                                    TypeInfoSet& loadedWayTypes) const
   {
     StopClock time;
 
     std::vector<FileOffset> offsets;
+
+    loadedWayTypes.Clear();
 
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
@@ -289,6 +292,7 @@ namespace osmscout
               ++typeData) {
             if (typeData->optLevel==magnification.GetLevel()) {
               match=typeData;
+              break;
             }
           }
 
@@ -319,10 +323,9 @@ namespace osmscout
 
               offsets.clear();
             }
-          }
 
-          if (match!=type->second.end()) {
-            wayTypes[i].UnsetType(type->first);
+            // Successfully loaded type data
+            loadedWayTypes.Set(typeConfig->GetWayTypeInfo(type->first));
           }
         }
       }

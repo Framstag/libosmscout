@@ -99,10 +99,10 @@ namespace osmscout {
 
   private:
     bool GetObjectsNodes(const AreaSearchParameter& parameter,
-                         const TypeSet &nodeTypes,
+                         const TypeSet &requestedNodeTypes,
                          const GeoBox& boundingBox,
                          std::string& nodeIndexTime,
-                         std::string& nodesTime,
+                         std::string& nodeAreasTime,
                          std::vector<NodeRef>& nodes) const;
 
     bool GetObjectsWays(const AreaSearchParameter& parameter,
@@ -115,7 +115,7 @@ namespace osmscout {
                         std::vector<WayRef>& ways) const;
 
     bool GetObjectsAreas(const AreaSearchParameter& parameter,
-                               const TypeSet& areaTypes,
+                               const TypeSet& requestedAreaTypes,
                                const Magnification& magnification,
                                const GeoBox& boundingBox,
                                std::string& areaOptimizedTime,

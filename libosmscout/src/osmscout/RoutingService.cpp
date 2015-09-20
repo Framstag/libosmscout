@@ -1715,6 +1715,8 @@ namespace osmscout {
                                        GeoCoord(botLat,rightLon));
     osmscout::TypeSet      wayRoutableTypes;
     osmscout::TypeSet      areaRoutableTypes;
+    TypeInfoSet            wayLoadedTypes;
+    TypeInfoSet            areaLoadedTypes;
 
     for (const auto& type : database->GetTypeConfig()->GetTypes()) {
       if (!type->GetIgnore() &&
@@ -1740,16 +1742,18 @@ namespace osmscout {
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
-                                  wayWayOffsets)) {
+                                  wayWayOffsets,
+                                  wayLoadedTypes)) {
       log.Error() << "Error getting ways from area way index!";
     }
 
-    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+    if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                        boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        areaRoutableTypes,
                                        std::numeric_limits<size_t>::max(),
-                                       wayAreaSpans)) {
+                                       wayAreaSpans,
+                                       areaLoadedTypes)) {
       log.Error() << "Error getting areas from area area index!";
     }
 

@@ -105,7 +105,7 @@ namespace osmscout {
                       IndexCell& indexCell,
                       FileOffset& dataOffset) const;
 
-    bool ReadCellData(TypeConfig& typeConfig,
+    bool ReadCellData(const TypeConfig& typeConfig,
                       const TypeSet& types,
                       FileOffset dataOffset,
                       size_t spaceLeft,
@@ -128,12 +128,13 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetAreasInArea(const TypeConfigRef& typeConfig,
+    bool GetAreasInArea(const TypeConfig& typeConfig,
                         const GeoBox& boundingBox,
                         size_t maxLevel,
                         const TypeSet& types,
                         size_t maxCount,
-                        std::vector<DataBlockSpan>& spans) const;
+                        std::vector<DataBlockSpan>& spans,
+                        TypeInfoSet& loadedTypes) const;
 
     void DumpStatistics();
   };

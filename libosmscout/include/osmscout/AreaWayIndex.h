@@ -92,7 +92,8 @@ namespace osmscout {
     bool GetOffsets(const GeoBox& boundingBox,
                     const std::vector<TypeSet>& types,
                     size_t maxWayCount,
-                    std::vector<FileOffset>& offsets) const;
+                    std::vector<FileOffset>& offsets,
+                    TypeInfoSet& loadedTypes) const;
 
     void DumpStatistics();
   };

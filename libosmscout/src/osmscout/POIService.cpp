@@ -58,6 +58,7 @@ namespace osmscout {
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
     NodeDataFileRef  nodeDataFile=database->GetNodeDataFile();
+    TypeInfoSet      loadedTypes;
 
     nodes.clear();
 
@@ -68,10 +69,12 @@ namespace osmscout {
 
     std::vector<FileOffset> nodeOffsets;
 
-    if (!areaNodeIndex->GetOffsets(boundingBox,
+    if (!areaNodeIndex->GetOffsets(*database->GetTypeConfig(),
+                                   boundingBox,
                                    types,
                                    std::numeric_limits<size_t>::max(),
-                                   nodeOffsets)) {
+                                   nodeOffsets,
+                                   loadedTypes)) {
       log.Error() << "Error getting nodes from area node index!";
       return false;
     }
@@ -107,6 +110,7 @@ namespace osmscout {
   {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
     AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
+    TypeInfoSet      loadedTypes;
 
     areas.clear();
 
@@ -117,12 +121,13 @@ namespace osmscout {
 
     std::vector<DataBlockSpan> spans;
 
-    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+    if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                        boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        types,
                                        std::numeric_limits<size_t>::max(),
-                                       spans)) {
+                                       spans,
+                                       loadedTypes)) {
       log.Error() << "Error getting ways and relations from area index!";
 
       return false;
@@ -170,6 +175,7 @@ namespace osmscout {
 
     std::vector<TypeSet>    wayTypes;
     std::vector<FileOffset> wayWayOffsets;
+    TypeInfoSet              loadedWayTypes;
 
 
     wayTypes.push_back(types);
@@ -178,7 +184,8 @@ namespace osmscout {
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
-                                  wayWayOffsets)) {
+                                  wayWayOffsets,
+                                  loadedWayTypes)) {
       log.Error() << "Error getting ways and relations from area way index!";
 
       return false;

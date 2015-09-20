@@ -86,10 +86,12 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetOffsets(const GeoBox& boundingBox,
+    bool GetOffsets(const TypeConfig& typeConfig,
+                    const GeoBox& boundingBox,
                     const TypeSet& nodeTypes,
                     size_t maxNodeCount,
-                    std::vector<FileOffset>& nodeOffsets) const;
+                    std::vector<FileOffset>& offsets,
+                    TypeInfoSet& loadedTypes) const;
 
     void DumpStatistics();
   };
