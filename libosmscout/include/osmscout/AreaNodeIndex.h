@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include <osmscout/TypeSet.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 
@@ -86,9 +86,8 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetOffsets(const TypeConfig& typeConfig,
-                    const GeoBox& boundingBox,
-                    const TypeSet& nodeTypes,
+    bool GetOffsets(const GeoBox& boundingBox,
+                    const TypeInfoSet& requestedTypes,
                     size_t maxNodeCount,
                     std::vector<FileOffset>& offsets,
                     TypeInfoSet& loadedTypes) const;

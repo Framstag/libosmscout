@@ -24,9 +24,6 @@
 #include <set>
 #include <string>
 
-#include <osmscout/TypeSet.h>
-
-#include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>
@@ -63,13 +60,13 @@ namespace osmscout {
     };
 
   private:
-    TypeConfigRef                         typeConfig;    //!< Metadata information for loading the actual obejcts
-    std::string                           datafile;      //!< Basename part for the data file name
-    std::string                           datafilename;  //!< complete filename for data file
-    mutable FileScanner                   scanner;       //!< File stream to the data file
+    TypeConfigRef                              typeConfig;    //!< Metadata information for loading the actual obejcts
+    std::string                                datafile;      //!< Basename part for the data file name
+    std::string                                datafilename;  //!< complete filename for data file
+    mutable FileScanner                        scanner;       //!< File stream to the data file
 
-    double                                magnification; //!< Magnification, up to which we support optimization
-    std::map<TypeId,std::list<TypeData> > wayTypesData;  //!< Index information for all way types
+    double                                     magnification; //!< Magnification, up to which we support optimization
+    std::map<TypeInfoRef,std::list<TypeData> > wayTypesData;  //!< Index information for all way types
 
   private:
     bool ReadTypeData(FileScanner& scanner,
@@ -77,7 +74,7 @@ namespace osmscout {
 
     bool GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
-                    std::vector<FileOffset>& offsets) const;
+                    std::set<FileOffset>& offsets) const;
 
   public:
     OptimizeWaysLowZoom();
@@ -89,9 +86,12 @@ namespace osmscout {
 
     bool HasOptimizations(double magnification) const;
 
+    void GetTypes(const Magnification& magnification,
+                  const std::vector<TypeInfoSet>& wayTypes,
+                 TypeInfoSet& availableWayTypes) const;
     bool GetWays(const GeoBox& boundingBox,
                  const Magnification& magnification,
-                 const std::vector<TypeSet>& wayTypes,
+                 const TypeInfoSet& wayTypes,
                  std::vector<WayRef>& ways,
                  TypeInfoSet& loadedWayTypes) const;
   };

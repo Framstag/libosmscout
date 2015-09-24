@@ -270,13 +270,15 @@ void DBThread::TriggerMapRendering()
     osmscout::AreaSearchParameter searchParameter;
 
     searchParameter.SetBreaker(renderBreakerRef);
+
     if (currentMagnification.GetLevel()>=15) {
       searchParameter.SetMaximumAreaLevel(6);
     }
     else {
       searchParameter.SetMaximumAreaLevel(4);
     }
-    searchParameter.SetUseMultithreading(true/*currentMagnification.GetMagnification()<=osmscout::Magnification::magCity*/);
+
+    searchParameter.SetUseMultithreading(true);
 
     std::list<std::string>        paths;
 

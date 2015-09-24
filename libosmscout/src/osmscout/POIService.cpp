@@ -53,7 +53,7 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetNodesInArea(const GeoBox& boundingBox,
-                                  const TypeSet& types,
+                                  const TypeInfoSet& types,
                                   std::vector<NodeRef>& nodes) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
@@ -69,8 +69,7 @@ namespace osmscout {
 
     std::vector<FileOffset> nodeOffsets;
 
-    if (!areaNodeIndex->GetOffsets(*database->GetTypeConfig(),
-                                   boundingBox,
+    if (!areaNodeIndex->GetOffsets(boundingBox,
                                    types,
                                    std::numeric_limits<size_t>::max(),
                                    nodeOffsets,
@@ -105,7 +104,7 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetAreasInArea(const GeoBox& boundingBox,
-                                  const TypeSet& types,
+                                  const TypeInfoSet& types,
                                   std::vector<AreaRef>& areas) const
   {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
@@ -160,7 +159,7 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetWaysInArea(const GeoBox& boundingBox,
-                                 const TypeSet& types,
+                                 const TypeInfoSet& types,
                                  std::vector<WayRef>& ways) const
   {
     AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
@@ -173,8 +172,8 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<TypeSet>    wayTypes;
-    std::vector<FileOffset> wayWayOffsets;
+    std::vector<TypeInfoSet> wayTypes;
+    std::vector<FileOffset>  wayWayOffsets;
     TypeInfoSet              loadedWayTypes;
 
 
@@ -223,11 +222,11 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetPOIsInArea(const GeoBox& boundingBox,
-                                 const TypeSet& nodeTypes,
+                                 const TypeInfoSet& nodeTypes,
                                  std::vector<NodeRef>& nodes,
-                                 const TypeSet& wayTypes,
+                                 const TypeInfoSet& wayTypes,
                                  std::vector<WayRef>& ways,
-                                 const TypeSet& areaTypes,
+                                 const TypeInfoSet& areaTypes,
                                  std::vector<AreaRef>& areas) const
   {
     bool nodesSuccess=true;

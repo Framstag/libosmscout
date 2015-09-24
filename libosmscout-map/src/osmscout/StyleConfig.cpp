@@ -1700,41 +1700,11 @@ namespace osmscout {
     }
   }
 
-  class TypeIdProvider
-  {
-  public:
-    virtual ~TypeIdProvider()
-    {
-      // no code
-    }
-
-    virtual TypeId GetId(const TypeInfoRef& type) const = 0;
-  };
-
-  class NodeTypeIdProvider : public TypeIdProvider
-  {
-  public:
-    inline TypeId GetId(const TypeInfoRef& type) const
-    {
-      return type->GetNodeId();
-    }
-  };
-
-  class AreaTypeIdProvider : public TypeIdProvider
-  {
-  public:
-    inline TypeId GetId(const TypeInfoRef& type) const
-    {
-      return type->GetAreaId();
-    }
-  };
-
   template <class S, class A>
   void CalculateUsedTypes(const TypeConfig& typeConfig,
                           const std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
-                          std::vector<TypeSet>& typeSets,
-                          const TypeIdProvider& typeIdProvider)
+                          std::vector<TypeInfoSet>& typeSets)
   {
     for (size_t level=0;
         level<maxLevel;
@@ -1754,7 +1724,7 @@ namespace osmscout {
             continue;
           }
 
-          typeSets[level].SetType(typeIdProvider.GetId(type));
+          typeSets[level].Set(type);
         }
       }
     }
@@ -1859,19 +1829,17 @@ namespace osmscout {
     nodeTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      nodeTypeSets.push_back(TypeSet(*typeConfig));
+      nodeTypeSets.push_back(TypeInfoSet(*typeConfig));
     }
 
     CalculateUsedTypes(*typeConfig,
                        nodeTextStyleConditionals,
                        maxLevel,
-                       nodeTypeSets,
-                       NodeTypeIdProvider());
+                       nodeTypeSets);
     CalculateUsedTypes(*typeConfig,
                        nodeIconStyleConditionals,
                        maxLevel,
-                       nodeTypeSets,
-                       NodeTypeIdProvider());
+                       nodeTypeSets);
 
     nodeTextStyleConditionals.clear();
     nodeIconStyleConditionals.clear();
@@ -1944,21 +1912,21 @@ namespace osmscout {
             continue;
           }
 
-          TypeSet typeSet(*typeConfig);
+          TypeInfoSet typeSet(*typeConfig);
 
           for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
             if (!wayLineStyleSelectors[slot][type->GetIndex()][level].empty()) {
-              typeSet.SetType(type->GetWayId());
+              typeSet.Set(type);
             }
           }
 
           if (!wayPathTextStyleSelectors[type->GetIndex()][level].empty() ||
               !wayPathSymbolStyleSelectors[type->GetIndex()][level].empty() ||
               !wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
-            typeSet.SetType(type->GetWayId());
+            typeSet.Set(type);
           }
 
-          if (typeSet.HasTypes()) {
+          if (!typeSet.Empty()) {
             wayTypeSets[level].push_back(typeSet);
           }
         }
@@ -2013,24 +1981,21 @@ namespace osmscout {
     areaTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      areaTypeSets.push_back(TypeSet(*typeConfig));
+      areaTypeSets.push_back(TypeInfoSet(*typeConfig));
     }
 
     CalculateUsedTypes(*typeConfig,
                        areaFillStyleConditionals,
                        maxLevel,
-                       areaTypeSets,
-                       AreaTypeIdProvider());
+                       areaTypeSets);
     CalculateUsedTypes(*typeConfig,
                        areaTextStyleConditionals,
                        maxLevel,
-                       areaTypeSets,
-                       AreaTypeIdProvider());
+                       areaTypeSets);
     CalculateUsedTypes(*typeConfig,
                        areaIconStyleConditionals,
                        maxLevel,
-                       areaTypeSets,
-                       AreaTypeIdProvider());
+                       areaTypeSets);
 
     areaFillStyleConditionals.clear();
     areaTextStyleConditionals.clear();
@@ -2213,7 +2178,7 @@ namespace osmscout {
   }
 
   void StyleConfig::GetNodeTypesWithMaxMag(const Magnification& maxMag,
-                                           TypeSet& types) const
+                                           TypeInfoSet& types) const
   {
     if (!nodeTypeSets.empty()) {
       types=nodeTypeSets[std::min((size_t)maxMag.GetLevel(),nodeTypeSets.size()-1)];
@@ -2221,7 +2186,7 @@ namespace osmscout {
   }
 
   void StyleConfig::GetWayTypesByPrioWithMaxMag(const Magnification& maxMag,
-                                                std::vector<TypeSet>& types) const
+                                                std::vector<TypeInfoSet>& types) const
   {
     if (!wayTypeSets.empty()) {
       types=wayTypeSets[std::min((size_t)maxMag.GetLevel(),wayTypeSets.size()-1)];
@@ -2229,7 +2194,7 @@ namespace osmscout {
   }
 
   void StyleConfig::GetAreaTypesWithMaxMag(const Magnification& maxMag,
-                                           TypeSet& types) const
+                                           TypeInfoSet& types) const
   {
     if (!areaTypeSets.empty()) {
       types=areaTypeSets[std::min((size_t)maxMag.GetLevel(),areaTypeSets.size()-1)];

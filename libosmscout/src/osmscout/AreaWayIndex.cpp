@@ -238,7 +238,7 @@ namespace osmscout {
   }
 
   bool AreaWayIndex::GetOffsets(const GeoBox& boundingBox,
-                                const std::vector<TypeSet>& wayTypes,
+                                const std::vector<TypeInfoSet>& types,
                                 size_t maxWayCount,
                                 std::vector<FileOffset>& offsets,
                                 TypeInfoSet& loadedTypes) const
@@ -260,11 +260,15 @@ namespace osmscout {
     offsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
     newOffsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
 
-    for (const auto typeSet : wayTypes) {
+    for (const auto& typeSet : types) {
+      if (typeSet.Empty()) {
+        continue;
+      }
+
       newOffsets.clear();
 
       for (const auto& data : wayTypeData) {
-        if (typeSet.IsTypeSet(data.type->GetWayId())) {
+        if (typeSet.IsSet(data.type)) {
           if (!GetOffsets(data,
                           boundingBox,
                           maxWayCount,
@@ -282,13 +286,12 @@ namespace osmscout {
 
       // Mark types as loaded
       for (const auto& data : wayTypeData) {
-        if (typeSet.IsTypeSet(data.type->GetWayId())) {
+        if (typeSet.IsSet(data.type)) {
           loadedTypes.Set(data.type);
         }
       }
 
       // Copy data from temporary set to final vector
-
       offsets.insert(offsets.end(),newOffsets.begin(),newOffsets.end());
     }
 

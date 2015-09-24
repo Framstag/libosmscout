@@ -28,7 +28,6 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeSet.h>
 
 #include <osmscout/MapPainter.h>
 #include <osmscout/StyleConfig.h>
@@ -99,14 +98,14 @@ namespace osmscout {
 
   private:
     bool GetObjectsNodes(const AreaSearchParameter& parameter,
-                         const TypeSet &requestedNodeTypes,
+                         const TypeInfoSet& requestedNodeTypes,
                          const GeoBox& boundingBox,
                          std::string& nodeIndexTime,
                          std::string& nodeAreasTime,
                          std::vector<NodeRef>& nodes) const;
 
     bool GetObjectsWays(const AreaSearchParameter& parameter,
-                        const std::vector<TypeSet>& wayTypes,
+                        const std::vector<TypeInfoSet>& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
                         std::string& wayOptimizedTime,
@@ -115,7 +114,7 @@ namespace osmscout {
                         std::vector<WayRef>& ways) const;
 
     bool GetObjectsAreas(const AreaSearchParameter& parameter,
-                               const TypeSet& requestedAreaTypes,
+                               const TypeInfoSet& requestedAreaTypes,
                                const Magnification& magnification,
                                const GeoBox& boundingBox,
                                std::string& areaOptimizedTime,
@@ -134,13 +133,13 @@ namespace osmscout {
 
     bool GetObjects(const AreaSearchParameter& parameter,
                     const Magnification& magnification,
-                    const TypeSet &nodeTypes,
+                    const TypeInfoSet &nodeTypes,
                     const GeoBox& nodeBoundingBox,
                     std::vector<NodeRef>& nodes,
-                    const std::vector<TypeSet>& wayTypes,
+                    const std::vector<TypeInfoSet>& wayTypes,
                     const GeoBox& wayBoundingBox,
                     std::vector<WayRef>& ways,
-                    const TypeSet& areaTypes,
+                    const TypeInfoSet& areaTypes,
                     const GeoBox& areaBoundingBox,
                     std::vector<AreaRef>& areas) const;
 

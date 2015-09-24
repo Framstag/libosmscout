@@ -24,8 +24,6 @@
 #include <set>
 #include <string>
 
-#include <osmscout/TypeSet.h>
-
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
@@ -67,12 +65,12 @@ namespace osmscout {
 
   private:
     TypeConfigRef                              typeConfig;    //!< Metadata information for loading the actual objects
-    std::string                           datafile;      //!< Basename part for the data file name
-    std::string                           datafilename;  //!< complete filename for data file
-    mutable FileScanner                   scanner;       //!< File stream to the data file
+    std::string                                datafile;      //!< Basename part for the data file name
+    std::string                                datafilename;  //!< complete filename for data file
+    mutable FileScanner                        scanner;       //!< File stream to the data file
 
-    double                                magnification; //!< Magnification, up to which we support optimization
-    std::map<TypeId,std::list<TypeData> > areaTypesData; //!< Index information for all area types
+    double                                     magnification; //!< Magnification, up to which we support optimization
+    std::map<TypeInfoRef,std::list<TypeData> > areaTypesData; //!< Index information for all area types
 
   private:
     bool ReadTypeData(FileScanner& scanner,
@@ -80,7 +78,7 @@ namespace osmscout {
 
     bool GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
-                    std::vector<FileOffset>& offsets) const;
+                    std::set<FileOffset>& offsets) const;
 
   public:
     OptimizeAreasLowZoom();
@@ -92,9 +90,12 @@ namespace osmscout {
 
     bool HasOptimizations(double magnification) const;
 
+    void GetTypes(const Magnification& magnification,
+                  const TypeInfoSet& areaTypes,
+                 TypeInfoSet& availableAreaTypes) const;
     bool GetAreas(const GeoBox& boundingBox,
                   const Magnification& magnification,
-                  TypeSet& areaTypes,
+                  const TypeInfoSet& areaTypes,
                   std::vector<AreaRef>& areas,
                   TypeInfoSet& loadedAreaTypes) const;
   };

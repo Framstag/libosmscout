@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeSet.h>
 
 #include <osmscout/util/FileScanner.h>
 
@@ -44,25 +43,25 @@ namespace osmscout {
     struct TypeData
     {
       TypeInfoRef type;
-      uint32_t   indexLevel;
+      uint32_t    indexLevel;
 
-      uint8_t    dataOffsetBytes;
-      FileOffset bitmapOffset;
+      uint8_t     dataOffsetBytes;
+      FileOffset  bitmapOffset;
 
-      uint32_t   cellXStart;
-      uint32_t   cellXEnd;
-      uint32_t   cellYStart;
-      uint32_t   cellYEnd;
-      uint32_t   cellXCount;
-      uint32_t   cellYCount;
+      uint32_t    cellXStart;
+      uint32_t    cellXEnd;
+      uint32_t    cellYStart;
+      uint32_t    cellYEnd;
+      uint32_t    cellXCount;
+      uint32_t    cellYCount;
 
-      double     cellWidth;
-      double     cellHeight;
+      double      cellWidth;
+      double      cellHeight;
 
-      double     minLon;
-      double     maxLon;
-      double     minLat;
-      double     maxLat;
+      double      minLon;
+      double      maxLon;
+      double      minLat;
+      double      maxLat;
 
       TypeData();
     };
@@ -90,7 +89,7 @@ namespace osmscout {
               const std::string& path);
 
     bool GetOffsets(const GeoBox& boundingBox,
-                    const std::vector<TypeSet>& types,
+                    const std::vector<TypeInfoSet>& types,
                     size_t maxWayCount,
                     std::vector<FileOffset>& offsets,
                     TypeInfoSet& loadedTypes) const;

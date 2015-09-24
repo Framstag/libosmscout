@@ -24,6 +24,8 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
+#include <osmscout/system/Math.h>
+
 //#define ANALYZE_CACHE
 
 namespace osmscout {
@@ -118,7 +120,7 @@ namespace osmscout {
   }
 
   bool AreaAreaIndex::ReadCellData(const TypeConfig& typeConfig,
-                                   const TypeSet& types,
+                                   const TypeInfoSet& types,
                                    FileOffset dataOffset,
                                    size_t spaceLeft,
                                    std::vector<DataBlockSpan>& spans,
@@ -161,7 +163,9 @@ namespace osmscout {
         continue;
       }
 
-      if (types.IsTypeSet(typeId)) {
+      TypeInfoRef type=typeConfig.GetAreaTypeInfo(typeId);
+
+      if (types.IsSet(type)) {
         DataBlockSpan span;
 
         span.startOffset=dataFileOffset;
@@ -283,7 +287,7 @@ namespace osmscout {
   bool AreaAreaIndex::GetAreasInArea(const TypeConfig& typeConfig,
                                      const GeoBox& boundingBox,
                                      size_t maxLevel,
-                                     const TypeSet& types,
+                                     const TypeInfoSet& types,
                                      size_t maxCount,
                                      std::vector<DataBlockSpan>& spans,
                                      TypeInfoSet& loadedTypes) const
@@ -384,11 +388,7 @@ namespace osmscout {
       log.Warn() << "Retrieving " << spans.size() << " spans from area index took " << time.ResultString();
     }
 
-    for (const auto& type : typeConfig.GetTypes()) {
-      if (types.IsTypeSet(type->GetAreaId())) {
-        loadedTypes.Set(type);
-      }
-    }
+    loadedTypes=types;
 
     return true;
   }

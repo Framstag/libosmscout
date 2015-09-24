@@ -115,6 +115,8 @@ namespace osmscout
 
       scanner.Read(typeId);
 
+      TypeInfoRef type=typeConfig->GetWayTypeInfo(typeId);
+
       TypeData typeData;
 
       if (!ReadTypeData(scanner,
@@ -122,7 +124,7 @@ namespace osmscout
         return false;
       }
 
-      wayTypesData[typeId].push_back(typeData);
+      wayTypesData[type].push_back(typeData);
     }
 
     return !scanner.HasError();
@@ -148,10 +150,8 @@ namespace osmscout
 
   bool OptimizeWaysLowZoom::GetOffsets(const TypeData& typeData,
                                        const GeoBox& boundingBox,
-                                       std::vector<FileOffset>& offsets) const
+                                       std::set<FileOffset>& offsets) const
   {
-    std::set<FileOffset> newOffsets;
-
     if (typeData.bitmapOffset==0) {
       // No data for this type available
       return true;
@@ -243,31 +243,48 @@ namespace osmscout
 
           objectOffset+=lastOffset;
 
-          newOffsets.insert(objectOffset);
+          offsets.insert(objectOffset);
 
           lastOffset=objectOffset;
         }
       }
     }
 
-    for (std::set<FileOffset>::const_iterator offset=newOffsets.begin();
-         offset!=newOffsets.end();
-         ++offset) {
-      offsets.push_back(*offset);
-    }
-
     return true;
+  }
+
+  /**
+   * Returns the subset of types of wayTypes that can get retrieved from this index.
+   */
+  void OptimizeWaysLowZoom::GetTypes(const Magnification& magnification,
+                                     const std::vector<TypeInfoSet>& wayTypes,
+                                     TypeInfoSet& availableWayTypes) const
+  {
+    availableWayTypes.Clear();
+
+    for (size_t i=0; i<wayTypes.size(); i++) {
+      for (const auto& type : wayTypesData) {
+        if (wayTypes[i].IsSet(type.first)) {
+          for (const auto& typeData : type.second) {
+            if (typeData.optLevel==magnification.GetLevel()) {
+              availableWayTypes.Set(type.first);
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   bool OptimizeWaysLowZoom::GetWays(const GeoBox& boundingBox,
                                     const Magnification& magnification,
-                                    const std::vector<TypeSet>& wayTypes,
+                                    const TypeInfoSet& wayTypes,
                                     std::vector<WayRef>& ways,
                                     TypeInfoSet& loadedWayTypes) const
   {
     StopClock time;
 
-    std::vector<FileOffset> offsets;
+    std::set<FileOffset> offsets;
 
     loadedWayTypes.Clear();
 
@@ -278,57 +295,51 @@ namespace osmscout
       }
     }
 
-    offsets.reserve(20000);
+    for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=wayTypesData.begin();
+        type!=wayTypesData.end();
+        ++type) {
+      if (wayTypes.IsSet(type->first)) {
+        std::list<TypeData>::const_iterator match=type->second.end();
 
-    for (size_t i=0; i<wayTypes.size(); i++) {
-      for (std::map<TypeId,std::list<TypeData> >::const_iterator type=wayTypesData.begin();
-          type!=wayTypesData.end();
-          ++type) {
-        if (wayTypes[i].IsTypeSet(type->first)) {
-          std::list<TypeData>::const_iterator match=type->second.end();
-
-          for (std::list<TypeData>::const_iterator typeData=type->second.begin();
-              typeData!=type->second.end();
-              ++typeData) {
-            if (typeData->optLevel==magnification.GetLevel()) {
-              match=typeData;
-              break;
-            }
-          }
-
-          if (match!=type->second.end()) {
-            if (match->bitmapOffset!=0) {
-              if (!GetOffsets(*match,
-                              boundingBox,
-                              offsets)) {
-                return false;
-              }
-
-              for (const auto& offset : offsets) {
-                if (!scanner.SetPos(offset)) {
-                  log.Error() << "Error while positioning in file '" << scanner.GetFilename()  << "'";
-                  return false;
-                }
-
-                WayRef way=std::make_shared<Way>();
-
-                if (!way->ReadOptimized(*typeConfig,
-                                        scanner)) {
-                  log.Error() << "Error while reading way at offset " << offset << " from file '" << scanner.GetFilename()  << "'";
-                  return false;
-                }
-
-                ways.push_back(way);
-              }
-
-              offsets.clear();
-            }
-
-            // Successfully loaded type data
-            loadedWayTypes.Set(typeConfig->GetWayTypeInfo(type->first));
+        for (std::list<TypeData>::const_iterator typeData=type->second.begin();
+            typeData!=type->second.end();
+            ++typeData) {
+          if (typeData->optLevel==magnification.GetLevel()) {
+            match=typeData;
+            break;
           }
         }
+
+        if (match!=type->second.end()) {
+          if (match->bitmapOffset!=0) {
+            if (!GetOffsets(*match,
+                            boundingBox,
+                            offsets)) {
+              return false;
+            }
+          }
+
+          // Successfully loaded type data
+          loadedWayTypes.Set(type->first);
+        }
       }
+    }
+
+    for (const auto& offset : offsets) {
+      if (!scanner.SetPos(offset)) {
+        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      WayRef way=std::make_shared<Way>();
+
+      if (!way->ReadOptimized(*typeConfig,
+                              scanner)) {
+        log.Error() << "Error while reading way at offset " << offset << " from file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      ways.push_back(way);
     }
 
     time.Stop();

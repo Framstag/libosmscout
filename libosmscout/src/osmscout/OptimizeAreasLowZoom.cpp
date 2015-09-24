@@ -113,9 +113,12 @@ namespace osmscout
     magnification=pow(2.0,(int)optimizationMaxMag);
 
     for (size_t i=1; i<=areaTypeCount; i++) {
-      TypeId typeId;
+      TypeId      typeId;
+      TypeInfoRef type;
 
       scanner.Read(typeId);
+
+      type=typeConfig->GetAreaTypeInfo(typeId);
 
       TypeData typeData;
 
@@ -124,7 +127,7 @@ namespace osmscout
         return false;
       }
 
-      areaTypesData[typeId].push_back(typeData);
+      areaTypesData[type].push_back(typeData);
     }
 
     return !scanner.HasError();
@@ -150,10 +153,8 @@ namespace osmscout
 
   bool OptimizeAreasLowZoom::GetOffsets(const TypeData& typeData,
                                         const GeoBox& boundingBox,
-                                        std::vector<FileOffset>& offsets) const
+                                        std::set<FileOffset>& offsets) const
   {
-    std::set<FileOffset> newOffsets;
-
     if (typeData.bitmapOffset==0) {
       // No data for this type available
       return true;
@@ -245,31 +246,43 @@ namespace osmscout
 
           objectOffset+=lastOffset;
 
-          newOffsets.insert(objectOffset);
+          offsets.insert(objectOffset);
 
           lastOffset=objectOffset;
         }
       }
     }
 
-    for (std::set<FileOffset>::const_iterator offset=newOffsets.begin();
-         offset!=newOffsets.end();
-         ++offset) {
-      offsets.push_back(*offset);
-    }
-
     return true;
+  }
+
+  void OptimizeAreasLowZoom::GetTypes(const Magnification& magnification,
+                                      const TypeInfoSet& areaTypes,
+                                      TypeInfoSet& availableAreaTypes) const
+  {
+    availableAreaTypes.Clear();
+
+    for (const auto& type : areaTypesData) {
+      if (areaTypes.IsSet(type.first)) {
+        for (const auto& typeData : type.second) {
+          if (typeData.optLevel==magnification.GetLevel()) {
+            availableAreaTypes.Set(type.first);
+            break;
+          }
+        }
+      }
+    }
   }
 
   bool OptimizeAreasLowZoom::GetAreas(const GeoBox& boundingBox,
                                       const Magnification& magnification,
-                                      TypeSet& areaTypes,
+                                      const TypeInfoSet& areaTypes,
                                       std::vector<AreaRef>& areas,
                                       TypeInfoSet& loadedAreaTypes) const
   {
     StopClock time;
 
-    std::vector<FileOffset> offsets;
+    std::set<FileOffset> offsets;
 
     loadedAreaTypes.Clear();
 
@@ -280,12 +293,10 @@ namespace osmscout
       }
     }
 
-    offsets.reserve(20000);
-
-    for (std::map<TypeId,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
+    for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
         type!=areaTypesData.end();
         ++type) {
-      if (areaTypes.IsTypeSet(type->first)) {
+      if (areaTypes.IsSet(type->first)) {
         std::list<TypeData>::const_iterator match=type->second.end();
 
         for (std::list<TypeData>::const_iterator typeData=type->second.begin();
@@ -293,6 +304,7 @@ namespace osmscout
             ++typeData) {
           if (typeData->optLevel==magnification.GetLevel()) {
             match=typeData;
+            break;
           }
         }
 
@@ -303,34 +315,29 @@ namespace osmscout
                             offsets)) {
               return false;
             }
-
-            loadedAreaTypes.Set(typeConfig->GetAreaTypeInfo(type->first));
-
-            for (const auto& offset : offsets) {
-              if (!scanner.SetPos(offset)) {
-                log.Error() << "Error while positioning in file '" << scanner.GetFilename()  << "'";
-                return false;
-              }
-
-              AreaRef area=std::make_shared<Area>();
-
-              if (!area->ReadOptimized(*typeConfig,
-                                       scanner)) {
-                log.Error() << "Error while reading area at offset " << offset << " from file '" << scanner.GetFilename()  << "'";
-                return false;
-              }
-
-              areas.push_back(area);
-            }
-
-            offsets.clear();
           }
-        }
 
-        if (match!=type->second.end()) {
-          areaTypes.UnsetType(type->first);
+          loadedAreaTypes.Set(type->first);
         }
       }
+    }
+
+    for (const auto& offset : offsets) {
+      if (!scanner.SetPos(offset)) {
+        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      AreaRef area=std::make_shared<Area>();
+
+      if (!area->ReadOptimized(*typeConfig,
+                               scanner)) {
+        log.Error() << "Error while reading area at offset " << offset << " from file '" << scanner.GetFilename() <<
+        "'";
+        return false;
+      }
+
+      areas.push_back(area);
     }
 
     time.Stop();
