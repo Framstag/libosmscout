@@ -148,8 +148,6 @@ namespace osmscout {
                               bool& isSet);
 
     bool Read(std::vector<GeoCoord>& nodes);
-    bool Read(std::vector<GeoCoord>& nodes,
-              size_t count);
 
     bool ReadBox(GeoBox& box);
 

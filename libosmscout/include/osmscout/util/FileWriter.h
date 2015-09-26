@@ -108,8 +108,6 @@ namespace osmscout {
     bool WriteInvalidCoord();
 
     bool Write(const std::vector<GeoCoord>& nodes);
-    bool Write(const std::vector<GeoCoord>& nodes,
-               size_t count);
 
     bool WriteTypeId(TypeId id, uint8_t maxBytes);
 

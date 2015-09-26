@@ -587,6 +587,10 @@ namespace osmscout {
       return false;
     }
 
+    if (nodes.empty()) {
+      return true;
+    }
+
     GeoCoord minCoord=nodes[0];
 
     for (size_t i=1; i<nodes.size(); i++) {
@@ -604,36 +608,6 @@ namespace osmscout {
       }
 
       if (!WriteNumber((uint32_t)round((nodes[i].GetLon()-minCoord.GetLon())*lonConversionFactor))) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  bool FileWriter::Write(const std::vector<GeoCoord>& nodes,
-                         size_t count)
-  {
-    GeoCoord minCoord=nodes[0];
-
-    for (size_t i=1; i<count; i++) {
-      minCoord.Set(std::min(minCoord.GetLat(),nodes[i].GetLat()),
-                   std::min(minCoord.GetLon(),nodes[i].GetLon()));
-    }
-
-    if (!WriteCoord(minCoord)) {
-      return false;
-    }
-
-    for (size_t i=0; i<count; i++) {
-      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minCoord.GetLat())*latConversionFactor);
-      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minCoord.GetLon())*lonConversionFactor);
-
-      if (!WriteNumber(latValue)) {
-        return false;
-      }
-
-      if (!WriteNumber(lonValue)) {
         return false;
       }
     }

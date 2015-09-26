@@ -2235,6 +2235,10 @@ namespace osmscout {
       return false;
     }
 
+    if (nodeCount==0) {
+      return true;
+    }
+
     GeoCoord minCoord;
 
     if (!ReadCoord(minCoord)) {
@@ -2243,32 +2247,6 @@ namespace osmscout {
 
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
-      uint32_t latValue;
-      uint32_t lonValue;
-
-      if (!ReadNumber(latValue) ||
-          !ReadNumber(lonValue)) {
-        return false;
-      }
-
-      nodes[i].Set(minCoord.GetLat()+latValue/latConversionFactor,
-                   minCoord.GetLon()+lonValue/lonConversionFactor);
-    }
-
-    return !HasError();
-  }
-
-  bool FileScanner::Read(std::vector<GeoCoord>& nodes,
-                         size_t count)
-  {
-    GeoCoord minCoord;
-
-    if (!ReadCoord(minCoord)) {
-      return false;
-    }
-
-    nodes.resize(count);
-    for (size_t i=0; i<count; i++) {
       uint32_t latValue;
       uint32_t lonValue;
 

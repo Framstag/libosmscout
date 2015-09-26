@@ -31,12 +31,12 @@
 class Statistics
 {
 public:
-  size_t  numberOfVectors;   // Overall numbe rof vectors
-  size_t  emptyVectorCount;  // Numbe rof vectors with size()==0
+  size_t  numberOfVectors;   // Overall number of vectors
+  size_t  emptyVectorCount;  // Number of vectors with size()==0
   size_t  sixBitVectorCount; // Length of vector is 0..63
   size_t  coordCount;        // Overall number of coordinates
-  size_t  minLength;         // Minimum length of coord array
-  size_t  maxLength;         // Maximum length of coord array
+  size_t  minLength;         // Minimum length of coordinate array
+  size_t  maxLength;         // Maximum length of coordinate array
   int32_t minDelta;
   int32_t maxDelta;
   size_t  deltaCount;

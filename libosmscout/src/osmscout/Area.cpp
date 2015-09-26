@@ -193,10 +193,9 @@ namespace osmscout {
       return false;
     }
 
-    TypeId   ringType;
-    bool     multipleRings;
-    uint32_t ringCount=1;
-    uint32_t nodesCount;
+    TypeId             ringType;
+    bool               multipleRings;
+    uint32_t           ringCount=1;
     FeatureValueBuffer featureValueBuffer;
 
     scanner.ReadTypeId(ringType,
@@ -230,21 +229,15 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    if (!scanner.ReadNumber(nodesCount)) {
+    if (!scanner.Read(rings[0].nodes)) {
       return false;
     }
 
-    if (nodesCount>0) {
-      if (rings[0].GetType()->CanRoute()) {
-        if (!ReadIds(scanner,
-                     nodesCount,
-                     rings[0].ids)) {
-          return false;
-        }
-      }
-
-      if (!scanner.Read(rings[0].nodes,
-                        nodesCount)) {
+    if (!rings[0].nodes.empty() &&
+        rings[0].GetType()->CanRoute()) {
+      if (!ReadIds(scanner,
+                   rings[0].nodes.size(),
+                   rings[0].ids)) {
         return false;
       }
     }
@@ -265,20 +258,16 @@ namespace osmscout {
 
       scanner.Read(rings[i].ring);
 
-      scanner.ReadNumber(nodesCount);
+      if (!scanner.Read(rings[i].nodes)) {
+        return false;
+      }
 
-      if (nodesCount>0) {
-        if (rings[i].GetType()->GetAreaId()!=typeIgnore &&
-            rings[i].GetType()->CanRoute()) {
-          if (!ReadIds(scanner,
-                       nodesCount,
-                       rings[i].ids)) {
-            return false;
-          }
-        }
-
-        if (!scanner.Read(rings[i].nodes,
-                          nodesCount)) {
+      if (!rings[i].nodes.empty() &&
+          rings[i].GetType()->GetAreaId()!=typeIgnore &&
+          rings[i].GetType()->CanRoute()) {
+        if (!ReadIds(scanner,
+                     rings[i].nodes.size(),
+                     rings[i].ids)) {
           return false;
         }
       }
@@ -294,10 +283,9 @@ namespace osmscout {
       return false;
     }
 
-    TypeId   ringType;
-    bool     multipleRings;
-    uint32_t ringCount=1;
-    uint32_t nodesCount;
+    TypeId             ringType;
+    bool               multipleRings;
+    uint32_t           ringCount=1;
     FeatureValueBuffer featureValueBuffer;
 
     scanner.ReadTypeId(ringType,
@@ -331,19 +319,14 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    if (!scanner.ReadNumber(nodesCount)) {
+    if (!scanner.Read(rings[0].nodes)) {
       return false;
     }
 
-    if (nodesCount>0) {
+    if (!rings[0].nodes.empty()) {
       if (!ReadIds(scanner,
-                   nodesCount,
+                   rings[0].nodes.size(),
                    rings[0].ids)) {
-        return false;
-      }
-
-      if (!scanner.Read(rings[0].nodes,
-                        nodesCount)) {
         return false;
       }
     }
@@ -364,19 +347,15 @@ namespace osmscout {
 
       scanner.Read(rings[i].ring);
 
-      scanner.ReadNumber(nodesCount);
+      if (!scanner.Read(rings[i].nodes)) {
+        return false;
+      }
 
-      if (nodesCount>0) {
-        if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
-          if (!ReadIds(scanner,
-                       nodesCount,
-                       rings[i].ids)) {
-            return false;
-          }
-        }
-
-        if (!scanner.Read(rings[i].nodes,
-                          nodesCount)) {
+      if (!rings[i].nodes.empty() &&
+          rings[i].GetType()->GetAreaId()!=typeIgnore) {
+        if (!ReadIds(scanner,
+                     rings[i].nodes.size(),
+                     rings[i].ids)) {
           return false;
         }
       }
@@ -392,10 +371,9 @@ namespace osmscout {
       return false;
     }
 
-    TypeId   ringType;
-    bool     multipleRings;
-    uint32_t ringCount=1;
-    uint32_t nodesCount;
+    TypeId             ringType;
+    bool               multipleRings;
+    uint32_t           ringCount=1;
     FeatureValueBuffer featureValueBuffer;
 
     scanner.ReadTypeId(ringType,
@@ -429,15 +407,8 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    if (!scanner.ReadNumber(nodesCount)) {
+    if (!scanner.Read(rings[0].nodes)) {
       return false;
-    }
-
-    if (nodesCount>0) {
-      if (!scanner.Read(rings[0].nodes,
-                        nodesCount)) {
-        return false;
-      }
     }
 
     for (size_t i=1; i<ringCount; i++) {
@@ -456,13 +427,8 @@ namespace osmscout {
 
       scanner.Read(rings[i].ring);
 
-      scanner.ReadNumber(nodesCount);
-
-      if (nodesCount>0) {
-        if (!scanner.Read(rings[i].nodes,
-                          nodesCount)) {
-          return false;
-        }
+      if (!scanner.Read(rings[i].nodes)) {
+        return false;
       }
     }
 
@@ -540,18 +506,14 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.WriteNumber((uint32_t)ring->nodes.size());
+    if (!writer.Write(ring->nodes)) {
+      return false;
+    }
 
-    if (!ring->nodes.empty()) {
-      if (ring->GetType()->CanRoute()) {
-        if (!WriteIds(writer,
-                      ring->ids)) {
-          return false;
-        }
-      }
-
-      if (!writer.Write(ring->nodes,
-                        ring->nodes.size())) {
+    if (!ring->nodes.empty() &&
+        ring->GetType()->CanRoute()) {
+      if (!WriteIds(writer,
+                    ring->ids)) {
         return false;
       }
     }
@@ -572,19 +534,15 @@ namespace osmscout {
 
       writer.Write(ring->ring);
 
-      writer.WriteNumber((uint32_t)ring->nodes.size());
+      if (!writer.Write(ring->nodes)) {
+        return false;
+      }
 
-      if (!ring->nodes.empty()) {
-        if (ring->GetType()->GetAreaId()!=typeIgnore &&
-            ring->GetType()->CanRoute()) {
-          if (!WriteIds(writer,
-                        ring->ids)) {
-            return false;
-          }
-        }
-
-        if (!writer.Write(ring->nodes,
-                          ring->nodes.size())) {
+      if (!ring->nodes.empty() &&
+          ring->GetType()->GetAreaId()!=typeIgnore &&
+          ring->GetType()->CanRoute()) {
+        if (!WriteIds(writer,
+                      ring->ids)) {
           return false;
         }
       }
@@ -615,17 +573,13 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.WriteNumber((uint32_t)ring->nodes.size());
+    if (!writer.Write(ring->nodes)) {
+      return false;
+    }
 
     if (!ring->nodes.empty()) {
       if (!WriteIds(writer,
                     ring->ids)) {
-        return false;
-      }
-
-
-      if (!writer.Write(ring->nodes,
-                        ring->nodes.size())) {
         return false;
       }
     }
@@ -646,18 +600,14 @@ namespace osmscout {
 
       writer.Write(ring->ring);
 
-      writer.WriteNumber((uint32_t)ring->nodes.size());
+      if (!writer.Write(ring->nodes)) {
+        return false;
+      }
 
-      if (!ring->nodes.empty()) {
-        if (ring->GetType()->GetAreaId()!=typeIgnore) {
-          if (!WriteIds(writer,
-                        ring->ids)) {
-            return false;
-          }
-        }
-
-        if (!writer.Write(ring->nodes,
-                          ring->nodes.size())) {
+      if (!ring->nodes.empty() &&
+          ring->GetType()->GetAreaId()!=typeIgnore) {
+        if (!WriteIds(writer,
+                      ring->ids)) {
           return false;
         }
       }
@@ -688,13 +638,8 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.WriteNumber((uint32_t)ring->nodes.size());
-
-    if (!ring->nodes.empty()) {
-      if (!writer.Write(ring->nodes,
-                        ring->nodes.size())) {
-        return false;
-      }
+    if (!writer.Write(ring->nodes)) {
+      return false;
     }
 
     ++ring;
@@ -713,13 +658,8 @@ namespace osmscout {
 
       writer.Write(ring->ring);
 
-      writer.WriteNumber((uint32_t)ring->nodes.size());
-
-      if (!ring->nodes.empty()) {
-        if (!writer.Write(ring->nodes,
-                          ring->nodes.size())) {
-          return false;
-        }
+      if (!writer.Write(ring->nodes)) {
+        return false;
       }
 
       ++ring;
