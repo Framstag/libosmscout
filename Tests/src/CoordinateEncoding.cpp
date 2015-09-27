@@ -334,13 +334,13 @@ public:
       return;
     }
 
-    if (coords.size()<64) /* 2^6) */ {
+    if (coords.size()<32) /* 2^5) */ {
       bytesNeeded++;
     }
-    else if (coords.size()<8192) /* 2^(6+7) */ {
+    else if (coords.size()<4096) /* 2^(5+7) */ {
       bytesNeeded+=2;
     }
-    else /* 2097152 / 2^(6+7+8)) */ {
+    else /* 2097152 / 2^(5+7+8)) */ {
       bytesNeeded+=3;
     }
 
@@ -369,18 +369,19 @@ public:
 
     for (size_t i=0; i<deltaBuffer.size()-1; i++) {
       if (deltaBuffer[i]>=-128 && deltaBuffer[i]<=127) {
-        coordBitSize=std::max(coordBitSize,16);
+        coordBitSize=std::max(coordBitSize,16); // 2x 8 bit
       }
       else if (deltaBuffer[i]>=-32768 && deltaBuffer[i]<=32767) {
-        coordBitSize=std::max(coordBitSize,32);
+        coordBitSize=std::max(coordBitSize,32); // 2* 16 bit
       }
       else {
-        coordBitSize=std::max(coordBitSize,48);
+        coordBitSize=std::max(coordBitSize,48); // 2 * 24 bit
       }
     }
 
-    bytesNeeded+=(coords.size()-1)*coordBitSize/8;
+    bytesNeeded+=(coords.size()-1)*coordBitSize/8; // all coordinates in the same encoding
 
+    // one more byte, if the is a rest
     if (coordBitSize % 8 !=0) {
       bytesNeeded++;
     }
