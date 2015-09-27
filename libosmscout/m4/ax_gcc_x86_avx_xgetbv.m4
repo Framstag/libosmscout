@@ -54,7 +54,7 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-#serial 1
+#serial 2
 
 AC_DEFUN([AX_GCC_X86_AVX_XGETBV],
 [AC_REQUIRE([AC_PROG_CC])
@@ -64,7 +64,7 @@ AC_CACHE_CHECK(for x86-AVX xgetbv $1 output, ax_cv_gcc_x86_avx_xgetbv_$1,
      int op = $1, eax, edx;
      FILE *f;
       /* Opcodes for xgetbv */
-      __asm__(".byte 0x0f, 0x01, 0xd0"
+      __asm__ __volatile__ (".byte 0x0f, 0x01, 0xd0"
         : "=a" (eax), "=d" (edx)
         : "c" (op));
      f = fopen("conftest_xgetbv", "w"); if (!f) return 1;
