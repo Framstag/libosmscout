@@ -213,7 +213,7 @@ namespace osmscout {
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,
                           const TypeConfigRef& typeConfig,
-                          const TypeInfoRef& boundaryType,
+                          const std::unordered_set<TypeInfoRef>& boundaryType,
                           std::list<Boundary>& boundaryAreas);
 
     void SortInBoundaries(Progress& progress,

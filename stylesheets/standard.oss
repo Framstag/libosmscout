@@ -323,6 +323,9 @@ CONST
   COLOR landColor             = #fcfbe7;
   COLOR unknownColor          = #c4dff6;*/
 
+  // Borders
+  COLOR countryBorderColor         = #ff0000;
+
   // Contour
   COLOR majorContourColor          = #9f9f9f;
   COLOR mediumContourColor         = #a5a5a5;
@@ -527,6 +530,8 @@ SYMBOL speed_camera
    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
    // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
+
+   [TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.4mm; dash: 7,3;}
  }
 
  // -------------------------------------------------------
