@@ -365,7 +365,7 @@ namespace osmscout {
   bool LocationIndexGenerator::GetBoundaryAreas(const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const TypeConfigRef& typeConfig,
-                                                const TypeInfoRef& boundaryType,
+                                                const std::unordered_set<TypeInfoRef>& boundaryTypes,
                                                 std::list<Boundary>& boundaryAreas)
   {
     FileScanner                  scanner;
@@ -402,7 +402,7 @@ namespace osmscout {
         return false;
       }
 
-      if (area.GetType()!=boundaryType) {
+      if (boundaryTypes.count(area.GetType()) == 0) {
         continue;
       }
 
@@ -1847,6 +1847,7 @@ namespace osmscout {
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
     TypeInfoRef                        boundaryType;
+    std::unordered_set<TypeInfoRef>    boundaryTypes;
     std::list<Boundary>                boundaryAreas;
     std::list<std::string>             regionIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
@@ -1879,8 +1880,22 @@ namespace osmscout {
     rootRegion->indexOffset=0;
     rootRegion->dataOffset=0;
 
+    boundaryType=typeConfig->GetTypeInfo("boundary_country");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
+    boundaryType=typeConfig->GetTypeInfo("boundary_state");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
+    boundaryType=typeConfig->GetTypeInfo("boundary_county");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
     boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
     assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
 
     //
     // Getting all areas of type 'administrative boundary'.
@@ -1891,7 +1906,7 @@ namespace osmscout {
     if (!GetBoundaryAreas(parameter,
                           progress,
                           typeConfig,
-                          boundaryType,
+                          boundaryTypes,
                           boundaryAreas)) {
       return false;
     }
