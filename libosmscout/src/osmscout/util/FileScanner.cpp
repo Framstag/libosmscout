@@ -56,7 +56,9 @@ namespace osmscout {
      hasError(true),
      buffer(NULL),
      size(0),
-     offset(0)
+     offset(0),
+     byteBuffer(NULL),
+     byteBufferSize(0)
 #if defined(__WIN32__) || defined(WIN32)
      ,mmfHandle((HANDLE)0)
 #endif
@@ -69,6 +71,21 @@ namespace osmscout {
     if (IsOpen()) {
       Close();
     }
+
+    delete [] byteBuffer;
+  }
+
+  void FileScanner::AssureByteBufferSize(size_t size)
+  {
+    if (byteBufferSize>=size) {
+      return;
+    }
+
+    delete [] byteBuffer;
+
+    byteBuffer=new uint8_t[size];
+    byteBufferSize=size;
+
   }
 
   void FileScanner::FreeBuffer()
@@ -2229,34 +2246,158 @@ namespace osmscout {
 
   bool FileScanner::Read(std::vector<GeoCoord>& nodes)
   {
-    uint32_t nodeCount;
+    size_t  coordBitSize;
+    uint8_t sizeByte;
 
-    if (!ReadNumber(nodeCount)) {
+    if (!Read(sizeByte)) {
       return false;
     }
 
-    if (nodeCount==0) {
+    // Fast exit for empty arrays
+    if (sizeByte==0) {
       return true;
     }
 
-    GeoCoord minCoord;
-
-    if (!ReadCoord(minCoord)) {
-      return false;
+    if ((sizeByte & 0x03) == 0) {
+      coordBitSize=16;
+    }
+    else if ((sizeByte & 0x03) == 1) {
+      coordBitSize=32;
+    }
+    else {
+      coordBitSize=48;
     }
 
-    nodes.resize(nodeCount);
-    for (size_t i=0; i<nodeCount; i++) {
-      uint32_t latValue;
-      uint32_t lonValue;
+    size_t nodeCount=(sizeByte & 0x7c) >> 2;
 
-      if (!ReadNumber(latValue) ||
-          !ReadNumber(lonValue)) {
+    if ((sizeByte & 0x80) != 0) {
+      if (!Read(sizeByte)) {
         return false;
       }
 
-      nodes[i].Set(minCoord.GetLat()+latValue/latConversionFactor,
-                   minCoord.GetLon()+lonValue/lonConversionFactor);
+      nodeCount|=(sizeByte & 0x7f) << 5;
+
+      if ((sizeByte & 0x80) != 0) {
+        if (!Read(sizeByte)) {
+          return false;
+        }
+
+        nodeCount|=sizeByte << 12;
+      }
+    }
+
+    //std::cout << "Read " << std::dec << nodeCount << " nodes, " << coordBitSize << " bits per coordinate pair" << std::endl;
+
+    nodes.resize(nodeCount);
+
+    size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
+
+    AssureByteBufferSize(byteBufferSize);
+
+    if (!ReadCoord(nodes[0])) {
+      return false;
+    }
+
+    uint32_t latValue=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+
+    if (!Read((char*)byteBuffer,byteBufferSize)) {
+      return false;
+    }
+
+    /* std::cout << "Read - byte buffer: ";
+    for (size_t i=0; i<byteBufferSize; i++) {
+      std::cout << std::hex << (unsigned int) byteBuffer[i] << " ";
+    }
+    std::cout << std::endl;*/
+
+    //std::cout << "Read - calculated deltas: ";
+    if (coordBitSize==16) {
+      size_t currentCoordPos=1;
+
+      for (size_t i=0; i<byteBufferSize; i+=2) {
+        int32_t latDelta=(int8_t)byteBuffer[i];
+        int32_t lonDelta=(int8_t)byteBuffer[i+1];
+
+        latValue+=latDelta;
+        lonValue+=lonDelta;
+
+        //std::cout << std::hex << latDelta << " " << lonDelta << " ";
+
+        nodes[currentCoordPos].Set(latValue/latConversionFactor-90.0,
+                                   lonValue/lonConversionFactor-180.0);
+
+        currentCoordPos++;
+      }
+      //std::cout << std::endl;
+    }
+    else if (coordBitSize==32) {
+      size_t currentCoordPos=1;
+
+      for (size_t i=0; i<byteBufferSize; i+=4) {
+        uint32_t latUDelta=byteBuffer[i+0] | (byteBuffer[i+1]<<8);
+        uint32_t lonUDelta=byteBuffer[i+2] | (byteBuffer[i+3]<<8);
+        int32_t  latDelta;
+        int32_t  lonDelta;
+
+        if (latUDelta & 0x8000) {
+          latDelta=(int32_t)(latUDelta | 0xffff0000);
+        }
+        else {
+          latDelta=(int32_t)latUDelta;
+        }
+
+        latValue+=latDelta;
+
+        if (lonUDelta & 0x8000) {
+          lonDelta=(int32_t)(lonUDelta | 0xffff0000);
+        }
+        else {
+          lonDelta=(int32_t)lonUDelta;
+        }
+
+        lonValue+=lonDelta;
+
+        //std::cout << std::hex << latDelta << " " << lonDelta << " ";
+
+        nodes[currentCoordPos].Set(latValue/latConversionFactor-90.0,
+                                   lonValue/lonConversionFactor-180.0);
+        currentCoordPos++;
+      }
+      //std::cout << std::endl;
+    }
+    else {
+      size_t currentCoordPos=1;
+
+      for (size_t i=0; i<byteBufferSize; i+=6) {
+        uint32_t latUDelta=(byteBuffer[i+0]) | (byteBuffer[i+1]<<8) | (byteBuffer[i+2]<<16);
+        uint32_t lonUDelta=(byteBuffer[i+3]) | (byteBuffer[i+4]<<8) | (byteBuffer[i+5]<<16);
+        int32_t  latDelta;
+        int32_t  lonDelta;
+
+        if (latUDelta & 0x800000) {
+          latDelta=(int32_t)(latUDelta | 0xff000000);
+        }
+        else {
+          latDelta=(int32_t)latUDelta;
+        }
+
+        latValue+=latDelta;
+
+        if (lonUDelta & 0x800000) {
+          lonDelta=(int32_t)(lonUDelta | 0xff000000);
+        }
+        else {
+          lonDelta=(int32_t)lonUDelta;
+        }
+
+        lonValue+=lonDelta;
+
+        nodes[currentCoordPos].Set(latValue/latConversionFactor-90.0,
+                                   lonValue/lonConversionFactor-180.0);
+
+        currentCoordPos++;
+      }
     }
 
     return !HasError();

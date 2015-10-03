@@ -44,9 +44,11 @@ namespace osmscout {
   class OSMSCOUT_API FileWriter
   {
   private:
-    std::string filename;
-    std::FILE   *file;
-    bool        hasError;
+    std::string          filename;    //!< The filename
+    std::FILE            *file;       //!< The low level FILE object
+    bool                 hasError;    //!< Flag for signaling that the stream has errors
+    std::vector<int32_t> deltaBuffer; //!< Temporary storage for deltas for storing of std::vector<GeoCoord>
+    std::vector<uint8_t> byteBuffer;  //!< Temporary data buffer for storing of std::vector<GeoCoord>
 
   public:
     FileWriter();

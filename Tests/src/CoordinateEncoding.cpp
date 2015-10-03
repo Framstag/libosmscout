@@ -334,13 +334,13 @@ public:
       return;
     }
 
-    if (coords.size()<32) /* 2^5) */ {
+    if (coords.size()<32) /* 2 bit signal + 2^5 length) */ {
       bytesNeeded++;
     }
-    else if (coords.size()<4096) /* 2^(5+7) */ {
+    else if (coords.size()<4096) /* 2 bit signal + 2^(5+7) length */ {
       bytesNeeded+=2;
     }
-    else /* 2097152 / 2^(5+7+8)) */ {
+    else /* 2097152 / 2 bit signal + 2^(5+7+8)) length */ {
       bytesNeeded+=3;
     }
 
@@ -369,13 +369,16 @@ public:
 
     for (size_t i=0; i<deltaBuffer.size()-1; i++) {
       if (deltaBuffer[i]>=-128 && deltaBuffer[i]<=127) {
-        coordBitSize=std::max(coordBitSize,16); // 2x 8 bit
+        coordBitSize=std::max(coordBitSize,16); // 2x 1 byte => 4 byte
+      }
+      else if (deltaBuffer[i]>=-2048 && deltaBuffer[i]<=2047) {
+        coordBitSize=std::max(coordBitSize,24); // 2x 12 bit => 3 byte
       }
       else if (deltaBuffer[i]>=-32768 && deltaBuffer[i]<=32767) {
-        coordBitSize=std::max(coordBitSize,32); // 2* 16 bit
+        coordBitSize=std::max(coordBitSize,32); // 2x 2 byte => 4 byte
       }
       else {
-        coordBitSize=std::max(coordBitSize,48); // 2 * 24 bit
+        coordBitSize=std::max(coordBitSize,48); // 2x 3 byte => 6 byte
       }
     }
 
@@ -418,6 +421,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  /*
   std::cout << "Reading '" << areaDatFilename << "'..." << std::endl;
 
   if (!scanner.Open(areaDatFilename,osmscout::FileScanner::Sequential,true)) {
@@ -448,7 +452,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  scanner.Close();
+  scanner.Close();*/
 
   std::cout << "Reading " << wayDatFilename << "..." << std::endl;
 
@@ -470,6 +474,11 @@ int main(int argc, char* argv[])
       std::cerr << "Cannot read data set #" << i << "'from file " << scanner.GetFilename() << "'" << std::endl;
       return 1;
     }
+
+    for (size_t n =0; n<way.nodes.size(); n++) {
+      std::cout << way.nodes[n].GetDisplayText() << " ";
+    }
+    std::cout << std::endl;
 
     statistics.Measure(way.nodes);
 
