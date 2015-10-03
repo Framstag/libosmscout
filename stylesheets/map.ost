@@ -1737,6 +1737,24 @@ TYPES
   // 
 
   // Do not delete the following type, they are required by the GenLocation import step
+  TYPE boundary_country
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND
+
+  TYPE boundary_state
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="4") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="4")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND
+
+  TYPE boundary_county
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="6") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="6")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND
+
   TYPE boundary_administrative
     = WAY AREA ("boundary"=="administrative") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative")

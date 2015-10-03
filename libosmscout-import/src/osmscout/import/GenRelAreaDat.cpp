@@ -594,7 +594,8 @@ namespace osmscout {
                                                         const RawRelation& rawRelation,
                                                         std::list<MultipolygonPart>& parts)
   {
-    TypeInfoRef                    boundaryType=typeConfig.GetTypeInfo("boundary_administrative");
+    std::unordered_set<TypeInfoRef>    boundaryTypes;
+    TypeInfoRef                    boundaryType;
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
     std::set<OSMId>                pendingRelationIds;
@@ -603,6 +604,22 @@ namespace osmscout {
     CoordDataFile::CoordResultMap  coordMap;
     IdRawWayMap                    wayMap;
     std::map<OSMId,RawRelationRef> relationMap;
+
+    boundaryType=typeConfig.GetTypeInfo("boundary_country");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
+    boundaryType=typeConfig.GetTypeInfo("boundary_state");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
+    boundaryType=typeConfig.GetTypeInfo("boundary_county");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
+
+    boundaryType=typeConfig.GetTypeInfo("boundary_administrative");
+    assert(boundaryType);
+    boundaryTypes.insert(boundaryType);
 
     visitedRelationIds.insert(rawRelation.GetId());
 
@@ -619,8 +636,7 @@ namespace osmscout {
                (member.role=="inner" ||
                 member.role=="outer" ||
                 member.role.empty())) {
-        if (boundaryType &&
-            rawRelation.GetType()==boundaryType) {
+        if (boundaryTypes.count(rawRelation.GetType()) == 1) {
           if (visitedRelationIds.find(member.id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
                              NumberToString(member.id)+
@@ -679,8 +695,7 @@ namespace osmscout {
                    (member.role=="inner" ||
                     member.role=="outer" ||
                     member.role.empty())) {
-            if (boundaryType &&
-                rawRelation.GetType()==boundaryType) {
+            if (boundaryTypes.count(rawRelation.GetType())==1) {
               if (visitedRelationIds.find(member.id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
                                  NumberToString(member.id)+
@@ -755,8 +770,7 @@ namespace osmscout {
 
     // Now build together everything
 
-    if (boundaryType &&
-        rawRelation.GetType()==boundaryType) {
+    if (boundaryTypes.count(rawRelation.GetType())==1) {
       return ComposeBoundaryMembers(typeConfig,
                                     progress,
                                     coordMap,
