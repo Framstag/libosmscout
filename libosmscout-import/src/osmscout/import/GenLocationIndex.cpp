@@ -273,6 +273,52 @@ namespace osmscout {
         out << " = " << alias.name << " Node " << alias.reference << std::endl;
       }
 
+      DumpRegion(*childRegion,
+                 indent+2,
+                 out);
+    }
+  }
+
+  bool LocationIndexGenerator::DumpRegionTree(Progress& progress,
+                                              const Region& rootRegion,
+                                              const std::string& filename)
+  {
+    std::ofstream debugStream;
+
+    debugStream.open(filename.c_str(),
+                     std::ios::out|std::ios::trunc);
+
+    if (!debugStream.is_open()) {
+      progress.Error("Cannot open '"+filename+"'");
+
+      return false;
+    }
+
+    DumpRegion(rootRegion,
+               0,
+               debugStream);
+    debugStream.close();
+
+    return true;
+  }
+
+  void LocationIndexGenerator::DumpRegionAndData(const Region& parent,
+                                                 size_t indent,
+                                                 std::ostream& out)
+  {
+    for (const auto& childRegion : parent.regions) {
+      for (size_t i=0; i<indent; i++) {
+        out << " ";
+      }
+      out << " + " << childRegion->name << " " << childRegion->reference.GetTypeName() << " " << childRegion->reference.GetFileOffset() << std::endl;
+
+      for (const auto& alias : childRegion->aliases) {
+        for (size_t i=0; i<indent+2; i++) {
+          out << " ";
+        }
+        out << " = " << alias.name << " Node " << alias.reference << std::endl;
+      }
+
       for (const auto& poi : childRegion->pois) {
         for (size_t i=0; i<indent+2; i++) {
           out << " ";
@@ -304,9 +350,9 @@ namespace osmscout {
         }
       }
 
-      DumpRegion(*childRegion,
-                 indent+2,
-                 out);
+      DumpRegionAndData(*childRegion,
+                        indent+2,
+                        out);
     }
   }
 
@@ -325,9 +371,9 @@ namespace osmscout {
       return false;
     }
 
-    DumpRegion(rootRegion,
-               0,
-               debugStream);
+    DumpRegionAndData(rootRegion,
+                      0,
+                      debugStream);
     debugStream.close();
 
     return true;
@@ -365,7 +411,7 @@ namespace osmscout {
   bool LocationIndexGenerator::GetBoundaryAreas(const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const TypeConfigRef& typeConfig,
-                                                const std::unordered_set<TypeInfoRef>& boundaryTypes,
+                                                const TypeInfoSet& boundaryTypes,
                                                 std::list<Boundary>& boundaryAreas)
   {
     FileScanner                  scanner;
@@ -402,7 +448,7 @@ namespace osmscout {
         return false;
       }
 
-      if (boundaryTypes.count(area.GetType()) == 0) {
+      if (!boundaryTypes.IsSet(area.GetType())) {
         continue;
       }
 
@@ -466,7 +512,6 @@ namespace osmscout {
 
       region->reference=boundary.reference;
       region->name=boundary.name;
-
       region->areas=boundary.areas;
 
       region->CalculateMinMax();
@@ -586,12 +631,12 @@ namespace osmscout {
     for (size_t level=regionTree.size()-1; level>=1; level--) {
       for (const auto& region : regionTree[level]) {
         uint32_t cellMinX=(uint32_t)((region->minlon+180.0)/regionIndex.cellWidth);
-		uint32_t cellMaxX=(uint32_t)((region->maxlon + 180.0) / regionIndex.cellWidth);
-		uint32_t cellMinY=(uint32_t)((region->minlat + 90.0) / regionIndex.cellHeight);
-		uint32_t cellMaxY=(uint32_t)((region->maxlat + 90.0) / regionIndex.cellHeight);
+        uint32_t cellMaxX=(uint32_t)((region->maxlon+180.0)/regionIndex.cellWidth);
+        uint32_t cellMinY=(uint32_t)((region->minlat+90.0)/regionIndex.cellHeight);
+        uint32_t cellMaxY=(uint32_t)((region->maxlat+90.0)/regionIndex.cellHeight);
 
-		for (uint32_t y = cellMinY; y <= cellMaxY; y++) {
-			for (uint32_t x = cellMinX; x <= cellMaxX; x++) {
+        for (uint32_t y=cellMinY; y<=cellMaxY; y++) {
+          for (uint32_t x=cellMinX; x<=cellMaxX; x++) {
             Pixel pixel(x,y);
 
             regionIndex.index[pixel].push_back(region);
@@ -1847,7 +1892,7 @@ namespace osmscout {
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
     TypeInfoRef                        boundaryType;
-    std::unordered_set<TypeInfoRef>    boundaryTypes;
+    TypeInfoSet                        boundaryTypes(*typeConfig);
     std::list<Boundary>                boundaryAreas;
     std::list<std::string>             regionIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
@@ -1882,19 +1927,19 @@ namespace osmscout {
 
     boundaryType=typeConfig->GetTypeInfo("boundary_country");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     boundaryType=typeConfig->GetTypeInfo("boundary_state");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     boundaryType=typeConfig->GetTypeInfo("boundary_county");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
 
     //
@@ -1998,10 +2043,8 @@ namespace osmscout {
     for (size_t i=0; i<regionTree.size(); i++) {
       size_t count=0;
 
-      for (std::list<RegionRef>::const_iterator iter=regionTree[i].begin();
-           iter!=regionTree[i].end();
-           ++iter) {
-        count+=(*iter)->locations.size();
+      for (const auto& region : regionTree[i]) {
+        count+=region->locations.size();
       }
 
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
@@ -2045,12 +2088,19 @@ namespace osmscout {
 
     progress.Info("Detected "+NumberToString(regionIgnoreTokens.size())+" token(s) to ignore");
 
+    progress.SetAction("Dumping region tree");
+
+    DumpRegionTree(progress,
+                   *rootRegion,
+                   AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   "location_region.txt"));
+
     progress.SetAction("Dumping location tree");
 
     DumpLocationTree(progress,
                      *rootRegion,
                      AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "location.txt"));
+                                     "location_full.txt"));
 
     FileWriter writer;
 
