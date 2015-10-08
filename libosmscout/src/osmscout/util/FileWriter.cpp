@@ -616,8 +616,11 @@ namespace osmscout {
       else if (latDelta>=-32768 && latDelta<=32767) {
         coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
       }
-      else {
+      else if (latDelta>=-8388608 && latDelta<=8388608) {
         coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        return false;
       }
 
       deltaBuffer[deltaBufferPos]=latDelta;
@@ -633,8 +636,11 @@ namespace osmscout {
       else if (lonDelta>=-32768 && lonDelta<=32767) {
         coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
       }
-      else {
+      else if (lonDelta>=-8388608 && lonDelta<=8388608) {
         coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        return false;
       }
       
       deltaBuffer[deltaBufferPos]=lonDelta;
@@ -840,6 +846,42 @@ namespace osmscout {
     delete [] buffer;
 
     return !hasError;
+  }
+
+  bool IsValidToWrite(const std::vector<GeoCoord>& nodes)
+  {
+    if (nodes.size()<=1) {
+      return true;
+    }
+
+    uint32_t lastLat=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lastLon=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
+      uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
+
+      // lat
+
+      int32_t latDelta=currentLat-lastLat;
+
+      if (latDelta<-8388608 || latDelta>8388608) {
+        return false;
+      }
+
+      // lon
+
+      int32_t lonDelta=currentLon-lastLon;
+
+      if (lonDelta<-8388608 || lonDelta>8388608) {
+        return false;
+      }
+
+      lastLat=currentLat;
+      lastLon=currentLon;
+    }
+
+    return true;
   }
 
   ObjectFileRefStreamWriter::ObjectFileRefStreamWriter(FileWriter& writer)

@@ -234,11 +234,16 @@ namespace osmscout {
       }
 
       ring.ids[n]=coord->second.point.GetId();
-
       ring.nodes[n]=coord->second.point.GetCoords();
     }
 
     if (!success) {
+      return true;
+    }
+
+    if (!IsValidToWrite(ring.nodes)) {
+      progress.Error("Area coordinates are not dense enough to be written for area "+
+                     NumberToString(wayId));
       return true;
     }
 

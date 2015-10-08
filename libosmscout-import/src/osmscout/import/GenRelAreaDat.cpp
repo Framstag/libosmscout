@@ -1113,6 +1113,7 @@ namespace osmscout {
       }
 
       bool valid=true;
+      bool dense=true;
 
       for (const auto& ring : rel.rings) {
         if (ring.ring!=Area::masterRingId) {
@@ -1120,6 +1121,10 @@ namespace osmscout {
             valid=false;
 
             break;
+          }
+
+          if (!IsValidToWrite(ring.nodes)) {
+            dense=false;
           }
         }
       }
@@ -1129,6 +1134,14 @@ namespace osmscout {
                          NumberToString(rawRel.GetId())+" "+
                          rel.GetType()->GetName()+" "+
                          name+" has ring with less than three nodes, skipping");
+        continue;
+      }
+
+      if (!dense) {
+        progress.Warning("Relation "+
+                         NumberToString(rawRel.GetId())+" "+
+                         rel.GetType()->GetName()+" "+
+                         name+" has ring(s) which nodes are not dense enough to be written, skipping");
         continue;
       }
 
