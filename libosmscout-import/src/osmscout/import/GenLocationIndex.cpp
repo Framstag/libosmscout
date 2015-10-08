@@ -389,12 +389,13 @@ namespace osmscout {
           !(region->minlat>childRegion->maxlat)) {
         for (size_t i=0; i<region->areas.size(); i++) {
           for (size_t j=0; j<childRegion->areas.size(); j++) {
-            if (IsAreaSubOfArea(region->areas[i],childRegion->areas[j])) {
+            if (IsAreaSubOfAreaQuorum(region->areas[i],childRegion->areas[j])) {
               // If we already have the same name and are a "minor" reference, we skip...
               if (!(region->name==childRegion->name &&
                     region->reference.type<childRegion->reference.type)) {
                 AddRegion(*childRegion,region);
               }
+
               return;
             }
           }
