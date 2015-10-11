@@ -790,6 +790,7 @@ namespace osmscout {
     RegisterTag("natural");
     RegisterTag("type");
     RegisterTag("restriction");
+    RegisterTag("junction");
 
     featureName=std::make_shared<NameFeature>();
     RegisterFeature(featureName);
@@ -905,11 +906,13 @@ namespace osmscout {
     tagNatural=GetTagId("natural");
     tagType=GetTagId("type");
     tagRestriction=GetTagId("restriction");
+    tagJunction=GetTagId("junction");
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
     assert(tagType!=tagIgnore);
     assert(tagRestriction!=tagIgnore);
+    assert(tagJunction!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()
