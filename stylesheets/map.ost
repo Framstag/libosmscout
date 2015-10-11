@@ -115,6 +115,7 @@ GRADES
   SURFACE GRADE 3 {
     "unpaved"
     "dirt"
+    "dirt/sand"
     "earth"
     "grass"
     "grass;earth"
@@ -857,7 +858,7 @@ TYPES
       ADDRESS OPTIMIZE_LOW_ZOOM MERGE_AREAS
       
   TYPE leisure_nature_reserve
-    = NODE AREA ("leisure"=="nature_reserve")
+    = NODE WAY AREA ("leisure"=="nature_reserve")
       {Name, NameAlt}
       MERGE_AREAS
     
@@ -2028,7 +2029,7 @@ TYPES
     = AREA ("boundary"=="civil")
 
   TYPE boundary_national_park IGNORE
-    = AREA RELATION ("boundary"=="national_park")
+    = WAY AREA RELATION ("boundary"=="national_park")
 
   TYPE boundary_maritime IGNORE
     = AREA RELATION ("boundary"=="maritime")
