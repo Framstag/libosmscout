@@ -401,7 +401,7 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           osmscout::AdminLevelFeatureValue *adminLevelValue=dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
 
           DumpIndent(indent);
-          std::cout << "AdminLevel: " << adminLevelValue->GetAdminLevel() << std::endl;
+          std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel() << std::endl;
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);

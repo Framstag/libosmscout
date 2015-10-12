@@ -58,7 +58,7 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-#serial 12
+#serial 13
 
 AC_DEFUN([AX_CREATE_PKGCONFIG_INFO],[dnl
 AS_VAR_PUSHDEF([PKGCONFIG_suffix],[ax_create_pkgconfig_suffix])dnl
@@ -153,7 +153,7 @@ PKGCONFIG_cppflags=`eval echo "$PKGCONFIG_cppflags"`
 AC_MSG_RESULT($PKGCONFIG_cppflags)
 
 AC_MSG_CHECKING(our pkgconfig ldflags)
-PKGCONFIG_ldflags="ifelse($6,,$PACKAGE_LDFLAGS,$5)"
+PKGCONFIG_ldflags="ifelse($6,,$PACKAGE_LDFLAGS,$6)"
 PKGCONFIG_ldflags=`eval echo "$PKGCONFIG_ldflags"`
 PKGCONFIG_ldflags=`eval echo "$PKGCONFIG_ldflags"`
 AC_MSG_RESULT($PKGCONFIG_ldflags)

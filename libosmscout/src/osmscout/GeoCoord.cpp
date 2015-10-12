@@ -35,7 +35,7 @@ namespace osmscout {
     std::streamsize         oldPrecision=stream.precision(5);
     std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
 
-    stream << GetLat();
+    stream << std::abs(GetLat());
 
     if (GetLat()>=0) {
       stream << " N ";
@@ -44,7 +44,7 @@ namespace osmscout {
       stream << " S ";
     }
 
-    stream << GetLon();
+    stream << std::abs(GetLon());
 
     if (GetLon()>=0) {
       stream << " E";

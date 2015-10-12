@@ -53,11 +53,12 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetNodesInArea(const GeoBox& boundingBox,
-                                  const TypeSet& types,
+                                  const TypeInfoSet& types,
                                   std::vector<NodeRef>& nodes) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
     NodeDataFileRef  nodeDataFile=database->GetNodeDataFile();
+    TypeInfoSet      loadedTypes;
 
     nodes.clear();
 
@@ -71,7 +72,8 @@ namespace osmscout {
     if (!areaNodeIndex->GetOffsets(boundingBox,
                                    types,
                                    std::numeric_limits<size_t>::max(),
-                                   nodeOffsets)) {
+                                   nodeOffsets,
+                                   loadedTypes)) {
       log.Error() << "Error getting nodes from area node index!";
       return false;
     }
@@ -102,11 +104,12 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetAreasInArea(const GeoBox& boundingBox,
-                                  const TypeSet& types,
+                                  const TypeInfoSet& types,
                                   std::vector<AreaRef>& areas) const
   {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
     AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
+    TypeInfoSet      loadedTypes;
 
     areas.clear();
 
@@ -117,12 +120,13 @@ namespace osmscout {
 
     std::vector<DataBlockSpan> spans;
 
-    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+    if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                        boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        types,
                                        std::numeric_limits<size_t>::max(),
-                                       spans)) {
+                                       spans,
+                                       loadedTypes)) {
       log.Error() << "Error getting ways and relations from area index!";
 
       return false;
@@ -155,7 +159,7 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetWaysInArea(const GeoBox& boundingBox,
-                                 const TypeSet& types,
+                                 const TypeInfoSet& types,
                                  std::vector<WayRef>& ways) const
   {
     AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
@@ -168,8 +172,9 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<TypeSet>    wayTypes;
-    std::vector<FileOffset> wayWayOffsets;
+    std::vector<TypeInfoSet> wayTypes;
+    std::vector<FileOffset>  wayWayOffsets;
+    TypeInfoSet              loadedWayTypes;
 
 
     wayTypes.push_back(types);
@@ -178,7 +183,8 @@ namespace osmscout {
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
-                                  wayWayOffsets)) {
+                                  wayWayOffsets,
+                                  loadedWayTypes)) {
       log.Error() << "Error getting ways and relations from area way index!";
 
       return false;
@@ -216,11 +222,11 @@ namespace osmscout {
    *    True, if success, else false
    */
   bool POIService::GetPOIsInArea(const GeoBox& boundingBox,
-                                 const TypeSet& nodeTypes,
+                                 const TypeInfoSet& nodeTypes,
                                  std::vector<NodeRef>& nodes,
-                                 const TypeSet& wayTypes,
+                                 const TypeInfoSet& wayTypes,
                                  std::vector<WayRef>& ways,
-                                 const TypeSet& areaTypes,
+                                 const TypeInfoSet& areaTypes,
                                  std::vector<AreaRef>& areas) const
   {
     bool nodesSuccess=true;

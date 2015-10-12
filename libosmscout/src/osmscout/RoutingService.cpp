@@ -1711,25 +1711,27 @@ namespace osmscout {
                                      botLat,
                                      rightLon);
 
-    GeoBox                 boundingBox(GeoCoord(topLat,leftLon),
-                                       GeoCoord(botLat,rightLon));
-    osmscout::TypeSet      wayRoutableTypes;
-    osmscout::TypeSet      areaRoutableTypes;
+    GeoBox      boundingBox(GeoCoord(topLat,leftLon),
+                            GeoCoord(botLat,rightLon));
+    TypeInfoSet wayRoutableTypes;
+    TypeInfoSet areaRoutableTypes;
+    TypeInfoSet wayLoadedTypes;
+    TypeInfoSet areaLoadedTypes;
 
     for (const auto& type : database->GetTypeConfig()->GetTypes()) {
       if (!type->GetIgnore() &&
           type->CanRoute(vehicle)) {
         if (type->CanBeWay()) {
-          wayRoutableTypes.SetType(type->GetWayId());
+          wayRoutableTypes.Set(type);
         }
 
         if (type->CanBeArea()) {
-          areaRoutableTypes.SetType(type->GetAreaId());
+          areaRoutableTypes.Set(type);
         }
       }
     }
 
-    std::vector<TypeSet>           wayTypes;
+    std::vector<TypeInfoSet>       wayTypes;
     std::vector<FileOffset>        wayWayOffsets;
     std::vector<DataBlockSpan>     wayAreaSpans;
     std::vector<osmscout::AreaRef> areas;
@@ -1740,16 +1742,18 @@ namespace osmscout {
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayTypes,
                                   std::numeric_limits<size_t>::max(),
-                                  wayWayOffsets)) {
+                                  wayWayOffsets,
+                                  wayLoadedTypes)) {
       log.Error() << "Error getting ways from area way index!";
     }
 
-    if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+    if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                        boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        areaRoutableTypes,
                                        std::numeric_limits<size_t>::max(),
-                                       wayAreaSpans)) {
+                                       wayAreaSpans,
+                                       areaLoadedTypes)) {
       log.Error() << "Error getting areas from area area index!";
     }
 
@@ -1792,7 +1796,6 @@ namespace osmscout {
       }
 
       for (size_t i=0;  i<way->nodes.size(); i++) {
-
         double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
                              (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));
         if (distance<minDistance) {

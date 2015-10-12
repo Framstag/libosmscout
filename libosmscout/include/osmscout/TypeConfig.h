@@ -1009,6 +1009,7 @@ namespace osmscout {
     TagId                                       tagNatural;
     TagId                                       tagType;
     TagId                                       tagRestriction;
+    TagId                                       tagJunction;
 
     TypeInfoRef                                 typeInfoIgnore;
     TypeInfoRef                                 typeInfoTileLand;

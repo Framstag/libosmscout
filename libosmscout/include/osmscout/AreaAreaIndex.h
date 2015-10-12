@@ -24,7 +24,6 @@
 #include <vector>
 
 #include <osmscout/DataFile.h>
-#include <osmscout/TypeSet.h>
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/Geometry.h>
@@ -91,7 +90,7 @@ namespace osmscout {
 
   private:
     std::string                     filepart;       //!< name of the data file
-    std::string                     datafilename;   //!< Fullpath and name of the data file
+    std::string                     datafilename;   //!< Full path and name of the data file
     mutable FileScanner             scanner;        //!< Scanner instance for reading this file
 
     uint32_t                        maxLevel;       //!< Maximum level in index
@@ -105,8 +104,8 @@ namespace osmscout {
                       IndexCell& indexCell,
                       FileOffset& dataOffset) const;
 
-    bool ReadCellData(TypeConfig& typeConfig,
-                      const TypeSet& types,
+    bool ReadCellData(const TypeConfig& typeConfig,
+                      const TypeInfoSet& types,
                       FileOffset dataOffset,
                       size_t spaceLeft,
                       std::vector<DataBlockSpan>& spans,
@@ -128,12 +127,13 @@ namespace osmscout {
     void Close();
     bool Load(const std::string& path);
 
-    bool GetAreasInArea(const TypeConfigRef& typeConfig,
+    bool GetAreasInArea(const TypeConfig& typeConfig,
                         const GeoBox& boundingBox,
                         size_t maxLevel,
-                        const TypeSet& types,
+                        const TypeInfoSet& types,
                         size_t maxCount,
-                        std::vector<DataBlockSpan>& spans) const;
+                        std::vector<DataBlockSpan>& spans,
+                        TypeInfoSet& loadedTypes) const;
 
     void DumpStatistics();
   };

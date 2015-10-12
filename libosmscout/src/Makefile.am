@@ -33,7 +33,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Types.cpp \
                         osmscout/TypeConfig.cpp \
                         osmscout/TypeFeatures.cpp \
-                        osmscout/TypeSet.cpp \
                         osmscout/ost/Scanner.cpp \
                         osmscout/ost/Parser.cpp \
                         osmscout/GroundTile.cpp \

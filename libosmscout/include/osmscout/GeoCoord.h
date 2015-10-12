@@ -188,6 +188,14 @@ namespace osmscout {
       return lat==other.lat && lon==other.lon;
     }
 
+    /**
+     * Return true if coordinates are not equal
+     */
+    inline bool operator!=(const GeoCoord& other) const
+    {
+      return lat!=other.lat || lon!=other.lon;
+    }
+
     inline bool operator<(const GeoCoord& other) const
     {
       return lat<other.lat ||

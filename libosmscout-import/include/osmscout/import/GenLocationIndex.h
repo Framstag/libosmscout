@@ -203,6 +203,14 @@ namespace osmscout {
                     size_t indent,
                     std::ostream& out);
 
+    void DumpRegionAndData(const Region& parent,
+                           size_t indent,
+                           std::ostream& out);
+
+    bool DumpRegionTree(Progress& progress,
+                        const Region& rootRegion,
+                        const std::string& filename);
+
     bool DumpLocationTree(Progress& progress,
                           const Region& rootRegion,
                           const std::string& filename);
@@ -213,7 +221,7 @@ namespace osmscout {
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,
                           const TypeConfigRef& typeConfig,
-                          const std::unordered_set<TypeInfoRef>& boundaryType,
+                          const TypeInfoSet& boundaryTypes,
                           std::list<Boundary>& boundaryAreas);
 
     void SortInBoundaries(Progress& progress,

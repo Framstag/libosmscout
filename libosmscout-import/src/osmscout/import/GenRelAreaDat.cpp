@@ -594,7 +594,7 @@ namespace osmscout {
                                                         const RawRelation& rawRelation,
                                                         std::list<MultipolygonPart>& parts)
   {
-    std::unordered_set<TypeInfoRef>    boundaryTypes;
+    TypeInfoSet                    boundaryTypes(typeConfig);
     TypeInfoRef                    boundaryType;
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
@@ -607,19 +607,19 @@ namespace osmscout {
 
     boundaryType=typeConfig.GetTypeInfo("boundary_country");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     boundaryType=typeConfig.GetTypeInfo("boundary_state");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     boundaryType=typeConfig.GetTypeInfo("boundary_county");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     boundaryType=typeConfig.GetTypeInfo("boundary_administrative");
     assert(boundaryType);
-    boundaryTypes.insert(boundaryType);
+    boundaryTypes.Set(boundaryType);
 
     visitedRelationIds.insert(rawRelation.GetId());
 
@@ -636,7 +636,7 @@ namespace osmscout {
                (member.role=="inner" ||
                 member.role=="outer" ||
                 member.role.empty())) {
-        if (boundaryTypes.count(rawRelation.GetType()) == 1) {
+        if (boundaryTypes.IsSet(rawRelation.GetType())) {
           if (visitedRelationIds.find(member.id)!=visitedRelationIds.end()) {
             progress.Warning("Relation "+
                              NumberToString(member.id)+
@@ -695,7 +695,7 @@ namespace osmscout {
                    (member.role=="inner" ||
                     member.role=="outer" ||
                     member.role.empty())) {
-            if (boundaryTypes.count(rawRelation.GetType())==1) {
+            if (boundaryTypes.IsSet(rawRelation.GetType())) {
               if (visitedRelationIds.find(member.id)!=visitedRelationIds.end()) {
                 progress.Warning("Relation "+
                                  NumberToString(member.id)+
@@ -770,7 +770,7 @@ namespace osmscout {
 
     // Now build together everything
 
-    if (boundaryTypes.count(rawRelation.GetType())==1) {
+    if (boundaryTypes.IsSet(rawRelation.GetType())) {
       return ComposeBoundaryMembers(typeConfig,
                                     progress,
                                     coordMap,
@@ -1113,6 +1113,7 @@ namespace osmscout {
       }
 
       bool valid=true;
+      bool dense=true;
 
       for (const auto& ring : rel.rings) {
         if (ring.ring!=Area::masterRingId) {
@@ -1120,6 +1121,10 @@ namespace osmscout {
             valid=false;
 
             break;
+          }
+
+          if (!IsValidToWrite(ring.nodes)) {
+            dense=false;
           }
         }
       }
@@ -1129,6 +1134,14 @@ namespace osmscout {
                          NumberToString(rawRel.GetId())+" "+
                          rel.GetType()->GetName()+" "+
                          name+" has ring with less than three nodes, skipping");
+        continue;
+      }
+
+      if (!dense) {
+        progress.Warning("Relation "+
+                         NumberToString(rawRel.GetId())+" "+
+                         rel.GetType()->GetName()+" "+
+                         name+" has ring(s) which nodes are not dense enough to be written, skipping");
         continue;
       }
 

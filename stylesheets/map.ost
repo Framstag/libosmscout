@@ -115,6 +115,7 @@ GRADES
   SURFACE GRADE 3 {
     "unpaved"
     "dirt"
+    "dirt/sand"
     "earth"
     "grass"
     "grass;earth"
@@ -154,71 +155,71 @@ TYPES
   TYPE highway_motorway
     = WAY ("highway"=="motorway")
       {Name, NameAlt, Ref}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
       {Name, NameAlt, Ref}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
       {Name, NameAlt, Ref}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
       {Name, NameAlt, Ref}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
   
   // Other roads mainly for cars
   
   TYPE highway_trunk
     = WAY ("highway"=="trunk")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_trunk_link
     = WAY ("highway"=="trunk_link")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
        
   TYPE highway_primary 
     = WAY ("highway"=="primary")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_primary_link
     = WAY ("highway"=="primary_link")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION
-      
+      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
+
   TYPE highway_secondary
     = WAY ("highway"=="secondary")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_secondary_link
     = WAY ("highway"=="secondary_link")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION
+      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       
   TYPE highway_tertiary
     = WAY ("highway"=="tertiary")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_tertiary_link
     = WAY ("highway"=="tertiary_link")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION
+      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       
   TYPE highway_unclassified
     = WAY ("highway"=="unclassified")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION
+      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       
   TYPE highway_road
     = WAY ("highway"=="road")
       {Name, NameAlt, Ref}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_residential
     = WAY AREA ("highway"=="residential")
@@ -226,21 +227,21 @@ TYPES
       PATH[FOOT BICYCLE CAR] LOCATION
       
   TYPE highway_living_street
-    = WAY ("highway"=="living_street")
+    = WAY AREA ("highway"=="living_street")
       {Name, NameAlt}
-      PATH[FOOT BICYCLE CAR] LOCATION
+      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       
   TYPE highway_service
     = WAY AREA ("highway"=="service")
       {Name, NameAlt}
-      PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
+      PATH[FOOT BICYCLE CAR] LOCATION
   
   // Ways with main designation different to car
   
   TYPE highway_track
     = WAY ("highway"=="track")
       {Name, NameAlt}
-      PATH[FOOT BICYCLE] LOCATION
+      PATH[FOOT BICYCLE] LOCATION PIN_WAY
       
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
@@ -250,12 +251,12 @@ TYPES
   TYPE highway_path
     = WAY ("highway"=="path")
       {Name, NameAlt}
-      PATH[FOOT BICYCLE] IGNORESEALAND
+      PATH[FOOT BICYCLE] IGNORESEALAND PIN_WAY
 
   TYPE highway_cycleway
     = WAY ("highway"=="cycleway")
       {Name, NameAlt}
-      PATH[BICYCLE]
+      PATH[BICYCLE] PIN_WAY
       
   TYPE highway_footway
     = WAY AREA ("highway"=="footway")
@@ -265,7 +266,7 @@ TYPES
   TYPE highway_bridleway
     = WAY ("highway"=="bridleway")
       {Name, NameAlt}
-      PATH
+      PATH PIN_WAY
     
   TYPE highway_steps
     = WAY ("highway"=="steps")
@@ -328,12 +329,12 @@ TYPES
   TYPE waterway_stream
     = WAY ("waterway"=="stream")
       {Name, NameAlt, Width}
-      OPTIMIZE_LOW_ZOOM IGNORESEALAND
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
       
   TYPE waterway_river
     = WAY ("waterway"=="river")
       {Name, NameAlt, Width, Tunnel}
-      OPTIMIZE_LOW_ZOOM IGNORESEALAND 
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
       
   TYPE waterway_riverbank
     = AREA ("waterway"=="riverbank" OR ("natural"=="water" AND  "water"=="river"))
@@ -488,7 +489,7 @@ TYPES
     
   TYPE aeroway_taxiway
     = WAY ("aeroway"=="taxiway")
-      {Ref, Width}
+      {Ref, Width} PIN_WAY
     
   TYPE aeroway_apron
     = AREA ("aeroway"=="apron")
@@ -2028,7 +2029,7 @@ TYPES
     = AREA ("boundary"=="civil")
 
   TYPE boundary_national_park IGNORE
-    = AREA RELATION ("boundary"=="national_park")
+    = WAY AREA RELATION ("boundary"=="national_park")
 
   TYPE boundary_maritime IGNORE
     = AREA RELATION ("boundary"=="maritime")

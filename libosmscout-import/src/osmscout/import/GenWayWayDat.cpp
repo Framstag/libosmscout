@@ -493,6 +493,12 @@ namespace osmscout {
       return true;
     }
 
+    if (!IsValidToWrite(way.nodes)) {
+      progress.Error("Way coordinates are not dense enough to be written for Way "+
+                     NumberToString(wayId));
+      return true;
+    }
+
     if (!writer.Write((uint8_t)osmRefWay) ||
         !writer.Write(wayId) ||
         !way.Write(typeConfig,

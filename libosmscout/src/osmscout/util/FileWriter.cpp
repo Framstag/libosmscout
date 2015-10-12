@@ -583,60 +583,216 @@ namespace osmscout {
 
   bool FileWriter::Write(const std::vector<GeoCoord>& nodes)
   {
-    if (!WriteNumber((uint32_t)nodes.size())) {
-      return false;
+    // Quick exit for empty vector arrays
+    if (nodes.empty()) {
+      uint8_t size=0;
+
+      return Write(size);
     }
 
-    GeoCoord minCoord=nodes[0];
+    // A lat and a lon delta for each coordinate delta
+    deltaBuffer.resize((nodes.size()-1)*2);
+
+    //
+    // Calculate deltas and required space
+    //
+
+    uint32_t lastLat=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lastLon=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+    size_t   deltaBufferPos=0;
+    size_t   coordBitSize=16;
 
     for (size_t i=1; i<nodes.size(); i++) {
-      minCoord.Set(std::min(minCoord.GetLat(),nodes[i].GetLat()),
-                   std::min(minCoord.GetLon(),nodes[i].GetLon()));
+      uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
+      uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
+
+      // lat
+
+      int32_t latDelta=currentLat-lastLat;
+
+      if (latDelta>=-128 && latDelta<=127) {
+        coordBitSize=std::max(coordBitSize,(size_t)16); // 2x 8 bit
+      }
+      else if (latDelta>=-32768 && latDelta<=32767) {
+        coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
+      }
+      else if (latDelta>=-8388608 && latDelta<=8388608) {
+        coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        return false;
+      }
+
+      deltaBuffer[deltaBufferPos]=latDelta;
+      deltaBufferPos++;
+
+      // lon
+
+      int32_t lonDelta=currentLon-lastLon;
+
+      if (lonDelta>=-128 && lonDelta<=127) {
+        coordBitSize=std::max(coordBitSize,(size_t)16); // 2x 8 bit
+      }
+      else if (lonDelta>=-32768 && lonDelta<=32767) {
+        coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
+      }
+      else if (lonDelta>=-8388608 && lonDelta<=8388608) {
+        coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        return false;
+      }
+      
+      deltaBuffer[deltaBufferPos]=lonDelta;
+      deltaBufferPos++;
+
+      lastLat=currentLat;
+      lastLon=currentLon;
     }
 
-    if (!WriteCoord(minCoord)) {
+    size_t bytesNeeded=(nodes.size()-1)*coordBitSize/8; // all coordinates in the same encoding
+
+    //
+    // Write starting length / signal bit section
+    //
+
+    if (nodes.size()<32) {
+      uint8_t size;
+      uint8_t nodeSize=(nodes.size() & 0x1f) << 2;
+
+      if (coordBitSize==16) {
+        size=0x00 | nodeSize;
+      }
+      else if (coordBitSize==32) {
+        size=0x01 | nodeSize;
+      }
+      else {
+        size=0x02 | nodeSize;
+      }
+
+      if (!Write(size)) {
+        return false;
+      }
+    }
+    else if (nodes.size()<4096) {
+      uint8_t size[2];
+      uint8_t nodeSize1=((nodes.size() & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=nodes.size() >> 5; // The final bits
+
+      if (coordBitSize==16) {
+        size[0]=0x00 | nodeSize1;
+      }
+      else if (coordBitSize==32) {
+        size[0]=0x01 | nodeSize1;
+      }
+      else {
+        size[0]=0x02 | nodeSize1;
+      }
+
+      size[1]=nodeSize2;
+
+      if (!Write((char*)size,2)) {
+        return false;
+      }
+    }
+    else {
+      uint8_t size[3];
+      uint8_t nodeSize1=((nodes.size() & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=((nodes.size() >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+      uint8_t nodeSize3=nodes.size() >> 12; // The final bits
+
+      if (coordBitSize==16) {
+        size[0]=0x00 | nodeSize1;
+      }
+      else if (coordBitSize==32) {
+        size[0]=0x01 | nodeSize1;
+      }
+      else {
+        size[0]=0x02 | nodeSize1;
+      }
+
+      size[1]=nodeSize2;
+      size[2]=nodeSize3;
+
+      if (!Write((char*)size,3)) {
+        return false;
+      }
+    }
+
+    //std::cout << "Write " << std::dec << nodes.size() << " nodes, " << coordBitSize << " bits per coordinate pair" << std::endl;
+
+    /*
+    std::cout << "Write - Calculated deltas: ";
+    for (size_t i=0; i<deltaBuffer.size(); i++) {
+      std::cout << std::hex << deltaBuffer[i] << " ";
+    }
+    std::cout << std::endl;*/
+
+    //
+    // Write data array
+    //
+
+    if (!WriteCoord(nodes[0])) {
       return false;
     }
 
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (!WriteNumber((uint32_t)round((nodes[i].GetLat()-minCoord.GetLat())*latConversionFactor))) {
-        return false;
-      }
+    byteBuffer.resize(bytesNeeded);
 
-      if (!WriteNumber((uint32_t)round((nodes[i].GetLon()-minCoord.GetLon())*lonConversionFactor))) {
-        return false;
+    if (coordBitSize==16) {
+      size_t byteBufferPos=0;
+
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i];
+        byteBufferPos++;
+      }
+    }
+    else if (coordBitSize==32) {
+      size_t byteBufferPos=0;
+
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8);
+        ++byteBufferPos;
+      }
+    }
+    else {
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        size_t byteBufferPos=0;
+
+        for (size_t i=0; i<deltaBuffer.size(); i+=2) {
+          byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
+          ++byteBufferPos;
+        }
       }
     }
 
-    return true;
-  }
-
-  bool FileWriter::Write(const std::vector<GeoCoord>& nodes,
-                         size_t count)
-  {
-    GeoCoord minCoord=nodes[0];
-
-    for (size_t i=1; i<count; i++) {
-      minCoord.Set(std::min(minCoord.GetLat(),nodes[i].GetLat()),
-                   std::min(minCoord.GetLon(),nodes[i].GetLon()));
-    }
-
-    if (!WriteCoord(minCoord)) {
+    if (!Write((char*)byteBuffer.data(),byteBuffer.size())) {
       return false;
     }
 
-    for (size_t i=0; i<count; i++) {
-      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minCoord.GetLat())*latConversionFactor);
-      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minCoord.GetLon())*lonConversionFactor);
-
-      if (!WriteNumber(latValue)) {
-        return false;
-      }
-
-      if (!WriteNumber(lonValue)) {
-        return false;
-      }
+    /*
+    std::cout << "Write - byte buffer: ";
+    for (size_t i=0; i<byteBuffer.size(); i++) {
+      std::cout << std::hex << (unsigned int) byteBuffer[i] << " ";
     }
+    std::cout << std::endl;*/
 
     return true;
   }
@@ -690,6 +846,42 @@ namespace osmscout {
     delete [] buffer;
 
     return !hasError;
+  }
+
+  bool IsValidToWrite(const std::vector<GeoCoord>& nodes)
+  {
+    if (nodes.size()<=1) {
+      return true;
+    }
+
+    uint32_t lastLat=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lastLon=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
+      uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
+
+      // lat
+
+      int32_t latDelta=currentLat-lastLat;
+
+      if (latDelta<-8388608 || latDelta>8388608) {
+        return false;
+      }
+
+      // lon
+
+      int32_t lonDelta=currentLon-lastLon;
+
+      if (lonDelta<-8388608 || lonDelta>8388608) {
+        return false;
+      }
+
+      lastLat=currentLat;
+      lastLon=currentLon;
+    }
+
+    return true;
   }
 
   ObjectFileRefStreamWriter::ObjectFileRefStreamWriter(FileWriter& writer)

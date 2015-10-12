@@ -348,8 +348,8 @@ namespace osmscout {
   inline bool IsAreaCompletelyInArea(const std::vector<N>& a,
                                      const std::vector<M>& b)
   {
-    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
-      if (GetRelationOfPointToArea(*i,b)<0) {
+    for (const auto& node : a) {
+      if (GetRelationOfPointToArea(node,b)<0) {
         return false;
       }
     }
@@ -362,11 +362,11 @@ namespace osmscout {
    * Return true, if at least one point of area a in within area b
    */
   template<typename N,typename M>
-  bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
-                                 const std::vector<M>& b)
+  inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
+                                        const std::vector<M>& b)
   {
-    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
-      if (GetRelationOfPointToArea(*i,b)>=0) {
+    for (const auto& node : a) {
+      if (GetRelationOfPointToArea(node,b)>=0) {
         return true;
       }
     }
@@ -376,15 +376,18 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
-   * Returns true, if area a is completely in area b under the assumption that the area a is either
-   * completely within or outside the area b.
+   * Assumes that the given areas do not intersect.
+   *
+   * Returns true, of area a is within b (because at least
+   * one point of area a is in b), else (at least one point
+   * of area a is outside area b) false
    */
   template<typename N,typename M>
-  bool IsAreaSubOfArea(const std::vector<N>& a,
-                       const std::vector<M>& b)
+  inline bool IsAreaSubOfArea(const std::vector<N>& a,
+                              const std::vector<M>& b)
   {
-    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
-      int relPos=GetRelationOfPointToArea(*i,b);
+    for (const auto& node : a) {
+      int relPos=GetRelationOfPointToArea(node,b);
 
       if (relPos>0) {
         return true;
@@ -401,25 +404,36 @@ namespace osmscout {
    * \ingroup Geometry
    * Assumes that the given areas do not intersect.
    *
-   * Returns true, of area a is within b (because at least
-   * one point of area a is in b), else (at least one point
-   * of area a is outside area b) false
+   * Returns true, of area a is within b. This version uses some heuristic
+   * based on thr asumption that areas are either in another area or not but
+   * there may be some smaller errors.
    */
-  inline bool IsAreaSubOfArea(const std::vector<GeoCoord>& a,
-                              const std::vector<GeoCoord>& b)
+  template<typename N,typename M>
+  inline bool IsAreaSubOfAreaQuorum(const std::vector<N>& a,
+                                    const std::vector<M>& b)
   {
-    for (std::vector<GeoCoord>::const_iterator i=a.begin(); i!=a.end(); i++) {
-      int relPos=GetRelationOfPointToArea(*i,b);
+    size_t pro=0;
+    size_t contra=0;
+    size_t count=0;
+
+    for (const auto& node : a) {
+      int relPos=GetRelationOfPointToArea(node,b);
+
+      ++count;
 
       if (relPos>0) {
-        return true;
+        ++pro;
       }
       else if (relPos<0) {
-        return false;
+        ++contra;
+      }
+
+      if (count>=100 && pro/20>contra) {
+        return true;
       }
     }
 
-    return false;
+    return pro/20>contra;
   }
 
   /**

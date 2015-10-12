@@ -44,9 +44,11 @@ namespace osmscout {
   class OSMSCOUT_API FileWriter
   {
   private:
-    std::string filename;
-    std::FILE   *file;
-    bool        hasError;
+    std::string          filename;    //!< The filename
+    std::FILE            *file;       //!< The low level FILE object
+    bool                 hasError;    //!< Flag for signaling that the stream has errors
+    std::vector<int32_t> deltaBuffer; //!< Temporary storage for deltas for storing of std::vector<GeoCoord>
+    std::vector<uint8_t> byteBuffer;  //!< Temporary data buffer for storing of std::vector<GeoCoord>
 
   public:
     FileWriter();
@@ -108,14 +110,14 @@ namespace osmscout {
     bool WriteInvalidCoord();
 
     bool Write(const std::vector<GeoCoord>& nodes);
-    bool Write(const std::vector<GeoCoord>& nodes,
-               size_t count);
 
     bool WriteTypeId(TypeId id, uint8_t maxBytes);
 
     bool Flush();
     bool FlushCurrentBlockWithZeros(size_t blockSize);
   };
+
+  extern OSMSCOUT_API bool IsValidToWrite(const std::vector<GeoCoord>& nodes);
 
   /**
    * Efficiently (in disk space handling) write a number of (sorted by file offset) ObjectFileRefs.

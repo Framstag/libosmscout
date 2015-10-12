@@ -32,7 +32,6 @@
 #include <osmscout/Types.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
-#include <osmscout/TypeSet.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
@@ -1360,7 +1359,7 @@ namespace osmscout {
     std::vector<TextStyleLookupTable>          nodeTextStyleSelectors;
     IconStyleLookupTable                       nodeIconStyleSelectors;
 
-    std::vector<TypeSet>                       nodeTypeSets;
+    std::vector<TypeInfoSet>                   nodeTypeSets;
 
     // Way
 
@@ -1376,7 +1375,7 @@ namespace osmscout {
     PathSymbolStyleLookupTable                 wayPathSymbolStyleSelectors;
     PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
 
-    std::vector<std::vector<TypeSet> >         wayTypeSets;
+    std::vector<std::vector<TypeInfoSet> >     wayTypeSets;
 
     // Area
 
@@ -1388,7 +1387,7 @@ namespace osmscout {
     std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
     IconStyleLookupTable                       areaIconStyleSelectors;
 
-    std::vector<TypeSet>                       areaTypeSets;
+    std::vector<TypeInfoSet>                   areaTypeSets;
 
     std::unordered_map<std::string,StyleVariableRef> variables;
 
@@ -1456,11 +1455,11 @@ namespace osmscout {
                           IconPartialStyle& style);
 
     void GetNodeTypesWithMaxMag(const Magnification& maxMag,
-                                TypeSet& types) const;
+                                TypeInfoSet& types) const;
     void GetWayTypesByPrioWithMaxMag(const Magnification& mag,
-                                     std::vector<TypeSet>& types) const;
+                                     std::vector<TypeInfoSet>& types) const;
     void GetAreaTypesWithMaxMag(const Magnification& maxMag,
-                                TypeSet& types) const;
+                                TypeInfoSet& types) const;
 
 
     inline size_t GetWayPrio(const TypeInfoRef& type) const

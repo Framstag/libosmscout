@@ -511,13 +511,13 @@ namespace osmscout {
      }
 
      TypeInfoRef typeInfo=database.GetTypeConfig()->GetTypeInfo("highway_motorway_junction");
-     TypeSet     nodeTypes;
+     TypeInfoSet nodeTypes;
 
      if (!typeInfo) {
        return false;
      }
 
-     nodeTypes.SetType(typeInfo->GetNodeId());
+     nodeTypes.Set(typeInfo);
 
      RefFeatureValueReader  refReader(*database.GetTypeConfig());
      NameFeatureValueReader nameReader(*database.GetTypeConfig());
@@ -557,7 +557,8 @@ namespace osmscout {
            return false;
          }
 
-         double lat,lon;
+         double      lat,lon;
+         TypeInfoSet loadedTypes;
 
          way->GetCoordinates(node.GetCurrentNodeIndex(),
                              lat,lon);
@@ -569,7 +570,8 @@ namespace osmscout {
          if (!areaNodeIndex->GetOffsets(boundingBox,
                                         nodeTypes,
                                         100,
-                                        nodeOffsets)) {
+                                        nodeOffsets,
+                                        loadedTypes)) {
            log.Error() << "Error getting nodes from area node index!";
            return false;
          }

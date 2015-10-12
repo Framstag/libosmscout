@@ -20,7 +20,6 @@
 #include <osmscout/MapService.h>
 
 #include <algorithm>
-#include <iostream>
 
 #if _OPENMP
 #include <omp.h>
@@ -30,6 +29,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -131,19 +131,20 @@ namespace osmscout {
   }
 
   bool MapService::GetObjectsNodes(const AreaSearchParameter& parameter,
-                                   const TypeSet &nodeTypes,
+                                   const TypeInfoSet& requestedNodeTypes,
                                    const GeoBox& boundingBox,
                                    std::string& nodeIndexTime,
                                    std::string& nodesTime,
                                    std::vector<NodeRef>& nodes) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
+    TypeInfoSet      loadedNodeTypes;
+
+    nodes.clear();
 
     if (!areaNodeIndex) {
       return false;
     }
-
-    nodes.clear();
 
     if (parameter.IsAborted()) {
       return false;
@@ -152,12 +153,13 @@ namespace osmscout {
     std::vector<FileOffset> nodeOffsets;
     StopClock               nodeIndexTimer;
 
-    if (nodeTypes.HasTypes()) {
+    if (!requestedNodeTypes.Empty()) {
       if (!areaNodeIndex->GetOffsets(boundingBox,
-                                     nodeTypes,
+                                     requestedNodeTypes,
                                      parameter.GetMaximumNodes(),
-                                     nodeOffsets)) {
-        std::cout << "Error getting nodes from area node index!" << std::endl;
+                                     nodeOffsets,
+                                     loadedNodeTypes)) {
+        log.Error() << "Error getting nodes from area node index!";
         return false;
       }
     }
@@ -169,6 +171,7 @@ namespace osmscout {
       return false;
     }
 
+    // Sort offsets before loading to optimize disk access
     std::sort(nodeOffsets.begin(),nodeOffsets.end());
 
     if (parameter.IsAborted()) {
@@ -179,7 +182,7 @@ namespace osmscout {
 
     if (!database->GetNodesByOffset(nodeOffsets,
                                     nodes)) {
-      std::cout << "Error reading nodes in area!" << std::endl;
+      log.Error() << "Error reading nodes in area!";
       return false;
     }
 
@@ -194,7 +197,7 @@ namespace osmscout {
   }
 
   bool MapService::GetObjectsAreas(const AreaSearchParameter& parameter,
-                                   const TypeSet& areaTypes,
+                                   const TypeInfoSet& requestedAreaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
                                    std::string& areaOptimizedTime,
@@ -205,14 +208,14 @@ namespace osmscout {
     AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
 
+    areas.clear();
+
     if (!areaAreaIndex ||
         !optimizeAreasLowZoom) {
       return false;
     }
 
-    areas.clear();
-
-    TypeSet internalAreaTypes(areaTypes);
+    TypeInfoSet internalAreaTypes(requestedAreaTypes);
 
     if (parameter.IsAborted()) {
       return false;
@@ -220,15 +223,26 @@ namespace osmscout {
 
     StopClock areaOptimizedTimer;
 
-    if (internalAreaTypes.HasTypes()) {
+    if (!internalAreaTypes.Empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
+        TypeInfoSet optimizedAreaTypes;
+        TypeInfoSet loadedAreaTypes;
+
+        optimizeAreasLowZoom->GetTypes(magnification,
+                                       internalAreaTypes,
+                                       optimizedAreaTypes);
+
         optimizeAreasLowZoom->GetAreas(boundingBox,
                                        magnification,
                                        internalAreaTypes,
-                                       areas);
+                                       areas,
+                                       loadedAreaTypes);
+
+        internalAreaTypes.Remove(loadedAreaTypes);
       }
     }
+
 
     areaOptimizedTimer.Stop();
     areaOptimizedTime=areaOptimizedTimer.ResultString();
@@ -237,18 +251,20 @@ namespace osmscout {
       return false;
     }
 
+    TypeInfoSet                loadedAreaTypes;
     std::vector<DataBlockSpan> spans;
     StopClock                  areaIndexTimer;
 
-    if (internalAreaTypes.HasTypes()) {
-      if (!areaAreaIndex->GetAreasInArea(database->GetTypeConfig(),
+    if (!internalAreaTypes.Empty()) {
+      if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                          boundingBox,
                                          magnification.GetLevel()+
                                          parameter.GetMaximumAreaLevel(),
                                          internalAreaTypes,
                                          parameter.GetMaximumAreas(),
-                                         spans)) {
-        std::cout << "Error getting areas from area index!" << std::endl;
+                                         spans,
+                                         loadedAreaTypes)) {
+        log.Error() << "Error getting areas from area index!";
         return false;
       }
     }
@@ -267,7 +283,7 @@ namespace osmscout {
 
       if (!database->GetAreasByBlockSpans(spans,
                                           areas)) {
-        std::cout << "Error reading areas in area!" << std::endl;
+        log.Error() << "Error reading areas in area!";
         return false;
       }
     }
@@ -279,7 +295,7 @@ namespace osmscout {
   }
 
   bool MapService::GetObjectsWays(const AreaSearchParameter& parameter,
-                                  const std::vector<TypeSet>& wayTypes,
+                                  const std::vector<TypeInfoSet>& wayTypes,
                                   const Magnification& magnification,
                                   const GeoBox& boundingBox,
                                   std::string& wayOptimizedTime,
@@ -289,6 +305,8 @@ namespace osmscout {
   {
     AreaWayIndexRef        areaWayIndex=database->GetAreaWayIndex();
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
+
+    ways.clear();
 
     if (!areaWayIndex ||
         !optimizeWaysLowZoom) {
@@ -305,7 +323,7 @@ namespace osmscout {
 
     ways.clear();
 
-    std::vector<TypeSet> internalWayTypes(wayTypes);
+    std::vector<TypeInfoSet> internalWayTypes(wayTypes);
 
     if (parameter.IsAborted()) {
       return false;
@@ -313,13 +331,26 @@ namespace osmscout {
 
     StopClock wayOptimizedTimer;
 
+
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
+        TypeInfoSet optimizedWayTypes;
+        TypeInfoSet loadedWayTypes;
+
+        optimizeWaysLowZoom->GetTypes(magnification,
+                                      internalWayTypes,
+                                      optimizedWayTypes);
+
         optimizeWaysLowZoom->GetWays(boundingBox,
                                      magnification,
-                                     internalWayTypes,
-                                     ways);
+                                     optimizedWayTypes,
+                                     ways,
+                                     loadedWayTypes);
+
+        for (auto& typeSet : internalWayTypes) {
+          typeSet.Remove(loadedWayTypes);
+        }
       }
     }
 
@@ -330,6 +361,7 @@ namespace osmscout {
       return false;
     }
 
+    TypeInfoSet             loadedWayTypes;
     std::vector<FileOffset> offsets;
     StopClock               wayIndexTimer;
 
@@ -337,8 +369,9 @@ namespace osmscout {
       if (!areaWayIndex->GetOffsets(boundingBox,
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
-                                    offsets)) {
-        std::cout << "Error getting ways from area way index!" << std::endl;
+                                    offsets,
+                                    loadedWayTypes)) {
+        log.Error() << "Error getting ways from area way index!";
         return false;
       }
     }
@@ -378,7 +411,7 @@ namespace osmscout {
     if (!restOffsets.empty()) {
       if (!database->GetWaysByOffset(restOffsets,
                                      ways)) {
-        std::cout << "Error reading ways in area!" << std::endl;
+        log.Error() << "Error reading ways in area!";
         return false;
       }
     }
@@ -409,10 +442,10 @@ namespace osmscout {
                               const Projection& projection,
                               MapData& data) const
   {
-    osmscout::TypeSet              nodeTypes;
-    std::vector<osmscout::TypeSet> wayTypes;
-    osmscout::TypeSet              areaTypes;
-    GeoBox                         boundingBox;
+    osmscout::TypeInfoSet              nodeTypes;
+    std::vector<osmscout::TypeInfoSet> wayTypes;
+    osmscout::TypeInfoSet              areaTypes;
+    GeoBox                             boundingBox;
 
     projection.GetDimensions(boundingBox);
 
@@ -468,13 +501,13 @@ namespace osmscout {
    */
   bool MapService::GetObjects(const AreaSearchParameter& parameter,
                               const Magnification& magnification,
-                              const TypeSet &nodeTypes,
+                              const TypeInfoSet &nodeTypes,
                               const GeoBox& nodeBoundingBox,
                               std::vector<NodeRef>& nodes,
-                              const std::vector<TypeSet>& wayTypes,
+                              const std::vector<TypeInfoSet>& wayTypes,
                               const GeoBox& wayBoundingBox,
                               std::vector<WayRef>& ways,
-                              const TypeSet& areaTypes,
+                              const TypeInfoSet& areaTypes,
                               const GeoBox& areaBoundingBox,
                               std::vector<AreaRef>& areas) const
   {

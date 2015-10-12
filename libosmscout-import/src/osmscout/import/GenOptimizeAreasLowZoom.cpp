@@ -116,8 +116,8 @@ namespace osmscout
                                                std::vector<std::list<AreaRef> >& areas,
                                                TypeInfoSet& loadedTypes)
   {
-    uint32_t              areaCount=0;
-    size_t                collectedAreasCount=0;
+    uint32_t    areaCount=0;
+    size_t      collectedAreasCount=0;
 
     loadedTypes=types;
 

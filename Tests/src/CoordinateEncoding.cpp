@@ -31,12 +31,12 @@
 class Statistics
 {
 public:
-  size_t  numberOfVectors;   // Overall numbe rof vectors
-  size_t  emptyVectorCount;  // Numbe rof vectors with size()==0
+  size_t  numberOfVectors;   // Overall number of vectors
+  size_t  emptyVectorCount;  // Number of vectors with size()==0
   size_t  sixBitVectorCount; // Length of vector is 0..63
   size_t  coordCount;        // Overall number of coordinates
-  size_t  minLength;         // Minimum length of coord array
-  size_t  maxLength;         // Maximum length of coord array
+  size_t  minLength;         // Minimum length of coordinate array
+  size_t  maxLength;         // Maximum length of coordinate array
   int32_t minDelta;
   int32_t maxDelta;
   size_t  deltaCount;
@@ -334,13 +334,13 @@ public:
       return;
     }
 
-    if (coords.size()<64) /* 2^6) */ {
+    if (coords.size()<32) /* 2 bit signal + 2^5 length) */ {
       bytesNeeded++;
     }
-    else if (coords.size()<8192) /* 2^(6+7) */ {
+    else if (coords.size()<4096) /* 2 bit signal + 2^(5+7) length */ {
       bytesNeeded+=2;
     }
-    else /* 2097152 / 2^(6+7+8)) */ {
+    else /* 2097152 / 2 bit signal + 2^(5+7+8)) length */ {
       bytesNeeded+=3;
     }
 
@@ -369,18 +369,22 @@ public:
 
     for (size_t i=0; i<deltaBuffer.size()-1; i++) {
       if (deltaBuffer[i]>=-128 && deltaBuffer[i]<=127) {
-        coordBitSize=std::max(coordBitSize,16);
+        coordBitSize=std::max(coordBitSize,16); // 2x 1 byte => 4 byte
+      }
+      else if (deltaBuffer[i]>=-2048 && deltaBuffer[i]<=2047) {
+        coordBitSize=std::max(coordBitSize,24); // 2x 12 bit => 3 byte
       }
       else if (deltaBuffer[i]>=-32768 && deltaBuffer[i]<=32767) {
-        coordBitSize=std::max(coordBitSize,32);
+        coordBitSize=std::max(coordBitSize,32); // 2x 2 byte => 4 byte
       }
       else {
-        coordBitSize=std::max(coordBitSize,48);
+        coordBitSize=std::max(coordBitSize,48); // 2x 3 byte => 6 byte
       }
     }
 
-    bytesNeeded+=(coords.size()-1)*coordBitSize/8;
+    bytesNeeded+=(coords.size()-1)*coordBitSize/8; // all coordinates in the same encoding
 
+    // one more byte, if the is a rest
     if (coordBitSize % 8 !=0) {
       bytesNeeded++;
     }
@@ -417,6 +421,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  /*
   std::cout << "Reading '" << areaDatFilename << "'..." << std::endl;
 
   if (!scanner.Open(areaDatFilename,osmscout::FileScanner::Sequential,true)) {
@@ -447,7 +452,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  scanner.Close();
+  scanner.Close();*/
 
   std::cout << "Reading " << wayDatFilename << "..." << std::endl;
 
@@ -469,6 +474,11 @@ int main(int argc, char* argv[])
       std::cerr << "Cannot read data set #" << i << "'from file " << scanner.GetFilename() << "'" << std::endl;
       return 1;
     }
+
+    for (size_t n =0; n<way.nodes.size(); n++) {
+      std::cout << way.nodes[n].GetDisplayText() << " ";
+    }
+    std::cout << std::endl;
 
     statistics.Measure(way.nodes);
 

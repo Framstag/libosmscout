@@ -86,9 +86,9 @@ int main(int argc, char* argv[])
   std::cout << "- Search area: " << boundingBox.GetDisplayText() << std::endl;
 
   osmscout::TypeConfigRef          typeConfig(database->GetTypeConfig());
-  osmscout::TypeSet                nodeTypes(*typeConfig);
-  osmscout::TypeSet                wayTypes(*typeConfig);
-  osmscout::TypeSet                areaTypes(*typeConfig);
+  osmscout::TypeInfoSet            nodeTypes(*typeConfig);
+  osmscout::TypeInfoSet            wayTypes(*typeConfig);
+  osmscout::TypeInfoSet            areaTypes(*typeConfig);
   osmscout::NameFeatureLabelReader nameLabelReader(*typeConfig);
 
   for (const auto &name : typeNames) {
@@ -105,17 +105,17 @@ int main(int argc, char* argv[])
     if (!type->GetIgnore()) {
       if (type->CanBeNode()) {
         std::cout << " node";
-        nodeTypes.SetType(type->GetNodeId());
+        nodeTypes.Set(type);
       }
 
       if (type->CanBeWay()) {
         std::cout << " way";
-        wayTypes.SetType(type->GetWayId());
+        wayTypes.Set(type);
       }
 
       if (type->CanBeArea()) {
         std::cout << " area";
-        areaTypes.SetType(type->GetAreaId());
+        areaTypes.Set(type);
       }
     }
 

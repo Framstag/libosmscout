@@ -396,6 +396,28 @@ namespace osmscout {
 
     way.SetId(id);
 
+    auto naturalTag=tagMap.find(typeConfig->tagNatural);
+
+    if (naturalTag!=tagMap.end() &&
+        naturalTag->second=="coastline") {
+      isCoastline=true;
+    }
+
+    if (isCoastline) {
+      isCoastlineArea=nodes.size()>3 &&
+                      (nodes.front()==nodes.back() ||
+                       isArea==1);
+    }
+
+    //
+    // Way/Area object type detection
+    //
+
+    typeConfig->GetWayAreaType(tagMap,
+                               wayType,
+                               areaType);
+
+    // Evaluate the isArea tag
     auto areaTag=tagMap.find(typeConfig->tagArea);
 
     if (areaTag==tagMap.end()) {
@@ -410,55 +432,24 @@ namespace osmscout {
       isArea=1;
     }
 
-    auto naturalTag=tagMap.find(typeConfig->tagNatural);
+    // Evaluate the junction=roundabout tag
+    auto junctionTag=tagMap.find(typeConfig->tagJunction);
 
-    if (naturalTag!=tagMap.end() &&
-        naturalTag->second=="coastline") {
-      isCoastline=true;
-    }
-
-    if (isCoastline) {
-      isCoastlineArea=nodes.size()>3 &&
-                      (nodes.front()==nodes.back() ||
-                       isArea==1);
-    }
-
-    typeConfig->GetWayAreaType(tagMap,
-                               wayType,
-                               areaType);
-
-    if (isArea==1 &&
-        areaType==typeConfig->typeInfoIgnore) {
-      isArea=0;
-    }
-    else if (isArea==-1 &&
-             wayType==typeConfig->typeInfoIgnore) {
-      isArea=0;
+    if (junctionTag!=tagMap.end() &&
+        junctionTag->second=="roundabout") {
+      isArea=-1;
     }
 
     if (isArea==0) {
-      if (wayType!=typeConfig->typeInfoIgnore &&
-          areaType==typeConfig->typeInfoIgnore) {
+      if (wayType->GetPinWay()) {
         isArea=-1;
       }
-      else if (wayType==typeConfig->typeInfoIgnore &&
-               areaType!=typeConfig->typeInfoIgnore) {
+      else if (nodes.size()>3 &&
+         nodes.front()==nodes.back()) {
         isArea=1;
       }
-      else if (wayType!=typeConfig->typeInfoIgnore &&
-               areaType!=typeConfig->typeInfoIgnore) {
-        if (nodes.size()>3 &&
-            nodes.front()==nodes.back()) {
-          if (wayType->GetPinWay()) {
-            isArea=-1;
-          }
-          else {
-            isArea=1;
-          }
-        }
-        else {
-          isArea=-1;
-        }
+      else {
+        isArea=-1;
       }
     }
 
@@ -466,7 +457,15 @@ namespace osmscout {
     case 1:
       areaStat[areaType->GetIndex()]++;
 
-      if (areaType->GetIgnore()) {
+      if (areaType==typeConfig->typeInfoIgnore &&
+          wayType!=typeConfig->typeInfoIgnore) {
+        progress.Warning("Way "+
+                         NumberToString(id)+
+                         " of type '" + wayType->GetName()+"' should be way but is area => ignoring type");
+      }
+
+      if (areaType==typeConfig->typeInfoIgnore ||
+          areaType->GetIgnore()) {
         way.SetType(typeConfig->typeInfoIgnore,
                     true);
       }
@@ -484,7 +483,15 @@ namespace osmscout {
     case -1:
       wayStat[wayType->GetIndex()]++;
 
-      if (wayType->GetIgnore()) {
+      if (wayType==typeConfig->typeInfoIgnore &&
+          areaType!=typeConfig->typeInfoIgnore) {
+        progress.Warning("Way "+
+                         NumberToString(id)+
+                         " of type '" + areaType->GetName()+"' should be area but is way => ignoring type!");
+      }
+
+      if (wayType==typeConfig->typeInfoIgnore ||
+          wayType->GetIgnore()) {
         way.SetType(typeConfig->typeInfoIgnore,false);
       }
       else {
@@ -494,22 +501,7 @@ namespace osmscout {
       wayCount++;
       break;
     default:
-      if (nodes.size()>3 &&
-          nodes.front()==nodes.back()) {
-        areaStat[typeIgnore]++;
-        way.SetType(typeConfig->typeInfoIgnore,
-                    true);
-
-        nodes.pop_back();
-
-        areaCount++;
-      }
-      else {
-        wayStat[typeIgnore]++;
-        way.SetType(typeConfig->typeInfoIgnore,
-                    false);
-        wayCount++;
-      }
+      assert(false);
     }
 
     way.SetNodes(nodes);
@@ -660,11 +652,9 @@ namespace osmscout {
     coordWriter.SetPos(coordIndexOffset);
     coordWriter.Write((uint32_t)coordIndex.size());
 
-    for (CoordPageOffsetMap::const_iterator entry=coordIndex.begin();
-         entry!=coordIndex.end();
-         ++entry) {
-      coordWriter.Write(entry->first);
-      coordWriter.Write(entry->second);
+    for (const auto& entry :coordIndex) {
+      coordWriter.Write(entry.first);
+      coordWriter.Write(entry.second);
     }
 
     nodeWriter.Close();
