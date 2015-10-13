@@ -69,6 +69,7 @@ namespace osmscout {
   FileScanner::~FileScanner()
   {
     if (IsOpen()) {
+      log.Warn() << "Automatically closing FileScanner for file '" << filename << "'!";
       Close();
     }
 
