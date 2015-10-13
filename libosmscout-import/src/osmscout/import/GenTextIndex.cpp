@@ -297,9 +297,8 @@ namespace osmscout
         }
       }
     }
-    scanner.Close();
 
-    return true;
+    return scanner.Close();
   }
 
   bool TextIndexGenerator::AddWayTextToKeysets(const ImportParameter &parameter,
@@ -414,9 +413,7 @@ namespace osmscout
       }
     }
 
-    scanner.Close();
-
-    return true;
+    return scanner.Close();
   }
 
   bool TextIndexGenerator::AddAreaTextToKeysets(const ImportParameter &parameter,
@@ -517,7 +514,7 @@ namespace osmscout
       }
     }
 
-    return true;
+    return scanner.Close();
   }
 
   bool TextIndexGenerator::BuildKeyStr(const std::string &text,
