@@ -627,17 +627,15 @@ namespace osmscout {
 
       std::set<Id> nodeIds;
 
-      for (std::vector<Id>::const_iterator id=way.ids.begin();
-          id!=way.ids.end();
-          id++) {
-        if (*id==0) {
+      for (const auto& id : way.ids) {
+        if (id==0) {
           continue;
         }
 
-        if (nodeIds.find(*id)==nodeIds.end()) {
-          nodeUseMap.SetNodeUsed(*id);
+        if (nodeIds.find(id)==nodeIds.end()) {
+          nodeUseMap.SetNodeUsed(id);
 
-          nodeIds.insert(*id);
+          nodeIds.insert(id);
         }
       }
     }
@@ -693,17 +691,15 @@ namespace osmscout {
 
       std::set<Id> nodeIds;
 
-      for (std::vector<Id>::const_iterator id=area.rings.front().ids.begin();
-          id!=area.rings.front().ids.end();
-          id++) {
-        if (*id==0) {
+      for (const auto& id : area.rings.front().ids) {
+        if (id==0) {
           continue;
         }
 
-        if (nodeIds.find(*id)==nodeIds.end()) {
-          nodeUseMap.SetNodeUsed(*id);
+        if (nodeIds.find(id)==nodeIds.end()) {
+          nodeUseMap.SetNodeUsed(id);
 
-          nodeIds.insert(*id);
+          nodeIds.insert(id);
         }
       }
     }
@@ -722,8 +718,10 @@ namespace osmscout {
                                                       const NodeUseMap& nodeUseMap,
                                                       NodeIdObjectsMap& nodeObjectsMap)
   {
-    FileScanner              scanner;
-    uint32_t                 dataCount=0;
+    FileScanner scanner;
+    uint32_t    dataCount=0;
+
+    progress.Info("Scanning ways");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
@@ -793,6 +791,8 @@ namespace osmscout {
       progress.Error("Cannot close file 'ways.dat'");
       return false;
     }
+
+    progress.Info("Scanning areas");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "areas.dat"),
@@ -910,6 +910,8 @@ namespace osmscout {
       return true;
     }
 
+    progress.Info("Loading " +NumberToString(fileOffsets.size())+" ways");
+
     FileOffset oldPos;
 
     if (!scanner.GetPos(oldPos)) {
@@ -953,6 +955,8 @@ namespace osmscout {
     if (fileOffsets.empty()) {
       return true;
     }
+
+    progress.Info("Loading " +NumberToString(fileOffsets.size())+" areas");
 
     FileOffset oldPos;
 
@@ -1727,7 +1731,7 @@ namespace osmscout {
         node++;
       }
 
-      progress.Info("Loading intersecting ways");
+      progress.Info("Loading intersecting ways and areas");
 
       // Collect way ids of all ways in current block and load them
 
@@ -1943,6 +1947,11 @@ namespace osmscout {
 
     if (!wayScanner.Close()) {
       progress.Error("Cannot close file '"+wayScanner.GetFilename()+"'");
+      return false;
+    }
+
+    if (!areaScanner.Close()) {
+      progress.Error("Cannot close file '"+areaScanner.GetFilename()+"'");
       return false;
     }
 
