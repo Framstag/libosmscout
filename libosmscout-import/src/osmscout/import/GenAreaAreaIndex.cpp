@@ -1046,9 +1046,11 @@ namespace osmscout {
 
     progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
-    return !indexWriter.HasError() &&
+    return !scanner.HasError() &&
+           !indexWriter.HasError() &&
            !dataWriter.HasError() &&
            !mapWriter.HasError() &&
+           scanner.Close() &&
            indexWriter.Close() &&
            dataWriter.Close() &&
            mapWriter.Close();
