@@ -176,7 +176,7 @@ namespace osmscout
 
     progress.Info("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(loadedTypes.Size())+" types");
 
-    return true;
+    return !scanner.HasError();
   }
 
   void OptimizeAreasLowZoomGenerator::OptimizeAreas(const std::list<AreaRef>& areas,
@@ -633,7 +633,8 @@ namespace osmscout
       }
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError() &&
+           scanner.Close();
   }
 
   bool OptimizeAreasLowZoomGenerator::Import(const TypeConfigRef& typeConfig,
@@ -691,6 +692,7 @@ namespace osmscout
       progress.Error("Cannot write index position");
     }
 
-    return true;
+    return !writer.HasError() &&
+           writer.Close();
   }
 }

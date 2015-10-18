@@ -263,7 +263,7 @@ namespace osmscout {
   }
 
   bool MercatorProjection::Move(double horizPixel,
-                                 double vertPixel)
+                                double vertPixel)
   {
     double x;
     double y;
@@ -338,7 +338,7 @@ namespace osmscout {
     lonOffset=lonMin*scaleGradtorad;
     latOffset=scale*atanh(sin(latMin*gradtorad));
 
-    pixelSize=earthExtent/magnification.GetMagnification()/256;
+    pixelSize=earthExtent/magnification.GetMagnification()/width;
     meterInPixel=1/pixelSize;
     meterInMM=meterInPixel*25.4/pixelSize;
 

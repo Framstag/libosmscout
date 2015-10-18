@@ -573,7 +573,10 @@ namespace osmscout {
       }
     }
 
-    return !writer.HasError() && writer.Close();
+    return !wayScanner.HasError() &&
+           !writer.HasError() &&
+           wayScanner.Close() &&
+           writer.Close();
   }
 }
 

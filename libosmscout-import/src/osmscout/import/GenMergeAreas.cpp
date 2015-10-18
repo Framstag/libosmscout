@@ -341,6 +341,12 @@ namespace osmscout {
         while (candidate!=idAreaMap[id].end()) {
           AreaRef candidateArea(*candidate);
 
+          // We only merge against "simple" areas
+          if (candidateArea->rings.size()!=1) {
+            candidate++;
+            continue;
+          }
+
           // The area itself => skip
           if (area.GetFileOffset()==candidateArea->GetFileOffset()) {
             // TODO: Should not happen?
@@ -488,7 +494,7 @@ namespace osmscout {
     std::unordered_set<FileOffset>         ignores;
 
     for (const auto& type : loadedTypes) {
-      for (const auto& area : mergeJob[type->GetIndex()].areas) {
+      for (const auto& area : mergeJob[type->GetIndex()].merges) {
         merges[area->GetFileOffset()]=area;
       }
 

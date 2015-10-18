@@ -69,6 +69,7 @@ namespace osmscout {
   FileScanner::~FileScanner()
   {
     if (IsOpen()) {
+      log.Warn() << "Automatically closing FileScanner for file '" << filename << "'!";
       Close();
     }
 
@@ -826,7 +827,7 @@ namespace osmscout {
     hasError=fread(&number,1,1,file)!=1;
 
     if (hasError) {
-      log.Error() << "Cannot read uint8_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint8_t from file'"  << filename << "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -872,7 +873,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,2,file)!=2;
 
     if (hasError) {
-      log.Error() << "Cannot read uint16_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint16_t from file'"  << filename<< "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -940,7 +941,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,4,file)!=4;
 
     if (hasError) {
-      log.Error() << "Cannot read uint32_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1038,7 +1039,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,8,file)!=8;
 
     if (hasError) {
-      log.Error() << "Cannot read uint64_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1129,7 +1130,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read uint16_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint16_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1206,7 +1207,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read uint32_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1325,7 +1326,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read uint64_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read uint64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1472,7 +1473,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,8,file)!=8;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::FileOffset beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read osmscout::FileOffset from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1607,7 +1608,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::FileOffset beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read osmscout::FileOffset from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -1697,7 +1698,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed int16_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read compressed int16_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
       return false;
     }
@@ -1717,7 +1718,7 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int16_t beyond end of file'"  << filename << "'";
+          log.Error() << "Cannot read compressed int16_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
           return false;
         }
@@ -1739,7 +1740,7 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int16_t beyond end of file'"  << filename << "'";
+          log.Error() << "Cannot read compressed int16_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
           return false;
         }
@@ -1783,7 +1784,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed int32_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read compressed int32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
       return false;
     }
@@ -1804,7 +1805,7 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int32_t beyond end of file'"  << filename << "'";
+          log.Error() << "Cannot read compressed int32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
           return false;
         }
@@ -1826,7 +1827,7 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int32_t beyond end of file'"  << filename << "'";
+          log.Error() << "Cannot read compressed int32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
           return false;
         }
@@ -1870,7 +1871,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed int64_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read compressed int64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
       return false;
     }
@@ -1890,7 +1891,7 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int64_t beyond end of file'"  << filename << "'";
+          log.Error() << "Cannot read compressed int64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
           return false;
         }
@@ -1912,7 +1913,7 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int64_t beyond end of file'"  << filename << "'";
+          log.Error() << "Cannot read compressed int64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
           return false;
         }
@@ -1961,7 +1962,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed uint16_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read compressed uint16_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
       return false;
     }
@@ -1976,7 +1977,7 @@ namespace osmscout {
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        log.Error() << "Cannot read compressed uint16_t beyond end of file'"  << filename << "'";
+        log.Error() << "Cannot read compressed uint16_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
         hasError=true;
         return false;
       }
@@ -2019,7 +2020,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed uint32_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read compressed uint32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
       return false;
     }
@@ -2034,7 +2035,7 @@ namespace osmscout {
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        log.Error() << "Cannot read compressed uint32_t beyond end of file'"  << filename << "'";
+        log.Error() << "Cannot read compressed uint32_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
         hasError=true;
         return false;
       }
@@ -2077,7 +2078,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed uint64_t beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read compressed uint64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
       return false;
     }
@@ -2092,7 +2093,7 @@ namespace osmscout {
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        log.Error() << "Cannot read compressed uint64_t beyond end of file'"  << filename << "'";
+        log.Error() << "Cannot read compressed uint64_t from file'"  << filename <<  "' (" << strerror(errno) << ")";
         hasError=true;
         return false;
       }
@@ -2146,7 +2147,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::GeoCoord beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read osmscout::GeoCoord from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 
@@ -2217,7 +2218,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::GeoCoord beyond end of file'"  << filename << "'";
+      log.Error() << "Cannot read osmscout::GeoCoord from file'"  << filename <<  "' (" << strerror(errno) << ")";
       return false;
     }
 

@@ -192,7 +192,7 @@ namespace osmscout
 
     progress.Info("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
 
-    return true;
+    return !scanner.HasError();
   }
 
   void OptimizeWaysLowZoomGenerator::MergeWays(Progress& progress,
@@ -658,7 +658,7 @@ namespace osmscout
       }
     }
 
-    return true;
+    return !writer.HasError();
   }
 
   bool OptimizeWaysLowZoomGenerator::HandleWays(const ImportParameter& parameter,
@@ -855,6 +855,7 @@ namespace osmscout
       progress.Error("Cannot write index position");
     }
 
-    return true;
+    return !writer.HasError() &&
+           writer.Close();
   }
 }

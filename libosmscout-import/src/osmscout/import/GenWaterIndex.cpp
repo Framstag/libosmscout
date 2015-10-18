@@ -592,7 +592,7 @@ namespace osmscout {
       }
     }
 
-    return true;
+    return !scanner.HasError() && scanner.Close();
   }
 
   /**

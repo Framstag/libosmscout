@@ -32,6 +32,7 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/Number.h>
 
 namespace osmscout {
@@ -46,6 +47,7 @@ namespace osmscout {
   FileWriter::~FileWriter()
   {
     if (file!=NULL) {
+      log.Warn() << "Automatically closing FileWriter for file '" << filename << "'!";
       fclose(file);
     }
   }

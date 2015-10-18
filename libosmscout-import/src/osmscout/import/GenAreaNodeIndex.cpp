@@ -425,7 +425,10 @@ namespace osmscout {
       }
     }
 
-    return !writer.HasError() && writer.Close();
+    return !nodeScanner.HasError() &&
+           nodeScanner.Close() &&
+           !writer.HasError() &&
+           writer.Close();
   }
 }
 
