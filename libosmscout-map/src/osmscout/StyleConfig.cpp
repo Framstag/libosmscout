@@ -190,29 +190,29 @@ namespace osmscout {
     }
   }
 
-  StyleVariable::StyleVariable()
+  StyleConstant::StyleConstant()
   {
     // no code
   }
 
-  StyleVariable::~StyleVariable()
+  StyleConstant::~StyleConstant()
   {
     // no code
   }
 
-  StyleVariableColor::StyleVariableColor(const Color& color)
+  StyleConstantColor::StyleConstantColor(const Color& color)
   : color(color)
   {
     // no code
   }
 
-  StyleVariableMag::StyleVariableMag(Magnification& magnification)
+  StyleConstantMag::StyleConstantMag(Magnification& magnification)
   : magnification(magnification)
   {
     // no code
   }
 
-  StyleVariableUInt::StyleVariableUInt(size_t& value)
+  StyleConstantUInt::StyleConstantUInt(size_t& value)
   : value(value)
   {
     // no code
@@ -1596,7 +1596,7 @@ namespace osmscout {
     areaIconStyleSelectors.clear();
     areaTypeSets.clear();
 
-    variables.clear();
+    constants.clear();
   }
 
   bool StyleConfig::RegisterLabelProviderFactory(const std::string& name,
@@ -1626,23 +1626,55 @@ namespace osmscout {
     return entry->second->Create(*typeConfig);
   }
 
-  StyleVariableRef StyleConfig::GetVariableByName(const std::string& name) const
+  /**
+   * Returns 'true', if the given flag exists, else 'false'.
+   */
+  bool StyleConfig::HasFlag(const std::string& name) const
   {
-    StyleVariableRef result;
+    return flags.find(name)!=flags.end();
+  }
 
-    auto entry=variables.find(name);
+  /**
+   * Returns thevalue of the given flag identified by the name of the flag.
+   *
+   * Asserts, if the flag name is unnown.
+   */
+  bool StyleConfig::GetFlagByName(const std::string& name) const
+  {
+    const auto entry=flags.find(name);
 
-    if (entry!=variables.end()) {
+    assert(entry!=flags.end());
+
+    return entry->second;
+  }
+
+  /**
+   * Add the flag with the given value. If the flag already exists, its value
+   * gets overwritten.
+   */
+  void StyleConfig::AddFlag(const std::string& name,
+                           bool value)
+  {
+    flags[name]=value;
+  }
+
+  StyleConstantRef StyleConfig::GetConstantByName(const std::string& name) const
+  {
+    StyleConstantRef result;
+
+    auto entry=constants.find(name);
+
+    if (entry!=constants.end()) {
       result=entry->second;
     }
 
     return result;
   }
 
-  void StyleConfig::AddVariable(const std::string& name,
-                                const StyleVariableRef& variable)
+  void StyleConfig::AddConstant(const std::string& name,
+                                const StyleConstantRef& variable)
   {
-    variables.insert(std::make_pair(name,variable));
+    constants.insert(std::make_pair(name,variable));
   }
 
   bool StyleConfig::RegisterSymbol(const SymbolRef& symbol)

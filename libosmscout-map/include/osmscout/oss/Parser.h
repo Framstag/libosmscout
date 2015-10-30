@@ -185,12 +185,15 @@ inline void ToRGBA(const std::string& str, Color& color)
   void SemWarning(const char* msg);
 
 	void OSS();
+	void FLAGBLOCK();
 	void WAYORDER();
-	void CONST();
-	void SYMBOL();
-	void STYLE(StyleFilter filter);
-	void WAYGROUP(size_t priority);
+	void CONSTBLOCK();
+	void SYMBOLBLOCK();
+	void STYLEBLOCK();
+	void FLAGDEF();
 	void IDENT(std::string& value);
+	void BOOL(bool& value);
+	void WAYGROUP(size_t priority);
 	void POLYGON(Symbol& symbol);
 	void RECTANGLE(Symbol& symbol);
 	void CIRCLE(Symbol& symbol);
@@ -198,6 +201,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void FILLSTYLEATTR(FillPartialStyle& style);
 	void UDOUBLE(double& value);
 	void DOUBLE(double& value);
+	void CONSTCONDBLOCK();
 	void CONSTDEF();
 	void COLORCONSTDEF();
 	void MAGCONSTDEF();
@@ -205,8 +209,10 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void COLOR(Color& color);
 	void MAG(Magnification& magnification);
 	void UINT(size_t& value);
+	void STYLE(StyleFilter filter, bool state);
+	void STYLECONDBLOCK(StyleFilter filter, bool state);
 	void STYLEFILTER(StyleFilter& filter);
-	void STYLEDEF(StyleFilter filter);
+	void STYLEDEF(StyleFilter filter, bool state);
 	void STYLEFILTER_GROUP(StyleFilter& filter);
 	void STYLEFILTER_FEATURE(StyleFilter& filter);
 	void STYLEFILTER_PATH(StyleFilter& filter);
@@ -217,24 +223,24 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STYLEFILTER_TUNNEL(StyleFilter& filter);
 	void STYLEFILTER_SIZE(StyleFilter& filter);
 	void SIZECONDITION(SizeConditionRef& condition);
-	void NODESTYLEDEF(StyleFilter filter);
-	void WAYSTYLEDEF(StyleFilter filter);
-	void AREASTYLEDEF(StyleFilter filter);
-	void NODETEXTSTYLE(StyleFilter filter);
-	void NODEICONSTYLE(StyleFilter filter);
+	void NODESTYLEDEF(StyleFilter filter, bool state);
+	void WAYSTYLEDEF(StyleFilter filter, bool state);
+	void AREASTYLEDEF(StyleFilter filter, bool state);
+	void NODETEXTSTYLE(StyleFilter filter, bool state);
+	void NODEICONSTYLE(StyleFilter filter, bool state);
 	void TEXTSTYLEATTR(TextPartialStyle& style);
 	void ICONSTYLEATTR(IconPartialStyle& style);
-	void WAYSTYLE(StyleFilter filter);
-	void WAYPATHTEXTSTYLE(StyleFilter filter);
-	void WAYPATHSYMBOLSTYLE(StyleFilter filter);
-	void WAYSHIELDSTYLE(StyleFilter filter);
+	void WAYSTYLE(StyleFilter filter, bool state);
+	void WAYPATHTEXTSTYLE(StyleFilter filter, bool state);
+	void WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state);
+	void WAYSHIELDSTYLE(StyleFilter filter, bool state);
 	void LINESTYLEATTR(LinePartialStyle& style);
 	void PATHTEXTSTYLEATTR(PathTextPartialStyle& style);
 	void PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style);
 	void PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style);
-	void AREASTYLE(StyleFilter filter);
-	void AREATEXTSTYLE(StyleFilter filter);
-	void AREAICONSTYLE(StyleFilter filter);
+	void AREASTYLE(StyleFilter filter, bool state);
+	void AREATEXTSTYLE(StyleFilter filter, bool state);
+	void AREAICONSTYLE(StyleFilter filter, bool state);
 	void UDISPLAYSIZE(double& value);
 	void UMAPSIZE(double& value);
 	void DISPLAYSIZE(double& value);
@@ -244,7 +250,6 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STRING(std::string& value);
 	void TEXTLABEL(LabelProviderRef& label);
 	void LABELSTYLE(TextStyle::Style& style);
-	void BOOL(bool& value);
 
   void Parse();
 

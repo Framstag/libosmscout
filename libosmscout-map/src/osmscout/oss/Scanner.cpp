@@ -149,94 +149,98 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 85;
-	noSym = 85;
+	maxT = 89;
+	noSym = 89;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 16);
-	start.set(35, 32);
+	start.set(35, 33);
 	start.set(64, 12);
 	start.set(34, 14);
-	start.set(44, 19);
-	start.set(123, 20);
-	start.set(59, 21);
-	start.set(125, 22);
-	start.set(61, 23);
-	start.set(91, 24);
-	start.set(93, 25);
-	start.set(45, 26);
-	start.set(58, 27);
-	start.set(60, 28);
-	start.set(46, 29);
-	start.set(40, 30);
-	start.set(41, 31);
+	start.set(61, 19);
+	start.set(59, 20);
+	start.set(44, 21);
+	start.set(123, 22);
+	start.set(125, 23);
+	start.set(33, 24);
+	start.set(91, 25);
+	start.set(93, 26);
+	start.set(45, 27);
+	start.set(58, 28);
+	start.set(60, 29);
+	start.set(46, 30);
+	start.set(40, 31);
+	start.set(41, 32);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 7);
 	keywords.set("END", 8);
-	keywords.set("ORDER", 9);
-	keywords.set("WAYS", 10);
-	keywords.set("GROUP", 11);
-	keywords.set("SYMBOL", 13);
-	keywords.set("POLYGON", 14);
-	keywords.set("RECTANGLE", 18);
-	keywords.set("x", 19);
-	keywords.set("CIRCLE", 20);
-	keywords.set("CONST", 21);
-	keywords.set("COLOR", 22);
-	keywords.set("MAG", 24);
-	keywords.set("UINT", 25);
-	keywords.set("FEATURE", 28);
-	keywords.set("PATH", 29);
-	keywords.set("TYPE", 30);
-	keywords.set("ONEWAY", 32);
-	keywords.set("BRIDGE", 33);
-	keywords.set("TUNNEL", 34);
-	keywords.set("SIZE", 35);
-	keywords.set("m", 36);
-	keywords.set("mm", 37);
-	keywords.set("px", 39);
-	keywords.set("NODE", 41);
-	keywords.set("TEXT", 43);
-	keywords.set("ICON", 45);
-	keywords.set("WAY", 46);
-	keywords.set("SHIELD", 47);
-	keywords.set("AREA", 48);
-	keywords.set("color", 49);
-	keywords.set("dash", 50);
-	keywords.set("gapColor", 51);
-	keywords.set("displayWidth", 52);
-	keywords.set("width", 53);
-	keywords.set("displayOffset", 54);
-	keywords.set("offset", 55);
-	keywords.set("cap", 56);
-	keywords.set("joinCap", 57);
-	keywords.set("endCap", 58);
-	keywords.set("priority", 59);
-	keywords.set("pattern", 60);
-	keywords.set("patternMinMag", 61);
-	keywords.set("borderColor", 62);
-	keywords.set("borderWidth", 63);
-	keywords.set("borderDash", 64);
-	keywords.set("label", 65);
-	keywords.set("style", 66);
-	keywords.set("size", 67);
-	keywords.set("scaleMag", 68);
-	keywords.set("autoSize", 69);
-	keywords.set("position", 70);
-	keywords.set("backgroundColor", 71);
-	keywords.set("shieldSpace", 72);
-	keywords.set("symbol", 73);
-	keywords.set("symbolSpace", 74);
-	keywords.set("name", 75);
-	keywords.set("butt", 76);
-	keywords.set("round", 77);
-	keywords.set("square", 78);
-	keywords.set("normal", 79);
-	keywords.set("emphasize", 80);
-	keywords.set("lighten", 81);
-	keywords.set("darken", 84);
+	keywords.set("FLAG", 9);
+	keywords.set("ORDER", 12);
+	keywords.set("WAYS", 13);
+	keywords.set("GROUP", 14);
+	keywords.set("SYMBOL", 16);
+	keywords.set("POLYGON", 17);
+	keywords.set("RECTANGLE", 20);
+	keywords.set("x", 21);
+	keywords.set("CIRCLE", 22);
+	keywords.set("CONST", 23);
+	keywords.set("IF", 24);
+	keywords.set("COLOR", 26);
+	keywords.set("MAG", 27);
+	keywords.set("UINT", 28);
+	keywords.set("STYLE", 29);
+	keywords.set("FEATURE", 32);
+	keywords.set("PATH", 33);
+	keywords.set("TYPE", 34);
+	keywords.set("ONEWAY", 36);
+	keywords.set("BRIDGE", 37);
+	keywords.set("TUNNEL", 38);
+	keywords.set("SIZE", 39);
+	keywords.set("m", 40);
+	keywords.set("mm", 41);
+	keywords.set("px", 43);
+	keywords.set("NODE", 45);
+	keywords.set("TEXT", 47);
+	keywords.set("ICON", 49);
+	keywords.set("WAY", 50);
+	keywords.set("SHIELD", 51);
+	keywords.set("AREA", 52);
+	keywords.set("color", 53);
+	keywords.set("dash", 54);
+	keywords.set("gapColor", 55);
+	keywords.set("displayWidth", 56);
+	keywords.set("width", 57);
+	keywords.set("displayOffset", 58);
+	keywords.set("offset", 59);
+	keywords.set("cap", 60);
+	keywords.set("joinCap", 61);
+	keywords.set("endCap", 62);
+	keywords.set("priority", 63);
+	keywords.set("pattern", 64);
+	keywords.set("patternMinMag", 65);
+	keywords.set("borderColor", 66);
+	keywords.set("borderWidth", 67);
+	keywords.set("borderDash", 68);
+	keywords.set("label", 69);
+	keywords.set("style", 70);
+	keywords.set("size", 71);
+	keywords.set("scaleMag", 72);
+	keywords.set("autoSize", 73);
+	keywords.set("position", 74);
+	keywords.set("backgroundColor", 75);
+	keywords.set("shieldSpace", 76);
+	keywords.set("symbol", 77);
+	keywords.set("symbolSpace", 78);
+	keywords.set("name", 79);
+	keywords.set("butt", 80);
+	keywords.set("round", 81);
+	keywords.set("square", 82);
+	keywords.set("normal", 83);
+	keywords.set("emphasize", 84);
+	keywords.set("lighten", 85);
+	keywords.set("darken", 88);
 
 
   tvalLength = 128;
@@ -462,35 +466,37 @@ TokenRef Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_17;}
 			else {t->kind = 6; break;}
 		case 19:
-			{t->kind = 12; break;}
+			{t->kind = 10; break;}
 		case 20:
-			{t->kind = 15; break;}
+			{t->kind = 11; break;}
 		case 21:
-			{t->kind = 16; break;}
+			{t->kind = 15; break;}
 		case 22:
-			{t->kind = 17; break;}
+			{t->kind = 18; break;}
 		case 23:
-			{t->kind = 23; break;}
+			{t->kind = 19; break;}
 		case 24:
-			{t->kind = 26; break;}
+			{t->kind = 25; break;}
 		case 25:
-			{t->kind = 27; break;}
+			{t->kind = 30; break;}
 		case 26:
 			{t->kind = 31; break;}
 		case 27:
-			{t->kind = 38; break;}
+			{t->kind = 35; break;}
 		case 28:
-			{t->kind = 40; break;}
-		case 29:
 			{t->kind = 42; break;}
+		case 29:
+			{t->kind = 44; break;}
 		case 30:
-			{t->kind = 82; break;}
+			{t->kind = 46; break;}
 		case 31:
-			{t->kind = 83; break;}
+			{t->kind = 86; break;}
 		case 32:
-			recEnd = pos; recKind = 44;
+			{t->kind = 87; break;}
+		case 33:
+			recEnd = pos; recKind = 48;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
-			else {t->kind = 44; break;}
+			else {t->kind = 48; break;}
 
   }
   AppendVal(t);

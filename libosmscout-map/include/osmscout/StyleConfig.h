@@ -171,22 +171,22 @@ namespace osmscout {
     bool IsOneway(const FeatureValueBuffer& buffer) const;
   };
 
-  class OSMSCOUT_MAP_API StyleVariable
+  class OSMSCOUT_MAP_API StyleConstant
   {
   public:
-    StyleVariable();
-    virtual ~StyleVariable();
+    StyleConstant();
+    virtual ~StyleConstant();
   };
 
-  typedef std::shared_ptr<StyleVariable> StyleVariableRef;
+  typedef std::shared_ptr<StyleConstant> StyleConstantRef;
 
-  class OSMSCOUT_MAP_API StyleVariableColor : public StyleVariable
+  class OSMSCOUT_MAP_API StyleConstantColor : public StyleConstant
   {
   private:
     Color color;
 
   public:
-    StyleVariableColor(const Color& color);
+    StyleConstantColor(const Color& color);
 
     inline const Color& GetColor()
     {
@@ -194,13 +194,13 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_MAP_API StyleVariableMag : public StyleVariable
+  class OSMSCOUT_MAP_API StyleConstantMag : public StyleConstant
   {
   private:
     Magnification magnification;
 
   public:
-    StyleVariableMag(Magnification& magnification);
+    StyleConstantMag(Magnification& magnification);
 
     inline const Magnification& GetMag()
     {
@@ -208,13 +208,13 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_MAP_API StyleVariableUInt : public StyleVariable
+  class OSMSCOUT_MAP_API StyleConstantUInt : public StyleConstant
   {
   private:
     size_t value;
 
   public:
-    StyleVariableUInt(size_t& value);
+    StyleConstantUInt(size_t& value);
 
     inline const size_t& GetUInt()
     {
@@ -1348,8 +1348,8 @@ namespace osmscout {
     std::unordered_map<std::string,LabelProviderFactoryRef> labelFactories; //!< Map of Label Factories
 
     // Symbol
-    std::unordered_map<std::string,SymbolRef>  symbols;
-    SymbolRef                                  emptySymbol;
+    std::unordered_map<std::string,SymbolRef>  symbols;                //!< Map of symbols by name
+    SymbolRef                                  emptySymbol;            //!< A default empty symbol
 
     // Node
 
@@ -1389,7 +1389,8 @@ namespace osmscout {
 
     std::vector<TypeInfoSet>                   areaTypeSets;
 
-    std::unordered_map<std::string,StyleVariableRef> variables;
+    std::unordered_map<std::string,bool>       flags;
+    std::unordered_map<std::string,StyleConstantRef> constants;
 
 
   private:
@@ -1419,9 +1420,14 @@ namespace osmscout {
     LabelProviderRef GetLabelProvider(const std::string& name) const;
     //@}
 
-    StyleVariableRef GetVariableByName(const std::string& name) const;
-    void AddVariable(const std::string& name,
-                     const StyleVariableRef& variable);
+    bool HasFlag(const std::string& name) const;
+    bool GetFlagByName(const std::string& name) const;
+    void AddFlag(const std::string& name,
+                 bool value);
+
+    StyleConstantRef GetConstantByName(const std::string& name) const;
+    void AddConstant(const std::string& name,
+                     const StyleConstantRef& variable);
 
     bool RegisterSymbol(const SymbolRef& symbol);
     const SymbolRef& GetSymbol(const std::string& name) const;

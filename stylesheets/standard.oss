@@ -6,6 +6,22 @@ OSS
    The OSS file defines how data is visualsized in a map. In constists of the
    following sections:
 
+   FLAGS:
+     The flag sections allows you to define a number of flags you can later
+     on make use of conditional evaluation on using simple
+     
+       IF <variable> {
+         ...
+       }
+       
+     statements in the CONST section and in the STYLE section. Flags values
+     are only assigned if the have not programmatically been set before in
+     the style config. Thus you can manipulate flags before style loading
+     programatically, allowing different style variant in your application
+     bases on the same config file. Examples:
+     * Show/hide certain features based on configuration
+     * Support day/night modusby choosing different const values.
+
    ORDER WAYS:
      This section defines in which order ways are rendered. It defines a
      number groups which contains ways types. Ways types in the same group
@@ -218,7 +234,6 @@ OSS
 
   Gaps in the position sequence are possible. The default is 0. The order of labels
   with the same position is undefined.
-
  */
 
 /*
@@ -230,7 +245,12 @@ OSS
   * A possible additional label (height of a peak) will be placed below the main label.
 */
 
- ORDER WAYS
+FLAG
+  daylight = true;
+  waterway = true;
+  natural  = true;
+
+ORDER WAYS
   GROUP _route
   GROUP highway_motorway
   GROUP waterway_river, waterway_canal, waterway_drain
@@ -456,210 +476,215 @@ CONST
   COLOR postBuildingBorderColor    = darken(@postBuildingColor, 0.3);
   COLOR postLabelColor             = darken(@postColor, 0.5);
 
-SYMBOL oneway_arrow
-  POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
+  SYMBOL oneway_arrow
+    POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
 
-SYMBOL natural_peak
-  POLYGON 0,0 1.5,0 0.75,1.5 { color: @peakSymbolColor; }
+  SYMBOL natural_peak
+    POLYGON 0,0 1.5,0 0.75,1.5 { color: @peakSymbolColor; }
 
-SYMBOL railway_station
-  RECTANGLE 0,0 2 x 2 { color: @railwaySymbolColor; }
+  SYMBOL railway_station
+    RECTANGLE 0,0 2 x 2 { color: @railwaySymbolColor; }
 
-SYMBOL railway_halt
-  RECTANGLE 0,0 1 x 1 { color: @railwaySymbolColor; }
+  SYMBOL railway_halt
+    RECTANGLE 0,0 1 x 1 { color: @railwaySymbolColor; }
 
-SYMBOL railway_tram_stop
-  RECTANGLE 0,0 1 x 1 { color: @railwaySymbolColor; }
+  SYMBOL railway_tram_stop
+    RECTANGLE 0,0 1 x 1 { color: @railwaySymbolColor; }
 
-SYMBOL highway_bus_stop
-  CIRCLE 0,0 0.75 {color: @busSymbolColor; }
+  SYMBOL highway_bus_stop
+    CIRCLE 0,0 0.75 {color: @busSymbolColor; }
 
-SYMBOL amenity
-  RECTANGLE 0,0 1 x 1 { color: #b89c9c; }
+  SYMBOL amenity
+    RECTANGLE 0,0 1 x 1 { color: #b89c9c; }
 
-SYMBOL amenity_hospital
-  CIRCLE 0,0 1 {borderColor: @hospitalSymbolColor; borderWidth: 0.2mm; }
-  // Horizontal bar
-  RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @hospitalSymbolColor; }
-  // Vertical bar
-  RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @hospitalSymbolColor; }
+  SYMBOL amenity_hospital
+    CIRCLE 0,0 1 {borderColor: @hospitalSymbolColor; borderWidth: 0.2mm; }
+    // Horizontal bar
+    RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @hospitalSymbolColor; }
+    // Vertical bar
+    RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @hospitalSymbolColor; }
 
-SYMBOL amenity_pharmacy
-  // Box
-  RECTANGLE -1,1 2 x 2 {borderColor: @pharmacySymbolColor; borderWidth: 0.2mm; }
-  // Horizontal bar
-  RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @pharmacySymbolColor; }
-  // Vertical bar
-  RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @pharmacySymbolColor; }
+  SYMBOL amenity_pharmacy
+    // Box
+    RECTANGLE -1,1 2 x 2 {borderColor: @pharmacySymbolColor; borderWidth: 0.2mm; }
+    // Horizontal bar
+    RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @pharmacySymbolColor; }
+    // Vertical bar
+    RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @pharmacySymbolColor; }
 
-SYMBOL amenity_parking
-  CIRCLE 0,0 0.75 {color: #4bb2da; }
+  SYMBOL amenity_parking
+    CIRCLE 0,0 0.75 {color: #4bb2da; }
 
-SYMBOL amenity_post_box
-  RECTANGLE 0,0 1 x 1 { color: @postSymbolColor; }
+  SYMBOL amenity_post_box
+    RECTANGLE 0,0 1 x 1 { color: @postSymbolColor; }
 
-SYMBOL amenity_post_office
-  RECTANGLE 0,0 2 x 2 { color: @postSymbolColor; }
+  SYMBOL amenity_post_office
+    RECTANGLE 0,0 2 x 2 { color: @postSymbolColor; }
 
-SYMBOL christian_church_cross
-  RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }   // vertical bar
-  RECTANGLE 0,1.5 1.5 x 0.5 { color: #000000; } // horizontal bar
+  SYMBOL christian_church_cross
+    RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }   // vertical bar
+    RECTANGLE 0,1.5 1.5 x 0.5 { color: #000000; } // horizontal bar
 
-SYMBOL speed_camera
-  CIRCLE 0,0 0.75 {color: @red; }
+  SYMBOL speed_camera
+    CIRCLE 0,0 0.75 {color: @red; }
 
- // -------------------------------------------------------
- //
- // Synthetic
- //
+STYLE
+  // -------------------------------------------------------
+  //
+  // Synthetic
+  //
 
- /*
- NODE "internal_start"
-  ICON { name: start;}
+  /*
+  NODE "internal_start"
+    ICON { name: start;}
 
- NODE "internal_target"
-  ICON { name: target;} */
+  NODE "internal_target"
+    ICON { name: target;} */
 
- [MAG world-] {
-   [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
+  [MAG world-] {
+    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
 
-   [TYPE _tile_sea] AREA {color: @waterColor;}
-   [TYPE _tile_coast] AREA {color: @waterColor;}
-   //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
-   [TYPE _tile_land] AREA {color: @landColor;}
-   [TYPE _tile_unknown] AREA {color: @unknownColor;}
+    [TYPE _tile_sea] AREA {color: @waterColor;}
+    [TYPE _tile_coast] AREA {color: @waterColor;}
+    //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
+    [TYPE _tile_land] AREA {color: @landColor;}
+    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
-   // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
+    // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
 
-   [TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.4mm; dash: 7,3;}
- }
+    [TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.4mm; dash: 7,3;}
+  }
 
  // -------------------------------------------------------
  //
  // contour lines
  //
 
-[MAG detail-] {
-   [TYPE elevation_contour_major] {
-     WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-     WAY.TEXT { label: Ele.inMeter; }
-   }
-
-   [TYPE elevation_contour_medium] {
-     WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-     WAY.TEXT { label: Ele.inMeter; }
-   }
-
-   [TYPE elevation_contour_minor] {
-     WAY {color: @minorContourColor; displayWidth: 0.075mm; }
-   }
- }
- 
- // -------------------------------------------------------
- //
- // natural_* (without coastline)
- //
-
- [MAG state-] {
-   [TYPE natural_glacier] AREA { color: @glacierColor; }
-   [TYPE natural_grassland] AREA { color: @grassColor; }
-   [TYPE natural_fell] AREA { color: @fellColor; }
-   [TYPE natural_heath] AREA { color: @heathColor; }
-   [TYPE wood] AREA { color: @woodColor; }
-   [TYPE natural_wetland_marsh] AREA { color: @marshColor; }
-   [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
-   [TYPE natural_water] AREA { color: @waterColor; }
-   [TYPE natural_beach] AREA { color: @beachColor; }
-   [TYPE natural_land] AREA { color: @landColor; }
-   [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "scrub"; patternMinMag: cityOver; }
- }
-
  [MAG detail-] {
-   [TYPE natural_glacier,
-         natural_fell,
-         natural_grassland,
-         natural_heath,
-         natural_scrub,
-         natural_wetland,
-         natural_wetland_marsh,
-         natural_wetland_tidalflat,
-         natural_beach,
-         natural_land] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; autoSize: true;}
+    [TYPE elevation_contour_major] {
+      WAY {color: @majorContourColor; displayWidth: 0.150mm; }
+      WAY.TEXT { label: Ele.inMeter; }
+    }
 
-   [TYPE wood] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
-   [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
+    [TYPE elevation_contour_medium] {
+      WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
+      WAY.TEXT { label: Ele.inMeter; }
+    }
 
-   [TYPE natural_peak] {
-     NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
-     NODE.TEXT#ele { label: Ele.inMeter; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
-   }
- }
-
- [MAG city-] {
-   [TYPE natural_peak] NODE.ICON { symbol: natural_peak; }
- }
-
- // -------------------------------------------------------
- //
- // waterway_*
- //
-
- [MAG proximity-] {
-   [TYPE waterway_river,
-         waterway_canal] {
-     [SIZE 15m 0.25mm:3px<] {
-       WAY {color: @waterColor; width: 15m;}
-
-       [TUNNEL] {
-         WAY#ldash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: -7.5m; priority: 1; }
-         WAY#rdash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: 7.5m; priority: 1;}
-
-         WAY {color: #f2f6f6; width: 15m;}
-       }
-     }
-
-     [SIZE 15m <0.25mm:3px] {
-       WAY {color: @waterColor; displayWidth: 0.25mm; }
-
-       [TUNNEL] {
-         WAY {color: #ff000000;}
-       }
-     }
-   }
-
-   [TYPE waterway_dock,
-         waterway_riverbank] AREA { color: @waterColor; }
- }
-
- [MAG suburb-] {
-   [TYPE waterway_stream] {
-     [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
-     [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
-   }
+    [TYPE elevation_contour_minor] {
+      WAY {color: @minorContourColor; displayWidth: 0.075mm; }
+    }
   }
+ 
+  // -------------------------------------------------------
+  //
+  // natural_* (without coastline)
+  //
 
-  [MAG detail-] {
-   [TYPE waterway_drain] {
-     [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
-     [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
-   }
- }
+  IF natural {
+    [MAG state-] {
+      [TYPE natural_glacier] AREA { color: @glacierColor; }
+      [TYPE natural_grassland] AREA { color: @grassColor; }
+      [TYPE natural_fell] AREA { color: @fellColor; }
+      [TYPE natural_heath] AREA { color: @heathColor; }
+      [TYPE wood] AREA { color: @woodColor; }
+      [TYPE natural_wetland_marsh] AREA { color: @marshColor; }
+      [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
+      [TYPE natural_water] AREA { color: @waterColor; }
+      [TYPE natural_beach] AREA { color: @beachColor; }
+      [TYPE natural_land] AREA { color: @landColor; }
+      [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "scrub"; patternMinMag: cityOver; }
+    }
 
- // Labels
+    [MAG detail-] {
+      [TYPE natural_glacier,
+            natural_fell,
+            natural_grassland,
+            natural_heath,
+            natural_scrub,
+            natural_wetland,
+            natural_wetland_marsh,
+            natural_wetland_tidalflat,
+            natural_beach,
+            natural_land] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; autoSize: true;}
 
- [MAG proximity-] {
-   [TYPE waterway_dock] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor; autoSize: true;}
- }
+      [TYPE wood] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
+      [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
 
- [MAG veryClose-] {
-   [TYPE waterway_stream,
-         waterway_drain,
-         waterway_river,
-         waterway_canal]
-     WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+      [TYPE natural_peak] {
+        NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+        NODE.TEXT#ele { label: Ele.inMeter; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
+      }
+    }
 
-   [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}
- }
+    [MAG city-] {
+      [TYPE natural_peak] NODE.ICON { symbol: natural_peak; }
+    }
+  }  
+
+  // -------------------------------------------------------
+  //
+  // waterway_*
+  //
+
+  IF waterway {
+    [MAG proximity-] {
+      [TYPE waterway_river,
+            waterway_canal] {
+        [SIZE 15m 0.25mm:3px<] {
+          WAY {color: @waterColor; width: 15m;}
+
+          [TUNNEL] {
+            WAY#ldash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: -7.5m; priority: 1; }
+            WAY#rdash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: 7.5m; priority: 1;}
+
+            WAY {color: #f2f6f6; width: 15m;}
+          }
+        }
+
+        [SIZE 15m <0.25mm:3px] {
+          WAY {color: @waterColor; displayWidth: 0.25mm; }
+
+          [TUNNEL] {
+            WAY {color: #ff000000;}
+          }
+        }
+      }
+
+      [TYPE waterway_dock,
+            waterway_riverbank] AREA { color: @waterColor; }
+    }
+
+    [MAG suburb-] {
+      [TYPE waterway_stream] {
+        [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
+        [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
+      }
+     }
+
+     [MAG detail-] {
+      [TYPE waterway_drain] {
+        [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
+        [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
+      }
+    }
+
+    // Labels
+
+    [MAG proximity-] {
+      [TYPE waterway_dock] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor; autoSize: true;}
+    }
+
+    [MAG veryClose-] {
+      [TYPE waterway_stream,
+            waterway_drain,
+            waterway_river,
+            waterway_canal]
+        WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+
+      [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}
+    }
+  }
 
  // -------------------------------------------------------
  //
