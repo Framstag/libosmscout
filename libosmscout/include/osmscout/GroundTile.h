@@ -27,7 +27,19 @@
 namespace osmscout {
 
   /**
-   * A single ground tile cell.
+   * A single ground tile cell. The ground tile defines an area
+   * of the given type.
+   *
+   * If the coords array is empty, the area is the complete cell.
+   * If the coords array is not empty it is defining a polygon which
+   * is of the given type.
+   *
+   * A cell can either have no GroundTile, one GroundTile that fills
+   * the complete cell area or multiple GroundTiles that only fill
+   * parts of the cell area.
+   *
+   * The polygon can consist (partly) of a coastline (Coord.coast=true) or
+   * of cell boundary lines (Coord.cell=false).
    */
   struct OSMSCOUT_API GroundTile
   {
