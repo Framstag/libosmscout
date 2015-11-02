@@ -1043,7 +1043,7 @@ TYPES
       GROUP amenity
 
   TYPE amenity_pharmacy
-    = NODE AREA ("amenity"=="pharmacy")
+    = NODE AREA ("amenity"=="pharmacy" OR "shop"=="pharmacy")
       {Name, NameAlt}
       ADDRESS POI
       GROUP amenity
