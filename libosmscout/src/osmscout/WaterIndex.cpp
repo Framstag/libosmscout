@@ -89,7 +89,17 @@ namespace osmscout {
       return false;
     }
 
-    return scanner.Close();
+    return true;
+  }
+
+  bool WaterIndex::Close()
+  {
+    if (scanner.IsOpen()) {
+      return scanner.Close();
+    }
+    else {
+    return true;
+    }
   }
 
   bool WaterIndex::GetRegions(double minlon,

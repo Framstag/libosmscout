@@ -188,6 +188,11 @@ namespace osmscout {
       areaWayIndex=NULL;
     }
 
+    if (waterIndex) {
+      waterIndex->Close();
+      waterIndex=NULL;
+    }
+
     if (optimizeWaysLowZoom) {
       optimizeWaysLowZoom->Close();
       optimizeWaysLowZoom=NULL;
