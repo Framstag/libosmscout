@@ -99,24 +99,24 @@ IGNORE ' ' + '\t' + '\r' + '\n'
 PRODUCTIONS
   OSS         = SYNC "OSS"
                 {
-                  FLAGBLOCK
+                  FLAGSECTION
                 }
                 [
                   WAYORDER
                 ]
                 {
-                  CONSTBLOCK
+                  CONSTSECTION
                 }
                 {
-                  SYMBOLBLOCK
+                  SYMBOLSECTION
                 }
                 {
-                  STYLEBLOCK
+                  STYLESECTION
                 }
                 "END"
                 .
 
-  FLAGBLOCK   = SYNC "FLAG"
+  FLAGSECTION = SYNC "FLAG"
                 {
                   FLAGDEF
                 }
@@ -196,7 +196,8 @@ PRODUCTIONS
                 }
                 .
 
-  SYMBOLBLOCK = SYNC "SYMBOL"
+  SYMBOLSECTION
+              = SYNC "SYMBOL"
                 (.
                   std::string name;
                 .)
@@ -297,34 +298,52 @@ PRODUCTIONS
                 (. coord=Coord(x,y); .)
                 .
 
-  CONSTBLOCK  = SYNC "CONST"
-                {
-                    CONSTCONDBLOCK
-                  | CONSTDEF ";"
+  CONSTSECTION
+              = SYNC "CONST"
+                CONSTBLOCK<true>
+                .
+
+  CONSTBLOCK<bool state>
+              = {
+                    CONSTCONDBLOCK<state>
+                  | CONSTDEF<state> ";"
                 }
                 .
 
-  CONSTCONDBLOCK
+  CONSTCONDBLOCK<bool state>
               =  (.
-                    bool        negate=false;
-                    std::string flag;
+                    bool newState=state;
+                    bool executed=false;
                  .)
                  "IF"
-                 ["!" (. negate=true; .)]
-                 IDENT<flag>
+                 IFCOND<newState>
                  "{"
-                 {
-                   CONSTDEF ";"
-                 }
+                 CONSTBLOCK<state && newState>
                  "}"
+                 (. executed=newState; .)
+                 {
+                   "ELIF"
+                   IFCOND<newState>
+                   "{"
+                   CONSTBLOCK<!executed && state && newState>
+                   "}"
+                   (. executed=newState; .)
+                 }
+                 [
+                   "ELSE"
+                   "{"
+                   CONSTBLOCK<!executed && state>
+                   "}"
+                 ]
                  .
 
-  CONSTDEF    =   COLORCONSTDEF
-                | MAGCONSTDEF
-                | UINTCONSTDEF
+  CONSTDEF<bool state>
+              =   COLORCONSTDEF<state>
+                | MAGCONSTDEF<state>
+                | UINTCONSTDEF<state>
                 .
 
-  COLORCONSTDEF
+  COLORCONSTDEF<bool state>
               = (.
                   std::string      name;
                   StyleConstantRef constant;
@@ -332,25 +351,26 @@ PRODUCTIONS
                 .)
                 "COLOR"
                 IDENT<name>
-                (.
-                  constant=config.GetConstantByName(name);
-
-                  if (constant) {
-                    std::string e="Constant already defined";
-
-                    SemErr(e.c_str());
-                  }
-                .)
                 "="
                 COLOR<color>
                 (.
-                  if (!errors->hasErrors) {
-                    config.AddConstant(name,std::make_shared<StyleConstantColor>(color));
+                  if (state) {
+                    constant=config.GetConstantByName(name);
+
+                    if (constant) {
+                      std::string e="Constant already defined";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      config.AddConstant(name,std::make_shared<StyleConstantColor>(color));
+                    }
                   }
                 .)
                 .
 
-  MAGCONSTDEF
+  MAGCONSTDEF<bool state>
               = (.
                   std::string      name;
                   StyleConstantRef constant;
@@ -358,25 +378,26 @@ PRODUCTIONS
                 .)
                 "MAG"
                 IDENT<name>
-                (.
-                  constant=config.GetConstantByName(name);
-
-                  if (constant) {
-                    std::string e="Constant already defined";
-
-                    SemErr(e.c_str());
-                  }
-                .)
                 "="
                 MAG<magnification>
                 (.
-                  if (!errors->hasErrors) {
-                    config.AddConstant(name,std::make_shared<StyleConstantMag>(magnification));
+                  if (state) {
+                    constant=config.GetConstantByName(name);
+
+                    if (constant) {
+                      std::string e="Constant already defined";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      config.AddConstant(name,std::make_shared<StyleConstantMag>(magnification));
+                    }
                   }
                 .)
                 .
 
-  UINTCONSTDEF
+  UINTCONSTDEF<bool state>
               = (.
                   std::string      name;
                   StyleConstantRef constant;
@@ -384,30 +405,37 @@ PRODUCTIONS
                 .)
                 "UINT"
                 IDENT<name>
-                (.
-                  constant=config.GetConstantByName(name);
-
-                  if (constant) {
-                    std::string e="Constant already defined";
-
-                    SemErr(e.c_str());
-                  }
-                .)
                 "="
                 UINT<value>
                 (.
-                  if (!errors->hasErrors) {
-                    config.AddConstant(name,std::make_shared<StyleConstantUInt>(value));
+                  if (state) {
+                    constant=config.GetConstantByName(name);
+
+                    if (constant) {
+                      std::string e="Constant already defined";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      config.AddConstant(name,std::make_shared<StyleConstantUInt>(value));
+                    }
                   }
                 .)
                 .
 
-  STYLEBLOCK  = "STYLE"
+  STYLESECTION
+              = "STYLE"
+                (. StyleFilter filter; .)
+                STYLEBLOCK<filter,true>
+                .
+
+  STYLEBLOCK<StyleFilter filter, bool state>
+              =
                 {
-                  (. StyleFilter filter; .)
                   (
-                      STYLE<filter,true>
-                    | STYLECONDBLOCK<filter,true>
+                      STYLE<filter,state>
+                    | STYLECONDBLOCK<filter,state>
                   )
                 }
                 .
@@ -419,9 +447,7 @@ PRODUCTIONS
                 (
                   (
                     "{"
-                    {
-                      STYLE<filter,state>
-                    }
+                    STYLEBLOCK<filter,state>
                     "}"
                   )
                   | STYLEDEF<filter,state>
@@ -430,32 +456,29 @@ PRODUCTIONS
 
   STYLECONDBLOCK<StyleFilter filter, bool state>
               =  (.
-                    bool        negate=false;
-                    std::string flag;
-                    bool        newState=state;
+                    bool newState=state;
+                    bool executed=false;
                  .)
                  "IF"
-                 ["!" (. negate=true; .)]
-                 IDENT<flag>
-                 (.
-                   if (!config.HasFlag(flag)) {
-                    std::string e="Flag '" + flag +"' is unknown, ignoring";
-
-                    SemErr(e.c_str());
-                   }
-                   else {
-                     newState=config.GetFlagByName(flag);
-                     
-                     if (negate) {
-                       newState=!newState;
-                     }
-                   }
-                 .)
+                 IFCOND<newState>
                  "{"
-                 {
-                   STYLE<filter,newState>
-                 }
+                 STYLEBLOCK<filter,state && newState>
                  "}"
+                 (. executed=newState; .)
+                 {
+                   "ELIF"
+                   IFCOND<newState>
+                   "{"
+                   STYLEBLOCK<filter,!executed && state && newState>
+                   "}"
+                   (. executed=newState; .)
+                 }
+                 [
+                   "ELSE"
+                   "{"
+                   STYLEBLOCK<filter,!executed && state>
+                   "}"
+                 ]
                  .
 
   STYLEFILTER<StyleFilter& filter>
@@ -1651,5 +1674,28 @@ PRODUCTIONS
                     }
                   .)
                 .
+  IFCOND<bool& state>
+              =  (.
+                   std::string flag;
+                   bool        negate=false;
+                 .)
+                 ["!" (. negate=true; .)]
+                 IDENT<flag>
+                 (.
+                   if (!config.HasFlag(flag)) {
+                     std::string e="Flag '" + flag +"' is unknown, ignoring";
+
+                     SemErr(e.c_str());
+                     state=false;
+                   }
+                   else {
+                     state=config.GetFlagByName(flag);
+                   }
+
+                   if (negate) {
+                     state=!state;
+                   }
+                 .)
+                 .
 END OSS.
 

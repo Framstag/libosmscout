@@ -10,7 +10,13 @@ OSS
      The flag sections allows you to define a number of flags you can later
      on make use of conditional evaluation on using simple
      
-       IF <variable> {
+       IF [!] <variable> {
+         ...
+       }
+       ELIF <variable> {
+         ...
+       }
+       ELSE {
          ...
        }
        
@@ -334,7 +340,6 @@ CONST
 
   COLOR waterColor                 = #9acffd;
   COLOR waterLabelColor            = darken(@waterColor, 0.5);
-
   COLOR landColor                  = #f1eee9;
   COLOR unknownColor               = @waterColor;
 
@@ -555,12 +560,12 @@ STYLE
     [TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.4mm; dash: 7,3;}
   }
 
- // -------------------------------------------------------
- //
- // contour lines
- //
+  // -------------------------------------------------------
+  //
+  // contour lines
+  //
 
- [MAG detail-] {
+  [MAG detail-] {
     [TYPE elevation_contour_major] {
       WAY {color: @majorContourColor; displayWidth: 0.150mm; }
       WAY.TEXT { label: Ele.inMeter; }

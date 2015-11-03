@@ -185,11 +185,11 @@ inline void ToRGBA(const std::string& str, Color& color)
   void SemWarning(const char* msg);
 
 	void OSS();
-	void FLAGBLOCK();
+	void FLAGSECTION();
 	void WAYORDER();
-	void CONSTBLOCK();
-	void SYMBOLBLOCK();
-	void STYLEBLOCK();
+	void CONSTSECTION();
+	void SYMBOLSECTION();
+	void STYLESECTION();
 	void FLAGDEF();
 	void IDENT(std::string& value);
 	void BOOL(bool& value);
@@ -201,14 +201,17 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void FILLSTYLEATTR(FillPartialStyle& style);
 	void UDOUBLE(double& value);
 	void DOUBLE(double& value);
-	void CONSTCONDBLOCK();
-	void CONSTDEF();
-	void COLORCONSTDEF();
-	void MAGCONSTDEF();
-	void UINTCONSTDEF();
+	void CONSTBLOCK(bool state);
+	void CONSTCONDBLOCK(bool state);
+	void CONSTDEF(bool state);
+	void IFCOND(bool& state);
+	void COLORCONSTDEF(bool state);
+	void MAGCONSTDEF(bool state);
+	void UINTCONSTDEF(bool state);
 	void COLOR(Color& color);
 	void MAG(Magnification& magnification);
 	void UINT(size_t& value);
+	void STYLEBLOCK(StyleFilter filter, bool state);
 	void STYLE(StyleFilter filter, bool state);
 	void STYLECONDBLOCK(StyleFilter filter, bool state);
 	void STYLEFILTER(StyleFilter& filter);
