@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QDir>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 QBreaker::QBreaker()
@@ -54,15 +55,8 @@ void QBreaker::Reset()
 }
 
 
-
 DBThread::DBThread()
  : database(new osmscout::Database(databaseParameter)),
-/*
-DBThread::DBThread(const SettingsRef& settings)
- : settings(settings),
-   painter(NULL),
-   database(new osmscout::Database(databaseParameter)),
-*/
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
    painter(NULL),
@@ -81,9 +75,20 @@ DBThread::DBThread(const SettingsRef& settings)
    renderBreaker(new QBreaker()),
    renderBreakerRef(renderBreaker)
 {
+    osmscout::log.Debug() << "DBThread::DBThread()";
+
     QScreen *srn = QApplication::screens().at(0);
 
     dpi = (double)srn->physicalDotsPerInch();
+}
+
+DBThread::~DBThread()
+{
+  osmscout::log.Debug() << "DBThread::~DBThread()";
+
+  if (painter!=NULL) {
+    delete painter;
+  }
 }
 
 void DBThread::FreeMaps()
@@ -101,7 +106,7 @@ bool DBThread::AssureRouter(osmscout::Vehicle /*vehicle*/)
     return false;
   }
 
-  if (!router /*||
+  if (!router/*||
       (router && router->GetVehicle()!=vehicle)*/) {
     if (router) {
       if (router->IsOpen()) {
@@ -145,24 +150,13 @@ void DBThread::Initialize()
       else {
         qDebug() << "Cannot load style sheet!";
         styleConfig=NULL;
-/*
-    if (database->GetTypeConfig()) {
-      if(painter) {
-        delete painter;
-        painter = NULL;
-      }
-      styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
-
-      if (!styleConfig->Load(m_stylesheetFilename.toLocal8Bit().data())) {
-        styleConfig=NULL;
-      } else {
-          painter=new osmscout::MapPainterQt(styleConfig);
-*/
+        return;
       }
     }
     else {
       qDebug() << "TypeConfig invalid!";
       styleConfig=NULL;
+      return;
     }
   }
   else {
@@ -189,9 +183,6 @@ void DBThread::ReloadStyle(const QString &suffix){
         styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     }
     if (!styleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
-/*
-    if (!styleConfig->Load((m_stylesheetFilename+suffix).toLocal8Bit().data())) {
-*/
         styleConfig=NULL;
 
     } else {
@@ -280,6 +271,7 @@ void DBThread::TriggerMapRendering()
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
+    drawParameter.SetRenderBackground(true);
     drawParameter.SetRenderSeaLand(true);
     drawParameter.SetBreaker(renderBreakerRef);
 

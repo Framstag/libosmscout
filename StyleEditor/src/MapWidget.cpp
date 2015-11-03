@@ -201,8 +201,8 @@ void MapWidget::paint(QPainter *painter)
 
 void MapWidget::zoomIn(double zoomFactor)
 {
-    if (magnification.GetMagnification()*zoomFactor>200000) {
-        magnification.SetMagnification(200000);
+    if (magnification.GetMagnification()*zoomFactor>800000) {
+        magnification.SetMagnification(800000);
     }
     else {
         magnification.SetMagnification(magnification.GetMagnification()*zoomFactor);

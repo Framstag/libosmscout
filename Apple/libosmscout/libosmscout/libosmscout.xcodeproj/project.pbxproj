@@ -31,7 +31,6 @@
 		F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */; };
 		F51E3F19161A5FEC00D51926 /* TypeConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED4161A5FEC00D51926 /* TypeConfig.cpp */; };
 		F51E3F1B161A5FEC00D51926 /* Types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED6161A5FEC00D51926 /* Types.cpp */; };
-		F51E3F1C161A5FEC00D51926 /* TypeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED7161A5FEC00D51926 /* TypeSet.cpp */; };
 		F51E3F1D161A5FEC00D51926 /* Breaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EEB161A5FEC00D51926 /* Breaker.cpp */; };
 		F51E3F1E161A5FEC00D51926 /* Cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EEC161A5FEC00D51926 /* Cache.cpp */; };
 		F51E3F1F161A5FEC00D51926 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EED161A5FEC00D51926 /* Color.cpp */; };
@@ -43,7 +42,6 @@
 		F51E3F27161A5FEC00D51926 /* NumberSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */; };
 		F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF6161A5FEC00D51926 /* Progress.cpp */; };
 		F51E3F29161A5FEC00D51926 /* Projection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF7161A5FEC00D51926 /* Projection.cpp */; };
-		F51E3F2A161A5FEC00D51926 /* Reference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF8161A5FEC00D51926 /* Reference.cpp */; };
 		F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF9161A5FEC00D51926 /* StopClock.cpp */; };
 		F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFA161A5FEC00D51926 /* String.cpp */; };
 		F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFB161A5FEC00D51926 /* Transformation.cpp */; };
@@ -73,7 +71,6 @@
 		F53BD1BC1638867D006C7AE1 /* TurnRestriction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */; };
 		F53BD1BD1638867D006C7AE1 /* TypeConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED4161A5FEC00D51926 /* TypeConfig.cpp */; };
 		F53BD1BF1638867D006C7AE1 /* Types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED6161A5FEC00D51926 /* Types.cpp */; };
-		F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3ED7161A5FEC00D51926 /* TypeSet.cpp */; };
 		F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFC161A5FEC00D51926 /* WaterIndex.cpp */; };
 		F53BD1C216388682006C7AE1 /* Way.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFD161A5FEC00D51926 /* Way.cpp */; };
 		F53BD1C31638868B006C7AE1 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EC2161A5FEC00D51926 /* Parser.cpp */; };
@@ -90,7 +87,6 @@
 		F53BD1D0163886B2006C7AE1 /* NumberSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */; };
 		F53BD1D1163886B2006C7AE1 /* Progress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF6161A5FEC00D51926 /* Progress.cpp */; };
 		F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF7161A5FEC00D51926 /* Projection.cpp */; };
-		F53BD1D3163886B2006C7AE1 /* Reference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF8161A5FEC00D51926 /* Reference.cpp */; };
 		F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF9161A5FEC00D51926 /* StopClock.cpp */; };
 		F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFA161A5FEC00D51926 /* String.cpp */; };
 		F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFB161A5FEC00D51926 /* Transformation.cpp */; };
@@ -120,8 +116,6 @@
 		F54DAA5C1815DA9A00625DDA /* SRTM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA481815DA6500625DDA /* SRTM.cpp */; };
 		F54DAA5F1815DAFB00625DDA /* NodeUseMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */; };
 		F54DAA601815DAFB00625DDA /* NodeUseMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */; };
-		F54DAA611815DAFB00625DDA /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5E1815DAFB00625DDA /* Parser.cpp */; };
-		F54DAA621815DAFB00625DDA /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54DAA5E1815DAFB00625DDA /* Parser.cpp */; };
 		F54DAA6E1815DB3F00625DDA /* Area.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA631815DB3F00625DDA /* Area.h */; };
 		F54DAA6F1815DB3F00625DDA /* AreaDataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA641815DB3F00625DDA /* AreaDataFile.h */; };
 		F54DAA711815DB3F00625DDA /* Coord.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA661815DB3F00625DDA /* Coord.h */; };
@@ -133,10 +127,8 @@
 		F54DAA771815DB3F00625DDA /* Pixel.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6C1815DB3F00625DDA /* Pixel.h */; };
 		F54DAA781815DB3F00625DDA /* SRTM.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA6D1815DB3F00625DDA /* SRTM.h */; };
 		F54DAA7B1815DB7D00625DDA /* NodeUseMap.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA791815DB7D00625DDA /* NodeUseMap.h */; };
-		F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = F54DAA7A1815DB7D00625DDA /* Parser.h */; };
 		F54FD00C186596AD000E8579 /* LocationIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54FD00B186596AD000E8579 /* LocationIndex.cpp */; };
 		F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F54FD00B186596AD000E8579 /* LocationIndex.cpp */; };
-		F550E56319B085C700CB6072 /* Navigation.h in Headers */ = {isa = PBXBuildFile; fileRef = F550E56219B085C700CB6072 /* Navigation.h */; };
 		F556EFFE19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */; };
 		F556EFFF19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */; };
 		F556F00019C6E36700EAAA8B /* TypeFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */; };
@@ -155,6 +147,8 @@
 		F58399471AF6E1C400F79DFF /* Tiling.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399441AF6E1C400F79DFF /* Tiling.h */; };
 		F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
 		F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
+		F5CA00151B9FB524003B0EF6 /* Parsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CA00141B9FB524003B0EF6 /* Parsing.cpp */; };
+		F5CA00161B9FB604003B0EF6 /* Parsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CA00141B9FB524003B0EF6 /* Parsing.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -195,7 +189,6 @@
 		F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TurnRestriction.cpp; path = ../../../../libosmscout/src/osmscout/TurnRestriction.cpp; sourceTree = "<group>"; };
 		F51E3ED4161A5FEC00D51926 /* TypeConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeConfig.cpp; path = ../../../../libosmscout/src/osmscout/TypeConfig.cpp; sourceTree = "<group>"; };
 		F51E3ED6161A5FEC00D51926 /* Types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Types.cpp; path = ../../../../libosmscout/src/osmscout/Types.cpp; sourceTree = "<group>"; };
-		F51E3ED7161A5FEC00D51926 /* TypeSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeSet.cpp; path = ../../../../libosmscout/src/osmscout/TypeSet.cpp; sourceTree = "<group>"; };
 		F51E3EEB161A5FEC00D51926 /* Breaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Breaker.cpp; sourceTree = "<group>"; };
 		F51E3EEC161A5FEC00D51926 /* Cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cache.cpp; sourceTree = "<group>"; };
 		F51E3EED161A5FEC00D51926 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Color.cpp; sourceTree = "<group>"; };
@@ -207,7 +200,6 @@
 		F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NumberSet.cpp; sourceTree = "<group>"; };
 		F51E3EF6161A5FEC00D51926 /* Progress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Progress.cpp; sourceTree = "<group>"; };
 		F51E3EF7161A5FEC00D51926 /* Projection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Projection.cpp; sourceTree = "<group>"; };
-		F51E3EF8161A5FEC00D51926 /* Reference.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Reference.cpp; sourceTree = "<group>"; };
 		F51E3EF9161A5FEC00D51926 /* StopClock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StopClock.cpp; sourceTree = "<group>"; };
 		F51E3EFA161A5FEC00D51926 /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = String.cpp; sourceTree = "<group>"; };
 		F51E3EFB161A5FEC00D51926 /* Transformation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Transformation.cpp; sourceTree = "<group>"; };
@@ -241,7 +233,6 @@
 		F51E3F5C161A604300D51926 /* TurnRestriction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TurnRestriction.h; sourceTree = "<group>"; };
 		F51E3F5D161A604300D51926 /* TypeConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeConfig.h; sourceTree = "<group>"; };
 		F51E3F5F161A604300D51926 /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
-		F51E3F60161A604300D51926 /* TypeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeSet.h; sourceTree = "<group>"; };
 		F51E3F62161A604300D51926 /* Breaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Breaker.h; sourceTree = "<group>"; };
 		F51E3F63161A604300D51926 /* Cache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cache.h; sourceTree = "<group>"; };
 		F51E3F64161A604300D51926 /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Color.h; sourceTree = "<group>"; };
@@ -253,7 +244,6 @@
 		F51E3F6C161A604300D51926 /* NumberSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NumberSet.h; sourceTree = "<group>"; };
 		F51E3F6D161A604300D51926 /* Progress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Progress.h; sourceTree = "<group>"; };
 		F51E3F6E161A604300D51926 /* Projection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Projection.h; sourceTree = "<group>"; };
-		F51E3F6F161A604300D51926 /* Reference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reference.h; sourceTree = "<group>"; };
 		F51E3F70161A604300D51926 /* StopClock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StopClock.h; sourceTree = "<group>"; };
 		F51E3F71161A604300D51926 /* String.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = String.h; sourceTree = "<group>"; };
 		F51E3F72161A604300D51926 /* Transformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Transformation.h; sourceTree = "<group>"; };
@@ -283,7 +273,6 @@
 		F54DAA471815DA6500625DDA /* Pixel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Pixel.cpp; path = ../../../../libosmscout/src/osmscout/Pixel.cpp; sourceTree = "<group>"; };
 		F54DAA481815DA6500625DDA /* SRTM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SRTM.cpp; path = ../../../../libosmscout/src/osmscout/SRTM.cpp; sourceTree = "<group>"; };
 		F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NodeUseMap.cpp; sourceTree = "<group>"; };
-		F54DAA5E1815DAFB00625DDA /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
 		F54DAA631815DB3F00625DDA /* Area.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Area.h; sourceTree = "<group>"; };
 		F54DAA641815DB3F00625DDA /* AreaDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AreaDataFile.h; sourceTree = "<group>"; };
 		F54DAA661815DB3F00625DDA /* Coord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Coord.h; sourceTree = "<group>"; };
@@ -295,7 +284,6 @@
 		F54DAA6C1815DB3F00625DDA /* Pixel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pixel.h; sourceTree = "<group>"; };
 		F54DAA6D1815DB3F00625DDA /* SRTM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRTM.h; sourceTree = "<group>"; };
 		F54DAA791815DB7D00625DDA /* NodeUseMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeUseMap.h; sourceTree = "<group>"; };
-		F54DAA7A1815DB7D00625DDA /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
 		F54FD00B186596AD000E8579 /* LocationIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocationIndex.cpp; path = ../../../../libosmscout/src/osmscout/LocationIndex.cpp; sourceTree = "<group>"; };
 		F550E56219B085C700CB6072 /* Navigation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Navigation.h; sourceTree = "<group>"; };
 		F556EFFC19C6E36700EAAA8B /* NodeDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NodeDataFile.cpp; path = ../../../../libosmscout/src/osmscout/NodeDataFile.cpp; sourceTree = "<group>"; };
@@ -311,6 +299,8 @@
 		F58399441AF6E1C400F79DFF /* Tiling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tiling.h; sourceTree = "<group>"; };
 		F5A66AC71A46F5BF007AD752 /* TextSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSearchIndex.h; sourceTree = "<group>"; };
 		F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextSearchIndex.cpp; path = ../../../../libosmscout/src/osmscout/TextSearchIndex.cpp; sourceTree = "<group>"; };
+		F5CA00131B9FB4F6003B0EF6 /* Parsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parsing.h; sourceTree = "<group>"; };
+		F5CA00141B9FB524003B0EF6 /* Parsing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parsing.cpp; sourceTree = "<group>"; };
 		F5EDD5441891556D00646B92 /* LocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationIndex.h; sourceTree = "<group>"; };
 		F5EDD545189155AA00646B92 /* CoreFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreFeatures.h; sourceTree = "<group>"; };
 		F5EDD5461891561000646B92 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
@@ -416,7 +406,6 @@
 				F51E3ED3161A5FEC00D51926 /* TurnRestriction.cpp */,
 				F51E3ED4161A5FEC00D51926 /* TypeConfig.cpp */,
 				F51E3ED6161A5FEC00D51926 /* Types.cpp */,
-				F51E3ED7161A5FEC00D51926 /* TypeSet.cpp */,
 				F51E3ED8161A5FEC00D51926 /* util */,
 				F51E3EFC161A5FEC00D51926 /* WaterIndex.cpp */,
 				F51E3EFD161A5FEC00D51926 /* Way.cpp */,
@@ -454,10 +443,10 @@
 		F51E3ED8161A5FEC00D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F5CA00141B9FB524003B0EF6 /* Parsing.cpp */,
 				F583993C1AF6E19B00F79DFF /* GeoBox.cpp */,
 				F583993D1AF6E19B00F79DFF /* Logger.cpp */,
 				F54DAA5D1815DAFB00625DDA /* NodeUseMap.cpp */,
-				F54DAA5E1815DAFB00625DDA /* Parser.cpp */,
 				F57B4945169341C7008E1B2C /* Magnification.cpp */,
 				F51E3EEB161A5FEC00D51926 /* Breaker.cpp */,
 				F51E3EEC161A5FEC00D51926 /* Cache.cpp */,
@@ -470,7 +459,6 @@
 				F51E3EF5161A5FEC00D51926 /* NumberSet.cpp */,
 				F51E3EF6161A5FEC00D51926 /* Progress.cpp */,
 				F51E3EF7161A5FEC00D51926 /* Projection.cpp */,
-				F51E3EF8161A5FEC00D51926 /* Reference.cpp */,
 				F51E3EF9161A5FEC00D51926 /* StopClock.cpp */,
 				F51E3EFA161A5FEC00D51926 /* String.cpp */,
 				F51E3EFB161A5FEC00D51926 /* Transformation.cpp */,
@@ -526,7 +514,6 @@
 				F51E3F5C161A604300D51926 /* TurnRestriction.h */,
 				F51E3F5D161A604300D51926 /* TypeConfig.h */,
 				F51E3F5F161A604300D51926 /* Types.h */,
-				F51E3F60161A604300D51926 /* TypeSet.h */,
 				F51E3F61161A604300D51926 /* util */,
 				F51E3F73161A604300D51926 /* WaterIndex.h */,
 				F51E3F74161A604300D51926 /* Way.h */,
@@ -567,11 +554,11 @@
 		F51E3F61161A604300D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F5CA00131B9FB4F6003B0EF6 /* Parsing.h */,
 				F58399421AF6E1C400F79DFF /* GeoBox.h */,
 				F58399431AF6E1C400F79DFF /* Logger.h */,
 				F58399441AF6E1C400F79DFF /* Tiling.h */,
 				F54DAA791815DB7D00625DDA /* NodeUseMap.h */,
-				F54DAA7A1815DB7D00625DDA /* Parser.h */,
 				F57B4943169341A3008E1B2C /* Magnification.h */,
 				F51E3F62161A604300D51926 /* Breaker.h */,
 				F51E3F63161A604300D51926 /* Cache.h */,
@@ -584,7 +571,6 @@
 				F51E3F6C161A604300D51926 /* NumberSet.h */,
 				F51E3F6D161A604300D51926 /* Progress.h */,
 				F51E3F6E161A604300D51926 /* Projection.h */,
-				F51E3F6F161A604300D51926 /* Reference.h */,
 				F51E3F70161A604300D51926 /* StopClock.h */,
 				F51E3F71161A604300D51926 /* String.h */,
 				F51E3F72161A604300D51926 /* Transformation.h */,
@@ -614,12 +600,10 @@
 				F58399451AF6E1C400F79DFF /* GeoBox.h in Headers */,
 				F54DAA711815DB3F00625DDA /* Coord.h in Headers */,
 				F58399461AF6E1C400F79DFF /* Logger.h in Headers */,
-				F550E56319B085C700CB6072 /* Navigation.h in Headers */,
 				F556F00319C9D00700EAAA8B /* TypeFeatures.h in Headers */,
 				F54DAA731815DB3F00625DDA /* DebugDatabase.h in Headers */,
 				F54DAA721815DB3F00625DDA /* CoordDataFile.h in Headers */,
 				F534FB9B1823E8BD0039CEE4 /* Intersection.h in Headers */,
-				F54DAA7C1815DB7D00625DDA /* Parser.h in Headers */,
 				F58399471AF6E1C400F79DFF /* Tiling.h in Headers */,
 				F54DAA741815DB3F00625DDA /* GeoCoord.h in Headers */,
 				F54DAA7B1815DB7D00625DDA /* NodeUseMap.h in Headers */,
@@ -673,7 +657,7 @@
 		F51E3E96161A5F4000D51926 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "Vladimir Vyskocil";
 			};
 			buildConfigurationList = F51E3E99161A5F4000D51926 /* Build configuration list for PBXProject "libosmscout" */;
@@ -709,6 +693,7 @@
 				F51E3F04161A5FEC00D51926 /* GroundTile.cpp in Sources */,
 				F54C1E5418F480AC008C5EB3 /* POIService.cpp in Sources */,
 				F51E3F05161A5FEC00D51926 /* Location.cpp in Sources */,
+				F5CA00151B9FB524003B0EF6 /* Parsing.cpp in Sources */,
 				F51E3F06161A5FEC00D51926 /* Node.cpp in Sources */,
 				F51E3F07161A5FEC00D51926 /* NumericIndex.cpp in Sources */,
 				F51E3F08161A5FEC00D51926 /* ObjectRef.cpp in Sources */,
@@ -728,7 +713,6 @@
 				F51E3F14161A5FEC00D51926 /* RoutingProfile.cpp in Sources */,
 				F51E3F16161A5FEC00D51926 /* SSEMath.cpp in Sources */,
 				F51E3F17161A5FEC00D51926 /* Tag.cpp in Sources */,
-				F54DAA611815DAFB00625DDA /* Parser.cpp in Sources */,
 				F583993E1AF6E19B00F79DFF /* GeoBox.cpp in Sources */,
 				F54C1E5218F480AC008C5EB3 /* LocationService.cpp in Sources */,
 				F51E3F18161A5FEC00D51926 /* TurnRestriction.cpp in Sources */,
@@ -736,7 +720,6 @@
 				F51E3F1B161A5FEC00D51926 /* Types.cpp in Sources */,
 				F55A3ACE1A45E57A0010005B /* Tiling.cpp in Sources */,
 				F54DAA521815DA6500625DDA /* SRTM.cpp in Sources */,
-				F51E3F1C161A5FEC00D51926 /* TypeSet.cpp in Sources */,
 				F51E3F1D161A5FEC00D51926 /* Breaker.cpp in Sources */,
 				F51E3F1E161A5FEC00D51926 /* Cache.cpp in Sources */,
 				F51E3F1F161A5FEC00D51926 /* Color.cpp in Sources */,
@@ -750,7 +733,6 @@
 				F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */,
 				F54DAA501815DA6500625DDA /* OptimizeWaysLowZoom.cpp in Sources */,
 				F51E3F29161A5FEC00D51926 /* Projection.cpp in Sources */,
-				F51E3F2A161A5FEC00D51926 /* Reference.cpp in Sources */,
 				F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */,
 				F54DAA491815DA6500625DDA /* Area.cpp in Sources */,
 				F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */,
@@ -780,6 +762,7 @@
 				F53BD1AB1638866B006C7AE1 /* GroundTile.cpp in Sources */,
 				F54C1E5B18F583BF008C5EB3 /* POIService.cpp in Sources */,
 				F53BD1AC1638866B006C7AE1 /* Location.cpp in Sources */,
+				F5CA00161B9FB604003B0EF6 /* Parsing.cpp in Sources */,
 				F53BD1AD1638866B006C7AE1 /* Node.cpp in Sources */,
 				F53BD1AE1638866B006C7AE1 /* NumericIndex.cpp in Sources */,
 				F53BD1AF1638866B006C7AE1 /* ObjectRef.cpp in Sources */,
@@ -798,11 +781,9 @@
 				F53BD1BB1638867D006C7AE1 /* Tag.cpp in Sources */,
 				F53BD1BC1638867D006C7AE1 /* TurnRestriction.cpp in Sources */,
 				F53BD1BD1638867D006C7AE1 /* TypeConfig.cpp in Sources */,
-				F54DAA621815DAFB00625DDA /* Parser.cpp in Sources */,
 				F54C1E5918F583BA008C5EB3 /* LocationService.cpp in Sources */,
 				F583993F1AF6E19B00F79DFF /* GeoBox.cpp in Sources */,
 				F53BD1BF1638867D006C7AE1 /* Types.cpp in Sources */,
-				F53BD1C01638867D006C7AE1 /* TypeSet.cpp in Sources */,
 				F53BD1C116388682006C7AE1 /* WaterIndex.cpp in Sources */,
 				F53BD1C216388682006C7AE1 /* Way.cpp in Sources */,
 				F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */,
@@ -827,7 +808,6 @@
 				F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */,
 				F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */,
 				F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */,
-				F53BD1D3163886B2006C7AE1 /* Reference.cpp in Sources */,
 				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
 				F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */,
 				F54C1E5C18F583C2008C5EB3 /* RoutingService.cpp in Sources */,
@@ -844,7 +824,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -861,7 +840,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
+				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -872,7 +851,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -882,7 +860,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
+				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -892,6 +870,7 @@
 		F51E3EAE161A5F4000D51926 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/libosmscout.dst;
@@ -914,6 +893,7 @@
 		F51E3EAF161A5F4000D51926 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/libosmscout.dst;
@@ -936,6 +916,8 @@
 		F53BD16516388375006C7AE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -946,16 +928,20 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
 		F53BD16616388375006C7AE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				EXECUTABLE_PREFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -967,9 +953,11 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
