@@ -1428,6 +1428,18 @@ namespace osmscout {
      return false;
     }
 
+    uint32_t fileFormatVersion;
+
+    if (!scanner.Read(fileFormatVersion)) {
+      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
+      return false;
+    }
+
+    if (fileFormatVersion!=FILE_FORMAT_VERSION) {
+      log.Error() << "File '" << scanner.GetFilename() << "' does not have the expected format version! Actual " << fileFormatVersion << ", expected: " << FILE_FORMAT_VERSION;
+      return false;
+    }
+
     // Tags
 
     uint32_t tagCount;
@@ -1664,6 +1676,8 @@ namespace osmscout {
       //progress.Error("Cannot create 'types.dat'");
       return false;
     }
+
+    writer.Write(FILE_FORMAT_VERSION);
 
     writer.WriteNumber((uint32_t)tags.size());
     for (const auto &tag : tags) {
