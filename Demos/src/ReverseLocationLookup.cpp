@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
   if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -83,31 +83,29 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::LocationServiceRef locationService(new osmscout::LocationService(database));
+  osmscout::LocationServiceRef locationService=std::make_shared<osmscout::LocationService>(database);
 
   std::list<osmscout::LocationService::ReverseLookupResult> result;
 
   if (locationService->ReverseLookupObjects(objects,
                                             result)) {
-    for (std::list<osmscout::LocationService::ReverseLookupResult>::const_iterator entry=result.begin();
-         entry!=result.end();
-         ++entry) {
-      std::cout << entry->object.GetTypeName() << " " << entry->object.GetFileOffset() << " matches";
+    for (const auto& entry : result) {
+      std::cout << entry.object.GetTypeName() << " " << entry.object.GetFileOffset() << " matches";
 
-      if (entry->adminRegion) {
-        std::cout << " region '" << entry->adminRegion->name << "'";
+      if (entry.adminRegion) {
+        std::cout << " region '" << entry.adminRegion->name << "'";
       }
 
-      if (entry->poi) {
-        std::cout << " poi '" << entry->poi->name << "'";
+      if (entry.poi) {
+        std::cout << " poi '" << entry.poi->name << "'";
       }
 
-      if (entry->location) {
-        std::cout << " location '" << entry->location->name << "'";
+      if (entry.location) {
+        std::cout << " location '" << entry.location->name << "'";
       }
 
-      if (entry->address) {
-        std::cout << " address '" << entry->address->name << "'";
+      if (entry.address) {
+        std::cout << " address '" << entry.address->name << "'";
       }
 
       std::cout << std::endl;
