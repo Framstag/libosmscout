@@ -80,6 +80,7 @@ signals:
   void Redraw();
 
 public slots:
+  void ToggleDaylight();
   void TriggerMapRendering();
   void Initialize();
   void Finalize();
@@ -98,6 +99,8 @@ private:
   osmscout::RoutingServiceRef   router;
   osmscout::RoutePostprocessor  routePostprocessor;
 
+  QString                       stylesheetFilename;
+  bool                          daylight;
   osmscout::StyleConfigRef      styleConfig;
   osmscout::MapData             data;
   osmscout::MapPainterQt        *painter;

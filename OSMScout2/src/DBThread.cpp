@@ -59,6 +59,7 @@ DBThread::DBThread()
  : database(new osmscout::Database(databaseParameter)),
    locationService(new osmscout::LocationService(database)),
    mapService(new osmscout::MapService(database)),
+   daylight(true),
    painter(NULL),
    iconDirectory(),
    currentImage(NULL),
@@ -156,14 +157,15 @@ void DBThread::Initialize()
         qDebug() << "Loading database from " << databaseDirectory;
     }
 
-    QString stylesheetFilename=databaseDirectory+"/standard.oss";
+    stylesheetFilename=databaseDirectory+"/standard.oss";
 
     qDebug() << "Loading style sheet from " << stylesheetFilename;
 
 #else
   QStringList cmdLineArgs = QApplication::arguments();
   QString databaseDirectory = cmdLineArgs.size() > 1 ? cmdLineArgs.at(1) : QDir::currentPath();
-  QString stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
+
+  stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
 #endif
 
@@ -233,6 +235,45 @@ void DBThread::UpdateRenderRequest(const RenderMapRequest& request)
   doRender=true;
 
   renderBreaker->Break();
+}
+
+void DBThread::ToggleDaylight()
+{
+  QMutexLocker locker(&mutex);
+
+  qDebug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
+
+  if (!database->IsOpen()) {
+    return;
+  }
+
+  doRender=true;
+
+  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+
+  if (!typeConfig) {
+    return;
+  }
+
+  osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+
+  newStyleConfig->AddFlag("daylight",!daylight);
+
+  qDebug() << "Loading new stylesheet with daylight = " << newStyleConfig->GetFlagByName("daylight");
+
+  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+    // Tear down
+    delete painter;
+    painter=NULL;
+
+    // Recreate
+    styleConfig=newStyleConfig;
+    painter=new osmscout::MapPainterQt(styleConfig);
+
+    daylight=!daylight;
+
+    qDebug() << "Toggling daylight done.";
+  }
 }
 
 void DBThread::TriggerMapRendering()

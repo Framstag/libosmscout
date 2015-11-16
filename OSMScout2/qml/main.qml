@@ -144,6 +144,10 @@ Window {
                     searchDialog.focus = true
                     event.accepted = true
                 }
+                else if (event.modifiers===Qt.ControlModifier &&
+                         event.key === Qt.Key_D) {
+                    map.toggleDaylight();
+                }
             }
 
             // Use PinchArea for multipoint zoom in/out?

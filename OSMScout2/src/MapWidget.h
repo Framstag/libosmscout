@@ -63,6 +63,9 @@ public slots:
   void down();
   void rotateLeft();
   void rotateRight();
+
+  void toggleDaylight();
+
   void showCoordinates(double lat, double lon);
   void showLocation(Location* location);
 
