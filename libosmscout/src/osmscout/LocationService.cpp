@@ -22,8 +22,60 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
+#include <osmscout/TypeFeatures.h>
 
 namespace osmscout {
+
+  LocationCoordDescription::LocationCoordDescription(const GeoCoord& location)
+    : location(location)
+  {
+    // no code
+  }
+
+  GeoCoord LocationCoordDescription::GetLocation() const
+  {
+    return location;
+  }
+
+  LocationAtPlaceDescription::LocationAtPlaceDescription(const Place& place)
+  : place(place),
+    atPlace(true),
+    distance(0.0),
+    bearing(0.0)
+  {
+    // no oce
+  }
+
+  LocationAtPlaceDescription::LocationAtPlaceDescription(const Place& place,
+                                                         double distance,
+                                                         double bearing)
+  : place(place),
+    atPlace(false),
+    distance(distance),
+    bearing(bearing)
+  {
+
+  }
+
+  void LocationDescription::SetCoordDescription(const LocationCoordDescriptionRef& description)
+  {
+    this->coordDescription=description;
+  }
+
+  void LocationDescription::SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description)
+  {
+    this->atAddressDescription=description;
+  }
+
+  LocationCoordDescriptionRef LocationDescription::GetCoordDescription() const
+  {
+    return coordDescription;
+  }
+
+  LocationAtPlaceDescriptionRef LocationDescription::GetAtAddressDescription() const
+  {
+    return atAddressDescription;
+  }
 
   LocationService::VisitorMatcher::VisitorMatcher(const std::string& searchPattern)
   :pattern(searchPattern)
@@ -1254,4 +1306,149 @@ namespace osmscout {
     return ReverseLookupObjects(objects,
                                 result);
   }
+
+  bool LocationService::DescribeLocationByAddress(const GeoCoord& location,
+                                                  LocationDescription& description)
+  {
+    TypeConfigRef    typeConfig=database->GetTypeConfig();
+    AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
+    GeoBox           box100=GeoBox::BoxByCenterAndRadius(location,100);
+
+    if (!typeConfig ||
+        !areaAreaIndex) {
+      return false;
+    }
+
+    TypeInfoSet addressTypes;
+
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeArea() &&
+          type->HasFeature(AddressFeature::NAME)) {
+        addressTypes.Set(type);
+      }
+    }
+
+    if (addressTypes.Empty()) {
+      return true;
+    }
+
+    std::vector<DataBlockSpan> areaSpans;
+    TypeInfoSet                loadedAddressTypes;
+
+    if (!areaAreaIndex->GetAreasInArea(*typeConfig,
+                                       box100,
+                                       std::numeric_limits<size_t>::max(),
+                                       addressTypes,
+                                       std::numeric_limits<size_t>::max(),
+                                       areaSpans,
+                                       loadedAddressTypes)) {
+      return false;
+    }
+
+    if (areaSpans.empty()) {
+      return true;
+    }
+
+    std::vector<AreaRef> areas;
+
+    if (!database->GetAreasByBlockSpans(areaSpans,
+                                        areas)) {
+      return false;
+    }
+
+    if (areas.empty()) {
+      return true;
+    }
+
+    bool    atPlace=false;
+    AreaRef placeArea;
+    double  distance=std::numeric_limits<double>::max(); // In Km
+    double  bearing;
+
+    for (const auto& area : areas) {
+      for (const auto& ring : area->rings) {
+        if (ring.ring==Area::outerRingId) {
+          if (!atPlace && IsCoordInArea(location,
+                                        ring.nodes)) {
+            atPlace=true;
+            placeArea=area;
+            distance=0.0;
+            bearing=0;
+          }
+
+          for (size_t i=0; i<ring.nodes.size(); i++) {
+            double   currentDistance;
+            GeoCoord a;
+            GeoCoord b;
+            GeoCoord intersection;
+
+            if (i>0) {
+              a=ring.nodes[i-1];
+              b=ring.nodes[i];
+            }
+            else {
+              a=ring.nodes[ring.nodes.size()-1];
+              b=ring.nodes[i];
+            }
+
+            currentDistance=CalculateDistancePointToLineSegment(location,
+                                                                a,
+                                                                b,
+                                                                intersection);
+
+            currentDistance=GetEllipsoidalDistance(location,intersection);
+
+            if (!atPlace &&
+                currentDistance<distance) {
+              placeArea=area;
+              distance=currentDistance;
+              //distance=GetEllipsoidalDistance(location,intersection);
+              bearing=GetSphericalBearingInitial(intersection,location);
+            }
+          }
+        }
+      }
+    }
+
+    if (placeArea) {
+      std::list<ReverseLookupResult> result;
+
+      if (!ReverseLookupObject(ObjectFileRef(placeArea->GetFileOffset(),
+                                             refArea),
+                               result)) {
+        return false;
+      }
+
+      if (!result.empty()) {
+        Place place=Place(result.front().object,
+                          result.front().adminRegion,
+                          result.front().poi,
+                          result.front().location,
+                          result.front().address);
+
+        if (atPlace) {
+          description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place));
+        }
+        else {
+          description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,distance*1000,bearing));
+        }
+      }
+    }
+
+    return true;
+  }
+
+  bool LocationService::DescribeLocation(const GeoCoord& location,
+                                         LocationDescription& description)
+  {
+    description.SetCoordDescription(std::make_shared<LocationCoordDescription>(location));
+
+
+    if (!DescribeLocationByAddress(location,description)) {
+      return false;
+    }
+
+    return true;
+  }
+
 }

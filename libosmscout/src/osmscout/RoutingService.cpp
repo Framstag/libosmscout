@@ -1691,28 +1691,7 @@ namespace osmscout {
       return false;
     }
 
-    double           topLat;
-    double           botLat;
-    double           leftLon;
-    double           rightLon;
-    double           minDistance=std::numeric_limits<double>::max();
-
-    osmscout::GetEllipsoidalDistance(lat,
-                                     lon,
-                                     315.0,
-                                     radius,
-                                     topLat,
-                                     leftLon);
-
-    osmscout::GetEllipsoidalDistance(lat,
-                                     lon,
-                                     135.0,
-                                     radius,
-                                     botLat,
-                                     rightLon);
-
-    GeoBox      boundingBox(GeoCoord(topLat,leftLon),
-                            GeoCoord(botLat,rightLon));
+    GeoBox      boundingBox=GeoBox::BoxByCenterAndRadius(GeoCoord(lat,lon),radius);
     TypeInfoSet wayRoutableTypes;
     TypeInfoSet areaRoutableTypes;
     TypeInfoSet wayLoadedTypes;
@@ -1771,6 +1750,8 @@ namespace osmscout {
       log.Error() << "Error reading areas in area!";
       return false;
     }
+
+    double minDistance=std::numeric_limits<double>::max();
 
     for (const auto& area : areas) {
       if (!HasNodeWithId(area->rings[0].ids)) {

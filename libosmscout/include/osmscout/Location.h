@@ -205,6 +205,63 @@ namespace osmscout {
                const Location& location,
                const Address& address);
   };
+
+  /**
+   * \ingroup Location
+   *
+   * A Place description a certain place in respect to the location index.
+   * A place consists on certain optional attributes, that in turn describe
+   * certain aspects.
+   *
+   * * object: A reference to the object that is described by the place
+   * * adminRegion: The hierarchical administrative region the object is in (normally the City)
+   * * poi: Additional information, if the object is an POI
+   * * location: The location the place is at (normally the street)
+   * * address: The address of the object in respect to the location (normally the house number)
+   */
+  class OSMSCOUT_API Place
+  {
+  private:
+    ObjectFileRef  object;      //!< Object the location is in
+    AdminRegionRef adminRegion; //!< Region the object is in, if set
+    POIRef         poi;         //!< POI data, if set
+    LocationRef    location;    //!< Location data, if set
+    AddressRef     address;     //!< Address data if set
+
+  public:
+    Place(const ObjectFileRef& object,
+          const AdminRegionRef& adminRegion,
+          const POIRef& poi,
+          const LocationRef& location,
+          const AddressRef& address);
+
+    inline ObjectFileRef GetObject() const
+    {
+      return object;
+    }
+
+    inline AdminRegionRef GetAdminRegion() const
+    {
+      return adminRegion;
+    }
+
+    inline POIRef GetPOI() const
+    {
+      return poi;
+    }
+
+    inline LocationRef GetLocation() const
+    {
+      return location;
+    }
+
+    inline AddressRef GetAddress() const
+    {
+      return address;
+    }
+
+    std::string GetDisplayString() const;
+  };
 }
 
 #endif

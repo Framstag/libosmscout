@@ -34,7 +34,16 @@ target_link_libraries(DumpOSS
 
 set_property(TARGET DumpOSS PROPERTY CXX_STANDARD 11)
 
-#---- LocationLookuo
+#---- LocationDescription
+
+add_executable(LocationDescription src/LocationDescription.cpp)
+
+target_link_libraries(LocationDescription
+        ${LIBOSMSCOUT_LIBRARIES})
+
+set_property(TARGET LocationDescription PROPERTY CXX_STANDARD 11)
+
+#---- LocationLookup
 
 add_executable(LocationLookup src/LocationLookup.cpp)
 

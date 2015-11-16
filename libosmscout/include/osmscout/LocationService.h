@@ -31,6 +31,103 @@ namespace osmscout {
   /**
    * \ingroup Location
    *
+   * Description of a location based on the GeoCoord of that location.
+   */
+  class OSMSCOUT_API LocationCoordDescription
+  {
+  private:
+    GeoCoord location;
+
+  public:
+    LocationCoordDescription(const GeoCoord& location);
+
+    GeoCoord GetLocation() const;
+  };
+
+  //! \ingroup Location
+  //! Reference counted reference to a LocationCoordDescription instance
+  typedef std::shared_ptr<LocationCoordDescription> LocationCoordDescriptionRef;
+
+  /**
+   * \ingroup Location
+   *
+   * Description of a location based on the GeoCoord of that location.
+   */
+  class OSMSCOUT_API LocationAtPlaceDescription
+  {
+  private:
+    Place  place;     //!< Place
+    bool   atPlace;   //!< 'true' if at the place itself
+    double distance;  //!< distance to the place
+    double bearing;   //!< bearing to take from place to reach location
+
+  public:
+    LocationAtPlaceDescription(const Place& place);
+    LocationAtPlaceDescription(const Place& place,
+                               double distance,
+                               double bearing);
+
+    /**
+     * Return the place this information is refering to
+     */
+    inline Place GetPlace() const
+    {
+      return place;
+    }
+
+    /**
+     * 'true' if the location is at the place itself (in spite of 'close to...')
+     */
+    inline bool IsAtPlace() const
+    {
+      return atPlace;
+    }
+
+    /**
+     * Return the distance to the location in meter
+     */
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+
+    /**
+     * Return the bearing you have to go to from the place for 'distance' meter to reach the location
+     */
+    inline double GetBearing() const
+    {
+      return bearing;
+    }
+  };
+
+  //! \ingroup Location
+  //! Reference counted reference to a LocationAtPlaceDescription instance
+  typedef std::shared_ptr<LocationAtPlaceDescription> LocationAtPlaceDescriptionRef;
+
+
+  /**
+   * \ingroup Location
+   *
+   * A LocationDescription objects holds various alternative (and optional) descriptions
+   * of the given locations.
+   */
+  class OSMSCOUT_API LocationDescription
+  {
+  private:
+    LocationCoordDescriptionRef     coordDescription;
+    LocationAtPlaceDescriptionRef atAddressDescription;
+
+  public:
+    void SetCoordDescription(const LocationCoordDescriptionRef& description);
+    void SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description);
+
+    LocationCoordDescriptionRef GetCoordDescription() const;
+    LocationAtPlaceDescriptionRef GetAtAddressDescription() const;
+  };
+
+  /**
+   * \ingroup Location
+   *
    * Object holding a search request for to lookup one
    * or more locations based on search patterns for the
    * region, the location and a address.
@@ -285,6 +382,9 @@ namespace osmscout {
                                           const AddressMatchVisitor::AddressResult& addressResult,
                                           LocationSearchResult& result) const;
 
+    bool DescribeLocationByAddress(const GeoCoord& location,
+                                   LocationDescription& description);
+
   public:
     LocationService(const DatabaseRef& database);
 
@@ -310,6 +410,9 @@ namespace osmscout {
                               std::list<ReverseLookupResult>& result) const;
     bool ReverseLookupObject(const ObjectFileRef& object,
                               std::list<ReverseLookupResult>& result) const;
+
+    bool DescribeLocation(const GeoCoord& location,
+                          LocationDescription& description);
   };
 
   //! \ingroup Service

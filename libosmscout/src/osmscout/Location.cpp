@@ -19,6 +19,8 @@
 
 #include <osmscout/Location.h>
 
+#include <sstream>
+
 #include <osmscout/util/String.h>
 
 namespace osmscout {
@@ -83,6 +85,73 @@ namespace osmscout {
     limitReached=results.size()>=limit;
 
     return !limitReached;
+  }
+
+  Place::Place(const ObjectFileRef& object,
+               const AdminRegionRef& adminRegion,
+               const POIRef& poi,
+               const LocationRef& location,
+               const AddressRef& address)
+  : object(object),
+    adminRegion(adminRegion),
+    poi(poi),
+    location(location),
+    address(address)
+  {
+    // no oce
+  }
+
+  std::string Place::GetDisplayString() const
+  {
+    std::ostringstream stream;
+    bool               empty=true;
+
+    stream.imbue(std::locale(""));
+
+    if (poi) {
+      stream << poi->name;
+      empty=false;
+    }
+
+    if (location && address) {
+      if (!empty) {
+        stream << ", ";
+      }
+
+      stream << location->name << " " << address->name;
+      empty=false;
+    }
+    else if (location) {
+      if (!empty) {
+        stream << ", ";
+      }
+
+      stream << location->name;
+      empty=false;
+    }
+    else if (address) {
+      if (!empty) {
+        stream << ", ";
+      }
+
+      stream << address->name;
+      empty=false;
+    }
+
+    if (adminRegion) {
+      if (!empty) {
+        stream << ", ";
+      }
+
+      if (!adminRegion->aliasName.empty()) {
+        stream << adminRegion->aliasName;
+      }
+      else {
+        stream << adminRegion->name;
+      }
+    }
+
+    return stream.str();
   }
 }
 

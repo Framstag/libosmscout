@@ -1,4 +1,5 @@
 bin_PROGRAMS = DumpOSS \
+               LocationDescription \
                LocationLookup \
                ReverseLocationLookup \
                PerformanceTest \
@@ -44,6 +45,10 @@ DumpOSS_LDADD = $(LIBOSMSCOUTMAP_LIBS) \
 LocationLookup_SOURCES = LocationLookup.cpp
 LocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 LocationLookup_LDADD = $(LIBOSMSCOUT_LIBS)
+
+LocationDescription_SOURCES = LocationDescription.cpp
+LocationDescription_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+LocationDescription_LDADD = $(LIBOSMSCOUT_LIBS)
 
 ReverseLocationLookup_SOURCES = ReverseLocationLookup.cpp
 ReverseLocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
