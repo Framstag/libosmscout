@@ -23,6 +23,8 @@
 
 #include <osmscout/system/Assert.h>
 
+#include <osmscout/util/Geometry.h>
+
 namespace osmscout {
 
   /**
@@ -94,4 +96,37 @@ namespace osmscout {
   {
     return "[" + minCoord.GetDisplayText() + " - " + maxCoord.GetDisplayText() + "]";
   }
+
+  /**
+   * Return an GeoBox based on the center and the radius of a circle around the center.
+   * The resulting box will cross the circle in its corners.
+   */
+  GeoBox GeoBox::BoxByCenterAndRadius(const GeoCoord& center,
+                                      double radius)
+  {
+    double topLat;
+    double botLat;
+    double leftLon;
+    double rightLon;
+
+    GetEllipsoidalDistance(center.GetLat(),
+                           center.GetLon(),
+                           315.0,
+                           radius,
+                           topLat,
+                           leftLon);
+
+    GetEllipsoidalDistance(center.GetLat(),
+                           center.GetLon(),
+                           135.0,
+                           radius,
+                           botLat,
+                           rightLon);
+
+    GeoBox boundingBox(GeoCoord(topLat,leftLon),
+                       GeoCoord(botLat,rightLon));
+
+    return boundingBox;
+  }
+
 }
