@@ -121,6 +121,7 @@ typedef std::list<PathShieldStyleRef> PathShieldStyleList;
 
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
+bool                                  state;
 
 inline std::string Destring(const char* str)
 {
@@ -190,7 +191,10 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void CONSTSECTION();
 	void SYMBOLSECTION();
 	void STYLESECTION();
+	void FLAGBLOCK(bool state);
 	void FLAGDEF();
+	void FLAGCONDBLOCK(bool state);
+	void IFCOND(bool& state);
 	void IDENT(std::string& value);
 	void BOOL(bool& value);
 	void WAYGROUP(size_t priority);
@@ -203,11 +207,10 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void DOUBLE(double& value);
 	void CONSTBLOCK(bool state);
 	void CONSTCONDBLOCK(bool state);
-	void CONSTDEF(bool state);
-	void IFCOND(bool& state);
-	void COLORCONSTDEF(bool state);
-	void MAGCONSTDEF(bool state);
-	void UINTCONSTDEF(bool state);
+	void CONSTDEF();
+	void COLORCONSTDEF();
+	void MAGCONSTDEF();
+	void UINTCONSTDEF();
 	void COLOR(Color& color);
 	void MAG(Magnification& magnification);
 	void UINT(size_t& value);

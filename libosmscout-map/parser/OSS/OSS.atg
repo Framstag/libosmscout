@@ -21,6 +21,7 @@ typedef std::list<PathShieldStyleRef> PathShieldStyleList;
 
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
+bool                                  state;
 
 inline std::string Destring(const char* str)
 {
@@ -98,6 +99,7 @@ IGNORE ' ' + '\t' + '\r' + '\n'
 
 PRODUCTIONS
   OSS         = SYNC "OSS"
+                (. state=true; .)
                 {
                   FLAGSECTION
                 }
@@ -117,10 +119,60 @@ PRODUCTIONS
                 .
 
   FLAGSECTION = SYNC "FLAG"
-                {
-                  FLAGDEF
+                FLAGBLOCK<true>
+                .
+
+  FLAGBLOCK<bool state>
+              = {
+                    FLAGDEF
+                  | FLAGCONDBLOCK<state>
                 }
                 .
+
+  FLAGCONDBLOCK<bool state>
+              =  (.
+                   bool newState=state;
+                   bool executed=false;
+                 .)
+                 "IF"
+                 IFCOND<newState>
+                 "{"
+                 (.
+                   this->state=state && newState;
+                 .)
+                 FLAGBLOCK<state && newState>
+                 (.
+                   this->state=state; 
+                   executed=newState;
+                 .)
+                 "}"
+                 {
+                   "ELIF"
+                   IFCOND<newState>
+                   "{"
+                   (.
+                     this->state=!executed && state && newState;
+                   .)
+                   FLAGBLOCK<!executed && state && newState>
+                   (.
+                     this->state=state; 
+                     executed=newState;
+                   .)
+                   "}"
+                 }
+                 [
+                   "ELSE"
+                   "{"
+                   (.
+                     this->state=!executed && state;
+                   .)
+                   FLAGBLOCK<!executed && state>
+                   (.
+                     this->state=state; 
+                   .)
+                   "}"
+                 ]
+                 .
 
   FLAGDEF     = (.
                   std::string name;
@@ -306,44 +358,62 @@ PRODUCTIONS
   CONSTBLOCK<bool state>
               = {
                     CONSTCONDBLOCK<state>
-                  | CONSTDEF<state> ";"
+                  | CONSTDEF ";"
                 }
                 .
 
   CONSTCONDBLOCK<bool state>
               =  (.
-                    bool newState=state;
-                    bool executed=false;
+                   bool newState=state;
+                   bool executed=false;
                  .)
                  "IF"
                  IFCOND<newState>
                  "{"
+                 (.
+                   this->state=state && newState;
+                 .)
                  CONSTBLOCK<state && newState>
+                 (.
+                   this->state=state; 
+                   executed=newState;
+                 .)
                  "}"
-                 (. executed=newState; .)
                  {
                    "ELIF"
                    IFCOND<newState>
                    "{"
+                   (.
+                     this->state=!executed && state && newState;
+                   .)
                    CONSTBLOCK<!executed && state && newState>
+                   (.
+                     this->state=state; 
+                     executed=newState;
+                   .)
                    "}"
-                   (. executed=newState; .)
                  }
                  [
                    "ELSE"
                    "{"
+                   (.
+                     this->state=!executed && state;
+                   .)
                    CONSTBLOCK<!executed && state>
+                   (.
+                     this->state=state; 
+                   .)
                    "}"
                  ]
                  .
 
-  CONSTDEF<bool state>
-              =   COLORCONSTDEF<state>
-                | MAGCONSTDEF<state>
-                | UINTCONSTDEF<state>
+  CONSTDEF
+              =   COLORCONSTDEF
+                | MAGCONSTDEF
+                | UINTCONSTDEF
                 .
 
-  COLORCONSTDEF<bool state>
+  COLORCONSTDEF
               = (.
                   std::string      name;
                   StyleConstantRef constant;
@@ -370,7 +440,7 @@ PRODUCTIONS
                 .)
                 .
 
-  MAGCONSTDEF<bool state>
+  MAGCONSTDEF
               = (.
                   std::string      name;
                   StyleConstantRef constant;
@@ -397,7 +467,7 @@ PRODUCTIONS
                 .)
                 .
 
-  UINTCONSTDEF<bool state>
+  UINTCONSTDEF
               = (.
                   std::string      name;
                   StyleConstantRef constant;
@@ -462,21 +532,39 @@ PRODUCTIONS
                  "IF"
                  IFCOND<newState>
                  "{"
+                 (.
+                   this->state=state && newState;
+                 .)
                  STYLEBLOCK<filter,state && newState>
+                 (.
+                   this->state=state;
+                   executed=newState;
+                 .)
                  "}"
-                 (. executed=newState; .)
                  {
                    "ELIF"
                    IFCOND<newState>
                    "{"
+                   (.
+                     this->state=!executed && state && newState;
+                   .)
                    STYLEBLOCK<filter,!executed && state && newState>
+                   (.
+                     this->state=state;
+                     executed=newState;
+                   .)
                    "}"
-                   (. executed=newState; .)
                  }
                  [
                    "ELSE"
                    "{"
+                   (.
+                     this->state=!executed && state;
+                   .)
                    STYLEBLOCK<filter,!executed && state>
+                   (.
+                     this->state=state;
+                   .)
                    "}"
                  ]
                  .
@@ -1439,8 +1527,7 @@ PRODUCTIONS
 
                     if (c.length()!=7 &&
                         c.length()!=9) {
-                     std::string e="Illegal color value";
-
+                      std::string e="Illegal color value";
                       SemErr(e.c_str());
                     }
 
@@ -1456,14 +1543,17 @@ PRODUCTIONS
                       std::string e="Constant not defined";
 
                       SemErr(e.c_str());
+                      
+                      color=Color::BLACK;
                     }
                     else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
                       std::string e="Constant is not of type 'COLOR'";
 
                       SemErr(e.c_str());
+                      
+                      color=Color::BLACK;
                     }
-
-                    if (!errors->hasErrors) {
+                    else {
                       StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
 
                       color=colorConstant->GetColor();

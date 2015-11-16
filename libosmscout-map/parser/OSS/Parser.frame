@@ -132,6 +132,10 @@ void Parser::SynErr(int n)
 
 void Parser::SemErr(const char* msg)
 {
+  if (!state) {
+    return;
+  }
+
   if (errDist >= minErrDist) {
     errors->Error(t->line, t->col, msg);
   }
@@ -140,6 +144,10 @@ void Parser::SemErr(const char* msg)
 
 void Parser::SemWarning(const char* msg)
 {
+  if (!state) {
+    return;
+  }
+
   errors->Warning(t->line, t->col, msg);
 }
 

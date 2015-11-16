@@ -159,11 +159,11 @@ void Scanner::Init() {
 	start.set(35, 33);
 	start.set(64, 12);
 	start.set(34, 14);
-	start.set(61, 19);
-	start.set(59, 20);
-	start.set(44, 21);
-	start.set(123, 22);
-	start.set(125, 23);
+	start.set(123, 19);
+	start.set(125, 20);
+	start.set(61, 21);
+	start.set(59, 22);
+	start.set(44, 23);
 	start.set(91, 24);
 	start.set(93, 25);
 	start.set(45, 26);
@@ -177,18 +177,18 @@ void Scanner::Init() {
 	keywords.set("OSS", 7);
 	keywords.set("END", 8);
 	keywords.set("FLAG", 9);
-	keywords.set("ORDER", 12);
-	keywords.set("WAYS", 13);
-	keywords.set("GROUP", 14);
-	keywords.set("SYMBOL", 16);
-	keywords.set("POLYGON", 17);
-	keywords.set("RECTANGLE", 20);
-	keywords.set("x", 21);
-	keywords.set("CIRCLE", 22);
-	keywords.set("CONST", 23);
-	keywords.set("IF", 24);
-	keywords.set("ELIF", 25);
-	keywords.set("ELSE", 26);
+	keywords.set("IF", 10);
+	keywords.set("ELIF", 13);
+	keywords.set("ELSE", 14);
+	keywords.set("ORDER", 17);
+	keywords.set("WAYS", 18);
+	keywords.set("GROUP", 19);
+	keywords.set("SYMBOL", 21);
+	keywords.set("POLYGON", 22);
+	keywords.set("RECTANGLE", 23);
+	keywords.set("x", 24);
+	keywords.set("CIRCLE", 25);
+	keywords.set("CONST", 26);
 	keywords.set("COLOR", 27);
 	keywords.set("MAG", 28);
 	keywords.set("UINT", 29);
@@ -468,15 +468,15 @@ TokenRef Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_17;}
 			else {t->kind = 6; break;}
 		case 19:
-			{t->kind = 10; break;}
-		case 20:
 			{t->kind = 11; break;}
+		case 20:
+			{t->kind = 12; break;}
 		case 21:
 			{t->kind = 15; break;}
 		case 22:
-			{t->kind = 18; break;}
+			{t->kind = 16; break;}
 		case 23:
-			{t->kind = 19; break;}
+			{t->kind = 20; break;}
 		case 24:
 			{t->kind = 31; break;}
 		case 25:
