@@ -405,8 +405,8 @@ namespace osmscout {
    * Assumes that the given areas do not intersect.
    *
    * Returns true, of area a is within b. This version uses some heuristic
-   * based on thr asumption that areas are either in another area or not but
-   * there may be some smaller errors.
+   * based on the assumption that areas are either in another area or not - but
+   * there may be some smaller errors due to areas slightly overlapping.
    */
   template<typename N,typename M>
   inline bool IsAreaSubOfAreaQuorum(const std::vector<N>& a,
@@ -714,6 +714,11 @@ namespace osmscout {
                                                                  const GeoCoord& a,
                                                                  const GeoCoord& b);
 
+  extern OSMSCOUT_API double CalculateDistancePointToLineSegment(const GeoCoord& p,
+                                                                 const GeoCoord& a,
+                                                                 const GeoCoord& b,
+                                                                 GeoCoord& intersection);
+
   /**
    * \ingroup Geometry
    * Calculates the spherical distance between the two given points
@@ -728,6 +733,14 @@ namespace osmscout {
    */
   extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
                                                    double bLon, double bLat);
+
+  /**
+   * \ingroup Geometry
+   * Calculates the ellipsoidal (WGS-84) distance between the two given points
+   * on the ellipsoid.
+   */
+  extern OSMSCOUT_API double GetEllipsoidalDistance(const GeoCoord& a,
+                                                    const GeoCoord& b);
 
   /**
    * \ingroup Geometry
@@ -748,11 +761,24 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
+   *Calculates the initial bearing for a line from one coordinate two the other coordinate
+   *on a sphere.
+   */
+  extern OSMSCOUT_API double GetSphericalBearingInitial(const GeoCoord& a,
+                                                        const GeoCoord& b);
+
+  /**
+   * \ingroup Geometry
    *Calculates the final bearing for a line from one coordinate two the other coordinate
    *on a sphere.
    */
   extern OSMSCOUT_API double GetSphericalBearingFinal(double aLon, double aLat,
                                                       double bLon, double bLat);
+
+  /**
+   * COnvert the bearing to to a direction description in releation tothe compass.
+   */
+  extern OSMSCOUT_API std::string BearingDisplayString(double bearing);
 
   /**
    * \ingroup Geometry

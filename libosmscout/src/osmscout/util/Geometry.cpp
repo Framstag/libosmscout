@@ -93,9 +93,9 @@ namespace osmscout {
    * @return
    *    The distance
    */
-   double CalculateDistancePointToLineSegment(const GeoCoord& p,
-                                              const GeoCoord& a,
-                                              const GeoCoord& b)
+  double CalculateDistancePointToLineSegment(const GeoCoord& p,
+                                             const GeoCoord& a,
+                                             const GeoCoord& b)
   {
     double xdelta=b.lon-a.lon;
     double ydelta=b.lat-a.lat;
@@ -123,6 +123,57 @@ namespace osmscout {
 
     double dx=cx-p.lon;
     double dy=cy-p.lat;
+
+    return sqrt(dx*dx+dy*dy);
+  }
+
+  /**
+   * Calculates the distance between a point p and a line defined by the points a and b.
+   * @param p
+   *    The point in distance to a line
+   * @param a
+   *    One point defining the line
+   * @param b
+   *    Another point defining the line
+   * @param intersection
+   *    The point that is closest to 'p', either 'a', 'b', or a point on the line between
+   *    'a' and 'b'.
+   * @return
+   *    The distance
+   */
+   double CalculateDistancePointToLineSegment(const GeoCoord& p,
+                                              const GeoCoord& a,
+                                              const GeoCoord& b,
+                                              GeoCoord& intersection)
+  {
+    double xdelta=b.lon-a.lon;
+    double ydelta=b.lat-a.lat;
+
+    if (xdelta==0 && ydelta==0) {
+      return std::numeric_limits<double>::infinity();
+    }
+
+    double u=((p.lon-a.lon)*xdelta+(p.lat-a.lat)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
+
+    double cx,cy;
+
+    if (u<0) {
+      cx=a.lon;
+      cy=a.lat;
+    }
+    else if (u>1) {
+      cx=b.lon;
+      cy=b.lat;
+    }
+    else {
+      cx=a.lon+u*xdelta;
+      cy=a.lat+u*ydelta;
+    }
+
+    double dx=cx-p.lon;
+    double dy=cy-p.lat;
+
+    intersection.Set(cy,cx);
 
     return sqrt(dx*dx+dy*dy);
   }
@@ -246,6 +297,13 @@ namespace osmscout {
     return b * A * (sigma - deltasigma)/1000; // We want the distance in Km
   }
 
+
+  double GetEllipsoidalDistance(const GeoCoord& a,
+                                const GeoCoord& b)
+  {
+    return GetEllipsoidalDistance(a.GetLon(),a.GetLat(),b.GetLon(),b.GetLat());
+  }
+
   void GetEllipsoidalDistance(double lat1, double lon1,
                               double bearing, double distance,
                               double& lat2, double& lon2)
@@ -332,6 +390,31 @@ namespace osmscout {
     return bearing;
   }
 
+  double GetSphericalBearingInitial(const GeoCoord& a,
+                                    const GeoCoord& b)
+  {
+    double aLon=a.GetLon()*M_PI/180;
+    double aLat=a.GetLat()*M_PI/180;
+
+    double bLon=b.GetLon()*M_PI/180;
+    double bLat=b.GetLat()*M_PI/180;
+
+    double dLon=bLon-aLon;
+
+    double sindLon, sinaLat, sinbLat;
+    double cosdLon, cosaLat, cosbLat;
+    sincos(dLon, sindLon, cosdLon);
+    sincos(aLat, sinaLat, cosaLat);
+    sincos(bLat, sinbLat, cosbLat);
+
+    double y=sindLon*cosbLat;
+    double x=cosaLat*sinbLat-sinaLat*cosbLat*cosdLon;
+
+    double bearing=atan2(y,x);
+
+    return bearing;
+  }
+
   /**
    * Taken the path from A to B over a sphere return the bearing (0..2PI) at the destination point B.
    */
@@ -367,6 +450,35 @@ namespace osmscout {
     //double bearing=fmod(atan2(y,x)+3*M_PI,2*M_PI);
 
     return bearing;
+  }
+
+  std::string BearingDisplayString(double bearing)
+  {
+    int grad=(int)round(bearing*180/M_PI);
+
+    grad=grad % 360;
+
+    if (grad<0) {
+      grad+=360;
+    }
+
+    if (grad>0 && grad<=45) {
+      return "N";
+    }
+    else if (grad>45 && grad<=135) {
+      return "E";
+    }
+    else if (grad>135 && grad<=225) {
+      return "S";
+    }
+    else if (grad>225 && grad<=315) {
+      return "W";
+    }
+    else if (grad>315 && grad<=360) {
+      return "N";
+    }
+
+    return "?";
   }
 
   double NormalizeRelativeAngel(double angle)
