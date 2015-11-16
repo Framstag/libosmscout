@@ -252,9 +252,15 @@ OSS
 */
 
 FLAG
-  daylight = true;
-  waterway = true;
-  natural  = true;
+  daylight   = true;
+  waterway   = true;
+  
+  IF daylight {
+    natural  = true;
+  }
+  ELSE {
+    natural  = false;
+  }
 
 ORDER WAYS
   GROUP _route
@@ -338,9 +344,16 @@ CONST
 
   // Ground tiles
 
-  COLOR waterColor                 = #9acffd;
-  COLOR waterLabelColor            = darken(@waterColor, 0.5);
-  COLOR landColor                  = #f1eee9;
+  IF daylight {
+    COLOR waterColor               = #9acffd;
+    COLOR waterLabelColor          = darken(@waterColor, 0.5);
+    COLOR landColor                = #f1eee9;
+  }
+  ELSE {
+    COLOR waterColor               = #9acffd;
+    COLOR waterLabelColor          = darken(@waterColor, 0.5);
+    COLOR landColor                = #333333;
+  }
   COLOR unknownColor               = @waterColor;
 
 /*
