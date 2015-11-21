@@ -104,11 +104,9 @@ namespace osmscout {
     bool                         coordDataMemoryMaped;     //<! Use memory mapping for coord data file access
 
     bool                         rawNodeDataMemoryMaped;   //<! Use memory mapping for raw node data file access
-    size_t                       rawNodeDataCacheSize;     //<! Size of the raw node data cache
 
     bool                         rawWayIndexMemoryMaped;   //<! Use memory mapping for raw way index file access
     bool                         rawWayDataMemoryMaped;    //<! Use memory mapping for raw way data file access
-    size_t                       rawWayDataCacheSize;      //<! Size of the raw way data cache
     size_t                       rawWayIndexCacheSize;     //<! Size of the raw way index cache
     size_t                       rawWayBlockSize;          //<! Number of ways loaded during import until nodes get resolved
 
@@ -165,11 +163,9 @@ namespace osmscout {
     bool GetCoordDataMemoryMaped() const;
 
     bool GetRawNodeDataMemoryMaped() const;
-    size_t GetRawNodeDataCacheSize() const;
 
     bool GetRawWayIndexMemoryMaped() const;
     bool GetRawWayDataMemoryMaped() const;
-    size_t GetRawWayDataCacheSize() const;
     size_t GetRawWayIndexCacheSize() const;
     size_t GetRawWayBlockSize() const;
 

@@ -77,32 +77,14 @@ namespace osmscout {
     unsigned long areaAreaIndexCacheSize;
     unsigned long areaNodeIndexCacheSize;
 
-    unsigned long nodeCacheSize;
-
-    unsigned long wayCacheSize;
-
-    unsigned long areaCacheSize;
-
   public:
     DatabaseParameter();
 
     void SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize);
     void SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize);
 
-    void SetNodeCacheSize(unsigned long nodeCacheSize);
-
-    void SetWayCacheSize(unsigned long wayCacheSize);
-
-    void SetAreaCacheSize(unsigned long relationCacheSize);
-
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetAreaNodeIndexCacheSize() const;
-
-    unsigned long GetNodeCacheSize() const;
-
-    unsigned long GetWayCacheSize() const;
-
-    unsigned long GetAreaCacheSize() const;
   };
 
   /**
@@ -150,8 +132,6 @@ namespace osmscout {
     bool Open(const std::string& path);
     bool IsOpen() const;
     void Close();
-
-    void FlushCache();
 
     std::string GetPath() const;
     TypeConfigRef GetTypeConfig() const;

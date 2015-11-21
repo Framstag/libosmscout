@@ -1005,11 +1005,9 @@ namespace osmscout {
 
     CoordDataFile              coordDataFile("coord.dat");
 
-    RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayDataCacheSize(),
-                                           parameter.GetRawWayIndexCacheSize());
+    RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayIndexCacheSize());
 
-    RawRelationIndexedDataFile relDataFile(parameter.GetRawWayDataCacheSize(),
-                                           parameter.GetRawWayIndexCacheSize());
+    RawRelationIndexedDataFile relDataFile(parameter.GetRawWayIndexCacheSize());
     FeatureRef                 featureName(typeConfig->GetFeature(RefFeature::NAME));
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),

@@ -75,11 +75,9 @@ namespace osmscout {
      debugPerformance(parameter.IsDebugPerformance()),
      routeNodeDataFile(GetDataFilename(filenamebase),
                        GetIndexFilename(filenamebase),
-                       0,
                        6000),
      junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
                       RoutingService::FILENAME_INTERSECTIONS_IDX,
-                      0,
                       6000)
   {
     assert(database);
@@ -208,16 +206,6 @@ namespace osmscout {
     routeNodeDataFile.Close();
 
     isOpen=false;
-  }
-
-  /**
-   * Flush any available caches
-   */
-  void RoutingService::FlushCache()
-  {
-    if (database->IsOpen()) {
-      database->FlushCache();
-    }
   }
 
   /**
@@ -1648,8 +1636,6 @@ namespace osmscout {
     if (database) {
       database->DumpStatistics();
     }
-
-    routeNodeDataFile.DumpStatistics();
   }
 
   /**

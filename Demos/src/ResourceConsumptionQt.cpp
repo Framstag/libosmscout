@@ -136,10 +136,6 @@ int main(int argc, char* argv[])
   databaseParameter.SetAreaAreaIndexCacheSize(0);
   databaseParameter.SetAreaNodeIndexCacheSize(0);
 
-  databaseParameter.SetNodeCacheSize(0);
-  databaseParameter.SetWayCacheSize(0);
-  databaseParameter.SetAreaCacheSize(0);
-
   osmscout::DatabaseRef   database(new osmscout::Database(databaseParameter));
   osmscout::MapServiceRef mapService(new osmscout::MapService(database));
 
@@ -201,12 +197,6 @@ int main(int argc, char* argv[])
 
   delete painter;
   delete pixmap;
-
-  std::cout << "# Press return to flush caches" << std::endl;
-
-  std::cin.get();
-
-  database->FlushCache();
 
   std::cout << "# Press return to end application" << std::endl;
 

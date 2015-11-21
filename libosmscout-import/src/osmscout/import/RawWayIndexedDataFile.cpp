@@ -21,11 +21,9 @@
 
 namespace osmscout {
 
-  RawWayIndexedDataFile::RawWayIndexedDataFile(unsigned long dataCacheSize,
-                                               unsigned long indexCacheSize)
+  RawWayIndexedDataFile::RawWayIndexedDataFile(unsigned long indexCacheSize)
   : IndexedDataFile<OSMId,RawWay>("rawways.dat",
                                   "rawway.idx",
-                                  dataCacheSize,
                                   indexCacheSize)
   {
     // no code

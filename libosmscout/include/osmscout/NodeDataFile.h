@@ -33,7 +33,7 @@ namespace osmscout {
   class NodeDataFile : public DataFile<Node>
   {
   public:
-    NodeDataFile(unsigned long dataCacheSize);
+    NodeDataFile();
   };
 
   typedef std::shared_ptr<NodeDataFile> NodeDataFileRef;

@@ -21,9 +21,8 @@
 
 namespace osmscout {
 
-  NodeDataFile::NodeDataFile(unsigned long dataCacheSize)
-  : DataFile<Node>("nodes.dat",
-                   dataCacheSize)
+  NodeDataFile::NodeDataFile()
+  : DataFile<Node>("nodes.dat")
   {
     // no code
   }

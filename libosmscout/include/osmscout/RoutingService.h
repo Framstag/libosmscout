@@ -273,8 +273,6 @@ namespace osmscout {
     bool IsOpen() const;
     void Close();
 
-    void FlushCache();
-
     TypeConfigRef GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,

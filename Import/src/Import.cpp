@@ -101,11 +101,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
 
   std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawNodeDataCacheSize <number>      raw node data cache size (default: " << parameter.GetRawNodeDataCacheSize() << ")" << std::endl;
 
   std::cout << " --rawWayIndexMemoryMaped true|false  memory maped raw way index file access (default: " << BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
   std::cout << " --rawWayDataMemoryMaped true|false   memory maped raw way data file access (default: " << BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawWayDataCacheSize <number>       raw way data cache size (default: " << parameter.GetRawWayDataCacheSize() << ")" << std::endl;
   std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
   std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
 
@@ -479,19 +477,6 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"--rawNodeDataCacheSize")==0) {
-      size_t rawNodeDataCacheSize;
-
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             rawNodeDataCacheSize)) {
-        parameter.SetRawNodeDataCacheSize(rawNodeDataCacheSize);
-      }
-      else {
-        parameterError=true;
-      }
-    }
     else if (strcmp(argv[i],"--rawWayIndexMemoryMaped")==0) {
       bool rawWayIndexMemoryMaped;
 
@@ -513,19 +498,6 @@ int main(int argc, char* argv[])
                             i,
                             rawWayDataMemoryMaped)) {
         parameter.SetRawWayDataMemoryMaped(rawWayDataMemoryMaped);
-      }
-      else {
-        parameterError=true;
-      }
-    }
-    else if (strcmp(argv[i],"--rawWayDataCacheSize")==0) {
-      size_t rawWayDataCacheSize;
-
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             rawWayDataCacheSize)) {
-        parameter.SetRawWayDataCacheSize(rawWayDataCacheSize);
       }
       else {
         parameterError=true;
@@ -694,15 +666,11 @@ int main(int argc, char* argv[])
 
   progress.Info(std::string("RawNodeDataMemoryMaped: ")+
                 (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("RawNodeDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetRawNodeDataCacheSize()));
 
   progress.Info(std::string("RawWayIndexMemoryMaped: ")+
                 (parameter.GetRawWayIndexMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("RawWayDataMemoryMaped: ")+
                 (parameter.GetRawWayDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("RawWayDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetRawWayDataCacheSize()));
   progress.Info(std::string("RawWayIndexCacheSize: ")+
                 osmscout::NumberToString(parameter.GetRawWayIndexCacheSize()));
   progress.Info(std::string("RawWayBlockSize: ")+

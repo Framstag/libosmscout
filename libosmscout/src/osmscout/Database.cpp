@@ -36,10 +36,7 @@ namespace osmscout {
 
   DatabaseParameter::DatabaseParameter()
   : areaAreaIndexCacheSize(5000),
-    areaNodeIndexCacheSize(1000),
-    nodeCacheSize(1000),
-    wayCacheSize(4000),
-    areaCacheSize(4000)
+    areaNodeIndexCacheSize(1000)
   {
     // no code
   }
@@ -54,21 +51,6 @@ namespace osmscout {
     this->areaNodeIndexCacheSize=areaNodeIndexCacheSize;
   }
 
-  void DatabaseParameter::SetNodeCacheSize(unsigned long nodeCacheSize)
-  {
-    this->nodeCacheSize=nodeCacheSize;
-  }
-
-  void DatabaseParameter::SetWayCacheSize(unsigned long wayCacheSize)
-  {
-    this->wayCacheSize=wayCacheSize;
-  }
-
-  void DatabaseParameter::SetAreaCacheSize(unsigned long areaCacheSize)
-  {
-    this->areaCacheSize=areaCacheSize;
-  }
-
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
@@ -77,21 +59,6 @@ namespace osmscout {
   unsigned long DatabaseParameter::GetAreaNodeIndexCacheSize() const
   {
     return areaNodeIndexCacheSize;
-  }
-
-  unsigned long DatabaseParameter::GetNodeCacheSize() const
-  {
-    return nodeCacheSize;
-  }
-
-  unsigned long DatabaseParameter::GetWayCacheSize() const
-  {
-    return wayCacheSize;
-  }
-
-  unsigned long DatabaseParameter::GetAreaCacheSize() const
-  {
-    return areaCacheSize;
   }
 
   Database::Database(const DatabaseParameter& parameter)
@@ -206,21 +173,6 @@ namespace osmscout {
     isOpen=false;
   }
 
-  void Database::FlushCache()
-  {
-    if (nodeDataFile) {
-      nodeDataFile->FlushCache();
-    }
-
-    if (areaDataFile) {
-      areaDataFile->FlushCache();
-    }
-
-    if (wayDataFile) {
-      wayDataFile->FlushCache();
-    }
-  }
-
   std::string Database::GetPath() const
   {
     return path;
@@ -238,7 +190,7 @@ namespace osmscout {
     }
 
     if (!nodeDataFile) {
-      nodeDataFile=std::make_shared<NodeDataFile>(parameter.GetNodeCacheSize());
+      nodeDataFile=std::make_shared<NodeDataFile>();
     }
 
     if (!nodeDataFile->IsOpen()) {
@@ -267,8 +219,7 @@ namespace osmscout {
     }
 
     if (!areaDataFile) {
-      areaDataFile=std::make_shared<AreaDataFile>("areas.dat",
-                                                  parameter.GetAreaCacheSize());
+      areaDataFile=std::make_shared<AreaDataFile>("areas.dat");
     }
 
     if (!areaDataFile->IsOpen()) {
@@ -297,8 +248,7 @@ namespace osmscout {
     }
 
     if (!wayDataFile) {
-      wayDataFile=std::make_shared<WayDataFile>("ways.dat",
-                                                parameter.GetWayCacheSize());
+      wayDataFile=std::make_shared<WayDataFile>("ways.dat");
     }
 
     if (!wayDataFile->IsOpen()) {
@@ -851,18 +801,6 @@ namespace osmscout {
 
   void Database::DumpStatistics()
   {
-    if (nodeDataFile) {
-      nodeDataFile->DumpStatistics();
-    }
-
-    if (areaDataFile) {
-      areaDataFile->DumpStatistics();
-    }
-
-    if (wayDataFile) {
-      wayDataFile->DumpStatistics();
-    }
-
     if (areaNodeIndex) {
       areaNodeIndex->DumpStatistics();
     }
