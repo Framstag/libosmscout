@@ -236,11 +236,13 @@ void Parser::FLAGDEF() {
 		IDENT(name);
 		Expect(15 /* "=" */);
 		BOOL(value);
-		Expect(16 /* ";" */);
-		if (!config.HasFlag(name)) {
-		 config.AddFlag(name,value);
+		if (state) {
+		 if (!config.HasFlag(name)) {
+		   config.AddFlag(name,value);
+		 }
 		}
 		
+		Expect(16 /* ";" */);
 }
 
 void Parser::FLAGCONDBLOCK(bool state) {

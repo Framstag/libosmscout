@@ -181,12 +181,14 @@ PRODUCTIONS
                 IDENT<name>
                 "="
                 BOOL<value>
-                ";"
                 (.
-                  if (!config.HasFlag(name)) {
-                    config.AddFlag(name,value);
+                  if (state) {
+                    if (!config.HasFlag(name)) {
+                      config.AddFlag(name,value);
+                    }
                   }
                 .)
+                ";"
                 .
 
   WAYORDER    = SYNC "ORDER" "WAYS"
