@@ -1926,7 +1926,8 @@ namespace osmscout {
     std::map<size_t,std::list<TypeInfoRef>> wayTypeByPrioMap;
 
     for (const auto& type : typeConfig->GetTypes()) {
-      if (type->GetIndex()<wayPrio.size()) {
+      if (type->CanBeWay() &&
+          type->GetIndex()<wayPrio.size()) {
         wayTypeByPrioMap[wayPrio[type->GetIndex()]].push_back(type);
       }
     }
@@ -1937,14 +1938,9 @@ namespace osmscout {
       for (std::map<size_t,std::list<TypeInfoRef>>::const_iterator prio=wayTypeByPrioMap.begin();
           prio!=wayTypeByPrioMap.end();
           ++prio) {
+        TypeInfoSet typeSet(*typeConfig);
 
         for (const auto& type : prio->second) {
-          if (!type->CanBeWay()) {
-            // we ignore any way specific style sheets for this type, since there will be no way for it :-)
-            continue;
-          }
-
-          TypeInfoSet typeSet(*typeConfig);
 
           for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
             if (!wayLineStyleSelectors[slot][type->GetIndex()][level].empty()) {
@@ -1957,10 +1953,10 @@ namespace osmscout {
               !wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
             typeSet.Set(type);
           }
+        }
 
-          if (!typeSet.Empty()) {
-            wayTypeSets[level].push_back(typeSet);
-          }
+        if (!typeSet.Empty()) {
+          wayTypeSets[level].push_back(typeSet);
         }
       }
     }
