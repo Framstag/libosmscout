@@ -1921,45 +1921,31 @@ namespace osmscout {
                        maxLevel,
                        wayPathShieldStyleSelectors);
 
-    wayTypeSets.resize(maxLevel);
+    wayTypeSets.reserve(maxLevel);
 
-    std::map<size_t,std::list<TypeInfoRef>> wayTypeByPrioMap;
-
-    for (const auto& type : typeConfig->GetTypes()) {
-      if (type->CanBeWay() &&
-          type->GetIndex()<wayPrio.size()) {
-        wayTypeByPrioMap[wayPrio[type->GetIndex()]].push_back(type);
-      }
+    for (size_t type=0; type<maxLevel; type++) {
+      wayTypeSets.push_back(TypeInfoSet(*typeConfig));
     }
 
-    for (size_t level=0;
-        level<maxLevel;
-        ++level) {
-      for (std::map<size_t,std::list<TypeInfoRef>>::const_iterator prio=wayTypeByPrioMap.begin();
-          prio!=wayTypeByPrioMap.end();
-          ++prio) {
-        TypeInfoSet typeSet(*typeConfig);
+    CalculateUsedTypes(*typeConfig,
+                       wayLineStyleConditionals,
+                       maxLevel,
+                       wayTypeSets);
 
-        for (const auto& type : prio->second) {
+    CalculateUsedTypes(*typeConfig,
+                       wayPathTextStyleConditionals,
+                       maxLevel,
+                       wayTypeSets);
 
-          for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-            if (!wayLineStyleSelectors[slot][type->GetIndex()][level].empty()) {
-              typeSet.Set(type);
-            }
-          }
+    CalculateUsedTypes(*typeConfig,
+                       wayPathSymbolStyleConditionals,
+                       maxLevel,
+                       wayTypeSets);
 
-          if (!wayPathTextStyleSelectors[type->GetIndex()][level].empty() ||
-              !wayPathSymbolStyleSelectors[type->GetIndex()][level].empty() ||
-              !wayPathShieldStyleSelectors[type->GetIndex()][level].empty()) {
-            typeSet.Set(type);
-          }
-        }
-
-        if (!typeSet.Empty()) {
-          wayTypeSets[level].push_back(typeSet);
-        }
-      }
-    }
+    CalculateUsedTypes(*typeConfig,
+                       wayPathShieldStyleConditionals,
+                       maxLevel,
+                       wayTypeSets);
 
     wayLineStyleConditionals.clear();
     wayPathTextStyleConditionals.clear();
@@ -2213,8 +2199,8 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetWayTypesByPrioWithMaxMag(const Magnification& maxMag,
-                                                std::vector<TypeInfoSet>& types) const
+  void StyleConfig::GetWayTypesWithMaxMag(const Magnification& maxMag,
+                                          TypeInfoSet& types) const
   {
     if (!wayTypeSets.empty()) {
       types=wayTypeSets[std::min((size_t)maxMag.GetLevel(),wayTypeSets.size()-1)];

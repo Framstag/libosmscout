@@ -35,8 +35,8 @@ namespace osmscout {
 
   AreaSearchParameter::AreaSearchParameter()
   : maxAreaLevel(4),
-    maxNodes(2000),
-    maxWays(10000),
+    maxNodes(std::numeric_limits<unsigned long>::max()),
+    maxWays(std::numeric_limits<unsigned long>::max()),
     maxAreas(std::numeric_limits<unsigned long>::max()),
     useLowZoomOptimization(true),
     useMultithreading(false)
@@ -295,7 +295,7 @@ namespace osmscout {
   }
 
   bool MapService::GetObjectsWays(const AreaSearchParameter& parameter,
-                                  const std::vector<TypeInfoSet>& wayTypes,
+                                  const TypeInfoSet& wayTypes,
                                   const Magnification& magnification,
                                   const GeoBox& boundingBox,
                                   std::string& wayOptimizedTime,
@@ -323,7 +323,7 @@ namespace osmscout {
 
     ways.clear();
 
-    std::vector<TypeInfoSet> internalWayTypes(wayTypes);
+    TypeInfoSet internalWayTypes(wayTypes);
 
     if (parameter.IsAborted()) {
       return false;
@@ -332,7 +332,7 @@ namespace osmscout {
     StopClock wayOptimizedTimer;
 
 
-    if (!internalWayTypes.empty()) {
+    if (!internalWayTypes.Empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
         TypeInfoSet optimizedWayTypes;
@@ -348,9 +348,7 @@ namespace osmscout {
                                      ways,
                                      loadedWayTypes);
 
-        for (auto& typeSet : internalWayTypes) {
-          typeSet.Remove(loadedWayTypes);
-        }
+        internalWayTypes.Remove(loadedWayTypes);
       }
     }
 
@@ -365,7 +363,7 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
     StopClock               wayIndexTimer;
 
-    if (!internalWayTypes.empty()) {
+    if (!internalWayTypes.Empty()) {
       if (!areaWayIndex->GetOffsets(boundingBox,
                                     internalWayTypes,
                                     parameter.GetMaximumWays(),
@@ -442,18 +440,18 @@ namespace osmscout {
                               const Projection& projection,
                               MapData& data) const
   {
-    osmscout::TypeInfoSet              nodeTypes;
-    std::vector<osmscout::TypeInfoSet> wayTypes;
-    osmscout::TypeInfoSet              areaTypes;
-    GeoBox                             boundingBox;
+    osmscout::TypeInfoSet nodeTypes;
+    osmscout::TypeInfoSet wayTypes;
+    osmscout::TypeInfoSet areaTypes;
+    GeoBox                boundingBox;
 
     projection.GetDimensions(boundingBox);
 
     styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
                                        nodeTypes);
 
-    styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                            wayTypes);
+    styleConfig.GetWayTypesWithMaxMag(projection.GetMagnification(),
+                                      wayTypes);
 
     styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
                                        areaTypes);
@@ -504,7 +502,7 @@ namespace osmscout {
                               const TypeInfoSet &nodeTypes,
                               const GeoBox& nodeBoundingBox,
                               std::vector<NodeRef>& nodes,
-                              const std::vector<TypeInfoSet>& wayTypes,
+                              TypeInfoSet& wayTypes,
                               const GeoBox& wayBoundingBox,
                               std::vector<WayRef>& ways,
                               const TypeInfoSet& areaTypes,

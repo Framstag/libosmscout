@@ -1375,7 +1375,7 @@ namespace osmscout {
     PathSymbolStyleLookupTable                 wayPathSymbolStyleSelectors;
     PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
 
-    std::vector<std::vector<TypeInfoSet> >     wayTypeSets;
+    std::vector<TypeInfoSet>                   wayTypeSets;
 
     // Area
 
@@ -1462,8 +1462,8 @@ namespace osmscout {
 
     void GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                 TypeInfoSet& types) const;
-    void GetWayTypesByPrioWithMaxMag(const Magnification& mag,
-                                     std::vector<TypeInfoSet>& types) const;
+    void GetWayTypesWithMaxMag(const Magnification& mag,
+                               TypeInfoSet& types) const;
     void GetAreaTypesWithMaxMag(const Magnification& maxMag,
                                 TypeInfoSet& types) const;
 

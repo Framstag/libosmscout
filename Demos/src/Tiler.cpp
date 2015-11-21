@@ -190,15 +190,15 @@ int main(int argc, char* argv[])
     double maxTime=0.0;
     double totalTime=0.0;
 
-    osmscout::TypeInfoSet              nodeTypes;
-    std::vector<osmscout::TypeInfoSet> wayTypes;
-    osmscout::TypeInfoSet              areaTypes;
+    osmscout::TypeInfoSet nodeTypes;
+    osmscout::TypeInfoSet wayTypes;
+    osmscout::TypeInfoSet areaTypes;
 
     styleConfig->GetNodeTypesWithMaxMag(magnification,
                                         nodeTypes);
 
-    styleConfig->GetWayTypesByPrioWithMaxMag(magnification,
-                                             wayTypes);
+    styleConfig->GetWayTypesWithMaxMag(magnification,
+                                       wayTypes);
 
     styleConfig->GetAreaTypesWithMaxMag(magnification,
                                         areaTypes);

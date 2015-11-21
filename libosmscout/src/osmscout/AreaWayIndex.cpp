@@ -238,7 +238,7 @@ namespace osmscout {
   }
 
   bool AreaWayIndex::GetOffsets(const GeoBox& boundingBox,
-                                const std::vector<TypeInfoSet>& types,
+                                const TypeInfoSet& types,
                                 size_t maxWayCount,
                                 std::vector<FileOffset>& offsets,
                                 TypeInfoSet& loadedTypes) const
@@ -255,45 +255,28 @@ namespace osmscout {
     }
 
     bool                           sizeExceeded=false;
-    std::unordered_set<FileOffset> newOffsets;
+    std::unordered_set<FileOffset> uniqueOffsets;
 
-    offsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
-    newOffsets.reserve(std::min(10000u,(uint32_t)maxWayCount));
-
-    for (const auto& typeSet : types) {
-      if (typeSet.Empty()) {
-        continue;
-      }
-
-      newOffsets.clear();
-
-      for (const auto& data : wayTypeData) {
-        if (typeSet.IsSet(data.type)) {
-          if (!GetOffsets(data,
-                          boundingBox,
-                          maxWayCount,
-                          newOffsets,
-                          offsets.size(),
-                          sizeExceeded)) {
-            return false;
-          }
-
-          if (sizeExceeded) {
-            return true;
-          }
+    for (const auto& data : wayTypeData) {
+      if (types.IsSet(data.type)) {
+        if (!GetOffsets(data,
+                        boundingBox,
+                        maxWayCount,
+                        uniqueOffsets,
+                        uniqueOffsets.size(),
+                        sizeExceeded)) {
+          return false;
         }
-      }
 
-      // Mark types as loaded
-      for (const auto& data : wayTypeData) {
-        if (typeSet.IsSet(data.type)) {
-          loadedTypes.Set(data.type);
+        if (sizeExceeded) {
+          return true;
         }
-      }
 
-      // Copy data from temporary set to final vector
-      offsets.insert(offsets.end(),newOffsets.begin(),newOffsets.end());
+        loadedTypes.Set(data.type);
+      }
     }
+
+    offsets.insert(offsets.end(),uniqueOffsets.begin(),uniqueOffsets.end());
 
     //std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;
 

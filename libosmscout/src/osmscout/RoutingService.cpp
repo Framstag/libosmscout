@@ -1710,16 +1710,13 @@ namespace osmscout {
       }
     }
 
-    std::vector<TypeInfoSet>       wayTypes;
     std::vector<FileOffset>        wayWayOffsets;
     std::vector<DataBlockSpan>     wayAreaSpans;
     std::vector<osmscout::AreaRef> areas;
     std::vector<osmscout::WayRef>  ways;
 
-    wayTypes.push_back(wayRoutableTypes);
-
     if (!areaWayIndex->GetOffsets(boundingBox,
-                                  wayTypes,
+                                  wayRoutableTypes,
                                   std::numeric_limits<size_t>::max(),
                                   wayWayOffsets,
                                   wayLoadedTypes)) {

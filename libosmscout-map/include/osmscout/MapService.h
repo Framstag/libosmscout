@@ -105,7 +105,7 @@ namespace osmscout {
                          std::vector<NodeRef>& nodes) const;
 
     bool GetObjectsWays(const AreaSearchParameter& parameter,
-                        const std::vector<TypeInfoSet>& wayTypes,
+                        const TypeInfoSet& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
                         std::string& wayOptimizedTime,
@@ -136,7 +136,7 @@ namespace osmscout {
                     const TypeInfoSet &nodeTypes,
                     const GeoBox& nodeBoundingBox,
                     std::vector<NodeRef>& nodes,
-                    const std::vector<TypeInfoSet>& wayTypes,
+                    TypeInfoSet& wayTypes,
                     const GeoBox& wayBoundingBox,
                     std::vector<WayRef>& ways,
                     const TypeInfoSet& areaTypes,

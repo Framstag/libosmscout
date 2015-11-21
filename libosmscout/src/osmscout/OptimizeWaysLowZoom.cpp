@@ -257,19 +257,17 @@ namespace osmscout
    * Returns the subset of types of wayTypes that can get retrieved from this index.
    */
   void OptimizeWaysLowZoom::GetTypes(const Magnification& magnification,
-                                     const std::vector<TypeInfoSet>& wayTypes,
+                                     const TypeInfoSet& wayTypes,
                                      TypeInfoSet& availableWayTypes) const
   {
     availableWayTypes.Clear();
 
-    for (size_t i=0; i<wayTypes.size(); i++) {
-      for (const auto& type : wayTypesData) {
-        if (wayTypes[i].IsSet(type.first)) {
-          for (const auto& typeData : type.second) {
-            if (typeData.optLevel==magnification.GetLevel()) {
-              availableWayTypes.Set(type.first);
-              break;
-            }
+    for (const auto& type : wayTypesData) {
+      if (wayTypes.IsSet(type.first)) {
+        for (const auto& typeData : type.second) {
+          if (typeData.optLevel==magnification.GetLevel()) {
+            availableWayTypes.Set(type.first);
+            break;
           }
         }
       }

@@ -87,7 +87,7 @@ namespace osmscout {
     bool HasOptimizations(double magnification) const;
 
     void GetTypes(const Magnification& magnification,
-                  const std::vector<TypeInfoSet>& wayTypes,
+                  const TypeInfoSet& wayTypes,
                  TypeInfoSet& availableWayTypes) const;
     bool GetWays(const GeoBox& boundingBox,
                  const Magnification& magnification,

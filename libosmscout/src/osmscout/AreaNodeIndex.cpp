@@ -247,6 +247,8 @@ namespace osmscout {
 
     loadedTypes.Clear();
 
+    offsets.reserve(std::min(10000u,(uint32_t)maxNodeCount));
+
     for (TypeInfoRef type : requestedTypes) {
       if (!GetOffsets(nodeTypeData[type->GetNodeId()],
                       boundingBox,
