@@ -116,7 +116,7 @@ namespace osmscout {
 
       if (locationReader->GetIndex(ring->GetFeatureValueBuffer(),
                                    locationIndex) &&
-          ring->GetFeatureValueBuffer().HasValue(locationIndex)) {
+      ring->GetFeatureValueBuffer().HasFeature(locationIndex)) {
         ring->UnsetFeature(locationIndex);
       }
 

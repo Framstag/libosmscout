@@ -72,10 +72,10 @@ namespace osmscout {
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
-    AccessFeatureValueReader      *accessReader;
-    AccessRestrictedFeatureReader *accessRestrictedReader;
-    MaxSpeedFeatureValueReader    *maxSpeedReader;
-    GradeFeatureValueReader       *gradeReader;
+    AccessFeatureValueReader           *accessReader;
+    AccessRestrictedFeatureValueReader *accessRestrictedReader;
+    MaxSpeedFeatureValueReader         *maxSpeedReader;
+    GradeFeatureValueReader            *gradeReader;
 
   private:
     bool IsAccessRestricted(const FeatureValueBuffer& buffer) const;

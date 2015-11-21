@@ -61,10 +61,12 @@ namespace osmscout {
   class OSMSCOUT_API RouteNode
   {
   public:
-    static const uint8_t hasAccess            = 1 << 0; //!< We do have access rights to this way/area
-    static const uint8_t usableByFoot         = 1 << 1; //!< This path can be traveled by foot
-    static const uint8_t usableByBicycle      = 1 << 2; //!< This path can be traveled by bicycle
-    static const uint8_t usableByCar          = 1 << 3; //!< This path can be traveled by car
+    static const uint8_t usableByFoot         = 1 << 0; //!< This path can be traveled by foot
+    static const uint8_t usableByBicycle      = 1 << 1; //!< This path can be traveled by bicycle
+    static const uint8_t usableByCar          = 1 << 2; //!< This path can be traveled by car
+    static const uint8_t restrictedForFoot    = 1 << 3; //!< Using this path ist restricted for foot
+    static const uint8_t restrictedForBicycle = 1 << 4; //!< Using this path ist restricted for bicycle
+    static const uint8_t restrictedForCar     = 1 << 5; //!< Using this path ist restricted for car
 
     /**
      * \ingroup Routing
@@ -100,9 +102,18 @@ namespace osmscout {
       uint8_t    flags;       //!< Certain flags
       //uint8_t    bearing;     //!< Encoded initial and final bearing of this path
 
-      inline bool HasAccess() const
+      inline bool IsRestricted(Vehicle vehicle) const
       {
-        return (flags & hasAccess) != 0;
+        switch (vehicle) {
+        case vehicleFoot:
+          return (flags & restrictedForFoot) != 0;
+        case vehicleBicycle:
+          return (flags & restrictedForBicycle) != 0;
+        case vehicleCar:
+          return (flags & restrictedForCar) != 0;
+        }
+
+        return false;
       }
     };
 

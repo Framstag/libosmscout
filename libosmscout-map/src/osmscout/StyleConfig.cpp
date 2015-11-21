@@ -104,7 +104,7 @@ namespace osmscout {
       size_t index=nameAltLookupTable[buffer.GetType()->GetIndex()];
 
       if (index!=std::numeric_limits<size_t>::max() &&
-          buffer.HasValue(index)) {
+          buffer.HasFeature(index)) {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=NULL) {
@@ -115,7 +115,7 @@ namespace osmscout {
       index=nameLookupTable[buffer.GetType()->GetIndex()];
 
       if (index!=std::numeric_limits<size_t>::max() &&
-          buffer.HasValue(index)) {
+          buffer.HasFeature(index)) {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=NULL) {
@@ -129,7 +129,7 @@ namespace osmscout {
       size_t index=nameLookupTable[buffer.GetType()->GetIndex()];
 
       if (index!=std::numeric_limits<size_t>::max() &&
-          buffer.HasValue(index)) {
+          buffer.HasFeature(index)) {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=NULL) {
@@ -157,7 +157,7 @@ namespace osmscout {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
-        buffer.HasValue(index)) {
+        buffer.HasFeature(index)) {
       FeatureValue *value=buffer.GetValue(index);
 
       if (value!=NULL) {

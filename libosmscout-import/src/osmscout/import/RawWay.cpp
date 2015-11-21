@@ -31,7 +31,7 @@ namespace osmscout {
   bool RawWay::IsOneway() const
   {
     for (size_t i=0; i<featureValueBuffer.GetFeatureCount(); i++) {
-      if (featureValueBuffer.HasValue(i) &&
+      if (featureValueBuffer.HasFeature(i) &&
           featureValueBuffer.GetFeature(i).GetFeature()->HasValue()) {
         AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(featureValueBuffer.GetValue(i));
 

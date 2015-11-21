@@ -109,10 +109,12 @@ namespace osmscout {
 
   FeatureInstance::FeatureInstance(const FeatureRef& feature,
                                    const TypeInfo* type,
+                                   size_t featureBit,
                                    size_t index,
                                    size_t offset)
   : feature(feature),
     type(type),
+    featureBit(featureBit),
     index(index),
     offset(offset)
   {
@@ -146,7 +148,7 @@ namespace osmscout {
       SetType(other.GetType());
 
       for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
-        if (other.HasValue(idx)) {
+        if (other.HasFeature(idx)) {
           if (other.GetFeature(idx).GetFeature()->HasValue()) {
             FeatureValue* otherValue=other.GetValue(idx);
             FeatureValue* thisValue=AllocateValue(idx);
@@ -154,9 +156,10 @@ namespace osmscout {
             *thisValue=*otherValue;
           }
           else {
-            size_t byteIdx=idx/8;
+            size_t featureBit=GetFeature(idx).GetFeatureBit();
+            size_t byteIdx=featureBit/8;
 
-            featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
+            featureBits[byteIdx]=featureBits[byteIdx] | (1 << featureBit%8);
           }
         }
       }
@@ -181,7 +184,7 @@ namespace osmscout {
   {
     if (featureValueBuffer!=NULL) {
       for (size_t i=0; i<type->GetFeatureCount(); i++) {
-        if (HasValue(i)) {
+        if (HasFeature(i)) {
           FreeValue(i);
         }
       }
@@ -213,9 +216,10 @@ namespace osmscout {
 
   FeatureValue* FeatureValueBuffer::AllocateValue(size_t idx)
   {
-    size_t byteIdx=idx/8;
+    size_t featureBit=GetFeature(idx).GetFeatureBit();
+    size_t byteIdx=featureBit/8;
 
-    featureBits[byteIdx]=featureBits[byteIdx] | (1 << idx%8);
+    featureBits[byteIdx]=featureBits[byteIdx] | (1 << featureBit%8);
 
     if (type->GetFeature(idx).GetFeature()->HasValue()) {
       FeatureValue* value=GetValue(idx);
@@ -229,9 +233,10 @@ namespace osmscout {
 
   void FeatureValueBuffer::FreeValue(size_t idx)
   {
-    size_t byteIdx=idx/8;
+    size_t featureBit=GetFeature(idx).GetFeatureBit();
+    size_t byteIdx=featureBit/8;
 
-    featureBits[byteIdx]=featureBits[byteIdx] & ~(1 << idx%8);
+    featureBits[byteIdx]=featureBits[byteIdx] & ~(1 << featureBit%8);
 
     if (type->GetFeature(idx).GetFeature()->HasValue()) {
       FeatureValue* value=GetValue(idx);
@@ -266,7 +271,7 @@ namespace osmscout {
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
-      if (HasValue(idx) &&
+      if (HasFeature(idx) &&
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
 
@@ -304,7 +309,7 @@ namespace osmscout {
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
-      if (HasValue(idx) &&
+      if (HasFeature(idx) &&
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
 
@@ -328,7 +333,7 @@ namespace osmscout {
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
-      if (HasValue(idx) &&
+      if (HasFeature(idx) &&
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=GetValue(idx);
 
@@ -375,7 +380,7 @@ namespace osmscout {
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
-      if (HasValue(idx) &&
+      if (HasFeature(idx) &&
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=GetValue(idx);
 
@@ -402,13 +407,13 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<GetFeatureCount(); i++) {
-      if (HasValue(i)!=other.HasValue(i)) {
+      if (HasFeature(i)!=other.HasFeature(i)) {
         return false;
       }
 
       // If a feature has a value, we compare the values
-      if (HasValue(i) &&
-          other.HasValue(i) &&
+      if (HasFeature(i) &&
+          other.HasFeature(i) &&
           GetFeature(i).GetFeature()->HasValue()) {
         FeatureValue *thisValue=GetValue(i);
         FeatureValue *otherValue=other.GetValue(i);
@@ -541,11 +546,13 @@ namespace osmscout {
     assert(feature);
     assert(nameToFeatureMap.find(feature->GetName())==nameToFeatureMap.end());
 
+    size_t featureBit=0;
     size_t index=0;
     size_t offset=0;
     size_t alignment=std::max(sizeof(size_t),sizeof(void*));
 
     if (!features.empty()) {
+      featureBit=features.back().GetFeatureBit()+1+feature->GetFeatureBitCount();
       index=features.back().GetIndex()+1;
       offset=features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
       if (offset%alignment!=0) {
@@ -556,12 +563,19 @@ namespace osmscout {
 
     features.push_back(FeatureInstance(feature,
                                        this,
+                                       featureBit,
                                        index,
                                        offset));
     nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
 
-    featureMaskBytes=BitsToBytes(features.size());
-    specialFeatureMaskBytes=BitsToBytes(features.size()+1);
+    size_t featureBitCount=0;
+
+    if (!features.empty()) {
+      featureBitCount=features.back().GetFeatureBit()+feature->GetFeatureBitCount()+1;
+    }
+
+    featureMaskBytes=BitsToBytes(featureBitCount);
+    specialFeatureMaskBytes=BitsToBytes(featureBitCount+1);
 
     valueBufferSize=offset+feature->GetValueSize();
 

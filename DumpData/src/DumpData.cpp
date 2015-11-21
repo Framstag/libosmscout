@@ -327,13 +327,38 @@ static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessVal
   std::cout << "}" << std::endl;
 }
 
+static void DumpAccessRestrictedFeatureValue(const osmscout::AccessRestrictedFeatureValue& accessValue,
+                                             size_t indent)
+{
+  DumpIndent(indent);
+  std::cout << "AccessRestricted {" << std::endl;
+
+  if (!accessValue.CanAccessFoot()) {
+    DumpIndent(indent+2);
+    std::cout << "foot: restricted" << std::endl;
+  }
+
+  if (!accessValue.CanAccessBicycle()) {
+    DumpIndent(indent+2);
+    std::cout << "bicycle: restricted" << std::endl;
+  }
+
+  if (!accessValue.CanAccessCar()) {
+    DumpIndent(indent+2);
+    std::cout << "car: restricted" << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
+}
+
 static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                                    size_t indent)
 {
   for (size_t idx=0; idx<buffer.GetFeatureCount(); idx++) {
     osmscout::FeatureInstance meta=buffer.GetFeature(idx);
 
-    if (buffer.HasValue(idx)) {
+    if (buffer.HasFeature(idx)) {
       if (meta.GetFeature()->HasValue()) {
         osmscout::FeatureValue *value=buffer.GetValue(idx);
 
@@ -372,6 +397,12 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
           DumpAccessFeatureValue(*accessValue,
                                  indent);
+        }
+        else if (dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value)!=NULL) {
+          osmscout::AccessRestrictedFeatureValue *accessValue=dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value);
+
+          DumpAccessRestrictedFeatureValue(*accessValue,
+                                           indent);
         }
         else if (dynamic_cast<osmscout::LayerFeatureValue*>(value)!=NULL) {
           osmscout::LayerFeatureValue *layerValue=dynamic_cast<osmscout::LayerFeatureValue*>(value);

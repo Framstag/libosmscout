@@ -48,11 +48,6 @@ namespace osmscout {
     return "Generate routing graphs";
   }
 
-  bool RouteDataGenerator::IsAccessRestricted(const FeatureValueBuffer& buffer) const
-  {
-    return accessRestrictedReader->IsSet(buffer);
-  }
-
   AccessFeatureValue RouteDataGenerator::GetAccess(const FeatureValueBuffer& buffer) const
   {
     AccessFeatureValue *accessValue=accessReader->GetValue(buffer);
@@ -91,11 +86,23 @@ namespace osmscout {
 
   uint8_t RouteDataGenerator::CopyFlags(const Area::Ring& ring) const
   {
-    uint8_t            flags=0;
-    AccessFeatureValue access=GetAccess(ring.GetFeatureValueBuffer());
+    uint8_t                      flags=0;
+    AccessFeatureValue           access=GetAccess(ring.GetFeatureValueBuffer());
+    AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(ring.GetFeatureValueBuffer());
 
-    if (!IsAccessRestricted(ring.GetFeatureValueBuffer())) {
-      flags|=RouteNode::hasAccess;
+
+    if (accessRestrictedValue!=NULL) {
+      if (!accessRestrictedValue->CanAccessFoot()) {
+        flags|=RouteNode::restrictedForFoot;
+      }
+
+      if (!accessRestrictedValue->CanAccessBicycle()) {
+        flags|=RouteNode::restrictedForFoot;
+      }
+
+      if (!accessRestrictedValue->CanAccessCar()) {
+        flags|=RouteNode::restrictedForCar;
+      }
     }
 
     if (access.CanRouteFoot()) {
@@ -115,11 +122,22 @@ namespace osmscout {
 
   uint8_t RouteDataGenerator::CopyFlagsForward(const Way& way) const
   {
-    uint8_t            flags=0;
-    AccessFeatureValue access=GetAccess(way.GetFeatureValueBuffer());
+    uint8_t                      flags=0;
+    AccessFeatureValue           access=GetAccess(way.GetFeatureValueBuffer());
+    AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(way.GetFeatureValueBuffer());
 
-    if (!IsAccessRestricted(way.GetFeatureValueBuffer())) {
-      flags|=RouteNode::hasAccess;
+    if (accessRestrictedValue!=NULL) {
+      if (!accessRestrictedValue->CanAccessFoot()) {
+        flags|=RouteNode::restrictedForFoot;
+      }
+
+      if (!accessRestrictedValue->CanAccessBicycle()) {
+        flags|=RouteNode::restrictedForFoot;
+      }
+
+      if (!accessRestrictedValue->CanAccessCar()) {
+        flags|=RouteNode::restrictedForCar;
+      }
     }
 
     if (access.CanRouteFootForward()) {
@@ -141,10 +159,20 @@ namespace osmscout {
   {
     uint8_t            flags=0;
     AccessFeatureValue access=GetAccess(way.GetFeatureValueBuffer());
+    AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(way.GetFeatureValueBuffer());
 
-    // TODO: This is more meant as a "while you can physically travel, you are not allowed to" flag
-    if (!IsAccessRestricted(way.GetFeatureValueBuffer())) {
-      flags|=RouteNode::hasAccess;
+    if (accessRestrictedValue!=NULL) {
+      if (!accessRestrictedValue->CanAccessFoot()) {
+        flags|=RouteNode::restrictedForFoot;
+      }
+
+      if (!accessRestrictedValue->CanAccessBicycle()) {
+        flags|=RouteNode::restrictedForFoot;
+      }
+
+      if (!accessRestrictedValue->CanAccessCar()) {
+        flags|=RouteNode::restrictedForCar;
+      }
     }
 
     if (access.CanRouteFootBackward()) {
@@ -1982,14 +2010,14 @@ namespace osmscout {
                                   Progress& progress)
   {
     // List of restrictions for a way
-    ViaTurnRestrictionMap      restrictions;
+    ViaTurnRestrictionMap              restrictions;
 
-    NodeUseMap                    nodeUseMap;
-    NodeIdObjectsMap              nodeObjectsMap;
-    AccessRestrictedFeatureReader accessRestrictedReader(*typeConfig);
-    AccessFeatureValueReader      accessReader(*typeConfig);
-    MaxSpeedFeatureValueReader    maxSpeedReader(*typeConfig);
-    GradeFeatureValueReader       gradeReader(*typeConfig);
+    NodeUseMap                         nodeUseMap;
+    NodeIdObjectsMap                   nodeObjectsMap;
+    AccessRestrictedFeatureValueReader accessRestrictedReader(*typeConfig);
+    AccessFeatureValueReader           accessReader(*typeConfig);
+    MaxSpeedFeatureValueReader         maxSpeedReader(*typeConfig);
+    GradeFeatureValueReader            gradeReader(*typeConfig);
 
     this->accessRestrictedReader=&accessRestrictedReader;
     this->accessReader=&accessReader;

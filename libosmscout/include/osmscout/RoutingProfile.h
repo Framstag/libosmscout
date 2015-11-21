@@ -46,6 +46,8 @@ namespace osmscout {
   public:
     virtual ~RoutingProfile();
 
+    virtual Vehicle GetVehicle() const = 0;
+
     virtual bool CanUse(const RouteNode& currentNode,
                         const std::vector<ObjectVariantData>& objectVariantData,
                         size_t pathIndex) const = 0;

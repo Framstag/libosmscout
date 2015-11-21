@@ -722,16 +722,57 @@ namespace osmscout {
     }
   }
 
+  bool AccessRestrictedFeatureValue::Read(FileScanner& scanner)
+  {
+    return scanner.Read(access);
+  }
+
+  bool AccessRestrictedFeatureValue::Write(FileWriter& writer)
+  {
+    return writer.Write(access);
+  }
+
+  FeatureValue& AccessRestrictedFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const AccessRestrictedFeatureValue& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
+
+      access=otherValue.access;
+    }
+
+    return *this;
+  }
+
+  bool AccessRestrictedFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const AccessRestrictedFeatureValue& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
+
+    return access==otherValue.access;
+  }
+
   const char* const AccessRestrictedFeature::NAME = "AccessRestricted";
 
   void AccessRestrictedFeature::Initialize(TypeConfig& typeConfig)
   {
     tagAccess=typeConfig.RegisterTag("access");
+    tagFoot=typeConfig.RegisterTag("foot");
+    tagBicycle=typeConfig.RegisterTag("bicycle");
+    tagMotorVehicle=typeConfig.RegisterTag("motor_vehicle");
   }
 
   std::string AccessRestrictedFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t AccessRestrictedFeature::GetValueSize() const
+  {
+    return sizeof(AccessRestrictedFeatureValue);
+  }
+
+  FeatureValue* AccessRestrictedFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) AccessRestrictedFeatureValue();
   }
 
   void AccessRestrictedFeature::Parse(Progress& /*progress*/,
@@ -741,15 +782,59 @@ namespace osmscout {
                                       const TagMap& tags,
                                       FeatureValueBuffer& buffer) const
   {
+    uint8_t access=AccessRestrictedFeatureValue::foot|AccessRestrictedFeatureValue::bicycle|AccessRestrictedFeatureValue::car;
+    uint8_t defaultAccess=AccessRestrictedFeatureValue::foot|AccessRestrictedFeatureValue::bicycle|AccessRestrictedFeatureValue::car;
+
     auto accessValue=tags.find(tagAccess);
 
-    if (accessValue!=tags.end() &&
-        accessValue->second!="no" &&
-        accessValue->second!="yes" &&
-        accessValue->second!="use_sidepath" &&
-        accessValue->second!="permissive" &&
-        accessValue->second!="designated") {
-      buffer.AllocateValue(feature.GetIndex());
+    if (accessValue!=tags.end()) {
+
+      if (accessValue->second=="delivery" ||
+          accessValue->second=="destination") {
+        access&=~(AccessRestrictedFeatureValue::foot|AccessRestrictedFeatureValue::bicycle|AccessRestrictedFeatureValue::car);
+      }
+    }
+
+    auto accessFootValue=tags.find(tagFoot);
+
+    if (accessFootValue!=tags.end()) {
+      if (accessFootValue->second=="delivery" ||
+          accessFootValue->second=="destination") {
+        access&=~AccessRestrictedFeatureValue::foot;
+      }
+      else {
+        access|=AccessRestrictedFeatureValue::foot;
+      }
+    }
+
+    auto accessBicycleValue=tags.find(tagBicycle);
+
+    if (accessBicycleValue!=tags.end()) {
+      if (accessBicycleValue->second=="delivery" ||
+          accessBicycleValue->second=="destination") {
+        access&=~AccessRestrictedFeatureValue::bicycle;
+      }
+      else {
+        access|=AccessRestrictedFeatureValue::bicycle;
+      }
+    }
+
+    auto accessCarValue=tags.find(tagMotorVehicle);
+
+    if (accessCarValue!=tags.end()) {
+      if (accessCarValue->second=="delivery" ||
+          accessCarValue->second=="destination") {
+        access&=~AccessRestrictedFeatureValue::car;
+      }
+      else {
+        access|=AccessRestrictedFeatureValue::car;
+      }
+    }
+
+    if (access!=defaultAccess) {
+      AccessRestrictedFeatureValue* value=static_cast<AccessRestrictedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      value->SetAccess(access);
     }
   }
 

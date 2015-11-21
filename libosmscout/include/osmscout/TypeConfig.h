@@ -116,21 +116,49 @@ namespace osmscout {
      */
     virtual std::string GetName() const = 0;
 
+    /**
+     * A feature, if set for an object, can hold a value. If there is no value object,
+     * this method returns 0, else it returns the C++ size of the value object.
+     */
     inline virtual size_t GetValueSize() const
     {
       return 0;
     }
 
+    /**
+     * This method returns the number of additional feature bits reserved. If there are
+     * additional features bit, 0 is returned.
+     *
+     * A feature may reserve additional feature bits. Feature bits should be used
+     * if a custom value object is too expensive. Space for feature bits is always reserved
+     * even if the feature itself is not set for a certain object.
+     */
+    inline virtual size_t GetFeatureBitCount() const
+    {
+      return 0;
+    }
+
+    /**
+     * Returns 'true' if the feature has an value object.
+     */
     inline virtual bool HasValue() const
     {
       return GetValueSize()>0;
     }
 
+    /**
+     * Returns 'true' if the feature provides labels.
+     */
     inline virtual bool HasLabel() const
     {
       return !labels.empty();
     }
 
+    /**
+     * Returns the index of the label with the given name. Method returns 'true'
+     * if the feature has labels and a label with the given name exists. Else
+     * 'false' is returned.
+     */
     bool GetLabelIndex(const std::string& labelName,
                        size_t& index) const;
 
@@ -152,14 +180,16 @@ namespace osmscout {
   class OSMSCOUT_API FeatureInstance
   {
   private:
-    FeatureRef     feature; //!< The feature we are an instance of
-    const TypeInfo *type;   //!< The type we are assigned to (we are no Ref type to avoid circular references)
-    size_t         index;   //!< The index we have in the list of features
-    size_t         offset;  //!< Our offset into the value buffer for our data
+    FeatureRef     feature;    //!< The feature we are an instance of
+    const TypeInfo *type;      //!< The type we are assigned to (we are no Ref type to avoid circular references)
+    size_t         featureBit; //!< index of the bit that signals that the feature is available
+    size_t         index;      //!< The index we have in the list of features
+    size_t         offset;     //!< Our offset into the value buffer for our data
 
   public:
     FeatureInstance(const FeatureRef& feature,
                     const TypeInfo* type,
+                    size_t featureBit,
                     size_t index,
                     size_t offset);
 
@@ -177,6 +207,14 @@ namespace osmscout {
     inline const TypeInfo* GetType() const
     {
       return type;
+    }
+
+    /**
+     * return the index of this feature within the list of features of the type.
+     */
+    inline size_t GetFeatureBit() const
+    {
+      return featureBit;
     }
 
     /**
@@ -888,6 +926,10 @@ namespace osmscout {
     }
   };
 
+  /**
+   * A FeatureValueBuffer is instantiated by an object and holds information
+   * about the type of the object, the features and feature values available for the given object.
+   */
   class OSMSCOUT_API FeatureValueBuffer
   {
   private:
@@ -923,9 +965,11 @@ namespace osmscout {
       return type->GetFeature(idx);
     }
 
-    inline bool HasValue(size_t idx) const
+    inline bool HasFeature(size_t idx) const
     {
-      return (featureBits[idx/8] & (1 << idx%8))!=0;
+      size_t featureBit=type->GetFeature(idx).GetFeatureBit();
+
+      return (featureBits[featureBit/8] & (1 << featureBit%8))!=0;
     }
 
     inline FeatureValue* GetValue(size_t idx) const
@@ -953,7 +997,7 @@ namespace osmscout {
     bool operator!=(const FeatureValueBuffer& other) const;
   };
 
-  static const uint32_t FILE_FORMAT_VERSION = 1;
+  static const uint32_t FILE_FORMAT_VERSION = 2;
 
   /**
    * \ingroup type

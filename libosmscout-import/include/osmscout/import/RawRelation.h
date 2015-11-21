@@ -78,10 +78,10 @@ namespace osmscout {
 
     inline bool HasFeature(size_t idx) const
     {
-      return featureValueBuffer.HasValue(idx);
+      return featureValueBuffer.HasFeature(idx);
     }
 
-    inline FeatureInstance GetFeature(size_t idx) const
+    inline const FeatureInstance& GetFeature(size_t idx) const
     {
       return featureValueBuffer.GetType()->GetFeature(idx);
     }

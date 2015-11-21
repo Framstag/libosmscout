@@ -613,10 +613,120 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API AccessRestrictedFeatureValue : public FeatureValue
+  {
+  public:
+    enum Access {
+      foot     = 1 << 0,
+      bicycle  = 1 << 1,
+      car      = 1 << 2,
+    };
+
+  private:
+    uint8_t access;
+
+  public:
+    inline AccessRestrictedFeatureValue()
+    : access(0)
+    {
+      // no code
+    }
+
+    inline AccessRestrictedFeatureValue(uint8_t access)
+    : access(access)
+    {
+      // no code
+    }
+
+    inline void SetAccess(uint8_t access)
+    {
+      this->access=access;
+    }
+
+    inline uint8_t GetAccess()
+    {
+      return access;
+    }
+
+    inline bool CanAccess() const
+    {
+      return (access & (foot|bicycle|car))!=0;
+    }
+
+    inline bool CanAccess(Vehicle vehicle) const
+    {
+      switch (vehicle)
+      {
+      case vehicleFoot:
+        return (access &foot)!=0;
+      case vehicleBicycle:
+        return (access & bicycle)!=0;
+      case vehicleCar:
+        return (access & car)!=0;
+      }
+
+      return false;
+    }
+
+    inline bool CanAccess(VehicleMask vehicleMask) const
+    {
+      if ((vehicleMask & vehicleFoot)!=0 &&
+          (access & foot)!=0) {
+        return true;
+      }
+
+      if ((vehicleMask & vehicleBicycle)!=0 &&
+          (access & bicycle)!=0) {
+        return true;
+      }
+
+      if ((vehicleMask & vehicleCar)!=0 &&
+          (access & car)!=0) {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool CanAccessFoot() const
+    {
+      return (access & foot)!=0;
+    }
+
+    inline bool CanAccessBicycle() const
+    {
+      return (access & bicycle)!=0;
+    }
+
+    inline bool CanAccessCar() const
+    {
+      return (access & car)!=0;
+    }
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  /**
+   * AccessRestriction signals, if there is some access restriction for a given way and a given vehicle.
+   *
+   * An access restriction means, that a way can be used for a vehicle, but access ist restricted.
+   * Restricted access means, that you can enter a restricted region, but cannot leave it again for a given
+   * route. You may only enter the restricted region if you have a certain intention.
+   *
+   * No acces restriction, dies not mean, that a way can be used for a given vehicle. You must still evaluate if
+   * there is access at all for the vehicle.
+   */
   class OSMSCOUT_API AccessRestrictedFeature : public Feature
   {
   private:
     TagId tagAccess;
+    TagId tagFoot;
+    TagId tagBicycle;
+    TagId tagMotorVehicle;
 
   public:
     /** Name of this feature */
@@ -626,6 +736,9 @@ namespace osmscout {
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
@@ -1168,7 +1281,7 @@ namespace osmscout {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max()) {
-      return buffer.HasValue(index);
+      return buffer.HasFeature(index);
     }
     else {
       return false;
@@ -1255,7 +1368,7 @@ namespace osmscout {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
-        buffer.HasValue(index)) {
+    buffer.HasFeature(index)) {
       return dynamic_cast<V*>(buffer.GetValue(index));
     }
     else {
@@ -1263,17 +1376,18 @@ namespace osmscout {
     }
   }
 
-  typedef FeatureValueReader<NameFeature,NameFeatureValue>             NameFeatureValueReader;
-  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>       NameAltFeatureValueReader;
-  typedef FeatureValueReader<RefFeature,RefFeatureValue>               RefFeatureValueReader;
-  typedef FeatureValueReader<LocationFeature,LocationFeatureValue>     LocationFeatureValueReader;
-  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>       AddressFeatureValueReader;
-  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>         AccessFeatureValueReader;
-  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>           LayerFeatureValueReader;
-  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>           WidthFeatureValueReader;
-  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>     MaxSpeedFeatureValueReader;
-  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>           GradeFeatureValueReader;
-  typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue> AdminLevelFeatureValueReader;
+  typedef FeatureValueReader<NameFeature,NameFeatureValue>                         NameFeatureValueReader;
+  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>                   NameAltFeatureValueReader;
+  typedef FeatureValueReader<RefFeature,RefFeatureValue>                           RefFeatureValueReader;
+  typedef FeatureValueReader<LocationFeature,LocationFeatureValue>                 LocationFeatureValueReader;
+  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>                   AddressFeatureValueReader;
+  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>                     AccessFeatureValueReader;
+  typedef FeatureValueReader<AccessRestrictedFeature,AccessRestrictedFeatureValue> AccessRestrictedFeatureValueReader;
+  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>                       LayerFeatureValueReader;
+  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>                       WidthFeatureValueReader;
+  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>                 MaxSpeedFeatureValueReader;
+  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
+  typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader
@@ -1320,7 +1434,7 @@ namespace osmscout {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
-        buffer.HasValue(index)) {
+    buffer.HasFeature(index)) {
       V* value=dynamic_cast<V*>(buffer.GetValue(index));
 
       if (value!=NULL) {

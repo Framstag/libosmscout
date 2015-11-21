@@ -1091,6 +1091,7 @@ namespace osmscout {
                                       size_t targetNodeIndex,
                                       RouteData& route)
   {
+    Vehicle                  vehicle=profile.GetVehicle();
     RouteNodeRef             startForwardRouteNode;
     RouteNodeRef             startBackwardRouteNode;
     RNodeRef                 startForwardNode;
@@ -1170,6 +1171,8 @@ namespace osmscout {
 
       nodesLoadedCount++;
 
+      bool accessViolation=false;
+
       // Get potential follower in the current way
 
 #if defined(DEBUG_ROUTING)
@@ -1192,7 +1195,7 @@ namespace osmscout {
         }
 
         if (!current->access &&
-            path.HasAccess()) {
+            !path.IsRestricted(vehicle)) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path.offset;
@@ -1201,6 +1204,9 @@ namespace osmscout {
 #endif
           nodesIgnoredCount++;
           i++;
+
+          accessViolation=true;
+
           continue;
         }
 
@@ -1302,7 +1308,7 @@ namespace osmscout {
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
           node->overallCost=overallCost;
-          node->access=currentRouteNode->paths[i].HasAccess();
+          node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
 
 #if defined(DEBUG_ROUTING)
           std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
@@ -1322,7 +1328,7 @@ namespace osmscout {
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
           node->overallCost=overallCost;
-          node->access=path.HasAccess();
+          node->access=!path.IsRestricted(vehicle);
 
 #if defined(DEBUG_ROUTING)
           std::cout << "  Inserting route to " << path.offset;
@@ -1341,7 +1347,9 @@ namespace osmscout {
       // Added current node to close map
       //
 
-      closeMap[current->nodeOffset]=current;
+      if (!accessViolation) {
+        closeMap[current->nodeOffset]=current;
+      }
       current->node=NULL;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
