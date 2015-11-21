@@ -116,7 +116,10 @@ namespace osmscout {
      */
     virtual std::string GetName() const = 0;
 
-    virtual size_t GetValueSize() const = 0;
+    inline virtual size_t GetValueSize() const
+    {
+      return 0;
+    }
 
     inline virtual bool HasValue() const
     {

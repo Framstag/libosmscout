@@ -627,8 +627,6 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    size_t GetValueSize() const;
-
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
@@ -952,8 +950,6 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    size_t GetValueSize() const;
-
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
@@ -976,8 +972,6 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    size_t GetValueSize() const;
-
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
@@ -999,8 +993,6 @@ namespace osmscout {
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
-
-    size_t GetValueSize() const;
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
@@ -1095,8 +1087,6 @@ namespace osmscout {
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
-
-    size_t GetValueSize() const;
 
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,

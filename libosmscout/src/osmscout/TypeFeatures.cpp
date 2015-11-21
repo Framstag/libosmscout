@@ -734,11 +734,6 @@ namespace osmscout {
     return NAME;
   }
 
-  size_t AccessRestrictedFeature::GetValueSize() const
-  {
-    return 0;
-  }
-
   void AccessRestrictedFeature::Parse(Progress& /*progress*/,
                                       const TypeConfig& /*typeConfig*/,
                                       const FeatureInstance& feature,
@@ -1286,11 +1281,6 @@ namespace osmscout {
     return NAME;
   }
 
-  size_t BridgeFeature::GetValueSize() const
-  {
-    return 0;
-  }
-
   void BridgeFeature::Parse(Progress& /*progress*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
@@ -1320,11 +1310,6 @@ namespace osmscout {
     return NAME;
   }
 
-  size_t TunnelFeature::GetValueSize() const
-  {
-    return 0;
-  }
-
   void TunnelFeature::Parse(Progress& /*progress*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
@@ -1352,11 +1337,6 @@ namespace osmscout {
   std::string RoundaboutFeature::GetName() const
   {
     return NAME;
-  }
-
-  size_t RoundaboutFeature::GetValueSize() const
-  {
-    return 0;
   }
 
   void RoundaboutFeature::Parse(Progress& /*progress*/,
@@ -1503,11 +1483,6 @@ namespace osmscout {
   std::string BuildingFeature::GetName() const
   {
     return NAME;
-  }
-
-  size_t BuildingFeature::GetValueSize() const
-  {
-    return 0;
   }
 
   void BuildingFeature::Parse(Progress& /*progress*/,
