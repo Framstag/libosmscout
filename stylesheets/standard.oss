@@ -360,16 +360,11 @@ CONST
     COLOR unknownColor             = @waterColor;
   }
   ELSE {
-    COLOR waterColor               = #9acffd;
+    COLOR waterColor               = darken(#9acffd, 0.5);
     COLOR waterLabelColor          = darken(@waterColor, 0.5);
     COLOR landColor                = #333333;
     COLOR unknownColor             = #000000;
   }
-
-/*
-  COLOR seaColor              = #c4dff6;
-  COLOR landColor             = #fcfbe7;
-  COLOR unknownColor          = #c4dff6;*/
 
   // Borders
   COLOR countryBorderColor         = #ff0000;
@@ -450,34 +445,38 @@ CONST
   // Ways
   COLOR bridgeColor                = #000000; // black
 
-  COLOR motorwayColor              = #4440ec; // dark blue
-  COLOR motorwayShieldColor        = @motorwayColor;
-  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
-  COLOR trunkColor                 = #7674ec; // lighther blue
-  COLOR trunkShieldColor           = @trunkColor;
-  COLOR primaryColor               = #ec4044; // red
-  COLOR primaryShieldColor         = @primaryColor;
-  COLOR secondaryColor             = #fdac44; // orange
-  COLOR tertiaryColor              = #fef271; // yelow
-  
   IF daylight {
+    COLOR motorwayColor            = #4440ec; // dark blue
+    COLOR trunkColor               = #7674ec; // lighther blue
+    COLOR primaryColor             = #ec4044; // red
+    COLOR secondaryColor           = #fdac44; // orange
+    COLOR tertiaryColor            = #fef271; // yelow
     COLOR roadColor                = #ffffff; // white
     COLOR roadBColor               = #bfbfbf;
     COLOR livingStreetColor        = #bababa; // grey
+    COLOR pedestrianColor          = #ededed;
+    
+    COLOR wayLabelColor            = #000000; // black
   }
   ELSE {
+    COLOR motorwayColor            = darken(#4440ec, 0.3);
+    COLOR trunkColor               = darken(#7674ec, 0.3);
+    COLOR primaryColor             = darken(#ec4044, 0.3);
+    COLOR secondaryColor           = darken(#fdac44, 0.3);
+    COLOR tertiaryColor            = darken(#fef271, 0.3);
     COLOR roadColor                = darken(#ffffff, 0.5);
     COLOR roadBColor               = darken(#bfbfbf, 0.5);
     COLOR livingStreetColor        = darken(#bababa, 0.5);
-  }
-
-  IF daylight {
-    COLOR pedestrianColor          = #ededed;
-  }
-  ELSE {
     COLOR pedestrianColor          = darken(#ededed, 0.5);
+    
+    COLOR wayLabelColor            = #cccccc;
   }
-
+  
+  COLOR motorwayShieldColor        = @motorwayColor;
+  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
+  COLOR trunkShieldColor           = @trunkColor;
+  COLOR primaryShieldColor         = @primaryColor;
+  
   // Buildings
   COLOR buildingColor              = #d9d9d9;
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
@@ -1167,12 +1166,12 @@ STYLE
          highway_primary_link,
          highway_secondary,
          highway_secondary_link,
-         route_ferry] WAY.TEXT{ label: Name.name; size: 1.0; }
+         route_ferry] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; }
  }
 
  [MAG close-] {
-   [TYPE highway_services] NODE.TEXT {label: Name.name; priority: @labelPrioHighwayServices; }
-   [TYPE highway_construction] WAY.TEXT { label: Name.name;}
+   [TYPE highway_services] NODE.TEXT {label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
+   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; }
  }
 
  [MAG veryClose-] {
@@ -1183,9 +1182,9 @@ STYLE
          highway_living_street,
          highway_service,
          highway_track,
-         leisure_track] WAY.TEXT { label: Name.name; size: 0.9; }
+         leisure_track] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.9; }
 
-   [TYPE highway_service] AREA.TEXT { label: Name.name; priority: @labelPrioHighwayServices; }
+   [TYPE highway_service] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
    
    [TYPE highway_bus_stop] NODE.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt;}
  }
@@ -1197,11 +1196,11 @@ STYLE
          highway_cycleway,
          highway_footway,
          highway_bridleway,
-         highway_steps] WAY.TEXT { label: Name.name; size: 0.8;}
+         highway_steps] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8;}
 
    [TYPE highway_pedestrian,
          highway_services,
-         highway_footway] AREA.TEXT { label: Name.name; priority: @labelPrioHighwayArea; }
+         highway_footway] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayArea; }
  }
 
  // Oneways
