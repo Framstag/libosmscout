@@ -289,10 +289,11 @@ void DBThread::TriggerMapRendering()
 
     osmscout::StopClock dataRetrievalTimer;
 
-    mapService->GetObjects(searchParameter,
-                           *styleConfig,
-                           projection,
-                           data);
+    std::list<osmscout::TileRef> tiles;
+
+    mapService->LookupTiles(projection,tiles);
+    mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+    mapService->ConvertTilesToMapData(tiles,data);
 
     if (drawParameter.GetRenderSeaLand()) {
       mapService->GetGroundTiles(projection,

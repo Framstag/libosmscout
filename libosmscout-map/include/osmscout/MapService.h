@@ -36,6 +36,8 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
 
+#include <osmscout/TiledDataCache.h>
+
 namespace osmscout {
 
   /**
@@ -83,54 +85,77 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapService
   {
   private:
-    DatabaseRef database;
+    struct TypeDefinition
+    {
+      Magnification magnification;
+      TypeInfoSet   nodeTypes;
+      TypeInfoSet   wayTypes;
+      TypeInfoSet   areaTypes;
+      TypeInfoSet   optimizedAreaTypes;
+      TypeInfoSet   optimizedWayTypes;
+    };
+
+    typedef std::shared_ptr<TypeDefinition> TypeDefinitionRef;
 
   private:
-    bool GetObjectsNodes(const AreaSearchParameter& parameter,
-                         const TypeInfoSet& requestedNodeTypes,
-                         const GeoBox& boundingBox,
-                         std::string& nodeIndexTime,
-                         std::string& nodeAreasTime,
-                         std::vector<NodeRef>& nodes) const;
+    DatabaseRef            database;       //!< The reference to the database
+    mutable TiledDataCache cache;          //!< Data cache
+    TypeDefinitionRef      typeDefinition; //<! Last used and cached TypeDefinition
 
-    bool GetObjectsWays(const AreaSearchParameter& parameter,
+  private:
+    TypeDefinitionRef GetTypeDefinition(const AreaSearchParameter& parameter,
+                                        const StyleConfig& styleConfig,
+                                        const Magnification& magnification) const;
+
+    bool GetNodes(const AreaSearchParameter& parameter,
+                  const TypeInfoSet& nodeTypes,
+                  const GeoBox& boundingBox,
+                  TileNodeData& data) const;
+
+    bool GetAreasLowZoom(const AreaSearchParameter& parameter,
+                         const TypeInfoSet& areaTypes,
+                         const Magnification& magnification,
+                         const GeoBox& boundingBox,
+                         TileAreaData& data) const;
+
+    bool GetAreas(const AreaSearchParameter& parameter,
+                  const TypeInfoSet& areaTypes,
+                  const Magnification& magnification,
+                  const GeoBox& boundingBox,
+                  TileAreaData& data) const;
+
+    bool GetWaysLowZoom(const AreaSearchParameter& parameter,
                         const TypeInfoSet& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
-                        std::string& wayOptimizedTime,
-                        std::string& wayIndexTime,
-                        std::string& waysTime,
-                        std::vector<WayRef>& ways) const;
+                        TileWayData& data) const;
 
-    bool GetObjectsAreas(const AreaSearchParameter& parameter,
-                               const TypeInfoSet& requestedAreaTypes,
-                               const Magnification& magnification,
-                               const GeoBox& boundingBox,
-                               std::string& areaOptimizedTime,
-                               std::string& areaIndexTime,
-                               std::string& areasTime,
-                               std::vector<AreaRef>& areas) const;
+    bool GetWays(const AreaSearchParameter& parameter,
+                 const TypeInfoSet& wayTypes,
+                 const GeoBox& boundingBox,
+                 TileWayData& data) const;
 
   public:
     MapService(const DatabaseRef& database);
     virtual ~MapService();
 
-    bool GetObjects(const AreaSearchParameter& parameter,
-                    const StyleConfig& styleConfig,
-                    const Projection& projection,
-                    MapData& data) const;
+    void SetCacheSize(size_t cacheSize);
 
-    bool GetObjects(const AreaSearchParameter& parameter,
-                    const Magnification& magnification,
-                    const TypeInfoSet &nodeTypes,
-                    const GeoBox& nodeBoundingBox,
-                    std::vector<NodeRef>& nodes,
-                    TypeInfoSet& wayTypes,
-                    const GeoBox& wayBoundingBox,
-                    std::vector<WayRef>& ways,
-                    const TypeInfoSet& areaTypes,
-                    const GeoBox& areaBoundingBox,
-                    std::vector<AreaRef>& areas) const;
+    void LookupTiles(const Magnification& magnification,
+                     const GeoBox& boundingBox,
+                     std::list<TileRef>& tiles) const;
+
+    void LookupTiles(const Projection& projection,
+                     std::list<TileRef>& tiles) const;
+
+    TileRef LookupTile(const TileId& id) const;
+
+    bool LoadMissingTileData(const AreaSearchParameter& parameter,
+                             const StyleConfig& styleConfig,
+                             std::list<TileRef>& tiles) const;
+
+    void ConvertTilesToMapData(std::list<TileRef>& tiles,
+                               MapData& data) const;
 
     bool GetGroundTiles(const Projection& projection,
                         std::list<GroundTile>& tiles) const;

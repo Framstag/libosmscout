@@ -17,6 +17,7 @@ set(HEADER_FILES
         include/osmscout/MapParameter.h
         include/osmscout/MapService.h
         include/osmscout/StyleConfig.h
+        include/osmscout/TiledDataCache.h
         include/osmscout/MapPainterNoOp.h)
 
 set(SOURCE_FILES
@@ -26,6 +27,7 @@ set(SOURCE_FILES
         src/osmscout/MapParameter.cpp
         src/osmscout/MapService.cpp
         src/osmscout/StyleConfig.cpp
+        src/osmscout/TiledDataCache.cpp
         src/osmscout/MapPainterNoOp.cpp)
 
 add_library(libosmscout_map SHARED ${SOURCE_FILES} ${HEADER_FILES})

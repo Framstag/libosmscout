@@ -33,12 +33,12 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory), drawing the "Ruhrgebiet":
 
-  src/Tiler ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 10 13
+  src/Tiler ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.2 6.5 51.7 8 10 13
 */
 
-static unsigned long tileWidth=256;
-static unsigned long tileHeight=256;
-static const double  DPI=96.0;
+static unsigned int tileWidth=256;
+static unsigned int tileHeight=256;
+static const double DPI=96.0;
 
 bool write_ppm(const agg::rendering_buffer& buffer,
                const char* file_name)
@@ -64,12 +64,11 @@ bool write_ppm(const agg::rendering_buffer& buffer,
 
 int main(int argc, char* argv[])
 {
-  std::string   map;
-  std::string   style;
-  double        latTop,latBottom,lonLeft,lonRight;
-  unsigned long xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
-  unsigned long startLevel;
-  unsigned long endLevel;
+  std::string  map;
+  std::string  style;
+  double       latTop,latBottom,lonLeft,lonRight;
+  unsigned int startLevel;
+  unsigned int endLevel;
 
   if (argc!=9) {
     std::cerr << "DrawMap ";
@@ -103,19 +102,19 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (sscanf(argv[7],"%lu",&startLevel)!=1) {
+  if (sscanf(argv[7],"%u",&startLevel)!=1) {
     std::cerr << "start zoom is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[8],"%lu",&endLevel)!=1) {
+  if (sscanf(argv[8],"%u",&endLevel)!=1) {
     std::cerr << "end zoom is not numeric!" << std::endl;
     return 1;
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
+  osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
   if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
+  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
   if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
@@ -137,7 +136,7 @@ int main(int argc, char* argv[])
   // Change this, to match your system
   drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
   drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
-  drawParameter.SetFontSize(6.0);
+  drawParameter.SetFontSize(5.0);
   // Fadings make problems with tile approach, we disable it
   drawParameter.SetDrawFadings(false);
   // To get accurate label drawing at tile borders, we take into account labels
@@ -148,12 +147,12 @@ int main(int argc, char* argv[])
   searchParameter.SetMaximumAreaLevel(3);
 
   osmscout::MapPainterAgg painter(styleConfig);
-  osmscout::Magnification magnification;
 
   for (size_t level=std::min(startLevel,endLevel);
        level<=std::max(startLevel,endLevel);
        level++) {
     osmscout::Magnification magnification;
+    int                     xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
 
     magnification.SetLevel(level);
 
@@ -200,25 +199,11 @@ int main(int argc, char* argv[])
     styleConfig->GetAreaTypesWithMaxMag(magnification,
                                         areaTypes);
 
-    for (size_t y=yTileStart; y<=yTileEnd; y++) {
-      for (size_t x=xTileStart; x<=xTileEnd; x++) {
+    for (int y=yTileStart; y<=yTileEnd; y++) {
+      for (int x=xTileStart; x<=xTileEnd; x++) {
         agg::pixfmt_rgb24   pf(rbuf);
         osmscout::StopClock timer;
-        osmscout::GeoBox    boundingBox1;
-        osmscout::GeoBox    boundingBox2;
-        osmscout::GeoCoord  center;
-
-        boundingBox2.Set(osmscout::GeoCoord(osmscout::TileYToLat(y+2,
-                                                                 magnification),
-                                            osmscout::TileXToLon(x-1,
-                                                                 magnification)),
-                         osmscout::GeoCoord(osmscout::TileYToLat(y-1,
-                                                                 magnification),
-                                            osmscout::TileXToLon(x+2,
-                                                                 magnification)));
-
-        //std::cout << x << "," << y << "/";
-        //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
+        osmscout::GeoBox    boundingBox;
 
         projection.Set(x,y,
                        magnification,
@@ -226,23 +211,18 @@ int main(int argc, char* argv[])
                        tileWidth,
                        tileHeight);
 
+        projection.GetDimensions(boundingBox);
 
-        projection.GetDimensions(boundingBox1);
-        center=boundingBox1.GetCenter();
+        std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
 
-        std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox1.GetDisplayText() << std::endl;
+        osmscout::GeoBox dataBoundingBox(osmscout::GeoCoord(osmscout::TileYToLat(y-1,magnification),osmscout::TileXToLon(x-1,magnification)),
+                                         osmscout::GeoCoord(osmscout::TileYToLat(y+1,magnification),osmscout::TileXToLon(x+1,magnification)));
 
-        mapService->GetObjects(searchParameter,
-                               projection.GetMagnification(),
-                               nodeTypes,
-                               boundingBox2,
-                               data.nodes,
-                               wayTypes,
-                               boundingBox1,
-                               data.ways,
-                               areaTypes,
-                               boundingBox2,
-                               data.areas);
+        std::list<osmscout::TileRef> tiles;
+
+        mapService->LookupTiles(magnification,dataBoundingBox,tiles);
+        mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+        mapService->ConvertTilesToMapData(tiles,data);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
                             (x-xTileStart)*tileWidth*3;

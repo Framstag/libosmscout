@@ -119,11 +119,15 @@ public:
                 osmscout::MapData& data)
   {
     painter = new osmscout::MapPainterOpenGL(styleConfig);
+    bool result=true;
 
-    return mapService->GetObjects(searchParameter,
-                                  *styleConfig,
-                                  projection,
-                                  data);
+    std::list<osmscout::TileRef> tiles;
+
+    mapService->LookupTiles(projection,tiles);
+    result=mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+    mapService->ConvertTilesToMapData(tiles,data);
+
+    return result;
   }
 };
 

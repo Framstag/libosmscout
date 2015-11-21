@@ -125,10 +125,11 @@ int main(int argc, char* argv[])
 
   searchParameter.SetMaximumAreaLevel(6);
 
-  mapService->GetObjects(searchParameter,
-                         *styleConfig,
-                         projection,
-                         data);
+  std::list<osmscout::TileRef> tiles;
+
+  mapService->LookupTiles(projection,tiles);
+  mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+  mapService->ConvertTilesToMapData(tiles,data);
 
   painter.DrawMap(projection,
                   drawParameter,

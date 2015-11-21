@@ -157,10 +157,11 @@ int main(int argc, char* argv[])
 
       osmscout::StopClock dbTimer;
 
-      mapService->GetObjects(searchParameter,
-                             *styleConfig,
-                             projection,
-                             data);
+      std::list<osmscout::TileRef> tiles;
+
+      mapService->LookupTiles(projection,tiles);
+      mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+      mapService->ConvertTilesToMapData(tiles,data);
 
       dbTimer.Stop();
 

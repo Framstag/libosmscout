@@ -87,7 +87,8 @@ namespace osmscout {
   }
 
   MapService::MapService(const DatabaseRef& database)
-   : database(database)
+   : database(database),
+     cache(25)
   {
     // no code
   }
@@ -97,17 +98,71 @@ namespace osmscout {
     // no code
   }
 
-  bool MapService::GetObjectsNodes(const AreaSearchParameter& parameter,
-                                   const TypeInfoSet& requestedNodeTypes,
-                                   const GeoBox& boundingBox,
-                                   std::string& nodeIndexTime,
-                                   std::string& nodesTime,
-                                   std::vector<NodeRef>& nodes) const
+  /**
+   * Set the size of the tile data cache
+   */
+  void MapService::SetCacheSize(size_t cacheSize)
+  {
+    cache.SetSize(cacheSize);
+  }
+
+  MapService::TypeDefinitionRef MapService::GetTypeDefinition(const AreaSearchParameter& parameter,
+                                                              const StyleConfig& styleConfig,
+                                                              const Magnification& magnification) const
+  {
+    // TODO: Make sure that the styleConfig has not changed!
+
+    if (typeDefinition &&
+        typeDefinition->magnification==magnification) {
+      return typeDefinition;
+    }
+
+    OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
+    OptimizeWaysLowZoomRef  optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
+
+    if (!optimizeAreasLowZoom ||
+        !optimizeWaysLowZoom) {
+      return false;
+    }
+
+    TypeDefinitionRef typeDefinition=std::make_shared<TypeDefinition>();
+
+    styleConfig.GetNodeTypesWithMaxMag(magnification,
+                                       typeDefinition->nodeTypes);
+
+    styleConfig.GetWayTypesWithMaxMag(magnification,
+                                       typeDefinition->wayTypes);
+
+    styleConfig.GetAreaTypesWithMaxMag(magnification,
+                                       typeDefinition->areaTypes);
+
+    if (parameter.GetUseLowZoomOptimization()) {
+      if (optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
+        optimizeAreasLowZoom->GetTypes(magnification,
+                                       typeDefinition->areaTypes,
+                                       typeDefinition->optimizedAreaTypes);
+
+        typeDefinition->areaTypes.Remove(typeDefinition->optimizedAreaTypes);
+      }
+
+      if (optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
+        optimizeWaysLowZoom->GetTypes(magnification,
+                                      typeDefinition->wayTypes,
+                                      typeDefinition->optimizedWayTypes);
+
+        typeDefinition->wayTypes.Remove(typeDefinition->optimizedWayTypes);
+      }
+    }
+
+    return typeDefinition;
+  }
+
+  bool MapService::GetNodes(const AreaSearchParameter& parameter,
+                            const TypeInfoSet& nodeTypes,
+                            const GeoBox& boundingBox,
+                            TileNodeData& data) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
-    TypeInfoSet      loadedNodeTypes;
-
-    nodes.clear();
 
     if (!areaNodeIndex) {
       return false;
@@ -117,116 +172,132 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset> nodeOffsets;
-    StopClock               nodeIndexTimer;
+
+    TypeInfoSet             cachedNodeTypes(data.GetTypes());
+    TypeInfoSet             requestedNodeTypes(nodeTypes);
+    TypeInfoSet             loadedNodeTypes;
+    std::vector<FileOffset> offsets;
+
+    if (!cachedNodeTypes.Empty()) {
+      requestedNodeTypes.Remove(data.GetTypes());
+    }
 
     if (!requestedNodeTypes.Empty()) {
       if (!areaNodeIndex->GetOffsets(boundingBox,
                                      requestedNodeTypes,
-                                     nodeOffsets,
+                                     offsets,
                                      loadedNodeTypes)) {
         log.Error() << "Error getting nodes from area node index!";
         return false;
       }
     }
 
-    nodeIndexTimer.Stop();
-    nodeIndexTime=nodeIndexTimer.ResultString();
-
     if (parameter.IsAborted()) {
       return false;
     }
 
-    // Sort offsets before loading to optimize disk access
-    std::sort(nodeOffsets.begin(),nodeOffsets.end());
+    if (!offsets.empty()) {
+      // Sort offsets before loading to optimize disk access
+      std::sort(offsets.begin(),offsets.end());
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
+      if (parameter.IsAborted()) {
+        return false;
+      }
 
-    StopClock nodesTimer;
-
-    if (!database->GetNodesByOffset(nodeOffsets,
-                                    nodes)) {
-      log.Error() << "Error reading nodes in area!";
-      return false;
-    }
-
-    nodesTimer.Stop();
-    nodesTime=nodesTimer.ResultString();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    return true;
-  }
-
-  bool MapService::GetObjectsAreas(const AreaSearchParameter& parameter,
-                                   const TypeInfoSet& requestedAreaTypes,
-                                   const Magnification& magnification,
-                                   const GeoBox& boundingBox,
-                                   std::string& areaOptimizedTime,
-                                   std::string& areaIndexTime,
-                                   std::string& areasTime,
-                                   std::vector<AreaRef>& areas) const
-  {
-    AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
-    OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
-
-    areas.clear();
-
-    if (!areaAreaIndex ||
-        !optimizeAreasLowZoom) {
-      return false;
-    }
-
-    TypeInfoSet internalAreaTypes(requestedAreaTypes);
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock areaOptimizedTimer;
-
-    if (!internalAreaTypes.Empty()) {
-      if (parameter.GetUseLowZoomOptimization() &&
-          optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        TypeInfoSet optimizedAreaTypes;
-        TypeInfoSet loadedAreaTypes;
-
-        optimizeAreasLowZoom->GetTypes(magnification,
-                                       internalAreaTypes,
-                                       optimizedAreaTypes);
-
-        optimizeAreasLowZoom->GetAreas(boundingBox,
-                                       magnification,
-                                       internalAreaTypes,
-                                       areas,
-                                       loadedAreaTypes);
-
-        internalAreaTypes.Remove(loadedAreaTypes);
+      if (!database->GetNodesByOffset(offsets,
+                                      data.GetData())) {
+        log.Error() << "Error reading nodes in area!";
+        return false;
       }
     }
 
+    loadedNodeTypes.Add(cachedNodeTypes);
 
-    areaOptimizedTimer.Stop();
-    areaOptimizedTime=areaOptimizedTimer.ResultString();
+    data.SetData(loadedNodeTypes,data.GetData());
+
+    return !parameter.IsAborted();
+  }
+
+  bool MapService::GetAreasLowZoom(const AreaSearchParameter& parameter,
+                                   const TypeInfoSet& areaTypes,
+                                   const Magnification& magnification,
+                                   const GeoBox& boundingBox,
+                                   TileAreaData& data) const
+  {
+    if (!parameter.GetUseLowZoomOptimization()) {
+      return true;
+    }
+
+    OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
+
+    if (!optimizeAreasLowZoom) {
+      return false;
+    }
+
+    if (!optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
+      return true;
+    }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
+    TypeInfoSet cachedAreaTypes(data.GetTypes());
+    TypeInfoSet requestedAreaTypes(areaTypes);
+    TypeInfoSet loadedAreaTypes;
+
+    if (!cachedAreaTypes.Empty()) {
+      requestedAreaTypes.Remove(data.GetTypes());
+    }
+
+    if (!requestedAreaTypes.Empty()) {
+      if (!optimizeAreasLowZoom->GetAreas(boundingBox,
+                                          magnification,
+                                          requestedAreaTypes,
+                                          data.GetData(),
+                                          loadedAreaTypes)) {
+        log.Error() << "Error getting areas from optimized areas index!";
+        return false;
+      }
+    }
+
+    loadedAreaTypes.Add(cachedAreaTypes);
+    data.SetData(loadedAreaTypes,data.GetData());
+
+    return !parameter.IsAborted();
+  }
+
+  bool MapService::GetAreas(const AreaSearchParameter& parameter,
+                            const TypeInfoSet& areaTypes,
+                            const Magnification& magnification,
+                            const GeoBox& boundingBox,
+                            TileAreaData& data) const
+  {
+    AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
+
+    if (!areaAreaIndex) {
+      return false;
+    }
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    TypeInfoSet                cachedAreaTypes(data.GetTypes());
+    TypeInfoSet                requestedAreaTypes(areaTypes);
     TypeInfoSet                loadedAreaTypes;
     std::vector<DataBlockSpan> spans;
-    StopClock                  areaIndexTimer;
 
-    if (!internalAreaTypes.Empty()) {
+    if (!cachedAreaTypes.Empty()) {
+      requestedAreaTypes.Remove(data.GetTypes());
+    }
+
+    if (!requestedAreaTypes.Empty()) {
       if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
                                          boundingBox,
                                          magnification.GetLevel()+
                                          parameter.GetMaximumAreaLevel(),
-                                         internalAreaTypes,
+                                         requestedAreaTypes,
                                          spans,
                                          loadedAreaTypes)) {
         log.Error() << "Error getting areas from area index!";
@@ -234,103 +305,104 @@ namespace osmscout {
       }
     }
 
-    areaIndexTimer.Stop();
-    areaIndexTime=areaIndexTimer.ResultString();
-
     if (parameter.IsAborted()) {
       return false;
     }
 
-    StopClock areasTimer;
-
     if (!spans.empty()) {
+      // Sort spans before loading to optimize disk access
       std::sort(spans.begin(),spans.end());
 
       if (!database->GetAreasByBlockSpans(spans,
-                                          areas)) {
+                                          data.GetData())) {
         log.Error() << "Error reading areas in area!";
         return false;
       }
     }
 
-    areasTimer.Stop();
-    areasTime=areasTimer.ResultString();
+    loadedAreaTypes.Add(cachedAreaTypes);
+
+    data.SetData(loadedAreaTypes,data.GetData());
 
     return !parameter.IsAborted();
   }
 
-  bool MapService::GetObjectsWays(const AreaSearchParameter& parameter,
+  bool MapService::GetWaysLowZoom(const AreaSearchParameter& parameter,
                                   const TypeInfoSet& wayTypes,
                                   const Magnification& magnification,
                                   const GeoBox& boundingBox,
-                                  std::string& wayOptimizedTime,
-                                  std::string& wayIndexTime,
-                                  std::string& waysTime,
-                                  std::vector<WayRef>& ways) const
+                                  TileWayData& data) const
   {
-    AreaWayIndexRef        areaWayIndex=database->GetAreaWayIndex();
+    if (!parameter.GetUseLowZoomOptimization()) {
+      return true;
+    }
+
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
-    ways.clear();
-
-    if (!areaWayIndex ||
-        !optimizeWaysLowZoom) {
+    if (!optimizeWaysLowZoom) {
       return false;
     }
 
-    std::unordered_map<FileOffset,WayRef> cachedWays;
-
-    for (auto& way : ways) {
-      if (way->GetFileOffset()!=0) {
-        cachedWays[way->GetFileOffset()]=way;
-      }
+    if (!optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
+      return true;
     }
-
-    ways.clear();
-
-    TypeInfoSet internalWayTypes(wayTypes);
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    StopClock wayOptimizedTimer;
+    TypeInfoSet cachedWayTypes(data.GetTypes());
+    TypeInfoSet requestedWayTypes(wayTypes);
+    TypeInfoSet loadedWayTypes;
 
+    if (!cachedWayTypes.Empty()) {
+      requestedWayTypes.Remove(data.GetTypes());
+    }
 
-    if (!internalWayTypes.Empty()) {
-      if (parameter.GetUseLowZoomOptimization() &&
-          optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
-        TypeInfoSet optimizedWayTypes;
-        TypeInfoSet loadedWayTypes;
-
-        optimizeWaysLowZoom->GetTypes(magnification,
-                                      internalWayTypes,
-                                      optimizedWayTypes);
-
-        optimizeWaysLowZoom->GetWays(boundingBox,
-                                     magnification,
-                                     optimizedWayTypes,
-                                     ways,
-                                     loadedWayTypes);
-
-        internalWayTypes.Remove(loadedWayTypes);
+    if (!requestedWayTypes.Empty()) {
+      if (!optimizeWaysLowZoom->GetWays(boundingBox,
+                                        magnification,
+                                        requestedWayTypes,
+                                        data.GetData(),
+                                        loadedWayTypes)) {
+        log.Error() << "Error getting ways from optimized ways index!";
+        return false;
       }
     }
 
-    wayOptimizedTimer.Stop();
-    wayOptimizedTime=wayOptimizedTimer.ResultString();
+    loadedWayTypes.Add(cachedWayTypes);
+    data.SetData(loadedWayTypes,data.GetData());
+
+    return !parameter.IsAborted();
+  }
+
+  bool MapService::GetWays(const AreaSearchParameter& parameter,
+                           const TypeInfoSet& wayTypes,
+                           const GeoBox& boundingBox,
+                           TileWayData& data) const
+  {
+    AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
+
+    if (!areaWayIndex) {
+      return false;
+    }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
+    TypeInfoSet             cachedWayTypes(data.GetTypes());
+    TypeInfoSet             requestedWayTypes(wayTypes);
     TypeInfoSet             loadedWayTypes;
     std::vector<FileOffset> offsets;
-    StopClock               wayIndexTimer;
 
-    if (!internalWayTypes.Empty()) {
+    if (!cachedWayTypes.Empty()) {
+      requestedWayTypes.Remove(data.GetTypes());
+    }
+
+    if (!requestedWayTypes.Empty()) {
       if (!areaWayIndex->GetOffsets(boundingBox,
-                                    internalWayTypes,
+                                    requestedWayTypes,
                                     offsets,
                                     loadedWayTypes)) {
         log.Error() << "Error getting ways from area way index!";
@@ -338,213 +410,284 @@ namespace osmscout {
       }
     }
 
-    wayIndexTimer.Stop();
-    wayIndexTime=wayIndexTimer.ResultString();
-
     if (parameter.IsAborted()) {
       return false;
     }
 
-    ways.reserve(offsets.size());
+    if (!offsets.empty()) {
+      // Sort offsets before loading to optimize disk access
+      std::sort(offsets.begin(),offsets.end());
 
-    std::vector<FileOffset> restOffsets;
-
-    restOffsets.reserve(offsets.size());
-
-    for (const auto& offset : offsets) {
-      auto entry=cachedWays.find(offset);
-
-      if (entry!=cachedWays.end()) {
-        ways.push_back(entry->second);
+      if (parameter.IsAborted()) {
+        return false;
       }
-      else {
-        restOffsets.push_back(offset);
-      }
-    }
 
-    std::sort(restOffsets.begin(),restOffsets.end());
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock waysTimer;
-
-    if (!restOffsets.empty()) {
-      if (!database->GetWaysByOffset(restOffsets,
-                                     ways)) {
+      if (!database->GetWaysByOffset(offsets,
+                                     data.GetData())) {
         log.Error() << "Error reading ways in area!";
         return false;
       }
     }
 
-    waysTimer.Stop();
-    waysTime=waysTimer.ResultString();
+    loadedWayTypes.Add(cachedWayTypes);
+
+    data.SetData(loadedWayTypes,data.GetData());
 
     return !parameter.IsAborted();
   }
 
   /**
-   * Returns all objects conforming to the given restrictions.
+   * Return all tiles with the magnification defined by the projection
+   * that cover the region covered by the projection
    *
-   * @param parameter
-   *    Further restrictions
-   * @param styleConfig
-   *    Style configuration, defining which types are loaded for the
-   *    magnification defined by the projection
-   * @param projection
-   *    Projection defining the area and the magnification
-   * @param data
-   *    the returned data
-   * @return
-   *    true, if loading of data was successfull else false
+   * Note, that tiles may be partially prefill or empty, if not already
+   * cached.
    */
-  bool MapService::GetObjects(const AreaSearchParameter& parameter,
-                              const StyleConfig& styleConfig,
-                              const Projection& projection,
-                              MapData& data) const
+  void MapService::LookupTiles(const Projection& projection,
+                               std::list<TileRef>& tiles) const
   {
-    osmscout::TypeInfoSet nodeTypes;
-    osmscout::TypeInfoSet wayTypes;
-    osmscout::TypeInfoSet areaTypes;
-    GeoBox                boundingBox;
+    StopClock cacheRetrievalTime;
+
+    GeoBox boundingBox;
 
     projection.GetDimensions(boundingBox);
 
-    styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                       nodeTypes);
+    cache.GetTilesForBoundingBox(projection.GetMagnification(),
+                                 boundingBox,
+                                 tiles);
 
-    styleConfig.GetWayTypesWithMaxMag(projection.GetMagnification(),
-                                      wayTypes);
+    cacheRetrievalTime.Stop();
 
-    styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                       areaTypes);
-
-    return GetObjects(parameter,
-                      projection.GetMagnification(),
-                      nodeTypes,
-                      boundingBox,
-                      data.nodes,
-                      wayTypes,
-                      boundingBox,
-                      data.ways,
-                      areaTypes,
-                      boundingBox,
-                      data.areas);
+    //std::cout << "Cache retrieval time: " << cacheRetrievalTime.ResultString() << std::endl;
   }
 
   /**
-   * Returns all objects conforming to the given restrictions.
+   * Return all tiles with the given covering the region given by the boundingBox
    *
-   * @param parameter
-   *    Further restrictions
-   * @param magnification
-   *    Magnification
-   * @param nodeTypes
-   *    Allowed node types
-   * @param nodeBoundingBox
-   *    Boundary coordinates for loading nodes
-   * @param nodes
-   *    Found nodes
-   * @param wayTypes
-   *    Allowed way types
-   * @param wayBoundingBox
-   *    Boundary coordinates for loading ways
-   * @param ways
-   *    Found ways
-   * @param areaTypes
-   *    Allowed area types
-   * @param areaBoundingBox
-   *    Boundary coordinates for loading areas
-   * @param areas
-   *    Found areas
-   * @return
-   *    False, if there was an error, else true.
+   * Note, that tiles may be partially prefill or empty, if not already
+   * cached.
    */
-  bool MapService::GetObjects(const AreaSearchParameter& parameter,
-                              const Magnification& magnification,
-                              const TypeInfoSet &nodeTypes,
-                              const GeoBox& nodeBoundingBox,
-                              std::vector<NodeRef>& nodes,
-                              TypeInfoSet& wayTypes,
-                              const GeoBox& wayBoundingBox,
-                              std::vector<WayRef>& ways,
-                              const TypeInfoSet& areaTypes,
-                              const GeoBox& areaBoundingBox,
-                              std::vector<AreaRef>& areas) const
+  void MapService::LookupTiles(const Magnification& magnification,
+                               const GeoBox& boundingBox,
+                               std::list<TileRef>& tiles) const
   {
-    std::string nodeIndexTime;
-    std::string nodesTime;
+    StopClock cacheRetrievalTime;
 
-    std::string areaOptimizedTime;
-    std::string areaIndexTime;
-    std::string areasTime;
+    cache.GetTilesForBoundingBox(magnification,
+                                 boundingBox,
+                                 tiles);
 
-    std::string wayOptimizedTime;
-    std::string wayIndexTime;
-    std::string waysTime;
+    cacheRetrievalTime.Stop();
 
-    bool nodesSuccess=true;
-    bool waysSuccess=true;
-    bool areasSuccess=true;
+    //std::cout << "Cache retrieval time: " << cacheRetrievalTime.ResultString() << std::endl;
+  }
 
-#pragma omp parallel if(parameter.GetUseMultithreading())
-#pragma omp sections
-    {
-#pragma omp section
-      nodesSuccess=GetObjectsNodes(parameter,
-                                   nodeTypes,
-                                   nodeBoundingBox,
-                                   nodeIndexTime,
-                                   nodesTime,
-                                   nodes);
+  /**
+   * Return the given tile.
+   *
+   * Note, that tiles may be partially prefill or empty, if not already
+   * cached.
+   */
+  TileRef MapService::LookupTile(const TileId& id) const
+  {
+    StopClock cacheRetrievalTime;
 
-#pragma omp section
-      waysSuccess=GetObjectsWays(parameter,
-                                 wayTypes,
-                                 magnification,
-                                 wayBoundingBox,
-                                 wayOptimizedTime,
-                                 wayIndexTime,
-                                 waysTime,
-                                 ways);
+    TileRef tile=cache.GetTile(id);
 
-#pragma omp section
-      areasSuccess=GetObjectsAreas(parameter,
-                                   areaTypes,
-                                   magnification,
-                                   areaBoundingBox,
-                                   areaOptimizedTime,
-                                   areaIndexTime,
-                                   areasTime,
-                                   areas);
+    cacheRetrievalTime.Stop();
+
+    //std::cout << "Cache retrieval time: " << cacheRetrievalTime.ResultString() << std::endl;
+
+    return tile;
+  }
+
+  /**
+   * Load all missing data for the given tiles based on the given style config.
+   */
+  bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
+                                       const StyleConfig& styleConfig,
+                                       std::list<TileRef>& tiles) const
+  {
+    StopClock         overallTime;
+
+    TypeDefinitionRef typeDefinition;
+
+    StopClock         dataLoadingTime;
+
+    for (auto& tile : tiles) {
+      GeoBox          tileBoundingBox(tile->GetBoundingBox());
+
+      if (tile->IsEmpty()) {
+        //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
+
+        StopClock tileLoadingTime;
+
+        Magnification magnification;
+        bool          nodesSuccess=true;
+        bool          areasLowZoomSuccess=true;
+        bool          areasSuccess=true;
+        bool          waysLowZoomSuccess=true;
+        bool          waysSuccess=true;
+
+        magnification.SetLevel(tile->GetId().GetLevel());
+
+        // TODO: Cache the type definitions, perhaps already in the StyleConfig?
+        typeDefinition=GetTypeDefinition(parameter,
+                                         styleConfig,
+                                         magnification);
+        cache.PrefillDataFromCache(*tile,
+                                   typeDefinition->nodeTypes,
+                                   typeDefinition->wayTypes,
+                                   typeDefinition->areaTypes,
+                                   typeDefinition->optimizedWayTypes,
+                                   typeDefinition->optimizedAreaTypes);
+
+        #pragma omp parallel if(parameter.GetUseMultithreading())
+        #pragma omp sections
+        {
+          #pragma omp section
+          nodesSuccess=GetNodes(parameter,
+                                typeDefinition->nodeTypes,
+                                tileBoundingBox,
+                                tile->GetNodeData());
+          #pragma omp section
+          areasLowZoomSuccess=GetAreasLowZoom(parameter,
+                                              typeDefinition->optimizedAreaTypes,
+                                              magnification,
+                                              tileBoundingBox,
+                                              tile->GetOptimizedAreaData());
+          #pragma omp section
+          areasSuccess=GetAreas(parameter,
+                                typeDefinition->areaTypes,
+                                magnification,
+                                tileBoundingBox,
+                                tile->GetAreaData());
+          #pragma omp section
+          waysLowZoomSuccess=GetWaysLowZoom(parameter,
+                                            typeDefinition->optimizedWayTypes,
+                                            magnification,
+                                            tileBoundingBox,
+                                            tile->GetOptimizedWayData());
+          #pragma omp section
+          waysSuccess=GetWays(parameter,
+                              typeDefinition->wayTypes,
+                              tileBoundingBox,
+                              tile->GetWayData());
+        }
+
+        if (!nodesSuccess ||
+            !areasLowZoomSuccess ||
+            !areasSuccess ||
+            !waysLowZoomSuccess ||
+            !waysSuccess) {
+
+          return false;
+        }
+
+        tileLoadingTime.Stop();
+
+        //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
+
+        if (tileLoadingTime.GetMilliseconds()>150) {
+          log.Warn() << "Retrieving tile data for tile " << tile->GetId().DisplayText() << " took " << tileLoadingTime.ResultString();
+        }
+
+      }
+      else {
+        //std::cout << "Using cached tile: " << (std::string)tile->GetId() << std::endl;
+      }
     }
 
-    if (!nodesSuccess ||
-        !waysSuccess ||
-        !areasSuccess) {
-      nodes.clear();
-      areas.clear();
-      ways.clear();
+    dataLoadingTime.Stop();
 
-      return false;
+    //std::cout << "DataLoadingTime: " << dataLoadingTime.ResultString() << std::endl;
+
+    overallTime.Stop();
+
+    if (overallTime.GetMilliseconds()>200) {
+      log.Warn() << "Retrieving all tile data took " << overallTime.ResultString();
     }
 
-    /*
-    if (database->IsDebugPerformance()) {
-      std::cout << "Query: ";
-      std::cout << "n " << nodeIndexTime << " ";
-      std::cout << "w " << wayIndexTime << " ";
-      std::cout << "a " << areaIndexTime << std::endl;
-
-      std::cout << "Load: ";
-      std::cout << "n " << nodesTime << " ";
-      std::cout << "w " << wayOptimizedTime << "/" << waysTime << " ";
-      std::cout << "a " << areaOptimizedTime << "/" << areasTime;
-      std::cout << std::endl;
-    }*/
+    cache.CleanupCache();
 
     return true;
+  }
+
+  /**
+   * Convert the data hold by the given tiles to the given MapData class instance.
+   */
+  void MapService::ConvertTilesToMapData(std::list<TileRef>& tiles,
+                                         MapData& data) const
+  {
+    // TODO: Use a set and higher level fill functions
+    std::unordered_map<FileOffset,NodeRef> nodeMap(10000);
+    std::unordered_map<FileOffset,WayRef>  wayMap(10000);
+    std::unordered_map<FileOffset,AreaRef> areaMap(10000);
+    std::unordered_map<FileOffset,WayRef>  optimizedWayMap(10000);
+    std::unordered_map<FileOffset,AreaRef> optimizedAreaMap(10000);
+
+    StopClock uniqueTime;
+
+    for (auto tile : tiles) {
+
+      for (const auto& node : tile->GetNodeData().GetData()) {
+        nodeMap[node->GetFileOffset()]=node;
+      }
+
+      for (const auto& way : tile->GetWayData().GetData()) {
+        wayMap[way->GetFileOffset()]=way;
+      }
+
+      for (const auto& area : tile->GetAreaData().GetData()) {
+        areaMap[area->GetFileOffset()]=area;
+      }
+
+      for (const auto& way : tile->GetOptimizedWayData().GetData()) {
+        optimizedWayMap[way->GetFileOffset()]=way;
+      }
+
+      for (const auto& area : tile->GetOptimizedAreaData().GetData()) {
+        optimizedAreaMap[area->GetFileOffset()]=area;
+      }
+    }
+
+    uniqueTime.Stop();
+
+    //std::cout << "Make data unique time: " << uniqueTime.ResultString() << std::endl;
+
+    StopClock copyTime;
+
+    data.nodes.clear();
+    data.ways.clear();
+    data.areas.clear();
+
+    data.nodes.reserve(nodeMap.size());
+    data.ways.reserve(wayMap.size()+optimizedWayMap.size());
+    data.areas.reserve(areaMap.size()+optimizedAreaMap.size());
+
+    for (const auto& nodeEntry : nodeMap) {
+      data.nodes.push_back(nodeEntry.second);
+    }
+
+    for (const auto& wayEntry : wayMap) {
+      data.ways.push_back(wayEntry.second);
+    }
+
+    for (const auto& wayEntry : optimizedWayMap) {
+      data.ways.push_back(wayEntry.second);
+    }
+
+    for (const auto& areaEntry : areaMap) {
+      data.areas.push_back(areaEntry.second);
+    }
+
+    for (const auto& areaEntry : optimizedAreaMap) {
+      data.areas.push_back(areaEntry.second);
+    }
+
+    copyTime.Stop();
+
+    //std::cout << "Tile data copy time: " << copyTime.ResultString() << std::endl;
   }
 
   /**
@@ -604,11 +747,13 @@ namespace osmscout {
                                 boundingBox.GetMaxLat(),
                                 magnification,
                                 tiles)) {
-      std::cerr << "Error reading ground tiles in area!" << std::endl;
+      log.Error() << "Error reading ground tiles in area!";
       return false;
     }
 
     timer.Stop();
+
+    //std::cout << "Loading ground tiles took: " << timer.ResultString() << std::endl;
 
     return true;
   }

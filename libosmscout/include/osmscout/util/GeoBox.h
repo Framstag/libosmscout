@@ -91,6 +91,14 @@ namespace osmscout {
              maxCoord.GetLon()>coord.GetLon();
     }
 
+    inline bool Intersects(GeoBox& other)
+    {
+      return !(other.GetMaxLon()<minCoord.GetLon() ||
+               other.GetMinLon()>=maxCoord.GetLon() ||
+               other.GetMaxLat()<minCoord.GetLat() ||
+               other.GetMinLat()>=maxCoord.GetLat());
+    }
+
     /**
      * Returns true, if the GeoBox instance is valid. This means there were
      * values assigned to the box. While being valid, the rectangle spanned by

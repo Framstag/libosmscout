@@ -118,10 +118,11 @@ int main(int argc, char* argv[])
                      width,
                      height);
 
-      mapService->GetObjects(searchParameter,
-                             *styleConfig,
-                             projection,
-                             data);
+      std::list<osmscout::TileRef> tiles;
+
+      mapService->LookupTiles(projection,tiles);
+      mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+      mapService->ConvertTilesToMapData(tiles,data);
 
       if (mapPainter.DrawMap(projection,
                              drawParameter,

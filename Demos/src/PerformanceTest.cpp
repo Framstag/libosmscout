@@ -315,10 +315,14 @@ int main(int argc, char* argv[])
 
         osmscout::StopClock dbTimer;
 
-        mapService->GetObjects(searchParameter,
-                               *styleConfig,
-                               projection,
-                               data);
+        osmscout::GeoBox dataBoundingBox(osmscout::GeoCoord(osmscout::TileYToLat(y-1,magnification),osmscout::TileXToLon(x-1,magnification)),
+                                         osmscout::GeoCoord(osmscout::TileYToLat(y+1,magnification),osmscout::TileXToLon(x+1,magnification)));
+
+        std::list<osmscout::TileRef> tiles;
+
+        mapService->LookupTiles(magnification,dataBoundingBox,tiles);
+        mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+        mapService->ConvertTilesToMapData(tiles,data);
 
         stats.nodeCount+=data.nodes.size();
         stats.wayCount+=data.ways.size();

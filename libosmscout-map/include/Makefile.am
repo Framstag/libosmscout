@@ -6,5 +6,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/MapPainter.h \
                         osmscout/MapParameter.h \
                         osmscout/StyleConfig.h \
+                        osmscout/TiledDataCache.h \
                         osmscout/MapService.h \
                         osmscout/MapPainterNoOp.h
