@@ -80,7 +80,8 @@ namespace osmscout {
     void Include(const GeoBox& other);
 
     /**
-     * Returns 'true' if coord is within the bounding box. The boundingBox intervall is as an open intervall [..[.
+     * Returns 'true' if coord is within the bounding box. The boundingBox interval is as an open interval
+     * at one end [..[.
      */
     inline bool Includes(const GeoCoord& coord)
     {
