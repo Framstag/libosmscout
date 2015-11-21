@@ -1558,6 +1558,85 @@ namespace osmscout {
     }
   }
 
+  bool DestinationFeatureValue::Read(FileScanner& scanner)
+  {
+    return scanner.Read(destination);
+  }
+
+  bool DestinationFeatureValue::Write(FileWriter& writer)
+  {
+    return writer.Write(destination);
+  }
+
+  FeatureValue& DestinationFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const DestinationFeatureValue& otherValue=static_cast<const DestinationFeatureValue&>(other);
+
+      destination=otherValue.destination;
+    }
+
+    return *this;
+  }
+
+  bool DestinationFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const DestinationFeatureValue& otherValue=static_cast<const DestinationFeatureValue&>(other);
+
+    return destination==otherValue.destination;
+  }
+
+  const char* const DestinationFeature::NAME             = "Destination";
+  const char* const DestinationFeature::NAME_LABEL       = "label";
+  const size_t      DestinationFeature::NAME_LABEL_INDEX = 0;
+
+  DestinationFeature::DestinationFeature()
+  : tagDestination(0)
+  {
+    RegisterLabel(NAME_LABEL,
+                  NAME_LABEL_INDEX);
+  }
+
+  void DestinationFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagDestination=typeConfig.RegisterTag("destination");
+  }
+
+  std::string DestinationFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t DestinationFeature::GetValueSize() const
+  {
+    return sizeof(DestinationFeatureValue);
+  }
+
+  FeatureValue* DestinationFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) DestinationFeatureValue();
+  }
+
+  void DestinationFeature::Parse(Progress& /*progress*/,
+                                 const TypeConfig& /*typeConfig*/,
+                                 const FeatureInstance& feature,
+                                 const ObjectOSMRef& /*object*/,
+                                 const TagMap& tags,
+                                 FeatureValueBuffer& buffer) const
+  {
+    auto destination=tags.find(tagDestination);
+
+    if (destination==tags.end()) {
+      return;
+    }
+
+    if (!destination->second.empty()) {
+      DestinationFeatureValue* value=static_cast<DestinationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      value->SetDestination(destination->second);
+    }
+  }
+
   const char* const BuildingFeature::NAME = "Building";
 
   void BuildingFeature::Initialize(TypeConfig& typeConfig)

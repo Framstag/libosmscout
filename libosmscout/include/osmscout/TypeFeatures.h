@@ -1187,6 +1187,77 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API DestinationFeatureValue : public FeatureValue
+  {
+  private:
+    std::string destination;
+
+  public:
+    inline DestinationFeatureValue()
+    {
+      // no code
+    }
+
+    inline DestinationFeatureValue(const std::string& destination)
+    : destination(destination)
+    {
+      // no code
+    }
+
+    inline void SetDestination(const std::string& destination)
+    {
+      this->destination=destination;
+    }
+
+    inline std::string GetDestination() const
+    {
+      return destination;
+    }
+
+    inline std::string GetLabel() const
+    {
+      return destination;
+    }
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API DestinationFeature : public Feature
+  {
+  private:
+    TagId tagDestination;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
+  public:
+    DestinationFeature();
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+
   class OSMSCOUT_API BuildingFeature : public Feature
   {
   private:
