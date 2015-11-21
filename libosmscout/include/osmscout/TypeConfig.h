@@ -830,12 +830,14 @@ namespace osmscout {
 
     void Set(const TypeInfoRef& type);
     void Set(const std::vector<TypeInfoRef>& types);
-    void Set(const TypeInfoSet& types);
+    void Set(const TypeInfoSet& other);
 
     void Add(const TypeInfoSet& types);
 
     void Remove(const TypeInfoRef& type);
     void Remove(const TypeInfoSet& otherTypes);
+
+    void Intersection(const TypeInfoSet& otherTypes);
 
     inline bool IsSet(const TypeInfoRef& type) const
     {
@@ -854,6 +856,8 @@ namespace osmscout {
     {
       return count;
     }
+
+    bool Intersects(const TypeInfoSet& otherTypes) const;
 
     inline TypeInfoSet& operator=(const TypeInfoSet& other)
     {

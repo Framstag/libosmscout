@@ -662,13 +662,10 @@ namespace osmscout {
     }
   }
 
-  void TypeInfoSet::Set(const TypeInfoSet& types)
+  void TypeInfoSet::Set(const TypeInfoSet& other)
   {
-    Clear();
-
-    for (const auto& type : types) {
-      Set(type);
-    }
+    types=other.types;
+    count=other.count;
   }
 
   void TypeInfoSet::Set(const std::vector<TypeInfoRef>& types)
@@ -709,6 +706,35 @@ namespace osmscout {
         count--;
       }
     }
+  }
+
+  void TypeInfoSet::Intersection(const TypeInfoSet& otherTypes)
+  {
+    for (size_t i=0; i<types.size(); i++) {
+      if (types[i] &&
+          (i>=otherTypes.types.size() ||
+          !otherTypes.types[i])) {
+        types[i]=NULL;
+        count--;
+      }
+    }
+  }
+
+  /**
+   * Returns 'true' if at least one type is set in both Sets. Else
+   * 'false' is returned.
+   */
+  bool TypeInfoSet::Intersects(const TypeInfoSet& otherTypes) const
+  {
+    size_t minSize=std::min(types.size(),otherTypes.types.size());
+
+    for (size_t i=0; i<minSize; i++) {
+      if (types[i] && otherTypes.types[i]) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   bool TypeInfoSet::operator==(const TypeInfoSet& other) const
