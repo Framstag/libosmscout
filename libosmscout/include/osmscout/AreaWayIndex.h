@@ -76,10 +76,7 @@ namespace osmscout {
   private:
     bool GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
-                    size_t maxWayCount,
-                    std::unordered_set<FileOffset>& offsets,
-                    size_t currentSize,
-                    bool& sizeExceeded) const;
+                    std::unordered_set<FileOffset>& offsets) const;
 
   public:
     AreaWayIndex();
@@ -90,7 +87,6 @@ namespace osmscout {
 
     bool GetOffsets(const GeoBox& boundingBox,
                     const TypeInfoSet& types,
-                    size_t maxWayCount,
                     std::vector<FileOffset>& offsets,
                     TypeInfoSet& loadedTypes) const;
 

@@ -107,9 +107,7 @@ namespace osmscout {
     bool ReadCellData(const TypeConfig& typeConfig,
                       const TypeInfoSet& types,
                       FileOffset dataOffset,
-                      size_t spaceLeft,
-                      std::vector<DataBlockSpan>& spans,
-                      bool& stopArea) const;
+                      std::vector<DataBlockSpan>& spans) const;
 
     void PushCellsForNextLevel(double minlon,
                                double minlat,
@@ -131,7 +129,6 @@ namespace osmscout {
                         const GeoBox& boundingBox,
                         size_t maxLevel,
                         const TypeInfoSet& types,
-                        size_t maxCount,
                         std::vector<DataBlockSpan>& spans,
                         TypeInfoSet& loadedTypes) const;
 

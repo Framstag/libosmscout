@@ -46,9 +46,6 @@ namespace osmscout {
   {
   private:
     unsigned long maxAreaLevel;
-    unsigned long maxNodes;
-    unsigned long maxWays;
-    unsigned long maxAreas;
     bool          useLowZoomOptimization;
     BreakerRef    breaker;
     bool          useMultithreading;
@@ -58,10 +55,6 @@ namespace osmscout {
 
     void SetMaximumAreaLevel(unsigned long maxAreaLevel);
 
-    void SetMaximumNodes(unsigned long maxNodes);
-    void SetMaximumWays(unsigned long maxWays);
-    void SetMaximumAreas(unsigned long maxAreas);
-
     void SetUseLowZoomOptimization(bool useLowZoomOptimization);
 
     void SetUseMultithreading(bool useMultithreading);
@@ -69,10 +62,6 @@ namespace osmscout {
     void SetBreaker(const BreakerRef& breaker);
 
     unsigned long GetMaximumAreaLevel() const;
-
-    unsigned long GetMaximumNodes() const;
-    unsigned long GetMaximumWays() const;
-    unsigned long GetMaximumAreas() const;
 
     bool GetUseLowZoomOptimization() const;
 

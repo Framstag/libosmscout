@@ -122,16 +122,13 @@ namespace osmscout {
   bool AreaAreaIndex::ReadCellData(const TypeConfig& typeConfig,
                                    const TypeInfoSet& types,
                                    FileOffset dataOffset,
-                                   size_t spaceLeft,
-                                   std::vector<DataBlockSpan>& spans,
-                                   bool& stopArea) const
+                                   std::vector<DataBlockSpan>& spans) const
   {
     if (!scanner.SetPos(dataOffset)) {
       return false;
     }
 
     uint32_t typeCount;
-    uint32_t overallDataCount=0;
 
     if (!scanner.ReadNumber(typeCount)) {
       return false;
@@ -172,12 +169,6 @@ namespace osmscout {
         span.count=dataCount;
 
         spans.push_back(span);
-
-        overallDataCount++;
-
-        if (overallDataCount>spaceLeft) {
-          stopArea=true;
-        }
       }
     }
 
@@ -288,7 +279,6 @@ namespace osmscout {
                                      const GeoBox& boundingBox,
                                      size_t maxLevel,
                                      const TypeInfoSet& types,
-                                     size_t maxCount,
                                      std::vector<DataBlockSpan>& spans,
                                      TypeInfoSet& loadedTypes) const
   {
@@ -307,8 +297,7 @@ namespace osmscout {
 
     // Make the vector preallocate memory for the expected data size
     // This should void reallocation
-    spans.reserve(std::min(1000u,(uint32_t)maxCount));
-    newSpans.reserve(std::min(1000u,(uint32_t)maxCount));
+    spans.reserve(1000);
 
     cellRefs.reserve(2000);
     nextCellRefs.reserve(2000);
@@ -321,14 +310,11 @@ namespace osmscout {
     // * Add the new offsets to the list of offsets and finish if we have
     //   reached maxLevel or maxAreaCount.
     // * copy no, ntx, nty to ctx, cty, co and go to next iteration
-    bool stopArea=false;
     for (uint32_t level=0;
-         !stopArea &&
          level<=this->maxLevel &&
          level<=maxLevel &&
          !cellRefs.empty();
          level++) {
-      newSpans.clear();
       nextCellRefs.clear();
 
       for (const auto& cellRef : cellRefs) {
@@ -343,21 +329,13 @@ namespace osmscout {
           return false;
         }
 
-        size_t spaceLeft=maxCount-spans.size();
-
         // Now read the area offsets by type in this index entry
 
         if (!ReadCellData(typeConfig,
                           types,
                           cellDataOffset,
-                          spaceLeft,
-                          newSpans,
-                          stopArea)) {
+                          spans)) {
           log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";
-        }
-
-        if (stopArea) {
-          break;
         }
 
         if (level<this->maxLevel) {
@@ -373,10 +351,6 @@ namespace osmscout {
                                 cx,cy,
                                 nextCellRefs);
         }
-      }
-
-      if (!stopArea) {
-        spans.insert(spans.end(),newSpans.begin(),newSpans.end());
       }
 
       std::swap(cellRefs,nextCellRefs);

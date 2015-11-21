@@ -146,9 +146,6 @@ int main(int argc, char* argv[])
 
   searchParameter.SetUseLowZoomOptimization(false);
   searchParameter.SetMaximumAreaLevel(3);
-  searchParameter.SetMaximumNodes(std::numeric_limits<unsigned long>::max());
-  searchParameter.SetMaximumWays(std::numeric_limits<unsigned long>::max());
-  searchParameter.SetMaximumAreas(std::numeric_limits<unsigned long>::max());
 
   osmscout::MapPainterAgg painter(styleConfig);
   osmscout::Magnification magnification;

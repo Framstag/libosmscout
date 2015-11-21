@@ -123,9 +123,6 @@ int main(int argc, char* argv[])
                  width,
                  height);
 
-  searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
-  searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());
-  searchParameter.SetMaximumAreas(std::numeric_limits<size_t>::max());
   searchParameter.SetMaximumAreaLevel(6);
 
   mapService->GetObjects(searchParameter,

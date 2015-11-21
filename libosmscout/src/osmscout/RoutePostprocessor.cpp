@@ -569,7 +569,6 @@ namespace osmscout {
          nodeOffsets.clear();
          if (!areaNodeIndex->GetOffsets(boundingBox,
                                         nodeTypes,
-                                        100,
                                         nodeOffsets,
                                         loadedTypes)) {
            log.Error() << "Error getting nodes from area node index!";

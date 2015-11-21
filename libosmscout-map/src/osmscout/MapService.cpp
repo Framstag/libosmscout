@@ -35,9 +35,6 @@ namespace osmscout {
 
   AreaSearchParameter::AreaSearchParameter()
   : maxAreaLevel(4),
-    maxNodes(std::numeric_limits<unsigned long>::max()),
-    maxWays(std::numeric_limits<unsigned long>::max()),
-    maxAreas(std::numeric_limits<unsigned long>::max()),
     useLowZoomOptimization(true),
     useMultithreading(false)
   {
@@ -47,21 +44,6 @@ namespace osmscout {
   void AreaSearchParameter::SetMaximumAreaLevel(unsigned long maxAreaLevel)
   {
     this->maxAreaLevel=maxAreaLevel;
-  }
-
-  void AreaSearchParameter::SetMaximumNodes(unsigned long maxNodes)
-  {
-    this->maxNodes=maxNodes;
-  }
-
-  void AreaSearchParameter::SetMaximumWays(unsigned long maxWays)
-  {
-    this->maxWays=maxWays;
-  }
-
-  void AreaSearchParameter::SetMaximumAreas(unsigned long maxAreas)
-  {
-    this->maxAreas=maxAreas;
   }
 
   void AreaSearchParameter::SetUseLowZoomOptimization(bool useLowZoomOptimization)
@@ -82,21 +64,6 @@ namespace osmscout {
   unsigned long AreaSearchParameter::GetMaximumAreaLevel() const
   {
     return maxAreaLevel;
-  }
-
-  unsigned long AreaSearchParameter::GetMaximumNodes() const
-  {
-    return maxNodes;
-  }
-
-  unsigned long AreaSearchParameter::GetMaximumWays() const
-  {
-    return maxWays;
-  }
-
-  unsigned long AreaSearchParameter::GetMaximumAreas() const
-  {
-    return maxAreas;
   }
 
   bool AreaSearchParameter::GetUseLowZoomOptimization() const
@@ -156,7 +123,6 @@ namespace osmscout {
     if (!requestedNodeTypes.Empty()) {
       if (!areaNodeIndex->GetOffsets(boundingBox,
                                      requestedNodeTypes,
-                                     parameter.GetMaximumNodes(),
                                      nodeOffsets,
                                      loadedNodeTypes)) {
         log.Error() << "Error getting nodes from area node index!";
@@ -261,7 +227,6 @@ namespace osmscout {
                                          magnification.GetLevel()+
                                          parameter.GetMaximumAreaLevel(),
                                          internalAreaTypes,
-                                         parameter.GetMaximumAreas(),
                                          spans,
                                          loadedAreaTypes)) {
         log.Error() << "Error getting areas from area index!";
@@ -366,7 +331,6 @@ namespace osmscout {
     if (!internalWayTypes.Empty()) {
       if (!areaWayIndex->GetOffsets(boundingBox,
                                     internalWayTypes,
-                                    parameter.GetMaximumWays(),
                                     offsets,
                                     loadedWayTypes)) {
         log.Error() << "Error getting ways from area way index!";

@@ -71,7 +71,6 @@ namespace osmscout {
 
     if (!areaNodeIndex->GetOffsets(boundingBox,
                                    types,
-                                   std::numeric_limits<size_t>::max(),
                                    nodeOffsets,
                                    loadedTypes)) {
       log.Error() << "Error getting nodes from area node index!";
@@ -124,7 +123,6 @@ namespace osmscout {
                                        boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        types,
-                                       std::numeric_limits<size_t>::max(),
                                        spans,
                                        loadedTypes)) {
       log.Error() << "Error getting ways and relations from area index!";
@@ -178,7 +176,6 @@ namespace osmscout {
 
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   types,
-                                  std::numeric_limits<size_t>::max(),
                                   wayWayOffsets,
                                   loadedWayTypes)) {
       log.Error() << "Error getting ways and relations from area way index!";

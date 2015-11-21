@@ -1717,7 +1717,6 @@ namespace osmscout {
 
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   wayRoutableTypes,
-                                  std::numeric_limits<size_t>::max(),
                                   wayWayOffsets,
                                   wayLoadedTypes)) {
       log.Error() << "Error getting ways from area way index!";
@@ -1727,7 +1726,6 @@ namespace osmscout {
                                        boundingBox,
                                        std::numeric_limits<size_t>::max(),
                                        areaRoutableTypes,
-                                       std::numeric_limits<size_t>::max(),
                                        wayAreaSpans,
                                        areaLoadedTypes)) {
       log.Error() << "Error getting areas from area area index!";

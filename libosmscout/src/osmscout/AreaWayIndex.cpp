@@ -119,10 +119,7 @@ namespace osmscout {
 
   bool AreaWayIndex::GetOffsets(const TypeData& typeData,
                                 const GeoBox& boundingBox,
-                                size_t maxWayCount,
-                                std::unordered_set<FileOffset>& offsets,
-                                size_t currentSize,
-                                bool& sizeExceeded) const
+                                std::unordered_set<FileOffset>& offsets) const
   {
     if (typeData.bitmapOffset==0) {
       // No data for this type available
@@ -214,12 +211,6 @@ namespace osmscout {
           return false;
         }
 
-        if (currentSize+offsets.size()+dataCount>maxWayCount) {
-          //std::cout << currentSize<< "+" << newOffsets.size() << "+" << dataCount << ">" << maxWayCount << std::endl;
-          sizeExceeded=true;
-          return true;
-        }
-
         for (size_t d=0; d<dataCount; d++) {
           FileOffset objectOffset;
 
@@ -239,7 +230,6 @@ namespace osmscout {
 
   bool AreaWayIndex::GetOffsets(const GeoBox& boundingBox,
                                 const TypeInfoSet& types,
-                                size_t maxWayCount,
                                 std::vector<FileOffset>& offsets,
                                 TypeInfoSet& loadedTypes) const
   {
@@ -254,22 +244,14 @@ namespace osmscout {
       }
     }
 
-    bool                           sizeExceeded=false;
     std::unordered_set<FileOffset> uniqueOffsets;
 
     for (const auto& data : wayTypeData) {
       if (types.IsSet(data.type)) {
         if (!GetOffsets(data,
                         boundingBox,
-                        maxWayCount,
-                        uniqueOffsets,
-                        uniqueOffsets.size(),
-                        sizeExceeded)) {
+                        uniqueOffsets)) {
           return false;
-        }
-
-        if (sizeExceeded) {
-          return true;
         }
 
         loadedTypes.Set(data.type);

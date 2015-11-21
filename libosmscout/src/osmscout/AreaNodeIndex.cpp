@@ -110,10 +110,7 @@ namespace osmscout {
 
   bool AreaNodeIndex::GetOffsets(const TypeData& typeData,
                                  const GeoBox& boundingBox,
-                                 size_t maxNodeCount,
-                                 std::vector<FileOffset>& offsets,
-                                 size_t currentSize,
-                                 bool& sizeExceeded) const
+                                 std::vector<FileOffset>& offsets) const
   {
     if (typeData.indexOffset==0) {
       // No data for this type available
@@ -127,8 +124,6 @@ namespace osmscout {
       // No data available in given bounding box
       return true;
     }
-
-    std::unordered_set<FileOffset> newOffsets;
 
     uint32_t             minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
     uint32_t             maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
@@ -204,11 +199,6 @@ namespace osmscout {
           return false;
         }
 
-        if (currentSize+newOffsets.size()+dataCount>maxNodeCount) {
-          sizeExceeded=true;
-          return true;
-        }
-
         for (size_t d=0; d<dataCount; d++) {
           FileOffset objectOffset;
 
@@ -216,21 +206,18 @@ namespace osmscout {
 
           objectOffset+=lastOffset;
 
-          newOffsets.insert(objectOffset);
+          offsets.push_back(objectOffset);
 
           lastOffset=objectOffset;
         }
       }
     }
 
-    offsets.insert(offsets.end(),newOffsets.begin(),newOffsets.end());
-
     return true;
   }
 
   bool AreaNodeIndex::GetOffsets(const GeoBox& boundingBox,
                                  const TypeInfoSet& requestedTypes,
-                                 size_t maxNodeCount,
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
@@ -243,24 +230,15 @@ namespace osmscout {
       }
     }
 
-    bool sizeExceeded=false;
-
     loadedTypes.Clear();
 
-    offsets.reserve(std::min(10000u,(uint32_t)maxNodeCount));
+    offsets.reserve(std::min((size_t)10000,offsets.capacity()));
 
     for (TypeInfoRef type : requestedTypes) {
       if (!GetOffsets(nodeTypeData[type->GetNodeId()],
                       boundingBox,
-                      maxNodeCount,
-                      offsets,
-                      offsets.size(),
-                      sizeExceeded)) {
+                      offsets)) {
         return false;
-      }
-
-      if (sizeExceeded) {
-        break;
       }
 
       loadedTypes.Set(type);

@@ -1339,7 +1339,6 @@ namespace osmscout {
                                        box100,
                                        std::numeric_limits<size_t>::max(),
                                        addressTypes,
-                                       std::numeric_limits<size_t>::max(),
                                        areaSpans,
                                        loadedAddressTypes)) {
       return false;
