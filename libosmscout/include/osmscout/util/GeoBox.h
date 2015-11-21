@@ -80,6 +80,17 @@ namespace osmscout {
     void Include(const GeoBox& other);
 
     /**
+     * Returns 'true' if coord is within the bounding box. The boundingBox intervall is as an open intervall [..[.
+     */
+    inline bool Includes(const GeoCoord& coord)
+    {
+      return minCoord.GetLat()<=coord.GetLat() &&
+             maxCoord.GetLat()>coord.GetLat() &&
+             minCoord.GetLon()<=coord.GetLon() &&
+             maxCoord.GetLon()>coord.GetLon();
+    }
+
+    /**
      * Returns true, if the GeoBox instance is valid. This means there were
      * values assigned to the box. While being valid, the rectangle spanned by
      * the coordinate might still be degraded.
