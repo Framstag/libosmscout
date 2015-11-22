@@ -247,8 +247,6 @@ void DBThread::ToggleDaylight()
     return;
   }
 
-  doRender=true;
-
   osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
   if (!typeConfig) {
@@ -273,6 +271,39 @@ void DBThread::ToggleDaylight()
     daylight=!daylight;
 
     qDebug() << "Toggling daylight done.";
+  }
+}
+
+void DBThread::ReloadStyle()
+{
+  QMutexLocker locker(&mutex);
+
+  qDebug() << "Reloading style...";
+
+  if (!database->IsOpen()) {
+    return;
+  }
+
+  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+
+  if (!typeConfig) {
+    return;
+  }
+
+  osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+
+  newStyleConfig->AddFlag("daylight",daylight);
+
+  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+    // Tear down
+    delete painter;
+    painter=NULL;
+
+    // Recreate
+    styleConfig=newStyleConfig;
+    painter=new osmscout::MapPainterQt(styleConfig);
+
+    qDebug() << "Reloading style done.";
   }
 }
 

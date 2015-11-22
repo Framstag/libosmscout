@@ -148,6 +148,10 @@ Window {
                          event.key === Qt.Key_D) {
                     map.toggleDaylight();
                 }
+                else if (event.modifiers===Qt.ControlModifier &&
+                         event.key === Qt.Key_R) {
+                    map.reloadStyle();
+                }
             }
 
             // Use PinchArea for multipoint zoom in/out?

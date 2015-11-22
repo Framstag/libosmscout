@@ -81,6 +81,7 @@ signals:
 
 public slots:
   void ToggleDaylight();
+  void ReloadStyle();
   void TriggerMapRendering();
   void Initialize();
   void Finalize();

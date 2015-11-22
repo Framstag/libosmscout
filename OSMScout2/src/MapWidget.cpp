@@ -291,6 +291,14 @@ void MapWidget::toggleDaylight()
     TriggerMapRendering();
 }
 
+void MapWidget::reloadStyle()
+{
+    DBThread *dbThread=DBThread::GetInstance();
+
+    dbThread->ReloadStyle();
+    TriggerMapRendering();
+}
+
 void MapWidget::showCoordinates(double lat, double lon)
 {
     center=osmscout::GeoCoord(lat,lon);
