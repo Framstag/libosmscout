@@ -29,8 +29,8 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
 
-  src/DrawMapCairo ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.png
-*/
+  src/DrawMapCairo ../maps/nordrhein-westfalen ../stylesheets/standard.oss 1024 800 7.46525 51.51241 70000 test.png
+ */
 
 static const double DPI=96.0;
 
