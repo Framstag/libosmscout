@@ -41,6 +41,7 @@
 #endif
 
 namespace osmscout {
+
   /**
     \ingroup File
 

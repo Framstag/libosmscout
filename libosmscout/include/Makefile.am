@@ -7,6 +7,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Breaker.h \
                         osmscout/util/Cache.h \
                         osmscout/util/Color.h \
+                        osmscout/util/Exception.h \
                         osmscout/util/File.h \
                         osmscout/util/FileScanner.h \
                         osmscout/util/FileWriter.h \
