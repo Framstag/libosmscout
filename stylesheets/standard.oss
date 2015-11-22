@@ -611,6 +611,9 @@ CONST
   SYMBOL speed_camera
     CIRCLE 0,0 0.75 {color: @red; }
 
+  SYMBOL highway_street_lamp
+    CIRCLE 0,0 5 {color: #f5fb5b; }
+
 STYLE
   // -------------------------------------------------------
   //
@@ -1055,8 +1058,6 @@ STYLE
  [MAG veryClose-] {
    [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
  
-   //[TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
-   
    [TYPE highway_track] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
      WAY {color: #90570c; dash: 3,1; cap: butt; displayWidth: 0.4mm;}
@@ -1068,8 +1069,8 @@ STYLE
    }
 
    [TYPE highway_pedestrian] {
-     WAY#outline {color: #ffffff50; displayWidth: 0.6mm; cap: butt;}
-     WAY {color: #ebeaea; displayWidth: 0.1mm;}
+     WAY#outline {color: @pedestrianColor; displayWidth: 0.6mm; cap: butt;}
+     WAY {color: darken(@pedestrianColor, 0.3); displayWidth: 0.1mm;}
 
      [BRIDGE] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.3mm;}
@@ -1208,6 +1209,16 @@ STYLE
  [PATH
   MAG veryClose-
   ONEWAY] WAY.SYMBOL {symbol: oneway_arrow; }
+
+ // Special objects
+
+ [MAG detail-] {
+   //[TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp;}
+ }
+
+ [MAG veryClose-] {
+   //[TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
+ }
 
  // -------------------------------------------------------
  //
