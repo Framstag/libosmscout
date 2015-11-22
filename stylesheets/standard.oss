@@ -467,7 +467,7 @@ CONST
     COLOR roadColor                = darken(#ffffff, 0.5);
     COLOR roadBColor               = darken(#bfbfbf, 0.5);
     COLOR livingStreetColor        = darken(#bababa, 0.5);
-    COLOR pedestrianColor          = darken(#ededed, 0.5);
+    COLOR pedestrianColor          = darken(#ededed, 0.7);
     
     COLOR wayLabelColor            = #cccccc;
   }
@@ -1069,8 +1069,8 @@ STYLE
    }
 
    [TYPE highway_pedestrian] {
-     WAY#outline {color: @pedestrianColor; displayWidth: 0.6mm; cap: butt;}
-     WAY {color: darken(@pedestrianColor, 0.3); displayWidth: 0.1mm;}
+     [SIZE 8m 0.1mm:3px<] WAY {color: @pedestrianColor; width: 8m; }
+     [SIZE 8m <0.1mm:3px] WAY {color: @pedestrianColor; displayWidth: 0.1mm; }
 
      [BRIDGE] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.3mm;}
@@ -1243,8 +1243,7 @@ STYLE
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
 
      [TYPE railway_subway] {
-       WAY#outline { color: #ffffff50; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-       WAY {color: #b3b3b3; width: 5m;}
+       WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; cap: butt; }
      }
    }
 
