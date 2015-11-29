@@ -166,7 +166,7 @@ namespace osmscout {
     typeData.cellYCount=typeData.cellYEnd-typeData.cellYStart+1;
   }
 
-  bool AreaWayIndexGenerator::CalculateDistribution(const TypeConfigRef& typeConfig,
+  bool AreaWayIndexGenerator::CalculateDistribution(const TypeConfig& typeConfig,
                                                     const ImportParameter& parameter,
                                                     Progress& progress,
                                                     std::vector<TypeData>& wayTypeData,
@@ -177,7 +177,7 @@ namespace osmscout {
     size_t      level;
 
     maxLevel=0;
-    wayTypeData.resize(typeConfig->GetTypeCount());
+    wayTypeData.resize(typeConfig.GetTypeCount());
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
@@ -187,13 +187,14 @@ namespace osmscout {
       return false;
     }
 
-    remainingWayTypes.Set(typeConfig->GetWayTypes());
+    remainingWayTypes.Set(typeConfig.GetWayTypes());
 
     level=parameter.GetAreaWayMinMag();
-    while (!remainingWayTypes.Empty()) {
+    while (!remainingWayTypes.Empty() &&
+           level<=parameter.GetAreaWayIndexMaxLevel()) {
       uint32_t                   wayCount=0;
       TypeInfoSet                currentWayTypes(remainingWayTypes);
-      std::vector<CoordCountMap> cellFillCount(typeConfig->GetTypeCount());
+      std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypeCount());
 
       progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
 
@@ -209,7 +210,7 @@ namespace osmscout {
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
-        if (!way.Read(*typeConfig,
+        if (!way.Read(typeConfig,
                       wayScanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
@@ -255,10 +256,15 @@ namespace osmscout {
 
         if (!FitsIndexCriteria(parameter,
                                progress,
-                               *typeConfig->GetTypeInfo(i),
+                               *typeConfig.GetTypeInfo(i),
                                wayTypeData[i],
                                cellFillCount[i])) {
-          currentWayTypes.Remove(type);
+          if (level<parameter.GetAreaWayIndexMaxLevel()) {
+            currentWayTypes.Remove(type);
+          }
+          else {
+            progress.Warning(typeConfig.GetTypeInfo(i)->GetName()+" has too many index cells, that area filled over the limit");
+          }
         }
       }
 
@@ -427,7 +433,7 @@ namespace osmscout {
 
     progress.SetAction("Scanning level distribution of way types");
 
-    if (!CalculateDistribution(typeConfig,
+    if (!CalculateDistribution(*typeConfig,
                                parameter,
                                progress,
                                wayTypeData,

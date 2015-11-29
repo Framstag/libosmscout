@@ -73,7 +73,7 @@ namespace osmscout {
                              TypeData& typeData,
                              const CoordCountMap& cellFillCount) const;
 
-    bool CalculateDistribution(const TypeConfigRef& typeConfig,
+    bool CalculateDistribution(const TypeConfig& typeConfig,
                                const ImportParameter& parameter,
                                Progress& progress,
                                std::vector<TypeData>& wayTypeData,
