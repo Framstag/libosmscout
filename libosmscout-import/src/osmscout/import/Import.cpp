@@ -111,11 +111,12 @@ namespace osmscout {
      wayDataMemoryMaped(false),
      wayDataCacheSize(0),
      areaAreaIndexMaxMag(17),
-     areaWayMinMag(11), // Should not be >= than optimizationMaxMag
      areaNodeMinMag(8),
      areaNodeIndexMinFillRate(0.1),
      areaNodeIndexCellSizeAverage(16),
      areaNodeIndexCellSizeMax(256),
+     areaWayMinMag(11), // Should not be >= than optimizationMaxMag
+     areaWayIndexMaxLevel(13),
      waterIndexMinMag(6),
      waterIndexMaxMag(14),
      optimizationMaxWayCount(1000000),
@@ -258,6 +259,11 @@ namespace osmscout {
   size_t ImportParameter::GetAreaWayMinMag() const
   {
     return areaWayMinMag;
+  }
+
+  size_t ImportParameter::GetAreaWayIndexMaxLevel() const
+  {
+    return areaWayIndexMaxLevel;
   }
 
   size_t ImportParameter::GetAreaAreaIndexMaxMag() const
@@ -456,6 +462,11 @@ namespace osmscout {
   void ImportParameter::SetAreaWayMinMag(size_t areaWayMinMag)
   {
     this->areaWayMinMag=areaWayMinMag;
+  }
+
+  void ImportParameter::SetAreaWayIndexMaxMag(size_t areaWayIndexMaxLevel)
+  {
+    this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
   }
 
   void ImportParameter::SetWaterIndexMinMag(size_t waterIndexMinMag)
