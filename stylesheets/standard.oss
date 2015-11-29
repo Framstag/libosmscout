@@ -646,12 +646,14 @@ STYLE
   // contour lines
   //
 
-  [MAG detail-] {
+  [MAG suburb-] {
     [TYPE elevation_contour_major] {
       WAY {color: @majorContourColor; displayWidth: 0.150mm; }
       WAY.TEXT { label: Ele.inMeter; }
     }
+  }
 
+  [MAG detail-] {
     [TYPE elevation_contour_medium] {
       WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
       WAY.TEXT { label: Ele.inMeter; }
