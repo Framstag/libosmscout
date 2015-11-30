@@ -477,7 +477,9 @@ namespace osmscout {
                                double& height) = 0;
 
     /**
-      Return the bounding box of the given text.
+      Return the bounding box of the given text. The method is call
+      every time a label for a node or an area has to be drawn (which means
+      "not for contour labels").
 
       The backend may decide to relayout the given text, however it must assure
       that later calls to corresponding DrawXXX methods will honour the initial
