@@ -122,7 +122,7 @@ namespace osmscout {
 
     if (!optimizeAreasLowZoom ||
         !optimizeWaysLowZoom) {
-      return false;
+      return NULL;
     }
 
     TypeDefinitionRef typeDefinition=std::make_shared<TypeDefinition>();
