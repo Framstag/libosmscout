@@ -455,8 +455,6 @@ namespace osmscout {
 
     switch (isArea) {
     case 1:
-      areaStat[areaType->GetIndex()]++;
-
       if (areaType==typeConfig->typeInfoIgnore &&
           wayType!=typeConfig->typeInfoIgnore) {
         progress.Warning("Way "+
@@ -478,11 +476,11 @@ namespace osmscout {
         nodes.pop_back();
       }
 
+      areaStat[areaType->GetIndex()]++;
+
       areaCount++;
       break;
     case -1:
-      wayStat[wayType->GetIndex()]++;
-
       if (wayType==typeConfig->typeInfoIgnore &&
           areaType!=typeConfig->typeInfoIgnore) {
         progress.Warning("Way "+
@@ -497,6 +495,8 @@ namespace osmscout {
       else {
         way.SetType(wayType,false);
       }
+
+      wayStat[wayType->GetIndex()]++;
 
       wayCount++;
       break;
