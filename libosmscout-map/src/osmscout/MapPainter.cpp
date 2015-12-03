@@ -856,6 +856,11 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Register a label with the given parameter.The given coordinates
+   * define the center of the label. The resulting label will be
+   * vertically and horizontally alligned to the given coordinate.
+   */
   bool MapPainter::RegisterPointLabel(const Projection& projection,
                                       const MapParameter& parameter,
                                       const LabelStyleRef& style,
@@ -1005,8 +1010,8 @@ namespace osmscout {
 
     LabelData label;
 
-    label.x=x-width/2;
-    label.y=y-height/2;
+    label.x=x-xOff-width/2;
+    label.y=y-yOff-height/2;
     label.bx1=bx1;
     label.by1=by1;
     label.bx2=bx2;
@@ -1137,11 +1142,13 @@ namespace osmscout {
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
+    // This is the top center position of the initial label element.
+    // Note that RegisterPointLabel gets passed the center of the labe,
+    // thus we need to convert it...
     double offset=centerY;
 
     for (const auto& data : labelLayoutData) {
       if (data.textStyle) {
-
         RegisterPointLabel(projection,
                            parameter,
                            data.textStyle,
@@ -1149,7 +1156,7 @@ namespace osmscout {
                            data.fontSize,
                            data.height,
                            data.alpha,
-                           centerX,offset);
+                           centerX,offset+data.height/2);
       }
       else if (data.icon) {
         DrawIcon(data.iconStyle.get(),

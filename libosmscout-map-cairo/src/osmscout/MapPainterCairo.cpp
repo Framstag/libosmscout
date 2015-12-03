@@ -642,24 +642,39 @@ namespace osmscout {
                                          double& height)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    Font           font;
-    PangoLayout    *layout=pango_cairo_create_layout(draw);
-    PangoRectangle extends;
-
-    font=GetFont(projection,
-                 parameter,
-                 fontSize);
+    Font             font=GetFont(projection,
+                                  parameter,
+                                  fontSize);
+    PangoLayout      *layout=pango_cairo_create_layout(draw);
 
     pango_layout_set_font_description(layout,font);
-    pango_layout_set_text(layout,text.c_str(),text.length());
 
-    pango_layout_get_pixel_extents(layout,&extends,NULL);
+    PangoContext     *context=pango_layout_get_context(layout);
+    PangoFontMetrics *metrics=pango_context_get_metrics(context,
+                                                        font,
+                                                        pango_context_get_language(context));
+    size_t           proposedWidth=pango_font_metrics_get_approximate_char_width(metrics)*parameter.GetLabelLineCharCount();
+    PangoRectangle   extends;
+
+    pango_layout_set_text(layout,text.c_str(),text.length());
+    pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
+    pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
+    pango_layout_set_width(layout,proposedWidth);
+
+    pango_layout_get_pixel_extents(layout,NULL,&extends);
 
     xOff=extends.x;
     yOff=extends.y;
     width=extends.width;
-    height=pango_font_description_get_size(font)/PANGO_SCALE;
 
+    if (pango_layout_get_line_count(layout)<=1) {
+      height=pango_font_description_get_size(font)/PANGO_SCALE;
+    }
+    else {
+      height=extends.height;
+    }
+
+    pango_font_metrics_unref(metrics);
     g_object_unref(layout);
 #else
     Font                 font;
@@ -784,10 +799,20 @@ namespace osmscout {
                                     label.fontSize);
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-      PangoLayout *layout=pango_cairo_create_layout(draw);
+      PangoLayout      *layout=pango_cairo_create_layout(draw);
 
       pango_layout_set_font_description(layout,font);
+
+      PangoContext     *context=pango_layout_get_context(layout);
+      PangoFontMetrics *metrics=pango_context_get_metrics(context,
+                                                          font,
+                                                          pango_context_get_language(context));
+      size_t           proposedWidth=pango_font_metrics_get_approximate_char_width(metrics)*parameter.GetLabelLineCharCount();
+
       pango_layout_set_text(layout,label.text.c_str(),label.text.length());
+      pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
+      pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
+      pango_layout_set_width(layout,proposedWidth);
 
       cairo_set_source_rgba(draw,r,g,b,label.alpha);
 
@@ -812,6 +837,7 @@ namespace osmscout {
         cairo_fill(draw);
       }
 
+      pango_font_metrics_unref(metrics);
       g_object_unref(layout);
 
 #else
@@ -1070,8 +1096,8 @@ namespace osmscout {
                                           double maxY)
   {
     DrawPrimitive* primitive=p.get();
-    double         centerX=maxX-minX;
-    double         centerY=maxY-minY;
+    double         centerX=(minX+maxX)/2;
+    double         centerY=(minY+maxY)/2;
 
     if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
       PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
