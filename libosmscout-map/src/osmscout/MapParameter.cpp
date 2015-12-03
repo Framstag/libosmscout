@@ -30,6 +30,7 @@ namespace osmscout {
     optimizeErrorToleranceMm(0.25),
     drawFadings(true),
     drawWaysWithFixedWidth(false),
+    labelLineCharCount(1000/*20*/),
     labelSpace(1.0),
     plateLabelSpace(5.0),
     sameLabelSpace(40.0),
@@ -96,6 +97,11 @@ namespace osmscout {
   void MapParameter::SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth)
   {
     this->drawWaysWithFixedWidth=drawWaysWithFixedWidth;
+  }
+
+  void MapParameter::SetLabelLineCharCount(size_t labelLineCharCount)
+  {
+    this->labelLineCharCount=labelLineCharCount;
   }
 
   void MapParameter::SetLabelSpace(double labelSpace)

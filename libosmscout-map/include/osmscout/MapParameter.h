@@ -50,6 +50,7 @@ namespace osmscout {
     bool                         drawFadings;               //!< Draw label fadings (default: true)
     bool                         drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
+    size_t                       labelLineCharCount;        //!< Labels will be word wrapped if  they are longer then the given characters
     double                       labelSpace;                //!< Space between point labels in mm (default 3).
     double                       plateLabelSpace;           //!< Space between plates in mm (default 5).
     double                       sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
@@ -84,6 +85,7 @@ namespace osmscout {
     void SetDrawFadings(bool drawFadings);
     void SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth);
 
+    void SetLabelLineCharCount(size_t labelLineCharCount);
     void SetLabelSpace(double labelSpace);
     void SetPlateLabelSpace(double plateLabelSpace);
     void SetSameLabelSpace(double sameLabelSpace);
@@ -148,6 +150,11 @@ namespace osmscout {
     inline bool GetDrawWaysWithFixedWidth() const
     {
       return drawWaysWithFixedWidth;
+    }
+
+    inline size_t GetLabelLineCharCount() const
+    {
+      return labelLineCharCount;
     }
 
     inline double GetLabelSpace() const
