@@ -1,11 +1,11 @@
-import QtQuick 2.3
+import QtQuick 2.2
 
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls.Styles 1.1
 import QtQuick.Window 2.0
 
-import QtPositioning 5.3
+import QtPositioning 5.2
 
 import net.sf.libosmscout.map 1.0
 
