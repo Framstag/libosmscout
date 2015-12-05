@@ -825,16 +825,8 @@ namespace osmscout {
 
   void Database::DumpStatistics()
   {
-    if (areaNodeIndex) {
-      areaNodeIndex->DumpStatistics();
-    }
-
     if (areaAreaIndex) {
       areaAreaIndex->DumpStatistics();
-    }
-
-    if (areaWayIndex) {
-      areaWayIndex->DumpStatistics();
     }
 
     if (locationIndex) {
