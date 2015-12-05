@@ -85,6 +85,11 @@ namespace osmscout {
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path);
 
+    inline bool IsOpen() const
+    {
+      return scanner.IsOpen();
+    }
+
     bool GetOffsets(const GeoBox& boundingBox,
                     const TypeInfoSet& types,
                     std::vector<FileOffset>& offsets,

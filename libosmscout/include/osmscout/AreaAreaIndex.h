@@ -125,6 +125,11 @@ namespace osmscout {
     void Close();
     bool Open(const std::string& path);
 
+    inline bool IsOpen() const
+    {
+      return scanner.IsOpen();
+    }
+
     bool GetAreasInArea(const TypeConfig& typeConfig,
                         const GeoBox& boundingBox,
                         size_t maxLevel,
