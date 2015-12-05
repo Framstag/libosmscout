@@ -46,6 +46,16 @@ namespace osmscout {
     {
       return startOffset<other.startOffset;
     }
+
+    inline bool operator==(const DataBlockSpan& other) const
+    {
+      return startOffset==other.startOffset && count==other.count;
+    }
+
+    inline bool operator!=(const DataBlockSpan& other) const
+    {
+      return startOffset!=other.startOffset || count!=other.count;
+    }
   };
 
   /**
