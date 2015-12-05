@@ -103,6 +103,8 @@ namespace osmscout {
               bool memoryMaped);
     bool Close();
 
+    bool IsOpen() const;
+
     bool GetOffset(const N& id, FileOffset& offset) const;
     bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
     bool GetOffsets(const std::list<N>& ids, std::vector<FileOffset>& offsets) const;
@@ -179,12 +181,6 @@ namespace osmscout {
     }
 
     page->entries.reserve(pageSize);
-
-    if (!scanner.IsOpen() &&
-        !scanner.Open(filename,mode,memoryMaped)) {
-      std::cerr << "Cannot open '" << scanner.GetFilename() << "'!" << std::endl;
-      return false;
-    }
 
     scanner.SetPos(offset);
 
@@ -306,6 +302,12 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  template <class N>
+  bool NumericIndex<N>::IsOpen() const
+  {
+    return scanner.IsOpen();
   }
 
   template <class N>
