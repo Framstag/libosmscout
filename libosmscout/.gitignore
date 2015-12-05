@@ -35,3 +35,5 @@
 /parser/OST/Scanner.h
 /parser/OST/Scanner.h.old
 /src/**/*.lo
+/src/**/.dirstamp
+/src/**/.deps
