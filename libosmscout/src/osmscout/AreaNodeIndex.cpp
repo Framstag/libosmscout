@@ -61,7 +61,7 @@ namespace osmscout {
     }
   }
 
-  bool AreaNodeIndex::Load(const std::string& path)
+  bool AreaNodeIndex::Open(const std::string& path)
   {
     datafilename=path+"/"+filepart;
 
@@ -105,7 +105,7 @@ namespace osmscout {
       nodeTypeData[type].maxLat=(nodeTypeData[type].cellYEnd+1)*nodeTypeData[type].cellHeight-90.0;
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError();
   }
 
   bool AreaNodeIndex::GetOffsets(const TypeData& typeData,
@@ -222,13 +222,6 @@ namespace osmscout {
                                  TypeInfoSet& loadedTypes) const
   {
     StopClock time;
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        log.Error() << "Error while opening file '" << scanner.GetFilename() << "' for reading!";
-        return false;
-      }
-    }
 
     loadedTypes.Clear();
 

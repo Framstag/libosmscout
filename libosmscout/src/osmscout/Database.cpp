@@ -185,6 +185,8 @@ namespace osmscout {
 
   NodeDataFileRef Database::GetNodeDataFile() const
   {
+    std::lock_guard<std::mutex> guard(nodeDataFileMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -214,6 +216,8 @@ namespace osmscout {
 
   AreaDataFileRef Database::GetAreaDataFile() const
   {
+    std::lock_guard<std::mutex> guard(areaDataFileMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -243,6 +247,8 @@ namespace osmscout {
 
   WayDataFileRef Database::GetWayDataFile() const
   {
+    std::lock_guard<std::mutex> guard(wayDataFileMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -272,6 +278,8 @@ namespace osmscout {
 
   AreaNodeIndexRef Database::GetAreaNodeIndex() const
   {
+    std::lock_guard<std::mutex> guard(areaNodeIndexMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -281,7 +289,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!areaNodeIndex->Load(path)) {
+      if (!areaNodeIndex->Open(path)) {
         log.Error() << "Cannot load area node index!";
         areaNodeIndex=NULL;
 
@@ -298,6 +306,8 @@ namespace osmscout {
 
   AreaAreaIndexRef Database::GetAreaAreaIndex() const
   {
+    std::lock_guard<std::mutex> guard(areaAreaIndexMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -307,7 +317,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!areaAreaIndex->Load(path)) {
+      if (!areaAreaIndex->Open(path)) {
         log.Error() << "Cannot load area area index!";
         areaAreaIndex=NULL;
 
@@ -324,6 +334,8 @@ namespace osmscout {
 
   AreaWayIndexRef Database::GetAreaWayIndex() const
   {
+    std::lock_guard<std::mutex> guard(areaWayIndexMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -333,7 +345,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!areaWayIndex->Load(typeConfig,
+      if (!areaWayIndex->Open(typeConfig,
                               path)) {
         log.Error() << "Cannot load area way index!";
         areaWayIndex=NULL;
@@ -351,6 +363,8 @@ namespace osmscout {
 
   LocationIndexRef Database::GetLocationIndex() const
   {
+    std::lock_guard<std::mutex> guard(locationIndexMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -377,6 +391,8 @@ namespace osmscout {
 
   WaterIndexRef Database::GetWaterIndex() const
   {
+    std::lock_guard<std::mutex> guard(waterIndexMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -403,6 +419,8 @@ namespace osmscout {
 
   OptimizeAreasLowZoomRef Database::GetOptimizeAreasLowZoom() const
   {
+    std::lock_guard<std::mutex> guard(optimizeAreasMutex);
+
     if (!IsOpen()) {
       return NULL;
     }
@@ -431,6 +449,8 @@ namespace osmscout {
 
   OptimizeWaysLowZoomRef Database::GetOptimizeWaysLowZoom() const
   {
+    std::lock_guard<std::mutex> guard(optimizeWaysMutex);
+
     if (!optimizeWaysLowZoom) {
       optimizeWaysLowZoom=std::make_shared<OptimizeWaysLowZoom>();
 

@@ -123,7 +123,7 @@ namespace osmscout {
     AreaAreaIndex(size_t cacheSize);
 
     void Close();
-    bool Load(const std::string& path);
+    bool Open(const std::string& path);
 
     bool GetAreasInArea(const TypeConfig& typeConfig,
                         const GeoBox& boundingBox,

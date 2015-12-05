@@ -81,7 +81,7 @@ namespace osmscout {
     AreaNodeIndex();
 
     void Close();
-    bool Load(const std::string& path);
+    bool Open(const std::string& path);
 
     bool GetOffsets(const GeoBox& boundingBox,
                     const TypeInfoSet& requestedTypes,

@@ -61,7 +61,7 @@ namespace osmscout {
     }
   }
 
-  bool AreaWayIndex::Load(const TypeConfigRef& typeConfig,
+  bool AreaWayIndex::Open(const TypeConfigRef& typeConfig,
                           const std::string& path)
   {
     datafilename=path+"/"+filepart;
@@ -114,7 +114,7 @@ namespace osmscout {
       wayTypeData.push_back(data);
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError();
   }
 
   bool AreaWayIndex::GetOffsets(const TypeData& typeData,
@@ -236,13 +236,6 @@ namespace osmscout {
     StopClock time;
 
     loadedTypes.Clear();
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        log.Error() << "Error while opening " << scanner.GetFilename() << " for reading!";
-        return false;
-      }
-    }
 
     std::unordered_set<FileOffset> uniqueOffsets;
 

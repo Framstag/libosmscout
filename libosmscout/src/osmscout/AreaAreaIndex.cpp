@@ -66,15 +66,6 @@ namespace osmscout {
 
         cacheRef=indexCache.SetEntry(cacheEntry);
 
-        if (!scanner.IsOpen()) {
-          if (!scanner.Open(datafilename,
-                            FileScanner::LowMemRandom,
-                            true)) {
-            log.Error() << "Error while opening '" << scanner.GetFilename() << "' for reading!";
-            return false;
-          }
-        }
-
         if (!scanner.SetPos(offset)) {
           log.Error() << "Cannot navigate to offset " << offset << " in file '" << scanner.GetFilename() << "'";
         }
@@ -238,7 +229,7 @@ namespace osmscout {
     }
   }
 
-  bool AreaAreaIndex::Load(const std::string& path)
+  bool AreaAreaIndex::Open(const std::string& path)
   {
     datafilename=path+"/"+filepart;
 
@@ -257,7 +248,7 @@ namespace osmscout {
       return false;
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError();
   }
 
   /**
