@@ -184,13 +184,6 @@ namespace osmscout {
   {
     assert(isOpen);
 
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
-    }
-
     data.reserve(data.size()+offsets.size());
 
     for (const auto& offset : offsets) {
@@ -217,13 +210,6 @@ namespace osmscout {
                                 std::vector<ValueType>& data) const
   {
     assert(isOpen);
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
-    }
 
     data.reserve(data.size()+offsets.size());
 
@@ -252,13 +238,6 @@ namespace osmscout {
                                 std::vector<ValueType>& data) const
   {
     assert(isOpen);
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
-    }
 
     data.reserve(data.size()+offsets.size());
 
@@ -305,13 +284,6 @@ namespace osmscout {
   {
     assert(isOpen);
 
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
-    }
-
     ValueType value=std::make_shared<N>();
 
     scanner.SetPos(offset);
@@ -338,13 +310,6 @@ namespace osmscout {
 
     if (span.count==0) {
       return true;
-    }
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
     }
 
     if (!scanner.SetPos(span.startOffset)) {
@@ -377,13 +342,6 @@ namespace osmscout {
                                     std::vector<ValueType>& data) const
   {
     assert(isOpen);
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
-    }
 
     uint32_t overallCount=0;
 
@@ -473,8 +431,6 @@ namespace osmscout {
 
     bool Get(const I& id,
              ValueType& entry) const;
-
-    void DumpStatistics() const;
   };
 
   template <class I, class N>
@@ -598,14 +554,6 @@ namespace osmscout {
     }
 
     return DataFile<N>::GetByOffset(offset,entry);
-  }
-
-  template <class I, class N>
-  void IndexedDataFile<I,N>::DumpStatistics() const
-  {
-    DataFile<N>::DumpStatistics();
-
-    index.DumpStatistics();
   }
 }
 
