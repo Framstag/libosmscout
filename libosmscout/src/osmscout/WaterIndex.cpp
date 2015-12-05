@@ -34,7 +34,7 @@ namespace osmscout {
     // no code
   }
 
-  bool WaterIndex::Load(const std::string& path)
+  bool WaterIndex::Open(const std::string& path)
   {
     datafilename=path+"/"+filepart;
 
@@ -92,13 +92,10 @@ namespace osmscout {
     return true;
   }
 
-  bool WaterIndex::Close()
+  void WaterIndex::Close()
   {
     if (scanner.IsOpen()) {
-      return scanner.Close();
-    }
-    else {
-    return true;
+      scanner.Close();
     }
   }
 
@@ -124,13 +121,6 @@ namespace osmscout {
     idx-=waterIndexMinMag;
 
     tiles.clear();
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        log.Error() << "Error while opening " << scanner.GetFilename() << " for reading!";
-        return false;
-      }
-    }
 
     cx1=(uint32_t)floor((minlon+180.0)/levels[idx].cellWidth);
     cx2=(uint32_t)floor((maxlon+180.0)/levels[idx].cellWidth);

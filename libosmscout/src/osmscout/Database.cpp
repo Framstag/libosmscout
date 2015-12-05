@@ -155,6 +155,10 @@ namespace osmscout {
       areaWayIndex=NULL;
     }
 
+    if (locationIndex) {
+      locationIndex=NULL;
+    }
+
     if (waterIndex) {
       waterIndex->Close();
       waterIndex=NULL;
@@ -402,7 +406,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!waterIndex->Load(path)) {
+      if (!waterIndex->Open(path)) {
         log.Error() << "Cannot load water index!";
         waterIndex=NULL;
 
