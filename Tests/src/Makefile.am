@@ -5,7 +5,8 @@ bin_PROGRAMS = CachePerformance \
                CalculateResolution \
                CoordinateEncoding \
                NumberSetPerformance \
-               ReaderScannerPerformance
+               ReaderScannerPerformance \
+               ThreadedDatabase 
 
 CachePerformance_SOURCES = CachePerformance.cpp
 
@@ -17,4 +18,4 @@ NumberSetPerformance_SOURCES = NumberSetPerformance.cpp
 
 ReaderScannerPerformance_SOURCES = ReaderScannerPerformance.cpp
 
-
+ThreadedDatabase_SOURCES = ThreadedDatabase.cpp
