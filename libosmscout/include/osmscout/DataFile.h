@@ -69,7 +69,6 @@ namespace osmscout {
     mutable FileScanner scanner;         //!< File stream to the data file
 
   protected:
-    bool                isOpen;          //!< If true,the data file is opened
     TypeConfigRef       typeConfig;
 
   private:
@@ -112,9 +111,7 @@ namespace osmscout {
   DataFile<N>::DataFile(const std::string& datafile)
   : datafile(datafile),
     modeData(FileScanner::LowMemRandom),
-    memoryMapedData(false),
-    isOpen(false)
-
+    memoryMapedData(false)
   {
     // no code
   }
@@ -122,7 +119,7 @@ namespace osmscout {
   template <class N>
   DataFile<N>::~DataFile()
   {
-    if (isOpen) {
+    if (IsOpen()) {
       Close();
     }
   }
@@ -149,41 +146,31 @@ namespace osmscout {
     this->memoryMapedData=memoryMapedData;
     this->modeData=modeData;
 
-    isOpen=scanner.Open(datafilename,modeData,memoryMapedData);
-
-    return isOpen;
+    return scanner.Open(datafilename,modeData,memoryMapedData);
   }
 
   template <class N>
   bool DataFile<N>::IsOpen() const
   {
-    return isOpen;
+    return scanner.IsOpen();
   }
 
   template <class N>
   bool DataFile<N>::Close()
   {
-    bool success=true;
-
     typeConfig=NULL;
 
     if (scanner.IsOpen()) {
-      if (!scanner.Close()) {
-        success=false;
-      }
+      return scanner.Close();
     }
 
-    isOpen=false;
-
-    return success;
+    return true;
   }
 
   template <class N>
   bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
   {
-    assert(isOpen);
-
     data.reserve(data.size()+offsets.size());
 
     for (const auto& offset : offsets) {
@@ -209,8 +196,6 @@ namespace osmscout {
   bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
   {
-    assert(isOpen);
-
     data.reserve(data.size()+offsets.size());
 
     for (const auto& offset : offsets) {
@@ -237,8 +222,6 @@ namespace osmscout {
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
   {
-    assert(isOpen);
-
     data.reserve(data.size()+offsets.size());
 
     for (const auto& offset : offsets) {
@@ -282,8 +265,6 @@ namespace osmscout {
   bool DataFile<N>::GetByOffset(const FileOffset& offset,
                                 ValueType& entry) const
   {
-    assert(isOpen);
-
     ValueType value=std::make_shared<N>();
 
     scanner.SetPos(offset);
@@ -306,8 +287,6 @@ namespace osmscout {
   bool DataFile<N>::GetByBlockSpan(const DataBlockSpan& span,
                                    std::vector<ValueType>& area) const
   {
-    assert(isOpen);
-
     if (span.count==0) {
       return true;
     }
@@ -341,8 +320,6 @@ namespace osmscout {
   bool DataFile<N>::GetByBlockSpans(const std::vector<DataBlockSpan>& spans,
                                     std::vector<ValueType>& data) const
   {
-    assert(isOpen);
-
     uint32_t overallCount=0;
 
     for (const auto& span : spans) {
@@ -415,6 +392,8 @@ namespace osmscout {
               bool memoryMapedData);
     bool Close();
 
+    bool IsOpen() const;
+
     bool GetOffsets(const std::set<I>& ids,
                     std::vector<FileOffset>& offsets) const;
     bool GetOffsets(const std::vector<I>& ids,
@@ -466,13 +445,24 @@ namespace osmscout {
   template <class I, class N>
   bool IndexedDataFile<I,N>::Close()
   {
-    bool success=DataFile<N>::Close();
+    bool result=true;
 
-    if (!index.Close()) {
-      success=false;
+    if (!DataFile<N>::Close()) {
+      result=false;
     }
 
-    return success;
+    if (index.Close()) {
+      result=false;
+    }
+
+    return result;
+  }
+
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::IsOpen() const
+  {
+    return DataFile<N>::IsOpen() &&
+           index.IsOpen();
   }
 
   template <class I, class N>
@@ -500,8 +490,6 @@ namespace osmscout {
   bool IndexedDataFile<I,N>::Get(const std::vector<I>& ids,
                                  std::vector<ValueType>& data) const
   {
-    assert(DataFile<N>::isOpen);
-
     std::vector<FileOffset> offsets;
 
     if (!index.GetOffsets(ids,offsets)) {
@@ -515,8 +503,6 @@ namespace osmscout {
   bool IndexedDataFile<I,N>::Get(const std::list<I>& ids,
                                  std::vector<ValueType>& data) const
   {
-    assert(DataFile<N>::isOpen);
-
     std::vector<FileOffset> offsets;
 
     if (!index.GetOffsets(ids,offsets)) {
@@ -530,8 +516,6 @@ namespace osmscout {
   bool IndexedDataFile<I,N>::Get(const std::set<I>& ids,
                                  std::vector<ValueType>& data) const
   {
-    assert(DataFile<N>::isOpen);
-
     std::vector<FileOffset> offsets;
 
     if (!index.GetOffsets(ids,offsets)) {
@@ -545,8 +529,6 @@ namespace osmscout {
   bool IndexedDataFile<I,N>::Get(const I& id,
                                  ValueType& entry) const
   {
-    assert(DataFile<N>::isOpen);
-
     FileOffset offset;
 
     if (!index.GetOffset(id,offset)) {
