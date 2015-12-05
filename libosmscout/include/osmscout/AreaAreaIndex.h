@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #include <osmscout/DataFile.h>
@@ -89,14 +90,16 @@ namespace osmscout {
     };
 
   private:
-    std::string                     filepart;       //!< name of the data file
-    std::string                     datafilename;   //!< Full path and name of the data file
-    mutable FileScanner             scanner;        //!< Scanner instance for reading this file
+    std::string           filepart;       //!< name of the data file
+    std::string           datafilename;   //!< Full path and name of the data file
+    mutable FileScanner   scanner;        //!< Scanner instance for reading this file
 
-    uint32_t                        maxLevel;       //!< Maximum level in index
-    FileOffset                      topLevelOffset; //!< File offset of the top level index entry
+    uint32_t              maxLevel;       //!< Maximum level in index
+    FileOffset            topLevelOffset; //!< File offset of the top level index entry
 
-    mutable IndexCache              indexCache;     //!< Cached map of all index entries by file offset
+    mutable IndexCache    indexCache;     //!< Cached map of all index entries by file offset
+
+    mutable std::mutex    lookupMutex;
 
   private:
     bool GetIndexCell(uint32_t level,

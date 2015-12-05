@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <mutex>
 #include <unordered_set>
 #include <vector>
 
@@ -73,6 +74,8 @@ namespace osmscout {
 
     std::vector<TypeData> wayTypeData;
 
+    mutable std::mutex    lookupMutex;
+
   private:
     bool GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
@@ -94,8 +97,6 @@ namespace osmscout {
                     const TypeInfoSet& types,
                     std::vector<FileOffset>& offsets,
                     TypeInfoSet& loadedTypes) const;
-
-    void DumpStatistics();
   };
 
   typedef std::shared_ptr<AreaWayIndex> AreaWayIndexRef;

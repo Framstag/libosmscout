@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
@@ -72,6 +73,8 @@ namespace osmscout {
 
     std::vector<TypeData> nodeTypeData;
 
+    mutable std::mutex    lookupMutex;
+
   private:
     bool GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
@@ -92,8 +95,6 @@ namespace osmscout {
                     const TypeInfoSet& requestedTypes,
                     std::vector<FileOffset>& offsets,
                     TypeInfoSet& loadedTypes) const;
-
-    void DumpStatistics();
   };
 
   typedef std::shared_ptr<AreaNodeIndex> AreaNodeIndexRef;

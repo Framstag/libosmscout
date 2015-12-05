@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
@@ -231,9 +232,9 @@ namespace osmscout {
 
   bool AreaAreaIndex::Open(const std::string& path)
   {
-    datafilename=path+"/"+filepart;
+    datafilename=AppendFileToDir(path,filepart);
 
-    if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
+    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
       return false;
     }
@@ -273,14 +274,16 @@ namespace osmscout {
                                      std::vector<DataBlockSpan>& spans,
                                      TypeInfoSet& loadedTypes) const
   {
-    std::vector<CellRef>       cellRefs;     // cells to scan in this level
-    std::vector<CellRef>       nextCellRefs; // cells to scan for the next level
-    std::vector<DataBlockSpan> newSpans;     // offsets collected in the current level
-    double                     minlon=boundingBox.GetMinLon()+180.0;
-    double                     maxlon=boundingBox.GetMaxLon()+180.0;
-    double                     minlat=boundingBox.GetMinLat()+90.0;
-    double                     maxlat=boundingBox.GetMaxLat()+90.0;
-    StopClock                  time;
+    StopClock                   time;
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
+    std::vector<CellRef>        cellRefs;     // cells to scan in this level
+    std::vector<CellRef>        nextCellRefs; // cells to scan for the next level
+    std::vector<DataBlockSpan>  newSpans;     // offsets collected in the current level
+    double                      minlon=boundingBox.GetMinLon()+180.0;
+    double                      maxlon=boundingBox.GetMaxLon()+180.0;
+    double                      minlat=boundingBox.GetMinLat()+90.0;
+    double                      maxlat=boundingBox.GetMaxLat()+90.0;
 
     // Clear result data structures
     spans.clear();
@@ -350,7 +353,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << spans.size() << " spans from area index took " << time.ResultString();
+      log.Warn() << "Retrieving " << spans.size() << " spans from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
     }
 
     loadedTypes=types;

@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
@@ -63,9 +64,9 @@ namespace osmscout {
 
   bool AreaNodeIndex::Open(const std::string& path)
   {
-    datafilename=path+"/"+filepart;
+    datafilename=AppendFileToDir(path,filepart);
 
-    if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
+    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
       return false;
     }
@@ -221,7 +222,8 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
-    StopClock time;
+    StopClock                   time;
+    std::lock_guard<std::mutex> guard(lookupMutex);
 
     loadedTypes.Clear();
 
@@ -240,14 +242,10 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << offsets.size() << " node offsets from area index took " << time.ResultString();
+      log.Warn() << "Retrieving " << offsets.size() << " node offsets from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
     }
 
     return true;
-  }
-
-  void AreaNodeIndex::DumpStatistics()
-  {
   }
 }
 
