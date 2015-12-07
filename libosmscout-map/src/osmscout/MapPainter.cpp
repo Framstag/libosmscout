@@ -1283,7 +1283,7 @@ namespace osmscout {
                         ring.GetFeatureValueBuffer(),
                         boundingBox);
         }
-        else {
+        else if (!ring.GetType()->GetIgnore()) {
           GeoBox boundingBox;
 
           ring.GetBoundingBox(boundingBox);
