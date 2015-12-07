@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <mutex>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -29,6 +30,7 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -76,7 +78,10 @@ namespace osmscout {
     std::string         datafilename;    //!< complete filename for data file
     FileScanner::Mode   modeData;        //!< Type of file access
     bool                memoryMapedData; //!< Use memory mapped files for data access
+
     mutable FileScanner scanner;         //!< File stream to the data file
+
+    mutable std::mutex  accessMutex;     //!< Mutex to secure multi-thread access
 
   protected:
     TypeConfigRef       typeConfig;
@@ -84,6 +89,10 @@ namespace osmscout {
   private:
     bool ReadData(const TypeConfig& typeConfig,
                   FileScanner& scanner,
+                  N& data) const;
+    bool ReadData(const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  FileOffset offset,
                   N& data) const;
 
   public:
@@ -95,8 +104,8 @@ namespace osmscout {
               const std::string& path,
               FileScanner::Mode modeData,
               bool memoryMapedData);
-    bool IsOpen() const;
-    bool Close();
+    virtual bool IsOpen() const;
+    virtual bool Close();
 
     bool GetByOffset(const std::vector<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
@@ -134,6 +143,32 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Read one data value from the given file offset.
+   *
+   * Method is thread-safe.
+   */
+  template <class N>
+  bool DataFile<N>::ReadData(const TypeConfig& typeConfig,
+                             FileScanner& scanner,
+                             FileOffset offset,
+                             N& data) const
+  {
+    std::lock_guard<std::mutex> lock(accessMutex);
+
+    if (!scanner.SetPos(offset)) {
+      return false;
+    }
+
+    return data.Read(typeConfig,
+                     scanner);
+  }
+
+  /**
+   * Read one data value from the current position of the stream
+   *
+   * Method is not thread-safe.
+   */
   template <class N>
   bool DataFile<N>::ReadData(const TypeConfig& typeConfig,
                              FileScanner& scanner,
@@ -143,6 +178,11 @@ namespace osmscout {
                      scanner);
   }
 
+  /**
+   * Open the index file.
+   *
+   * Method is not thread-safe.
+   */
   template <class N>
   bool DataFile<N>::Open(const TypeConfigRef& typeConfig,
                          const std::string& path,
@@ -159,12 +199,22 @@ namespace osmscout {
     return scanner.Open(datafilename,modeData,memoryMapedData);
   }
 
+  /**
+   * Return true, if index is currently opened.
+   *
+   * Method is not thread-safe.
+   */
   template <class N>
   bool DataFile<N>::IsOpen() const
   {
     return scanner.IsOpen();
   }
 
+  /**
+   * Close the index.
+   *
+   * Method is not thread-safe.
+   */
   template <class N>
   bool DataFile<N>::Close()
   {
@@ -177,6 +227,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read data values from the given file offsets.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -186,13 +241,11 @@ namespace osmscout {
     for (const auto& offset : offsets) {
       ValueType value=std::make_shared<N>();
 
-      scanner.SetPos(offset);
-
       if (!ReadData(*typeConfig,
                     scanner,
+                    offset,
                     *value)) {
-        std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
-        scanner.Close();
+        log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
         return false;
       }
 
@@ -202,6 +255,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read data values from the given file offsets.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -211,14 +269,12 @@ namespace osmscout {
     for (const auto& offset : offsets) {
       ValueType value=std::make_shared<N>();
 
-      scanner.SetPos(offset);
-
       if (!ReadData(*typeConfig,
                     scanner,
+                    offset,
                     *value)) {
-        std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
+        log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
         // TODO: Remove broken entry from cache
-        scanner.Close();
         return false;
       }
 
@@ -228,6 +284,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read data values from the given file offsets.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -237,14 +298,12 @@ namespace osmscout {
     for (const auto& offset : offsets) {
       ValueType value=std::make_shared<N>();
 
-      scanner.SetPos(offset);
-
       if (!ReadData(*typeConfig,
                     scanner,
+                    offset,
                     *value)) {
-        std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
+        log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
         // TODO: Remove broken entry from cache
-        scanner.Close();
         return false;
       }
 
@@ -254,6 +313,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read data values from the given file offsets.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
                                 std::unordered_map<FileOffset,ValueType>& dataMap) const
@@ -271,20 +335,23 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read one data value from the given file offset.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByOffset(const FileOffset& offset,
                                 ValueType& entry) const
   {
     ValueType value=std::make_shared<N>();
 
-    scanner.SetPos(offset);
-
     if (!ReadData(*typeConfig,
                   scanner,
+                  offset,
                   *value)) {
-      std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
+      log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
       // TODO: Remove broken entry from cache
-      scanner.Close();
       return false;
     }
 
@@ -293,6 +360,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read data values from the given DataBlockSpan.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByBlockSpan(const DataBlockSpan& span,
                                    std::vector<ValueType>& area) const
@@ -301,9 +373,10 @@ namespace osmscout {
       return true;
     }
 
+    std::lock_guard<std::mutex> lock(accessMutex);
+
     if (!scanner.SetPos(span.startOffset)) {
-      std::cerr << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!" << std::endl;
-      scanner.Close();
+      log.Error() << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!";
       return false;
     }
 
@@ -315,8 +388,7 @@ namespace osmscout {
       if (!ReadData(*typeConfig,
                     scanner,
                     *value)) {
-        std::cerr << "Error while reading data #" << i << " starting from offset " << span.startOffset << " of file " << datafilename << "!" << std::endl;
-        scanner.Close();
+        log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset << " of file " << datafilename << "!";
         return false;
       }
 
@@ -326,6 +398,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Read data values from the given DataBlockSpans.
+   *
+   * Method is thread-safe.
+   */
   template <class N>
   bool DataFile<N>::GetByBlockSpans(const std::vector<DataBlockSpan>& spans,
                                     std::vector<ValueType>& data) const
@@ -343,10 +420,10 @@ namespace osmscout {
         continue;
       }
 
+      std::lock_guard<std::mutex> lock(accessMutex);
+
       if (!scanner.SetPos(span.startOffset)) {
-        std::cerr << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!" <<
-        std::endl;
-        scanner.Close();
+        log.Error() << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!";
         return false;
       }
 
@@ -356,9 +433,8 @@ namespace osmscout {
         if (!ReadData(*typeConfig,
                       scanner,
                       *value)) {
-          std::cerr << "Error while reading data #" << i << " starting from offset " << span.startOffset <<
-          " of file " << datafilename << "!" << std::endl;
-          scanner.Close();
+          log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset <<
+          " of file " << datafilename << "!";
           return false;
         }
 

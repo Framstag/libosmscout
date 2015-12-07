@@ -20,14 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <mutex>
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/Cache.h>
-#include <osmscout/util/Number.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Logger.h>
+#include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {
@@ -76,18 +78,23 @@ namespace osmscout {
     };
 
   private:
-    std::string                    filepart;
-    std::string                    filename;
-    unsigned long                  cacheSize;
-    mutable FileScanner            scanner;
-    bool                           memoryMaped;
-    FileScanner::Mode              mode;
-    uint32_t                       pageSize;
-    uint32_t                       levels;
-    std::vector<uint32_t>          pageCounts;
-    char                           *buffer;
-    PageRef                        root;
-    mutable std::vector<PageCache> leafs;
+    std::string                    filepart;    //!< Name of the index file
+    std::string                    filename;    //!< Complete file name including directory
+
+    mutable FileScanner            scanner;     //!< FileScanner instance for file access
+    bool                           memoryMaped; //!< File access is memory maped
+    FileScanner::Mode              mode;        //!< File access mode
+
+    unsigned long                  cacheSize;   //!< Maximum umber of index pages cached
+    uint32_t                       pageSize;    //!< Size of one page as stated by the actual index file
+    uint32_t                       levels;      //!< Number of index levels as stated by the actual index file
+    std::vector<uint32_t>          pageCounts;  //!< Number of pages per level as stated by the actual index file
+    char                           *buffer;     //!< Temporary buffer for reading page data
+
+    PageRef                        root;        //!< Reference to the root page
+    mutable std::vector<PageCache> leafs;       //!< Page caches - one for each index level
+
+    mutable std::mutex             accessMutex; //!< Mutex to secure multi-thread access
 
   private:
     size_t GetPageIndex(const PageRef& page, N id) const;
@@ -117,9 +124,9 @@ namespace osmscout {
   NumericIndex<N>::NumericIndex(const std::string& filename,
                                 unsigned long cacheSize)
    : filepart(filename),
-     cacheSize(cacheSize),
      memoryMaped(false),
      mode(FileScanner::Normal),
+     cacheSize(cacheSize),
      pageSize(0),
      levels(0),
      buffer(NULL)
@@ -186,7 +193,7 @@ namespace osmscout {
 
     if (!scanner.Read(buffer,
                       pageSize)) {
-      std::cerr << "Cannot read index page from file '" << scanner.GetFilename() << "'!" << std::endl;
+      log.Error() << "Cannot read index page from file '" << scanner.GetFilename() << "'!";
       return false;
     }
 
@@ -237,7 +244,7 @@ namespace osmscout {
     this->mode=mode;
 
     if (!scanner.Open(filename,mode,memoryMaped)) {
-      std::cerr << "Cannot open index file '" << filename << "'" << std::endl;
+      log.Error() << "Cannot open index file '" << filename << "'";
       return false;
     }
 
@@ -249,7 +256,7 @@ namespace osmscout {
     scanner.ReadFileOffset(indexPageCountsOffset); // Start of list of sizes of index levels
 
     if (scanner.HasError()) {
-      std::cerr << "Error while loading header data of index file '" << filename << "'" << std::endl;
+      log.Error() << "Error while loading header data of index file '" << filename << "'";
       return false;
     }
 
@@ -285,7 +292,7 @@ namespace osmscout {
       }
 
       if (requiredCacheSize>cacheSize) {
-        std::cerr << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!" << std::endl;
+        log.Warn() << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!";
       }
 
       leafs.push_back(PageCache(resultingCacheSize));
@@ -310,20 +317,28 @@ namespace osmscout {
     return scanner.IsOpen();
   }
 
+  /**
+   * Return the file offset in the data file for the given object id.
+   *
+   * This method is thread-safe.
+   */
   template <class N>
   bool NumericIndex<N>::GetOffset(const N& id,
                                   FileOffset& offset) const
   {
-    size_t r=GetPageIndex(root,id);
+    std::lock_guard<std::mutex> lock(accessMutex);
+    size_t                      r=GetPageIndex(root,id);
 
     if (!root->IndexIsValid(r)) {
       //std::cerr << "Id " << id << " not found in root index, " << root->entries.front().startId << "-" << root->entries.back().startId << std::endl;
       return false;
     }
 
-    offset=root->entries[r].fileOffset;
+    const Entry& rootEntry=root->entries[r];
 
-    N startId=root->entries[r].startId;
+    offset=rootEntry.fileOffset;
+
+    N startId=rootEntry.startId;
     for (size_t level=0; level+2<=levels; level++) {
       typename PageCache::CacheRef cacheRef;
 
@@ -342,8 +357,10 @@ namespace osmscout {
         return false;
       }
 
-      startId=cacheRef->value->entries[i].startId;
-      offset=cacheRef->value->entries[i].fileOffset;
+      const Entry& entry=cacheRef->value->entries[i];
+
+      startId=entry.startId;
+      offset=entry.fileOffset;
     }
 
     /*
@@ -354,6 +371,11 @@ namespace osmscout {
     return startId==id;
   }
 
+  /**
+   * Return the file offsets in the data file for the given object ids.
+   *
+   * This method is thread-safe.
+   */
   template <class N>
   bool NumericIndex<N>::GetOffsets(const std::vector<N>& ids,
                                    std::vector<FileOffset>& offsets) const
@@ -373,6 +395,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Return the file offsets in the data file for the given object ids.
+   *
+   * This method is thread-safe.
+   */
   template <class N>
   bool NumericIndex<N>::GetOffsets(const std::list<N>& ids,
                                    std::vector<FileOffset>& offsets) const
@@ -392,6 +419,11 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Return the file offsets in the data file for the given object ids.
+   *
+   * This method is thread-safe.
+   */
   template <class N>
   bool NumericIndex<N>::GetOffsets(const std::set<N>& ids,
                                    std::vector<FileOffset>& offsets) const
@@ -426,7 +458,7 @@ namespace osmscout {
       memory+=sizeof(leafs[i])+leafs[i].GetMemory(NumericIndexCacheValueSizer());
     }
 
-    std::cout << "Index " << filepart << ": " << pages << " pages, memory " << memory << std::endl;
+    log.Info() << "Index " << filepart << ": " << pages << " pages, memory " << memory;
   }
 }
 
