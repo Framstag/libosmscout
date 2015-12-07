@@ -138,7 +138,8 @@ DumpData: libosmscout
 Import: libosmscout libosmscout-import
 	(cd Import && $(MAKE))
 
-Tests: libosmscout
+Tests: libosmscout \
+       libosmscout-map
 	(cd Tests && $(MAKE))
 
 OSMScout2: libosmscout libosmscout-map libosmscout-map-qt
