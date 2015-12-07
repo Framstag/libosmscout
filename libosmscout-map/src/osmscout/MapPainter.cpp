@@ -43,21 +43,21 @@ namespace osmscout {
       return false;
     }
 
-    if (a.minLon==b.minLon) {
-      if (a.maxLon==b.maxLon) {
-        if (a.minLat==b.minLat) {
-          return a.maxLat>b.maxLat;
+    if (a.boundingBox.minCoord.GetLon()==b.boundingBox.minCoord.GetLon()) {
+      if (a.boundingBox.maxCoord.GetLon()==b.boundingBox.maxCoord.GetLon()) {
+        if (a.boundingBox.minCoord.GetLat()==b.boundingBox.minCoord.GetLat()) {
+          return a.boundingBox.maxCoord.GetLat()>b.boundingBox.maxCoord.GetLat();
         }
         else {
-          return a.minLat<b.minLat;
+          return a.boundingBox.minCoord.GetLat()<b.boundingBox.minCoord.GetLat();
         }
       }
       else {
-        return a.maxLon>b.maxLon;
+        return a.boundingBox.maxCoord.GetLon()>b.boundingBox.maxCoord.GetLon();
       }
     }
     else {
-      return a.minLon<b.minLon;
+      return a.boundingBox.minCoord.GetLon()<b.boundingBox.minCoord.GetLon();
     }
   }
 
@@ -637,18 +637,20 @@ namespace osmscout {
         break;
       }
 
-      areaData.minLat=tile->yAbs*tile->cellHeight-90.0;
-      areaData.maxLat=areaData.minLat+tile->cellHeight;
-      areaData.minLon=tile->xAbs*tile->cellWidth-180.0;
-      areaData.maxLon=areaData.minLon+tile->cellWidth;
+      GeoCoord minCoord(tile->yAbs*tile->cellHeight-90.0,
+                        tile->xAbs*tile->cellWidth-180.0);
+      GeoCoord maxCoord(minCoord.GetLat()+tile->cellHeight,
+                        minCoord.GetLon()+tile->cellWidth);
+
+      areaData.boundingBox.Set(minCoord,maxCoord);
 
       if (tile->coords.empty()) {
         points.resize(5);
 
-        points[0].Set(areaData.minLat,areaData.minLon);
-        points[1].Set(areaData.minLat,areaData.maxLon);
-        points[2].Set(areaData.maxLat,areaData.maxLon);
-        points[3].Set(areaData.maxLat,areaData.minLon);
+        points[0].Set(areaData.boundingBox.minCoord.GetLat(),areaData.boundingBox.minCoord.GetLon());
+        points[1].Set(areaData.boundingBox.minCoord.GetLat(),areaData.boundingBox.maxCoord.GetLon());
+        points[2].Set(areaData.boundingBox.maxCoord.GetLat(),areaData.boundingBox.maxCoord.GetLon());
+        points[3].Set(areaData.boundingBox.maxCoord.GetLat(),areaData.boundingBox.minCoord.GetLon());
         points[4]=points[0];
 
         transBuffer.transPolygon.TransformArea(projection,
@@ -681,8 +683,8 @@ namespace osmscout {
           double lat;
           double lon;
 
-          lat=areaData.minLat+tile->coords[i].y*tile->cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=areaData.minLon+tile->coords[i].x*tile->cellWidth/GroundTile::Coord::CELL_MAX;
+          lat=areaData.boundingBox.minCoord.GetLat()+tile->coords[i].y*tile->cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=areaData.boundingBox.minCoord.GetLon()+tile->coords[i].x*tile->cellWidth/GroundTile::Coord::CELL_MAX;
 
           points[i].Set(lat,lon);
         }
@@ -1208,8 +1210,7 @@ namespace osmscout {
 
   void MapPainter::DrawAreas(const StyleConfig& /*styleConfig*/,
                              const Projection& projection,
-                             const MapParameter& parameter,
-                             const MapData& /*data*/)
+                             const MapParameter& parameter)
   {
     for (const auto& area : areaData)
     {
@@ -1266,36 +1267,18 @@ namespace osmscout {
 
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
                                   const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const MapData& data)
+                                  const MapParameter& parameter)
   {
-    for (const auto& area : data.areas) {
-      for (const auto& ring :area->rings) {
-        if (ring.ring==Area::masterRingId) {
-          GeoBox   boundingBox;
+    for (const auto& area : areaData)
+    {
+      DrawAreaLabel(styleConfig,
+                    projection,
+                    parameter,
+                    area.type,
+                    *area.buffer,
+                    area.boundingBox);
 
-          area->GetBoundingBox(boundingBox);
-
-          DrawAreaLabel(styleConfig,
-                        projection,
-                        parameter,
-                        area->GetType(),
-                        ring.GetFeatureValueBuffer(),
-                        boundingBox);
-        }
-        else if (!ring.GetType()->GetIgnore()) {
-          GeoBox boundingBox;
-
-          ring.GetBoundingBox(boundingBox);
-
-          DrawAreaLabel(styleConfig,
-                        projection,
-                        parameter,
-                        ring.GetType(),
-                        ring.GetFeatureValueBuffer(),
-                        boundingBox);
-        }
-      }
+      areasDrawn++;
     }
   }
 
@@ -1364,8 +1347,7 @@ namespace osmscout {
 
   void MapPainter::DrawWays(const StyleConfig& styleConfig,
                             const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& /*data*/)
+                            const MapParameter& parameter)
   {
     for (const auto& way : wayData) {
       DrawWay(styleConfig,
@@ -1450,8 +1432,7 @@ namespace osmscout {
 
   void MapPainter::DrawWayLabels(const StyleConfig& styleConfig,
                                  const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const MapData& /*data*/)
+                                 const MapParameter& parameter)
   {
     for (const auto& way : wayPathData) {
       DrawWayLabel(styleConfig,
@@ -1515,6 +1496,7 @@ namespace osmscout {
       std::vector<PolyData> data(area->rings.size());
 
       for (size_t i=0; i<area->rings.size(); i++) {
+        // The master ring does not have any nodes, skipping...
         if (area->rings[i].ring==Area::masterRingId) {
           continue;
         }
@@ -1536,20 +1518,23 @@ namespace osmscout {
           const Area::Ring& ring=area->rings[i];
 
           if (ring.ring==ringId) {
+            TypeInfoRef  type;
             FillStyleRef fillStyle;
 
             if (ring.ring==Area::outerRingId) {
-              styleConfig.GetAreaFillStyle(area->GetType(),
-                                           ring.GetFeatureValueBuffer(),
-                                           projection,
-                                           fillStyle);
+              type=area->GetType();
             }
             else if (!ring.GetType()->GetIgnore()) {
-              styleConfig.GetAreaFillStyle(ring.GetType(),
-                                           ring.GetFeatureValueBuffer(),
-                                           projection,
-                                           fillStyle);
+              type=ring.GetType();
             }
+            else {
+              continue;
+            }
+
+            styleConfig.GetAreaFillStyle(type,
+                                         ring.GetFeatureValueBuffer(),
+                                         projection,
+                                         fillStyle);
 
             if (!fillStyle) {
               continue;
@@ -1565,7 +1550,7 @@ namespace osmscout {
 
             AreaData a;
 
-            // Collect possible clippings. We only take into account, inner rings of the next level
+            // Collect possible clippings. We only take into account inner rings of the next level
             // that do not have a type and thus act as a clipping region. If a inner ring has a type,
             // we currently assume that it does not have alpha and paints over its region and clipping is
             // not required.
@@ -1581,22 +1566,13 @@ namespace osmscout {
             }
 
             a.ref=ObjectFileRef(area->GetFileOffset(),refArea);
+            a.type=type;
             a.buffer=&ring.GetFeatureValueBuffer();
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
 
-            a.minLat=ring.nodes[0].GetLat();
-            a.maxLat=ring.nodes[0].GetLat();
-            a.maxLon=ring.nodes[0].GetLon();
-            a.minLon=ring.nodes[0].GetLon();
-
-            for (size_t r=1; r<ring.nodes.size(); r++) {
-              a.minLat=std::min(a.minLat,ring.nodes[r].GetLat());
-              a.maxLat=std::min(a.maxLat,ring.nodes[r].GetLat());
-              a.minLon=std::min(a.minLon,ring.nodes[r].GetLon());
-              a.maxLon=std::min(a.maxLon,ring.nodes[r].GetLon());
-            }
+            ring.GetBoundingBox(a.boundingBox);
 
             areaData.push_back(a);
 
@@ -1900,8 +1876,7 @@ namespace osmscout {
 
     DrawAreas(*styleConfig,
               projection,
-              parameter,
-              data);
+              parameter);
 
     areasTimer.Stop();
 
@@ -1917,8 +1892,7 @@ namespace osmscout {
 
     DrawWays(*styleConfig,
              projection,
-             parameter,
-             data);
+             parameter);
 
     pathsTimer.Stop();
 
@@ -1954,8 +1928,7 @@ namespace osmscout {
 
     DrawWayLabels(*styleConfig,
                   projection,
-                  parameter,
-                  data);
+                  parameter);
 
     pathLabelsTimer.Stop();
 
@@ -1988,8 +1961,7 @@ namespace osmscout {
 
     DrawAreaLabels(*styleConfig,
                    projection,
-                   parameter,
-                   data);
+                   parameter);
 
     areaLabelsTimer.Stop();
 

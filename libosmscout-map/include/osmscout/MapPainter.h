@@ -155,12 +155,10 @@ namespace osmscout {
     struct OSMSCOUT_MAP_API AreaData
     {
       ObjectFileRef            ref;
+      TypeInfoRef              type;
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       FillStyleRef             fillStyle;       //!< Fill style
-      double                   minLat;
-      double                   maxLat;
-      double                   minLon;
-      double                   maxLon;
+      GeoBox                   boundingBox;     //!< Bounding box of the area
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
@@ -377,8 +375,7 @@ namespace osmscout {
 
     void DrawWayLabels(const StyleConfig& styleConfig,
                        const Projection& projection,
-                       const MapParameter& parameter,
-                       const MapData& data);
+                       const MapParameter& parameter);
 
     void DrawAreaLabel(const StyleConfig& styleConfig,
                        const Projection& projection,
@@ -389,8 +386,7 @@ namespace osmscout {
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
-                        const MapParameter& parameter,
-                        const MapData& data);
+                        const MapParameter& parameter);
 
     void DrawPOINodes(const StyleConfig& styleConfig,
                       const Projection& projection,
@@ -602,13 +598,11 @@ namespace osmscout {
 
     virtual void DrawWays(const StyleConfig& styleConfig,
                           const Projection& projection,
-                          const MapParameter& parameter,
-                          const MapData& data);
+                          const MapParameter& parameter);
 
     virtual void DrawAreas(const StyleConfig& styleConfig,
                            const Projection& projection,
-                           const MapParameter& parameter,
-                           const MapData& data);
+                           const MapParameter& parameter);
 
     bool Draw(const Projection& projection,
               const MapParameter& parameter,
