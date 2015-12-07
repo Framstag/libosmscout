@@ -30,6 +30,16 @@
 
 namespace osmscout {
 
+  FileOffset AreaWayIndex::TypeData::GetDataOffset() const
+  {
+    return bitmapOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
+  }
+
+  FileOffset AreaWayIndex::TypeData::GetCellOffset(size_t x, size_t y) const
+  {
+    return bitmapOffset+((y-cellYStart)*cellXCount+x-cellXStart)*dataOffsetBytes;
+  }
+
   AreaWayIndex::TypeData::TypeData()
   : indexLevel(0),
     dataOffsetBytes(0),
@@ -147,16 +157,14 @@ namespace osmscout {
     minyc=std::max(minyc,typeData.cellYStart);
     maxyc=std::min(maxyc,typeData.cellYEnd);
 
-    FileOffset dataOffset=typeData.bitmapOffset+
-                          typeData.cellXCount*typeData.cellYCount*(FileOffset)typeData.dataOffsetBytes;
+    FileOffset dataOffset=typeData.GetDataOffset();
 
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
-      FileOffset initialCellDataOffset=0;
-      size_t     cellDataOffsetCount=0;
-      FileOffset bitmapCellOffset=typeData.bitmapOffset+
-                                  ((y-typeData.cellYStart)*typeData.cellXCount+
-                                   minxc-typeData.cellXStart)*(FileOffset)typeData.dataOffsetBytes;
+      std::lock_guard<std::mutex> guard(lookupMutex);
+      FileOffset                  initialCellDataOffset=0;
+      size_t                      cellDataOffsetCount=0;
+      FileOffset                  bitmapCellOffset=typeData.GetCellOffset(minxc,y);
 
       if (!scanner.SetPos(bitmapCellOffset)) {
         log.Error() << "Cannot go to type cell index position " << bitmapCellOffset << " in file '" << scanner.GetFilename() << "'";
@@ -234,8 +242,7 @@ namespace osmscout {
                                 std::vector<FileOffset>& offsets,
                                 TypeInfoSet& loadedTypes) const
   {
-    StopClock                   time;
-    std::lock_guard<std::mutex> guard(lookupMutex);
+    StopClock time;
 
     offsets.reserve(std::min((size_t)10000,offsets.capacity()));
     loadedTypes.Clear();

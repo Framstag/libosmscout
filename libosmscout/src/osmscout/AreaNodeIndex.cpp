@@ -30,6 +30,16 @@
 
 namespace osmscout {
 
+  FileOffset AreaNodeIndex::TypeData::GetDataOffset() const
+  {
+    return indexOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
+  }
+
+  FileOffset AreaNodeIndex::TypeData::GetCellOffset(size_t x, size_t y) const
+  {
+    return indexOffset+((y-cellYStart)*cellXCount+x-cellXStart)*dataOffsetBytes;
+  }
+
   AreaNodeIndex::TypeData::TypeData()
   : indexLevel(0),
     indexOffset(0),
@@ -138,16 +148,14 @@ namespace osmscout {
     minyc=std::max(minyc,typeData.cellYStart);
     maxyc=std::min(maxyc,typeData.cellYEnd);
 
-    FileOffset dataOffset=typeData.indexOffset+
-                          typeData.cellXCount*typeData.cellYCount*(FileOffset)typeData.dataOffsetBytes;
+    FileOffset dataOffset=typeData.GetDataOffset();
 
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
-      FileOffset initialCellDataOffset=0;
-      size_t     cellDataOffsetCount=0;
-      FileOffset cellIndexOffset=typeData.indexOffset+
-                                 ((y-typeData.cellYStart)*typeData.cellXCount+
-                                  minxc-typeData.cellXStart)*typeData.dataOffsetBytes;
+      std::lock_guard<std::mutex> guard(lookupMutex);
+      FileOffset                  initialCellDataOffset=0;
+      size_t                      cellDataOffsetCount=0;
+      FileOffset                  cellIndexOffset=typeData.GetCellOffset(minxc,y);
 
       if (!scanner.SetPos(cellIndexOffset)) {
         log.Error() << "Cannot go to type cell index position " << cellIndexOffset << " in file '" << scanner.GetFilename() << "'";
@@ -222,8 +230,7 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
-    StopClock                   time;
-    std::lock_guard<std::mutex> guard(lookupMutex);
+    StopClock time;
 
     loadedTypes.Clear();
 

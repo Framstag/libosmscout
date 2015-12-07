@@ -65,6 +65,9 @@ namespace osmscout {
       double      maxLat;
 
       TypeData();
+
+      FileOffset GetDataOffset() const;
+      FileOffset GetCellOffset(size_t x, size_t y) const;
     };
 
   private:
