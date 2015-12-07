@@ -614,6 +614,9 @@ CONST
   SYMBOL highway_street_lamp
     CIRCLE 0,0 5 {color: #f5fb5b; }
 
+  SYMBOL marker
+    CIRCLE 0,0 0.75 {color: #ff0000; }
+
 STYLE
   // -------------------------------------------------------
   //

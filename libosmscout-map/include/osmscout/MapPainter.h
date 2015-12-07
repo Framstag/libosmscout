@@ -360,12 +360,10 @@ namespace osmscout {
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const FeatureValueBuffer& buffer,
-                           double minX,
-                           double minY,
-                           double maxX,
-                           double maxY,
                            const IconStyleRef iconStyle,
-                           const std::vector<TextStyleRef>& textStyles);
+                           const std::vector<TextStyleRef>& textStyles,
+                           double x, double y,
+                           double objectHeight);
 
     void DrawWayDecorations(const StyleConfig& styleConfig,
                             const Projection& projection,

@@ -405,10 +405,8 @@ namespace osmscout {
 
   void MapPainter::ClearLabelMarks(std::list<LabelData>& labels)
   {
-    for (std::list<LabelData>::iterator label=labels.begin();
-         label!=labels.end();
-         ++label) {
-      label->mark=false;
+    for (auto& label : labels) {
+      label.mark=false;
     }
   }
 
@@ -944,7 +942,7 @@ namespace osmscout {
     by1=y-height/2-frameVert;
     by2=y+height/2+frameVert;
 
-    // Again - is box visible? No also checking horizontal extends
+    // Again - is box visible? Now also checking horizontal extends
     if (parameter.GetDropNotVisiblePointLabels()) {
       if (bx1>=projection.GetWidth() ||
           bx2<0 ||
@@ -1034,17 +1032,26 @@ namespace osmscout {
   void MapPainter::LayoutPointLabels(const Projection& projection,
                                      const MapParameter& parameter,
                                      const FeatureValueBuffer& buffer,
-                                     double minX,
-                                     double minY,
-                                     double maxX,
-                                     double maxY,
                                      const IconStyleRef iconStyle,
-                                     const std::vector<TextStyleRef>& textStyles)
+                                     const std::vector<TextStyleRef>& textStyles,
+                                     double x,
+                                     double y,
+                                     double objectHeight)
   {
     labelLayoutData.clear();
 
-    double centerX=(minX+maxX)/2;
-    double centerY=(minY+maxY)/2;
+    /*
+    SymbolRef symbol=styleConfig->GetSymbol("marker");
+
+    if (symbol) {
+      DrawSymbol(projection,
+                 parameter,
+                 *symbol,
+                 x,y);
+    }*/
+
+    double overallTextHeight=0;
+    bool   hasSymbol=false;
 
     if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
@@ -1058,6 +1065,8 @@ namespace osmscout {
         data.icon=true;
         data.iconStyle=iconStyle;
 
+        hasSymbol=true;
+
         labelLayoutData.push_back(data);
       }
       else if (iconStyle->GetSymbol()) {
@@ -1067,6 +1076,8 @@ namespace osmscout {
         data.height=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
         data.icon=false;
         data.iconStyle=iconStyle;
+
+        hasSymbol=true;
 
         labelLayoutData.push_back(data);
       }
@@ -1101,7 +1112,7 @@ namespace osmscout {
         data.alpha=alpha;
       }
       else if (textStyle->GetAutoSize()) {
-        double height=std::abs((maxY-minY)*0.1);
+        double height=std::abs((objectHeight)*0.1);
 
         if (height==0) {
           continue;
@@ -1131,6 +1142,8 @@ namespace osmscout {
       data.textStyle=textStyle;
       data.icon=false;
 
+      overallTextHeight+=data.height;
+
       labelLayoutData.push_back(data);
     }
 
@@ -1143,9 +1156,16 @@ namespace osmscout {
                      LabelLayoutDataSorter);
 
     // This is the top center position of the initial label element.
-    // Note that RegisterPointLabel gets passed the center of the labe,
+    // Note that RegisterPointLabel gets passed the center of the label,
     // thus we need to convert it...
-    double offset=centerY;
+    double offset;
+
+    if (hasSymbol) {
+     offset=y;
+    }
+    else {
+      offset=y-overallTextHeight/2;
+    }
 
     for (const auto& data : labelLayoutData) {
       if (data.textStyle) {
@@ -1156,17 +1176,17 @@ namespace osmscout {
                            data.fontSize,
                            data.height,
                            data.alpha,
-                           centerX,offset+data.height/2);
+                           x,offset+data.height/2);
       }
       else if (data.icon) {
         DrawIcon(data.iconStyle.get(),
-                 centerX,offset);
+                 x,offset);
       }
       else {
         DrawSymbol(projection,
                    parameter,
                    *data.iconStyle->GetSymbol(),
-                   centerX,offset);
+                   x,offset);
       }
 
       offset+=data.height;
@@ -1219,6 +1239,10 @@ namespace osmscout {
                                  projection,
                                  iconStyle);
 
+    if (!iconStyle && textStyles.empty()) {
+      return;
+    }
+
     double minX;
     double maxX;
     double minY;
@@ -1233,10 +1257,11 @@ namespace osmscout {
     LayoutPointLabels(projection,
                       parameter,
                       buffer,
-                      minX,minY,
-                      maxX,maxY,
                       iconStyle,
-                      textStyles);
+                      textStyles,
+                      (minX+maxX)/2,
+                      (minY+maxY)/2,
+                      maxY-minY);
   }
 
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
@@ -1299,10 +1324,9 @@ namespace osmscout {
     LayoutPointLabels(projection,
                       parameter,
                       node->GetFeatureValueBuffer(),
-                      x,y,
-                      x,y,
                       iconStyle,
-                      textStyles);
+                      textStyles,
+                      x,y,0);
 
     nodesDrawn++;
   }
