@@ -132,15 +132,11 @@ namespace osmscout
 
   bool OptimizeWaysLowZoom::Close()
   {
-    bool success=true;
-
     if (scanner.IsOpen()) {
-      if (!scanner.Close()) {
-        success=false;
-      }
+      return scanner.Close();
     }
 
-    return success;
+    return true;
   }
 
   bool OptimizeWaysLowZoom::HasOptimizations(double magnification) const
@@ -152,6 +148,8 @@ namespace osmscout
                                        const GeoBox& boundingBox,
                                        std::set<FileOffset>& offsets) const
   {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
     if (typeData.bitmapOffset==0) {
       // No data for this type available
       return true;
@@ -253,6 +251,32 @@ namespace osmscout
     return true;
   }
 
+  bool OptimizeWaysLowZoom::LoadData(std::set<FileOffset>& offsets,
+                                     std::vector<WayRef>& ways) const
+  {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
+    for (const auto& offset : offsets) {
+      if (!scanner.SetPos(offset)) {
+        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      WayRef way=std::make_shared<Way>();
+
+      if (!way->ReadOptimized(*typeConfig,
+                              scanner)) {
+        log.Error() << "Error while reading way at offset " << offset << " from file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      ways.push_back(way);
+    }
+
+
+    return true;
+  }
+
   /**
    * Returns the subset of types of wayTypes that can get retrieved from this index.
    */
@@ -280,18 +304,10 @@ namespace osmscout
                                     std::vector<WayRef>& ways,
                                     TypeInfoSet& loadedWayTypes) const
   {
-    StopClock time;
-
+    StopClock            time;
     std::set<FileOffset> offsets;
 
     loadedWayTypes.Clear();
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        log.Error() << "Error while opening file '" << scanner.GetFilename() << "' for reading!";
-        return false;
-      }
-    }
 
     for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=wayTypesData.begin();
         type!=wayTypesData.end();
@@ -323,21 +339,9 @@ namespace osmscout
       }
     }
 
-    for (const auto& offset : offsets) {
-      if (!scanner.SetPos(offset)) {
-        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
-
-      WayRef way=std::make_shared<Way>();
-
-      if (!way->ReadOptimized(*typeConfig,
-                              scanner)) {
-        log.Error() << "Error while reading way at offset " << offset << " from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
-
-      ways.push_back(way);
+    if (!LoadData(offsets,
+                  ways)) {
+      return false;
     }
 
     time.Stop();

@@ -53,7 +53,8 @@ namespace osmscout {
                                    FileOffset &dataOffset) const
   {
     if (level<maxLevel) {
-      IndexCache::CacheRef cacheRef;
+      std::lock_guard<std::mutex> guard(lookupMutex);
+      IndexCache::CacheRef        cacheRef;
 
 #if defined(ANALYZE_CACHE)
       if (indexCache.GetSize()==indexCache.GetMaxSize()) {
@@ -116,6 +117,8 @@ namespace osmscout {
                                    FileOffset dataOffset,
                                    std::vector<DataBlockSpan>& spans) const
   {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
     if (!scanner.SetPos(dataOffset)) {
       return false;
     }
@@ -274,16 +277,13 @@ namespace osmscout {
                                      std::vector<DataBlockSpan>& spans,
                                      TypeInfoSet& loadedTypes) const
   {
-    StopClock                   time;
-    std::lock_guard<std::mutex> guard(lookupMutex);
-
-    std::vector<CellRef>        cellRefs;     // cells to scan in this level
-    std::vector<CellRef>        nextCellRefs; // cells to scan for the next level
-    std::vector<DataBlockSpan>  newSpans;     // offsets collected in the current level
-    double                      minlon=boundingBox.GetMinLon()+180.0;
-    double                      maxlon=boundingBox.GetMaxLon()+180.0;
-    double                      minlat=boundingBox.GetMinLat()+90.0;
-    double                      maxlat=boundingBox.GetMaxLat()+90.0;
+    StopClock            time;
+    std::vector<CellRef> cellRefs;     // cells to scan in this level
+    std::vector<CellRef> nextCellRefs; // cells to scan for the next level
+    double               minlon=boundingBox.GetMinLon()+180.0;
+    double               maxlon=boundingBox.GetMaxLon()+180.0;
+    double               minlat=boundingBox.GetMinLat()+90.0;
+    double               maxlat=boundingBox.GetMaxLat()+90.0;
 
     // Clear result data structures
     spans.clear();

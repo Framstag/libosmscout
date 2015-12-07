@@ -135,15 +135,11 @@ namespace osmscout
 
   bool OptimizeAreasLowZoom::Close()
   {
-    bool success=true;
-
     if (scanner.IsOpen()) {
-      if (!scanner.Close()) {
-        success=false;
-      }
+      return scanner.Close();
     }
 
-    return success;
+    return true;
   }
 
   bool OptimizeAreasLowZoom::HasOptimizations(double magnification) const
@@ -155,6 +151,8 @@ namespace osmscout
                                         const GeoBox& boundingBox,
                                         std::set<FileOffset>& offsets) const
   {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
     if (typeData.bitmapOffset==0) {
       // No data for this type available
       return true;
@@ -256,6 +254,32 @@ namespace osmscout
     return true;
   }
 
+  bool OptimizeAreasLowZoom::LoadData(std::set<FileOffset>& offsets,
+                                      std::vector<AreaRef>& areas) const
+  {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
+    for (const auto& offset : offsets) {
+      if (!scanner.SetPos(offset)) {
+        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      AreaRef area=std::make_shared<Area>();
+
+      if (!area->ReadOptimized(*typeConfig,
+                               scanner)) {
+        log.Error() << "Error while reading area at offset " << offset << " from file '" << scanner.GetFilename() <<
+        "'";
+        return false;
+      }
+
+      areas.push_back(area);
+    }
+
+    return true;
+  }
+
   void OptimizeAreasLowZoom::GetTypes(const Magnification& magnification,
                                       const TypeInfoSet& areaTypes,
                                       TypeInfoSet& availableAreaTypes) const
@@ -280,18 +304,10 @@ namespace osmscout
                                       std::vector<AreaRef>& areas,
                                       TypeInfoSet& loadedAreaTypes) const
   {
-    StopClock time;
-
+    StopClock            time;
     std::set<FileOffset> offsets;
 
     loadedAreaTypes.Clear();
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        log.Error() << "Error while opening file '" << scanner.GetFilename() << "' for reading!";
-        return false;
-      }
-    }
 
     for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
         type!=areaTypesData.end();
@@ -322,22 +338,9 @@ namespace osmscout
       }
     }
 
-    for (const auto& offset : offsets) {
-      if (!scanner.SetPos(offset)) {
-        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
-
-      AreaRef area=std::make_shared<Area>();
-
-      if (!area->ReadOptimized(*typeConfig,
-                               scanner)) {
-        log.Error() << "Error while reading area at offset " << offset << " from file '" << scanner.GetFilename() <<
-        "'";
-        return false;
-      }
-
-      areas.push_back(area);
+    if (!LoadData(offsets,
+                  areas)) {
+      return false;
     }
 
     time.Stop();

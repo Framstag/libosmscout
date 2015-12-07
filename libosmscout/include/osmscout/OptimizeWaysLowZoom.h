@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 
@@ -68,6 +69,8 @@ namespace osmscout {
     double                                     magnification; //!< Magnification, up to which we support optimization
     std::map<TypeInfoRef,std::list<TypeData> > wayTypesData;  //!< Index information for all way types
 
+    mutable std::mutex                         lookupMutex;
+
   private:
     bool ReadTypeData(FileScanner& scanner,
                       TypeData& data);
@@ -75,6 +78,9 @@ namespace osmscout {
     bool GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
                     std::set<FileOffset>& offsets) const;
+
+    bool LoadData(std::set<FileOffset>& offsets,
+                  std::vector<WayRef>& ways) const;
 
   public:
     OptimizeWaysLowZoom();
