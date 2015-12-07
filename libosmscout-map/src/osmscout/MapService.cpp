@@ -741,10 +741,7 @@ namespace osmscout {
 
     StopClock timer;
 
-    if (!waterIndex->GetRegions(boundingBox.GetMinLon(),
-                                boundingBox.GetMinLat(),
-                                boundingBox.GetMaxLon(),
-                                boundingBox.GetMaxLat(),
+    if (!waterIndex->GetRegions(boundingBox,
                                 magnification,
                                 tiles)) {
       log.Error() << "Error reading ground tiles in area!";

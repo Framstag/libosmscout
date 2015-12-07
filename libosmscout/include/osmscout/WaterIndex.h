@@ -22,6 +22,7 @@
 
 #include <list>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -63,6 +64,8 @@ namespace osmscout {
     uint32_t                   waterIndexMaxMag;
     std::vector<Level>         levels;
 
+    mutable std::mutex         lookupMutex;
+
   private:
 
   public:
@@ -71,10 +74,7 @@ namespace osmscout {
     bool Open(const std::string& path);
     void Close();
 
-    bool GetRegions(double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
+    bool GetRegions(const GeoBox& boundingBox,
                     const Magnification& magnification,
                     std::list<GroundTile>& tiles) const;
 

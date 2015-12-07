@@ -23,12 +23,14 @@
 #include <vector>
 
 #include <osmscout/Database.h>
+#include <osmscout/StyleConfig.h>
 
 static const size_t DATAFILEACCESS_THREAD_COUNT=100;
 static const size_t DATAFILEACCESS_ITERATION_COUNT=1000000;
 
-static const size_t AREAINDEXACCESS_THREAD_COUNT=5;
-static const size_t AREAINDEXACCESS_ITERATION_COUNT=300;
+static const size_t AREAINDEXACCESS_THREAD_COUNT=10;
+static const size_t AREAINDEXACCESS_ITERATION_COUNT=100;
+static const size_t AREAINDEXACCESS_AREA_LEVEL=10;
 
 //
 // Datafile access
@@ -109,8 +111,13 @@ struct AreaIndexTestData
   osmscout::GeoBox                     boundingBox;
 
   osmscout::TypeConfigRef              typeConfig;
+
+  osmscout::Magnification              magnification;
+
   osmscout::TypeInfoSet                nodeTypes;
+  osmscout::TypeInfoSet                optimizedAreaTypes;
   osmscout::TypeInfoSet                areaTypes;
+  osmscout::TypeInfoSet                optimizedWayTypes;
   osmscout::TypeInfoSet                wayTypes;
 
   std::vector<osmscout::FileOffset>    nodeOffsets;
@@ -131,31 +138,66 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
   result=true;
 
   for (size_t i=1; i<=iterationCount; i++) {
-    osmscout::AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
-    osmscout::AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
-    osmscout::AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
+    osmscout::NodeDataFileRef         nodeDataFile=database->GetNodeDataFile();
+    osmscout::WayDataFileRef          wayDataFile=database->GetWayDataFile();
+    osmscout::AreaDataFileRef         areaDataFile=database->GetAreaDataFile();
 
-    if (!areaNodeIndex ||
+    osmscout::AreaNodeIndexRef        areaNodeIndex=database->GetAreaNodeIndex();
+    osmscout::AreaWayIndexRef         areaWayIndex=database->GetAreaWayIndex();
+    osmscout::AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
+
+    osmscout::OptimizeWaysLowZoomRef  areaOptimizedWayIndex=database->GetOptimizeWaysLowZoom();
+    osmscout::OptimizeAreasLowZoomRef areaOptimizedAreaIndex=database->GetOptimizeAreasLowZoom();
+
+    osmscout::WaterIndexRef           waterIndex=database->GetWaterIndex();
+
+    if (!nodeDataFile ||
+        !wayDataFile ||
+        !areaDataFile ||
+        !areaNodeIndex ||
         !areaWayIndex ||
-        !areaAreaIndex) {
+        !areaAreaIndex ||
+        !areaOptimizedWayIndex ||
+        !areaOptimizedAreaIndex) {
       result=false;
+    }
+
+    if ((i % 5) == 0) {
+      std::cout << "Thread " << std::this_thread::get_id() << ": iteration " << i << std::endl;
     }
 
     for (auto& testData : testDataSet) {
       std::vector<osmscout::FileOffset>    nodeOffsets;
       osmscout::TypeInfoSet                loadedNodeTypes;
+      std::vector<osmscout::NodeRef>       nodeData;
 
       std::vector<osmscout::FileOffset>    wayOffsets;
       osmscout::TypeInfoSet                loadedWayTypes;
+      osmscout::TypeInfoSet                loadedOptimizedWayTypes;
+      std::vector<osmscout::WayRef>        optimizedWayData;
+      std::vector<osmscout::WayRef>        wayData;
 
       std::vector<osmscout::DataBlockSpan> areaOffsets;
       osmscout::TypeInfoSet                loadedAreaTypes;
+      osmscout::TypeInfoSet                loadedOptimizedAreaTypes;
+      std::vector<osmscout::AreaRef>       optimizedAreaData;
+      std::vector<osmscout::AreaRef>       areaData;
+
+      std::list<osmscout::GroundTile>      tiles;
 
       if (!areaNodeIndex->GetOffsets(testData.boundingBox,
                                      testData.nodeTypes,
                                      nodeOffsets,
                                      loadedNodeTypes)) {
         result=false;
+      }
+
+      if (areaOptimizedWayIndex->GetWays(testData.boundingBox,
+                                         testData.magnification,
+                                         testData.optimizedWayTypes,
+                                         optimizedWayData,
+                                         loadedOptimizedWayTypes)) {
+
       }
 
       if (!areaWayIndex->GetOffsets(testData.boundingBox,
@@ -165,9 +207,17 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
         result=false;
       }
 
+      if (areaOptimizedAreaIndex->GetAreas(testData.boundingBox,
+                                           testData.magnification,
+                                           testData.optimizedAreaTypes,
+                                           optimizedAreaData,
+                                           loadedOptimizedAreaTypes)) {
+
+      }
+
       if (!areaAreaIndex->GetAreasInArea(*testData.typeConfig,
                                          testData.boundingBox,
-                                         30,
+                                         AREAINDEXACCESS_AREA_LEVEL+4,
                                          testData.areaTypes,
                                          areaOffsets,
                                          loadedAreaTypes)) {
@@ -197,11 +247,62 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
       if (testData.areaOffsets!=areaOffsets) {
         result=false;
       }
+
+      if (!nodeDataFile->GetByOffset(nodeOffsets,
+                                     nodeData)) {
+        result=false;
+      }
+
+      if (!wayDataFile->GetByOffset(wayOffsets,
+                                    wayData)) {
+        result=false;
+      }
+
+      if (!areaDataFile->GetByBlockSpans(areaOffsets,
+                                         areaData)) {
+        result=false;
+      }
+
+      if (!waterIndex->GetRegions(testData.boundingBox,
+                                  testData.magnification,
+                                  tiles)) {
+        result=false;
+      }
+
+      std::vector<osmscout::FileOffset> loadedNodeOffsets;
+      std::vector<osmscout::FileOffset> loadedWayOffsets;
+      std::vector<osmscout::FileOffset> loadedAreaOffsets;
+
+      for (const auto& node : nodeData) {
+        loadedNodeOffsets.push_back(node->GetFileOffset());
+      }
+
+      for (const auto& way : wayData) {
+        loadedWayOffsets.push_back(way->GetFileOffset());
+      }
+
+      for (const auto& area : areaData) {
+        loadedAreaOffsets.push_back(area->GetFileOffset());
+      }
+
+      if (nodeOffsets!=loadedNodeOffsets) {
+        result=false;
+      }
+
+      if (wayOffsets!=loadedWayOffsets) {
+        result=false;
+      }
+
+      /*
+      if (areaOffsets!=loadedAreaOffsets) {
+        result=false;
+      }*/
     }
   }
 }
 
 bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
+                          osmscout::StyleConfig& styleConfig,
                           size_t threadCount,
                           size_t iterationCount)
 {
@@ -209,27 +310,51 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
 
   osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
   osmscout::TypeInfoSet   nodeTypes;
-  osmscout::TypeInfoSet   areaTypes;
+  osmscout::TypeInfoSet   optimizedWayTypes;
   osmscout::TypeInfoSet   wayTypes;
+  osmscout::TypeInfoSet   optimizedAreaTypes;
+  osmscout::TypeInfoSet   areaTypes;
+  osmscout::Magnification magnification;
+
+  magnification.SetLevel(AREAINDEXACCESS_AREA_LEVEL);
+
+  osmscout::AreaNodeIndexRef        areaNodeIndex=database->GetAreaNodeIndex();
+  osmscout::AreaWayIndexRef         areaWayIndex=database->GetAreaWayIndex();
+  osmscout::OptimizeWaysLowZoomRef  areaOptimizedWayIndex=database->GetOptimizeWaysLowZoom();
+  osmscout::AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
+  osmscout::OptimizeAreasLowZoomRef areaOptimizedAreaIndex=database->GetOptimizeAreasLowZoom();
 
   std::cout << "Collection test data..." << std::endl;
 
-  for (const auto& type : typeConfig->GetTypes()) {
-    if (type->CanBeNode()) {
-      nodeTypes.Set(type);
-    }
+  styleConfig.GetNodeTypesWithMaxMag(magnification,
+                                     nodeTypes);
 
-    if (type->CanBeWay()) {
-      wayTypes.Set(type);
-    }
+  styleConfig.GetWayTypesWithMaxMag(magnification,
+                                    wayTypes);
 
-    if (type->CanBeArea()) {
-      areaTypes.Set(type);
-    }
+  styleConfig.GetAreaTypesWithMaxMag(magnification,
+                                     areaTypes);
+
+  if (areaOptimizedWayIndex->HasOptimizations(magnification.GetMagnification())) {
+    areaOptimizedWayIndex->GetTypes(magnification,
+                                    wayTypes,
+                                    optimizedWayTypes);
+
+    wayTypes.Remove(optimizedWayTypes);
+  }
+
+  if (areaOptimizedAreaIndex->HasOptimizations(magnification.GetMagnification())) {
+    areaOptimizedAreaIndex->GetTypes(magnification,
+                                     areaTypes,
+                                     optimizedAreaTypes);
+
+    areaTypes.Remove(optimizedAreaTypes);
   }
 
   std::cout << " - " << nodeTypes.Size() << " node type(s)" << std::endl;
+  std::cout << " - " << optimizedWayTypes.Size() << " optimized way type(s)" << std::endl;
   std::cout << " - " << wayTypes.Size() << " way type(s)" << std::endl;
+  std::cout << " - " << optimizedAreaTypes.Size() << " optimized area type(s)" << std::endl;
   std::cout << " - " << areaTypes.Size() << " area type(s)" << std::endl;
 
   osmscout::GeoBox mapBoundingBox;
@@ -241,8 +366,11 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
   AreaIndexTestData testData;
 
   testData.typeConfig=typeConfig;
+  testData.magnification=magnification;
   testData.nodeTypes=nodeTypes;
+  testData.optimizedWayTypes=optimizedWayTypes;
   testData.wayTypes=wayTypes;
+  testData.optimizedAreaTypes=optimizedAreaTypes;
   testData.areaTypes=areaTypes;
   testData.boundingBox=mapBoundingBox;
 
@@ -261,10 +389,6 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
                                                            mapBoundingBox.GetMaxLon()-4*mapBoundingBox.GetWidth()/10));
 
   testDataSet.push_back(testData);
-
-  osmscout::AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
-  osmscout::AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
-  osmscout::AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
 
   for (auto& testData : testDataSet) {
     std::cout << " - BoundingBox " << testData.boundingBox.GetDisplayText() << ":" << std::endl;
@@ -289,7 +413,7 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
 
     if (!areaAreaIndex->GetAreasInArea(*testData.typeConfig,
                                        testData.boundingBox,
-                                       30,
+                                       AREAINDEXACCESS_AREA_LEVEL+4,
                                        testData.areaTypes,
                                        testData.areaOffsets,
                                        testData.loadedAreaTypes)) {
@@ -331,11 +455,13 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
 
 int main(int argc, char* argv[])
 {
-  if (argc!=2) {
-    std::cerr << "ThreadedDatabase <database directory>" << std::endl;
+  if (argc!=3) {
+    std::cerr << "ThreadedDatabase <database directory> <style config>" << std::endl;
 
     return 1;
   }
+
+  // Database
 
   osmscout::DatabaseParameter parameter;
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(parameter);
@@ -344,6 +470,20 @@ int main(int argc, char* argv[])
 
   if (!database->Open(argv[1])) {
     std::cerr << "Cannot open database" << std::endl;
+
+    return 1;
+  }
+
+  std::cout << "Done." << std::endl;
+
+  // Style Config
+
+  std::cout << "Loading style config..." << std::endl;
+
+  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
+
+  if (!styleConfig->Load(argv[2])) {
+    std::cerr << "Cannot open style config" << std::endl;
 
     return 1;
   }
@@ -365,8 +505,9 @@ int main(int argc, char* argv[])
   std::cout << "Testing area index access with " << AREAINDEXACCESS_THREAD_COUNT << " threads iterating " << AREAINDEXACCESS_ITERATION_COUNT << " times..." << std::endl;
 
   if (TestAreaIndexAcceess(database,
+                           *styleConfig,
                            AREAINDEXACCESS_THREAD_COUNT,
-                           AREAINDEXACCESS_THREAD_COUNT)) {
+                           AREAINDEXACCESS_ITERATION_COUNT)) {
     std::cout << "Test result: OK" << std::endl;
   }
   else {

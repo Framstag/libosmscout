@@ -23,6 +23,7 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Logger.h>
 
@@ -36,9 +37,9 @@ namespace osmscout {
 
   bool WaterIndex::Open(const std::string& path)
   {
-    datafilename=path+"/"+filepart;
+    datafilename=AppendFileToDir(path,filepart);
 
-    if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
+    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
       return false;
     }
@@ -99,10 +100,7 @@ namespace osmscout {
     }
   }
 
-  bool WaterIndex::GetRegions(double minlon,
-                              double minlat,
-                              double maxlon,
-                              double maxlat,
+  bool WaterIndex::GetRegions(const GeoBox& boundingBox,
                               const Magnification& magnification,
                               std::list<GroundTile>& tiles) const
   {
@@ -122,10 +120,10 @@ namespace osmscout {
 
     tiles.clear();
 
-    cx1=(uint32_t)floor((minlon+180.0)/levels[idx].cellWidth);
-    cx2=(uint32_t)floor((maxlon+180.0)/levels[idx].cellWidth);
-    cy1=(uint32_t)floor((minlat+90.0)/levels[idx].cellHeight);
-    cy2=(uint32_t)floor((maxlat+90.0)/levels[idx].cellHeight);
+    cx1=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/levels[idx].cellWidth);
+    cx2=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/levels[idx].cellWidth);
+    cy1=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/levels[idx].cellHeight);
+    cy2=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/levels[idx].cellHeight);
 
     GroundTile tile;
 
@@ -158,9 +156,10 @@ namespace osmscout {
           tiles.push_back(tile);
         }
         else {
-          uint32_t   cellId=(y-levels[idx].cellYStart)*levels[idx].cellXCount+x-levels[idx].cellXStart;
-          uint32_t   index=cellId*8;
-          FileOffset cell;
+          std::lock_guard<std::mutex> guard(lookupMutex);
+          uint32_t                    cellId=(y-levels[idx].cellYStart)*levels[idx].cellXCount+x-levels[idx].cellXStart;
+          uint32_t                    index=cellId*8;
+          FileOffset                  cell;
 
           scanner.SetPos(levels[idx].offset+index);
 
@@ -231,4 +230,3 @@ namespace osmscout {
     log.Info() << "WaterIndex size " << entries << ", memory " << memeory;
   }
 }
-
