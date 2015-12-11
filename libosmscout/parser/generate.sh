@@ -1,6 +1,15 @@
 #!/bin/sh
 
-COCO=cococpp
+if [ -x "$(command -v Coco)" ]; then
+  COCO=Coco
+elif  [ -x "$(command -v cococpp)" ]; then   
+  COCO=cococpp
+else
+  echo "No coco implementation found!"
+  exit 1  
+fi
+
+echo "Using Coco command '${COCO}'..."
 
 # OST (aka OSMScout types)
 $COCO OST/OST.atg -namespace osmscout:ost -frames OST -o OST 
