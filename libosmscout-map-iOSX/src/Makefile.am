@@ -8,4 +8,4 @@ libosmscoutmapiosx_la_LDFLAGS  = -no-undefined \
                                $(LIBOSMSCOUTMAP_LIBS) \
                                $(LIBOSMSCOUT_LIBS)
 
-libosmscoutmapiosx_la_SOURCES = osmscout/MapPainterIOS.cpp
+libosmscoutmapiosx_la_SOURCES = osmscout/MapPainterIOS.mm
