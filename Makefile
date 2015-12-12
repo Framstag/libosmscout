@@ -67,6 +67,8 @@ configure:
 	  elif [ -d $$x ] && [ -f $$x/*.pro ]; then \
 	    echo Configuring $$x...; \
 	    (cd $$x && ./qmake); \
+	  else
+	    echo NOT configuring $$x...; \
 	  fi \
 	done
 
