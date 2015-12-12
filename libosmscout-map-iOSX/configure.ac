@@ -10,7 +10,7 @@ AC_CONFIG_HEADERS([include/osmscout/private/Config.h])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-AC_PROG_CXX
+AC_PROG_OBJCXX
 AC_PROG_INSTALL
 
 LT_INIT([win32-dll])
@@ -18,13 +18,7 @@ gl_VISIBILITY
 AS_IF([test "$HAVE_VISIBILITY" == "1"],
       [AC_DEFINE([OSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
 
-AC_LANG(C++)
-AX_CXX_COMPILE_STDCXX_11([],[mandatory])
-
-AX_CXXFLAGS_WARN_ALL
-if test "$GXX" = yes; then
-  CXXFLAGS="$CXXFLAGS -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
-fi
+AC_LANG(Objective C++)
 
 AC_SEARCH_LIBS([sqrt],[m],[])
 
@@ -38,11 +32,6 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
                    AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
-AC_MSG_CHECKING([Checking for OS X/iOS])
-AS_CASE([$host],
-        [*-apple-darwin*],[AC_MSG_RESULT([yes])],
-        [AC_MSG_RESULT([no])
-         AC_MSG_ERROR([This backend oly builds under OS X/iOS, not under $host])])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 

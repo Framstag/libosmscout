@@ -3,6 +3,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(LIBOSMSCOUTMAP_CFLAGS) \
               $(LIBOSMSCOUT_CFLAGS)
 
+AM_OBJCXXFLAGS = -std=c++11
+
 lib_LTLIBRARIES = libosmscoutmapiosx.la
 libosmscoutmapiosx_la_LDFLAGS  = -no-undefined \
                                $(LIBOSMSCOUTMAP_LIBS) \
