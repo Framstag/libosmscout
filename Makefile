@@ -103,25 +103,37 @@ libosmscout:
 libosmscout-import: libosmscout
 	(cd libosmscout-import && $(MAKE))
 
-# libosmscout-map && backends
+# libosmscout-map
 
 libosmscout-map: libosmscout
 	(cd libosmscout-map && $(MAKE))
 
+# Rendering backends (optional)
+
 libosmscout-map-agg: libosmscout libosmscout-map
-	(cd libosmscout-map-agg && $(MAKE))
+	if [ -f libosmscout-map-agg/Makefile ]; then \
+	  (cd libosmscout-map-agg && $(MAKE)) \
+	fi
 
 libosmscout-map-cairo: libosmscout libosmscout-map
-	(cd libosmscout-map-cairo && $(MAKE))
+	if [ -f libosmscout-map-cairo/Makefile ]; then \
+	  (cd libosmscout-map-cairo && $(MAKE)) \
+	fi
 
 libosmscout-map-opengl: libosmscout libosmscout-map
-	(cd libosmscout-map-opengl && $(MAKE))
+	if [ -f libosmscout-map-opengl/Makefile ]; then \
+	  (cd libosmscout-map-opengl && $(MAKE)) \
+	fi
 
 libosmscout-map-qt: libosmscout libosmscout-map
-	(cd libosmscout-map-qt && $(MAKE))
+	if [ -f libosmscout-map-qt/Makefile ]; then \
+	  (cd libosmscout-map-qt && $(MAKE)) \
+	fi
 
 libosmscout-map-svg: libosmscout libosmscout-map
-	(cd libosmscout-map-svg && $(MAKE))
+	if [ -f libosmscout-map-svg/Makefile ]; then \
+	  (cd libosmscout-map-svg && $(MAKE)) \
+	fi
 
 # Applications & Demos
 
