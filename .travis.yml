@@ -20,12 +20,11 @@ os:
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then (brew update); fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then (brew install protobuf qt5); fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then (export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/opt/qt5/lib/pkgconfig); fi
-  - env
 
 before_script:
   - . setupAutoconf.sh
   - env
+  - pkg-config --list-all | sort
   
 script:
   - make full

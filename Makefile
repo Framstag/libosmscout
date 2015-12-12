@@ -62,10 +62,10 @@ autogen:
 configure:
 	@for x in $(programs); do\
 	  if [ -d $$x ] && [ -f $$x/configure ]; then \
-	    echo Configuring $$x...; \
+	    echo Configuring autoconf based library $$x...; \
 	    (cd $$x && ./configure); \
 	  elif [ -d $$x ] && [ -f $$x/*.pro ]; then \
-	    echo Configuring $$x...; \
+	    echo Configuring Qt application $$x...; \
 	    (cd $$x && qmake); \
 	  else \
 	    echo NOT configuring $$x...; \
@@ -130,6 +130,11 @@ libosmscout-map-qt: libosmscout libosmscout-map
 	  (cd libosmscout-map-qt && $(MAKE)) \
 	fi
 
+libosmscout-map-iOSX: libosmscout libosmscout-map
+	if [ -f libosmscout-map-iOSX/Makefile ]; then \
+	  (cd libosmscout-map-iOSX && $(MAKE)) \
+	fi
+
 libosmscout-map-svg: libosmscout libosmscout-map
 	if [ -f libosmscout-map-svg/Makefile ]; then \
 	  (cd libosmscout-map-svg && $(MAKE)) \
@@ -157,8 +162,12 @@ Tests: libosmscout \
 	(cd Tests && $(MAKE))
 
 OSMScout2: libosmscout libosmscout-map libosmscout-map-qt
-	(cd OSMScout2 && $(MAKE))
+	if [ -f OSMScout2/Makefile ]; then \
+	  (cd OSMScout2 && $(MAKE)) \
+	fi
 
 StyleEditor: libosmscout libosmscout-map libosmscout-map-qt
-	(cd StyleEditor && $(MAKE))
+	if [ -f StyleEditor/Makefile ]; then \
+	  (cd StyleEditor && $(MAKE)) \
+	fi
 
