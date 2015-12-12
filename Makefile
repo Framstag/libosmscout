@@ -65,10 +65,10 @@ autogen:
 configure:
 	@for x in $(programs); do\
 	  if [ -d $$x ] && [ -f $$x/configure ]; then \
-	    echo Configuring autoconf based library $$x...; \
+	    echo Configuring autoconf project $$x...; \
 	    (cd $$x && ./configure); \
 	  elif [ -d $$x ] && [ -f $$x/*.pro ]; then \
-	    echo Configuring Qt application $$x...; \
+	    echo Configuring Qt project $$x...; \
 	    (cd $$x && qmake); \
 	  else \
 	    echo NOT configuring $$x...; \
