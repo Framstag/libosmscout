@@ -46,9 +46,9 @@ addons:
     - libcairo2-dev
     - libpangocairo
     - libpango1.0-dev
-    - qtbase5-dev
-    - libqt5gui5
-    - qt5make
+    - qt5-default
+    - qtdeclarative5-dev
+    - libqt5svg5-dev
     - freeglut3
     - freeglut3-dev
     - libmarisa-dev
