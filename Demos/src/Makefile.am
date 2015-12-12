@@ -103,7 +103,8 @@ LookupPOI_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 LookupPOI_LDADD = $(LIBOSMSCOUT_LIBS)
 
 PerformanceTest_SOURCES = PerformanceTest.cpp
-PerformanceTest_CXXFLAGS = $(LIBOSMSCOUTMAPCAIRO_CFLAGS) \
+PerformanceTest_CXXFLAGS = -fPIC \
+                           $(LIBOSMSCOUTMAPCAIRO_CFLAGS) \
                            $(LIBOSMSCOUTMAPQT_CFLAGS) \
                            $(LIBOSMSCOUTMAP_CFLAGS) \
                            $(LIBOSMSCOUT_CFLAGS)
