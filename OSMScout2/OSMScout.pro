@@ -4,7 +4,15 @@ QT_CONFIG -= no-pkg-config
 
 CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
 
-QT += core gui widgets qml quick svg positioning
+QT += core gui widgets qml quick
+
+qtHaveModule(svg) {
+ QT += svg
+}
+
+qtHaveModule(positioning) {
+ QT += positioning
+}
 
 PKGCONFIG += libosmscout-map-qt
 
