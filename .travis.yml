@@ -28,6 +28,7 @@ before_script:
   
 script:
   - make full
+  - (cd libosmscout/tests && make check)
 
 notifications:
   email:
