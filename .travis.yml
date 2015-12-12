@@ -16,6 +16,12 @@ os:
   - linux
   - osx
 
+before_script:
+  - echo $PWD
+  - env
+  - . setupAutoconf.sh
+  - env
+  
 script:
   - make full
 
@@ -42,3 +48,4 @@ addons:
     - libqt5gui5
     - freeglut3
     - freeglut3-dev
+    - libmarisa-dev
