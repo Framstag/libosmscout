@@ -66,7 +66,7 @@ configure:
 	    (cd $$x && ./configure); \
 	  elif [ -d $$x ] && [ -f $$x/*.pro ]; then \
 	    echo Configuring $$x...; \
-	    (cd $$x && ./qmake); \
+	    (cd $$x && qmake); \
 	  else \
 	    echo NOT configuring $$x...; \
 	  fi \
