@@ -4,7 +4,7 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(LIBOSMSCOUT_CFLAGS) \
               -stdlib=libc++
 
-AM_OBJCXXFLAGS = -std=c++11 -fobjc-arc -stdlib=libc++ -lc++
+AM_OBJCXXFLAGS = -std=c++11 -fobjc-arc -stdlib=libc++
 
 lib_LTLIBRARIES = libosmscoutmapiosx.la
 libosmscoutmapiosx_la_LDFLAGS  = -no-undefined \
