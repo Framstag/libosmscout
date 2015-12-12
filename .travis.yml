@@ -58,6 +58,3 @@ addons:
     - freeglut3-dev
     - libmarisa-dev
 
-matrix:
-  allow_failures:
-    - os: osx
