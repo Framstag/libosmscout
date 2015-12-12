@@ -5,6 +5,7 @@ programs = libosmscout \
            libosmscout-map \
            libosmscout-map-agg \
            libosmscout-map-cairo \
+           libosmscout-map-iOSX \
            libosmscout-map-opengl \
            libosmscout-map-qt \
            libosmscout-map-svg \
@@ -21,6 +22,7 @@ programs = libosmscout \
         libosmscout-map \
         libosmscout-map-agg \
         libosmscout-map-cairo \
+        libosmscout-map-iOSX \
         libosmscout-map-opengl \
         libosmscout-map-qt \
         libosmscout-map-svg \
@@ -36,6 +38,7 @@ all: libosmscout \
      libosmscout-map \
      libosmscout-map-agg \
      libosmscout-map-cairo \
+     libosmscout-map-iOSX \
      libosmscout-map-opengl \
      libosmscout-map-qt \
      libosmscout-map-svg \
