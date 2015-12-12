@@ -39,10 +39,10 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
                    AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
 AC_MSG_CHECKING([Checking for OS X/iOS])
-AS_CASE([$target],
+AS_CASE([$host],
         [*-apple-darwin*],[AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])
-         AC_MSG_ERROR([This backend oly builds under OS X/iOS])])
+         AC_MSG_ERROR([This backend oly builds under OS X/iOS, not under $host])])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
