@@ -48,6 +48,7 @@ addons:
     - libpango1.0-dev
     - qtbase5-dev
     - libqt5gui5
+    - qt5make
     - freeglut3
     - freeglut3-dev
     - libmarisa-dev
