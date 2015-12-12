@@ -1,0 +1,44 @@
+sudo: false
+
+language: cpp
+compiler:
+  - clang
+  - gcc
+
+cache:
+  - apt
+
+branches:
+  only:
+    - master
+
+os:
+  - linux
+  - osx
+
+script:
+  - make full
+
+notifications:
+  email:
+    recipients:
+      - tim@framstag.com
+    on_success: change
+    on_failure: always
+
+addons:
+  apt:
+    packages:
+    - pkg-config
+    - libxml2-dev
+    - libprotobuf-dev
+    - protobuf-compiler
+    - libagg-dev
+    - libfreetype6-dev
+    - libcairo2-dev
+    - libpangocairo
+    - libpango1.0-dev
+    - qtbase5-dev
+    - libqt5gui5
+    - freeglut3
+    - freeglut3-dev
