@@ -83,7 +83,7 @@ namespace osmscout {
      * Returns 'true' if coord is within the bounding box. The boundingBox interval is as an open interval
      * at one end [..[.
      */
-    inline bool Includes(const GeoCoord& coord)
+    inline bool Includes(const GeoCoord& coord) const
     {
       return minCoord.GetLat()<=coord.GetLat() &&
              maxCoord.GetLat()>coord.GetLat() &&
@@ -91,7 +91,7 @@ namespace osmscout {
              maxCoord.GetLon()>coord.GetLon();
     }
 
-    inline bool Intersects(GeoBox& other)
+    inline bool Intersects(const GeoBox& other) const
     {
       return !(other.GetMaxLon()<minCoord.GetLon() ||
                other.GetMinLon()>=maxCoord.GetLon() ||
