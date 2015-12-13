@@ -62,9 +62,9 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<Page> PageRef;
-
-    typedef Cache<N,PageRef> PageCache;
+    typedef std::shared_ptr<Page>         PageRef;
+    typedef Cache<N,PageRef>              PageCache;
+    typedef std::unordered_map<N,PageRef> PageSimpleCache;
 
     /**
       Returns the size of a individual cache entry
@@ -78,28 +78,30 @@ namespace osmscout {
     };
 
   private:
-    std::string                    filepart;    //!< Name of the index file
-    std::string                    filename;    //!< Complete file name including directory
+    std::string                         filepart;             //!< Name of the index file
+    std::string                         filename;             //!< Complete file name including directory
 
-    mutable FileScanner            scanner;     //!< FileScanner instance for file access
-    bool                           memoryMaped; //!< File access is memory maped
-    FileScanner::Mode              mode;        //!< File access mode
+    mutable FileScanner                  scanner;             //!< FileScanner instance for file access
+    bool                                 memoryMaped;         //!< File access is memory maped
+    FileScanner::Mode                    mode;                //!< File access mode
 
-    unsigned long                  cacheSize;   //!< Maximum umber of index pages cached
-    uint32_t                       pageSize;    //!< Size of one page as stated by the actual index file
-    uint32_t                       levels;      //!< Number of index levels as stated by the actual index file
-    std::vector<uint32_t>          pageCounts;  //!< Number of pages per level as stated by the actual index file
-    char                           *buffer;     //!< Temporary buffer for reading page data
+    unsigned long                        cacheSize;           //!< Maximum umber of index pages cached
+    uint32_t                             pageSize;            //!< Size of one page as stated by the actual index file
+    uint32_t                             levels;              //!< Number of index levels as stated by the actual index file
+    std::vector<uint32_t>                pageCounts;          //!< Number of pages per level as stated by the actual index file
+    char                                 *buffer;             //!< Temporary buffer for reading page data
 
-    PageRef                        root;        //!< Reference to the root page
-    mutable std::vector<PageCache> leafs;       //!< Page caches - one for each index level
+    PageRef                              root;                //!< Reference to the root page
+    size_t                               simpleCacheMaxLevel; //!< Maximum level for simple caching
+    mutable std::vector<PageSimpleCache> simplePageCache;     //!< Simple map to cache all entries
+    mutable std::vector<PageCache>       pageCaches;          //!< Complex cache with LRU characteristics
 
-    mutable std::mutex             accessMutex; //!< Mutex to secure multi-thread access
+    mutable std::mutex                   accessMutex;         //!< Mutex to secure multi-thread access
 
   private:
     size_t GetPageIndex(const Page& page, N id) const;
     bool ReadPage(FileOffset offset, PageRef& page) const;
-    void InitializeCache() const;
+    void InitializeCache();
 
   public:
     NumericIndex(const std::string& filename,
@@ -232,30 +234,39 @@ namespace osmscout {
   }
 
   template <class N>
-  void NumericIndex<N>::InitializeCache() const
+  void NumericIndex<N>::InitializeCache()
   {
     unsigned long currentCacheSize=cacheSize; // Available free space in cache
     unsigned long requiredCacheSize=0;        // Space needed for caching everything
 
-    for (size_t i=1; i<pageCounts.size(); i++) {
+    for (const auto count : pageCounts) {
+      requiredCacheSize+=count;
+    }
+
+    if (requiredCacheSize>cacheSize) {
+      log.Warn() << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!";
+    }
+
+    simpleCacheMaxLevel=0;
+    for (size_t level=1; level<pageCounts.size(); level++) {
       unsigned long resultingCacheSize; // Cache size we actually use for this level
 
-      requiredCacheSize+=pageCounts[i];
+      simplePageCache.push_back(PageSimpleCache());
 
-      if (pageCounts[i]>currentCacheSize) {
+      if (pageCounts[level]>currentCacheSize) {
         resultingCacheSize=currentCacheSize;
         currentCacheSize=0;
+
+        pageCaches.push_back(PageCache(resultingCacheSize));
       }
       else {
-        resultingCacheSize=pageCounts[i];
-        currentCacheSize-=pageCounts[i];
-      }
+        resultingCacheSize=pageCounts[level];
+        currentCacheSize-=pageCounts[level];
 
-      if (requiredCacheSize>cacheSize) {
-        log.Warn() << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!";
-      }
+        simpleCacheMaxLevel=level;
 
-      leafs.push_back(PageCache(resultingCacheSize));
+        pageCaches.push_back(PageCache(0));
+      }
     }
   }
 
@@ -335,6 +346,7 @@ namespace osmscout {
   {
     std::lock_guard<std::mutex> lock(accessMutex);
     size_t                      r=GetPageIndex(*root,id);
+    PageRef                     pageRef;
 
     if (!root->IndexIsValid(r)) {
       //std::cerr << "Id " << id << " not found in root index, " << root->entries.front().startId << "-" << root->entries.back().startId << std::endl;
@@ -347,24 +359,48 @@ namespace osmscout {
 
     N startId=rootEntry.startId;
     for (size_t level=0; level+2<=levels; level++) {
-      typename PageCache::CacheRef cacheRef;
+      if (level<=simpleCacheMaxLevel) {
+        auto cacheRef=simplePageCache[level].find(startId);
 
-      if (!leafs[level].GetEntry(startId,cacheRef)) {
-        typename PageCache::CacheEntry cacheEntry(startId);
+        if (cacheRef==simplePageCache[level].end()) {
+          pageRef=NULL; // Make sure, that we allocate a new page and not reuse an old one
 
-        cacheRef=leafs[level].SetEntry(cacheEntry);
+          if (!ReadPage(offset,pageRef)) {
+            return false;
+          }
 
-        ReadPage(offset,cacheRef->value);
+          simplePageCache[level].insert(std::make_pair(startId,pageRef));
+        }
+        else {
+          pageRef=cacheRef->second;
+        }
+      }
+      else {
+        typename PageCache::CacheRef cacheRef;
+
+        if (!pageCaches[level].GetEntry(startId,cacheRef)) {
+          typename PageCache::CacheEntry cacheEntry(startId);
+
+          cacheRef=pageCaches[level].SetEntry(cacheEntry);
+
+          if (!ReadPage(offset,cacheRef->value)) {
+            return false;
+          }
+        }
+
+        pageRef=cacheRef->value;
       }
 
-      size_t i=GetPageIndex(*cacheRef->value,id);
+      Page& page=*pageRef;
 
-      if (!cacheRef->value->IndexIsValid(i)) {
+      size_t i=GetPageIndex(page,id);
+
+      if (!page.IndexIsValid(i)) {
         //std::cerr << "Id " << id << " not found in index level " << level+2 << "!" << std::endl;
         return false;
       }
 
-      const Entry& entry=cacheRef->value->entries[i];
+      const Entry& entry=page.entries[i];
 
       startId=entry.startId;
       offset=entry.fileOffset;
@@ -460,9 +496,9 @@ namespace osmscout {
     memory+=root->entries.size()*sizeof(Entry);
 
 
-    for (size_t i=0; i<leafs.size(); i++) {
-      pages+=leafs[i].GetSize();
-      memory+=sizeof(leafs[i])+leafs[i].GetMemory(NumericIndexCacheValueSizer());
+    for (size_t i=0; i<pageCaches.size(); i++) {
+      pages+=pageCaches[i].GetSize();
+      memory+=sizeof(pageCaches[i])+pageCaches[i].GetMemory(NumericIndexCacheValueSizer());
     }
 
     log.Info() << "Index " << filepart << ": " << pages << " pages, memory " << memory;
