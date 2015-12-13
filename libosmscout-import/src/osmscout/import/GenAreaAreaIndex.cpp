@@ -955,6 +955,10 @@ namespace osmscout {
 
     assert(levels[0].size()==1);
 
+    for (size_t i=0; i<levels.size(); i++) {
+      progress.Info("Level "+NumberToString(i)+" has " + NumberToString(levels[i].size())+" entries");
+    }
+
     //
     // Writing index, data and idmap files
     //
