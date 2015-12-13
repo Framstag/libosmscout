@@ -537,7 +537,7 @@ namespace osmscout {
       result=false;
     }
 
-    if (index.Close()) {
+    if (!index.Close()) {
       result=false;
     }
 
