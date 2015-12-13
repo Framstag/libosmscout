@@ -266,23 +266,21 @@ namespace osmscout {
   {
     bool result;
 
-
     if (file==NULL) {
       log.Error() << "File '" << filename << "' already closed, cannot close it again!";
-      filename.clear();
       return false;
     }
-
-    filename.clear();
 
     FreeBuffer();
 
     result=fclose(file)==0;
 
-    if (result) {
-      file=NULL;
-    }
+    file=NULL;
 
+	if (!result) {
+      log.Error() << "Cannot close file '" << filename << "'";
+	}
+	
     return result;
   }
 
