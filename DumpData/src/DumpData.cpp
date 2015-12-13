@@ -619,9 +619,15 @@ int main(int argc, char* argv[])
 {
   std::string                    map;
   std::list<Job>                 jobs;
-
   std::set<osmscout::OSMId>      coordIds;
 
+  try {
+    std::locale globalLocale("");
+  }
+  catch (std::runtime_error) {
+	std::cerr << "ERROR: Cannot set locale" << std::endl;
+  }  
+  
   if (!ParseArguments(argc,
                       argv,
                       map,

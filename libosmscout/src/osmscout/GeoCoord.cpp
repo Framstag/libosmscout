@@ -28,13 +28,12 @@ namespace osmscout {
 
   std::string GeoCoord::GetDisplayText() const
   {
-    std::ostringstream stream;
-
-    stream.imbue(std::locale(""));
-
+    std::ostringstream      stream;
     std::streamsize         oldPrecision=stream.precision(5);
     std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
 
+    stream.imbue(std::locale());
+	
     stream << std::abs(GetLat());
 
     if (GetLat()>=0) {

@@ -106,7 +106,7 @@ namespace osmscout {
     std::ostringstream stream;
     bool               empty=true;
 
-    stream.imbue(std::locale(""));
+    stream.imbue(std::locale());
 
     if (poi) {
       stream << poi->name;
