@@ -97,8 +97,9 @@ namespace osmscout {
     mutable std::mutex             accessMutex; //!< Mutex to secure multi-thread access
 
   private:
-    size_t GetPageIndex(const PageRef& page, N id) const;
+    size_t GetPageIndex(const Page& page, N id) const;
     bool ReadPage(FileOffset offset, PageRef& page) const;
+    void InitializeCache() const;
 
   public:
     NumericIndex(const std::string& filename,
@@ -146,9 +147,9 @@ namespace osmscout {
     Binary search for index page for given id
     */
   template <class N>
-  inline size_t NumericIndex<N>::GetPageIndex(const PageRef& page, N id) const
+  inline size_t NumericIndex<N>::GetPageIndex(const Page& page, N id) const
   {
-    size_t size=page->entries.size();
+    size_t size=page.entries.size();
 
     if (size>0) {
       size_t left=0;
@@ -157,11 +158,11 @@ namespace osmscout {
 
       while (left<=right) {
         mid=(left+right)/2;
-        if (page->entries[mid].startId<=id &&
-            (mid+1>=size || page->entries[mid+1].startId>id)) {
+        if (page.entries[mid].startId<=id &&
+            (mid+1>=size || page.entries[mid+1].startId>id)) {
           return mid;
         }
-        else if (page->entries[mid].startId<id) {
+        else if (page.entries[mid].startId<id) {
           left=mid+1;
         }
         else {
@@ -231,6 +232,34 @@ namespace osmscout {
   }
 
   template <class N>
+  void NumericIndex<N>::InitializeCache() const
+  {
+    unsigned long currentCacheSize=cacheSize; // Available free space in cache
+    unsigned long requiredCacheSize=0;        // Space needed for caching everything
+
+    for (size_t i=1; i<pageCounts.size(); i++) {
+      unsigned long resultingCacheSize; // Cache size we actually use for this level
+
+      requiredCacheSize+=pageCounts[i];
+
+      if (pageCounts[i]>currentCacheSize) {
+        resultingCacheSize=currentCacheSize;
+        currentCacheSize=0;
+      }
+      else {
+        resultingCacheSize=pageCounts[i];
+        currentCacheSize-=pageCounts[i];
+      }
+
+      if (requiredCacheSize>cacheSize) {
+        log.Warn() << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!";
+      }
+
+      leafs.push_back(PageCache(resultingCacheSize));
+    }
+  }
+
+  template <class N>
   bool NumericIndex<N>::Open(const std::string& path,
                              FileScanner::Mode mode,
                              bool memoryMaped)
@@ -274,29 +303,7 @@ namespace osmscout {
 
     ReadPage(lastLevelPageStart,root);
 
-    unsigned long currentCacheSize=cacheSize; // Available free space in cache
-    unsigned long requiredCacheSize=0;        // Space needed for caching everything
-
-    for (size_t i=1; i<pageCounts.size(); i++) {
-      unsigned long resultingCacheSize; // Cache size we actually use for this level
-
-      requiredCacheSize+=pageCounts[i];
-
-      if (pageCounts[i]>currentCacheSize) {
-        resultingCacheSize=currentCacheSize;
-        currentCacheSize=0;
-      }
-      else {
-        resultingCacheSize=pageCounts[i];
-        currentCacheSize-=pageCounts[i];
-      }
-
-      if (requiredCacheSize>cacheSize) {
-        log.Warn() << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!";
-      }
-
-      leafs.push_back(PageCache(resultingCacheSize));
-    }
+    InitializeCache();
 
     return !scanner.HasError();
   }
@@ -327,7 +334,7 @@ namespace osmscout {
                                   FileOffset& offset) const
   {
     std::lock_guard<std::mutex> lock(accessMutex);
-    size_t                      r=GetPageIndex(root,id);
+    size_t                      r=GetPageIndex(*root,id);
 
     if (!root->IndexIsValid(r)) {
       //std::cerr << "Id " << id << " not found in root index, " << root->entries.front().startId << "-" << root->entries.back().startId << std::endl;
@@ -350,7 +357,7 @@ namespace osmscout {
         ReadPage(offset,cacheRef->value);
       }
 
-      size_t i=GetPageIndex(cacheRef->value,id);
+      size_t i=GetPageIndex(*cacheRef->value,id);
 
       if (!cacheRef->value->IndexIsValid(i)) {
         //std::cerr << "Id " << id << " not found in index level " << level+2 << "!" << std::endl;
