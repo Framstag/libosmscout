@@ -224,10 +224,6 @@ namespace osmscout {
                                    const GeoBox& boundingBox,
                                    TileRef tile) const
   {
-    if (!parameter.GetUseLowZoomOptimization()) {
-      return true;
-    }
-
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
 
     if (!optimizeAreasLowZoom) {
@@ -333,10 +329,6 @@ namespace osmscout {
                                   const GeoBox& boundingBox,
                                   TileRef tile) const
   {
-    if (!parameter.GetUseLowZoomOptimization()) {
-      return true;
-    }
-
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
     if (!optimizeWaysLowZoom) {
@@ -518,8 +510,13 @@ namespace osmscout {
       GeoBox          tileBoundingBox(tile->GetBoundingBox());
 
       if (tile->IsEmpty()) {
-        StopClock     tileLoadingTime;
-        Magnification magnification;
+        StopClock         tileLoadingTime;
+        Magnification     magnification;
+        std::future<bool> nodeResult;
+        std::future<bool> areasLowZoomResult;
+        std::future<bool> areasResult;
+        std::future<bool> waysLowZoomResult;
+        std::future<bool> waysResult;
 
         //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
 
@@ -536,48 +533,52 @@ namespace osmscout {
                                    typeDefinition->optimizedWayTypes,
                                    typeDefinition->optimizedAreaTypes);
 
-        std::future<bool> nodeResult=std::async(std::launch::async,
-                                                &MapService::GetNodes,this,
-                                                parameter,
-                                                typeDefinition->nodeTypes,
-                                                tileBoundingBox,
-                                                tile);
+        nodeResult=std::async(std::launch::async,
+                              &MapService::GetNodes,this,
+                              parameter,
+                              typeDefinition->nodeTypes,
+                              tileBoundingBox,
+                              tile);
 
-        std::future<bool> areasLowZoomResult=std::async(std::launch::async,
-                                                        &MapService::GetAreasLowZoom,this,
-                                                        parameter,
-                                                        typeDefinition->optimizedAreaTypes,
-                                                        magnification,
-                                                        tileBoundingBox,
-                                                        tile);
+        if (parameter.GetUseLowZoomOptimization()) {
+          areasLowZoomResult=std::async(std::launch::async,
+                                        &MapService::GetAreasLowZoom,this,
+                                        parameter,
+                                        typeDefinition->optimizedAreaTypes,
+                                        magnification,
+                                        tileBoundingBox,
+                                        tile);
+        }
 
-        std::future<bool> areasResult=std::async(std::launch::async,
-                                                 &MapService::GetAreas,this,
-                                                 parameter,
-                                                 typeDefinition->areaTypes,
-                                                 magnification,
-                                                 tileBoundingBox,
-                                                 tile);
+        areasResult=std::async(std::launch::async,
+                               &MapService::GetAreas,this,
+                               parameter,
+                               typeDefinition->areaTypes,
+                               magnification,
+                               tileBoundingBox,
+                               tile);
 
-        std::future<bool> waysLowZoomResult=std::async(std::launch::async,
-                                                       &MapService::GetWaysLowZoom,this,
-                                                       parameter,
-                                                       typeDefinition->optimizedWayTypes,
-                                                       magnification,
-                                                       tileBoundingBox,
-                                                       tile);
+        if (parameter.GetUseLowZoomOptimization()) {
+          waysLowZoomResult=std::async(std::launch::async,
+                                       &MapService::GetWaysLowZoom,this,
+                                       parameter,
+                                       typeDefinition->optimizedWayTypes,
+                                       magnification,
+                                       tileBoundingBox,
+                                       tile);
+        }
 
-        std::future<bool> waysResult=std::async(std::launch::async,
-                                                &MapService::GetWays,this,
-                                                parameter,
-                                                typeDefinition->wayTypes,
-                                                tileBoundingBox,
-                                                tile);
+        waysResult=std::async(std::launch::async,
+                              &MapService::GetWays,this,
+                              parameter,
+                              typeDefinition->wayTypes,
+                              tileBoundingBox,
+                              tile);
 
         if (!nodeResult.get() ||
-            !areasLowZoomResult.get() ||
+            (areasLowZoomResult.valid() && !areasLowZoomResult.get()) ||
             !areasResult.get() ||
-            !waysLowZoomResult.get() ||
+            (waysLowZoomResult.valid() && !waysLowZoomResult.get()) ||
             !waysResult.get()) {
           return false;
         }
