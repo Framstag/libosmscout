@@ -20,6 +20,7 @@
 #include <osmscout/MapService.h>
 
 #include <algorithm>
+#include <future>
 
 #if _OPENMP
 #include <omp.h>
@@ -160,7 +161,7 @@ namespace osmscout {
   bool MapService::GetNodes(const AreaSearchParameter& parameter,
                             const TypeInfoSet& nodeTypes,
                             const GeoBox& boundingBox,
-                            TileNodeData& data) const
+                            TileRef tile) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
 
@@ -172,14 +173,13 @@ namespace osmscout {
       return false;
     }
 
-
-    TypeInfoSet             cachedNodeTypes(data.GetTypes());
+    TypeInfoSet             cachedNodeTypes(tile->GetNodeData().GetTypes());
     TypeInfoSet             requestedNodeTypes(nodeTypes);
     TypeInfoSet             loadedNodeTypes;
     std::vector<FileOffset> offsets;
 
     if (!cachedNodeTypes.Empty()) {
-      requestedNodeTypes.Remove(data.GetTypes());
+      requestedNodeTypes.Remove(tile->GetNodeData().GetTypes());
     }
 
     if (!requestedNodeTypes.Empty()) {
@@ -205,7 +205,7 @@ namespace osmscout {
       }
 
       if (!database->GetNodesByOffset(offsets,
-                                      data.GetData())) {
+                                      tile->GetNodeData().GetData())) {
         log.Error() << "Error reading nodes in area!";
         return false;
       }
@@ -213,7 +213,7 @@ namespace osmscout {
 
     loadedNodeTypes.Add(cachedNodeTypes);
 
-    data.SetData(loadedNodeTypes,data.GetData());
+    tile->GetNodeData().SetData(loadedNodeTypes,tile->GetNodeData().GetData());
 
     return !parameter.IsAborted();
   }
@@ -222,7 +222,7 @@ namespace osmscout {
                                    const TypeInfoSet& areaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
-                                   TileAreaData& data) const
+                                   TileRef tile) const
   {
     if (!parameter.GetUseLowZoomOptimization()) {
       return true;
@@ -242,19 +242,19 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoSet cachedAreaTypes(data.GetTypes());
+    TypeInfoSet cachedAreaTypes(tile->GetOptimizedAreaData().GetTypes());
     TypeInfoSet requestedAreaTypes(areaTypes);
     TypeInfoSet loadedAreaTypes;
 
     if (!cachedAreaTypes.Empty()) {
-      requestedAreaTypes.Remove(data.GetTypes());
+      requestedAreaTypes.Remove(tile->GetOptimizedAreaData().GetTypes());
     }
 
     if (!requestedAreaTypes.Empty()) {
       if (!optimizeAreasLowZoom->GetAreas(boundingBox,
                                           magnification,
                                           requestedAreaTypes,
-                                          data.GetData(),
+                                          tile->GetOptimizedAreaData().GetData(),
                                           loadedAreaTypes)) {
         log.Error() << "Error getting areas from optimized areas index!";
         return false;
@@ -262,7 +262,7 @@ namespace osmscout {
     }
 
     loadedAreaTypes.Add(cachedAreaTypes);
-    data.SetData(loadedAreaTypes,data.GetData());
+    tile->GetOptimizedAreaData().SetData(loadedAreaTypes,tile->GetOptimizedAreaData().GetData());
 
     return !parameter.IsAborted();
   }
@@ -271,7 +271,7 @@ namespace osmscout {
                             const TypeInfoSet& areaTypes,
                             const Magnification& magnification,
                             const GeoBox& boundingBox,
-                            TileAreaData& data) const
+                            TileRef tile) const
   {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
 
@@ -283,13 +283,13 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoSet                cachedAreaTypes(data.GetTypes());
+    TypeInfoSet                cachedAreaTypes(tile->GetAreaData().GetTypes());
     TypeInfoSet                requestedAreaTypes(areaTypes);
     TypeInfoSet                loadedAreaTypes;
     std::vector<DataBlockSpan> spans;
 
     if (!cachedAreaTypes.Empty()) {
-      requestedAreaTypes.Remove(data.GetTypes());
+      requestedAreaTypes.Remove(tile->GetAreaData().GetTypes());
     }
 
     if (!requestedAreaTypes.Empty()) {
@@ -314,7 +314,7 @@ namespace osmscout {
       std::sort(spans.begin(),spans.end());
 
       if (!database->GetAreasByBlockSpans(spans,
-                                          data.GetData())) {
+                                          tile->GetAreaData().GetData())) {
         log.Error() << "Error reading areas in area!";
         return false;
       }
@@ -322,7 +322,7 @@ namespace osmscout {
 
     loadedAreaTypes.Add(cachedAreaTypes);
 
-    data.SetData(loadedAreaTypes,data.GetData());
+    tile->GetAreaData().SetData(loadedAreaTypes,tile->GetAreaData().GetData());
 
     return !parameter.IsAborted();
   }
@@ -331,7 +331,7 @@ namespace osmscout {
                                   const TypeInfoSet& wayTypes,
                                   const Magnification& magnification,
                                   const GeoBox& boundingBox,
-                                  TileWayData& data) const
+                                  TileRef tile) const
   {
     if (!parameter.GetUseLowZoomOptimization()) {
       return true;
@@ -351,19 +351,19 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoSet cachedWayTypes(data.GetTypes());
+    TypeInfoSet cachedWayTypes(tile->GetOptimizedWayData().GetTypes());
     TypeInfoSet requestedWayTypes(wayTypes);
     TypeInfoSet loadedWayTypes;
 
     if (!cachedWayTypes.Empty()) {
-      requestedWayTypes.Remove(data.GetTypes());
+      requestedWayTypes.Remove(tile->GetOptimizedWayData().GetTypes());
     }
 
     if (!requestedWayTypes.Empty()) {
       if (!optimizeWaysLowZoom->GetWays(boundingBox,
                                         magnification,
                                         requestedWayTypes,
-                                        data.GetData(),
+                                        tile->GetOptimizedWayData().GetData(),
                                         loadedWayTypes)) {
         log.Error() << "Error getting ways from optimized ways index!";
         return false;
@@ -371,7 +371,7 @@ namespace osmscout {
     }
 
     loadedWayTypes.Add(cachedWayTypes);
-    data.SetData(loadedWayTypes,data.GetData());
+    tile->GetOptimizedWayData().SetData(loadedWayTypes,tile->GetOptimizedWayData().GetData());
 
     return !parameter.IsAborted();
   }
@@ -379,7 +379,7 @@ namespace osmscout {
   bool MapService::GetWays(const AreaSearchParameter& parameter,
                            const TypeInfoSet& wayTypes,
                            const GeoBox& boundingBox,
-                           TileWayData& data) const
+                           TileRef tile) const
   {
     AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
 
@@ -391,13 +391,13 @@ namespace osmscout {
       return false;
     }
 
-    TypeInfoSet             cachedWayTypes(data.GetTypes());
+    TypeInfoSet             cachedWayTypes(tile->GetWayData().GetTypes());
     TypeInfoSet             requestedWayTypes(wayTypes);
     TypeInfoSet             loadedWayTypes;
     std::vector<FileOffset> offsets;
 
     if (!cachedWayTypes.Empty()) {
-      requestedWayTypes.Remove(data.GetTypes());
+      requestedWayTypes.Remove(tile->GetWayData().GetTypes());
     }
 
     if (!requestedWayTypes.Empty()) {
@@ -423,7 +423,7 @@ namespace osmscout {
       }
 
       if (!database->GetWaysByOffset(offsets,
-                                     data.GetData())) {
+                                     tile->GetWayData().GetData())) {
         log.Error() << "Error reading ways in area!";
         return false;
       }
@@ -431,7 +431,7 @@ namespace osmscout {
 
     loadedWayTypes.Add(cachedWayTypes);
 
-    data.SetData(loadedWayTypes,data.GetData());
+    tile->GetWayData().SetData(loadedWayTypes,tile->GetWayData().GetData());
 
     return !parameter.IsAborted();
   }
@@ -518,16 +518,10 @@ namespace osmscout {
       GeoBox          tileBoundingBox(tile->GetBoundingBox());
 
       if (tile->IsEmpty()) {
-        //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
-
-        StopClock tileLoadingTime;
-
+        StopClock     tileLoadingTime;
         Magnification magnification;
-        bool          nodesSuccess=true;
-        bool          areasLowZoomSuccess=true;
-        bool          areasSuccess=true;
-        bool          waysLowZoomSuccess=true;
-        bool          waysSuccess=true;
+
+        //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
 
         magnification.SetLevel(tile->GetId().GetLevel());
 
@@ -542,45 +536,49 @@ namespace osmscout {
                                    typeDefinition->optimizedWayTypes,
                                    typeDefinition->optimizedAreaTypes);
 
-        #pragma omp parallel if(parameter.GetUseMultithreading())
-        #pragma omp sections
-        {
-          #pragma omp section
-          nodesSuccess=GetNodes(parameter,
-                                typeDefinition->nodeTypes,
-                                tileBoundingBox,
-                                tile->GetNodeData());
-          #pragma omp section
-          areasLowZoomSuccess=GetAreasLowZoom(parameter,
-                                              typeDefinition->optimizedAreaTypes,
-                                              magnification,
-                                              tileBoundingBox,
-                                              tile->GetOptimizedAreaData());
-          #pragma omp section
-          areasSuccess=GetAreas(parameter,
-                                typeDefinition->areaTypes,
-                                magnification,
-                                tileBoundingBox,
-                                tile->GetAreaData());
-          #pragma omp section
-          waysLowZoomSuccess=GetWaysLowZoom(parameter,
-                                            typeDefinition->optimizedWayTypes,
-                                            magnification,
-                                            tileBoundingBox,
-                                            tile->GetOptimizedWayData());
-          #pragma omp section
-          waysSuccess=GetWays(parameter,
-                              typeDefinition->wayTypes,
-                              tileBoundingBox,
-                              tile->GetWayData());
-        }
+        std::future<bool> nodeResult=std::async(std::launch::async,
+                                                &MapService::GetNodes,this,
+                                                parameter,
+                                                typeDefinition->nodeTypes,
+                                                tileBoundingBox,
+                                                tile);
 
-        if (!nodesSuccess ||
-            !areasLowZoomSuccess ||
-            !areasSuccess ||
-            !waysLowZoomSuccess ||
-            !waysSuccess) {
+        std::future<bool> areasLowZoomResult=std::async(std::launch::async,
+                                                        &MapService::GetAreasLowZoom,this,
+                                                        parameter,
+                                                        typeDefinition->optimizedAreaTypes,
+                                                        magnification,
+                                                        tileBoundingBox,
+                                                        tile);
 
+        std::future<bool> areasResult=std::async(std::launch::async,
+                                                 &MapService::GetAreas,this,
+                                                 parameter,
+                                                 typeDefinition->areaTypes,
+                                                 magnification,
+                                                 tileBoundingBox,
+                                                 tile);
+
+        std::future<bool> waysLowZoomResult=std::async(std::launch::async,
+                                                       &MapService::GetWaysLowZoom,this,
+                                                       parameter,
+                                                       typeDefinition->optimizedWayTypes,
+                                                       magnification,
+                                                       tileBoundingBox,
+                                                       tile);
+
+        std::future<bool> waysResult=std::async(std::launch::async,
+                                                &MapService::GetWays,this,
+                                                parameter,
+                                                typeDefinition->wayTypes,
+                                                tileBoundingBox,
+                                                tile);
+
+        if (!nodeResult.get() ||
+            !areasLowZoomResult.get() ||
+            !areasResult.get() ||
+            !waysLowZoomResult.get() ||
+            !waysResult.get()) {
           return false;
         }
 
@@ -629,7 +627,6 @@ namespace osmscout {
     StopClock uniqueTime;
 
     for (auto tile : tiles) {
-
       for (const auto& node : tile->GetNodeData().GetData()) {
         nodeMap[node->GetFileOffset()]=node;
       }

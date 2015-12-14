@@ -110,30 +110,30 @@ namespace osmscout {
     bool GetNodes(const AreaSearchParameter& parameter,
                   const TypeInfoSet& nodeTypes,
                   const GeoBox& boundingBox,
-                  TileNodeData& data) const;
+                  TileRef tile) const;
 
     bool GetAreasLowZoom(const AreaSearchParameter& parameter,
                          const TypeInfoSet& areaTypes,
                          const Magnification& magnification,
                          const GeoBox& boundingBox,
-                         TileAreaData& data) const;
+                         TileRef tile) const;
 
     bool GetAreas(const AreaSearchParameter& parameter,
                   const TypeInfoSet& areaTypes,
                   const Magnification& magnification,
                   const GeoBox& boundingBox,
-                  TileAreaData& data) const;
+                  TileRef tile) const;
 
     bool GetWaysLowZoom(const AreaSearchParameter& parameter,
                         const TypeInfoSet& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
-                        TileWayData& data) const;
+                        TileRef tile) const;
 
     bool GetWays(const AreaSearchParameter& parameter,
                  const TypeInfoSet& wayTypes,
                  const GeoBox& boundingBox,
-                 TileWayData& data) const;
+                 TileRef tile) const;
 
   public:
     MapService(const DatabaseRef& database);
