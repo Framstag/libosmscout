@@ -49,7 +49,14 @@ namespace osmscout {
     /**
      * Copy-Constructor
      */
-    GeoBox(const GeoBox& other);
+    inline GeoBox(const GeoBox& other)
+    : minCoord(other.minCoord),
+      maxCoord(other.maxCoord),
+      valid(other.valid)
+    {
+      // no code
+    }
+
 
     /**
      * Initialize the GeoBox based on the given coordinates. The two Coordinates

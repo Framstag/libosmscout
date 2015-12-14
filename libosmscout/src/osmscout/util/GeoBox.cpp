@@ -38,14 +38,6 @@ namespace osmscout {
     // no code
   }
 
-  GeoBox::GeoBox(const GeoBox& other)
-  : minCoord(other.minCoord),
-    maxCoord(other.maxCoord),
-    valid(other.valid)
-  {
-    // no code
-  }
-
   GeoBox::GeoBox(const GeoCoord& coordA,
                  const GeoCoord& coordB)
   : minCoord(std::min(coordA.GetLat(),coordB.GetLat()),
