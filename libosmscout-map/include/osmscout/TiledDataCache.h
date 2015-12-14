@@ -74,7 +74,7 @@ namespace osmscout {
      */
     inline size_t GetX() const
     {
-      return y;
+      return x;
     }
 
     /**
@@ -82,7 +82,7 @@ namespace osmscout {
      */
     inline size_t GetY() const
     {
-      return x;
+      return y;
     }
 
     /**
@@ -387,6 +387,29 @@ namespace osmscout {
 
     mutable CacheIndex tileIndex;
     mutable Cache      tileCache;
+
+    void ResolveNodesFromParent(Tile& tile,
+                                const Tile& parentTile,
+                                const GeoBox& boundingBox,
+                                const TypeInfoSet& nodeTypes);
+    void ResolveOptimizedWaysFromParent(Tile& tile,
+                                        const Tile& parentTile,
+                                        const GeoBox& boundingBox,
+                                        const TypeInfoSet& optimizedWayTypes,
+                                        const TypeInfoSet& wayTypes);
+    void ResolveWaysFromParent(Tile& tile,
+                               const Tile& parentTile,
+                               const GeoBox& boundingBox,
+                               const TypeInfoSet& wayTypes);
+    void ResolveOptimizedAreasFromParent(Tile& tile,
+                                         const Tile& parentTile,
+                                         const GeoBox& boundingBox,
+                                         const TypeInfoSet& optimizedAreaTypes,
+                                         const TypeInfoSet& areaTypes);
+    void ResolveAreasFromParent(Tile& tile,
+                                const Tile& parentTile,
+                                const GeoBox& boundingBox,
+                                const TypeInfoSet& areaTypes);
 
   public:
     TiledDataCache(size_t cacheSize);
