@@ -59,8 +59,6 @@ int main(int argc, char* argv[])
   app.setOrganizationDomain("libosmscout.sf.net");
   app.setApplicationName("OSMScout");
 
-  settings=std::make_shared<Settings>();
-
   //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
 
@@ -74,10 +72,13 @@ int main(int argc, char* argv[])
 
   osmscout::log.Debug(true);
 
+  settings=std::make_shared<Settings>();
+
   QThread thread;
 
   if (!DBThread::InitializeInstance()) {
     std::cerr << "Cannot initialize DBThread" << std::endl;
+    return 1;
   }
 
   DBThread* dbThread=DBThread::GetInstance();
