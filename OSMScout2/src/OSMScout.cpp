@@ -19,6 +19,7 @@
 
 // Qt includes
 #include <QGuiApplication>
+#include <QQmlApplicationEngine>
 #include <QQuickView>
 
 // Custom QML objects
@@ -31,9 +32,6 @@
 
 // Application theming
 #include "Theme.h"
-
-// Main Window
-#include "MainWindow.h"
 
 #include <osmscout/util/Logger.h>
 
@@ -55,7 +53,6 @@ int main(int argc, char* argv[])
 
   QGuiApplication app(argc,argv);
   SettingsRef     settings;
-  MainWindow      *window;
   int             result;
 
   app.setOrganizationName("libosmscout");
@@ -90,14 +87,11 @@ int main(int argc, char* argv[])
 
   dbThread->moveToThread(&thread);
 
-  window=new MainWindow(settings,
-                        dbThread);
+  QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
 
   thread.start();
 
   result=app.exec();
-
-  delete window;
 
   thread.quit();
   thread.wait();
@@ -106,11 +100,3 @@ int main(int argc, char* argv[])
 
   return result;
 }
-
-#if defined(__WIN32__) || defined(WIN32)
-int CALLBACK WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/){
-	main(0, NULL);
-	
-	return 0;
-}
-#endif
