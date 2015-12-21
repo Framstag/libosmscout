@@ -82,7 +82,7 @@ signals:
 public slots:
   void ToggleDaylight();
   void ReloadStyle();
-  void TriggerMapRendering();
+  void TriggerMapRendering(const RenderMapRequest& request);
   void Initialize();
   void Finalize();
 
@@ -119,10 +119,7 @@ private:
   double                        finishedAngle;
   osmscout::Magnification       finishedMagnification;
 
-  RenderMapRequest              currentRenderRequest;
-  bool                          doRender;
-  QBreaker*                     renderBreaker;
-  osmscout::BreakerRef          renderBreakerRef;
+  osmscout::BreakerRef          renderBreaker;
 
 private:
   DBThread();
@@ -133,7 +130,7 @@ private:
 public:
   void GetProjection(osmscout::MercatorProjection& projection);
 
-  void UpdateRenderRequest(const RenderMapRequest& request);
+  void CancelPotentialRendering();
 
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);

@@ -29,7 +29,7 @@ MapWidget::MapWidget(QQuickItem* parent)
       center(0.0,0.0),
       angle(0.0),
       magnification(64),
-      requestNewMap(true)
+      mouseDragging(false)
 
 {
     setOpaquePainting(true);
@@ -41,8 +41,8 @@ MapWidget::MapWidget(QQuickItem* parent)
     connect(dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
             this,SLOT(initialisationFinished(DatabaseLoadedResponse)));
 
-    connect(this,SIGNAL(TriggerMapRenderingSignal()),
-            dbThread,SLOT(TriggerMapRendering()));
+    connect(this,SIGNAL(TriggerMapRenderingSignal(RenderMapRequest)),
+            dbThread,SLOT(TriggerMapRendering(RenderMapRequest)));
 
     connect(dbThread,SIGNAL(HandleMapRenderingResult()),
             this,SLOT(redraw()));
@@ -93,9 +93,9 @@ void MapWidget::TriggerMapRendering()
     request.width=width();
     request.height=height();
 
-    dbThread->UpdateRenderRequest(request);
+    dbThread->CancelPotentialRendering();
 
-    emit TriggerMapRenderingSignal();
+    emit TriggerMapRenderingSignal(request);
 }
 
 
@@ -122,21 +122,24 @@ void MapWidget::mousePressEvent(QMouseEvent* event)
         startY=event->y();
 
         setFocus(true);
+        mouseDragging=true;
     }
 }
 
 void MapWidget::mouseMoveEvent(QMouseEvent* event)
 {
     HandleMouseMove(event);
-    requestNewMap=false;
     update();
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (event->button()==1) {
+    if (event->button()==1 &&
+        (startX!=event->x() ||
+         startY!=event->y())) {
+        mouseDragging=false;
         HandleMouseMove(event);
-        requestNewMap=true;
+        TriggerMapRendering();
         update();
     }
 }
@@ -169,12 +172,11 @@ void MapWidget::paint(QPainter *painter)
     request.width=boundingBox.width();
     request.height=boundingBox.height();
 
-    if (!dbThread->RenderMap(*painter,request) &&
-            requestNewMap) {
-        TriggerMapRendering();
+    if (!dbThread->RenderMap(*painter,request)) {
+        if (!mouseDragging) {
+            TriggerMapRendering();
+        }
     }
-
-    requestNewMap=true;
 }
 
 void MapWidget::zoomIn(double zoomFactor)
@@ -310,12 +312,12 @@ void MapWidget::showCoordinates(double lat, double lon)
 void MapWidget::showLocation(Location* location)
 {
     if (location==NULL) {
-        std::cout << "MapWidget::showLocation(): no location passed!" << std::endl;
+        qDebug() << "MapWidget::showLocation(): no location passed!";
 
         return;
     }
 
-    std::cout << "MapWidget::showLocation(\"" << location->getName().toLocal8Bit().constData() << "\")" << std::endl;
+    qDebug() << "MapWidget::showLocation(\"" << location->getName().toLocal8Bit().constData() << "\")";
 
     if (location->getType()==Location::typeObject) {
         osmscout::ObjectFileRef reference=location->getReferences().front();
@@ -361,7 +363,7 @@ void MapWidget::showLocation(Location* location)
     else if (location->getType()==Location::typeCoordinate) {
         osmscout::GeoCoord coord=location->getCoord();
 
-        std::cout << "MapWidget: " << coord.GetDisplayText() << std::endl;
+        qDebug() << "MapWidget: " << coord.GetDisplayText().c_str();
 
         center=coord;
         this->magnification=osmscout::Magnification::magVeryClose;

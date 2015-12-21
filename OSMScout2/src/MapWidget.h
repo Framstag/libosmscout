@@ -45,10 +45,10 @@ private:
   osmscout::MercatorProjection startProjection;
 
   // Controlling rerendering...
-  bool                          requestNewMap;
+  bool                         mouseDragging;
 
 signals:
-  void TriggerMapRenderingSignal();
+  void TriggerMapRenderingSignal(const RenderMapRequest& request);
   void latChanged();
   void lonChanged();
 
