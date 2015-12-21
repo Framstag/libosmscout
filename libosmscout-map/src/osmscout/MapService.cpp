@@ -500,11 +500,12 @@ namespace osmscout {
                                        const StyleConfig& styleConfig,
                                        std::list<TileRef>& tiles) const
   {
-    StopClock         overallTime;
+    StopClock                    overallTime;
 
-    TypeDefinitionRef typeDefinition;
+    TypeDefinitionRef            typeDefinition;
 
-    StopClock         dataLoadingTime;
+    StopClock                    dataLoadingTime;
+    std::list<std::future<bool>> results;
 
     for (auto& tile : tiles) {
       GeoBox          tileBoundingBox(tile->GetBoundingBox());
@@ -526,6 +527,7 @@ namespace osmscout {
         typeDefinition=GetTypeDefinition(parameter,
                                          styleConfig,
                                          magnification);
+
         cache.PrefillDataFromCache(*tile,
                                    typeDefinition->nodeTypes,
                                    typeDefinition->wayTypes,
@@ -533,55 +535,47 @@ namespace osmscout {
                                    typeDefinition->optimizedWayTypes,
                                    typeDefinition->optimizedAreaTypes);
 
-        nodeResult=std::async(std::launch::async,
-                              &MapService::GetNodes,this,
-                              parameter,
-                              typeDefinition->nodeTypes,
-                              tileBoundingBox,
-                              tile);
+        results.push_back(std::async(std::launch::async,
+                                     &MapService::GetNodes,this,
+                                     parameter,
+                                     typeDefinition->nodeTypes,
+                                     tileBoundingBox,
+                                     tile));
 
         if (parameter.GetUseLowZoomOptimization()) {
-          areasLowZoomResult=std::async(std::launch::async,
-                                        &MapService::GetAreasLowZoom,this,
-                                        parameter,
-                                        typeDefinition->optimizedAreaTypes,
-                                        magnification,
-                                        tileBoundingBox,
-                                        tile);
+          results.push_back(std::async(std::launch::async,
+                                       &MapService::GetAreasLowZoom,this,
+                                       parameter,
+                                       typeDefinition->optimizedAreaTypes,
+                                       magnification,
+                                       tileBoundingBox,
+                                       tile));
         }
 
-        areasResult=std::async(std::launch::async,
-                               &MapService::GetAreas,this,
-                               parameter,
-                               typeDefinition->areaTypes,
-                               magnification,
-                               tileBoundingBox,
-                               tile);
+        results.push_back(std::async(std::launch::async,
+                                     &MapService::GetAreas,this,
+                                     parameter,
+                                     typeDefinition->areaTypes,
+                                     magnification,
+                                     tileBoundingBox,
+                                     tile));
 
         if (parameter.GetUseLowZoomOptimization()) {
-          waysLowZoomResult=std::async(std::launch::async,
+          results.push_back(std::async(std::launch::async,
                                        &MapService::GetWaysLowZoom,this,
                                        parameter,
                                        typeDefinition->optimizedWayTypes,
                                        magnification,
                                        tileBoundingBox,
-                                       tile);
+                                       tile));
         }
 
-        waysResult=std::async(std::launch::async,
-                              &MapService::GetWays,this,
-                              parameter,
-                              typeDefinition->wayTypes,
-                              tileBoundingBox,
-                              tile);
-
-        if (!nodeResult.get() ||
-            (areasLowZoomResult.valid() && !areasLowZoomResult.get()) ||
-            !areasResult.get() ||
-            (waysLowZoomResult.valid() && !waysLowZoomResult.get()) ||
-            !waysResult.get()) {
-          return false;
-        }
+        results.push_back(std::async(std::launch::async,
+                                     &MapService::GetWays,this,
+                                     parameter,
+                                     typeDefinition->wayTypes,
+                                     tileBoundingBox,
+                                     tile));
 
         tileLoadingTime.Stop();
 
@@ -597,6 +591,14 @@ namespace osmscout {
       }
     }
 
+    bool success=true;
+
+    for (auto& result : results) {
+      if (!result.get()) {
+        success=false;
+      }
+    }
+
     dataLoadingTime.Stop();
 
     //std::cout << "DataLoadingTime: " << dataLoadingTime.ResultString() << std::endl;
@@ -609,7 +611,7 @@ namespace osmscout {
 
     cache.CleanupCache();
 
-    return true;
+    return success;
   }
 
   /**
