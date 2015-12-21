@@ -23,6 +23,8 @@
 #include <ctime>
 #include <string>
 
+#include <osmscout/CoreFeatures.h>
+
 #include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
@@ -43,10 +45,12 @@ namespace osmscout {
 
     virtual void SetStep(const std::string& step);
     virtual void SetAction(const std::string& action);
-	virtual void SetProgress(double current, double total);
-	virtual void SetProgress(uint32_t current, uint32_t total);
-	virtual void SetProgress(uint64_t current, uint64_t total);
-
+    virtual void SetProgress(double current, double total);
+    virtual void SetProgress(unsigned int current, unsigned int total);
+    virtual void SetProgress(unsigned long current, unsigned long total);
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+    virtual void SetProgress(unsigned long long current, unsigned long long total);
+#endif
     virtual void Debug(const std::string& text);
     virtual void Info(const std::string& text);
     virtual void Warning(const std::string& text);
@@ -65,9 +69,12 @@ namespace osmscout {
   public:
     void SetStep(const std::string& step);
     void SetAction(const std::string& action);
-	void SetProgress(double current, double total);
-	void SetProgress(uint32_t current, uint32_t total);
-	void SetProgress(uint64_t current, uint64_t total);
+    void SetProgress(double current, double total);
+    void SetProgress(unsigned int current, unsigned int total);
+    void SetProgress(unsigned long current, unsigned long total);
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+    virtual void SetProgress(unsigned long long current, unsigned long long total);
+#endif
 
     void Debug(const std::string& text);
     void Info(const std::string& text);

@@ -61,17 +61,25 @@ namespace osmscout {
     // no code
   }
 
-  void Progress::SetProgress(uint32_t /*current*/,
-                             uint32_t /*total*/)
-  {
-	  // no code
-  }
-
-  void Progress::SetProgress(uint64_t /*current*/,
-                             uint64_t /*total*/)
+  void Progress::SetProgress(unsigned int /*current*/,
+                             unsigned int /*total*/)
   {
     // no code
   }
+
+  void Progress::SetProgress(unsigned long /*current*/,
+                             unsigned long /*total*/)
+  {
+    // no code
+  }
+
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+  void Progress::SetProgress(unsigned long long /*current*/,
+                             unsigned long long /*total*/)
+  {
+    // no code
+  }
+#endif
 
   void Progress::Debug(const std::string& /*text*/)
   {
@@ -123,15 +131,23 @@ namespace osmscout {
     }
   }
 
-  void ConsoleProgress::SetProgress(uint32_t current, uint32_t total)
+  void ConsoleProgress::SetProgress(unsigned int current, unsigned int total)
   {
-	  SetProgress((double)current, (double)total);
+    SetProgress((double)current, (double)total);
   }
   
-  void ConsoleProgress::SetProgress(uint64_t current, uint64_t total)
+  void ConsoleProgress::SetProgress(unsigned long current, unsigned long total)
   {
     SetProgress((double)current,(double)total);
   }
+
+#if defined(OSMSCOUT_HAVE_ULONG_LONG)
+  void ConsoleProgress::SetProgress(unsigned long long current,
+                                    unsigned long long total)
+  {
+    SetProgress((double)current,(double)total);
+  }
+#endif
 
   void ConsoleProgress::Debug(const std::string& text)
   {
