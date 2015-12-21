@@ -28,7 +28,6 @@ link_directories(${LIBOSMSCOUT_LIBRARY_DIRS}
 
 set(HEADER_FILES
     src/DBThread.h
-    src/MainWindow.h
     src/MapWidget.h
     src/RoutingModel.h
     src/SearchLocationModel.h
@@ -37,7 +36,6 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/DBThread.cpp
-    src/MainWindow.cpp
     src/MapWidget.cpp
     src/OSMScout.cpp
     src/RoutingModel.cpp
