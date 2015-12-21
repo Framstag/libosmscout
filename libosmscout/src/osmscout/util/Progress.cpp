@@ -61,6 +61,18 @@ namespace osmscout {
     // no code
   }
 
+  void Progress::SetProgress(uint32_t /*current*/,
+                             uint32_t /*total*/)
+  {
+	  // no code
+  }
+
+  void Progress::SetProgress(uint64_t /*current*/,
+                             uint64_t /*total*/)
+  {
+    // no code
+  }
+
   void Progress::Debug(const std::string& /*text*/)
   {
     // no code
@@ -111,6 +123,11 @@ namespace osmscout {
     }
   }
 
+  void ConsoleProgress::SetProgress(uint32_t current, uint32_t total)
+  {
+	  SetProgress((double)current, (double)total);
+  }
+  
   void ConsoleProgress::SetProgress(uint64_t current, uint64_t total)
   {
     SetProgress((double)current,(double)total);

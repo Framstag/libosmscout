@@ -43,7 +43,9 @@ namespace osmscout {
 
     virtual void SetStep(const std::string& step);
     virtual void SetAction(const std::string& action);
-    virtual void SetProgress(double current, double total);
+	virtual void SetProgress(double current, double total);
+	virtual void SetProgress(uint32_t current, uint32_t total);
+	virtual void SetProgress(uint64_t current, uint64_t total);
 
     virtual void Debug(const std::string& text);
     virtual void Info(const std::string& text);
@@ -63,8 +65,9 @@ namespace osmscout {
   public:
     void SetStep(const std::string& step);
     void SetAction(const std::string& action);
-    void SetProgress(double current, double total);
-    void SetProgress(uint64_t current, uint64_t total);
+	void SetProgress(double current, double total);
+	void SetProgress(uint32_t current, uint32_t total);
+	void SetProgress(uint64_t current, uint64_t total);
 
     void Debug(const std::string& text);
     void Info(const std::string& text);
