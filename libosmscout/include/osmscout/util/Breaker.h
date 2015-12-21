@@ -41,6 +41,7 @@ namespace osmscout {
 
     virtual bool Break() = 0;
     virtual bool IsAborted() const = 0;
+    virtual void Reset() = 0;
   };
 
   typedef std::shared_ptr<Breaker> BreakerRef;
@@ -52,6 +53,7 @@ namespace osmscout {
 
     virtual bool Break();
     virtual bool IsAborted() const;
+    virtual void Reset();
   };
 
 #if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
@@ -64,6 +66,7 @@ namespace osmscout {
 
     virtual bool Break();
     virtual bool IsAborted() const;
+    virtual void Reset();
   };
 #endif
 }

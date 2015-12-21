@@ -46,6 +46,11 @@ namespace osmscout {
     return false;
   }
 
+  void DummyBreaker::Reset()
+  {
+    // no code
+  }
+
 #if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
   ThreadedBreaker::ThreadedBreaker()
   : aborted(false)
@@ -63,6 +68,11 @@ namespace osmscout {
   bool ThreadedBreaker::IsAborted() const
   {
     return aborted;
+  }
+
+  void ThreadedBreaker::Reset()
+  {
+    aborted=false;
   }
 #endif
 }
