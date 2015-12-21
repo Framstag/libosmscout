@@ -33,7 +33,7 @@ namespace osmscout {
     std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
 
     stream.imbue(std::locale());
-	
+
     stream << std::abs(GetLat());
 
     if (GetLat()>=0) {
