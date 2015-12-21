@@ -30,3 +30,9 @@
 
 /* libmarisa is available */
 #undef OSMSCOUT_HAVE_LIB_MARISA
+
+/* long long is available */
+#undef OSMSCOUT_HAVE_LONG_LONG 1
+
+/* unsigned long long is available */
+#undef OSMSCOUT_HAVE_ULONG_LONG 1
