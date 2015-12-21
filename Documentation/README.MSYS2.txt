@@ -23,10 +23,9 @@ you need the following packages for building libosmscout:
 * git
 * autoconf
 * automake
-* libtool
 * make
-* mingw-w64-x86_64-pkg-config
-* mingw-w64-x86_64-gcc
+* mingw-w64-x86_64-toolchain
+* mingw-w64-x86_64-libtool
 
 For libosmscout-import you need additonally:
 * mingw-w64-x86_64-protobuf
