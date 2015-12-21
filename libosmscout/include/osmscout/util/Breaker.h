@@ -22,9 +22,10 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
-#include <atomic>
 #include <thread>
+
+#if defined(OSMSCOUT_HAVE_ATOMIC)
+#include <atomic>
 #endif
 
 #include <memory>
@@ -56,7 +57,7 @@ namespace osmscout {
     virtual void Reset();
   };
 
-#if defined(OSMSCOUT_HAVE_THREAD) && defined(OSMSCOUT_HAVE_ATOMIC)
+#if defined(OSMSCOUT_HAVE_ATOMIC)
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:

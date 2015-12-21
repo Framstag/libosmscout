@@ -29,11 +29,6 @@ AC_ARG_ENABLE([see2-support],
                               [disable use of SEE2 cpu extensions])],
               [])
 
-AC_ARG_ENABLE([thread-support],
-              [AS_HELP_STRING([--disable-thread-support],
-                              [disable C++0x thread support])],
-              [])
-
 AC_ARG_ENABLE([openmp-support],
               [AS_HELP_STRING([--disable-openmp-support],
                               [disable OpenMP support])],
@@ -68,11 +63,6 @@ dnl c++ 11 extensions
 AC_CHECK_HEADER([chrono],
                 [AC_DEFINE([OSMSCOUT_HAVE_CHRONO_H],[1],[system header <chrono> is available])])
       
-AS_IF([test "$enable_thread_support" != "no"],
-      [AC_CHECK_HEADER([thread],
-                       [AC_DEFINE([OSMSCOUT_HAVE_THREAD],[1],[system header <thread> is available])])])
-
-
 AC_MSG_CHECKING([if C++ include <atomic> is usable])
 AC_COMPILE_IFELSE(
   [AC_LANG_PROGRAM(

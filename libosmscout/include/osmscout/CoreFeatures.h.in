@@ -28,14 +28,5 @@
 /* standard library has support for atomic */
 #undef OSMSCOUT_HAVE_ATOMIC
 
-/* system header <thread> is available */
-#undef OSMSCOUT_HAVE_THREAD
-
 /* libmarisa is available */
 #undef OSMSCOUT_HAVE_LIB_MARISA
-
-/* long long is available */
-#undef OSMSCOUT_HAVE_LONG_LONG 1
-
-/* unsigned long long is available */
-#undef OSMSCOUT_HAVE_ULONG_LONG 1
