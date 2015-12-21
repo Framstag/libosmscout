@@ -991,11 +991,9 @@ namespace osmscout {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
 
-    Draw(projection,
-         parameter,
-         data);
-
-    return true;
+    return Draw(projection,
+                parameter,
+                data);
   }
 }
 
