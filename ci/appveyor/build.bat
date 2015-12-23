@@ -10,5 +10,6 @@ echo Bits: %BIT%
 
 IF %COMPILER%==msys2 (
   @echo on
+  SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
   bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
 )
