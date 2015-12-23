@@ -17,9 +17,8 @@ environment:
 install:
   - set
   - echo %COMPILER% %MSYS2_ARCH% %MSYS2_DIR% %MSYSTEM% %BIT%
-  - echo %PATH%
-  - dir C:\%MSYS2_DIR%\%MSYSTEM%\bin
-  - dir C:\%MSYS2_DIR%\usr\bin
+  - dir %APPVEYOR_BUILD_FOLDER%\ci\appveyor\
+  - %APPVEYOR_BUILD_FOLDER%\ci\appveyor\install.bat
   
 build_script:
   - set
