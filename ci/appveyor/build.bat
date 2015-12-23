@@ -10,5 +10,5 @@ echo Bits: %BIT%
 
 IF %COMPILER%==msys2 (
   @echo on
-  bash -lc "make full"
+  bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && make full"
 )
