@@ -44,12 +44,12 @@ packages can be installed using
 
 Building
 ========
-* Source the setupAutoconf.sh in the top level directory. It sets  the pkg-config
+* Source the setupMSYS2.sh in the top level directory. It sets  the pkg-config
   path to the right values for the given shell session.
 * For OSMScout2 you have to build the release version, the debug version
   crashes for yet unknown reasons.  
 * You have to copy the required libosmscout DLLs (libosmsocut, libosmsocut-map,
-  libosmscout-map-qt) to the release sub directory to get them found.
+  libosmscout-map-qt) to the OSMScout2 release sub directory to get them found.
   
 Other recomendations
 ====================
