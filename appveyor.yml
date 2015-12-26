@@ -12,7 +12,10 @@ environment:
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
-    BIT: 64  
+    BIT: 64
+  - COMPILER: msvc2015
+    PLATFORM: x64
+    CONFIGURATION: Debug
 
 install:
   - set

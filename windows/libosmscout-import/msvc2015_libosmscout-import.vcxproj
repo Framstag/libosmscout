@@ -166,7 +166,6 @@
     <ClCompile Include="src\osmscout\import\RawRelIndexedDataFile.cpp" />
     <ClCompile Include="src\osmscout\import\RawWay.cpp" />
     <ClCompile Include="src\osmscout\import\RawWayIndexedDataFile.cpp" />
-    <ClCompile Include="src\osmscout\import\SortAreaDat.cpp" />
     <ClCompile Include="src\osmscout\import\SortDat.cpp" />
     <ClCompile Include="src\osmscout\import\SortNodeDat.cpp" />
     <ClCompile Include="src\osmscout\import\SortWayDat.cpp" />
@@ -203,7 +202,6 @@
     <ClInclude Include="include\osmscout\import\RawRelIndexedDataFile.h" />
     <ClInclude Include="include\osmscout\import\RawWay.h" />
     <ClInclude Include="include\osmscout\import\RawWayIndexedDataFile.h" />
-    <ClInclude Include="include\osmscout\import\SortAreaDat.h" />
     <ClInclude Include="include\osmscout\import\SortDat.h" />
     <ClInclude Include="include\osmscout\import\SortNodeDat.h" />
     <ClInclude Include="include\osmscout\import\SortWayDat.h" />

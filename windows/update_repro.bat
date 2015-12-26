@@ -12,4 +12,4 @@ copy ..\libosmscout-map\libosmscout-map.vcxproj libosmscout-map\msvc2015_libosms
 
 copy ..\Import\Import.vcxproj Import\msvc2015_Import.vcxproj
 
-copy ..\libosmscout\libosmscout.sln msvc2015_libosmscout.sln
+copy ..\libosmscout.sln msvc2015_libosmscout.sln
