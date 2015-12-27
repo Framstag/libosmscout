@@ -161,9 +161,6 @@
 /* std::wstring is available */
 #define OSMSCOUT_HAVE_STD_WSTRING 1
 
-/* system header <thread> is available */
-#define OSMSCOUT_HAVE_THREAD 1
-
 /* uint16_t is available */
 #define OSMSCOUT_HAVE_UINT16_T 1
 

@@ -10,30 +10,6 @@
 /* std::wstring is available */
 #define OSMSCOUT_HAVE_STD_WSTRING 1
 
-/* int8_t is available */
-#define OSMSCOUT_HAVE_INT8_T 1
-
-/* uint8_t is available */
-#define OSMSCOUT_HAVE_UINT8_T 1
-
-/* int16_t is available */
-#define OSMSCOUT_HAVE_INT16_T 1
-
-/* uint16_t is available */
-#define OSMSCOUT_HAVE_UINT16_T 1
-
-/* int32_t is available */
-#define OSMSCOUT_HAVE_INT32_T 1
-
-/* uint32_t is available */
-#define OSMSCOUT_HAVE_UINT32_T 1
-
-/* int64_t is available */
-#define OSMSCOUT_HAVE_INT64_T 1
-
-/* uint64_t is available */
-#define OSMSCOUT_HAVE_UINT64_T 1
-
 /* SSE2 processor extension available */
 #define OSMSCOUT_HAVE_SSE2 1
 
@@ -51,9 +27,6 @@
 
 /* math function lround(double) is available */
 #define OSMSCOUT_HAVE_LROUND 1
-
-/* system header <thread> is available */
-#define OSMSCOUT_HAVE_THREAD 1
 
 /* libmarisa is available */
 /* #undef OSMSCOUT_HAVE_LIB_MARISA 1 */
