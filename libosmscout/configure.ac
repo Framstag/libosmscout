@@ -16,7 +16,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CXX
 AC_PROG_INSTALL
 
-LT_INIT([win32-dll])
+LT_INIT([win32-dll disable-static])
 gl_VISIBILITY
 AS_IF([test "$HAVE_VISIBILITY" == "1"],
       [AC_DEFINE([OSMSCOUT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
@@ -70,15 +70,6 @@ AC_COMPILE_IFELSE(
     [[std::atomic_bool atomBoolValue;]])],
   [AC_MSG_RESULT(yes)
    AC_DEFINE([OSMSCOUT_HAVE_ATOMIC],[1],[standard library has support for atomic])],
-  [AC_MSG_RESULT(no)])
-
-AC_MSG_CHECKING([if C++ include <mutex> is usable])
-AC_COMPILE_IFELSE(
-  [AC_LANG_PROGRAM(
-    [[#include <mutex>]],
-    [[std::mutex mutexValue;]])],
-  [AC_MSG_RESULT(yes)
-   AC_DEFINE([OSMSCOUT_HAVE_MUTEX],[1],[standard library has support for mutex])],
   [AC_MSG_RESULT(no)])
 
 AC_SEARCH_LIBS([sqrt],[m],[])

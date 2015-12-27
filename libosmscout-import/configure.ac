@@ -12,7 +12,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CXX
 AC_PROG_INSTALL
 
-LT_INIT([win32-dll])
+LT_INIT([win32-dll disable-static])
 gl_VISIBILITY
 AS_IF([test "$HAVE_VISIBILITY" == "1"],
       [AC_DEFINE([OSMSCOUT_IMPORT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
