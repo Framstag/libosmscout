@@ -22,13 +22,10 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <thread>
 
-#if defined(OSMSCOUT_HAVE_ATOMIC)
 #include <atomic>
-#endif
-
 #include <memory>
+#include <thread>
 
 #include <osmscout/private/CoreImportExport.h>
 
@@ -57,7 +54,6 @@ namespace osmscout {
     virtual void Reset();
   };
 
-#if defined(OSMSCOUT_HAVE_ATOMIC)
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:
@@ -69,7 +65,6 @@ namespace osmscout {
     virtual bool IsAborted() const;
     virtual void Reset();
   };
-#endif
 }
 
 #endif

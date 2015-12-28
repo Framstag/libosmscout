@@ -51,7 +51,6 @@ namespace osmscout {
     // no code
   }
 
-#if defined(OSMSCOUT_HAVE_ATOMIC)
   ThreadedBreaker::ThreadedBreaker()
   : aborted(false)
   {
@@ -74,6 +73,5 @@ namespace osmscout {
   {
     aborted=false;
   }
-#endif
 }
 

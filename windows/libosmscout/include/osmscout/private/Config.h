@@ -91,9 +91,6 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
-/* Define to 1 if you have the <thread> header file. */
-#define HAVE_THREAD 1
-
 /* Define to 1 if the system has the type `uint16_t'. */
 #define HAVE_UINT16_T 1
 
@@ -119,12 +116,6 @@
 /* libosmscout uses special gcc compiler features to export symbols */
 /* #undef OSMSCOUT_EXPORT_SYMBOLS */
 
-/* math function atanh(double) is available */
-#define OSMSCOUT_HAVE_ATANH 1
-
-/* standard library has support for atomic */
-#define OSMSCOUT_HAVE_ATOMIC 1
-
 /* int16_t is available */
 #define OSMSCOUT_HAVE_INT16_T 1
 
@@ -140,17 +131,8 @@
 /* libmarisa detected */
 /* #undef OSMSCOUT_HAVE_LIB_MARISA */
 
-/* math function log2(double) is available */
-#define OSMSCOUT_HAVE_LOG2 1
-
 /* long long is available */
 #define OSMSCOUT_HAVE_LONG_LONG 1
-
-/* math function lround(double) is available */
-#define OSMSCOUT_HAVE_LROUND 1
-
-/* standard library has support for mutex */
-#define OSMSCOUT_HAVE_MUTEX 1
 
 /* SSE2 processor extension available */
 #define OSMSCOUT_HAVE_SSE2 1
@@ -176,12 +158,6 @@
 /* unsigned long long is available */
 #define OSMSCOUT_HAVE_ULONG_LONG 1
 
-/* libosmscout needs to include <assert.h> */
-/* #undef OSMSCOUT_REQUIRES_ASSERTH */
-
-/* libosmscout needs to include <math.h> */
-#define OSMSCOUT_REQUIRES_MATHH 1
-
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "tim@teulings.org"
 
@@ -205,8 +181,5 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* Define to 1 if you have <chrono> header */
-#define OSMSCOUT_HAVE_CHRONO_H
 
 #endif

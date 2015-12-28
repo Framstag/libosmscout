@@ -29,33 +29,8 @@
 
 #include <cmath>
 
-#if defined(OSMSCOUT_REQUIRES_MATHH)
-  #include <math.h>
-#endif
-
 #if !defined(M_PI)
   #define M_PI 3.14159265358979323846
-#endif
-
-#if !defined(OSMSCOUT_HAVE_LOG2)
-  inline double log2(double x)
-  {
-    return log(x)/log(2.0l);
-  }
-#endif
-
-#if !defined(OSMSCOUT_HAVE_ATANH)
-  inline double atanh(double x)
-  {
-    return log((1.0+x)/(1.0-x))/2.0;
-  }
-#endif
-
-#if !defined(OSMSCOUT_HAVE_LROUND)
-  inline long lround(double d)
-  {
-    return (long)(d>0 ? d+0.5 : ceil(d-0.5));
-  }
 #endif
 
 #endif

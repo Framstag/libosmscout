@@ -56,68 +56,11 @@ dnl the agg backend needs wstring support
 AC_CHECK_TYPES([std::wstring],[AC_DEFINE([OSMSCOUT_HAVE_STD_WSTRING],[1],[std::wstring is available])],,[#include <string>])
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_CHECK_HEADERS([fcntl.h sys/time.h])
+AC_CHECK_HEADERS([fcntl.h])
       
 dnl c++ 11 extensions
 
-AC_CHECK_HEADER([chrono],
-                [AC_DEFINE([OSMSCOUT_HAVE_CHRONO_H],[1],[system header <chrono> is available])])
-      
-AC_MSG_CHECKING([if C++ include <atomic> is usable])
-AC_COMPILE_IFELSE(
-  [AC_LANG_PROGRAM(
-    [[#include <atomic>]],
-    [[std::atomic_bool atomBoolValue;]])],
-  [AC_MSG_RESULT(yes)
-   AC_DEFINE([OSMSCOUT_HAVE_ATOMIC],[1],[standard library has support for atomic])],
-  [AC_MSG_RESULT(no)])
-
 AC_SEARCH_LIBS([sqrt],[m],[])
-
-AC_MSG_CHECKING([if C++ include <cassert> defines assert() without namespace])
-AC_COMPILE_IFELSE(
-  [AC_LANG_PROGRAM(
-    [[#include <cassert>]],
-    [[assert(true);]])],
-  [AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)
-   AC_DEFINE([OSMSCOUT_REQUIRES_ASSERTH],[1],[libosmscout needs to include <assert.h>])])
-
-AC_MSG_CHECKING([if C++ include <cmath> defines C math symbols, too])
-AC_COMPILE_IFELSE(
-  [AC_LANG_PROGRAM(
-    [[#include <cmath>]],
-     [[sin(1);]])],
-  [AC_MSG_RESULT(yes)
-   AC_DEFINE([OSMSCOUT_REQUIRES_MATHH],[1],[libosmscout needs to include <math.h>])],
-  [AC_MSG_RESULT(no)])
-
-AC_CHECK_DECL([log2(double)],
-              [AC_DEFINE([OSMSCOUT_HAVE_LOG2],[1],[math function log2(double) is available])],
-              [],
-              [#include <cmath>
-               #if defined(OSMSCOUT_REQUIRES_MATHH)
-                 #include <math.h>
-               #endif
-              ])
-
-AC_CHECK_DECL([atanh(double)],
-              [AC_DEFINE([OSMSCOUT_HAVE_ATANH],[1],[math function atanh(double) is available])],
-              [],
-              [#include <cmath>
-               #if defined(OSMSCOUT_REQUIRES_MATHH)
-                 #include <math.h>
-               #endif
-              ])
-
-AC_CHECK_DECL([lround(double)],
-              [AC_DEFINE([OSMSCOUT_HAVE_LROUND],[1],[math function lround(double) is available])],
-              [],
-              [#include <cmath>
-               #if defined(OSMSCOUT_REQUIRES_MATHH)
-                 #include <math.h>
-               #endif
-              ])
 
 AC_CHECK_FUNCS([mmap posix_fadvise posix_madvise])
 

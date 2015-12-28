@@ -10,24 +10,6 @@
 /* SSE2 processor extension available */
 #undef OSMSCOUT_HAVE_SSE2
 
-/* libosmscout needs to include <assert.h> */
-#undef OSMSCOUT_REQUIRES_ASSERTH
-
-/* libosmscout needs to include <math.h> */
-#undef OSMSCOUT_REQUIRES_MATHH
-
-/* math function log2(double) is available */
-#undef OSMSCOUT_HAVE_LOG2
-
-/* math function atanh(double) is available */
-#undef OSMSCOUT_HAVE_ATANH
-
-/* math function lround(double) is available */
-#undef OSMSCOUT_HAVE_LROUND
-
-/* standard library has support for atomic */
-#undef OSMSCOUT_HAVE_ATOMIC
-
 /* libmarisa is available */
 #undef OSMSCOUT_HAVE_LIB_MARISA
 

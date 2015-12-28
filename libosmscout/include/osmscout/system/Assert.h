@@ -25,8 +25,4 @@
 
 #include <cassert>
 
-#if defined(OSMSCOUT_REQUIRES_ASSERTH)
-  #include <assert.h>
-#endif
-
 #endif
