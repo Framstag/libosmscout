@@ -4,9 +4,6 @@
 /* libosmscout uses special gcc compiler features to export symbols */
 /* #undef OSMSCOUT_EXPORT_SYMBOLS */
 
-/* system header <stdint.h> is available */
-#define OSMSCOUT_HAVE_STDINT_H 1
-
 /* std::wstring is available */
 #define OSMSCOUT_HAVE_STD_WSTRING 1
 
