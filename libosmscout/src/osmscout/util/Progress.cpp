@@ -73,13 +73,11 @@ namespace osmscout {
     // no code
   }
 
-#if defined(OSMSCOUT_HAVE_ULONG_LONG)
   void Progress::SetProgress(unsigned long long /*current*/,
                              unsigned long long /*total*/)
   {
     // no code
   }
-#endif
 
   void Progress::Debug(const std::string& /*text*/)
   {
@@ -141,13 +139,11 @@ namespace osmscout {
     SetProgress((double)current,(double)total);
   }
 
-#if defined(OSMSCOUT_HAVE_ULONG_LONG)
   void ConsoleProgress::SetProgress(unsigned long long current,
                                     unsigned long long total)
   {
     SetProgress((double)current,(double)total);
   }
-#endif
 
   void ConsoleProgress::Debug(const std::string& text)
   {
