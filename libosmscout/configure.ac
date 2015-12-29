@@ -46,10 +46,7 @@ AS_IF([test "x$GXX" = xyes],
 
 dnl Support for XintXX_T constants
 
-AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t],[],[AC_MSG_ERROR("required type is not available")])
-
-AC_CHECK_TYPES([long long],[AC_DEFINE([OSMSCOUT_HAVE_LONG_LONG],[1],[long long is available])],,)
-AC_CHECK_TYPES([unsigned long long],[AC_DEFINE([OSMSCOUT_HAVE_ULONG_LONG],[1],[unsigned long long is available])],,)
+AC_CHECK_TYPES([long long, unsigned long long, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t],[],[AC_MSG_ERROR("required type is not available")])
 
 dnl the agg backend needs wstring support
 

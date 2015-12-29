@@ -13,10 +13,4 @@
 /* libmarisa is available */
 /* #undef OSMSCOUT_HAVE_LIB_MARISA 1 */
 
-/* long long is available */
-#define OSMSCOUT_HAVE_LONG_LONG 1
-
-/* unsigned long long is available */
-#define OSMSCOUT_HAVE_ULONG_LONG 1
-
 #endif

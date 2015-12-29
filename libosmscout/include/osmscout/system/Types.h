@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <stddef.h>
+#include <cstddef>
 #include <cstdint>
 
 #endif
