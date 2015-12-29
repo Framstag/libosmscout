@@ -23,10 +23,6 @@
 #include <osmscout/CoreFeatures.h>
 
 #include <stddef.h>
-
-#if defined(OSMSCOUT_HAVE_STDINT_H)
-  // will be <cstdint> in c++0x
-  #include <stdint.h>
-#endif
+#include <cstdint>
 
 #endif

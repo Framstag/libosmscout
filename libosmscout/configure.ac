@@ -56,7 +56,7 @@ dnl the agg backend needs wstring support
 AC_CHECK_TYPES([std::wstring],[AC_DEFINE([OSMSCOUT_HAVE_STD_WSTRING],[1],[std::wstring is available])],,[#include <string>])
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_CHECK_HEADERS([fcntl.h cstdint stdint.h])
+AC_CHECK_HEADERS([fcntl.h])
       
 dnl c++ 11 extensions
 
