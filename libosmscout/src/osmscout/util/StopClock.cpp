@@ -19,11 +19,8 @@
 
 #include <osmscout/util/StopClock.h>
 
-#include <chrono>
 #include <iomanip>
 #include <sstream>
-
-#include <osmscout/private/Config.h>
 
 #include <osmscout/util/String.h>
 
@@ -31,31 +28,26 @@ namespace osmscout {
 
   typedef std::chrono::duration<double,std::milli> MilliDouble;
 
-  struct StopClock::StopClockPIMPL
-  {
-    std::chrono::steady_clock::time_point start;
-    std::chrono::steady_clock::time_point stop;
-  };
-
   StopClock::StopClock()
-    : pimpl(new StopClockPIMPL())
+   : start(std::chrono::steady_clock::now()),
+     stop(start)
   {
-    pimpl->start=std::chrono::steady_clock::now();
+    // no code
   }
 
   StopClock::~StopClock()
   {
-    delete pimpl;
+    // no code
   }
 
   void StopClock::Stop()
   {
-    pimpl->stop=std::chrono::steady_clock::now();
+    stop=std::chrono::steady_clock::now();
   }
 
   double StopClock::GetMilliseconds() const
   {
-    return std::chrono::duration_cast<MilliDouble>(pimpl->stop-pimpl->start).count();
+    return std::chrono::duration_cast<MilliDouble>(stop-start).count();
   }
 
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
