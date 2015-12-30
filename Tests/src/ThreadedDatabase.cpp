@@ -490,7 +490,6 @@ int main(int argc, char* argv[])
 
   std::cout << "Done." << std::endl;
 
-  /*
   std::cout << "Testing data file access with " << DATAFILEACCESS_THREAD_COUNT << " threads iterating " << DATAFILEACCESS_ITERATION_COUNT << " times each..." << std::endl;
 
   if (TestDatafilesAcceess(database,
@@ -500,7 +499,7 @@ int main(int argc, char* argv[])
   }
   else {
     std::cout << "Test result: ERROR" << std::endl;
-  }*/
+  }
 
   std::cout << "Testing area index access with " << AREAINDEXACCESS_THREAD_COUNT << " threads iterating " << AREAINDEXACCESS_ITERATION_COUNT << " times..." << std::endl;
 
