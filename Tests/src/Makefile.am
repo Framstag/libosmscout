@@ -3,7 +3,8 @@ bin_PROGRAMS = CachePerformance \
                CoordinateEncoding \
                NumberSetPerformance \
                ReaderScannerPerformance \
-               ThreadedDatabase 
+               ThreadedDatabase \
+               WorkQueue
 
 CachePerformance_SOURCES = CachePerformance.cpp
 CachePerformance_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
@@ -29,3 +30,6 @@ ThreadedDatabase_SOURCES = ThreadedDatabase.cpp
 ThreadedDatabase_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(LIBOSMSCOUTMAP_CFLAGS)
 ThreadedDatabase_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
 
+WorkQueue_SOURCES = WorkQueue.cpp
+WorkQueue_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(LIBOSMSCOUTMAP_CFLAGS)
+WorkQueue_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
