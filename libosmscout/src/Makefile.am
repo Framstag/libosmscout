@@ -31,6 +31,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/String.cpp \
                         osmscout/util/Tiling.cpp \
                         osmscout/util/Transformation.cpp \
+                        osmscout/util/WorkQueue.cpp \
                         osmscout/Types.cpp \
                         osmscout/TypeConfig.cpp \
                         osmscout/TypeFeatures.cpp \

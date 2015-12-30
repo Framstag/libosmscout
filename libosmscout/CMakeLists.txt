@@ -34,6 +34,7 @@ set(HEADER_FILES
     include/osmscout/util/String.h
     include/osmscout/util/Tiling.h
     include/osmscout/util/Transformation.h
+    include/osmscout/util/WorkQueue.h
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
@@ -104,6 +105,7 @@ set(SOURCE_FILES
     src/osmscout/util/String.cpp
     src/osmscout/util/Tiling.cpp
     src/osmscout/util/Transformation.cpp
+    src/osmscout/util/WorkQueue.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaAreaIndex.cpp
     src/osmscout/AreaNodeIndex.cpp
@@ -153,3 +155,15 @@ set(SOURCE_FILES
 
 add_library(libosmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout PROPERTY CXX_STANDARD 11)
+
+include(CheckCXXSourceCompiles)
+include(CheckPrototypeDefinition)
+
+CHECK_CXX_SOURCE_COMPILES("
+#include <string>
+
+int main()
+{
+  std::wstring value=L\"Hello\";
+}
+" OSMSCOUT_HAVE_STD_WSTRING)
