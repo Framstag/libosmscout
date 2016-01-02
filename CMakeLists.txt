@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(libosmscout_project)
+project(libosmscout_project CXX)
 
 add_subdirectory(libosmscout)
 
@@ -16,3 +16,4 @@ add_subdirectory(Import)
 add_subdirectory(Demos)
 add_subdirectory(DumpData)
 add_subdirectory(OSMScout2)
+add_subdirectory(Tests)
