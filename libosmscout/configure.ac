@@ -72,13 +72,7 @@ AS_IF([test "$enable_see2_support" != "no"],
 AS_IF([test "$enable_openmp_support" != "no"],
       [AX_OPENMP([AC_SUBST(OPENMP_CXXFLAGS)])])
 
-dnl Selfmade tests
-
-AS_IF([test "x$ac_cv_header_stdint_h" = xyes],
-      [AC_DEFINE([OSMSCOUT_HAVE_STDINT_H],[1],[system header <stdint.h> is available])])
-
 dnl SSE support
-
 AS_IF([test "x$ax_cv_have_sse2_ext" = xyes],
       [AC_DEFINE([OSMSCOUT_HAVE_SSE2],[1],[SSE2 processor extension available])])
 
