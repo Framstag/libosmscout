@@ -22,6 +22,7 @@
 
 #include <list>
 #include <memory>
+#include <thread>
 #include <vector>
 
 #include <osmscout/private/MapImportExport.h>
@@ -35,6 +36,7 @@
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
+#include <osmscout/util/WorkQueue.h>
 
 #include <osmscout/TiledDataCache.h>
 
@@ -98,9 +100,24 @@ namespace osmscout {
     typedef std::shared_ptr<TypeDefinition> TypeDefinitionRef;
 
   private:
-    DatabaseRef            database;       //!< The reference to the database
-    mutable TiledDataCache cache;          //!< Data cache
-    TypeDefinitionRef      typeDefinition; //<! Last used and cached TypeDefinition
+    DatabaseRef             database;       //!< The reference to the database
+    mutable TiledDataCache  cache;          //!< Data cache
+    TypeDefinitionRef       typeDefinition; //<! Last used and cached TypeDefinition
+
+    std::thread             nodeWorkerThread;
+    mutable WorkQueue<bool> nodeWorkerQueue;
+
+    std::thread             wayWorkerThread;
+    mutable WorkQueue<bool> wayWorkerQueue;
+
+    std::thread             wayLowZoomWorkerThread;
+    mutable WorkQueue<bool> wayLowZoomWorkerQueue;
+
+    std::thread             areaWorkerThread;
+    mutable WorkQueue<bool> areaWorkerQueue;
+
+    std::thread             areaLowZoomWorkerThread;
+    mutable WorkQueue<bool> areaLowZoomWorkerQueue;
 
   private:
     TypeDefinitionRef GetTypeDefinition(const AreaSearchParameter& parameter,
@@ -110,30 +127,64 @@ namespace osmscout {
     bool GetNodes(const AreaSearchParameter& parameter,
                   const TypeInfoSet& nodeTypes,
                   const GeoBox& boundingBox,
-                  TileRef tile) const;
+                  const TileRef& tile) const;
 
     bool GetAreasLowZoom(const AreaSearchParameter& parameter,
                          const TypeInfoSet& areaTypes,
                          const Magnification& magnification,
                          const GeoBox& boundingBox,
-                         TileRef tile) const;
+                         const TileRef& tile) const;
 
     bool GetAreas(const AreaSearchParameter& parameter,
                   const TypeInfoSet& areaTypes,
                   const Magnification& magnification,
                   const GeoBox& boundingBox,
-                  TileRef tile) const;
+                  const TileRef& tile) const;
 
     bool GetWaysLowZoom(const AreaSearchParameter& parameter,
                         const TypeInfoSet& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
-                        TileRef tile) const;
+                        const TileRef& tile) const;
 
     bool GetWays(const AreaSearchParameter& parameter,
                  const TypeInfoSet& wayTypes,
                  const GeoBox& boundingBox,
-                 TileRef tile) const;
+                 const TileRef& tile) const;
+
+    void NodeWorkerLoop();
+    void WayWorkerLoop();
+    void WayLowZoomWorkerLoop();
+    void AreaWorkerLoop();
+    void AreaLowZoomWorkerLoop();
+
+    std::future<bool> PushNodeTask(const AreaSearchParameter& parameter,
+                                   const TypeInfoSet& nodeTypes,
+                                   const GeoBox& boundingBox,
+                                   const TileRef& tile) const;
+
+    std::future<bool> PushAreaLowZoomTask(const AreaSearchParameter& parameter,
+                                          const TypeInfoSet& areaTypes,
+                                          const Magnification& magnification,
+                                          const GeoBox& boundingBox,
+                                          const TileRef& tile) const;
+
+    std::future<bool> PushAreaTask(const AreaSearchParameter& parameter,
+                                   const TypeInfoSet& areaTypes,
+                                   const Magnification& magnification,
+                                   const GeoBox& boundingBox,
+                                   const TileRef& tile) const;
+
+    std::future<bool> PushWayLowZoomTask(const AreaSearchParameter& parameter,
+                                         const TypeInfoSet& wayTypes,
+                                         const Magnification& magnification,
+                                         const GeoBox& boundingBox,
+                                         const TileRef& tile) const;
+
+    std::future<bool> PushWayTask(const AreaSearchParameter& parameter,
+                                  const TypeInfoSet& wayTypes,
+                                  const GeoBox& boundingBox,
+                                  const TileRef& tile) const;
 
   public:
     MapService(const DatabaseRef& database);

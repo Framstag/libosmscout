@@ -22,10 +22,6 @@
 #include <algorithm>
 #include <future>
 
-#if _OPENMP
-#include <omp.h>
-#endif
-
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -89,14 +85,29 @@ namespace osmscout {
 
   MapService::MapService(const DatabaseRef& database)
    : database(database),
-     cache(25)
+     cache(25),
+     nodeWorkerThread(&MapService::NodeWorkerLoop,this),
+     wayWorkerThread(&MapService::WayWorkerLoop,this),
+     wayLowZoomWorkerThread(&MapService::WayLowZoomWorkerLoop,this),
+     areaWorkerThread(&MapService::AreaWorkerLoop,this),
+     areaLowZoomWorkerThread(&MapService::AreaLowZoomWorkerLoop,this)
   {
     // no code
   }
 
   MapService::~MapService()
   {
-    // no code
+    nodeWorkerQueue.Stop();
+    wayWorkerQueue.Stop();
+    wayLowZoomWorkerQueue.Stop();
+    areaWorkerQueue.Stop();
+    areaLowZoomWorkerQueue.Stop();
+
+    nodeWorkerThread.join();
+    wayWorkerThread.join();
+    wayLowZoomWorkerThread.join();
+    areaWorkerThread.join();
+    areaLowZoomWorkerThread.join();
   }
 
   /**
@@ -161,7 +172,7 @@ namespace osmscout {
   bool MapService::GetNodes(const AreaSearchParameter& parameter,
                             const TypeInfoSet& nodeTypes,
                             const GeoBox& boundingBox,
-                            TileRef tile) const
+                            const TileRef& tile) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
 
@@ -222,7 +233,7 @@ namespace osmscout {
                                    const TypeInfoSet& areaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
-                                   TileRef tile) const
+                                   const TileRef& tile) const
   {
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
 
@@ -267,7 +278,7 @@ namespace osmscout {
                             const TypeInfoSet& areaTypes,
                             const Magnification& magnification,
                             const GeoBox& boundingBox,
-                            TileRef tile) const
+                            const TileRef& tile) const
   {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
 
@@ -327,7 +338,7 @@ namespace osmscout {
                                   const TypeInfoSet& wayTypes,
                                   const Magnification& magnification,
                                   const GeoBox& boundingBox,
-                                  TileRef tile) const
+                                  const TileRef& tile) const
   {
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
@@ -371,7 +382,7 @@ namespace osmscout {
   bool MapService::GetWays(const AreaSearchParameter& parameter,
                            const TypeInfoSet& wayTypes,
                            const GeoBox& boundingBox,
-                           TileRef tile) const
+                           const TileRef& tile) const
   {
     AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
 
@@ -426,6 +437,126 @@ namespace osmscout {
     tile->GetWayData().SetData(loadedWayTypes,tile->GetWayData().GetData());
 
     return !parameter.IsAborted();
+  }
+
+  void MapService::NodeWorkerLoop()
+  {
+    std::packaged_task<bool()> task;
+
+    while (nodeWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  void MapService::WayWorkerLoop()
+  {
+    std::packaged_task<bool()> task;
+
+    while (wayWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  void MapService::WayLowZoomWorkerLoop()
+  {
+    std::packaged_task<bool()> task;
+
+    while (wayLowZoomWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  void MapService::AreaWorkerLoop()
+  {
+    std::packaged_task<bool()> task;
+
+    while (areaWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  void MapService::AreaLowZoomWorkerLoop()
+  {
+    std::packaged_task<bool()> task;
+
+    while (areaLowZoomWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  std::future<bool> MapService::PushNodeTask(const AreaSearchParameter& parameter,
+                                             const TypeInfoSet& nodeTypes,
+                                             const GeoBox& boundingBox,
+                                             const TileRef& tile) const
+  {
+    std::packaged_task<bool()> task(std::bind(&MapService::GetNodes,this,parameter,nodeTypes,boundingBox,tile));
+
+    std::future<bool> future=task.get_future();
+
+    nodeWorkerQueue.PushTask(task);
+
+    return future;
+  }
+
+  std::future<bool> MapService::PushAreaLowZoomTask(const AreaSearchParameter& parameter,
+                                                    const TypeInfoSet& areaTypes,
+                                                    const Magnification& magnification,
+                                                    const GeoBox& boundingBox,
+                                                    const TileRef& tile) const
+  {
+    std::packaged_task<bool()> task(std::bind(&MapService::GetAreasLowZoom,this,parameter,areaTypes,magnification,boundingBox,tile));
+
+    std::future<bool> future=task.get_future();
+
+    areaLowZoomWorkerQueue.PushTask(task);
+
+    return future;
+  }
+
+  std::future<bool> MapService::PushAreaTask(const AreaSearchParameter& parameter,
+                                             const TypeInfoSet& areaTypes,
+                                             const Magnification& magnification,
+                                             const GeoBox& boundingBox,
+                                             const TileRef& tile) const
+  {
+    std::packaged_task<bool()> task(std::bind(&MapService::GetAreas,this,parameter,areaTypes,magnification,boundingBox,tile));
+
+    std::future<bool> future=task.get_future();
+
+    areaWorkerQueue.PushTask(task);
+
+    return future;
+  }
+
+  std::future<bool> MapService::PushWayLowZoomTask(const AreaSearchParameter& parameter,
+                                                   const TypeInfoSet& wayTypes,
+                                                   const Magnification& magnification,
+                                                   const GeoBox& boundingBox,
+                                                   const TileRef& tile) const
+  {
+    std::packaged_task<bool()> task(std::bind(&MapService::GetWaysLowZoom,this,parameter,
+                                              wayTypes,magnification,boundingBox,tile));
+
+    std::future<bool> future=task.get_future();
+
+    wayLowZoomWorkerQueue.PushTask(task);
+
+    return future;
+  }
+
+  std::future<bool> MapService::PushWayTask(const AreaSearchParameter& parameter,
+                                            const TypeInfoSet& wayTypes,
+                                            const GeoBox& boundingBox,
+                                            const TileRef& tile) const
+  {
+    std::packaged_task<bool()> task(std::bind(&MapService::GetWays,this,parameter,
+                                              wayTypes,boundingBox,tile));
+
+    std::future<bool> future=task.get_future();
+
+    wayWorkerQueue.PushTask(task);
+
+    return future;
   }
 
   /**
@@ -535,47 +666,37 @@ namespace osmscout {
                                    typeDefinition->optimizedWayTypes,
                                    typeDefinition->optimizedAreaTypes);
 
-        results.push_back(std::async(std::launch::async,
-                                     &MapService::GetNodes,this,
-                                     parameter,
-                                     typeDefinition->nodeTypes,
-                                     tileBoundingBox,
-                                     tile));
+        results.push_back(PushNodeTask(parameter,
+                                       typeDefinition->nodeTypes,
+                                       tileBoundingBox,
+                                       tile));
 
         if (parameter.GetUseLowZoomOptimization()) {
-          results.push_back(std::async(std::launch::async,
-                                       &MapService::GetAreasLowZoom,this,
-                                       parameter,
-                                       typeDefinition->optimizedAreaTypes,
+          results.push_back(PushAreaLowZoomTask(parameter,
+                                                typeDefinition->optimizedAreaTypes,
+                                                magnification,
+                                                tileBoundingBox,
+                                                tile));
+        }
+
+        results.push_back(PushAreaTask(parameter,
+                                       typeDefinition->areaTypes,
                                        magnification,
                                        tileBoundingBox,
                                        tile));
-        }
-
-        results.push_back(std::async(std::launch::async,
-                                     &MapService::GetAreas,this,
-                                     parameter,
-                                     typeDefinition->areaTypes,
-                                     magnification,
-                                     tileBoundingBox,
-                                     tile));
 
         if (parameter.GetUseLowZoomOptimization()) {
-          results.push_back(std::async(std::launch::async,
-                                       &MapService::GetWaysLowZoom,this,
-                                       parameter,
-                                       typeDefinition->optimizedWayTypes,
-                                       magnification,
-                                       tileBoundingBox,
-                                       tile));
+          results.push_back(PushWayLowZoomTask(parameter,
+                                               typeDefinition->optimizedWayTypes,
+                                               magnification,
+                                               tileBoundingBox,
+                                               tile));
         }
 
-        results.push_back(std::async(std::launch::async,
-                                     &MapService::GetWays,this,
-                                     parameter,
-                                     typeDefinition->wayTypes,
-                                     tileBoundingBox,
-                                     tile));
+        results.push_back(PushWayTask(parameter,
+                                      typeDefinition->wayTypes,
+                                      tileBoundingBox,
+                                      tile));
 
         tileLoadingTime.Stop();
 
