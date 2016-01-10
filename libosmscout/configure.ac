@@ -22,7 +22,7 @@ AS_IF([test "$HAVE_VISIBILITY" == "1"],
       [AC_DEFINE([OSMSCOUT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
 
 AC_LANG([C++])
-AX_CXX_COMPILE_STDCXX_11([],[mandatory])
+AX_CXX_COMPILE_STDCXX([11],[noext],[mandatory])
 
 AC_ARG_ENABLE([see2-support],
               [AS_HELP_STRING([--disable-see2-support],
@@ -52,6 +52,8 @@ dnl the agg backend needs wstring support
 
 AC_CHECK_TYPES([std::wstring],[AC_DEFINE([OSMSCOUT_HAVE_STD_WSTRING],[1],[std::wstring is available])],,[#include <string>])
 AC_CHECK_SIZEOF([wchar_t])
+
+AC_CHECK_TYPES([std::shared_mutex],[AC_DEFINE([OSMSCOUT_HAVE_SHARED_MUTEX],[1],[std::shared_mutex is available])],,[#include <shared_mutex>])
 
 AC_CHECK_HEADERS([fcntl.h])
       
