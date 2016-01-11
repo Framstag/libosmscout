@@ -99,25 +99,34 @@ namespace osmscout {
 
     typedef std::shared_ptr<TypeDefinition> TypeDefinitionRef;
 
+  public:
+    typedef size_t                              CallbackId;
+    typedef std::function<void(const TileRef&)> TileStateCallback;
+
   private:
-    DatabaseRef             database;       //!< The reference to the database
-    mutable TiledDataCache  cache;          //!< Data cache
-    TypeDefinitionRef       typeDefinition; //<! Last used and cached TypeDefinition
+    DatabaseRef                  database;             //!< The reference to the database
+    mutable TiledDataCache       cache;                //!< Data cache
+    TypeDefinitionRef            typeDefinition;       //<! Last used and cached TypeDefinition
 
-    std::thread             nodeWorkerThread;
-    mutable WorkQueue<bool> nodeWorkerQueue;
+    std::thread                  nodeWorkerThread;
+    mutable WorkQueue<bool>      nodeWorkerQueue;
 
-    std::thread             wayWorkerThread;
-    mutable WorkQueue<bool> wayWorkerQueue;
+    std::thread                  wayWorkerThread;
+    mutable WorkQueue<bool>      wayWorkerQueue;
 
-    std::thread             wayLowZoomWorkerThread;
-    mutable WorkQueue<bool> wayLowZoomWorkerQueue;
+    std::thread                  wayLowZoomWorkerThread;
+    mutable WorkQueue<bool>      wayLowZoomWorkerQueue;
 
-    std::thread             areaWorkerThread;
-    mutable WorkQueue<bool> areaWorkerQueue;
+    std::thread                  areaWorkerThread;
+    mutable WorkQueue<bool>      areaWorkerQueue;
 
-    std::thread             areaLowZoomWorkerThread;
-    mutable WorkQueue<bool> areaLowZoomWorkerQueue;
+    std::thread                  areaLowZoomWorkerThread;
+    mutable WorkQueue<bool>      areaLowZoomWorkerQueue;
+
+    CallbackId                   nextCallbackId;
+    std::map<CallbackId,TileStateCallback> tileStateCallbacks;
+    mutable std::mutex           callbackMutex;
+
 
   private:
     TypeDefinitionRef GetTypeDefinition(const AreaSearchParameter& parameter,
@@ -186,6 +195,8 @@ namespace osmscout {
                                   const GeoBox& boundingBox,
                                   const TileRef& tile) const;
 
+    void NotifyTileStateCallbacks(const TileRef& tile) const;
+
   public:
     MapService(const DatabaseRef& database);
     virtual ~MapService();
@@ -214,6 +225,9 @@ namespace osmscout {
     bool GetGroundTiles(const GeoBox& boundingBox,
                         const Magnification& magnification,
                         std::list<GroundTile>& tiles) const;
+
+    CallbackId RegisterTileStateCallback(TileStateCallback callback);
+    void DeregisterTileStateCallback(CallbackId callbackId);
   };
 
   //! \ingroup Service

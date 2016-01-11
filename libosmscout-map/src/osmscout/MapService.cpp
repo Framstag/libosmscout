@@ -90,7 +90,8 @@ namespace osmscout {
      wayWorkerThread(&MapService::WayWorkerLoop,this),
      wayLowZoomWorkerThread(&MapService::WayLowZoomWorkerLoop,this),
      areaWorkerThread(&MapService::AreaWorkerLoop,this),
-     areaLowZoomWorkerThread(&MapService::AreaLowZoomWorkerLoop,this)
+     areaLowZoomWorkerThread(&MapService::AreaLowZoomWorkerLoop,this),
+     nextCallbackId(0)
   {
     // no code
   }
@@ -190,7 +191,7 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
 
     if (!cachedNodeTypes.Empty()) {
-      requestedNodeTypes.Remove(tile->GetNodeData().GetTypes());
+      requestedNodeTypes.Remove(cachedNodeTypes);
     }
 
     if (!requestedNodeTypes.Empty()) {
@@ -201,30 +202,36 @@ namespace osmscout {
         log.Error() << "Error getting nodes from area node index!";
         return false;
       }
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+
+      if (!offsets.empty()) {
+        // Sort offsets before loading to optimize disk access
+        std::sort(offsets.begin(),offsets.end());
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        if (!database->GetNodesByOffset(offsets,
+                                        tile->GetNodeData().GetData())) {
+          log.Error() << "Error reading nodes in area!";
+          return false;
+        }
+      }
     }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    if (!offsets.empty()) {
-      // Sort offsets before loading to optimize disk access
-      std::sort(offsets.begin(),offsets.end());
-
-      if (parameter.IsAborted()) {
-        return false;
-      }
-
-      if (!database->GetNodesByOffset(offsets,
-                                      tile->GetNodeData().GetData())) {
-        log.Error() << "Error reading nodes in area!";
-        return false;
-      }
-    }
-
     loadedNodeTypes.Add(cachedNodeTypes);
 
     tile->GetNodeData().SetData(loadedNodeTypes,tile->GetNodeData().GetData());
+
+    NotifyTileStateCallbacks(tile);
 
     return !parameter.IsAborted();
   }
@@ -254,7 +261,7 @@ namespace osmscout {
     TypeInfoSet loadedAreaTypes;
 
     if (!cachedAreaTypes.Empty()) {
-      requestedAreaTypes.Remove(tile->GetOptimizedAreaData().GetTypes());
+      requestedAreaTypes.Remove(cachedAreaTypes);
     }
 
     if (!requestedAreaTypes.Empty()) {
@@ -268,8 +275,14 @@ namespace osmscout {
       }
     }
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     loadedAreaTypes.Add(cachedAreaTypes);
     tile->GetOptimizedAreaData().SetData(loadedAreaTypes,tile->GetOptimizedAreaData().GetData());
+
+    NotifyTileStateCallbacks(tile);
 
     return !parameter.IsAborted();
   }
@@ -296,7 +309,7 @@ namespace osmscout {
     std::vector<DataBlockSpan> spans;
 
     if (!cachedAreaTypes.Empty()) {
-      requestedAreaTypes.Remove(tile->GetAreaData().GetTypes());
+      requestedAreaTypes.Remove(cachedAreaTypes);
     }
 
     if (!requestedAreaTypes.Empty()) {
@@ -310,26 +323,36 @@ namespace osmscout {
         log.Error() << "Error getting areas from area index!";
         return false;
       }
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+
+      if (!spans.empty()) {
+        // Sort spans before loading to optimize disk access
+        std::sort(spans.begin(),spans.end());
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        if (!database->GetAreasByBlockSpans(spans,
+                                            tile->GetAreaData().GetData())) {
+          log.Error() << "Error reading areas in area!";
+          return false;
+        }
+      }
     }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    if (!spans.empty()) {
-      // Sort spans before loading to optimize disk access
-      std::sort(spans.begin(),spans.end());
-
-      if (!database->GetAreasByBlockSpans(spans,
-                                          tile->GetAreaData().GetData())) {
-        log.Error() << "Error reading areas in area!";
-        return false;
-      }
-    }
-
     loadedAreaTypes.Add(cachedAreaTypes);
 
     tile->GetAreaData().SetData(loadedAreaTypes,tile->GetAreaData().GetData());
+
+    NotifyTileStateCallbacks(tile);
 
     return !parameter.IsAborted();
   }
@@ -359,7 +382,7 @@ namespace osmscout {
     TypeInfoSet loadedWayTypes;
 
     if (!cachedWayTypes.Empty()) {
-      requestedWayTypes.Remove(tile->GetOptimizedWayData().GetTypes());
+      requestedWayTypes.Remove(cachedWayTypes);
     }
 
     if (!requestedWayTypes.Empty()) {
@@ -373,8 +396,14 @@ namespace osmscout {
       }
     }
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     loadedWayTypes.Add(cachedWayTypes);
     tile->GetOptimizedWayData().SetData(loadedWayTypes,tile->GetOptimizedWayData().GetData());
+
+    NotifyTileStateCallbacks(tile);
 
     return !parameter.IsAborted();
   }
@@ -400,7 +429,7 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
 
     if (!cachedWayTypes.Empty()) {
-      requestedWayTypes.Remove(tile->GetWayData().GetTypes());
+      requestedWayTypes.Remove(cachedWayTypes);
     }
 
     if (!requestedWayTypes.Empty()) {
@@ -411,30 +440,36 @@ namespace osmscout {
         log.Error() << "Error getting ways from area way index!";
         return false;
       }
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+
+      if (!offsets.empty()) {
+        // Sort offsets before loading to optimize disk access
+        std::sort(offsets.begin(),offsets.end());
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        if (!database->GetWaysByOffset(offsets,
+                                       tile->GetWayData().GetData())) {
+          log.Error() << "Error reading ways in area!";
+          return false;
+        }
+      }
     }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    if (!offsets.empty()) {
-      // Sort offsets before loading to optimize disk access
-      std::sort(offsets.begin(),offsets.end());
-
-      if (parameter.IsAborted()) {
-        return false;
-      }
-
-      if (!database->GetWaysByOffset(offsets,
-                                     tile->GetWayData().GetData())) {
-        log.Error() << "Error reading ways in area!";
-        return false;
-      }
-    }
-
     loadedWayTypes.Add(cachedWayTypes);
 
     tile->GetWayData().SetData(loadedWayTypes,tile->GetWayData().GetData());
+
+    NotifyTileStateCallbacks(tile);
 
     return !parameter.IsAborted();
   }
@@ -559,6 +594,15 @@ namespace osmscout {
     return future;
   }
 
+  void MapService::NotifyTileStateCallbacks(const TileRef& tile) const
+  {
+    std::lock_guard<std::mutex> lock(callbackMutex);
+
+    for (auto& callbackEntry : tileStateCallbacks) {
+      callbackEntry.second(tile);
+    }
+  }
+
   /**
    * Return all tiles with the magnification defined by the projection
    * that cover the region covered by the projection
@@ -665,6 +709,8 @@ namespace osmscout {
                                    typeDefinition->areaTypes,
                                    typeDefinition->optimizedWayTypes,
                                    typeDefinition->optimizedAreaTypes);
+
+        NotifyTileStateCallbacks(tile);
 
         results.push_back(PushNodeTask(parameter,
                                        typeDefinition->nodeTypes,
@@ -874,5 +920,23 @@ namespace osmscout {
     //std::cout << "Loading ground tiles took: " << timer.ResultString() << std::endl;
 
     return true;
+  }
+
+  MapService::CallbackId MapService::RegisterTileStateCallback(TileStateCallback callback)
+  {
+    std::lock_guard<std::mutex> lock(callbackMutex);
+
+    CallbackId id=nextCallbackId++;
+
+    tileStateCallbacks.insert(std::make_pair(id,callback));
+
+    return id;
+  }
+
+  void MapService::DeregisterTileStateCallback(CallbackId callbackId)
+  {
+    std::lock_guard<std::mutex> lock(callbackMutex);
+
+    tileStateCallbacks.erase(callbackId);
   }
 }
