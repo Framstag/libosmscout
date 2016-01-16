@@ -211,9 +211,9 @@ namespace osmscout {
 
             return false;
           }
-        }
 
-        areasWritten++;
+          areasWritten++;
+        }
 
         continue;
       }
