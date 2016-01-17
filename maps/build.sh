@@ -6,7 +6,7 @@ if [ $# -lt 1 ]; then
 fi
 
 scriptDirectory="${BASH_SOURCE%/*}"
-if [[ ! -d "$scriptDirectory" ]]; then scriptDirectory="$PWD"; fi
+if [ ! -d "$scriptDirectory" ]; then scriptDirectory="$PWD"; fi
 
 mappingFile="$1"
 
