@@ -181,11 +181,15 @@ namespace osmscout {
       return false;
     }
 
+    if (tile->GetNodeData().IsComplete()) {
+      return true;
+    }
+
     if (parameter.IsAborted()) {
       return false;
     }
 
-    TypeInfoSet             cachedNodeTypes(tile->GetNodeData().GetTypes());
+    TypeInfoSet             cachedNodeTypes(tile->GetNodeData().GetPrefillTypes());
     TypeInfoSet             requestedNodeTypes(nodeTypes);
     TypeInfoSet             loadedNodeTypes;
     std::vector<FileOffset> offsets;
@@ -215,21 +219,23 @@ namespace osmscout {
           return false;
         }
 
+        std::vector<NodeRef> nodes;
+
         if (!database->GetNodesByOffset(offsets,
-                                        tile->GetNodeData().GetData())) {
+                                        nodes)) {
           log.Error() << "Error reading nodes in area!";
           return false;
         }
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        tile->GetNodeData().SetData(loadedNodeTypes,std::move(nodes));
       }
     }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    loadedNodeTypes.Add(cachedNodeTypes);
-
-    tile->GetNodeData().SetData(loadedNodeTypes,tile->GetNodeData().GetData());
+    tile->GetNodeData().SetComplete();
 
     NotifyTileStateCallbacks(tile);
 
@@ -252,6 +258,10 @@ namespace osmscout {
       return true;
     }
 
+    if (tile->GetOptimizedAreaData().IsComplete()) {
+      return true;
+    }
+
     if (parameter.IsAborted()) {
       return false;
     }
@@ -265,22 +275,25 @@ namespace osmscout {
     }
 
     if (!requestedAreaTypes.Empty()) {
+      std::vector<AreaRef> areas;
+
       if (!optimizeAreasLowZoom->GetAreas(boundingBox,
                                           magnification,
                                           requestedAreaTypes,
-                                          tile->GetOptimizedAreaData().GetData(),
+                                          areas,
                                           loadedAreaTypes)) {
         log.Error() << "Error getting areas from optimized areas index!";
         return false;
       }
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+
+      tile->GetOptimizedAreaData().SetData(loadedAreaTypes,std::move(areas));
     }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    loadedAreaTypes.Add(cachedAreaTypes);
-    tile->GetOptimizedAreaData().SetData(loadedAreaTypes,tile->GetOptimizedAreaData().GetData());
+    tile->GetOptimizedAreaData().SetComplete();
 
     NotifyTileStateCallbacks(tile);
 
@@ -297,6 +310,10 @@ namespace osmscout {
 
     if (!areaAreaIndex) {
       return false;
+    }
+
+    if (tile->GetAreaData().IsComplete()) {
+      return true;
     }
 
     if (parameter.IsAborted()) {
@@ -336,21 +353,23 @@ namespace osmscout {
           return false;
         }
 
+        std::vector<AreaRef> areas;
+
         if (!database->GetAreasByBlockSpans(spans,
-                                            tile->GetAreaData().GetData())) {
+                                            areas)) {
           log.Error() << "Error reading areas in area!";
           return false;
         }
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        tile->GetAreaData().SetData(loadedAreaTypes,std::move(areas));
       }
     }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    loadedAreaTypes.Add(cachedAreaTypes);
-
-    tile->GetAreaData().SetData(loadedAreaTypes,tile->GetAreaData().GetData());
+    tile->GetAreaData().SetComplete();
 
     NotifyTileStateCallbacks(tile);
 
@@ -373,6 +392,10 @@ namespace osmscout {
       return true;
     }
 
+    if (tile->GetOptimizedWayData().IsComplete()) {
+      return true;
+    }
+
     if (parameter.IsAborted()) {
       return false;
     }
@@ -386,22 +409,25 @@ namespace osmscout {
     }
 
     if (!requestedWayTypes.Empty()) {
+      std::vector<WayRef> ways;
+
       if (!optimizeWaysLowZoom->GetWays(boundingBox,
                                         magnification,
                                         requestedWayTypes,
-                                        tile->GetOptimizedWayData().GetData(),
+                                        ways,
                                         loadedWayTypes)) {
         log.Error() << "Error getting ways from optimized ways index!";
         return false;
       }
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+
+      tile->GetOptimizedWayData().SetData(loadedWayTypes,std::move(ways));
     }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    loadedWayTypes.Add(cachedWayTypes);
-    tile->GetOptimizedWayData().SetData(loadedWayTypes,tile->GetOptimizedWayData().GetData());
+    tile->GetOptimizedWayData().SetComplete();
 
     NotifyTileStateCallbacks(tile);
 
@@ -417,6 +443,10 @@ namespace osmscout {
 
     if (!areaWayIndex) {
       return false;
+    }
+
+    if (tile->GetWayData().IsComplete()) {
+      return true;
     }
 
     if (parameter.IsAborted()) {
@@ -453,21 +483,23 @@ namespace osmscout {
           return false;
         }
 
+        std::vector<WayRef> ways;
+
         if (!database->GetWaysByOffset(offsets,
-                                       tile->GetWayData().GetData())) {
+                                       ways)) {
           log.Error() << "Error reading ways in area!";
           return false;
         }
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        tile->GetWayData().SetData(loadedWayTypes,std::move(ways));
       }
     }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    loadedWayTypes.Add(cachedWayTypes);
-
-    tile->GetWayData().SetData(loadedWayTypes,tile->GetWayData().GetData());
+    tile->GetWayData().SetComplete();
 
     NotifyTileStateCallbacks(tile);
 
@@ -679,13 +711,12 @@ namespace osmscout {
 
     TypeDefinitionRef            typeDefinition;
 
-    StopClock                    dataLoadingTime;
     std::list<std::future<bool>> results;
 
     for (auto& tile : tiles) {
       GeoBox          tileBoundingBox(tile->GetBoundingBox());
 
-      if (tile->IsEmpty()) {
+      if (!tile->IsComplete()) {
         StopClock         tileLoadingTime;
         Magnification     magnification;
         std::future<bool> nodeResult;
@@ -766,10 +797,6 @@ namespace osmscout {
       }
     }
 
-    dataLoadingTime.Stop();
-
-    //std::cout << "DataLoadingTime: " << dataLoadingTime.ResultString() << std::endl;
-
     overallTime.Stop();
 
     if (overallTime.GetMilliseconds()>200) {
@@ -797,25 +824,24 @@ namespace osmscout {
     StopClock uniqueTime;
 
     for (auto tile : tiles) {
-      for (const auto& node : tile->GetNodeData().GetData()) {
-        nodeMap[node->GetFileOffset()]=node;
-      }
+      tile->GetNodeData().CopyPrefillData([&nodeMap](const NodeRef& node) {nodeMap[node->GetFileOffset()]=node;});
+      tile->GetNodeData().CopyData([&nodeMap](const NodeRef& node) {nodeMap[node->GetFileOffset()]=node;});
 
-      for (const auto& way : tile->GetWayData().GetData()) {
-        wayMap[way->GetFileOffset()]=way;
-      }
+      //---
 
-      for (const auto& area : tile->GetAreaData().GetData()) {
-        areaMap[area->GetFileOffset()]=area;
-      }
+      tile->GetOptimizedWayData().CopyPrefillData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
+      tile->GetOptimizedWayData().CopyData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
 
-      for (const auto& way : tile->GetOptimizedWayData().GetData()) {
-        optimizedWayMap[way->GetFileOffset()]=way;
-      }
+      tile->GetWayData().CopyPrefillData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
+      tile->GetWayData().CopyData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
 
-      for (const auto& area : tile->GetOptimizedAreaData().GetData()) {
-        optimizedAreaMap[area->GetFileOffset()]=area;
-      }
+      //---
+
+      tile->GetOptimizedAreaData().CopyPrefillData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
+      tile->GetOptimizedAreaData().CopyData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
+
+      tile->GetAreaData().CopyPrefillData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
+      tile->GetAreaData().CopyData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
     }
 
     uniqueTime.Stop();
@@ -854,7 +880,9 @@ namespace osmscout {
 
     copyTime.Stop();
 
-    //std::cout << "Tile data copy time: " << copyTime.ResultString() << std::endl;
+    if (copyTime.GetMilliseconds()>20) {
+      log.Warn() << "Copying data from tile to MapData took " << copyTime.ResultString();
+    }
   }
 
   /**

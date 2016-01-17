@@ -22,6 +22,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #include <osmscout/private/MapImportExport.h>
@@ -113,66 +114,119 @@ namespace osmscout {
   class OSMSCOUT_MAP_API TileData
   {
   private:
-    TypeInfoSet    types;
-    std::vector<O> data;
-    bool           isAssigned;
+    mutable std::mutex mutex;
+
+    TypeInfoSet        prefillTypes;
+    std::vector<O>     prefillData;
+
+    TypeInfoSet        types;
+    std::vector<O>     data;
+
+    bool               complete;
 
   public:
     /**
      * Create an empty and unassigned TileData
      */
     TileData()
-    : isAssigned(false)
+    : complete(false)
     {
       // no code
     }
 
+    /**
+     * Assign data to the tile that was derived from existing tiles
+     */
+    void SetPrefillData(const TypeInfoSet& types,
+                        const std::vector<O>& data)
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      this->prefillData=data;
+      this->prefillTypes=types;
+    }
 
     /**
-     * Assign data to the tile
+     * Assign data to the tile that was loaded
      */
     void SetData(const TypeInfoSet& types,
                  const std::vector<O>& data)
     {
+      std::lock_guard<std::mutex> guard(mutex);
+
       this->data=data;
       this->types=types;
+    }
 
-      isAssigned=true;
+    void SetComplete()
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      complete=true;
     }
 
     /**
      * Return 'true' if there was data already assigned to the tile
      */
-    bool IsAssigned() const
+    bool IsComplete() const
     {
-      return isAssigned;
+      std::lock_guard<std::mutex> guard(mutex);
+
+      return complete;
     }
 
     /**
-     * Return the list of types of the dat stored in the tile.
+     * Return the list of types of the prefill data stored in the tile.
      *
      * Note that it is stll possibly that there is no acutal data for this type in the
      * TileData stored.
      */
-    const TypeInfoSet& GetTypes() const
+    const TypeInfoSet GetPrefillTypes() const
     {
+      std::lock_guard<std::mutex> guard(mutex);
+
       return types;
     }
 
-    /**
-     * Return a read-only reference to the actual data.
-     */
-    const std::vector<O>& GetData() const
+    size_t GetPrefillDataSize() const
     {
-      return data;
+      std::lock_guard<std::mutex> guard(mutex);
+
+      return prefillData.size();
+    }
+
+    void CopyPrefillData(std::function<void(const O&)> function) const
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      std::for_each(prefillData.begin(),prefillData.end(),function);
     }
 
     /**
-     * Return a read-write reference to the actual data.
+     * Return the list of types of the data stored in the tile.
+     *
+     * Note that it is stll possibly that there is no acutal data for this type in the
+     * TileData stored.
      */
-    std::vector<O>& GetData()
+    const TypeInfoSet GetTypes() const
     {
-      return data;
+      std::lock_guard<std::mutex> guard(mutex);
+
+      return types;
+    }
+
+    size_t GetDataSize() const
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      return prefillData.size();
+    }
+
+    void CopyData(std::function<void(const O&)> function) const
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      std::for_each(data.begin(),data.end(),function);
     }
   };
 
@@ -324,13 +378,25 @@ namespace osmscout {
     /**
      * Return 'true' if no data at all has been assigned
      */
+    inline bool IsComplete() const
+    {
+      return nodeData.IsComplete() &&
+             wayData.IsComplete() &&
+             areaData.IsComplete() &&
+             optimizedWayData.IsComplete() &&
+             optimizedAreaData.IsComplete();
+    }
+
+    /**
+     * Return 'true' if no data at all has been assigned
+     */
     inline bool IsEmpty() const
     {
-      return !nodeData.IsAssigned() &&
-             !wayData.IsAssigned() &&
-             !areaData.IsAssigned() &&
-             !optimizedWayData.IsAssigned() &&
-             !optimizedAreaData.IsAssigned();
+      return !nodeData.IsComplete() &&
+             !wayData.IsComplete() &&
+             !areaData.IsComplete() &&
+             !optimizedWayData.IsComplete() &&
+             !optimizedAreaData.IsComplete();
     }
   };
 

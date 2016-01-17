@@ -254,18 +254,18 @@ namespace osmscout {
 
       std::vector<NodeRef> data;
 
-      data.reserve(parentTile.GetNodeData().GetData().size());
+      data.reserve(parentTile.GetNodeData().GetDataSize());
 
-      for (const auto& node : parentTile.GetNodeData().GetData()) {
+      parentTile.GetNodeData().CopyData([&](const NodeRef& node) {
         if (nodeTypes.IsSet(node->GetType())) {
           if (boundingBox.Includes(node->GetCoords())) {
             data.push_back(node);
           }
         }
-      }
+      });
 
-      tile.GetNodeData().SetData(subset,
-                                 data);
+      tile.GetNodeData().SetPrefillData(subset,
+                                        data);
     }
   }
 
@@ -282,9 +282,9 @@ namespace osmscout {
 
       std::vector<WayRef> data;
 
-      data.reserve(parentTile.GetOptimizedWayData().GetData().size());
+      data.reserve(parentTile.GetOptimizedWayData().GetDataSize());
 
-      for (const auto& way : parentTile.GetOptimizedWayData().GetData()) {
+      parentTile.GetOptimizedWayData().CopyData([&](const WayRef& way) {
         if (wayTypes.IsSet(way->GetType())) {
           GeoBox wayBoundingBox;
 
@@ -294,10 +294,10 @@ namespace osmscout {
             data.push_back(way);
           }
         }
-      }
+      });
 
-      tile.GetOptimizedWayData().SetData(subset,
-                                         data);
+      tile.GetOptimizedWayData().SetPrefillData(subset,
+                                                data);
     }
   }
 
@@ -313,9 +313,9 @@ namespace osmscout {
 
       std::vector<WayRef> data;
 
-      data.reserve(parentTile.GetWayData().GetData().size());
+      data.reserve(parentTile.GetWayData().GetDataSize());
 
-      for (const auto& way : parentTile.GetWayData().GetData()) {
+      parentTile.GetWayData().CopyData([&](const WayRef& way) {
         if (wayTypes.IsSet(way->GetType())) {
           GeoBox wayBoundingBox;
 
@@ -325,10 +325,10 @@ namespace osmscout {
             data.push_back(way);
           }
         }
-      }
+      });
 
-      tile.GetWayData().SetData(subset,
-                                data);
+      tile.GetWayData().SetPrefillData(subset,
+                                       data);
     }
   }
 
@@ -345,9 +345,9 @@ namespace osmscout {
 
       std::vector<AreaRef> data;
 
-      data.reserve(parentTile.GetOptimizedAreaData().GetData().size());
+      data.reserve(parentTile.GetOptimizedAreaData().GetDataSize());
 
-      for (const auto& area : parentTile.GetOptimizedAreaData().GetData()) {
+      parentTile.GetOptimizedAreaData().CopyData([&](const AreaRef& area) {
         if (areaTypes.IsSet(area->GetType())) {
           GeoBox areaBoundingBox;
 
@@ -357,10 +357,10 @@ namespace osmscout {
             data.push_back(area);
           }
         }
-      }
+      });
 
-      tile.GetOptimizedAreaData().SetData(subset,
-                                          data);
+      tile.GetOptimizedAreaData().SetPrefillData(subset,
+                                                 data);
     }
 
   }
@@ -377,9 +377,9 @@ namespace osmscout {
 
       std::vector<AreaRef> data;
 
-      data.reserve(parentTile.GetAreaData().GetData().size());
+      data.reserve(parentTile.GetAreaData().GetDataSize());
 
-      for (const auto& area : parentTile.GetAreaData().GetData()) {
+      parentTile.GetAreaData().CopyData([&](const AreaRef& area) {
         if (areaTypes.IsSet(area->GetType())) {
           GeoBox areaBoundingBox;
 
@@ -389,10 +389,10 @@ namespace osmscout {
             data.push_back(area);
           }
         }
-      }
+      });
 
-      tile.GetAreaData().SetData(subset,
-                                 data);
+      tile.GetAreaData().SetPrefillData(subset,
+                                        data);
     }
   }
 
@@ -419,7 +419,7 @@ namespace osmscout {
         ResolveNodesFromParent(tile,*parentTile,boundingBox,nodeTypes);
         ResolveOptimizedWaysFromParent(tile,*parentTile,boundingBox,optimizedWayTypes,wayTypes);
         ResolveWaysFromParent(tile,*parentTile,boundingBox,wayTypes);
-        ResolveOptimizedWaysFromParent(tile,*parentTile,boundingBox,optimizedAreaTypes,areaTypes);
+        ResolveOptimizedAreasFromParent(tile,*parentTile,boundingBox,optimizedAreaTypes,areaTypes);
         ResolveAreasFromParent(tile,*parentTile,boundingBox,areaTypes);
 
         return;
