@@ -926,7 +926,12 @@ TYPES
     IGNORE // Too many for mobile?
     = NODE ("amenity"=="bench")
       GROUP amenity
-          
+
+  TYPE amenity_brothel
+    IGNORE // Too many for mobile?
+    = NODE AREA ("amenity"=="brothel")
+      GROUP amenity
+
   TYPE amenity_bus_station
     = NODE AREA ("amenity"=="bus_station")
       {Name, NameAlt}
