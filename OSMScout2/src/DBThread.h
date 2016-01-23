@@ -95,6 +95,7 @@ private:
   osmscout::DatabaseRef         database;
   osmscout::LocationServiceRef  locationService;
   osmscout::MapServiceRef       mapService;
+  osmscout::MapService::CallbackId callbackId;
   osmscout::MercatorProjection  projection;
   osmscout::RouterParameter     routerParameter;
   osmscout::RoutingServiceRef   router;
@@ -127,6 +128,9 @@ private:
 
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
+
+  void TileStateCallback(const osmscout::TileRef& tile);
+
 public:
   void GetProjection(osmscout::MercatorProjection& projection);
 
@@ -134,6 +138,7 @@ public:
 
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);
+  void RenderMessage(QPainter& painter, qreal width, qreal height, const char* message);
 
   osmscout::TypeConfigRef GetTypeConfig() const;
 

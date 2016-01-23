@@ -46,6 +46,8 @@ private:
 
   // Controlling rerendering...
   bool                         mouseDragging;
+  bool                         dbInitialized;
+  bool                         hasBeenPainted;
 
 signals:
   void TriggerMapRenderingSignal(const RenderMapRequest& request);

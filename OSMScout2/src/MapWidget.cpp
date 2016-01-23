@@ -29,7 +29,9 @@ MapWidget::MapWidget(QQuickItem* parent)
       center(0.0,0.0),
       angle(0.0),
       magnification(64),
-      mouseDragging(false)
+      mouseDragging(false),
+      dbInitialized(false),
+      hasBeenPainted(false)
 
 {
     setOpaquePainting(true);
@@ -78,7 +80,11 @@ void MapWidget::initialisationFinished(const DatabaseLoadedResponse& response)
 
     magnification=zoom;
 
-    TriggerMapRendering();
+    dbInitialized=true;
+
+    if (hasBeenPainted) {
+        TriggerMapRendering();
+    }
 }
 
 void MapWidget::TriggerMapRendering()
@@ -102,6 +108,10 @@ void MapWidget::TriggerMapRendering()
 void MapWidget::HandleMouseMove(QMouseEvent* event)
 {
     osmscout::MercatorProjection projection=startProjection;
+
+    if (!projection.IsValid()) {
+        return;
+    }
 
     if (!projection.Move(startX-event->x(),
                          event->y()-startY)) {
@@ -161,22 +171,30 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
-    RenderMapRequest request;
-    DBThread         *dbThread=DBThread::GetInstance();
-    QRectF           boundingBox=contentsBoundingRect();
+    DBThread *dbThread=DBThread::GetInstance();
 
-    request.lat=center.GetLat();
-    request.lon=center.GetLon();
-    request.angle=angle;
-    request.magnification=magnification;
-    request.width=boundingBox.width();
-    request.height=boundingBox.height();
+    if (dbInitialized) {
+        RenderMapRequest request;
+        QRectF           boundingBox=contentsBoundingRect();
 
-    if (!dbThread->RenderMap(*painter,request)) {
-        if (!mouseDragging) {
-            TriggerMapRendering();
+        request.lat=center.GetLat();
+        request.lon=center.GetLon();
+        request.angle=angle;
+        request.magnification=magnification;
+        request.width=boundingBox.width();
+        request.height=boundingBox.height();
+
+        if (!dbThread->RenderMap(*painter,request)) {
+            if (!mouseDragging) {
+                TriggerMapRendering();
+            }
         }
     }
+    else {
+      dbThread->RenderMessage(*painter,width(),height(),"Database not initialized yet");
+    }
+
+    hasBeenPainted=true;
 }
 
 void MapWidget::zoomIn(double zoomFactor)
@@ -214,6 +232,11 @@ void MapWidget::left()
 
     dbThread->GetProjection(projection);
 
+    if (!projection.IsValid()) {
+        TriggerMapRendering();
+        return;
+    }
+
     projection.MoveLeft(width()/3);
 
     center=projection.GetCenter();
@@ -227,6 +250,11 @@ void MapWidget::right()
     osmscout::MercatorProjection projection;
 
     dbThread->GetProjection(projection);
+
+    if (!projection.IsValid()) {
+        TriggerMapRendering();
+        return;
+    }
 
     projection.MoveRight(width()/3);
 
@@ -242,6 +270,11 @@ void MapWidget::up()
 
     dbThread->GetProjection(projection);
 
+    if (!projection.IsValid()) {
+        TriggerMapRendering();
+        return;
+    }
+
     projection.MoveUp(height()/3);
 
     center=projection.GetCenter();
@@ -255,6 +288,11 @@ void MapWidget::down()
     osmscout::MercatorProjection projection;
 
     dbThread->GetProjection(projection);
+
+    if (!projection.IsValid()) {
+        TriggerMapRendering();
+        return;
+    }
 
     projection.MoveDown(height()/3);
 

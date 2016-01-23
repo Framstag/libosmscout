@@ -82,6 +82,10 @@ DBThread::DBThread()
   QScreen *srn=QApplication::screens().at(0);
 
   dpi=(double)srn->physicalDotsPerInch();
+
+  osmscout::MapService::TileStateCallback callback=[this](const osmscout::TileRef& tile) {TileStateCallback(tile);};
+
+  callbackId=mapService->RegisterTileStateCallback(callback);
 }
 
 DBThread::~DBThread()
@@ -91,6 +95,8 @@ DBThread::~DBThread()
   if (painter!=NULL) {
     delete painter;
   }
+
+  mapService->DeregisterTileStateCallback(callbackId);
 }
 
 void DBThread::FreeMaps()
@@ -127,6 +133,11 @@ bool DBThread::AssureRouter(osmscout::Vehicle /*vehicle*/)
   }
 
   return true;
+}
+
+void DBThread::TileStateCallback(const osmscout::TileRef& tile)
+{
+  //qDebug() << "Tile state callback called for tile " << tile->GetId().DisplayText().c_str();
 }
 
 void DBThread::Initialize()
@@ -410,24 +421,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     QPainter p;
 
-    p.begin(currentImage);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setRenderHint(QPainter::TextAntialiasing);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
-
-    p.fillRect(0,0,request.width,request.height,
-               QColor::fromRgbF(0.0,0.0,0.0,1.0));
-
-    p.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
-
-    QString text("not initialized (yet)");
-
-    p.drawText(QRect(0,0,request.width,request.height),
-               Qt::AlignCenter|Qt::AlignVCenter,
-               text,
-               NULL);
-
-    p.end();
+    RenderMessage(p,request.width,request.height,"Database not open");
   }
 
   {
@@ -447,22 +441,39 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
   emit HandleMapRenderingResult();
 }
 
+void DBThread::RenderMessage(QPainter& painter, qreal width, qreal height, const char* message)
+{
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::TextAntialiasing);
+  painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+  painter.fillRect(0,0,width,height,
+                   QColor::fromRgbF(0.0,0.0,0.0,1.0));
+
+  painter.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
+
+  QString text(message);
+
+  painter.drawText(QRectF(0.0,0.0,width,height),
+                   Qt::AlignCenter|Qt::AlignVCenter,
+                   text,
+                   NULL);
+}
+
 bool DBThread::RenderMap(QPainter& painter,
                          const RenderMapRequest& request)
 {
   QMutexLocker locker(&mutex);
 
-  if (finishedImage==NULL || !styleConfig) {
-    painter.fillRect(0,0,request.width,request.height,
-                     QColor::fromRgbF(0.0,0.0,0.0,1.0));
+  if (finishedImage==NULL) {
+    RenderMessage(painter,request.width,request.height,"no image rendered (internal error?)");
 
-    painter.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
-
-    QString text("no map available");
-
-    painter.drawText(QRectF(0,0,request.width,request.height),
-                     text,
-                     QTextOption(Qt::AlignCenter));
+    // Since we assume that this is just a temporary problem, or we just were not instructed to render
+    // a map yet, we trigger rendering an image...
+    return false;
+  }
+  else if (!styleConfig) {
+    RenderMessage(painter,request.width,request.height,"no valid style sheet loaded");
 
     return true;
   }
@@ -693,22 +704,26 @@ bool DBThread::TransformRouteDataToWay(osmscout::Vehicle vehicle,
 
 void DBThread::ClearRoute()
 {
-  QMutexLocker locker(&mutex);
+  {
+    QMutexLocker locker(&mutex);
 
-  data.poiWays.clear();
+    data.poiWays.clear();
 
-  FreeMaps();
+    FreeMaps();
+  }
 
   emit Redraw();
 }
 
 void DBThread::AddRoute(const osmscout::Way& way)
 {
-  QMutexLocker locker(&mutex);
+  {
+    QMutexLocker locker(&mutex);
 
-  data.poiWays.push_back(std::make_shared<osmscout::Way>(way));
+    data.poiWays.push_back(std::make_shared<osmscout::Way>(way));
 
-  FreeMaps();
+    FreeMaps();
+  }
 
   emit Redraw();
 }
