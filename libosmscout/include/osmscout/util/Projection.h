@@ -136,6 +136,7 @@ namespace osmscout {
     virtual ~Projection();
 
     virtual bool CanBatch() const = 0;
+    virtual bool IsValid() const = 0;
 
     inline GeoCoord GetCenter() const
     {
@@ -336,6 +337,11 @@ namespace osmscout {
       return false;
     }
 
+    inline bool IsValid() const
+    {
+      return valid;
+    }
+
     inline bool Set(double lon,double lat,
                     const Magnification& magnification,
                     size_t width,size_t height)
@@ -439,6 +445,11 @@ namespace osmscout {
     inline bool CanBatch() const
     {
       return true;
+    }
+
+    inline bool IsValid() const
+    {
+      return valid;
     }
 
     inline bool Set(size_t tileX, size_t tileY,
