@@ -31,7 +31,7 @@
 namespace osmscout {
 
   template<class R>
-  class OSMSCOUT_API WorkQueue
+  class WorkQueue
   {
   private:
     typedef std::packaged_task<R()> Task;
