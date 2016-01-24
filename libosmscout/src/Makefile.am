@@ -21,6 +21,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/Logger.cpp \
                         osmscout/util/Magnification.cpp \
+                        osmscout/util/MemoryMonitor.cpp \
                         osmscout/util/NodeUseMap.cpp \
                         osmscout/util/Number.cpp \
                         osmscout/util/NumberSet.cpp \

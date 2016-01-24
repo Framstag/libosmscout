@@ -24,6 +24,7 @@ set(HEADER_FILES
     include/osmscout/util/Geometry.h
     include/osmscout/util/Logger.h
     include/osmscout/util/Magnification.h
+    include/osmscout/util/MemoryMonitor.h
     include/osmscout/util/NodeUseMap.h
     include/osmscout/util/Number.h
     include/osmscout/util/NumberSet.h
@@ -95,6 +96,7 @@ set(SOURCE_FILES
     src/osmscout/util/Geometry.cpp
     src/osmscout/util/Logger.cpp
     src/osmscout/util/Magnification.cpp
+    src/osmscout/util/MemoryMonitor.cpp
     src/osmscout/util/NodeUseMap.cpp
     src/osmscout/util/Number.cpp
     src/osmscout/util/NumberSet.cpp

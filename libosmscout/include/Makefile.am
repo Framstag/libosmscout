@@ -15,6 +15,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/Logger.h \
                         osmscout/util/Magnification.h \
+                        osmscout/util/MemoryMonitor.h \
                         osmscout/util/NodeUseMap.h \
                         osmscout/util/Number.h \
                         osmscout/util/NumberSet.h \
