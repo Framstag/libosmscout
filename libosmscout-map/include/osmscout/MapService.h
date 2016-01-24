@@ -108,20 +108,20 @@ namespace osmscout {
     mutable TiledDataCache       cache;                //!< Data cache
     TypeDefinitionRef            typeDefinition;       //<! Last used and cached TypeDefinition
 
-    std::thread                  nodeWorkerThread;
     mutable WorkQueue<bool>      nodeWorkerQueue;
+    std::thread                  nodeWorkerThread;
 
-    std::thread                  wayWorkerThread;
     mutable WorkQueue<bool>      wayWorkerQueue;
+    std::thread                  wayWorkerThread;
 
-    std::thread                  wayLowZoomWorkerThread;
     mutable WorkQueue<bool>      wayLowZoomWorkerQueue;
+    std::thread                  wayLowZoomWorkerThread;
 
-    std::thread                  areaWorkerThread;
     mutable WorkQueue<bool>      areaWorkerQueue;
+    std::thread                  areaWorkerThread;
 
-    std::thread                  areaLowZoomWorkerThread;
     mutable WorkQueue<bool>      areaLowZoomWorkerQueue;
+    std::thread                  areaLowZoomWorkerThread;
 
     CallbackId                   nextCallbackId;
     std::map<CallbackId,TileStateCallback> tileStateCallbacks;
