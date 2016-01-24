@@ -71,6 +71,7 @@
 #include <osmscout/import/GenTextIndex.h>
 #endif
 
+#include <osmscout/util/MemoryMonitor.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/StopClock.h>
 
@@ -531,19 +532,26 @@ namespace osmscout {
                             Progress& progress,
                             const TypeConfigRef& typeConfig)
   {
-    StopClock overAllTimer;
-    size_t    currentStep=1;
+    StopClock     overAllTimer;
+    size_t        currentStep=1;
+    MemoryMonitor monitor;
+    double        maxVMUsage=0.0;
+    double        maxResidentSet=0.0;
 
     for (const auto& module : modules) {
       if (currentStep>=parameter.GetStartStep() &&
           currentStep<=parameter.GetEndStep()) {
         StopClock timer;
         bool      success;
+        double    vmUsage;
+        double    residentSet;
 
         progress.SetStep(std::string("Step #")+
                          NumberToString(currentStep)+
                          " - "+
                          module->GetDescription());
+
+        monitor.Reset();
 
         success=module->Import(typeConfig,
                                parameter,
@@ -551,7 +559,17 @@ namespace osmscout {
 
         timer.Stop();
 
-        progress.Info(std::string("=> ")+timer.ResultString()+" second(s)");
+        monitor.GetMaxValue(vmUsage,residentSet);
+
+        maxVMUsage=std::max(maxVMUsage,vmUsage);
+        maxResidentSet=std::max(maxResidentSet,residentSet);
+
+        if (vmUsage!=0.0 || residentSet!=0.0) {
+          progress.Info(std::string("=> ")+timer.ResultString()+"s, RSS "+ByteSizeToString(residentSet)+", VM "+ByteSizeToString(vmUsage));
+        }
+        else {
+          progress.Info(std::string("=> ")+timer.ResultString()+"s");
+        }
 
         if (!success) {
           progress.Error(std::string("Error while executing step '")+module->GetDescription()+"'!");
@@ -563,7 +581,13 @@ namespace osmscout {
     }
 
     overAllTimer.Stop();
-    progress.Info(std::string("=> ")+overAllTimer.ResultString()+" second(s)");
+
+    if (maxVMUsage!=0.0 || maxResidentSet!=0.0) {
+      progress.Info(std::string("Overall ")+overAllTimer.ResultString()+"s, RSS "+ByteSizeToString(maxResidentSet)+", VM "+ByteSizeToString(maxVMUsage));
+    }
+    else {
+      progress.Info(std::string("Overall ")+overAllTimer.ResultString()+"s");
+    }
 
     return true;
   }
