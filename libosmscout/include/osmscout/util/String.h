@@ -189,7 +189,7 @@ namespace osmscout {
       size_t digitValue;
 
       if (!GetDigitValue(string[pos],
-		  digitValue)) {
+                         digitValue)) {
         return false;
       }
 
@@ -279,7 +279,7 @@ namespace osmscout {
       size_t digitValue;
 
       if (!GetDigitValue(string[pos],
-		  digitValue)) {
+                         digitValue)) {
         return false;
       }
 
