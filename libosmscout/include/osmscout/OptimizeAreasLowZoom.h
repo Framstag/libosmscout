@@ -38,6 +38,9 @@ namespace osmscout {
    */
   class OSMSCOUT_API OptimizeAreasLowZoom
   {
+  public:
+    static const char* FILE_AREASOPT_DAT;
+
   private:
     struct TypeData
     {
@@ -66,7 +69,6 @@ namespace osmscout {
 
   private:
     TypeConfigRef                              typeConfig;    //!< Metadata information for loading the actual objects
-    std::string                                datafile;      //!< Basename part for the data file name
     std::string                                datafilename;  //!< complete filename for data file
     mutable FileScanner                        scanner;       //!< File stream to the data file
 

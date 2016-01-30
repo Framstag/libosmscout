@@ -36,9 +36,10 @@
 
 namespace osmscout
 {
+  const char* OptimizeAreasLowZoom::FILE_AREASOPT_DAT = "areasopt.dat";
+
   OptimizeAreasLowZoom::OptimizeAreasLowZoom()
-  : datafile("areasopt.dat"),
-    magnification(0.0)
+  : magnification(0.0)
   {
     // no code
   }
@@ -81,7 +82,7 @@ namespace osmscout
                                   const std::string& path)
   {
     this->typeConfig=typeConfig;
-    datafilename=AppendFileToDir(path,datafile);
+    datafilename=AppendFileToDir(path,FILE_AREASOPT_DAT);
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
@@ -352,4 +353,3 @@ namespace osmscout
     return true;
   }
 }
-
