@@ -40,6 +40,9 @@ namespace osmscout {
     */
   class OSMSCOUT_API AreaWayIndex
   {
+  public:
+    static const char* AREA_WAY_IDX;
+
   private:
     struct TypeData
     {
@@ -71,7 +74,6 @@ namespace osmscout {
     };
 
   private:
-    std::string           filepart;       //!< name of the data file
     std::string           datafilename;   //!< Full path and name of the data file
     mutable FileScanner   scanner;        //!< Scanner instance for reading this file
 

@@ -30,6 +30,8 @@
 
 namespace osmscout {
 
+  const char* AreaWayIndex::AREA_WAY_IDX="areaway.idx";
+
   FileOffset AreaWayIndex::TypeData::GetDataOffset() const
   {
     return bitmapOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
@@ -60,7 +62,6 @@ namespace osmscout {
   }
 
   AreaWayIndex::AreaWayIndex()
-  : filepart("areaway.idx")
   {
     // no code
   }
@@ -75,7 +76,7 @@ namespace osmscout {
   bool AreaWayIndex::Open(const TypeConfigRef& typeConfig,
                           const std::string& path)
   {
-    datafilename=AppendFileToDir(path,filepart);
+    datafilename=AppendFileToDir(path,AREA_WAY_IDX);
 
     if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
