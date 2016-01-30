@@ -412,7 +412,7 @@ namespace osmscout {
   LocationService::LocationService(const DatabaseRef& database)
   : database(database)
   {
-    // no code
+    assert(database);
   }
 
   /**
