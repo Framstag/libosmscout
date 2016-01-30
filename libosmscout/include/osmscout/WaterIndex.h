@@ -39,6 +39,9 @@ namespace osmscout {
    */
   class OSMSCOUT_API WaterIndex
   {
+  public:
+    static const char* WATER_IDX;
+
   private:
     struct Level
     {
@@ -56,7 +59,6 @@ namespace osmscout {
     };
 
   private:
-    std::string                filepart;       //!< name of the data file
     std::string                datafilename;   //!< Full path and name of the data file
     mutable FileScanner        scanner;        //!< Scanner instance for reading this file
 

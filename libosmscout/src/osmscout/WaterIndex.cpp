@@ -29,15 +29,16 @@
 
 namespace osmscout {
 
+  const char* WaterIndex::WATER_IDX="water.idx";
+
   WaterIndex::WaterIndex()
-  : filepart("water.idx")
   {
     // no code
   }
 
   bool WaterIndex::Open(const std::string& path)
   {
-    datafilename=AppendFileToDir(path,filepart);
+    datafilename=AppendFileToDir(path,WATER_IDX);
 
     if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
@@ -225,8 +226,8 @@ namespace osmscout {
   void WaterIndex::DumpStatistics()
   {
     size_t entries=0;
-    size_t memeory=0;
+    size_t memory=0;
 
-    log.Info() << "WaterIndex size " << entries << ", memory " << memeory;
+    log.Info() << "WaterIndex size " << entries << ", memory " << memory;
   }
 }
