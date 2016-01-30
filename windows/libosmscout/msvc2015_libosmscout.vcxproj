@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClCompile Include="src\osmscout\Area.cpp" />
     <ClCompile Include="src\osmscout\AreaAreaIndex.cpp" />
+    <ClCompile Include="src\osmscout\AreaDataFile.cpp" />
     <ClCompile Include="src\osmscout\AreaNodeIndex.cpp" />
     <ClCompile Include="src\osmscout\AreaWayIndex.cpp" />
     <ClCompile Include="src\osmscout\Coord.cpp" />
@@ -204,6 +205,7 @@
     <ClCompile Include="src\osmscout\util\Transformation.cpp" />
     <ClCompile Include="src\osmscout\WaterIndex.cpp" />
     <ClCompile Include="src\osmscout\Way.cpp" />
+    <ClCompile Include="src\osmscout\WayDataFile.cpp" />
     <ClCompile Include="tests\AccessParse.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

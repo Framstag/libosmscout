@@ -10,6 +10,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenAreaAreaIndex.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \
+                        osmscout/import/GenIntersectionIndex.h \
                         osmscout/import/GenLocationIndex.h \
                         osmscout/import/GenMergeAreas.h \
                         osmscout/import/GenNumericIndex.h \

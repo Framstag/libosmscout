@@ -28,8 +28,13 @@ namespace osmscout {
   class RawNodeIndexGenerator : public NumericIndexGenerator<OSMId,RawNode>
   {
   public:
-    RawNodeIndexGenerator(const std::string& datafile,
-                          const std::string& indexfile);
+    static const char* RAWNODE_IDX;
+
+  public:
+    RawNodeIndexGenerator();
+
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
   };
 }
 

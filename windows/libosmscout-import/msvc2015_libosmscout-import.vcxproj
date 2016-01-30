@@ -139,6 +139,7 @@
     <ClCompile Include="src\osmscout\import\GenAreaAreaIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenAreaNodeIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenAreaWayIndex.cpp" />
+    <ClCompile Include="src\osmscout\import\GenIntersectionIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenLocationIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenMergeAreas.cpp" />
     <ClCompile Include="src\osmscout\import\GenNodeDat.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="include\osmscout\import\GenAreaAreaIndex.h" />
     <ClInclude Include="include\osmscout\import\GenAreaNodeIndex.h" />
     <ClInclude Include="include\osmscout\import\GenAreaWayIndex.h" />
+    <ClInclude Include="include\osmscout\import\GenIntersectionIndex.h" />
     <ClInclude Include="include\osmscout\import\GenLocationIndex.h" />
     <ClInclude Include="include\osmscout\import\GenMergeAreas.h" />
     <ClInclude Include="include\osmscout\import\GenNodeDat.h" />

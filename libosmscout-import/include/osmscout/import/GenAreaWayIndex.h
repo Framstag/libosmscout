@@ -86,7 +86,9 @@ namespace osmscout {
                      const CoordOffsetsMap& typeCellOffsets);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

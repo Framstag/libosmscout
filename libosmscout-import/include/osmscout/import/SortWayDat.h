@@ -28,6 +28,9 @@ namespace osmscout {
 
   class SortWayDataGenerator : public SortDataGenerator<Way>
   {
+  public:
+    static const char* WAYADDRESS_DAT;
+
   private:
     void GetTopLeftCoordinate(const Way& data,
                               GeoCoord& coord);
@@ -35,7 +38,8 @@ namespace osmscout {
   public:
     SortWayDataGenerator();
 
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
   };
 }
 

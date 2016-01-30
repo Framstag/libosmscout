@@ -25,6 +25,8 @@
 
 #include <osmscout/Way.h>
 
+#include <osmscout/WayDataFile.h>
+#include <osmscout/OptimizeWaysLowZoom.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -39,8 +41,6 @@
 
 namespace osmscout
 {
-  const char* OptimizeWaysLowZoomGenerator::FILE_WAYSOPT_DAT = "waysopt.dat";
-
   OptimizeWaysLowZoomGenerator::TypeData::TypeData()
   : type(0),
     optLevel(0),
@@ -59,9 +59,15 @@ namespace osmscout
     // no code
   }
 
-  std::string OptimizeWaysLowZoomGenerator::GetDescription() const
+  void OptimizeWaysLowZoomGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                                    ImportModuleDescription& description) const
   {
-    return "Generate '"+std::string(FILE_WAYSOPT_DAT)+"'";
+    description.SetName("OptimizeWaysLowZoomGenerator");
+    description.SetDescription("Create index for area lookup of reduced resolution ways");
+
+    description.AddRequiredFile(WayDataFile::WAYS_DAT);
+
+    description.AddProvidedOptionalFile(OptimizeWaysLowZoom::FILE_WAYSOPT_DAT);
   }
 
   void OptimizeWaysLowZoomGenerator::GetWayTypesToOptimize(const TypeConfig& typeConfig,
@@ -677,10 +683,10 @@ namespace osmscout
     magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -814,8 +820,8 @@ namespace osmscout
                           wayTypes);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     FILE_WAYSOPT_DAT))) {
-      progress.Error("Cannot create '"+std::string(FILE_WAYSOPT_DAT)+"'");
+                                     OptimizeWaysLowZoom::FILE_WAYSOPT_DAT))) {
+      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
       return false;
     }
 

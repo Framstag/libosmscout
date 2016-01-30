@@ -36,9 +36,6 @@ namespace osmscout {
 
   class OptimizeAreasLowZoomGenerator : public ImportModule
   {
-  public:
-    static const char* FILE_AREASOPT_DAT;
-
   private:
     typedef std::unordered_map<FileOffset,FileOffset> FileOffsetFileOffsetMap;
 
@@ -122,7 +119,9 @@ namespace osmscout {
                        TransPolygon::OptimizeMethod optimizeWayMethod);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

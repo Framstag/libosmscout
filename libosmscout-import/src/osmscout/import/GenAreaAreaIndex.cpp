@@ -23,6 +23,9 @@
 
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/AreaAreaIndex.h>
+#include <osmscout/AreaDataFile.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -32,7 +35,11 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
 
+#include <osmscout/import/GenOptimizeAreaWayIds.h>
+
 namespace osmscout {
+
+  const char* AreaAreaIndexGenerator::AREAADDRESS_DAT="areaaddress.dat";
 
   class AreaLocationProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
   {
@@ -67,7 +74,7 @@ namespace osmscout {
     addressReader=new AddressFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areaaddress.dat"))) {
+                                     AreaAreaIndexGenerator::AREAADDRESS_DAT))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
 
       return false;
@@ -519,9 +526,19 @@ namespace osmscout {
     return true;
   }
 
-  std::string AreaAreaIndexGenerator::GetDescription() const
+  void AreaAreaIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                             ImportModuleDescription& description) const
   {
-    return "Generate 'areaarea.idx'";
+    description.SetName("AreaAreaIndexGenerator");
+    description.SetDescription("Index areas for area lookup");
+
+    description.AddRequiredFile(OptimizeAreaWayIdsGenerator::AREAS3_TMP);
+
+    description.AddProvidedFile(AreaAreaIndex::AREA_AREA_IDX);
+    description.AddProvidedFile(AreaDataFile::AREAS_DAT);
+
+    description.AddProvidedDebuggingFile(AreaAreaIndexGenerator::AREAADDRESS_DAT);
+    description.AddProvidedDebuggingFile(AreaDataFile::AREAS_IDMAP);
   }
 
   size_t AreaAreaIndexGenerator::CalculateLevel(const ImportParameter& parameter,
@@ -930,10 +947,10 @@ namespace osmscout {
     std::vector<Level>  levels;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas3.tmp"),
+                                      OptimizeAreaWayIdsGenerator::AREAS3_TMP),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'areas.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -974,8 +991,8 @@ namespace osmscout {
     // Index file
 
     if (!indexWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          "areaarea.idx"))) {
-      progress.Error("Cannot create 'areaarea.idx'");
+                                          AreaAreaIndex::AREA_AREA_IDX))) {
+      progress.Error("Cannot create file '"+indexWriter.GetFilename()+"'");
       return false;
     }
 
@@ -995,7 +1012,7 @@ namespace osmscout {
     // Data file
 
     if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "areas.dat"))) {
+                                         AreaDataFile::AREAS_DAT))) {
       progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
       return false;
     }
@@ -1005,7 +1022,7 @@ namespace osmscout {
     // Id map file
 
     if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "areas.idmap"))) {
+                                        AreaDataFile::AREAS_IDMAP))) {
       progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
       return false;
     }

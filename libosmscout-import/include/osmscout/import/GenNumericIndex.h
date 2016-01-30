@@ -24,6 +24,7 @@
 
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Number.h>
@@ -53,7 +54,6 @@ namespace osmscout {
                           const std::string& indexfile);
     virtual ~NumericIndexGenerator();
 
-    std::string GetDescription() const;
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);
@@ -86,12 +86,6 @@ namespace osmscout {
   }
 
   template <class N,class T>
-  std::string NumericIndexGenerator<N,T>::GetDescription() const
-  {
-    return description;
-  }
-
-  template <class N,class T>
   bool NumericIndexGenerator<N,T>::Import(const TypeConfigRef& typeConfig,
                                           const ImportParameter& parameter,
                                           Progress& progress)
@@ -118,13 +112,16 @@ namespace osmscout {
 
     progress.SetAction(std::string("Generating '")+indexfile+"'");
 
-    if (!writer.Open(indexfile)) {
-      progress.Error(std::string("Cannot create '")+indexfile+"'");
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     indexfile))) {
+      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
       return false;
     }
 
-    if (!scanner.Open(datafile,FileScanner::Sequential,true)) {
-      progress.Error(std::string("Cannot open '")+datafile+"'");
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      datafile),
+                      FileScanner::Sequential,true)) {
+      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
 

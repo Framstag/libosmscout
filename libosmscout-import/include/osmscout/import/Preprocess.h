@@ -36,6 +36,15 @@
 namespace osmscout {
   class Preprocess : public ImportModule
   {
+  public:
+    static const char* BOUNDING_DAT;
+    static const char* DISTRIBUTION_DAT;
+    static const char* RAWNODES_DAT;
+    static const char* RAWWAYS_DAT;
+    static const char* RAWRELS_DAT;
+    static const char* RAWCOASTLINE_DAT;
+    static const char* RAWTURNRESTR_DAT;
+
   private:
     typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
 
@@ -133,7 +142,9 @@ namespace osmscout {
                       Callback& callback);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

@@ -22,6 +22,8 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/OptimizeAreasLowZoom.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -32,11 +34,10 @@
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
+#include <osmscout/AreaDataFile.h>
 
 namespace osmscout
 {
-  const char* OptimizeAreasLowZoomGenerator::FILE_AREASOPT_DAT = "areasopt.dat";
-
   OptimizeAreasLowZoomGenerator::TypeData::TypeData()
   : optLevel(0),
     indexLevel(0),
@@ -54,9 +55,15 @@ namespace osmscout
     // no code
   }
 
-  std::string OptimizeAreasLowZoomGenerator::GetDescription() const
+  void OptimizeAreasLowZoomGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                                     ImportModuleDescription& description) const
   {
-    return "Generate '"+std::string(FILE_AREASOPT_DAT)+"'";
+    description.SetName("OptimizeAreasLowZoomGenerator");
+    description.SetDescription("Create index for area lookup of reduced resolution areas");
+
+    description.AddRequiredFile(AreaDataFile::AREAS_DAT);
+
+    description.AddProvidedOptionalFile(OptimizeAreasLowZoom::FILE_AREASOPT_DAT);
   }
 
   void OptimizeAreasLowZoomGenerator::GetAreaTypesToOptimize(const TypeConfig& typeConfig,
@@ -511,10 +518,10 @@ namespace osmscout
     progress.Info("Minimum visible size in pixel: "+NumberToString((unsigned long)pixel));
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      AreaDataFile::AREAS_DAT),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'areas.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -651,8 +658,8 @@ namespace osmscout
                            areaTypes);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     FILE_AREASOPT_DAT))) {
-      progress.Error("Cannot create '"+std::string(FILE_AREASOPT_DAT)+"'");
+                                     OptimizeAreasLowZoom::FILE_AREASOPT_DAT))) {
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
 

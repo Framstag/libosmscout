@@ -19,16 +19,29 @@
 
 #include <osmscout/import/GenRawWayIndex.h>
 
+#include <osmscout/import/Preprocess.h>
+
 namespace osmscout {
 
-  RawWayIndexGenerator::RawWayIndexGenerator(const std::string& datafile,
-                                             const std::string& indexfile)
+  const char* RawWayIndexGenerator::RAWWAY_IDX="rawway.idx";
+
+  RawWayIndexGenerator::RawWayIndexGenerator()
    : NumericIndexGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
-                                         datafile,
-                                         indexfile)
+                                         Preprocess::RAWWAYS_DAT,
+                                         RAWWAY_IDX)
   {
     // no code
   }
 
+  void RawWayIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                             ImportModuleDescription& description) const
+  {
+    description.SetName("RawWayIndexGenerator");
+    description.SetDescription("Generate id lookup index on raw way data file");
+
+    description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
+
+    description.AddProvidedTemporaryFile(RAWWAY_IDX);
+  }
 }
 

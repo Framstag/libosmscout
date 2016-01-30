@@ -109,6 +109,7 @@ set(SOURCE_FILES
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/Area.cpp
+    src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
     src/osmscout/AreaNodeIndex.cpp
     src/osmscout/AreaWayIndex.cpp
@@ -147,6 +148,7 @@ set(SOURCE_FILES
     src/osmscout/Types.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
+    src/osmscout/WayDataFile.cpp
 #    tests/AccessParse.cpp
  #   tests/EncodeNumber.cpp
 #    tests/FileScannerWriter.cpp

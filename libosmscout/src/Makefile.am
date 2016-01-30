@@ -42,19 +42,21 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Intersection.cpp \
                         osmscout/Location.cpp \
                         osmscout/Coord.cpp \
+                        osmscout/CoordDataFile.cpp \
                         osmscout/GeoCoord.cpp \
                         osmscout/Pixel.cpp \
                         osmscout/Area.cpp \
+                        osmscout/AreaDataFile.cpp \
                         osmscout/Node.cpp \
+                        osmscout/NodeDataFile.cpp \
                         osmscout/Path.cpp \
                         osmscout/Point.cpp \
                         osmscout/Tag.cpp \
                         osmscout/TurnRestriction.cpp \
                         osmscout/Way.cpp \
+                        osmscout/WayDataFile.cpp \
                         osmscout/ObjectRef.cpp \
                         osmscout/NumericIndex.cpp \
-                        osmscout/CoordDataFile.cpp \
-                        osmscout/NodeDataFile.cpp \
                         osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \

@@ -27,6 +27,7 @@
 
 #include <osmscout/DataFile.h>
 #include <osmscout/CoordDataFile.h>
+#include <osmscout/WaterIndex.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -35,8 +36,10 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
 
+#include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
+#include <osmscout/WayDataFile.h>
 
 //#define DEBUG_COASTLINE
 //#define DEBUG_TILING
@@ -131,10 +134,10 @@ namespace osmscout {
     progress.SetAction("Scanning for coastlines");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawcoastline.dat"),
+                                      Preprocess::RAWCOASTLINE_DAT),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'rawcoastline.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -162,11 +165,11 @@ namespace osmscout {
 
     progress.SetAction("Resolving nodes of coastline");
 
-    CoordDataFile coordDataFile("coord.dat");
+    CoordDataFile coordDataFile;
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
-      std::cerr << "Cannot open coord data file!" << std::endl;
+      progress.Error("Cannot open file '"+coordDataFile.GetFilename()+"'!");
       return false;
     }
 
@@ -241,7 +244,7 @@ namespace osmscout {
     }
 
     if (!scanner.Close()) {
-      progress.Error("Error while reading/closing 'ways.dat'");
+      progress.Error("Error while reading/closing '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -544,10 +547,10 @@ namespace osmscout {
     // We do not yet know if we handle borders as ways or areas
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -1601,9 +1604,20 @@ namespace osmscout {
     }
   }
 
-  std::string WaterIndexGenerator::GetDescription() const
+  void WaterIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                              ImportModuleDescription& description) const
   {
-    return "Generate 'water.idx'";
+    description.SetName("WaterIndexGenerator");
+    description.SetDescription("Create index for lookup of ground/See tiles");
+
+    description.AddRequiredFile(Preprocess::BOUNDING_DAT);
+
+    description.AddRequiredFile(Preprocess::RAWCOASTLINE_DAT);
+
+    description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(WayDataFile::WAYS_DAT);
+
+    description.AddProvidedFile(WaterIndex::WATER_IDX);
   }
 
   bool WaterIndexGenerator::Import(const TypeConfigRef& typeConfig,
@@ -1628,21 +1642,21 @@ namespace osmscout {
     //
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "bounding.dat"),
+                                      Preprocess::BOUNDING_DAT),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'bounding.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
     if (!scanner.ReadCoord(minCoord) ||
         !scanner.ReadCoord(maxCoord)) {
-      progress.Error("Error while reading from 'bounding.dat'");
+      progress.Error("Error while reading from file '"+scanner.GetFilename()+"'");
       return false;
     }
 
     if (scanner.HasError() || !scanner.Close()) {
-      progress.Error("Error while reading/closing 'bounding.dat'");
+      progress.Error("Error while reading/closing file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -1671,9 +1685,11 @@ namespace osmscout {
     // Load and merge coastlines
     //
 
-    LoadCoastlines(parameter,
-                   progress,
-                   coastlines);
+    if (!LoadCoastlines(parameter,
+                        progress,
+                        coastlines)) {
+      return false;
+    }
 
     MergeCoastlines(progress,
                     coastlines);
@@ -1684,8 +1700,8 @@ namespace osmscout {
     FileWriter writer;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "water.idx"))) {
-      progress.Error("Error while opening 'water.idx' for writing");
+                                     WaterIndex::WATER_IDX))) {
+      progress.Error("Error while opening '"+writer.GetFilename()+"' for writing");
       return false;
     }
 
@@ -1803,7 +1819,7 @@ namespace osmscout {
     coastlines.clear();
 
     if (writer.HasError() || !writer.Close()) {
-      progress.Error("Error while closing 'water.idx'");
+      progress.Error("Error while closing '"+writer.GetFilename()+"'");
       return false;
     }
 

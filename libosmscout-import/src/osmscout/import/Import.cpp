@@ -19,6 +19,7 @@
 
 #include <osmscout/import/Import.h>
 
+#include <algorithm>
 #include <iostream>
 
 #include <osmscout/Types.h>
@@ -28,7 +29,6 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
 
-#include <osmscout/import/GenRawNodeIndex.h>
 #include <osmscout/import/GenRawWayIndex.h>
 #include <osmscout/import/GenRawRelIndex.h>
 
@@ -66,6 +66,7 @@
 
 // Routing
 #include <osmscout/import/GenRouteDat.h>
+#include <osmscout/import/GenIntersectionIndex.h>
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
 #include <osmscout/import/GenTextIndex.h>
@@ -79,9 +80,9 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=24;
-#else
   static const size_t defaultEndStep=23;
+#else
+  static const size_t defaultEndStep=22;
 #endif
 
   ImportParameter::Router::Router(uint8_t vehicleMask,
@@ -96,6 +97,7 @@ namespace osmscout {
    : typefile("map.ost"),
      startStep(defaultStartStep),
      endStep(defaultEndStep),
+     eco(false),
      strictAreas(false),
      sortObjects(true),
      sortBlockSize(40000000),
@@ -155,6 +157,11 @@ namespace osmscout {
   size_t ImportParameter::GetEndStep() const
   {
     return endStep;
+  }
+
+  bool ImportParameter::IsEco() const
+  {
+    return eco;
   }
 
   const std::list<ImportParameter::Router>& ImportParameter::GetRouter() const
@@ -349,6 +356,11 @@ namespace osmscout {
     this->endStep=endStep;
   }
 
+  void ImportParameter::SetEco(bool eco)
+  {
+    this->eco=eco;
+  }
+
   void ImportParameter::ClearRouter()
   {
     router.clear();
@@ -522,15 +534,267 @@ namespace osmscout {
     this->assumeLand=assumeLand;
   }
 
+  void ImportModuleDescription::SetName(const std::string& name)
+  {
+    this->name=name;
+  }
+
+  void ImportModuleDescription::SetDescription(const std::string& description)
+  {
+    this->description=description;
+  }
+
+  void ImportModuleDescription::AddProvidedFile(const std::string& providedFile)
+  {
+    providedFiles.push_back(providedFile);
+  }
+
+  void ImportModuleDescription::AddProvidedOptionalFile(const std::string& providedFile)
+  {
+    providedOptionalFiles.push_back(providedFile);
+  }
+
+  void ImportModuleDescription::AddProvidedDebuggingFile(const std::string& providedFile)
+  {
+    providedDebuggingFiles.push_back(providedFile);
+  }
+
+  void ImportModuleDescription::AddProvidedTemporaryFile(const std::string& providedFile)
+  {
+    providedTemporaryFiles.push_back(providedFile);
+  }
+
+  void ImportModuleDescription::AddRequiredFile(const std::string& requiredFile)
+  {
+    requiredFiles.push_back(requiredFile);
+  }
+
   ImportModule::~ImportModule()
   {
     // no code
   }
 
-  static bool ExecuteModules(std::list<ImportModule*>& modules,
-                            const ImportParameter& parameter,
-                            Progress& progress,
-                            const TypeConfigRef& typeConfig)
+  void ImportModule::GetDescription(const ImportParameter& /*parameter*/,
+                                    ImportModuleDescription& /*description*/) const
+  {
+    // no code
+  }
+
+  Importer::Importer(const ImportParameter& parameter)
+  : parameter(parameter)
+  {
+    GetModuleList(modules);
+
+    for (const auto& module : modules) {
+      ImportModuleDescription description;
+
+      module->GetDescription(parameter,
+                             description);
+
+      moduleDescriptions.push_back(description);
+    }
+  }
+
+  Importer::~Importer()
+  {
+    // no code
+  }
+
+  bool Importer::ValidateDescription(Progress& progress)
+  {
+    std::unordered_set<std::string> temporaryFiles;
+    std::unordered_set<std::string> requiredFiles;
+    bool                            success=true;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedTemporaryFiles()) {
+        temporaryFiles.insert(file);
+      }
+      for (const auto& file : description.GetRequiredFiles()) {
+        requiredFiles.insert(file);
+      }
+    }
+
+    // Temporary files must be required by some module
+
+    for (const auto& tmpFile : temporaryFiles) {
+      if (requiredFiles.find(tmpFile)==requiredFiles.end()) {
+        progress.Error("Temporary file '"+tmpFile+"' is not required by any import module");
+        success=false;
+      }
+    }
+
+    return success;
+  }
+
+  bool Importer::ValidateParameter(Progress& progress)
+  {
+    if (parameter.GetAreaWayMinMag()<=parameter.GetOptimizationMaxMag()) {
+      progress.Error("Area way index minimum magnification is <= than optimization max magnification");
+      return false;
+    }
+
+    if (parameter.IsEco() &&
+        (parameter.GetStartStep()!=defaultStartStep ||
+         parameter.GetEndStep()!=defaultEndStep)) {
+      progress.Error("If eco mode is activated you must run all import steps");
+    }
+
+    return true;
+  }
+
+  void Importer::GetModuleList(std::vector<ImportModuleRef>& modules)
+  {
+    /* 1 */
+    modules.push_back(std::make_shared<TypeDataGenerator>());
+
+    /* 2 */
+    modules.push_back(std::make_shared<Preprocess>());
+
+    /* 3 */
+    modules.push_back(std::make_shared<RawWayIndexGenerator>());
+    /* 4 */
+    modules.push_back(std::make_shared<RawRelationIndexGenerator>());
+    /* 5 */
+    modules.push_back(std::make_shared<RelAreaDataGenerator>());
+
+    /* 6 */
+    modules.push_back(std::make_shared<WayAreaDataGenerator>());
+
+    /* 7 */
+    modules.push_back(std::make_shared<MergeAreaDataGenerator>());
+
+    /* 8 */
+    modules.push_back(std::make_shared<MergeAreasGenerator>());
+
+    /* 9 */
+    modules.push_back(std::make_shared<WayWayDataGenerator>());
+
+    /* 10 */
+    modules.push_back(std::make_shared<OptimizeAreaWayIdsGenerator>());
+
+    /* 11 */
+    modules.push_back(std::make_shared<NodeDataGenerator>());
+
+    /* 12 */
+    modules.push_back(std::make_shared<SortNodeDataGenerator>());
+
+    /* 13 */
+    modules.push_back(std::make_shared<SortWayDataGenerator>());
+
+    /* 14 */
+    modules.push_back(std::make_shared<AreaNodeIndexGenerator>());
+
+    /* 15 */
+    modules.push_back(std::make_shared<AreaWayIndexGenerator>());
+
+    /* 16 */
+    modules.push_back(std::make_shared<AreaAreaIndexGenerator>());
+
+    /* 17 */
+    modules.push_back(std::make_shared<WaterIndexGenerator>());
+
+    /* 18 */
+    modules.push_back(std::make_shared<OptimizeAreasLowZoomGenerator>());
+
+    /* 19 */
+    modules.push_back(std::make_shared<OptimizeWaysLowZoomGenerator>());
+
+    /* 22 */
+    modules.push_back(std::make_shared<LocationIndexGenerator>());
+
+    /* 21 */
+    modules.push_back(std::make_shared<RouteDataGenerator>());
+
+    /* 22 */
+    modules.push_back(std::make_shared<IntersectionIndexGenerator>());
+
+#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
+    /* 23 */
+    modules.push_back(std::make_shared<TextIndexGenerator>());
+#endif
+  }
+
+  void Importer::DumpTypeConfigData(const TypeConfig& typeConfig,
+                                    Progress& progress)
+  {
+    progress.Info("Number of types: "+NumberToString(typeConfig.GetTypes().size()));
+    progress.Info("Number of node types: "+NumberToString(typeConfig.GetNodeTypes().size())+" "+NumberToString(typeConfig.GetNodeTypeIdBytes())+" byte(s)");
+    progress.Info("Number of way types: "+NumberToString(typeConfig.GetWayTypes().size())+" "+NumberToString(typeConfig.GetWayTypeIdBytes())+" byte(s)");
+    progress.Info("Number of area types: "+NumberToString(typeConfig.GetAreaTypes().size())+" "+NumberToString(typeConfig.GetAreaTypeIdBytes())+" byte(s)");
+  }
+
+  void Importer::DumpModuleDescription(const ImportModuleDescription& description,
+                                       Progress& progress)
+  {
+    for (const auto& filename : description.GetRequiredFiles()) {
+      progress.Info("Module requires file '"+filename+"'");
+    }
+    for (const auto& filename : description.GetProvidedFiles()) {
+      progress.Info("Module provides file '"+filename+"'");
+    }
+    for (const auto& filename : description.GetProvidedOptionalFiles()) {
+      progress.Info("Module provides optional file '"+filename+"'");
+    }
+    for (const auto& filename : description.GetProvidedDebuggingFiles()) {
+      progress.Info("Module provides debugging file '"+filename+"'");
+    }
+    for (const auto& filename : description.GetProvidedTemporaryFiles()) {
+      progress.Info("Module provides temporary file '"+filename+"'");
+    }
+  }
+
+  bool Importer::CleanupTemporaries(size_t currentStep,
+                                    Progress& progress)
+  {
+    std::set<std::string> allTemporaryFiles;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedTemporaryFiles()) {
+        allTemporaryFiles.insert(file);
+      }
+    }
+
+    std::set<std::string> uptoNowRequiredTemporaryFiles;
+
+    for (const auto& file : moduleDescriptions[currentStep-1].GetRequiredFiles()) {
+      if (allTemporaryFiles.find(file)!=allTemporaryFiles.end()) {
+        uptoNowRequiredTemporaryFiles.insert(file);
+      }
+    }
+
+    std::set<std::string> inFutureStillRequiredTemporaryFiles;
+
+    for (size_t step=currentStep; step<moduleDescriptions.size(); step++) {
+      for (const auto& file : moduleDescriptions[step].GetRequiredFiles()) {
+        if (allTemporaryFiles.find(file)!=allTemporaryFiles.end()) {
+          inFutureStillRequiredTemporaryFiles.insert(file);
+        }
+      }
+    }
+
+    std::list<std::string> notAnymoreRequiredFiles;
+
+    std::set_difference(uptoNowRequiredTemporaryFiles.begin(),uptoNowRequiredTemporaryFiles.end(),
+                        inFutureStillRequiredTemporaryFiles.begin(),inFutureStillRequiredTemporaryFiles.end(),
+                        std::inserter(notAnymoreRequiredFiles,notAnymoreRequiredFiles.begin()));
+
+    for (const auto& file : notAnymoreRequiredFiles) {
+      std::string filename=AppendFileToDir(parameter.GetDestinationDirectory(),file);
+
+      progress.Info("Removing temporary file '"+ filename + "'...");
+
+      if (!RemoveFile(filename)) {
+        progress.Error("Error while rmeoving file '"+ filename + "'!");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool Importer::ExecuteModules(const TypeConfigRef& typeConfig,
+                                Progress& progress)
   {
     StopClock     overAllTimer;
     size_t        currentStep=1;
@@ -541,17 +805,25 @@ namespace osmscout {
     for (const auto& module : modules) {
       if (currentStep>=parameter.GetStartStep() &&
           currentStep<=parameter.GetEndStep()) {
-        StopClock timer;
-        bool      success;
-        double    vmUsage;
-        double    residentSet;
+        ImportModuleDescription moduleDescription;
+        StopClock               timer;
+        bool                    success;
+        double                  vmUsage;
+        double                  residentSet;
 
-        progress.SetStep(std::string("Step #")+
+        module->GetDescription(parameter,
+                               moduleDescription);
+
+        progress.SetStep("Step #"+
                          NumberToString(currentStep)+
                          " - "+
-                         module->GetDescription());
+                         moduleDescription.GetName());
+        progress.Info("Module description: "+moduleDescription.GetDescription());
 
         monitor.Reset();
+
+        DumpModuleDescription(moduleDescription,
+                              progress);
 
         success=module->Import(typeConfig,
                                parameter,
@@ -572,8 +844,15 @@ namespace osmscout {
         }
 
         if (!success) {
-          progress.Error(std::string("Error while executing step '")+module->GetDescription()+"'!");
+          progress.Error("Error while executing step '"+moduleDescription.GetName()+"'!");
           return false;
+        }
+
+        if (parameter.IsEco()) {
+          if (!CleanupTemporaries(currentStep,
+                                  progress)) {
+            return false;
+          }
         }
       }
 
@@ -592,16 +871,16 @@ namespace osmscout {
     return true;
   }
 
-  bool Import(const ImportParameter& parameter,
-              Progress& progress)
+  bool Importer::Import(Progress& progress)
   {
-    // TODO: verify parameter
+    TypeConfigRef typeConfig(std::make_shared<TypeConfig>());
 
-    TypeConfigRef            typeConfig(new TypeConfig());
-    std::list<ImportModule*> modules;
+    if (!ValidateDescription(progress)) {
+      return false;
+    }
 
-    if (parameter.GetAreaWayMinMag()<=parameter.GetOptimizationMaxMag()) {
-      progress.Error("Area way index minimum magnification is <= than optimization max magnification");
+    if (!ValidateParameter(progress)) {
+      return false;
     }
 
     progress.SetStep("Loading type config");
@@ -611,10 +890,8 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info("Number of types: "+NumberToString(typeConfig->GetTypes().size()));
-    progress.Info("Number of node types: "+NumberToString(typeConfig->GetNodeTypes().size())+" "+NumberToString(typeConfig->GetNodeTypeIdBytes())+" byte(s)");
-    progress.Info("Number of way types: "+NumberToString(typeConfig->GetWayTypes().size())+" "+NumberToString(typeConfig->GetWayTypeIdBytes())+" byte(s)");
-    progress.Info("Number of area types: "+NumberToString(typeConfig->GetAreaTypes().size())+" "+NumberToString(typeConfig->GetAreaTypeIdBytes())+" byte(s)");
+    DumpTypeConfigData(*typeConfig,
+                       progress);
 
     typeConfig->RegisterNameTag("name",0);
     typeConfig->RegisterNameTag("place_name",1);
@@ -624,100 +901,44 @@ namespace osmscout {
     typeConfig->RegisterNameAltTag("place_name:ru",1);
     */
 
-    /* 1 */
-    modules.push_back(new TypeDataGenerator());
-
-    /* 2 */
-    modules.push_back(new Preprocess());
-
-    /* 3 */
-    modules.push_back(new RawNodeIndexGenerator(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                "rawnodes.dat"),
-                                                AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                "rawnode.idx")));
-    /* 4 */
-    modules.push_back(new RawWayIndexGenerator(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                               "rawways.dat"),
-                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                               "rawway.idx")));
-    /* 5 */
-    modules.push_back(new RawRelationIndexGenerator(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                    "rawrels.dat"),
-                                                    AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                    "rawrel.idx")));
-    /* 6 */
-    modules.push_back(new RelAreaDataGenerator());
-
-    /* 7 */
-    modules.push_back(new WayAreaDataGenerator());
-
-    /* 8 */
-    modules.push_back(new MergeAreaDataGenerator());
-
-    /* 9 */
-    modules.push_back(new MergeAreasGenerator());
-
-    /* 10 */
-    modules.push_back(new WayWayDataGenerator());
-
-    /* 11 */
-    modules.push_back(new OptimizeAreaWayIdsGenerator());
-
-    /* 12 */
-    modules.push_back(new NodeDataGenerator());
-
-    /* 13 */
-    modules.push_back(new SortNodeDataGenerator());
-
-    /* 14 */
-    modules.push_back(new SortWayDataGenerator());
-
-    /* 15 */
-    modules.push_back(new AreaNodeIndexGenerator());
-
-    /* 16 */
-    modules.push_back(new AreaWayIndexGenerator());
-
-    /* 17 */
-    modules.push_back(new AreaAreaIndexGenerator());
-
-    /* 18 */
-    modules.push_back(new WaterIndexGenerator());
-
-    /* 19 */
-    modules.push_back(new OptimizeAreasLowZoomGenerator());
-
-    /* 20 */
-    modules.push_back(new OptimizeWaysLowZoomGenerator());
-
-    /* 21 */
-    modules.push_back(new LocationIndexGenerator());
-
-    /* 22 */
-    modules.push_back(new RouteDataGenerator());
-
-    /* 23 */
-    modules.push_back(new NumericIndexGenerator<Id,Intersection>(std::string("Generating '")+RoutingService::FILENAME_INTERSECTIONS_IDX+"'",
-                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                 RoutingService::FILENAME_INTERSECTIONS_DAT),
-                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                 RoutingService::FILENAME_INTERSECTIONS_IDX)));
-
-#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 24 */
-    modules.push_back(new TextIndexGenerator());
-#endif
-
-    bool result=ExecuteModules(modules,
-                               parameter,
-                               progress,
-                               typeConfig);
-
-    for (const auto& module : modules) {
-      delete module;
-    }
+    bool result=ExecuteModules(typeConfig,
+                               progress);
 
     return result;
+  }
+
+  std::list<std::string> Importer::GetProvidedFiles() const
+  {
+    std::set<std::string> providedFileSet;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedFiles()) {
+        providedFileSet.insert(file);
+      }
+    }
+
+    std::list<std::string> providedFiles;
+
+    std::copy(providedFileSet.begin(),providedFileSet.end(),std::back_inserter(providedFiles));
+
+    return providedFiles;
+  }
+
+  std::list<std::string> Importer::GetProvidedOptionalFiles() const
+  {
+    std::set<std::string> providedFileSet;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedOptionalFiles()) {
+        providedFileSet.insert(file);
+      }
+    }
+
+    std::list<std::string> providedFiles;
+
+    std::copy(providedFileSet.begin(),providedFileSet.end(),std::back_inserter(providedFiles));
+
+    return providedFiles;
   }
 }
 

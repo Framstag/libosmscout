@@ -227,7 +227,7 @@ namespace osmscout {
     }
 
     if (!areaDataFile) {
-      areaDataFile=std::make_shared<AreaDataFile>("areas.dat");
+      areaDataFile=std::make_shared<AreaDataFile>();
     }
 
     if (!areaDataFile->IsOpen()) {
@@ -258,7 +258,7 @@ namespace osmscout {
     }
 
     if (!wayDataFile) {
-      wayDataFile=std::make_shared<WayDataFile>("ways.dat");
+      wayDataFile=std::make_shared<WayDataFile>();
     }
 
     if (!wayDataFile->IsOpen()) {

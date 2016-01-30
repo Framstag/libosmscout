@@ -26,8 +26,15 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/import/Preprocess.h>
+#include <osmscout/import/GenRawNodeIndex.h>
+#include <osmscout/import/GenRawWayIndex.h>
+#include <osmscout/import/GenRawRelIndex.h>
 
 namespace osmscout {
+
+  const char* RelAreaDataGenerator::RELAREA_TMP="relarea.tmp";
+  const char* RelAreaDataGenerator::WAYAREABLACK_DAT="wayareablack.dat";
 
   /**
     Returns true, if area a is in area b
@@ -992,9 +999,20 @@ namespace osmscout {
     return "";
   }
 
-  std::string RelAreaDataGenerator::GetDescription() const
+  void RelAreaDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                                 ImportModuleDescription& description) const
   {
-    return "Generate 'relarea.tmp'";
+    description.SetName("RelAreaDataGenerator");
+    description.SetDescription("Resolves raw relations to areas");
+
+    description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
+    description.AddRequiredFile(Preprocess::RAWRELS_DAT);
+    description.AddRequiredFile(RawWayIndexGenerator::RAWWAY_IDX);
+    description.AddRequiredFile(RawRelationIndexGenerator::RAWREL_IDX);
+
+    description.AddProvidedTemporaryFile(RELAREA_TMP);
+    description.AddProvidedTemporaryFile(WAYAREABLACK_DAT);
   }
 
   bool RelAreaDataGenerator::Import(const TypeConfigRef& typeConfig,
@@ -1003,7 +1021,7 @@ namespace osmscout {
   {
     IdSet                      wayAreaIndexBlacklist;
 
-    CoordDataFile              coordDataFile("coord.dat");
+    CoordDataFile              coordDataFile;
 
     RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayIndexCacheSize());
 
@@ -1052,7 +1070,7 @@ namespace osmscout {
     std::vector<size_t> areaNodeTypeCount(typeConfig->GetTypeCount(),0);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawrels.dat"),
+                                      Preprocess::RAWRELS_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -1065,7 +1083,7 @@ namespace osmscout {
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "relarea.tmp"))) {
+                                     RELAREA_TMP))) {
       progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
@@ -1176,8 +1194,8 @@ namespace osmscout {
     progress.SetAction("Generate wayareablack.dat");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "wayareablack.dat"))) {
-      progress.Error("Cannot create 'wayblack.dat'");
+                                        WAYAREABLACK_DAT))) {
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
 

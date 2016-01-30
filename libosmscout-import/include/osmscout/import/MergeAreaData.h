@@ -33,13 +33,18 @@ namespace osmscout {
 
   class MergeAreaDataGenerator : public ImportModule
   {
+  public:
+    static const char* AREAS_TMP;
+
   private:
     bool MergeAreas(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_WAYDATAFILE_H
-#define OSMSCOUT_WAYDATAFILE_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2016  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,27 +17,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <memory>
-
-#include <osmscout/DataFile.h>
-#include <osmscout/Way.h>
+#include <osmscout/AreaDataFile.h>
 
 namespace osmscout {
-  /**
-    \ingroup Database
-    Abstraction for getting cached access to the 'ways.dat' file.
-    */
-  class WayDataFile : public DataFile<Way>
+
+  const char* AreaDataFile::AREAS_DAT="areas.dat";
+  const char* AreaDataFile::AREAS_IDMAP="areas.idmap";
+
+  AreaDataFile::AreaDataFile()
+  : DataFile<Area>(AREAS_DAT)
   {
-  public:
-    static const char* WAYS_DAT;
-    static const char* WAYS_IDMAP;
-
-  public:
-    WayDataFile();
-  };
-
-  typedef std::shared_ptr<WayDataFile> WayDataFileRef;
+    // no code
+  }
 }
 
-#endif

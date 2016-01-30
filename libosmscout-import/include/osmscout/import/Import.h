@@ -91,6 +91,7 @@ namespace osmscout {
     std::string                  destinationDirectory;     //<! Name of the destination directory
     size_t                       startStep;                //<! Starting step for import
     size_t                       endStep;                  //<! End step for import
+    bool                         eco;                      //<! Eco modus, deletes temporary files ASAP
     std::list<Router>            router;                   //<! Definition of router
 
     bool                         strictAreas;              //<! Assure that areas conform to "simple" definition
@@ -150,6 +151,7 @@ namespace osmscout {
 
     size_t GetStartStep() const;
     size_t GetEndStep() const;
+    bool   IsEco() const;
 
     const std::list<Router>& GetRouter() const;
 
@@ -206,6 +208,7 @@ namespace osmscout {
 
     void SetStartStep(size_t startStep);
     void SetSteps(size_t startStep, size_t endStep);
+    void SetEco(bool eco);
 
     void ClearRouter();
     void AddRouter(const Router& router);
@@ -260,6 +263,63 @@ namespace osmscout {
     void SetAssumeLand(bool assumeLand);
   };
 
+  class OSMSCOUT_IMPORT_API ImportModuleDescription
+  {
+  private:
+    std::string            name;
+    std::string            description;
+    std::list<std::string> providedFiles;
+    std::list<std::string> providedOptionalFiles;
+    std::list<std::string> providedDebuggingFiles;
+    std::list<std::string> providedTemporaryFiles;
+    std::list<std::string> requiredFiles;
+
+  public:
+    void SetName(const std::string& name);
+    void SetDescription(const std::string& description);
+
+    void AddProvidedFile(const std::string& providedFile);
+    void AddProvidedOptionalFile(const std::string& providedFile);
+    void AddProvidedDebuggingFile(const std::string& providedFile);
+    void AddProvidedTemporaryFile(const std::string& providedFile);
+    void AddRequiredFile(const std::string& requiredFile);
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline std::string GetDescription() const
+    {
+      return description;
+    }
+
+    inline std::list<std::string> GetProvidedFiles() const
+    {
+      return providedFiles;
+    }
+
+    inline std::list<std::string> GetProvidedOptionalFiles() const
+    {
+      return providedOptionalFiles;
+    }
+
+    inline std::list<std::string> GetProvidedDebuggingFiles() const
+    {
+      return providedDebuggingFiles;
+    }
+
+    inline std::list<std::string> GetProvidedTemporaryFiles() const
+    {
+      return providedTemporaryFiles;
+    }
+
+    inline std::list<std::string> GetRequiredFiles() const
+    {
+      return requiredFiles;
+    }
+  };
+
   /**
     A single import module representing a single import step.
 
@@ -272,10 +332,8 @@ namespace osmscout {
   public:
     virtual ~ImportModule();
 
-    /**
-     * Return a description of the module
-     */
-    virtual std::string GetDescription() const = 0;
+    virtual void GetDescription(const ImportParameter& parameter,
+                                ImportModuleDescription& description) const;
 
     /**
      * Do the import
@@ -292,12 +350,41 @@ namespace osmscout {
                         Progress& progress) = 0;
   };
 
+  typedef std::shared_ptr<ImportModule> ImportModuleRef;
+
   /**
     Does the import based on the given parameters. Feedback about the import progress
     is given by the indivudal import modules calling the Progress instance as appropriate.
     */
-  extern OSMSCOUT_IMPORT_API bool Import(const ImportParameter& parameter,
-                                         Progress& progress);
+  class OSMSCOUT_IMPORT_API Importer
+  {
+  private:
+    ImportParameter                      parameter;
+    std::vector<ImportModuleRef>         modules;
+    std::vector<ImportModuleDescription> moduleDescriptions;
+
+  private:
+    bool ValidateDescription(Progress& progress);
+    bool ValidateParameter(Progress& progress);
+    void GetModuleList(std::vector<ImportModuleRef>& modules);
+    void DumpTypeConfigData(const TypeConfig& typeConfig,
+                            Progress& progress);
+    void DumpModuleDescription(const ImportModuleDescription& description,
+                               Progress& progress);
+    bool CleanupTemporaries(size_t currentStep,
+                            Progress& progress);
+
+    bool ExecuteModules(const TypeConfigRef& typeConfig,
+                        Progress& progress);
+  public:
+    Importer(const ImportParameter& parameter);
+    virtual ~Importer();
+
+    bool Import(Progress& progress);
+
+    std::list<std::string> GetProvidedFiles() const;
+    std::list<std::string> GetProvidedOptionalFiles() const;
+  };
 }
 
 #endif

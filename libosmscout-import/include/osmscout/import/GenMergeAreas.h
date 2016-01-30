@@ -41,6 +41,9 @@ namespace osmscout {
    */
   class MergeAreasGenerator : public ImportModule
   {
+  public:
+    static const char* AREAS2_TMP;
+
   private:
     /**
      * Data structure holding all information for merging
@@ -175,7 +178,9 @@ namespace osmscout {
                           uint32_t& areasWritten);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

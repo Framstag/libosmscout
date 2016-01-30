@@ -27,7 +27,11 @@ namespace osmscout {
   class TypeDataGenerator : public ImportModule
   {
   public:
-    std::string GetDescription() const;
+
+  public:
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

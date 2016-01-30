@@ -24,6 +24,9 @@
 #include <osmscout/Node.h>
 #include <osmscout/Pixel.h>
 
+#include <osmscout/AreaNodeIndex.h>
+#include <osmscout/NodeDataFile.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -50,9 +53,15 @@ namespace osmscout {
   {
   }
 
-  std::string AreaNodeIndexGenerator::GetDescription() const
+  void AreaNodeIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                            ImportModuleDescription& description) const
   {
-    return "Generate 'areanode.idx'";
+    description.SetName("AreaNodeIndexGenerator");
+    description.SetDescription("Index nodes for area lookup");
+
+    description.AddRequiredFile(NodeDataFile::NODES_DAT);
+
+    description.AddProvidedFile(AreaNodeIndex::AREA_NODE_IDX);
   }
 
   bool AreaNodeIndexGenerator::Import(const TypeConfigRef& typeConfig,
@@ -69,7 +78,7 @@ namespace osmscout {
     nodeTypeData.resize(typeConfig->GetTypeCount());
 
     if (!nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "nodes.dat"),
+                                          NodeDataFile::NODES_DAT),
                           FileScanner::Sequential,
                           true)) {
       progress.Error("Cannot open 'nodes.dat'");
@@ -220,8 +229,8 @@ namespace osmscout {
     progress.SetAction("Generating 'areanode.idx'");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areanode.idx"))) {
-      progress.Error("Cannot create 'areanode.idx'");
+                                     AreaNodeIndex::AREA_NODE_IDX))) {
+      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
       return false;
     }
 

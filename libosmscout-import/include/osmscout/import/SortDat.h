@@ -129,6 +129,8 @@ namespace osmscout {
     void AddFilter(const ProcessingFilterRef& filter);
 
   public:
+    std::list<std::string> ProvidesFiles(const ImportParameter& parameter) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);
@@ -147,6 +149,14 @@ namespace osmscout {
     mapFilename(mapFilename)
   {
     // no code
+  }
+
+  template <class N>
+  std::list<std::string> SortDataGenerator<N>::ProvidesFiles(const ImportParameter& /*parameter*/) const
+  {
+    std::list<std::string> providedFiles={dataFilename, mapFilename};
+
+    return providedFiles;
   }
 
   template <class N>

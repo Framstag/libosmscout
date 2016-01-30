@@ -27,7 +27,12 @@ namespace osmscout {
   class NodeDataGenerator : public ImportModule
   {
   public:
-    std::string GetDescription() const;
+    static const char* NODES_TMP;
+
+  public:
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

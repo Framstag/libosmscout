@@ -39,9 +39,6 @@ namespace osmscout {
 
   class OptimizeWaysLowZoomGenerator : public ImportModule
   {
-  public:
-    static const char* FILE_WAYSOPT_DAT;
-
   private:
     typedef std::unordered_map<FileOffset,FileOffset> FileOffsetFileOffsetMap;
 
@@ -128,7 +125,9 @@ namespace osmscout {
                     std::list<TypeData>& typesData);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

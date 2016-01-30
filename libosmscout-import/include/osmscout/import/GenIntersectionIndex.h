@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_WAYDATAFILE_H
-#define OSMSCOUT_WAYDATAFILE_H
+#ifndef OSMSCOUT_IMPORT_GENINTERSECTIONINDEX_H
+#define OSMSCOUT_IMPORT_GENINTERSECTIONINDEX_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2016  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,27 +20,20 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <memory>
+#include <osmscout/Intersection.h>
 
-#include <osmscout/DataFile.h>
-#include <osmscout/Way.h>
+#include <osmscout/import/GenNumericIndex.h>
 
 namespace osmscout {
-  /**
-    \ingroup Database
-    Abstraction for getting cached access to the 'ways.dat' file.
-    */
-  class WayDataFile : public DataFile<Way>
+
+  class IntersectionIndexGenerator : public NumericIndexGenerator<Id,Intersection>
   {
   public:
-    static const char* WAYS_DAT;
-    static const char* WAYS_IDMAP;
+    IntersectionIndexGenerator();
 
-  public:
-    WayDataFile();
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
   };
-
-  typedef std::shared_ptr<WayDataFile> WayDataFileRef;
 }
 
 #endif

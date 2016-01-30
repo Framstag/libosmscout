@@ -34,7 +34,8 @@ namespace osmscout
   public:
     TextIndexGenerator();
 
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter &parameter,

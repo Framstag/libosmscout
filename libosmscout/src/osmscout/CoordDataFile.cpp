@@ -26,9 +26,10 @@
 
 namespace osmscout {
 
-  CoordDataFile::CoordDataFile(const std::string& datafile)
+  const char* CoordDataFile::COORD_DAT="coord.dat";
+
+  CoordDataFile::CoordDataFile()
   : isOpen(false),
-    datafile(datafile),
     coordPageSize(0)
   {
     // no code
@@ -44,7 +45,7 @@ namespace osmscout {
   bool CoordDataFile::Open(const std::string& path,
                            bool memoryMapedData)
   {
-    datafilename=AppendFileToDir(path,datafile);
+    datafilename=AppendFileToDir(path,COORD_DAT);
 
     isOpen=false;
     coordPageOffsetMap.clear();

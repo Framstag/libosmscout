@@ -35,6 +35,8 @@
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/GenNumericIndex.h>
+#include <osmscout/import/Preprocess.h>
+#include <osmscout/import/GenWayWayDat.h>
 
 namespace osmscout {
 
@@ -43,9 +45,28 @@ namespace osmscout {
     // no code
   }
 
-  std::string RouteDataGenerator::GetDescription() const
+  void RouteDataGenerator::GetDescription(const ImportParameter& parameter,
+                                          ImportModuleDescription& description) const
   {
-    return "Generate routing graphs";
+    description.SetName("RouteDataGenerator");
+    description.SetDescription("Generate routing graph(s)");
+
+    description.AddRequiredFile(CoordDataFile::COORD_DAT);
+
+    description.AddRequiredFile(WayDataFile::WAYS_DAT);
+    description.AddRequiredFile(AreaDataFile::AREAS_DAT);
+
+    description.AddRequiredFile(WayDataFile::WAYS_IDMAP);
+
+    description.AddRequiredFile(WayWayDataGenerator::TURNRESTR_DAT);
+
+    for (const auto& router : parameter.GetRouter()) {
+      description.AddProvidedFile(router.GetDataFilename());
+      description.AddProvidedFile(router.GetVariantFilename());
+      description.AddProvidedFile(router.GetIndexFilename());
+    }
+
+    description.AddProvidedFile(RoutingService::FILENAME_INTERSECTIONS_DAT);
   }
 
   AccessFeatureValue RouteDataGenerator::GetAccess(const FeatureValueBuffer& buffer) const
@@ -267,7 +288,7 @@ namespace osmscout {
     progress.Info("Reading turn restriction way ids");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "turnrestr.dat"),
+                                      WayWayDataGenerator::TURNRESTR_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -318,7 +339,7 @@ namespace osmscout {
     progress.Info("Resolving turn restriction way ids to way file offsets");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.idmap"),
+                                      WayDataFile::WAYS_IDMAP),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -382,12 +403,12 @@ namespace osmscout {
   {
     progress.Info("Resolving turn restriction OSM node ids to node ids");
 
-    CoordDataFile coordDataFile("coord.dat");
+    CoordDataFile coordDataFile;
     uint32_t      resolveCount=0;
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
-      std::cerr << "Cannot open coord data file!" << std::endl;
+      progress.Error("Cannot open '"+coordDataFile.GetFilename()+"'!");
       return false;
     }
 
@@ -400,7 +421,7 @@ namespace osmscout {
 
     if (!coordDataFile.Get(nodeIds,
                            coordsMap)) {
-      std::cerr << "Cannot read nodes!" << std::endl;
+      progress.Error("Cannot read nodes!");
       return false;
     }
 
@@ -435,7 +456,7 @@ namespace osmscout {
     progress.Info("Creating turn restriction data structures");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "turnrestr.dat"),
+                                      WayWayDataGenerator::TURNRESTR_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -617,7 +638,7 @@ namespace osmscout {
     progress.Info("Scanning ways");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -676,7 +697,7 @@ namespace osmscout {
     progress.Info("Scanning areas");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      AreaDataFile::AREAS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -752,7 +773,7 @@ namespace osmscout {
     progress.Info("Scanning ways");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -823,7 +844,7 @@ namespace osmscout {
     progress.Info("Scanning areas");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      AreaDataFile::AREAS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -1726,7 +1747,7 @@ namespace osmscout {
     writer.Write(writtenRouteNodeCount);
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "ways.dat"),
+                                         WayDataFile::WAYS_DAT),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+wayScanner.GetFilename()+"'");
@@ -1734,7 +1755,7 @@ namespace osmscout {
     }
 
     if (!areaScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          "areas.dat"),
+                                          AreaDataFile::AREAS_DAT),
                           FileScanner::Sequential,
                           parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+areaScanner.GetFilename()+"'");
@@ -2107,8 +2128,8 @@ namespace osmscout {
                       variantFilename);
 
       NumericIndexGenerator<Id,RouteNode> indexGenerator(std::string("Generating '")+indexFilename+"'",
-                                                         dataFilename,
-                                                         indexFilename);
+                                                         router.GetDataFilename(),
+                                                         router.GetIndexFilename());
 
       if (!indexGenerator.Import(typeConfig,
                                  parameter,

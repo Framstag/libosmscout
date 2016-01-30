@@ -23,6 +23,7 @@ set(HEADER_FILES
     include/osmscout/import/GenAreaAreaIndex.h
     include/osmscout/import/GenAreaNodeIndex.h
     include/osmscout/import/GenAreaWayIndex.h
+    include/osmscout/import/GenIntersectionIndex.h
     include/osmscout/import/GenLocationIndex.h
     include/osmscout/import/GenMergeAreas.h
     include/osmscout/import/GenNodeDat.h
@@ -66,6 +67,7 @@ set(SOURCE_FILES
     src/osmscout/import/GenAreaAreaIndex.cpp
     src/osmscout/import/GenAreaNodeIndex.cpp
     src/osmscout/import/GenAreaWayIndex.cpp
+    src/osmscout/import/GenIntersectionIndex.cpp
     src/osmscout/import/GenLocationIndex.cpp
     src/osmscout/import/GenMergeAreas.cpp
     src/osmscout/import/GenNodeDat.cpp

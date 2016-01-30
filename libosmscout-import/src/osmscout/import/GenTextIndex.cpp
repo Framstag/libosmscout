@@ -19,11 +19,17 @@
 
 #include <osmscout/ObjectRef.h>
 
-#include <osmscout/Way.h>
 #include <osmscout/Node.h>
+#include <osmscout/Way.h>
 #include <osmscout/Area.h>
 
 #include <osmscout/TypeFeatures.h>
+
+#include <osmscout/TextSearchIndex.h>
+
+#include <osmscout/NodeDataFile.h>
+#include <osmscout/WayDataFile.h>
+#include <osmscout/AreaDataFile.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
@@ -43,11 +49,21 @@ namespace osmscout
     // no code
   }
 
-  std::string TextIndexGenerator::GetDescription() const
+  void TextIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                          ImportModuleDescription& description) const
   {
-    return "Generate text data files 'text(poi,loc,region,other).dat'";
-  }
+    description.SetName("TextIndexGenerator");
+    description.SetDescription("Generate text based object search");
 
+    description.AddRequiredFile(NodeDataFile::NODES_DAT);
+    description.AddRequiredFile(WayDataFile::WAYS_DAT);
+    description.AddRequiredFile(AreaDataFile::AREAS_DAT);
+
+    description.AddProvidedOptionalFile(TextSearchIndex::TEXT_POI_DAT);
+    description.AddProvidedOptionalFile(TextSearchIndex::TEXT_LOC_DAT);
+    description.AddProvidedOptionalFile(TextSearchIndex::TEXT_REGION_DAT);
+    description.AddProvidedOptionalFile(TextSearchIndex::TEXT_OTHER_DAT);
+  }
 
   bool TextIndexGenerator::Import(const TypeConfigRef& typeConfig,
                                   const ImportParameter &parameter,
@@ -95,16 +111,16 @@ namespace osmscout
 
     std::vector<std::string> trieFiles;
     trieFiles.push_back(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "textpoi.dat"));
+                                        TextSearchIndex::TEXT_POI_DAT));
 
     trieFiles.push_back(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "textloc.dat"));
+                                        TextSearchIndex::TEXT_LOC_DAT));
 
     trieFiles.push_back(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "textregion.dat"));
+                                        TextSearchIndex::TEXT_REGION_DAT));
 
     trieFiles.push_back(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "textother.dat"));
+                                        TextSearchIndex::TEXT_OTHER_DAT));
 
     for(size_t i=0; i < keysets.size(); i++) {
       // add sz_offset to the keyset
@@ -217,19 +233,19 @@ namespace osmscout
     // Open nodes.dat
     std::string nodesDataFile=
         AppendFileToDir(parameter.GetDestinationDirectory(),
-                        "nodes.dat");
+                        NodeDataFile::NODES_DAT);
 
     FileScanner scanner;
     if(!scanner.Open(nodesDataFile,
                      FileScanner::Sequential,
                      false)) {
-      progress.Error("Cannot open 'nodes.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
     uint32_t nodeCount=0;
     if(!scanner.Read(nodeCount)) {
-      progress.Error("Error reading node count in 'nodes.dat'");
+      progress.Error("Error reading node count in file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -314,19 +330,19 @@ namespace osmscout
     // Open ways.dat
     std::string waysDataFile=
         AppendFileToDir(parameter.GetDestinationDirectory(),
-                        "ways.dat");
+                        WayDataFile::WAYS_DAT);
 
     FileScanner scanner;
     if(!scanner.Open(waysDataFile,
                      FileScanner::Sequential,
                      false)) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
     uint32_t wayCount=0;
     if(!scanner.Read(wayCount)) {
-      progress.Error("Error reading way count in 'ways.dat'");
+      progress.Error("Error reading way count in file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -428,19 +444,19 @@ namespace osmscout
     // Open areas.dat
     std::string areasDataFile=
         AppendFileToDir(parameter.GetDestinationDirectory(),
-                        "areas.dat");
+                        AreaDataFile::AREAS_DAT);
 
     FileScanner scanner;
     if(!scanner.Open(areasDataFile,
                      FileScanner::Sequential,
                      false)) {
-      progress.Error("Cannot open 'areas.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
     uint32_t areaCount=0;
     if(!scanner.Read(areaCount)) {
-      progress.Error("Error reading area count in 'areas.dat'");
+      progress.Error("Error reading area count in file '"+scanner.GetFilename()+"'");
       return false;
     }
 

@@ -19,16 +19,29 @@
 
 #include <osmscout/import/GenRawRelIndex.h>
 
+#include <osmscout/import/Preprocess.h>
+
 namespace osmscout {
 
-  RawRelationIndexGenerator::RawRelationIndexGenerator(const std::string& datafile,
-                                                       const std::string& indexfile)
+  const char* RawRelationIndexGenerator::RAWREL_IDX="rawrel.idx";
+
+  RawRelationIndexGenerator::RawRelationIndexGenerator()
    : NumericIndexGenerator<OSMId,RawRelation>("Generating 'rawrel.idx'",
-                                              datafile,
-                                              indexfile)
+                                              Preprocess::RAWRELS_DAT,
+                                              RAWREL_IDX)
   {
     // no code
   }
 
+  void RawRelationIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                                 ImportModuleDescription& description) const
+  {
+    description.SetName("RawRelationIndexGenerator");
+    description.SetDescription("Generate id lookup index on raw relation data file");
+
+    description.AddRequiredFile(Preprocess::RAWRELS_DAT);
+
+    description.AddProvidedTemporaryFile(RAWREL_IDX);
+  }
 }
 

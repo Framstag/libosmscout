@@ -26,6 +26,7 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenAreaAreaIndex.cpp \
                                osmscout/import/GenAreaNodeIndex.cpp \
                                osmscout/import/GenAreaWayIndex.cpp \
+                               osmscout/import/GenIntersectionIndex.cpp \
                                osmscout/import/GenLocationIndex.cpp \
                                osmscout/import/GenMergeAreas.cpp \
                                osmscout/import/GenNumericIndex.cpp \

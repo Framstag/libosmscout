@@ -25,12 +25,25 @@
 #include <osmscout/util/FileWriter.h>
 
 #include <osmscout/DataFile.h>
+#include <osmscout/import/GenMergeAreas.h>
+#include <osmscout/import/GenWayWayDat.h>
 
 namespace osmscout {
 
-  std::string OptimizeAreaWayIdsGenerator::GetDescription() const
+  const char* OptimizeAreaWayIdsGenerator::AREAS3_TMP = "areas3.tmp";
+  const char* OptimizeAreaWayIdsGenerator::WAYS_TMP = "ways.tmp";
+
+  void OptimizeAreaWayIdsGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                                   ImportModuleDescription& description) const
   {
-    return "Optimize ids for areas and ways";
+    description.SetName("OptimizeAreaWayIdsGenerator");
+    description.SetDescription("Optimize ids for areas and ways");
+
+    description.AddRequiredFile(MergeAreasGenerator::AREAS2_TMP);
+    description.AddRequiredFile(WayWayDataGenerator::WAYWAY_TMP);
+
+    description.AddProvidedTemporaryFile(AREAS3_TMP);
+    description.AddProvidedTemporaryFile(WAYS_TMP);
   }
 
   bool OptimizeAreaWayIdsGenerator::ScanAreaIds(const ImportParameter& parameter,
@@ -44,7 +57,7 @@ namespace osmscout {
     progress.SetAction("Scanning ids from 'areas2.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas2.tmp"),
+                                      MergeAreasGenerator::AREAS2_TMP),
                       FileScanner::Sequential,
                       parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
@@ -113,7 +126,7 @@ namespace osmscout {
     progress.SetAction("Scanning ids from 'wayway.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayway.tmp"),
+                                      WayWayDataGenerator::WAYWAY_TMP),
                                       FileScanner::Sequential,
                                       parameter.GetWayDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
@@ -187,7 +200,7 @@ namespace osmscout {
     uint32_t    areaCount=0;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areas3.tmp"))) {
+                                     AREAS3_TMP))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
       return false;
     }
@@ -197,7 +210,7 @@ namespace osmscout {
     progress.SetAction("Copy data from 'areas2.tmp' to 'areas3.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas2.tmp"),
+                                      MergeAreasGenerator::AREAS2_TMP),
                       FileScanner::Sequential,
                       parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
@@ -285,7 +298,7 @@ namespace osmscout {
     progress.SetAction("Copy data from 'wayway.tmp' to 'ways.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayway.tmp"),
+                                      WayWayDataGenerator::WAYWAY_TMP),
                                       FileScanner::Sequential,
                                       parameter.GetWayDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
@@ -298,7 +311,7 @@ namespace osmscout {
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "ways.tmp"))) {
+                                     WAYS_TMP))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
       return false;
     }

@@ -36,6 +36,9 @@ namespace osmscout {
 
   class AreaAreaIndexGenerator : public ImportModule
   {
+  public:
+    static const char* AREAADDRESS_DAT;
+
   private:
     struct Entry
     {
@@ -51,7 +54,6 @@ namespace osmscout {
     typedef std::map<Pixel,AreaLeaf> Level;
 
   private:
-
     std::list<SortDataGenerator<Area>::ProcessingFilterRef> filters;
 
   private:
@@ -108,7 +110,10 @@ namespace osmscout {
 
   public:
     AreaAreaIndexGenerator();
-    std::string GetDescription() const;
+
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

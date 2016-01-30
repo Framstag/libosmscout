@@ -21,9 +21,16 @@
 
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/WayDataFile.h>
+
 #include <osmscout/util/Geometry.h>
 
+#include <osmscout/import/GenWayWayDat.h>
+#include <osmscout/import/GenOptimizeAreaWayIds.h>
+
 namespace osmscout {
+
+  const char* SortWayDataGenerator::WAYADDRESS_DAT="wayaddress.dat";
 
   class WayLocationProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
   {
@@ -56,7 +63,7 @@ namespace osmscout {
     locationReader=new LocationFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "wayaddress.dat"))) {
+                                     SortWayDataGenerator::WAYADDRESS_DAT))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
 
       return false;
@@ -429,18 +436,25 @@ namespace osmscout {
   }
 
   SortWayDataGenerator::SortWayDataGenerator()
-  : SortDataGenerator<Way>("ways.dat","ways.idmap")
+  : SortDataGenerator<Way>(WayDataFile::WAYS_DAT,WayDataFile::WAYS_IDMAP)
   {
-    AddSource("ways.tmp");
+    AddSource(OptimizeAreaWayIdsGenerator::WAYS_TMP);
 
     AddFilter(std::make_shared<WayLocationProcessorFilter>());
     AddFilter(std::make_shared<WayNodeReductionProcessorFilter>());
     AddFilter(std::make_shared<WayTypeIgnoreProcessorFilter>());
   }
 
-  std::string SortWayDataGenerator::GetDescription() const
+  void SortWayDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                             ImportModuleDescription& description) const
   {
-    return "Sort/copy ways";
-  }
+    description.SetName("SortWayDataGenerator");
+    description.SetDescription("Sort ways to improve lookup");
 
+    description.AddRequiredFile(OptimizeAreaWayIdsGenerator::WAYS_TMP);
+
+    description.AddProvidedFile(WayDataFile::WAYS_DAT);
+    description.AddProvidedDebuggingFile(WayDataFile::WAYS_IDMAP);
+    description.AddProvidedTemporaryFile(WAYADDRESS_DAT);
+  }
 }

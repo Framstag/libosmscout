@@ -89,6 +89,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
   std::cout << " -s <end step>                        set final step" << std::endl;
+  std::cout << " --eco                                do delete temporary fiels ASAP" << std::endl;
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
 
@@ -268,47 +269,17 @@ bool GetFileSize(const std::string& filename,
   return true;
 }
 
-bool CountDataSize(const osmscout::ImportParameter& parameter,
-                   osmscout::Progress& progress,
-                   double& dataSize)
+bool DumpDataSize(const osmscout::ImportParameter& parameter,
+                  const osmscout::Importer& importer,
+                  osmscout::Progress& progress)
 {
-  std::string              fileName;
-  osmscout::FileOffset     fileSize=0;
-  std::vector<std::string> files;
+  osmscout::FileOffset dataSize=0;
 
-  files.push_back("types.dat");
-  files.push_back("bounding.dat");
+  progress.Info("Mandatory files:");
 
-  files.push_back("nodes.dat");
-  files.push_back("areas.dat");
-  files.push_back("ways.dat");
-
-  files.push_back("areasopt.dat");
-  files.push_back("waysopt.dat");
-
-  files.push_back("areanode.idx");
-  files.push_back("areaarea.idx");
-  files.push_back("areaway.idx");
-
-  files.push_back("location.idx");
-
-  files.push_back("water.idx");
-
-  if (!parameter.GetRouter().empty()) {
-    files.push_back("intersections.dat");
-    files.push_back("intersections.idx");
-
-    for (const auto& router : parameter.GetRouter()) {
-      files.push_back(router.GetDataFilename());
-      files.push_back(router.GetVariantFilename());
-      files.push_back(router.GetIndexFilename());
-    }
-  }
-
-  dataSize=0;
-
-  for (const auto& filename : files) {
-    std::string filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
+  for (const auto& filename : importer.GetProvidedFiles()) {
+    osmscout::FileOffset fileSize=0;
+    std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
                                                    filename);
 
     if (!GetFileSize(filePath,
@@ -320,6 +291,28 @@ bool CountDataSize(const osmscout::ImportParameter& parameter,
 
     dataSize+=fileSize;
   }
+
+  progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
+
+  progress.Info("Optional files:");
+
+  dataSize=0;
+  for (const auto& filename : importer.GetProvidedOptionalFiles()) {
+    osmscout::FileOffset fileSize=0;
+    std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                            filename);
+
+    if (!GetFileSize(filePath,
+                     fileSize)) {
+      return false;
+    }
+
+    progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
+
+    dataSize+=fileSize;
+  }
+
+  progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
 
   return true;
 }
@@ -372,6 +365,19 @@ int main(int argc, char* argv[])
         parameter.SetSteps(parameter.GetStartStep(),
                            endStep);
 
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--eco")==0) {
+      bool eco;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            eco)) {
+        parameter.SetEco(eco);
       }
       else {
         parameterError=true;
@@ -650,6 +656,8 @@ int main(int argc, char* argv[])
                 osmscout::NumberToString(parameter.GetStartStep())+
                 " - "+
                 osmscout::NumberToString(parameter.GetEndStep()));
+  progress.Info(std::string("Eco: ")+
+                (parameter.IsEco() ? "true" : "false"));
 
   for (const auto& router : parameter.GetRouter()) {
     progress.Info(std::string("Router: ")+VehcileMaskToString(router.GetVehicleMask())+ " - '"+router.GetFilenamebase()+"'");
@@ -695,24 +703,19 @@ int main(int argc, char* argv[])
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
 
-  bool result=osmscout::Import(parameter,
-                               progress);
+  osmscout::Importer importer(parameter);
+
+  bool result=importer.Import(progress);
 
   progress.SetStep("Summary");
 
   if (result) {
 
-    double dataSize=0;
-
-    if (!CountDataSize(parameter,
-                       progress,
-                       dataSize)) {
+    if (!DumpDataSize(parameter,
+                      importer,
+                      progress)) {
       progress.Error("Error while retrieving data size");
     }
-    else {
-      progress.Info(std::string("Resulting data size: ")+osmscout::ByteSizeToString(dataSize));
-    }
-
     progress.Info("Import OK!");
   }
   else {

@@ -21,7 +21,12 @@
 
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/NodeDataFile.h>
+#include <osmscout/import/GenNodeDat.h>
+
 namespace osmscout {
+  const char* SortNodeDataGenerator::NODEADDRESS_DAT="nodeaddress.dat";
+
   class NodeLocationProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
   {
   private:
@@ -55,7 +60,7 @@ namespace osmscout {
     addressReader=new AddressFeatureValueReader(typeConfig);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "nodeaddress.dat"))) {
+                                     SortNodeDataGenerator::NODEADDRESS_DAT))) {
       progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
 
       return false;
@@ -216,16 +221,24 @@ namespace osmscout {
   }
 
   SortNodeDataGenerator::SortNodeDataGenerator()
-  : SortDataGenerator<Node>("nodes.dat","nodes.idmap")
+  : SortDataGenerator<Node>(NodeDataFile::NODES_DAT,NodeDataFile::NODES_IDMAP)
   {
-    AddSource("nodes.tmp");
+    AddSource(NodeDataGenerator::NODES_TMP);
 
     AddFilter(std::make_shared<NodeLocationProcessorFilter>());
     AddFilter(std::make_shared<NodeTypeIgnoreProcessorFilter>());
   }
 
-  std::string SortNodeDataGenerator::GetDescription() const
+  void SortNodeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                         ImportModuleDescription& description) const
   {
-    return "Sort/copy nodes";
+    description.SetName("SortNodeDataGenerator");
+    description.SetDescription("Sort nodes to improve lookup");
+
+    description.AddRequiredFile(NodeDataGenerator::NODES_TMP);
+
+    description.AddProvidedFile(NodeDataFile::NODES_DAT);
+    description.AddProvidedDebuggingFile(NodeDataFile::NODES_IDMAP);
+    description.AddProvidedTemporaryFile(NODEADDRESS_DAT);
   }
 }

@@ -22,13 +22,23 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
-#include <osmscout/DataFile.h>
+#include <osmscout/import/GenRelAreaDat.h>
+#include <osmscout/import/GenWayAreaDat.h>
 
 namespace osmscout {
 
-  std::string MergeAreaDataGenerator::GetDescription() const
+  const char* MergeAreaDataGenerator::AREAS_TMP="areas.tmp";
+
+  void MergeAreaDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                            ImportModuleDescription& description) const
   {
-    return "Merge area data files";
+    description.SetName("MergeAreaDataGenerator");
+    description.SetDescription("Merge relation and way area data files into one area file");
+
+    description.AddRequiredFile(WayAreaDataGenerator::WAYAREA_TMP);
+    description.AddRequiredFile(RelAreaDataGenerator::RELAREA_TMP);
+
+    description.AddProvidedTemporaryFile(AREAS_TMP);
   }
 
   bool MergeAreaDataGenerator::MergeAreas(const ImportParameter& parameter,
@@ -41,7 +51,7 @@ namespace osmscout {
     uint32_t    dataWritten=0;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areas.tmp"))) {
+                                     AREAS_TMP))) {
       progress.Error("Cannot create '" + writer.GetFilename() + "'");
       return false;
     }
@@ -51,7 +61,7 @@ namespace osmscout {
     progress.SetAction("Copying areas from file 'wayarea.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayarea.tmp"),
+                                      WayAreaDataGenerator::WAYAREA_TMP),
                                       FileScanner::Sequential,
                                       parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
@@ -106,7 +116,7 @@ namespace osmscout {
     progress.SetAction("Copying areas from file 'relarea.tmp'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "relarea.tmp"),
+                                      RelAreaDataGenerator::RELAREA_TMP),
                                       FileScanner::Sequential,
                                       parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");

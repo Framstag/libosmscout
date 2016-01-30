@@ -33,6 +33,10 @@ namespace osmscout {
   class NodeDataFile : public DataFile<Node>
   {
   public:
+    static const char* NODES_DAT;
+    static const char* NODES_IDMAP;
+
+  public:
     NodeDataFile();
   };
 

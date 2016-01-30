@@ -32,8 +32,12 @@
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
+#include <osmscout/import/Preprocess.h>
 
 namespace osmscout {
+
+  const char* WayWayDataGenerator::WAYWAY_TMP="wayway.tmp";
+  const char* WayWayDataGenerator::TURNRESTR_DAT="turnrestr.dat";
 
   static inline bool WayByNodeCountSorter(const RawWayRef& a,
                                           const RawWayRef& b)
@@ -49,9 +53,18 @@ namespace osmscout {
     // no code
   }
 
-  std::string WayWayDataGenerator::GetDescription() const
+  void WayWayDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                           ImportModuleDescription& description) const
   {
-    return "Generate 'wayway.tmp'";
+    description.SetName("WayWayDataGenerator");
+    description.SetDescription("Merge ways into bigger ways");
+
+    description.AddRequiredFile(Preprocess::DISTRIBUTION_DAT);
+    description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
+    description.AddRequiredFile(Preprocess::RAWTURNRESTR_DAT);
+
+    description.AddProvidedTemporaryFile(WAYWAY_TMP);
+    description.AddProvidedTemporaryFile(TURNRESTR_DAT);
   }
 
   bool WayWayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
@@ -62,10 +75,10 @@ namespace osmscout {
     uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawturnrestr.dat"),
+                                      Preprocess::RAWTURNRESTR_DAT),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'rawturnrestr.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -117,8 +130,8 @@ namespace osmscout {
     FileWriter writer;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "turnrestr.dat"))) {
-      progress.Error("Cannot create 'turnrestr.dat'");
+                                     TURNRESTR_DAT))) {
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -129,7 +142,7 @@ namespace osmscout {
     }
 
     if (!writer.Close()) {
-      progress.Error("Cannot close file 'turnrestr.dat'");
+      progress.Error("Cannot close file '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -149,7 +162,7 @@ namespace osmscout {
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "distribution.dat"),
+                                      Preprocess::DISTRIBUTION_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '" + scanner.GetFilename() + "'");
@@ -647,19 +660,19 @@ namespace osmscout {
       return false;
     }
 
-    CoordDataFile     coordDataFile("coord.dat");
+    CoordDataFile     coordDataFile;
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
-      std::cerr << "Cannot open coord data file!" << std::endl;
+      progress.Error("Cannot open file '"+coordDataFile.GetFilename()+"'!");
       return false;
     }
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawways.dat"),
+                                      Preprocess::RAWWAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'rawways.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -669,8 +682,8 @@ namespace osmscout {
     }
 
     if (!wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "wayway.tmp"))) {
-      progress.Error("Cannot create 'wayway.tmp'");
+                                        WAYWAY_TMP))) {
+      progress.Error("Cannot create '"+wayWriter.GetFilename()+"'");
       return false;
     }
 
@@ -775,7 +788,7 @@ namespace osmscout {
     /* -------*/
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawways.dat'");
+      progress.Error("Cannot close file '"+scanner.GetFilename()+"'");
       return false;
     }
 

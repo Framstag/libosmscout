@@ -23,6 +23,9 @@
 
 #include <osmscout/Way.h>
 
+#include <osmscout/AreaWayIndex.h>
+#include <osmscout/WayDataFile.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -51,9 +54,15 @@ namespace osmscout {
     // no code
   }
 
-  std::string AreaWayIndexGenerator::GetDescription() const
+  void AreaWayIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                              ImportModuleDescription& description) const
   {
-    return "Generate 'areaway.idx'";
+    description.SetName("AreaWayIndexGenerator");
+    description.SetDescription("Index ways for area lookup");
+
+    description.AddRequiredFile(WayDataFile::WAYS_DAT);
+
+    description.AddProvidedFile(AreaWayIndex::AREA_WAY_IDX);
   }
 
   bool AreaWayIndexGenerator::FitsIndexCriteria(const ImportParameter& /*parameter*/,
@@ -180,10 +189,10 @@ namespace osmscout {
     wayTypeData.resize(typeConfig.GetTypeCount());
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "ways.dat"),
+                                         WayDataFile::WAYS_DAT),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open file '"+wayScanner.GetFilename()+"'");
       return false;
     }
 
@@ -459,8 +468,8 @@ namespace osmscout {
     progress.SetAction("Generating 'areaway.idx'");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areaway.idx"))) {
-      progress.Error("Cannot create 'areaway.idx'");
+                                     AreaWayIndex::AREA_WAY_IDX))) {
+      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -489,10 +498,10 @@ namespace osmscout {
     }
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "ways.dat"),
+                                         WayDataFile::WAYS_DAT),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open file '"+wayScanner.GetFilename()+"'");
       return false;
     }
 

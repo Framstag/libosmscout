@@ -30,7 +30,16 @@ namespace osmscout {
     \ingroup Database
     Abstraction for getting cached access to the 'ways.dat' file.
     */
-  typedef DataFile<Area>                AreaDataFile;
+  class AreaDataFile : public DataFile<Area>
+  {
+  public:
+    static const char* AREAS_DAT;
+    static const char* AREAS_IDMAP;
+
+  public:
+    AreaDataFile();
+  };
+
   typedef std::shared_ptr<AreaDataFile> AreaDataFileRef;
 }
 

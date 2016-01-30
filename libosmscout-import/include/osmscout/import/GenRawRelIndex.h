@@ -28,8 +28,13 @@ namespace osmscout {
   class RawRelationIndexGenerator : public NumericIndexGenerator<OSMId,RawRelation>
   {
   public:
-    RawRelationIndexGenerator(const std::string& datafile,
-                              const std::string& indexfile);
+    static const char* RAWREL_IDX;
+
+  public:
+    RawRelationIndexGenerator();
+
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
   };
 }
 

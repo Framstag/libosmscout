@@ -41,6 +41,12 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
+#include <osmscout/AreaDataFile.h>
+#include <osmscout/NodeDataFile.h>
+#include <osmscout/WayDataFile.h>
+#include <osmscout/import/SortWayDat.h>
+#include <osmscout/import/SortNodeDat.h>
+#include <osmscout/import/GenAreaAreaIndex.h>
 
 namespace osmscout {
 
@@ -422,10 +428,10 @@ namespace osmscout {
 
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      AreaDataFile::AREAS_DAT),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'relations.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -536,10 +542,10 @@ namespace osmscout {
     NameFeatureValueReader nameReader(typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      AreaDataFile::AREAS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'areas.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -684,10 +690,10 @@ namespace osmscout {
     NameFeatureValueReader nameReader(*typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "nodes.dat"),
+                                      NodeDataFile::NODES_DAT),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'nodes.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -850,10 +856,10 @@ namespace osmscout {
     NameFeatureValueReader nameReader(typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.dat"),
+                                      AreaDataFile::AREAS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'areas.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -961,10 +967,10 @@ namespace osmscout {
     NameFeatureValueReader nameReader(*typeConfig);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -1134,7 +1140,7 @@ namespace osmscout {
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areaaddress.dat"),
+                                      AreaAreaIndexGenerator::AREAADDRESS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -1390,7 +1396,7 @@ namespace osmscout {
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayaddress.dat"),
+                                      SortWayDataGenerator::WAYADDRESS_DAT),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -1557,7 +1563,7 @@ namespace osmscout {
     size_t      poiFound=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "nodeaddress.dat"),
+                                      SortNodeDataGenerator::NODEADDRESS_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -1880,9 +1886,21 @@ namespace osmscout {
     return true;
   }
 
-  std::string LocationIndexGenerator::GetDescription() const
+  void LocationIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                              ImportModuleDescription& description) const
   {
-    return "Generate 'location.idx'";
+    description.SetName("LocationIndexGenerator");
+    description.SetDescription("Create index for lookup of objects based on address data");
+
+    description.AddRequiredFile(NodeDataFile::NODES_DAT);
+    description.AddRequiredFile(WayDataFile::WAYS_DAT);
+    description.AddRequiredFile(AreaDataFile::AREAS_DAT);
+
+    description.AddRequiredFile(SortNodeDataGenerator::NODEADDRESS_DAT);
+    description.AddRequiredFile(SortWayDataGenerator::WAYADDRESS_DAT);
+    description.AddRequiredFile(AreaAreaIndexGenerator::AREAADDRESS_DAT);
+
+    description.AddProvidedFile(LocationIndex::FILENAME_LOCATION_IDX);
   }
 
   bool LocationIndexGenerator::Import(const TypeConfigRef& typeConfig,

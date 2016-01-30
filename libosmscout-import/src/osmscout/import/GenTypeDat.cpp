@@ -23,9 +23,13 @@
 
 namespace osmscout {
 
-  std::string TypeDataGenerator::GetDescription() const
+  void TypeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                  ImportModuleDescription& description) const
   {
-    return "Generate 'types.dat'";
+    description.SetName("TypeDataGenerator");
+    description.SetDescription("Dump *.ost information into data file");
+
+    description.AddProvidedFile(TypeConfig::FILE_TYPES_DAT);
   }
 
   bool TypeDataGenerator::Import(const TypeConfigRef& typeConfig,
@@ -37,7 +41,7 @@ namespace osmscout {
     progress.Info("Number of types: "+NumberToString(typeConfig->GetTypes().size()));
 
     if (!typeConfig->StoreToDataFile(parameter.GetDestinationDirectory())) {
-      progress.Error("Cannot create 'types.dat'");
+      progress.Error(std::string("Cannot create file '")+TypeConfig::FILE_TYPES_DAT+"'");
       return false;
     }
 

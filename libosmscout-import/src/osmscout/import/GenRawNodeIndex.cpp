@@ -19,16 +19,29 @@
 
 #include <osmscout/import/GenRawNodeIndex.h>
 
+#include <osmscout/import/Preprocess.h>
+
 namespace osmscout {
 
-  RawNodeIndexGenerator::RawNodeIndexGenerator(const std::string& datafile,
-                                               const std::string& indexfile)
+  const char* RawNodeIndexGenerator::RAWNODE_IDX="rawnode.idx";
+
+  RawNodeIndexGenerator::RawNodeIndexGenerator()
    : NumericIndexGenerator<OSMId,RawNode>("Generating 'rawnode.idx'",
-                                          datafile,
-                                          indexfile)
+                                          Preprocess::RAWNODES_DAT,
+                                          RAWNODE_IDX)
   {
     // no code
   }
 
+  void RawNodeIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                         ImportModuleDescription& description) const
+  {
+    description.SetName("RawNodeIndexGenerator");
+    description.SetDescription("Generate id lookup index on raw node data file");
+
+    description.AddRequiredFile(Preprocess::RAWNODES_DAT);
+
+    description.AddProvidedTemporaryFile(RAWNODE_IDX);
+  }
 }
 

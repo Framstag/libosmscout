@@ -33,12 +33,21 @@
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>
+#include <osmscout/import/Preprocess.h>
 
 namespace osmscout {
 
-  std::string NodeDataGenerator::GetDescription() const
+  const char* NodeDataGenerator::NODES_TMP="nodes.tmp";
+
+  void NodeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                                   ImportModuleDescription& description) const
   {
-    return "Generate 'nodes.tmp'";
+    description.SetName("NodeDataGenerator");
+    description.SetDescription("Convert raw nodes to nodes");
+
+    description.AddRequiredFile(Preprocess::RAWNODES_DAT);
+
+    description.AddProvidedTemporaryFile(NODES_TMP);
   }
 
   bool NodeDataGenerator::Import(const TypeConfigRef& typeConfig,
@@ -62,7 +71,7 @@ namespace osmscout {
     FileWriter  writer;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawnodes.dat"),
+                                      Preprocess::RAWNODES_DAT),
                       FileScanner::Sequential,
                       parameter.GetRawNodeDataMemoryMaped())) {
       progress.Error("Cannot open 'rawnodes.dat'");
@@ -75,8 +84,8 @@ namespace osmscout {
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "nodes.tmp"))) {
-      progress.Error("Cannot create 'nodes.tmp'");
+                                     NODES_TMP))) {
+      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
       return false;
     }
 

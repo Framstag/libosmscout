@@ -23,6 +23,8 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/CoordDataFile.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
@@ -43,6 +45,14 @@
 namespace osmscout {
 
   static uint32_t coordPageSize=64;
+
+  const char* Preprocess::BOUNDING_DAT="bounding.dat";
+  const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
+  const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
+  const char* Preprocess::RAWWAYS_DAT="rawways.dat";
+  const char* Preprocess::RAWRELS_DAT="rawrels.dat";
+  const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
+  const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
   bool Preprocess::Callback::StoreCurrentPage()
   {
@@ -284,27 +294,27 @@ namespace osmscout {
   bool Preprocess::Callback::Initialize()
   {
     nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                    "rawnodes.dat"));
+                                    RAWNODES_DAT));
     nodeWriter.Write(nodeCount);
 
     wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   "rawways.dat"));
+                                   RAWWAYS_DAT));
     wayWriter.Write(wayCount+areaCount);
 
     coastlineWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawcoastline.dat"));
+                                         RAWCOASTLINE_DAT));
     coastlineWriter.Write(coastlineCount);
 
     turnRestrictionWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawturnrestr.dat"));
+                                               RAWTURNRESTR_DAT));
     turnRestrictionWriter.Write(turnRestrictionCount);
 
     multipolygonWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawrels.dat"));
+                                            RAWRELS_DAT));
     multipolygonWriter.Write(multipolygonCount);
 
     coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "coord.dat"));
+                                     CoordDataFile::COORD_DAT));
 
     FileOffset offset=0;
 
@@ -586,7 +596,8 @@ namespace osmscout {
     progress.SetAction("Writing 'distribution.dat'");
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                    "distribution.dat"))) {
+                                     DISTRIBUTION_DAT))) {
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -606,14 +617,14 @@ namespace osmscout {
     FileWriter writer;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "bounding.dat"))) {
-      progress.Error("Cannot create 'bounding.dat'");
+                                     BOUNDING_DAT))) {
+      progress.Error("Cannot create '"+writer.GetFilename()+"'");
       return false;
     }
 
     if (!writer.WriteCoord(minCoord) ||
         !writer.WriteCoord(maxCoord)) {
-      progress.Error("Cannot write to 'bounding.dat'");
+      progress.Error("Cannot write to '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -726,9 +737,22 @@ namespace osmscout {
     return true;
   }
 
-  std::string Preprocess::GetDescription() const
+  void Preprocess::GetDescription(const ImportParameter& /*parameter*/,
+                                  ImportModuleDescription& description) const
   {
-    return "Preprocess";
+    description.SetName("Preprocess");
+    description.SetDescription("Initial parsing of import file(s)");
+
+    description.AddProvidedFile(BOUNDING_DAT);
+
+    description.AddProvidedDebuggingFile(CoordDataFile::COORD_DAT);
+
+    description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
+    description.AddProvidedTemporaryFile(RAWNODES_DAT);
+    description.AddProvidedTemporaryFile(RAWWAYS_DAT);
+    description.AddProvidedTemporaryFile(RAWRELS_DAT);
+    description.AddProvidedTemporaryFile(RAWCOASTLINE_DAT);
+    description.AddProvidedTemporaryFile(RAWTURNRESTR_DAT);
   }
 
   bool Preprocess::ProcessFiles(const TypeConfigRef& typeConfig,

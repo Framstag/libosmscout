@@ -21,8 +21,11 @@
 
 namespace osmscout {
 
+  const char* NodeDataFile::NODES_DAT="nodes.dat";
+  const char* NodeDataFile::NODES_IDMAP="nodes.idmap";
+
   NodeDataFile::NodeDataFile()
-  : DataFile<Node>("nodes.dat")
+  : DataFile<Node>(NODES_DAT)
   {
     // no code
   }

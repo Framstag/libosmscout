@@ -21,19 +21,20 @@
 
 #include <algorithm>
 
-#include <osmscout/DataFile.h>
-
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 
-#include <osmscout/import/RawNode.h>
-#include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
 
+#include <osmscout/import/GenRelAreaDat.h>
+#include <osmscout/import/Preprocess.h>
+
 namespace osmscout {
+
+  const char* WayAreaDataGenerator::WAYAREA_TMP="wayarea.tmp";
 
   WayAreaDataGenerator::Distribution::Distribution()
   : nodeCount(0),
@@ -43,9 +44,18 @@ namespace osmscout {
     // no code
   }
 
-  std::string WayAreaDataGenerator::GetDescription() const
+  void WayAreaDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                            ImportModuleDescription& description) const
   {
-    return "Generate 'wayarea.tmp'";
+    description.SetName("WayAreaDataGenerator");
+    description.SetDescription("Resolves raw ways to areas");
+
+    description.AddRequiredFile(Preprocess::DISTRIBUTION_DAT);
+    description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
+    description.AddRequiredFile(RelAreaDataGenerator::WAYAREABLACK_DAT);
+
+    description.AddProvidedTemporaryFile(WAYAREA_TMP);
   }
 
   bool WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
@@ -55,7 +65,7 @@ namespace osmscout {
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayareablack.dat"),
+                                      RelAreaDataGenerator::WAYAREABLACK_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '" + scanner.GetFilename() + "'");
@@ -88,7 +98,7 @@ namespace osmscout {
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "distribution.dat"),
+                                      Preprocess::DISTRIBUTION_DAT),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open '" + scanner.GetFilename() + "'");
@@ -370,7 +380,7 @@ namespace osmscout {
 
     BlacklistSet              wayBlacklist; //! Set of ways that should not be handled
 
-    CoordDataFile             coordDataFile("coord.dat");
+    CoordDataFile             coordDataFile;
     FileScanner               scanner;
     FileWriter                areaWriter;
     uint32_t                  rawWayCount=0;
@@ -416,7 +426,7 @@ namespace osmscout {
     }
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawways.dat"),
+                                      Preprocess::RAWWAYS_DAT),
                       FileScanner::Sequential,
                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open '" + scanner.GetFilename()+ "'");
@@ -429,7 +439,7 @@ namespace osmscout {
     }
 
     if (!areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "wayarea.tmp"))) {
+                                         WAYAREA_TMP))) {
       progress.Error("Cannot create '" + areaWriter.GetFilename() + "'");
       return false;
     }

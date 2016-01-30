@@ -37,6 +37,9 @@ namespace osmscout {
 
   class WayAreaDataGenerator : public ImportModule
   {
+  public:
+    static const char* WAYAREA_TMP;
+
   private:
     struct Distribution
     {
@@ -87,7 +90,9 @@ namespace osmscout {
                                  const CoordDataFile& coordDataFile);
 
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

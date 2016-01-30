@@ -33,6 +33,10 @@ namespace osmscout {
 
   class OptimizeAreaWayIdsGenerator : public ImportModule
   {
+  public:
+    static const char* AREAS3_TMP;
+    static const char* WAYS_TMP;
+
   private:
     bool ScanAreaIds(const ImportParameter& parameter,
                      Progress& progress,
@@ -54,7 +58,9 @@ namespace osmscout {
                   const TypeConfig& typeConfig,
                   NodeUseMap& nodeUseMap);
   public:
-    std::string GetDescription() const;
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress);

@@ -19,16 +19,26 @@
 
 #include <osmscout/import/GenMergeAreas.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/String.h>
 
-#include <osmscout/DataFile.h>
+#include <osmscout/import/MergeAreaData.h>
 
 namespace osmscout {
 
-  std::string MergeAreasGenerator::GetDescription() const
+  const char* MergeAreasGenerator::AREAS2_TMP="areas2.tmp";
+
+  void MergeAreasGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                              ImportModuleDescription& description) const
   {
-    return "Merge areas";
+    description.SetName("MergeAreasGenerator");
+    description.SetDescription("Merge areas into bigger areas");
+
+    description.AddRequiredFile(MergeAreaDataGenerator::AREAS_TMP);
+
+    description.AddProvidedTemporaryFile(AREAS2_TMP);
   }
 
   /**
@@ -585,7 +595,7 @@ namespace osmscout {
     nodeUseMap.resize(typeConfig->GetTypeCount());
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "areas.tmp"),
+                                      MergeAreaDataGenerator::AREAS_TMP),
                              FileScanner::Sequential,
                              parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -593,7 +603,7 @@ namespace osmscout {
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "areas2.tmp"))) {
+                                     AREAS2_TMP))) {
       progress.Error("Cannot create '" + writer.GetFilename() + "'");
       return false;
     }
