@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
   std::string addressPattern;
 
   if (argc<3) {
-    std::cerr << "AddressLookup <map directory> [location [address]] <area>" << std::endl;
+    std::cerr << "LocationLookup <map directory> [location [address]] <area>" << std::endl;
     return 1;
   }
 
