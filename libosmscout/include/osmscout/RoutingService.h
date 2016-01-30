@@ -285,7 +285,7 @@ namespace osmscout {
     bool CalculateRoute(const RoutingProfile& profile,
                         Vehicle vehicle,
                         double radius,
-                        std::vector<osmscout::GeoCoord> via,
+                        std::vector<GeoCoord> via,
                         RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,
@@ -297,11 +297,14 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
+#ifdef SWIG
+    %apply long& INOUT {size_t& nodeIndex};
+#endif
     bool GetClosestRoutableNode(double lat,
                                 double lon,
-                                const osmscout::Vehicle& vehicle,
+                                const Vehicle& vehicle,
                                 double radius,
-                                osmscout::ObjectFileRef& object,
+                                ObjectFileRef& object,
                                 size_t& nodeIndex) const;
 
     void DumpStatistics();
