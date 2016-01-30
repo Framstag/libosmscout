@@ -31,9 +31,10 @@
 
 namespace osmscout {
 
+  const char* AreaAreaIndex::AREA_AREA_IDX="areaarea.idx";
+
   AreaAreaIndex::AreaAreaIndex(size_t cacheSize)
-  : filepart("areaarea.idx"),
-    maxLevel(0),
+  : maxLevel(0),
     topLevelOffset(0),
     indexCache(cacheSize)
   {
@@ -235,7 +236,7 @@ namespace osmscout {
 
   bool AreaAreaIndex::Open(const std::string& path)
   {
-    datafilename=AppendFileToDir(path,filepart);
+    datafilename=AppendFileToDir(path,AREA_AREA_IDX);
 
     if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
@@ -363,6 +364,6 @@ namespace osmscout {
 
   void AreaAreaIndex::DumpStatistics()
   {
-    indexCache.DumpStatistics(filepart.c_str(),IndexCacheValueSizer());
+    indexCache.DumpStatistics(AREA_AREA_IDX,IndexCacheValueSizer());
   }
 }

@@ -48,6 +48,9 @@ namespace osmscout {
     */
   class OSMSCOUT_API AreaAreaIndex
   {
+  public:
+    static const char* AREA_AREA_IDX;
+
   private:
     /**
       Data structure for every index cell of our index.
@@ -90,7 +93,6 @@ namespace osmscout {
     };
 
   private:
-    std::string           filepart;       //!< name of the data file
     std::string           datafilename;   //!< Full path and name of the data file
     mutable FileScanner   scanner;        //!< Scanner instance for reading this file
 
