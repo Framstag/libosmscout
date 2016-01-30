@@ -1,25 +1,9 @@
 cmake_minimum_required(VERSION 3.3)
 project(libosmscout_import)
 
-include(FindPkgConfig)
-
-pkg_check_modules(LIBOSMSCOUT REQUIRED libosmscout)
-pkg_check_modules(XML2 "libxml-2.0 >= 2.6.0")
-pkg_check_modules(PROTOBUF protobuf)
-pkg_check_modules(ZLIB zlib)
-pkg_check_modules(MARISA maris)
-
-include_directories(include
-                    include/osmscout/import/pbf
-                    ${LIBOSMSCOUT_INCLUDE_DIRS}
-                    ${XML2_INCLUDE_DIRS}
-                    ${PROTOBUF_INCLUDE_DIRS}
-                    ${ZLIB_INCLUDE_DIRS}
-                    ${MARISA_INCLUDE_DIRS})
-
 set(HEADER_FILES
-    include/osmscout/import/pbf/fileformat.pb.h
-    include/osmscout/import/pbf/osmformat.pb.h
+    #include/osmscout/import/pbf/fileformat.pb.h
+    #include/osmscout/import/pbf/osmformat.pb.h
     include/osmscout/import/GenAreaAreaIndex.h
     include/osmscout/import/GenAreaNodeIndex.h
     include/osmscout/import/GenAreaWayIndex.h
@@ -56,14 +40,14 @@ set(HEADER_FILES
     include/osmscout/import/SortDat.h
     include/osmscout/import/SortNodeDat.h
     include/osmscout/import/SortWayDat.h
-    include/osmscout/private/Config.h
+    #include/osmscout/private/Config.h
     include/osmscout/private/ImportImportExport.h
-    include/osmscout/ImportFeatures.h
+    #include/osmscout/ImportFeatures.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/import/pbf/fileformat.pb.cc
-    src/osmscout/import/pbf/osmformat.pb.cc
+    #src/osmscout/import/pbf/fileformat.pb.cc
+    #src/osmscout/import/pbf/osmformat.pb.cc
     src/osmscout/import/GenAreaAreaIndex.cpp
     src/osmscout/import/GenAreaNodeIndex.cpp
     src/osmscout/import/GenAreaWayIndex.cpp
@@ -99,7 +83,40 @@ set(SOURCE_FILES
     src/osmscout/import/RawWayIndexedDataFile.cpp
     src/osmscout/import/SortDat.cpp
     src/osmscout/import/SortNodeDat.cpp
-    src/osmscout/import/SortWayDat.cpp)
+    src/osmscout/import/SortWayDat.cpp
+)
 
-add_library(libosmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
+
+add_library(libosmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
 set_property(TARGET libosmscout_import PROPERTY CXX_STANDARD 11)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ImportFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/private/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h)
+target_include_directories(libosmscout_import PRIVATE 
+		include
+		include/osmscout/import/pbf
+		${CMAKE_CURRENT_BINARY_DIR}/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+		${ZLIB_INCLUDE_DIRS}
+		${LIBXML2_INCLUDE_DIR}
+		${PROTOBUF_INCLUDE_DIRS}
+		${MARISA_INCLUDE_DIRS})
+target_link_libraries(libosmscout_import
+		libosmscout
+		${ZLIB_LIBRARIES}
+		${LIBXML2_LIBRARIES}
+		${PROTOBUF_LIBRARIES}
+		${PROTOBUF_PROTOC_LIBRARIES}
+		${PROTOBUF_LITE_LIBRARIES}
+		${MARISA_LIBRARIES})
+if(WIN32)
+  target_link_libraries(libosmscout_import Ws2_32.lib)
+  target_compile_definitions(libosmscout_import PRIVATE -DPROTOBUF_USE_DLLS)
+endif()
+target_compile_definitions(libosmscout_import PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
+install(TARGETS libosmscout_import
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h DESTINATION include/osmscout)

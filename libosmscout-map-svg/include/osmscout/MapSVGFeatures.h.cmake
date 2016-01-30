@@ -1,0 +1,7 @@
+#ifndef LIBOSMSCOUT_MAP_SVG_FEATURES
+#define LIBOSMSCOUT_MAP_SVG_FEATURES
+
+/* libpango found */
+#cmakedefine OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO
+
+#endif
