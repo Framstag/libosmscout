@@ -30,7 +30,7 @@ namespace osmscout {
     \ingroup Database
     Abstraction for getting cached access to the 'ways.dat' file.
     */
-  class AreaDataFile : public DataFile<Area>
+  class OSMSCOUT_API AreaDataFile : public DataFile<Area>
   {
   public:
     static const char* AREAS_DAT;

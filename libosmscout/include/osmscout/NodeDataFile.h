@@ -30,7 +30,7 @@ namespace osmscout {
     \ingroup Database
     Abstraction for getting cached access to the 'nodes.dat' file.
     */
-  class NodeDataFile : public DataFile<Node>
+  class OSMSCOUT_API NodeDataFile : public DataFile<Node>
   {
   public:
     static const char* NODES_DAT;
