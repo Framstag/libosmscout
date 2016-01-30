@@ -1,10 +1,15 @@
 #include <osmscout/TextSearchIndex.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Logger.h>
 
 namespace osmscout
 {
+  const char* TextSearchIndex::TEXT_POI_DAT="textpoi.dat";
+  const char* TextSearchIndex::TEXT_LOC_DAT="textloc.dat";
+  const char* TextSearchIndex::TEXT_REGION_DAT="textregion.dat";
+  const char* TextSearchIndex::TEXT_OTHER_DAT="textother.dat";
 
   TextSearchIndex::TextSearchIndex()
   {
@@ -30,16 +35,16 @@ namespace osmscout
     }
 
     TrieInfo trie;
-    trie.file=fixedPath+"textpoi.dat";
+    trie.file=AppendFileToDir(fixedPath,TEXT_POI_DAT);
     tries.push_back(trie);
 
-    trie.file=fixedPath+"textloc.dat";
+    trie.file=AppendFileToDir(fixedPath,TEXT_LOC_DAT);
     tries.push_back(trie);
 
-    trie.file=fixedPath+"textregion.dat";
+    trie.file=AppendFileToDir(fixedPath,TEXT_REGION_DAT);
     tries.push_back(trie);
 
-    trie.file=fixedPath+"textother.dat";
+    trie.file=AppendFileToDir(fixedPath,TEXT_OTHER_DAT);
     tries.push_back(trie);
 
     uint8_t triesAvail=0;

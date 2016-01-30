@@ -37,6 +37,12 @@ namespace osmscout
    */
   class OSMSCOUT_API TextSearchIndex
   {
+  public:
+    static const char* TEXT_POI_DAT;
+    static const char* TEXT_LOC_DAT;
+    static const char* TEXT_REGION_DAT;
+    static const char* TEXT_OTHER_DAT;
+
   private:
     struct TrieInfo
     {
