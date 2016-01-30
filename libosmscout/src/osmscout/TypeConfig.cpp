@@ -107,6 +107,18 @@ namespace osmscout {
     return NULL;
   }
 
+  /**
+   * Just to make the compiler happy :-/
+   */
+  FeatureInstance::FeatureInstance()
+  : type(NULL),
+    featureBit(0),
+    index(0),
+    offset(0)
+  {
+
+  }
+
   FeatureInstance::FeatureInstance(const FeatureRef& feature,
                                    const TypeInfo* type,
                                    size_t featureBit,
@@ -431,6 +443,8 @@ namespace osmscout {
   {
     return !operator==(other);
   }
+
+  const char* TypeConfig::FILE_TYPES_DAT="types.dat";
 
   TypeInfo::TypeInfo()
    : nodeId(0),

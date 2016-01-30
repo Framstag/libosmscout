@@ -187,6 +187,7 @@ namespace osmscout {
     size_t         offset;     //!< Our offset into the value buffer for our data
 
   public:
+    FeatureInstance();
     FeatureInstance(const FeatureRef& feature,
                     const TypeInfo* type,
                     size_t featureBit,
@@ -1008,6 +1009,9 @@ namespace osmscout {
    */
   class OSMSCOUT_API TypeConfig
   {
+  public:
+    static const char* FILE_TYPES_DAT;
+
   private:
 
     // Tags
