@@ -26,6 +26,8 @@
 #include <fstream>
 #endif
 
+#include <algorithm>
+
 namespace osmscout {
 
   MemoryMonitor::MemoryMonitor()
