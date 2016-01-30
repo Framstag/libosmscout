@@ -191,6 +191,7 @@
     <ClCompile Include="src\osmscout\util\Geometry.cpp" />
     <ClCompile Include="src\osmscout\util\Logger.cpp" />
     <ClCompile Include="src\osmscout\util\Magnification.cpp" />
+    <ClCompile Include="src\osmscout\util\MemoryMonitor.cpp" />
     <ClCompile Include="src\osmscout\util\NodeUseMap.cpp" />
     <ClCompile Include="src\osmscout\util\Number.cpp" />
     <ClCompile Include="src\osmscout\util\NumberSet.cpp" />
@@ -292,6 +293,7 @@
     <ClInclude Include="include\osmscout\util\Geometry.h" />
     <ClInclude Include="include\osmscout\util\Logger.h" />
     <ClInclude Include="include\osmscout\util\Magnification.h" />
+    <ClInclude Include="include\osmscout\util\MemoryMonitor.h" />
     <ClInclude Include="include\osmscout\util\NodeUseMap.h" />
     <ClInclude Include="include\osmscout\util\Number.h" />
     <ClInclude Include="include\osmscout\util\NumberSet.h" />
