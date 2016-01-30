@@ -34,9 +34,10 @@
 
 namespace osmscout
 {
+  const char* OptimizeWaysLowZoom::FILE_WAYSOPT_DAT = "waysopt.dat";
+
   OptimizeWaysLowZoom::OptimizeWaysLowZoom()
-  : datafile("waysopt.dat"),
-    magnification(0.0)
+  : magnification(0.0)
   {
     // no code
   }
@@ -79,7 +80,7 @@ namespace osmscout
                                  const std::string& path)
   {
     this->typeConfig=typeConfig;
-    datafilename=AppendFileToDir(path,datafile);
+    datafilename=AppendFileToDir(path,FILE_WAYSOPT_DAT);
 
     if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
