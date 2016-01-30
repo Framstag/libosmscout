@@ -89,9 +89,6 @@ namespace osmscout {
 
     currentVMUsage=vsize*pageSizeInByte;
     currentResidentSet=rss*pageSizeInByte;
-#else
-    this->vmUsage=0.0;
-    this->residentSet=0.0;
 #endif
 
     maxVMUsage=std::max(maxVMUsage,currentVMUsage);
