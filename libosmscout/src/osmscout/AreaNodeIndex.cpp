@@ -30,6 +30,9 @@
 
 namespace osmscout {
 
+  const char* AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
+
+
   FileOffset AreaNodeIndex::TypeData::GetDataOffset() const
   {
     return indexOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
@@ -60,7 +63,6 @@ namespace osmscout {
   }
 
   AreaNodeIndex::AreaNodeIndex()
-  : filepart("areanode.idx")
   {
     // no code
   }
@@ -74,7 +76,7 @@ namespace osmscout {
 
   bool AreaNodeIndex::Open(const std::string& path)
   {
-    datafilename=AppendFileToDir(path,filepart);
+    datafilename=AppendFileToDir(path,AREA_NODE_IDX);
 
     if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
       log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
