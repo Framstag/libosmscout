@@ -857,7 +857,7 @@ namespace osmscout {
     TypeInfoSet();
     TypeInfoSet(const TypeConfig& typeConfig);
     TypeInfoSet(const TypeInfoSet& other);
-    TypeInfoSet(TypeInfoSet&& other) = default;
+    TypeInfoSet(TypeInfoSet&& other);
     TypeInfoSet(const std::vector<TypeInfoRef>& types);
 
     void Adapt(const TypeConfig& typeConfig);

@@ -34,7 +34,7 @@ namespace osmscout {
         size_t transEnd;
         size_t i;
         size_t nVertex;
-        ssize_t direction;
+        size_t direction;
     } FollowPathHandle;
 
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter

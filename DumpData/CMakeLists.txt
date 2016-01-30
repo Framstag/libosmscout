@@ -1,24 +1,17 @@
 cmake_minimum_required(VERSION 3.2)
 project(DumpData)
 
-include(FindPkgConfig)
-
-pkg_check_modules(LIBOSMSCOUT REQUIRED libosmscout)
-
-include_directories(${LIBOSMSCOUT_INCLUDE_DIRS})
-
-link_directories(${LIBOSMSCOUT_LIBRARY_DIRS})
-
-set(HEADER_FILES
-    src/config.h)
-
 set(SOURCE_FILES
-    src/DumpData.cpp)
+    src/DumpData.cpp
+)
 
-add_executable(DumpData ${SOURCE_FILES} ${HEADER_FILES})
-
-target_link_libraries(DumpData
-                      ${LIBOSMSCOUT_LIBRARIES}
-                      ${LIBOSMSCOUTIMPORT_LIBRARIES})
-
+add_executable(DumpData ${SOURCE_FILES})
 set_property(TARGET DumpData PROPERTY CXX_STANDARD 11)
+target_include_directories(DumpData PRIVATE 
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include)
+target_link_libraries(DumpData libosmscout libosmscout_import)
+install(TARGETS DumpData
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)

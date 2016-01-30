@@ -24,7 +24,7 @@
 
 // Shared library support
 #if defined(__WIN32__) || defined(WIN32)
-  #if defined(OSMSCOUTMAPAGGDLL)
+  #if defined(OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
       #define OSMSCOUT_MAP_AGG_EXPTEMPL
       #define OSMSCOUT_MAP_AGG_API __declspec(dllexport)
@@ -49,7 +49,7 @@
     #define OSMSCOUT_MAP_AGG_DLLLOCAL
   #endif
 
-  #if defined(OSMSCOUTMAPAGGDLL)
+  #if defined(OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
     #define OSMSCOUT_MAP_AGG_API OSMSCOUT_MAP_AGG_EXPORT
   #else
     #define OSMSCOUT_MAP_AGG_API OSMSCOUT_MAP_AGG_IMPORT
