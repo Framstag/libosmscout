@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 
 #include <osmscout/Types.h>
 
