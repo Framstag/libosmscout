@@ -579,16 +579,18 @@ namespace osmscout
     // LSB was written first, it would have four
     // branches immediately from its root.
 
-    char buffer[offsetSizeBytes];
-    for(uint8_t i=0; i < offsetSizeBytes; i++) {
-      uint8_t r=offsetSizeBytes-1-i;
-      buffer[r] = ((offset >> (i*8)) & 0xff);
-    }
-
-    for(uint8_t i=0; i < offsetSizeBytes; i++) {
-      keyString.push_back(buffer[i]);
-    }
-
+	if (offsetSizeBytes > 0)
+	{
+		char* buffer = new char[offsetSizeBytes];
+		for (uint8_t i = 0; i < offsetSizeBytes; i++) {
+			uint8_t r = offsetSizeBytes - 1 - i;
+			buffer[r] = ((offset >> (i * 8)) & 0xff);
+		}
+		for (uint8_t i = 0; i < offsetSizeBytes; i++) {
+			keyString.push_back(buffer[i]);
+		}
+		delete buffer;
+	}
     return true;
   }
 }
