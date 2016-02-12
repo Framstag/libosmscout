@@ -56,59 +56,58 @@ namespace osmscout {
 
     progress.SetAction("Scanning ids from 'areas2.tmp'");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      MergeAreasGenerator::AREAS2_TMP),
-                      FileScanner::Sequential,
-                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   MergeAreasGenerator::AREAS2_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetAreaDataMemoryMaped());
 
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t current=1; current<=dataCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
-
-      progress.SetProgress(current,dataCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.ReadImport(typeConfig,
-                           scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      for (const auto& ring: data.rings) {
-        std::unordered_set<Id> nodeIds;
+      for (uint32_t current=1; current<=dataCount; current++) {
+        uint8_t type;
+        Id      id;
+        Area    data;
 
-        if (!ring.GetType()->CanRoute()) {
-          continue;
+        progress.SetProgress(current,dataCount);
+
+        if (!scanner.Read(type) ||
+            !scanner.Read(id) ||
+            !data.ReadImport(typeConfig,
+                             scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+
+          return false;
         }
 
-        for (const auto id: ring.ids) {
-          if (nodeIds.find(id)==nodeIds.end()) {
-            nodeUseMap.SetNodeUsed(id);
+        for (const auto& ring: data.rings) {
+          std::unordered_set<Id> nodeIds;
 
-            nodeIds.insert(id);
+          if (!ring.GetType()->CanRoute()) {
+            continue;
+          }
+
+          for (const auto id: ring.ids) {
+            if (nodeIds.find(id)==nodeIds.end()) {
+              nodeUseMap.SetNodeUsed(id);
+
+              nodeIds.insert(id);
+            }
           }
         }
       }
-    }
 
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -125,65 +124,64 @@ namespace osmscout {
 
     progress.SetAction("Scanning ids from 'wayway.tmp'");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayWayDataGenerator::WAYWAY_TMP),
-                                      FileScanner::Sequential,
-                                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayWayDataGenerator::WAYWAY_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t current=1; current<=dataCount; current++) {
-      uint8_t type;
-      Id      id;
-      Way     data;
-
-      progress.SetProgress(current,dataCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (!data.GetType()->CanRoute()) {
-        continue;
-      }
+      for (uint32_t current=1; current<=dataCount; current++) {
+        uint8_t type;
+        Id      id;
+        Way     data;
 
-      std::unordered_set<Id> nodeIds;
+        progress.SetProgress(current,dataCount);
 
-      for (const auto& id : data.ids) {
-        if (nodeIds.find(id)==nodeIds.end()) {
-          nodeUseMap.SetNodeUsed(id);
+        if (!scanner.Read(type) ||
+            !scanner.Read(id) ||
+            !data.Read(typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
 
-          nodeIds.insert(id);
+          return false;
+        }
+
+        if (!data.GetType()->CanRoute()) {
+          continue;
+        }
+
+        std::unordered_set<Id> nodeIds;
+
+        for (const auto& id : data.ids) {
+          if (nodeIds.find(id)==nodeIds.end()) {
+            nodeUseMap.SetNodeUsed(id);
+
+            nodeIds.insert(id);
+          }
+        }
+
+        // If we have a circular way, we "fake" a double usage,
+        // to make sure, that the node id of the first node
+        // is not dropped later on, and we cannot detect
+        // circular ways anymore
+        if (data.ids.front()==data.ids.back()) {
+          nodeUseMap.SetNodeUsed(data.ids.back());
         }
       }
 
-      // If we have a circular way, we "fake" a double usage,
-      // to make sure, that the node id of the first node
-      // is not dropped later on, and we cannot detect
-      // circular ways anymore
-      if (data.ids.front()==data.ids.back()) {
-        nodeUseMap.SetNodeUsed(data.ids.back());
-      }
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -209,63 +207,62 @@ namespace osmscout {
 
     progress.SetAction("Copy data from 'areas2.tmp' to 'areas3.tmp'");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      MergeAreasGenerator::AREAS2_TMP),
-                      FileScanner::Sequential,
-                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   MergeAreasGenerator::AREAS2_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetAreaDataMemoryMaped());
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t current=1; current<=areaCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
-
-      progress.SetProgress(current,areaCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.ReadImport(typeConfig,
-                           scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
+      if (!scanner.Read(areaCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      for (auto& ring : data.rings) {
-        std::unordered_set<Id> nodeIds;
+      for (uint32_t current=1; current<=areaCount; current++) {
+        uint8_t type;
+        Id      id;
+        Area    data;
 
-        for (auto& id : ring.ids) {
-          if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-            id=0;
+        progress.SetProgress(current,areaCount);
+
+        if (!scanner.Read(type) ||
+            !scanner.Read(id) ||
+            !data.ReadImport(typeConfig,
+                             scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(areaCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+
+          return false;
+        }
+
+        for (auto& ring : data.rings) {
+          std::unordered_set<Id> nodeIds;
+
+          for (auto& id : ring.ids) {
+            if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+              id=0;
+            }
           }
+        }
+
+        if (!writer.Write(type) ||
+            !writer.Write(id) ||
+            !data.Write(typeConfig,
+                        writer)) {
+          progress.Error(std::string("Error while writing data entry to file '")+
+                         writer.GetFilename()+"'");
+
+          return false;
         }
       }
 
-      if (!writer.Write(type) ||
-          !writer.Write(id) ||
-          !data.Write(typeConfig,
-                      writer)) {
-        progress.Error(std::string("Error while writing data entry to file '")+
-                       writer.GetFilename()+"'");
-
-        return false;
-      }
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -297,67 +294,66 @@ namespace osmscout {
 
     progress.SetAction("Copy data from 'wayway.tmp' to 'ways.tmp'");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayWayDataGenerator::WAYWAY_TMP),
-                                      FileScanner::Sequential,
-                                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayWayDataGenerator::WAYWAY_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     WAYS_TMP))) {
-      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
-      return false;
-    }
-
-    writer.Write(dataCount);
-
-    for (uint32_t current=1; current<=dataCount; current++) {
-      uint8_t type;
-      Id      id;
-      Way     data;
-
-      progress.SetProgress(current,dataCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      for (auto& id : data.ids) {
-        if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-          id=0;
+      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       WAYS_TMP))) {
+        progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
+        return false;
+      }
+
+      writer.Write(dataCount);
+
+      for (uint32_t current=1; current<=dataCount; current++) {
+        uint8_t type;
+        Id      id;
+        Way     data;
+
+        progress.SetProgress(current,dataCount);
+
+        if (!scanner.Read(type) ||
+            !scanner.Read(id) ||
+            !data.Read(typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+
+          return false;
+        }
+
+        for (auto& id : data.ids) {
+          if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            id=0;
+          }
+        }
+
+        if (!writer.Write(type) ||
+            !writer.Write(id) ||
+            !data.Write(typeConfig,
+                        writer)) {
+          progress.Error(std::string("Error while writing data entry to file '")+
+                         writer.GetFilename()+"'");
+
+          return false;
         }
       }
 
-      if (!writer.Write(type) ||
-          !writer.Write(id) ||
-          !data.Write(typeConfig,
-                      writer)) {
-        progress.Error(std::string("Error while writing data entry to file '")+
-                       writer.GetFilename()+"'");
-
-        return false;
-      }
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 

@@ -112,46 +112,52 @@ namespace osmscout {
     uint32_t    entryCount;
     std::string filename=AppendFileToDir(path,mapName);
 
-    if (!scanner.Open(filename,FileScanner::LowMemRandom,false)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
+    try {
+      scanner.Open(filename,FileScanner::LowMemRandom,false);
+
+      if (!scanner.Read(entryCount)) {
+        return false;
+      }
+
+      for (size_t i=1; i<=entryCount; i++) {
+        Id         id;
+        uint8_t    typeByte;
+        OSMRefType osmType;
+        FileOffset fileOffset;
+
+        if (!scanner.Read(id)) {
+          return false;
+        }
+
+        if (!scanner.Read(typeByte)) {
+          return false;
+        }
+
+        osmType=(OSMRefType)typeByte;
+
+        if (!scanner.ReadFileOffset(fileOffset)) {
+          return false;
+        }
+
+        ObjectOSMRef  osmRef(id,osmType);
+        ObjectFileRef fileRef(fileOffset,fileType);
+
+        if (ids.find(osmRef)!=ids.end() ||
+            fileOffsets.find(fileRef)!=fileOffsets.end()) {
+          idFileOffsetMap.insert(std::make_pair(osmRef,fileRef));
+          fileOffsetIdMap.insert(std::make_pair(fileRef,osmRef));
+        }
+      }
+
+      scanner.Close();
+
+      return true;
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
     }
-
-    if (!scanner.Read(entryCount)) {
-      return false;
-    }
-
-    for (size_t i=1; i<=entryCount; i++) {
-      Id         id;
-      uint8_t    typeByte;
-      OSMRefType osmType;
-      FileOffset fileOffset;
-
-      if (!scanner.Read(id)) {
-        return false;
-      }
-
-      if (!scanner.Read(typeByte)) {
-        return false;
-      }
-
-      osmType=(OSMRefType)typeByte;
-
-      if (!scanner.ReadFileOffset(fileOffset)) {
-        return false;
-      }
-
-      ObjectOSMRef  osmRef(id,osmType);
-      ObjectFileRef fileRef(fileOffset,fileType);
-
-      if (ids.find(osmRef)!=ids.end() ||
-          fileOffsets.find(fileRef)!=fileOffsets.end()) {
-        idFileOffsetMap.insert(std::make_pair(osmRef,fileRef));
-        fileOffsetIdMap.insert(std::make_pair(fileRef,osmRef));
-      }
-    }
-
-    return scanner.Close();
   }
 
   bool DebugDatabase::ResolveReferences(const std::set<ObjectOSMRef>& ids,

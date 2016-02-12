@@ -50,9 +50,11 @@ namespace osmscout {
     isOpen=false;
     coordPageOffsetMap.clear();
 
-    if (scanner.Open(datafilename,
+    try {
+      scanner.Open(datafilename,
                      FileScanner::FastRandom,
-                     memoryMapedData)) {
+                     memoryMapedData);
+
       FileOffset mapOffset;
 
       if (!scanner.Read(coordPageSize)) {
@@ -97,25 +99,31 @@ namespace osmscout {
 
       isOpen=true;
     }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
+    }
 
-    return isOpen;
+    return true;
   }
 
   bool CoordDataFile::Close()
   {
-    bool success=true;
-
     coordPageOffsetMap.clear();
 
-    if (scanner.IsOpen()) {
-      if (!scanner.Close()) {
-        success=false;
+    try {
+      if (scanner.IsOpen()) {
+        scanner.Close();
       }
     }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      isOpen=false;
+      return false;
+    }
 
-    isOpen=false;
-
-    return success;
+    return true;
   }
 
   std::string CoordDataFile::GetFilename() const

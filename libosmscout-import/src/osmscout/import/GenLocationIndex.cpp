@@ -426,75 +426,79 @@ namespace osmscout {
     NameFeatureValueReader       nameReader(*typeConfig);
     AdminLevelFeatureValueReader adminLevelReader(*typeConfig);
 
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaDataFile::AREAS_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
-
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t r=1; r<=areaCount; r++) {
-      progress.SetProgress(r,areaCount);
-
-      Area area;
-
-      if (!area.Read(*typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(r)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(areaCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (!boundaryTypes.IsSet(area.GetType())) {
-        continue;
-      }
+      for (uint32_t r=1; r<=areaCount; r++) {
+        progress.SetProgress(r,areaCount);
 
-      NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+        Area area;
 
-      if (nameValue==NULL) {
-        progress.Warning(std::string("Boundary area ")+
-                         area.GetType()->GetName()+" "+
-                         NumberToString(area.GetFileOffset())+" has no name");
-        continue;
-      }
-
-      AdminLevelFeatureValue *adminLevelValue=adminLevelReader.GetValue(area.rings.front().GetFeatureValueBuffer());
-
-      if (adminLevelValue!=NULL) {
-        Boundary boundary;
-
-        boundary.reference.Set(area.GetFileOffset(),refArea);
-        boundary.name=nameValue->GetName();
-        boundary.level=adminLevelValue->GetAdminLevel();
-
-        for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-             ring!=area.rings.end();
-             ++ring) {
-          if (ring->ring==Area::outerRingId) {
-            boundary.areas.push_back(ring->nodes);
-          }
+        if (!area.Read(*typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(r)+" of "+
+                         NumberToString(areaCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
         }
 
-        boundaryAreas.push_back(boundary);
+        if (!boundaryTypes.IsSet(area.GetType())) {
+          continue;
+        }
+
+        NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+
+        if (nameValue==NULL) {
+          progress.Warning(std::string("Boundary area ")+
+                           area.GetType()->GetName()+" "+
+                           NumberToString(area.GetFileOffset())+" has no name");
+          continue;
+        }
+
+        AdminLevelFeatureValue *adminLevelValue=adminLevelReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+
+        if (adminLevelValue!=NULL) {
+          Boundary boundary;
+
+          boundary.reference.Set(area.GetFileOffset(),refArea);
+          boundary.name=nameValue->GetName();
+          boundary.level=adminLevelValue->GetAdminLevel();
+
+          for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+               ring!=area.rings.end();
+               ++ring) {
+            if (ring->ring==Area::outerRingId) {
+              boundary.areas.push_back(ring->nodes);
+            }
+          }
+
+          boundaryAreas.push_back(boundary);
+        }
+        else {
+          progress.Info("No tag 'admin_level' for relation "+
+                        area.GetType()->GetName()+" "+
+                        NumberToString(area.GetFileOffset()));
+        }
       }
-      else {
-        progress.Info("No tag 'admin_level' for relation "+
-                      area.GetType()->GetName()+" "+
-                      NumberToString(area.GetFileOffset()));
-      }
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return scanner.Close();
+    return true;
   }
 
   void LocationIndexGenerator::SortInBoundaries(Progress& progress,
@@ -541,70 +545,75 @@ namespace osmscout {
     size_t                 areasFound=0;
     NameFeatureValueReader nameReader(typeConfig);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaDataFile::AREAS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t a=1; a<=areaCount; a++) {
-      progress.SetProgress(a,areaCount);
-
-      Area area;
-
-      if (!area.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(a)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(areaCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (!area.GetType()->GetIndexAsRegion()) {
-        continue;
-      }
+      for (uint32_t a=1; a<=areaCount; a++) {
+        progress.SetProgress(a,areaCount);
 
-      NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+        Area area;
 
-      if (nameValue==NULL) {
-        progress.Warning(std::string("Region ")+
-                         area.GetType()->GetName()+" "+
-                         NumberToString(area.GetFileOffset())+" has no name");
-        continue;
-      }
-
-
-      RegionRef region=std::make_shared<Region>();
-
-      region->reference.Set(area.GetFileOffset(),refArea);
-      region->name=nameValue->GetName();
-
-      for (const auto& ring : area.rings) {
-        if (ring.ring==Area::outerRingId) {
-          region->areas.push_back(ring.nodes);
+        if (!area.Read(typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(a)+" of "+
+                         NumberToString(areaCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
         }
+
+        if (!area.GetType()->GetIndexAsRegion()) {
+          continue;
+        }
+
+        NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+
+        if (nameValue==NULL) {
+          progress.Warning(std::string("Region ")+
+                           area.GetType()->GetName()+" "+
+                           NumberToString(area.GetFileOffset())+" has no name");
+          continue;
+        }
+
+
+        RegionRef region=std::make_shared<Region>();
+
+        region->reference.Set(area.GetFileOffset(),refArea);
+        region->name=nameValue->GetName();
+
+        for (const auto& ring : area.rings) {
+          if (ring.ring==Area::outerRingId) {
+            region->areas.push_back(ring.nodes);
+          }
+        }
+
+        region->CalculateMinMax();
+
+        AddRegion(rootRegion,
+                  region);
+
+        areasFound++;
       }
 
-      region->CalculateMinMax();
+      progress.Info(std::string("Found ")+NumberToString(areasFound)+" cities of type 'area'");
 
-      AddRegion(rootRegion,
-                region);
-
-      areasFound++;
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(areasFound)+" cities of type 'area'");
-
-    return scanner.Close();
+    return true;
   }
 
   unsigned long LocationIndexGenerator::GetRegionTreeDepth(const Region& rootRegion)
@@ -689,61 +698,66 @@ namespace osmscout {
     size_t                 citiesFound=0;
     NameFeatureValueReader nameReader(*typeConfig);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      NodeDataFile::NODES_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   NodeDataFile::NODES_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Read(nodeCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t n=1; n<=nodeCount; n++) {
-      progress.SetProgress(n,nodeCount);
-
-      Node node;
-
-      if (!node.Read(*typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(nodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(nodeCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (node.GetType()->GetIndexAsRegion()) {
-        NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
+      for (uint32_t n=1; n<=nodeCount; n++) {
+        progress.SetProgress(n,nodeCount);
 
-        if (nameValue==NULL) {
-          progress.Warning(std::string("Node ")+NumberToString(node.GetFileOffset())+" has no name, skipping");
-          continue;
+        Node node;
+
+        if (!node.Read(*typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(n)+" of "+
+                         NumberToString(nodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
         }
 
-        RegionAlias alias;
+        if (node.GetType()->GetIndexAsRegion()) {
+          NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
 
-        alias.reference=node.GetFileOffset();
-        alias.name=nameValue->GetName();
+          if (nameValue==NULL) {
+            progress.Warning(std::string("Node ")+NumberToString(node.GetFileOffset())+" has no name, skipping");
+            continue;
+          }
 
-        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                      node.GetCoords());
+          RegionAlias alias;
 
-        AddAliasToRegion(*region,
-                         alias,
-                         node.GetCoords());
+          alias.reference=node.GetFileOffset();
+          alias.name=nameValue->GetName();
 
-        citiesFound++;
+          RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                        node.GetCoords());
+
+          AddAliasToRegion(*region,
+                           alias,
+                           node.GetCoords());
+
+          citiesFound++;
+        }
       }
+
+      progress.Info(std::string("Found ")+NumberToString(citiesFound)+" cities of type 'node'");
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(citiesFound)+" cities of type 'node'");
-
-    return scanner.Close();
+    return true;
   }
 
   bool LocationIndexGenerator::AddLocationAreaToRegion(Region& region,
@@ -855,54 +869,59 @@ namespace osmscout {
     size_t                 areasFound=0;
     NameFeatureValueReader nameReader(typeConfig);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaDataFile::AREAS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=areaCount; w++) {
-      progress.SetProgress(w,areaCount);
-
-      Area area;
-
-      if (!area.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(areaCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      for (const auto& ring : area.rings) {
-        if (!ring.GetType()->GetIgnore() && ring.GetType()->GetIndexAsLocation()) {
-          NameFeatureValue *nameValue=nameReader.GetValue(ring.GetFeatureValueBuffer());
+      for (uint32_t w=1; w<=areaCount; w++) {
+        progress.SetProgress(w,areaCount);
 
-          if (nameValue!=NULL) {
-            AddLocationAreaToRegion(rootRegion,
-                                    area,
-                                    ring,
-                                    nameValue->GetName(),
-                                    regionIndex);
+        Area area;
 
-            areasFound++;
+        if (!area.Read(typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(areaCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        for (const auto& ring : area.rings) {
+          if (!ring.GetType()->GetIgnore() && ring.GetType()->GetIndexAsLocation()) {
+            NameFeatureValue *nameValue=nameReader.GetValue(ring.GetFeatureValueBuffer());
+
+            if (nameValue!=NULL) {
+              AddLocationAreaToRegion(rootRegion,
+                                      area,
+                                      ring,
+                                      nameValue->GetName(),
+                                      regionIndex);
+
+              areasFound++;
+            }
           }
         }
       }
+
+      progress.Info(std::string("Found ")+NumberToString(areasFound)+" locations of type 'area'");
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(areasFound)+" locations of type 'area'");
-
-    return scanner.Close();
+    return true;
   }
 
   /**
@@ -966,66 +985,71 @@ namespace osmscout {
     size_t                 waysFound=0;
     NameFeatureValueReader nameReader(*typeConfig);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayDataFile::WAYS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayDataFile::WAYS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
-
-      Way way;
-
-      if (!way.Read(*typeConfig,
-                    scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(wayCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (!way.GetType()->GetIndexAsLocation()) {
-        continue;
+
+      for (uint32_t w=1; w<=wayCount; w++) {
+        progress.SetProgress(w,wayCount);
+
+        Way way;
+
+        if (!way.Read(*typeConfig,
+                      scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(wayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        if (!way.GetType()->GetIndexAsLocation()) {
+          continue;
+        }
+
+        NameFeatureValue *nameValue=nameReader.GetValue(way.GetFeatureValueBuffer());
+
+        if (nameValue==NULL) {
+          continue;
+        }
+
+        GeoBox boundingBox;
+
+        way.GetBoundingBox(boundingBox);
+
+        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                      boundingBox.GetMinCoord());
+
+        AddLocationWayToRegion(*region,
+                               way,
+                               nameValue->GetName(),
+                               boundingBox.GetMinLon(),
+                               boundingBox.GetMinLat(),
+                               boundingBox.GetMaxLon(),
+                               boundingBox.GetMaxLat());
+
+        waysFound++;
       }
 
-      NameFeatureValue *nameValue=nameReader.GetValue(way.GetFeatureValueBuffer());
+      progress.Info(std::string("Found ")+NumberToString(waysFound)+" locations of type 'way'");
 
-      if (nameValue==NULL) {
-        continue;
-      }
-
-      GeoBox boundingBox;
-
-      way.GetBoundingBox(boundingBox);
-
-      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    boundingBox.GetMinCoord());
-
-      AddLocationWayToRegion(*region,
-                             way,
-                             nameValue->GetName(),
-                             boundingBox.GetMinLon(),
-                             boundingBox.GetMinLat(),
-                             boundingBox.GetMaxLon(),
-                             boundingBox.GetMaxLat());
-
-      waysFound++;
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(waysFound)+" locations of type 'way'");
-
-    return scanner.Close();
+    return true;
   }
 
   void LocationIndexGenerator::AddAddressAreaToRegion(Progress& progress,
@@ -1139,114 +1163,119 @@ namespace osmscout {
     size_t      addressFound=0;
     size_t      poiFound=0;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaAreaIndexGenerator::AREAADDRESS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaAreaIndexGenerator::AREAADDRESS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    FileOffset            fileOffset;
-    uint32_t              tmpType;
-    TypeId                typeId;
-    TypeInfoRef           type;
-    std::string           name;
-    std::string           location;
-    std::string           address;
-    std::vector<GeoCoord> nodes;
-
-    for (uint32_t a=1; a<=areaCount; a++) {
-      progress.SetProgress(a,areaCount);
-
-      if (!scanner.ReadFileOffset(fileOffset) ||
-          !scanner.ReadNumber(tmpType) ||
-          !scanner.Read(name) ||
-          !scanner.Read(location) ||
-          !scanner.Read(address) ||
-          !scanner.Read(nodes)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(a)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(areaCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      typeId=(TypeId)tmpType;
-      type=typeConfig.GetAreaTypeInfo(typeId);
+      FileOffset            fileOffset;
+      uint32_t              tmpType;
+      TypeId                typeId;
+      TypeInfoRef           type;
+      std::string           name;
+      std::string           location;
+      std::string           address;
+      std::vector<GeoCoord> nodes;
 
-      bool isAddress=!location.empty() &&
-                     !address.empty();
-      bool isPOI=!name.empty() &&
-                 type->GetIndexAsPOI();
+      for (uint32_t a=1; a<=areaCount; a++) {
+        progress.SetProgress(a,areaCount);
 
-      if (!isAddress && !isPOI) {
-        continue;
-      }
+        if (!scanner.ReadFileOffset(fileOffset) ||
+            !scanner.ReadNumber(tmpType) ||
+            !scanner.Read(name) ||
+            !scanner.Read(location) ||
+            !scanner.Read(address) ||
+            !scanner.Read(nodes)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(a)+" of "+
+                         NumberToString(areaCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-      double minlon;
-      double maxlon;
-      double minlat;
-      double maxlat;
+        typeId=(TypeId)tmpType;
+        type=typeConfig.GetAreaTypeInfo(typeId);
 
-      GetBoundingBox(nodes,
-                     minlon,
-                     maxlon,
-                     minlat,
-                     maxlat);
+        bool isAddress=!location.empty() &&
+                       !address.empty();
+        bool isPOI=!name.empty() &&
+                   type->GetIndexAsPOI();
 
-      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(minlat,minlon));
+        if (!isAddress && !isPOI) {
+          continue;
+        }
 
-      if (isAddress) {
-        bool added=false;
+        double minlon;
+        double maxlon;
+        double minlat;
+        double maxlat;
 
-        AddAddressAreaToRegion(progress,
-                               *region,
-                               fileOffset,
-                               location,
-                               address,
-                               nodes,
-                               minlon,
-                               minlat,
-                               maxlon,
-                               maxlat,
-                               added);
+        GetBoundingBox(nodes,
+                       minlon,
+                       maxlon,
+                       minlat,
+                       maxlat);
 
-        if (added) {
-          addressFound++;
+        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                      GeoCoord(minlat,minlon));
+
+        if (isAddress) {
+          bool added=false;
+
+          AddAddressAreaToRegion(progress,
+                                 *region,
+                                 fileOffset,
+                                 location,
+                                 address,
+                                 nodes,
+                                 minlon,
+                                 minlat,
+                                 maxlon,
+                                 maxlat,
+                                 added);
+
+          if (added) {
+            addressFound++;
+          }
+        }
+
+        if (isPOI) {
+          bool added=false;
+
+          AddPOIAreaToRegion(progress,
+                             *region,
+                             fileOffset,
+                             name,
+                             nodes,
+                             minlon,
+                             minlat,
+                             maxlon,
+                             maxlat,
+                             added);
+
+          if (added) {
+            poiFound++;
+          }
         }
       }
 
-      if (isPOI) {
-        bool added=false;
+      progress.Info(NumberToString(areaCount)+" areas analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
 
-        AddPOIAreaToRegion(progress,
-                           *region,
-                           fileOffset,
-                           name,
-                           nodes,
-                           minlon,
-                           minlat,
-                           maxlon,
-                           maxlat,
-                           added);
-
-        if (added) {
-          poiFound++;
-        }
-      }
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(NumberToString(areaCount)+" areas analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
-
-    return scanner.Close();
+    return true;
   }
 
   bool LocationIndexGenerator::AddAddressWayToRegion(Progress& progress,
@@ -1395,115 +1424,120 @@ namespace osmscout {
     //size_t      addressFound=0;
     size_t      poiFound=0;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      SortWayDataGenerator::WAYADDRESS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   SortWayDataGenerator::WAYADDRESS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    FileOffset            fileOffset;
-    uint32_t              tmpType;
-    TypeId                typeId;
-    TypeInfoRef           type;
-    std::string           name;
-    std::string           location;
-    std::vector<GeoCoord> nodes;
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
-
-      if (!scanner.ReadFileOffset(fileOffset) ||
-          !scanner.ReadNumber(tmpType) ||
-          !scanner.Read(name) ||
-          !scanner.Read(location) ||
-          !scanner.Read(nodes)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(wayCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      typeId=(TypeId)tmpType;
-      type=typeConfig.GetWayTypeInfo(typeId);
+      FileOffset            fileOffset;
+      uint32_t              tmpType;
+      TypeId                typeId;
+      TypeInfoRef           type;
+      std::string           name;
+      std::string           location;
+      std::vector<GeoCoord> nodes;
 
-      bool isPOI=!name.empty() &&
-                 type->GetIndexAsPOI();
+      for (uint32_t w=1; w<=wayCount; w++) {
+        progress.SetProgress(w,wayCount);
 
-      if (!isPOI) {
-        continue;
-      }
-
-      double minlon;
-      double maxlon;
-      double minlat;
-      double maxlat;
-
-      if (nodes.size()==0) {
-        std::cerr << "Way " << fileOffset << " has no nodes" << std::endl;
-      }
-
-      GetBoundingBox(nodes,
-                     minlon,
-                     maxlon,
-                     minlat,
-                     maxlat);
-
-      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    GeoCoord(minlat,minlon));
-
-      /*
-      if (isAddress) {
-        bool added=false;
-
-        AddAddressWayToRegion(progress,
-                              region,
-                              fileOffset,
-                              location,
-                              address,
-                              nodes,
-                              minlon,
-                              minlat,
-                              maxlon,
-                              maxlat,
-                              added);
-
-      if (added) {
-        addressFound++;
+        if (!scanner.ReadFileOffset(fileOffset) ||
+            !scanner.ReadNumber(tmpType) ||
+            !scanner.Read(name) ||
+            !scanner.Read(location) ||
+            !scanner.Read(nodes)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(wayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
         }
-      }*/
 
-      if (isPOI) {
-        bool added=false;
+        typeId=(TypeId)tmpType;
+        type=typeConfig.GetWayTypeInfo(typeId);
 
-        AddPOIWayToRegion(progress,
-                          *region,
-                          fileOffset,
-                          name,
-                          nodes,
-                          minlon,
-                          minlat,
-                          maxlon,
-                          maxlat,
-                          added);
+        bool isPOI=!name.empty() &&
+                   type->GetIndexAsPOI();
 
-      if (added) {
-          poiFound++;
+        if (!isPOI) {
+          continue;
+        }
+
+        double minlon;
+        double maxlon;
+        double minlat;
+        double maxlat;
+
+        if (nodes.size()==0) {
+          std::cerr << "Way " << fileOffset << " has no nodes" << std::endl;
+        }
+
+        GetBoundingBox(nodes,
+                       minlon,
+                       maxlon,
+                       minlat,
+                       maxlat);
+
+        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                      GeoCoord(minlat,minlon));
+
+        /*
+        if (isAddress) {
+          bool added=false;
+
+          AddAddressWayToRegion(progress,
+                                region,
+                                fileOffset,
+                                location,
+                                address,
+                                nodes,
+                                minlon,
+                                minlat,
+                                maxlon,
+                                maxlat,
+                                added);
+
+        if (added) {
+          addressFound++;
+          }
+        }*/
+
+        if (isPOI) {
+          bool added=false;
+
+          AddPOIWayToRegion(progress,
+                            *region,
+                            fileOffset,
+                            name,
+                            nodes,
+                            minlon,
+                            minlat,
+                            maxlon,
+                            maxlat,
+                            added);
+
+          if (added) {
+            poiFound++;
+          }
         }
       }
+
+      progress.Info(NumberToString(wayCount)+" ways analyzed, "/*+NumberToString(addressFound)+" addresses founds, "*/+NumberToString(poiFound)+" POIs founds");
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(NumberToString(wayCount)+" ways analyzed, "/*+NumberToString(addressFound)+" addresses founds, "*/+NumberToString(poiFound)+" POIs founds");
-
-    return scanner.Close();
+    return true;
   }
 
   void LocationIndexGenerator::AddAddressNodeToRegion(Progress& progress,
@@ -1562,94 +1596,99 @@ namespace osmscout {
     size_t      addressFound=0;
     size_t      poiFound=0;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      SortNodeDataGenerator::NODEADDRESS_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   SortNodeDataGenerator::NODEADDRESS_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Read(nodeCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    FileOffset  fileOffset;
-    uint32_t    tmpType;
-    TypeId      typeId;
-    TypeInfoRef type;
-    std::string name;
-    std::string location;
-    std::string address;
-    GeoCoord    coord;
-
-    for (uint32_t n=1; n<=nodeCount; n++) {
-      progress.SetProgress(n,nodeCount);
-
-      if (!scanner.ReadFileOffset(fileOffset) ||
-          !scanner.ReadNumber(tmpType) ||
-          !scanner.Read(name) ||
-          !scanner.Read(location) ||
-          !scanner.Read(address) ||
-          !scanner.ReadCoord(coord)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(nodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(nodeCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      typeId=(TypeId)tmpType;
-      type=typeConfig.GetNodeTypeInfo(typeId);
+      FileOffset  fileOffset;
+      uint32_t    tmpType;
+      TypeId      typeId;
+      TypeInfoRef type;
+      std::string name;
+      std::string location;
+      std::string address;
+      GeoCoord    coord;
 
-      bool isAddress=!location.empty() &&
-                     !address.empty();
-      bool isPOI=!name.empty() &&
-                 type->GetIndexAsPOI();
+      for (uint32_t n=1; n<=nodeCount; n++) {
+        progress.SetProgress(n,nodeCount);
 
-      if (!isAddress && !isPOI) {
-        continue;
-      }
+        if (!scanner.ReadFileOffset(fileOffset) ||
+            !scanner.ReadNumber(tmpType) ||
+            !scanner.Read(name) ||
+            !scanner.Read(location) ||
+            !scanner.Read(address) ||
+            !scanner.ReadCoord(coord)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(n)+" of "+
+                         NumberToString(nodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-      RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                    coord);
+        typeId=(TypeId)tmpType;
+        type=typeConfig.GetNodeTypeInfo(typeId);
 
-      if (!region) {
-        continue;
-      }
+        bool isAddress=!location.empty() &&
+                       !address.empty();
+        bool isPOI=!name.empty() &&
+                   type->GetIndexAsPOI();
 
-      if (isAddress) {
-        bool added=false;
+        if (!isAddress && !isPOI) {
+          continue;
+        }
 
-        AddAddressNodeToRegion(progress,
-                               *region,
-                               fileOffset,
-                               location,
-                               address,
-                               added);
-        if (added) {
-          addressFound++;
+        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                      coord);
+
+        if (!region) {
+          continue;
+        }
+
+        if (isAddress) {
+          bool added=false;
+
+          AddAddressNodeToRegion(progress,
+                                 *region,
+                                 fileOffset,
+                                 location,
+                                 address,
+                                 added);
+          if (added) {
+            addressFound++;
+          }
+        }
+
+        if (isPOI) {
+          bool added=false;
+
+          AddPOINodeToRegion(*region,
+                             fileOffset,
+                             name,
+                             added);
+          if (added) {
+            poiFound++;
+          }
         }
       }
 
-      if (isPOI) {
-        bool added=false;
+      progress.Info(NumberToString(nodeCount)+" nodes analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
 
-        AddPOINodeToRegion(*region,
-                           fileOffset,
-                           name,
-                           added);
-        if (added) {
-          poiFound++;
-        }
-      }
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    progress.Info(NumberToString(nodeCount)+" nodes analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
-
-    return scanner.Close();
+    return true;
   }
 
   bool LocationIndexGenerator::WriteIgnoreTokens(FileWriter& writer,

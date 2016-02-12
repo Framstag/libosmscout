@@ -50,133 +50,125 @@ namespace osmscout {
     uint32_t    dataCount=0;
     uint32_t    dataWritten=0;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     AREAS_TMP))) {
-      progress.Error("Cannot create '" + writer.GetFilename() + "'");
-      return false;
-    }
-
-    writer.Write(dataWritten);
-
-    progress.SetAction("Copying areas from file 'wayarea.tmp'");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayAreaDataGenerator::WAYAREA_TMP),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t current=1; current<=dataCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
-
-      progress.SetProgress(current,dataCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.ReadImport(typeConfig,
-                           scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
+    try {
+      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       AREAS_TMP))) {
+        progress.Error("Cannot create '" + writer.GetFilename() + "'");
         return false;
       }
 
-      if (!writer.Write(type) ||
-          !writer.Write(id) ||
-          !data.WriteImport(typeConfig,
-                            writer)) {
-        progress.Error(std::string("Error while writing data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " from file '"+
-                       scanner.GetFilename()+"' to '"+writer.GetFilename()+"'");
-      }
+      writer.Write(dataWritten);
 
-      dataWritten++;
-    }
+      progress.SetAction("Copying areas from file 'wayarea.tmp'");
 
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
-      return false;
-    }
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayAreaDataGenerator::WAYAREA_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetAreaDataMemoryMaped());
 
-    progress.SetAction("Copying areas from file 'relarea.tmp'");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      RelAreaDataGenerator::RELAREA_TMP),
-                                      FileScanner::Sequential,
-                                      parameter.GetAreaDataMemoryMaped())) {
-      progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t current=1; current<=dataCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
-
-      progress.SetProgress(current,dataCount);
-
-      if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.ReadImport(typeConfig,
-                           scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (!writer.Write(type) ||
-          !writer.Write(id) ||
-          !data.WriteImport(typeConfig,
-                            writer)) {
-        progress.Error(std::string("Error while writing data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(dataCount)+
-                       " from file '"+
-                       scanner.GetFilename()+"' to '"+writer.GetFilename()+"'");
+      for (uint32_t current=1; current<=dataCount; current++) {
+        uint8_t type;
+        Id      id;
+        Area    data;
+
+        progress.SetProgress(current,dataCount);
+
+        if (!scanner.Read(type) ||
+            !scanner.Read(id) ||
+            !data.ReadImport(typeConfig,
+                             scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+
+          return false;
+        }
+
+        if (!writer.Write(type) ||
+            !writer.Write(id) ||
+            !data.WriteImport(typeConfig,
+                              writer)) {
+          progress.Error(std::string("Error while writing data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " from file '"+
+                         scanner.GetFilename()+"' to '"+writer.GetFilename()+"'");
+        }
+
+        dataWritten++;
       }
 
-      dataWritten++;
-    }
+      scanner.Close();
 
-    if (!scanner.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     scanner.GetFilename()+"'");
+      progress.SetAction("Copying areas from file 'relarea.tmp'");
+
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   RelAreaDataGenerator::RELAREA_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetAreaDataMemoryMaped());
+
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t current=1; current<=dataCount; current++) {
+        uint8_t type;
+        Id      id;
+        Area    data;
+
+        progress.SetProgress(current,dataCount);
+
+        if (!scanner.Read(type) ||
+            !scanner.Read(id) ||
+            !data.ReadImport(typeConfig,
+                             scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+
+          return false;
+        }
+
+        if (!writer.Write(type) ||
+            !writer.Write(id) ||
+            !data.WriteImport(typeConfig,
+                              writer)) {
+          progress.Error(std::string("Error while writing data entry ")+
+                         NumberToString(current)+" of "+
+                         NumberToString(dataCount)+
+                         " from file '"+
+                         scanner.GetFilename()+"' to '"+writer.GetFilename()+"'");
+        }
+
+        dataWritten++;
+      }
+
+      scanner.Close();
+
+      if (!writer.SetPos(0)) {
+        return false;
+      }
+
+      if (!writer.Write(dataWritten)) {
+        return false;
+      }
+
+      return writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    if (!writer.SetPos(0)) {
-      return false;
-    }
-
-    if (!writer.Write(dataWritten)) {
-      return false;
-    }
-
-    return writer.Close();
   }
 
   bool MergeAreaDataGenerator::Import(const TypeConfigRef& typeConfig,

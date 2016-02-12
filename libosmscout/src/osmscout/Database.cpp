@@ -92,21 +92,22 @@ namespace osmscout {
 
     FileScanner scanner;
 
-    if (!scanner.Open(AppendFileToDir(path,"bounding.dat"),
-                      FileScanner::Normal,
-                      false)) {
-      log.Error() << "Cannot open '" << scanner.GetFilename() << "'";
-      return false;
+    try {
+      scanner.Open(AppendFileToDir(path,"bounding.dat"),
+                   FileScanner::Normal,
+                   false);
+
+      if (!scanner.ReadBox(boundingBox)) {
+        log.Error() << "Error while reading '" << scanner.GetFilename() << "'";
+      }
+
+      log.Debug() << "BoundingBox: " << boundingBox.GetDisplayText();
+
+      scanner.Close();
     }
-
-    if (!scanner.ReadBox(boundingBox)) {
-      log.Error() << "Error while reading '" << scanner.GetFilename() << "'";
-    }
-
-    log.Debug() << "BoundingBox: " << boundingBox.GetDisplayText();
-
-    if (scanner.HasError() || !scanner.Close()) {
-      log.Error() << "Cannot while reading/closing '" << scanner.GetFilename() << "'";
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
     }
 

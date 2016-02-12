@@ -517,131 +517,135 @@ namespace osmscout
 
     progress.Info("Minimum visible size in pixel: "+NumberToString((unsigned long)pixel));
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaDataFile::AREAS_DAT),
-                         FileScanner::Sequential,
-                         parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    TypeInfoSet                      typesToProcess(types);
-    std::vector<std::list<AreaRef> > allAreas(typeConfig.GetTypeCount());
+      TypeInfoSet                      typesToProcess(types);
+      std::vector<std::list<AreaRef> > allAreas(typeConfig.GetTypeCount());
 
-    while (true) {
-      //
-      // Load type data
-      //
+      while (true) {
+        //
+        // Load type data
+        //
 
-      TypeInfoSet loadedTypes;
+        TypeInfoSet loadedTypes;
 
-      if (!GetAreas(typeConfig,
-                    parameter,
-                    progress,
-                    scanner,
-                    typesToProcess,
-                    allAreas,
-                    loadedTypes)) {
-        return false;
-      }
+        if (!GetAreas(typeConfig,
+                      parameter,
+                      progress,
+                      scanner,
+                      typesToProcess,
+                      allAreas,
+                      loadedTypes)) {
+          return false;
+        }
 
-      typesToProcess.Remove(loadedTypes);
+        typesToProcess.Remove(loadedTypes);
 
-      for (const auto& type : loadedTypes) {
-        progress.SetAction("Optimizing type "+ type->GetName());
+        for (const auto& type : loadedTypes) {
+          progress.SetAction("Optimizing type "+ type->GetName());
 
-        for (uint32_t level=parameter.GetOptimizationMinMag();
-             level<=parameter.GetOptimizationMaxMag();
-             level++) {
-          Magnification      magnification; // Magnification, we optimize for
-          std::list<AreaRef> optimizedAreas;
+          for (uint32_t level=parameter.GetOptimizationMinMag();
+               level<=parameter.GetOptimizationMaxMag();
+               level++) {
+            Magnification      magnification; // Magnification, we optimize for
+            std::list<AreaRef> optimizedAreas;
 
-          magnification.SetLevel(level);
+            magnification.SetLevel(level);
 
-          OptimizeAreas(allAreas[type->GetIndex()],
-                        optimizedAreas,
-                        1280,768,
-                        dpi,
-                        pixel,
-                        magnification,
-                        parameter.GetOptimizationWayMethod());
+            OptimizeAreas(allAreas[type->GetIndex()],
+                          optimizedAreas,
+                          1280,768,
+                          dpi,
+                          pixel,
+                          magnification,
+                          parameter.GetOptimizationWayMethod());
 
-          if (optimizedAreas.empty()) {
-            progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index generated");
+            if (optimizedAreas.empty()) {
+              progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index generated");
+
+              TypeData typeData;
+
+              typeData.type=type;
+              typeData.optLevel=level;
+
+              typesData.push_back(typeData);
+
+              continue;
+            }
+
+            /*
+            size_t optAreas=optimizedAreas.size();
+            size_t optRoles=0;
+            size_t optNodes=0;
+
+            for (std::list<AreaRef>::const_iterator a=optimizedAreas.begin();
+                a!=optimizedAreas.end();
+                ++a) {
+              AreaRef area=*a;
+
+              optRoles+=area->rings.size();
+
+              for (size_t r=0; r<area->rings.size(); r++) {
+                optNodes+=area->rings[r].nodes.size();
+              }
+            }*/
+
+            /*
+            std::cout << "Areas: " << origAreas << " => " << optAreas << std::endl;
+            std::cout << "Roles: " << origRoles << " => " << optRoles << std::endl;
+            std::cout << "Nodes: " << origNodes << " => " << optNodes << std::endl;*/
 
             TypeData typeData;
 
             typeData.type=type;
             typeData.optLevel=level;
 
-            typesData.push_back(typeData);
+            GetAreaIndexLevel(parameter,
+                              optimizedAreas,
+                              typeData);
 
-            continue;
-          }
+            //std::cout << "Resulting index level: " << typeData.indexLevel << ", " << typeData.indexCells << ", " << typeData.indexEntries << std::endl;
 
-          /*
-          size_t optAreas=optimizedAreas.size();
-          size_t optRoles=0;
-          size_t optNodes=0;
+            FileOffsetFileOffsetMap offsets;
 
-          for (std::list<AreaRef>::const_iterator a=optimizedAreas.begin();
-              a!=optimizedAreas.end();
-              ++a) {
-            AreaRef area=*a;
-
-            optRoles+=area->rings.size();
-
-            for (size_t r=0; r<area->rings.size(); r++) {
-              optNodes+=area->rings[r].nodes.size();
-            }
-          }*/
-
-          /*
-          std::cout << "Areas: " << origAreas << " => " << optAreas << std::endl;
-          std::cout << "Roles: " << origRoles << " => " << optRoles << std::endl;
-          std::cout << "Nodes: " << origNodes << " => " << optNodes << std::endl;*/
-
-          TypeData typeData;
-
-          typeData.type=type;
-          typeData.optLevel=level;
-
-          GetAreaIndexLevel(parameter,
+            if (!WriteAreas(typeConfig,
+                            writer,
                             optimizedAreas,
-                            typeData);
+                            offsets)) {
+              return false;
+            }
 
-          //std::cout << "Resulting index level: " << typeData.indexLevel << ", " << typeData.indexCells << ", " << typeData.indexEntries << std::endl;
+            if (!WriteAreaBitmap(progress,
+                                 writer,
+                                 optimizedAreas,
+                                 offsets,
+                                 typeData)) {
+              return false;
+            }
 
-          FileOffsetFileOffsetMap offsets;
-
-          if (!WriteAreas(typeConfig,
-                          writer,
-                          optimizedAreas,
-                          offsets)) {
-            return false;
+            typesData.push_back(typeData);
           }
 
-          if (!WriteAreaBitmap(progress,
-                               writer,
-                               optimizedAreas,
-                               offsets,
-                               typeData)) {
-            return false;
-          }
-
-          typesData.push_back(typeData);
+          allAreas[type->GetIndex()].clear();
         }
 
-        allAreas[type->GetIndex()].clear();
+        if (typesToProcess.Empty()) {
+          break;
+        }
       }
 
-      if (typesToProcess.Empty()) {
-        break;
-      }
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError() &&
-           scanner.Close();
+    return true;
   }
 
   bool OptimizeAreasLowZoomGenerator::Import(const TypeConfigRef& typeConfig,

@@ -196,7 +196,16 @@ namespace osmscout {
     this->memoryMapedData=memoryMapedData;
     this->modeData=modeData;
 
-    return scanner.Open(datafilename,modeData,memoryMapedData);
+    try {
+      scanner.Open(datafilename,modeData,memoryMapedData);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -220,8 +229,15 @@ namespace osmscout {
   {
     typeConfig=NULL;
 
-    if (scanner.IsOpen()) {
-      return scanner.Close();
+    try  {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
     }
 
     return true;

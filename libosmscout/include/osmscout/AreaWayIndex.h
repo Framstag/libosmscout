@@ -88,6 +88,7 @@ namespace osmscout {
 
   public:
     AreaWayIndex();
+    virtual ~AreaWayIndex();
 
     void Close();
     bool Open(const TypeConfigRef& typeConfig,

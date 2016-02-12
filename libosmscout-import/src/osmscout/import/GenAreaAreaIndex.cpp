@@ -946,135 +946,138 @@ namespace osmscout {
     FileScanner         scanner;
     std::vector<Level>  levels;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      OptimizeAreaWayIdsGenerator::AREAS3_TMP),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   OptimizeAreaWayIdsGenerator::AREAS3_TMP),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
+
+      progress.SetAction("Building in memory area index from '"+scanner.GetFilename()+"'");
+
+      levels.resize(parameter.GetAreaAreaIndexMaxMag()+1);
+
+      if (!BuildInMemoryIndex(typeConfig,
+                              parameter,
+                              progress,
+                              scanner,
+                              levels)) {
+        return false;
+      }
+
+      progress.SetAction("Enriching index tree");
+
+      EnrichLevels(levels);
+
+      assert(levels[0].size()==1);
+
+      for (size_t i=0; i<levels.size(); i++) {
+        progress.Info("Level "+NumberToString(i)+" has " + NumberToString(levels[i].size())+" entries");
+      }
+
+      //
+      // Writing index, data and idmap files
+      //
+
+      FileWriter indexWriter;
+      FileWriter  dataWriter;
+      FileWriter  mapWriter;
+      uint32_t    overallDataCount=0;
+
+      FileOffset topLevelOffset=0;
+      FileOffset topLevelOffsetOffset; // Offset of the top level entry
+
+      // Index file
+
+      if (!indexWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                            AreaAreaIndex::AREA_AREA_IDX))) {
+        progress.Error("Cannot create file '"+indexWriter.GetFilename()+"'");
+        return false;
+      }
+
+      indexWriter.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
+
+      if (!indexWriter.GetPos(topLevelOffsetOffset)) {
+        progress.Error("Cannot read current file position");
+        return false;
+      }
+
+      // This is not the final value, that will be written later on
+      if (!indexWriter.WriteFileOffset(topLevelOffset)) {
+        progress.Error("Cannot write top level entry offset");
+        return false;
+      }
+
+      // Data file
+
+      if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                           AreaDataFile::AREAS_DAT))) {
+        progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
+        return false;
+      }
+
+      dataWriter.Write(overallDataCount);
+
+      // Id map file
+
+      if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                          AreaDataFile::AREAS_IDMAP))) {
+        progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
+        return false;
+      }
+
+      mapWriter.Write(overallDataCount);
+
+      progress.SetAction("Writing files '"+indexWriter.GetFilename()+"', '"+dataWriter.GetFilename()+"' and '"+
+                         mapWriter.GetFilename()+"'");
+
+      if (!WriteCell(*typeConfig,
+                     progress,
+                     parameter,
+                     scanner,
+                     indexWriter,
+                     dataWriter,
+                     mapWriter,
+                     levels,
+                     0,
+                     Pixel(0,0),
+                     levels[0][Pixel(0,0)],
+                     topLevelOffset,
+                     overallDataCount)) {
+        return false;
+      }
+
+      // Finishing index file
+
+      if (!indexWriter.SetPos(topLevelOffsetOffset) ||
+          !indexWriter.WriteFileOffset(topLevelOffset)) {
+        return false;
+      }
+
+      // Finishing data file
+
+      dataWriter.SetPos(0);
+      dataWriter.Write(overallDataCount);
+
+      // Finishing id map file
+
+      mapWriter.SetPos(0);
+      mapWriter.Write(overallDataCount);
+
+      progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+
+      scanner.Close();
+
+      return !indexWriter.HasError() &&
+             !dataWriter.HasError() &&
+             !mapWriter.HasError() &&
+             indexWriter.Close() &&
+             dataWriter.Close() &&
+             mapWriter.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    progress.SetAction("Building in memory area index from '"+scanner.GetFilename()+"'");
-
-    levels.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-
-    if (!BuildInMemoryIndex(typeConfig,
-                            parameter,
-                            progress,
-                            scanner,
-                            levels)) {
-      return false;
-    }
-
-    progress.SetAction("Enriching index tree");
-
-    EnrichLevels(levels);
-
-    assert(levels[0].size()==1);
-
-    for (size_t i=0; i<levels.size(); i++) {
-      progress.Info("Level "+NumberToString(i)+" has " + NumberToString(levels[i].size())+" entries");
-    }
-
-    //
-    // Writing index, data and idmap files
-    //
-
-    FileWriter indexWriter;
-    FileWriter  dataWriter;
-    FileWriter  mapWriter;
-    uint32_t    overallDataCount=0;
-
-    FileOffset topLevelOffset=0;
-    FileOffset topLevelOffsetOffset; // Offset of the top level entry
-
-    // Index file
-
-    if (!indexWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          AreaAreaIndex::AREA_AREA_IDX))) {
-      progress.Error("Cannot create file '"+indexWriter.GetFilename()+"'");
-      return false;
-    }
-
-    indexWriter.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
-
-    if (!indexWriter.GetPos(topLevelOffsetOffset)) {
-      progress.Error("Cannot read current file position");
-      return false;
-    }
-
-    // This is not the final value, that will be written later on
-    if (!indexWriter.WriteFileOffset(topLevelOffset)) {
-      progress.Error("Cannot write top level entry offset");
-      return false;
-    }
-
-    // Data file
-
-    if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         AreaDataFile::AREAS_DAT))) {
-      progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
-      return false;
-    }
-
-    dataWriter.Write(overallDataCount);
-
-    // Id map file
-
-    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        AreaDataFile::AREAS_IDMAP))) {
-      progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
-      return false;
-    }
-
-    mapWriter.Write(overallDataCount);
-
-    progress.SetAction("Writing files '"+indexWriter.GetFilename()+"', '"+dataWriter.GetFilename()+"' and '"+
-                       mapWriter.GetFilename()+"'");
-
-    if (!WriteCell(*typeConfig,
-                   progress,
-                   parameter,
-                   scanner,
-                   indexWriter,
-                   dataWriter,
-                   mapWriter,
-                   levels,
-                   0,
-                   Pixel(0,0),
-                   levels[0][Pixel(0,0)],
-                   topLevelOffset,
-                   overallDataCount)) {
-      return false;
-    }
-
-    // Finishing index file
-
-    if (!indexWriter.SetPos(topLevelOffsetOffset) ||
-        !indexWriter.WriteFileOffset(topLevelOffset)) {
-      return false;
-    }
-
-    // Finishing data file
-
-    dataWriter.SetPos(0);
-    dataWriter.Write(overallDataCount);
-
-    // Finishing id map file
-
-    mapWriter.SetPos(0);
-    mapWriter.Write(overallDataCount);
-
-    progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
-
-    return !scanner.HasError() &&
-           !indexWriter.HasError() &&
-           !dataWriter.HasError() &&
-           !mapWriter.HasError() &&
-           scanner.Close() &&
-           indexWriter.Close() &&
-           dataWriter.Close() &&
-           mapWriter.Close();
   }
 
   bool AreaAreaIndexGenerator::Import(const TypeConfigRef& typeConfig,

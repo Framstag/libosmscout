@@ -456,38 +456,41 @@ int main(int argc, char* argv[])
 
   std::cout << "Reading " << wayDatFilename << "..." << std::endl;
 
-  if (!scanner.Open(wayDatFilename,osmscout::FileScanner::Sequential,true)) {
-    std::cerr << "Cannot open '" << scanner.GetFilename() << "'" << std::endl;
+  try {
+    scanner.Open(wayDatFilename,osmscout::FileScanner::Sequential,true);
+
+    if (!scanner.Read(dataCount)) {
+      std::cerr << "Cannot read number of entries in file" << std::endl;
+    }
+
+    std::cout << dataCount << " entries..." << std::endl;
+
+    for (size_t i=1; i<=dataCount; i++) {
+      osmscout::Way way;
+
+      if (!way.Read(typeConfig,scanner)) {
+        std::cerr << "Cannot read data set #" << i << "'from file " << scanner.GetFilename() << "'" << std::endl;
+        return 1;
+      }
+
+      for (size_t n =0; n<way.nodes.size(); n++) {
+        std::cout << way.nodes[n].GetDisplayText() << " ";
+      }
+      std::cout << std::endl;
+
+      statistics.Measure(way.nodes);
+
+      for (auto& encoder : encoders) {
+        encoder->Encode(way.GetFileOffset(),way.nodes);
+      }
+    }
+
+    scanner.Close();
+  }
+  catch (osmscout::IOException& e) {
+    std::cerr << e.GetDescription() << std::endl;
     return 1;
   }
-
-  if (!scanner.Read(dataCount)) {
-    std::cerr << "Cannot read number of entries in file" << std::endl;
-  }
-
-  std::cout << dataCount << " entries..." << std::endl;
-
-  for (size_t i=1; i<=dataCount; i++) {
-    osmscout::Way way;
-
-    if (!way.Read(typeConfig,scanner)) {
-      std::cerr << "Cannot read data set #" << i << "'from file " << scanner.GetFilename() << "'" << std::endl;
-      return 1;
-    }
-
-    for (size_t n =0; n<way.nodes.size(); n++) {
-      std::cout << way.nodes[n].GetDisplayText() << " ";
-    }
-    std::cout << std::endl;
-
-    statistics.Measure(way.nodes);
-
-    for (auto& encoder : encoders) {
-      encoder->Encode(way.GetFileOffset(),way.nodes);
-    }
-  }
-
-  scanner.Close();
 
   std::cout << "---" << std::endl;
 

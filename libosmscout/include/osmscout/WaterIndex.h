@@ -72,6 +72,7 @@ namespace osmscout {
 
   public:
     WaterIndex();
+    virtual ~WaterIndex();
 
     bool Open(const std::string& path);
     void Close();

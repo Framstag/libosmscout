@@ -36,68 +36,82 @@ namespace osmscout {
     // no code
   }
 
+  WaterIndex::~WaterIndex()
+  {
+    Close();
+  }
+
   bool WaterIndex::Open(const std::string& path)
   {
     datafilename=AppendFileToDir(path,WATER_IDX);
 
-    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
-      return false;
-    }
+    try {
+      scanner.Open(datafilename,FileScanner::FastRandom,true);
 
-    if (!scanner.ReadNumber(waterIndexMinMag)) {
-      log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    if (!scanner.ReadNumber(waterIndexMaxMag)) {
-      log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    levels.resize(waterIndexMaxMag-waterIndexMinMag+1);
-
-    double cellWidth=360.0;
-    double cellHeight=180.0;
-
-    for (size_t level=0; level<=waterIndexMaxMag; level++) {
-      if (level>=waterIndexMinMag && level<=waterIndexMaxMag) {
-        size_t idx=level-waterIndexMinMag;
-
-        levels[idx].cellWidth=cellWidth;
-        levels[idx].cellHeight=cellHeight;
+      if (!scanner.ReadNumber(waterIndexMinMag)) {
+        log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
+        return false;
       }
 
-      cellWidth=cellWidth/2;
-      cellHeight=cellHeight/2;
+      if (!scanner.ReadNumber(waterIndexMaxMag)) {
+        log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      levels.resize(waterIndexMaxMag-waterIndexMinMag+1);
+
+      double cellWidth=360.0;
+      double cellHeight=180.0;
+
+      for (size_t level=0; level<=waterIndexMaxMag; level++) {
+        if (level>=waterIndexMinMag && level<=waterIndexMaxMag) {
+          size_t idx=level-waterIndexMinMag;
+
+          levels[idx].cellWidth=cellWidth;
+          levels[idx].cellHeight=cellHeight;
+        }
+
+        cellWidth=cellWidth/2;
+        cellHeight=cellHeight/2;
+      }
+
+      for (size_t level=waterIndexMinMag; level<=waterIndexMaxMag; level++){
+        size_t idx=level-waterIndexMinMag;
+
+        scanner.ReadFileOffset(levels[idx].offset);
+
+        scanner.ReadNumber(levels[idx].cellXStart);
+        scanner.ReadNumber(levels[idx].cellXEnd);
+        scanner.ReadNumber(levels[idx].cellYStart);
+        scanner.ReadNumber(levels[idx].cellYEnd);
+
+        levels[idx].cellXCount=levels[idx].cellXEnd-levels[idx].cellXStart+1;
+        levels[idx].cellYCount=levels[idx].cellYEnd-levels[idx].cellYStart+1;
+      }
+
+      if (scanner.HasError()) {
+        log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      return true;
     }
-
-    for (size_t level=waterIndexMinMag; level<=waterIndexMaxMag; level++){
-      size_t idx=level-waterIndexMinMag;
-
-      scanner.ReadFileOffset(levels[idx].offset);
-
-      scanner.ReadNumber(levels[idx].cellXStart);
-      scanner.ReadNumber(levels[idx].cellXEnd);
-      scanner.ReadNumber(levels[idx].cellYStart);
-      scanner.ReadNumber(levels[idx].cellYEnd);
-
-      levels[idx].cellXCount=levels[idx].cellXEnd-levels[idx].cellXStart+1;
-      levels[idx].cellYCount=levels[idx].cellYEnd-levels[idx].cellYStart+1;
-    }
-
-    if (scanner.HasError()) {
-      log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    return true;
   }
 
   void WaterIndex::Close()
   {
-    if (scanner.IsOpen()) {
-      scanner.Close();
+    try  {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
     }
   }
 

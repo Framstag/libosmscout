@@ -126,6 +126,7 @@ namespace osmscout {
 
   public:
     AreaAreaIndex(size_t cacheSize);
+    virtual ~AreaAreaIndex();
 
     void Close();
     bool Open(const std::string& path);

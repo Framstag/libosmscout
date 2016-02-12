@@ -133,122 +133,122 @@ namespace osmscout {
 
     progress.SetAction("Scanning for coastlines");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      Preprocess::RAWCOASTLINE_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::RAWCOASTLINE_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Read(coastlineCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t c=1; c<=coastlineCount; c++) {
-      progress.SetProgress(c,coastlineCount);
-
-      RawCoastlineRef coastline(new RawCoastline());
-
-      if (!coastline->Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(c)+" of "+
-                       NumberToString(coastlineCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(coastlineCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      rawCoastlines.push_back(coastline);
-    }
+      for (uint32_t c=1; c<=coastlineCount; c++) {
+        progress.SetProgress(c,coastlineCount);
 
-    progress.SetAction("Resolving nodes of coastline");
+        RawCoastlineRef coastline(new RawCoastline());
 
-    CoordDataFile coordDataFile;
-
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
-                            parameter.GetCoordDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+coordDataFile.GetFilename()+"'!");
-      return false;
-    }
-
-    std::set<OSMId> nodeIds;
-
-    for (const auto& coastline : rawCoastlines) {
-      for (size_t n=0; n<coastline->GetNodeCount(); n++) {
-        nodeIds.insert(coastline->GetNodeId(n));
-      }
-    }
-
-    CoordDataFile::CoordResultMap coordsMap;
-
-    if (!coordDataFile.Get(nodeIds,
-                           coordsMap)) {
-      std::cerr << "Cannot read nodes!" << std::endl;
-      return false;
-    }
-
-    nodeIds.clear();
-
-    progress.SetAction("Enriching coastline with node data");
-
-    while (!rawCoastlines.empty()) {
-      RawCoastlineRef coastline=rawCoastlines.front();
-      bool            processingError=false;
-
-      rawCoastlines.pop_front();
-
-      CoastRef coast=std::make_shared<Coast>();
-
-      coast->id=coastline->GetId();
-      coast->isArea=coastline->IsArea();
-
-      coast->coast.resize(coastline->GetNodeCount());
-
-      for (size_t n=0; n<coastline->GetNodeCount(); n++) {
-        CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
-
-        if (coord==coordsMap.end()) {
-          processingError=true;
-
-          progress.Error("Cannot resolve node with id "+
-                         NumberToString(coastline->GetNodeId(n))+
-                         " for coastline "+
-                         NumberToString(coastline->GetId()));
-
-          break;
+        if (!coastline->Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(c)+" of "+
+                         NumberToString(coastlineCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
         }
 
-        if (n==0) {
-          coast->frontNodeId=coord->second.point.GetId();
-        }
-
-        if (n==coastline->GetNodeCount()-1) {
-          coast->backNodeId=coord->second.point.GetId();
-        }
-
-        coast->coast[n]=coord->second.point.GetCoords();
+        rawCoastlines.push_back(coastline);
       }
 
-      if (!processingError) {
-        if (coast->isArea) {
-          areaCoastCount++;
-        }
-        else {
-          wayCoastCount++;
-        }
+      progress.SetAction("Resolving nodes of coastline");
 
-        coastlines.push_back(coast);
+      CoordDataFile coordDataFile;
+
+      if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+                              parameter.GetCoordDataMemoryMaped())) {
+        progress.Error("Cannot open file '"+coordDataFile.GetFilename()+"'!");
+        return false;
       }
-    }
 
-    if (!scanner.Close()) {
-      progress.Error("Error while reading/closing '"+scanner.GetFilename()+"'");
+      std::set<OSMId> nodeIds;
+
+      for (const auto& coastline : rawCoastlines) {
+        for (size_t n=0; n<coastline->GetNodeCount(); n++) {
+          nodeIds.insert(coastline->GetNodeId(n));
+        }
+      }
+
+      CoordDataFile::CoordResultMap coordsMap;
+
+      if (!coordDataFile.Get(nodeIds,
+                             coordsMap)) {
+        std::cerr << "Cannot read nodes!" << std::endl;
+        return false;
+      }
+
+      nodeIds.clear();
+
+      progress.SetAction("Enriching coastline with node data");
+
+      while (!rawCoastlines.empty()) {
+        RawCoastlineRef coastline=rawCoastlines.front();
+        bool            processingError=false;
+
+        rawCoastlines.pop_front();
+
+        CoastRef coast=std::make_shared<Coast>();
+
+        coast->id=coastline->GetId();
+        coast->isArea=coastline->IsArea();
+
+        coast->coast.resize(coastline->GetNodeCount());
+
+        for (size_t n=0; n<coastline->GetNodeCount(); n++) {
+          CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
+
+          if (coord==coordsMap.end()) {
+            processingError=true;
+
+            progress.Error("Cannot resolve node with id "+
+                           NumberToString(coastline->GetNodeId(n))+
+                           " for coastline "+
+                           NumberToString(coastline->GetId()));
+
+            break;
+          }
+
+          if (n==0) {
+            coast->frontNodeId=coord->second.point.GetId();
+          }
+
+          if (n==coastline->GetNodeCount()-1) {
+            coast->backNodeId=coord->second.point.GetId();
+          }
+
+          coast->coast[n]=coord->second.point.GetCoords();
+        }
+
+        if (!processingError) {
+          if (coast->isArea) {
+            areaCoastCount++;
+          }
+          else {
+            wayCoastCount++;
+          }
+
+          coastlines.push_back(coast);
+        }
+      }
+
+      progress.Info(NumberToString(wayCoastCount)+" way coastline(s), "+NumberToString(areaCoastCount)+" area coastline(s)");
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    progress.Info(NumberToString(wayCoastCount)+" way coastline(s), "+NumberToString(areaCoastCount)+" area coastline(s)");
 
     return true;
   }
@@ -546,56 +546,61 @@ namespace osmscout {
 
     // We do not yet know if we handle borders as ways or areas
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayDataFile::WAYS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayDataFile::WAYS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
-
-      Way way;
-
-      if (!way.Read(typeConfig,
-                    scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(wayCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (way.GetType()!=typeConfig.typeInfoIgnore &&
-          !way.GetType()->GetIgnoreSeaLand()) {
-        if (way.nodes.size()>=2) {
-          std::set<Pixel> coords;
+      for (uint32_t w=1; w<=wayCount; w++) {
+        progress.SetProgress(w,wayCount);
 
-          GetCells(level,way.nodes,coords);
+        Way way;
 
-          for (const auto& coord : coords) {
-            if (level.IsInAbsolute(coord.x,coord.y)) {
-              if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
+        if (!way.Read(typeConfig,
+                      scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(wayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        if (way.GetType()!=typeConfig.typeInfoIgnore &&
+            !way.GetType()->GetIgnoreSeaLand()) {
+          if (way.nodes.size()>=2) {
+            std::set<Pixel> coords;
+
+            GetCells(level,way.nodes,coords);
+
+            for (const auto& coord : coords) {
+              if (level.IsInAbsolute(coord.x,coord.y)) {
+                if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-          std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
+                  std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
-                level.SetStateAbsolute(coord.x,coord.y,land);
+                  level.SetStateAbsolute(coord.x,coord.y,land);
+                }
               }
             }
           }
         }
       }
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return true;
   }
 
   /**
@@ -1641,22 +1646,23 @@ namespace osmscout {
     // Read bounding box
     //
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      Preprocess::BOUNDING_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::BOUNDING_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.ReadCoord(minCoord) ||
-        !scanner.ReadCoord(maxCoord)) {
-      progress.Error("Error while reading from file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+      if (!scanner.ReadCoord(minCoord) ||
+          !scanner.ReadCoord(maxCoord)) {
+        progress.Error("Error while reading from file '"+scanner.GetFilename()+"'");
+        return false;
+      }
 
-    if (scanner.HasError() || !scanner.Close()) {
-      progress.Error("Error while reading/closing file '"+scanner.GetFilename()+"'");
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
     }
 

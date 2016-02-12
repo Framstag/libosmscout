@@ -46,6 +46,7 @@
 
 #include <osmscout/system/Assert.h>
 
+#include <osmscout/util/Exception.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/Number.h>
 
@@ -70,7 +71,7 @@ namespace osmscout {
   {
     if (IsOpen()) {
       log.Warn() << "Automatically closing FileScanner for file '" << filename << "'!";
-      Close();
+      CloseFailsafe();
     }
 
     delete [] byteBuffer;
@@ -111,22 +112,22 @@ namespace osmscout {
 #endif
   }
 
-  bool FileScanner::Open(const std::string& filename,
+  void FileScanner::Open(const std::string& filename,
                          Mode mode,
                          bool useMmap)
   {
     if (file!=NULL) {
       log.Error() << "File '" << filename << "' already opened, cannot open it again!";
-      return false;
+      throw IOException(filename,"Error opening file","File already opened");
     }
 
+    hasError=true;
     this->filename=filename;
 
     file=fopen(filename.c_str(),"rb");
 
     if (file==NULL) {
-      hasError=true;
-      return false;
+      throw IOException(filename,"Cannot open file");
     }
 
 #if defined(HAVE_FSEEKO)
@@ -134,48 +135,42 @@ namespace osmscout {
 
     if (fseeko(file,0L,SEEK_END)!=0) {
       log.Error() << "Cannot seek to end of file '" << filename << "' (" << strerror(errno) << ")";
-      hasError=true;
-      return false;
+      throw IOException(filename,"Cannot seek to end of file");
     }
 
     size=ftello(file);
 
     if (size==-1) {
       log.Error() << "Cannot get size of file '" << filename << "' (" << strerror(errno) << ")";
-      hasError=true;
-      return false;
+      throw IOException(filename,"Cannot get size of file");
     }
 
     this->size=(FileOffset)size;
 
     if (fseeko(file,0L,SEEK_SET)!=0) {
       log.Error() << "Cannot seek to start of file '" << filename << "' (" << strerror(errno) << ")";
-      hasError=true;
-      return false;
+      throw IOException(filename,"Cannot seek to start of file");
     }
 #else
     long size;
 
     if (fseek(file,0L,SEEK_END)!=0) {
       log.Error() << "Cannot seek to end of file '" << filename << "' (" << strerror(errno) << ")";
-      hasError=true;
-      return false;
+      throw OSMScoutFileIOException(filename,"Cannot seek to end of file");
     }
 
     size=ftell(file);
 
     if (size==-1) {
       log.Error() << "Cannot get size of file '" << filename << "' (" << strerror(errno) << ")";
-      hasError=true;
-      return false;
+      throw OSMScoutFileIOException(filename,"Cannot get size of file");
     }
 
     this->size=(FileOffset)size;
 
     if (fseek(file,0L,SEEK_SET)!=0) {
       log.Error() << "Cannot seek to start of file '" << filename << "' (" << strerror(errno) << ")";
-      hasError=true;
-      return false;
+      throw OSMScoutFileIOException(filename,"Cannot seek to start of file");
     }
 #endif
 
@@ -198,7 +193,7 @@ namespace osmscout {
 #endif
 
 #if defined(HAVE_MMAP)
-    if (file!=NULL && useMmap && this->size>0) {
+    if (useMmap && this->size>0) {
       FreeBuffer();
 
       buffer=(char*)mmap(NULL,size,PROT_READ,MAP_PRIVATE,fileno(file),0);
@@ -228,7 +223,7 @@ namespace osmscout {
       }
     }
 #elif  defined(__WIN32__) || defined(WIN32)
-    if (file!=NULL && useMmap && this->size>0) {
+    if (useMmap && this->size>0) {
       FreeBuffer();
 
       mmfHandle=CreateFileMapping((HANDLE)_get_osfhandle(fileno(file)),
@@ -257,18 +252,22 @@ namespace osmscout {
     }
 #endif
 
-    hasError=file==NULL;
-
-    return !hasError;
+    hasError=false;
   }
 
-  bool FileScanner::Close()
+  /**
+   * Closes the file.
+   *
+   * If the file was never opened or was already closed an exception is thrown.
+   *
+   * If closing the file fails, an exception is thrown
+   */
+  void FileScanner::Close()
   {
     bool result;
 
     if (file==NULL) {
-      log.Error() << "File '" << filename << "' already closed, cannot close it again!";
-      return false;
+      throw IOException(filename,"Cannot close file","File already closed");
     }
 
     FreeBuffer();
@@ -278,10 +277,28 @@ namespace osmscout {
     file=NULL;
 
     if (!result) {
-      log.Error() << "Cannot close file '" << filename << "' (" << strerror(errno) << ")";
+      throw IOException(filename,"Cannot close file");
+    }
+  }
+
+  /**
+   * Closes the file. Does not throw any exceptions even if an error occurs.
+   *
+   * Use this variant of Close() in cases where the file already run into errors and you just
+   * want to clean up the resources using best effort.
+   *
+   */
+  void FileScanner::CloseFailsafe()
+  {
+    if (file==NULL) {
+      return;
     }
 
-    return result;
+    FreeBuffer();
+
+    fclose(file);
+
+    file=NULL;
   }
 
   bool FileScanner::IsEOF() const

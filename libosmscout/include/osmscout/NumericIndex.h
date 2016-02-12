@@ -283,28 +283,32 @@ namespace osmscout {
     this->memoryMaped=memoryMaped;
     this->mode=mode;
 
-    if (!scanner.Open(filename,mode,memoryMaped)) {
-      log.Error() << "Cannot open index file '" << filename << "'";
-      return false;
+    try {
+       scanner.Open(filename,mode,memoryMaped);
+
+      scanner.ReadNumber(pageSize);                  // Size of one index page
+      scanner.ReadNumber(entries);                   // Number of entries in data file
+
+      scanner.Read(levels);                          // Number of levels
+      scanner.ReadFileOffset(lastLevelPageStart);    // Start of top level index page
+      scanner.ReadFileOffset(indexPageCountsOffset); // Start of list of sizes of index levels
+
+      if (scanner.HasError()) {
+        log.Error() << "Error while loading header data of index file '" << filename << "'";
+        return false;
+      }
+
+      pageCounts.resize(levels);
+
+      scanner.SetPos(indexPageCountsOffset);
+      for (size_t level=0; level<levels; level++) {
+        scanner.ReadNumber(pageCounts[level]);
+      }
     }
-
-    scanner.ReadNumber(pageSize);                  // Size of one index page
-    scanner.ReadNumber(entries);                   // Number of entries in data file
-
-    scanner.Read(levels);                          // Number of levels
-    scanner.ReadFileOffset(lastLevelPageStart);    // Start of top level index page
-    scanner.ReadFileOffset(indexPageCountsOffset); // Start of list of sizes of index levels
-
-    if (scanner.HasError()) {
-      log.Error() << "Error while loading header data of index file '" << filename << "'";
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
-    }
-
-    pageCounts.resize(levels);
-
-    scanner.SetPos(indexPageCountsOffset);
-    for (size_t level=0; level<levels; level++) {
-      scanner.ReadNumber(pageCounts[level]);
     }
 
     delete [] buffer;
@@ -322,8 +326,15 @@ namespace osmscout {
   template <class N>
   bool NumericIndex<N>::Close()
   {
-    if (scanner.IsOpen()) {
-      return scanner.Close();
+    try {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
     }
 
     return true;

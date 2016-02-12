@@ -1069,125 +1069,130 @@ namespace osmscout {
     std::vector<size_t> areaTypeCount(typeConfig->GetTypeCount(),0);
     std::vector<size_t> areaNodeTypeCount(typeConfig->GetTypeCount(),0);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      Preprocess::RAWRELS_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::RAWRELS_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Read(rawRelationCount)) {
-      progress.Error("Cannot read number of raw relations from data file");
-      return false;
-    }
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     RELAREA_TMP))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
-      return false;
-    }
-
-    writer.Write(writtenRelationCount);
-
-    for (uint32_t r=1; r<=rawRelationCount; r++) {
-      progress.SetProgress(r,rawRelationCount);
-
-      RawRelation rawRel;
-
-      if (!rawRel.Read(*typeConfig,
-                       scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(r)+" of "+
-                       NumberToString(rawRelationCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(rawRelationCount)) {
+        progress.Error("Cannot read number of raw relations from data file");
         return false;
       }
 
-      // Normally we now also skip an object because of its missing type, but
-      // in case of relations things are a little bit more difficult,
-      // type might be placed at the outer ring and not on the relation
-      // itself, we thus still need to parse the complete relation for
-      // type analysis before we can skip it.
-
-      std::string name=ResolveRelationName(featureName,
-                                           rawRel);
-      Area        rel;
-
-      if (!HandleMultipolygonRelation(parameter,
-                                      progress,
-                                      *typeConfig,
-                                      wayAreaIndexBlacklist,
-                                      coordDataFile,
-                                      wayDataFile,
-                                      relDataFile,
-                                      rawRel,
-                                      name,
-                                      rel)) {
-        continue;
-      }
-
-      bool valid=true;
-      bool dense=true;
-
-      for (const auto& ring : rel.rings) {
-        if (ring.ring!=Area::masterRingId) {
-          if (ring.nodes.size()<3) {
-            valid=false;
-
-            break;
-          }
-
-          if (!IsValidToWrite(ring.nodes)) {
-            dense=false;
-          }
-        }
-      }
-
-      if (!valid) {
-        progress.Warning("Relation "+
-                         NumberToString(rawRel.GetId())+" "+
-                         rel.GetType()->GetName()+" "+
-                         name+" has ring with less than three nodes, skipping");
-        continue;
-      }
-
-      if (!dense) {
-        progress.Warning("Relation "+
-                         NumberToString(rawRel.GetId())+" "+
-                         rel.GetType()->GetName()+" "+
-                         name+" has ring(s) which nodes are not dense enough to be written, skipping");
-        continue;
-      }
-
-      areaTypeCount[rel.GetType()->GetIndex()]++;
-      for (const auto& ring: rel.rings) {
-        if (ring.ring==Area::outerRingId) {
-          areaNodeTypeCount[rel.GetType()->GetIndex()]+=ring.nodes.size();
-        }
-      }
-
-      if (!writer.Write((uint8_t)osmRefRelation) ||
-          !writer.Write(rawRel.GetId()) ||
-          !rel.WriteImport(*typeConfig,
-                           writer)) {
+      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       RELAREA_TMP))) {
+        progress.Error("Cannot create '"+writer.GetFilename()+"'");
         return false;
       }
 
-      writtenRelationCount++;
+      writer.Write(writtenRelationCount);
+
+      for (uint32_t r=1; r<=rawRelationCount; r++) {
+        progress.SetProgress(r,rawRelationCount);
+
+        RawRelation rawRel;
+
+        if (!rawRel.Read(*typeConfig,
+                         scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(r)+" of "+
+                         NumberToString(rawRelationCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        // Normally we now also skip an object because of its missing type, but
+        // in case of relations things are a little bit more difficult,
+        // type might be placed at the outer ring and not on the relation
+        // itself, we thus still need to parse the complete relation for
+        // type analysis before we can skip it.
+
+        std::string name=ResolveRelationName(featureName,
+                                             rawRel);
+        Area        rel;
+
+        if (!HandleMultipolygonRelation(parameter,
+                                        progress,
+                                        *typeConfig,
+                                        wayAreaIndexBlacklist,
+                                        coordDataFile,
+                                        wayDataFile,
+                                        relDataFile,
+                                        rawRel,
+                                        name,
+                                        rel)) {
+          continue;
+        }
+
+        bool valid=true;
+        bool dense=true;
+
+        for (const auto& ring : rel.rings) {
+          if (ring.ring!=Area::masterRingId) {
+            if (ring.nodes.size()<3) {
+              valid=false;
+
+              break;
+            }
+
+            if (!IsValidToWrite(ring.nodes)) {
+              dense=false;
+            }
+          }
+        }
+
+        if (!valid) {
+          progress.Warning("Relation "+
+                           NumberToString(rawRel.GetId())+" "+
+                           rel.GetType()->GetName()+" "+
+                           name+" has ring with less than three nodes, skipping");
+          continue;
+        }
+
+        if (!dense) {
+          progress.Warning("Relation "+
+                           NumberToString(rawRel.GetId())+" "+
+                           rel.GetType()->GetName()+" "+
+                           name+" has ring(s) which nodes are not dense enough to be written, skipping");
+          continue;
+        }
+
+        areaTypeCount[rel.GetType()->GetIndex()]++;
+        for (const auto& ring: rel.rings) {
+          if (ring.ring==Area::outerRingId) {
+            areaNodeTypeCount[rel.GetType()->GetIndex()]+=ring.nodes.size();
+          }
+        }
+
+        if (!writer.Write((uint8_t)osmRefRelation) ||
+            !writer.Write(rawRel.GetId()) ||
+            !rel.WriteImport(*typeConfig,
+                             writer)) {
+          return false;
+        }
+
+        writtenRelationCount++;
+      }
+
+      progress.Info(NumberToString(rawRelationCount)+" relations read"+
+                    ", "+NumberToString(writtenRelationCount)+" relations written");
+
+      writer.SetPos(0);
+      writer.Write(writtenRelationCount);
+
+      if (!(writer.Close() &&
+            wayDataFile.Close() &&
+            coordDataFile.Close())) {
+        return false;
+      }
+
+      scanner.Close();
     }
-
-    progress.Info(NumberToString(rawRelationCount)+" relations read"+
-                  ", "+NumberToString(writtenRelationCount)+" relations written");
-
-    writer.SetPos(0);
-    writer.Write(writtenRelationCount);
-
-    if (!(scanner.Close() &&
-          writer.Close() &&
-          wayDataFile.Close() &&
-          coordDataFile.Close())) {
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
     }
 

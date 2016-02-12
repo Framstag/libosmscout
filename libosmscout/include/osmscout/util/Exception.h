@@ -33,16 +33,22 @@ namespace osmscout {
     virtual std::string GetDescription() const;
   };
 
-  class OSMSCOUT_API OSMScoutFileIOException : public OSMScoutException
+  class OSMSCOUT_API IOException : public OSMScoutException
   {
   private:
     std::string filename;
+    std::string semanticError;
     std::string errorMsg;
 
   public:
-    OSMScoutFileIOException(const std::string& filename);
+    IOException(const std::string& filename,
+                const std::string& semanticError);
+    IOException(const std::string& filename,
+                const std::string& semanticError,
+                const std::string& errorMsg);
 
     std::string GetFilename() const;
+    std::string GetSemanticError() const;
     std::string GetErrorMsg() const;
     std::string GetDescription() const;
   };

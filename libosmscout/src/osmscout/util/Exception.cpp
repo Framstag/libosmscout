@@ -34,24 +34,46 @@ namespace osmscout {
     return "No error";
   }
 
-  OSMScoutFileIOException::OSMScoutFileIOException(const std::string& filename)
-  : filename(filename)
+  IOException::IOException(const std::string& filename,
+                           const std::string& semanticError)
+  : filename(filename),
+    semanticError(semanticError)
   {
     errorMsg=strerror(errno);
   }
 
-  std::string OSMScoutFileIOException::GetFilename() const
+  IOException::IOException(const std::string& filename,
+                           const std::string& semanticError,
+                           const std::string& errorMsg)
+  : filename(filename),
+    semanticError(semanticError),
+    errorMsg(errorMsg)
+  {
+    // no code
+  }
+
+  std::string IOException::GetFilename() const
   {
     return filename;
   }
 
-  std::string OSMScoutFileIOException::GetErrorMsg() const
+  std::string IOException::GetErrorMsg() const
   {
     return errorMsg;
   }
 
-  std::string OSMScoutFileIOException::GetDescription() const
+  std::string IOException::GetSemanticError() const
   {
-    return "File '" + filename +"': " + errorMsg;
+    return semanticError;
+  }
+
+  std::string IOException::GetDescription() const
+  {
+    if (!errorMsg.empty()) {
+      return "File '" + filename +"' - " + semanticError+": " + errorMsg;
+    }
+    else {
+      return "File '" + filename +"' - " + semanticError;
+    }
   }
 }

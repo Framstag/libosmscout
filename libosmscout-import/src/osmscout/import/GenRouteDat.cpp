@@ -287,41 +287,41 @@ namespace osmscout {
 
     progress.Info("Reading turn restriction way ids");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayWayDataGenerator::TURNRESTR_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayWayDataGenerator::TURNRESTR_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Read(restrictionCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t r=1; r<=restrictionCount; r++) {
-      progress.SetProgress(r,restrictionCount);
-
-      TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
-
-      if (!restriction->Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(r)+" of "+
-                       NumberToString(restrictionCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(restrictionCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      wayIdOffsetMap.insert(std::make_pair(restriction->GetFrom(),0));
-      wayIdOffsetMap.insert(std::make_pair(restriction->GetTo(),0));
+      for (uint32_t r=1; r<=restrictionCount; r++) {
+        progress.SetProgress(r,restrictionCount);
 
-      nodeIdMap.insert(std::make_pair(restriction->GetVia(),0));
+        TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
+
+        if (!restriction->Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(r)+" of "+
+                         NumberToString(restrictionCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        wayIdOffsetMap.insert(std::make_pair(restriction->GetFrom(),0));
+        wayIdOffsetMap.insert(std::make_pair(restriction->GetTo(),0));
+
+        nodeIdMap.insert(std::make_pair(restriction->GetVia(),0));
+      }
+
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'turnrestr.dat'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -338,61 +338,60 @@ namespace osmscout {
 
     progress.Info("Resolving turn restriction way ids to way file offsets");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayDataFile::WAYS_IDMAP),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayDataFile::WAYS_IDMAP),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-      return false;
-    }
-
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
-
-      OSMId      wayId;
-      uint8_t    typeByte;
-      OSMRefType type;
-      FileOffset wayOffset;
-
-      if (!scanner.Read(wayId) ||
-          !scanner.Read(typeByte) ||
-          !scanner.ReadFileOffset(wayOffset)) {
-        progress.Error(std::string("Error while reading idmap file entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(wayCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      type=(OSMRefType)typeByte;
+      for (uint32_t w=1; w<=wayCount; w++) {
+        progress.SetProgress(w,wayCount);
 
-      if (type!=osmRefWay) {
-        continue;
+        OSMId      wayId;
+        uint8_t    typeByte;
+        OSMRefType type;
+        FileOffset wayOffset;
+
+        if (!scanner.Read(wayId) ||
+            !scanner.Read(typeByte) ||
+            !scanner.ReadFileOffset(wayOffset)) {
+          progress.Error(std::string("Error while reading idmap file entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(wayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        type=(OSMRefType)typeByte;
+
+        if (type!=osmRefWay) {
+          continue;
+        }
+
+        std::map<OSMId,FileOffset>::iterator idOffsetEntry;
+
+        idOffsetEntry=wayIdOffsetMap.find(wayId);
+
+        if (idOffsetEntry!=wayIdOffsetMap.end()) {
+          idOffsetEntry->second=wayOffset;
+          resolveCount++;
+        }
       }
 
-      std::map<OSMId,FileOffset>::iterator idOffsetEntry;
+      progress.Info(NumberToString(resolveCount)+" id(s) resolved");
 
-      idOffsetEntry=wayIdOffsetMap.find(wayId);
-
-      if (idOffsetEntry!=wayIdOffsetMap.end()) {
-        idOffsetEntry->second=wayOffset;
-        resolveCount++;
-      }
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
-      progress.Error(std::string("Cannot close file '")+scanner.GetFilename()+"'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    progress.Info(NumberToString(resolveCount)+" id(s) resolved");
 
     return true;
   }
@@ -455,86 +454,86 @@ namespace osmscout {
 
     progress.Info("Creating turn restriction data structures");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayWayDataGenerator::TURNRESTR_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayWayDataGenerator::TURNRESTR_DAT),
+                   FileScanner::Sequential,
+                   true);
 
-    if (!scanner.Read(restrictionCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t r=1; r<=restrictionCount; r++) {
-      progress.SetProgress(r,restrictionCount);
-
-      TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
-
-      if (!restriction->Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(r)+" of "+
-                       NumberToString(restrictionCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(restrictionCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      TurnRestrictionData                        data;
-      std::map<OSMId,FileOffset>::const_iterator idOffsetEntry;
-      std::map<OSMId,Id>::const_iterator         nodeIdEntry;
+      for (uint32_t r=1; r<=restrictionCount; r++) {
+        progress.SetProgress(r,restrictionCount);
+
+        TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
+
+        if (!restriction->Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(r)+" of "+
+                         NumberToString(restrictionCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        TurnRestrictionData                        data;
+        std::map<OSMId,FileOffset>::const_iterator idOffsetEntry;
+        std::map<OSMId,Id>::const_iterator         nodeIdEntry;
 
 
-      idOffsetEntry=wayIdOffsetMap.find(restriction->GetFrom());
+        idOffsetEntry=wayIdOffsetMap.find(restriction->GetFrom());
 
-      if (idOffsetEntry==wayIdOffsetMap.end() || idOffsetEntry->second==0) {
-        progress.Error(std::string("Error while retrieving way offset for way id ")+
-                       NumberToString(restriction->GetFrom()));
-        continue;
+        if (idOffsetEntry==wayIdOffsetMap.end() || idOffsetEntry->second==0) {
+          progress.Error(std::string("Error while retrieving way offset for way id ")+
+                         NumberToString(restriction->GetFrom()));
+          continue;
+        }
+
+        data.fromWayOffset=idOffsetEntry->second;
+
+        nodeIdEntry=nodeIdMap.find(restriction->GetVia());
+
+        if (nodeIdEntry==nodeIdMap.end() || nodeIdEntry->second==0) {
+          progress.Error(std::string("Error while retrieving node id for node OSM id ")+
+                         NumberToString(restriction->GetVia()));
+          continue;
+        }
+
+        data.viaNodeId=nodeIdEntry->second;
+
+        idOffsetEntry=wayIdOffsetMap.find(restriction->GetTo());
+
+        if (idOffsetEntry==wayIdOffsetMap.end() || idOffsetEntry->second==0) {
+          progress.Error(std::string("Error while retrieving way offset for way id ")+
+                         NumberToString(restriction->GetTo()));
+          continue;
+        }
+
+        data.toWayOffset=idOffsetEntry->second;
+
+        switch (restriction->GetType()) {
+        case TurnRestriction::Allow:
+          data.type=TurnRestrictionData::Allow;
+          break;
+        case TurnRestriction::Forbit:
+          data.type=TurnRestrictionData::Forbit;
+          break;
+        }
+
+        restrictions[data.viaNodeId].push_back(data);
       }
 
-      data.fromWayOffset=idOffsetEntry->second;
+      progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
 
-      nodeIdEntry=nodeIdMap.find(restriction->GetVia());
-
-      if (nodeIdEntry==nodeIdMap.end() || nodeIdEntry->second==0) {
-        progress.Error(std::string("Error while retrieving node id for node OSM id ")+
-                       NumberToString(restriction->GetVia()));
-        continue;
-      }
-
-      data.viaNodeId=nodeIdEntry->second;
-
-      idOffsetEntry=wayIdOffsetMap.find(restriction->GetTo());
-
-      if (idOffsetEntry==wayIdOffsetMap.end() || idOffsetEntry->second==0) {
-        progress.Error(std::string("Error while retrieving way offset for way id ")+
-                       NumberToString(restriction->GetTo()));
-        continue;
-      }
-
-      data.toWayOffset=idOffsetEntry->second;
-
-      switch (restriction->GetType()) {
-      case TurnRestriction::Allow:
-        data.type=TurnRestrictionData::Allow;
-        break;
-      case TurnRestriction::Forbit:
-        data.type=TurnRestrictionData::Forbit;
-        break;
-      }
-
-      restrictions[data.viaNodeId].push_back(data);
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'turnrestr.dat'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
 
     return true;
   }
@@ -637,124 +636,116 @@ namespace osmscout {
 
     progress.Info("Scanning ways");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayDataFile::WAYS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayDataFile::WAYS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t d=1; d<=dataCount; d++) {
-      progress.SetProgress(d,dataCount);
-
-      Way way;
-
-      if (!way.Read(typeConfig,
-                    scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (way.GetType()->GetIgnore()) {
-        continue;
-      }
+      for (uint32_t d=1; d<=dataCount; d++) {
+        progress.SetProgress(d,dataCount);
 
-      if (!GetAccess(way).CanRoute()) {
-        continue;
-      }
+        Way way;
 
-      std::set<Id> nodeIds;
+        if (!way.Read(typeConfig,
+                      scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(d)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-      for (const auto& id : way.ids) {
-        if (id==0) {
+        if (way.GetType()->GetIgnore()) {
           continue;
         }
 
-        if (nodeIds.find(id)==nodeIds.end()) {
-          nodeUseMap.SetNodeUsed(id);
+        if (!GetAccess(way).CanRoute()) {
+          continue;
+        }
 
-          nodeIds.insert(id);
+        std::set<Id> nodeIds;
+
+        for (const auto& id : way.ids) {
+          if (id==0) {
+            continue;
+          }
+
+          if (nodeIds.find(id)==nodeIds.end()) {
+            nodeUseMap.SetNodeUsed(id);
+
+            nodeIds.insert(id);
+          }
         }
       }
-    }
 
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'ways.dat'");
-      return false;
-    }
+      scanner.Close();
 
-    progress.Info("Scanning areas");
+      progress.Info("Scanning areas");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaDataFile::AREAS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t d=1; d<=dataCount; d++) {
-      progress.SetProgress(d,dataCount);
-
-      Area area;
-
-      if (!area.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (area.GetType()->GetIgnore()) {
-        continue;
-      }
+      for (uint32_t d=1; d<=dataCount; d++) {
+        progress.SetProgress(d,dataCount);
 
-      if (!area.GetType()->CanRoute()) {
-        continue;
-      }
+        Area area;
 
-      // We currently route only on simple areas, multipolygon relations
-      if (!area.IsSimple()) {
-        continue;
-      }
+        if (!area.Read(typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(d)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-      std::set<Id> nodeIds;
-
-      for (const auto& id : area.rings.front().ids) {
-        if (id==0) {
+        if (area.GetType()->GetIgnore()) {
           continue;
         }
 
-        if (nodeIds.find(id)==nodeIds.end()) {
-          nodeUseMap.SetNodeUsed(id);
+        if (!area.GetType()->CanRoute()) {
+          continue;
+        }
 
-          nodeIds.insert(id);
+        // We currently route only on simple areas, multipolygon relations
+        if (!area.IsSimple()) {
+          continue;
+        }
+
+        std::set<Id> nodeIds;
+
+        for (const auto& id : area.rings.front().ids) {
+          if (id==0) {
+            continue;
+          }
+
+          if (nodeIds.find(id)==nodeIds.end()) {
+            nodeUseMap.SetNodeUsed(id);
+
+            nodeIds.insert(id);
+          }
         }
       }
-    }
 
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'areas.dat'");
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -772,148 +763,140 @@ namespace osmscout {
 
     progress.Info("Scanning ways");
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayDataFile::WAYS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayDataFile::WAYS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t d=1; d<=dataCount; d++) {
-      progress.SetProgress(d,dataCount);
-
-      Way        way;
-      FileOffset fileOffset;
-
-      if (!scanner.GetPos(fileOffset)) {
-        progress.Error(std::string("Error while reading file offset for data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      if (!way.Read(typeConfig,
-                    scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
+      for (uint32_t d=1; d<=dataCount; d++) {
+        progress.SetProgress(d,dataCount);
 
-      if (way.GetType()->GetIgnore()) {
-        continue;
-      }
+        Way        way;
+        FileOffset fileOffset;
 
-      if (!GetAccess(way).CanRoute()) {
-        continue;
-      }
+        if (!scanner.GetPos(fileOffset)) {
+          progress.Error(std::string("Error while reading file offset for data entry ")+
+                         NumberToString(d)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-      std::set<Id> nodeIds;
+        if (!way.Read(typeConfig,
+                      scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(d)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-      for (auto id : way.ids) {
-        if (id==0) {
+        if (way.GetType()->GetIgnore()) {
           continue;
         }
 
-        if (nodeIds.find(id)==nodeIds.end()) {
-          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-            nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refWay));
-          }
-
-          nodeIds.insert(id);
-        }
-      }
-    }
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'ways.dat'");
-      return false;
-    }
-
-    progress.Info("Scanning areas");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      AreaDataFile::AREAS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
-
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t d=1; d<=dataCount; d++) {
-      progress.SetProgress(d,dataCount);
-
-      Area       area;
-      FileOffset fileOffset;
-
-      if (!scanner.GetPos(fileOffset)) {
-        progress.Error(std::string("Error while reading file offset for data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (!area.Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (area.GetType()->GetIgnore()) {
-        continue;
-      }
-
-      if (!(area.GetType()->CanRoute())) {
-        continue;
-      }
-
-      // We currently route only on simple areas, multipolygon relations
-      if (!area.IsSimple()) {
-        continue;
-      }
-
-      std::set<Id> nodeIds;
-
-      for (auto id : area.rings.front().ids) {
-        if (id==0) {
+        if (!GetAccess(way).CanRoute()) {
           continue;
         }
 
-        if (nodeIds.find(id)==nodeIds.end()) {
-          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-            nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refArea));
+        std::set<Id> nodeIds;
+
+        for (auto id : way.ids) {
+          if (id==0) {
+            continue;
           }
 
-          nodeIds.insert(id);
+          if (nodeIds.find(id)==nodeIds.end()) {
+            if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+              nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refWay));
+            }
+
+            nodeIds.insert(id);
+          }
         }
       }
-    }
 
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'areas.dat'");
+      scanner.Close();
+
+      progress.Info("Scanning areas");
+
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
+
+      if (!scanner.Read(dataCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t d=1; d<=dataCount; d++) {
+        progress.SetProgress(d,dataCount);
+
+        Area       area;
+        FileOffset fileOffset;
+
+        if (!scanner.GetPos(fileOffset)) {
+          progress.Error(std::string("Error while reading file offset for data entry ")+
+                         NumberToString(d)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        if (!area.Read(typeConfig,
+                       scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(d)+" of "+
+                         NumberToString(dataCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        if (area.GetType()->GetIgnore()) {
+          continue;
+        }
+
+        if (!(area.GetType()->CanRoute())) {
+          continue;
+        }
+
+        // We currently route only on simple areas, multipolygon relations
+        if (!area.IsSimple()) {
+          continue;
+        }
+
+        std::set<Id> nodeIds;
+
+        for (auto id : area.rings.front().ids) {
+          if (id==0) {
+            continue;
+          }
+
+          if (nodeIds.find(id)==nodeIds.end()) {
+            if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+              nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refArea));
+            }
+
+            nodeIds.insert(id);
+          }
+        }
+      }
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -1598,54 +1581,55 @@ namespace osmscout {
       return false;
     }
 
-    if (!routeScanner.Open(routeNodeWriter.GetFilename(),
-                           FileScanner::LowMemRandom,
-                           false)) {
-      progress.Error("Cannot open '"+routeScanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      routeScanner.Open(routeNodeWriter.GetFilename(),
+                        FileScanner::LowMemRandom,
+                        false);
 
-    for (size_t b=0; b<blockCount; b++) {
-      PendingRouteNodeOffsetsMap::iterator pendingRouteNodeEntry=pendingOffsetsMap.find(block[b]->first);
+      for (size_t b=0; b<blockCount; b++) {
+        PendingRouteNodeOffsetsMap::iterator pendingRouteNodeEntry=pendingOffsetsMap.find(block[b]->first);
 
-      if (pendingRouteNodeEntry==pendingOffsetsMap.end()) {
-        continue;
-      }
-
-      NodeIdOffsetMap::const_iterator pathNodeOffset=routeNodeIdOffsetMap.find(pendingRouteNodeEntry->first);
-
-      assert(pathNodeOffset!=routeNodeIdOffsetMap.end());
-
-      for (const auto& pendingOffset : pendingRouteNodeEntry->second) {
-        std::map<FileOffset,RouteNodeRef>::const_iterator routeNodeIter=routeNodeOffsetMap.find(pendingOffset.routeNodeOffset);
-        RouteNodeRef                                      routeNode;
-
-        if (routeNodeIter!=routeNodeOffsetMap.end()) {
-          routeNode=routeNodeIter->second;
-        }
-        else {
-          routeNode=std::make_shared<RouteNode>();
-
-          if (!routeScanner.SetPos(pendingOffset.routeNodeOffset)) {
-            return false;
-          }
-
-          if (!routeNode->Read(routeScanner)) {
-            return false;
-          }
-
-          routeNodeOffsetMap.insert(std::make_pair(pendingOffset.routeNodeOffset,routeNode));
+        if (pendingRouteNodeEntry==pendingOffsetsMap.end()) {
+          continue;
         }
 
-        assert(pendingOffset.index<routeNode->paths.size());
+        NodeIdOffsetMap::const_iterator pathNodeOffset=routeNodeIdOffsetMap.find(pendingRouteNodeEntry->first);
 
-        routeNode->paths[pendingOffset.index].offset=pathNodeOffset->second;
+        assert(pathNodeOffset!=routeNodeIdOffsetMap.end());
+
+        for (const auto& pendingOffset : pendingRouteNodeEntry->second) {
+          std::map<FileOffset,RouteNodeRef>::const_iterator routeNodeIter=routeNodeOffsetMap.find(pendingOffset.routeNodeOffset);
+          RouteNodeRef                                      routeNode;
+
+          if (routeNodeIter!=routeNodeOffsetMap.end()) {
+            routeNode=routeNodeIter->second;
+          }
+          else {
+            routeNode=std::make_shared<RouteNode>();
+
+            if (!routeScanner.SetPos(pendingOffset.routeNodeOffset)) {
+              return false;
+            }
+
+            if (!routeNode->Read(routeScanner)) {
+              return false;
+            }
+
+            routeNodeOffsetMap.insert(std::make_pair(pendingOffset.routeNodeOffset,routeNode));
+          }
+
+          assert(pendingOffset.index<routeNode->paths.size());
+
+          routeNode->paths[pendingOffset.index].offset=pathNodeOffset->second;
+        }
+
+        pendingOffsetsMap.erase(pendingRouteNodeEntry);
       }
 
-      pendingOffsetsMap.erase(pendingRouteNodeEntry);
+      routeScanner.Close();
     }
-
-    if (!routeScanner.Close()) {
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -1746,261 +1730,256 @@ namespace osmscout {
 
     writer.Write(writtenRouteNodeCount);
 
-    if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         WayDataFile::WAYS_DAT),
-                         FileScanner::Sequential,
-                         parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+wayScanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      WayDataFile::WAYS_DAT),
+                      FileScanner::Sequential,
+                      parameter.GetWayDataMemoryMaped());
 
-    if (!areaScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          AreaDataFile::AREAS_DAT),
-                          FileScanner::Sequential,
-                          parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open '"+areaScanner.GetFilename()+"'");
-      return false;
-    }
+      areaScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       AreaDataFile::AREAS_DAT),
+                       FileScanner::Sequential,
+                       parameter.GetWayDataMemoryMaped());
 
-    std::vector<NodeIdObjectsMap::const_iterator> block(parameter.GetRouteNodeBlockSize());
+      std::vector<NodeIdObjectsMap::const_iterator> block(parameter.GetRouteNodeBlockSize());
 
-    NodeIdObjectsMap::const_iterator node=nodeObjectsMap.begin();
-    while (node!=nodeObjectsMap.end()) {
+      NodeIdObjectsMap::const_iterator node=nodeObjectsMap.begin();
+      while (node!=nodeObjectsMap.end()) {
 
-      // Fill the current block of nodes to be processed
+        // Fill the current block of nodes to be processed
 
-      size_t blockCount=0;
+        size_t blockCount=0;
 
-      progress.Info("Loading up to " + NumberToString(block.size()) + " route nodes");
-      while (blockCount<block.size() &&
-             node!=nodeObjectsMap.end()) {
-        block[blockCount]=node;
+        progress.Info("Loading up to " + NumberToString(block.size()) + " route nodes");
+        while (blockCount<block.size() &&
+               node!=nodeObjectsMap.end()) {
+          block[blockCount]=node;
 
-        blockCount++;
-        node++;
-      }
+          blockCount++;
+          node++;
+        }
 
-      progress.Info("Loading intersecting ways and areas");
+        progress.Info("Loading intersecting ways and areas");
 
-      // Collect way ids of all ways in current block and load them
+        // Collect way ids of all ways in current block and load them
 
-      std::set<FileOffset> wayOffsets;
-      std::set<FileOffset> areaOffsets;
+        std::set<FileOffset> wayOffsets;
+        std::set<FileOffset> areaOffsets;
 
-      for (size_t b=0; b<blockCount; b++) {
-        for (const auto& ref : block[b]->second) {
-          switch (ref.GetType())
-          {
-          case refNone:
-          case refNode:
-            // Should never happen, since nodes are not routable
-            assert(false);
-            break;
-          case refWay:
-            wayOffsets.insert(ref.GetFileOffset());
-            break;
-          case refArea:
-            areaOffsets.insert(ref.GetFileOffset());
-            break;
+        for (size_t b=0; b<blockCount; b++) {
+          for (const auto& ref : block[b]->second) {
+            switch (ref.GetType())
+            {
+            case refNone:
+            case refNode:
+              // Should never happen, since nodes are not routable
+              assert(false);
+              break;
+            case refWay:
+              wayOffsets.insert(ref.GetFileOffset());
+              break;
+            case refArea:
+              areaOffsets.insert(ref.GetFileOffset());
+              break;
+            }
           }
         }
-      }
 
-      std::unordered_map<FileOffset,WayRef>  waysMap;
+        std::unordered_map<FileOffset,WayRef>  waysMap;
 
-      if (!LoadWays(typeConfig,
-                    progress,
-                    wayScanner,
-                    wayOffsets,
-                    waysMap)) {
-        return false;
-      }
-
-      wayOffsets.clear();
-
-      std::unordered_map<FileOffset,AreaRef> areasMap;
-
-      if (!LoadAreas(typeConfig,
-                     progress,
-                     areaScanner,
-                     areaOffsets,
-                     areasMap)) {
-        return false;
-      }
-
-      areaOffsets.clear();
-
-      progress.Info("Storing route nodes");
-
-      for (size_t b=0; b<blockCount; b++) {
-        NodeIdObjectsMap::const_iterator node=block[b];
-        FileOffset                       routeNodeOffset;
-
-        if (!writer.GetPos(routeNodeOffset)) {
+        if (!LoadWays(typeConfig,
+                      progress,
+                      wayScanner,
+                      wayOffsets,
+                      waysMap)) {
           return false;
         }
 
-        handledRouteNodeCount++;
-        progress.SetProgress(handledRouteNodeCount,
-                             (uint32_t)nodeObjectsMap.size());
+        wayOffsets.clear();
 
-        //
-        // Find out if any of the areas/ways at the intersection is routable
-        // for us for the given vehicle (we already only loaded those objects
-        // that are routable at all).
-        // If none of the objects is routable the complete node is not routable and
-        // we can safely drop this node from the routing graph.
-        //
+        std::unordered_map<FileOffset,AreaRef> areasMap;
 
-        if (!IsAnyRoutable(progress,
-                           node->second,
-                           waysMap,
-                           areasMap,
-                           vehicles)) {
-          continue;
-        }
-
-        RouteNode routeNode;
-
-        routeNode.id=node->first;
-
-        if (!GetRouteNodeCoord(progress,
-                               node->first,
-                               node->second,
-                               waysMap,
-                               areasMap,
-                               routeNode.coord)) {
-          continue;
-        }
-
-        //
-        // Calculate all outgoing paths
-        //
-
-        for (const auto& ref : node->second) {
-          if (ref.GetType()==refWay) {
-            const WayRef& way=waysMap[ref.GetFileOffset()];
-
-            if (!way) {
-              progress.Error("Error while loading way at offset "+
-                             NumberToString(ref.GetFileOffset()) +
-                             " (Internal error?)");
-              continue;
-            }
-
-            if (!GetAccess(*way).CanRoute(vehicles)) {
-              continue;
-            }
-
-            uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
-                                                                       way->GetType(),
-                                                                       GetMaxSpeed(*way),
-                                                                       GetGrade(*way));
-
-            if (way->IsCircular()) {
-              // Circular way routing (similar to current area routing, but respecting isOneway())
-              CalculateCircularWayPaths(routeNode,
-                                        *way,
-                                        objectVariantIndex,
-                                        routeNodeOffset,
-                                        nodeObjectsMap,
-                                        routeNodeIdOffsetMap,
-                                        pendingOffsetsMap);
-            }
-            else {
-              // Normal way routing
-              CalculateWayPaths(routeNode,
-                                *way,
-                                objectVariantIndex,
-                                routeNodeOffset,
-                                nodeObjectsMap,
-                                routeNodeIdOffsetMap,
-                                pendingOffsetsMap);
-            }
-          }
-          else if (ref.GetType()==refArea) {
-            const AreaRef& area=areasMap[ref.GetFileOffset()];
-
-            if (!area) {
-              progress.Error("Error while loading area at offset "+
-                             NumberToString(ref.GetFileOffset()) +
-                             " (Internal error?)");
-              continue;
-            }
-
-            if (!area->GetType()->CanRoute()) {
-              continue;
-            }
-
-            uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
-                                                                       area->GetType(),
-                                                                       0,
-                                                                       1);
-
-            routeNode.AddObject(ref,
-                                objectVariantIndex);
-
-            CalculateAreaPaths(routeNode,
-                               *area,
-                               objectVariantIndex,
-                               routeNodeOffset,
-                               nodeObjectsMap,
-                               routeNodeIdOffsetMap,
-                               pendingOffsetsMap);
-          }
-        }
-
-        FillRoutePathExcludes(routeNode,
-                              node->second,
-                              restrictions);
-
-        routeNodeIdOffsetMap.insert(std::make_pair(node->first,routeNodeOffset));
-
-        if (routeNode.paths.size()==1) {
-          simpleNodesCount++;
-        }
-
-        objectCount+=routeNode.objects.size();
-        pathCount+=routeNode.paths.size();
-        excludeCount+=routeNode.excludes.size();
-
-        if (!routeNode.Write(writer)) {
-          progress.Error(std::string("Error while writing route node to file '")+
-                         writer.GetFilename()+"'");
+        if (!LoadAreas(typeConfig,
+                       progress,
+                       areaScanner,
+                       areaOffsets,
+                       areasMap)) {
           return false;
         }
 
-        writtenRouteNodeCount++;
+        areaOffsets.clear();
+
+        progress.Info("Storing route nodes");
+
+        for (size_t b=0; b<blockCount; b++) {
+          NodeIdObjectsMap::const_iterator node=block[b];
+          FileOffset                       routeNodeOffset;
+
+          if (!writer.GetPos(routeNodeOffset)) {
+            return false;
+          }
+
+          handledRouteNodeCount++;
+          progress.SetProgress(handledRouteNodeCount,
+                               (uint32_t)nodeObjectsMap.size());
+
+          //
+          // Find out if any of the areas/ways at the intersection is routable
+          // for us for the given vehicle (we already only loaded those objects
+          // that are routable at all).
+          // If none of the objects is routable the complete node is not routable and
+          // we can safely drop this node from the routing graph.
+          //
+
+          if (!IsAnyRoutable(progress,
+                             node->second,
+                             waysMap,
+                             areasMap,
+                             vehicles)) {
+            continue;
+          }
+
+          RouteNode routeNode;
+
+          routeNode.id=node->first;
+
+          if (!GetRouteNodeCoord(progress,
+                                 node->first,
+                                 node->second,
+                                 waysMap,
+                                 areasMap,
+                                 routeNode.coord)) {
+            continue;
+          }
+
+          //
+          // Calculate all outgoing paths
+          //
+
+          for (const auto& ref : node->second) {
+            if (ref.GetType()==refWay) {
+              const WayRef& way=waysMap[ref.GetFileOffset()];
+
+              if (!way) {
+                progress.Error("Error while loading way at offset "+
+                               NumberToString(ref.GetFileOffset()) +
+                               " (Internal error?)");
+                continue;
+              }
+
+              if (!GetAccess(*way).CanRoute(vehicles)) {
+                continue;
+              }
+
+              uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
+                                                                         way->GetType(),
+                                                                         GetMaxSpeed(*way),
+                                                                         GetGrade(*way));
+
+              if (way->IsCircular()) {
+                // Circular way routing (similar to current area routing, but respecting isOneway())
+                CalculateCircularWayPaths(routeNode,
+                                          *way,
+                                          objectVariantIndex,
+                                          routeNodeOffset,
+                                          nodeObjectsMap,
+                                          routeNodeIdOffsetMap,
+                                          pendingOffsetsMap);
+              }
+              else {
+                // Normal way routing
+                CalculateWayPaths(routeNode,
+                                  *way,
+                                  objectVariantIndex,
+                                  routeNodeOffset,
+                                  nodeObjectsMap,
+                                  routeNodeIdOffsetMap,
+                                  pendingOffsetsMap);
+              }
+            }
+            else if (ref.GetType()==refArea) {
+              const AreaRef& area=areasMap[ref.GetFileOffset()];
+
+              if (!area) {
+                progress.Error("Error while loading area at offset "+
+                               NumberToString(ref.GetFileOffset()) +
+                               " (Internal error?)");
+                continue;
+              }
+
+              if (!area->GetType()->CanRoute()) {
+                continue;
+              }
+
+              uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
+                                                                         area->GetType(),
+                                                                         0,
+                                                                         1);
+
+              routeNode.AddObject(ref,
+                                  objectVariantIndex);
+
+              CalculateAreaPaths(routeNode,
+                                 *area,
+                                 objectVariantIndex,
+                                 routeNodeOffset,
+                                 nodeObjectsMap,
+                                 routeNodeIdOffsetMap,
+                                 pendingOffsetsMap);
+            }
+          }
+
+          FillRoutePathExcludes(routeNode,
+                                node->second,
+                                restrictions);
+
+          routeNodeIdOffsetMap.insert(std::make_pair(node->first,routeNodeOffset));
+
+          if (routeNode.paths.size()==1) {
+            simpleNodesCount++;
+          }
+
+          objectCount+=routeNode.objects.size();
+          pathCount+=routeNode.paths.size();
+          excludeCount+=routeNode.excludes.size();
+
+          if (!routeNode.Write(writer)) {
+            progress.Error(std::string("Error while writing route node to file '")+
+                           writer.GetFilename()+"'");
+            return false;
+          }
+
+          writtenRouteNodeCount++;
+        }
+
+        writer.Flush();
+
+        //
+        // A route node stores the fileOffset of all other route nodes (destinations) it can route to.
+        // However if the destination route node is not yet stored, we do not have a file offset yet. Route nodes
+        // we do not have a file offset for yet, are stored in the pendingOffsetsMap map.
+        // So for every blocked store we are looking if any node in the block is in the pendingOffsetsMap, reload
+        // the requesting route node, store the new offsets and write the route node back.
+
+        if (!HandlePendingOffsets(progress,
+                                  routeNodeIdOffsetMap,
+                                  pendingOffsetsMap,
+                                  writer,
+                                  block,
+                                  blockCount)) {
+          return false;
+        }
       }
 
-      writer.Flush();
+      assert(pendingOffsetsMap.empty());
 
-      //
-      // A route node stores the fileOffset of all other route nodes (destinations) it can route to.
-      // However if the destination route node is not yet stored, we do not have a file offset yet. Route nodes
-      // we do not have a file offset for yet, are stored in the pendingOffsetsMap map.
-      // So for every blocked store we are looking if any node in the block is in the pendingOffsetsMap, reload
-      // the requesting route node, store the new offsets and write the route node back.
-
-      if (!HandlePendingOffsets(progress,
-                                routeNodeIdOffsetMap,
-                                pendingOffsetsMap,
-                                writer,
-                                block,
-                                blockCount)) {
-        return false;
-      }
+      wayScanner.Close();
+      areaScanner.Close();
     }
-
-    assert(pendingOffsetsMap.empty());
-
-    if (!wayScanner.Close()) {
-      progress.Error("Cannot close file '"+wayScanner.GetFilename()+"'");
-      return false;
-    }
-
-    if (!areaScanner.Close()) {
-      progress.Error("Cannot close file '"+areaScanner.GetFilename()+"'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      wayScanner.CloseFailsafe();
+      areaScanner.CloseFailsafe();
       return false;
     }
 

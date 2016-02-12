@@ -66,10 +66,21 @@ namespace osmscout {
     // no code
   }
 
+  AreaWayIndex::~AreaWayIndex()
+  {
+    Close();
+  }
+
   void AreaWayIndex::Close()
   {
-    if (scanner.IsOpen()) {
-      scanner.Close();
+    try  {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
     }
   }
 
@@ -78,55 +89,58 @@ namespace osmscout {
   {
     datafilename=AppendFileToDir(path,AREA_WAY_IDX);
 
-    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
-      return false;
-    }
+    try {
+      scanner.Open(datafilename,FileScanner::FastRandom,true);
 
-    uint32_t indexEntries;
+      uint32_t indexEntries;
 
-    scanner.Read(indexEntries);
+      scanner.Read(indexEntries);
 
-    wayTypeData.reserve(indexEntries);
+      wayTypeData.reserve(indexEntries);
 
-    for (size_t i=0; i<indexEntries; i++) {
-      TypeId typeId;
+      for (size_t i=0; i<indexEntries; i++) {
+        TypeId typeId;
 
-      scanner.ReadTypeId(typeId,
-                         typeConfig->GetWayTypeIdBytes());
+        scanner.ReadTypeId(typeId,
+                           typeConfig->GetWayTypeIdBytes());
 
-      TypeData data;
+        TypeData data;
 
-      data.type=typeConfig->GetWayTypeInfo(typeId);
+        data.type=typeConfig->GetWayTypeInfo(typeId);
 
-      scanner.ReadFileOffset(data.bitmapOffset);
+        scanner.ReadFileOffset(data.bitmapOffset);
 
-      if (data.bitmapOffset>0) {
-        scanner.Read(data.dataOffsetBytes);
+        if (data.bitmapOffset>0) {
+          scanner.Read(data.dataOffsetBytes);
 
-        scanner.ReadNumber(data.indexLevel);
+          scanner.ReadNumber(data.indexLevel);
 
-        scanner.ReadNumber(data.cellXStart);
-        scanner.ReadNumber(data.cellXEnd);
-        scanner.ReadNumber(data.cellYStart);
-        scanner.ReadNumber(data.cellYEnd);
+          scanner.ReadNumber(data.cellXStart);
+          scanner.ReadNumber(data.cellXEnd);
+          scanner.ReadNumber(data.cellYStart);
+          scanner.ReadNumber(data.cellYEnd);
 
-        data.cellXCount=data.cellXEnd-data.cellXStart+1;
-        data.cellYCount=data.cellYEnd-data.cellYStart+1;
+          data.cellXCount=data.cellXEnd-data.cellXStart+1;
+          data.cellYCount=data.cellYEnd-data.cellYStart+1;
 
-        data.cellWidth=cellDimension[data.indexLevel].width;
-        data.cellHeight=cellDimension[data.indexLevel].height;
+          data.cellWidth=cellDimension[data.indexLevel].width;
+          data.cellHeight=cellDimension[data.indexLevel].height;
 
-        data.minLon=data.cellXStart*data.cellWidth-180.0;
-        data.maxLon=(data.cellXEnd+1)*data.cellWidth-180.0;
-        data.minLat=data.cellYStart*data.cellHeight-90.0;
-        data.maxLat=(data.cellYEnd+1)*data.cellHeight-90.0;
+          data.minLon=data.cellXStart*data.cellWidth-180.0;
+          data.maxLon=(data.cellXEnd+1)*data.cellWidth-180.0;
+          data.minLat=data.cellYStart*data.cellHeight-90.0;
+          data.maxLat=(data.cellYEnd+1)*data.cellHeight-90.0;
+        }
+
+        wayTypeData.push_back(data);
       }
 
-      wayTypeData.push_back(data);
+      return !scanner.HasError();
     }
-
-    return !scanner.HasError();
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   bool AreaWayIndex::GetOffsets(const TypeData& typeData,

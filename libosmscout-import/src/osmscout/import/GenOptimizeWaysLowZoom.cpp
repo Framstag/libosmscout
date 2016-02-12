@@ -682,128 +682,133 @@ namespace osmscout
 
     magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      WayDataFile::WAYS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+scanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   WayDataFile::WAYS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetWayDataMemoryMaped());
 
-    std::set<TypeInfoRef>           typesToProcess(types);
-    std::vector<std::list<WayRef> > allWays(typeConfig.GetTypeCount());
+      std::set<TypeInfoRef>           typesToProcess(types);
+      std::vector<std::list<WayRef> > allWays(typeConfig.GetTypeCount());
 
-    while (true) {
-      //
-      // Load type data
-      //
+      while (true) {
+        //
+        // Load type data
+        //
 
-      if (!GetWays(typeConfig,
-                   parameter,
-                   progress,
-                   scanner,
-                   typesToProcess,
-                   allWays)) {
-        return false;
-      }
-
-      for (size_t type=0; type<allWays.size(); type++) {
-        if (allWays[type].empty()) {
-          continue;
+        if (!GetWays(typeConfig,
+                     parameter,
+                     progress,
+                     scanner,
+                     typesToProcess,
+                     allWays)) {
+          return false;
         }
 
-        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName());
+        for (size_t type=0; type<allWays.size(); type++) {
+          if (allWays[type].empty()) {
+            continue;
+          }
 
-        //
-        // Join ways
-        //
+          progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName());
 
-        std::list<WayRef> newWays;
+          //
+          // Join ways
+          //
 
-        MergeWays(progress,
-                  allWays[type],
-                  newWays);
+          std::list<WayRef> newWays;
 
-        allWays[type].clear();
+          MergeWays(progress,
+                    allWays[type],
+                    newWays);
 
-        if (newWays.empty()) {
-          continue;
-        }
+          allWays[type].clear();
 
-        //
-        // Transform/Optimize the way and store it
-        //
+          if (newWays.empty()) {
+            continue;
+          }
 
-        for (uint32_t level=parameter.GetOptimizationMinMag();
-             level<=parameter.GetOptimizationMaxMag();
-             level++) {
-          Magnification     magnification; // Magnification, we optimize for
-          std::list<WayRef> optimizedWays;
+          //
+          // Transform/Optimize the way and store it
+          //
 
-          magnification.SetLevel(level);
+          for (uint32_t level=parameter.GetOptimizationMinMag();
+               level<=parameter.GetOptimizationMaxMag();
+               level++) {
+            Magnification     magnification; // Magnification, we optimize for
+            std::list<WayRef> optimizedWays;
 
-          // TODO: Wee need to make import parameters for the width and the height
-          OptimizeWays(newWays,
-                       optimizedWays,
-                       1280,768,
-                       dpi,
-                       pixel,
-                       magnification,
-                       parameter.GetOptimizationWayMethod());
+            magnification.SetLevel(level);
 
-          if (optimizedWays.empty()) {
-            progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index bitmap generated");
+            // TODO: Wee need to make import parameters for the width and the height
+            OptimizeWays(newWays,
+                         optimizedWays,
+                         1280,768,
+                         dpi,
+                         pixel,
+                         magnification,
+                         parameter.GetOptimizationWayMethod());
+
+            if (optimizedWays.empty()) {
+              progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index bitmap generated");
+
+              TypeData typeData;
+
+              typeData.type=typeConfig.GetTypeInfo(type);
+              typeData.optLevel=level;
+
+              typesData.push_back(typeData);
+              continue;
+            }
 
             TypeData typeData;
 
             typeData.type=typeConfig.GetTypeInfo(type);
             typeData.optLevel=level;
 
-            typesData.push_back(typeData);
-            continue;
-          }
+            GetWayIndexLevel(parameter,
+                             optimizedWays,
+                             typeData);
 
-          TypeData typeData;
 
-          typeData.type=typeConfig.GetTypeInfo(type);
-          typeData.optLevel=level;
+            FileOffsetFileOffsetMap offsets;
 
-          GetWayIndexLevel(parameter,
+            if (!WriteWays(typeConfig,
+                           writer,
                            optimizedWays,
-                           typeData);
+                           offsets)) {
+              return false;
+            }
 
+            if (!WriteWayBitmap(progress,
+                                writer,
+                                optimizedWays,
+                                offsets,
+                                typeData)) {
+              return false;
+            }
 
-          FileOffsetFileOffsetMap offsets;
+            typesData.push_back(typeData);
 
-          if (!WriteWays(typeConfig,
-                         writer,
-                         optimizedWays,
-                         offsets)) {
-            return false;
+            optimizedWays.clear();
           }
 
-          if (!WriteWayBitmap(progress,
-                              writer,
-                              optimizedWays,
-                              offsets,
-                              typeData)) {
-            return false;
-          }
-
-          typesData.push_back(typeData);
-
-          optimizedWays.clear();
+          newWays.clear();
         }
 
-        newWays.clear();
+        if (typesToProcess.empty()) {
+          break;
+        }
       }
 
-      if (typesToProcess.empty()) {
-        break;
-      }
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return true;
   }
 
   bool OptimizeWaysLowZoomGenerator::Import(const TypeConfigRef& typeConfig,

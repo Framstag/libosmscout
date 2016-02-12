@@ -41,10 +41,21 @@ namespace osmscout {
     // no code
   }
 
+  AreaAreaIndex::~AreaAreaIndex()
+  {
+    Close();
+  }
+
   void AreaAreaIndex::Close()
   {
-    if (scanner.IsOpen()) {
-      scanner.Close();
+    try  {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
     }
   }
 
@@ -238,22 +249,25 @@ namespace osmscout {
   {
     datafilename=AppendFileToDir(path,AREA_AREA_IDX);
 
-    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
+    try {
+      scanner.Open(datafilename,FileScanner::FastRandom,true);
+
+      if (!scanner.ReadNumber(maxLevel)) {
+        log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      if (!scanner.ReadFileOffset(topLevelOffset)) {
+        log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      return !scanner.HasError();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    if (!scanner.ReadNumber(maxLevel)) {
-      log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    if (!scanner.ReadFileOffset(topLevelOffset)) {
-      log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    return !scanner.HasError();
   }
 
   /**

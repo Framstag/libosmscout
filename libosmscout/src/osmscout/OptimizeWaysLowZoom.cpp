@@ -44,9 +44,7 @@ namespace osmscout
 
   OptimizeWaysLowZoom::~OptimizeWaysLowZoom()
   {
-    if (scanner.IsOpen()) {
-      Close();
-    }
+    Close();
   }
 
   bool OptimizeWaysLowZoom::ReadTypeData(FileScanner& scanner,
@@ -82,59 +80,69 @@ namespace osmscout
     this->typeConfig=typeConfig;
     datafilename=AppendFileToDir(path,FILE_WAYSOPT_DAT);
 
-    if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
-      return false;
-    }
+    try {
+      scanner.Open(datafilename,FileScanner::LowMemRandom,true);
 
-    FileOffset indexOffset;
+      FileOffset indexOffset;
 
-    if (!scanner.ReadFileOffset(indexOffset)) {
-      log.Error() << "Cannot read index offset from file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    if (!scanner.SetPos(indexOffset)) {
-      log.Error() << "Cannot goto to start of index at position " << indexOffset << " in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    uint32_t optimizationMaxMag;
-    uint32_t wayTypeCount;
-
-    scanner.Read(optimizationMaxMag);
-    scanner.Read(wayTypeCount);
-
-    if (scanner.HasError()) {
-      return false;
-    }
-
-    magnification=pow(2.0,(int)optimizationMaxMag);
-
-    for (size_t i=1; i<=wayTypeCount; i++) {
-      TypeId typeId;
-
-      scanner.Read(typeId);
-
-      TypeInfoRef type=typeConfig->GetWayTypeInfo(typeId);
-
-      TypeData typeData;
-
-      if (!ReadTypeData(scanner,
-                        typeData)) {
+      if (!scanner.ReadFileOffset(indexOffset)) {
+        log.Error() << "Cannot read index offset from file '" << scanner.GetFilename() << "'";
         return false;
       }
 
-      wayTypesData[type].push_back(typeData);
-    }
+      if (!scanner.SetPos(indexOffset)) {
+        log.Error() << "Cannot goto to start of index at position " << indexOffset << " in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
 
-    return !scanner.HasError();
+      uint32_t optimizationMaxMag;
+      uint32_t wayTypeCount;
+
+      scanner.Read(optimizationMaxMag);
+      scanner.Read(wayTypeCount);
+
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      magnification=pow(2.0,(int)optimizationMaxMag);
+
+      for (size_t i=1; i<=wayTypeCount; i++) {
+        TypeId typeId;
+
+        scanner.Read(typeId);
+
+        TypeInfoRef type=typeConfig->GetWayTypeInfo(typeId);
+
+        TypeData typeData;
+
+        if (!ReadTypeData(scanner,
+                          typeData)) {
+          return false;
+        }
+
+        wayTypesData[type].push_back(typeData);
+      }
+
+      return !scanner.HasError();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   bool OptimizeWaysLowZoom::Close()
   {
-    if (scanner.IsOpen()) {
-      return scanner.Close();
+    try  {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
     }
 
     return true;

@@ -30,6 +30,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>
@@ -70,71 +71,72 @@ namespace osmscout {
     FileScanner scanner;
     FileWriter  writer;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      Preprocess::RAWNODES_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetRawNodeDataMemoryMaped())) {
-      progress.Error("Cannot open 'rawnodes.dat'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::RAWNODES_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetRawNodeDataMemoryMaped());
 
-    if (!scanner.Read(rawNodeCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     NODES_TMP))) {
-      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
-      return false;
-    }
-
-    writer.Write(nodesWrittenCount);
-
-    for (uint32_t n=1; n<=rawNodeCount; n++) {
-      progress.SetProgress(n,rawNodeCount);
-
-      RawNode rawNode;
-      Node    node;
-
-      if (!rawNode.Read(*typeConfig,
-                        scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(rawNodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
+      if (!scanner.Read(rawNodeCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      nodesReadCount++;
-
-      if (rawNode.GetType()->GetIgnore()) {
-        continue;
-      }
-
-      node.SetFeatures(rawNode.GetFeatureValueBuffer());
-      node.SetCoords(rawNode.GetCoords());
-
-      FileOffset fileOffset;
-
-      if (!writer.GetPos(fileOffset)) {
-        progress.Error(std::string("Error while reading current fileOffset in file '")+
-                       writer.GetFilename()+"'");
+      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       NODES_TMP))) {
+        progress.Error("Cannot create file '"+writer.GetFilename()+"'");
         return false;
       }
 
-      if (!writer.Write((uint8_t)osmRefNode) ||
-          !writer.Write(rawNode.GetId()) ||
-          !node.Write(*typeConfig,
-                      writer)) {
-        return false;
+      writer.Write(nodesWrittenCount);
+
+      for (uint32_t n=1; n<=rawNodeCount; n++) {
+        progress.SetProgress(n,rawNodeCount);
+
+        RawNode rawNode;
+        Node    node;
+
+        if (!rawNode.Read(*typeConfig,
+                          scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(n)+" of "+
+                         NumberToString(rawNodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        nodesReadCount++;
+
+        if (rawNode.GetType()->GetIgnore()) {
+          continue;
+        }
+
+        node.SetFeatures(rawNode.GetFeatureValueBuffer());
+        node.SetCoords(rawNode.GetCoords());
+
+        FileOffset fileOffset;
+
+        if (!writer.GetPos(fileOffset)) {
+          progress.Error(std::string("Error while reading current fileOffset in file '")+
+                         writer.GetFilename()+"'");
+          return false;
+        }
+
+        if (!writer.Write((uint8_t)osmRefNode) ||
+            !writer.Write(rawNode.GetId()) ||
+            !node.Write(*typeConfig,
+                        writer)) {
+          return false;
+        }
+
+        nodesWrittenCount++;
       }
 
-      nodesWrittenCount++;
+      scanner.Close();
     }
-
-    if (!scanner.Close()) {
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 

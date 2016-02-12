@@ -188,107 +188,112 @@ namespace osmscout {
     maxLevel=0;
     wayTypeData.resize(typeConfig.GetTypeCount());
 
-    if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         WayDataFile::WAYS_DAT),
-                         FileScanner::Sequential,
-                         parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+wayScanner.GetFilename()+"'");
-      return false;
-    }
+    try {
+      wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      WayDataFile::WAYS_DAT),
+                      FileScanner::Sequential,
+                      parameter.GetWayDataMemoryMaped());
 
-    remainingWayTypes.Set(typeConfig.GetWayTypes());
+      remainingWayTypes.Set(typeConfig.GetWayTypes());
 
-    level=parameter.GetAreaWayMinMag();
-    while (!remainingWayTypes.Empty() &&
-           level<=parameter.GetAreaWayIndexMaxLevel()) {
-      uint32_t                   wayCount=0;
-      TypeInfoSet                currentWayTypes(remainingWayTypes);
-      std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypeCount());
+      level=parameter.GetAreaWayMinMag();
+      while (!remainingWayTypes.Empty() &&
+             level<=parameter.GetAreaWayIndexMaxLevel()) {
+        uint32_t                   wayCount=0;
+        TypeInfoSet                currentWayTypes(remainingWayTypes);
+        std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypeCount());
 
-      progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
+        progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
 
-      wayScanner.GotoBegin();
+        wayScanner.GotoBegin();
 
-      if (!wayScanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      Way way;
-
-      for (uint32_t w=1; w<=wayCount; w++) {
-        progress.SetProgress(w,wayCount);
-
-        if (!way.Read(typeConfig,
-                      wayScanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         wayScanner.GetFilename()+"'");
+        if (!wayScanner.Read(wayCount)) {
+          progress.Error("Error while reading number of data entries in file");
           return false;
         }
 
-        // Count number of entries per current type and coordinate
-        if (!currentWayTypes.IsSet(way.GetType())) {
-          continue;
-        }
+        Way way;
 
-        GeoBox boundingBox;
+        for (uint32_t w=1; w<=wayCount; w++) {
+          progress.SetProgress(w,wayCount);
 
-        way.GetBoundingBox(boundingBox);
+          if (!way.Read(typeConfig,
+                        wayScanner)) {
+            progress.Error(std::string("Error while reading data entry ")+
+                           NumberToString(w)+" of "+
+                           NumberToString(wayCount)+
+                           " in file '"+
+                           wayScanner.GetFilename()+"'");
+            return false;
+          }
 
-        //
-        // Calculate minimum and maximum tile ids that are covered
-        // by the way
-        // Renormalized coordinate space (everything is >=0)
-        //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
+          // Count number of entries per current type and coordinate
+          if (!currentWayTypes.IsSet(way.GetType())) {
+            continue;
+          }
 
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[way.GetType()->GetIndex()][Pixel(x,y)]++;
+          GeoBox boundingBox;
+
+          way.GetBoundingBox(boundingBox);
+
+          //
+          // Calculate minimum and maximum tile ids that are covered
+          // by the way
+          // Renormalized coordinate space (everything is >=0)
+          //
+          uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
+          uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
+          uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
+          uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
+
+          for (uint32_t y=minyc; y<=maxyc; y++) {
+            for (uint32_t x=minxc; x<=maxxc; x++) {
+              cellFillCount[way.GetType()->GetIndex()][Pixel(x,y)]++;
+            }
           }
         }
-      }
 
-      // Check if cell fill for current type is in defined limits
-      for (auto &type : currentWayTypes) {
-        size_t i=type->GetIndex();
+        // Check if cell fill for current type is in defined limits
+        for (auto &type : currentWayTypes) {
+          size_t i=type->GetIndex();
 
-        CalculateStatistics(level,
-                            wayTypeData[i],
-                            cellFillCount[i]);
+          CalculateStatistics(level,
+                              wayTypeData[i],
+                              cellFillCount[i]);
 
-        if (!FitsIndexCriteria(parameter,
-                               progress,
-                               *typeConfig.GetTypeInfo(i),
-                               wayTypeData[i],
-                               cellFillCount[i])) {
-          if (level<parameter.GetAreaWayIndexMaxLevel()) {
-            currentWayTypes.Remove(type);
-          }
-          else {
-            progress.Warning(typeConfig.GetTypeInfo(i)->GetName()+" has too many index cells, that area filled over the limit");
+          if (!FitsIndexCriteria(parameter,
+                                 progress,
+                                 *typeConfig.GetTypeInfo(i),
+                                 wayTypeData[i],
+                                 cellFillCount[i])) {
+            if (level<parameter.GetAreaWayIndexMaxLevel()) {
+              currentWayTypes.Remove(type);
+            }
+            else {
+              progress.Warning(typeConfig.GetTypeInfo(i)->GetName()+" has too many index cells, that area filled over the limit");
+            }
           }
         }
+
+        for (const auto &type : currentWayTypes) {
+          maxLevel=std::max(maxLevel,level);
+
+          progress.Info("Type "+type->GetName()+", "+NumberToString(wayTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(wayTypeData[type->GetIndex()].indexEntries)+" objects");
+
+          remainingWayTypes.Remove(type);
+        }
+
+        level++;
       }
 
-      for (const auto &type : currentWayTypes) {
-        maxLevel=std::max(maxLevel,level);
-
-        progress.Info("Type "+type->GetName()+", "+NumberToString(wayTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(wayTypeData[type->GetIndex()].indexEntries)+" objects");
-
-        remainingWayTypes.Remove(type);
-      }
-
-      level++;
+      wayScanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !wayScanner.HasError() && wayScanner.Close();
+    return true;
   }
 
   /**
@@ -429,7 +434,6 @@ namespace osmscout {
                                      const ImportParameter& parameter,
                                      Progress& progress)
   {
-    FileScanner           wayScanner;
     FileWriter            writer;
     std::vector<TypeData> wayTypeData;
     size_t                maxLevel;
@@ -497,100 +501,105 @@ namespace osmscout {
       }
     }
 
-    if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         WayDataFile::WAYS_DAT),
-                         FileScanner::Sequential,
-                         parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+wayScanner.GetFilename()+"'");
-      return false;
-    }
+    FileScanner wayScanner;
 
-    for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
-      TypeInfoSet indexTypes(*typeConfig);
-      uint32_t    wayCount;
+    try {
+      wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      WayDataFile::WAYS_DAT),
+                      FileScanner::Sequential,
+                      parameter.GetWayDataMemoryMaped());
 
-      wayScanner.GotoBegin();
+      for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
+        TypeInfoSet indexTypes(*typeConfig);
+        uint32_t    wayCount;
 
-      for (const auto &type : typeConfig->GetWayTypes()) {
-        if (wayTypeData[type->GetIndex()].HasEntries() &&
-            wayTypeData[type->GetIndex()].indexLevel==l) {
-          indexTypes.Set(type);
-        }
-      }
+        wayScanner.GotoBegin();
 
-      if (indexTypes.Empty()) {
-        continue;
-      }
-
-      progress.Info("Scanning ways for index level "+NumberToString(l));
-
-      std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
-
-      if (!wayScanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      Way way;
-
-      for (uint32_t w=1; w<=wayCount; w++) {
-        progress.SetProgress(w,wayCount);
-
-        FileOffset offset;
-
-        wayScanner.GetPos(offset);
-
-        if (!way.Read(*typeConfig,
-                      wayScanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         wayScanner.GetFilename()+"'");
-          return false;
+        for (const auto &type : typeConfig->GetWayTypes()) {
+          if (wayTypeData[type->GetIndex()].HasEntries() &&
+              wayTypeData[type->GetIndex()].indexLevel==l) {
+            indexTypes.Set(type);
+          }
         }
 
-        if (!indexTypes.IsSet(way.GetType())) {
+        if (indexTypes.Empty()) {
           continue;
         }
 
-        GeoBox boundingBox;
+        progress.Info("Scanning ways for index level "+NumberToString(l));
 
-        way.GetBoundingBox(boundingBox);
+        std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
 
-        //
-        // Calculate minimum and maximum tile ids that are covered
-        // by the way
-        // Renormalized coordinate space (everything is >=0)
-        //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[l].width);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[l].width);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[l].height);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[l].height);
+        if (!wayScanner.Read(wayCount)) {
+          progress.Error("Error while reading number of data entries in file");
+          return false;
+        }
 
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            typeCellOffsets[way.GetType()->GetIndex()][Pixel(x,y)].push_back(offset);
+        Way way;
+
+        for (uint32_t w=1; w<=wayCount; w++) {
+          progress.SetProgress(w,wayCount);
+
+          FileOffset offset;
+
+          wayScanner.GetPos(offset);
+
+          if (!way.Read(*typeConfig,
+                        wayScanner)) {
+            progress.Error(std::string("Error while reading data entry ")+
+                           NumberToString(w)+" of "+
+                           NumberToString(wayCount)+
+                           " in file '"+
+                           wayScanner.GetFilename()+"'");
+            return false;
+          }
+
+          if (!indexTypes.IsSet(way.GetType())) {
+            continue;
+          }
+
+          GeoBox boundingBox;
+
+          way.GetBoundingBox(boundingBox);
+
+          //
+          // Calculate minimum and maximum tile ids that are covered
+          // by the way
+          // Renormalized coordinate space (everything is >=0)
+          //
+          uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[l].width);
+          uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[l].width);
+          uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[l].height);
+          uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[l].height);
+
+          for (uint32_t y=minyc; y<=maxyc; y++) {
+            for (uint32_t x=minxc; x<=maxxc; x++) {
+              typeCellOffsets[way.GetType()->GetIndex()][Pixel(x,y)].push_back(offset);
+            }
+          }
+        }
+
+        for (const auto &type : indexTypes) {
+          size_t index=type->GetIndex();
+
+          if (!WriteBitmap(progress,
+                           writer,
+                           *typeConfig->GetTypeInfo(index),
+                           wayTypeData[index],
+                           typeCellOffsets[index])) {
+            return false;
           }
         }
       }
 
-      for (const auto &type : indexTypes) {
-        size_t index=type->GetIndex();
-
-        if (!WriteBitmap(progress,
-                         writer,
-                         *typeConfig->GetTypeInfo(index),
-                         wayTypeData[index],
-                         typeCellOffsets[index])) {
-          return false;
-        }
-      }
+      wayScanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !wayScanner.HasError() &&
-           !writer.HasError() &&
-           wayScanner.Close() &&
+    return !writer.HasError() &&
            writer.Close();
   }
 }

@@ -45,33 +45,36 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (!scanner.Open(wayFilename,osmscout::FileScanner::Sequential,true)) {
-    std::cerr << "Cannot open of file '" << wayFilename << "'!" << std::endl;
-    return 1;
-  }
+  try {
+    scanner.Open(wayFilename,osmscout::FileScanner::Sequential,true);
 
-  std::cout << "Start reading files using FileScanner..." << std::endl;
+    std::cout << "Start reading files using FileScanner..." << std::endl;
 
-  uint32_t wayCount;
+    uint32_t wayCount;
 
-  if (!scanner.Read(wayCount)) {
-    std::cout << "Cannot read number of entries" << std::endl;
-    return 1;
-  }
-
-  for (size_t w=1; w<=wayCount; w++) {
-    osmscout::Way way;
-
-    if (way.Read(typeConfig,
-                 scanner)) {
+    if (!scanner.Read(wayCount)) {
+      std::cout << "Cannot read number of entries" << std::endl;
+      return 1;
     }
+
+    for (size_t w=1; w<=wayCount; w++) {
+      osmscout::Way way;
+
+      if (way.Read(typeConfig,
+                   scanner)) {
+      }
+    }
+
+    scanner.Close();
+
+    scannerTimer.Stop();
+
+    std::cout << "Reading " << wayCount << " ways via FileScanner took " << scannerTimer << std::endl;
   }
-
-  scanner.Close();
-
-  scannerTimer.Stop();
-
-  std::cout << "Reading " << wayCount << " ways via FileScanner took " << scannerTimer << std::endl;
+  catch (osmscout::IOException& e) {
+    std::cerr << e.GetDescription() << std::endl;
+    return 1;
+  }
 
   return 0;
 }

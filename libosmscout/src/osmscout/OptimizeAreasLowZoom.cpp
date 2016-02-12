@@ -46,9 +46,7 @@ namespace osmscout
 
   OptimizeAreasLowZoom::~OptimizeAreasLowZoom()
   {
-    if (scanner.IsOpen()) {
-      Close();
-    }
+    Close();
   }
 
   bool OptimizeAreasLowZoom::ReadTypeData(FileScanner& scanner,
@@ -84,60 +82,70 @@ namespace osmscout
     this->typeConfig=typeConfig;
     datafilename=AppendFileToDir(path,FILE_AREASOPT_DAT);
 
-    if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'!";
-      return false;
-    }
+    try {
+      scanner.Open(datafilename,FileScanner::LowMemRandom,true);
 
-    FileOffset indexOffset;
+      FileOffset indexOffset;
 
-    if (!scanner.ReadFileOffset(indexOffset)) {
-      log.Error() << "Cannot read index offset from file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    if (!scanner.SetPos(indexOffset)) {
-      log.Error() << "Cannot goto to start of index at position " << indexOffset << " in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    uint32_t optimizationMaxMag;
-    uint32_t areaTypeCount;
-
-    scanner.Read(optimizationMaxMag);
-    scanner.Read(areaTypeCount);
-
-    if (scanner.HasError()) {
-      return false;
-    }
-
-    magnification=pow(2.0,(int)optimizationMaxMag);
-
-    for (size_t i=1; i<=areaTypeCount; i++) {
-      TypeId      typeId;
-      TypeInfoRef type;
-
-      scanner.Read(typeId);
-
-      type=typeConfig->GetAreaTypeInfo(typeId);
-
-      TypeData typeData;
-
-      if (!ReadTypeData(scanner,
-                        typeData)) {
+      if (!scanner.ReadFileOffset(indexOffset)) {
+        log.Error() << "Cannot read index offset from file '" << scanner.GetFilename() << "'";
         return false;
       }
 
-      areaTypesData[type].push_back(typeData);
-    }
+      if (!scanner.SetPos(indexOffset)) {
+        log.Error() << "Cannot goto to start of index at position " << indexOffset << " in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
 
-    return !scanner.HasError();
+      uint32_t optimizationMaxMag;
+      uint32_t areaTypeCount;
+
+      scanner.Read(optimizationMaxMag);
+      scanner.Read(areaTypeCount);
+
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      magnification=pow(2.0,(int)optimizationMaxMag);
+
+      for (size_t i=1; i<=areaTypeCount; i++) {
+        TypeId      typeId;
+        TypeInfoRef type;
+
+        scanner.Read(typeId);
+
+        type=typeConfig->GetAreaTypeInfo(typeId);
+
+        TypeData typeData;
+
+        if (!ReadTypeData(scanner,
+                          typeData)) {
+          return false;
+        }
+
+        areaTypesData[type].push_back(typeData);
+      }
+
+      return !scanner.HasError();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   bool OptimizeAreasLowZoom::Close()
   {
-    if (scanner.IsOpen()) {
-      return scanner.Close();
+    try  {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
     }
 
     return true;

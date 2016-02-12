@@ -121,29 +121,30 @@ namespace osmscout {
   {
     FileScanner scanner;
 
-    if (!scanner.Open(filename,
-                      FileScanner::FastRandom,true)) {
-      log.Error() << "Cannot open '" << scanner.GetFilename() << "'!";
-      return false;
-    }
+    try {
+      scanner.Open(filename,
+                   FileScanner::FastRandom,true);
 
-    uint32_t objectVariantDataCount;
+      uint32_t objectVariantDataCount;
 
-    if (!scanner.Read(objectVariantDataCount)) {
-      return false;
-    }
-
-    objectVariantData.resize(objectVariantDataCount);
-
-    for (size_t i=0; i<objectVariantDataCount; i++) {
-      if (!objectVariantData[i].Read(*database->GetTypeConfig(),
-                                     scanner)) {
-        log.Error() << "Cannot read data entry " << i+1 << " from file '" << scanner.GetFilename() << "'!";
+      if (!scanner.Read(objectVariantDataCount)) {
+        return false;
       }
-    }
 
-    if (!scanner.Close()) {
-      log.Error() << "Cannot close '" << scanner.GetFilename() << "'!";
+      objectVariantData.resize(objectVariantDataCount);
+
+      for (size_t i=0; i<objectVariantDataCount; i++) {
+        if (!objectVariantData[i].Read(*database->GetTypeConfig(),
+                                       scanner)) {
+          log.Error() << "Cannot read data entry " << i+1 << " from file '" << scanner.GetFilename() << "'!";
+        }
+      }
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
     }
 

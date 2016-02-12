@@ -32,6 +32,7 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/Exception.h>
 #include <osmscout/util/GeoBox.h>
 
 #if defined(__WIN32__) || defined(WIN32)
@@ -92,10 +93,11 @@ namespace osmscout {
     FileScanner();
     virtual ~FileScanner();
 
-    bool Open(const std::string& filename,
+    void Open(const std::string& filename,
               Mode mode,
               bool useMmap);
-    bool Close();
+    void Close();
+    void CloseFailsafe();
 
     inline bool IsOpen() const
     {

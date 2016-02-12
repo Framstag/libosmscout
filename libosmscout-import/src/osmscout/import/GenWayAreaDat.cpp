@@ -64,27 +64,32 @@ namespace osmscout {
   {
     FileScanner scanner;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      RelAreaDataGenerator::WAYAREABLACK_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '" + scanner.GetFilename() + "'");
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   RelAreaDataGenerator::WAYAREABLACK_DAT),
+                   FileScanner::Sequential,
+                   true);
+
+      while (!scanner.IsEOF()) {
+        OSMId id;
+
+        scanner.ReadNumber(id);
+
+        if (scanner.HasError()) {
+          return false;
+        }
+
+        wayBlacklist.insert(id);
+      }
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
-    while (!scanner.IsEOF()) {
-      OSMId id;
-
-      scanner.ReadNumber(id);
-
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      wayBlacklist.insert(id);
-    }
-
-    return scanner.Close();
+    return true;
   }
 
   bool WayAreaDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
@@ -97,23 +102,28 @@ namespace osmscout {
 
     FileScanner scanner;
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      Preprocess::DISTRIBUTION_DAT),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open '" + scanner.GetFilename() + "'");
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::DISTRIBUTION_DAT),
+                   FileScanner::Sequential,
+                   true);
+
+      for (const auto &type : typeConfig->GetTypes()) {
+        if (!scanner.Read(typeDistribution[type->GetIndex()].nodeCount) ||
+            !scanner.Read(typeDistribution[type->GetIndex()].wayCount) ||
+            !scanner.Read(typeDistribution[type->GetIndex()].areaCount)) {
+          return false;
+        }
+      }
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
-    for (const auto &type : typeConfig->GetTypes()) {
-      if (!scanner.Read(typeDistribution[type->GetIndex()].nodeCount) ||
-          !scanner.Read(typeDistribution[type->GetIndex()].wayCount) ||
-          !scanner.Read(typeDistribution[type->GetIndex()].areaCount)) {
-        return false;
-      }
-    }
-
-    return scanner.Close();
+    return true;
   }
 
   bool WayAreaDataGenerator::GetAreas(const ImportParameter& parameter,
@@ -425,113 +435,114 @@ namespace osmscout {
       return false;
     }
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      Preprocess::RAWWAYS_DAT),
-                      FileScanner::Sequential,
-                      parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Cannot open '" + scanner.GetFilename()+ "'");
-      return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::RAWWAYS_DAT),
+                   FileScanner::Sequential,
+                   parameter.GetRawWayDataMemoryMaped());
 
-    if (!scanner.Read(rawWayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    if (!areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         WAYAREA_TMP))) {
-      progress.Error("Cannot create '" + areaWriter.GetFilename() + "'");
-      return false;
-    }
-
-    areaWriter.Write(writtenWayCount);
-
-    /* ------ */
-
-    while (!areaTypes.Empty()) {
-      std::vector<std::list<RawWayRef> > areasByType(typeConfig->GetTypeCount());
-
-      //
-      // Load type data
-      //
-
-      progress.SetAction("Collecting area data by type");
-
-      if (!GetAreas(parameter,
-                    progress,
-                    *typeConfig,
-                    areaTypes,
-                    wayBlacklist,
-                    scanner,
-                    areasByType)) {
+      if (!scanner.Read(rawWayCount)) {
+        progress.Error("Error while reading number of data entries in file");
         return false;
       }
 
-      progress.SetAction("Collecting node ids");
-
-      std::set<OSMId>               nodeIds;
-      CoordDataFile::CoordResultMap coordsMap;
-
-      for (size_t type=0; type<areasByType.size(); type++) {
-        for (const auto &rawWay : areasByType[type]) {
-          for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
-            nodeIds.insert(rawWay->GetNodeId(n));
-          }
-        }
+      if (!areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                           WAYAREA_TMP))) {
+        progress.Error("Cannot create '" + areaWriter.GetFilename() + "'");
+        return false;
       }
 
-      if (!nodeIds.empty()) {
-        progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
-        if (!coordDataFile.Get(nodeIds,coordsMap)) {
-          std::cerr << "Cannot read nodes!" << std::endl;
+      areaWriter.Write(writtenWayCount);
+
+      /* ------ */
+
+      while (!areaTypes.Empty()) {
+        std::vector<std::list<RawWayRef> > areasByType(typeConfig->GetTypeCount());
+
+        //
+        // Load type data
+        //
+
+        progress.SetAction("Collecting area data by type");
+
+        if (!GetAreas(parameter,
+                      progress,
+                      *typeConfig,
+                      areaTypes,
+                      wayBlacklist,
+                      scanner,
+                      areasByType)) {
           return false;
         }
 
-        nodeIds.clear();
-      }
+        progress.SetAction("Collecting node ids");
 
-      progress.SetAction("Writing areas");
+        std::set<OSMId>               nodeIds;
+        CoordDataFile::CoordResultMap coordsMap;
 
-      for (size_t type=0; type<areasByType.size(); type++) {
-        for (const auto &rawWay : areasByType[type]) {
-          WriteArea(parameter,
-                    progress,
-                    *typeConfig,
-                    areaWriter,
-                    writtenWayCount,
-                    coordsMap,
-                    *rawWay);
+        for (size_t type=0; type<areasByType.size(); type++) {
+          for (const auto &rawWay : areasByType[type]) {
+            for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
+              nodeIds.insert(rawWay->GetNodeId(n));
+            }
+          }
         }
 
-        areasByType[type].clear();
+        if (!nodeIds.empty()) {
+          progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
+          if (!coordDataFile.Get(nodeIds,coordsMap)) {
+            std::cerr << "Cannot read nodes!" << std::endl;
+            return false;
+          }
+
+          nodeIds.clear();
+        }
+
+        progress.SetAction("Writing areas");
+
+        for (size_t type=0; type<areasByType.size(); type++) {
+          for (const auto &rawWay : areasByType[type]) {
+            WriteArea(parameter,
+                      progress,
+                      *typeConfig,
+                      areaWriter,
+                      writtenWayCount,
+                      coordsMap,
+                      *rawWay);
+          }
+
+          areasByType[type].clear();
+        }
       }
-    }
 
-    progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
-                  NumberToString(writtenWayCount) + " areas(s) written");
+      progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
+                    NumberToString(writtenWayCount) + " areas(s) written");
 
-    if (!slowFallbackTypes.Empty()) {
-      progress.Info("Handling low memory fall back for the following types");
+      if (!slowFallbackTypes.Empty()) {
+        progress.Info("Handling low memory fall back for the following types");
 
-      for (auto type : slowFallbackTypes) {
-        progress.Info("* "+type->GetName());
+        for (auto type : slowFallbackTypes) {
+          progress.Info("* "+type->GetName());
+        }
+
+        HandleLowMemoryFallback(parameter,
+                                progress,
+                                *typeConfig,
+                                scanner,
+                                slowFallbackTypes,
+                                wayBlacklist,
+                                areaWriter,
+                                writtenWayCount,
+                                coordDataFile);
       }
 
-      HandleLowMemoryFallback(parameter,
-                              progress,
-                              *typeConfig,
-                              scanner,
-                              slowFallbackTypes,
-                              wayBlacklist,
-                              areaWriter,
-                              writtenWayCount,
-                              coordDataFile);
+      /* -------*/
+
+      scanner.Close();
     }
-
-    /* -------*/
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file '" + scanner.GetFilename() + "'");
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
       return false;
     }
 

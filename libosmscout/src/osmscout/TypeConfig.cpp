@@ -1482,242 +1482,246 @@ namespace osmscout {
 
     FileScanner scanner;
 
-    if (!scanner.Open(AppendFileToDir(directory,
-                                      "types.dat"),
-                      FileScanner::Sequential,
-                      true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
-     return false;
-    }
+    try {
+      scanner.Open(AppendFileToDir(directory,
+                                   "types.dat"),
+                   FileScanner::Sequential,
+                   true);
 
-    uint32_t fileFormatVersion;
+      uint32_t fileFormatVersion;
 
-    if (!scanner.Read(fileFormatVersion)) {
-      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    if (fileFormatVersion!=FILE_FORMAT_VERSION) {
-      log.Error() << "File '" << scanner.GetFilename() << "' does not have the expected format version! Actual " << fileFormatVersion << ", expected: " << FILE_FORMAT_VERSION;
-      return false;
-    }
-
-    // Tags
-
-    uint32_t tagCount;
-
-    if (!scanner.ReadNumber(tagCount)) {
-      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    for (size_t i=1; i<=tagCount; i++) {
-      TagId       requestedId;
-      TagId       actualId;
-      std::string name;
-
-      if (!(scanner.ReadNumber(requestedId) &&
-            scanner.Read(name))) {
+      if (!scanner.Read(fileFormatVersion)) {
         log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
-      actualId=RegisterTag(name);
-
-      if (actualId!=requestedId) {
-        log.Error() << "Requested and actual tag id do not match";
+      if (fileFormatVersion!=FILE_FORMAT_VERSION) {
+        log.Error() << "File '" << scanner.GetFilename() << "' does not have the expected format version! Actual " << fileFormatVersion << ", expected: " << FILE_FORMAT_VERSION;
         return false;
       }
-    }
 
-    // Name Tags
+      // Tags
 
-    uint32_t nameTagCount;
+      uint32_t tagCount;
 
-    if (!scanner.ReadNumber(nameTagCount)) {
-      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    for (size_t i=1; i<=nameTagCount; i++) {
-      TagId       requestedId;
-      TagId       actualId;
-      std::string name;
-      uint32_t    priority = 0;
-
-      if (!(scanner.ReadNumber(requestedId) &&
-            scanner.Read(name) &&
-            scanner.ReadNumber(priority))) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      }
-
-      actualId=RegisterNameTag(name,priority);
-
-      if (actualId!=requestedId) {
-        log.Error() << "Requested and actual name tag id do not match";
-        return false;
-      }
-    }
-
-    // Alternative Name Tags
-
-    uint32_t nameAltTagCount;
-
-    if (!scanner.ReadNumber(nameAltTagCount)) {
-      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    for (size_t i=1; i<=nameAltTagCount; i++) {
-      TagId       requestedId;
-      TagId       actualId;
-      std::string name;
-      uint32_t    priority = 0;
-
-      if (!(scanner.ReadNumber(requestedId) &&
-            scanner.Read(name) &&
-            scanner.ReadNumber(priority))) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      }
-
-      actualId=RegisterNameAltTag(name,priority);
-
-      if (actualId!=requestedId) {
-        log.Error() << "Requested and actual name alt tag id do not match";
-        return false;
-      }
-    }
-
-    // Types
-
-    uint32_t typeCount;
-
-    if (!scanner.ReadNumber(typeCount)) {
-      log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-      return false;
-    }
-
-    for (size_t i=1; i<=typeCount; i++) {
-      std::string name;
-      bool        canBeNode;
-      bool        canBeWay;
-      bool        canBeArea;
-      bool        canBeRelation;
-      bool        isPath;
-      bool        canRouteFoot;
-      bool        canRouteBicycle;
-      bool        canRouteCar;
-      bool        indexAsAddress;
-      bool        indexAsLocation;
-      bool        indexAsRegion;
-      bool        indexAsPOI;
-      bool        optimizeLowZoom;
-      bool        multipolygon;
-      bool        pinWay;
-      bool        mergeAreas;
-      bool        ignore;
-      bool        ignoreSeaLand;
-
-      if (!(scanner.Read(name) &&
-            scanner.Read(canBeNode) &&
-            scanner.Read(canBeWay) &&
-            scanner.Read(canBeArea) &&
-            scanner.Read(canBeRelation) &&
-            scanner.Read(isPath) &&
-            scanner.Read(canRouteFoot) &&
-            scanner.Read(canRouteBicycle) &&
-            scanner.Read(canRouteCar) &&
-            scanner.Read(indexAsAddress) &&
-            scanner.Read(indexAsLocation) &&
-            scanner.Read(indexAsRegion) &&
-            scanner.Read(indexAsPOI) &&
-            scanner.Read(optimizeLowZoom) &&
-            scanner.Read(multipolygon) &&
-            scanner.Read(pinWay) &&
-            scanner.Read(mergeAreas) &&
-            scanner.Read(ignoreSeaLand) &&
-            scanner.Read(ignore))) {
-
+      if (!scanner.ReadNumber(tagCount)) {
         log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
-      TypeInfoRef typeInfo=std::make_shared<TypeInfo>();
+      for (size_t i=1; i<=tagCount; i++) {
+        TagId       requestedId;
+        TagId       actualId;
+        std::string name;
 
-      typeInfo->SetType(name);
-
-      typeInfo->CanBeNode(canBeNode);
-      typeInfo->CanBeWay(canBeWay);
-      typeInfo->CanBeArea(canBeArea);
-      typeInfo->CanBeRelation(canBeRelation);
-      typeInfo->SetIsPath(isPath);
-      typeInfo->CanRouteFoot(canRouteFoot);
-      typeInfo->CanRouteBicycle(canRouteBicycle);
-      typeInfo->CanRouteCar(canRouteCar);
-      typeInfo->SetIndexAsAddress(indexAsAddress);
-      typeInfo->SetIndexAsLocation(indexAsLocation);
-      typeInfo->SetIndexAsRegion(indexAsRegion);
-      typeInfo->SetIndexAsPOI(indexAsPOI);
-      typeInfo->SetOptimizeLowZoom(optimizeLowZoom);
-      typeInfo->SetMultipolygon(multipolygon);
-      typeInfo->SetPinWay(pinWay);
-      typeInfo->SetMergeAreas(mergeAreas);
-      typeInfo->SetIgnoreSeaLand(ignoreSeaLand);
-      typeInfo->SetIgnore(ignore);
-
-      // Type Features
-
-      uint32_t featureCount;
-
-      if (!scanner.ReadNumber(featureCount)) {
-        return false;
-      }
-
-      for (size_t f=0; f<featureCount; f++) {
-        std::string featureName;
-
-        if (!scanner.Read(featureName)) {
+        if (!(scanner.ReadNumber(requestedId) &&
+              scanner.Read(name))) {
+          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
-        FeatureRef feature=GetFeature(featureName);
+        actualId=RegisterTag(name);
 
-        if (!feature) {
-          log.Error() << "Feature '" << featureName << "' not found";
+        if (actualId!=requestedId) {
+          log.Error() << "Requested and actual tag id do not match";
           return false;
         }
-
-        typeInfo->AddFeature(feature);
       }
 
-      // Groups
+      // Name Tags
 
-      uint32_t groupCount;
+      uint32_t nameTagCount;
 
-      if (!scanner.ReadNumber(groupCount)) {
+      if (!scanner.ReadNumber(nameTagCount)) {
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
         return false;
       }
 
-      for (size_t g=0; g<groupCount; g++) {
-        std::string groupName;
+      for (size_t i=1; i<=nameTagCount; i++) {
+        TagId       requestedId;
+        TagId       actualId;
+        std::string name;
+        uint32_t    priority = 0;
 
-        if (!scanner.Read(groupName)) {
+        if (!(scanner.ReadNumber(requestedId) &&
+              scanner.Read(name) &&
+              scanner.ReadNumber(priority))) {
+          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
+        }
+
+        actualId=RegisterNameTag(name,priority);
+
+        if (actualId!=requestedId) {
+          log.Error() << "Requested and actual name tag id do not match";
+          return false;
+        }
+      }
+
+      // Alternative Name Tags
+
+      uint32_t nameAltTagCount;
+
+      if (!scanner.ReadNumber(nameAltTagCount)) {
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      for (size_t i=1; i<=nameAltTagCount; i++) {
+        TagId       requestedId;
+        TagId       actualId;
+        std::string name;
+        uint32_t    priority = 0;
+
+        if (!(scanner.ReadNumber(requestedId) &&
+              scanner.Read(name) &&
+              scanner.ReadNumber(priority))) {
+          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
+        }
+
+        actualId=RegisterNameAltTag(name,priority);
+
+        if (actualId!=requestedId) {
+          log.Error() << "Requested and actual name alt tag id do not match";
+          return false;
+        }
+      }
+
+      // Types
+
+      uint32_t typeCount;
+
+      if (!scanner.ReadNumber(typeCount)) {
+        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
+        return false;
+      }
+
+      for (size_t i=1; i<=typeCount; i++) {
+        std::string name;
+        bool        canBeNode;
+        bool        canBeWay;
+        bool        canBeArea;
+        bool        canBeRelation;
+        bool        isPath;
+        bool        canRouteFoot;
+        bool        canRouteBicycle;
+        bool        canRouteCar;
+        bool        indexAsAddress;
+        bool        indexAsLocation;
+        bool        indexAsRegion;
+        bool        indexAsPOI;
+        bool        optimizeLowZoom;
+        bool        multipolygon;
+        bool        pinWay;
+        bool        mergeAreas;
+        bool        ignore;
+        bool        ignoreSeaLand;
+
+        if (!(scanner.Read(name) &&
+              scanner.Read(canBeNode) &&
+              scanner.Read(canBeWay) &&
+              scanner.Read(canBeArea) &&
+              scanner.Read(canBeRelation) &&
+              scanner.Read(isPath) &&
+              scanner.Read(canRouteFoot) &&
+              scanner.Read(canRouteBicycle) &&
+              scanner.Read(canRouteCar) &&
+              scanner.Read(indexAsAddress) &&
+              scanner.Read(indexAsLocation) &&
+              scanner.Read(indexAsRegion) &&
+              scanner.Read(indexAsPOI) &&
+              scanner.Read(optimizeLowZoom) &&
+              scanner.Read(multipolygon) &&
+              scanner.Read(pinWay) &&
+              scanner.Read(mergeAreas) &&
+              scanner.Read(ignoreSeaLand) &&
+              scanner.Read(ignore))) {
+
+          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
           return false;
         }
 
-        typeInfo->AddGroup(groupName);
+        TypeInfoRef typeInfo=std::make_shared<TypeInfo>();
+
+        typeInfo->SetType(name);
+
+        typeInfo->CanBeNode(canBeNode);
+        typeInfo->CanBeWay(canBeWay);
+        typeInfo->CanBeArea(canBeArea);
+        typeInfo->CanBeRelation(canBeRelation);
+        typeInfo->SetIsPath(isPath);
+        typeInfo->CanRouteFoot(canRouteFoot);
+        typeInfo->CanRouteBicycle(canRouteBicycle);
+        typeInfo->CanRouteCar(canRouteCar);
+        typeInfo->SetIndexAsAddress(indexAsAddress);
+        typeInfo->SetIndexAsLocation(indexAsLocation);
+        typeInfo->SetIndexAsRegion(indexAsRegion);
+        typeInfo->SetIndexAsPOI(indexAsPOI);
+        typeInfo->SetOptimizeLowZoom(optimizeLowZoom);
+        typeInfo->SetMultipolygon(multipolygon);
+        typeInfo->SetPinWay(pinWay);
+        typeInfo->SetMergeAreas(mergeAreas);
+        typeInfo->SetIgnoreSeaLand(ignoreSeaLand);
+        typeInfo->SetIgnore(ignore);
+
+        // Type Features
+
+        uint32_t featureCount;
+
+        if (!scanner.ReadNumber(featureCount)) {
+          return false;
+        }
+
+        for (size_t f=0; f<featureCount; f++) {
+          std::string featureName;
+
+          if (!scanner.Read(featureName)) {
+            return false;
+          }
+
+          FeatureRef feature=GetFeature(featureName);
+
+          if (!feature) {
+            log.Error() << "Feature '" << featureName << "' not found";
+            return false;
+          }
+
+          typeInfo->AddFeature(feature);
+        }
+
+        // Groups
+
+        uint32_t groupCount;
+
+        if (!scanner.ReadNumber(groupCount)) {
+          return false;
+        }
+
+        for (size_t g=0; g<groupCount; g++) {
+          std::string groupName;
+
+          if (!scanner.Read(groupName)) {
+            return false;
+          }
+
+          typeInfo->AddGroup(groupName);
+        }
+
+        RegisterType(typeInfo);
       }
 
-      RegisterType(typeInfo);
+      scanner.Close();
     }
-
-    bool result=!scanner.HasError() && scanner.Close();
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
+    }
 
     timer.Stop();
 
     log.Debug() << "Opening TypeConfig: " << timer.ResultString();
 
-    return result;
+    return true;
   }
 
   /**

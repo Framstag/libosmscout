@@ -69,8 +69,14 @@ namespace osmscout {
 
   void AreaNodeIndex::Close()
   {
-    if (scanner.IsOpen()) {
-      scanner.Close();
+    try {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
     }
   }
 
@@ -78,47 +84,50 @@ namespace osmscout {
   {
     datafilename=AppendFileToDir(path,AREA_NODE_IDX);
 
-    if (!scanner.Open(datafilename,FileScanner::FastRandom,true)) {
-      log.Error() << "Cannot open file '" << scanner.GetFilename() << "'";
-      return false;
-    }
+    try {
+      scanner.Open(datafilename,FileScanner::FastRandom,true);
 
-    uint32_t indexEntries;
+      uint32_t indexEntries;
 
-    scanner.Read(indexEntries);
+      scanner.Read(indexEntries);
 
-    for (size_t i=0; i<indexEntries; i++) {
-      TypeId type;
+      for (size_t i=0; i<indexEntries; i++) {
+        TypeId type;
 
-      scanner.ReadNumber(type);
+        scanner.ReadNumber(type);
 
-      if (type>=nodeTypeData.size()) {
-        nodeTypeData.resize(type+1);
+        if (type>=nodeTypeData.size()) {
+          nodeTypeData.resize(type+1);
+        }
+
+        scanner.ReadFileOffset(nodeTypeData[type].indexOffset);
+        scanner.Read(nodeTypeData[type].dataOffsetBytes);
+
+        scanner.ReadNumber(nodeTypeData[type].indexLevel);
+
+        scanner.ReadNumber(nodeTypeData[type].cellXStart);
+        scanner.ReadNumber(nodeTypeData[type].cellXEnd);
+        scanner.ReadNumber(nodeTypeData[type].cellYStart);
+        scanner.ReadNumber(nodeTypeData[type].cellYEnd);
+
+        nodeTypeData[type].cellXCount=nodeTypeData[type].cellXEnd-nodeTypeData[type].cellXStart+1;
+        nodeTypeData[type].cellYCount=nodeTypeData[type].cellYEnd-nodeTypeData[type].cellYStart+1;
+
+        nodeTypeData[type].cellWidth=cellDimension[nodeTypeData[type].indexLevel].width;
+        nodeTypeData[type].cellHeight=cellDimension[nodeTypeData[type].indexLevel].height;
+
+        nodeTypeData[type].minLon=nodeTypeData[type].cellXStart*nodeTypeData[type].cellWidth-180.0;
+        nodeTypeData[type].maxLon=(nodeTypeData[type].cellXEnd+1)*nodeTypeData[type].cellWidth-180.0;
+        nodeTypeData[type].minLat=nodeTypeData[type].cellYStart*nodeTypeData[type].cellHeight-90.0;
+        nodeTypeData[type].maxLat=(nodeTypeData[type].cellYEnd+1)*nodeTypeData[type].cellHeight-90.0;
       }
 
-      scanner.ReadFileOffset(nodeTypeData[type].indexOffset);
-      scanner.Read(nodeTypeData[type].dataOffsetBytes);
-
-      scanner.ReadNumber(nodeTypeData[type].indexLevel);
-
-      scanner.ReadNumber(nodeTypeData[type].cellXStart);
-      scanner.ReadNumber(nodeTypeData[type].cellXEnd);
-      scanner.ReadNumber(nodeTypeData[type].cellYStart);
-      scanner.ReadNumber(nodeTypeData[type].cellYEnd);
-
-      nodeTypeData[type].cellXCount=nodeTypeData[type].cellXEnd-nodeTypeData[type].cellXStart+1;
-      nodeTypeData[type].cellYCount=nodeTypeData[type].cellYEnd-nodeTypeData[type].cellYStart+1;
-
-      nodeTypeData[type].cellWidth=cellDimension[nodeTypeData[type].indexLevel].width;
-      nodeTypeData[type].cellHeight=cellDimension[nodeTypeData[type].indexLevel].height;
-
-      nodeTypeData[type].minLon=nodeTypeData[type].cellXStart*nodeTypeData[type].cellWidth-180.0;
-      nodeTypeData[type].maxLon=(nodeTypeData[type].cellXEnd+1)*nodeTypeData[type].cellWidth-180.0;
-      nodeTypeData[type].minLat=nodeTypeData[type].cellYStart*nodeTypeData[type].cellHeight-90.0;
-      nodeTypeData[type].maxLat=(nodeTypeData[type].cellYEnd+1)*nodeTypeData[type].cellHeight-90.0;
+      return !scanner.HasError();
     }
-
-    return !scanner.HasError();
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   bool AreaNodeIndex::GetOffsets(const TypeData& typeData,
