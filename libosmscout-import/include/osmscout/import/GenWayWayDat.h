@@ -66,7 +66,6 @@ namespace osmscout {
 
     bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
                               const ImportParameter& parameter,
-                              Progress& progress,
                               std::vector<Distribution>& typeDistribution) const;
 
     bool GetWays(const ImportParameter& parameter,

@@ -131,10 +131,7 @@ namespace osmscout
 
     progress.SetAction("Collecting way data to optimize");
 
-    if (!scanner.GotoBegin()) {
-      progress.Error("Error while positioning at start of file");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(wayCount)) {
       progress.Error("Error while reading number of data entries in file");

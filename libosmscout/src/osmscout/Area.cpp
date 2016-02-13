@@ -189,7 +189,10 @@ namespace osmscout {
   bool Area::Read(const TypeConfig& typeConfig,
                   FileScanner& scanner)
   {
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 
@@ -279,7 +282,10 @@ namespace osmscout {
   bool Area::ReadImport(const TypeConfig& typeConfig,
                         FileScanner& scanner)
   {
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 
@@ -367,7 +373,10 @@ namespace osmscout {
   bool Area::ReadOptimized(const TypeConfig& typeConfig,
                            FileScanner& scanner)
   {
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 

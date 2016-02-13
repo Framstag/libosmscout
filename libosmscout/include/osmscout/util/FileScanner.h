@@ -113,9 +113,9 @@ namespace osmscout {
 
     std::string GetFilename() const;
 
-    bool GotoBegin();
-    bool SetPos(FileOffset pos);
-    bool GetPos(FileOffset &pos) const;
+    void GotoBegin();
+    void SetPos(FileOffset pos);
+    FileOffset GetPos() const;
 
     bool Read(char* buffer, size_t bytes);
 

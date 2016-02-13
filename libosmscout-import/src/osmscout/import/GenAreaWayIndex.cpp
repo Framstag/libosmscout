@@ -542,7 +542,7 @@ namespace osmscout {
 
           FileOffset offset;
 
-          wayScanner.GetPos(offset);
+          offset=wayScanner.GetPos();
 
           if (!way.Read(*typeConfig,
                         wayScanner)) {

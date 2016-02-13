@@ -239,10 +239,7 @@ namespace osmscout {
           uint32_t dataCount;
           progress.Info("Reading objects from file '"+source->scanner.GetFilename()+"'");
 
-          if (!source->scanner.GotoBegin()) {
-            progress.Error(std::string("Error while setting current position in file '")+
-                           source->scanner.GetFilename()+"'");
-          }
+          source->scanner.GotoBegin();
 
           if (!source->scanner.Read(dataCount)) {
             progress.Error("Error while reading number of data entries in file'"+
@@ -342,12 +339,7 @@ namespace osmscout {
 
             N data;
 
-            if (!entry.source->scanner.SetPos(entry.fileOffset)) {
-              progress.Error(std::string("Error while setting current position in file '")+
-                             entry.source->scanner.GetFilename()+"'");
-
-              return false;
-            }
+            entry.source->scanner.SetPos(entry.fileOffset);
 
             if (!data.Read(typeConfig,
                            entry.source->scanner))  {

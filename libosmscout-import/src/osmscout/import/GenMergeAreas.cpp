@@ -92,10 +92,7 @@ namespace osmscout {
 
     progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
 
-    if (!scanner.GotoBegin()) {
-      progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
@@ -176,10 +173,7 @@ namespace osmscout {
 
     loadedTypes=candidateTypes;
 
-    if (!scanner.GotoBegin()) {
-      progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
@@ -513,10 +507,7 @@ namespace osmscout {
                      mergeJob[type->GetIndex()].mergedAway.end());
     }
 
-    if (!scanner.GotoBegin()) {
-      progress.Error(std::string("Cannot position to start of file '")+scanner.GetFilename()+"'");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");

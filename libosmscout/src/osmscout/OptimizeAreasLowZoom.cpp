@@ -92,10 +92,7 @@ namespace osmscout
         return false;
       }
 
-      if (!scanner.SetPos(indexOffset)) {
-        log.Error() << "Cannot goto to start of index at position " << indexOffset << " in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.SetPos(indexOffset);
 
       uint32_t optimizationMaxMag;
       uint32_t areaTypeCount;
@@ -198,10 +195,7 @@ namespace osmscout
                                  ((y-typeData.cellYStart)*typeData.cellXCount+
                                   minxc-typeData.cellXStart)*typeData.dataOffsetBytes;
 
-      if (!scanner.SetPos(cellIndexOffset)) {
-        log.Error() << "Cannot go to type cell index position " << cellIndexOffset << " in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.SetPos(cellIndexOffset);
 
       // For each column in row
       for (size_t x=minxc; x<=maxxc; x++) {
@@ -230,10 +224,7 @@ namespace osmscout
 
       assert(initialCellDataOffset>=cellIndexOffset);
 
-      if (!scanner.SetPos(initialCellDataOffset)) {
-        log.Error() << "Cannot go to cell data position " << initialCellDataOffset << " in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.SetPos(initialCellDataOffset);
 
       // For each data cell in row found
       for (size_t i=0; i<cellDataOffsetCount; i++) {
@@ -269,10 +260,7 @@ namespace osmscout
     std::lock_guard<std::mutex> guard(lookupMutex);
 
     for (const auto& offset : offsets) {
-      if (!scanner.SetPos(offset)) {
-        log.Error() << "Error while positioning in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.SetPos(offset);
 
       AreaRef area=std::make_shared<Area>();
 
@@ -318,37 +306,43 @@ namespace osmscout
 
     loadedAreaTypes.Clear();
 
-    for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
-        type!=areaTypesData.end();
-        ++type) {
-      if (areaTypes.IsSet(type->first)) {
-        std::list<TypeData>::const_iterator match=type->second.end();
+    try {
+      for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
+           type!=areaTypesData.end();
+           ++type) {
+        if (areaTypes.IsSet(type->first)) {
+          std::list<TypeData>::const_iterator match=type->second.end();
 
-        for (std::list<TypeData>::const_iterator typeData=type->second.begin();
-            typeData!=type->second.end();
-            ++typeData) {
-          if (typeData->optLevel==magnification.GetLevel()) {
-            match=typeData;
-            break;
-          }
-        }
-
-        if (match!=type->second.end()) {
-          if (match->bitmapOffset!=0) {
-            if (!GetOffsets(*match,
-                            boundingBox,
-                            offsets)) {
-              return false;
+          for (std::list<TypeData>::const_iterator typeData=type->second.begin();
+               typeData!=type->second.end();
+               ++typeData) {
+            if (typeData->optLevel==magnification.GetLevel()) {
+              match=typeData;
+              break;
             }
           }
 
-          loadedAreaTypes.Set(type->first);
+          if (match!=type->second.end()) {
+            if (match->bitmapOffset!=0) {
+              if (!GetOffsets(*match,
+                              boundingBox,
+                              offsets)) {
+                return false;
+              }
+            }
+
+            loadedAreaTypes.Set(type->first);
+          }
         }
       }
-    }
 
-    if (!LoadData(offsets,
-                  areas)) {
+      if (!LoadData(offsets,
+                    areas)) {
+        return false;
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 

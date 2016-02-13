@@ -130,10 +130,7 @@ namespace osmscout
 
     progress.SetAction("Collecting area data to optimize");
 
-    if (!scanner.GotoBegin()) {
-      progress.Error("Error while positioning at start of file");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");

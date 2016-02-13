@@ -80,9 +80,7 @@ namespace osmscout {
 
         cacheRef=indexCache.SetEntry(cacheEntry);
 
-        if (!scanner.SetPos(offset)) {
-          log.Error() << "Cannot navigate to offset " << offset << " in file '" << scanner.GetFilename() << "'";
-        }
+        scanner.SetPos(offset);
 
         for (size_t c=0; c<4; c++) {
           FileOffset childOffset;
@@ -100,10 +98,7 @@ namespace osmscout {
           }
         }
 
-        if (!scanner.GetPos(cacheRef->value.data)) {
-          log.Error() << "Cannot get current file position in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        cacheRef->value.data=scanner.GetPos();
 
         indexCell=cacheRef->value;
       }
@@ -131,9 +126,7 @@ namespace osmscout {
   {
     std::lock_guard<std::mutex> guard(lookupMutex);
 
-    if (!scanner.SetPos(dataOffset)) {
-      return false;
-    }
+    scanner.SetPos(dataOffset);
 
     uint32_t typeCount;
 
@@ -313,56 +306,63 @@ namespace osmscout {
 
     cellRefs.push_back(CellRef(topLevelOffset,0,0));
 
-    // For all levels:
-    // * Take the tiles and offsets of the last level
-    // * Calculate the new tiles and offsets that still interfere with given area
-    // * Add the new offsets to the list of offsets and finish if we have
-    //   reached maxLevel or maxAreaCount.
-    // * copy no, ntx, nty to ctx, cty, co and go to next iteration
-    for (uint32_t level=0;
-         level<=this->maxLevel &&
-         level<=maxLevel &&
-         !cellRefs.empty();
-         level++) {
-      nextCellRefs.clear();
+    try {
+      // For all levels:
+      // * Take the tiles and offsets of the last level
+      // * Calculate the new tiles and offsets that still interfere with given area
+      // * Add the new offsets to the list of offsets and finish if we have
+      //   reached maxLevel or maxAreaCount.
+      // * copy no, ntx, nty to ctx, cty, co and go to next iteration
+      for (uint32_t level=0;
+           level<=this->maxLevel &&
+           level<=maxLevel &&
+           !cellRefs.empty();
+           level++) {
+        nextCellRefs.clear();
 
-      for (const auto& cellRef : cellRefs) {
-        IndexCell  cellIndexData;
-        FileOffset cellDataOffset;
+        for (const auto& cellRef : cellRefs) {
+          IndexCell  cellIndexData;
+          FileOffset cellDataOffset;
 
-        if (!GetIndexCell(level,
-                          cellRef.offset,
-                          cellIndexData,
-                          cellDataOffset)) {
-          log.Error() << "Cannot find offset " << cellRef.offset << " in level " << level << " in file '" << scanner.GetFilename() << "'";
-          return false;
+          if (!GetIndexCell(level,
+                            cellRef.offset,
+                            cellIndexData,
+                            cellDataOffset)) {
+            log.Error() << "Cannot find offset " << cellRef.offset << " in level " << level << " in file '" << scanner.GetFilename() << "'";
+            return false;
+          }
+
+          // Now read the area offsets by type in this index entry
+
+          if (!ReadCellData(typeConfig,
+                            types,
+                            cellDataOffset,
+                            spans)) {
+            log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";
+            return false;
+          }
+
+          if (level<this->maxLevel) {
+            size_t cx=cellRef.x*2;
+            size_t cy=cellRef.y*2;
+
+            PushCellsForNextLevel(minlon,
+                                  minlat,
+                                  maxlon,
+                                  maxlat,
+                                  cellIndexData,
+                                  cellDimension[level+1],
+                                  cx,cy,
+                                  nextCellRefs);
+          }
         }
 
-        // Now read the area offsets by type in this index entry
-
-        if (!ReadCellData(typeConfig,
-                          types,
-                          cellDataOffset,
-                          spans)) {
-          log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";
-        }
-
-        if (level<this->maxLevel) {
-          size_t cx=cellRef.x*2;
-          size_t cy=cellRef.y*2;
-
-          PushCellsForNextLevel(minlon,
-                                minlat,
-                                maxlon,
-                                maxlat,
-                                cellIndexData,
-                                cellDimension[level+1],
-                                cx,cy,
-                                nextCellRefs);
-        }
+        std::swap(cellRefs,nextCellRefs);
       }
-
-      std::swap(cellRefs,nextCellRefs);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
     time.Stop();

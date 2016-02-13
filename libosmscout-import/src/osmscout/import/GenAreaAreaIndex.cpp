@@ -599,9 +599,7 @@ namespace osmscout {
       FileOffset dstOffset;
       bool       save=true;
 
-      if (!scanner.SetPos(srcOffset)) {
-        return false;
-      }
+      scanner.SetPos(srcOffset);
 
       if (!scanner.Read(objectType) ||
           !scanner.Read(id) ||
@@ -880,9 +878,7 @@ namespace osmscout {
   {
     uint32_t areaCount=0;
 
-    if (!scanner.GotoBegin()) {
-      progress.Error("Cannot go to begin of way file");
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
@@ -897,7 +893,7 @@ namespace osmscout {
 
       progress.SetProgress(a,areaCount);
 
-      scanner.GetPos(offset);
+      offset=scanner.GetPos();
 
       if (!scanner.Read(objectType) ||
           !scanner.Read(id)||

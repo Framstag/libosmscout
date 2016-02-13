@@ -114,10 +114,7 @@ namespace osmscout {
         for (uint32_t n=1; n<=nodeCount; n++) {
           progress.SetProgress(n,nodeCount);
 
-          FileOffset offset;
           Node node;
-
-          nodeScanner.GetPos(offset);
 
           if (!node.Read(*typeConfig,
                          nodeScanner)) {
@@ -307,7 +304,7 @@ namespace osmscout {
           FileOffset offset;
           Node node;
 
-          nodeScanner.GetPos(offset);
+          offset=nodeScanner.GetPos();
 
           if (!node.Read(*typeConfig,
                          nodeScanner)) {

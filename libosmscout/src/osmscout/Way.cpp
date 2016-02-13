@@ -121,7 +121,10 @@ namespace osmscout {
   bool Way::Read(const TypeConfig& typeConfig,
                  FileScanner& scanner)
   {
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 
@@ -155,7 +158,10 @@ namespace osmscout {
   bool Way::ReadOptimized(const TypeConfig& typeConfig,
                           FileScanner& scanner)
   {
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 

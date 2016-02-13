@@ -156,8 +156,9 @@ namespace osmscout {
         FileOffset readPos;
         T          data;
 
-        if (!scanner.GetPos(readPos) ||
-            !ReadData(*typeConfig,
+        readPos=scanner.GetPos();
+
+        if (!ReadData(*typeConfig,
                       scanner,
                       data)) {
           progress.Error(std::string("Error while reading data entry ")+

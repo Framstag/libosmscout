@@ -59,7 +59,6 @@ namespace osmscout {
   }
 
   bool WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
-                                              Progress& progress,
                                               BlacklistSet& wayBlacklist) const
   {
     FileScanner scanner;
@@ -94,7 +93,6 @@ namespace osmscout {
 
   bool WayAreaDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
                                                   const ImportParameter& parameter,
-                                                  Progress& progress,
                                                   std::vector<Distribution>& typeDistribution) const
   {
     typeDistribution.clear();
@@ -139,10 +137,7 @@ namespace osmscout {
     size_t      typesWithWays=0;
     TypeInfoSet currentTypes(types);
 
-    if (!scanner.GotoBegin()) {
-      progress.Error("Error while positioning at start of file");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(wayCount)) {
       progress.Error("Error while reading number of data entries in file");
@@ -300,10 +295,7 @@ namespace osmscout {
     uint32_t wayCount=0;
     size_t   collectedWaysCount=0;
 
-    if (!scanner.GotoBegin()) {
-      progress.Error("Error while positioning at start of file");
-      return false;
-    }
+    scanner.GotoBegin();
 
     if (!scanner.Read(wayCount)) {
       progress.Error("Error while reading number of data entries in file");
@@ -401,7 +393,6 @@ namespace osmscout {
 
     if (!ReadTypeDistribution(typeConfig,
                               parameter,
-                              progress,
                               typeDistribution)) {
       return false;
     }
@@ -424,7 +415,6 @@ namespace osmscout {
     progress.SetAction("Reading way area blacklist");
 
     if (!ReadWayBlacklist(parameter,
-                          progress,
                           wayBlacklist)) {
       return false;
     }

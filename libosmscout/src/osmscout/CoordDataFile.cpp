@@ -69,11 +69,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!scanner.SetPos(mapOffset)) {
-        Close();
-
-        return false;
-      }
+      scanner.SetPos(mapOffset);
 
       uint32_t mapSize;
 

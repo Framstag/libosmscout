@@ -55,12 +55,10 @@ namespace osmscout {
     typedef std::list<RawWayRef>      WayList;
 
     bool ReadWayBlacklist(const ImportParameter& parameter,
-                          Progress& progress,
                           BlacklistSet& wayBlacklist) const;
 
     bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
                               const ImportParameter& parameter,
-                              Progress& progress,
                               std::vector<Distribution>& typeDistribution) const;
 
     bool GetAreas(const ImportParameter& parameter,

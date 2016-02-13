@@ -96,7 +96,10 @@ namespace osmscout {
     uint32_t pathCount;
     uint32_t excludesCount;
 
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 

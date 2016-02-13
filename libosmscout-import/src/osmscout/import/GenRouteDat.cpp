@@ -780,14 +780,7 @@ namespace osmscout {
         Way        way;
         FileOffset fileOffset;
 
-        if (!scanner.GetPos(fileOffset)) {
-          progress.Error(std::string("Error while reading file offset for data entry ")+
-                         NumberToString(d)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        fileOffset=scanner.GetPos();
 
         if (!way.Read(typeConfig,
                       scanner)) {
@@ -844,14 +837,7 @@ namespace osmscout {
         Area       area;
         FileOffset fileOffset;
 
-        if (!scanner.GetPos(fileOffset)) {
-          progress.Error(std::string("Error while reading file offset for data entry ")+
-                         NumberToString(d)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        fileOffset=scanner.GetPos();
 
         if (!area.Read(typeConfig,
                        scanner)) {
@@ -946,16 +932,10 @@ namespace osmscout {
 
     FileOffset oldPos;
 
-    if (!scanner.GetPos(oldPos)) {
-      progress.Error("Error while loading current file position");
-      return false;
-    }
+    oldPos=scanner.GetPos();
 
     for (auto offset : fileOffsets) {
-      if (!scanner.SetPos(offset)) {
-        progress.Error("Error while moving to way at offset " + NumberToString(offset));
-        return false;
-      }
+      scanner.SetPos(offset);
 
       WayRef way=std::make_shared<Way>();
 
@@ -970,10 +950,7 @@ namespace osmscout {
       waysMap[offset]=way;
     }
 
-    if (!scanner.SetPos(oldPos)) {
-      progress.Error("Error while resetting current file position");
-      return false;
-    }
+    scanner.SetPos(oldPos);
 
     return true;
   }
@@ -992,16 +969,10 @@ namespace osmscout {
 
     FileOffset oldPos;
 
-    if (!scanner.GetPos(oldPos)) {
-      progress.Error("Error while loading current file position");
-      return false;
-    }
+    oldPos=scanner.GetPos();
 
     for (auto offset : fileOffsets) {
-      if (!scanner.SetPos(offset)) {
-        progress.Error("Error while moving to area at offset " + NumberToString(offset));
-        return false;
-      }
+      scanner.SetPos(offset);
 
       AreaRef area=std::make_shared<Area>();
 
@@ -1016,10 +987,7 @@ namespace osmscout {
       areasMap[offset]=area;
     }
 
-    if (!scanner.SetPos(oldPos)) {
-      progress.Error("Error while resetting current file position");
-      return false;
-    }
+    scanner.SetPos(oldPos);
 
     return true;
   }
@@ -1607,9 +1575,7 @@ namespace osmscout {
           else {
             routeNode=std::make_shared<RouteNode>();
 
-            if (!routeScanner.SetPos(pendingOffset.routeNodeOffset)) {
-              return false;
-            }
+            routeScanner.SetPos(pendingOffset.routeNodeOffset);
 
             if (!routeNode->Read(routeScanner)) {
               return false;

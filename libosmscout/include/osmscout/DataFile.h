@@ -156,12 +156,16 @@ namespace osmscout {
   {
     std::lock_guard<std::mutex> lock(accessMutex);
 
-    if (!scanner.SetPos(offset)) {
+    try {
+      scanner.SetPos(offset);
+
+      return data.Read(typeConfig,
+                       scanner);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    return data.Read(typeConfig,
-                     scanner);
   }
 
   /**
@@ -391,27 +395,30 @@ namespace osmscout {
 
     std::lock_guard<std::mutex> lock(accessMutex);
 
-    if (!scanner.SetPos(span.startOffset)) {
-      log.Error() << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!";
-      return false;
-    }
+    try {
+      scanner.SetPos(span.startOffset);
 
-    area.reserve(area.size()+span.count);
+      area.reserve(area.size()+span.count);
 
-    for (uint32_t i=1; i<=span.count; i++) {
-      ValueType value=std::make_shared<N>();
+      for (uint32_t i=1; i<=span.count; i++) {
+        ValueType value=std::make_shared<N>();
 
-      if (!ReadData(*typeConfig,
-                    scanner,
-                    *value)) {
-        log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset << " of file " << datafilename << "!";
-        return false;
+        if (!ReadData(*typeConfig,
+                      scanner,
+                      *value)) {
+          log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset << " of file " << datafilename << "!";
+          return false;
+        }
+
+        area.push_back(value);
       }
 
-      area.push_back(value);
+      return true;
     }
-
-    return true;
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   /**
@@ -431,31 +438,34 @@ namespace osmscout {
 
     data.reserve(data.size()+overallCount);
 
-    for (const auto& span : spans) {
-      if (span.count==0) {
-        continue;
-      }
-
-      std::lock_guard<std::mutex> lock(accessMutex);
-
-      if (!scanner.SetPos(span.startOffset)) {
-        log.Error() << "Error while navigating to offset " << span.startOffset << " of file " << datafilename << "!";
-        return false;
-      }
-
-      for (uint32_t i=1; i<=span.count; i++) {
-        ValueType value=std::make_shared<N>();
-
-        if (!ReadData(*typeConfig,
-                      scanner,
-                      *value)) {
-          log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset <<
-          " of file " << datafilename << "!";
-          return false;
+    try {
+      for (const auto& span : spans) {
+        if (span.count==0) {
+          continue;
         }
 
-        data.push_back(value);
+        std::lock_guard<std::mutex> lock(accessMutex);
+
+        scanner.SetPos(span.startOffset);
+
+        for (uint32_t i=1; i<=span.count; i++) {
+          ValueType value=std::make_shared<N>();
+
+          if (!ReadData(*typeConfig,
+                        scanner,
+                        *value)) {
+            log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset <<
+            " of file " << datafilename << "!";
+            return false;
+          }
+
+          data.push_back(value);
+        }
       }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
     return true;

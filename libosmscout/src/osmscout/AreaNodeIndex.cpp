@@ -168,10 +168,7 @@ namespace osmscout {
       size_t                      cellDataOffsetCount=0;
       FileOffset                  cellIndexOffset=typeData.GetCellOffset(minxc,y);
 
-      if (!scanner.SetPos(cellIndexOffset)) {
-        log.Error() << "Cannot go to type cell index position " << cellIndexOffset << " in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.SetPos(cellIndexOffset);
 
       // For each column in row
       for (size_t x=minxc; x<=maxxc; x++) {
@@ -203,10 +200,7 @@ namespace osmscout {
 
       assert(initialCellDataOffset>=cellIndexOffset);
 
-      if (!scanner.SetPos(initialCellDataOffset)) {
-        log.Error() << "Cannot go to cell data position " << initialCellDataOffset << " in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.SetPos(initialCellDataOffset);
 
       // For each data cell in row found
       for (size_t i=0; i<cellDataOffsetCount; i++) {
@@ -247,14 +241,20 @@ namespace osmscout {
 
     offsets.reserve(std::min((size_t)10000,offsets.capacity()));
 
-    for (TypeInfoRef type : requestedTypes) {
-      if (!GetOffsets(nodeTypeData[type->GetNodeId()],
-                      boundingBox,
-                      offsets)) {
-        return false;
-      }
+    try {
+      for (TypeInfoRef type : requestedTypes) {
+        if (!GetOffsets(nodeTypeData[type->GetNodeId()],
+                        boundingBox,
+                        offsets)) {
+          return false;
+        }
 
-      loadedTypes.Set(type);
+        loadedTypes.Set(type);
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
     time.Stop();

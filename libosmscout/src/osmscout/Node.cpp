@@ -39,8 +39,10 @@ namespace osmscout {
   bool Node::Read(const TypeConfig& typeConfig,
                   FileScanner& scanner)
   {
-
-    if (!scanner.GetPos(fileOffset)) {
+    try {
+      fileOffset=scanner.GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 

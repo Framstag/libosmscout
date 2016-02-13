@@ -325,26 +325,26 @@ namespace osmscout {
     return filename;
   }
 
-  bool FileScanner::GotoBegin()
+  void FileScanner::GotoBegin()
   {
-    return SetPos(0);
+    SetPos(0);
   }
 
-  bool FileScanner::SetPos(FileOffset pos)
+  void FileScanner::SetPos(FileOffset pos)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot set position in file","File already in error state");
     }
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (pos>=size) {
-        return false;
+        throw IOException(filename,"Cannot set position in file","Position beyond file end");
       }
 
       offset=pos;
 
-      return true;
+      return;
     }
 #endif
 
@@ -357,22 +357,19 @@ namespace osmscout {
 #endif
 
     if (hasError) {
-      log.Error() << "Cannot set file pos for file '" << filename << "' (" << strerror(errno) << ")";
+      throw IOException(filename,"Cannot set position in file");
     }
-
-    return !hasError;
   }
 
-  bool FileScanner::GetPos(FileOffset& pos) const
+  FileOffset FileScanner::GetPos() const
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read position in file","File already in error state");
     }
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      pos=offset;
-      return true;
+      return offset;
     }
 #endif
 
@@ -381,26 +378,20 @@ namespace osmscout {
 
     if (filepos==-1) {
       hasError=true;
+      throw IOException(filename,"Cannot set position in file");
     }
-    else {
-      pos=(FileOffset)filepos;
-    }
+
+    return (FileOffset)filepos;
 #else
     long filepos=ftell(file);
 
     if (filepos==-1) {
       hasError=true;
+      throw IOException(filename,"Cannot set position in file");
     }
-    else {
-      pos=(FileOffset)filepos;
-    }
+
+    return (FileOffset)filepos;
 #endif
-
-    if (hasError) {
-      log.Error() << "Cannot read file pos for file '" << filename << "' (" << strerror(errno) << ")";
-    }
-
-    return !hasError;
   }
 
   bool FileScanner::Read(char* buffer, size_t bytes)

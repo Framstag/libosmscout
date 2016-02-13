@@ -87,9 +87,7 @@ namespace osmscout {
         locationIgnoreTokens.insert(token);
       }
 
-      if (!scanner.GetPos(indexOffset)) {
-        return false;
-      }
+      indexOffset=scanner.GetPos();
 
       scanner.Close();
 
@@ -156,9 +154,7 @@ namespace osmscout {
   {
     uint32_t aliasCount;
 
-    if (!scanner.GetPos(region.regionOffset)) {
-      return false;
-    }
+    region.regionOffset=scanner.GetPos();
 
     if (!scanner.ReadFileOffset(region.dataOffset)) {
       return false;
@@ -226,34 +222,38 @@ namespace osmscout {
       break;
     }
 
-    if (!scanner.ReadNumber(childCount)) {
-      return AdminRegionVisitor::error;
-    }
-
-    for (size_t i=0; i<childCount; i++) {
-      FileOffset nextChildOffset;
-
-      if (!scanner.ReadFileOffset(nextChildOffset)) {
+    try {
+      if (!scanner.ReadNumber(childCount)) {
         return AdminRegionVisitor::error;
       }
 
-      action=VisitRegionEntries(scanner,
-                                visitor);
+      for (size_t i=0; i<childCount; i++) {
+        FileOffset nextChildOffset;
 
-      if (action==AdminRegionVisitor::stop ||
-          action==AdminRegionVisitor::error) {
-        return action;
-      }
-      else if (action==AdminRegionVisitor::skipChildren) {
-        if (i+1<childCount) {
-          if (!scanner.SetPos(nextChildOffset)) {
-            return AdminRegionVisitor::error;
+        if (!scanner.ReadFileOffset(nextChildOffset)) {
+          return AdminRegionVisitor::error;
+        }
+
+        action=VisitRegionEntries(scanner,
+                                  visitor);
+
+        if (action==AdminRegionVisitor::stop ||
+            action==AdminRegionVisitor::error) {
+          return action;
+        }
+        else if (action==AdminRegionVisitor::skipChildren) {
+          if (i+1<childCount) {
+            scanner.SetPos(nextChildOffset);
+          }
+          else {
+            return AdminRegionVisitor::skipChildren;
           }
         }
-        else {
-          return AdminRegionVisitor::skipChildren;
-        }
       }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return AdminRegionVisitor::error;
     }
 
     if (scanner.HasError()) {
@@ -307,9 +307,7 @@ namespace osmscout {
       Location location;
       uint32_t  objectCount;
 
-      if (!scanner.GetPos(location.locationOffset)) {
-        return false;
-      }
+      location.locationOffset=scanner.GetPos();
 
       if (!scanner.Read(location.name)) {
         return false;
@@ -375,13 +373,9 @@ namespace osmscout {
       return false;
     }
 
-    if (!scanner.GetPos(childrenOffset)) {
-      return false;
-    }
+    childrenOffset=scanner.GetPos();
 
-    if (!scanner.SetPos(region.dataOffset)) {
-      return false;
-    }
+    scanner.SetPos(region.dataOffset);
 
     if (!LoadRegionDataEntry(scanner,
                              region,
@@ -394,9 +388,7 @@ namespace osmscout {
       return !scanner.HasError();
     }
 
-    if (!scanner.SetPos(childrenOffset)) {
-      return false;
-    }
+    scanner.SetPos(childrenOffset);
 
     if (!scanner.ReadNumber(childCount)) {
       return false;
@@ -432,9 +424,7 @@ namespace osmscout {
   {
     uint32_t addressCount;
 
-    if (!scanner.SetPos(location.addressesOffset)) {
-      return false;
-    }
+    scanner.SetPos(location.addressesOffset);
 
     if (!scanner.ReadNumber(addressCount)) {
       return false;
@@ -445,9 +435,7 @@ namespace osmscout {
     for (size_t i=0; i<addressCount; i++) {
       Address address;
 
-      if (!scanner.GetPos(address.addressOffset)) {
-        return false;
-      }
+      address.addressOffset=scanner.GetPos();
 
       address.locationOffset=location.locationOffset;
       address.regionOffset=location.regionOffset;
@@ -482,9 +470,7 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    false);
 
-      if (!scanner.SetPos(indexOffset)) {
-        return false;
-      }
+      scanner.SetPos(indexOffset);
 
       uint32_t regionCount;
 
@@ -511,9 +497,7 @@ namespace osmscout {
         }
         else if (action==AdminRegionVisitor::skipChildren) {
           if (i+1<regionCount) {
-            if (!scanner.SetPos(nextChildOffset)) {
-              return false;
-            }
+            scanner.SetPos(nextChildOffset);
           }
         }
       }
@@ -542,13 +526,8 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    true);
 
-      if (!scanner.SetPos(indexOffset)) {
-        return false;
-      }
-
-      if (!scanner.SetPos(region.regionOffset)) {
-        return false;
-      }
+      scanner.SetPos(indexOffset);
+      scanner.SetPos(region.regionOffset);
 
       if (!VisitRegionLocationEntries(scanner,
                                       visitor,
@@ -581,9 +560,7 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    true);
 
-      if (!scanner.SetPos(indexOffset)) {
-        return false;
-      }
+      scanner.SetPos(indexOffset);
 
       if (!VisitLocationAddressEntries(scanner,
                                        region,
@@ -615,9 +592,7 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    true);
 
-      if (!scanner.SetPos(indexOffset)) {
-        return false;
-      }
+      scanner.SetPos(indexOffset);
 
       std::list<FileOffset> offsets;
 
@@ -635,9 +610,7 @@ namespace osmscout {
             continue;
           }
 
-          if (!scanner.SetPos(offset)) {
-            return false;
-          }
+          scanner.SetPos(offset);
 
           AdminRegion adminRegion;
 
