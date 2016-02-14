@@ -1,0 +1,6 @@
+*.opt
+*.txt
+*.osm
+*.osm.pbf
+*.zip
+/**/
