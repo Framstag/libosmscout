@@ -69,8 +69,8 @@ namespace osmscout {
 
   bool FileWriter::Close()
   {
-	bool result;  
-	  
+    bool result;
+
     if (file==NULL) {
       log.Error() << "File '" << filename << "' already closed, cannot close it again!";
       return false;
@@ -80,11 +80,22 @@ namespace osmscout {
 
     file=NULL;
 
-	if (!result) {
+    if (!result) {
       log.Error() << "Cannot close file '" << filename << "'";
-	}
-	
+    }
+
     return result;
+  }
+
+  void FileWriter::CloseFailsafe()
+  {
+    if (file==NULL) {
+      return;
+    }
+
+    fclose(file);
+
+    file=NULL;
   }
 
   std::string FileWriter::GetFilename() const

@@ -32,6 +32,8 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/Exception.h>
+
 namespace osmscout {
 
   /**
@@ -56,6 +58,7 @@ namespace osmscout {
 
     bool Open(const std::string& filename);
     bool Close();
+    void CloseFailsafe();
     inline bool IsOpen() const
     {
       return file!=NULL;
