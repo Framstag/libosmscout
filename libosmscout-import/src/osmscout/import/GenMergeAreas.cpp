@@ -592,11 +592,8 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       AREAS2_TMP))) {
-        progress.Error("Cannot create '" + writer.GetFilename() + "'");
-        return false;
-      }
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AREAS2_TMP));
 
       writer.Write(areasWritten);
 
@@ -671,22 +668,17 @@ namespace osmscout {
       }
 
       scanner.Close();
+
+      writer.GotoBegin();
+      writer.Write(areasWritten);
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
-      return false;
-    }
 
-    if (!(writer.GotoBegin() &&
-          writer.Write(areasWritten))) {
-      progress.Error(std::string("Error while writing number of entries to file '")+
-                     writer.GetFilename()+"'");
-      return false;
-    }
+      scanner.CloseFailsafe();
+      writer.CloseFailsafe();
 
-    if (!writer.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     writer.GetFilename()+"'");
       return false;
     }
 

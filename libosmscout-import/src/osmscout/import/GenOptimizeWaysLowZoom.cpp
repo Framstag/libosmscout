@@ -821,49 +821,56 @@ namespace osmscout
     GetWayTypesToOptimize(*typeConfig,
                           wayTypes);
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     OptimizeWaysLowZoom::FILE_WAYSOPT_DAT))) {
-      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  OptimizeWaysLowZoom::FILE_WAYSOPT_DAT));
+
+      //
+      // Write header
+      //
+
+      writer.WriteFileOffset(indexOffset);
+
+      if (!HandleWays(parameter,
+                      progress,
+                      *typeConfig,
+                      writer,
+                      wayTypes,
+                      wayTypesData)) {
+        progress.Error("Error while optimizing ways");
+        return false;
+      }
+
+      if (!writer.GetPos(indexOffset)) {
+        progress.Error("Cannot read index start position");
+        return false;
+      }
+
+      if (!WriteHeader(writer,
+                       wayTypesData,
+                       (uint32_t)parameter.GetOptimizationMaxMag())) {
+        progress.Error("Cannot write file header");
+        return false;
+      }
+
+      if (!writer.SetPos(0)) {
+        progress.Error("Cannot read index offset");
+      }
+
+      if (!writer.WriteFileOffset(indexOffset)) {
+        progress.Error("Cannot write index position");
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
       return false;
     }
 
-    //
-    // Write header
-    //
-
-    writer.WriteFileOffset(indexOffset);
-
-    if (!HandleWays(parameter,
-                    progress,
-                    *typeConfig,
-                    writer,
-                    wayTypes,
-                    wayTypesData)) {
-      progress.Error("Error while optimizing ways");
-      return false;
-    }
-
-    if (!writer.GetPos(indexOffset)) {
-      progress.Error("Cannot read index start position");
-      return false;
-    }
-
-    if (!WriteHeader(writer,
-                     wayTypesData,
-                    (uint32_t)parameter.GetOptimizationMaxMag())) {
-      progress.Error("Cannot write file header");
-      return false;
-    }
-
-    if (!writer.SetPos(0)) {
-      progress.Error("Cannot read index offset");
-    }
-
-    if (!writer.WriteFileOffset(indexOffset)) {
-      progress.Error("Cannot write index position");
-    }
-
-    return !writer.HasError() &&
-           writer.Close();
+    return true;
   }
 }

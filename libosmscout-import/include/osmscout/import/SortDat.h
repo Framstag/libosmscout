@@ -211,19 +211,13 @@ namespace osmscout {
       }
 
 
-      if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                           dataFilename))) {
-        progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
-        return false;
-      }
+      dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      dataFilename));
 
       dataWriter.Write(overallDataCount);
 
-      if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          mapFilename))) {
-        progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
-        return false;
-      }
+      mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     mapFilename));
 
       mapWriter.Write(overallDataCount);
 
@@ -414,6 +408,17 @@ namespace osmscout {
       for (auto& source : sources) {
         source.scanner.Close();
       }
+
+      progress.Info(NumberToString(dataCopiedCount)+" of " +NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+
+      dataWriter.SetPos(0);
+      dataWriter.Write(dataCopiedCount);
+
+      mapWriter.SetPos(0);
+      mapWriter.Write(dataCopiedCount);
+
+      dataWriter.Close();
+      mapWriter.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
@@ -421,19 +426,14 @@ namespace osmscout {
       for (auto& source : sources) {
         source.scanner.CloseFailsafe();
       }
+
+      dataWriter.CloseFailsafe();
+      mapWriter.CloseFailsafe();
+
       return false;
     }
 
-    progress.Info(NumberToString(dataCopiedCount)+" of " +NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
-
-    dataWriter.SetPos(0);
-    dataWriter.Write(dataCopiedCount);
-
-    mapWriter.SetPos(0);
-    mapWriter.Write(dataCopiedCount);
-
-    return dataWriter.Close() &&
-           mapWriter.Close();
+    return true;
   }
 
   template <class N>
@@ -448,19 +448,13 @@ namespace osmscout {
     progress.SetAction("Copy data");
 
     try {
-      if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                           dataFilename))) {
-        progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
-        return false;
-      }
+      dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      dataFilename));
 
       dataWriter.Write(overallDataCount);
 
-      if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          mapFilename))) {
-        progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
-        return false;
-      }
+      mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     mapFilename));
 
       mapWriter.Write(overallDataCount);
 
@@ -556,8 +550,8 @@ namespace osmscout {
 
       progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
-      return dataWriter.Close() &&
-             mapWriter.Close();
+      dataWriter.Close();
+      mapWriter.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
@@ -566,8 +560,13 @@ namespace osmscout {
         source.scanner.CloseFailsafe();
       }
 
+      dataWriter.CloseFailsafe();
+      mapWriter.CloseFailsafe();
+
       return false;
     }
+
+    return true;
   }
 
   template <class N>

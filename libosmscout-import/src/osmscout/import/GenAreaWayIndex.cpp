@@ -434,6 +434,7 @@ namespace osmscout {
                                      const ImportParameter& parameter,
                                      Progress& progress)
   {
+    FileScanner          wayScanner;
     FileWriter            writer;
     std::vector<TypeData> wayTypeData;
     size_t                maxLevel;
@@ -471,39 +472,34 @@ namespace osmscout {
 
     progress.SetAction("Generating 'areaway.idx'");
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     AreaWayIndex::AREA_WAY_IDX))) {
-      progress.Error("Cannot create file '"+writer.GetFilename()+"'");
-      return false;
-    }
-
-    writer.Write(indexEntries);
-
-    for (const auto &type : typeConfig->GetWayTypes()) {
-      size_t i=type->GetIndex();
-
-      if (wayTypeData[i].HasEntries()) {
-        uint8_t    dataOffsetBytes=0;
-        FileOffset bitmapOffset=0;
-
-        writer.WriteTypeId(type->GetWayId(),
-                           typeConfig->GetWayTypeIdBytes());
-
-        writer.GetPos(wayTypeData[i].indexOffset);
-
-        writer.WriteFileOffset(bitmapOffset);
-        writer.Write(dataOffsetBytes);
-        writer.WriteNumber(wayTypeData[i].indexLevel);
-        writer.WriteNumber(wayTypeData[i].cellXStart);
-        writer.WriteNumber(wayTypeData[i].cellXEnd);
-        writer.WriteNumber(wayTypeData[i].cellYStart);
-        writer.WriteNumber(wayTypeData[i].cellYEnd);
-      }
-    }
-
-    FileScanner wayScanner;
-
     try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AreaWayIndex::AREA_WAY_IDX));
+
+      writer.Write(indexEntries);
+
+      for (const auto &type : typeConfig->GetWayTypes()) {
+        size_t i=type->GetIndex();
+
+        if (wayTypeData[i].HasEntries()) {
+          uint8_t    dataOffsetBytes=0;
+          FileOffset bitmapOffset=0;
+
+          writer.WriteTypeId(type->GetWayId(),
+                             typeConfig->GetWayTypeIdBytes());
+
+          writer.GetPos(wayTypeData[i].indexOffset);
+
+          writer.WriteFileOffset(bitmapOffset);
+          writer.Write(dataOffsetBytes);
+          writer.WriteNumber(wayTypeData[i].indexLevel);
+          writer.WriteNumber(wayTypeData[i].cellXStart);
+          writer.WriteNumber(wayTypeData[i].cellXEnd);
+          writer.WriteNumber(wayTypeData[i].cellYStart);
+          writer.WriteNumber(wayTypeData[i].cellYEnd);
+        }
+      }
+
       wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
@@ -593,14 +589,18 @@ namespace osmscout {
       }
 
       wayScanner.Close();
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
+      wayScanner.CloseFailsafe();
+      writer.CloseFailsafe();
+
       return false;
     }
 
-    return !writer.HasError() &&
-           writer.Close();
+    return true;
   }
 }
 

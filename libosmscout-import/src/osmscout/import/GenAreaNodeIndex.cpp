@@ -226,11 +226,8 @@ namespace osmscout {
 
       progress.SetAction("Generating 'areanode.idx'");
 
-      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       AreaNodeIndex::AREA_NODE_IDX))) {
-        progress.Error("Cannot create file '"+writer.GetFilename()+"'");
-        return false;
-      }
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AreaNodeIndex::AREA_NODE_IDX));
 
       uint32_t indexEntries=0;
 
@@ -435,9 +432,7 @@ namespace osmscout {
       }
 
       nodeScanner.Close();
-
-      return !writer.HasError() &&
-             writer.Close();
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();

@@ -48,43 +48,40 @@ namespace osmscout {
   {
     if (file!=NULL) {
       log.Warn() << "Automatically closing FileWriter for file '" << filename << "'!";
-      fclose(file);
+      CloseFailsafe();
     }
   }
 
-  bool FileWriter::Open(const std::string& filename)
+  void FileWriter::Open(const std::string& filename)
   {
     if (file!=NULL) {
-      return false;
+      throw IOException(filename,"Error opening file for writing","File already opened");
     }
 
+    hasError=true;
     this->filename=filename;
 
     file=fopen(filename.c_str(),"w+b");
 
-    hasError=file==NULL;
+    if (file==NULL) {
+      throw IOException(filename,"Error opening file for writing");
+    }
 
-    return !hasError;
+    hasError=false;
   }
 
-  bool FileWriter::Close()
+  void FileWriter::Close()
   {
-    bool result;
-
     if (file==NULL) {
-      log.Error() << "File '" << filename << "' already closed, cannot close it again!";
-      return false;
+      throw IOException(filename,"Cannot close file","File already closed");
     }
 
-    result=fclose(file)==0;
+    if (fclose(file)!=0) {
+      file=NULL;
+      throw IOException(filename,"Cannot close file");
+    }
 
     file=NULL;
-
-    if (!result) {
-      log.Error() << "Cannot close file '" << filename << "'";
-    }
-
-    return result;
   }
 
   void FileWriter::CloseFailsafe()

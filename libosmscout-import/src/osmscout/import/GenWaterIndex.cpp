@@ -1705,127 +1705,130 @@ namespace osmscout {
 
     FileWriter writer;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     WaterIndex::WATER_IDX))) {
-      progress.Error("Error while opening '"+writer.GetFilename()+"' for writing");
-      return false;
-    }
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  WaterIndex::WATER_IDX));
 
-    DumpIndexHeader(parameter,
-                    writer,
-                    levels);
+      DumpIndexHeader(parameter,
+                      writer,
+                      levels);
 
-    for (size_t level=0; level<levels.size(); level++) {
-      FileOffset                             indexOffset;
-      Magnification                          magnification;
-      MercatorProjection                     projection;
-      Data                                   data;
-      std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
+      for (size_t level=0; level<levels.size(); level++) {
+        FileOffset                             indexOffset;
+        Magnification                          magnification;
+        MercatorProjection                     projection;
+        Data                                   data;
+        std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
 
-      magnification.SetLevel((uint32_t)(level+parameter.GetWaterIndexMinMag()));
+        magnification.SetLevel((uint32_t)(level+parameter.GetWaterIndexMinMag()));
 
-      projection.Set(0,0,magnification,72,640,480);
+        projection.Set(0,0,magnification,72,640,480);
 
-      progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
+        progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 
-      writer.GetPos(indexOffset);
-      writer.SetPos(levels[level].indexEntryOffset);
-      writer.WriteFileOffset(indexOffset);
-      writer.SetPos(indexOffset);
+        writer.GetPos(indexOffset);
+        writer.SetPos(levels[level].indexEntryOffset);
+        writer.WriteFileOffset(indexOffset);
+        writer.SetPos(indexOffset);
 
-      if (!coastlines.empty()) {
-        MarkCoastlineCells(progress,
+        if (!coastlines.empty()) {
+          MarkCoastlineCells(progress,
+                             coastlines,
+                             levels[level]);
+
+          GetCoastlineData(parameter,
+                           progress,
+                           projection,
+                           levels[level],
                            coastlines,
-                           levels[level]);
+                           data);
 
-        GetCoastlineData(parameter,
-                         progress,
-                         projection,
-                         levels[level],
-                         coastlines,
-                         data);
+          HandleAreaCoastlinesCompletelyInACell(progress,
+                                                levels[level],
+                                                data,
+                                                cellGroundTileMap);
 
-        HandleAreaCoastlinesCompletelyInACell(progress,
-                                              levels[level],
-                                              data,
-                                              cellGroundTileMap);
-
-        HandleCoastlinesPartiallyInACell(progress,
-                                         coastlines,
-                                         levels[level],
-                                         cellGroundTileMap,
-                                         data);
-      }
-
-      CalculateLandCells(progress,
-                         levels[level],
-                         cellGroundTileMap);
-
-      if (parameter.GetAssumeLand()) {
-        AssumeLand(parameter,
-                   progress,
-                   *typeConfig,
-                   levels[level]);
-      }
-
-      if (!coastlines.empty()) {
-        FillWater(progress,
-                  levels[level],20);
-      }
-
-      FillLand(progress,
-               levels[level]);
-
-      for (uint32_t y=0; y<levels[level].cellYCount; y++) {
-        for (uint32_t x=0; x<levels[level].cellXCount; x++) {
-          State state=levels[level].GetState(x,y);
-
-          writer.WriteFileOffset((FileOffset)state);
+          HandleCoastlinesPartiallyInACell(progress,
+                                           coastlines,
+                                           levels[level],
+                                           cellGroundTileMap,
+                                           data);
         }
-      }
 
-      for (const auto& coord : cellGroundTileMap) {
-        FileOffset startPos;
+        CalculateLandCells(progress,
+                           levels[level],
+                           cellGroundTileMap);
 
-        writer.GetPos(startPos);
+        if (parameter.GetAssumeLand()) {
+          AssumeLand(parameter,
+                     progress,
+                     *typeConfig,
+                     levels[level]);
+        }
 
-        writer.WriteNumber((uint32_t)coord.second.size());
+        if (!coastlines.empty()) {
+          FillWater(progress,
+                    levels[level],20);
+        }
 
-        for (const auto& tile : coord.second) {
-          writer.Write((uint8_t)tile.type);
+        FillLand(progress,
+                 levels[level]);
 
-          writer.WriteNumber((uint32_t)tile.coords.size());
+        for (uint32_t y=0; y<levels[level].cellYCount; y++) {
+          for (uint32_t x=0; x<levels[level].cellXCount; x++) {
+            State state=levels[level].GetState(x,y);
 
-          for (size_t c=0; c<tile.coords.size(); c++) {
-            if (tile.coords[c].coast) {
-              uint16_t x=tile.coords[c].x | uint16_t(1 << 15);
-
-              writer.Write(x);
-            }
-            else {
-              writer.Write(tile.coords[c].x);
-            }
-            writer.Write(tile.coords[c].y);
+            writer.WriteFileOffset((FileOffset)state);
           }
         }
 
-        FileOffset endPos;
-        uint32_t cellId=coord.first.y*levels[level].cellXCount+coord.first.x;
-        size_t index=cellId*sizeof(FileOffset);
+        for (const auto& coord : cellGroundTileMap) {
+          FileOffset startPos;
 
-        writer.GetPos(endPos);
+          writer.GetPos(startPos);
 
-        writer.SetPos(indexOffset+index);
-        writer.WriteFileOffset(startPos);
+          writer.WriteNumber((uint32_t)coord.second.size());
 
-        writer.SetPos(endPos);
+          for (const auto& tile : coord.second) {
+            writer.Write((uint8_t)tile.type);
+
+            writer.WriteNumber((uint32_t)tile.coords.size());
+
+            for (size_t c=0; c<tile.coords.size(); c++) {
+              if (tile.coords[c].coast) {
+                uint16_t x=tile.coords[c].x | uint16_t(1 << 15);
+
+                writer.Write(x);
+              }
+              else {
+                writer.Write(tile.coords[c].x);
+              }
+              writer.Write(tile.coords[c].y);
+            }
+          }
+
+          FileOffset endPos;
+          uint32_t cellId=coord.first.y*levels[level].cellXCount+coord.first.x;
+          size_t index=cellId*sizeof(FileOffset);
+
+          writer.GetPos(endPos);
+
+          writer.SetPos(indexOffset+index);
+          writer.WriteFileOffset(startPos);
+
+          writer.SetPos(endPos);
+        }
       }
+
+      coastlines.clear();
+
+      writer.Close();
     }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
 
-    coastlines.clear();
+      writer.CloseFailsafe();
 
-    if (writer.HasError() || !writer.Close()) {
-      progress.Error("Error while closing '"+writer.GetFilename()+"'");
       return false;
     }
 

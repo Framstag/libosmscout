@@ -113,13 +113,10 @@ namespace osmscout {
 
     progress.SetAction(std::string("Generating '")+indexfile+"'");
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     indexfile))) {
-      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
-      return false;
-    }
-
     try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  indexfile));
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    datafile),
                    FileScanner::Sequential,true);
@@ -310,14 +307,18 @@ namespace osmscout {
       }
 
       scanner.Close();
-
-      return !writer.HasError() &&
-             writer.Close();
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
+      scanner.CloseFailsafe();
+      writer.CloseFailsafe();
+
       return false;
     }
+
+    return true;
   }
 }
 

@@ -56,8 +56,8 @@ namespace osmscout {
     FileWriter();
     virtual ~FileWriter();
 
-    bool Open(const std::string& filename);
-    bool Close();
+    void Open(const std::string& filename);
+    void Close();
     void CloseFailsafe();
     inline bool IsOpen() const
     {

@@ -895,27 +895,32 @@ namespace osmscout {
   {
     FileWriter writer;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     RoutingService::FILENAME_INTERSECTIONS_DAT))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  RoutingService::FILENAME_INTERSECTIONS_DAT));
+
+      writer.Write((uint32_t)nodeIdObjectsMap.size());
+
+      for (const auto& junction : nodeIdObjectsMap) {
+
+        writer.WriteNumber(junction.first);
+        writer.WriteNumber((uint32_t)junction.second.size());
+
+        ObjectFileRefStreamWriter objectFileRefWriter(writer);
+
+        for (const auto& object : junction.second) {
+          objectFileRefWriter.Write(object);
+        }
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
-    writer.Write((uint32_t)nodeIdObjectsMap.size());
-
-    for (const auto& junction : nodeIdObjectsMap) {
-
-      writer.WriteNumber(junction.first);
-      writer.WriteNumber((uint32_t)junction.second.size());
-
-      ObjectFileRefStreamWriter objectFileRefWriter(writer);
-
-      for (const auto& object : junction.second) {
-        objectFileRefWriter.Write(object);
-      }
-    }
-
-    return writer.Close();
+    return true;
   }
 
   bool RouteDataGenerator::LoadWays(const TypeConfig& typeConfig,
@@ -1628,32 +1633,33 @@ namespace osmscout {
   {
     FileWriter writer;
 
-    if (!writer.Open(variantFilename)) {
-      progress.Error("Cannot create '"+variantFilename+"'");
-      return false;
-    }
+    try {
+      writer.Open(variantFilename);
 
-    std::vector<ObjectVariantData> objectVariantData;
+      std::vector<ObjectVariantData> objectVariantData;
 
-    objectVariantData.resize(routeDataMap.size());
+      objectVariantData.resize(routeDataMap.size());
 
-    for (const auto& entry : routeDataMap) {
-      objectVariantData[entry.second]=entry.first;
-    }
-
-    writer.Write((uint32_t)objectVariantData.size());
-
-    for (const auto& entry : objectVariantData) {
-      if (!entry.Write(writer)) {
-        progress.Error(std::string("Error while writing object variant data to file '")+
-                       writer.GetFilename()+"'");
-        return false;
+      for (const auto& entry : routeDataMap) {
+        objectVariantData[entry.second]=entry.first;
       }
+
+      writer.Write((uint32_t)objectVariantData.size());
+
+      for (const auto& entry : objectVariantData) {
+        if (!entry.Write(writer)) {
+          progress.Error(std::string("Error while writing object variant data to file '")+
+                         writer.GetFilename()+"'");
+          return false;
+        }
+      }
+
+      progress.Info(NumberToString(objectVariantData.size()) + " object variant(s)");
+
+      writer.Close();
     }
-
-    progress.Info(NumberToString(objectVariantData.size()) + " object variant(s)");
-
-    if (!writer.Close()) {
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
@@ -1689,14 +1695,12 @@ namespace osmscout {
     // Writing route nodes
     //
 
-    if (!writer.Open(dataFilename)) {
-      progress.Error("Cannot create '"+dataFilename+"'");
-      return false;
-    }
-
-    writer.Write(writtenRouteNodeCount);
 
     try {
+      writer.Open(dataFilename);
+
+      writer.Write(writtenRouteNodeCount);
+
       wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       WayDataFile::WAYS_DAT),
                       FileScanner::Sequential,
@@ -1939,26 +1943,24 @@ namespace osmscout {
 
       assert(pendingOffsetsMap.empty());
 
+      writer.SetPos(0);
+      writer.Write(writtenRouteNodeCount);
+
+      progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) written");
+      progress.Info(NumberToString(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
+      progress.Info(NumberToString(objectCount)+ " object(s)");
+      progress.Info(NumberToString(pathCount) + " path(s)");
+      progress.Info(NumberToString(excludeCount) + " exclude(s)");
+
       wayScanner.Close();
       areaScanner.Close();
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       wayScanner.CloseFailsafe();
       areaScanner.CloseFailsafe();
-      return false;
-    }
-
-    writer.SetPos(0);
-    writer.Write(writtenRouteNodeCount);
-
-    progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) written");
-    progress.Info(NumberToString(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
-    progress.Info(NumberToString(objectCount)+ " object(s)");
-    progress.Info(NumberToString(pathCount) + " path(s)");
-    progress.Info(NumberToString(excludeCount) + " exclude(s)");
-
-    if (!writer.Close()) {
+      writer.CloseFailsafe();
       return false;
     }
 

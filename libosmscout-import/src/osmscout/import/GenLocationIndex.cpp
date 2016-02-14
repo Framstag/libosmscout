@@ -2168,40 +2168,44 @@ namespace osmscout {
 
     progress.SetAction(std::string("Write '")+LocationIndex::FILENAME_LOCATION_IDX+"'");
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     LocationIndex::FILENAME_LOCATION_IDX))) {
-      progress.Error("Cannot open '"+writer.GetFilename()+"'");
-      return false;
-    }
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  LocationIndex::FILENAME_LOCATION_IDX));
 
-    if (!writer.Write(bytesForNodeFileOffset) ||
-        !writer.Write(bytesForAreaFileOffset) ||
-        !writer.Write(bytesForWayFileOffset)) {
-      return false;
-    }
+      if (!writer.Write(bytesForNodeFileOffset) ||
+          !writer.Write(bytesForAreaFileOffset) ||
+          !writer.Write(bytesForWayFileOffset)) {
+        return false;
+      }
 
-    if (!WriteIgnoreTokens(writer,
-                           regionIgnoreTokens,
-                           locationIgnoreTokens)) {
-      return false;
-    }
+      if (!WriteIgnoreTokens(writer,
+                             regionIgnoreTokens,
+                             locationIgnoreTokens)) {
+        return false;
+      }
 
-    if (!WriteRegionIndex(writer,
-                          *rootRegion)) {
-      return false;
-    }
+      if (!WriteRegionIndex(writer,
+                            *rootRegion)) {
+        return false;
+      }
 
-    if (!WriteRegionData(writer,
-                         *rootRegion)) {
-      return false;
-    }
+      if (!WriteRegionData(writer,
+                           *rootRegion)) {
+        return false;
+      }
 
-    if (!WriteAddressData(writer,
-                          *rootRegion)) {
-      return false;
-    }
+      if (!WriteAddressData(writer,
+                            *rootRegion)) {
+        return false;
+      }
 
-    if (writer.HasError() || !writer.Close()) {
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
       return false;
     }
 

@@ -658,49 +658,56 @@ namespace osmscout
     GetAreaTypesToOptimize(*typeConfig,
                            areaTypes);
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     OptimizeAreasLowZoom::FILE_AREASOPT_DAT))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  OptimizeAreasLowZoom::FILE_AREASOPT_DAT));
+
+      //
+      // Write header
+      //
+
+      writer.WriteFileOffset(indexOffset);
+
+      if (!HandleAreas(parameter,
+                       progress,
+                       *typeConfig,
+                       writer,
+                       areaTypes,
+                       areaTypesData)) {
+        progress.Error("Error while optimizing areas");
+        return false;
+      }
+
+      if (!writer.GetPos(indexOffset)) {
+        progress.Error("Cannot read index start position");
+        return false;
+      }
+
+      if (!WriteHeader(writer,
+                       areaTypesData,
+                       (uint32_t)parameter.GetOptimizationMaxMag())) {
+        progress.Error("Cannot write file header");
+        return false;
+      }
+
+      if (!writer.SetPos(0)) {
+        progress.Error("Cannot read index offset");
+      }
+
+      if (!writer.WriteFileOffset(indexOffset)) {
+        progress.Error("Cannot write index position");
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
       return false;
     }
 
-    //
-    // Write header
-    //
-
-    writer.WriteFileOffset(indexOffset);
-
-    if (!HandleAreas(parameter,
-                     progress,
-                     *typeConfig,
-                     writer,
-                     areaTypes,
-                     areaTypesData)) {
-      progress.Error("Error while optimizing areas");
-      return false;
-    }
-
-    if (!writer.GetPos(indexOffset)) {
-      progress.Error("Cannot read index start position");
-      return false;
-    }
-
-    if (!WriteHeader(writer,
-                     areaTypesData,
-                    (uint32_t)parameter.GetOptimizationMaxMag())) {
-      progress.Error("Cannot write file header");
-      return false;
-    }
-
-    if (!writer.SetPos(0)) {
-      progress.Error("Cannot read index offset");
-    }
-
-    if (!writer.WriteFileOffset(indexOffset)) {
-      progress.Error("Cannot write index position");
-    }
-
-    return !writer.HasError() &&
-           writer.Close();
+    return true;
   }
 }

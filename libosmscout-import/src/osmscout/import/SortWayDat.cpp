@@ -62,14 +62,17 @@ namespace osmscout {
     nameReader=new NameFeatureValueReader(typeConfig);
     locationReader=new LocationFeatureValueReader(typeConfig);
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     SortWayDataGenerator::WAYADDRESS_DAT))) {
-      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  SortWayDataGenerator::WAYADDRESS_DAT));
+
+      writer.Write(overallDataCount);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
 
       return false;
     }
-
-    writer.Write(overallDataCount);
 
     return true;
   }
@@ -138,7 +141,18 @@ namespace osmscout {
     writer.SetPos(0);
     writer.Write(overallDataCount);
 
-    return writer.Close();
+    try {
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
+      return false;
+    }
+
+    return true;
   }
 
   class WayNodeReductionProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter

@@ -82,11 +82,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       NODES_TMP))) {
-        progress.Error("Cannot create file '"+writer.GetFilename()+"'");
-        return false;
-      }
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  NODES_TMP));
 
       writer.Write(nodesWrittenCount);
 
@@ -134,16 +131,17 @@ namespace osmscout {
       }
 
       scanner.Close();
+
+      writer.SetPos(0);
+      writer.Write(nodesWrittenCount);
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
-      return false;
-    }
 
-    writer.SetPos(0);
-    writer.Write(nodesWrittenCount);
+      scanner.CloseFailsafe();
+      writer.CloseFailsafe();
 
-    if (!writer.Close()) {
       return false;
     }
 

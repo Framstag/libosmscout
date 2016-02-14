@@ -197,17 +197,14 @@ namespace osmscout {
     FileWriter  writer;
     uint32_t    areaCount=0;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     AREAS3_TMP))) {
-      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
-      return false;
-    }
-
-    writer.Write(areaCount);
-
-    progress.SetAction("Copy data from 'areas2.tmp' to 'areas3.tmp'");
-
     try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AREAS3_TMP));
+
+      writer.Write(areaCount);
+
+      progress.SetAction("Copy data from 'areas2.tmp' to 'areas3.tmp'");
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    MergeAreasGenerator::AREAS2_TMP),
                    FileScanner::Sequential,
@@ -260,23 +257,23 @@ namespace osmscout {
       }
 
       scanner.Close();
+
+      if (!writer.SetPos(0)) {
+        return false;
+      }
+
+      if (!writer.Write(areaCount)) {
+        return false;
+      }
+
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
-      return false;
-    }
 
-    if (!writer.SetPos(0)) {
-      return false;
-    }
+      scanner.CloseFailsafe();
+      writer.CloseFailsafe();
 
-    if (!writer.Write(areaCount)) {
-      return false;
-    }
-
-    if (!writer.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     writer.GetFilename()+"'");
       return false;
     }
 
@@ -305,11 +302,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       WAYS_TMP))) {
-        progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
-        return false;
-      }
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  WAYS_TMP));
 
       writer.Write(dataCount);
 
@@ -351,15 +345,14 @@ namespace osmscout {
       }
 
       scanner.Close();
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
-      return false;
-    }
 
-    if (!writer.Close()) {
-      progress.Error(std::string("Error while closing file '")+
-                     writer.GetFilename()+"'");
+      scanner.CloseFailsafe();
+      writer.CloseFailsafe();
+
       return false;
     }
 

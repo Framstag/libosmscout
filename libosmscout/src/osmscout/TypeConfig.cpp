@@ -1738,90 +1738,96 @@ namespace osmscout {
   {
     FileWriter writer;
 
-    if (!writer.Open(AppendFileToDir(directory,"types.dat"))) {
-      //progress.Error("Cannot create 'types.dat'");
+    try {
+      writer.Open(AppendFileToDir(directory,"types.dat"));
+
+      writer.Write(FILE_FORMAT_VERSION);
+
+      writer.WriteNumber((uint32_t)tags.size());
+      for (const auto &tag : tags) {
+        writer.WriteNumber(tag.GetId());
+        writer.Write(tag.GetName());
+      }
+
+      uint32_t nameTagCount=0;
+      uint32_t nameAltTagCount=0;
+
+      for (const auto &tag : tags) {
+        uint32_t priority;
+
+        if (IsNameTag(tag.GetId(),priority)) {
+          nameTagCount++;
+        }
+
+        if (IsNameAltTag(tag.GetId(),priority)) {
+          nameAltTagCount++;
+        }
+      }
+
+      writer.WriteNumber(nameTagCount);
+      for (const auto &tag : tags) {
+        uint32_t priority;
+
+        if (IsNameTag(tag.GetId(),priority)) {
+          writer.WriteNumber(tag.GetId());
+          writer.Write(tag.GetName());
+          writer.WriteNumber((uint32_t)priority);
+        }
+      }
+
+      writer.WriteNumber(nameAltTagCount);
+      for (const auto &tag : tags) {
+        uint32_t priority;
+
+        if (IsNameAltTag(tag.GetId(),priority)) {
+          writer.WriteNumber(tag.GetId());
+          writer.Write(tag.GetName());
+          writer.WriteNumber((uint32_t)priority);
+        }
+      }
+
+      writer.WriteNumber((uint32_t)GetTypes().size());
+
+      for (auto type : GetTypes()) {
+        writer.Write(type->GetName());
+        writer.Write(type->CanBeNode());
+        writer.Write(type->CanBeWay());
+        writer.Write(type->CanBeArea());
+        writer.Write(type->CanBeRelation());
+        writer.Write(type->IsPath());
+        writer.Write(type->CanRouteFoot());
+        writer.Write(type->CanRouteBicycle());
+        writer.Write(type->CanRouteCar());
+        writer.Write(type->GetIndexAsAddress());
+        writer.Write(type->GetIndexAsLocation());
+        writer.Write(type->GetIndexAsRegion());
+        writer.Write(type->GetIndexAsPOI());
+        writer.Write(type->GetOptimizeLowZoom());
+        writer.Write(type->GetMultipolygon());
+        writer.Write(type->GetPinWay());
+        writer.Write(type->GetMergeAreas());
+        writer.Write(type->GetIgnoreSeaLand());
+        writer.Write(type->GetIgnore());
+
+        writer.WriteNumber((uint32_t)type->GetFeatures().size());
+        for (const auto &feature : type->GetFeatures()) {
+          writer.Write(feature.GetFeature()->GetName());
+        }
+
+        writer.WriteNumber((uint32_t)type->GetGroups().size());
+        for (const auto &groupName : type->GetGroups()) {
+          writer.Write(groupName);
+        }
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      writer.CloseFailsafe();
       return false;
     }
 
-    writer.Write(FILE_FORMAT_VERSION);
-
-    writer.WriteNumber((uint32_t)tags.size());
-    for (const auto &tag : tags) {
-      writer.WriteNumber(tag.GetId());
-      writer.Write(tag.GetName());
-    }
-
-    uint32_t nameTagCount=0;
-    uint32_t nameAltTagCount=0;
-
-    for (const auto &tag : tags) {
-      uint32_t priority;
-
-      if (IsNameTag(tag.GetId(),priority)) {
-        nameTagCount++;
-      }
-
-      if (IsNameAltTag(tag.GetId(),priority)) {
-        nameAltTagCount++;
-      }
-    }
-
-    writer.WriteNumber(nameTagCount);
-    for (const auto &tag : tags) {
-      uint32_t priority;
-
-      if (IsNameTag(tag.GetId(),priority)) {
-        writer.WriteNumber(tag.GetId());
-        writer.Write(tag.GetName());
-        writer.WriteNumber((uint32_t)priority);
-      }
-    }
-
-    writer.WriteNumber(nameAltTagCount);
-    for (const auto &tag : tags) {
-      uint32_t priority;
-
-      if (IsNameAltTag(tag.GetId(),priority)) {
-        writer.WriteNumber(tag.GetId());
-        writer.Write(tag.GetName());
-        writer.WriteNumber((uint32_t)priority);
-      }
-    }
-
-    writer.WriteNumber((uint32_t)GetTypes().size());
-
-    for (auto type : GetTypes()) {
-      writer.Write(type->GetName());
-      writer.Write(type->CanBeNode());
-      writer.Write(type->CanBeWay());
-      writer.Write(type->CanBeArea());
-      writer.Write(type->CanBeRelation());
-      writer.Write(type->IsPath());
-      writer.Write(type->CanRouteFoot());
-      writer.Write(type->CanRouteBicycle());
-      writer.Write(type->CanRouteCar());
-      writer.Write(type->GetIndexAsAddress());
-      writer.Write(type->GetIndexAsLocation());
-      writer.Write(type->GetIndexAsRegion());
-      writer.Write(type->GetIndexAsPOI());
-      writer.Write(type->GetOptimizeLowZoom());
-      writer.Write(type->GetMultipolygon());
-      writer.Write(type->GetPinWay());
-      writer.Write(type->GetMergeAreas());
-      writer.Write(type->GetIgnoreSeaLand());
-      writer.Write(type->GetIgnore());
-
-      writer.WriteNumber((uint32_t)type->GetFeatures().size());
-      for (const auto &feature : type->GetFeatures()) {
-        writer.Write(feature.GetFeature()->GetName());
-      }
-
-      writer.WriteNumber((uint32_t)type->GetGroups().size());
-      for (const auto &groupName : type->GetGroups()) {
-        writer.Write(groupName);
-      }
-    }
-
-    return !writer.HasError()&&writer.Close();
+    return true;
   }
 }

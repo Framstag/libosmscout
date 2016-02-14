@@ -59,14 +59,16 @@ namespace osmscout {
     locationReader=new LocationFeatureValueReader(typeConfig);
     addressReader=new AddressFeatureValueReader(typeConfig);
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     SortNodeDataGenerator::NODEADDRESS_DAT))) {
-      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  SortNodeDataGenerator::NODEADDRESS_DAT));
 
+      writer.Write(overallDataCount);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    writer.Write(overallDataCount);
 
     return true;
   }
@@ -155,10 +157,21 @@ namespace osmscout {
     delete addressReader;
     addressReader=NULL;
 
-    writer.SetPos(0);
-    writer.Write(overallDataCount);
+    try {
+      writer.SetPos(0);
+      writer.Write(overallDataCount);
 
-    return writer.Close();
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
+      return false;
+    }
+
+    return true;
   }
 
   class NodeTypeIgnoreProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter

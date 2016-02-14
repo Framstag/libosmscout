@@ -25,6 +25,7 @@
 
 #include <osmscout/CoordDataFile.h>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
@@ -293,46 +294,55 @@ namespace osmscout {
 
   bool Preprocess::Callback::Initialize()
   {
-    nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                    RAWNODES_DAT));
-    nodeWriter.Write(nodeCount);
+    try {
+      nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      RAWNODES_DAT));
+      nodeWriter.Write(nodeCount);
 
-    wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   RAWWAYS_DAT));
-    wayWriter.Write(wayCount+areaCount);
+      wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     RAWWAYS_DAT));
+      wayWriter.Write(wayCount+areaCount);
 
-    coastlineWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         RAWCOASTLINE_DAT));
-    coastlineWriter.Write(coastlineCount);
+      coastlineWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                           RAWCOASTLINE_DAT));
+      coastlineWriter.Write(coastlineCount);
 
-    turnRestrictionWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                               RAWTURNRESTR_DAT));
-    turnRestrictionWriter.Write(turnRestrictionCount);
+      turnRestrictionWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                 RAWTURNRESTR_DAT));
+      turnRestrictionWriter.Write(turnRestrictionCount);
 
-    multipolygonWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                            RAWRELS_DAT));
-    multipolygonWriter.Write(multipolygonCount);
+      multipolygonWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                              RAWRELS_DAT));
+      multipolygonWriter.Write(multipolygonCount);
 
-    coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     CoordDataFile::COORD_DAT));
+      coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       CoordDataFile::COORD_DAT));
 
-    FileOffset offset=0;
+      FileOffset offset=0;
 
-    coordWriter.Write(coordPageSize);
-    coordWriter.Write(offset);
-    coordWriter.FlushCurrentBlockWithZeros(coordPageSize*coordByteSize);
+      coordWriter.Write(coordPageSize);
+      coordWriter.Write(offset);
+      coordWriter.FlushCurrentBlockWithZeros(coordPageSize*coordByteSize);
 
-    coordPageCount++;
+      coordPageCount++;
 
-    coords.resize(coordPageSize);
-    isSet.resize(coordPageSize);
+      coords.resize(coordPageSize);
+      isSet.resize(coordPageSize);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
 
-    return !nodeWriter.HasError() &&
-           !wayWriter.HasError() &&
-           !coastlineWriter.HasError() &&
-           !turnRestrictionWriter.HasError() &&
-           !multipolygonWriter.HasError() &&
-           !coordWriter.HasError();
+      nodeWriter.CloseFailsafe();
+      wayWriter.CloseFailsafe();
+      coastlineWriter.CloseFailsafe();
+      turnRestrictionWriter.CloseFailsafe();
+      multipolygonWriter.CloseFailsafe();
+      coordWriter.CloseFailsafe();
+
+      return false;
+    }
+
+    return true;
   }
 
   void Preprocess::Callback::ProcessNode(const OSMId& id,
@@ -595,19 +605,27 @@ namespace osmscout {
 
     progress.SetAction("Writing 'distribution.dat'");
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     DISTRIBUTION_DAT))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  DISTRIBUTION_DAT));
+
+      for (const auto &type : typeConfig->GetTypes()) {
+        writer.Write(nodeStat[type->GetIndex()]);
+        writer.Write(wayStat[type->GetIndex()]);
+        writer.Write(areaStat[type->GetIndex()]);
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
       return false;
     }
 
-    for (const auto &type : typeConfig->GetTypes()) {
-      writer.Write(nodeStat[type->GetIndex()]);
-      writer.Write(wayStat[type->GetIndex()]);
-      writer.Write(areaStat[type->GetIndex()]);
-    }
-
-    return writer.Close();
+    return true;
   }
 
   bool Preprocess::Callback::DumpBoundingBox()
@@ -616,19 +634,27 @@ namespace osmscout {
 
     FileWriter writer;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     BOUNDING_DAT))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  BOUNDING_DAT));
+
+      if (!writer.WriteCoord(minCoord) ||
+          !writer.WriteCoord(maxCoord)) {
+        progress.Error("Cannot write to '"+writer.GetFilename()+"'");
+        return false;
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
       return false;
     }
 
-    if (!writer.WriteCoord(minCoord) ||
-        !writer.WriteCoord(maxCoord)) {
-      progress.Error("Cannot write to '"+writer.GetFilename()+"'");
-      return false;
-    }
-
-    return writer.Close();
+    return true;
   }
 
   bool Preprocess::Callback::Cleanup(bool success)
@@ -668,12 +694,26 @@ namespace osmscout {
       coordWriter.Write(entry.second);
     }
 
-    nodeWriter.Close();
-    wayWriter.Close();
-    coastlineWriter.Close();
-    coordWriter.Close();
-    turnRestrictionWriter.Close();
-    multipolygonWriter.Close();
+    try {
+      nodeWriter.Close();
+      wayWriter.Close();
+      coastlineWriter.Close();
+      coordWriter.Close();
+      turnRestrictionWriter.Close();
+      multipolygonWriter.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      nodeWriter.CloseFailsafe();
+      wayWriter.CloseFailsafe();
+      coastlineWriter.CloseFailsafe();
+      coordWriter.CloseFailsafe();
+      turnRestrictionWriter.CloseFailsafe();
+      multipolygonWriter.CloseFailsafe();
+
+      return false;
+    }
 
     if (success) {
       progress.Info(std::string("Coords:           ")+NumberToString(coordCount));

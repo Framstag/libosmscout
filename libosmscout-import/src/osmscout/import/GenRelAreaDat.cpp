@@ -1080,11 +1080,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       RELAREA_TMP))) {
-        progress.Error("Cannot create '"+writer.GetFilename()+"'");
-        return false;
-      }
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  RELAREA_TMP));
 
       writer.Write(writtenRelationCount);
 
@@ -1182,46 +1179,47 @@ namespace osmscout {
       writer.SetPos(0);
       writer.Write(writtenRelationCount);
 
-      if (!(writer.Close() &&
-            wayDataFile.Close() &&
+      writer.Close();
+
+      if (!(wayDataFile.Close() &&
             coordDataFile.Close())) {
         return false;
       }
 
       scanner.Close();
+
+      progress.SetAction("Generate wayareablack.dat");
+
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  WAYAREABLACK_DAT));
+
+      for (const auto& id : wayAreaIndexBlacklist) {
+        writer.WriteNumber(id);
+      }
+
+      progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");
+
+      progress.Info("Dump statistics");
+
+      for (const auto &type : typeConfig->GetTypes()) {
+        size_t idx=type->GetIndex();
+
+        std::string buffer=type->GetName()+": "+
+                NumberToString(wayTypeCount[idx])+" "+NumberToString(wayNodeTypeCount[idx])+" "+
+                NumberToString(areaTypeCount[idx])+" "+NumberToString(areaNodeTypeCount[idx]);
+
+        progress.Debug(buffer);
+      }
+
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       scanner.CloseFailsafe();
+      writer.CloseFailsafe();
+
       return false;
     }
-
-    progress.SetAction("Generate wayareablack.dat");
-
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        WAYAREABLACK_DAT))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
-      return false;
-    }
-
-    for (const auto& id : wayAreaIndexBlacklist) {
-      writer.WriteNumber(id);
-    }
-
-    progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");
-
-    progress.Info("Dump statistics");
-
-    for (const auto &type : typeConfig->GetTypes()) {
-      size_t idx=type->GetIndex();
-
-      std::string buffer=type->GetName()+": "+
-              NumberToString(wayTypeCount[idx])+" "+NumberToString(wayNodeTypeCount[idx])+" "+
-              NumberToString(areaTypeCount[idx])+" "+NumberToString(areaNodeTypeCount[idx]);
-
-      progress.Debug(buffer);
-    }
-
-    return writer.Close();
   }
 }

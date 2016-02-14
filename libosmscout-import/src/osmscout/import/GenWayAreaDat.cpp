@@ -436,11 +436,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                           WAYAREA_TMP))) {
-        progress.Error("Cannot create '" + areaWriter.GetFilename() + "'");
-        return false;
-      }
+      areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      WAYAREA_TMP));
 
       areaWriter.Write(writtenWayCount);
 
@@ -529,18 +526,17 @@ namespace osmscout {
       /* -------*/
 
       scanner.Close();
+
+      areaWriter.SetPos(0);
+      areaWriter.Write(writtenWayCount);
+      areaWriter.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       scanner.CloseFailsafe();
-      return false;
-    }
+      areaWriter.CloseFailsafe();
 
-    areaWriter.SetPos(0);
-    areaWriter.Write(writtenWayCount);
-
-
-    if (!areaWriter.Close()) {
       return false;
     }
 

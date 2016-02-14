@@ -64,7 +64,7 @@ namespace osmscout {
   };
 
   bool AreaLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
-                                                          Progress& progress,
+                                                          Progress& /*progress*/,
                                                           const TypeConfig& typeConfig)
   {
     overallDataCount=0;
@@ -73,14 +73,16 @@ namespace osmscout {
     locationReader=new LocationFeatureValueReader(typeConfig);
     addressReader=new AddressFeatureValueReader(typeConfig);
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     AreaAreaIndexGenerator::AREAADDRESS_DAT))) {
-      progress.Error(std::string("Cannot create '")+writer.GetFilename()+"'");
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AreaAreaIndexGenerator::AREAADDRESS_DAT));
 
+      writer.Write(overallDataCount);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
-
-    writer.Write(overallDataCount);
 
     return true;
   }
@@ -210,10 +212,19 @@ namespace osmscout {
     delete addressReader;
     addressReader=NULL;
 
-    writer.SetPos(0);
-    writer.Write(overallDataCount);
+    try {
+      writer.SetPos(0);
+      writer.Write(overallDataCount);
 
-    return writer.Close();
+      writer.Close();
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      writer.CloseFailsafe();
+      return false;
+    }
+
+    return true;
   }
 
   class AreaNodeReductionProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
@@ -940,6 +951,9 @@ namespace osmscout {
                                               Progress& progress)
   {
     FileScanner         scanner;
+    FileWriter          indexWriter;
+    FileWriter          dataWriter;
+    FileWriter          mapWriter;
     std::vector<Level>  levels;
 
     try {
@@ -974,9 +988,6 @@ namespace osmscout {
       // Writing index, data and idmap files
       //
 
-      FileWriter indexWriter;
-      FileWriter  dataWriter;
-      FileWriter  mapWriter;
       uint32_t    overallDataCount=0;
 
       FileOffset topLevelOffset=0;
@@ -984,11 +995,8 @@ namespace osmscout {
 
       // Index file
 
-      if (!indexWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                            AreaAreaIndex::AREA_AREA_IDX))) {
-        progress.Error("Cannot create file '"+indexWriter.GetFilename()+"'");
-        return false;
-      }
+      indexWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       AreaAreaIndex::AREA_AREA_IDX));
 
       indexWriter.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
 
@@ -1005,21 +1013,15 @@ namespace osmscout {
 
       // Data file
 
-      if (!dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                           AreaDataFile::AREAS_DAT))) {
-        progress.Error(std::string("Cannot create '")+dataWriter.GetFilename()+"'");
-        return false;
-      }
+      dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      AreaDataFile::AREAS_DAT));
 
       dataWriter.Write(overallDataCount);
 
       // Id map file
 
-      if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          AreaDataFile::AREAS_IDMAP))) {
-        progress.Error(std::string("Cannot create '")+mapWriter.GetFilename()+"'");
-        return false;
-      }
+      mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                          AreaDataFile::AREAS_IDMAP));
 
       mapWriter.Write(overallDataCount);
 
@@ -1062,18 +1064,22 @@ namespace osmscout {
       progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
       scanner.Close();
-
-      return !indexWriter.HasError() &&
-             !dataWriter.HasError() &&
-             !mapWriter.HasError() &&
-             indexWriter.Close() &&
-             dataWriter.Close() &&
-             mapWriter.Close();
+      indexWriter.Close();
+      dataWriter.Close();
+      mapWriter.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
+      scanner.CloseFailsafe();
+      indexWriter.CloseFailsafe();
+      dataWriter.CloseFailsafe();
+      mapWriter.CloseFailsafe();
+
       return false;
     }
+
+    return true;
   }
 
   bool AreaAreaIndexGenerator::Import(const TypeConfigRef& typeConfig,

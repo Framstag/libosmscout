@@ -129,20 +129,23 @@ namespace osmscout {
 
     FileWriter writer;
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     TURNRESTR_DAT))) {
-      progress.Error("Cannot create '"+writer.GetFilename()+"'");
-      return false;
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  TURNRESTR_DAT));
+
+      writer.Write((uint32_t)restrictionsSet.size());
+
+      for (const auto &restriction : restrictionsSet) {
+        restriction->Write(writer);
+      }
+
+      writer.Close();
     }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
 
-    writer.Write((uint32_t)restrictionsSet.size());
+      writer.CloseFailsafe();
 
-    for (const auto &restriction : restrictionsSet) {
-      restriction->Write(writer);
-    }
-
-    if (!writer.Close()) {
-      progress.Error("Cannot close file '"+writer.GetFilename()+"'");
       return false;
     }
 
@@ -676,11 +679,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          WAYWAY_TMP))) {
-        progress.Error("Cannot create '"+wayWriter.GetFilename()+"'");
-        return false;
-      }
+      wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     WAYWAY_TMP));
 
       wayWriter.Write(writtenWayCount);
 
@@ -783,18 +783,14 @@ namespace osmscout {
       /* -------*/
 
       scanner.Close();
+
+      wayWriter.SetPos(0);
+      wayWriter.Write(writtenWayCount);
+      wayWriter.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
-      return false;
-    }
-
-    wayWriter.SetPos(0);
-    wayWriter.Write(writtenWayCount);
-
-
-    if (!wayWriter.Close()) {
       return false;
     }
 

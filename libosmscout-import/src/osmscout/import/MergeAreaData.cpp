@@ -51,11 +51,8 @@ namespace osmscout {
     uint32_t    dataWritten=0;
 
     try {
-      if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       AREAS_TMP))) {
-        progress.Error("Cannot create '" + writer.GetFilename() + "'");
-        return false;
-      }
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AREAS_TMP));
 
       writer.Write(dataWritten);
 
@@ -163,12 +160,17 @@ namespace osmscout {
         return false;
       }
 
-      return writer.Close();
+      writer.Close();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
+      writer.CloseFailsafe();
+
       return false;
     }
+
+    return true;
   }
 
   bool MergeAreaDataGenerator::Import(const TypeConfigRef& typeConfig,
