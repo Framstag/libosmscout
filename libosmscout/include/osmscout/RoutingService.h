@@ -298,7 +298,8 @@ namespace osmscout {
                                               RouteDescription& description);
 
 #ifdef SWIG
-    %apply long& INOUT {size_t& nodeIndex};
+    %apply ObjectFileRef& OUTPUT {ObjectFileRef& object};
+    %apply long& OUTPUT {size_t& nodeIndex};
 #endif
     bool GetClosestRoutableNode(double lat,
                                 double lon,
