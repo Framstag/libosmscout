@@ -152,9 +152,7 @@ namespace osmscout {
 
       scanner.Close();
 
-      if (!writer.SetPos(0)) {
-        return false;
-      }
+      writer.GotoBegin();
 
       if (!writer.Write(dataWritten)) {
         return false;

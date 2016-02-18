@@ -129,13 +129,13 @@ namespace osmscout {
       writer.WriteNumber(pageSize);       // Size of one index page in bytes
       writer.WriteNumber(dataCount);      // Number of entries in data file
 
-      writer.GetPos(levelsOffset);
+      levelsOffset=writer.GetPos();
       writer.Write((uint32_t)0);        // Number of levels
 
-      writer.GetPos(lastLevelPageStartOffset);
+      lastLevelPageStartOffset=writer.GetPos();
       writer.WriteFileOffset((FileOffset)0);        // Write the starting position of the last page
 
-      writer.GetPos(indexPageCountsOffset);
+      indexPageCountsOffset=writer.GetPos();
       writer.WriteFileOffset((FileOffset)0);        // Write the starting position of list of sizes of each index level
 
       writer.FlushCurrentBlockWithZeros(pageSize);
@@ -198,7 +198,7 @@ namespace osmscout {
         if (currentPageSize==0) {
           FileOffset writePos;
 
-          writer.GetPos(writePos);
+          writePos=writer.GetPos();
 
           startingIds.push_back(data.GetId());
           pageStarts.push_back(writePos);
@@ -206,7 +206,7 @@ namespace osmscout {
           writer.WriteNumber(data.GetId());
           writer.WriteNumber(readPos);
 
-          writer.GetPos(writePos);
+          writePos=writer.GetPos();
           currentPageSize=writePos%pageSize;
         }
 
@@ -261,7 +261,7 @@ namespace osmscout {
           if (currentPageSize==0) {
             FileOffset writePos;
 
-            writer.GetPos(writePos);
+            writePos=writer.GetPos();
 
             startingIds.push_back(si[i]);
             pageStarts.push_back(writePos);
@@ -269,7 +269,7 @@ namespace osmscout {
             writer.WriteNumber(si[i]);
             writer.WriteNumber(po[i]);
 
-            writer.GetPos(writePos);
+            writePos=writer.GetPos();
             currentPageSize=writePos%pageSize;
           }
         }
@@ -284,7 +284,7 @@ namespace osmscout {
 
         FileOffset indexPageCountsPos;
 
-        writer.GetPos(indexPageCountsPos);
+        indexPageCountsPos=writer.GetPos();
 
         writer.SetPos(levelsOffset);
         writer.Write((uint32_t)indexPageCounts.size());

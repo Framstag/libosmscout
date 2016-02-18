@@ -250,7 +250,7 @@ namespace osmscout {
 
           writer.WriteNumber(type->GetNodeId());
 
-          writer.GetPos(nodeTypeData[i].indexOffset);
+          nodeTypeData[i].indexOffset=writer.GetPos();
 
           writer.WriteFileOffset(bitmapOffset);
           writer.Write(dataOffsetBytes);
@@ -356,25 +356,16 @@ namespace osmscout {
 
           FileOffset bitmapOffset;
 
-          if (!writer.GetPos(bitmapOffset)) {
-            progress.Error("Cannot get type index start position in file");
-            return false;
-          }
+          bitmapOffset=writer.GetPos();
 
           assert(nodeTypeData[type->GetIndex()].indexOffset!=0);
 
-          if (!writer.SetPos(nodeTypeData[type->GetIndex()].indexOffset)) {
-            progress.Error("Cannot go to type index offset in file");
-            return false;
-          }
+          writer.SetPos(nodeTypeData[type->GetIndex()].indexOffset);
 
           writer.WriteFileOffset(bitmapOffset);
           writer.Write(dataOffsetBytes);
 
-          if (!writer.SetPos(bitmapOffset)) {
-            progress.Error("Cannot go to type index start position in file");
-            return false;
-          }
+          writer.SetPos(bitmapOffset);
 
           // Write the bitmap with offsets for each cell
           // We prefill with zero and only overwrite cells that have data
@@ -388,10 +379,7 @@ namespace osmscout {
 
           FileOffset dataStartOffset;
 
-          if (!writer.GetPos(dataStartOffset)) {
-            progress.Error("Cannot get start of data section after bitmap");
-            return false;
-          }
+          dataStartOffset=writer.GetPos();
 
           // Now write the list of offsets of objects for every cell with content
           for (const auto& cell : typeCellOffsets[type->GetIndex()]) {
@@ -402,23 +390,14 @@ namespace osmscout {
             FileOffset previousOffset=0;
             FileOffset cellOffset;
 
-            if (!writer.GetPos(cellOffset)) {
-              progress.Error("Cannot get cell start position in file");
-              return false;
-            }
+            cellOffset=writer.GetPos();
 
-            if (!writer.SetPos(bitmapCellOffset)) {
-              progress.Error("Cannot go to cell start position in file");
-              return false;
-            }
+            writer.SetPos(bitmapCellOffset);
 
             writer.WriteFileOffset(cellOffset-dataStartOffset+1,
                                    dataOffsetBytes);
 
-            if (!writer.SetPos(cellOffset)) {
-              progress.Error("Cannot go back to cell start position in file");
-              return false;
-            }
+            writer.SetPos(cellOffset);
 
             writer.WriteNumber((uint32_t) cell.second.size());
 

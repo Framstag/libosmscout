@@ -114,11 +114,7 @@ namespace osmscout {
 
         FileOffset fileOffset;
 
-        if (!writer.GetPos(fileOffset)) {
-          progress.Error(std::string("Error while reading current fileOffset in file '")+
-                         writer.GetFilename()+"'");
-          return false;
-        }
+        fileOffset=writer.GetPos();
 
         if (!writer.Write((uint8_t)osmRefNode) ||
             !writer.Write(rawNode.GetId()) ||

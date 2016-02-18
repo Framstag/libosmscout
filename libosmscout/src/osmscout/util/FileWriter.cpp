@@ -100,10 +100,15 @@ namespace osmscout {
     return filename;
   }
 
-  bool FileWriter::GetPos(FileOffset& pos)
+  /**
+   * Returns the current position of the writing cursor in relation to the begining of the file
+   *
+   * throws IOException on error
+   */
+  FileOffset FileWriter::GetPos()
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read position in file","File already closed");
     }
 
 #if defined(HAVE_FSEEKO)
@@ -111,28 +116,31 @@ namespace osmscout {
 
     if (filepos==-1) {
       hasError=true;
+      throw IOException(filename,"Cannot read position in file");
     }
-    else {
-      pos=(FileOffset)filepos;
-    }
+
+    return (FileOffset)filepos;
 #else
     long filepos=ftell(file);
 
     if (filepos==-1) {
       hasError=true;
+      throw IOException(filename,"Cannot read position in file");
     }
-    else {
-      pos=(FileOffset)filepos;
-    }
-#endif
 
-    return !hasError;
+    return (FileOffset)filepos;
+#endif
   }
 
-  bool FileWriter::SetPos(FileOffset pos)
+  /**
+   * Moves the writing cursor to the given file position
+   *
+   * throws IOException on error
+   */
+  void FileWriter::SetPos(FileOffset pos)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot set position in file","File already closed");
     }
 
 #if defined(HAVE_FSEEKO)
@@ -141,10 +149,17 @@ namespace osmscout {
     hasError=fseek(file,pos,SEEK_SET)!=0;
 #endif
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot set position in file");
+    }
   }
 
-  bool FileWriter::GotoBegin()
+  /**
+   * Moves the writing cursor to the start of the file (offset 0)
+   *
+   * throws IOException on error
+   */
+  void FileWriter::GotoBegin()
   {
     return SetPos(0);
   }
@@ -842,7 +857,10 @@ namespace osmscout {
     FileOffset currentPos;
     size_t     bytesToWrite;
 
-    if (!GetPos(currentPos)) {
+    try {
+      currentPos=GetPos();
+    }
+    catch (IOException& e) {
       return false;
     }
 

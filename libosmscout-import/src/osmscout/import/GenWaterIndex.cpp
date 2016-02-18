@@ -791,7 +791,7 @@ namespace osmscout {
 
     for (auto& level : levels) {
       FileOffset offset=0;
-      writer.GetPos(level.indexEntryOffset);
+      level.indexEntryOffset=writer.GetPos();
       writer.WriteFileOffset(offset);
       writer.WriteNumber(level.cellXStart);
       writer.WriteNumber(level.cellXEnd);
@@ -1726,7 +1726,7 @@ namespace osmscout {
 
         progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 
-        writer.GetPos(indexOffset);
+        indexOffset=writer.GetPos();
         writer.SetPos(levels[level].indexEntryOffset);
         writer.WriteFileOffset(indexOffset);
         writer.SetPos(indexOffset);
@@ -1785,7 +1785,7 @@ namespace osmscout {
         for (const auto& coord : cellGroundTileMap) {
           FileOffset startPos;
 
-          writer.GetPos(startPos);
+          startPos=writer.GetPos();
 
           writer.WriteNumber((uint32_t)coord.second.size());
 
@@ -1811,7 +1811,7 @@ namespace osmscout {
           uint32_t cellId=coord.first.y*levels[level].cellXCount+coord.first.x;
           size_t index=cellId*sizeof(FileOffset);
 
-          writer.GetPos(endPos);
+          endPos=writer.GetPos();
 
           writer.SetPos(indexOffset+index);
           writer.WriteFileOffset(startPos);

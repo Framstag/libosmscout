@@ -71,9 +71,9 @@ namespace osmscout {
 
     std::string GetFilename() const;
 
-    bool GetPos(FileOffset &pos);
-    bool SetPos(FileOffset pos);
-    bool GotoBegin();
+    FileOffset GetPos();
+    void SetPos(FileOffset pos);
+    void GotoBegin();
 
     bool Write(const char* buffer, size_t bytes);
 

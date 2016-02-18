@@ -318,11 +318,21 @@ namespace osmscout {
     return filename;
   }
 
+  /**
+   * Moves the reading cursor to the start of the file (offset 0)
+   *
+   * throws IOException on error
+   */
   void FileScanner::GotoBegin()
   {
     SetPos(0);
   }
 
+  /**
+   * Moves the reading cursor to the given file position
+   *
+   * throws IOException on error
+   */
   void FileScanner::SetPos(FileOffset pos)
   {
     if (HasError()) {
@@ -332,6 +342,7 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (pos>=size) {
+        hasError=true;
         throw IOException(filename,"Cannot set position in file","Position beyond file end");
       }
 
@@ -354,6 +365,11 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Returns the current position of the reading cursor in relation to the begining of the file
+   *
+   * throws IOException on error
+   */
   FileOffset FileScanner::GetPos() const
   {
     if (HasError()) {

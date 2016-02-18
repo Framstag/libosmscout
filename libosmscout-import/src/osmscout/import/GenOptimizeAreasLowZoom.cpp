@@ -347,11 +347,7 @@ namespace osmscout
                                                  FileOffsetFileOffsetMap& offsets)
   {
     for (const auto &area : areas) {
-      FileOffset offset;
-
-      writer.GetPos(offset);
-
-      offsets[area->GetFileOffset()]=offset;
+      offsets[area->GetFileOffset()]=writer.GetPos();
 
       if (!area->WriteOptimized(typeConfig,
                                 writer)) {
@@ -436,10 +432,7 @@ namespace osmscout
                   NumberToString(indexEntries)+" entries, "+
                   ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));
 
-    if (!writer.GetPos(data.bitmapOffset)) {
-      progress.Error("Cannot get type index start position in file");
-      return false;
-    }
+    data.bitmapOffset=writer.GetPos();
 
     // Write the bitmap with offsets for each cell
     // We prefill with zero and only overrite cells that have data
@@ -453,10 +446,7 @@ namespace osmscout
 
     FileOffset dataStartOffset;
 
-    if (!writer.GetPos(dataStartOffset)) {
-      progress.Error("Cannot get start of data section after bitmap");
-      return false;
-    }
+    dataStartOffset=writer.GetPos();
 
     // Now write the list of offsets of objects for every cell with content
     for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
@@ -468,23 +458,14 @@ namespace osmscout
       FileOffset previousOffset=0;
       FileOffset cellOffset;
 
-      if (!writer.GetPos(cellOffset)) {
-        progress.Error("Cannot get cell start position in file");
-        return false;
-      }
+      cellOffset=writer.GetPos();
 
-      if (!writer.SetPos(bitmapCellOffset)) {
-        progress.Error("Cannot go to cell start position in file");
-        return false;
-      }
+      writer.SetPos(bitmapCellOffset);
 
       writer.WriteFileOffset(cellOffset-dataStartOffset,
                              data.dataOffsetBytes);
 
-      if (!writer.SetPos(cellOffset)) {
-        progress.Error("Cannot go back to cell start position in file");
-        return false;
-      }
+      writer.SetPos(cellOffset);
 
       writer.WriteNumber((uint32_t)cell->second.size());
 
@@ -678,10 +659,8 @@ namespace osmscout
         return false;
       }
 
-      if (!writer.GetPos(indexOffset)) {
-        progress.Error("Cannot read index start position");
-        return false;
-      }
+      // Position of the index
+      indexOffset=writer.GetPos();
 
       if (!WriteHeader(writer,
                        areaTypesData,
@@ -690,9 +669,7 @@ namespace osmscout
         return false;
       }
 
-      if (!writer.SetPos(0)) {
-        progress.Error("Cannot read index offset");
-      }
+      writer.GotoBegin();
 
       if (!writer.WriteFileOffset(indexOffset)) {
         progress.Error("Cannot write index position");

@@ -1718,9 +1718,7 @@ namespace osmscout {
                                                      const Region& parentRegion,
                                                      Region& region)
   {
-    if (!writer.GetPos(region.indexOffset)) {
-      return false;
-    }
+    region.indexOffset=writer.GetPos();
 
     writer.WriteFileOffset(region.dataOffset);
     writer.WriteFileOffset(parentRegion.indexOffset);
@@ -1742,8 +1740,9 @@ namespace osmscout {
     for (const auto& childRegion : region.regions) {
       FileOffset nextChildOffsetOffset;
 
-      if (!writer.GetPos(nextChildOffsetOffset) ||
-          !writer.WriteFileOffset(0)) {
+      nextChildOffsetOffset=writer.GetPos();
+
+      if (!writer.WriteFileOffset(0)) {
         return false;
       }
 
@@ -1755,12 +1754,14 @@ namespace osmscout {
 
       FileOffset nextChildOffset;
 
-      if (!writer.GetPos(nextChildOffset) ||
-          !writer.SetPos(nextChildOffsetOffset) ||
-          !writer.WriteFileOffset(nextChildOffset) ||
-          !writer.SetPos(nextChildOffset)) {
+      nextChildOffset=writer.GetPos();
+      writer.SetPos(nextChildOffsetOffset);
+
+      if (!writer.WriteFileOffset(nextChildOffset)) {
         return false;
       }
+
+      writer.SetPos(nextChildOffset);
     }
 
     return !writer.HasError();
@@ -1774,8 +1775,9 @@ namespace osmscout {
     for (const auto& childRegion : rootRegion.regions) {
       FileOffset nextChildOffsetOffset;
 
-      if (!writer.GetPos(nextChildOffsetOffset) ||
-          !writer.WriteFileOffset(0)) {
+      nextChildOffsetOffset=writer.GetPos();
+
+      if (!writer.WriteFileOffset(0)) {
         return false;
       }
 
@@ -1787,12 +1789,14 @@ namespace osmscout {
 
       FileOffset nextChildOffset=0;
 
-      if (!writer.GetPos(nextChildOffset) ||
-          !writer.SetPos(nextChildOffsetOffset) ||
-          !writer.WriteFileOffset(nextChildOffset) ||
-          !writer.SetPos(nextChildOffset)) {
+      nextChildOffset=writer.GetPos();
+      writer.SetPos(nextChildOffsetOffset);
+
+      if (!writer.WriteFileOffset(nextChildOffset)) {
         return false;
       }
+
+      writer.SetPos(nextChildOffset);
     }
 
     return true;
@@ -1801,21 +1805,15 @@ namespace osmscout {
   bool LocationIndexGenerator::WriteRegionDataEntry(FileWriter& writer,
                                                     Region& region)
   {
-    if (!writer.GetPos(region.dataOffset)) {
-      return false;
-    }
+    region.dataOffset=writer.GetPos();
 
-    if (!writer.SetPos(region.indexOffset)) {
-      return false;
-    }
+    writer.SetPos(region.indexOffset);
 
     if (!writer.WriteFileOffset(region.dataOffset)) {
       return false;
     }
 
-    if (!writer.SetPos(region.dataOffset)) {
-      return false;
-    }
+    writer.SetPos(region.dataOffset);
 
     region.pois.sort();
 
@@ -1838,7 +1836,7 @@ namespace osmscout {
 
       if (!location.second.addresses.empty()) {
         writer.Write(true);
-        writer.GetPos(location.second.addressOffset);
+        location.second.addressOffset=writer.GetPos();
         writer.WriteFileOffset(0);
       }
       else {
@@ -1882,7 +1880,7 @@ namespace osmscout {
       if (!location.second.addresses.empty()) {
         FileOffset offset;
 
-        writer.GetPos(offset);
+        offset=writer.GetPos();
 
         writer.SetPos(location.second.addressOffset);
         writer.WriteFileOffset(offset);

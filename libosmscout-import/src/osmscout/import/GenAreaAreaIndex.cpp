@@ -621,9 +621,7 @@ namespace osmscout {
 
       //  std::cout << (size_t)objectType << " " << id << " " << area.GetType()->GetName() << " " << area.GetType()->GetIndex() << std::endl;
 
-      if (!dataWriter.GetPos(dstOffset)) {
-        return false;
-      }
+      dstOffset=dataWriter.GetPos();
 
       for (const auto& filter : filters) {
         if (!filter->Process(progress,
@@ -771,9 +769,7 @@ namespace osmscout {
       }
     }
 
-    if (!indexWriter.GetPos(offset)) {
-      return false;
-    }
+    offset=indexWriter.GetPos();
 
     if (topLeftOffset!=0) {
       topLeftOffset=offset-topLeftOffset;
@@ -841,9 +837,7 @@ namespace osmscout {
       }
     }
     else {
-      if (!indexWriter.GetPos(dataStartOffset)) {
-        return false;
-      }
+      dataStartOffset=indexWriter.GetPos();
     }
 
     std::unordered_map<TypeId,std::list<FileOffset>> offsetsTypeMap;
@@ -1000,10 +994,7 @@ namespace osmscout {
 
       indexWriter.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
 
-      if (!indexWriter.GetPos(topLevelOffsetOffset)) {
-        progress.Error("Cannot read current file position");
-        return false;
-      }
+      topLevelOffsetOffset=indexWriter.GetPos();
 
       // This is not the final value, that will be written later on
       if (!indexWriter.WriteFileOffset(topLevelOffset)) {
@@ -1046,10 +1037,8 @@ namespace osmscout {
 
       // Finishing index file
 
-      if (!indexWriter.SetPos(topLevelOffsetOffset) ||
-          !indexWriter.WriteFileOffset(topLevelOffset)) {
-        return false;
-      }
+      indexWriter.SetPos(topLevelOffsetOffset);
+      indexWriter.WriteFileOffset(topLevelOffset);
 
       // Finishing data file
 

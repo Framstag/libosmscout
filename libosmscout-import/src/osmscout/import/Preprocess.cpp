@@ -57,9 +57,7 @@ namespace osmscout {
 
   bool Preprocess::Callback::StoreCurrentPage()
   {
-    if (!coordWriter.SetPos(currentPageOffset)) {
-      return false;
-    }
+    coordWriter.SetPos(currentPageOffset);
 
     for (size_t i=0; i<coordPageSize; i++) {
       if (!isSet[i]) {
@@ -117,9 +115,7 @@ namespace osmscout {
     }
 
     // We have to update a coord in a page we have already written
-    if (!coordWriter.SetPos(pageOffsetEntry->second+coordPageIndex*coordByteSize)) {
-      return false;
-    }
+    coordWriter.SetPos(pageOffsetEntry->second+coordPageIndex*coordByteSize);
 
     return coordWriter.WriteCoord(coord);
   }

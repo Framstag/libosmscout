@@ -349,25 +349,16 @@ namespace osmscout {
 
     FileOffset bitmapOffset;
 
-    if (!writer.GetPos(bitmapOffset)) {
-      progress.Error("Cannot get type index start position in file");
-      return false;
-    }
+    bitmapOffset=writer.GetPos();
 
     assert(typeData.indexOffset!=0);
 
-    if (!writer.SetPos(typeData.indexOffset)) {
-      progress.Error("Cannot go to type index offset in file");
-      return false;
-    }
+    writer.SetPos(typeData.indexOffset);
 
     writer.WriteFileOffset(bitmapOffset);
     writer.Write(dataOffsetBytes);
 
-    if (!writer.SetPos(bitmapOffset)) {
-      progress.Error("Cannot go to type index start position in file");
-      return false;
-    }
+    writer.SetPos(bitmapOffset);
 
     // Write the bitmap with offsets for each cell
     // We prefill with zero and only overwrite cells that have data
@@ -379,10 +370,7 @@ namespace osmscout {
 
     FileOffset dataStartOffset;
 
-    if (!writer.GetPos(dataStartOffset)) {
-      progress.Error("Cannot get start of data section after bitmap");
-      return false;
-    }
+    dataStartOffset=writer.GetPos();
 
     // Now write the list of offsets of objects for every cell with content
     for (const auto& cell : typeCellOffsets) {
@@ -394,25 +382,16 @@ namespace osmscout {
 
       assert(bitmapCellOffset>=bitmapOffset);
 
-      if (!writer.GetPos(cellOffset)) {
-        progress.Error("Cannot get cell start position in file");
-        return false;
-      }
+      cellOffset=writer.GetPos();
 
-      if (!writer.SetPos(bitmapCellOffset)) {
-        progress.Error("Cannot go to cell start position in file");
-        return false;
-      }
+      writer.SetPos(bitmapCellOffset);
 
       assert(cellOffset>bitmapCellOffset);
 
       // We add +1 to make sure, that we can differentiate between "0" as "no entry" and "0" as first data entry.
       writer.WriteFileOffset(cellOffset-dataStartOffset+1,dataOffsetBytes);
 
-      if (!writer.SetPos(cellOffset)) {
-        progress.Error("Cannot go back to cell start position in file");
-        return false;
-      }
+      writer.SetPos(cellOffset);
 
       writer.WriteNumber((uint32_t)cell.second.size());
 
@@ -488,7 +467,7 @@ namespace osmscout {
           writer.WriteTypeId(type->GetWayId(),
                              typeConfig->GetWayTypeIdBytes());
 
-          writer.GetPos(wayTypeData[i].indexOffset);
+          wayTypeData[i].indexOffset=writer.GetPos();
 
           writer.WriteFileOffset(bitmapOffset);
           writer.Write(dataOffsetBytes);

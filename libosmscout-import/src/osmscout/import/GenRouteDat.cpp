@@ -1548,11 +1548,7 @@ namespace osmscout {
     FileScanner                       routeScanner;
     FileOffset                        currentOffset;
 
-    if (!routeNodeWriter.GetPos(currentOffset)) {
-      progress.Error(std::string("Error while reading current file offset in file '")+
-                     routeNodeWriter.GetFilename()+"'");
-      return false;
-    }
+    currentOffset=routeNodeWriter.GetPos();
 
     try {
       routeScanner.Open(routeNodeWriter.GetFilename(),
@@ -1605,11 +1601,7 @@ namespace osmscout {
     }
 
     for (const auto& routeNodeEntry : routeNodeOffsetMap) {
-      if (!routeNodeWriter.SetPos(routeNodeEntry.first)) {
-        progress.Error(std::string("Error while setting file offset in file '")+
-                       routeNodeWriter.GetFilename()+"'");
-        return false;
-      }
+      routeNodeWriter.SetPos(routeNodeEntry.first);
 
       if (!routeNodeEntry.second->Write(routeNodeWriter)) {
         progress.Error(std::string("Error while writing route node to file '")+
@@ -1618,11 +1610,7 @@ namespace osmscout {
       }
     }
 
-    if (!routeNodeWriter.SetPos(currentOffset)) {
-      progress.Error(std::string("Error while setting current file offset in file '")+
-                     routeNodeWriter.GetFilename()+"'");
-      return false;
-    }
+    routeNodeWriter.SetPos(currentOffset);
 
     return !routeNodeWriter.HasError();
   }
@@ -1785,9 +1773,7 @@ namespace osmscout {
           NodeIdObjectsMap::const_iterator node=block[b];
           FileOffset                       routeNodeOffset;
 
-          if (!writer.GetPos(routeNodeOffset)) {
-            return false;
-          }
+          routeNodeOffset=writer.GetPos();
 
           handledRouteNodeCount++;
           progress.SetProgress(handledRouteNodeCount,

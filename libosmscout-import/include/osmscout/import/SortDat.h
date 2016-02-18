@@ -348,11 +348,7 @@ namespace osmscout {
             FileOffset fileOffset;
             bool       save=true;
 
-            if (!dataWriter.GetPos(fileOffset)) {
-              progress.Error(std::string("Error while reading current fileOffset in file '")+
-                             dataWriter.GetFilename()+"'");
-              return false;
-            }
+            fileOffset=dataWriter.GetPos();
 
             for (const auto& filter : filters) {
               if (!filter->Process(progress,
@@ -500,11 +496,7 @@ namespace osmscout {
           FileOffset fileOffset;
           bool       save=true;
 
-          if (!dataWriter.GetPos(fileOffset)) {
-            progress.Error(std::string("Error while reading current fileOffset in file '")+
-                           dataWriter.GetFilename()+"'");
-            return false;
-          }
+          fileOffset=dataWriter.GetPos();
 
           for (auto& filter : filters) {
             if (!filter->Process(progress,
