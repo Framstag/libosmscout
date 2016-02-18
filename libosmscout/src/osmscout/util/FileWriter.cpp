@@ -108,7 +108,7 @@ namespace osmscout {
   FileOffset FileWriter::GetPos()
   {
     if (HasError()) {
-      throw IOException(filename,"Cannot read position in file","File already closed");
+      throw IOException(filename,"Cannot read position in file","File already in error state");
     }
 
 #if defined(HAVE_FSEEKO)
@@ -140,7 +140,7 @@ namespace osmscout {
   void FileWriter::SetPos(FileOffset pos)
   {
     if (HasError()) {
-      throw IOException(filename,"Cannot set position in file","File already closed");
+      throw IOException(filename,"Cannot read position in file","File already in error state");
     }
 
 #if defined(HAVE_FSEEKO)
@@ -837,35 +837,32 @@ namespace osmscout {
     }
   }
 
-  bool FileWriter::Flush()
+  void FileWriter::Flush()
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot flush file","File already in error state");
     }
 
     hasError=fflush(file)!=0;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot flush file");
+    }
   }
 
-  bool FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
+  void FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot flush file","File already in error state");
     }
 
     FileOffset currentPos;
     size_t     bytesToWrite;
 
-    try {
-      currentPos=GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
+    currentPos=GetPos();
 
     if (currentPos%blockSize==0) {
-      return true;
+      return;
     }
 
     bytesToWrite=blockSize-(currentPos%blockSize);
@@ -878,7 +875,9 @@ namespace osmscout {
 
     delete [] buffer;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write data to flush current block");
+    }
   }
 
   bool IsValidToWrite(const std::vector<GeoCoord>& nodes)

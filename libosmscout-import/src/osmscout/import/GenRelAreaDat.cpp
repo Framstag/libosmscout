@@ -1221,5 +1221,7 @@ namespace osmscout {
 
       return false;
     }
+
+    return true;
   }
 }

@@ -112,10 +112,6 @@ namespace osmscout {
         node.SetFeatures(rawNode.GetFeatureValueBuffer());
         node.SetCoords(rawNode.GetCoords());
 
-        FileOffset fileOffset;
-
-        fileOffset=writer.GetPos();
-
         if (!writer.Write((uint8_t)osmRefNode) ||
             !writer.Write(rawNode.GetId()) ||
             !node.Write(*typeConfig,

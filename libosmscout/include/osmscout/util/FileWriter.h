@@ -116,8 +116,8 @@ namespace osmscout {
 
     bool WriteTypeId(TypeId id, uint8_t maxBytes);
 
-    bool Flush();
-    bool FlushCurrentBlockWithZeros(size_t blockSize);
+    void Flush();
+    void FlushCurrentBlockWithZeros(size_t blockSize);
   };
 
   extern OSMSCOUT_API bool IsValidToWrite(const std::vector<GeoCoord>& nodes);

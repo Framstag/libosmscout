@@ -916,7 +916,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 

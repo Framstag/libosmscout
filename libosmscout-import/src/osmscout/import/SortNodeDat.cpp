@@ -66,7 +66,7 @@ namespace osmscout {
       writer.Write(overallDataCount);
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
