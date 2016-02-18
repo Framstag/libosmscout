@@ -94,8 +94,8 @@ namespace osmscout {
       std::vector<uint32_t>  wayStat;
 
     private:
-      bool StoreCurrentPage();
-      bool StoreCoord(OSMId id,
+      void StoreCurrentPage();
+      void StoreCoord(OSMId id,
                       const GeoCoord& coord);
 
       bool IsTurnRestriction(const TagMap& tags,

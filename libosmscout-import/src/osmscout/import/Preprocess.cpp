@@ -55,7 +55,7 @@ namespace osmscout {
   const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
   const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
-  bool Preprocess::Callback::StoreCurrentPage()
+  void Preprocess::Callback::StoreCurrentPage()
   {
     coordWriter.SetPos(currentPageOffset);
 
@@ -69,11 +69,9 @@ namespace osmscout {
     }
 
     currentPageId=std::numeric_limits<PageId>::max();
-
-    return !coordWriter.HasError();
   }
 
-  bool Preprocess::Callback::StoreCoord(OSMId id,
+  void Preprocess::Callback::StoreCoord(OSMId id,
                                         const GeoCoord& coord)
   {
     PageId     relatedId=id-std::numeric_limits<Id>::min();
@@ -85,7 +83,7 @@ namespace osmscout {
         coords[coordPageIndex]=coord;
         isSet[coordPageIndex]=true;
 
-        return true;
+        return;
       }
       else {
         StoreCurrentPage();
@@ -111,13 +109,13 @@ namespace osmscout {
 
       coordPageCount++;
 
-      return true;
+      return;
     }
 
     // We have to update a coord in a page we have already written
     coordWriter.SetPos(pageOffsetEntry->second+coordPageIndex*coordByteSize);
 
-    return coordWriter.WriteCoord(coord);
+    coordWriter.WriteCoord(coord);
   }
 
   bool Preprocess::Callback::IsTurnRestriction(const TagMap& tags,
@@ -634,16 +632,13 @@ namespace osmscout {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   BOUNDING_DAT));
 
-      if (!writer.WriteCoord(minCoord) ||
-          !writer.WriteCoord(maxCoord)) {
-        progress.Error("Cannot write to '"+writer.GetFilename()+"'");
-        return false;
-      }
+      writer.WriteCoord(minCoord);
+      writer.WriteCoord(maxCoord);
 
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 

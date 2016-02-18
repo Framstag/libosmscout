@@ -562,10 +562,10 @@ namespace osmscout {
     return !hasError;
   }
 
-  bool FileWriter::WriteCoord(const GeoCoord& coord)
+  void FileWriter::WriteCoord(const GeoCoord& coord)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write coordinate","File already in error state");
     }
 
     uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
@@ -585,13 +585,15 @@ namespace osmscout {
 
     hasError=fwrite(buffer,1,coordByteSize,file)!=coordByteSize;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write coordinate");
+    }
   }
 
-  bool FileWriter::WriteInvalidCoord()
+  void FileWriter::WriteInvalidCoord()
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write coordinate","File already in error state");
     }
 
     char buffer[coordByteSize];
@@ -608,16 +610,20 @@ namespace osmscout {
 
     hasError=fwrite(buffer,1,coordByteSize,file)!=coordByteSize;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write coordinate");
+    }
   }
 
-  bool FileWriter::Write(const std::vector<GeoCoord>& nodes)
+  void FileWriter::Write(const std::vector<GeoCoord>& nodes)
   {
     // Quick exit for empty vector arrays
     if (nodes.empty()) {
       uint8_t size=0;
 
-      return Write(size);
+      Write(size);
+
+      return;
     }
 
     // A lat and a lon delta for each coordinate delta
@@ -650,7 +656,7 @@ namespace osmscout {
         coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
       }
       else {
-        return false;
+        throw IOException(filename,"Cannot write coordinate","Delta between coordinates too big");
       }
 
       deltaBuffer[deltaBufferPos]=latDelta;
@@ -670,7 +676,7 @@ namespace osmscout {
         coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
       }
       else {
-        return false;
+        throw IOException(filename,"Cannot write coordinate","Delta between coordinates too big");
       }
       
       deltaBuffer[deltaBufferPos]=lonDelta;
@@ -700,9 +706,7 @@ namespace osmscout {
         size=0x02 | nodeSize;
       }
 
-      if (!Write(size)) {
-        return false;
-      }
+      Write(size);
     }
     else if (nodes.size()<4096) {
       uint8_t size[2];
@@ -721,9 +725,7 @@ namespace osmscout {
 
       size[1]=nodeSize2;
 
-      if (!Write((char*)size,2)) {
-        return false;
-      }
+      Write((char*)size,2);
     }
     else {
       uint8_t size[3];
@@ -744,9 +746,7 @@ namespace osmscout {
       size[1]=nodeSize2;
       size[2]=nodeSize3;
 
-      if (!Write((char*)size,3)) {
-        return false;
-      }
+      Write((char*)size,3);
     }
 
     //std::cout << "Write " << std::dec << nodes.size() << " nodes, " << coordBitSize << " bits per coordinate pair" << std::endl;
@@ -762,9 +762,7 @@ namespace osmscout {
     // Write data array
     //
 
-    if (!WriteCoord(nodes[0])) {
-      return false;
-    }
+    WriteCoord(nodes[0]);
 
     byteBuffer.resize(bytesNeeded);
 
@@ -813,9 +811,7 @@ namespace osmscout {
       }
     }
 
-    if (!Write((char*)byteBuffer.data(),byteBuffer.size())) {
-      return false;
-    }
+    Write((char*)byteBuffer.data(),byteBuffer.size());
 
     /*
     std::cout << "Write - byte buffer: ";
@@ -823,8 +819,6 @@ namespace osmscout {
       std::cout << std::hex << (unsigned int) byteBuffer[i] << " ";
     }
     std::cout << std::endl;*/
-
-    return true;
   }
 
   bool FileWriter::WriteTypeId(TypeId id, uint8_t maxBytes)

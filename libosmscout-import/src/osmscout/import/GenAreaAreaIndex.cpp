@@ -159,9 +159,7 @@ namespace osmscout {
               return false;
             }
 
-            if (!writer.Write(r->nodes)) {
-              return false;
-            }
+            writer.Write(r->nodes);
 
             overallDataCount++;
           }
@@ -188,9 +186,7 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.Write(ring->nodes)) {
-          return false;
-        }
+        writer.Write(ring->nodes);
 
         overallDataCount++;
       }
@@ -1076,27 +1072,41 @@ namespace osmscout {
                                       Progress& progress)
   {
 
-    for (auto& filter : filters) {
-      if (!filter->BeforeProcessingStart(parameter,
-                                         progress,
-                                         *typeConfig)) {
-        progress.Error("Cannot initialize processor filter");
+    try {
+      for (auto& filter : filters) {
+        if (!filter->BeforeProcessingStart(parameter,
+                                           progress,
+                                           *typeConfig)) {
+          progress.Error("Cannot initialize processor filter");
 
-        return false;
+          return false;
+        }
       }
     }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
 
-    bool result=ImportInternal(typeConfig,
-                               parameter,
-                               progress);
+      return false;
+    }
 
-    for (auto& filter : filters) {
-      if (!filter->AfterProcessingEnd(parameter,
-                                      progress,
-                                      *typeConfig)) {
-        progress.Error("Cannot deinitialize processor filter");
-        return false;
+      bool result=ImportInternal(typeConfig,
+                                 parameter,
+                                 progress);
+
+    try {
+      for (auto& filter : filters) {
+        if (!filter->AfterProcessingEnd(parameter,
+                                        progress,
+                                        *typeConfig)) {
+          progress.Error("Cannot deinitialize processor filter");
+          return false;
+        }
       }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      return false;
     }
 
     return result;

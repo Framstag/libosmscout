@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <limits>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Math.h>
@@ -503,60 +504,54 @@ namespace osmscout {
 
     // Outer ring
 
-    writer.WriteTypeId(ring->GetType()->GetAreaId(),
-                       typeConfig.GetAreaTypeIdBytes());
-
-    if (!ring->featureValueBuffer.Write(writer,
-                                        multipleRings)) {
-      return false;
-    }
-
-    if (multipleRings) {
-      writer.WriteNumber((uint32_t)(rings.size()-1));
-    }
-
-    if (!writer.Write(ring->nodes)) {
-      return false;
-    }
-
-    if (!ring->nodes.empty() &&
-        ring->GetType()->CanRoute()) {
-      if (!WriteIds(writer,
-                    ring->ids)) {
-        return false;
-      }
-    }
-
-    ++ring;
-
-    // Potential additional rings
-
-    while (ring!=rings.end()) {
+    try {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      if (ring->GetType()->GetAreaId()!=typeIgnore) {
-        if (!ring->featureValueBuffer.Write(writer)) {
-          return false;
-        }
+      ring->featureValueBuffer.Write(writer,
+                                     multipleRings);
+
+      if (multipleRings) {
+        writer.WriteNumber((uint32_t)(rings.size()-1));
       }
 
-      writer.Write(ring->ring);
-
-      if (!writer.Write(ring->nodes)) {
-        return false;
-      }
+      writer.Write(ring->nodes);
 
       if (!ring->nodes.empty() &&
-          ring->GetType()->GetAreaId()!=typeIgnore &&
           ring->GetType()->CanRoute()) {
-        if (!WriteIds(writer,
-                      ring->ids)) {
-          return false;
-        }
+        WriteIds(writer,
+                 ring->ids);
       }
 
       ++ring;
+
+      // Potential additional rings
+
+      while (ring!=rings.end()) {
+        writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                           typeConfig.GetAreaTypeIdBytes());
+
+        if (ring->GetType()->GetAreaId()!=typeIgnore) {
+          ring->featureValueBuffer.Write(writer);
+        }
+
+        writer.Write(ring->ring);
+        writer.Write(ring->nodes);
+
+        if (!ring->nodes.empty() &&
+            ring->GetType()->GetAreaId()!=typeIgnore &&
+            ring->GetType()->CanRoute()) {
+          WriteIds(writer,
+                   ring->ids);
+        }
+
+        ++ring;
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      return false;
     }
 
     return !writer.HasError();
@@ -568,60 +563,55 @@ namespace osmscout {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
-    // Outer ring
+    try {
+      // Outer ring
 
-    writer.WriteTypeId(ring->GetType()->GetAreaId(),
-                       typeConfig.GetAreaTypeIdBytes());
-
-    if (!ring->featureValueBuffer.Write(writer,
-                                        multipleRings)) {
-      return false;
-    }
-
-    if (multipleRings) {
-      writer.WriteNumber((uint32_t)(rings.size()-1));
-    }
-
-    if (!writer.Write(ring->nodes)) {
-      return false;
-    }
-
-    if (!ring->nodes.empty()) {
-      if (!WriteIds(writer,
-                    ring->ids)) {
-        return false;
-      }
-    }
-
-    ++ring;
-
-    // Potential additional rings
-
-    while (ring!=rings.end()) {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      if (ring->GetType()->GetAreaId()!=typeIgnore) {
-        if (!ring->featureValueBuffer.Write(writer)) {
-          return false;
-        }
+      ring->featureValueBuffer.Write(writer,
+                                     multipleRings);
+
+      if (multipleRings) {
+        writer.WriteNumber((uint32_t)(rings.size()-1));
       }
 
-      writer.Write(ring->ring);
+      writer.Write(ring->nodes);
 
-      if (!writer.Write(ring->nodes)) {
-        return false;
-      }
-
-      if (!ring->nodes.empty() &&
-          ring->GetType()->GetAreaId()!=typeIgnore) {
-        if (!WriteIds(writer,
-                      ring->ids)) {
-          return false;
-        }
+      if (!ring->nodes.empty()) {
+        WriteIds(writer,
+                 ring->ids);
       }
 
       ++ring;
+
+      // Potential additional rings
+
+      while (ring!=rings.end()) {
+        writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                           typeConfig.GetAreaTypeIdBytes());
+
+        if (ring->GetType()->GetAreaId()!=typeIgnore) {
+          ring->featureValueBuffer.Write(writer);
+        }
+
+        writer.Write(ring->ring);
+
+        writer.Write(ring->nodes);
+
+        if (!ring->nodes.empty() &&
+            ring->GetType()->GetAreaId()!=typeIgnore) {
+          WriteIds(writer,
+                   ring->ids);
+        }
+
+        ++ring;
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      return false;
     }
 
     return !writer.HasError();
@@ -633,45 +623,43 @@ namespace osmscout {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
-    // Outer ring
+    try {
+      // Outer ring
 
-    writer.WriteTypeId(ring->GetType()->GetAreaId(),
-                       typeConfig.GetAreaTypeIdBytes());
-
-    if (!ring->featureValueBuffer.Write(writer,
-                                        multipleRings)) {
-      return false;
-    }
-
-    if (multipleRings) {
-      writer.WriteNumber((uint32_t)(rings.size()-1));
-    }
-
-    if (!writer.Write(ring->nodes)) {
-      return false;
-    }
-
-    ++ring;
-
-    // Potential additional rings
-
-    while (ring!=rings.end()) {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      if (ring->GetType()->GetAreaId()!=typeIgnore) {
-        if (!ring->featureValueBuffer.Write(writer)) {
-          return false;
-        }
+      ring->featureValueBuffer.Write(writer,
+                                     multipleRings);
+
+      if (multipleRings) {
+        writer.WriteNumber((uint32_t)(rings.size()-1));
       }
 
-      writer.Write(ring->ring);
-
-      if (!writer.Write(ring->nodes)) {
-        return false;
-      }
+      writer.Write(ring->nodes);
 
       ++ring;
+
+      // Potential additional rings
+
+      while (ring!=rings.end()) {
+        writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                           typeConfig.GetAreaTypeIdBytes());
+
+        if (ring->GetType()->GetAreaId()!=typeIgnore) {
+          ring->featureValueBuffer.Write(writer);
+        }
+
+        writer.Write(ring->ring);
+        writer.Write(ring->nodes);
+
+        ++ring;
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      return false;
     }
 
     return !writer.HasError();

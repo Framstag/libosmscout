@@ -73,73 +73,78 @@ namespace osmscout {
     return true;
   }
 
-  bool NodeLocationProcessorFilter::Process(Progress& /*progress*/,
+  bool NodeLocationProcessorFilter::Process(Progress& progress,
                                             const FileOffset& offset,
                                             Node& node,
                                             bool& /*save*/)
   {
-    NameFeatureValue     *nameValue=nameReader->GetValue(node.GetFeatureValueBuffer());
-    LocationFeatureValue *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
-    AddressFeatureValue  *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
+    try {
+      NameFeatureValue     *nameValue=nameReader->GetValue(node.GetFeatureValueBuffer());
+      LocationFeatureValue *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
+      AddressFeatureValue  *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
 
-    bool isAddress=addressValue!=NULL;
-    bool isPoi=nameValue!=NULL;
+      bool isAddress=addressValue!=NULL;
+      bool isPoi=nameValue!=NULL;
 
-    std::string name;
-    std::string location;
-    std::string address;
+      std::string name;
+      std::string location;
+      std::string address;
 
-    if (nameValue!=NULL) {
-      name=nameValue->GetName();
-    }
-
-    if (addressValue!=NULL && locationValue!=NULL) {
-      location=locationValue->GetLocation();
-      address=addressValue->GetAddress();
-    }
-
-    if (locationValue!=NULL) {
-      size_t locationIndex;
-
-      if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
-                                   locationIndex)) {
-        node.UnsetFeature(locationIndex);
+      if (nameValue!=NULL) {
+        name=nameValue->GetName();
       }
-    }
 
-    if (!node.GetType()->GetIndexAsPOI()) {
-      return true;
-    }
+      if (addressValue!=NULL && locationValue!=NULL) {
+        location=locationValue->GetLocation();
+        address=addressValue->GetAddress();
+      }
 
-    if (!isAddress && !isPoi) {
-      return true;
-    }
+      if (locationValue!=NULL) {
+        size_t locationIndex;
 
-    if (!writer.WriteFileOffset(offset)) {
+        if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
+                                     locationIndex)) {
+          node.UnsetFeature(locationIndex);
+        }
+      }
+
+      if (!node.GetType()->GetIndexAsPOI()) {
+        return true;
+      }
+
+      if (!isAddress && !isPoi) {
+        return true;
+      }
+
+      if (!writer.WriteFileOffset(offset)) {
+        return false;
+      }
+
+      if (!writer.WriteNumber(node.GetType()->GetNodeId())) {
+        return false;
+      }
+
+      if (!writer.Write(name)) {
+        return false;
+      }
+
+      if (!writer.Write(location)) {
+        return false;
+      }
+
+      if (!writer.Write(address)) {
+        return false;
+      }
+
+      writer.WriteCoord(node.GetCoords());
+
+      overallDataCount++;
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
+
       return false;
     }
-
-    if (!writer.WriteNumber(node.GetType()->GetNodeId())) {
-      return false;
-    }
-
-    if (!writer.Write(name)) {
-      return false;
-    }
-
-    if (!writer.Write(location)) {
-      return false;
-    }
-
-    if (!writer.Write(address)) {
-      return false;
-    }
-
-    if (!writer.WriteCoord(node.GetCoords())) {
-      return false;
-    }
-
-    overallDataCount++;
 
     return true;
   }

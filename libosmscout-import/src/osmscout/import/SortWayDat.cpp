@@ -77,53 +77,58 @@ namespace osmscout {
     return true;
   }
 
-  bool WayLocationProcessorFilter::Process(Progress& /*progress*/,
+  bool WayLocationProcessorFilter::Process(Progress& progress,
                                            const FileOffset& offset,
                                            Way& way,
                                            bool& /*save*/)
   {
-    if (!way.GetType()->GetIndexAsPOI()) {
-      return true;
+    try {
+      if (!way.GetType()->GetIndexAsPOI()) {
+        return true;
+      }
+
+      NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
+
+      if (nameValue==NULL) {
+        return true;
+      }
+
+      LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
+      std::string          name;
+      std::string          location;
+      std::string          address;
+
+      name=nameValue->GetName();
+
+      if (locationValue!=NULL) {
+        location=locationValue->GetLocation();
+      }
+
+      if (!writer.WriteFileOffset(offset)) {
+        return false;
+      }
+
+      if (!writer.WriteNumber(way.GetType()->GetWayId())) {
+        return false;
+      }
+
+      if (!writer.Write(name)) {
+        return false;
+      }
+
+      if (!writer.Write(location)) {
+        return false;
+      }
+
+      writer.Write(way.nodes);
+
+      overallDataCount++;
     }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
 
-    NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
-
-    if (nameValue==NULL) {
-      return true;
-    }
-
-    LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
-    std::string          name;
-    std::string          location;
-    std::string          address;
-
-    name=nameValue->GetName();
-
-    if (locationValue!=NULL) {
-      location=locationValue->GetLocation();
-    }
-
-    if (!writer.WriteFileOffset(offset)) {
       return false;
     }
-
-    if (!writer.WriteNumber(way.GetType()->GetWayId())) {
-      return false;
-    }
-
-    if (!writer.Write(name)) {
-      return false;
-    }
-
-    if (!writer.Write(location)) {
-      return false;
-    }
-
-    if (!writer.Write(way.nodes)) {
-      return false;
-    }
-
-    overallDataCount++;
 
     return true;
   }

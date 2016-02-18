@@ -21,6 +21,7 @@
 
 #include <limits>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>
@@ -240,22 +241,25 @@ namespace osmscout {
   {
     assert(!nodes.empty());
 
-    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
-                       typeConfig.GetWayTypeIdBytes());
+    try {
+      writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                         typeConfig.GetWayTypeIdBytes());
 
-    if (!featureValueBuffer.Write(writer)) {
-      return false;
-    }
+      featureValueBuffer.Write(writer);
 
-    if (!writer.Write(nodes)) {
-      return false;
-    }
+      writer.Write(nodes);
 
-    if (featureValueBuffer.GetType()->CanRoute() ||
-        featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
-      if (!WriteIds(writer)) {
-        return false;
+      if (featureValueBuffer.GetType()->CanRoute() ||
+          featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
+        if (!WriteIds(writer)) {
+          return false;
+        }
       }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      return false;
     }
 
     return !writer.HasError();
@@ -266,14 +270,17 @@ namespace osmscout {
   {
     assert(!nodes.empty());
 
-    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
-                       typeConfig.GetWayTypeIdBytes());
+    try {
+      writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                         typeConfig.GetWayTypeIdBytes());
 
-    if (!featureValueBuffer.Write(writer)) {
-      return false;
+      featureValueBuffer.Write(writer);
+
+      writer.Write(nodes);
     }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
 
-    if (!writer.Write(nodes)) {
       return false;
     }
 

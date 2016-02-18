@@ -49,6 +49,7 @@ namespace osmscout {
 
   private:
     const TypeConfig&                typeConfig;
+    Progress&                        progress;
     PreprocessorCallback&            callback;
     Context                          context;
     OSMId                            id;
@@ -59,8 +60,10 @@ namespace osmscout {
 
   public:
     Parser(const TypeConfig& typeConfig,
+           Progress& progress,
            PreprocessorCallback& callback)
     : typeConfig(typeConfig),
+      progress(progress),
       callback(callback),
       context(contextUnknown)
     {
@@ -90,7 +93,7 @@ namespace osmscout {
         }
 
         if (idValue==NULL || lonValue==NULL || latValue==NULL) {
-          std::cerr << "Not all required attributes found" << std::endl;
+          progress.Error("Not all required attributes found");
         }
 
         if (!StringToNumber((const char*)idValue,id)) {
@@ -258,29 +261,34 @@ namespace osmscout {
 
     void EndElement(const xmlChar *name)
     {
-      if (strcmp((const char*)name,"node")==0) {
-        callback.ProcessNode(id,
-                             lon,
-                             lat,
-                             tags);
-        tags.clear();
-        context=contextUnknown;
+      try {
+        if (strcmp((const char*)name,"node")==0) {
+          callback.ProcessNode(id,
+                               lon,
+                               lat,
+                               tags);
+          tags.clear();
+          context=contextUnknown;
+        }
+        else if (strcmp((const char*)name,"way")==0) {
+          callback.ProcessWay(id,
+                              nodes,
+                              tags);
+          nodes.clear();
+          tags.clear();
+          context=contextUnknown;
+        }
+        else if (strcmp((const char*)name,"relation")==0) {
+          callback.ProcessRelation(id,
+                                   members,
+                                   tags);
+          members.clear();
+          tags.clear();
+          context=contextUnknown;
+        }
       }
-      else if (strcmp((const char*)name,"way")==0) {
-        callback.ProcessWay(id,
-                            nodes,
-                            tags);
-        nodes.clear();
-        tags.clear();
-        context=contextUnknown;
-      }
-      else if (strcmp((const char*)name,"relation")==0) {
-        callback.ProcessRelation(id,
-                                 members,
-                                 tags);
-        members.clear();
-        tags.clear();
-        context=contextUnknown;
+      catch (IOException& e) {
+        progress.Error(e.GetDescription());
       }
     }
   };
@@ -338,6 +346,7 @@ namespace osmscout {
     progress.SetAction(std::string("Parsing *.osm file '")+filename+"'");
 
     Parser        parser(*typeConfig,
+                         progress,
                          callback);
     xmlSAXHandler saxParser;
 
@@ -359,4 +368,3 @@ namespace osmscout {
     return true;
   }
 }
-

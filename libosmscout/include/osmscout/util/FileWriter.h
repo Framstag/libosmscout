@@ -109,10 +109,10 @@ namespace osmscout {
     bool WriteNumber(uint32_t number);
     bool WriteNumber(uint64_t number);
 
-    bool WriteCoord(const GeoCoord& coord);
-    bool WriteInvalidCoord();
+    void WriteCoord(const GeoCoord& coord);
+    void WriteInvalidCoord();
 
-    bool Write(const std::vector<GeoCoord>& nodes);
+    void Write(const std::vector<GeoCoord>& nodes);
 
     bool WriteTypeId(TypeId id, uint8_t maxBytes);
 
