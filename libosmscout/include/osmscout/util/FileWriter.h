@@ -95,10 +95,10 @@ namespace osmscout {
     bool Write(uint32_t number, size_t bytes);
     bool Write(uint64_t number, size_t bytes);
 
-    bool Write(const ObjectFileRef& ref);
+    void Write(const ObjectFileRef& ref);
 
-    bool WriteFileOffset(FileOffset offset);
-    bool WriteFileOffset(FileOffset offset,
+    void WriteFileOffset(FileOffset offset);
+    void WriteFileOffset(FileOffset offset,
                          size_t bytes);
 
     void WriteNumber(int16_t number);
