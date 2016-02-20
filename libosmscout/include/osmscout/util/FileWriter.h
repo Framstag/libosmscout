@@ -101,20 +101,20 @@ namespace osmscout {
     bool WriteFileOffset(FileOffset offset,
                          size_t bytes);
 
-    bool WriteNumber(int16_t number);
-    bool WriteNumber(int32_t number);
-    bool WriteNumber(int64_t number);
+    void WriteNumber(int16_t number);
+    void WriteNumber(int32_t number);
+    void WriteNumber(int64_t number);
 
-    bool WriteNumber(uint16_t number);
-    bool WriteNumber(uint32_t number);
-    bool WriteNumber(uint64_t number);
+    void WriteNumber(uint16_t number);
+    void WriteNumber(uint32_t number);
+    void WriteNumber(uint64_t number);
 
     void WriteCoord(const GeoCoord& coord);
     void WriteInvalidCoord();
 
     void Write(const std::vector<GeoCoord>& nodes);
 
-    bool WriteTypeId(TypeId id, uint8_t maxBytes);
+    void WriteTypeId(TypeId id, uint8_t maxBytes);
 
     void Flush();
     void FlushCurrentBlockWithZeros(size_t blockSize);
@@ -138,7 +138,7 @@ namespace osmscout {
 
     void Reset();
 
-    bool Write(const ObjectFileRef& ref);
+    void Write(const ObjectFileRef& ref);
   };
 }
 

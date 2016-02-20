@@ -108,9 +108,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.WriteNumber(way.GetType()->GetWayId())) {
-        return false;
-      }
+      writer.WriteNumber(way.GetType()->GetWayId());
 
       if (!writer.Write(name)) {
         return false;

@@ -19,6 +19,7 @@
 
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>
@@ -1446,7 +1447,16 @@ namespace osmscout {
 
   bool EleFeatureValue::Write(FileWriter& writer)
   {
-    return writer.WriteNumber(ele);
+    try {
+      writer.WriteNumber(ele);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+
+      return false;
+    }
+
+    return true;
   }
 
   FeatureValue& EleFeatureValue::operator=(const FeatureValue& other)

@@ -1695,17 +1695,13 @@ namespace osmscout {
                                                  const std::list<std::string>& regionIgnoreTokens,
                                                  const std::list<std::string>& locationIgnoreTokens)
   {
-    if (!writer.WriteNumber((uint32_t)regionIgnoreTokens.size())) {
-      return false;
-    }
+    writer.WriteNumber((uint32_t)regionIgnoreTokens.size());
 
     for (const auto& token : regionIgnoreTokens) {
       writer.Write(token);
     }
 
-    if (!writer.WriteNumber((uint32_t)locationIgnoreTokens.size())) {
-      return false;
-    }
+    writer.WriteNumber((uint32_t)locationIgnoreTokens.size());
 
     for (const auto& token : locationIgnoreTokens) {
       writer.Write(token);

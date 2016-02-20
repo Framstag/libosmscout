@@ -64,7 +64,7 @@ namespace osmscout {
   };
 
   bool AreaLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
-                                                          Progress& /*progress*/,
+                                                          Progress& progress,
                                                           const TypeConfig& typeConfig)
   {
     overallDataCount=0;
@@ -80,123 +80,125 @@ namespace osmscout {
       writer.Write(overallDataCount);
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
     return true;
   }
 
-  bool AreaLocationProcessorFilter::Process(Progress& /*progress*/,
+  bool AreaLocationProcessorFilter::Process(Progress& progress,
                                             const FileOffset& offset,
                                             Area& area,
                                             bool& /*save*/)
   {
-    for (std::vector<Area::Ring>::iterator ring=area.rings.begin();
-         ring!=area.rings.end();
-         ++ring) {
-      NameFeatureValue     *nameValue=nameReader->GetValue(ring->GetFeatureValueBuffer());
-      LocationFeatureValue *locationValue=locationReader->GetValue(ring->GetFeatureValueBuffer());
-      AddressFeatureValue  *addressValue=addressReader->GetValue(ring->GetFeatureValueBuffer());
+    try {
+      for (std::vector<Area::Ring>::iterator ring=area.rings.begin();
+           ring!=area.rings.end();
+           ++ring) {
+        NameFeatureValue     *nameValue=nameReader->GetValue(ring->GetFeatureValueBuffer());
+        LocationFeatureValue *locationValue=locationReader->GetValue(ring->GetFeatureValueBuffer());
+        AddressFeatureValue  *addressValue=addressReader->GetValue(ring->GetFeatureValueBuffer());
 
-      std::string          name;
-      std::string          location;
-      std::string          address;
+        std::string          name;
+        std::string          location;
+        std::string          address;
 
-      if (nameValue!=NULL) {
-        name=nameValue->GetName();
-      }
+        if (nameValue!=NULL) {
+          name=nameValue->GetName();
+        }
 
-      if (locationValue!=NULL) {
-        location=locationValue->GetLocation();
-      }
+        if (locationValue!=NULL) {
+          location=locationValue->GetLocation();
+        }
 
-      if (addressValue!=NULL) {
-        address=addressValue->GetAddress();
-      }
+        if (addressValue!=NULL) {
+          address=addressValue->GetAddress();
+        }
 
-      bool isAddress=!ring->GetType()->GetIgnore() &&
-                     !location.empty() &&
-                     !address.empty();
+        bool isAddress=!ring->GetType()->GetIgnore() &&
+                       !location.empty() &&
+                       !address.empty();
 
-      bool isPoi=!name.empty() && ring->GetType()->GetIndexAsPOI();
+        bool isPoi=!name.empty() && ring->GetType()->GetIndexAsPOI();
 
-      size_t locationIndex;
+        size_t locationIndex;
 
-      if (locationReader->GetIndex(ring->GetFeatureValueBuffer(),
-                                   locationIndex) &&
-      ring->GetFeatureValueBuffer().HasFeature(locationIndex)) {
-        ring->UnsetFeature(locationIndex);
-      }
+        if (locationReader->GetIndex(ring->GetFeatureValueBuffer(),
+                                     locationIndex) &&
+            ring->GetFeatureValueBuffer().HasFeature(locationIndex)) {
+          ring->UnsetFeature(locationIndex);
+        }
 
-      if (!isAddress && !isPoi) {
-        continue;
-      }
+        if (!isAddress && !isPoi) {
+          continue;
+        }
 
-      if (ring->ring==Area::masterRingId &&
-          ring->nodes.empty()) {
-        for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
-             r!=area.rings.end();
-             ++r) {
-          if (r->ring==Area::outerRingId) {
-            if (!writer.WriteFileOffset(offset)) {
-              return false;
+        if (ring->ring==Area::masterRingId &&
+            ring->nodes.empty()) {
+          for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
+               r!=area.rings.end();
+               ++r) {
+            if (r->ring==Area::outerRingId) {
+              if (!writer.WriteFileOffset(offset)) {
+                return false;
+              }
+
+              writer.WriteNumber(ring->GetType()->GetAreaId());
+
+              if (!writer.Write(name)) {
+                return false;
+              }
+
+              if (!writer.Write(location)) {
+                return false;
+              }
+
+              if (!writer.Write(address)) {
+                return false;
+              }
+
+              writer.Write(r->nodes);
+
+              overallDataCount++;
             }
-
-            if (!writer.WriteNumber(ring->GetType()->GetAreaId())) {
-              return false;
-            }
-
-            if (!writer.Write(name)) {
-              return false;
-            }
-
-            if (!writer.Write(location)) {
-              return false;
-            }
-
-            if (!writer.Write(address)) {
-              return false;
-            }
-
-            writer.Write(r->nodes);
-
-            overallDataCount++;
           }
         }
+        else {
+          if (!writer.WriteFileOffset(offset)) {
+            return false;
+          }
+
+          writer.WriteNumber(ring->GetType()->GetAreaId());
+
+          if (!writer.Write(name)) {
+            return false;
+          }
+
+          if (!writer.Write(location)) {
+            return false;
+          }
+
+          if (!writer.Write(address)) {
+            return false;
+          }
+
+          writer.Write(ring->nodes);
+
+          overallDataCount++;
+        }
       }
-      else {
-        if (!writer.WriteFileOffset(offset)) {
-          return false;
-        }
-
-        if (!writer.WriteNumber(ring->GetType()->GetAreaId())) {
-          return false;
-        }
-
-        if (!writer.Write(name)) {
-          return false;
-        }
-
-        if (!writer.Write(location)) {
-          return false;
-        }
-
-        if (!writer.Write(address)) {
-          return false;
-        }
-
-        writer.Write(ring->nodes);
-
-        overallDataCount++;
-      }
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
+      return false;
     }
 
     return true;
   }
 
   bool AreaLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
-                                                       Progress& /*progress*/,
+                                                       Progress& progress,
                                                        const TypeConfig& /*typeConfig*/)
   {
     delete nameReader;
@@ -215,7 +217,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       writer.CloseFailsafe();
       return false;
     }
@@ -771,33 +773,25 @@ namespace osmscout {
       topLeftOffset=offset-topLeftOffset;
     }
 
-    if (!indexWriter.WriteNumber(topLeftOffset)) {
-      return false;
-    }
+    indexWriter.WriteNumber(topLeftOffset);
 
     if (topRightOffset!=0) {
       topRightOffset=offset-topRightOffset;
     }
 
-    if (!indexWriter.WriteNumber(topRightOffset)) {
-      return false;
-    }
+    indexWriter.WriteNumber(topRightOffset);
 
     if (bottomLeftOffset!=0) {
       bottomLeftOffset=offset-bottomLeftOffset;
     }
 
-    if (!indexWriter.WriteNumber(bottomLeftOffset)) {
-      return false;
-    }
+    indexWriter.WriteNumber(bottomLeftOffset);
 
     if (bottomRightOffset!=0) {
       bottomRightOffset=offset-bottomRightOffset;
     }
 
-    if (!indexWriter.WriteNumber(bottomRightOffset)) {
-      return false;
-    }
+    indexWriter.WriteNumber(bottomRightOffset);
 
     return true;
   }
@@ -1054,7 +1048,7 @@ namespace osmscout {
       mapWriter.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       scanner.CloseFailsafe();
       indexWriter.CloseFailsafe();
@@ -1084,7 +1078,7 @@ namespace osmscout {
       }
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       return false;
     }
@@ -1104,7 +1098,7 @@ namespace osmscout {
       }
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       return false;
     }

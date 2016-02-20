@@ -441,10 +441,10 @@ namespace osmscout {
     to reduce storage size. Note that this works only if the average number
     is small.
     */
-  bool FileWriter::WriteNumber(int16_t number)
+  void FileWriter::WriteNumber(int16_t number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write int16_t number","File already in error state");
     }
 
     char         buffer[3];
@@ -454,7 +454,9 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write int16_t number");
+    }
   }
 
   /**
@@ -462,10 +464,10 @@ namespace osmscout {
     to reduce storage size. Note that this works only if the average number
     is small.
     */
-  bool FileWriter::WriteNumber(int32_t number)
+  void FileWriter::WriteNumber(int32_t number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write int32_t number","File already in error state");
     }
 
     char         buffer[5];
@@ -475,7 +477,9 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write int32_t number");
+    }
   }
 
   /**
@@ -483,10 +487,10 @@ namespace osmscout {
     to reduce storage size. Note that this works only if the average number
     is small.
     */
-  bool FileWriter::WriteNumber(int64_t number)
+  void FileWriter::WriteNumber(int64_t number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write int64_t number","File already in error state");
     }
 
     char         buffer[10];
@@ -496,7 +500,9 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write int64_t number");
+    }
   }
 
   /**
@@ -504,10 +510,10 @@ namespace osmscout {
     to reduce storage size. Note that this works only if the average number
     is small.
     */
-  bool FileWriter::WriteNumber(uint16_t number)
+  void FileWriter::WriteNumber(uint16_t number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write uint16_t number","File already in error state");
     }
 
     char         buffer[10];
@@ -517,7 +523,9 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write uint16_t number");
+    }
   }
 
   /**
@@ -525,10 +533,10 @@ namespace osmscout {
     to reduce storage size. Note that this works only if the average number
     is small.
     */
-  bool FileWriter::WriteNumber(uint32_t number)
+  void FileWriter::WriteNumber(uint32_t number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write uint32_t number","File already in error state");
     }
 
     char         buffer[10];
@@ -538,7 +546,9 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write uint32_t number");
+    }
   }
 
   /**
@@ -546,10 +556,10 @@ namespace osmscout {
     to reduce storage size. Note that this works only if the average number
     is small.
     */
-  bool FileWriter::WriteNumber(uint64_t number)
+  void FileWriter::WriteNumber(uint64_t number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot write uint64_t number","File already in error state");
     }
 
     char         buffer[10];
@@ -559,7 +569,9 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
-    return !hasError;
+    if (hasError) {
+      throw IOException(filename,"Cannot write uint64_t number");
+    }
   }
 
   void FileWriter::WriteCoord(const GeoCoord& coord)
@@ -821,13 +833,15 @@ namespace osmscout {
     std::cout << std::endl;*/
   }
 
-  bool FileWriter::WriteTypeId(TypeId id, uint8_t maxBytes)
+  void FileWriter::WriteTypeId(TypeId id, uint8_t maxBytes)
   {
     if (maxBytes==1) {
-      return Write((uint8_t)id);
+      if (!Write((uint8_t)id)) {
+        throw IOException(filename,"Cannot write uint8_t");
+      }
     }
     else {
-      return WriteNumber(id);
+      WriteNumber(id);
     }
   }
 
@@ -922,7 +936,7 @@ namespace osmscout {
     lastFileOffset=0;
   }
 
-  bool ObjectFileRefStreamWriter::Write(const ObjectFileRef& ref)
+  void ObjectFileRefStreamWriter::Write(const ObjectFileRef& ref)
   {
     // ObjectFileRefs must be sorted
     assert(ref.GetFileOffset()>=lastFileOffset);
@@ -936,7 +950,7 @@ namespace osmscout {
 
     lastFileOffset=ref.GetFileOffset();
 
-    return writer.WriteNumber(offset);
+    writer.WriteNumber(offset);
   }
 
 }

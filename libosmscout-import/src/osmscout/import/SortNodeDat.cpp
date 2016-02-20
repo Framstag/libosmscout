@@ -120,9 +120,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.WriteNumber(node.GetType()->GetNodeId())) {
-        return false;
-      }
+      writer.WriteNumber(node.GetType()->GetNodeId());
 
       if (!writer.Write(name)) {
         return false;

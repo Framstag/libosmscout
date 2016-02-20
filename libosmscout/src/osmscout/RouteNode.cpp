@@ -21,6 +21,8 @@
 
 #include <limits>
 
+#include <osmscout/util/Logger.h>
+
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
@@ -60,9 +62,16 @@ namespace osmscout {
 
   bool ObjectVariantData::Write(FileWriter& writer) const
   {
-    return writer.WriteNumber((uint32_t)type->GetIndex()) &&
-           writer.Write(maxSpeed) &&
-           writer.Write(grade);
+    try {
+      writer.WriteNumber((uint32_t)type->GetIndex());
+
+      return writer.Write(maxSpeed) &&
+             writer.Write(grade);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   uint32_t RouteNode::AddObject(const ObjectFileRef& object,
