@@ -34,6 +34,17 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/Preprocess.h>
 
+#include <osmscout/private/Config.h>
+#if defined(OSMSCOUT_HAVE_OPENMP) || defined(_OPENMP)
+#ifdef HAVE_LONG_LONG
+#define opf long long
+#else
+#define opf long
+#endif
+#else
+#define opf size_t
+#endif
+
 namespace osmscout {
 
   const char* WayWayDataGenerator::WAYWAY_TMP="wayway.tmp";
@@ -713,7 +724,7 @@ namespace osmscout {
       progress.SetAction("Merging ways");
 
 #pragma omp parallel for
-      for (size_t typeIdx=0; typeIdx<typeConfig->GetTypeCount(); typeIdx++) {
+	  for (opf typeIdx = 0; typeIdx<(opf)typeConfig->GetTypeCount(); typeIdx++) {
         size_t originalWayCount=waysByType[typeIdx].size();
 
         if (originalWayCount>0) {
