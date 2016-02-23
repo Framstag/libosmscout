@@ -507,7 +507,7 @@ namespace osmscout
     }
   }
 
-  bool OptimizeWaysLowZoomGenerator::WriteWays(const TypeConfig& typeConfig,
+  void OptimizeWaysLowZoomGenerator::WriteWays(const TypeConfig& typeConfig,
                                                FileWriter& writer,
                                                const std::list<WayRef>& ways,
                                                FileOffsetFileOffsetMap& offsets)
@@ -515,13 +515,9 @@ namespace osmscout
     for (const auto &way : ways) {
       offsets[way->GetFileOffset()]=writer.GetPos();
 
-      if (!way->WriteOptimized(typeConfig,
-                               writer)) {
-        return false;
-      }
+      way->WriteOptimized(typeConfig,
+                          writer);
     }
-
-    return true;
   }
 
   bool OptimizeWaysLowZoomGenerator::WriteWayBitmap(Progress& progress,
@@ -751,12 +747,10 @@ namespace osmscout
 
             FileOffsetFileOffsetMap offsets;
 
-            if (!WriteWays(typeConfig,
-                           writer,
-                           optimizedWays,
-                           offsets)) {
-              return false;
-            }
+            WriteWays(typeConfig,
+                      writer,
+                      optimizedWays,
+                      offsets);
 
             if (!WriteWayBitmap(progress,
                                 writer,
@@ -782,7 +776,7 @@ namespace osmscout
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -832,15 +826,12 @@ namespace osmscout
       }
 
       writer.SetPos(0);
-
-      if (!writer.WriteFileOffset(indexOffset)) {
-        progress.Error("Cannot write index position");
-      }
+      writer.WriteFileOffset(indexOffset);
 
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 

@@ -104,20 +104,10 @@ namespace osmscout {
         location=locationValue->GetLocation();
       }
 
-      if (!writer.WriteFileOffset(offset)) {
-        return false;
-      }
-
+      writer.WriteFileOffset(offset);
       writer.WriteNumber(way.GetType()->GetWayId());
-
-      if (!writer.Write(name)) {
-        return false;
-      }
-
-      if (!writer.Write(location)) {
-        return false;
-      }
-
+      writer.Write(name);
+      writer.Write(location);
       writer.Write(way.nodes);
 
       overallDataCount++;

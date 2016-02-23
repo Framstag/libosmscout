@@ -179,7 +179,7 @@ namespace osmscout {
     uint8_t bytesForWayFileOffset;
 
   private:
-    bool Write(FileWriter& writer,
+    void Write(FileWriter& writer,
                const ObjectFileRef& object);
 
     void AnalyseStringForIgnoreTokens(const std::string& string,
@@ -364,27 +364,27 @@ namespace osmscout {
                            RegionRef& rootRegion,
                            const RegionIndex& regionIndex);
 
-    bool WriteIgnoreTokens(FileWriter& writer,
+    void WriteIgnoreTokens(FileWriter& writer,
                            const std::list<std::string>& regionIgnoreTokens,
                            const std::list<std::string>& locationIgnoreTokens);
 
-    bool WriteRegionIndexEntry(FileWriter& writer,
+    void WriteRegionIndexEntry(FileWriter& writer,
                                const Region& parentRegion,
                                Region& region);
 
-    bool WriteRegionIndex(FileWriter& writer,
+    void WriteRegionIndex(FileWriter& writer,
                           Region& root);
 
-    bool WriteRegionDataEntry(FileWriter& writer,
+    void WriteRegionDataEntry(FileWriter& writer,
                               Region& region);
 
-    bool WriteRegionData(FileWriter& writer,
+    void WriteRegionData(FileWriter& writer,
                          Region& root);
 
-    bool WriteAddressDataEntry(FileWriter& writer,
+    void WriteAddressDataEntry(FileWriter& writer,
                                Region& region);
 
-    bool WriteAddressData(FileWriter& writer,
+    void WriteAddressData(FileWriter& writer,
                           Region& root);
 
   public:

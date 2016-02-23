@@ -100,7 +100,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool RawNode::Write(const TypeConfig& typeConfig,
+  /**
+   * Writes the data to the given FileWriter
+   *
+   * @throws IOException
+   */
+  void RawNode::Write(const TypeConfig& typeConfig,
                       FileWriter& writer) const
   {
     writer.WriteNumber(id);
@@ -109,15 +114,10 @@ namespace osmscout {
                        typeConfig.GetNodeTypeIdBytes());
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
-      if (!featureValueBuffer.Write(writer)) {
-        return false;
-      }
+      featureValueBuffer.Write(writer);
     }
 
     writer.WriteCoord(coords);
-
-
-    return !writer.HasError();
   }
 }
 

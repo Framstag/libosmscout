@@ -141,7 +141,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool RawWay::Write(const TypeConfig& typeConfig,
+  /**
+   * Writes data to the given FileWriter
+   *
+   * @throws IOException
+   */
+  void RawWay::Write(const TypeConfig& typeConfig,
                      FileWriter& writer) const
   {
     writer.WriteNumber(id);
@@ -156,9 +161,7 @@ namespace osmscout {
     }
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
-      if (!featureValueBuffer.Write(writer)) {
-        return false;
-      }
+      featureValueBuffer.Write(writer);
     }
 
     writer.WriteNumber((uint32_t)nodes.size());
@@ -175,8 +178,6 @@ namespace osmscout {
         writer.WriteNumber(nodes[i]-minId);
       }
     }
-
-    return !writer.HasError();
   }
 }
 

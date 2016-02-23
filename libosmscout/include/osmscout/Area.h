@@ -170,7 +170,7 @@ namespace osmscout {
      * Write the area with all data required in the
      * standard database.
      */
-    bool Write(const TypeConfig& typeConfig,
+    void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;
 
     /**
@@ -178,14 +178,14 @@ namespace osmscout {
      * certain optimizations done on the final data
      * are not done here to not loose information.
      */
-    bool WriteImport(const TypeConfig& typeConfig,
+    void WriteImport(const TypeConfig& typeConfig,
                      FileWriter& writer) const;
 
     /**
      * Write the area with all data required by the OptimizeLowZoom
      * index, dropping all ids.
      */
-    bool WriteOptimized(const TypeConfig& typeConfig,
+    void WriteOptimized(const TypeConfig& typeConfig,
                         FileWriter& writer) const;
   };
 

@@ -101,7 +101,7 @@ namespace osmscout {
 
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
-    bool Write(const TypeConfig& typeConfig,
+    void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;
   };
 

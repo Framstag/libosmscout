@@ -64,19 +64,20 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool Node::Write(const TypeConfig& typeConfig,
+  /**
+   * Write the nod edata to the given FileWriter.
+   *
+   * @throws IOException
+   */
+  void Node::Write(const TypeConfig& typeConfig,
                    FileWriter& writer) const
   {
     writer.WriteTypeId(featureValueBuffer.GetType()->GetNodeId(),
                        typeConfig.GetNodeTypeIdBytes());
 
-    if (!featureValueBuffer.Write(writer)) {
-      return false;
-    }
+    featureValueBuffer.Write(writer);
 
     writer.WriteCoord(coords);
-
-    return !writer.HasError();
   }
 }
 

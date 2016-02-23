@@ -31,9 +31,9 @@ namespace osmscout {
     return scanner.Read(name);
   }
 
-  bool NameFeatureValue::Write(FileWriter& writer)
+  void NameFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(name);
+    writer.Write(name);
   }
 
 
@@ -119,9 +119,9 @@ namespace osmscout {
     return scanner.Read(nameAlt);
   }
 
-  bool NameAltFeatureValue::Write(FileWriter& writer)
+  void NameAltFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(nameAlt);
+    writer.Write(nameAlt);
   }
 
   FeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
@@ -205,9 +205,9 @@ namespace osmscout {
     return scanner.Read(ref);
   }
 
-  bool RefFeatureValue::Write(FileWriter& writer)
+  void RefFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(ref);
+    writer.Write(ref);
   }
 
   FeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
@@ -281,9 +281,9 @@ namespace osmscout {
     return scanner.Read(location);
   }
 
-  bool LocationFeatureValue::Write(FileWriter& writer)
+  void LocationFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(location);
+    writer.Write(location);
   }
 
   FeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
@@ -359,9 +359,9 @@ namespace osmscout {
     return scanner.Read(address);
   }
 
-  bool AddressFeatureValue::Write(FileWriter& writer)
+  void AddressFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(address);
+    writer.Write(address);
   }
 
   FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
@@ -448,9 +448,9 @@ namespace osmscout {
     return scanner.Read(access);
   }
 
-  bool AccessFeatureValue::Write(FileWriter& writer)
+  void AccessFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(access);
+    writer.Write(access);
   }
 
   FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
@@ -728,9 +728,9 @@ namespace osmscout {
     return scanner.Read(access);
   }
 
-  bool AccessRestrictedFeatureValue::Write(FileWriter& writer)
+  void AccessRestrictedFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(access);
+    writer.Write(access);
   }
 
   FeatureValue& AccessRestrictedFeatureValue::operator=(const FeatureValue& other)
@@ -844,9 +844,9 @@ namespace osmscout {
     return scanner.Read(layer);
   }
 
-  bool LayerFeatureValue::Write(FileWriter& writer)
+  void LayerFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(layer);
+    writer.Write(layer);
   }
 
   FeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
@@ -919,9 +919,9 @@ namespace osmscout {
     return scanner.Read(width);
   }
 
-  bool WidthFeatureValue::Write(FileWriter& writer)
+  void WidthFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(width);
+    writer.Write(width);
   }
 
   FeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
@@ -1029,9 +1029,9 @@ namespace osmscout {
     return scanner.Read(maxSpeed);
   }
 
-  bool MaxSpeedFeatureValue::Write(FileWriter& writer)
+  void MaxSpeedFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(maxSpeed);
+    writer.Write(maxSpeed);
   }
 
   FeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
@@ -1168,9 +1168,9 @@ namespace osmscout {
     return scanner.Read(grade);
   }
 
-  bool GradeFeatureValue::Write(FileWriter& writer)
+  void GradeFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(grade);
+    writer.Write(grade);
   }
 
   FeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
@@ -1286,9 +1286,9 @@ namespace osmscout {
     return scanner.Read(adminLevel);
   }
 
-  bool AdminLevelFeatureValue::Write(FileWriter& writer)
+  void AdminLevelFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(adminLevel);
+    writer.Write(adminLevel);
   }
 
   FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
@@ -1445,18 +1445,9 @@ namespace osmscout {
     return scanner.ReadNumber(ele);
   }
 
-  bool EleFeatureValue::Write(FileWriter& writer)
+  void EleFeatureValue::Write(FileWriter& writer)
   {
-    try {
-      writer.WriteNumber(ele);
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-
-    return true;
+    writer.WriteNumber(ele);
   }
 
   FeatureValue& EleFeatureValue::operator=(const FeatureValue& other)
@@ -1573,9 +1564,9 @@ namespace osmscout {
     return scanner.Read(destination);
   }
 
-  bool DestinationFeatureValue::Write(FileWriter& writer)
+  void DestinationFeatureValue::Write(FileWriter& writer)
   {
-    return writer.Write(destination);
+    writer.Write(destination);
   }
 
   FeatureValue& DestinationFeatureValue::operator=(const FeatureValue& other)

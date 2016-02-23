@@ -91,7 +91,7 @@ namespace osmscout {
                            const std::list<AreaRef>& areas,
                            TypeData& typeData);
 
-    bool WriteAreas(const TypeConfig& typeConfig,
+    void WriteAreas(const TypeConfig& typeConfig,
                     FileWriter& writer,
                     const std::list<AreaRef>& areas,
                     FileOffsetFileOffsetMap& offsets);

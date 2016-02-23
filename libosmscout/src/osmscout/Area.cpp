@@ -496,7 +496,13 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool Area::Write(const TypeConfig& typeConfig,
+  /**
+   * Writes data to the given FileWriter. Node ids will only be written
+   * if thought to be required for this area.
+   *
+   * @throws IOException
+   */
+  void Area::Write(const TypeConfig& typeConfig,
                    FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
@@ -504,165 +510,147 @@ namespace osmscout {
 
     // Outer ring
 
-    try {
+    writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                       typeConfig.GetAreaTypeIdBytes());
+
+    ring->featureValueBuffer.Write(writer,
+                                   multipleRings);
+
+    if (multipleRings) {
+      writer.WriteNumber((uint32_t)(rings.size()-1));
+    }
+
+    writer.Write(ring->nodes);
+
+    if (!ring->nodes.empty() &&
+        ring->GetType()->CanRoute()) {
+      WriteIds(writer,
+               ring->ids);
+    }
+
+    ++ring;
+
+    // Potential additional rings
+
+    while (ring!=rings.end()) {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      ring->featureValueBuffer.Write(writer,
-                                     multipleRings);
-
-      if (multipleRings) {
-        writer.WriteNumber((uint32_t)(rings.size()-1));
+      if (ring->GetType()->GetAreaId()!=typeIgnore) {
+        ring->featureValueBuffer.Write(writer);
       }
 
+      writer.Write(ring->ring);
       writer.Write(ring->nodes);
 
       if (!ring->nodes.empty() &&
+          ring->GetType()->GetAreaId()!=typeIgnore &&
           ring->GetType()->CanRoute()) {
         WriteIds(writer,
                  ring->ids);
       }
 
       ++ring;
-
-      // Potential additional rings
-
-      while (ring!=rings.end()) {
-        writer.WriteTypeId(ring->GetType()->GetAreaId(),
-                           typeConfig.GetAreaTypeIdBytes());
-
-        if (ring->GetType()->GetAreaId()!=typeIgnore) {
-          ring->featureValueBuffer.Write(writer);
-        }
-
-        writer.Write(ring->ring);
-        writer.Write(ring->nodes);
-
-        if (!ring->nodes.empty() &&
-            ring->GetType()->GetAreaId()!=typeIgnore &&
-            ring->GetType()->CanRoute()) {
-          WriteIds(writer,
-                   ring->ids);
-        }
-
-        ++ring;
-      }
     }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-
-    return !writer.HasError();
   }
 
-  bool Area::WriteImport(const TypeConfig& typeConfig,
+  /**
+   * Writes data to the given FileWriter. All data available will be written.
+   *
+   * @throws IOException
+   */
+  void Area::WriteImport(const TypeConfig& typeConfig,
                          FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
-    try {
-      // Outer ring
+    // Outer ring
 
+    writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                       typeConfig.GetAreaTypeIdBytes());
+
+    ring->featureValueBuffer.Write(writer,
+                                   multipleRings);
+
+    if (multipleRings) {
+      writer.WriteNumber((uint32_t)(rings.size()-1));
+    }
+
+    writer.Write(ring->nodes);
+
+    if (!ring->nodes.empty()) {
+      WriteIds(writer,
+               ring->ids);
+    }
+
+    ++ring;
+
+    // Potential additional rings
+
+    while (ring!=rings.end()) {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      ring->featureValueBuffer.Write(writer,
-                                     multipleRings);
-
-      if (multipleRings) {
-        writer.WriteNumber((uint32_t)(rings.size()-1));
+      if (ring->GetType()->GetAreaId()!=typeIgnore) {
+        ring->featureValueBuffer.Write(writer);
       }
 
+      writer.Write(ring->ring);
       writer.Write(ring->nodes);
 
-      if (!ring->nodes.empty()) {
+      if (!ring->nodes.empty() &&
+          ring->GetType()->GetAreaId()!=typeIgnore) {
         WriteIds(writer,
                  ring->ids);
       }
 
       ++ring;
-
-      // Potential additional rings
-
-      while (ring!=rings.end()) {
-        writer.WriteTypeId(ring->GetType()->GetAreaId(),
-                           typeConfig.GetAreaTypeIdBytes());
-
-        if (ring->GetType()->GetAreaId()!=typeIgnore) {
-          ring->featureValueBuffer.Write(writer);
-        }
-
-        writer.Write(ring->ring);
-
-        writer.Write(ring->nodes);
-
-        if (!ring->nodes.empty() &&
-            ring->GetType()->GetAreaId()!=typeIgnore) {
-          WriteIds(writer,
-                   ring->ids);
-        }
-
-        ++ring;
-      }
     }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-
-    return !writer.HasError();
   }
 
-  bool Area::WriteOptimized(const TypeConfig& typeConfig,
+  /**
+   * Writes data to the given FileWriter. No node ids will be written.
+   *
+   * @throws IOException
+   */
+  void Area::WriteOptimized(const TypeConfig& typeConfig,
                             FileWriter& writer) const
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
-    try {
-      // Outer ring
+    // Outer ring
 
+    writer.WriteTypeId(ring->GetType()->GetAreaId(),
+                       typeConfig.GetAreaTypeIdBytes());
+
+    ring->featureValueBuffer.Write(writer,
+                                   multipleRings);
+
+    if (multipleRings) {
+      writer.WriteNumber((uint32_t)(rings.size()-1));
+    }
+
+    writer.Write(ring->nodes);
+
+    ++ring;
+
+    // Potential additional rings
+
+    while (ring!=rings.end()) {
       writer.WriteTypeId(ring->GetType()->GetAreaId(),
                          typeConfig.GetAreaTypeIdBytes());
 
-      ring->featureValueBuffer.Write(writer,
-                                     multipleRings);
-
-      if (multipleRings) {
-        writer.WriteNumber((uint32_t)(rings.size()-1));
+      if (ring->GetType()->GetAreaId()!=typeIgnore) {
+        ring->featureValueBuffer.Write(writer);
       }
 
+      writer.Write(ring->ring);
       writer.Write(ring->nodes);
 
       ++ring;
-
-      // Potential additional rings
-
-      while (ring!=rings.end()) {
-        writer.WriteTypeId(ring->GetType()->GetAreaId(),
-                           typeConfig.GetAreaTypeIdBytes());
-
-        if (ring->GetType()->GetAreaId()!=typeIgnore) {
-          ring->featureValueBuffer.Write(writer);
-        }
-
-        writer.Write(ring->ring);
-        writer.Write(ring->nodes);
-
-        ++ring;
-      }
     }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-
-    return !writer.HasError();
   }
 }
 

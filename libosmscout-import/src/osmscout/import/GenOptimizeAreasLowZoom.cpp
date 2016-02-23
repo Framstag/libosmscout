@@ -341,7 +341,7 @@ namespace osmscout
     }
   }
 
-  bool OptimizeAreasLowZoomGenerator::WriteAreas(const TypeConfig& typeConfig,
+  void OptimizeAreasLowZoomGenerator::WriteAreas(const TypeConfig& typeConfig,
                                                  FileWriter& writer,
                                                  const std::list<AreaRef>& areas,
                                                  FileOffsetFileOffsetMap& offsets)
@@ -349,13 +349,9 @@ namespace osmscout
     for (const auto &area : areas) {
       offsets[area->GetFileOffset()]=writer.GetPos();
 
-      if (!area->WriteOptimized(typeConfig,
-                                writer)) {
-        return false;
-      }
+      area->WriteOptimized(typeConfig,
+                           writer);
     }
-
-    return true;
   }
 
   bool OptimizeAreasLowZoomGenerator::WriteAreaBitmap(Progress& progress,
@@ -590,12 +586,10 @@ namespace osmscout
 
             FileOffsetFileOffsetMap offsets;
 
-            if (!WriteAreas(typeConfig,
-                            writer,
-                            optimizedAreas,
-                            offsets)) {
-              return false;
-            }
+            WriteAreas(typeConfig,
+                       writer,
+                       optimizedAreas,
+                       offsets);
 
             if (!WriteAreaBitmap(progress,
                                  writer,
@@ -619,7 +613,7 @@ namespace osmscout
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -670,15 +664,12 @@ namespace osmscout
       }
 
       writer.GotoBegin();
-
-      if (!writer.WriteFileOffset(indexOffset)) {
-        progress.Error("Cannot write index position");
-      }
+      writer.WriteFileOffset(indexOffset);
 
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 

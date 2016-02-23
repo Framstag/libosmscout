@@ -108,7 +108,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -142,7 +142,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 
@@ -156,6 +156,7 @@ namespace osmscout {
 
   bool WayWayDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
                                                  const ImportParameter& parameter,
+                                                 Progress& progress,
                                                  std::vector<Distribution>& typeDistribution) const
   {
     typeDistribution.clear();
@@ -180,7 +181,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -474,7 +475,7 @@ namespace osmscout {
     return true;
   }
 
-  bool WayWayDataGenerator::WriteWay(Progress& progress,
+  void WayWayDataGenerator::WriteWay(Progress& progress,
                                      const TypeConfig& typeConfig,
                                      FileWriter& writer,
                                      uint32_t& writtenWayCount,
@@ -507,25 +508,21 @@ namespace osmscout {
     }
 
     if (!success) {
-      return true;
+      return;
     }
 
     if (!IsValidToWrite(way.nodes)) {
       progress.Error("Way coordinates are not dense enough to be written for Way "+
                      NumberToString(wayId));
-      return true;
+      return;
     }
 
-    if (!writer.Write((uint8_t)osmRefWay) ||
-        !writer.Write(wayId) ||
-        !way.Write(typeConfig,
-                   writer)) {
-      return false;
-    }
+    writer.Write((uint8_t)osmRefWay);
+    writer.Write(wayId);
+    way.Write(typeConfig,
+              writer);
 
     writtenWayCount++;
-
-    return true;
   }
 
   bool WayWayDataGenerator::HandleLowMemoryFallback(Progress& progress,
@@ -593,14 +590,12 @@ namespace osmscout {
 
       nodeIds.clear();
 
-      if (!WriteWay(progress,
-                    typeConfig,
-                    writer,
-                    writtenWayCount,
-                    coordsMap,
-                    *way)) {
-        return false;
-      }
+      WriteWay(progress,
+               typeConfig,
+               writer,
+               writtenWayCount,
+               coordsMap,
+               *way);
     }
 
     progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(types.Size())+" types");
@@ -633,6 +628,7 @@ namespace osmscout {
 
     if (!ReadTypeDistribution(typeConfig,
                               parameter,
+                              progress,
                               typeDistribution)) {
       return false;
     }
@@ -789,7 +785,7 @@ namespace osmscout {
       wayWriter.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       scanner.CloseFailsafe();
       return false;
     }

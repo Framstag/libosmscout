@@ -140,24 +140,11 @@ namespace osmscout {
                r!=area.rings.end();
                ++r) {
             if (r->ring==Area::outerRingId) {
-              if (!writer.WriteFileOffset(offset)) {
-                return false;
-              }
-
+              writer.WriteFileOffset(offset);
               writer.WriteNumber(ring->GetType()->GetAreaId());
-
-              if (!writer.Write(name)) {
-                return false;
-              }
-
-              if (!writer.Write(location)) {
-                return false;
-              }
-
-              if (!writer.Write(address)) {
-                return false;
-              }
-
+              writer.Write(name);
+              writer.Write(location);
+              writer.Write(address);
               writer.Write(r->nodes);
 
               overallDataCount++;
@@ -165,24 +152,11 @@ namespace osmscout {
           }
         }
         else {
-          if (!writer.WriteFileOffset(offset)) {
-            return false;
-          }
-
+          writer.WriteFileOffset(offset);
           writer.WriteNumber(ring->GetType()->GetAreaId());
-
-          if (!writer.Write(name)) {
-            return false;
-          }
-
-          if (!writer.Write(location)) {
-            return false;
-          }
-
-          if (!writer.Write(address)) {
-            return false;
-          }
-
+          writer.Write(name);
+          writer.Write(location);
+          writer.Write(address);
           writer.Write(ring->nodes);
 
           overallDataCount++;
@@ -645,16 +619,12 @@ namespace osmscout {
         dataStartOffset=dstOffset;
       }
 
-      if (!area.Write(typeConfig,
-                      dataWriter)) {
-        return false;
-      }
+      area.Write(typeConfig,
+                 dataWriter);
 
-      if (!mapWriter.Write(id) ||
-          !mapWriter.Write(objectType) ||
-          !mapWriter.WriteFileOffset(dstOffset)) {
-        return false;
-      }
+      mapWriter.Write(id);
+      mapWriter.Write(objectType);
+      mapWriter.WriteFileOffset(dstOffset);
 
       dataWrittenCount++;
     }
@@ -987,10 +957,7 @@ namespace osmscout {
       topLevelOffsetOffset=indexWriter.GetPos();
 
       // This is not the final value, that will be written later on
-      if (!indexWriter.WriteFileOffset(topLevelOffset)) {
-        progress.Error("Cannot write top level entry offset");
-        return false;
-      }
+      indexWriter.WriteFileOffset(topLevelOffset);
 
       // Data file
 

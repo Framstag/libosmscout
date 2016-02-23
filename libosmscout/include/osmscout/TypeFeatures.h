@@ -61,7 +61,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -129,7 +129,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -197,7 +197,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -261,7 +261,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -326,7 +326,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -549,7 +549,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -704,7 +704,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -777,7 +777,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -837,7 +837,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -897,7 +897,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -957,7 +957,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -1018,7 +1018,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -1149,7 +1149,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;
@@ -1220,7 +1220,7 @@ namespace osmscout {
     }
 
     bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer);
+    void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const;

@@ -60,11 +60,12 @@ namespace osmscout {
     return true;
   }
 
-  bool FeatureValue::Write(FileWriter& /*writer*/)
+  /**
+   * Write the FeatureValue to disk. May throw an IOException.
+   */
+  void FeatureValue::Write(FileWriter& /*writer*/)
   {
     assert(false);
-
-    return true;
   }
 
   Feature::Feature()
@@ -334,12 +335,15 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool FeatureValueBuffer::Write(FileWriter& writer) const
+  /**
+   * Writes the FeatureValueBuffer to the given FileWriter.
+   *
+   * @throws IOException
+   */
+  void FeatureValueBuffer::Write(FileWriter& writer) const
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      if (!writer.Write(featureBits[i])) {
-        return false;
-      }
+      writer.Write(featureBits[i]);
     }
 
     for (const auto &feature : type->GetFeatures()) {
@@ -349,16 +353,19 @@ namespace osmscout {
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=GetValue(idx);
 
-        if (!value->Write(writer)) {
-          return false;
-        }
+        value->Write(writer);
       }
     }
-
-    return !writer.HasError();
   }
 
-  bool FeatureValueBuffer::Write(FileWriter& writer,
+  /**
+   * Writes the FeatureValueBuffer to teh given FileWriter.
+   * It also writes the value of the special flag passed. The flag can later be retrieved
+   * by using the matching Read method.
+   *
+   * @throws IOException
+   */
+  void FeatureValueBuffer::Write(FileWriter& writer,
                                  bool specialFlag) const
   {
     if (type->GetFeatureCount()%8!=0) {
@@ -370,23 +377,17 @@ namespace osmscout {
       }
 
       for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-        if (!writer.Write(featureBits[i])) {
-          return false;
-        }
+        writer.Write(featureBits[i]);
       }
     }
     else {
       for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-        if (!writer.Write(featureBits[i])) {
-          return false;
-        }
+        writer.Write(featureBits[i]);
       }
 
       uint8_t addByte=specialFlag ? 0x80 : 0x00;
 
-      if (!writer.Write(addByte)) {
-        return false;
-      }
+      writer.Write(addByte);
     }
 
     for (const auto &feature : type->GetFeatures()) {
@@ -396,13 +397,9 @@ namespace osmscout {
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=GetValue(idx);
 
-        if (!value->Write(writer)) {
-          return false;
-        }
+        value->Write(writer);
       }
     }
-
-    return !writer.HasError();
   }
 
   FeatureValueBuffer& FeatureValueBuffer::operator=(const FeatureValueBuffer& other)

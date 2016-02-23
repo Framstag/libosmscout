@@ -22,7 +22,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/MergeAreaData.h>
@@ -206,16 +205,11 @@ namespace osmscout {
       // we directly store it in the target file.
       if (!loadedTypes.IsSet(area->GetType())) {
         if (firstCall) {
-          if (!(writer.Write(type) &&
-                writer.Write(id) &&
-                area->WriteImport(typeConfig,
-                                  writer))) {
-            progress.Error(std::string("Error while writing ")+
-                           " area to file '"+
-                           writer.GetFilename()+"'");
+          writer.Write(type);
+          writer.Write(id);
 
-            return false;
-          }
+          area->WriteImport(typeConfig,
+                            writer);
 
           areasWritten++;
         }
@@ -539,10 +533,8 @@ namespace osmscout {
           continue;
         }
 
-        if (!(writer.Write(type) &&
-              writer.Write(id))) {
-          return false;
-        }
+        writer.Write(type);
+        writer.Write(id);
 
         const auto& merge=merges.find(area->GetFileOffset()) ;
 
@@ -550,14 +542,8 @@ namespace osmscout {
           area=merge->second;
         }
 
-        if (!area->WriteImport(typeConfig,
-                                writer)) {
-          progress.Error(std::string("Error while writing ")+
-                         " area to file '"+
-                         writer.GetFilename()+"'");
-
-          return false;
-        }
+        area->WriteImport(typeConfig,
+                          writer);
 
         areasWritten++;
       }
@@ -674,7 +660,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       scanner.CloseFailsafe();
       writer.CloseFailsafe();

@@ -236,54 +236,44 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool Way::Write(const TypeConfig& typeConfig,
+  /**
+   * Writes the data to the given FileWriter.
+   *
+   * @throws IOException
+   */
+  void Way::Write(const TypeConfig& typeConfig,
                   FileWriter& writer) const
   {
     assert(!nodes.empty());
 
-    try {
-      writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
-                         typeConfig.GetWayTypeIdBytes());
+    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                       typeConfig.GetWayTypeIdBytes());
 
-      featureValueBuffer.Write(writer);
+    featureValueBuffer.Write(writer);
 
-      writer.Write(nodes);
+    writer.Write(nodes);
 
-      if (featureValueBuffer.GetType()->CanRoute() ||
-          featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
-        if (!WriteIds(writer)) {
-          return false;
-        }
-      }
+    if (featureValueBuffer.GetType()->CanRoute() ||
+        featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
+      WriteIds(writer);
     }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-
-    return !writer.HasError();
   }
 
-  bool Way::WriteOptimized(const TypeConfig& typeConfig,
+  /**
+   * Writes the data to the given FileWriter. Node Ids are not written.
+   *
+   * @throws IOException
+   */
+  void Way::WriteOptimized(const TypeConfig& typeConfig,
                            FileWriter& writer) const
   {
     assert(!nodes.empty());
 
-    try {
-      writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
-                         typeConfig.GetWayTypeIdBytes());
+    writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
+                       typeConfig.GetWayTypeIdBytes());
 
-      featureValueBuffer.Write(writer);
+    featureValueBuffer.Write(writer);
 
-      writer.Write(nodes);
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-
-    return !writer.HasError();
+    writer.Write(nodes);
   }
 }

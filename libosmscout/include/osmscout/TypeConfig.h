@@ -72,7 +72,7 @@ namespace osmscout {
     }
 
     virtual bool Read(FileScanner& scanner);
-    virtual bool Write(FileWriter& writer);
+    virtual void Write(FileWriter& writer);
 
     virtual FeatureValue& operator=(const FeatureValue& other);
     virtual bool operator==(const FeatureValue& other) const = 0;
@@ -990,8 +990,8 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Read(FileScanner& scanner,
               bool& specialFlag);
-    bool Write(FileWriter& writer) const;
-    bool Write(FileWriter& writer,
+    void Write(FileWriter& writer) const;
+    void Write(FileWriter& writer,
                bool specialFlag) const;
 
     FeatureValueBuffer& operator=(const FeatureValueBuffer& other);

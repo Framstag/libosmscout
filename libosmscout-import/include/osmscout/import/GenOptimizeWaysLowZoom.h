@@ -106,7 +106,7 @@ namespace osmscout {
                       const Magnification& magnification,
                       TransPolygon::OptimizeMethod optimizeWayMethod);
 
-    bool WriteWays(const TypeConfig& typeConfig,
+    void WriteWays(const TypeConfig& typeConfig,
                    FileWriter& writer,
                    const std::list<WayRef>& ways,
                    FileOffsetFileOffsetMap& offsets);

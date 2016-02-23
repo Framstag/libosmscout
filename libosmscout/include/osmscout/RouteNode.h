@@ -51,7 +51,7 @@ namespace osmscout {
 
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    void Write(FileWriter& writer) const;
   };
 
   /**
@@ -141,7 +141,7 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    void Write(FileWriter& writer) const;
   };
 
   typedef std::shared_ptr<RouteNode> RouteNodeRef;

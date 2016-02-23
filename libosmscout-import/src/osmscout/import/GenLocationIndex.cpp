@@ -73,23 +73,24 @@ namespace osmscout {
     return rootRegion;
   }
 
-  bool LocationIndexGenerator::Write(FileWriter& writer,
+  void LocationIndexGenerator::Write(FileWriter& writer,
                                      const ObjectFileRef& object)
   {
     writer.Write((uint8_t)object.GetType());
 
     switch (object.GetType()) {
+    case refNone:
+      // TODO: Why are we called with refNone?
+      break;
     case refNode:
-      return writer.WriteFileOffset(object.GetFileOffset(),
-                                    bytesForNodeFileOffset);
+      writer.WriteFileOffset(object.GetFileOffset(),
+                             bytesForNodeFileOffset);
     case refArea:
-      return writer.WriteFileOffset(object.GetFileOffset(),
-                                    bytesForAreaFileOffset);
+      writer.WriteFileOffset(object.GetFileOffset(),
+                             bytesForAreaFileOffset);
     case refWay:
-      return writer.WriteFileOffset(object.GetFileOffset(),
-                                    bytesForWayFileOffset);
-    default:
-      return false;
+      writer.WriteFileOffset(object.GetFileOffset(),
+                             bytesForWayFileOffset);
     }
   }
 
@@ -1691,7 +1692,7 @@ namespace osmscout {
     return true;
   }
 
-  bool LocationIndexGenerator::WriteIgnoreTokens(FileWriter& writer,
+  void LocationIndexGenerator::WriteIgnoreTokens(FileWriter& writer,
                                                  const std::list<std::string>& regionIgnoreTokens,
                                                  const std::list<std::string>& locationIgnoreTokens)
   {
@@ -1706,11 +1707,9 @@ namespace osmscout {
     for (const auto& token : locationIgnoreTokens) {
       writer.Write(token);
     }
-
-    return true;
   }
 
-  bool LocationIndexGenerator::WriteRegionIndexEntry(FileWriter& writer,
+  void LocationIndexGenerator::WriteRegionIndexEntry(FileWriter& writer,
                                                      const Region& parentRegion,
                                                      Region& region)
   {
@@ -1738,32 +1737,22 @@ namespace osmscout {
 
       nextChildOffsetOffset=writer.GetPos();
 
-      if (!writer.WriteFileOffset(0)) {
-        return false;
-      }
+      writer.WriteFileOffset(0);
 
-      if (!WriteRegionIndexEntry(writer,
-                                 region,
-                                 *childRegion)) {
-        return false;
-      }
+      WriteRegionIndexEntry(writer,
+                            region,
+                            *childRegion);
 
       FileOffset nextChildOffset;
 
       nextChildOffset=writer.GetPos();
       writer.SetPos(nextChildOffsetOffset);
-
-      if (!writer.WriteFileOffset(nextChildOffset)) {
-        return false;
-      }
-
+      writer.WriteFileOffset(nextChildOffset);
       writer.SetPos(nextChildOffset);
     }
-
-    return !writer.HasError();
   }
 
-  bool LocationIndexGenerator::WriteRegionIndex(FileWriter& writer,
+  void LocationIndexGenerator::WriteRegionIndex(FileWriter& writer,
                                                 Region& rootRegion)
   {
     writer.WriteNumber((uint32_t)rootRegion.regions.size());
@@ -1773,42 +1762,28 @@ namespace osmscout {
 
       nextChildOffsetOffset=writer.GetPos();
 
-      if (!writer.WriteFileOffset(0)) {
-        return false;
-      }
+      writer.WriteFileOffset(0);
 
-      if (!WriteRegionIndexEntry(writer,
-                                 rootRegion,
-                                 *childRegion)) {
-        return false;
-      }
+      WriteRegionIndexEntry(writer,
+                            rootRegion,
+                            *childRegion);
 
       FileOffset nextChildOffset=0;
 
       nextChildOffset=writer.GetPos();
       writer.SetPos(nextChildOffsetOffset);
-
-      if (!writer.WriteFileOffset(nextChildOffset)) {
-        return false;
-      }
-
+      writer.WriteFileOffset(nextChildOffset);
       writer.SetPos(nextChildOffset);
     }
-
-    return true;
   }
 
-  bool LocationIndexGenerator::WriteRegionDataEntry(FileWriter& writer,
+  void LocationIndexGenerator::WriteRegionDataEntry(FileWriter& writer,
                                                     Region& region)
   {
     region.dataOffset=writer.GetPos();
 
     writer.SetPos(region.indexOffset);
-
-    if (!writer.WriteFileOffset(region.dataOffset)) {
-      return false;
-    }
-
+    writer.WriteFileOffset(region.dataOffset);
     writer.SetPos(region.dataOffset);
 
     region.pois.sort();
@@ -1847,29 +1822,21 @@ namespace osmscout {
     }
 
     for (const auto& childRegion : region.regions) {
-      if (!WriteRegionDataEntry(writer,
-                                *childRegion)) {
-        return false;
-      }
+      WriteRegionDataEntry(writer,
+                           *childRegion);
     }
-
-    return !writer.HasError();
   }
 
-  bool LocationIndexGenerator::WriteRegionData(FileWriter& writer,
+  void LocationIndexGenerator::WriteRegionData(FileWriter& writer,
                                                  Region& rootRegion)
   {
     for (const auto& childRegion : rootRegion.regions) {
-      if (!WriteRegionDataEntry(writer,
-                                *childRegion)) {
-        return false;
-      }
+      WriteRegionDataEntry(writer,
+                           *childRegion);
     }
-
-    return true;
   }
 
-  bool LocationIndexGenerator::WriteAddressDataEntry(FileWriter& writer,
+  void LocationIndexGenerator::WriteAddressDataEntry(FileWriter& writer,
                                                      Region& region)
   {
     for (auto& location : region.locations) {
@@ -1897,26 +1864,18 @@ namespace osmscout {
     }
 
     for (const auto& childRegion: region.regions) {
-      if (!WriteAddressDataEntry(writer,
-                                 *childRegion)) {
-        return false;
-      }
+      WriteAddressDataEntry(writer,
+                            *childRegion);
     }
-
-    return !writer.HasError();
   }
 
-  bool LocationIndexGenerator::WriteAddressData(FileWriter& writer,
+  void LocationIndexGenerator::WriteAddressData(FileWriter& writer,
                                                 Region& rootRegion)
   {
     for (const auto& childRegion : rootRegion.regions) {
-      if (!WriteAddressDataEntry(writer,
-                                 *childRegion)) {
-        return false;
-      }
+      WriteAddressDataEntry(writer,
+                            *childRegion);
     }
-
-    return true;
   }
 
   void LocationIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
@@ -2166,32 +2125,22 @@ namespace osmscout {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   LocationIndex::FILENAME_LOCATION_IDX));
 
-      if (!writer.Write(bytesForNodeFileOffset) ||
-          !writer.Write(bytesForAreaFileOffset) ||
-          !writer.Write(bytesForWayFileOffset)) {
-        return false;
-      }
+      writer.Write(bytesForNodeFileOffset);
+      writer.Write(bytesForAreaFileOffset);
+      writer.Write(bytesForWayFileOffset);
 
-      if (!WriteIgnoreTokens(writer,
-                             regionIgnoreTokens,
-                             locationIgnoreTokens)) {
-        return false;
-      }
+      WriteIgnoreTokens(writer,
+                        regionIgnoreTokens,
+                        locationIgnoreTokens);
 
-      if (!WriteRegionIndex(writer,
-                            *rootRegion)) {
-        return false;
-      }
+      WriteRegionIndex(writer,
+                       *rootRegion);
 
-      if (!WriteRegionData(writer,
-                           *rootRegion)) {
-        return false;
-      }
+      WriteRegionData(writer,
+                      *rootRegion);
 
-      if (!WriteAddressData(writer,
-                            *rootRegion)) {
-        return false;
-      }
+      WriteAddressData(writer,
+                       *rootRegion);
 
       writer.Close();
     }

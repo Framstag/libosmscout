@@ -335,15 +335,8 @@ namespace osmscout {
 
             entry.source->scanner.SetPos(entry.fileOffset);
 
-            if (!data.Read(typeConfig,
-                           entry.source->scanner))  {
-              progress.Error(std::string("Error while reading data entry at offset ")+
-                             NumberToString(entry.fileOffset)+
-                             " in file '"+
-                             entry.source->scanner.GetFilename()+"'");
-
-              return false;
-            }
+            data.Read(typeConfig,
+                      entry.source->scanner);
 
             FileOffset fileOffset;
             bool       save=true;
@@ -370,12 +363,8 @@ namespace osmscout {
               continue;
             }
 
-            if (!data.Write(typeConfig,
-                            dataWriter)) {
-              progress.Error(std::string("Error while writing data entry to file '")+
-                             dataWriter.GetFilename()+"'");
-              return false;
-            }
+            data.Write(typeConfig,
+                       dataWriter);
 
             mapWriter.Write(entry.id);
             mapWriter.Write(entry.type);
@@ -417,7 +406,7 @@ namespace osmscout {
       mapWriter.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       for (auto& source : sources) {
         source.scanner.CloseFailsafe();
@@ -518,13 +507,8 @@ namespace osmscout {
             continue;
           }
 
-          if (!data.Write(typeConfig,
-                          dataWriter)) {
-            progress.Error(std::string("Error while writing data entry to file '")+
-                           dataWriter.GetFilename()+"'");
-
-            return false;
-          }
+          data.Write(typeConfig,
+                     dataWriter);
 
           mapWriter.Write(id);
           mapWriter.Write(type);
@@ -546,7 +530,7 @@ namespace osmscout {
       mapWriter.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       for (auto& source : sources) {
         source.scanner.CloseFailsafe();

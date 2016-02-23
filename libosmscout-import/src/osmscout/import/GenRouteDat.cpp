@@ -1594,25 +1594,21 @@ namespace osmscout {
       }
 
       routeScanner.Close();
+
+      for (const auto& routeNodeEntry : routeNodeOffsetMap) {
+        routeNodeWriter.SetPos(routeNodeEntry.first);
+
+        routeNodeEntry.second->Write(routeNodeWriter);
+      }
+
+      routeNodeWriter.SetPos(currentOffset);
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }
 
-    for (const auto& routeNodeEntry : routeNodeOffsetMap) {
-      routeNodeWriter.SetPos(routeNodeEntry.first);
-
-      if (!routeNodeEntry.second->Write(routeNodeWriter)) {
-        progress.Error(std::string("Error while writing route node to file '")+
-                       routeNodeWriter.GetFilename()+"'");
-        return false;
-      }
-    }
-
-    routeNodeWriter.SetPos(currentOffset);
-
-    return !routeNodeWriter.HasError();
+    return true;
   }
 
   bool RouteDataGenerator::WriteObjectVariantData(Progress& progress,
@@ -1635,11 +1631,7 @@ namespace osmscout {
       writer.Write((uint32_t)objectVariantData.size());
 
       for (const auto& entry : objectVariantData) {
-        if (!entry.Write(writer)) {
-          progress.Error(std::string("Error while writing object variant data to file '")+
-                         writer.GetFilename()+"'");
-          return false;
-        }
+        entry.Write(writer);
       }
 
       progress.Info(NumberToString(objectVariantData.size()) + " object variant(s)");
@@ -1899,11 +1891,7 @@ namespace osmscout {
           pathCount+=routeNode.paths.size();
           excludeCount+=routeNode.excludes.size();
 
-          if (!routeNode.Write(writer)) {
-            progress.Error(std::string("Error while writing route node to file '")+
-                           writer.GetFilename()+"'");
-            return false;
-          }
+          routeNode.Write(writer);
 
           writtenRouteNodeCount++;
         }

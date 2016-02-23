@@ -134,9 +134,9 @@ namespace osmscout {
     bool ReadOptimized(const TypeConfig& typeConfig,
                        FileScanner& scanner);
 
-    bool Write(const TypeConfig& typeConfig,
+    void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;
-    bool WriteOptimized(const TypeConfig& typeConfig,
+    void WriteOptimized(const TypeConfig& typeConfig,
                         FileWriter& writer) const;
   };
 

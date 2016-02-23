@@ -116,24 +116,13 @@ namespace osmscout {
         return true;
       }
 
-      if (!writer.WriteFileOffset(offset)) {
-        return false;
-      }
+      writer.WriteFileOffset(offset);
 
       writer.WriteNumber(node.GetType()->GetNodeId());
 
-      if (!writer.Write(name)) {
-        return false;
-      }
-
-      if (!writer.Write(location)) {
-        return false;
-      }
-
-      if (!writer.Write(address)) {
-        return false;
-      }
-
+      writer.Write(name);
+      writer.Write(location);
+      writer.Write(address);
       writer.WriteCoord(node.GetCoords());
 
       overallDataCount++;

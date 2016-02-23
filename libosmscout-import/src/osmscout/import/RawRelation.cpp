@@ -100,7 +100,12 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  bool RawRelation::Write(const TypeConfig& /*typeConfig*/,
+  /**
+   * Writes data to the given FileWriter
+   *
+   * @throws IOException
+   */
+  void RawRelation::Write(const TypeConfig& /*typeConfig*/,
                           FileWriter& writer) const
   {
     writer.WriteNumber(id);
@@ -108,9 +113,7 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)featureValueBuffer.GetType()->GetIndex());
 
     if (!featureValueBuffer.GetType()->GetIgnore()) {
-      if (!featureValueBuffer.Write(writer)) {
-        return false;
-      }
+      featureValueBuffer.Write(writer);
     }
 
     writer.WriteNumber((uint32_t)members.size());
@@ -130,8 +133,6 @@ namespace osmscout {
       writer.WriteNumber(members[i].id-minId);
       writer.Write(members[i].role);
     }
-
-    return !writer.HasError();
   }
 }
 

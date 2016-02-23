@@ -88,16 +88,10 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.Write(type) ||
-            !writer.Write(id) ||
-            !data.WriteImport(typeConfig,
-                              writer)) {
-          progress.Error(std::string("Error while writing data entry ")+
-                         NumberToString(current)+" of "+
-                         NumberToString(dataCount)+
-                         " from file '"+
-                         scanner.GetFilename()+"' to '"+writer.GetFilename()+"'");
-        }
+        writer.Write(type);
+        writer.Write(id);
+        data.WriteImport(typeConfig,
+                         writer);
 
         dataWritten++;
       }
@@ -136,16 +130,10 @@ namespace osmscout {
           return false;
         }
 
-        if (!writer.Write(type) ||
-            !writer.Write(id) ||
-            !data.WriteImport(typeConfig,
-                              writer)) {
-          progress.Error(std::string("Error while writing data entry ")+
-                         NumberToString(current)+" of "+
-                         NumberToString(dataCount)+
-                         " from file '"+
-                         scanner.GetFilename()+"' to '"+writer.GetFilename()+"'");
-        }
+        writer.Write(type);
+        writer.Write(id);
+        data.WriteImport(typeConfig,
+                         writer);
 
         dataWritten++;
       }
@@ -153,10 +141,7 @@ namespace osmscout {
       scanner.Close();
 
       writer.GotoBegin();
-
-      if (!writer.Write(dataWritten)) {
-        return false;
-      }
+      writer.Write(dataWritten);
 
       writer.Close();
     }

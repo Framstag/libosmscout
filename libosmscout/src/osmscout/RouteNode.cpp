@@ -60,18 +60,16 @@ namespace osmscout {
            scanner.Read(grade);
   }
 
-  bool ObjectVariantData::Write(FileWriter& writer) const
+  /**
+   * Write the data to the given FileWriter.
+   *
+   * @throws IOException
+   */
+  void ObjectVariantData::Write(FileWriter& writer) const
   {
-    try {
-      writer.WriteNumber((uint32_t)type->GetIndex());
-
-      return writer.Write(maxSpeed) &&
-             writer.Write(grade);
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      return false;
-    }
+    writer.WriteNumber((uint32_t)type->GetIndex());
+    writer.Write(maxSpeed);
+    writer.Write(grade);
   }
 
   uint32_t RouteNode::AddObject(const ObjectFileRef& object,
@@ -187,7 +185,12 @@ namespace osmscout {
     return Read(scanner);
   }
 
-  bool RouteNode::Write(FileWriter& writer) const
+  /**
+   * Write data to the given FileWriter
+   *
+   * @throws IOException
+   */
+  void RouteNode::Write(FileWriter& writer) const
   {
     writer.WriteNumber(id);
     writer.WriteCoord(coord);
@@ -232,7 +235,5 @@ namespace osmscout {
       writer.Write(exclude.source);
       writer.WriteNumber(exclude.targetIndex);
     }
-
-    return !writer.HasError();
   }
 }

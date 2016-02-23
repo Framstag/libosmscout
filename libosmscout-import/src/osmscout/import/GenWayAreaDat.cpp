@@ -259,7 +259,7 @@ namespace osmscout {
     if (!IsValidToWrite(ring.nodes)) {
       progress.Error("Area coordinates are not dense enough to be written for area "+
                      NumberToString(wayId));
-      return true;
+      return false;
     }
 
     if (parameter.GetStrictAreas() &&
@@ -270,12 +270,10 @@ namespace osmscout {
 
     area.rings.push_back(ring);
 
-    if (!writer.Write((uint8_t)osmRefWay) ||
-        !writer.Write(wayId) ||
-        !area.WriteImport(typeConfig,
-                          writer)) {
-      return false;
-    }
+    writer.Write((uint8_t)osmRefWay);
+    writer.Write(wayId);
+    area.WriteImport(typeConfig,
+                     writer);
 
     writtenWayCount++;
 

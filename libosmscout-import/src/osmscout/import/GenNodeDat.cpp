@@ -30,7 +30,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>
@@ -93,15 +92,8 @@ namespace osmscout {
         RawNode rawNode;
         Node    node;
 
-        if (!rawNode.Read(*typeConfig,
-                          scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(n)+" of "+
-                         NumberToString(rawNodeCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        rawNode.Read(*typeConfig,
+                     scanner);
 
         nodesReadCount++;
 
@@ -112,12 +104,10 @@ namespace osmscout {
         node.SetFeatures(rawNode.GetFeatureValueBuffer());
         node.SetCoords(rawNode.GetCoords());
 
-        if (!writer.Write((uint8_t)osmRefNode) ||
-            !writer.Write(rawNode.GetId()) ||
-            !node.Write(*typeConfig,
-                        writer)) {
-          return false;
-        }
+        writer.Write((uint8_t)osmRefNode);
+        writer.Write(rawNode.GetId());
+        node.Write(*typeConfig,
+                   writer);
 
         nodesWrittenCount++;
       }
@@ -129,7 +119,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       scanner.CloseFailsafe();
       writer.CloseFailsafe();

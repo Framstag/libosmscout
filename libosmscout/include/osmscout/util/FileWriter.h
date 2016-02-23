@@ -75,25 +75,25 @@ namespace osmscout {
     void SetPos(FileOffset pos);
     void GotoBegin();
 
-    bool Write(const char* buffer, size_t bytes);
+    void Write(const char* buffer, size_t bytes);
 
-    bool Write(const std::string& value);
+    void Write(const std::string& value);
 
-    bool Write(bool boolean);
+    void Write(bool boolean);
 
-    bool Write(int8_t number);
-    bool Write(int16_t number);
-    bool Write(int32_t number);
-    bool Write(int64_t number);
+    void Write(int8_t number);
+    void Write(int16_t number);
+    void Write(int32_t number);
+    void Write(int64_t number);
 
-    bool Write(uint8_t number);
-    bool Write(uint16_t number);
-    bool Write(uint32_t number);
-    bool Write(uint64_t number);
+    void Write(uint8_t number);
+    void Write(uint16_t number);
+    void Write(uint32_t number);
+    void Write(uint64_t number);
 
-    bool Write(uint16_t number, size_t bytes);
-    bool Write(uint32_t number, size_t bytes);
-    bool Write(uint64_t number, size_t bytes);
+    void Write(uint16_t number, size_t bytes);
+    void Write(uint32_t number, size_t bytes);
+    void Write(uint64_t number, size_t bytes);
 
     void Write(const ObjectFileRef& ref);
 
