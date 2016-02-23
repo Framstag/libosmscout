@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
-project(OSMScout2)
+set(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 ON CACHE INTERNAL "" FORCE)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

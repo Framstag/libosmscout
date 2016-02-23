@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
-project(DumpData)
+set(OSMSCOUT_BUILD_TOOL_DUMPDATA ON CACHE INTERNAL "" FORCE)
 
 set(SOURCE_FILES
     src/DumpData.cpp

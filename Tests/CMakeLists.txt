@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
-project(Demos)
-
 #---- CachePerformance
 
 add_executable(CachePerformance src/CachePerformance.cpp)

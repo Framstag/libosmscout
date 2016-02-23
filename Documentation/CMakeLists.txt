@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
-
 if(NOT DOXYGEN_FOUND)
   message(FATAL_ERROR "Doxygen is needed to build the documentation.")
 endif()

@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
-project(libosmscout_map)
+set(OSMSCOUT_BUILD_MAP ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
 	include/osmscout/oss/Parser.h

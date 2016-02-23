@@ -77,4 +77,10 @@
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
 
+/* Define to 1 if the system has the type `long long'. */
+#cmakedefine HAVE_LONG_LONG 1
+
+/* Define to 1 if you have OpenMP. */
+#cmakedefine OSMSCOUT_HAVE_OPENMP
+
 #endif

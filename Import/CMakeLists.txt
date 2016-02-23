@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
-project(Import)
+set(OSMSCOUT_BUILD_TOOL_IMPORT ON CACHE INTERNAL "" FORCE)
 
 set(SOURCE_FILES
     src/Import.cpp

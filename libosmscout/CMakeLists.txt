@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
-project(libosmscout CXX)
+set(OSMSCOUT_BUILD_CORE ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
     include/osmscout/ost/Parser.h
