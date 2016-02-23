@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
-project(StyleEditor)
+set(OSMSCOUT_BUILD_TOOL_STYLEEDITOR ON CACHE INTERNAL "" FORCE)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

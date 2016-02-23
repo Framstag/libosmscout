@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
-project(libosmscout_import)
+set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
     #include/osmscout/import/pbf/fileformat.pb.h

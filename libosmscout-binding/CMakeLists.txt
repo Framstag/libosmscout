@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
-project(libosmscout_binding)
-
 if(NOT SWIG_FOUND)
   message(FATAL_ERROR "SWIG is needed to create the java binding.")
 else()
