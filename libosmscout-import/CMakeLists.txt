@@ -1,4 +1,12 @@
-set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
+if(NOT LIBXML2_FOUND)
+	message(SEND_ERROR "libxml2 is required for import library")
+endif()
+if(NOT PROTOBUF_FOUND)
+	message(SEND_ERROR "protobuf is required for import library")
+endif()
+if(NOT ZLIB_FOUND)
+	message(SEND_ERROR "zlib is required for import library")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/import/pbf/fileformat.pb.h

@@ -1,4 +1,12 @@
-set(OSMSCOUT_BUILD_MAP_OPENGL ON CACHE INTERNAL "" FORCE)
+if(NOT OPENGL_FOUND)
+	message(SEND_ERROR "OpenGL is required for OpenGL map drawing backend")
+endif()
+if(NOT GLUT_FOUND)
+	message(SEND_ERROR "Glut is required for OpenGL map drawing backend")
+endif()
+if(NOT ${OSMSCOUT_BUILD_MAP})
+	message(SEND_ERROR "The main map drawing interface is required for OpenGL map drawing backend")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/private/Config.h

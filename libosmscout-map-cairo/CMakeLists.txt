@@ -1,4 +1,12 @@
-set(OSMSCOUT_BUILD_MAP_CAIRO ON CACHE INTERNAL "" FORCE)
+if(NOT CAIRO_FOUND)
+	message(SEND_ERROR "Cairo is required for cairo map drawing backend")
+endif()
+if(NOT PNG_FOUND)
+	message(SEND_ERROR "libpng is required for cairo map drawing backend")
+endif()
+if(NOT ${OSMSCOUT_BUILD_MAP})
+	message(SEND_ERROR "The main map drawing interface is required for cairo map drawing backend")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/private/Config.h
@@ -29,7 +37,7 @@ target_link_libraries(libosmscout_map_cairo
 		libosmscout_map
 		${CAIRO_LIBRARIES}
 		${PNG_LIBRARIES})
-if(PANGO_FOUND)
+if(PANGOCAIRO_FOUND)
   target_include_directories(libosmscout_map_cairo PRIVATE ${PANGO_INCLUDE_DIRS})
   target_link_libraries(libosmscout_map_cairo ${PANGO_LIBRARIES})
 endif()

@@ -1,3 +1,6 @@
+if(NOT MARISA_FOUND)
+	message(FATAL_ERROR "Marisa is required for main library")
+endif()
 set(OSMSCOUT_BUILD_CORE ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES

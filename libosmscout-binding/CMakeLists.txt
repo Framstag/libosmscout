@@ -1,8 +1,10 @@
 if(NOT SWIG_FOUND)
-  message(FATAL_ERROR "SWIG is needed to create the java binding.")
-else()
-  find_package(JNI REQUIRED)
+	message(SEND_ERROR "swig is required for java binding")
 endif()
+if(NOT JNI_FOUND)
+	message(SEND_ERROR "A JDK is required for java binding")
+endif()
+
 include(${SWIG_USE_FILE})
 set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/Java/src/main/java/net/sf/libosmscout/osmscout)
 file(MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR})

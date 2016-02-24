@@ -6,7 +6,7 @@
 #  MARISA_LIBRARIES - link these to use MARISA
 #
 FIND_PACKAGE(PkgConfig)
-PKG_CHECK_MODULES(PC_MARISA MARISA) # FIXME: After we require CMake 2.8.2 we can pass QUIET to this call.
+PKG_CHECK_MODULES(PC_MARISA QUIET MARISA)
 
 FIND_PATH(MARISA_INCLUDE_DIRS
     NAMES marisa.h
