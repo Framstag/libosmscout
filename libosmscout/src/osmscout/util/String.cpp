@@ -184,7 +184,7 @@ namespace osmscout {
       wordEnd=wordBegin;
 
       while (wordEnd+1<input.length() &&
-             !std::isspace(input[wordEnd+1])) {
+		  !std::isspace((unsigned char)input[wordEnd + 1])) {
         wordEnd++;
       }
 
