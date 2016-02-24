@@ -22,6 +22,9 @@
 #include <iostream>
 
 #include <GL/gl.h>
+#ifndef CALLBACK
+#define CALLBACK
+#endif
 
 namespace osmscout {
 
