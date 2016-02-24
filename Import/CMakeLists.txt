@@ -1,4 +1,6 @@
-set(OSMSCOUT_BUILD_TOOL_IMPORT ON CACHE INTERNAL "" FORCE)
+if(NOT ${OSMSCOUT_BUILD_IMPORT})
+	message(SEND_ERROR "The main import library is required for Import application")
+endif()
 
 set(SOURCE_FILES
     src/Import.cpp

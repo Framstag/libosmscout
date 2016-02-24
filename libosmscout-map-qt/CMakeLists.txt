@@ -1,4 +1,9 @@
-set(OSMSCOUT_BUILD_MAP_QT ON CACHE INTERNAL "" FORCE)
+if(NOT Qt5Gui_FOUND)
+	message(SEND_ERROR "Qt5 is required for Qt map drawing backend")
+endif()
+if(NOT ${OSMSCOUT_BUILD_MAP})
+	message(SEND_ERROR "The main map drawing interface is required for Qt map drawing backend")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/private/Config.h

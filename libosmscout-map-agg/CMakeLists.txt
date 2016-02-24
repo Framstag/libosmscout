@@ -1,4 +1,12 @@
-set(OSMSCOUT_BUILD_MAP_AGG ON CACHE INTERNAL "" FORCE)
+if(NOT LIBAGG_FOUND)
+	message(SEND_ERROR "libagg is required for agg map drawing backend")
+endif()
+if(NOT FREETYPE_FOUND)
+	message(SEND_ERROR "freetype2 is required for agg map drawing backend")
+endif()
+if(NOT ${OSMSCOUT_BUILD_MAP})
+	message(SEND_ERROR "The main map drawing interface is required for agg map drawing backend")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/private/Config.h

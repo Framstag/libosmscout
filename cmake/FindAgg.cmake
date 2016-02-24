@@ -6,7 +6,7 @@
 #  LIBAGG_LIBRARIES - link these to use libagg
 #
 FIND_PACKAGE(PkgConfig)
-PKG_CHECK_MODULES(PC_LIBAGG LIBAGG) # FIXME: After we require CMake 2.8.2 we can pass QUIET to this call.
+PKG_CHECK_MODULES(PC_LIBAGG QUIET LIBAGG)
 
 FIND_PATH(LIBAGG_INCLUDE_DIRS
     NAMES agg2/agg_basics.h

@@ -6,7 +6,7 @@
 #  CAIRO_LIBRARIES - link these to use Cairo
 #
 FIND_PACKAGE(PkgConfig)
-PKG_CHECK_MODULES(PC_CAIRO cairo) # FIXME: After we require CMake 2.8.2 we can pass QUIET to this call.
+PKG_CHECK_MODULES(PC_CAIRO QUIET cairo)
 
 FIND_PATH(CAIRO_INCLUDE_DIRS
     NAMES cairo.h

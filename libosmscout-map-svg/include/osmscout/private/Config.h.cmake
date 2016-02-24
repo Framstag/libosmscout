@@ -1,5 +1,5 @@
-#ifndef LIBOSMSCOUT_MAP_OPENGL_PRIVATE_CONFIG_H
-#define LIBOSMSCOUT_MAP_OPENGL_PRIVATE_CONFIG_H
+#ifndef LIBOSMSCOUT_MAP_SVG_PRIVATE_CONFIG_H
+#define LIBOSMSCOUT_MAP_SVG_PRIVATE_CONFIG_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1

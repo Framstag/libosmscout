@@ -1,5 +1,5 @@
 if(NOT DOXYGEN_FOUND)
-  message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+  message(SEND_ERROR "Doxygen is required to build the documentation.")
 endif()
 
 if(DOXYGEN_DOT_FOUND)

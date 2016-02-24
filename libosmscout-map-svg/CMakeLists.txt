@@ -1,4 +1,6 @@
-set(OSMSCOUT_BUILD_MAP_SVG ON CACHE INTERNAL "" FORCE)
+if(NOT ${OSMSCOUT_BUILD_MAP})
+	message(SEND_ERROR "The main map drawing interface is required for SVG map drawing backend")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/private/Config.h
@@ -23,7 +25,7 @@ target_include_directories(libosmscout_map_svg PRIVATE
 target_link_libraries(libosmscout_map_svg
 		libosmscout
 		libosmscout_map)
-if(PANGO_FOUND)
+if(PANGOFT2_FOUND)
   target_include_directories(libosmscout_map_svg PRIVATE ${PANGO_INCLUDE_DIRS})
   target_link_libraries(libosmscout_map_svg ${PANGO_LIBRARIES})
 endif()
