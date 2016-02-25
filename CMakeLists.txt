@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(libosmscout)
+project(libosmscout C CXX)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
 
@@ -31,7 +31,7 @@ endif ()
 
 include(CheckCXXCompilerFlag)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC)
-  set(OSMSCOUT_WARNING_FLAGS "-Wall -Winit-self -Wno-overloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter -Wshadow -Wno-missing-field-initializers -Wno-long-long")
+  set(OSMSCOUT_WARNING_FLAGS "-Wall -Winit-self -Wno-overloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-long-long")
   if(EMSCRIPTEN)
     set(OSMSCOUT_WARNING_FLAGS "${OSMSCOUT_WARNING_FLAGS} -Wno-warn-absolute-paths")
   elseif(NOT APPLE)
