@@ -1191,8 +1191,7 @@ namespace osmscout {
             !scanner.ReadNumber(tmpType) ||
             !scanner.Read(name) ||
             !scanner.Read(location) ||
-            !scanner.Read(address) ||
-            !scanner.Read(nodes)) {
+            !scanner.Read(address)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(a)+" of "+
                          NumberToString(areaCount)+
@@ -1200,6 +1199,8 @@ namespace osmscout {
                          scanner.GetFilename()+"'");
           return false;
         }
+
+        scanner.Read(nodes);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetAreaTypeInfo(typeId);
@@ -1450,8 +1451,7 @@ namespace osmscout {
         if (!scanner.ReadFileOffset(fileOffset) ||
             !scanner.ReadNumber(tmpType) ||
             !scanner.Read(name) ||
-            !scanner.Read(location) ||
-            !scanner.Read(nodes)) {
+            !scanner.Read(location)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
                          NumberToString(wayCount)+
@@ -1459,6 +1459,8 @@ namespace osmscout {
                          scanner.GetFilename()+"'");
           return false;
         }
+
+        scanner.Read(nodes);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetWayTypeInfo(typeId);
@@ -1624,8 +1626,7 @@ namespace osmscout {
             !scanner.ReadNumber(tmpType) ||
             !scanner.Read(name) ||
             !scanner.Read(location) ||
-            !scanner.Read(address) ||
-            !scanner.ReadCoord(coord)) {
+            !scanner.Read(address)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(n)+" of "+
                          NumberToString(nodeCount)+
@@ -1633,6 +1634,8 @@ namespace osmscout {
                          scanner.GetFilename()+"'");
           return false;
         }
+
+        scanner.ReadCoord(coord);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetNodeTypeInfo(typeId);

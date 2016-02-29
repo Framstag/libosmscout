@@ -191,258 +191,246 @@ namespace osmscout {
                   FileScanner& scanner)
   {
     try {
+      TypeId             ringType;
+      bool               multipleRings;
+      uint32_t           ringCount=1;
+      FeatureValueBuffer featureValueBuffer;
+
       fileOffset=scanner.GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
 
-    TypeId             ringType;
-    bool               multipleRings;
-    uint32_t           ringCount=1;
-    FeatureValueBuffer featureValueBuffer;
-
-    scanner.ReadTypeId(ringType,
-                       typeConfig.GetAreaTypeIdBytes());
-
-    TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
-
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner,
-                                 multipleRings)) {
-      return false;
-    }
-
-    if (multipleRings) {
-      if (!scanner.ReadNumber(ringCount)) {
-        return false;
-      }
-
-      ringCount++;
-    }
-
-    rings.resize(ringCount);
-
-    rings[0].featureValueBuffer=std::move(featureValueBuffer);
-
-    if (ringCount>1) {
-      rings[0].ring=masterRingId;
-    }
-    else {
-      rings[0].ring=outerRingId;
-    }
-
-    if (!scanner.Read(rings[0].nodes)) {
-      return false;
-    }
-
-    if (!rings[0].nodes.empty() &&
-        rings[0].GetType()->CanRoute()) {
-      if (!ReadIds(scanner,
-                   rings[0].nodes.size(),
-                   rings[0].ids)) {
-        return false;
-      }
-    }
-
-    for (size_t i=1; i<ringCount; i++) {
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
-      type=typeConfig.GetAreaTypeInfo(ringType);
+      TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
 
-      rings[i].SetType(type);
+      featureValueBuffer.SetType(type);
 
-      if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
-        if (!rings[i].featureValueBuffer.Read(scanner)) {
-          return false;
-        }
-      }
-
-      scanner.Read(rings[i].ring);
-
-      if (!scanner.Read(rings[i].nodes)) {
+      if (!featureValueBuffer.Read(scanner,
+                                   multipleRings)) {
         return false;
       }
 
-      if (!rings[i].nodes.empty() &&
-          rings[i].GetType()->GetAreaId()!=typeIgnore &&
-          rings[i].GetType()->CanRoute()) {
+      if (multipleRings) {
+        if (!scanner.ReadNumber(ringCount)) {
+          return false;
+        }
+
+        ringCount++;
+      }
+
+      rings.resize(ringCount);
+
+      rings[0].featureValueBuffer=std::move(featureValueBuffer);
+
+      if (ringCount>1) {
+        rings[0].ring=masterRingId;
+      }
+      else {
+        rings[0].ring=outerRingId;
+      }
+
+      scanner.Read(rings[0].nodes);
+
+      if (!rings[0].nodes.empty() &&
+          rings[0].GetType()->CanRoute()) {
         if (!ReadIds(scanner,
-                     rings[i].nodes.size(),
-                     rings[i].ids)) {
+                     rings[0].nodes.size(),
+                     rings[0].ids)) {
           return false;
         }
       }
+
+      for (size_t i=1; i<ringCount; i++) {
+        scanner.ReadTypeId(ringType,
+                           typeConfig.GetAreaTypeIdBytes());
+
+        type=typeConfig.GetAreaTypeInfo(ringType);
+
+        rings[i].SetType(type);
+
+        if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
+          if (!rings[i].featureValueBuffer.Read(scanner)) {
+            return false;
+          }
+        }
+
+        scanner.Read(rings[i].ring);
+        scanner.Read(rings[i].nodes);
+
+        if (!rings[i].nodes.empty() &&
+            rings[i].GetType()->GetAreaId()!=typeIgnore &&
+            rings[i].GetType()->CanRoute()) {
+          if (!ReadIds(scanner,
+                       rings[i].nodes.size(),
+                       rings[i].ids)) {
+            return false;
+          }
+        }
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError();
+    return true;
   }
 
   bool Area::ReadImport(const TypeConfig& typeConfig,
                         FileScanner& scanner)
   {
     try {
+      TypeId             ringType;
+      bool               multipleRings;
+      uint32_t           ringCount=1;
+      FeatureValueBuffer featureValueBuffer;
+
       fileOffset=scanner.GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
 
-    TypeId             ringType;
-    bool               multipleRings;
-    uint32_t           ringCount=1;
-    FeatureValueBuffer featureValueBuffer;
-
-    scanner.ReadTypeId(ringType,
-                       typeConfig.GetAreaTypeIdBytes());
-
-    TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
-
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner,
-                                 multipleRings)) {
-      return false;
-    }
-
-    if (multipleRings) {
-      if (!scanner.ReadNumber(ringCount)) {
-        return false;
-      }
-
-      ringCount++;
-    }
-
-    rings.resize(ringCount);
-
-    rings[0].featureValueBuffer=featureValueBuffer;
-
-    if (ringCount>1) {
-      rings[0].ring=masterRingId;
-    }
-    else {
-      rings[0].ring=outerRingId;
-    }
-
-    if (!scanner.Read(rings[0].nodes)) {
-      return false;
-    }
-
-    if (!rings[0].nodes.empty()) {
-      if (!ReadIds(scanner,
-                   rings[0].nodes.size(),
-                   rings[0].ids)) {
-        return false;
-      }
-    }
-
-    for (size_t i=1; i<ringCount; i++) {
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
-      type=typeConfig.GetAreaTypeInfo(ringType);
+      TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
 
-      rings[i].SetType(type);
+      featureValueBuffer.SetType(type);
 
-      if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
-        if (!rings[i].featureValueBuffer.Read(scanner)) {
-          return false;
-        }
-      }
-
-      scanner.Read(rings[i].ring);
-
-      if (!scanner.Read(rings[i].nodes)) {
+      if (!featureValueBuffer.Read(scanner,
+                                   multipleRings)) {
         return false;
       }
 
-      if (!rings[i].nodes.empty() &&
-          rings[i].GetType()->GetAreaId()!=typeIgnore) {
+      if (multipleRings) {
+        if (!scanner.ReadNumber(ringCount)) {
+          return false;
+        }
+
+        ringCount++;
+      }
+
+      rings.resize(ringCount);
+
+      rings[0].featureValueBuffer=featureValueBuffer;
+
+      if (ringCount>1) {
+        rings[0].ring=masterRingId;
+      }
+      else {
+        rings[0].ring=outerRingId;
+      }
+
+      scanner.Read(rings[0].nodes);
+
+      if (!rings[0].nodes.empty()) {
         if (!ReadIds(scanner,
-                     rings[i].nodes.size(),
-                     rings[i].ids)) {
+                     rings[0].nodes.size(),
+                     rings[0].ids)) {
           return false;
         }
       }
+
+      for (size_t i=1; i<ringCount; i++) {
+        scanner.ReadTypeId(ringType,
+                           typeConfig.GetAreaTypeIdBytes());
+
+        type=typeConfig.GetAreaTypeInfo(ringType);
+
+        rings[i].SetType(type);
+
+        if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
+          if (!rings[i].featureValueBuffer.Read(scanner)) {
+            return false;
+          }
+        }
+
+        scanner.Read(rings[i].ring);
+        scanner.Read(rings[i].nodes);
+
+        if (!rings[i].nodes.empty() &&
+            rings[i].GetType()->GetAreaId()!=typeIgnore) {
+          if (!ReadIds(scanner,
+                       rings[i].nodes.size(),
+                       rings[i].ids)) {
+            return false;
+          }
+        }
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError();
+    return true;
   }
 
   bool Area::ReadOptimized(const TypeConfig& typeConfig,
                            FileScanner& scanner)
   {
     try {
+      TypeId             ringType;
+      bool               multipleRings;
+      uint32_t           ringCount=1;
+      FeatureValueBuffer featureValueBuffer;
+
       fileOffset=scanner.GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
 
-    TypeId             ringType;
-    bool               multipleRings;
-    uint32_t           ringCount=1;
-    FeatureValueBuffer featureValueBuffer;
-
-    scanner.ReadTypeId(ringType,
-                       typeConfig.GetAreaTypeIdBytes());
-
-    TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
-
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner,
-                                 multipleRings)) {
-      return false;
-    }
-
-    if (multipleRings) {
-      if (!scanner.ReadNumber(ringCount)) {
-        return false;
-      }
-
-      ringCount++;
-    }
-
-    rings.resize(ringCount);
-
-    rings[0].featureValueBuffer=featureValueBuffer;
-
-    if (ringCount>1) {
-      rings[0].ring=masterRingId;
-    }
-    else {
-      rings[0].ring=outerRingId;
-    }
-
-    if (!scanner.Read(rings[0].nodes)) {
-      return false;
-    }
-
-    for (size_t i=1; i<ringCount; i++) {
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
-      type=typeConfig.GetAreaTypeInfo(ringType);
+      TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
 
-      rings[i].SetType(type);
+      featureValueBuffer.SetType(type);
 
-      if (rings[i].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-        if (!rings[i].featureValueBuffer.Read(scanner)) {
-          return false;
-        }
-      }
-
-      scanner.Read(rings[i].ring);
-
-      if (!scanner.Read(rings[i].nodes)) {
+      if (!featureValueBuffer.Read(scanner,
+                                   multipleRings)) {
         return false;
       }
+
+      if (multipleRings) {
+        if (!scanner.ReadNumber(ringCount)) {
+          return false;
+        }
+
+        ringCount++;
+      }
+
+      rings.resize(ringCount);
+
+      rings[0].featureValueBuffer=featureValueBuffer;
+
+      if (ringCount>1) {
+        rings[0].ring=masterRingId;
+      }
+      else {
+        rings[0].ring=outerRingId;
+      }
+
+      scanner.Read(rings[0].nodes);
+
+      for (size_t i=1; i<ringCount; i++) {
+        scanner.ReadTypeId(ringType,
+                           typeConfig.GetAreaTypeIdBytes());
+
+        type=typeConfig.GetAreaTypeInfo(ringType);
+
+        rings[i].SetType(type);
+
+        if (rings[i].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
+          if (!rings[i].featureValueBuffer.Read(scanner)) {
+            return false;
+          }
+        }
+
+        scanner.Read(rings[i].ring);
+        scanner.Read(rings[i].nodes);
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError();
+    return true;
   }
 
   bool Area::WriteIds(FileWriter& writer,

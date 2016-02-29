@@ -151,13 +151,13 @@ namespace osmscout {
     bool ReadNumber(uint32_t& number);
     bool ReadNumber(uint64_t& number);
 
-    bool ReadCoord(GeoCoord& coord);
-    bool ReadConditionalCoord(GeoCoord& coord,
+    void ReadCoord(GeoCoord& coord);
+    void ReadConditionalCoord(GeoCoord& coord,
                               bool& isSet);
 
-    bool Read(std::vector<GeoCoord>& nodes);
+    void Read(std::vector<GeoCoord>& nodes);
 
-    bool ReadBox(GeoBox& box);
+    void ReadBox(GeoBox& box);
 
     bool ReadTypeId(TypeId& id,
                     uint8_t maxBytes);

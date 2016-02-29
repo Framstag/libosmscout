@@ -1652,11 +1652,8 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.ReadCoord(minCoord) ||
-          !scanner.ReadCoord(maxCoord)) {
-        progress.Error("Error while reading from file '"+scanner.GetFilename()+"'");
-        return false;
-      }
+      scanner.ReadCoord(minCoord);
+      scanner.ReadCoord(maxCoord);
 
       scanner.Close();
     }

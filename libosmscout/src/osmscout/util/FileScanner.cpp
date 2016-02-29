@@ -2119,10 +2119,10 @@ namespace osmscout {
     return true;
   }
 
-  bool FileScanner::ReadCoord(GeoCoord& coord)
+  void FileScanner::ReadCoord(GeoCoord& coord)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read coordinate","File already in error state");
     }
 
     uint32_t latDat;
@@ -2131,9 +2131,9 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+coordByteSize-1>=size) {
-        log.Error() << "Cannot read osmscout::GeoCoord beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+
+        throw IOException(filename,"Cannot read coordinate","Cannot read beyonf end of file");
       }
 
       char *dataPtr=&buffer[offset];
@@ -2153,7 +2153,7 @@ namespace osmscout {
       coord.Set(latDat/latConversionFactor-90.0,
                 lonDat/lonConversionFactor-180.0);
 
-      return true;
+      return;
     }
 #endif
 
@@ -2162,8 +2162,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::GeoCoord from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read coordinate");
     }
 
     latDat=  (buffer[0] <<  0)
@@ -2178,15 +2177,13 @@ namespace osmscout {
 
     coord.Set(latDat/latConversionFactor-90.0,
               lonDat/lonConversionFactor-180.0);
-
-    return true;
   }
 
-  bool FileScanner::ReadConditionalCoord(GeoCoord& coord,
+  void FileScanner::ReadConditionalCoord(GeoCoord& coord,
                                          bool& isSet)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read coordinate","File already in error state");
     }
 
     uint32_t latDat;
@@ -2195,9 +2192,9 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+coordByteSize-1>=size) {
-        log.Error() << "Cannot read osmscout::GeoCoord beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+
+        throw IOException(filename,"Cannot read coordinate","Cannot read beyonf end of file");
       }
 
       char *dataPtr=&buffer[offset];
@@ -2224,7 +2221,7 @@ namespace osmscout {
         isSet=true;
       }
 
-      return true;
+      return;
     }
 #endif
 
@@ -2233,8 +2230,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::GeoCoord from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read coordinate");
     }
 
     latDat=  (buffer[0] <<  0)
@@ -2256,22 +2252,18 @@ namespace osmscout {
                 lonDat/lonConversionFactor-180.0);
       isSet=true;
     }
-
-    return true;
   }
 
-  bool FileScanner::Read(std::vector<GeoCoord>& nodes)
+  void FileScanner::Read(std::vector<GeoCoord>& nodes)
   {
     size_t  coordBitSize;
     uint8_t sizeByte;
 
-    if (!Read(sizeByte)) {
-      return false;
-    }
+    Read(sizeByte);
 
     // Fast exit for empty arrays
     if (sizeByte==0) {
-      return true;
+      return;
     }
 
     if ((sizeByte & 0x03) == 0) {
@@ -2287,16 +2279,12 @@ namespace osmscout {
     size_t nodeCount=(sizeByte & 0x7c) >> 2;
 
     if ((sizeByte & 0x80) != 0) {
-      if (!Read(sizeByte)) {
-        return false;
-      }
+      Read(sizeByte);
 
       nodeCount|=(sizeByte & 0x7f) << 5;
 
       if ((sizeByte & 0x80) != 0) {
-        if (!Read(sizeByte)) {
-          return false;
-        }
+        Read(sizeByte);
 
         nodeCount|=sizeByte << 12;
       }
@@ -2310,15 +2298,13 @@ namespace osmscout {
 
     AssureByteBufferSize(byteBufferSize);
 
-    if (!ReadCoord(nodes[0])) {
-      return false;
-    }
+    ReadCoord(nodes[0]);
 
     uint32_t latValue=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
 
     if (!Read((char*)byteBuffer,byteBufferSize)) {
-      return false;
+      throw IOException(filename,"Cannot read coordinate","Cannot read buffer");
     }
 
     /* std::cout << "Read - byte buffer: ";
@@ -2415,28 +2401,22 @@ namespace osmscout {
         currentCoordPos++;
       }
     }
-
-    return !HasError();
   }
 
-  bool FileScanner::ReadBox(GeoBox& box)
+  void FileScanner::ReadBox(GeoBox& box)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read geo box","File already in error state");
     }
 
     GeoCoord minCoord;
     GeoCoord maxCoord;
 
-    if (!(ReadCoord(minCoord) &&
-          ReadCoord(maxCoord))) {
-      return false;
-    }
+    ReadCoord(minCoord);
+    ReadCoord(maxCoord);
 
     box.Set(minCoord,
             maxCoord);
-
-    return !HasError();
   }
 
   bool FileScanner::ReadTypeId(TypeId& id,

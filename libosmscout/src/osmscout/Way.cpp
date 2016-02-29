@@ -123,67 +123,65 @@ namespace osmscout {
                  FileScanner& scanner)
   {
     try {
+      TypeId typeId;
+
       fileOffset=scanner.GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
 
-    TypeId typeId;
+      scanner.ReadTypeId(typeId,
+                         typeConfig.GetWayTypeIdBytes());
 
-    scanner.ReadTypeId(typeId,
-                       typeConfig.GetWayTypeIdBytes());
+      TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
 
-    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
+      featureValueBuffer.SetType(type);
 
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner)) {
-      return false;
-    }
-
-    if (!scanner.Read(nodes)) {
-      return false;
-    }
-
-    if (featureValueBuffer.GetType()->CanRoute() ||
-        featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
-      if (!ReadIds(scanner)) {
+      if (!featureValueBuffer.Read(scanner)) {
         return false;
       }
+
+      scanner.Read(nodes);
+
+      if (featureValueBuffer.GetType()->CanRoute() ||
+          featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
+        if (!ReadIds(scanner)) {
+          return false;
+        }
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    return !scanner.HasError();
+    return true;
   }
 
   bool Way::ReadOptimized(const TypeConfig& typeConfig,
                           FileScanner& scanner)
   {
     try {
+      TypeId typeId;
+
       fileOffset=scanner.GetPos();
+
+      scanner.ReadTypeId(typeId,
+                         typeConfig.GetWayTypeIdBytes());
+
+      TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
+
+      featureValueBuffer.SetType(type);
+
+      if (!featureValueBuffer.Read(scanner)) {
+        return false;
+      }
+
+      scanner.Read(nodes);
     }
     catch (IOException& e) {
+      log.Error() << e.GetDescription();
       return false;
     }
 
-    TypeId typeId;
-
-    scanner.ReadTypeId(typeId,
-                       typeConfig.GetWayTypeIdBytes());
-
-    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
-
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner)) {
-      return false;
-    }
-
-    if (!scanner.Read(nodes)) {
-      return false;
-    }
-
-    return !scanner.HasError();
+    return true;
   }
 
   bool Way::WriteIds(FileWriter& writer) const

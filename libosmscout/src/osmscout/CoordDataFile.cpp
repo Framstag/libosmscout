@@ -135,38 +135,40 @@ namespace osmscout {
     coordsMap.clear();
     coordsMap.reserve(ids.size());
 
-    for (const auto& id : ids) {
-      PageId relatedId=id-std::numeric_limits<Id>::min();
-      PageId pageId=relatedId/coordPageSize;
+    try {
+      for (const auto& id : ids) {
+        PageId relatedId=id-std::numeric_limits<Id>::min();
+        PageId pageId=relatedId/coordPageSize;
 
-      CoordPageOffsetMap::const_iterator pageOffset=coordPageOffsetMap.find(pageId);
+        CoordPageOffsetMap::const_iterator pageOffset=coordPageOffsetMap.find(pageId);
 
-      if (pageOffset!=coordPageOffsetMap.end()) {
-        FileOffset offset=pageOffset->second+(relatedId%coordPageSize)*coordByteSize;
-        // Number of entry in file (file starts with an empty page we skip)
-        PageId     substituteId=(offset-coordPageSize*coordByteSize)/coordByteSize;
+        if (pageOffset!=coordPageOffsetMap.end()) {
+          FileOffset offset=pageOffset->second+(relatedId%coordPageSize)*coordByteSize;
+          // Number of entry in file (file starts with an empty page we skip)
+          PageId     substituteId=(offset-coordPageSize*coordByteSize)/coordByteSize;
 
-        scanner.SetPos(offset);
+          scanner.SetPos(offset);
 
-        bool     isSet;
-        GeoCoord coord;
+          bool     isSet;
+          GeoCoord coord;
 
-        if (!scanner.ReadConditionalCoord(coord,
-                                          isSet)) {
-          log.Error() << "Error while reading data from offset " << pageOffset->second << " of file '" << scanner.GetFilename() << "'!";
-          scanner.Close();
-          return false;
+          scanner.ReadConditionalCoord(coord,
+                                       isSet);
+
+          if (!isSet) {
+            continue;
+          }
+
+          coordsMap.insert(std::make_pair(id,
+                                          CoordEntry(substituteId,
+                                                     coord.GetLat(),
+                                                     coord.GetLon())));
         }
-
-        if (!isSet) {
-          continue;
-        }
-
-        coordsMap.insert(std::make_pair(id,
-                                        CoordEntry(substituteId,
-                                                   coord.GetLat(),
-                                                   coord.GetLon())));
       }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
     return true;

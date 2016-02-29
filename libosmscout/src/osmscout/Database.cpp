@@ -97,9 +97,7 @@ namespace osmscout {
                    FileScanner::Normal,
                    false);
 
-      if (!scanner.ReadBox(boundingBox)) {
-        log.Error() << "Error while reading '" << scanner.GetFilename() << "'";
-      }
+      scanner.ReadBox(boundingBox);
 
       log.Debug() << "BoundingBox: " << boundingBox.GetDisplayText();
 

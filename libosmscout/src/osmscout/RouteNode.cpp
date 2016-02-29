@@ -105,78 +105,75 @@ namespace osmscout {
 
     try {
       fileOffset=scanner.GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
 
-    scanner.ReadNumber(id);
+      scanner.ReadNumber(id);
+      scanner.ReadCoord(coord);
+      scanner.ReadNumber(objectCount);
+      scanner.ReadNumber(pathCount);
+      scanner.ReadNumber(excludesCount);
 
-    if (!scanner.ReadCoord(coord)) {
-      return false;
-    }
-
-    scanner.ReadNumber(objectCount);
-    scanner.ReadNumber(pathCount);
-    scanner.ReadNumber(excludesCount);
-
-    if (scanner.HasError()) {
-      return false;
-    }
-
-    objects.resize(objectCount);
-
-    Id previousFileOffset=0;
-
-    for (size_t i=0; i<objectCount; i++) {
-      RefType    type;
-      FileOffset fileOffset;
-
-      if (!scanner.ReadNumber(fileOffset)) {
+      if (scanner.HasError()) {
         return false;
       }
 
-      if (fileOffset % 2==0) {
-        type=refWay;
+      objects.resize(objectCount);
+
+      Id previousFileOffset=0;
+
+      for (size_t i=0; i<objectCount; i++) {
+        RefType    type;
+        FileOffset fileOffset;
+
+        if (!scanner.ReadNumber(fileOffset)) {
+          return false;
+        }
+
+        if (fileOffset % 2==0) {
+          type=refWay;
+        }
+        else {
+          type=refArea;
+        }
+
+        fileOffset=fileOffset/2;
+
+        fileOffset+=previousFileOffset;
+
+        objects[i].object.Set(fileOffset,type);
+
+        scanner.Read(objects[i].objectVariantIndex);
+
+        previousFileOffset=fileOffset;
       }
-      else {
-        type=refArea;
+
+      if (pathCount>0) {
+        paths.resize(pathCount);
+
+        for (size_t i=0; i<pathCount; i++) {
+          uint32_t distanceValue;
+
+          scanner.ReadFileOffset(paths[i].offset);
+          scanner.ReadNumber(paths[i].objectIndex);
+          //scanner.Read(paths[i].bearing);
+          scanner.Read(paths[i].flags);
+          scanner.ReadNumber(distanceValue);
+
+          paths[i].distance=distanceValue/(1000.0*100.0);
+        }
       }
 
-      fileOffset=fileOffset/2;
-
-      fileOffset+=previousFileOffset;
-
-      objects[i].object.Set(fileOffset,type);
-
-      scanner.Read(objects[i].objectVariantIndex);
-
-      previousFileOffset=fileOffset;
+      excludes.resize(excludesCount);
+      for (size_t i=0; i<excludesCount; i++) {
+        scanner.Read(excludes[i].source);
+        scanner.ReadNumber(excludes[i].targetIndex);
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
-    if (pathCount>0) {
-      paths.resize(pathCount);
-
-      for (size_t i=0; i<pathCount; i++) {
-        uint32_t distanceValue;
-
-        scanner.ReadFileOffset(paths[i].offset);
-        scanner.ReadNumber(paths[i].objectIndex);
-        //scanner.Read(paths[i].bearing);
-        scanner.Read(paths[i].flags);
-        scanner.ReadNumber(distanceValue);
-
-        paths[i].distance=distanceValue/(1000.0*100.0);
-      }
-    }
-
-    excludes.resize(excludesCount);
-    for (size_t i=0; i<excludesCount; i++) {
-      scanner.Read(excludes[i].source);
-      scanner.ReadNumber(excludes[i].targetIndex);
-    }
-
-    return !scanner.HasError();
+    return true;
   }
 
   bool RouteNode::Read(const TypeConfig& /*typeConfig*/,
