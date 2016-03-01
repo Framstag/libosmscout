@@ -321,7 +321,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -358,8 +358,7 @@ namespace osmscout {
         FileOffset wayOffset;
 
         if (!scanner.Read(wayId) ||
-            !scanner.Read(typeByte) ||
-            !scanner.ReadFileOffset(wayOffset)) {
+            !scanner.Read(typeByte)) {
           progress.Error(std::string("Error while reading idmap file entry ")+
                          NumberToString(w)+" of "+
                          NumberToString(wayCount)+
@@ -367,6 +366,8 @@ namespace osmscout {
                          scanner.GetFilename()+"'");
           return false;
         }
+
+        scanner.ReadFileOffset(wayOffset);
 
         type=(OSMRefType)typeByte;
 
@@ -389,7 +390,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -531,7 +532,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -745,7 +746,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -882,7 +883,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1604,7 +1605,7 @@ namespace osmscout {
       routeNodeWriter.SetPos(currentOffset);
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1639,7 +1640,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1931,7 +1932,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       wayScanner.CloseFailsafe();
       areaScanner.CloseFailsafe();
       writer.CloseFailsafe();

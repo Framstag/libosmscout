@@ -187,11 +187,8 @@ namespace osmscout {
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.ReadFileOffset(cellDataOffset,
-                                    typeData.dataOffsetBytes)) {
-          log.Error() << "Cannot read cell data position in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        scanner.ReadFileOffset(cellDataOffset,
+                               typeData.dataOffsetBytes);
 
         if (cellDataOffset==0) {
           continue;

@@ -57,7 +57,7 @@ namespace osmscout {
     FileOffset                      indexOffset;
 
   private:
-    bool Read(FileScanner& scanner,
+    void Read(FileScanner& scanner,
               ObjectFileRef& object) const;
 
     bool LoadAdminRegion(FileScanner& scanner,

@@ -85,10 +85,7 @@ namespace osmscout
 
       FileOffset indexOffset;
 
-      if (!scanner.ReadFileOffset(indexOffset)) {
-        log.Error() << "Cannot read index offset from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadFileOffset(indexOffset);
 
       scanner.SetPos(indexOffset);
 
@@ -198,11 +195,8 @@ namespace osmscout
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.ReadFileOffset(cellDataOffset,
-                                    typeData.dataOffsetBytes)) {
-          log.Error() << "Cannot read cell data position in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        scanner.ReadFileOffset(cellDataOffset,
+                               typeData.dataOffsetBytes);
 
         if (cellDataOffset==0) {
           continue;

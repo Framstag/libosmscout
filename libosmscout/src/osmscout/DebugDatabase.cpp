@@ -135,9 +135,7 @@ namespace osmscout {
 
         osmType=(OSMRefType)typeByte;
 
-        if (!scanner.ReadFileOffset(fileOffset)) {
-          return false;
-        }
+        scanner.ReadFileOffset(fileOffset);
 
         ObjectOSMRef  osmRef(id,osmType);
         ObjectFileRef fileRef(fileOffset,fileType);

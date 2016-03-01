@@ -250,10 +250,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!scanner.ReadFileOffset(topLevelOffset)) {
-        log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadFileOffset(topLevelOffset);
 
       return !scanner.HasError();
     }

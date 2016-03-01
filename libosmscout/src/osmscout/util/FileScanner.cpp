@@ -1404,25 +1404,24 @@ namespace osmscout {
     return true;
   }
 
-  bool FileScanner::Read(ObjectFileRef& ref)
+  void FileScanner::Read(ObjectFileRef& ref)
   {
     uint8_t    typeByte;
     FileOffset fileOffset;
 
-    if (!(Read(typeByte) &&
-          ReadFileOffset(fileOffset))) {
-      return false;
+    if (!Read(typeByte)) {
+      throw IOException(filename,"Cannot read ObjectFileRef","Error reading type");
     }
 
-    ref.Set(fileOffset,(RefType)typeByte);
+    ReadFileOffset(fileOffset);
 
-    return true;
+    ref.Set(fileOffset,(RefType)typeByte);
   }
 
-  bool FileScanner::ReadFileOffset(FileOffset& fileOffset)
+  void FileScanner::ReadFileOffset(FileOffset& fileOffset)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read file offset","File already in error state");
     }
 
     fileOffset=0;
@@ -1430,9 +1429,8 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+8-1>=size) {
-        log.Error() << "Cannot read osmscout::FileOffset beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read file offset","Cannot read beyond end of file");
       }
 
       char       *dataPtr=&buffer[offset];
@@ -1479,7 +1477,7 @@ namespace osmscout {
 
       offset+=8;
 
-      return true;
+      return;
     }
 #endif
 
@@ -1488,8 +1486,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,8,file)!=8;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::FileOffset from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read file offset");
     }
 
     unsigned char *dataPtr=buffer;
@@ -1533,15 +1530,13 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     fileOffset|=add;
-
-    return true;
   }
 
-  bool FileScanner::ReadFileOffset(FileOffset& fileOffset,
+  void FileScanner::ReadFileOffset(FileOffset& fileOffset,
                                    size_t bytes)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read file offset","File already in error state");
     }
 
     assert(bytes>0 && bytes<=8);
@@ -1551,9 +1546,8 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+bytes-1>=size) {
-        log.Error() << "Cannot read osmscout::FileOffset beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read file offset","Cannot read beyond end of file");
       }
 
       char       *dataPtr=&buffer[offset];
@@ -1614,7 +1608,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
@@ -1623,8 +1617,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read osmscout::FileOffset from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read file offset");
     }
 
     unsigned char *dataPtr=buffer;
@@ -1682,8 +1675,6 @@ namespace osmscout {
         }
       }
     }
-
-    return true;
   }
 
   bool FileScanner::ReadNumber(int16_t& number)

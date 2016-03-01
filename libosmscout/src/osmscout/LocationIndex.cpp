@@ -110,43 +110,35 @@ namespace osmscout {
     return locationIgnoreTokens.find(token)!=locationIgnoreTokens.end();
   }
 
-  bool LocationIndex::Read(FileScanner& scanner,
+  void LocationIndex::Read(FileScanner& scanner,
                            ObjectFileRef& object) const
   {
     uint8_t    type;
     FileOffset fileOffset;
 
     if (!scanner.Read(type)) {
-      return false;
+      throw IOException(scanner.GetFilename(),"Cannot read ObjectFileRef","Error reading type");
     }
 
     switch (type) {
     case refNode:
-      if (!scanner.ReadFileOffset(fileOffset,
-                                  bytesForNodeFileOffset)) {
-        return false;
-      }
+      scanner.ReadFileOffset(fileOffset,
+                             bytesForNodeFileOffset);
       break;
     case refArea:
-      if (!scanner.ReadFileOffset(fileOffset,
-                                  bytesForAreaFileOffset)) {
-        return false;
-      }
+      scanner.ReadFileOffset(fileOffset,
+                             bytesForAreaFileOffset);
       break;
     case refWay:
-      if (!scanner.ReadFileOffset(fileOffset,
-                                  bytesForWayFileOffset)) {
-        return false;
-      }
+      scanner.ReadFileOffset(fileOffset,
+                             bytesForWayFileOffset);
       break;
     default:
-      return false;
+      throw IOException(scanner.GetFilename(),"Cannot read ObjectFileRef","Unknown object file type");
     }
 
     object.Set(fileOffset,
                (RefType)type);
-
-    return true;
   }
 
   bool LocationIndex::LoadAdminRegion(FileScanner& scanner,
@@ -156,22 +148,15 @@ namespace osmscout {
 
     region.regionOffset=scanner.GetPos();
 
-    if (!scanner.ReadFileOffset(region.dataOffset)) {
-      return false;
-    }
-
-    if (!scanner.ReadFileOffset(region.parentRegionOffset)) {
-      return false;
-    }
+    scanner.ReadFileOffset(region.dataOffset);
+    scanner.ReadFileOffset(region.parentRegionOffset);
 
     if (!scanner.Read(region.name)) {
       return false;
     }
 
-    if (!Read(scanner,
-              region.object)) {
-      return false;
-    }
+    Read(scanner,
+         region.object);
 
     if (!scanner.ReadNumber(aliasCount)) {
       return false;
@@ -187,10 +172,8 @@ namespace osmscout {
           return false;
         }
 
-        if (!scanner.ReadFileOffset(region.aliases[i].objectOffset,
-                                    bytesForNodeFileOffset)) {
-          return false;
-        }
+        scanner.ReadFileOffset(region.aliases[i].objectOffset,
+                               bytesForNodeFileOffset);
       }
     }
 
@@ -230,9 +213,7 @@ namespace osmscout {
       for (size_t i=0; i<childCount; i++) {
         FileOffset nextChildOffset;
 
-        if (!scanner.ReadFileOffset(nextChildOffset)) {
-          return AdminRegionVisitor::error;
-        }
+        scanner.ReadFileOffset(nextChildOffset);
 
         action=VisitRegionEntries(scanner,
                                   visitor);
@@ -328,9 +309,7 @@ namespace osmscout {
       }
 
       if (hasAddresses) {
-        if (!scanner.ReadFileOffset(location.addressesOffset)) {
-          return false;
-        }
+        scanner.ReadFileOffset(location.addressesOffset);
       }
       else {
         location.addressesOffset=0;
@@ -397,9 +376,7 @@ namespace osmscout {
     for (size_t i=0; i<childCount; i++) {
       FileOffset nextChildOffset;
 
-      if (!scanner.ReadFileOffset(nextChildOffset)) {
-        return false;
-      }
+      scanner.ReadFileOffset(nextChildOffset);
 
       if (!VisitRegionLocationEntries(scanner,
                                       visitor,
@@ -482,9 +459,7 @@ namespace osmscout {
         AdminRegionVisitor::Action action;
         FileOffset nextChildOffset;
 
-        if (!scanner.ReadFileOffset(nextChildOffset)) {
-          return false;
-        }
+        scanner.ReadFileOffset(nextChildOffset);
 
         action=VisitRegionEntries(scanner,
                                   visitor);

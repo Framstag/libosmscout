@@ -1187,8 +1187,9 @@ namespace osmscout {
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
 
-        if (!scanner.ReadFileOffset(fileOffset) ||
-            !scanner.ReadNumber(tmpType) ||
+        scanner.ReadFileOffset(fileOffset);
+
+        if (!scanner.ReadNumber(tmpType) ||
             !scanner.Read(name) ||
             !scanner.Read(location) ||
             !scanner.Read(address)) {
@@ -1448,8 +1449,9 @@ namespace osmscout {
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
-        if (!scanner.ReadFileOffset(fileOffset) ||
-            !scanner.ReadNumber(tmpType) ||
+        scanner.ReadFileOffset(fileOffset);
+
+        if (!scanner.ReadNumber(tmpType) ||
             !scanner.Read(name) ||
             !scanner.Read(location)) {
           progress.Error(std::string("Error while reading data entry ")+
@@ -1622,8 +1624,9 @@ namespace osmscout {
       for (uint32_t n=1; n<=nodeCount; n++) {
         progress.SetProgress(n,nodeCount);
 
-        if (!scanner.ReadFileOffset(fileOffset) ||
-            !scanner.ReadNumber(tmpType) ||
+        scanner.ReadFileOffset(fileOffset);
+
+        if (!scanner.ReadNumber(tmpType) ||
             !scanner.Read(name) ||
             !scanner.Read(location) ||
             !scanner.Read(address)) {
