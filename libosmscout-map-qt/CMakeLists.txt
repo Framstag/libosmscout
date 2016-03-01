@@ -19,7 +19,7 @@ set(SOURCE_FILES
 add_library(libosmscout_map_qt SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout_map_qt PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapQtFeatures.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/private/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-qt")
 target_include_directories(libosmscout_map_qt PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include

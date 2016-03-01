@@ -161,7 +161,7 @@ set(SOURCE_FILES
 add_library(libosmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/private/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout")
 target_include_directories(libosmscout PRIVATE include ${MARISA_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/include)
 target_link_libraries(libosmscout ${MARISA_LIBRARIES})
 target_compile_definitions(libosmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)

@@ -28,7 +28,7 @@ set(SOURCE_FILES
 add_library(libosmscout_map SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout_map PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapFeatures.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/private/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map")
 target_include_directories(libosmscout_map PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include

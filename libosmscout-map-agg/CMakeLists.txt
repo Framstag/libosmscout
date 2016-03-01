@@ -22,7 +22,7 @@ set(SOURCE_FILES
 add_library(libosmscout_map_agg SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout_map_agg PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapAggFeatures.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/private/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-agg")
 target_include_directories(libosmscout_map_agg PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include

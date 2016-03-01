@@ -16,7 +16,7 @@ set(SOURCE_FILES
 add_library(libosmscout_map_svg SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout_map_svg PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapSVGFeatures.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/private/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-svg")
 target_include_directories(libosmscout_map_svg PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
