@@ -49,7 +49,7 @@
     #define OSMSCOUT_DLLLOCAL
   #endif
 
-  #if defined(OSMSCOUTDLL)
+  #if defined(OSMSCOUT_EXPORT_SYMBOLS)
     #define OSMSCOUT_API OSMSCOUT_EXPORT
   #else
     #define OSMSCOUT_API OSMSCOUT_IMPORT
