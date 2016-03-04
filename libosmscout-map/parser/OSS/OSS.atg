@@ -57,6 +57,7 @@ inline size_t GetHexDigitValue(char c)
   }
 
   assert(false);
+  return 0;
 }
 
 inline void ToRGBA(const std::string& str, Color& color)

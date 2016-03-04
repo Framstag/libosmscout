@@ -1385,6 +1385,8 @@ namespace osmscout {
     }
     else {
       assert(false);
+
+      return false;
     }
 
     if (object.GetType()==refArea) {
