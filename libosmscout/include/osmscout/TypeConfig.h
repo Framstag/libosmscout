@@ -71,7 +71,7 @@ namespace osmscout {
       return "";
     }
 
-    virtual bool Read(FileScanner& scanner);
+    virtual void Read(FileScanner& scanner);
     virtual void Write(FileWriter& writer);
 
     virtual FeatureValue& operator=(const FeatureValue& other);
@@ -987,8 +987,8 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TagMap& tags);
 
-    bool Read(FileScanner& scanner);
-    bool Read(FileScanner& scanner,
+    void Read(FileScanner& scanner);
+    void Read(FileScanner& scanner,
               bool& specialFlag);
     void Write(FileWriter& writer) const;
     void Write(FileWriter& writer,

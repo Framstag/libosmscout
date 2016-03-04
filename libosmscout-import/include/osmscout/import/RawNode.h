@@ -131,7 +131,7 @@ namespace osmscout {
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const TagMap& tags);
-    bool Read(const TypeConfig& typeConfig,
+    void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;

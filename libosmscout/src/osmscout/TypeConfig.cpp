@@ -53,15 +53,20 @@ namespace osmscout {
     return *this;
   }
 
-  bool FeatureValue::Read(FileScanner& /*scanner*/)
+  /**
+   * Read the value of the Feature from the FileScanner
+   *
+   * @throws IOException
+   */
+  void FeatureValue::Read(FileScanner& /*scanner*/)
   {
     assert(false);
-
-    return true;
   }
 
   /**
-   * Write the FeatureValue to disk. May throw an IOException.
+   * Write the FeatureValue to disk.
+   *
+   * @throws IOException.
    */
   void FeatureValue::Write(FileWriter& /*writer*/)
   {
@@ -273,12 +278,15 @@ namespace osmscout {
     }
   }
 
-  bool FeatureValueBuffer::Read(FileScanner& scanner)
+  /**
+   * Read the FeatureValueBuffer from the given FileScanner.
+   *
+   * @throws IOException
+   */
+  void FeatureValueBuffer::Read(FileScanner& scanner)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      if (!scanner.Read(featureBits[i])) {
-        return false;
-      }
+      scanner.Read(featureBits[i]);
     }
 
     for (const auto &feature : type->GetFeatures()) {
@@ -288,22 +296,22 @@ namespace osmscout {
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
 
-        if (!value->Read(scanner)) {
-          return false;
-        }
+        value->Read(scanner);
       }
     }
-
-    return !scanner.HasError();
   }
 
-  bool FeatureValueBuffer::Read(FileScanner& scanner,
+  /**
+   * Reads the FeatureValueBuffer to the given FileScanner.
+   * It also reads the value of the special flag as passed to teh Write method.
+   *
+   * @throws IOException
+   */
+  void FeatureValueBuffer::Read(FileScanner& scanner,
                                 bool& specialFlag)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      if (!scanner.Read(featureBits[i])) {
-        return false;
-      }
+      scanner.Read(featureBits[i]);
     }
 
     if (type->GetFeatureCount()%8!=0) {
@@ -312,9 +320,7 @@ namespace osmscout {
     else {
       uint8_t addByte;
 
-      if (!scanner.Read(addByte)) {
-        return false;
-      }
+      scanner.Read(addByte);
 
       specialFlag=(addByte & 0x80)!=0;
     }
@@ -326,13 +332,9 @@ namespace osmscout {
           feature.GetFeature()->HasValue()) {
         FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
 
-        if (!value->Read(scanner)) {
-          return false;
-        }
+        value->Read(scanner);
       }
     }
-
-    return !scanner.HasError();
   }
 
   /**
@@ -359,7 +361,7 @@ namespace osmscout {
   }
 
   /**
-   * Writes the FeatureValueBuffer to teh given FileWriter.
+   * Writes the FeatureValueBuffer to the given FileWriter.
    * It also writes the value of the special flag passed. The flag can later be retrieved
    * by using the matching Read method.
    *
@@ -1501,21 +1503,15 @@ namespace osmscout {
 
       uint32_t tagCount;
 
-      if (!scanner.ReadNumber(tagCount)) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadNumber(tagCount);
 
       for (size_t i=1; i<=tagCount; i++) {
         TagId       requestedId;
         TagId       actualId;
         std::string name;
 
-        if (!(scanner.ReadNumber(requestedId) &&
-              scanner.Read(name))) {
-          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        scanner.ReadNumber(requestedId);
+        scanner.Read(name);
 
         actualId=RegisterTag(name);
 
@@ -1529,10 +1525,7 @@ namespace osmscout {
 
       uint32_t nameTagCount;
 
-      if (!scanner.ReadNumber(nameTagCount)) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadNumber(nameTagCount);
 
       for (size_t i=1; i<=nameTagCount; i++) {
         TagId       requestedId;
@@ -1540,11 +1533,9 @@ namespace osmscout {
         std::string name;
         uint32_t    priority = 0;
 
-        if (!(scanner.ReadNumber(requestedId) &&
-              scanner.Read(name) &&
-              scanner.ReadNumber(priority))) {
-          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        }
+        scanner.ReadNumber(requestedId);
+        scanner.Read(name);
+        scanner.ReadNumber(priority);
 
         actualId=RegisterNameTag(name,priority);
 
@@ -1558,10 +1549,7 @@ namespace osmscout {
 
       uint32_t nameAltTagCount;
 
-      if (!scanner.ReadNumber(nameAltTagCount)) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadNumber(nameAltTagCount);
 
       for (size_t i=1; i<=nameAltTagCount; i++) {
         TagId       requestedId;
@@ -1569,11 +1557,9 @@ namespace osmscout {
         std::string name;
         uint32_t    priority = 0;
 
-        if (!(scanner.ReadNumber(requestedId) &&
-              scanner.Read(name) &&
-              scanner.ReadNumber(priority))) {
-          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        }
+        scanner.ReadNumber(requestedId);
+        scanner.Read(name);
+        scanner.ReadNumber(priority);
 
         actualId=RegisterNameAltTag(name,priority);
 
@@ -1587,10 +1573,7 @@ namespace osmscout {
 
       uint32_t typeCount;
 
-      if (!scanner.ReadNumber(typeCount)) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadNumber(typeCount);
 
       for (size_t i=1; i<=typeCount; i++) {
         std::string name;
@@ -1664,9 +1647,7 @@ namespace osmscout {
 
         uint32_t featureCount;
 
-        if (!scanner.ReadNumber(featureCount)) {
-          return false;
-        }
+        scanner.ReadNumber(featureCount);
 
         for (size_t f=0; f<featureCount; f++) {
           std::string featureName;
@@ -1689,9 +1670,7 @@ namespace osmscout {
 
         uint32_t groupCount;
 
-        if (!scanner.ReadNumber(groupCount)) {
-          return false;
-        }
+        scanner.ReadNumber(groupCount);
 
         for (size_t g=0; g<groupCount; g++) {
           std::string groupName;

@@ -116,15 +116,8 @@ namespace osmscout {
 
           Node node;
 
-          if (!node.Read(*typeConfig,
-                         nodeScanner)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(n)+" of "+
-                           NumberToString(nodeCount)+
-                           " in file '"+
-                           nodeScanner.GetFilename()+"'");
-            return false;
-          }
+          node.Read(*typeConfig,
+                    nodeScanner);
 
           // If we still need to handle this type,
           // count number of entries per type and tile cell
@@ -303,15 +296,8 @@ namespace osmscout {
 
           offset=nodeScanner.GetPos();
 
-          if (!node.Read(*typeConfig,
-                         nodeScanner)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(n)+" of "+
-                           NumberToString(nodeCount)+
-                           " in file '"+
-                           nodeScanner.GetFilename()+"'");
-            return false;
-          }
+          node.Read(*typeConfig,
+                    nodeScanner);
 
           if (indexTypes.find(node.GetType())!=indexTypes.end()) {
             uint32_t xc=(uint32_t) floor((node.GetCoords().GetLon()+180.0)/cellDimension[l].width);

@@ -59,9 +59,7 @@ namespace osmscout {
 
       uint32_t ignoreTokenCount;
 
-      if (!scanner.ReadNumber(ignoreTokenCount)) {
-        return false;
-      }
+      scanner.ReadNumber(ignoreTokenCount);
 
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token;
@@ -73,9 +71,7 @@ namespace osmscout {
         regionIgnoreTokens.insert(token);
       }
 
-      if (!scanner.ReadNumber(ignoreTokenCount)) {
-        return false;
-      }
+      scanner.ReadNumber(ignoreTokenCount);
 
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token;
@@ -158,9 +154,7 @@ namespace osmscout {
     Read(scanner,
          region.object);
 
-    if (!scanner.ReadNumber(aliasCount)) {
-      return false;
-    }
+    scanner.ReadNumber(aliasCount);
 
     region.aliases.clear();
 
@@ -206,9 +200,7 @@ namespace osmscout {
     }
 
     try {
-      if (!scanner.ReadNumber(childCount)) {
-        return AdminRegionVisitor::error;
-      }
+      scanner.ReadNumber(childCount);
 
       for (size_t i=0; i<childCount; i++) {
         FileOffset nextChildOffset;
@@ -253,9 +245,7 @@ namespace osmscout {
     uint32_t poiCount;
     uint32_t locationCount;
 
-    if (!scanner.ReadNumber(poiCount)) {
-      return false;
-    }
+    scanner.ReadNumber(poiCount);
 
     ObjectFileRefStreamReader objectFileRefReader(scanner);
 
@@ -268,9 +258,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!objectFileRefReader.Read(poi.object)) {
-        return false;
-      }
+      objectFileRefReader.Read(poi.object);
 
       if (!visitor.Visit(adminRegion,
                          poi)) {
@@ -280,9 +268,7 @@ namespace osmscout {
       }
     }
 
-    if (!scanner.ReadNumber(locationCount)) {
-      return false;
-    }
+    scanner.ReadNumber(locationCount);
 
     for (size_t i=0; i<locationCount; i++) {
       Location location;
@@ -296,9 +282,7 @@ namespace osmscout {
 
       location.regionOffset=adminRegion.regionOffset;
 
-      if (!scanner.ReadNumber(objectCount)) {
-        return false;
-      }
+      scanner.ReadNumber(objectCount);
 
       location.objects.reserve(objectCount);
 
@@ -320,9 +304,7 @@ namespace osmscout {
       for (size_t j=0; j<objectCount; j++) {
         ObjectFileRef ref;
 
-        if (!objectFileRefReader.Read(ref)) {
-          return false;
-        }
+        objectFileRefReader.Read(ref);
 
         location.objects.push_back(ref);
       }
@@ -369,9 +351,7 @@ namespace osmscout {
 
     scanner.SetPos(childrenOffset);
 
-    if (!scanner.ReadNumber(childCount)) {
-      return false;
-    }
+    scanner.ReadNumber(childCount);
 
     for (size_t i=0; i<childCount; i++) {
       FileOffset nextChildOffset;
@@ -403,9 +383,7 @@ namespace osmscout {
 
     scanner.SetPos(location.addressesOffset);
 
-    if (!scanner.ReadNumber(addressCount)) {
-      return false;
-    }
+    scanner.ReadNumber(addressCount);
 
     ObjectFileRefStreamReader objectFileRefReader(scanner);
 
@@ -421,9 +399,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!objectFileRefReader.Read(address.object)) {
-        return false;
-      }
+      objectFileRefReader.Read(address.object);
 
       if (!visitor.Visit(region,
                          location,
@@ -451,9 +427,7 @@ namespace osmscout {
 
       uint32_t regionCount;
 
-      if (!scanner.ReadNumber(regionCount)) {
-        return false;
-      }
+      scanner.ReadNumber(regionCount);
 
       for (size_t i=0; i<regionCount; i++) {
         AdminRegionVisitor::Action action;

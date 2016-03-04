@@ -149,14 +149,7 @@ namespace osmscout {
 
         RawCoastlineRef coastline(new RawCoastline());
 
-        if (!coastline->Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(c)+" of "+
-                         NumberToString(coastlineCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        coastline->Read(scanner);
 
         rawCoastlines.push_back(coastline);
       }
@@ -562,15 +555,8 @@ namespace osmscout {
 
         Way way;
 
-        if (!way.Read(typeConfig,
-                      scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        way.Read(typeConfig,
+                 scanner);
 
         if (way.GetType()!=typeConfig.typeInfoIgnore &&
             !way.GetType()->GetIgnoreSeaLand()) {

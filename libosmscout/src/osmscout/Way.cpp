@@ -21,7 +21,6 @@
 
 #include <limits>
 
-#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>
@@ -83,7 +82,7 @@ namespace osmscout {
     return false;
   }
 
-  bool Way::ReadIds(FileScanner& scanner)
+  void Way::ReadIds(FileScanner& scanner)
   {
     ids.resize(nodes.size());
 
@@ -115,76 +114,60 @@ namespace osmscout {
         }
       }
     }
-
-    return !scanner.HasError();
   }
 
-  bool Way::Read(const TypeConfig& typeConfig,
+  /**
+   * Read the data from the given FileScanner.
+   *
+   * @throws IOException
+   */
+  void Way::Read(const TypeConfig& typeConfig,
                  FileScanner& scanner)
   {
-    try {
-      TypeId typeId;
+    TypeId typeId;
 
-      fileOffset=scanner.GetPos();
+    fileOffset=scanner.GetPos();
 
-      scanner.ReadTypeId(typeId,
-                         typeConfig.GetWayTypeIdBytes());
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetWayTypeIdBytes());
 
-      TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
+    TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
 
-      featureValueBuffer.SetType(type);
+    featureValueBuffer.SetType(type);
 
-      if (!featureValueBuffer.Read(scanner)) {
-        return false;
-      }
+    featureValueBuffer.Read(scanner);
 
-      scanner.Read(nodes);
+    scanner.Read(nodes);
 
-      if (featureValueBuffer.GetType()->CanRoute() ||
-          featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
-        if (!ReadIds(scanner)) {
-          return false;
-        }
-      }
+    if (type->CanRoute() ||
+        type->GetOptimizeLowZoom()) {
+      ReadIds(scanner);
     }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      return false;
-    }
-
-    return true;
   }
 
-  bool Way::ReadOptimized(const TypeConfig& typeConfig,
+  /**
+   * Read the data from the given FileScanner. Node Ids are not read.
+   *
+   * @throws IOException
+   */
+  void Way::ReadOptimized(const TypeConfig& typeConfig,
                           FileScanner& scanner)
   {
-    try {
-      TypeId typeId;
+    TypeId typeId;
 
-      fileOffset=scanner.GetPos();
+    fileOffset=scanner.GetPos();
 
-      scanner.ReadTypeId(typeId,
-                         typeConfig.GetWayTypeIdBytes());
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetWayTypeIdBytes());
 
-      TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
+    featureValueBuffer.SetType(typeConfig.GetWayTypeInfo(typeId));
 
-      featureValueBuffer.SetType(type);
+    featureValueBuffer.Read(scanner);
 
-      if (!featureValueBuffer.Read(scanner)) {
-        return false;
-      }
-
-      scanner.Read(nodes);
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      return false;
-    }
-
-    return true;
+    scanner.Read(nodes);
   }
 
-  bool Way::WriteIds(FileWriter& writer) const
+  void Way::WriteIds(FileWriter& writer) const
   {
     Id minId=0;
 
@@ -230,8 +213,6 @@ namespace osmscout {
         idCurrent+=8;
       }
     }
-
-    return !writer.HasError();
   }
 
   /**

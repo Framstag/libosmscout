@@ -159,13 +159,15 @@ namespace osmscout {
     try {
       scanner.SetPos(offset);
 
-      return data.Read(typeConfig,
-                       scanner);
+      data.Read(typeConfig,
+                scanner);
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }
+
+    return true;
   }
 
   /**
@@ -178,8 +180,16 @@ namespace osmscout {
                              FileScanner& scanner,
                              N& data) const
   {
-    return data.Read(typeConfig,
-                     scanner);
+    try {
+      data.Read(typeConfig,
+                scanner);
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
+
+    return true;
   }
 
   /**

@@ -149,15 +149,8 @@ namespace osmscout {
 
       progress.SetProgress(w,wayCount);
 
-      if (!way->Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-            NumberToString(w)+" of "+
-            NumberToString(wayCount)+
-            " in file '"+
-            scanner.GetFilename()+"'");
-        return false;
-      }
+      way->Read(typeConfig,
+                scanner);
 
       if (!way->IsArea()) {
         continue;
@@ -305,15 +298,8 @@ namespace osmscout {
 
       progress.SetProgress(w,wayCount);
 
-      if (!way->Read(typeConfig,
-                     scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-            NumberToString(w)+" of "+
-            NumberToString(wayCount)+
-            " in file '"+
-            scanner.GetFilename()+"'");
-        return false;
-      }
+      way->Read(typeConfig,
+                scanner);
 
       if (!way->IsArea()) {
         continue;

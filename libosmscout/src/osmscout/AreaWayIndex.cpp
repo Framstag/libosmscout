@@ -220,11 +220,7 @@ namespace osmscout {
         uint32_t   dataCount;
         FileOffset lastOffset=0;
 
-
-        if (!scanner.ReadNumber(dataCount)) {
-          log.Error() << "Cannot read cell data count"  << " in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        scanner.ReadNumber(dataCount);
 
         for (size_t d=0; d<dataCount; d++) {
           FileOffset objectOffset;

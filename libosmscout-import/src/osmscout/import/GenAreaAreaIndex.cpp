@@ -584,12 +584,11 @@ namespace osmscout {
 
       scanner.SetPos(srcOffset);
 
-      if (!scanner.Read(objectType) ||
-          !scanner.Read(id) ||
-          !area.Read(typeConfig,
-                     scanner)) {
-        return false;
-      }
+      scanner.Read(objectType);
+      scanner.Read(id);
+
+      area.Read(typeConfig,
+                scanner);
 
       //  std::cout << (size_t)objectType << " " << id << " " << area.GetType()->GetName() << " " << area.GetType()->GetIndex() << std::endl;
 
@@ -860,16 +859,10 @@ namespace osmscout {
 
       offset=scanner.GetPos();
 
-      if (!scanner.Read(objectType) ||
-          !scanner.Read(id)||
-          !area.Read(*typeConfig,scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(a)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
+      scanner.Read(objectType),
+      scanner.Read(id);
+
+      area.Read(*typeConfig,scanner);
 
       GeoBox boundingBox;
 

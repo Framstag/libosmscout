@@ -49,7 +49,7 @@ namespace osmscout {
     bool operator==(const ObjectVariantData& other) const;
     bool operator<(const ObjectVariantData& other) const;
 
-    bool Read(const TypeConfig& typeConfig,
+    void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     void Write(FileWriter& writer) const;
   };
@@ -138,8 +138,8 @@ namespace osmscout {
     uint32_t AddObject(const ObjectFileRef& object,
                        uint16_t objectVariantIndex);
 
-    bool Read(FileScanner& scanner);
-    bool Read(const TypeConfig& typeConfig,
+    void Read(FileScanner& scanner);
+    void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     void Write(FileWriter& writer) const;
   };

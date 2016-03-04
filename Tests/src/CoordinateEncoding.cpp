@@ -468,10 +468,7 @@ int main(int argc, char* argv[])
     for (size_t i=1; i<=dataCount; i++) {
       osmscout::Way way;
 
-      if (!way.Read(typeConfig,scanner)) {
-        std::cerr << "Cannot read data set #" << i << "'from file " << scanner.GetFilename() << "'" << std::endl;
-        return 1;
-      }
+      way.Read(typeConfig,scanner);
 
       for (size_t n =0; n<way.nodes.size(); n++) {
         std::cout << way.nodes[n].GetDisplayText() << " ";

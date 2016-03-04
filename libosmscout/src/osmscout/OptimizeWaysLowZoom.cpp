@@ -47,7 +47,7 @@ namespace osmscout
     Close();
   }
 
-  bool OptimizeWaysLowZoom::ReadTypeData(FileScanner& scanner,
+  void OptimizeWaysLowZoom::ReadTypeData(FileScanner& scanner,
                                          OptimizeWaysLowZoom::TypeData& data)
   {
     scanner.Read(data.optLevel);
@@ -70,8 +70,6 @@ namespace osmscout
     data.maxLon=(data.cellXEnd+1)*data.cellWidth-180.0;
     data.minLat=data.cellYStart*data.cellHeight-90.0;
     data.maxLat=(data.cellYEnd+1)*data.cellHeight-90.0;
-
-    return !scanner.HasError();
   }
 
   bool OptimizeWaysLowZoom::Open(const TypeConfigRef& typeConfig,
@@ -110,10 +108,8 @@ namespace osmscout
 
         TypeData typeData;
 
-        if (!ReadTypeData(scanner,
-                          typeData)) {
-          return false;
-        }
+        ReadTypeData(scanner,
+                     typeData);
 
         wayTypesData[type].push_back(typeData);
       }
@@ -147,7 +143,7 @@ namespace osmscout
     return magnification<=this->magnification;
   }
 
-  bool OptimizeWaysLowZoom::GetOffsets(const TypeData& typeData,
+  void OptimizeWaysLowZoom::GetOffsets(const TypeData& typeData,
                                        const GeoBox& boundingBox,
                                        std::set<FileOffset>& offsets) const
   {
@@ -155,7 +151,7 @@ namespace osmscout
 
     if (typeData.bitmapOffset==0) {
       // No data for this type available
-      return true;
+      return;
     }
 
     if (boundingBox.GetMaxLon()<typeData.minLon ||
@@ -163,7 +159,7 @@ namespace osmscout
         boundingBox.GetMaxLat()<typeData.minLat ||
         boundingBox.GetMinLat()>=typeData.maxLat) {
       // No data available in given bounding box
-      return true;
+      return;
     }
 
     uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
@@ -223,10 +219,7 @@ namespace osmscout
         FileOffset lastOffset=0;
 
 
-        if (!scanner.ReadNumber(dataCount)) {
-          log.Error() << "Cannot read cell data count from file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        scanner.ReadNumber(dataCount);
 
         for (size_t d=0; d<dataCount; d++) {
           FileOffset objectOffset;
@@ -241,11 +234,9 @@ namespace osmscout
         }
       }
     }
-
-    return true;
   }
 
-  bool OptimizeWaysLowZoom::LoadData(std::set<FileOffset>& offsets,
+  void OptimizeWaysLowZoom::LoadData(std::set<FileOffset>& offsets,
                                      std::vector<WayRef>& ways) const
   {
     std::lock_guard<std::mutex> guard(lookupMutex);
@@ -255,17 +246,11 @@ namespace osmscout
 
       WayRef way=std::make_shared<Way>();
 
-      if (!way->ReadOptimized(*typeConfig,
-                              scanner)) {
-        log.Error() << "Error while reading way at offset " << offset << " from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      way->ReadOptimized(*typeConfig,
+                         scanner);
 
       ways.push_back(way);
     }
-
-
-    return true;
   }
 
   /**
@@ -318,11 +303,9 @@ namespace osmscout
 
           if (match!=type->second.end()) {
             if (match->bitmapOffset!=0) {
-              if (!GetOffsets(*match,
-                              boundingBox,
-                              offsets)) {
-                return false;
-              }
+              GetOffsets(*match,
+                         boundingBox,
+                         offsets);
             }
 
             // Successfully loaded type data
@@ -331,10 +314,8 @@ namespace osmscout
         }
       }
 
-      if (!LoadData(offsets,
-                    ways)) {
-        return false;
-      }
+      LoadData(offsets,
+               ways);
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();

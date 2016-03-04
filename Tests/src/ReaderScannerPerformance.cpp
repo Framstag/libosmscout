@@ -60,9 +60,8 @@ int main(int argc, char* argv[])
     for (size_t w=1; w<=wayCount; w++) {
       osmscout::Way way;
 
-      if (way.Read(typeConfig,
-                   scanner)) {
-      }
+      way.Read(typeConfig,
+               scanner);
     }
 
     scanner.Close();

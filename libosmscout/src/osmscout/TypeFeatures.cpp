@@ -26,9 +26,9 @@
 
 namespace osmscout {
 
-  bool NameFeatureValue::Read(FileScanner& scanner)
+  void NameFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(name);
+    scanner.Read(name);
   }
 
   void NameFeatureValue::Write(FileWriter& writer)
@@ -114,9 +114,9 @@ namespace osmscout {
     }
   }
 
-  bool NameAltFeatureValue::Read(FileScanner& scanner)
+  void NameAltFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(nameAlt);
+    scanner.Read(nameAlt);
   }
 
   void NameAltFeatureValue::Write(FileWriter& writer)
@@ -200,9 +200,9 @@ namespace osmscout {
     }
   }
 
-  bool RefFeatureValue::Read(FileScanner& scanner)
+  void RefFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(ref);
+    scanner.Read(ref);
   }
 
   void RefFeatureValue::Write(FileWriter& writer)
@@ -276,9 +276,9 @@ namespace osmscout {
     }
   }
 
-  bool LocationFeatureValue::Read(FileScanner& scanner)
+  void LocationFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(location);
+    scanner.Read(location);
   }
 
   void LocationFeatureValue::Write(FileWriter& writer)
@@ -354,9 +354,9 @@ namespace osmscout {
     }
   }
 
-  bool AddressFeatureValue::Read(FileScanner& scanner)
+  void AddressFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(address);
+    scanner.Read(address);
   }
 
   void AddressFeatureValue::Write(FileWriter& writer)
@@ -443,9 +443,9 @@ namespace osmscout {
     }
   }
 
-  bool AccessFeatureValue::Read(FileScanner& scanner)
+  void AccessFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(access);
+    scanner.Read(access);
   }
 
   void AccessFeatureValue::Write(FileWriter& writer)
@@ -723,9 +723,9 @@ namespace osmscout {
     }
   }
 
-  bool AccessRestrictedFeatureValue::Read(FileScanner& scanner)
+  void AccessRestrictedFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(access);
+    scanner.Read(access);
   }
 
   void AccessRestrictedFeatureValue::Write(FileWriter& writer)
@@ -839,9 +839,9 @@ namespace osmscout {
     }
   }
 
-  bool LayerFeatureValue::Read(FileScanner& scanner)
+  void LayerFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(layer);
+    scanner.Read(layer);
   }
 
   void LayerFeatureValue::Write(FileWriter& writer)
@@ -914,9 +914,9 @@ namespace osmscout {
     }
   }
 
-  bool WidthFeatureValue::Read(FileScanner& scanner)
+  void WidthFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(width);
+    scanner.Read(width);
   }
 
   void WidthFeatureValue::Write(FileWriter& writer)
@@ -1024,9 +1024,9 @@ namespace osmscout {
     }
   }
 
-  bool MaxSpeedFeatureValue::Read(FileScanner& scanner)
+  void MaxSpeedFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(maxSpeed);
+    scanner.Read(maxSpeed);
   }
 
   void MaxSpeedFeatureValue::Write(FileWriter& writer)
@@ -1163,9 +1163,9 @@ namespace osmscout {
     }
   }
 
-  bool GradeFeatureValue::Read(FileScanner& scanner)
+  void GradeFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(grade);
+    scanner.Read(grade);
   }
 
   void GradeFeatureValue::Write(FileWriter& writer)
@@ -1281,9 +1281,9 @@ namespace osmscout {
     }
   }
 
-  bool AdminLevelFeatureValue::Read(FileScanner& scanner)
+  void AdminLevelFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(adminLevel);
+    scanner.Read(adminLevel);
   }
 
   void AdminLevelFeatureValue::Write(FileWriter& writer)
@@ -1440,9 +1440,9 @@ namespace osmscout {
     }
   }
 
-  bool EleFeatureValue::Read(FileScanner& scanner)
+  void EleFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.ReadNumber(ele);
+    scanner.ReadNumber(ele);
   }
 
   void EleFeatureValue::Write(FileWriter& writer)
@@ -1559,9 +1559,9 @@ namespace osmscout {
     }
   }
 
-  bool DestinationFeatureValue::Read(FileScanner& scanner)
+  void DestinationFeatureValue::Read(FileScanner& scanner)
   {
-    return scanner.Read(destination);
+    scanner.Read(destination);
   }
 
   void DestinationFeatureValue::Write(FileWriter& writer)

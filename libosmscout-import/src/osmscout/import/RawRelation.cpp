@@ -47,7 +47,12 @@ namespace osmscout {
                              tags);
   }
 
-  bool RawRelation::Read(const TypeConfig& typeConfig,
+  /**
+   * Reads data from the given FileScanner
+   *
+   * @throws IOException
+   */
+  void RawRelation::Read(const TypeConfig& typeConfig,
                          FileScanner& scanner)
   {
     uint32_t memberCount;
@@ -56,32 +61,24 @@ namespace osmscout {
 
     uint32_t tmpType;
 
-    if (!scanner.ReadNumber(tmpType)) {
-      return false;
-    }
+    scanner.ReadNumber(tmpType);
 
     TypeInfoRef type=typeConfig.GetTypeInfo(tmpType);
 
     featureValueBuffer.SetType(type);
 
     if (!type->GetIgnore()) {
-      if (!featureValueBuffer.Read(scanner)) {
-        return false;
-      }
+      featureValueBuffer.Read(scanner);
     }
 
-    if (!scanner.ReadNumber(memberCount)) {
-      return false;
-    }
+    scanner.ReadNumber(memberCount);
 
     members.resize(memberCount);
 
     if (memberCount>0) {
       OSMId minId;
 
-      if (!scanner.ReadNumber(minId)) {
-        return false;
-      }
+      scanner.ReadNumber(minId);
 
       for (size_t i=0; i<memberCount; i++) {
         uint32_t memberType;
@@ -96,8 +93,6 @@ namespace osmscout {
         scanner.Read(members[i].role);
       }
     }
-
-    return !scanner.HasError();
   }
 
   /**

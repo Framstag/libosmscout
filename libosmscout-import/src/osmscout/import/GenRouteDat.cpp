@@ -653,15 +653,8 @@ namespace osmscout {
 
         Way way;
 
-        if (!way.Read(typeConfig,
-                      scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(d)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        way.Read(typeConfig,
+                 scanner);
 
         if (way.GetType()->GetIgnore()) {
           continue;
@@ -705,15 +698,8 @@ namespace osmscout {
 
         Area area;
 
-        if (!area.Read(typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(d)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        area.Read(typeConfig,
+                  scanner);
 
         if (area.GetType()->GetIgnore()) {
           continue;
@@ -783,15 +769,8 @@ namespace osmscout {
 
         fileOffset=scanner.GetPos();
 
-        if (!way.Read(typeConfig,
-                      scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(d)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        way.Read(typeConfig,
+                 scanner);
 
         if (way.GetType()->GetIgnore()) {
           continue;
@@ -840,15 +819,8 @@ namespace osmscout {
 
         fileOffset=scanner.GetPos();
 
-        if (!area.Read(typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(d)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        area.Read(typeConfig,
+                  scanner);
 
         if (area.GetType()->GetIgnore()) {
           continue;
@@ -1579,9 +1551,7 @@ namespace osmscout {
 
             routeScanner.SetPos(pendingOffset.routeNodeOffset);
 
-            if (!routeNode->Read(routeScanner)) {
-              return false;
-            }
+            routeNode->Read(routeScanner);
 
             routeNodeOffsetMap.insert(std::make_pair(pendingOffset.routeNodeOffset,routeNode));
           }

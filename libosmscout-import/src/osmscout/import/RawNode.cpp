@@ -21,8 +21,6 @@
 
 #include <osmscout/system/Math.h>
 
-#include <osmscout/util/Logger.h>
-
 namespace osmscout {
 
   RawNode::RawNode()
@@ -71,39 +69,30 @@ namespace osmscout {
                              tags);
   }
 
-  bool RawNode::Read(const TypeConfig& typeConfig,
+  /**
+   * Reads the data from the given FileScanner
+   *
+   * @throws IOException
+   */
+  void RawNode::Read(const TypeConfig& typeConfig,
                      FileScanner& scanner)
   {
-    try {
-      if (!scanner.ReadNumber(id)) {
-        return false;
-      }
+    scanner.ReadNumber(id);
 
-      TypeId typeId;
+    TypeId typeId;
 
-      if (!scanner.ReadTypeId(typeId,
-                              typeConfig.GetNodeTypeIdBytes())) {
-        return false;
-      }
+    scanner.ReadTypeId(typeId,
+                       typeConfig.GetNodeTypeIdBytes());
 
-      TypeInfoRef type=typeConfig.GetNodeTypeInfo(typeId);
+    TypeInfoRef type=typeConfig.GetNodeTypeInfo(typeId);
 
-      featureValueBuffer.SetType(type);
+    featureValueBuffer.SetType(type);
 
-      if (!type->GetIgnore()) {
-        if (!featureValueBuffer.Read(scanner)) {
-          return false;
-        }
-      }
-
-      scanner.ReadCoord(coords);
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      return false;
+    if (!type->GetIgnore()) {
+      featureValueBuffer.Read(scanner);
     }
 
-    return true;
+    scanner.ReadCoord(coords);
   }
 
   /**

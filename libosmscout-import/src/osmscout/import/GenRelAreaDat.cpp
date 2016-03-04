@@ -1090,15 +1090,8 @@ namespace osmscout {
 
         RawRelation rawRel;
 
-        if (!rawRel.Read(*typeConfig,
-                         scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(rawRelationCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        rawRel.Read(*typeConfig,
+                    scanner);
 
         // Normally we now also skip an object because of its missing type, but
         // in case of relations things are a little bit more difficult,

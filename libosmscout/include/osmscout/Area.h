@@ -115,11 +115,11 @@ namespace osmscout {
     std::vector<Ring> rings;
 
   private:
-    bool ReadIds(FileScanner& scanner,
+    void ReadIds(FileScanner& scanner,
                  uint32_t nodesCount,
                  std::vector<Id>& ids);
 
-    bool WriteIds(FileWriter& writer,
+    void WriteIds(FileWriter& writer,
                   const std::vector<Id>& ids) const;
 
   public:
@@ -151,19 +151,19 @@ namespace osmscout {
     /**
      * Read the area as written by Write().
      */
-    bool Read(const TypeConfig& typeConfig,
+    void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
 
     /**
      * Read the area as written by WriteImport().
      */
-    bool ReadImport(const TypeConfig& typeConfig,
+    void ReadImport(const TypeConfig& typeConfig,
                     FileScanner& scanner);
 
     /**
      * Read the area as stored by WriteOptimized().
      */
-    bool ReadOptimized(const TypeConfig& typeConfig,
+    void ReadOptimized(const TypeConfig& typeConfig,
                        FileScanner& scanner);
 
     /**

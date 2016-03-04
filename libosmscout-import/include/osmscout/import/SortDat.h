@@ -251,9 +251,7 @@ namespace osmscout {
             progress.SetProgress(current,dataCount);
 
             if (!source->scanner.Read(type) ||
-                !source->scanner.Read(id) ||
-                !data.Read(typeConfig,
-                           source->scanner)) {
+                !source->scanner.Read(id)) {
               progress.Error(std::string("Error while reading data entry ")+
                              NumberToString(current)+" of "+
                              NumberToString(dataCount)+
@@ -261,6 +259,9 @@ namespace osmscout {
                              source->scanner.GetFilename()+"'");
               return false;
             }
+
+            data.Read(typeConfig,
+                      source->scanner);
 
             GeoCoord coord;;
 
@@ -470,9 +471,7 @@ namespace osmscout {
           progress.SetProgress(current,dataCount);
 
           if (!source.scanner.Read(type) ||
-              !source.scanner.Read(id) ||
-              !data.Read(typeConfig,
-                         source.scanner)) {
+              !source.scanner.Read(id)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(current)+" of "+
                            NumberToString(dataCount)+
@@ -481,6 +480,9 @@ namespace osmscout {
 
             return false;
           }
+
+          data.Read(typeConfig,
+                    source.scanner);
 
           FileOffset fileOffset;
           bool       save=true;

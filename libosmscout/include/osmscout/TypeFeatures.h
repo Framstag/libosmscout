@@ -60,7 +60,7 @@ namespace osmscout {
       return name;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -128,7 +128,7 @@ namespace osmscout {
       return nameAlt;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -196,7 +196,7 @@ namespace osmscout {
       return ref;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -260,7 +260,7 @@ namespace osmscout {
       return location;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -325,7 +325,7 @@ namespace osmscout {
       return address;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -548,7 +548,7 @@ namespace osmscout {
       return (access & onewayBackward)!=0;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -703,7 +703,7 @@ namespace osmscout {
       return (access & car)!=0;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -776,7 +776,7 @@ namespace osmscout {
       return layer;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -836,7 +836,7 @@ namespace osmscout {
       return width;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -896,7 +896,7 @@ namespace osmscout {
       return maxSpeed;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -956,7 +956,7 @@ namespace osmscout {
       return grade;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -1017,7 +1017,7 @@ namespace osmscout {
       return adminLevel;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -1148,7 +1148,7 @@ namespace osmscout {
       return NumberToString(ele)+"m";
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);
@@ -1219,7 +1219,7 @@ namespace osmscout {
       return destination;
     }
 
-    bool Read(FileScanner& scanner);
+    void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
     FeatureValue& operator=(const FeatureValue& other);

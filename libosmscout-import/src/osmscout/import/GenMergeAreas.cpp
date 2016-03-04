@@ -106,9 +106,7 @@ namespace osmscout {
       progress.SetProgress(current,areaCount);
 
       if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !data.ReadImport(typeConfig,
-                           scanner)) {
+          !scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(current)+" of "+
                        NumberToString(areaCount)+
@@ -117,6 +115,9 @@ namespace osmscout {
 
         return false;
       }
+
+      data.ReadImport(typeConfig,
+                      scanner);
 
       if (!mergeTypes.IsSet(data.GetType())) {
         continue;
@@ -187,9 +188,7 @@ namespace osmscout {
       progress.SetProgress(a,areaCount);
 
       if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !area->ReadImport(typeConfig,
-                            scanner)) {
+          !scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(a)+" of "+
                        NumberToString(areaCount)+
@@ -198,6 +197,9 @@ namespace osmscout {
 
         return false;
       }
+
+      area->ReadImport(typeConfig,
+                       scanner);
 
       mergeJob[area->GetType()->GetIndex()].areaCount++;
 
@@ -516,9 +518,7 @@ namespace osmscout {
       progress.SetProgress(a,areaCount);
 
       if (!scanner.Read(type) ||
-          !scanner.Read(id) ||
-          !area->ReadImport(typeConfig,
-                            scanner)) {
+          !scanner.Read(id)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(a)+" of "+
                        NumberToString(areaCount)+
@@ -527,6 +527,9 @@ namespace osmscout {
 
         return false;
       }
+
+      area->ReadImport(typeConfig,
+                       scanner);
 
       if (loadedTypes.IsSet(area->GetType())) {
         if (ignores.find(area->GetFileOffset())!=ignores.end()) {

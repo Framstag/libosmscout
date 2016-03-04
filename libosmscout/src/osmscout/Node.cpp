@@ -36,36 +36,30 @@ namespace osmscout {
     featureValueBuffer.Set(buffer);
   }
 
-  bool Node::Read(const TypeConfig& typeConfig,
+  /**
+   * Read the node data from the given FileScanner.
+   *
+   * @throws IOException
+   */
+  void Node::Read(const TypeConfig& typeConfig,
                   FileScanner& scanner)
   {
-    try {
-      fileOffset=scanner.GetPos();
-    }
-    catch (IOException& e) {
-      return false;
-    }
+    fileOffset=scanner.GetPos();
 
     TypeId typeId;
 
     scanner.ReadTypeId(typeId,
                        typeConfig.GetNodeTypeIdBytes());
 
-    TypeInfoRef type=typeConfig.GetNodeTypeInfo(typeId);
+    featureValueBuffer.SetType(typeConfig.GetNodeTypeInfo(typeId));
 
-    featureValueBuffer.SetType(type);
-
-    if (!featureValueBuffer.Read(scanner)) {
-      return false;
-    }
+    featureValueBuffer.Read(scanner);
 
     scanner.ReadCoord(coords);
-
-    return !scanner.HasError();
   }
 
   /**
-   * Write the nod edata to the given FileWriter.
+   * Write the node data to the given FileWriter.
    *
    * @throws IOException
    */

@@ -21,8 +21,6 @@
 
 #include <limits>
 
-#include <osmscout/util/Logger.h>
-
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
@@ -45,19 +43,17 @@ namespace osmscout {
     return grade<other.grade;
   }
 
-  bool ObjectVariantData::Read(const TypeConfig& typeConfig,
+  void ObjectVariantData::Read(const TypeConfig& typeConfig,
                                FileScanner& scanner)
   {
     uint32_t typeIndex;
 
-    if (!scanner.ReadNumber(typeIndex)) {
-      return false;
-    }
+    scanner.ReadNumber(typeIndex);
 
     type=typeConfig.GetTypeInfo(typeIndex);
 
-    return scanner.Read(maxSpeed) &&
-           scanner.Read(grade);
+    scanner.Read(maxSpeed);
+    scanner.Read(grade);
   }
 
   /**
@@ -97,89 +93,85 @@ namespace osmscout {
   }
 
 
-  bool RouteNode::Read(FileScanner& scanner)
+  /**
+   * Read data from the given FileScanner
+   *
+   * @throws IOException
+   */
+  void RouteNode::Read(FileScanner& scanner)
   {
     uint32_t objectCount;
     uint32_t pathCount;
     uint32_t excludesCount;
 
-    try {
-      fileOffset=scanner.GetPos();
+    fileOffset=scanner.GetPos();
 
-      scanner.ReadNumber(id);
-      scanner.ReadCoord(coord);
-      scanner.ReadNumber(objectCount);
-      scanner.ReadNumber(pathCount);
-      scanner.ReadNumber(excludesCount);
+    scanner.ReadNumber(id);
+    scanner.ReadCoord(coord);
+    scanner.ReadNumber(objectCount);
+    scanner.ReadNumber(pathCount);
+    scanner.ReadNumber(excludesCount);
 
-      if (scanner.HasError()) {
-        return false;
+    objects.resize(objectCount);
+
+    Id previousFileOffset=0;
+
+    for (size_t i=0; i<objectCount; i++) {
+      RefType    type;
+      FileOffset fileOffset;
+
+      scanner.ReadNumber(fileOffset);
+
+      if (fileOffset % 2==0) {
+        type=refWay;
+      }
+      else {
+        type=refArea;
       }
 
-      objects.resize(objectCount);
+      fileOffset=fileOffset/2;
 
-      Id previousFileOffset=0;
+      fileOffset+=previousFileOffset;
 
-      for (size_t i=0; i<objectCount; i++) {
-        RefType    type;
-        FileOffset fileOffset;
+      objects[i].object.Set(fileOffset,type);
 
-        if (!scanner.ReadNumber(fileOffset)) {
-          return false;
-        }
+      scanner.Read(objects[i].objectVariantIndex);
 
-        if (fileOffset % 2==0) {
-          type=refWay;
-        }
-        else {
-          type=refArea;
-        }
-
-        fileOffset=fileOffset/2;
-
-        fileOffset+=previousFileOffset;
-
-        objects[i].object.Set(fileOffset,type);
-
-        scanner.Read(objects[i].objectVariantIndex);
-
-        previousFileOffset=fileOffset;
-      }
-
-      if (pathCount>0) {
-        paths.resize(pathCount);
-
-        for (size_t i=0; i<pathCount; i++) {
-          uint32_t distanceValue;
-
-          scanner.ReadFileOffset(paths[i].offset);
-          scanner.ReadNumber(paths[i].objectIndex);
-          //scanner.Read(paths[i].bearing);
-          scanner.Read(paths[i].flags);
-          scanner.ReadNumber(distanceValue);
-
-          paths[i].distance=distanceValue/(1000.0*100.0);
-        }
-      }
-
-      excludes.resize(excludesCount);
-      for (size_t i=0; i<excludesCount; i++) {
-        scanner.Read(excludes[i].source);
-        scanner.ReadNumber(excludes[i].targetIndex);
-      }
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      return false;
+      previousFileOffset=fileOffset;
     }
 
-    return true;
+    if (pathCount>0) {
+      paths.resize(pathCount);
+
+      for (size_t i=0; i<pathCount; i++) {
+        uint32_t distanceValue;
+
+        scanner.ReadFileOffset(paths[i].offset);
+        scanner.ReadNumber(paths[i].objectIndex);
+        //scanner.Read(paths[i].bearing);
+        scanner.Read(paths[i].flags);
+        scanner.ReadNumber(distanceValue);
+
+        paths[i].distance=distanceValue/(1000.0*100.0);
+      }
+    }
+
+    excludes.resize(excludesCount);
+    for (size_t i=0; i<excludesCount; i++) {
+      scanner.Read(excludes[i].source);
+      scanner.ReadNumber(excludes[i].targetIndex);
+    }
   }
 
-  bool RouteNode::Read(const TypeConfig& /*typeConfig*/,
+  /**
+   * Read data from the given FileScanner
+   *
+   * @throws IOException
+   */
+  void RouteNode::Read(const TypeConfig& /*typeConfig*/,
                        FileScanner& scanner)
   {
-    return Read(scanner);
+    Read(scanner);
   }
 
   /**

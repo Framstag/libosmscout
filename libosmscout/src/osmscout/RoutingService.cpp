@@ -134,10 +134,8 @@ namespace osmscout {
       objectVariantData.resize(objectVariantDataCount);
 
       for (size_t i=0; i<objectVariantDataCount; i++) {
-        if (!objectVariantData[i].Read(*database->GetTypeConfig(),
-                                       scanner)) {
-          log.Error() << "Cannot read data entry " << i+1 << " from file '" << scanner.GetFilename() << "'!";
-        }
+        objectVariantData[i].Read(*database->GetTypeConfig(),
+                                  scanner);
       }
 
       scanner.Close();

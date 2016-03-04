@@ -142,15 +142,8 @@ namespace osmscout
 
       progress.SetProgress(a,areaCount);
 
-      if (!area->Read(typeConfig,
-                      scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-            NumberToString(a)+" of "+
-            NumberToString(areaCount)+
-            " in file '"+
-            scanner.GetFilename()+"'");
-        return false;
-      }
+      area->Read(typeConfig,
+                 scanner);
 
       if (loadedTypes.IsSet(area->GetType())) {
         areas[area->GetType()->GetIndex()].push_back(area);

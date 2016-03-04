@@ -443,15 +443,8 @@ namespace osmscout {
 
         Area area;
 
-        if (!area.Read(*typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(areaCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        area.Read(*typeConfig,
+                  scanner);
 
         if (!boundaryTypes.IsSet(area.GetType())) {
           continue;
@@ -562,15 +555,8 @@ namespace osmscout {
 
         Area area;
 
-        if (!area.Read(typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(a)+" of "+
-                         NumberToString(areaCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        area.Read(typeConfig,
+                  scanner);
 
         if (!area.GetType()->GetIndexAsRegion()) {
           continue;
@@ -715,15 +701,8 @@ namespace osmscout {
 
         Node node;
 
-        if (!node.Read(*typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(n)+" of "+
-                         NumberToString(nodeCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        node.Read(*typeConfig,
+                  scanner);
 
         if (node.GetType()->GetIndexAsRegion()) {
           NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
@@ -886,15 +865,8 @@ namespace osmscout {
 
         Area area;
 
-        if (!area.Read(typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(areaCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        area.Read(typeConfig,
+                  scanner);
 
         for (const auto& ring : area.rings) {
           if (!ring.GetType()->GetIgnore() && ring.GetType()->GetIndexAsLocation()) {
@@ -1003,15 +975,8 @@ namespace osmscout {
 
         Way way;
 
-        if (!way.Read(*typeConfig,
-                      scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        way.Read(*typeConfig,
+                 scanner);
 
         if (!way.GetType()->GetIndexAsLocation()) {
           continue;
@@ -1188,9 +1153,9 @@ namespace osmscout {
         progress.SetProgress(a,areaCount);
 
         scanner.ReadFileOffset(fileOffset);
+        scanner.ReadNumber(tmpType);
 
-        if (!scanner.ReadNumber(tmpType) ||
-            !scanner.Read(name) ||
+        if (!scanner.Read(name) ||
             !scanner.Read(location) ||
             !scanner.Read(address)) {
           progress.Error(std::string("Error while reading data entry ")+
@@ -1450,9 +1415,9 @@ namespace osmscout {
         progress.SetProgress(w,wayCount);
 
         scanner.ReadFileOffset(fileOffset);
+        scanner.ReadNumber(tmpType);
 
-        if (!scanner.ReadNumber(tmpType) ||
-            !scanner.Read(name) ||
+        if (!scanner.Read(name) ||
             !scanner.Read(location)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(w)+" of "+
@@ -1625,9 +1590,9 @@ namespace osmscout {
         progress.SetProgress(n,nodeCount);
 
         scanner.ReadFileOffset(fileOffset);
+        scanner.ReadNumber(tmpType);
 
-        if (!scanner.ReadNumber(tmpType) ||
-            !scanner.Read(name) ||
+        if (!scanner.Read(name) ||
             !scanner.Read(location) ||
             !scanner.Read(address)) {
           progress.Error(std::string("Error while reading data entry ")+

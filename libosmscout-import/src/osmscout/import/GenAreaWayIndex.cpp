@@ -217,15 +217,8 @@ namespace osmscout {
         for (uint32_t w=1; w<=wayCount; w++) {
           progress.SetProgress(w,wayCount);
 
-          if (!way.Read(typeConfig,
-                        wayScanner)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(w)+" of "+
-                           NumberToString(wayCount)+
-                           " in file '"+
-                           wayScanner.GetFilename()+"'");
-            return false;
-          }
+          way.Read(typeConfig,
+                   wayScanner);
 
           // Count number of entries per current type and coordinate
           if (!currentWayTypes.IsSet(way.GetType())) {
@@ -519,15 +512,8 @@ namespace osmscout {
 
           offset=wayScanner.GetPos();
 
-          if (!way.Read(*typeConfig,
-                        wayScanner)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(w)+" of "+
-                           NumberToString(wayCount)+
-                           " in file '"+
-                           wayScanner.GetFilename()+"'");
-            return false;
-          }
+          way.Read(*typeConfig,
+                   wayScanner);
 
           if (!indexTypes.IsSet(way.GetType())) {
             continue;
@@ -582,4 +568,3 @@ namespace osmscout {
     return true;
   }
 }
-

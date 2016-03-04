@@ -78,14 +78,14 @@ namespace osmscout {
     mutable std::mutex                         lookupMutex;
 
   private:
-    bool ReadTypeData(FileScanner& scanner,
+    void ReadTypeData(FileScanner& scanner,
                       TypeData& data);
 
-    bool GetOffsets(const TypeData& typeData,
+    void GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
                     std::set<FileOffset>& offsets) const;
 
-    bool LoadData(std::set<FileOffset>& offsets,
+    void LoadData(std::set<FileOffset>& offsets,
                   std::vector<AreaRef>& areas) const;
 
   public:

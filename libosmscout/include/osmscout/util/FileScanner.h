@@ -143,13 +143,13 @@ namespace osmscout {
     void ReadFileOffset(FileOffset& offset,
                         size_t bytes);
 
-    bool ReadNumber(int16_t& number);
-    bool ReadNumber(int32_t& number);
-    bool ReadNumber(int64_t& number);
+    void ReadNumber(int16_t& number);
+    void ReadNumber(int32_t& number);
+    void ReadNumber(int64_t& number);
 
-    bool ReadNumber(uint16_t& number);
-    bool ReadNumber(uint32_t& number);
-    bool ReadNumber(uint64_t& number);
+    void ReadNumber(uint16_t& number);
+    void ReadNumber(uint32_t& number);
+    void ReadNumber(uint64_t& number);
 
     void ReadCoord(GeoCoord& coord);
     void ReadConditionalCoord(GeoCoord& coord,
@@ -177,7 +177,7 @@ namespace osmscout {
 
     void Reset();
 
-    bool Read(ObjectFileRef& ref);
+    void Read(ObjectFileRef& ref);
   };
 
 }

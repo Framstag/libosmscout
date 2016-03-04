@@ -80,8 +80,8 @@ namespace osmscout {
     void SetType(bool area);
     void SetNodes(const std::vector<OSMId>& nodes);
 
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    void Read(FileScanner& scanner);
+    void Write(FileWriter& writer) const;
   };
 
   typedef std::shared_ptr<RawCoastline> RawCoastlineRef;

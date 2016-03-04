@@ -47,8 +47,8 @@ namespace osmscout {
     std::vector<GeoCoord> nodes;
 
   private:
-    bool ReadIds(FileScanner& scanner);
-    bool WriteIds(FileWriter& writer) const;
+    void ReadIds(FileScanner& scanner);
+    void WriteIds(FileWriter& writer) const;
 
   public:
     inline Way()
@@ -129,9 +129,9 @@ namespace osmscout {
 
     void SetLayerToMax();
 
-    bool Read(const TypeConfig& typeConfig,
+    void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
-    bool ReadOptimized(const TypeConfig& typeConfig,
+    void ReadOptimized(const TypeConfig& typeConfig,
                        FileScanner& scanner);
 
     void Write(const TypeConfig& typeConfig,

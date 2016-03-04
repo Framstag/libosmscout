@@ -1677,10 +1677,10 @@ namespace osmscout {
     }
   }
 
-  bool FileScanner::ReadNumber(int16_t& number)
+  void FileScanner::ReadNumber(int16_t& number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read int16_t number","File already in error state");
     }
 
     number=0;
@@ -1688,25 +1688,23 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset>=size) {
-        log.Error() << "Cannot read compressed int16_t beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read int16_t number","Cannot read beyond end of file");
       }
 
       unsigned int bytes=DecodeNumber(&buffer[offset],number);
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed int16_t from file '" << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read int16_t number");
     }
 
     typedef int16_t num_t;
@@ -1724,9 +1722,8 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int16_t from file '" << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
-          return false;
+          throw IOException(filename,"Cannot read int16_t number");
         }
 
         number^=(val << shift);
@@ -1746,9 +1743,8 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int16_t from file '" << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
-          return false;
+          throw IOException(filename,"Cannot read int16_t number");
         }
 
         number|=(val << shift);
@@ -1759,14 +1755,12 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
-
-    return true;
   }
 
-  bool FileScanner::ReadNumber(int32_t& number)
+  void FileScanner::ReadNumber(int32_t& number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read int32_t number","File already in error state");
     }
 
     number=0;
@@ -1774,25 +1768,23 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset>=size) {
-        log.Error() << "Cannot read compressed int32_t beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read int32_t number","Cannot read beyond end of file");
       }
 
       unsigned int bytes=DecodeNumber(&buffer[offset],number);
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed int32_t from file '" << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read int32_t number");
     }
 
 
@@ -1811,9 +1803,8 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int32_t from file '" << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
-          return false;
+          throw IOException(filename,"Cannot read int32_t number");
         }
 
         number^=(val << shift);
@@ -1833,9 +1824,8 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int32_t from file '" << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
-          return false;
+          throw IOException(filename,"Cannot read int32_t number");
         }
 
         number|=(val << shift);
@@ -1846,14 +1836,12 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
-
-    return true;
   }
 
-  bool FileScanner::ReadNumber(int64_t& number)
+  void FileScanner::ReadNumber(int64_t& number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read int64_t number","File already in error state");
     }
 
     number=0;
@@ -1861,25 +1849,23 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset>=size) {
-        log.Error() << "Cannot read compressed int64_t beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read int64_t number","Cannot read beyond end of file");
       }
 
       unsigned int bytes=DecodeNumber(&buffer[offset],number);
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed int64_t from file '" << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read int64_t number");
     }
 
     typedef int64_t num_t;
@@ -1897,9 +1883,8 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int64_t from file '" << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
-          return false;
+          throw IOException(filename,"Cannot read int64_t number");
         }
 
         number^=(val << shift);
@@ -1919,9 +1904,8 @@ namespace osmscout {
       while ((buffer & 0x80)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
-          log.Error() << "Cannot read compressed int64_t from file '" << filename <<  "' (" << strerror(errno) << ")";
           hasError=true;
-          return false;
+          throw IOException(filename,"Cannot read int64_t number");
         }
 
         number|=(val << shift);
@@ -1932,14 +1916,12 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
-
-    return true;
   }
 
-  bool FileScanner::ReadNumber(uint16_t& number)
+  void FileScanner::ReadNumber(uint16_t& number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read uint16_t number","File already in error state");
     }
 
     number=0;
@@ -1953,24 +1935,22 @@ namespace osmscout {
 
         if ((buffer[offset] & 128)==0) {
           offset++;
-          return true;
+          return;
         }
 
         shift+=7;
       }
 
-      log.Error() << "Cannot read compressed uint16_t beyond end of file '" << filename << "'";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read uint16_t number","Cannot read beyond end of file");
     }
 #endif
 
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed uint16_t from file '" << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read uint16_t number");
     }
 
     unsigned int shift=0;
@@ -1979,25 +1959,22 @@ namespace osmscout {
       number|=static_cast<uint16_t>(buffer & '\x7f') << shift;
 
       if ((buffer & '\x80')==0) {
-        return true;
+        return;
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        log.Error() << "Cannot read compressed uint16_t from file '" << filename <<  "' (" << strerror(errno) << ")";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read uint16_t number");
       }
 
       shift+=7;
     }
-
-    return true;
   }
 
-  bool FileScanner::ReadNumber(uint32_t& number)
+  void FileScanner::ReadNumber(uint32_t& number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read uint32_t number","File already in error state");
     }
 
     number=0;
@@ -2011,24 +1988,22 @@ namespace osmscout {
 
         if ((buffer[offset] & 128)==0) {
           offset++;
-          return true;
+          return;
         }
 
         shift+=7;
       }
 
-      log.Error() << "Cannot read compressed uint32_t beyond end of file '" << filename << "'";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read uint32_t number","Cannot read beyond end of file");
     }
 #endif
 
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed uint32_t from file '" << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read uint32_t number");
     }
 
     unsigned int shift=0;
@@ -2037,25 +2012,22 @@ namespace osmscout {
       number|=static_cast<uint32_t>(buffer & '\x7f') << shift;
 
       if ((buffer & '\x80')==0) {
-        return true;
+        return;
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        log.Error() << "Cannot read compressed uint32_t from file '" << filename <<  "' (" << strerror(errno) << ")";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read uint32_t number");
       }
 
       shift+=7;
     }
-
-    return true;
   }
 
-  bool FileScanner::ReadNumber(uint64_t& number)
+  void FileScanner::ReadNumber(uint64_t& number)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read uint64_t number","File already in error state");
     }
 
     number=0;
@@ -2069,24 +2041,22 @@ namespace osmscout {
 
         if ((buffer[offset] & 128)==0) {
           offset++;
-          return true;
+          return;
         }
 
         shift+=7;
       }
 
-      log.Error() << "Cannot read compressed uint64_t beyond end of file '" << filename << "'";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read uint64_t number","Cannot read beyond end of file");
     }
 #endif
 
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      log.Error() << "Cannot read compressed uint64_t from file '" << filename <<  "' (" << strerror(errno) << ")";
       hasError=true;
-      return false;
+      throw IOException(filename,"Cannot read uint64_t number");
     }
 
     unsigned int shift=0;
@@ -2095,19 +2065,16 @@ namespace osmscout {
       number|=static_cast<uint64_t>(buffer & '\x7f') << shift;
 
       if ((buffer & '\x80')==0) {
-        return true;
+        return;
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        log.Error() << "Cannot read compressed uint64_t from file '" << filename <<  "' (" << strerror(errno) << ")";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read uint64_t number");
       }
 
       shift+=7;
     }
-
-    return true;
   }
 
   void FileScanner::ReadCoord(GeoCoord& coord)
@@ -2416,17 +2383,18 @@ namespace osmscout {
     if (maxBytes==1) {
       uint8_t byteValue;
 
-      if (Read(byteValue)) {
-        id=byteValue;
-
-        return true;
-      }
-      else {
+      if (!Read(byteValue)) {
         return false;
       }
+
+      id=byteValue;
+
+      return true;
     }
     else {
-      return ReadNumber(id);
+      ReadNumber(id);
+
+      return true;
     }
   }
 
@@ -2442,14 +2410,12 @@ namespace osmscout {
     lastFileOffset=0;
   }
 
-  bool ObjectFileRefStreamReader::Read(ObjectFileRef& ref)
+  void ObjectFileRefStreamReader::Read(ObjectFileRef& ref)
   {
     RefType    type;
     FileOffset offset;
 
-    if (!reader.ReadNumber(offset)) {
-      return false;
-    }
+    reader.ReadNumber(offset);
 
     type=(RefType)(offset%4);
 
@@ -2459,7 +2425,5 @@ namespace osmscout {
     ref.Set(offset,type);
 
     lastFileOffset=offset;
-
-    return true;
   }
 }

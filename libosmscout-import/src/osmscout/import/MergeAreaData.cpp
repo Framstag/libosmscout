@@ -76,9 +76,7 @@ namespace osmscout {
         progress.SetProgress(current,dataCount);
 
         if (!scanner.Read(type) ||
-            !scanner.Read(id) ||
-            !data.ReadImport(typeConfig,
-                             scanner)) {
+            !scanner.Read(id)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(current)+" of "+
                          NumberToString(dataCount)+
@@ -87,6 +85,9 @@ namespace osmscout {
 
           return false;
         }
+
+        data.ReadImport(typeConfig,
+                        scanner);
 
         writer.Write(type);
         writer.Write(id);
@@ -118,9 +119,7 @@ namespace osmscout {
         progress.SetProgress(current,dataCount);
 
         if (!scanner.Read(type) ||
-            !scanner.Read(id) ||
-            !data.ReadImport(typeConfig,
-                             scanner)) {
+            !scanner.Read(id)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(current)+" of "+
                          NumberToString(dataCount)+
@@ -129,6 +128,9 @@ namespace osmscout {
 
           return false;
         }
+
+        data.ReadImport(typeConfig,
+                        scanner);
 
         writer.Write(type);
         writer.Write(id);
@@ -146,7 +148,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 

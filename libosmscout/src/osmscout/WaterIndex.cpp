@@ -48,15 +48,8 @@ namespace osmscout {
     try {
       scanner.Open(datafilename,FileScanner::FastRandom,true);
 
-      if (!scanner.ReadNumber(waterIndexMinMag)) {
-        log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
-
-      if (!scanner.ReadNumber(waterIndexMaxMag)) {
-        log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.ReadNumber(waterIndexMinMag);
+      scanner.ReadNumber(waterIndexMaxMag);
 
       levels.resize(waterIndexMaxMag-waterIndexMinMag+1);
 

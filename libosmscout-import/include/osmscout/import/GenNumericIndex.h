@@ -45,7 +45,7 @@ namespace osmscout {
     std::string indexfile;
 
   private:
-    bool ReadData(const TypeConfig& typeConfig,
+    void ReadData(const TypeConfig& typeConfig,
                   FileScanner& scanner,
                   T& data) const;
 
@@ -78,12 +78,12 @@ namespace osmscout {
   }
 
   template <class N,class T>
-  bool NumericIndexGenerator<N,T>::ReadData(const TypeConfig& typeConfig,
+  void NumericIndexGenerator<N,T>::ReadData(const TypeConfig& typeConfig,
                                             FileScanner& scanner,
                                             T& data) const
   {
-    return data.Read(typeConfig,
-                     scanner);
+    data.Read(typeConfig,
+              scanner);
   }
 
   template <class N,class T>
@@ -155,16 +155,9 @@ namespace osmscout {
 
         readPos=scanner.GetPos();
 
-        if (!ReadData(*typeConfig,
-                      scanner,
-                      data)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(d+1)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        ReadData(*typeConfig,
+                 scanner,
+                 data);
 
         if (currentPageSize>0) {
           char         b1[10];

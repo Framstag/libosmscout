@@ -74,18 +74,19 @@ namespace osmscout {
                              tags);
   }
 
-  bool RawWay::Read(const TypeConfig& typeConfig,
+  /**
+   * Reads data from the given FileScanner
+   *
+   * @throws IOException
+   */
+  void RawWay::Read(const TypeConfig& typeConfig,
                     FileScanner& scanner)
   {
-    if (!scanner.ReadNumber(id)) {
-      return false;
-    }
+    scanner.ReadNumber(id);
 
     TypeId tmpType;
 
-    if (!scanner.ReadNumber(tmpType)) {
-      return false;
-    }
+    scanner.ReadNumber(tmpType);
 
     if (tmpType>typeConfig.GetMaxTypeId()) {
       isArea=true;
@@ -107,38 +108,28 @@ namespace osmscout {
     featureValueBuffer.SetType(type);
 
     if (!type->GetIgnore()) {
-      if (!featureValueBuffer.Read(scanner)) {
-        return false;
-      }
+      featureValueBuffer.Read(scanner);
     }
 
     uint32_t nodeCount;
 
-    if (!scanner.ReadNumber(nodeCount)) {
-      return false;
-    }
+    scanner.ReadNumber(nodeCount);
 
     nodes.resize(nodeCount);
 
     if (nodeCount>0) {
       OSMId minId;
 
-      if (!scanner.ReadNumber(minId)) {
-        return false;
-      }
+      scanner.ReadNumber(minId);
 
       for (size_t i=0; i<nodeCount; i++) {
         OSMId id;
 
-        if (!scanner.ReadNumber(id)) {
-          return false;
-        }
+        scanner.ReadNumber(id);
 
         nodes[i]=minId+id;
       }
     }
-
-    return !scanner.HasError();
   }
 
   /**

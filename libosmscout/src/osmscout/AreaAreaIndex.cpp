@@ -85,10 +85,7 @@ namespace osmscout {
         for (size_t c=0; c<4; c++) {
           FileOffset childOffset;
 
-          if (!scanner.ReadNumber(childOffset)) {
-            log.Error() << "Cannot read index data at offset " << offset << " in file '" << scanner.GetFilename() << "'";
-            return false;
-          }
+          scanner.ReadNumber(childOffset);
 
           if (childOffset==0) {
             cacheRef->value.children[c]=0;
@@ -130,9 +127,7 @@ namespace osmscout {
 
     uint32_t typeCount;
 
-    if (!scanner.ReadNumber(typeCount)) {
-      return false;
-    }
+    scanner.ReadNumber(typeCount);
 
     FileOffset prevDataFileOffset=0;
 
@@ -145,13 +140,8 @@ namespace osmscout {
         return false;
       }
 
-      if (!scanner.ReadNumber(dataCount)) {
-        return false;
-      }
-
-      if (!scanner.ReadNumber(dataFileOffset)) {
-        return false;
-      }
+      scanner.ReadNumber(dataCount);
+      scanner.ReadNumber(dataFileOffset);
 
       dataFileOffset+=prevDataFileOffset;
       prevDataFileOffset=dataFileOffset;
@@ -245,11 +235,7 @@ namespace osmscout {
     try {
       scanner.Open(datafilename,FileScanner::FastRandom,true);
 
-      if (!scanner.ReadNumber(maxLevel)) {
-        log.Error() << "Cannot read data from file '" << scanner.GetFilename() << "'";
-        return false;
-      }
-
+      scanner.ReadNumber(maxLevel);
       scanner.ReadFileOffset(topLevelOffset);
 
       return !scanner.HasError();

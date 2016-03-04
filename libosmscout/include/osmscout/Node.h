@@ -99,7 +99,7 @@ namespace osmscout {
     void SetCoords(const GeoCoord& coords);
     void SetFeatures(const FeatureValueBuffer& buffer);
 
-    bool Read(const TypeConfig& typeConfig,
+    void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;

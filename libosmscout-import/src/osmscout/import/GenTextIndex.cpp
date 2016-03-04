@@ -252,15 +252,9 @@ namespace osmscout
       // data to the corresponding keyset
       for(uint32_t n=1; n <= nodeCount; n++) {
         Node node;
-        if (!node.Read(typeConfig,
-                       scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(n)+" of "+
-                         NumberToString(nodeCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+
+        node.Read(typeConfig,
+                  scanner);
 
         if(!node.GetType()->GetIgnore()) {
           NameFeatureValue    *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
@@ -316,7 +310,7 @@ namespace osmscout
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -346,6 +340,7 @@ namespace osmscout
                    false);
 
       uint32_t wayCount=0;
+
       if(!scanner.Read(wayCount)) {
         progress.Error("Error reading way count in file '"+scanner.GetFilename()+"'");
         return false;
@@ -355,15 +350,9 @@ namespace osmscout
       // data to the corresponding keyset
       for(uint32_t n=1; n <= wayCount; n++) {
         Way way;
-        if (!way.Read(typeConfig,
-                      scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(n)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+
+        way.Read(typeConfig,
+                 scanner);
 
         if(way.GetType()->GetIgnore()) {
           continue;
@@ -475,15 +464,9 @@ namespace osmscout
       // data to the corresponding keyset
       for(uint32_t n=1; n <= areaCount; n++) {
         Area area;
-        if(!area.Read(typeConfig,
-                      scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(n)+" of "+
-                         NumberToString(areaCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+
+        area.Read(typeConfig,
+                  scanner);
 
         // Rings might have different types and names
         // so we check  each ring individually
@@ -544,7 +527,7 @@ namespace osmscout
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
