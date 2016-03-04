@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <osmscout/TextSearchIndex.h>
+#include <algorithm>
 
 void badInput()
 {

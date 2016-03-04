@@ -22,6 +22,9 @@
 #include <iostream>
 
 #include <GL/gl.h>
+#ifndef CALLBACK
+#define CALLBACK
+#endif
 
 namespace osmscout {
 
@@ -54,19 +57,19 @@ namespace osmscout {
 
     gluTessCallback(tesselator,
                     GLU_TESS_BEGIN,
-                    (GLvoid (*) ()) &tessalatorBeginCallback);
+					(GLvoid(CALLBACK *)()) &tessalatorBeginCallback);
 
     gluTessCallback(tesselator,
                     GLU_TESS_VERTEX,
-                    (GLvoid (*) ()) &glVertex3dv);
+					(GLvoid(CALLBACK *)()) &glVertex3dv);
 
     gluTessCallback(tesselator,
                     GLU_TESS_END,
-                    (GLvoid (*) ()) &tessalatorEndCallback);
+					(GLvoid(CALLBACK *)()) &tessalatorEndCallback);
 
     gluTessCallback(tesselator,
                     GLU_TESS_ERROR,
-                    (GLvoid (*) ()) &tesselatorErrorCallback);
+					(GLvoid(CALLBACK *)()) &tesselatorErrorCallback);
 
   }
 
