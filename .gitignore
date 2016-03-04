@@ -22,3 +22,15 @@
 **/*.pc
 **/*.pc.in
 **/.dirstamp
+**/CMakeFiles
+**/CMakeCache.txt
+**/test-driver
+**/stamp-h1
+**/stamp-h2
+**/*.la
+**/.cproject
+**/.idea
+**/.project
+**/.settings
+**/.autotools
+**/autom4te.cache
