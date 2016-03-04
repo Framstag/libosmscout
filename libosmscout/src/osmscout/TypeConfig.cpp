@@ -664,6 +664,13 @@ namespace osmscout {
     // no code
   }
 
+  TypeInfoSet::TypeInfoSet(TypeInfoSet&& other)
+	  : types(other.types),
+	  count(other.count)
+  {
+	  // no code
+  }
+
   TypeInfoSet::TypeInfoSet(const std::vector<TypeInfoRef>& types)
   {
     for (const auto& type : types) {

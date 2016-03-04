@@ -333,7 +333,7 @@ namespace osmscout {
    * one number, where coordinates close in 2D are close in the
    * one dimensional projection, too.
    */
-  extern uint64_t InterleaveNumbers(uint32_t a,
+  extern OSMSCOUT_API uint64_t InterleaveNumbers(uint32_t a,
                                     uint32_t b);
 }
 

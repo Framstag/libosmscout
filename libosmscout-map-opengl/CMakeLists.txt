@@ -1,25 +1,44 @@
-cmake_minimum_required(VERSION 3.2)
-project(libosmscout_map_opengl)
-
-include(FindPkgConfig)
-
-pkg_check_modules(LIBOSMSCOUT REQUIRED libosmscout)
-pkg_check_modules(LIBOSMSCOUTMAP REQUIRED libosmscout-map)
-pkg_check_modules(LIBOPENGL REQUIRED gl)
-
-include_directories(include
-                    ${LIBOSMSCOUT_INCLUDE_DIRS}
-                    ${LIBOSMSCOUTMAP_INCLUDE_DIRS}
-                    ${LIBOPENGL_INCLUDE_DIRS})
+if(NOT OPENGL_FOUND)
+	message(SEND_ERROR "OpenGL is required for OpenGL map drawing backend")
+endif()
+if(NOT GLUT_FOUND)
+	message(SEND_ERROR "Glut is required for OpenGL map drawing backend")
+endif()
+if(NOT ${OSMSCOUT_BUILD_MAP})
+	message(SEND_ERROR "The main map drawing interface is required for OpenGL map drawing backend")
+endif()
 
 set(HEADER_FILES
-    include/osmscout/private/Config.h
+    #include/osmscout/private/Config.h
     include/osmscout/private/MapOpenGLImportExport.h
-    include/osmscout/MapOpenGLFeatures.h
-    include/osmscout/MapPainterOpenGL.h)
+    #include/osmscout/MapOpenGLFeatures.h
+    include/osmscout/MapPainterOpenGL.h
+)
 
 set(SOURCE_FILES
-    src/osmscout/MapPainterOpenGL.cpp)
+    src/osmscout/MapPainterOpenGL.cpp
+)
 
 add_library(libosmscout_map_opengl SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout_map_opengl PROPERTY CXX_STANDARD 11)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapOpenGLFeatures.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-opengl")
+target_include_directories(libosmscout_map_opengl PRIVATE 
+		include
+		${CMAKE_CURRENT_BINARY_DIR}/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
+		${OPENGL_INCLUDE_DIR}
+		${GLUT_INCLUDE_DIR})
+target_link_libraries(libosmscout_map_opengl
+		libosmscout
+		libosmscout_map
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARIES})
+target_compile_definitions(libosmscout_map_opengl PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
+install(TARGETS libosmscout_map_opengl
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapOpenGLFeatures.h DESTINATION include/osmscout)

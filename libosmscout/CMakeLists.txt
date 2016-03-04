@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.1)
-project(libosmscout)
-
-include_directories(include)
+if(NOT MARISA_FOUND)
+	message(FATAL_ERROR "Marisa is required for main library")
+endif()
+set(OSMSCOUT_BUILD_CORE ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
     include/osmscout/ost/Parser.h
     include/osmscout/ost/Scanner.h
-    include/osmscout/private/Config.h
+    #include/osmscout/private/Config.h
     include/osmscout/private/CoreImportExport.h
     include/osmscout/system/Assert.h
     include/osmscout/system/Math.h
@@ -43,7 +43,7 @@ set(HEADER_FILES
     include/osmscout/AreaWayIndex.h
     include/osmscout/Coord.h
     include/osmscout/CoordDataFile.h
-    include/osmscout/CoreFeatures.h
+    #include/osmscout/CoreFeatures.h
     include/osmscout/Database.h
     include/osmscout/DataFile.h
     include/osmscout/DebugDatabase.h
@@ -79,7 +79,8 @@ set(HEADER_FILES
     include/osmscout/Types.h
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
-    include/osmscout/WayDataFile.h)
+    include/osmscout/WayDataFile.h
+)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
@@ -159,15 +160,14 @@ set(SOURCE_FILES
 
 add_library(libosmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout PROPERTY CXX_STANDARD 11)
-
-include(CheckCXXSourceCompiles)
-include(CheckPrototypeDefinition)
-
-CHECK_CXX_SOURCE_COMPILES("
-#include <string>
-
-int main()
-{
-  std::wstring value=L\"Hello\";
-}
-" OSMSCOUT_HAVE_STD_WSTRING)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout")
+target_include_directories(libosmscout PRIVATE include ${MARISA_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_link_libraries(libosmscout ${MARISA_LIBRARIES})
+target_compile_definitions(libosmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
+install(TARGETS libosmscout
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h DESTINATION include/osmscout)
