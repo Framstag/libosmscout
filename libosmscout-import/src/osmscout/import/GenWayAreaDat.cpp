@@ -59,6 +59,7 @@ namespace osmscout {
   }
 
   bool WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
+                                              Progress& progress,
                                               BlacklistSet& wayBlacklist) const
   {
     FileScanner scanner;
@@ -84,7 +85,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -92,6 +93,7 @@ namespace osmscout {
   }
 
   bool WayAreaDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
+                                                  Progress& progress,
                                                   const ImportParameter& parameter,
                                                   std::vector<Distribution>& typeDistribution) const
   {
@@ -107,17 +109,15 @@ namespace osmscout {
                    true);
 
       for (const auto &type : typeConfig->GetTypes()) {
-        if (!scanner.Read(typeDistribution[type->GetIndex()].nodeCount) ||
-            !scanner.Read(typeDistribution[type->GetIndex()].wayCount) ||
-            !scanner.Read(typeDistribution[type->GetIndex()].areaCount)) {
-          return false;
-        }
+        scanner.Read(typeDistribution[type->GetIndex()].nodeCount);
+        scanner.Read(typeDistribution[type->GetIndex()].wayCount);
+        scanner.Read(typeDistribution[type->GetIndex()].areaCount);
       }
 
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -139,10 +139,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(wayCount);
 
     for (uint32_t w=1; w<=wayCount; w++) {
       RawWayRef way=std::make_shared<RawWay>();
@@ -288,10 +285,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(wayCount);
 
     for (uint32_t w=1; w<=wayCount; w++) {
       RawWayRef way=std::make_shared<RawWay>();
@@ -376,6 +370,7 @@ namespace osmscout {
     progress.SetAction("Reading type distribution");
 
     if (!ReadTypeDistribution(typeConfig,
+                              progress,
                               parameter,
                               typeDistribution)) {
       return false;
@@ -399,6 +394,7 @@ namespace osmscout {
     progress.SetAction("Reading way area blacklist");
 
     if (!ReadWayBlacklist(parameter,
+                          progress,
                           wayBlacklist)) {
       return false;
     }
@@ -415,10 +411,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      if (!scanner.Read(rawWayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(rawWayCount);
 
       areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       WAYAREA_TMP));
@@ -516,7 +509,7 @@ namespace osmscout {
       areaWriter.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       scanner.CloseFailsafe();
       areaWriter.CloseFailsafe();

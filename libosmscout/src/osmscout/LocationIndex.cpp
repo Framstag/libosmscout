@@ -51,11 +51,9 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    true);
 
-      if (!(scanner.Read(bytesForNodeFileOffset) &&
-            scanner.Read(bytesForAreaFileOffset) &&
-            scanner.Read(bytesForWayFileOffset))) {
-        return false;
-      }
+      scanner.Read(bytesForNodeFileOffset);
+      scanner.Read(bytesForAreaFileOffset);
+      scanner.Read(bytesForWayFileOffset);
 
       uint32_t ignoreTokenCount;
 
@@ -64,9 +62,7 @@ namespace osmscout {
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token;
 
-        if (!scanner.Read(token)) {
-          return false;
-        }
+        scanner.Read(token);
 
         regionIgnoreTokens.insert(token);
       }
@@ -76,9 +72,7 @@ namespace osmscout {
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token;
 
-        if (!scanner.Read(token)) {
-          return false;
-        }
+        scanner.Read(token);
 
         locationIgnoreTokens.insert(token);
       }
@@ -112,9 +106,7 @@ namespace osmscout {
     uint8_t    type;
     FileOffset fileOffset;
 
-    if (!scanner.Read(type)) {
-      throw IOException(scanner.GetFilename(),"Cannot read ObjectFileRef","Error reading type");
-    }
+    scanner.Read(type);
 
     switch (type) {
     case refNode:
@@ -146,10 +138,7 @@ namespace osmscout {
 
     scanner.ReadFileOffset(region.dataOffset);
     scanner.ReadFileOffset(region.parentRegionOffset);
-
-    if (!scanner.Read(region.name)) {
-      return false;
-    }
+    scanner.Read(region.name);
 
     Read(scanner,
          region.object);
@@ -162,10 +151,7 @@ namespace osmscout {
       region.aliases.resize(aliasCount);
 
       for (size_t i=0; i<aliasCount; i++) {
-        if (!scanner.Read(region.aliases[i].name)) {
-          return false;
-        }
-
+        scanner.Read(region.aliases[i].name);
         scanner.ReadFileOffset(region.aliases[i].objectOffset,
                                bytesForNodeFileOffset);
       }
@@ -254,10 +240,7 @@ namespace osmscout {
 
       poi.regionOffset=adminRegion.regionOffset;
 
-      if (!scanner.Read(poi.name)) {
-        return false;
-      }
-
+      scanner.Read(poi.name);
       objectFileRefReader.Read(poi.object);
 
       if (!visitor.Visit(adminRegion,
@@ -276,9 +259,7 @@ namespace osmscout {
 
       location.locationOffset=scanner.GetPos();
 
-      if (!scanner.Read(location.name)) {
-        return false;
-      }
+      scanner.Read(location.name);
 
       location.regionOffset=adminRegion.regionOffset;
 
@@ -288,9 +269,7 @@ namespace osmscout {
 
       bool hasAddresses;
 
-      if (!scanner.Read(hasAddresses)) {
-        return false;
-      }
+      scanner.Read(hasAddresses);
 
       if (hasAddresses) {
         scanner.ReadFileOffset(location.addressesOffset);
@@ -395,10 +374,7 @@ namespace osmscout {
       address.locationOffset=location.locationOffset;
       address.regionOffset=location.regionOffset;
 
-      if (!scanner.Read(address.name)) {
-        return false;
-      }
-
+      scanner.Read(address.name);
       objectFileRefReader.Read(address.object);
 
       if (!visitor.Visit(region,

@@ -57,38 +57,21 @@ namespace osmscout {
 
       FileOffset mapOffset;
 
-      if (!scanner.Read(coordPageSize)) {
-        Close();
-
-        return false;
-      }
-
-      if (!scanner.Read(mapOffset)) {
-        Close();
-
-        return false;
-      }
+      scanner.Read(coordPageSize);
+      scanner.Read(mapOffset);
 
       scanner.SetPos(mapOffset);
 
       uint32_t mapSize;
 
-      if (!scanner.Read(mapSize)) {
-        Close();
-
-        return false;
-      }
+      scanner.Read(mapSize);
 
       for (size_t i=1; i<=mapSize; i++) {
         PageId     id;
         FileOffset offset;
 
-        if (!scanner.Read(id) ||
-            !scanner.Read(offset)) {
-          Close();
-
-          return false;
-        }
+        scanner.Read(id);
+        scanner.Read(offset);
 
         coordPageOffsetMap[id]=offset;
       }

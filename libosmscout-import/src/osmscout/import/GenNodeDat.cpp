@@ -76,10 +76,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawNodeDataMemoryMaped());
 
-      if (!scanner.Read(rawNodeCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(rawNodeCount);
 
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   NODES_TMP));

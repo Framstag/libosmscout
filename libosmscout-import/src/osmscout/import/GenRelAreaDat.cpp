@@ -1075,10 +1075,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(rawRelationCount)) {
-        progress.Error("Cannot read number of raw relations from data file");
-        return false;
-      }
+      scanner.Read(rawRelationCount);
 
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   RELAREA_TMP));

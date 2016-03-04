@@ -27,7 +27,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Logger.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/String.h>
@@ -121,10 +120,7 @@ namespace osmscout {
                                    datafile),
                    FileScanner::Sequential,true);
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file '"+scanner.GetFilename()+"'");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       writer.WriteNumber(pageSize);       // Size of one index page in bytes
       writer.WriteNumber(dataCount);      // Number of entries in data file
@@ -303,7 +299,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       scanner.CloseFailsafe();
       writer.CloseFailsafe();

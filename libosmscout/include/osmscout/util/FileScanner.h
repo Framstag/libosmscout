@@ -117,21 +117,21 @@ namespace osmscout {
     void SetPos(FileOffset pos);
     FileOffset GetPos() const;
 
-    bool Read(char* buffer, size_t bytes);
+    void Read(char* buffer, size_t bytes);
 
-    bool Read(std::string& value);
+    void Read(std::string& value);
 
-    bool Read(bool& boolean);
+    void Read(bool& boolean);
 
-    bool Read(int8_t& number);
-    bool Read(int16_t& number);
-    bool Read(int32_t& number);
-    bool Read(int64_t& number);
+    void Read(int8_t& number);
+    void Read(int16_t& number);
+    void Read(int32_t& number);
+    void Read(int64_t& number);
 
-    bool Read(uint8_t& number);
-    bool Read(uint16_t& number);
-    bool Read(uint32_t& number);
-    bool Read(uint64_t& number);
+    void Read(uint8_t& number);
+    void Read(uint16_t& number);
+    void Read(uint32_t& number);
+    void Read(uint64_t& number);
 
     void Read(uint16_t& number, size_t bytes);
     void Read(uint32_t& number, size_t bytes);
@@ -159,7 +159,7 @@ namespace osmscout {
 
     void ReadBox(GeoBox& box);
 
-    bool ReadTypeId(TypeId& id,
+    void ReadTypeId(TypeId& id,
                     uint8_t maxBytes);
   };
 

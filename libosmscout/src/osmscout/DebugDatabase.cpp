@@ -115,29 +115,18 @@ namespace osmscout {
     try {
       scanner.Open(filename,FileScanner::LowMemRandom,false);
 
-      if (!scanner.Read(entryCount)) {
-        return false;
-      }
+      scanner.Read(entryCount);
 
       for (size_t i=1; i<=entryCount; i++) {
         Id         id;
         uint8_t    typeByte;
-        OSMRefType osmType;
         FileOffset fileOffset;
 
-        if (!scanner.Read(id)) {
-          return false;
-        }
-
-        if (!scanner.Read(typeByte)) {
-          return false;
-        }
-
-        osmType=(OSMRefType)typeByte;
-
+        scanner.Read(id);
+        scanner.Read(typeByte);
         scanner.ReadFileOffset(fileOffset);
 
-        ObjectOSMRef  osmRef(id,osmType);
+        ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,fileType);
 
         if (ids.find(osmRef)!=ids.end() ||

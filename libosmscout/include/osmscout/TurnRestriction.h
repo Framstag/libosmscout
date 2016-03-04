@@ -92,8 +92,8 @@ namespace osmscout {
       this->to=to;
     }
 
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
+    void Read(FileScanner& scanner);
+    void Write(FileWriter& writer) const;
   };
 
   typedef std::shared_ptr<TurnRestriction> TurnRestrictionRef;

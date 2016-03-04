@@ -63,10 +63,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetAreaDataMemoryMaped());
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       for (uint32_t current=1; current<=dataCount; current++) {
         uint8_t type;
@@ -75,17 +72,8 @@ namespace osmscout {
 
         progress.SetProgress(current,dataCount);
 
-        if (!scanner.Read(type) ||
-            !scanner.Read(id)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(current)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-
-          return false;
-        }
-
+        scanner.Read(type);
+        scanner.Read(id);
         data.ReadImport(typeConfig,
                         scanner);
 
@@ -106,10 +94,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetAreaDataMemoryMaped());
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       for (uint32_t current=1; current<=dataCount; current++) {
         uint8_t type;
@@ -118,17 +103,8 @@ namespace osmscout {
 
         progress.SetProgress(current,dataCount);
 
-        if (!scanner.Read(type) ||
-            !scanner.Read(id)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(current)+" of "+
-                         NumberToString(dataCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-
-          return false;
-        }
-
+        scanner.Read(type);
+        scanner.Read(id);
         data.ReadImport(typeConfig,
                         scanner);
 

@@ -137,7 +137,7 @@ namespace osmscout {
   }
 
   bool NodeLocationProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
-                                                       Progress& /*progress*/,
+                                                       Progress& progress,
                                                        const TypeConfig& /*typeConfig*/)
   {
     delete nameReader;
@@ -156,7 +156,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 

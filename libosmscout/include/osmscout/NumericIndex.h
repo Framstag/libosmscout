@@ -100,7 +100,7 @@ namespace osmscout {
 
   private:
     size_t GetPageIndex(const Page& page, N id) const;
-    bool ReadPage(FileOffset offset, PageRef& page) const;
+    void ReadPage(FileOffset offset, PageRef& page) const;
     void InitializeCache();
 
   public:
@@ -181,7 +181,7 @@ namespace osmscout {
   }
 
   template <class N>
-  inline bool NumericIndex<N>::ReadPage(FileOffset offset, PageRef& page) const
+  inline void NumericIndex<N>::ReadPage(FileOffset offset, PageRef& page) const
   {
     if (!page) {
       page=std::make_shared<Page>();
@@ -194,11 +194,8 @@ namespace osmscout {
 
     scanner.SetPos(offset);
 
-    if (!scanner.Read(buffer,
-                      pageSize)) {
-      log.Error() << "Cannot read index page from file '" << scanner.GetFilename() << "'!";
-      return false;
-    }
+    scanner.Read(buffer,
+                 pageSize);
 
     size_t     currentPos=0;
     N          prevId=0;
@@ -229,8 +226,6 @@ namespace osmscout {
 
       page->entries.push_back(entry);
     }
-
-    return !scanner.HasError();
   }
 
   template <class N>
@@ -304,21 +299,21 @@ namespace osmscout {
       for (size_t level=0; level<levels; level++) {
         scanner.ReadNumber(pageCounts[level]);
       }
+
+      delete [] buffer;
+      buffer=new char[pageSize];
+
+      //std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
+
+      ReadPage(lastLevelPageStart,root);
+
+      InitializeCache();
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
       return false;
     }
-
-    delete [] buffer;
-    buffer=new char[pageSize];
-
-    //std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
-
-    ReadPage(lastLevelPageStart,root);
-
-    InitializeCache();
 
     return !scanner.HasError();
   }
@@ -355,74 +350,77 @@ namespace osmscout {
   bool NumericIndex<N>::GetOffset(const N& id,
                                   FileOffset& offset) const
   {
-    std::lock_guard<std::mutex> lock(accessMutex);
-    size_t                      r=GetPageIndex(*root,id);
-    PageRef                     pageRef;
+    try
+    {
+      std::lock_guard<std::mutex> lock(accessMutex);
+      size_t                      r=GetPageIndex(*root,id);
+      PageRef                     pageRef;
 
-    if (!root->IndexIsValid(r)) {
-      //std::cerr << "Id " << id << " not found in root index, " << root->entries.front().startId << "-" << root->entries.back().startId << std::endl;
-      return false;
-    }
-
-    const Entry& rootEntry=root->entries[r];
-
-    offset=rootEntry.fileOffset;
-
-    N startId=rootEntry.startId;
-    for (size_t level=0; level+2<=levels; level++) {
-      if (level<=simpleCacheMaxLevel) {
-        auto cacheRef=simplePageCache[level].find(startId);
-
-        if (cacheRef==simplePageCache[level].end()) {
-          pageRef=NULL; // Make sure, that we allocate a new page and not reuse an old one
-
-          if (!ReadPage(offset,pageRef)) {
-            return false;
-          }
-
-          simplePageCache[level].insert(std::make_pair(startId,pageRef));
-        }
-        else {
-          pageRef=cacheRef->second;
-        }
-      }
-      else {
-        typename PageCache::CacheRef cacheRef;
-
-        if (!pageCaches[level].GetEntry(startId,cacheRef)) {
-          typename PageCache::CacheEntry cacheEntry(startId);
-
-          cacheRef=pageCaches[level].SetEntry(cacheEntry);
-
-          if (!ReadPage(offset,cacheRef->value)) {
-            return false;
-          }
-        }
-
-        pageRef=cacheRef->value;
-      }
-
-      Page& page=*pageRef;
-
-      size_t i=GetPageIndex(page,id);
-
-      if (!page.IndexIsValid(i)) {
-        //std::cerr << "Id " << id << " not found in index level " << level+2 << "!" << std::endl;
+      if (!root->IndexIsValid(r)) {
+        //std::cerr << "Id " << id << " not found in root index, " << root->entries.front().startId << "-" << root->entries.back().startId << std::endl;
         return false;
       }
 
-      const Entry& entry=page.entries[i];
+      const Entry& rootEntry=root->entries[r];
 
-      startId=entry.startId;
-      offset=entry.fileOffset;
+      offset=rootEntry.fileOffset;
+
+      N startId=rootEntry.startId;
+      for (size_t level=0; level+2<=levels; level++) {
+        if (level<=simpleCacheMaxLevel) {
+          auto cacheRef=simplePageCache[level].find(startId);
+
+          if (cacheRef==simplePageCache[level].end()) {
+            pageRef=NULL; // Make sure, that we allocate a new page and not reuse an old one
+
+            ReadPage(offset,pageRef);
+
+            simplePageCache[level].insert(std::make_pair(startId,pageRef));
+          }
+          else {
+            pageRef=cacheRef->second;
+          }
+        }
+        else {
+          typename PageCache::CacheRef cacheRef;
+
+          if (!pageCaches[level].GetEntry(startId,cacheRef)) {
+            typename PageCache::CacheEntry cacheEntry(startId);
+
+            cacheRef=pageCaches[level].SetEntry(cacheEntry);
+
+            ReadPage(offset,cacheRef->value);
+          }
+
+          pageRef=cacheRef->value;
+        }
+
+        Page& page=*pageRef;
+
+        size_t i=GetPageIndex(page,id);
+
+        if (!page.IndexIsValid(i)) {
+          //std::cerr << "Id " << id << " not found in index level " << level+2 << "!" << std::endl;
+          return false;
+        }
+
+        const Entry& entry=page.entries[i];
+
+        startId=entry.startId;
+        offset=entry.fileOffset;
+      }
+
+      /*
+      if (startId!=id) {
+        std::cerr << "Id " << id << " not found in leaf index level!"  << " " << levels << std::endl;
+      }*/
+
+      return startId==id;
     }
-
-    /*
-    if (startId!=id) {
-      std::cerr << "Id " << id << " not found in leaf index level!"  << " " << levels << std::endl;
-    }*/
-
-    return startId==id;
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
   }
 
   /**

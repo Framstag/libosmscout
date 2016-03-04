@@ -106,10 +106,7 @@ namespace osmscout {
 
         nodeScanner.GotoBegin();
 
-        if (!nodeScanner.Read(nodeCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
+        nodeScanner.Read(nodeCount);
 
         for (uint32_t n=1; n<=nodeCount; n++) {
           progress.SetProgress(n,nodeCount);
@@ -280,10 +277,7 @@ namespace osmscout {
 
         nodeScanner.GotoBegin();
 
-        if (!nodeScanner.Read(nodeCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
+        nodeScanner.Read(nodeCount);
 
         //
         // Collect all offsets
@@ -400,7 +394,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 

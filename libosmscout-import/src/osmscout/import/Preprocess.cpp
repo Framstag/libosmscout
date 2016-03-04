@@ -25,7 +25,6 @@
 
 #include <osmscout/CoordDataFile.h>
 
-#include <osmscout/util/Logger.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
@@ -324,7 +323,7 @@ namespace osmscout {
       isSet.resize(coordPageSize);
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();
@@ -612,7 +611,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 
@@ -694,7 +693,7 @@ namespace osmscout {
       multipolygonWriter.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();

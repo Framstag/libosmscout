@@ -32,6 +32,10 @@
 
 #include <osmscout/LocationIndex.h>
 
+#include <osmscout/AreaDataFile.h>
+#include <osmscout/NodeDataFile.h>
+#include <osmscout/WayDataFile.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -41,9 +45,7 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
-#include <osmscout/AreaDataFile.h>
-#include <osmscout/NodeDataFile.h>
-#include <osmscout/WayDataFile.h>
+
 #include <osmscout/import/SortWayDat.h>
 #include <osmscout/import/SortNodeDat.h>
 #include <osmscout/import/GenAreaAreaIndex.h>
@@ -433,10 +435,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(areaCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(areaCount);
 
       for (uint32_t r=1; r<=areaCount; r++) {
         progress.SetProgress(r,areaCount);
@@ -488,7 +487,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -545,10 +544,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(areaCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(areaCount);
 
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
@@ -596,7 +592,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -691,10 +687,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(nodeCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(nodeCount);
 
       for (uint32_t n=1; n<=nodeCount; n++) {
         progress.SetProgress(n,nodeCount);
@@ -733,7 +726,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -855,10 +848,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(areaCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(areaCount);
 
       for (uint32_t w=1; w<=areaCount; w++) {
         progress.SetProgress(w,areaCount);
@@ -890,7 +880,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -964,11 +954,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
+      scanner.Read(wayCount);
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
@@ -1011,7 +997,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1135,10 +1121,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(areaCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(areaCount);
 
       FileOffset            fileOffset;
       uint32_t              tmpType;
@@ -1155,17 +1138,9 @@ namespace osmscout {
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
 
-        if (!scanner.Read(name) ||
-            !scanner.Read(location) ||
-            !scanner.Read(address)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(a)+" of "+
-                         NumberToString(areaCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
-
+        scanner.Read(name);
+        scanner.Read(location);
+        scanner.Read(address);
         scanner.Read(nodes);
 
         typeId=(TypeId)tmpType;
@@ -1239,7 +1214,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1398,10 +1373,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(wayCount);
 
       FileOffset            fileOffset;
       uint32_t              tmpType;
@@ -1416,17 +1388,8 @@ namespace osmscout {
 
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
-
-        if (!scanner.Read(name) ||
-            !scanner.Read(location)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
-
+        scanner.Read(name);
+        scanner.Read(location);
         scanner.Read(nodes);
 
         typeId=(TypeId)tmpType;
@@ -1503,7 +1466,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1572,10 +1535,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(nodeCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(nodeCount);
 
       FileOffset  fileOffset;
       uint32_t    tmpType;
@@ -1591,17 +1551,9 @@ namespace osmscout {
 
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
-
-        if (!scanner.Read(name) ||
-            !scanner.Read(location) ||
-            !scanner.Read(address)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(n)+" of "+
-                         NumberToString(nodeCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        scanner.Read(name);
+        scanner.Read(location);
+        scanner.Read(address);
 
         scanner.ReadCoord(coord);
 
@@ -1656,7 +1608,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -2116,7 +2068,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription())                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ;
 
       writer.CloseFailsafe();
 

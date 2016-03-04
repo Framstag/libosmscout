@@ -293,24 +293,14 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(restrictionCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(restrictionCount);
 
       for (uint32_t r=1; r<=restrictionCount; r++) {
         progress.SetProgress(r,restrictionCount);
 
         TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
 
-        if (!restriction->Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(restrictionCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        restriction->Read(scanner);
 
         wayIdOffsetMap.insert(std::make_pair(restriction->GetFrom(),0));
         wayIdOffsetMap.insert(std::make_pair(restriction->GetTo(),0));
@@ -344,10 +334,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(wayCount);
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
@@ -357,15 +344,8 @@ namespace osmscout {
         OSMRefType type;
         FileOffset wayOffset;
 
-        if (!scanner.Read(wayId) ||
-            !scanner.Read(typeByte)) {
-          progress.Error(std::string("Error while reading idmap file entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        scanner.Read(wayId);
+        scanner.Read(typeByte);
 
         scanner.ReadFileOffset(wayOffset);
 
@@ -461,24 +441,14 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(restrictionCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(restrictionCount);
 
       for (uint32_t r=1; r<=restrictionCount; r++) {
         progress.SetProgress(r,restrictionCount);
 
         TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
 
-        if (!restriction->Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(restrictionCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        restriction->Read(scanner);
 
         TurnRestrictionData                        data;
         std::map<OSMId,FileOffset>::const_iterator idOffsetEntry;
@@ -643,10 +613,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       for (uint32_t d=1; d<=dataCount; d++) {
         progress.SetProgress(d,dataCount);
@@ -688,10 +655,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       for (uint32_t d=1; d<=dataCount; d++) {
         progress.SetProgress(d,dataCount);
@@ -756,10 +720,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       for (uint32_t d=1; d<=dataCount; d++) {
         progress.SetProgress(d,dataCount);
@@ -806,10 +767,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(dataCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(dataCount);
 
       for (uint32_t d=1; d<=dataCount; d++) {
         progress.SetProgress(d,dataCount);

@@ -132,10 +132,7 @@ namespace osmscout
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(areaCount);
 
     for (uint32_t a=1; a<=areaCount; a++) {
       AreaRef area=std::make_shared<Area>();

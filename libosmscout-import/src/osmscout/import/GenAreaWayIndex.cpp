@@ -207,10 +207,7 @@ namespace osmscout {
 
         wayScanner.GotoBegin();
 
-        if (!wayScanner.Read(wayCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
+        wayScanner.Read(wayCount);
 
         Way way;
 
@@ -282,7 +279,7 @@ namespace osmscout {
       wayScanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -498,10 +495,7 @@ namespace osmscout {
 
         std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
 
-        if (!wayScanner.Read(wayCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
+        wayScanner.Read(wayCount);
 
         Way way;
 
@@ -557,7 +551,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       wayScanner.CloseFailsafe();
       writer.CloseFailsafe();

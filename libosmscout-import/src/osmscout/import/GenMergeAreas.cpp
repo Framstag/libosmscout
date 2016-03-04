@@ -93,10 +93,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(areaCount);
 
     for (uint32_t current=1; current<=areaCount; current++) {
       uint8_t type;
@@ -105,16 +102,8 @@ namespace osmscout {
 
       progress.SetProgress(current,areaCount);
 
-      if (!scanner.Read(type) ||
-          !scanner.Read(id)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(current)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      scanner.Read(type);
+      scanner.Read(id);
 
       data.ReadImport(typeConfig,
                       scanner);
@@ -175,10 +164,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(areaCount);
 
     for (uint32_t a=1; a<=areaCount; a++) {
       uint8_t type;
@@ -187,16 +173,8 @@ namespace osmscout {
 
       progress.SetProgress(a,areaCount);
 
-      if (!scanner.Read(type) ||
-          !scanner.Read(id)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(a)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      scanner.Read(type);
+      scanner.Read(id);
 
       area->ReadImport(typeConfig,
                        scanner);
@@ -505,10 +483,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(areaCount);
 
     for (uint32_t a=1; a<=areaCount; a++) {
       uint8_t type;
@@ -517,16 +492,8 @@ namespace osmscout {
 
       progress.SetProgress(a,areaCount);
 
-      if (!scanner.Read(type) ||
-          !scanner.Read(id)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(a)+" of "+
-                       NumberToString(areaCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      scanner.Read(type);
+      scanner.Read(id);
 
       area->ReadImport(typeConfig,
                        scanner);

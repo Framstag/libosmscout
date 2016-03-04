@@ -127,9 +127,7 @@ namespace osmscout {
 
       uint32_t objectVariantDataCount;
 
-      if (!scanner.Read(objectVariantDataCount)) {
-        return false;
-      }
+      scanner.Read(objectVariantDataCount);
 
       objectVariantData.resize(objectVariantDataCount);
 

@@ -80,24 +80,14 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(restrictionCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(restrictionCount);
 
       for (uint32_t r=1; r<=restrictionCount; r++) {
         progress.SetProgress(r,restrictionCount);
 
         TurnRestrictionRef restriction=std::make_shared<TurnRestriction>();
 
-        if (!restriction->Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(restrictionCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
+        restriction->Read(scanner);
 
         restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
         restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
@@ -171,11 +161,9 @@ namespace osmscout {
                    true);
 
       for (const auto &type : typeConfig->GetTypes()) {
-        if (!scanner.Read(typeDistribution[type->GetIndex()].nodeCount) ||
-            !scanner.Read(typeDistribution[type->GetIndex()].wayCount) ||
-            !scanner.Read(typeDistribution[type->GetIndex()].areaCount)) {
-          return false;
-        }
+        scanner.Read(typeDistribution[type->GetIndex()].nodeCount);
+        scanner.Read(typeDistribution[type->GetIndex()].wayCount);
+        scanner.Read(typeDistribution[type->GetIndex()].areaCount);
       }
 
       scanner.Close();
@@ -202,10 +190,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(wayCount);
 
     for (uint32_t w=1; w<=wayCount; w++) {
       RawWayRef way=std::make_shared<RawWay>();
@@ -531,10 +516,7 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    if (!scanner.Read(areaCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
+    scanner.Read(areaCount);
 
     for (uint32_t w=1; w<=areaCount; w++) {
       RawWayRef way=std::make_shared<RawWay>();
@@ -656,10 +638,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      if (!scanner.Read(rawWayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(rawWayCount);
 
       wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      WAYWAY_TMP));

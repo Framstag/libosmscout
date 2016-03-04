@@ -112,119 +112,122 @@ namespace osmscout {
                               const Magnification& magnification,
                               std::list<GroundTile>& tiles) const
   {
-    uint32_t cx1,cx2,cy1,cy2;
-    uint32_t idx=magnification.GetLevel();
+    try {
+      uint32_t cx1,cx2,cy1,cy2;
+      uint32_t idx=magnification.GetLevel();
 
-    if (levels.empty()) {
-      return true;
-    }
+      if (levels.empty()) {
+        return true;
+      }
 
-    idx+=4;
+      idx+=4;
 
-    idx=std::max(waterIndexMinMag,idx);
-    idx=std::min(waterIndexMaxMag,idx);
+      idx=std::max(waterIndexMinMag,idx);
+      idx=std::min(waterIndexMaxMag,idx);
 
-    idx-=waterIndexMinMag;
+      idx-=waterIndexMinMag;
 
-    tiles.clear();
+      tiles.clear();
 
-    cx1=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/levels[idx].cellWidth);
-    cx2=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/levels[idx].cellWidth);
-    cy1=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/levels[idx].cellHeight);
-    cy2=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/levels[idx].cellHeight);
+      cx1=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/levels[idx].cellWidth);
+      cx2=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/levels[idx].cellWidth);
+      cy1=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/levels[idx].cellHeight);
+      cy2=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/levels[idx].cellHeight);
 
-    GroundTile tile;
+      GroundTile tile;
 
-    tile.coords.reserve(5);
-    tile.cellWidth=levels[idx].cellWidth;
-    tile.cellHeight=levels[idx].cellHeight;
+      tile.coords.reserve(5);
+      tile.cellWidth=levels[idx].cellWidth;
+      tile.cellHeight=levels[idx].cellHeight;
 
-    for (uint32_t y=cy1; y<=cy2; y++) {
-      for (uint32_t x=cx1; x<=cx2; x++) {
-        tile.xAbs=x;
-        tile.yAbs=y;
+      for (uint32_t y=cy1; y<=cy2; y++) {
+        for (uint32_t x=cx1; x<=cx2; x++) {
+          tile.xAbs=x;
+          tile.yAbs=y;
 
-        if (x>=levels[idx].cellXStart &&
-            y>=levels[idx].cellYStart) {
-          tile.xRel=x-levels[idx].cellXStart;
-          tile.yRel=y-levels[idx].cellYStart;
-        }
-        else {
-          tile.xRel=0;
-          tile.yRel=0;
-        }
-
-        if (x<levels[idx].cellXStart ||
-            x>levels[idx].cellXEnd ||
-            y<levels[idx].cellYStart ||
-            y>levels[idx].cellYEnd) {
-          tile.type=GroundTile::unknown;
-          tile.coords.clear();
-
-          tiles.push_back(tile);
-        }
-        else {
-          std::lock_guard<std::mutex> guard(lookupMutex);
-          uint32_t                    cellId=(y-levels[idx].cellYStart)*levels[idx].cellXCount+x-levels[idx].cellXStart;
-          uint32_t                    index=cellId*8;
-          FileOffset                  cell;
-
-          scanner.SetPos(levels[idx].offset+index);
-
-          if (!scanner.Read(cell)) {
-            log.Error() << "Error while reading from file '" << scanner.GetFilename() << "'";
-            return false;
+          if (x>=levels[idx].cellXStart &&
+              y>=levels[idx].cellYStart) {
+            tile.xRel=x-levels[idx].cellXStart;
+            tile.yRel=y-levels[idx].cellYStart;
+          }
+          else {
+            tile.xRel=0;
+            tile.yRel=0;
           }
 
-          if (cell==(FileOffset)GroundTile::land ||
-              cell==(FileOffset)GroundTile::water ||
-              cell==(FileOffset)GroundTile::coast ||
-              cell==(FileOffset)GroundTile::unknown) {
-            tile.type=(GroundTile::Type)cell;
+          if (x<levels[idx].cellXStart ||
+              x>levels[idx].cellXEnd ||
+              y<levels[idx].cellYStart ||
+              y>levels[idx].cellYEnd) {
+            tile.type=GroundTile::unknown;
             tile.coords.clear();
 
             tiles.push_back(tile);
           }
           else {
-            uint32_t tileCount;
+            std::lock_guard<std::mutex> guard(lookupMutex);
+            uint32_t                    cellId=(y-levels[idx].cellYStart)*levels[idx].cellXCount+x-levels[idx].cellXStart;
+            uint32_t                    index=cellId*8;
+            FileOffset                  cell;
 
-            tile.type=GroundTile::coast;
-            tile.coords.clear();
+            scanner.SetPos(levels[idx].offset+index);
 
-            tiles.push_back(tile);
+            scanner.Read(cell);
 
-            scanner.SetPos(cell);
-            scanner.ReadNumber(tileCount);
-
-            for (size_t t=1; t<=tileCount; t++) {
-              uint8_t    tileType;
-              uint32_t   coordCount;
-
-              scanner.Read(tileType);
-
-              tile.type=(GroundTile::Type)tileType;
-
-              scanner.ReadNumber(coordCount);
-
-              tile.coords.resize(coordCount);
-
-              for (size_t n=0; n<coordCount; n++) {
-                uint16_t x;
-                uint16_t y;
-
-                scanner.Read(x);
-                scanner.Read(y);
-
-                tile.coords[n].Set(x & ~(1 << 15),
-                                   y,
-                                   (x & (1 << 15))!=0);
-              }
+            if (cell==(FileOffset)GroundTile::land ||
+                cell==(FileOffset)GroundTile::water ||
+                cell==(FileOffset)GroundTile::coast ||
+                cell==(FileOffset)GroundTile::unknown) {
+              tile.type=(GroundTile::Type)cell;
+              tile.coords.clear();
 
               tiles.push_back(tile);
+            }
+            else {
+              uint32_t tileCount;
+
+              tile.type=GroundTile::coast;
+              tile.coords.clear();
+
+              tiles.push_back(tile);
+
+              scanner.SetPos(cell);
+              scanner.ReadNumber(tileCount);
+
+              for (size_t t=1; t<=tileCount; t++) {
+                uint8_t    tileType;
+                uint32_t   coordCount;
+
+                scanner.Read(tileType);
+
+                tile.type=(GroundTile::Type)tileType;
+
+                scanner.ReadNumber(coordCount);
+
+                tile.coords.resize(coordCount);
+
+                for (size_t n=0; n<coordCount; n++) {
+                  uint16_t x;
+                  uint16_t y;
+
+                  scanner.Read(x);
+                  scanner.Read(y);
+
+                  tile.coords[n].Set(x & ~(1 << 15),
+                                     y,
+                                     (x & (1 << 15))!=0);
+                }
+
+                tiles.push_back(tile);
+              }
             }
           }
         }
       }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
     }
 
     return true;

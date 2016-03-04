@@ -243,10 +243,8 @@ namespace osmscout
                    false);
 
       uint32_t nodeCount=0;
-      if(!scanner.Read(nodeCount)) {
-        progress.Error("Error reading node count in file '"+scanner.GetFilename()+"'");
-        return false;
-      }
+
+      scanner.Read(nodeCount);
 
       // Iterate through each node and add text
       // data to the corresponding keyset
@@ -341,10 +339,7 @@ namespace osmscout
 
       uint32_t wayCount=0;
 
-      if(!scanner.Read(wayCount)) {
-        progress.Error("Error reading way count in file '"+scanner.GetFilename()+"'");
-        return false;
-      }
+      scanner.Read(wayCount);
 
       // Iterate through each way and add text
       // data to the corresponding keyset
@@ -426,7 +421,7 @@ namespace osmscout
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -455,10 +450,8 @@ namespace osmscout
                    false);
 
       uint32_t areaCount=0;
-      if(!scanner.Read(areaCount)) {
-        progress.Error("Error reading area count in file '"+scanner.GetFilename()+"'");
-        return false;
-      }
+
+      scanner.Read(areaCount);
 
       // Iterate through each area and add text
       // data to the corresponding keyset

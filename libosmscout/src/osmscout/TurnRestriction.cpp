@@ -21,7 +21,12 @@
 
 namespace osmscout {
 
-  bool TurnRestriction::Read(FileScanner& scanner)
+  /**
+   * Reads the TurnRestriction data from the given FileScanner
+   *
+   * @throws IOException
+   */
+  void TurnRestriction::Read(FileScanner& scanner)
   {
     uint32_t typeValue;
 
@@ -31,18 +36,19 @@ namespace osmscout {
     scanner.ReadNumber(from);
     scanner.ReadNumber(via);
     scanner.ReadNumber(to);
-
-    return !scanner.HasError();
   }
 
-  bool TurnRestriction::Write(FileWriter& writer) const
+  /**
+   * Write the TurnRestriction data to the given FileWriter
+   *
+   * @throws IOException
+   */
+  void TurnRestriction::Write(FileWriter& writer) const
   {
     writer.WriteNumber((uint32_t)type);
 
     writer.WriteNumber(from);
     writer.WriteNumber(via);
     writer.WriteNumber(to);
-
-    return !writer.HasError();
   }
 }

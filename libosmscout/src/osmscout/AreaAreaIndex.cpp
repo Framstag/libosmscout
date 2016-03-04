@@ -136,10 +136,7 @@ namespace osmscout {
       uint32_t   dataCount;
       FileOffset dataFileOffset;
 
-      if (!scanner.ReadTypeId(typeId,typeConfig.GetAreaTypeIdBytes())) {
-        return false;
-      }
-
+      scanner.ReadTypeId(typeId,typeConfig.GetAreaTypeIdBytes());
       scanner.ReadNumber(dataCount);
       scanner.ReadNumber(dataFileOffset);
 

@@ -139,10 +139,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      if (!scanner.Read(coastlineCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(coastlineCount);
 
       for (uint32_t c=1; c<=coastlineCount; c++) {
         progress.SetProgress(c,coastlineCount);
@@ -239,7 +236,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -545,10 +542,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      if (!scanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
+      scanner.Read(wayCount);
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
@@ -582,7 +576,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       return false;
     }
 
@@ -1644,7 +1638,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
       scanner.CloseFailsafe();
       return false;
     }
@@ -1808,7 +1802,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      log.Error() << e.GetDescription();
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 

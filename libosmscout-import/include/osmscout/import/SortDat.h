@@ -200,10 +200,7 @@ namespace osmscout {
                             FileScanner::Sequential,
                             parameter.GetWayDataMemoryMaped());
 
-        if (!source.scanner.Read(dataCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
+        source.scanner.Read(dataCount);
 
         progress.Info(NumberToString(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
@@ -235,11 +232,7 @@ namespace osmscout {
 
           source->scanner.GotoBegin();
 
-          if (!source->scanner.Read(dataCount)) {
-            progress.Error("Error while reading number of data entries in file'"+
-                           source->scanner.GetFilename()+"'");
-            return false;
-          }
+          source->scanner.Read(dataCount);
 
           uint32_t current=1;
 
@@ -250,15 +243,8 @@ namespace osmscout {
 
             progress.SetProgress(current,dataCount);
 
-            if (!source->scanner.Read(type) ||
-                !source->scanner.Read(id)) {
-              progress.Error(std::string("Error while reading data entry ")+
-                             NumberToString(current)+" of "+
-                             NumberToString(dataCount)+
-                             " in file '"+
-                             source->scanner.GetFilename()+"'");
-              return false;
-            }
+            source->scanner.Read(type);
+            source->scanner.Read(id);
 
             data.Read(typeConfig,
                       source->scanner);
@@ -454,10 +440,7 @@ namespace osmscout {
                             FileScanner::Sequential,
                             parameter.GetWayDataMemoryMaped());
 
-        if (!source.scanner.Read(dataCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
+        source.scanner.Read(dataCount);
 
         progress.Info(NumberToString(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
@@ -470,16 +453,8 @@ namespace osmscout {
 
           progress.SetProgress(current,dataCount);
 
-          if (!source.scanner.Read(type) ||
-              !source.scanner.Read(id)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(current)+" of "+
-                           NumberToString(dataCount)+
-                           " in file '"+
-                           source.scanner.GetFilename()+"'");
-
-            return false;
-          }
+          source.scanner.Read(type);
+          source.scanner.Read(id);
 
           data.Read(typeConfig,
                     source.scanner);

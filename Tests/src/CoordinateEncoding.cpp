@@ -459,9 +459,7 @@ int main(int argc, char* argv[])
   try {
     scanner.Open(wayDatFilename,osmscout::FileScanner::Sequential,true);
 
-    if (!scanner.Read(dataCount)) {
-      std::cerr << "Cannot read number of entries in file" << std::endl;
-    }
+    scanner.Read(dataCount);
 
     std::cout << dataCount << " entries..." << std::endl;
 

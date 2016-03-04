@@ -1489,10 +1489,7 @@ namespace osmscout {
 
       uint32_t fileFormatVersion;
 
-      if (!scanner.Read(fileFormatVersion)) {
-        log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-        return false;
-      }
+      scanner.Read(fileFormatVersion);
 
       if (fileFormatVersion!=FILE_FORMAT_VERSION) {
         log.Error() << "File '" << scanner.GetFilename() << "' does not have the expected format version! Actual " << fileFormatVersion << ", expected: " << FILE_FORMAT_VERSION;
@@ -1596,29 +1593,25 @@ namespace osmscout {
         bool        ignore;
         bool        ignoreSeaLand;
 
-        if (!(scanner.Read(name) &&
-              scanner.Read(canBeNode) &&
-              scanner.Read(canBeWay) &&
-              scanner.Read(canBeArea) &&
-              scanner.Read(canBeRelation) &&
-              scanner.Read(isPath) &&
-              scanner.Read(canRouteFoot) &&
-              scanner.Read(canRouteBicycle) &&
-              scanner.Read(canRouteCar) &&
-              scanner.Read(indexAsAddress) &&
-              scanner.Read(indexAsLocation) &&
-              scanner.Read(indexAsRegion) &&
-              scanner.Read(indexAsPOI) &&
-              scanner.Read(optimizeLowZoom) &&
-              scanner.Read(multipolygon) &&
-              scanner.Read(pinWay) &&
-              scanner.Read(mergeAreas) &&
-              scanner.Read(ignoreSeaLand) &&
-              scanner.Read(ignore))) {
-
-          log.Error() << "Format error in file '" << scanner.GetFilename() << "'";
-          return false;
-        }
+        scanner.Read(name);
+        scanner.Read(canBeNode);
+        scanner.Read(canBeWay);
+        scanner.Read(canBeArea);
+        scanner.Read(canBeRelation);
+        scanner.Read(isPath);
+        scanner.Read(canRouteFoot);
+        scanner.Read(canRouteBicycle);
+        scanner.Read(canRouteCar);
+        scanner.Read(indexAsAddress);
+        scanner.Read(indexAsLocation);
+        scanner.Read(indexAsRegion);
+        scanner.Read(indexAsPOI);
+        scanner.Read(optimizeLowZoom);
+        scanner.Read(multipolygon);
+        scanner.Read(pinWay);
+        scanner.Read(mergeAreas);
+        scanner.Read(ignoreSeaLand);
+        scanner.Read(ignore);
 
         TypeInfoRef typeInfo=std::make_shared<TypeInfo>();
 
@@ -1652,9 +1645,7 @@ namespace osmscout {
         for (size_t f=0; f<featureCount; f++) {
           std::string featureName;
 
-          if (!scanner.Read(featureName)) {
-            return false;
-          }
+          scanner.Read(featureName);
 
           FeatureRef feature=GetFeature(featureName);
 
@@ -1675,9 +1666,7 @@ namespace osmscout {
         for (size_t g=0; g<groupCount; g++) {
           std::string groupName;
 
-          if (!scanner.Read(groupName)) {
-            return false;
-          }
+          scanner.Read(groupName);
 
           typeInfo->AddGroup(groupName);
         }

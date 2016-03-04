@@ -52,10 +52,7 @@ int main(int argc, char* argv[])
 
     uint32_t wayCount;
 
-    if (!scanner.Read(wayCount)) {
-      std::cout << "Cannot read number of entries" << std::endl;
-      return 1;
-    }
+    scanner.Read(wayCount);
 
     for (size_t w=1; w<=wayCount; w++) {
       osmscout::Way way;
