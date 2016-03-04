@@ -35,15 +35,6 @@
 #include <osmscout/import/Preprocess.h>
 
 #include <osmscout/private/Config.h>
-#if defined(OSMSCOUT_HAVE_OPENMP) || defined(_OPENMP)
-#ifdef HAVE_LONG_LONG
-#define opf long long
-#else
-#define opf long
-#endif
-#else
-#define opf size_t
-#endif
 
 namespace osmscout {
 
@@ -724,7 +715,7 @@ namespace osmscout {
       progress.SetAction("Merging ways");
 
 #pragma omp parallel for
-	  for (opf typeIdx = 0; typeIdx<(opf)typeConfig->GetTypeCount(); typeIdx++) {
+      for (int64_t typeIdx = 0; typeIdx<(int64_t)typeConfig->GetTypeCount(); typeIdx++) {
         size_t originalWayCount=waysByType[typeIdx].size();
 
         if (originalWayCount>0) {
