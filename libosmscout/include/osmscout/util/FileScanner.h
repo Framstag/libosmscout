@@ -133,9 +133,9 @@ namespace osmscout {
     bool Read(uint32_t& number);
     bool Read(uint64_t& number);
 
-    bool Read(uint16_t& number, size_t bytes);
-    bool Read(uint32_t& number, size_t bytes);
-    bool Read(uint64_t& number, size_t bytes);
+    void Read(uint16_t& number, size_t bytes);
+    void Read(uint32_t& number, size_t bytes);
+    void Read(uint64_t& number, size_t bytes);
 
     void Read(ObjectFileRef& ref);
 

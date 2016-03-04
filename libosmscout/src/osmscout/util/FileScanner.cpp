@@ -1103,11 +1103,11 @@ namespace osmscout {
     return true;
   }
 
-  bool FileScanner::Read(uint16_t& number,
+  void FileScanner::Read(uint16_t& number,
                          size_t bytes)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read size limited uint16_t","File already in error state");
     }
 
     number=0;
@@ -1115,9 +1115,8 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+bytes-1>=size) {
-        log.Error() << "Cannot read uint16_t beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read size limited uint16_t","Cannot read beyond end of file");
       }
 
       char     *dataPtr=&buffer[offset];
@@ -1136,7 +1135,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
@@ -1145,8 +1144,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read uint16_t from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read size limited uint16_t");
     }
 
     unsigned char *dataPtr=buffer;
@@ -1162,15 +1160,13 @@ namespace osmscout {
       add=add << 8;
       number|=add;
     }
-
-    return true;
   }
 
-  bool FileScanner::Read(uint32_t& number,
+  void FileScanner::Read(uint32_t& number,
                          size_t bytes)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read size limited uint32_t","File already in error state");
     }
 
     number=0;
@@ -1178,9 +1174,8 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+bytes-1>=size) {
-        log.Error() << "Cannot read uint32_t beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read size limited uint32_t","Cannot read beyond end of file");
       }
 
       char     *dataPtr=&buffer[offset];
@@ -1213,7 +1208,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
@@ -1222,8 +1217,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read uint32_t from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read size limited uint32_t");
     }
 
     unsigned char *dataPtr=buffer;
@@ -1253,15 +1247,13 @@ namespace osmscout {
         }
       }
     }
-
-    return true;
   }
 
-  bool FileScanner::Read(uint64_t& number,
+  void FileScanner::Read(uint64_t& number,
                          size_t bytes)
   {
     if (HasError()) {
-      return false;
+      throw IOException(filename,"Cannot read size limited uint64_t","File already in error state");
     }
 
     number=0;
@@ -1269,9 +1261,8 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset+bytes-1>=size) {
-        log.Error() << "Cannot read uint64_t beyond end of file '" << filename << "'";
         hasError=true;
-        return false;
+        throw IOException(filename,"Cannot read size limited uint64_t","Cannot read beyond end of file");
       }
 
       char     *dataPtr=&buffer[offset];
@@ -1332,7 +1323,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return true;
+      return;
     }
 #endif
 
@@ -1341,8 +1332,7 @@ namespace osmscout {
     hasError=fread(&buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
-      log.Error() << "Cannot read uint64_t from file '" << filename <<  "' (" << strerror(errno) << ")";
-      return false;
+      throw IOException(filename,"Cannot read size limited uint64_t");
     }
 
     unsigned char *dataPtr=buffer;
@@ -1400,8 +1390,6 @@ namespace osmscout {
         }
       }
     }
-
-    return true;
   }
 
   void FileScanner::Read(ObjectFileRef& ref)
