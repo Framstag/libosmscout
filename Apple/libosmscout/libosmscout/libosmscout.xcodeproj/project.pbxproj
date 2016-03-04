@@ -136,6 +136,10 @@
 		F556F00319C9D00700EAAA8B /* TypeFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = F556F00219C9D00700EAAA8B /* TypeFeatures.h */; };
 		F55A3ACE1A45E57A0010005B /* Tiling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55A3ACD1A45E57A0010005B /* Tiling.cpp */; };
 		F55A3ACF1A45E57A0010005B /* Tiling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55A3ACD1A45E57A0010005B /* Tiling.cpp */; };
+		F56129AE1C5FEBEE00EA29EA /* AreaDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56129AC1C5FEBEE00EA29EA /* AreaDataFile.cpp */; };
+		F56129AF1C5FEBEE00EA29EA /* WayDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56129AD1C5FEBEE00EA29EA /* WayDataFile.cpp */; };
+		F56129B41C5FECB200EA29EA /* MemoryMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56129B21C5FECB200EA29EA /* MemoryMonitor.cpp */; };
+		F56129B51C5FECB200EA29EA /* WorkQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56129B31C5FECB200EA29EA /* WorkQueue.cpp */; };
 		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 		F583993E1AF6E19B00F79DFF /* GeoBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F583993C1AF6E19B00F79DFF /* GeoBox.cpp */; };
@@ -147,6 +151,7 @@
 		F58399471AF6E1C400F79DFF /* Tiling.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399441AF6E1C400F79DFF /* Tiling.h */; };
 		F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
 		F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
+		F5B6E3161C046F1500A3EC39 /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B6E3151C046F1500A3EC39 /* Exception.cpp */; };
 		F5CA00151B9FB524003B0EF6 /* Parsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CA00141B9FB524003B0EF6 /* Parsing.cpp */; };
 		F5CA00161B9FB604003B0EF6 /* Parsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CA00141B9FB524003B0EF6 /* Parsing.cpp */; };
 /* End PBXBuildFile section */
@@ -290,6 +295,12 @@
 		F556EFFD19C6E36700EAAA8B /* TypeFeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFeatures.cpp; path = ../../../../libosmscout/src/osmscout/TypeFeatures.cpp; sourceTree = "<group>"; };
 		F556F00219C9D00700EAAA8B /* TypeFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeFeatures.h; sourceTree = "<group>"; };
 		F55A3ACD1A45E57A0010005B /* Tiling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tiling.cpp; path = ../../../../libosmscout/src/osmscout/util/Tiling.cpp; sourceTree = "<group>"; };
+		F56129AC1C5FEBEE00EA29EA /* AreaDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaDataFile.cpp; path = ../../../../libosmscout/src/osmscout/AreaDataFile.cpp; sourceTree = "<group>"; };
+		F56129AD1C5FEBEE00EA29EA /* WayDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WayDataFile.cpp; path = ../../../../libosmscout/src/osmscout/WayDataFile.cpp; sourceTree = "<group>"; };
+		F56129B01C5FEC7A00EA29EA /* MemoryMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryMonitor.h; sourceTree = "<group>"; };
+		F56129B11C5FEC7A00EA29EA /* WorkQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkQueue.h; sourceTree = "<group>"; };
+		F56129B21C5FECB200EA29EA /* MemoryMonitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryMonitor.cpp; sourceTree = "<group>"; };
+		F56129B31C5FECB200EA29EA /* WorkQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WorkQueue.cpp; sourceTree = "<group>"; };
 		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
 		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
 		F583993C1AF6E19B00F79DFF /* GeoBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeoBox.cpp; sourceTree = "<group>"; };
@@ -299,6 +310,8 @@
 		F58399441AF6E1C400F79DFF /* Tiling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tiling.h; sourceTree = "<group>"; };
 		F5A66AC71A46F5BF007AD752 /* TextSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSearchIndex.h; sourceTree = "<group>"; };
 		F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextSearchIndex.cpp; path = ../../../../libosmscout/src/osmscout/TextSearchIndex.cpp; sourceTree = "<group>"; };
+		F5B6E3151C046F1500A3EC39 /* Exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Exception.cpp; sourceTree = "<group>"; };
+		F5B6E3171C046F3500A3EC39 /* Exception.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Exception.h; sourceTree = "<group>"; };
 		F5CA00131B9FB4F6003B0EF6 /* Parsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parsing.h; sourceTree = "<group>"; };
 		F5CA00141B9FB524003B0EF6 /* Parsing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parsing.cpp; sourceTree = "<group>"; };
 		F5EDD5441891556D00646B92 /* LocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationIndex.h; sourceTree = "<group>"; };
@@ -366,6 +379,8 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F56129AC1C5FEBEE00EA29EA /* AreaDataFile.cpp */,
+				F56129AD1C5FEBEE00EA29EA /* WayDataFile.cpp */,
 				F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */,
 				F55A3ACD1A45E57A0010005B /* Tiling.cpp */,
 				F54C1E4E18F480AC008C5EB3 /* LocationService.cpp */,
@@ -443,6 +458,9 @@
 		F51E3ED8161A5FEC00D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F56129B21C5FECB200EA29EA /* MemoryMonitor.cpp */,
+				F56129B31C5FECB200EA29EA /* WorkQueue.cpp */,
+				F5B6E3151C046F1500A3EC39 /* Exception.cpp */,
 				F5CA00141B9FB524003B0EF6 /* Parsing.cpp */,
 				F583993C1AF6E19B00F79DFF /* GeoBox.cpp */,
 				F583993D1AF6E19B00F79DFF /* Logger.cpp */,
@@ -554,6 +572,9 @@
 		F51E3F61161A604300D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F56129B01C5FEC7A00EA29EA /* MemoryMonitor.h */,
+				F56129B11C5FEC7A00EA29EA /* WorkQueue.h */,
+				F5B6E3171C046F3500A3EC39 /* Exception.h */,
 				F5CA00131B9FB4F6003B0EF6 /* Parsing.h */,
 				F58399421AF6E1C400F79DFF /* GeoBox.h */,
 				F58399431AF6E1C400F79DFF /* Logger.h */,
@@ -687,6 +708,7 @@
 				F58399401AF6E19B00F79DFF /* Logger.cpp in Sources */,
 				F556EFFE19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */,
 				F51E3F00161A5FEC00D51926 /* AreaNodeIndex.cpp in Sources */,
+				F5B6E3161C046F1500A3EC39 /* Exception.cpp in Sources */,
 				F51E3F01161A5FEC00D51926 /* AreaWayIndex.cpp in Sources */,
 				F51E3F03161A5FEC00D51926 /* Database.cpp in Sources */,
 				F54DAA4D1815DA6500625DDA /* DebugDatabase.cpp in Sources */,
@@ -703,6 +725,7 @@
 				F51E3F0B161A5FEC00D51926 /* Scanner.cpp in Sources */,
 				F51E3F0C161A5FEC00D51926 /* Path.cpp in Sources */,
 				F534FB9D18242F660039CEE4 /* Intersection.cpp in Sources */,
+				F56129B41C5FECB200EA29EA /* MemoryMonitor.cpp in Sources */,
 				F51E3F0D161A5FEC00D51926 /* Point.cpp in Sources */,
 				F54DAA4E1815DA6500625DDA /* GeoCoord.cpp in Sources */,
 				F51E3F0F161A5FEC00D51926 /* Route.cpp in Sources */,
@@ -731,13 +754,16 @@
 				F51E3F26161A5FEC00D51926 /* Number.cpp in Sources */,
 				F51E3F27161A5FEC00D51926 /* NumberSet.cpp in Sources */,
 				F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */,
+				F56129B51C5FECB200EA29EA /* WorkQueue.cpp in Sources */,
 				F54DAA501815DA6500625DDA /* OptimizeWaysLowZoom.cpp in Sources */,
 				F51E3F29161A5FEC00D51926 /* Projection.cpp in Sources */,
 				F54DAA4B1815DA6500625DDA /* Coord.cpp in Sources */,
+				F56129AE1C5FEBEE00EA29EA /* AreaDataFile.cpp in Sources */,
 				F54DAA491815DA6500625DDA /* Area.cpp in Sources */,
 				F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */,
 				F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */,
 				F54FD00C186596AD000E8579 /* LocationIndex.cpp in Sources */,
+				F56129AF1C5FEBEE00EA29EA /* WayDataFile.cpp in Sources */,
 				F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */,
 				F54DAA4C1815DA6500625DDA /* CoordDataFile.cpp in Sources */,
 				F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */,

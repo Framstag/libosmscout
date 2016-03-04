@@ -23,6 +23,8 @@
 		F5A66ACC1A4A0782007AD752 /* MapService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66ACB1A4A0782007AD752 /* MapService.cpp */; };
 		F5A66ACD1A4A0782007AD752 /* MapService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66ACB1A4A0782007AD752 /* MapService.cpp */; };
 		F5A66ACF1A4A07A1007AD752 /* MapService.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A66ACE1A4A07A1007AD752 /* MapService.h */; };
+		F5B6E3191C046FB700A3EC39 /* TiledDataCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B6E3181C046FB700A3EC39 /* TiledDataCache.cpp */; };
+		F5B6E31D1C04700200A3EC39 /* MapPainterNoOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B6E31C1C04700200A3EC39 /* MapPainterNoOp.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -60,6 +62,10 @@
 		F53BD173163883E7006C7AE1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F5A66ACB1A4A0782007AD752 /* MapService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapService.cpp; path = "../../../../libosmscout-map/src/osmscout/MapService.cpp"; sourceTree = "<group>"; };
 		F5A66ACE1A4A07A1007AD752 /* MapService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapService.h; sourceTree = "<group>"; };
+		F5B6E3181C046FB700A3EC39 /* TiledDataCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TiledDataCache.cpp; path = "../../../../libosmscout-map/src/osmscout/TiledDataCache.cpp"; sourceTree = "<group>"; };
+		F5B6E31A1C046FD600A3EC39 /* MapPainterNoOp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapPainterNoOp.h; sourceTree = "<group>"; };
+		F5B6E31B1C046FD600A3EC39 /* TiledDataCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TiledDataCache.h; sourceTree = "<group>"; };
+		F5B6E31C1C04700200A3EC39 /* MapPainterNoOp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapPainterNoOp.cpp; path = "../../../../libosmscout-map/src/osmscout/MapPainterNoOp.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +128,8 @@
 		F51E3F92161A653C00D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				F5B6E31C1C04700200A3EC39 /* MapPainterNoOp.cpp */,
+				F5B6E3181C046FB700A3EC39 /* TiledDataCache.cpp */,
 				E57A2E1F1AB07734009B323C /* MapParameter.cpp */,
 				F5A66ACB1A4A0782007AD752 /* MapService.cpp */,
 				F51E3F94161A658300D51926 /* MapPainter.cpp */,
@@ -152,6 +160,8 @@
 		F51E3FA2161A65C000D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				F5B6E31A1C046FD600A3EC39 /* MapPainterNoOp.h */,
+				F5B6E31B1C046FD600A3EC39 /* TiledDataCache.h */,
 				E57A2E221AB0774D009B323C /* MapParameter.h */,
 				F5A66ACE1A4A07A1007AD752 /* MapService.h */,
 				F51E3FA3161A65C000D51926 /* MapFeatures.h */,
@@ -273,8 +283,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5B6E31D1C04700200A3EC39 /* MapPainterNoOp.cpp in Sources */,
 				F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */,
 				F5A66ACC1A4A0782007AD752 /* MapService.cpp in Sources */,
+				F5B6E3191C046FB700A3EC39 /* TiledDataCache.cpp in Sources */,
 				E57A2E201AB07734009B323C /* MapParameter.cpp in Sources */,
 				F51E3F9E161A658300D51926 /* Parser.cpp in Sources */,
 				F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */,
