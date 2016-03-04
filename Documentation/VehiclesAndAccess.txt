@@ -1,0 +1,22 @@
+References:
+* http://wiki.openstreetmap.org/wiki/Access
+* http://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Access-Restrictions
+* http://wiki.openstreetmap.org/wiki/Conditional_restrictions
+
+Supported vehicles:
+* foot (foot=*)
+* bicycle (bicycle=*)
+* car (motor_vehicle=*)
+
+Access must be separatly evaluated for each vehicle type and for both
+directions.
+
+Speed restrictions may also depend on vehicle type.
+
+Tag to evaluate:
+* access(:backward/foward)=true => foot, bicycle, car
+* (access:)foot(:backward/forward) => foot
+* (access:)bicylce(:backward/forward) => bicycle
+* (access:)motor_vehicle(:backward/forward) => car
+* (access:)motorcar(:backward/forward) => car
+* oneway => bicycle, car

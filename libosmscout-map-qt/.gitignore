@@ -1,1 +1,5 @@
-/src/**/*.lo
+Makefile
+include/Makefile
+src/Makefile
+
+include/osmscout/MapQtFeatures.h
