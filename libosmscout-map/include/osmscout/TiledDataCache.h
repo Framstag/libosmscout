@@ -443,7 +443,7 @@ namespace osmscout {
     typedef std::list<CacheEntry>     Cache;
 
     //! References to a tile in above list
-    typedef Cache::iterator  CacheRef;
+    typedef Cache::iterator           CacheRef;
 
     //! An index from TileIds to cache entries
     typedef std::map<TileId,CacheRef> CacheIndex;
