@@ -91,13 +91,15 @@ AS_IF([test "$enable_marisa_support" != "no"],
 
 AM_CONDITIONAL(OSMSCOUT_HAVE_LIB_MARISA,[test "$LIB_MARISA_FOUND" = true])
 
+AX_PTHREAD
+
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [],
-                         [-losmscout $MARISA_LIBS],
+                         [-losmscout $PTHREAD_CFLAGS $PTHREAD_LIBS $MARISA_LIBS],
                          [libosmscout base library],
-                         [$OPENMP_CXXFLAGS $SIMD_FLAGS $MARISA_CFLAGS],
+                         [$PTHREAD_CFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS $MARISA_CFLAGS],
                          [$OPENMP_CXXFLAGS])
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile])

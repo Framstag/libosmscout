@@ -1,4 +1,5 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
+              $(PTHREAD_CFLAGS) \
               $(OPENMP_CXXFLAGS) \
               $(SIMD_FLAGS) \
               $(MARISA_CFLAGS) \
@@ -7,6 +8,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
 lib_LTLIBRARIES = libosmscout.la
 
 libosmscout_la_LDFLAGS = -no-undefined \
+                         $(PTHREAD_CFLAGS) \
+                         $(PTHREAD_LIBS) \
                          $(OPENMP_CXXFLAGS) \
                          $(MARISA_LIBS)
 
