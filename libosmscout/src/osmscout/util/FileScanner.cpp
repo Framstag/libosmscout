@@ -49,6 +49,7 @@
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/Number.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -343,7 +344,7 @@ namespace osmscout {
     if (buffer!=NULL) {
       if (pos>=size) {
         hasError=true;
-        throw IOException(filename,"Cannot set position in file","Position beyond file end");
+        throw IOException(filename,"Cannot set position in file to "+NumberToString(pos),"Position beyond file end");
       }
 
       offset=pos;
