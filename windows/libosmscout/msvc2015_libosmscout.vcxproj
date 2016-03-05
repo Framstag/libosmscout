@@ -185,6 +185,7 @@
     <ClCompile Include="src\osmscout\util\Breaker.cpp" />
     <ClCompile Include="src\osmscout\util\Cache.cpp" />
     <ClCompile Include="src\osmscout\util\Color.cpp" />
+    <ClCompile Include="src\osmscout\util\Exception.cpp" />
     <ClCompile Include="src\osmscout\util\File.cpp" />
     <ClCompile Include="src\osmscout\util\FileScanner.cpp" />
     <ClCompile Include="src\osmscout\util\FileWriter.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="include\osmscout\util\Breaker.h" />
     <ClInclude Include="include\osmscout\util\Cache.h" />
     <ClInclude Include="include\osmscout\util\Color.h" />
+    <ClInclude Include="include\osmscout\util\Exception.h" />
     <ClInclude Include="include\osmscout\util\File.h" />
     <ClInclude Include="include\osmscout\util\FileScanner.h" />
     <ClInclude Include="include\osmscout\util\FileWriter.h" />
