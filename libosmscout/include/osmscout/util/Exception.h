@@ -20,16 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <exception>
 #include <string>
 
 #include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API OSMScoutException
+  class OSMSCOUT_API OSMScoutException : public std::exception
   {
   public:
-    virtual ~OSMScoutException();
     virtual std::string GetDescription() const;
   };
 
@@ -39,6 +39,7 @@ namespace osmscout {
     std::string filename;
     std::string semanticError;
     std::string errorMsg;
+    std::string description;
 
   public:
     IOException(const std::string& filename,
@@ -46,6 +47,8 @@ namespace osmscout {
     IOException(const std::string& filename,
                 const std::string& semanticError,
                 const std::string& errorMsg);
+
+    const char* what() const noexcept;
 
     std::string GetFilename() const;
     std::string GetSemanticError() const;

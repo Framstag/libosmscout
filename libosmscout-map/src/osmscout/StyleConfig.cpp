@@ -2522,52 +2522,53 @@ namespace osmscout {
     FILE*      file;
     bool       success=false;
 
-    Reset();
+    try {
+      Reset();
 
-    if (!GetFileSize(styleFile,fileSize)) {
-      std::cerr << "Cannot get size of file '" << styleFile << "'" << std::endl;
+      fileSize=GetFileSize(styleFile);
 
-      return false;
-    }
+      file=fopen(styleFile.c_str(),"rb");
+      if (file==NULL) {
+        std::cerr << "Cannot open file '" << styleFile << "'" << std::endl;
 
-    file=fopen(styleFile.c_str(),"rb");
-    if (file==NULL) {
-      std::cerr << "Cannot open file '" << styleFile << "'" << std::endl;
+        return false;
+      }
 
-      return false;
-    }
+      unsigned char* content=new unsigned char[fileSize];
 
-    unsigned char* content=new unsigned char[fileSize];
+      if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
+        std::cerr << "Cannot load file '" << styleFile << "'" << std::endl;
+        delete [] content;
+        fclose(file);
 
-    if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
-      std::cerr << "Cannot load file '" << styleFile << "'" << std::endl;
-      delete [] content;
+        return false;
+      }
+
       fclose(file);
 
-      return false;
+      oss::Scanner *scanner=new oss::Scanner(content,
+                                             fileSize);
+      oss::Parser  *parser=new oss::Parser(scanner,
+                                           *this);
+
+      delete [] content;
+
+      parser->Parse();
+
+      success=!parser->errors->hasErrors;
+
+      delete parser;
+      delete scanner;
+
+      Postprocess();
+
+      timer.Stop();
+
+      log.Debug() << "Opening StyleConfig: " << timer.ResultString();
     }
-
-    fclose(file);
-
-    oss::Scanner *scanner=new oss::Scanner(content,
-                                           fileSize);
-    oss::Parser  *parser=new oss::Parser(scanner,
-                                         *this);
-
-    delete [] content;
-
-    parser->Parse();
-
-    success=!parser->errors->hasErrors;
-
-    delete parser;
-    delete scanner;
-
-    Postprocess();
-
-    timer.Stop();
-
-    log.Debug() << "Opening StyleConfig: " << timer.ResultString();
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+    }
 
     return success;
   }

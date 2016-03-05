@@ -1822,6 +1822,7 @@ namespace osmscout {
                                       const ImportParameter& parameter,
                                       Progress& progress)
   {
+    FileWriter                         writer;
     RegionRef                          rootRegion;
     std::vector<std::list<RegionRef> > regionTree;
     RegionIndex                        regionIndex;
@@ -1833,218 +1834,202 @@ namespace osmscout {
 
     progress.SetAction("Setup");
 
-    if (!BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                      "nodes.dat"),
-                                      bytesForNodeFileOffset)) {
-      progress.Error("Cannot get file size of 'nodes.dat'");
-      return false;
-    }
+    try {
+      bytesForNodeFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                        "nodes.dat"));
+      bytesForAreaFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                        "areas.dat"));
+      bytesForWayFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                        "ways.dat"));
 
-    if (!BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                      "areas.dat"),
-                                      bytesForAreaFileOffset)) {
-      progress.Error("Cannot get file size of 'areas.dat'");
-      return false;
-    }
+      rootRegion=std::make_shared<Region>();
+      rootRegion->name="<root>";
+      rootRegion->indexOffset=0;
+      rootRegion->dataOffset=0;
 
-    if (!BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                      "ways.dat"),
-                                      bytesForWayFileOffset)) {
-      progress.Error("Cannot get file size of 'ways.dat'");
-      return false;
-    }
+      boundaryType=typeConfig->GetTypeInfo("boundary_country");
+      assert(boundaryType);
+      boundaryTypes.Set(boundaryType);
 
-    rootRegion=std::make_shared<Region>();
-    rootRegion->name="<root>";
-    rootRegion->indexOffset=0;
-    rootRegion->dataOffset=0;
+      boundaryType=typeConfig->GetTypeInfo("boundary_state");
+      assert(boundaryType);
+      boundaryTypes.Set(boundaryType);
 
-    boundaryType=typeConfig->GetTypeInfo("boundary_country");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
+      boundaryType=typeConfig->GetTypeInfo("boundary_county");
+      assert(boundaryType);
+      boundaryTypes.Set(boundaryType);
 
-    boundaryType=typeConfig->GetTypeInfo("boundary_state");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
-
-    boundaryType=typeConfig->GetTypeInfo("boundary_county");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
-
-    boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
+      boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
+      assert(boundaryType);
+      boundaryTypes.Set(boundaryType);
 
 
-    //
-    // Getting all areas of type 'administrative boundary'.
-    //
+      //
+      // Getting all areas of type 'administrative boundary'.
+      //
 
-    progress.SetAction("Scanning for administrative boundaries of type 'area'");
+      progress.SetAction("Scanning for administrative boundaries of type 'area'");
 
-    if (!GetBoundaryAreas(parameter,
-                          progress,
-                          typeConfig,
-                          boundaryTypes,
-                          boundaryAreas)) {
-      return false;
-    }
+      if (!GetBoundaryAreas(parameter,
+                            progress,
+                            typeConfig,
+                            boundaryTypes,
+                            boundaryAreas)) {
+        return false;
+      }
 
-    progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
+      progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
 
-    for (size_t level=1; level<=10; level++) {
-      progress.SetAction("Sorting in administrative boundaries of level "+NumberToString(level));
+      for (size_t level=1; level<=10; level++) {
+        progress.SetAction("Sorting in administrative boundaries of level "+NumberToString(level));
 
-      SortInBoundaries(progress,
-                       *rootRegion,
-                       boundaryAreas,
-                       level);
-    }
+        SortInBoundaries(progress,
+                         *rootRegion,
+                         boundaryAreas,
+                         level);
+      }
 
-    boundaryAreas.clear();
+      boundaryAreas.clear();
 
-    //
-    // Getting all areas of type place=*.
-    //
+      //
+      // Getting all areas of type place=*.
+      //
 
-    progress.SetAction("Indexing regions of type 'area'");
+      progress.SetAction("Indexing regions of type 'area'");
 
-    if (!IndexRegionAreas(*typeConfig,
-                          parameter,
-                          progress,
-                          *rootRegion)) {
-      return false;
-    }
+      if (!IndexRegionAreas(*typeConfig,
+                            parameter,
+                            progress,
+                            *rootRegion)) {
+        return false;
+      }
 
-    progress.SetAction("Calculating region tree depth");
+      progress.SetAction("Calculating region tree depth");
 
-    regionTree.resize(GetRegionTreeDepth(*rootRegion));
+      regionTree.resize(GetRegionTreeDepth(*rootRegion));
 
-    progress.Info(std::string("Area tree depth: ")+NumberToString(regionTree.size()));
+      progress.Info(std::string("Area tree depth: ")+NumberToString(regionTree.size()));
 
-    progress.SetAction("Sorting regions by levels");
+      progress.SetAction("Sorting regions by levels");
 
-    SortInRegion(rootRegion,
-                 regionTree,
-                 0);
+      SortInRegion(rootRegion,
+                   regionTree,
+                   0);
 
-    for (size_t i=0; i<regionTree.size(); i++) {
-      progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(regionTree[i].size()));
-    }
+      for (size_t i=0; i<regionTree.size(); i++) {
+        progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(regionTree[i].size()));
+      }
 
-    progress.SetAction("Index regions");
+      progress.SetAction("Index regions");
 
-    regionIndex.cellWidth=360.0/pow(2.0,REGION_INDEX_LEVEL);
-    regionIndex.cellHeight=180.0/pow(2.0,REGION_INDEX_LEVEL);
+      regionIndex.cellWidth=360.0/pow(2.0,REGION_INDEX_LEVEL);
+      regionIndex.cellHeight=180.0/pow(2.0,REGION_INDEX_LEVEL);
 
-    IndexRegions(regionTree,
-                 regionIndex);
+      IndexRegions(regionTree,
+                   regionIndex);
 
-    //
-    // Getting all nodes of type place=*. We later need an area for these cities.
-    //
+      //
+      // Getting all nodes of type place=*. We later need an area for these cities.
+      //
 
-    progress.SetAction("Indexing regions of type 'Node' as area aliases");
+      progress.SetAction("Indexing regions of type 'Node' as area aliases");
 
-    if (!IndexRegionNodes(typeConfig,
-                          parameter,
-                          progress,
-                          rootRegion,
-                          regionIndex)) {
-      return false;
-    }
-
-    progress.SetAction("Index location areas");
-
-    if (!IndexLocationAreas(*typeConfig,
+      if (!IndexRegionNodes(typeConfig,
                             parameter,
                             progress,
                             rootRegion,
                             regionIndex)) {
-      return false;
-    }
-
-    progress.SetAction("Index location ways");
-
-    if (!IndexLocationWays(typeConfig,
-                           parameter,
-                           progress,
-                           rootRegion,
-                           regionIndex)) {
-      return false;
-    }
-
-    for (size_t i=0; i<regionTree.size(); i++) {
-      size_t count=0;
-
-      for (const auto& region : regionTree[i]) {
-        count+=region->locations.size();
+        return false;
       }
 
-      progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
-    }
+      progress.SetAction("Index location areas");
 
-    progress.SetAction("Index address areas");
+      if (!IndexLocationAreas(*typeConfig,
+                              parameter,
+                              progress,
+                              rootRegion,
+                              regionIndex)) {
+        return false;
+      }
 
-    if (!IndexAddressAreas(*typeConfig,
-                           parameter,
-                           progress,
-                           rootRegion,
-                           regionIndex)) {
-      return false;
-    }
+      progress.SetAction("Index location ways");
 
-    progress.SetAction("Index address ways");
+      if (!IndexLocationWays(typeConfig,
+                             parameter,
+                             progress,
+                             rootRegion,
+                             regionIndex)) {
+        return false;
+      }
 
-    if (!IndexAddressWays(*typeConfig,
-                          parameter,
-                          progress,
-                          rootRegion,
-                          regionIndex)) {
-      return false;
-    }
+      for (size_t i=0; i<regionTree.size(); i++) {
+        size_t count=0;
 
-    progress.SetAction("Index address nodes");
+        for (const auto& region : regionTree[i]) {
+          count+=region->locations.size();
+        }
 
-    if (!IndexAddressNodes(*typeConfig,
-                           parameter,
-                           progress,
-                           rootRegion,
-                           regionIndex)) {
-      return false;
-    }
+        progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
+      }
 
-    progress.SetAction("Calculate ignore tokens");
+      progress.SetAction("Index address areas");
 
-    CalculateIgnoreTokens(*rootRegion,
-                          regionIgnoreTokens,
-                          locationIgnoreTokens);
+      if (!IndexAddressAreas(*typeConfig,
+                             parameter,
+                             progress,
+                             rootRegion,
+                             regionIndex)) {
+        return false;
+      }
 
-    progress.Info("Detected "+NumberToString(regionIgnoreTokens.size())+" token(s) to ignore");
+      progress.SetAction("Index address ways");
 
-    progress.SetAction("Dumping region tree");
+      if (!IndexAddressWays(*typeConfig,
+                            parameter,
+                            progress,
+                            rootRegion,
+                            regionIndex)) {
+        return false;
+      }
 
-    DumpRegionTree(progress,
-                   *rootRegion,
-                   AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   "location_region.txt"));
+      progress.SetAction("Index address nodes");
 
-    progress.SetAction("Dumping location tree");
+      if (!IndexAddressNodes(*typeConfig,
+                             parameter,
+                             progress,
+                             rootRegion,
+                             regionIndex)) {
+        return false;
+      }
 
-    DumpLocationTree(progress,
+      progress.SetAction("Calculate ignore tokens");
+
+      CalculateIgnoreTokens(*rootRegion,
+                            regionIgnoreTokens,
+                            locationIgnoreTokens);
+
+      progress.Info("Detected "+NumberToString(regionIgnoreTokens.size())+" token(s) to ignore");
+
+      progress.SetAction("Dumping region tree");
+
+      DumpRegionTree(progress,
                      *rootRegion,
                      AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "location_full.txt"));
+                                     "location_region.txt"));
 
-    FileWriter writer;
+      progress.SetAction("Dumping location tree");
 
-    //
-    // Generate file with all areas, where areas reference parent and children by offset
-    //
+      DumpLocationTree(progress,
+                       *rootRegion,
+                       AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       "location_full.txt"));
 
-    progress.SetAction(std::string("Write '")+LocationIndex::FILENAME_LOCATION_IDX+"'");
+      //
+      // Generate file with all areas, where areas reference parent and children by offset
+      //
 
-    try {
+      progress.SetAction(std::string("Write '")+LocationIndex::FILENAME_LOCATION_IDX+"'");
+
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   LocationIndex::FILENAME_LOCATION_IDX));
 

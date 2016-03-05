@@ -1421,43 +1421,45 @@ namespace osmscout {
   {
     FileOffset fileSize;
     FILE*      file;
+    bool success=false;
 
-    if (!GetFileSize(filename,
-                     fileSize)) {
-      log.Error() << "Cannot get size of file '" << filename << "'";
-      return false;
-    }
+    try {
+      fileSize=GetFileSize(filename);
 
-    file=fopen(filename.c_str(),"rb");
-    if (file==NULL) {
-      log.Error() << "Cannot open file '" << filename << "'";
-      return false;
-    }
+      file=fopen(filename.c_str(),"rb");
+      if (file==NULL) {
+        log.Error() << "Cannot open file '" << filename << "'";
+        return false;
+      }
 
-    unsigned char* content=new unsigned char[fileSize];
+      unsigned char* content=new unsigned char[fileSize];
 
-    if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
-      log.Error() << "Cannot load file '" << filename << "'";
-      delete [] content;
+      if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
+        log.Error() << "Cannot load file '" << filename << "'";
+        delete [] content;
+        fclose(file);
+        return false;
+      }
+
       fclose(file);
-      return false;
+
+      ost::Scanner *scanner=new ost::Scanner(content,
+                                             fileSize);
+      ost::Parser  *parser=new ost::Parser(scanner,
+                                           *this);
+
+      delete [] content;
+
+      parser->Parse();
+
+      success=!parser->errors->hasErrors;
+
+      delete parser;
+      delete scanner;
     }
-
-    fclose(file);
-
-    ost::Scanner *scanner=new ost::Scanner(content,
-                                           fileSize);
-    ost::Parser  *parser=new ost::Parser(scanner,
-                                         *this);
-
-    delete [] content;
-
-    parser->Parse();
-
-    bool success=!parser->errors->hasErrors;
-
-    delete parser;
-    delete scanner;
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+    }
 
     return success;
   }

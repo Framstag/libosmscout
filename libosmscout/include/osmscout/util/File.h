@@ -38,10 +38,11 @@ namespace osmscout {
   /**
    * \ingroup File
    *
-   * Return the size of the file in the parameter size. Returns true, if the file size
-   * could be calculated, else false.
+   * Return the size of the file in the parameter size.
+   *
+   * @throws IOException
    */
-  extern OSMSCOUT_API bool GetFileSize(const std::string& filename, FileOffset& size);
+  extern OSMSCOUT_API FileOffset GetFileSize(const std::string& filename);
 
   /**
    * \ingroup File
@@ -70,9 +71,10 @@ namespace osmscout {
    * \ingroup File
    *
    * Number of bytes needed to address the complete content of the given file.
+   *
+   * @throws IOException
    */
-  extern OSMSCOUT_API bool BytesNeededToAddressFileData(const std::string& filename,
-                                                        uint8_t& bytes);
+  extern OSMSCOUT_API uint8_t BytesNeededToAddressFileData(const std::string& filename);
 }
 
 #endif

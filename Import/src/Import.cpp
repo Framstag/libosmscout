@@ -257,18 +257,6 @@ osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
   return std::make_shared<osmscout::ImportParameter::Router>(vehicleMask,filenamebase);
 }
 
-bool GetFileSize(const std::string& filename,
-                 osmscout::FileOffset& fileSize)
-{
-  if (!osmscout::GetFileSize(filename,
-                             fileSize)) {
-    std::cerr << "Cannot read file size of file '" << filename << "'" << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
                   const osmscout::Importer& importer,
                   osmscout::Progress& progress)
@@ -277,42 +265,42 @@ bool DumpDataSize(const osmscout::ImportParameter& parameter,
 
   progress.Info("Mandatory files:");
 
-  for (const auto& filename : importer.GetProvidedFiles()) {
-    osmscout::FileOffset fileSize=0;
-    std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                   filename);
+  try {
+    for (const auto& filename : importer.GetProvidedFiles()) {
+      osmscout::FileOffset fileSize=0;
+      std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                              filename);
 
-    if (!GetFileSize(filePath,
-                     fileSize)) {
-      return false;
+      fileSize=osmscout::GetFileSize(filename);
+
+      progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
+
+      dataSize+=fileSize;
     }
 
-    progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
+    progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
 
-    dataSize+=fileSize;
-  }
+    progress.Info("Optional files:");
 
-  progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
+    dataSize=0;
+    for (const auto& filename : importer.GetProvidedOptionalFiles()) {
+      osmscout::FileOffset fileSize=0;
+      std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                              filename);
 
-  progress.Info("Optional files:");
+      fileSize=osmscout::GetFileSize(filePath);
 
-  dataSize=0;
-  for (const auto& filename : importer.GetProvidedOptionalFiles()) {
-    osmscout::FileOffset fileSize=0;
-    std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                            filename);
+      progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
 
-    if (!GetFileSize(filePath,
-                     fileSize)) {
-      return false;
+      dataSize+=fileSize;
     }
 
-    progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
-
-    dataSize+=fileSize;
+    progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
   }
-
-  progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
+  catch (osmscout::IOException& e) {
+    progress.Error(e.GetDescription());
+    return false;
+  }
 
   return true;
 }

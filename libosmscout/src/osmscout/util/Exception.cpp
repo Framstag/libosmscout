@@ -24,11 +24,6 @@
 
 namespace osmscout {
 
-  OSMScoutException::~OSMScoutException()
-  {
-    // no code
-  }
-
   std::string OSMScoutException::GetDescription() const
   {
     return "No error";
@@ -49,7 +44,17 @@ namespace osmscout {
     semanticError(semanticError),
     errorMsg(errorMsg)
   {
-    // no code
+    if (!errorMsg.empty()) {
+      description="File '" + filename +"' - " + semanticError+": " + errorMsg;
+    }
+    else {
+      description="File '" + filename +"' - " + semanticError;
+    }
+  }
+
+  const char* IOException::what() const noexcept
+  {
+    return description.c_str();
   }
 
   std::string IOException::GetFilename() const
@@ -69,11 +74,6 @@ namespace osmscout {
 
   std::string IOException::GetDescription() const
   {
-    if (!errorMsg.empty()) {
-      return "File '" + filename +"' - " + semanticError+": " + errorMsg;
-    }
-    else {
-      return "File '" + filename +"' - " + semanticError;
-    }
+    return description;
   }
 }

@@ -454,122 +454,124 @@ namespace osmscout {
 
     progress.SetAction(std::string("Parsing *.osm.pbf file '")+filename+"'");
 
-    if (!GetFileSize(filename,
-                     fileSize)) {
-      progress.Error("Cannot get size of file '"+filename+"'!");
-      return false;
-    }
+    try {
+      fileSize=GetFileSize(filename);
 
-    FILE* file;
+      FILE* file;
 
-    file=fopen(filename.c_str(),"rb");
+      file=fopen(filename.c_str(),"rb");
 
-    if (file==NULL) {
-      progress.Error("Cannot open file!");
-      return false;
-    }
-
-    // BlockHeader
-
-    PBF::BlockHeader blockHeader;
-
-    if (!ReadBlockHeader(progress,file,blockHeader,false)) {
-      fclose(file);
-      return false;
-    }
-
-    if (blockHeader.type()!="OSMHeader") {
-      progress.Error("File '"+filename+"' is not an OSM PBF file!");
-      fclose(file);
-      return false;
-    }
-
-    PBF::HeaderBlock headerBlock;
-
-    if (!ReadHeaderBlock(progress,
-                         file,
-                         blockHeader,
-                         headerBlock)) {
-      fclose(file);
-      return false;
-    }
-
-    for (int i=0; i<headerBlock.required_features_size(); i++) {
-      std::string feature=headerBlock.required_features(i);
-      if (feature!="OsmSchema-V0.6" &&
-          feature!="DenseNodes") {
-        progress.Error(std::string("Unsupported feature '")+feature+"'");
-        fclose(file);
+      if (file==NULL) {
+        progress.Error("Cannot open file!");
         return false;
       }
-    }
 
-    nodes.reserve(20000);
-    members.reserve(2000);
+      // BlockHeader
 
-    while (true) {
       PBF::BlockHeader blockHeader;
 
-      if (!GetPos(file,
-                  currentPosition)) {
-        progress.Error("Cannot read current position in '"+filename+"'!");
+      if (!ReadBlockHeader(progress,file,blockHeader,false)) {
         fclose(file);
         return false;
       }
 
-      progress.SetProgress(currentPosition,
-                           fileSize);
-
-      if (!ReadBlockHeader(progress,
-                           file,
-                           blockHeader,
-                           true)) {
-        fclose(file);
-        break;
-      }
-
-      if (blockHeader.type()!="OSMData") {
+      if (blockHeader.type()!="OSMHeader") {
         progress.Error("File '"+filename+"' is not an OSM PBF file!");
         fclose(file);
         return false;
       }
 
-      PBF::PrimitiveBlock block;
+      PBF::HeaderBlock headerBlock;
 
-      if (!ReadPrimitiveBlock(progress,
-                              file,
-                              blockHeader,
-                              block)) {
+      if (!ReadHeaderBlock(progress,
+                           file,
+                           blockHeader,
+                           headerBlock)) {
         fclose(file);
         return false;
       }
 
-      for (int currentGroup=0;
-           currentGroup<block.primitivegroup_size();
-           currentGroup++) {
-        const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
-
-        if (group.nodes_size()>0) {
-          ReadNodes(*typeConfig,
-                    block,
-                    group);
-        }
-        else if (group.ways_size()>0) {
-          ReadWays(*typeConfig,
-                   block,
-                   group);
-        }
-        else if (group.relations_size()>0) {
-          ReadRelations(*typeConfig,
-                        block,
-                        group);
-        }
-        else if (group.has_dense()) {
-          ReadDenseNodes(*typeConfig,
-                         block,
-                         group);
+      for (int i=0; i<headerBlock.required_features_size(); i++) {
+        std::string feature=headerBlock.required_features(i);
+        if (feature!="OsmSchema-V0.6" &&
+            feature!="DenseNodes") {
+          progress.Error(std::string("Unsupported feature '")+feature+"'");
+          fclose(file);
+          return false;
         }
       }
+
+      nodes.reserve(20000);
+      members.reserve(2000);
+
+      while (true) {
+        PBF::BlockHeader blockHeader;
+
+        if (!GetPos(file,
+                    currentPosition)) {
+          progress.Error("Cannot read current position in '"+filename+"'!");
+          fclose(file);
+          return false;
+        }
+
+        progress.SetProgress(currentPosition,
+                             fileSize);
+
+        if (!ReadBlockHeader(progress,
+                             file,
+                             blockHeader,
+                             true)) {
+          fclose(file);
+          break;
+        }
+
+        if (blockHeader.type()!="OSMData") {
+          progress.Error("File '"+filename+"' is not an OSM PBF file!");
+          fclose(file);
+          return false;
+        }
+
+        PBF::PrimitiveBlock block;
+
+        if (!ReadPrimitiveBlock(progress,
+                                file,
+                                blockHeader,
+                                block)) {
+          fclose(file);
+          return false;
+        }
+
+        for (int currentGroup=0;
+             currentGroup<block.primitivegroup_size();
+             currentGroup++) {
+          const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
+
+          if (group.nodes_size()>0) {
+            ReadNodes(*typeConfig,
+                      block,
+                      group);
+          }
+          else if (group.ways_size()>0) {
+            ReadWays(*typeConfig,
+                     block,
+                     group);
+          }
+          else if (group.relations_size()>0) {
+            ReadRelations(*typeConfig,
+                          block,
+                          group);
+          }
+          else if (group.has_dense()) {
+            ReadDenseNodes(*typeConfig,
+                           block,
+                           group);
+          }
+        }
+      }
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
+      return false;
     }
 
     return true;

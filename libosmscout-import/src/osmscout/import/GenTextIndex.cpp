@@ -69,8 +69,8 @@ namespace osmscout
                                   const ImportParameter &parameter,
                                   Progress &progress)
   {
-    if(!this->SetFileOffsetSize(parameter,
-                                progress)) {
+    if (!SetFileOffsetSize(parameter,
+                           progress)) {
       return false;
     }
     progress.Info("Using "+NumberToString(offsetSizeBytes)+"-byte offsets");
@@ -135,7 +135,7 @@ namespace osmscout
                    MARISA_LABEL_ORDER |
                    MARISA_DEFAULT_CACHE);
       }
-      catch (const marisa::Exception &ex){
+      catch (const marisa::Exception &ex) {
         std::string errorMsg="Error building:" +trieFiles[i];
         errorMsg.append(ex.what());
         progress.Error(errorMsg);
@@ -145,7 +145,7 @@ namespace osmscout
       try {
         trie.save(trieFiles[i].c_str());
       }
-      catch (const marisa::Exception &ex){
+      catch (const marisa::Exception &ex) {
         std::string errorMsg="Error saving:" +trieFiles[i];
         errorMsg.append(ex.what());
         progress.Error(errorMsg);
@@ -163,60 +163,54 @@ namespace osmscout
 
     FileScanner scanner;
 
-    FileOffset nodesFileSize=0;
-    FileOffset waysFileSize=0;
-    FileOffset areasFileSize=0;
+    try {
+      FileOffset nodesFileSize=0;
+      FileOffset waysFileSize=0;
+      FileOffset areasFileSize=0;
 
-    // node count
-    std::string nodesDataFile=
-        AppendFileToDir(parameter.GetDestinationDirectory(),
-                        "nodes.dat");
+      // node count
+      std::string nodesDataFile=
+      AppendFileToDir(parameter.GetDestinationDirectory(),
+                      "nodes.dat");
 
-    if (!GetFileSize(nodesDataFile,
-                     nodesFileSize)) {
-      progress.Error("Cannot get file size of file 'nodes.dat'");
+      nodesFileSize=GetFileSize(nodesDataFile);
+
+      // way count
+      std::string waysDataFile=
+      AppendFileToDir(parameter.GetDestinationDirectory(),
+                      "ways.dat");
+
+      waysFileSize=GetFileSize(waysDataFile);
+
+      // area count
+      std::string areasDataFile=
+      AppendFileToDir(parameter.GetDestinationDirectory(),
+                      "areas.dat");
+
+      areasFileSize=GetFileSize(areasDataFile);
+
+      // Determine the number of bytes needed to store offsets
+      uint8_t minNodeOffsetSizeBytes = BytesNeededToEncodeNumber(nodesFileSize);
+      uint8_t minWayOffsetSizeBytes  = BytesNeededToEncodeNumber(waysFileSize);
+      uint8_t minAreaOffsetSizeBytes = BytesNeededToEncodeNumber(areasFileSize);
+
+      progress.Info("Node filesize is " + NumberToString(nodesFileSize) + " bytes, "+
+                    "req. " + NumberToString(minNodeOffsetSizeBytes) +" bytes");
+
+      progress.Info("Way filesize is " + NumberToString(waysFileSize) + " bytes, "+
+                    "req. " + NumberToString(minWayOffsetSizeBytes) +" bytes");
+
+      progress.Info("Area filesize is " + NumberToString(areasFileSize) + " bytes, "+
+                    "req. " + NumberToString(minAreaOffsetSizeBytes) +" bytes");
+
+      offsetSizeBytes = 0;
+      offsetSizeBytes = std::max(minNodeOffsetSizeBytes,minWayOffsetSizeBytes);
+      offsetSizeBytes = std::max(offsetSizeBytes,minAreaOffsetSizeBytes);
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
       return false;
     }
-
-    // way count
-    std::string waysDataFile=
-        AppendFileToDir(parameter.GetDestinationDirectory(),
-                        "ways.dat");
-
-    if (!GetFileSize(waysDataFile,
-                     waysFileSize)) {
-      progress.Error("Cannot get file size of file 'ways.dat'");
-      return false;
-    }
-
-    // area count
-    std::string areasDataFile=
-        AppendFileToDir(parameter.GetDestinationDirectory(),
-                        "areas.dat");
-
-    if (!GetFileSize(areasDataFile,
-                     areasFileSize)) {
-      progress.Error("Cannot get file size of file 'areas.dat'");
-      return false;
-    }
-
-    // Determine the number of bytes needed to store offsets
-    uint8_t minNodeOffsetSizeBytes = BytesNeededToEncodeNumber(nodesFileSize);
-    uint8_t minWayOffsetSizeBytes  = BytesNeededToEncodeNumber(waysFileSize);
-    uint8_t minAreaOffsetSizeBytes = BytesNeededToEncodeNumber(areasFileSize);
-
-    progress.Info("Node filesize is " + NumberToString(nodesFileSize) + " bytes, "+
-                  "req. " + NumberToString(minNodeOffsetSizeBytes) +" bytes");
-
-    progress.Info("Way filesize is " + NumberToString(waysFileSize) + " bytes, "+
-                  "req. " + NumberToString(minWayOffsetSizeBytes) +" bytes");
-
-    progress.Info("Area filesize is " + NumberToString(areasFileSize) + " bytes, "+
-                  "req. " + NumberToString(minAreaOffsetSizeBytes) +" bytes");
-
-    offsetSizeBytes = 0;
-    offsetSizeBytes = std::max(minNodeOffsetSizeBytes,minWayOffsetSizeBytes);
-    offsetSizeBytes = std::max(offsetSizeBytes,minAreaOffsetSizeBytes);
 
     return true;
   }
@@ -573,18 +567,19 @@ namespace osmscout
     // LSB was written first, it would have four
     // branches immediately from its root.
 
-	if (offsetSizeBytes > 0)
-	{
-		char* buffer = new char[offsetSizeBytes];
-		for (uint8_t i = 0; i < offsetSizeBytes; i++) {
-			uint8_t r = offsetSizeBytes - 1 - i;
-			buffer[r] = ((offset >> (i * 8)) & 0xff);
-		}
-		for (uint8_t i = 0; i < offsetSizeBytes; i++) {
-			keyString.push_back(buffer[i]);
-		}
-		delete buffer;
-	}
+    if (offsetSizeBytes > 0)
+    {
+      char* buffer = new char[offsetSizeBytes];
+      for (uint8_t i = 0; i < offsetSizeBytes; i++) {
+        uint8_t r = offsetSizeBytes - 1 - i;
+        buffer[r] = ((offset >> (i * 8)) & 0xff);
+      }
+      for (uint8_t i = 0; i < offsetSizeBytes; i++) {
+        keyString.push_back(buffer[i]);
+      }
+      delete buffer;
+    }
+
     return true;
   }
 }
