@@ -113,6 +113,7 @@ namespace osmscout {
     size_t    maxSize;
     OrderList order;
     Map       map;
+    CacheRef  previousEntry;
 
   private:
 
@@ -136,6 +137,8 @@ namespace osmscout {
         // Remove it from order list
         order.pop_back();
 
+        previousEntry=order.end();
+
         size--;
       }
     }
@@ -149,6 +152,7 @@ namespace osmscout {
        maxSize(maxSize)
     {
       map.reserve(maxSize);
+      previousEntry=order.end();
     }
 
     /**
@@ -176,6 +180,12 @@ namespace osmscout {
         return false;
       }
 
+      if (previousEntry!=order.end() &&
+          previousEntry->key==key) {
+        reference=previousEntry;
+        return true;
+      }
+
       typename Map::iterator iter=map.find(key);
 
       if (iter!=map.end()) {
@@ -186,6 +196,7 @@ namespace osmscout {
         iter->second=order.begin();
 
         reference=order.begin();
+        previousEntry=reference;
 
         return true;
       }
