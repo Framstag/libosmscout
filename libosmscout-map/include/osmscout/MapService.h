@@ -104,6 +104,8 @@ namespace osmscout {
     typedef std::function<void(const TileRef&)> TileStateCallback;
 
   private:
+    mutable std::mutex           stateMutex;           //!< Mutex to protect internal state
+
     DatabaseRef                  database;             //!< The reference to the database
     mutable TiledDataCache       cache;                //!< Data cache
     TypeDefinitionRef            typeDefinition;       //<! Last used and cached TypeDefinition
@@ -125,7 +127,7 @@ namespace osmscout {
 
     CallbackId                   nextCallbackId;
     std::map<CallbackId,TileStateCallback> tileStateCallbacks;
-    mutable std::mutex           callbackMutex;
+    mutable std::mutex           callbackMutex;        //<! Mutex to protect callback (de)registering
 
 
   private:
@@ -197,6 +199,11 @@ namespace osmscout {
 
     void NotifyTileStateCallbacks(const TileRef& tile) const;
 
+    bool LoadMissingTileData(const AreaSearchParameter& parameter,
+                             const StyleConfig& styleConfig,
+                             std::list<TileRef>& tiles,
+                             bool async) const;
+
   public:
     MapService(const DatabaseRef& database);
     virtual ~MapService();
@@ -215,6 +222,10 @@ namespace osmscout {
     bool LoadMissingTileData(const AreaSearchParameter& parameter,
                              const StyleConfig& styleConfig,
                              std::list<TileRef>& tiles) const;
+
+    bool LoadMissingTileDataAsync(const AreaSearchParameter& parameter,
+                                  const StyleConfig& styleConfig,
+                                  std::list<TileRef>& tiles) const;
 
     void ConvertTilesToMapData(std::list<TileRef>& tiles,
                                MapData& data) const;

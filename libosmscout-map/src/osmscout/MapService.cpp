@@ -645,6 +645,8 @@ namespace osmscout {
   void MapService::LookupTiles(const Projection& projection,
                                std::list<TileRef>& tiles) const
   {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
     StopClock cacheRetrievalTime;
 
     GeoBox boundingBox;
@@ -670,6 +672,8 @@ namespace osmscout {
                                const GeoBox& boundingBox,
                                std::list<TileRef>& tiles) const
   {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
     StopClock cacheRetrievalTime;
 
     cache.GetTilesForBoundingBox(magnification,
@@ -689,6 +693,8 @@ namespace osmscout {
    */
   TileRef MapService::LookupTile(const TileId& id) const
   {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
     StopClock cacheRetrievalTime;
 
     TileRef tile=cache.GetTile(id);
@@ -705,8 +711,11 @@ namespace osmscout {
    */
   bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
                                        const StyleConfig& styleConfig,
-                                       std::list<TileRef>& tiles) const
+                                       std::list<TileRef>& tiles,
+                                       bool async) const
   {
+    std::lock_guard<std::mutex>  lock(stateMutex);
+
     StopClock                    overallTime;
 
     TypeDefinitionRef            typeDefinition;
@@ -791,9 +800,11 @@ namespace osmscout {
 
     bool success=true;
 
-    for (auto& result : results) {
-      if (!result.get()) {
-        success=false;
+    if (!async) {
+      for (auto& result : results) {
+        if (!result.get()) {
+          success=false;
+        }
       }
     }
 
@@ -807,6 +818,7 @@ namespace osmscout {
 
     return success;
   }
+
 
   /**
    * Convert the data hold by the given tiles to the given MapData class instance.
@@ -883,6 +895,31 @@ namespace osmscout {
     if (copyTime.GetMilliseconds()>20) {
       log.Warn() << "Copying data from tile to MapData took " << copyTime.ResultString();
     }
+  }
+
+  /**
+   * Load all missing data for the given tiles based on the given style config. The
+   * method returns, either after an error occured or all tiles have been successfully
+   * loaded.
+   */
+  bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
+                                       const StyleConfig& styleConfig,
+                                       std::list<TileRef>& tiles) const
+  {
+    return LoadMissingTileData(parameter,styleConfig,tiles,false);
+  }
+
+  /**
+   * Load all missing data for the given tiles based on the given style config. This method
+   * just triggers the loading but may return before all data has been loaded. Loading of tile
+   * data happens in the background. You have to register a callback to get notified
+   * about tile loading state.
+   */
+  bool MapService::LoadMissingTileDataAsync(const AreaSearchParameter& parameter,
+                                            const StyleConfig& styleConfig,
+                                            std::list<TileRef>& tiles) const
+  {
+    return LoadMissingTileData(parameter,styleConfig,tiles,true);
   }
 
   /**
