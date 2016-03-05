@@ -52,18 +52,16 @@ namespace osmscout {
 
     try {
       scanner.Open(datafilename,
-                     FileScanner::FastRandom,
-                     memoryMapedData);
+                   FileScanner::FastRandom,
+                   memoryMapedData);
 
       FileOffset mapOffset;
-
-      scanner.Read(coordPageSize);
-      scanner.Read(mapOffset);
-
-      scanner.SetPos(mapOffset);
-
       uint32_t mapSize;
 
+      scanner.Read(coordPageSize);
+      scanner.ReadFileOffset(mapOffset);
+
+      scanner.SetPos(mapOffset);
       scanner.Read(mapSize);
 
       for (size_t i=1; i<=mapSize; i++) {
