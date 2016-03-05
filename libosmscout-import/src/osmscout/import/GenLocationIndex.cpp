@@ -87,12 +87,18 @@ namespace osmscout {
     case refNode:
       writer.WriteFileOffset(object.GetFileOffset(),
                              bytesForNodeFileOffset);
+      break;
     case refArea:
       writer.WriteFileOffset(object.GetFileOffset(),
                              bytesForAreaFileOffset);
+      break;
     case refWay:
       writer.WriteFileOffset(object.GetFileOffset(),
                              bytesForWayFileOffset);
+      break;
+    default:
+      std::cout << "type: " << (int) object.GetType() << std::endl;
+      throw IOException(writer.GetFilename(),"Cannot write ObjectFileRef","Unknown object file type");
     }
   }
 
