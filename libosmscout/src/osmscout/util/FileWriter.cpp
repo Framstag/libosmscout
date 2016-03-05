@@ -982,8 +982,12 @@ namespace osmscout {
     if (maxBytes==1) {
       Write((uint8_t)id);
     }
+    else if (maxBytes==2) {
+      Write((uint8_t)(id/256));
+      Write((uint8_t)(id%256));
+    }
     else {
-      WriteNumber(id);
+      assert(false);
     }
   }
 

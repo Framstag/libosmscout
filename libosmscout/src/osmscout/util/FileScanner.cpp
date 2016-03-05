@@ -2328,8 +2328,19 @@ namespace osmscout {
 
       id=byteValue;
     }
+    else if (maxBytes==2) {
+      uint8_t byteValue;
+
+      Read(byteValue);
+
+      id=byteValue *256;
+
+      Read(byteValue);
+
+      id+=byteValue;
+    }
     else {
-      ReadNumber(id);
+      assert(false);
     }
   }
 
