@@ -63,7 +63,7 @@ namespace osmscout {
 
     double CalculateDistance(const TransPolygon::TransPoint& p)
     {
-      return sqrt(CalculateDistance(p));
+      return sqrt(CalculateDistanceSquared(p));
     }
   };
 
