@@ -210,6 +210,8 @@ namespace osmscout {
 
     void SetCacheSize(size_t cacheSize);
 
+    void FlushTileCache();
+
     void LookupTiles(const Magnification& magnification,
                      const GeoBox& boundingBox,
                      std::list<TileRef>& tiles) const;

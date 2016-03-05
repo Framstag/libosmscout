@@ -116,7 +116,16 @@ namespace osmscout {
    */
   void MapService::SetCacheSize(size_t cacheSize)
   {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
     cache.SetSize(cacheSize);
+  }
+
+  void MapService::FlushTileCache()
+  {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
+    cache.CleanupCache();
   }
 
   MapService::TypeDefinitionRef MapService::GetTypeDefinition(const AreaSearchParameter& parameter,
@@ -800,7 +809,10 @@ namespace osmscout {
 
     bool success=true;
 
-    if (!async) {
+    if (async) {
+      results.clear();
+    }
+    else {
       for (auto& result : results) {
         if (!result.get()) {
           success=false;
