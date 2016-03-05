@@ -99,12 +99,16 @@ distclean:
 # libosmscout
 
 libosmscout:
-	(cd libosmscout && $(MAKE))
+	if [ -f libosmscout/Makefile ]; then \
+	  (cd libosmscout && $(MAKE)) \
+	fi
 
 # libosmscout-import
 
 libosmscout-import: libosmscout
-	(cd libosmscout-import && $(MAKE))
+	if [ -f libosmscout-import/Makefile ]; then \
+	  (cd libosmscout-import && $(MAKE)) \
+	fi
 
 # libosmscout-map
 
