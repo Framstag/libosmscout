@@ -271,7 +271,7 @@ bool DumpDataSize(const osmscout::ImportParameter& parameter,
       std::string          filePath=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),
                                                               filename);
 
-      fileSize=osmscout::GetFileSize(filename);
+      fileSize=osmscout::GetFileSize(filePath);
 
       progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
 
