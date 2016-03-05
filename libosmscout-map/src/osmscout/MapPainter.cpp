@@ -73,6 +73,9 @@ namespace osmscout {
   MapPainter::MapPainter(const StyleConfigRef& styleConfig,
                          CoordBuffer *buffer)
   : coordBuffer(buffer),
+    labelSpace(1.0),
+    shieldLabelSpace(1.0),
+    sameLabelSpace(1.0),
     styleConfig(styleConfig),
     transBuffer(coordBuffer),
     nameReader(*styleConfig->GetTypeConfig()),
@@ -80,10 +83,7 @@ namespace osmscout {
     refReader(*styleConfig->GetTypeConfig()),
     layerReader(*styleConfig->GetTypeConfig()),
     widthReader(*styleConfig->GetTypeConfig()),
-    addressReader(*styleConfig->GetTypeConfig()),
-    labelSpace(1.0),
-    shieldLabelSpace(1.0),
-    sameLabelSpace(1.0)
+    addressReader(*styleConfig->GetTypeConfig())
   {
     log.Debug() << "MapPainter::MapPainter()";
 

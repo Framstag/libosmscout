@@ -194,36 +194,6 @@ namespace osmscout {
   private:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
 
-  protected:
-    StyleConfigRef               styleConfig;       //!< Reference to the style configuration to be used
-    /**
-       Scratch variables for path optimization algorithm
-     */
-    //@{
-    TransBuffer                  transBuffer;       //!< Static (avoid reallocation) buffer of transformed coordinates
-    //@}
-
-    /**
-     * Attribute readers
-     */
-    //@{
-    NameFeatureValueReader       nameReader;
-    NameAltFeatureValueReader    nameAltReader;
-    RefFeatureValueReader        refReader;
-    LayerFeatureValueReader      layerReader;
-    WidthFeatureValueReader      widthReader;
-    AddressFeatureValueReader    addressReader;
-    //@}
-
-    /**
-      Presets and similar
-     */
-    //@{
-    std::vector<double>          emptyDash;         //!< Empty dash array
-    std::vector<double>          tunnelDash;        //!< Dash array for drawing tunnel border
-    FillStyle                    areaMarkStyle;     //!< Marker fill style for internal debugging
-    //@}
-
     std::list<AreaData>          areaData;
     std::list<WayData>           wayData;
     std::list<WayPathData>       wayPathData;
@@ -240,6 +210,7 @@ namespace osmscout {
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
+
     /**
       Statistics counter
      */
@@ -277,9 +248,39 @@ namespace osmscout {
     double                       oneMMInPixel;
     //@}
 
+  protected:
+    StyleConfigRef               styleConfig;       //!< Reference to the style configuration to be used
+    /**
+       Scratch variables for path optimization algorithm
+     */
+    //@{
+    TransBuffer                  transBuffer;       //!< Static (avoid reallocation) buffer of transformed coordinates
+    //@}
+
+    /**
+     * Attribute readers
+     */
+    //@{
+    NameFeatureValueReader       nameReader;
+    NameAltFeatureValueReader    nameAltReader;
+    RefFeatureValueReader        refReader;
+    LayerFeatureValueReader      layerReader;
+    WidthFeatureValueReader      widthReader;
+    AddressFeatureValueReader    addressReader;
+    //@}
+
+    /**
+      Presets and similar
+     */
+    //@{
+    std::vector<double>          emptyDash;         //!< Empty dash array
+    std::vector<double>          tunnelDash;        //!< Dash array for drawing tunnel border
+    FillStyle                    areaMarkStyle;     //!< Marker fill style for internal debugging
+    //@}
+
   private:
     /**
-     Debuggn
+     Debugging
      */
     //@{
     void DumpDataStatistics(const Projection& projection,
@@ -428,6 +429,16 @@ namespace osmscout {
       return width/projection.GetPixelSize();
     }
     //@}
+
+    inline const std::list<WayData>& GetWayData() const
+    {
+      return wayData;
+    }
+
+    inline const std::list<AreaData>& GetAreaData() const
+    {
+      return areaData;
+    }
 
     /**
       Low level drawing routines that have to be implemented by

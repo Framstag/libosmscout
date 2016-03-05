@@ -139,48 +139,46 @@ namespace osmscout {
     stream << "       <![CDATA[" << std::endl;
 
     size_t nextAreaId=0;
-    for (std::list<AreaData>::const_iterator area=areaData.begin();
-        area!=areaData.end();
-        ++area) {
-      std::map<FillStyle,std::string>::const_iterator entry=fillStyleNameMap.find(*area->fillStyle);
+    for (const auto& area: GetAreaData()) {
+      std::map<FillStyle,std::string>::const_iterator entry=fillStyleNameMap.find(*area.fillStyle);
 
       if (entry==fillStyleNameMap.end()) {
         std::string name="area_"+NumberToString(nextAreaId);
 
-        fillStyleNameMap.insert(std::make_pair(*area->fillStyle,name));
+        fillStyleNameMap.insert(std::make_pair(*area.fillStyle,name));
 
         nextAreaId++;
 
         stream << "        ." << name << " {";
 
-        stream << "fill:" << GetColorValue(area->fillStyle->GetFillColor());
+        stream << "fill:" << GetColorValue(area.fillStyle->GetFillColor());
 
-        if (!area->fillStyle->GetFillColor().IsSolid()) {
-          stream << ";fill-opacity:" << area->fillStyle->GetFillColor().GetA();
+        if (!area.fillStyle->GetFillColor().IsSolid()) {
+          stream << ";fill-opacity:" << area.fillStyle->GetFillColor().GetA();
         }
 
         stream << ";fillRule:nonzero";
 
-        double borderWidth=projection.ConvertWidthToPixel(area->fillStyle->GetBorderWidth());
+        double borderWidth=projection.ConvertWidthToPixel(area.fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
-          stream << ";stroke:" << GetColorValue(area->fillStyle->GetBorderColor());
+          stream << ";stroke:" << GetColorValue(area.fillStyle->GetBorderColor());
 
-          if (!area->fillStyle->GetBorderColor().IsSolid()) {
-            stream << ";stroke-opacity:" << area->fillStyle->GetBorderColor().GetA();
+          if (!area.fillStyle->GetBorderColor().IsSolid()) {
+            stream << ";stroke-opacity:" << area.fillStyle->GetBorderColor().GetA();
           }
 
           stream << ";stroke-width:" << borderWidth;
 
-          if (area->fillStyle->HasBorderDashes()) {
+          if (area.fillStyle->HasBorderDashes()) {
             stream << ";stroke-dasharray:";
 
-            for (size_t i=0; i<area->fillStyle->GetBorderDash().size(); i++) {
+            for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i++) {
               if (i>0) {
                 stream << ",";
               }
 
-              stream << area->fillStyle->GetBorderDash()[i]*borderWidth;
+              stream << area.fillStyle->GetBorderDash()[i]*borderWidth;
             }
           }
         }
@@ -194,47 +192,45 @@ namespace osmscout {
     stream << std::endl;
 
     size_t nextWayId=0;
-    for (std::list<WayData>::const_iterator way=wayData.begin();
-        way!=wayData.end();
-        ++way) {
-      std::map<LineStyle,std::string>::const_iterator entry=lineStyleNameMap.find(*way->lineStyle);
+    for (const auto& way : GetWayData()) {
+      std::map<LineStyle,std::string>::const_iterator entry=lineStyleNameMap.find(*way.lineStyle);
 
       if (entry==lineStyleNameMap.end()) {
         std::string name="way_"+NumberToString(nextWayId);
 
-        lineStyleNameMap.insert(std::make_pair(*way->lineStyle,name));
+        lineStyleNameMap.insert(std::make_pair(*way.lineStyle,name));
 
         nextWayId++;
 
         double lineWidth;
 
-        if (way->lineStyle->GetWidth()==0) {
-          lineWidth=projection.ConvertWidthToPixel(way->lineStyle->GetDisplayWidth());
+        if (way.lineStyle->GetWidth()==0) {
+          lineWidth=projection.ConvertWidthToPixel(way.lineStyle->GetDisplayWidth());
         }
         else {
           lineWidth=GetProjectedWidth(projection,
-                                      projection.ConvertWidthToPixel(way->lineStyle->GetDisplayWidth()),
-                                      way->lineStyle->GetWidth());
+                                      projection.ConvertWidthToPixel(way.lineStyle->GetDisplayWidth()),
+                                      way.lineStyle->GetWidth());
         }
 
         stream << "        ." << name << " {";
         stream << "fill:none;";
-        stream << "stroke:" << GetColorValue(way->lineStyle->GetLineColor());
+        stream << "stroke:" << GetColorValue(way.lineStyle->GetLineColor());
 
-        if (!way->lineStyle->GetLineColor().IsSolid()) {
-          stream << ";stroke-opacity:" << way->lineStyle->GetLineColor().GetA();
+        if (!way.lineStyle->GetLineColor().IsSolid()) {
+          stream << ";stroke-opacity:" << way.lineStyle->GetLineColor().GetA();
         }
 
-        if (way->lineStyle->HasDashes()) {
+        if (way.lineStyle->HasDashes()) {
           stream << ";stroke-dasharray:";
 
-          for (size_t i=0; i<way->lineStyle->GetDash().size(); i++) {
+          for (size_t i=0; i<way.lineStyle->GetDash().size(); i++) {
 
             if (i>0) {
               stream << " ";
             }
 
-            stream << way->lineStyle->GetDash()[i]*lineWidth;
+            stream << way.lineStyle->GetDash()[i]*lineWidth;
           }
         }
 
@@ -531,8 +527,6 @@ namespace osmscout {
              data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.transStart,data.transEnd);
-
-    waysDrawn++;
   }
 
   void MapPainterSVG::DrawArea(const Projection& projection,
