@@ -44,7 +44,8 @@
 
 namespace osmscout {
 
-  static uint32_t coordPageSize=64;
+  static size_t coordPageSize=64;
+  static size_t coordCacheSize=1000000;
 
   const char* Preprocess::BOUNDING_DAT="bounding.dat";
   const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
@@ -54,20 +55,101 @@ namespace osmscout {
   const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
   const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
-  void Preprocess::Callback::StoreCurrentPage()
+  Preprocess::Callback::Page::Page(size_t coordPageSize, FileOffset offset, PageId id)
+  : offset(offset),
+    id (id)
   {
-    coordWriter.SetPos(currentPageOffset);
+    coords.resize(coordPageSize);
+    isSet.resize(coordPageSize,false);
+  };
+
+  void Preprocess::Callback::Page::SetCoord(size_t index, const GeoCoord& coord)
+  {
+    coords[index]=coord;
+    isSet[index]=true;
+  }
+
+  void Preprocess::Callback::Page::StorePage(FileWriter& writer)
+  {
+    writer.SetPos(offset);
 
     for (size_t i=0; i<coordPageSize; i++) {
       if (!isSet[i]) {
-        coordWriter.WriteInvalidCoord();
+        writer.WriteInvalidCoord();
       }
       else {
-        coordWriter.WriteCoord(coords[i]);
+        writer.WriteCoord(coords[i]);
       }
     }
+  }
 
-    currentPageId=std::numeric_limits<PageId>::max();
+  void Preprocess::Callback::Page::ReadPage(FileScanner& scanner)
+  {
+    scanner.SetPos(offset);
+
+    for (size_t i=0; i<coords.size(); i++) {
+      bool     isCoordSet;
+      GeoCoord coord;
+
+      scanner.ReadConditionalCoord(coord,
+                                   isCoordSet);
+
+      if (isCoordSet) {
+        isSet[i]=true;
+        coords[i]=coord;
+      }
+      else {
+        isSet[i]=false;
+      }
+    }
+  }
+
+  Preprocess::Callback::PageRef Preprocess::Callback::GetCoordPage(PageId id)
+  {
+    if (currentPage && currentPage->id==id) {
+      return currentPage;
+    }
+
+    PageCacheIndex::iterator existingEntry=coordPageIndex.find(id);
+
+    if (existingEntry==coordPageIndex.end()) {
+      auto pageOffsetMapEntry=coordPageOffsetMap.find(id);
+
+      FileOffset pageOffset=coordPageCount*coordPageSize*coordByteSize;
+      PageRef page=std::make_shared<Page>(coordPageSize,pageOffset,id);
+
+      if (pageOffsetMapEntry!=coordPageOffsetMap.end()) {
+        coordWriter.Flush();
+        page->ReadPage(coordScanner);
+      }
+      else {
+        coordPageOffsetMap[id]=pageOffset;
+
+        coordPageCount++;
+      }
+
+      coordPageCache.push_front(page);
+      coordPageIndex[id]=coordPageCache.begin();
+
+      currentPage=page;
+
+      if (coordPageCache.size()>coordCacheSize) {
+        PageRef oldPage=coordPageCache.back();
+
+        oldPage->StorePage(coordWriter);
+
+        coordPageCache.pop_back();
+        coordPageIndex.erase(oldPage->id);
+      }
+    }
+    else {
+      coordPageCache.splice(coordPageCache.begin(),coordPageCache,existingEntry->second);
+      existingEntry->second=coordPageCache.begin();
+
+      currentPage=*existingEntry->second;
+    }
+
+    return currentPage;
   }
 
   void Preprocess::Callback::StoreCoord(OSMId id,
@@ -76,45 +158,9 @@ namespace osmscout {
     PageId     relatedId=id-std::numeric_limits<Id>::min();
     PageId     pageId=relatedId/coordPageSize;
     FileOffset coordPageIndex=relatedId%coordPageSize;
+    PageRef    page=GetCoordPage(pageId);
 
-    if (currentPageId!=std::numeric_limits<PageId>::max()) {
-      if (currentPageId==pageId) {
-        coords[coordPageIndex]=coord;
-        isSet[coordPageIndex]=true;
-
-        return;
-      }
-      else {
-        StoreCurrentPage();
-      }
-    }
-
-    CoordPageOffsetMap::const_iterator pageOffsetEntry=coordIndex.find(pageId);
-
-    // Do we write a coord to a page, we have not yet written and
-    // thus must begin a new page?
-    if (pageOffsetEntry==coordIndex.end()) {
-      isSet.assign(coordPageSize,false);
-
-      coords[coordPageIndex]=coord;
-      isSet[coordPageIndex]=true;
-
-      FileOffset pageOffset=coordPageCount*coordPageSize*coordByteSize;
-
-      currentPageId=pageId;
-      currentPageOffset=pageOffset;
-
-      pageOffsetEntry=coordIndex.insert(std::make_pair(pageId,pageOffset)).first;
-
-      coordPageCount++;
-
-      return;
-    }
-
-    // We have to update a coord in a page we have already written
-    coordWriter.SetPos(pageOffsetEntry->second+coordPageIndex*coordByteSize);
-
-    coordWriter.WriteCoord(coord);
+    currentPage->SetCoord(coordPageIndex,coord);
   }
 
   bool Preprocess::Callback::IsTurnRestriction(const TagMap& tags,
@@ -272,9 +318,7 @@ namespace osmscout {
     nodeSortingError(false),
     waySortingError(false),
     relationSortingError(false),
-    coordPageCount(0),
-    currentPageId(std::numeric_limits<PageId>::max()),
-    currentPageOffset(0)
+    coordPageCount(0)
   {
     minCoord.Set(90.0,180.0);
     maxCoord.Set(-90.0,-180.0);
@@ -317,10 +361,12 @@ namespace osmscout {
       coordWriter.Write(offset);
       coordWriter.FlushCurrentBlockWithZeros(coordPageSize*coordByteSize);
 
-      coordPageCount++;
+      coordScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                       CoordDataFile::COORD_DAT),
+                        FileScanner::FastRandom,
+                        true);
 
-      coords.resize(coordPageSize);
-      isSet.resize(coordPageSize);
+      coordPageCount++;
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -331,6 +377,7 @@ namespace osmscout {
       turnRestrictionWriter.CloseFailsafe();
       multipolygonWriter.CloseFailsafe();
       coordWriter.CloseFailsafe();
+      coordScanner.CloseFailsafe();
 
       return false;
     }
@@ -649,9 +696,13 @@ namespace osmscout {
 
   bool Preprocess::Callback::Cleanup(bool success)
   {
-    if (currentPageId!=0) {
-      StoreCurrentPage();
+    progress.SetAction("Flushing " + NumberToString(coordPageCache.size())+" coord pages to disk");
+    for (auto& pageEntry : coordPageCache) {
+      (*pageEntry).StorePage(coordWriter);
     }
+
+    coordPageCache.clear();
+    coordPageIndex.clear();
 
     nodeWriter.SetPos(0);
     nodeWriter.Write(nodeCount);
@@ -668,18 +719,18 @@ namespace osmscout {
     multipolygonWriter.SetPos(0);
     multipolygonWriter.Write(multipolygonCount);
 
-    coordWriter.SetPos(0);
-
-    coordWriter.Write(coordPageSize);
+    progress.SetAction("Writing coordinate page index");
 
     FileOffset coordIndexOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
 
-    coordWriter.Write(coordIndexOffset);
+    coordWriter.SetPos(0);
+    coordWriter.Write((uint32_t)coordPageSize);
+    coordWriter.WriteFileOffset(coordIndexOffset);
 
     coordWriter.SetPos(coordIndexOffset);
-    coordWriter.Write((uint32_t)coordIndex.size());
+    coordWriter.Write((uint32_t)coordPageOffsetMap.size());
 
-    for (const auto& entry :coordIndex) {
+    for (const auto& entry :coordPageOffsetMap) {
       coordWriter.Write(entry.first);
       coordWriter.Write(entry.second);
     }
@@ -689,6 +740,7 @@ namespace osmscout {
       wayWriter.Close();
       coastlineWriter.Close();
       coordWriter.Close();
+      coordScanner.Close();
       turnRestrictionWriter.Close();
       multipolygonWriter.Close();
     }
@@ -698,6 +750,7 @@ namespace osmscout {
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();
       coastlineWriter.CloseFailsafe();
+      coordScanner.CloseFailsafe();
       coordWriter.CloseFailsafe();
       turnRestrictionWriter.CloseFailsafe();
       multipolygonWriter.CloseFailsafe();
@@ -705,9 +758,11 @@ namespace osmscout {
       return false;
     }
 
+    progress.SetAction("Dump statistics");
+
     if (success) {
       progress.Info(std::string("Coords:           ")+NumberToString(coordCount));
-      progress.Info(std::string("Coord pages:      ")+NumberToString(coordIndex.size()));
+      progress.Info(std::string("Coord pages:      ")+NumberToString(coordPageOffsetMap.size()));
       progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
       progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
                     NumberToString(areaCount)+" "+

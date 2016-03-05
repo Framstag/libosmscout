@@ -46,10 +46,38 @@ namespace osmscout {
     static const char* RAWTURNRESTR_DAT;
 
   private:
-    typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
-
     class Callback : public PreprocessorCallback
     {
+    private:
+      struct Page
+      {
+        FileOffset             offset;
+        PageId                 id;
+        std::vector<GeoCoord>  coords;
+        std::vector<bool>      isSet;
+
+        Page(size_t coordPageSize, FileOffset offset, PageId id);
+
+        void SetCoord(size_t index, const GeoCoord& coord);
+        void StorePage(FileWriter& writer);
+        void ReadPage(FileScanner& scanner);
+      };
+
+      //! Reference to a page
+      typedef std::shared_ptr<Page>         PageRef;
+
+      //! Teh cache is just a list of pages
+      typedef std::list<PageRef>            PageCache;
+
+      //! References to a page in above list
+      typedef PageCache::iterator           PageCacheRef;
+
+      //! An index from PageIds to cache entries
+      typedef std::map<PageId,PageCacheRef>         PageCacheIndex;
+
+      //! Index off all PageIds to their FileOffsets
+      typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
+
     private:
       const TypeConfigRef    typeConfig;
       const ImportParameter& parameter;
@@ -79,12 +107,12 @@ namespace osmscout {
       bool                   relationSortingError;
 
       Id                     coordPageCount;
-      CoordPageOffsetMap     coordIndex;
+      PageCacheIndex         coordPageIndex;
+      PageCache              coordPageCache;
+      CoordPageOffsetMap     coordPageOffsetMap;
+      FileScanner            coordScanner;
       FileWriter             coordWriter;
-      PageId                 currentPageId;
-      FileOffset             currentPageOffset;
-      std::vector<GeoCoord>  coords;
-      std::vector<bool>      isSet;
+      PageRef                currentPage;
 
       GeoCoord               minCoord;
       GeoCoord               maxCoord;
@@ -94,7 +122,7 @@ namespace osmscout {
       std::vector<uint32_t>  wayStat;
 
     private:
-      void StoreCurrentPage();
+      PageRef GetCoordPage(PageId id);
       void StoreCoord(OSMId id,
                       const GeoCoord& coord);
 
