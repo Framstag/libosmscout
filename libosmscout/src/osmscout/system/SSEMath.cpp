@@ -16,12 +16,10 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
+
 #include <osmscout/private/Config.h>
 
-#include "osmscout/CoreFeatures.h"
-
 #ifdef OSMSCOUT_HAVE_SSE2
-#include <osmscout/system/SSEMathPublic.h>
 #include <osmscout/system/SSEMath.h>
 
 /* This file is the place to store the constant arrays the math functions need */

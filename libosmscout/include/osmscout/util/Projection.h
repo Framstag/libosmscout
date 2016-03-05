@@ -22,12 +22,12 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/system/SSEMathPublic.h>
-
 #include <osmscout/GeoCoord.h>
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
+
+#include <osmscout/system/SSEMathPublic.h>
 
 namespace osmscout {
 
