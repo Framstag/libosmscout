@@ -152,21 +152,21 @@ namespace osmscout {
 
     if (fseek(file,0L,SEEK_END)!=0) {
       log.Error() << "Cannot seek to end of file '" << filename << "' (" << strerror(errno) << ")";
-      throw OSMScoutFileIOException(filename,"Cannot seek to end of file");
+      throw IOException(filename,"Cannot seek to end of file");
     }
 
     size=ftell(file);
 
     if (size==-1) {
       log.Error() << "Cannot get size of file '" << filename << "' (" << strerror(errno) << ")";
-      throw OSMScoutFileIOException(filename,"Cannot get size of file");
+      throw IOException(filename,"Cannot get size of file");
     }
 
     this->size=(FileOffset)size;
 
     if (fseek(file,0L,SEEK_SET)!=0) {
       log.Error() << "Cannot seek to start of file '" << filename << "' (" << strerror(errno) << ")";
-      throw OSMScoutFileIOException(filename,"Cannot seek to start of file");
+      throw IOException(filename,"Cannot seek to start of file");
     }
 #endif
 
