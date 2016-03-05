@@ -55,7 +55,7 @@ namespace osmscout {
   const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
   const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
-  Preprocess::Callback::Page::Page(size_t coordPageSize, FileOffset offset, PageId id)
+  Preprocess::Callback::CoordPage::CoordPage(size_t coordPageSize,FileOffset offset,PageId id)
   : offset(offset),
     id (id)
   {
@@ -63,13 +63,13 @@ namespace osmscout {
     isSet.resize(coordPageSize,false);
   };
 
-  void Preprocess::Callback::Page::SetCoord(size_t index, const GeoCoord& coord)
+  void Preprocess::Callback::CoordPage::SetCoord(size_t index,const GeoCoord& coord)
   {
     coords[index]=coord;
     isSet[index]=true;
   }
 
-  void Preprocess::Callback::Page::StorePage(FileWriter& writer)
+  void Preprocess::Callback::CoordPage::StorePage(FileWriter& writer)
   {
     writer.SetPos(offset);
 
@@ -83,7 +83,7 @@ namespace osmscout {
     }
   }
 
-  void Preprocess::Callback::Page::ReadPage(FileScanner& scanner)
+  void Preprocess::Callback::CoordPage::ReadPage(FileScanner& scanner)
   {
     scanner.SetPos(offset);
 
@@ -104,19 +104,19 @@ namespace osmscout {
     }
   }
 
-  Preprocess::Callback::PageRef Preprocess::Callback::GetCoordPage(PageId id)
+  Preprocess::Callback::CoordPageRef Preprocess::Callback::GetCoordPage(PageId id)
   {
     if (currentPage && currentPage->id==id) {
       return currentPage;
     }
 
-    PageCacheIndex::iterator existingEntry=coordPageIndex.find(id);
+    CoordPageCacheIndex::iterator existingEntry=coordPageIndex.find(id);
 
     if (existingEntry==coordPageIndex.end()) {
       auto pageOffsetMapEntry=coordPageOffsetMap.find(id);
 
       FileOffset pageOffset=coordPageCount*coordPageSize*coordByteSize;
-      PageRef page=std::make_shared<Page>(coordPageSize,pageOffset,id);
+      CoordPageRef page=std::make_shared<CoordPage>(coordPageSize,pageOffset,id);
 
       if (pageOffsetMapEntry!=coordPageOffsetMap.end()) {
         coordWriter.Flush();
@@ -134,7 +134,7 @@ namespace osmscout {
       currentPage=page;
 
       if (coordPageCache.size()>coordCacheSize) {
-        PageRef oldPage=coordPageCache.back();
+        CoordPageRef oldPage=coordPageCache.back();
 
         oldPage->StorePage(coordWriter);
 
@@ -158,7 +158,7 @@ namespace osmscout {
     PageId     relatedId=id-std::numeric_limits<Id>::min();
     PageId     pageId=relatedId/coordPageSize;
     FileOffset coordPageIndex=relatedId%coordPageSize;
-    PageRef    page=GetCoordPage(pageId);
+    CoordPageRef page=GetCoordPage(pageId);
 
     currentPage->SetCoord(coordPageIndex,coord);
   }

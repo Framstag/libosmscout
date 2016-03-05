@@ -49,31 +49,32 @@ namespace osmscout {
     class Callback : public PreprocessorCallback
     {
     private:
-      struct Page
+      struct CoordPage
       {
         FileOffset             offset;
         PageId                 id;
         std::vector<GeoCoord>  coords;
         std::vector<bool>      isSet;
 
-        Page(size_t coordPageSize, FileOffset offset, PageId id);
+        CoordPage(size_t coordPageSize,FileOffset offset,PageId id);
 
         void SetCoord(size_t index, const GeoCoord& coord);
+
         void StorePage(FileWriter& writer);
         void ReadPage(FileScanner& scanner);
       };
 
       //! Reference to a page
-      typedef std::shared_ptr<Page>         PageRef;
+      typedef std::shared_ptr<CoordPage>            CoordPageRef;
 
       //! Teh cache is just a list of pages
-      typedef std::list<PageRef>            PageCache;
+      typedef std::list<CoordPageRef>               CoordPageCache;
 
       //! References to a page in above list
-      typedef PageCache::iterator           PageCacheRef;
+      typedef CoordPageCache::iterator              CoordPageCacheRef;
 
       //! An index from PageIds to cache entries
-      typedef std::map<PageId,PageCacheRef>         PageCacheIndex;
+      typedef std::map<PageId,CoordPageCacheRef>    CoordPageCacheIndex;
 
       //! Index off all PageIds to their FileOffsets
       typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
@@ -107,12 +108,12 @@ namespace osmscout {
       bool                   relationSortingError;
 
       Id                     coordPageCount;
-      PageCacheIndex         coordPageIndex;
-      PageCache              coordPageCache;
+      CoordPageCacheIndex    coordPageIndex;
+      CoordPageCache         coordPageCache;
       CoordPageOffsetMap     coordPageOffsetMap;
       FileScanner            coordScanner;
       FileWriter             coordWriter;
-      PageRef                currentPage;
+      CoordPageRef currentPage;
 
       GeoCoord               minCoord;
       GeoCoord               maxCoord;
@@ -122,7 +123,7 @@ namespace osmscout {
       std::vector<uint32_t>  wayStat;
 
     private:
-      PageRef GetCoordPage(PageId id);
+      CoordPageRef GetCoordPage(PageId id);
       void StoreCoord(OSMId id,
                       const GeoCoord& coord);
 
