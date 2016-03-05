@@ -99,7 +99,7 @@ void MapWidget::TriggerMapRendering()
     request.width=width();
     request.height=height();
 
-    dbThread->CancelPotentialRendering();
+    dbThread->CancelCurrentDataLoading();
 
     emit TriggerMapRenderingSignal(request);
 }

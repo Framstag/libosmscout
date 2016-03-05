@@ -199,10 +199,10 @@ namespace osmscout {
 
     void NotifyTileStateCallbacks(const TileRef& tile) const;
 
-    bool LoadMissingTileData(const AreaSearchParameter& parameter,
-                             const StyleConfig& styleConfig,
-                             std::list<TileRef>& tiles,
-                             bool async) const;
+    bool LoadMissingTileDataInternal(const AreaSearchParameter& parameter,
+                                     const StyleConfig& styleConfig,
+                                     std::list<TileRef>& tiles,
+                                     bool async) const;
 
   public:
     MapService(const DatabaseRef& database);

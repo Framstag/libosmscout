@@ -35,6 +35,8 @@
 
 #include <osmscout/util/Logger.h>
 
+Q_DECLARE_METATYPE(osmscout::TileRef)
+
 static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine)
@@ -61,6 +63,7 @@ int main(int argc, char* argv[])
 
   qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
+  qRegisterMetaType<osmscout::TileRef>();
 
   qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
   qmlRegisterType<Location>("net.sf.libosmscout.map", 1, 0, "Location");

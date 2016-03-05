@@ -718,10 +718,10 @@ namespace osmscout {
   /**
    * Load all missing data for the given tiles based on the given style config.
    */
-  bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
-                                       const StyleConfig& styleConfig,
-                                       std::list<TileRef>& tiles,
-                                       bool async) const
+  bool MapService::LoadMissingTileDataInternal(const AreaSearchParameter& parameter,
+                                               const StyleConfig& styleConfig,
+                                               std::list<TileRef>& tiles,
+                                               bool async) const
   {
     std::lock_guard<std::mutex>  lock(stateMutex);
 
@@ -831,6 +831,40 @@ namespace osmscout {
     return success;
   }
 
+  /**
+   * Load all missing data for the given tiles based on the given style config. The
+   * method returns, either after an error occured or all tiles have been successfully
+   * loaded.
+   */
+  bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
+                                       const StyleConfig& styleConfig,
+                                       std::list<TileRef>& tiles) const
+  {
+    return LoadMissingTileDataInternal(parameter,styleConfig,tiles,false);
+  }
+
+  /**
+   * Load all missing data for the given tiles based on the given style config. This method
+   * just triggers the loading but may return before all data has been loaded. Loading of tile
+   * data happens in the background. You have to register a callback to get notified
+   * about tile loading state.
+   *
+   * You can be sure, that callbacks are not called in the context of the calling thread.
+   */
+  bool MapService::LoadMissingTileDataAsync(const AreaSearchParameter& parameter,
+                                            const StyleConfig& styleConfig,
+                                            std::list<TileRef>& tiles) const
+  {
+    auto result=std::async(std::launch::async,
+                           &MapService::LoadMissingTileDataInternal,this,
+                           std::ref(parameter),
+                           std::ref(styleConfig),
+                           std::ref(tiles),
+                           true);
+
+    return result.get();
+    //return LoadMissingTileData(parameter,styleConfig,tiles,true);
+  }
 
   /**
    * Convert the data hold by the given tiles to the given MapData class instance.
@@ -907,31 +941,6 @@ namespace osmscout {
     if (copyTime.GetMilliseconds()>20) {
       log.Warn() << "Copying data from tile to MapData took " << copyTime.ResultString();
     }
-  }
-
-  /**
-   * Load all missing data for the given tiles based on the given style config. The
-   * method returns, either after an error occured or all tiles have been successfully
-   * loaded.
-   */
-  bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
-                                       const StyleConfig& styleConfig,
-                                       std::list<TileRef>& tiles) const
-  {
-    return LoadMissingTileData(parameter,styleConfig,tiles,false);
-  }
-
-  /**
-   * Load all missing data for the given tiles based on the given style config. This method
-   * just triggers the loading but may return before all data has been loaded. Loading of tile
-   * data happens in the background. You have to register a callback to get notified
-   * about tile loading state.
-   */
-  bool MapService::LoadMissingTileDataAsync(const AreaSearchParameter& parameter,
-                                            const StyleConfig& styleConfig,
-                                            std::list<TileRef>& tiles) const
-  {
-    return LoadMissingTileData(parameter,styleConfig,tiles,true);
   }
 
   /**

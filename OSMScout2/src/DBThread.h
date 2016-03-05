@@ -24,6 +24,8 @@
 #include <QThread>
 #include <QMetaType>
 #include <QMutex>
+#include <QTime>
+#include <QTimer>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
@@ -77,11 +79,17 @@ class DBThread : public QObject
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void HandleMapRenderingResult();
+  void TriggerInitialRendering();
+  void TriggerDrawMap();
   void Redraw();
+  void TileStatusChanged(const osmscout::TileRef& tile);
 
 public slots:
   void ToggleDaylight();
   void ReloadStyle();
+  void HandleInitialRenderingRequest();
+  void HandleTileStatusChanged(const osmscout::TileRef& changedTile);
+  void DrawMap();
   void TriggerMapRendering(const RenderMapRequest& request);
   void Initialize();
   void Finalize();
@@ -108,7 +116,12 @@ private:
   osmscout::MapPainterQt        *painter;
   QString                       iconDirectory;
 
+  QTime                         lastRendering;
+  QTimer                        pendingRenderingTimer;
+
   QImage                        *currentImage;
+  size_t                        currentWidth;
+  size_t                        currentHeight;
   double                        currentLat;
   double                        currentLon;
   double                        currentAngle;
@@ -120,7 +133,7 @@ private:
   double                        finishedAngle;
   osmscout::Magnification       finishedMagnification;
 
-  osmscout::BreakerRef          renderBreaker;
+  osmscout::BreakerRef          dataLoadingBreaker;
 
 private:
   DBThread();
@@ -129,12 +142,12 @@ private:
   void FreeMaps();
   bool AssureRouter(osmscout::Vehicle vehicle);
 
-  void TileStateCallback(const osmscout::TileRef& tile);
+  void TileStateCallback(const osmscout::TileRef& changedTile);
 
 public:
   void GetProjection(osmscout::MercatorProjection& projection);
 
-  void CancelPotentialRendering();
+  void CancelCurrentDataLoading();
 
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);
