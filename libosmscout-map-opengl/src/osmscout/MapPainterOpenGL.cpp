@@ -57,19 +57,19 @@ namespace osmscout {
 
     gluTessCallback(tesselator,
                     GLU_TESS_BEGIN,
-					(GLvoid(CALLBACK *)()) &tessalatorBeginCallback);
+                    (GLvoid(CALLBACK *)()) &tessalatorBeginCallback);
 
     gluTessCallback(tesselator,
                     GLU_TESS_VERTEX,
-					(GLvoid(CALLBACK *)()) &glVertex3dv);
+                    (GLvoid(CALLBACK *)()) &glVertex3dv);
 
     gluTessCallback(tesselator,
                     GLU_TESS_END,
-					(GLvoid(CALLBACK *)()) &tessalatorEndCallback);
+                    (GLvoid(CALLBACK *)()) &tessalatorEndCallback);
 
     gluTessCallback(tesselator,
                     GLU_TESS_ERROR,
-					(GLvoid(CALLBACK *)()) &tesselatorErrorCallback);
+                    (GLvoid(CALLBACK *)()) &tesselatorErrorCallback);
 
   }
 
