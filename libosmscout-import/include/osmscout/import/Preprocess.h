@@ -56,7 +56,7 @@ namespace osmscout {
         std::vector<GeoCoord>  coords;
         std::vector<bool>      isSet;
 
-        CoordPage(size_t coordPageSize,FileOffset offset,PageId id);
+        CoordPage(FileOffset offset,PageId id);
 
         void SetCoord(size_t index, const GeoCoord& coord);
 
@@ -113,7 +113,7 @@ namespace osmscout {
       CoordPageOffsetMap     coordPageOffsetMap;
       FileScanner            coordScanner;
       FileWriter             coordWriter;
-      CoordPageRef currentPage;
+      CoordPageRef           currentCoordPage;
 
       GeoCoord               minCoord;
       GeoCoord               maxCoord;

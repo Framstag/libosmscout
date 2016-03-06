@@ -44,7 +44,8 @@
 
 namespace osmscout {
 
-  static size_t coordPageSize=64;
+  static size_t coordPageSize=64; // *coordByteSize
+  static size_t coordPageSizeBytes=coordPageSize*coordByteSize;
   static size_t coordCacheSize=1000000;
 
   const char* Preprocess::BOUNDING_DAT="bounding.dat";
@@ -55,7 +56,7 @@ namespace osmscout {
   const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
   const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
-  Preprocess::Callback::CoordPage::CoordPage(size_t coordPageSize,FileOffset offset,PageId id)
+  Preprocess::Callback::CoordPage::CoordPage(FileOffset offset,PageId id)
   : offset(offset),
     id (id)
   {
@@ -87,7 +88,7 @@ namespace osmscout {
   {
     scanner.SetPos(offset);
 
-    for (size_t i=0; i<coords.size(); i++) {
+    for (size_t i=0; i<coordPageSize; i++) {
       bool     isCoordSet;
       GeoCoord coord;
 
@@ -106,23 +107,26 @@ namespace osmscout {
 
   Preprocess::Callback::CoordPageRef Preprocess::Callback::GetCoordPage(PageId id)
   {
-    if (currentPage && currentPage->id==id) {
-      return currentPage;
+    if (currentCoordPage && currentCoordPage->id==id) {
+      return currentCoordPage;
     }
 
     CoordPageCacheIndex::iterator existingEntry=coordPageIndex.find(id);
 
     if (existingEntry==coordPageIndex.end()) {
-      auto pageOffsetMapEntry=coordPageOffsetMap.find(id);
-
-      FileOffset pageOffset=coordPageCount*coordPageSize*coordByteSize;
-      CoordPageRef page=std::make_shared<CoordPage>(coordPageSize,pageOffset,id);
+      auto         pageOffsetMapEntry=coordPageOffsetMap.find(id);
+      CoordPageRef page;
 
       if (pageOffsetMapEntry!=coordPageOffsetMap.end()) {
+        page=std::make_shared<CoordPage>(pageOffsetMapEntry->second,id);
+
         coordWriter.Flush();
         page->ReadPage(coordScanner);
       }
       else {
+        FileOffset pageOffset=coordPageCount*coordPageSizeBytes;
+
+        page=std::make_shared<CoordPage>(pageOffset,id);
         coordPageOffsetMap[id]=pageOffset;
 
         coordPageCount++;
@@ -131,7 +135,7 @@ namespace osmscout {
       coordPageCache.push_front(page);
       coordPageIndex[id]=coordPageCache.begin();
 
-      currentPage=page;
+      currentCoordPage=page;
 
       if (coordPageCache.size()>coordCacheSize) {
         CoordPageRef oldPage=coordPageCache.back();
@@ -146,21 +150,21 @@ namespace osmscout {
       coordPageCache.splice(coordPageCache.begin(),coordPageCache,existingEntry->second);
       existingEntry->second=coordPageCache.begin();
 
-      currentPage=*existingEntry->second;
+      currentCoordPage=*existingEntry->second;
     }
 
-    return currentPage;
+    return currentCoordPage;
   }
 
   void Preprocess::Callback::StoreCoord(OSMId id,
                                         const GeoCoord& coord)
   {
-    PageId     relatedId=id-std::numeric_limits<Id>::min();
-    PageId     pageId=relatedId/coordPageSize;
-    FileOffset coordPageIndex=relatedId%coordPageSize;
+    PageId       relatedId=id-std::numeric_limits<Id>::min();
+    PageId       pageId=relatedId/coordPageSize;
+    FileOffset   coordPageIndex=relatedId%coordPageSize;
     CoordPageRef page=GetCoordPage(pageId);
 
-    currentPage->SetCoord(coordPageIndex,coord);
+    page->SetCoord(coordPageIndex,coord);
   }
 
   bool Preprocess::Callback::IsTurnRestriction(const TagMap& tags,
@@ -355,11 +359,9 @@ namespace osmscout {
       coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        CoordDataFile::COORD_DAT));
 
-      FileOffset offset=0;
-
       coordWriter.Write(coordPageSize);
-      coordWriter.Write(offset);
-      coordWriter.FlushCurrentBlockWithZeros(coordPageSize*coordByteSize);
+      coordWriter.Write((FileOffset)0);
+      coordWriter.FlushCurrentBlockWithZeros(coordPageSizeBytes);
 
       coordScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        CoordDataFile::COORD_DAT),
@@ -406,9 +408,10 @@ namespace osmscout {
 
     coordCount++;
 
+    GeoCoord coord(lat,lon);
+
     StoreCoord(id,
-               GeoCoord(lat,
-                        lon));
+               coord);
 
     TypeInfoRef type=typeConfig->GetNodeType(tagMap);
 
@@ -721,7 +724,7 @@ namespace osmscout {
 
     progress.SetAction("Writing coordinate page index");
 
-    FileOffset coordIndexOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
+    FileOffset coordIndexOffset=coordPageCount*coordPageSizeBytes;
 
     coordWriter.SetPos(0);
     coordWriter.Write((uint32_t)coordPageSize);
@@ -830,6 +833,7 @@ namespace osmscout {
 
     description.AddProvidedFile(BOUNDING_DAT);
 
+    //description.AddProvidedTemporaryFile(USE_DAT);
     description.AddProvidedDebuggingFile(CoordDataFile::COORD_DAT);
 
     description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
