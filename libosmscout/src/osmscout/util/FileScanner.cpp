@@ -802,7 +802,7 @@ namespace osmscout {
     if (buffer!=NULL) {
       if (offset>=size) {
         hasError=true;
-        throw IOException(filename,"Cannot read int64_t","Cannot read beyond end of file");
+        throw IOException(filename,"Cannot read uint8_t","Cannot read beyond end of file");
       }
 
       number=(uint8_t)buffer[offset];
@@ -816,7 +816,7 @@ namespace osmscout {
     hasError=fread(&number,1,1,file)!=1;
 
     if (hasError) {
-      throw IOException(filename,"Cannot read int64_t");
+      throw IOException(filename,"Cannot read uint8_t");
     }
   }
 
