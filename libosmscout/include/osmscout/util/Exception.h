@@ -25,6 +25,13 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#if defined(_MSC_VER)
+#include <yvals.h>
+#define OSMSCOUT_NOEXCEPT _NOEXCEPT
+#else
+#define OSMSCOUT_NOEXCEPT noexcept
+#endif
+
 namespace osmscout {
 
   class OSMSCOUT_API OSMScoutException : public std::exception
@@ -48,7 +55,7 @@ namespace osmscout {
                 const std::string& semanticError,
                 const std::string& errorMsg);
 
-    const char* what() const noexcept;
+	const char* what() const OSMSCOUT_NOEXCEPT;
 
     std::string GetFilename() const;
     std::string GetSemanticError() const;
