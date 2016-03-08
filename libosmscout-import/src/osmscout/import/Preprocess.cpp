@@ -29,6 +29,7 @@
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/RawCoastline.h>
+#include <osmscout/import/RawCoord.h>
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
 
@@ -44,128 +45,14 @@
 
 namespace osmscout {
 
-  static size_t coordPageSize=64; // *coordByteSize
-  static size_t coordPageSizeBytes=coordPageSize*coordByteSize;
-  static size_t coordCacheSize=1000000;
-
   const char* Preprocess::BOUNDING_DAT="bounding.dat";
   const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
+  const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
   const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
   const char* Preprocess::RAWWAYS_DAT="rawways.dat";
   const char* Preprocess::RAWRELS_DAT="rawrels.dat";
   const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
   const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
-
-  Preprocess::Callback::CoordPage::CoordPage(FileOffset offset,PageId id)
-  : offset(offset),
-    id (id)
-  {
-    coords.resize(coordPageSize);
-    isSet.resize(coordPageSize,false);
-  };
-
-  void Preprocess::Callback::CoordPage::SetCoord(size_t index,const GeoCoord& coord)
-  {
-    coords[index]=coord;
-    isSet[index]=true;
-  }
-
-  void Preprocess::Callback::CoordPage::StorePage(FileWriter& writer)
-  {
-    writer.SetPos(offset);
-
-    for (size_t i=0; i<coordPageSize; i++) {
-      if (!isSet[i]) {
-        writer.WriteInvalidCoord();
-      }
-      else {
-        writer.WriteCoord(coords[i]);
-      }
-    }
-  }
-
-  void Preprocess::Callback::CoordPage::ReadPage(FileScanner& scanner)
-  {
-    scanner.SetPos(offset);
-
-    for (size_t i=0; i<coordPageSize; i++) {
-      bool     isCoordSet;
-      GeoCoord coord;
-
-      scanner.ReadConditionalCoord(coord,
-                                   isCoordSet);
-
-      if (isCoordSet) {
-        isSet[i]=true;
-        coords[i]=coord;
-      }
-      else {
-        isSet[i]=false;
-      }
-    }
-  }
-
-  Preprocess::Callback::CoordPageRef Preprocess::Callback::GetCoordPage(PageId id)
-  {
-    if (currentCoordPage && currentCoordPage->id==id) {
-      return currentCoordPage;
-    }
-
-    CoordPageCacheIndex::iterator existingEntry=coordPageIndex.find(id);
-
-    if (existingEntry==coordPageIndex.end()) {
-      auto         pageOffsetMapEntry=coordPageOffsetMap.find(id);
-      CoordPageRef page;
-
-      if (pageOffsetMapEntry!=coordPageOffsetMap.end()) {
-        page=std::make_shared<CoordPage>(pageOffsetMapEntry->second,id);
-
-        coordWriter.Flush();
-        page->ReadPage(coordScanner);
-      }
-      else {
-        FileOffset pageOffset=coordPageCount*coordPageSizeBytes;
-
-        page=std::make_shared<CoordPage>(pageOffset,id);
-        coordPageOffsetMap[id]=pageOffset;
-
-        coordPageCount++;
-      }
-
-      coordPageCache.push_front(page);
-      coordPageIndex[id]=coordPageCache.begin();
-
-      currentCoordPage=page;
-
-      if (coordPageCache.size()>coordCacheSize) {
-        CoordPageRef oldPage=coordPageCache.back();
-
-        oldPage->StorePage(coordWriter);
-
-        coordPageCache.pop_back();
-        coordPageIndex.erase(oldPage->id);
-      }
-    }
-    else {
-      coordPageCache.splice(coordPageCache.begin(),coordPageCache,existingEntry->second);
-      existingEntry->second=coordPageCache.begin();
-
-      currentCoordPage=*existingEntry->second;
-    }
-
-    return currentCoordPage;
-  }
-
-  void Preprocess::Callback::StoreCoord(OSMId id,
-                                        const GeoCoord& coord)
-  {
-    PageId       relatedId=id-std::numeric_limits<Id>::min();
-    PageId       pageId=relatedId/coordPageSize;
-    FileOffset   coordPageIndex=relatedId%coordPageSize;
-    CoordPageRef page=GetCoordPage(pageId);
-
-    page->SetCoord(coordPageIndex,coord);
-  }
 
   bool Preprocess::Callback::IsTurnRestriction(const TagMap& tags,
                                                TurnRestriction::Type& type) const
@@ -321,8 +208,7 @@ namespace osmscout {
     lastRelationId(std::numeric_limits<OSMId>::min()),
     nodeSortingError(false),
     waySortingError(false),
-    relationSortingError(false),
-    coordPageCount(0)
+    relationSortingError(false)
   {
     minCoord.Set(90.0,180.0);
     maxCoord.Set(-90.0,-180.0);
@@ -336,6 +222,10 @@ namespace osmscout {
   bool Preprocess::Callback::Initialize()
   {
     try {
+      rawCoordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      RAWCOORDS_DAT));
+      rawCoordWriter.Write(coordCount);
+
       nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       RAWNODES_DAT));
       nodeWriter.Write(nodeCount);
@@ -355,31 +245,16 @@ namespace osmscout {
       multipolygonWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                               RAWRELS_DAT));
       multipolygonWriter.Write(multipolygonCount);
-
-      coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       CoordDataFile::COORD_DAT));
-
-      coordWriter.Write(coordPageSize);
-      coordWriter.Write((FileOffset)0);
-      coordWriter.FlushCurrentBlockWithZeros(coordPageSizeBytes);
-
-      coordScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       CoordDataFile::COORD_DAT),
-                        FileScanner::FastRandom,
-                        true);
-
-      coordPageCount++;
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
 
+      rawCoordWriter.CloseFailsafe();
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();
       coastlineWriter.CloseFailsafe();
       turnRestrictionWriter.CloseFailsafe();
       multipolygonWriter.CloseFailsafe();
-      coordWriter.CloseFailsafe();
-      coordScanner.CloseFailsafe();
 
       return false;
     }
@@ -406,12 +281,16 @@ namespace osmscout {
     maxCoord.Set(std::max(maxCoord.GetLat(),lat),
                  std::max(maxCoord.GetLon(),lon));
 
-    coordCount++;
-
     GeoCoord coord(lat,lon);
 
-    StoreCoord(id,
-               coord);
+    RawCoord rawCoord;
+
+    rawCoord.SetId(id);
+    rawCoord.SetCoord(coord);
+
+    rawCoord.Write(*typeConfig,rawCoordWriter);
+
+    coordCount++;
 
     TypeInfoRef type=typeConfig->GetNodeType(tagMap);
 
@@ -699,13 +578,8 @@ namespace osmscout {
 
   bool Preprocess::Callback::Cleanup(bool success)
   {
-    progress.SetAction("Flushing " + NumberToString(coordPageCache.size())+" coord pages to disk");
-    for (auto& pageEntry : coordPageCache) {
-      (*pageEntry).StorePage(coordWriter);
-    }
-
-    coordPageCache.clear();
-    coordPageIndex.clear();
+    rawCoordWriter.SetPos(0);
+    rawCoordWriter.Write(coordCount);
 
     nodeWriter.SetPos(0);
     nodeWriter.Write(nodeCount);
@@ -722,39 +596,21 @@ namespace osmscout {
     multipolygonWriter.SetPos(0);
     multipolygonWriter.Write(multipolygonCount);
 
-    progress.SetAction("Writing coordinate page index");
-
-    FileOffset coordIndexOffset=coordPageCount*coordPageSizeBytes;
-
-    coordWriter.SetPos(0);
-    coordWriter.Write((uint32_t)coordPageSize);
-    coordWriter.WriteFileOffset(coordIndexOffset);
-
-    coordWriter.SetPos(coordIndexOffset);
-    coordWriter.Write((uint32_t)coordPageOffsetMap.size());
-
-    for (const auto& entry :coordPageOffsetMap) {
-      coordWriter.Write(entry.first);
-      coordWriter.Write(entry.second);
-    }
-
     try {
+      rawCoordWriter.Close();
       nodeWriter.Close();
       wayWriter.Close();
       coastlineWriter.Close();
-      coordWriter.Close();
-      coordScanner.Close();
       turnRestrictionWriter.Close();
       multipolygonWriter.Close();
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
 
+      rawCoordWriter.CloseFailsafe();
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();
       coastlineWriter.CloseFailsafe();
-      coordScanner.CloseFailsafe();
-      coordWriter.CloseFailsafe();
       turnRestrictionWriter.CloseFailsafe();
       multipolygonWriter.CloseFailsafe();
 
@@ -765,7 +621,6 @@ namespace osmscout {
 
     if (success) {
       progress.Info(std::string("Coords:           ")+NumberToString(coordCount));
-      progress.Info(std::string("Coord pages:      ")+NumberToString(coordPageOffsetMap.size()));
       progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
       progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
                     NumberToString(areaCount)+" "+
@@ -833,10 +688,8 @@ namespace osmscout {
 
     description.AddProvidedFile(BOUNDING_DAT);
 
-    //description.AddProvidedTemporaryFile(USE_DAT);
-    description.AddProvidedDebuggingFile(CoordDataFile::COORD_DAT);
-
     description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
+    description.AddProvidedTemporaryFile(RAWCOORDS_DAT);
     description.AddProvidedTemporaryFile(RAWNODES_DAT);
     description.AddProvidedTemporaryFile(RAWWAYS_DAT);
     description.AddProvidedTemporaryFile(RAWRELS_DAT);

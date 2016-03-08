@@ -184,7 +184,8 @@ namespace osmscout {
                                 double cellMinLon,
                                 bool coast);
 
-    bool LoadCoastlines(const ImportParameter& parameter,
+    bool LoadCoastlines(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
                         Progress& progress,
                         std::list<CoastRef>& coastlines);
 

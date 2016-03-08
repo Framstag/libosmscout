@@ -76,7 +76,7 @@ namespace osmscout {
                   const TypeConfig& typeConfig,
                   FileWriter& writer,
                   uint32_t& writtenWayCount,
-                  const CoordDataFile::CoordResultMap& coordsMap,
+                  const CoordDataFile::ResultMap& coordsMap,
                   const RawWay& rawWay);
 
     bool HandleLowMemoryFallback(const ImportParameter& parameter,

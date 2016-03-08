@@ -1190,20 +1190,20 @@ namespace osmscout {
     maxY=-std::numeric_limits<double>::max();
 
     for (const auto& coord : coords) {
-      minX=std::min(minX,coord.x);
-      minY=std::min(minY,coord.y);
+      minX=std::min(minX,coord.GetX());
+      minY=std::min(minY,coord.GetY());
 
-      maxX=std::max(maxX,coord.x);
-      maxY=std::max(maxY,coord.y);
+      maxX=std::max(maxX,coord.GetX());
+      maxY=std::max(maxY,coord.GetY());
     }
   }
 
-  void PolygonPrimitive::AddCoord(const Coord& coord)
+  void PolygonPrimitive::AddCoord(const Vertex2D& coord)
   {
     coords.push_back(coord);
   }
 
-  RectanglePrimitive::RectanglePrimitive(const Coord& topLeft,
+  RectanglePrimitive::RectanglePrimitive(const Vertex2D& topLeft,
                                          double width,
                                          double height,
                                          const FillStyleRef& fillStyle)
@@ -1220,14 +1220,14 @@ namespace osmscout {
                                           double& maxX,
                                           double& maxY) const
   {
-    minX=topLeft.x;
-    minY=topLeft.y-height;
+    minX=topLeft.GetX();
+    minY=topLeft.GetY()-height;
 
-    maxX=topLeft.x+width;
-    maxY=topLeft.y;
+    maxX=topLeft.GetX()+width;
+    maxY=topLeft.GetY();
   }
 
-  CirclePrimitive::CirclePrimitive(const Coord& center,
+  CirclePrimitive::CirclePrimitive(const Vertex2D& center,
                                    double radius,
                                    const FillStyleRef& fillStyle)
   : DrawPrimitive(fillStyle),
@@ -1242,11 +1242,11 @@ namespace osmscout {
                                        double& maxX,
                                        double& maxY) const
   {
-    minX=center.x-radius;
-    minY=center.y-radius;
+    minX=center.GetX()-radius;
+    minY=center.GetY()-radius;
 
-    maxX=center.x+radius;
-    maxY=center.y+radius;
+    maxX=center.GetX()+radius;
+    maxY=center.GetY()+radius;
   }
 
   Symbol::Symbol(const std::string& name)

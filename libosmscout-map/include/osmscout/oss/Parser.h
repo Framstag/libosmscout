@@ -26,7 +26,7 @@
 #include <list>
 #include <sstream>
 
-#include <osmscout/Coord.h>
+#include <osmscout/Pixel.h>
 
 #include <osmscout/TypeConfig.h>
 
@@ -157,6 +157,7 @@ inline size_t GetHexDigitValue(char c)
   }
 
   assert(false);
+  return 0;
 }
 
 inline void ToRGBA(const std::string& str, Color& color)
@@ -201,7 +202,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void POLYGON(Symbol& symbol);
 	void RECTANGLE(Symbol& symbol);
 	void CIRCLE(Symbol& symbol);
-	void COORD(Coord& coord);
+	void COORD(Vertex2D& coord);
 	void FILLSTYLEATTR(FillPartialStyle& style);
 	void UDOUBLE(double& value);
 	void DOUBLE(double& value);

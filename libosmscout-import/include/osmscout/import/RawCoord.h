@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_COORD_H
-#define OSMSCOUT_COORD_H
+#ifndef OSMSCOUT_IMPORT_RAWCOORD_H
+#define OSMSCOUT_IMPORT_RAWCOORD_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2013  Tim Teulings
+  Copyright (C) 2016  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/private/CoreImportExport.h>
-
-#include <osmscout/system/Types.h>
-
 #include <osmscout/GeoCoord.h>
 #include <osmscout/TypeConfig.h>
 
@@ -32,58 +28,19 @@
 
 namespace osmscout {
 
-  /**
-   * Resolved and enhanced OSM geo coordinate
-   */
-  struct OSMSCOUT_API Coord
+  class RawCoord
   {
   private:
-    FileOffset fileOffset;
-    OSMId      id;
-    GeoCoord   coord;
+    OSMId    id;
+    GeoCoord coord;
 
   public:
-    /**
-     * The default constructor
-     */
-    inline Coord()
-    {
-      // no code
-    }
-
-    inline Coord(OSMId id, const GeoCoord& coord)
-    : id(id),
-      coord(coord)
-    {
-      // no code
-    }
-
-    inline FileOffset GetFileOffset() const
-    {
-      return fileOffset;
-    }
-
-    inline void SetId(OSMId id)
-    {
-      this->id=id;
-    }
+    RawCoord();
+    virtual ~RawCoord();
 
     inline OSMId GetId() const
     {
       return id;
-    }
-
-    /**
-     * Returns the libosmscout-internal substitution id for the given OSMId
-     */
-    inline Id GetOSMScoutId() const
-    {
-      return (fileOffset-sizeof(uint32_t))/coordByteSize;
-    }
-
-    inline void SetCoord(const GeoCoord& coord)
-    {
-      this->coord=coord;
     }
 
     inline const GeoCoord& GetCoord() const
@@ -91,23 +48,31 @@ namespace osmscout {
       return coord;
     }
 
-    inline bool operator==(const Coord& other) const
+    inline bool IsIdentical(const RawCoord& other) const
+    {
+      return id==other.id;
+    }
+
+    inline bool IsSame(const RawCoord& other) const
     {
       return coord==other.coord;
     }
 
-    inline bool operator<(const Coord& other) const
+    inline bool IsEqual(const RawCoord& other) const
     {
-      return coord<other.coord;
+      return id==other.id || coord==other.coord;
     }
 
+    void SetId(OSMId id);
+
+    void SetCoord(const GeoCoord& coord);
     void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);
     void Write(const TypeConfig& typeConfig,
-              FileWriter& writer) const;
+               FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<Coord> CoordRef;
+  typedef std::shared_ptr<RawCoord> RawCoordRef;
 }
 
 #endif

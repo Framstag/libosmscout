@@ -389,7 +389,7 @@ void Parser::POLYGON(Symbol& symbol) {
 		StyleFilter         filter;
 		FillPartialStyle    style;
 		PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(style.style);
-		Coord               coord;
+		Vertex2D            coord;
 		
 		COORD(coord);
 		polygon->AddCoord(coord); 
@@ -415,7 +415,7 @@ void Parser::RECTANGLE(Symbol& symbol) {
 		Expect(23 /* "RECTANGLE" */);
 		StyleFilter       filter;
 		FillPartialStyle  style;
-		Coord             topLeft;
+		Vertex2D          topLeft;
 		double            width;
 		double            height;
 		
@@ -440,7 +440,7 @@ void Parser::RECTANGLE(Symbol& symbol) {
 void Parser::CIRCLE(Symbol& symbol) {
 		while (!(la->kind == _EOF || la->kind == 25 /* "CIRCLE" */)) {SynErr(104); Get();}
 		Expect(25 /* "CIRCLE" */);
-		Coord             center;
+		Vertex2D          center;
 		double            radius;
 		StyleFilter       filter;
 		FillPartialStyle  style;
@@ -461,14 +461,14 @@ void Parser::CIRCLE(Symbol& symbol) {
 		
 }
 
-void Parser::COORD(Coord& coord) {
+void Parser::COORD(Vertex2D& coord) {
 		double x;
 		double y;
 		
 		DOUBLE(x);
 		Expect(20 /* "," */);
 		DOUBLE(y);
-		coord=Coord(x,y); 
+		coord=Vertex2D(x,y); 
 }
 
 void Parser::FILLSTYLEATTR(FillPartialStyle& style) {

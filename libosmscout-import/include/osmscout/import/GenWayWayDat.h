@@ -26,6 +26,7 @@
 
 #include <osmscout/Way.h>
 
+#include <osmscout/Coord.h>
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/TurnRestriction.h>
@@ -88,11 +89,11 @@ namespace osmscout {
                    std::list<RawWayRef>& ways,
                    std::multimap<OSMId,TurnRestrictionRef>& restrictions);
 
-    void WriteWay(Progress& progress,
+    bool WriteWay(Progress& progress,
                   const TypeConfig& typeConfig,
                   FileWriter& writer,
                   uint32_t& writtenWayCount,
-                  const CoordDataFile::CoordResultMap& coordsMap,
+                  const CoordDataFile::ResultMap& coordsMap,
                   const RawWay& rawWay);
 
     bool HandleLowMemoryFallback(Progress& progress,

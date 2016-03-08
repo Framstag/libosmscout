@@ -453,11 +453,11 @@ namespace osmscout {
     return true;
   }
 
-  void WayWayDataGenerator::WriteWay(Progress& progress,
+  bool WayWayDataGenerator::WriteWay(Progress& progress,
                                      const TypeConfig& typeConfig,
                                      FileWriter& writer,
                                      uint32_t& writtenWayCount,
-                                     const CoordDataFile::CoordResultMap& coordsMap,
+                                     const CoordDataFile::ResultMap& coordsMap,
                                      const RawWay& rawWay)
   {
     Way   way;
@@ -470,7 +470,7 @@ namespace osmscout {
 
     bool success=true;
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
-      CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(rawWay.GetNodeId(n));
+      auto coord=coordsMap.find(rawWay.GetNodeId(n));
 
       if (coord==coordsMap.end()) {
         progress.Error("Cannot resolve node with id "+
@@ -481,18 +481,18 @@ namespace osmscout {
         break;
       }
 
-      way.ids[n]=coord->second.point.GetId();
-      way.nodes[n]=coord->second.point.GetCoords();
+      way.ids[n]=coord->second->GetOSMScoutId();
+      way.nodes[n]=coord->second->GetCoord();
     }
 
     if (!success) {
-      return;
+      return false;
     }
 
     if (!IsValidToWrite(way.nodes)) {
       progress.Error("Way coordinates are not dense enough to be written for Way "+
                      NumberToString(wayId));
-      return;
+      return false;
     }
 
     writer.Write((uint8_t)osmRefWay);
@@ -501,6 +501,8 @@ namespace osmscout {
               writer);
 
     writtenWayCount++;
+
+    return true;
   }
 
   bool WayWayDataGenerator::HandleLowMemoryFallback(Progress& progress,
@@ -544,26 +546,29 @@ namespace osmscout {
 
       collectedAreasCount++;
 
-      std::set<OSMId>               nodeIds;
-      CoordDataFile::CoordResultMap coordsMap;
+      std::set<OSMId>          nodeIds;
+      CoordDataFile::ResultMap coordsMap;
 
       for (size_t n=0; n<way->GetNodeCount(); n++) {
         nodeIds.insert(way->GetNodeId(n));
       }
 
-      if (!coordDataFile.Get(nodeIds,coordsMap)) {
-        std::cerr << "Cannot read nodes!" << std::endl;
+      if (!coordDataFile.Get(nodeIds,
+                             coordsMap)) {
+        progress.Error("Cannot read nodes!");
         return false;
       }
 
       nodeIds.clear();
 
-      WriteWay(progress,
-               typeConfig,
-               writer,
-               writtenWayCount,
-               coordsMap,
-               *way);
+      if (!WriteWay(progress,
+                    typeConfig,
+                    writer,
+                    writtenWayCount,
+                    coordsMap,
+                    *way)) {
+        return false;
+      }
     }
 
     progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(types.Size())+" types");
@@ -624,11 +629,15 @@ namespace osmscout {
       return false;
     }
 
-    CoordDataFile     coordDataFile;
+    CoordDataFile coordDataFile(parameter.GetCoordIndexCacheSize());
 
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+    if (!coordDataFile.Open(typeConfig,
+                            parameter.GetDestinationDirectory(),
+                            FileScanner::FastRandom,
+                            true,
+                            FileScanner::FastRandom,
                             parameter.GetCoordDataMemoryMaped())) {
-      progress.Error("Cannot open file '"+coordDataFile.GetFilename()+"'!");
+      std::cerr << "Cannot open coord data file!" << std::endl;
       return false;
     }
 
@@ -688,8 +697,8 @@ namespace osmscout {
 
         progress.SetAction("Collecting node ids");
 
-        std::set<OSMId>               nodeIds;
-        CoordDataFile::CoordResultMap coordsMap;
+        std::set<OSMId>          nodeIds;
+        CoordDataFile::ResultMap coordsMap;
 
         for (size_t type=0; type<waysByType.size(); type++) {
           for (const auto &rawWay : waysByType[type]) {
@@ -700,8 +709,11 @@ namespace osmscout {
         }
 
         progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
-        if (!coordDataFile.Get(nodeIds,coordsMap)) {
-          std::cerr << "Cannot read nodes!" << std::endl;
+
+        if (!coordDataFile.Get(nodeIds,
+                               coordsMap)) {
+          progress.Error("Cannot read nodes");
+
           return false;
         }
 
@@ -711,12 +723,14 @@ namespace osmscout {
 
         for (size_t type=0; type<waysByType.size(); type++) {
           for (const auto &rawWay : waysByType[type]) {
-            WriteWay(progress,
-                     *typeConfig,
-                     wayWriter,
-                     writtenWayCount,
-                     coordsMap,
-                     *rawWay);
+            if (!WriteWay(progress,
+                          *typeConfig,
+                          wayWriter,
+                          writtenWayCount,
+                          coordsMap,
+                          *rawWay)) {
+              return false;
+            }
           }
 
           waysByType[type].clear();

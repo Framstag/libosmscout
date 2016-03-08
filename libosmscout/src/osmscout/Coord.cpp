@@ -20,4 +20,21 @@
 #include <osmscout/Coord.h>
 
 namespace osmscout {
+
+
+  void Coord::Read(const TypeConfig& /*typeConfig*/,
+                   FileScanner& scanner)
+  {
+    fileOffset=scanner.GetPos();
+
+    scanner.Read(id);
+    scanner.ReadCoord(coord);
+  }
+
+  void Coord::Write(const TypeConfig& /*typeConfig*/,
+                    FileWriter& writer) const
+  {
+    writer.Write(id);
+    writer.WriteCoord(coord);
+  }
 }

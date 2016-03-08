@@ -652,15 +652,15 @@ namespace osmscout {
             if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
                 PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
                 CGContextBeginPath(cg);
-                for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+                for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
                      pixel!=polygon->GetCoords().end();
                      ++pixel) {
                     if (pixel==polygon->GetCoords().begin()) {
-                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                                             y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                                             y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
                     } else {
-                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                                                y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                                                y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
                     }
                 }
                 
@@ -668,8 +668,8 @@ namespace osmscout {
             }
             else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
                 RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX),
-                                         y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY),
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
+                                         y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
                                          projection.ConvertWidthToPixel(rectangle->GetWidth()),
                                          projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
@@ -677,8 +677,8 @@ namespace osmscout {
             }
             else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
                 CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
-                                         y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY),
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
+                                         y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
                                          projection.ConvertWidthToPixel(circle->GetRadius()),
                                          projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);

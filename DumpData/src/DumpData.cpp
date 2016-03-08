@@ -251,17 +251,18 @@ static void DumpIndent(size_t indent)
   }
 }
 
-static void DumpCoord(const osmscout::Point& coord)
+static void DumpCoord(const osmscout::Coord& coord)
 {
 
   std::cout << "Coord {" << std::endl;
   std::cout << "  id: " << coord.GetId() << std::endl;
+  std::cout << "  OSMScoutId: " << coord.GetOSMScoutId() << std::endl;
 
   std::streamsize         oldPrecision=std::cout.precision(5);
   std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
 
-  std::cout << "  lat: " << coord.GetLat() << std::endl;
-  std::cout << "  lon: " << coord.GetLon() << std::endl;
+  std::cout << "  lat: " << coord.GetCoord().GetLat() << std::endl;
+  std::cout << "  lon: " << coord.GetCoord().GetLon() << std::endl;
 
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);
@@ -625,7 +626,7 @@ int main(int argc, char* argv[])
     std::locale globalLocale("");
   }
   catch (std::runtime_error) {
-	std::cerr << "ERROR: Cannot set locale" << std::endl;
+    std::cerr << "ERROR: Cannot set locale" << std::endl;
   }  
   
   if (!ParseArguments(argc,
@@ -690,10 +691,10 @@ int main(int argc, char* argv[])
     }
   }
 
-  osmscout::CoordDataFile::CoordResultMap coordsMap;
-  std::vector<osmscout::NodeRef>          nodes;
-  std::vector<osmscout::AreaRef>          areas;
-  std::vector<osmscout::WayRef>           ways;
+  osmscout::CoordDataFile::ResultMap coordsMap;
+  std::vector<osmscout::NodeRef>     nodes;
+  std::vector<osmscout::AreaRef>     areas;
+  std::vector<osmscout::WayRef>      ways;
 
   if (!coordIds.empty()) {
 
@@ -757,7 +758,7 @@ int main(int argc, char* argv[])
   for (std::set<osmscout::OSMId>::const_iterator id=coordIds.begin();
        id!=coordIds.end();
        ++id) {
-    osmscout::CoordDataFile::CoordResultMap::const_iterator coordsEntry;
+    osmscout::CoordDataFile::ResultMap::const_iterator coordsEntry;
 
     coordsEntry=coordsMap.find(*id);
 
@@ -766,7 +767,7 @@ int main(int argc, char* argv[])
         std::cout << std::endl;
       }
 
-      DumpCoord(coordsEntry->second.point);
+      DumpCoord(*coordsEntry->second);
     }
     else {
       std::cerr << "Cannot find coord with id " << *id << std::endl;

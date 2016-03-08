@@ -52,6 +52,7 @@ namespace osmscout {
 
     description.AddRequiredFile(Preprocess::DISTRIBUTION_DAT);
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(CoordDataFile::COORD_IDX);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(RelAreaDataGenerator::WAYAREABLACK_DAT);
 
@@ -212,7 +213,7 @@ namespace osmscout {
                                        const TypeConfig& typeConfig,
                                        FileWriter& writer,
                                        uint32_t& writtenWayCount,
-                                       const CoordDataFile::CoordResultMap& coordsMap,
+                                       const CoordDataFile::ResultMap& coordsMap,
                                        const RawWay& rawWay)
   {
     Area       area;
@@ -227,7 +228,7 @@ namespace osmscout {
 
     bool success=true;
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
-      CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(rawWay.GetNodeId(n));
+      CoordDataFile::ResultMap::const_iterator coord=coordsMap.find(rawWay.GetNodeId(n));
 
       if (coord==coordsMap.end()) {
         progress.Error("Cannot resolve node with id "+
@@ -238,8 +239,8 @@ namespace osmscout {
         break;
       }
 
-      ring.ids[n]=coord->second.point.GetId();
-      ring.nodes[n]=coord->second.point.GetCoords();
+      ring.ids[n]=coord->second->GetOSMScoutId();
+      ring.nodes[n]=coord->second->GetCoord();
     }
 
     if (!success) {
@@ -317,8 +318,8 @@ namespace osmscout {
 
       collectedWaysCount++;
 
-      std::set<OSMId>               nodeIds;
-      CoordDataFile::CoordResultMap coordsMap;
+      std::set<OSMId>          nodeIds;
+      CoordDataFile::ResultMap coordsMap;
 
       for (size_t n=0; n<way->GetNodeCount(); n++) {
         nodeIds.insert(way->GetNodeId(n));
@@ -360,7 +361,7 @@ namespace osmscout {
 
     BlacklistSet              wayBlacklist; //! Set of ways that should not be handled
 
-    CoordDataFile             coordDataFile;
+    CoordDataFile             coordDataFile(parameter.GetCoordIndexCacheSize());
     FileScanner               scanner;
     FileWriter                areaWriter;
     uint32_t                  rawWayCount=0;
@@ -399,7 +400,11 @@ namespace osmscout {
       return false;
     }
 
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+    if (!coordDataFile.Open(typeConfig,
+                            parameter.GetDestinationDirectory(),
+                            FileScanner::FastRandom,
+                            true,
+                            FileScanner::FastRandom,
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data file!" << std::endl;
       return false;
@@ -441,8 +446,8 @@ namespace osmscout {
 
         progress.SetAction("Collecting node ids");
 
-        std::set<OSMId>               nodeIds;
-        CoordDataFile::CoordResultMap coordsMap;
+        std::set<OSMId>          nodeIds;
+        CoordDataFile::ResultMap coordsMap;
 
         for (size_t type=0; type<areasByType.size(); type++) {
           for (const auto &rawWay : areasByType[type]) {

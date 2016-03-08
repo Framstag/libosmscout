@@ -18,6 +18,7 @@ libosmscoutimport_la_LDFLAGS  = -no-undefined \
                                 $(MARISA_LIBS)
 
 libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
+                               osmscout/import/RawCoord.cpp \
                                osmscout/import/RawNode.cpp \
                                osmscout/import/RawRelation.cpp \
                                osmscout/import/RawRelIndexedDataFile.cpp \
@@ -26,6 +27,8 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenAreaAreaIndex.cpp \
                                osmscout/import/GenAreaNodeIndex.cpp \
                                osmscout/import/GenAreaWayIndex.cpp \
+                               osmscout/import/GenCoordDat.cpp \
+                               osmscout/import/GenCoordIndex.cpp \
                                osmscout/import/GenIntersectionIndex.cpp \
                                osmscout/import/GenLocationIndex.cpp \
                                osmscout/import/GenMergeAreas.cpp \

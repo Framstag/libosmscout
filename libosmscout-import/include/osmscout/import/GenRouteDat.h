@@ -123,7 +123,8 @@ namespace osmscout {
     /**
      * Resove the node ids from the OSM node ids given in the nodeIdMap
      */
-    bool ResolveNodeIds(const ImportParameter& parameter,
+    bool ResolveNodeIds(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
                         Progress& progress,
                         std::map<OSMId,Id>& nodeIdMap);
 
@@ -140,7 +141,8 @@ namespace osmscout {
      * Helper method that sequentially calls ReadTurnRestrictionWayIds(),
      * ResolveWayIdsToFileOffsets() and ReadTurnRestrictionData()
      */
-    bool ReadTurnRestrictions(const ImportParameter& parameter,
+    bool ReadTurnRestrictions(const TypeConfigRef& typeConfig,
+                              const ImportParameter& parameter,
                               Progress& progress,
                               ViaTurnRestrictionMap& restrictions);
 

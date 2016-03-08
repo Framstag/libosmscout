@@ -169,7 +169,7 @@ namespace osmscout {
 
     bool ComposeAreaMembers(const TypeConfig& typeConfig,
                             Progress& progress,
-                            const CoordDataFile::CoordResultMap& coordMap,
+                            const CoordDataFile::ResultMap& coordMap,
                             const IdRawWayMap& wayMap,
                             const std::string& name,
                             const RawRelation& rawRelation,
@@ -177,7 +177,7 @@ namespace osmscout {
 
     bool ComposeBoundaryMembers(const TypeConfig& typeConfig,
                                 Progress& progress,
-                                const CoordDataFile::CoordResultMap& coordMap,
+                                const CoordDataFile::ResultMap& coordMap,
                                 const IdRawWayMap& wayMap,
                                 const std::map<OSMId,RawRelationRef>& relationMap,
                                 const Area& relation,

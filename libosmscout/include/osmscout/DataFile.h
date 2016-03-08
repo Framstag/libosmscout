@@ -529,6 +529,8 @@ namespace osmscout {
              std::vector<ValueType>& data) const;
     bool Get(const std::set<I>& ids,
              std::vector<ValueType>& data) const;
+    bool Get(const std::set<I>& ids,
+             std::unordered_map<I,ValueType>& data) const;
 
     bool Get(const I& id,
              ValueType& entry) const;
@@ -645,6 +647,28 @@ namespace osmscout {
     }
 
     return DataFile<N>::GetByOffset(offsets,data);
+  }
+
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Get(const std::set<I>& ids,
+                                 std::unordered_map<I,ValueType>& data) const
+  {
+    std::vector<FileOffset> offsets;
+    std::vector<ValueType>  d;
+
+    if (!index.GetOffsets(ids,offsets)) {
+      return false;
+    }
+
+    if (!DataFile<N>::GetByOffset(offsets,d)) {
+      return false;
+    }
+
+    for (const auto& value : d) {
+      data[value->GetId()]=value;
+    }
+
+    return true;
   }
 
   template <class I, class N>

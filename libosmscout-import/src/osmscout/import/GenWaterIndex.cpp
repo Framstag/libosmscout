@@ -118,7 +118,8 @@ namespace osmscout {
     SetState(x-cellXStart,y-cellYStart,state);
   }
 
-  bool WaterIndexGenerator::LoadCoastlines(const ImportParameter& parameter,
+  bool WaterIndexGenerator::LoadCoastlines(const TypeConfigRef& typeConfig,
+                                           const ImportParameter& parameter,
                                            Progress& progress,
                                            std::list<CoastRef>& coastlines)
   {
@@ -153,11 +154,15 @@ namespace osmscout {
 
       progress.SetAction("Resolving nodes of coastline");
 
-      CoordDataFile coordDataFile;
+      CoordDataFile coordDataFile(parameter.GetCoordIndexCacheSize());
 
-      if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+      if (!coordDataFile.Open(typeConfig,
+                              parameter.GetDestinationDirectory(),
+                              FileScanner::FastRandom,
+                              true,
+                              FileScanner::FastRandom,
                               parameter.GetCoordDataMemoryMaped())) {
-        progress.Error("Cannot open file '"+coordDataFile.GetFilename()+"'!");
+        progress.Error("Cannot open coord file!");
         return false;
       }
 
@@ -169,7 +174,7 @@ namespace osmscout {
         }
       }
 
-      CoordDataFile::CoordResultMap coordsMap;
+      CoordDataFile::ResultMap coordsMap;
 
       if (!coordDataFile.Get(nodeIds,
                              coordsMap)) {
@@ -195,7 +200,7 @@ namespace osmscout {
         coast->coast.resize(coastline->GetNodeCount());
 
         for (size_t n=0; n<coastline->GetNodeCount(); n++) {
-          CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
+          CoordDataFile::ResultMap::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
 
           if (coord==coordsMap.end()) {
             processingError=true;
@@ -209,14 +214,14 @@ namespace osmscout {
           }
 
           if (n==0) {
-            coast->frontNodeId=coord->second.point.GetId();
+            coast->frontNodeId=coord->second->GetOSMScoutId();
           }
 
           if (n==coastline->GetNodeCount()-1) {
-            coast->backNodeId=coord->second.point.GetId();
+            coast->backNodeId=coord->second->GetOSMScoutId();
           }
 
-          coast->coast[n]=coord->second.point.GetCoords();
+          coast->coast[n]=coord->second->GetCoord();
         }
 
         if (!processingError) {
@@ -1400,7 +1405,7 @@ namespace osmscout {
       intersectionsCW.sort(IntersectionCWComparator());
 
       double    lonMin,lonMax,latMin,latMax;
-      Point     borderPoints[4];
+      Coord     borderPoints[4];
       GroundTile::Coord borderCoords[4];
 
       lonMin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
@@ -1408,10 +1413,10 @@ namespace osmscout {
       latMin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
       latMax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
 
-      borderPoints[0]=Point(1,latMax,lonMin); // top left
-      borderPoints[1]=Point(2,latMax,lonMax); // top right
-      borderPoints[2]=Point(3,latMin,lonMax); // bottom right
-      borderPoints[3]=Point(4,latMin,lonMin); // bottom left
+      borderPoints[0]=Coord(1,GeoCoord(latMax,lonMin)); // top left
+      borderPoints[1]=Coord(2,GeoCoord(latMax,lonMax)); // top right
+      borderPoints[2]=Coord(3,GeoCoord(latMin,lonMax)); // bottom right
+      borderPoints[3]=Coord(4,GeoCoord(latMin,lonMin)); // bottom left
 
       borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                           // top left
       borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
@@ -1600,6 +1605,8 @@ namespace osmscout {
     description.AddRequiredFile(Preprocess::RAWCOASTLINE_DAT);
 
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(CoordDataFile::COORD_IDX);
+
     description.AddRequiredFile(WayDataFile::WAYS_DAT);
 
     description.AddProvidedFile(WaterIndex::WATER_IDX);
@@ -1668,7 +1675,8 @@ namespace osmscout {
     // Load and merge coastlines
     //
 
-    if (!LoadCoastlines(parameter,
+    if (!LoadCoastlines(typeConfig,
+                        parameter,
                         progress,
                         coastlines)) {
       return false;

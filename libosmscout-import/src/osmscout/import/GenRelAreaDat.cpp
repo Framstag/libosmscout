@@ -417,7 +417,7 @@ namespace osmscout {
 
   bool RelAreaDataGenerator::ComposeAreaMembers(const TypeConfig& typeConfig,
                                                 Progress& progress,
-                                                const CoordDataFile::CoordResultMap& coordMap,
+                                                const CoordDataFile::ResultMap& coordMap,
                                                 const IdRawWayMap& wayMap,
                                                 const std::string& name,
                                                 const RawRelation& rawRelation,
@@ -459,7 +459,7 @@ namespace osmscout {
         part.role.nodes.reserve(way->GetNodeCount());
 
         for (const auto& osmId : way->GetNodes()) {
-          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(osmId);
+          CoordDataFile::ResultMap::const_iterator coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
@@ -472,8 +472,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.ids.push_back(coordEntry->second.point.GetId());
-          part.role.nodes.push_back(coordEntry->second.point.GetCoords());
+          part.role.ids.push_back(coordEntry->second->GetOSMScoutId());
+          part.role.nodes.push_back(coordEntry->second->GetCoord());
         }
 
         part.ways.push_back(way);
@@ -487,7 +487,7 @@ namespace osmscout {
 
   bool RelAreaDataGenerator::ComposeBoundaryMembers(const TypeConfig& typeConfig,
                                                     Progress& progress,
-                                                    const CoordDataFile::CoordResultMap& coordMap,
+                                                    const CoordDataFile::ResultMap& coordMap,
                                                     const IdRawWayMap& wayMap,
                                                     const std::map<OSMId,RawRelationRef>& relationMap,
                                                     const Area& relation,
@@ -564,7 +564,7 @@ namespace osmscout {
         part.role.nodes.reserve(way->GetNodeCount());
 
         for (const auto& osmId : way->GetNodes()) {
-          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(osmId);
+          CoordDataFile::ResultMap::const_iterator coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
@@ -577,8 +577,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.ids.push_back(coordEntry->second.point.GetId());
-          part.role.nodes.push_back(coordEntry->second.point.GetCoords());
+          part.role.ids.push_back(coordEntry->second->GetOSMScoutId());
+          part.role.nodes.push_back(coordEntry->second->GetCoord());
         }
 
         part.ways.push_back(way);
@@ -608,7 +608,7 @@ namespace osmscout {
     std::set<OSMId>                pendingRelationIds;
     std::set<OSMId>                visitedRelationIds;
 
-    CoordDataFile::CoordResultMap  coordMap;
+    CoordDataFile::ResultMap       coordMap;
     IdRawWayMap                    wayMap;
     std::map<OSMId,RawRelationRef> relationMap;
 
@@ -1006,6 +1006,7 @@ namespace osmscout {
     description.SetDescription("Resolves raw relations to areas");
 
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(CoordDataFile::COORD_IDX);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(Preprocess::RAWRELS_DAT);
     description.AddRequiredFile(RawWayIndexGenerator::RAWWAY_IDX);
@@ -1021,14 +1022,18 @@ namespace osmscout {
   {
     IdSet                      wayAreaIndexBlacklist;
 
-    CoordDataFile              coordDataFile;
+    CoordDataFile              coordDataFile(parameter.GetCoordIndexCacheSize());
 
     RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayIndexCacheSize());
 
     RawRelationIndexedDataFile relDataFile(parameter.GetRawWayIndexCacheSize());
     FeatureRef                 featureName(typeConfig->GetFeature(RefFeature::NAME));
 
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+    if (!coordDataFile.Open(typeConfig,
+                            parameter.GetDestinationDirectory(),
+                            FileScanner::FastRandom,
+                            true,
+                            FileScanner::FastRandom,
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data files!" << std::endl;
       return false;

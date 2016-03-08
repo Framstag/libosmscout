@@ -2,6 +2,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/ImportImportExport.h \
                         osmscout/ImportFeatures.h \
                         osmscout/import/RawCoastline.h \
+                        osmscout/import/RawCoord.h \
                         osmscout/import/RawNode.h \
                         osmscout/import/RawRelation.h \
                         osmscout/import/RawRelIndexedDataFile.h \
@@ -10,6 +11,8 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenAreaAreaIndex.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \
+                        osmscout/import/GenCoordDat.h \
+                        osmscout/import/GenCoordIndex.h \
                         osmscout/import/GenIntersectionIndex.h \
                         osmscout/import/GenLocationIndex.h \
                         osmscout/import/GenMergeAreas.h \

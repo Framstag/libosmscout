@@ -39,6 +39,7 @@ namespace osmscout {
   public:
     static const char* BOUNDING_DAT;
     static const char* DISTRIBUTION_DAT;
+    static const char* RAWCOORDS_DAT;
     static const char* RAWNODES_DAT;
     static const char* RAWWAYS_DAT;
     static const char* RAWRELS_DAT;
@@ -49,41 +50,11 @@ namespace osmscout {
     class Callback : public PreprocessorCallback
     {
     private:
-      struct CoordPage
-      {
-        FileOffset             offset;
-        PageId                 id;
-        std::vector<GeoCoord>  coords;
-        std::vector<bool>      isSet;
-
-        CoordPage(FileOffset offset,PageId id);
-
-        void SetCoord(size_t index, const GeoCoord& coord);
-
-        void StorePage(FileWriter& writer);
-        void ReadPage(FileScanner& scanner);
-      };
-
-      //! Reference to a page
-      typedef std::shared_ptr<CoordPage>            CoordPageRef;
-
-      //! Teh cache is just a list of pages
-      typedef std::list<CoordPageRef>               CoordPageCache;
-
-      //! References to a page in above list
-      typedef CoordPageCache::iterator              CoordPageCacheRef;
-
-      //! An index from PageIds to cache entries
-      typedef std::map<PageId,CoordPageCacheRef>    CoordPageCacheIndex;
-
-      //! Index off all PageIds to their FileOffsets
-      typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
-
-    private:
       const TypeConfigRef    typeConfig;
       const ImportParameter& parameter;
       Progress&              progress;
 
+      FileWriter             rawCoordWriter;
       FileWriter             nodeWriter;
       FileWriter             wayWriter;
       FileWriter             coastlineWriter;
@@ -107,14 +78,6 @@ namespace osmscout {
       bool                   waySortingError;
       bool                   relationSortingError;
 
-      Id                     coordPageCount;
-      CoordPageCacheIndex    coordPageIndex;
-      CoordPageCache         coordPageCache;
-      CoordPageOffsetMap     coordPageOffsetMap;
-      FileScanner            coordScanner;
-      FileWriter             coordWriter;
-      CoordPageRef           currentCoordPage;
-
       GeoCoord               minCoord;
       GeoCoord               maxCoord;
 
@@ -123,10 +86,6 @@ namespace osmscout {
       std::vector<uint32_t>  wayStat;
 
     private:
-      CoordPageRef GetCoordPage(PageId id);
-      void StoreCoord(OSMId id,
-                      const GeoCoord& coord);
-
       bool IsTurnRestriction(const TagMap& tags,
                              TurnRestriction::Type& type) const;
 

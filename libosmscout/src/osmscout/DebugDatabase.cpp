@@ -84,12 +84,16 @@ namespace osmscout {
   }
 
   bool DebugDatabase::GetCoords(std::set<OSMId>& ids,
-                                CoordDataFile::CoordResultMap& coordsMap) const
+                                CoordDataFile::ResultMap& coordsMap) const
   {
-    CoordDataFile dataFile;
+    CoordDataFile dataFile(200000);
 
-    if (!dataFile.Open(path,
-                       false)) {
+    if (!dataFile.Open(typeConfig,
+                       path,
+                       FileScanner::FastRandom,
+                       true,
+                       FileScanner::FastRandom,
+                       true)) {
       return false;
     }
 

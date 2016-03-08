@@ -3,7 +3,7 @@
 #include <list>
 #include <sstream>
 
-#include <osmscout/Coord.h>
+#include <osmscout/Pixel.h>
 
 #include <osmscout/TypeConfig.h>
 
@@ -279,7 +279,7 @@ PRODUCTIONS
                   StyleFilter         filter;
                   FillPartialStyle    style;
                   PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(style.style);
-                  Coord               coord;
+                  Vertex2D            coord;
                 .)
                 COORD<coord>   (. polygon->AddCoord(coord); .)
                 COORD<coord>   (. polygon->AddCoord(coord); .)
@@ -299,7 +299,7 @@ PRODUCTIONS
                 (.
                   StyleFilter       filter;
                   FillPartialStyle  style;
-                  Coord             topLeft;
+                  Vertex2D          topLeft;
                   double            width;
                   double            height;
                 .)
@@ -323,7 +323,7 @@ PRODUCTIONS
   CIRCLE<Symbol& symbol>
               = SYNC "CIRCLE"
                 (.
-                  Coord             center;
+                  Vertex2D          center;
                   double            radius;
                   StyleFilter       filter;
                   FillPartialStyle  style;
@@ -342,7 +342,7 @@ PRODUCTIONS
                 .)
                 .
 
-  COORD<Coord& coord>
+  COORD<Vertex2D& coord>
               = (.
                   double x;
                   double y;
@@ -350,7 +350,7 @@ PRODUCTIONS
                 DOUBLE<x>
                  ","
                 DOUBLE<y>
-                (. coord=Coord(x,y); .)
+                (. coord=Vertex2D(x,y); .)
                 .
 
   CONSTSECTION

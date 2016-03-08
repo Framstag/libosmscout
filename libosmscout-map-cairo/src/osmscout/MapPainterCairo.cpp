@@ -1102,18 +1102,18 @@ namespace osmscout {
     if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
       PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
 
-      for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+      for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
            pixel!=polygon->GetCoords().end();
            ++pixel) {
         if (pixel==polygon->GetCoords().begin()) {
           cairo_move_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+                        x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
         }
         else {
           cairo_line_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+                        x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
         }
       }
 
@@ -1123,8 +1123,8 @@ namespace osmscout {
       RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
 
       cairo_rectangle(draw,
-                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX),
-                      y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY),
+                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
+                      y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
@@ -1132,8 +1132,8 @@ namespace osmscout {
       CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
 
       cairo_arc(draw,
-                x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
-                y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY),
+                x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
+                y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
                 projection.ConvertWidthToPixel(circle->GetRadius()),
                 0,2*M_PI);
     }

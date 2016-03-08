@@ -27,7 +27,7 @@
 
 #include <osmscout/private/MapImportExport.h>
 
-#include <osmscout/Coord.h>
+#include <osmscout/Pixel.h>
 
 #include <osmscout/Types.h>
 #include <osmscout/TypeConfig.h>
@@ -1073,14 +1073,14 @@ namespace osmscout {
   class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
   {
   private:
-    std::list<Coord> coords;
+    std::list<Vertex2D> coords;
 
   public:
     PolygonPrimitive(const FillStyleRef& fillStyle);
 
-    void AddCoord(const Coord& coord);
+    void AddCoord(const Vertex2D& coord);
 
-    inline const std::list<Coord>& GetCoords() const
+    inline const std::list<Vertex2D>& GetCoords() const
     {
       return coords;
     }
@@ -1096,17 +1096,17 @@ namespace osmscout {
   class OSMSCOUT_MAP_API RectanglePrimitive : public DrawPrimitive
   {
   private:
-    Coord  topLeft;
-    double width;
-    double height;
+    Vertex2D topLeft;
+    double   width;
+    double   height;
 
   public:
-    RectanglePrimitive(const Coord& topLeft,
+    RectanglePrimitive(const Vertex2D& topLeft,
                        double width,
                        double height,
                        const FillStyleRef& fillStyle);
 
-    inline const Coord& GetTopLeft() const
+    inline const Vertex2D& GetTopLeft() const
     {
       return topLeft;
     }
@@ -1132,15 +1132,15 @@ namespace osmscout {
   class OSMSCOUT_MAP_API CirclePrimitive : public DrawPrimitive
   {
   private:
-    Coord  center;
-    double radius;
+    Vertex2D center;
+    double   radius;
 
   public:
-    CirclePrimitive(const Coord& center,
+    CirclePrimitive(const Vertex2D& center,
                     double radius,
                     const FillStyleRef& fillStyle);
 
-    inline const Coord& GetCenter() const
+    inline const Vertex2D& GetCenter() const
     {
       return center;
     }

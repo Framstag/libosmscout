@@ -652,16 +652,16 @@ namespace osmscout {
 
         QPainterPath path;
 
-        for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+        for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
              pixel!=polygon->GetCoords().end();
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
-            path.moveTo(x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+            path.moveTo(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
           }
           else {
-            path.lineTo(x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                        y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+            path.lineTo(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                        y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
           }
         }
 
@@ -677,8 +677,8 @@ namespace osmscout {
 
         QPainterPath path;
 
-        path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX),
-                     y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY),
+        path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
+                     y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
                      projection.ConvertWidthToPixel(rectangle->GetWidth()),
                      projection.ConvertWidthToPixel(rectangle->GetHeight()));
 
@@ -688,8 +688,8 @@ namespace osmscout {
         CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
         FillStyleRef     style=circle->GetFillStyle();
 
-        QPointF center(x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
-                       y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY));
+        QPointF center(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
+                       y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY));
 
         double  radius=projection.ConvertWidthToPixel(circle->GetRadius());
 

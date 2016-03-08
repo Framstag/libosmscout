@@ -20,65 +20,27 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <set>
-#include <list>
-#include <unordered_map>
-#include <vector>
-
-#include <osmscout/Point.h>
+#include <osmscout/DataFile.h>
+#include <osmscout/Coord.h>
 
 #include <osmscout/util/Cache.h>
-#include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 
   /**
    * \ingroup Database
    */
-  class OSMSCOUT_API CoordDataFile
+  class OSMSCOUT_API CoordDataFile : public IndexedDataFile<OSMId,Coord>
   {
   public:
     static const char* COORD_DAT;
-
-  private:
-    typedef std::unordered_map<PageId,FileOffset> CoordPageOffsetMap;
+    static const char* COORD_IDX;
 
   public:
-    struct CoordEntry
-    {
-      Point point;
-
-      CoordEntry(Id id,
-                 double lat,
-                 double lon)
-      : point(id,lat,lon)
-      {
-        // no code
-      }
-    };
-
-    typedef std::unordered_map<OSMId,CoordEntry> CoordResultMap;
-
-  private:
-    bool                isOpen;             //!< If true,the data file is opened
-    std::string         datafilename;       //!< complete filename for data file
-    mutable FileScanner scanner;            //!< File stream to the data file
-    uint32_t            coordPageSize;
-    CoordPageOffsetMap  coordPageOffsetMap;
+    typedef std::unordered_map<OSMId,CoordRef> ResultMap;
 
   public:
-    CoordDataFile();
-
-    virtual ~CoordDataFile();
-
-    bool Open(const std::string& path,
-              bool memoryMapedData);
-    bool Close();
-
-    std::string GetFilename() const;
-
-    bool Get(std::set<OSMId>& ids,
-             CoordResultMap& coordsMap) const;
+    CoordDataFile(unsigned long indexCacheSize);
   };
 }
 

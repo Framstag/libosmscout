@@ -424,6 +424,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
       }
 
       searchParameter.SetUseMultithreading(true);
+      searchParameter.SetUseLowZoomOptimization(true);
 
       projection.Set(currentLon,
                      currentLat,

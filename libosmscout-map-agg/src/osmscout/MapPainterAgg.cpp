@@ -520,16 +520,16 @@ namespace osmscout {
         FillStyleRef      style=polygon->GetFillStyle();
         agg::path_storage path;
 
-        for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+        for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
              pixel!=polygon->GetCoords().end();
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
-            path.move_to(x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                         y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+            path.move_to(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                         y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
           }
           else {
-            path.line_to(x+projection.ConvertWidthToPixel(pixel->x-centerX),
-                         y+projection.ConvertWidthToPixel(maxY-pixel->y-centerY));
+            path.line_to(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
+                         y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
           }
         }
 
@@ -546,8 +546,8 @@ namespace osmscout {
         RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
         FillStyleRef        style=rectangle->GetFillStyle();
         agg::path_storage   path;
-        double              xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().x-centerX);
-        double              yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().y-centerY);
+        double              xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX);
+        double              yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY);
         double              width=projection.ConvertWidthToPixel(rectangle->GetWidth());
         double              height=projection.ConvertWidthToPixel(rectangle->GetHeight());
 
@@ -571,8 +571,8 @@ namespace osmscout {
         agg::path_storage path;
         double            radius=projection.ConvertWidthToPixel(circle->GetRadius());
 
-        agg::ellipse ellipse(x+projection.ConvertWidthToPixel(circle->GetCenter().x-centerX),
-                             y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().y-centerY),
+        agg::ellipse ellipse(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
+                             y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
                              radius,
                              radius);
 

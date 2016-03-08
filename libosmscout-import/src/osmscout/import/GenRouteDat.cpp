@@ -52,6 +52,7 @@ namespace osmscout {
     description.SetDescription("Generate routing graph(s)");
 
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
+    description.AddRequiredFile(CoordDataFile::COORD_IDX);
 
     description.AddRequiredFile(WayDataFile::WAYS_DAT);
     description.AddRequiredFile(AreaDataFile::AREAS_DAT);
@@ -377,23 +378,28 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::ResolveNodeIds(const ImportParameter& parameter,
+  bool RouteDataGenerator::ResolveNodeIds(const TypeConfigRef& typeConfig,
+                                          const ImportParameter& parameter,
                                           Progress& progress,
                                           std::map<OSMId,Id>& nodeIdMap)
   {
     progress.Info("Resolving turn restriction OSM node ids to node ids");
 
-    CoordDataFile coordDataFile;
+    CoordDataFile coordDataFile(parameter.GetCoordIndexCacheSize());
     uint32_t      resolveCount=0;
 
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+    if (!coordDataFile.Open(typeConfig,
+                            parameter.GetDestinationDirectory(),
+                            FileScanner::FastRandom,
+                            true,
+                            FileScanner::FastRandom,
                             parameter.GetCoordDataMemoryMaped())) {
-      progress.Error("Cannot open '"+coordDataFile.GetFilename()+"'!");
+      progress.Error("Cannot open coord file!");
       return false;
     }
 
-    std::set<OSMId>               nodeIds;
-    CoordDataFile::CoordResultMap coordsMap;
+    std::set<OSMId>          nodeIds;
+    CoordDataFile::ResultMap coordsMap;
 
     for (const auto& entry : nodeIdMap) {
       nodeIds.insert(entry.first);
@@ -409,13 +415,13 @@ namespace osmscout {
       auto nodeIdEntry=nodeIdMap.find(entry.first);
 
       if (nodeIdEntry!=nodeIdMap.end()) {
-        nodeIdEntry->second=entry.second.point.GetId();
+        nodeIdEntry->second=entry.second->GetOSMScoutId();
         resolveCount++;
       }
     }
 
     if (!coordDataFile.Close()) {
-      progress.Error(std::string("Cannot close file '")+coordDataFile.GetFilename()+"'");
+      progress.Error(std::string("Cannot close coord file"));
       return false;
     }
 
@@ -509,7 +515,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
+  bool RouteDataGenerator::ReadTurnRestrictions(const TypeConfigRef& typeConfig,
+                                                const ImportParameter& parameter,
                                                 Progress& progress,
                                                 ViaTurnRestrictionMap& restrictions)
   {
@@ -541,7 +548,8 @@ namespace osmscout {
     // Now map node ids to file offsets
     //
 
-    if (!ResolveNodeIds(parameter,
+    if (!ResolveNodeIds(typeConfig,
+                        parameter,
                        progress,
                        nodeIdMap)) {
       return false;
@@ -1901,7 +1909,8 @@ namespace osmscout {
 
     progress.SetAction("Scanning for restriction relations");
 
-    if (!ReadTurnRestrictions(parameter,
+    if (!ReadTurnRestrictions(typeConfig,
+                              parameter,
                               progress,
                               restrictions)) {
       return false;

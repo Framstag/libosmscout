@@ -1,6 +1,9 @@
+#ifndef OSMSCOUT_IMPORT_GENCOORDINDEX_H
+#define OSMSCOUT_IMPORT_GENCOORDINDEX_H
+
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2012  Tim Teulings
+  Copyright (C) 2016  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,23 +20,20 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include "osmscout/CoordDataFile.h"
+#include <osmscout/Coord.h>
 
-#include <osmscout/system/Assert.h>
-
-#include <osmscout/util/File.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/import/GenNumericIndex.h>
 
 namespace osmscout {
 
-  const char* CoordDataFile::COORD_DAT="coord.dat";
-  const char* CoordDataFile::COORD_IDX="coord.idx";
-
-  CoordDataFile::CoordDataFile(unsigned long indexCacheSize)
-  : IndexedDataFile<OSMId,Coord>(COORD_DAT,
-                                 COORD_IDX,
-                                 indexCacheSize)
+  class CoordIndexGenerator : public NumericIndexGenerator<OSMId,Coord>
   {
-    // no code
-  }
+  public:
+    CoordIndexGenerator();
+
+    void GetDescription(const ImportParameter& parameter,
+                        ImportModuleDescription& description) const;
+  };
 }
+
+#endif

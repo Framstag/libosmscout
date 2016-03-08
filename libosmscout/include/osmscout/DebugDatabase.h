@@ -82,7 +82,7 @@ namespace osmscout {
     TypeConfigRef GetTypeConfig() const;
 
     bool GetCoords(std::set<OSMId>& ids,
-                   CoordDataFile::CoordResultMap& coordsMap) const;
+                   CoordDataFile::ResultMap& coordsMap) const;
 
     bool ResolveReferences(const std::set<ObjectOSMRef>& ids,
                            const std::set<ObjectFileRef>& fileOffsets,
