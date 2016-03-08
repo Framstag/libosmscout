@@ -108,7 +108,7 @@ namespace osmscout {
      sortTileMag(14),
      numericIndexPageSize(1024),
      coordDataMemoryMaped(false),
-     coordIndexCacheSize(5000000),
+     coordIndexCacheSize(1000000),
      rawNodeDataMemoryMaped(false),
      rawWayIndexMemoryMaped(true),
      rawWayDataMemoryMaped(false),

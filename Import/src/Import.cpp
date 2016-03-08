@@ -103,6 +103,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
 
   std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
 
   std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
 
@@ -500,6 +501,19 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--coordIndexCacheSize")==0) {
+      size_t coordIndexCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             coordIndexCacheSize)) {
+        parameter.SetCoordIndexCacheSize(coordIndexCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--rawNodeDataMemoryMaped")==0) {
       bool rawNodeDataMemoryMaped;
 
@@ -727,6 +741,8 @@ int main(int argc, char* argv[])
 
   progress.Info(std::string("CoordDataMemoryMaped: ")+
                 (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("CoordIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
 
   progress.Info(std::string("RawNodeDataMemoryMaped: ")+
                 (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
