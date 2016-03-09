@@ -2303,6 +2303,176 @@ namespace osmscout {
     }
   }
 
+
+  void FileScanner::Read(std::vector<Point>& nodes,bool readIds)
+  {
+    size_t  coordBitSize;
+    uint8_t sizeByte;
+
+    Read(sizeByte);
+
+    // Fast exit for empty arrays
+    if (sizeByte==0) {
+      return;
+    }
+
+    if ((sizeByte & 0x03) == 0) {
+      coordBitSize=16;
+    }
+    else if ((sizeByte & 0x03) == 1) {
+      coordBitSize=32;
+    }
+    else {
+      coordBitSize=48;
+    }
+
+    size_t nodeCount=(sizeByte & 0x7c) >> 2;
+
+    if ((sizeByte & 0x80) != 0) {
+      Read(sizeByte);
+
+      nodeCount|=(sizeByte & 0x7f) << 5;
+
+      if ((sizeByte & 0x80) != 0) {
+        Read(sizeByte);
+
+        nodeCount|=sizeByte << 12;
+      }
+    }
+
+    nodes.resize(nodeCount);
+
+    size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
+
+    AssureByteBufferSize(byteBufferSize);
+
+    GeoCoord firstCoord;
+
+    ReadCoord(firstCoord);
+
+    nodes[0].SetCoord(firstCoord);
+
+    uint32_t latValue=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+
+    Read((char*)byteBuffer,byteBufferSize);
+
+    if (coordBitSize==16) {
+      size_t currentCoordPos=1;
+
+      for (size_t i=0; i<byteBufferSize; i+=2) {
+        int32_t latDelta=(int8_t)byteBuffer[i];
+        int32_t lonDelta=(int8_t)byteBuffer[i+1];
+
+        latValue+=latDelta;
+        lonValue+=lonDelta;
+
+        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                                 lonValue/lonConversionFactor-180.0));
+
+        currentCoordPos++;
+      }
+    }
+    else if (coordBitSize==32) {
+      size_t currentCoordPos=1;
+
+      for (size_t i=0; i<byteBufferSize; i+=4) {
+        uint32_t latUDelta=byteBuffer[i+0] | (byteBuffer[i+1]<<8);
+        uint32_t lonUDelta=byteBuffer[i+2] | (byteBuffer[i+3]<<8);
+        int32_t  latDelta;
+        int32_t  lonDelta;
+
+        if (latUDelta & 0x8000) {
+          latDelta=(int32_t)(latUDelta | 0xffff0000);
+        }
+        else {
+          latDelta=(int32_t)latUDelta;
+        }
+
+        latValue+=latDelta;
+
+        if (lonUDelta & 0x8000) {
+          lonDelta=(int32_t)(lonUDelta | 0xffff0000);
+        }
+        else {
+          lonDelta=(int32_t)lonUDelta;
+        }
+
+        lonValue+=lonDelta;
+
+        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                                 lonValue/lonConversionFactor-180.0));
+        currentCoordPos++;
+      }
+    }
+    else {
+      size_t currentCoordPos=1;
+
+      for (size_t i=0; i<byteBufferSize; i+=6) {
+        uint32_t latUDelta=(byteBuffer[i+0]) | (byteBuffer[i+1]<<8) | (byteBuffer[i+2]<<16);
+        uint32_t lonUDelta=(byteBuffer[i+3]) | (byteBuffer[i+4]<<8) | (byteBuffer[i+5]<<16);
+        int32_t  latDelta;
+        int32_t  lonDelta;
+
+        if (latUDelta & 0x800000) {
+          latDelta=(int32_t)(latUDelta | 0xff000000);
+        }
+        else {
+          latDelta=(int32_t)latUDelta;
+        }
+
+        latValue+=latDelta;
+
+        if (lonUDelta & 0x800000) {
+          lonDelta=(int32_t)(lonUDelta | 0xff000000);
+        }
+        else {
+          lonDelta=(int32_t)lonUDelta;
+        }
+
+        lonValue+=lonDelta;
+
+        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                                 lonValue/lonConversionFactor-180.0));
+
+        currentCoordPos++;
+      }
+    }
+
+    if (readIds) {
+      Id minId;
+
+      ReadNumber(minId);
+
+      if (minId>0) {
+        size_t idCurrent=0;
+
+        while (idCurrent<nodes.size()) {
+          uint8_t bitset;
+          size_t  bitmask=1;
+
+          Read(bitset);
+
+          for (size_t i=0; i<8 && idCurrent<nodes.size(); i++) {
+            if (bitset & bitmask) {
+              Id id;
+              ReadNumber(id);
+
+              nodes[idCurrent].SetId(id+minId);
+
+            }
+            else {
+              nodes[idCurrent].SetId(0);
+            }
+
+            bitmask*=2;
+            idCurrent++;
+          }
+        }
+      }
+    }
+  }
+
   void FileScanner::ReadBox(GeoBox& box)
   {
     if (HasError()) {

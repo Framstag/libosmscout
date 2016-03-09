@@ -66,7 +66,12 @@ namespace osmscout {
       this->coords=coords;
     }
 
-    inline void Set(const GeoCoord& coords)
+    inline void SetId(Id id)
+    {
+      this->id=id;
+    }
+
+    inline void SetCoord(const GeoCoord& coords)
     {
       this->coords=coords;
     }
@@ -76,7 +81,7 @@ namespace osmscout {
       return id;
     }
 
-    inline const GeoCoord& GetCoords() const
+    inline const GeoCoord& GetCoord() const
     {
       return coords;
     }

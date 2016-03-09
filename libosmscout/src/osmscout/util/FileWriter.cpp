@@ -973,7 +973,245 @@ namespace osmscout {
     std::cout << std::endl;*/
   }
 
-  /**
+
+  void FileWriter::Write(const std::vector<Point>& nodes, bool writeIds)
+  {
+    // Quick exit for empty vector arrays
+    if (nodes.empty()) {
+      uint8_t size=0;
+
+      Write(size);
+
+      return;
+    }
+
+    // A lat and a lon delta for each coordinate delta
+    deltaBuffer.resize((nodes.size()-1)*2);
+
+    //
+    // Calculate deltas and required space
+    //
+
+    uint32_t lastLat=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lastLon=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+    size_t   deltaBufferPos=0;
+    size_t   coordBitSize=16;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
+      uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
+
+      // lat
+
+      int32_t latDelta=currentLat-lastLat;
+
+      if (latDelta>=-128 && latDelta<=127) {
+        coordBitSize=std::max(coordBitSize,(size_t)16); // 2x 8 bit
+      }
+      else if (latDelta>=-32768 && latDelta<=32767) {
+        coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
+      }
+      else if (latDelta>=-8388608 && latDelta<=8388608) {
+        coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        throw IOException(filename,"Cannot write coordinate","Delta between coordinates too big");
+      }
+
+      deltaBuffer[deltaBufferPos]=latDelta;
+      deltaBufferPos++;
+
+      // lon
+
+      int32_t lonDelta=currentLon-lastLon;
+
+      if (lonDelta>=-128 && lonDelta<=127) {
+        coordBitSize=std::max(coordBitSize,(size_t)16); // 2x 8 bit
+      }
+      else if (lonDelta>=-32768 && lonDelta<=32767) {
+        coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
+      }
+      else if (lonDelta>=-8388608 && lonDelta<=8388608) {
+        coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        throw IOException(filename,"Cannot write coordinate","Delta between coordinates too big");
+      }
+
+      deltaBuffer[deltaBufferPos]=lonDelta;
+      deltaBufferPos++;
+
+      lastLat=currentLat;
+      lastLon=currentLon;
+    }
+
+    size_t bytesNeeded=(nodes.size()-1)*coordBitSize/8; // all coordinates in the same encoding
+
+    //
+    // Write starting length / signal bit section
+    //
+
+    if (nodes.size()<32) {
+      uint8_t size;
+      uint8_t nodeSize=(nodes.size() & 0x1f) << 2;
+
+      if (coordBitSize==16) {
+        size=0x00 | nodeSize;
+      }
+      else if (coordBitSize==32) {
+        size=0x01 | nodeSize;
+      }
+      else {
+        size=0x02 | nodeSize;
+      }
+
+      Write(size);
+    }
+    else if (nodes.size()<4096) {
+      uint8_t size[2];
+      uint8_t nodeSize1=((nodes.size() & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=nodes.size() >> 5; // The final bits
+
+      if (coordBitSize==16) {
+        size[0]=0x00 | nodeSize1;
+      }
+      else if (coordBitSize==32) {
+        size[0]=0x01 | nodeSize1;
+      }
+      else {
+        size[0]=0x02 | nodeSize1;
+      }
+
+      size[1]=nodeSize2;
+
+      Write((char*)size,2);
+    }
+    else {
+      uint8_t size[3];
+      uint8_t nodeSize1=((nodes.size() & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=((nodes.size() >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+      uint8_t nodeSize3=nodes.size() >> 12; // The final bits
+
+      if (coordBitSize==16) {
+        size[0]=0x00 | nodeSize1;
+      }
+      else if (coordBitSize==32) {
+        size[0]=0x01 | nodeSize1;
+      }
+      else {
+        size[0]=0x02 | nodeSize1;
+      }
+
+      size[1]=nodeSize2;
+      size[2]=nodeSize3;
+
+      Write((char*)size,3);
+    }
+
+    //
+    // Write data array
+    //
+
+    WriteCoord(nodes[0].GetCoord());
+
+    byteBuffer.resize(bytesNeeded);
+
+    if (coordBitSize==16) {
+      size_t byteBufferPos=0;
+
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i];
+        byteBufferPos++;
+      }
+    }
+    else if (coordBitSize==32) {
+      size_t byteBufferPos=0;
+
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8);
+        ++byteBufferPos;
+      }
+    }
+    else {
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        size_t byteBufferPos=0;
+
+        for (size_t i=0; i<deltaBuffer.size(); i+=2) {
+          byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
+          ++byteBufferPos;
+
+          byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
+          ++byteBufferPos;
+        }
+      }
+    }
+
+    Write((char*)byteBuffer.data(),byteBuffer.size());
+
+    if (writeIds) {
+      Id minId=0;
+
+      for (size_t i=0; i<nodes.size(); i++) {
+        if (nodes[i].GetId()!=0) {
+          if (minId==0) {
+            minId=nodes[i].GetId();
+          }
+          else {
+            minId=std::min(minId,nodes[i].GetId());
+          }
+        }
+      }
+
+      WriteNumber(minId);
+
+      if (minId>0) {
+        size_t idCurrent=0;
+
+        while (idCurrent<nodes.size()) {
+          uint8_t bitset=0;
+          uint8_t bitMask=1;
+          size_t  idEnd=std::min(idCurrent+8,nodes.size());
+
+          for (size_t i=idCurrent; i<idEnd; i++) {
+            if (nodes[i].GetId()!=0) {
+              bitset=bitset | bitMask;
+            }
+
+            bitMask*=2;
+          }
+
+          Write(bitset);
+
+          for (size_t i=idCurrent; i<idEnd; i++) {
+            if (nodes[i].GetId()!=0) {
+              WriteNumber(nodes[i].GetId()-minId);
+            }
+
+            bitMask=bitMask*2;
+          }
+
+          idCurrent+=8;
+        }
+      }
+    }
+  }
+
+/**
    *
    * @throws IOException
    */

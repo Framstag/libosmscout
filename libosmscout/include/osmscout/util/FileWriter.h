@@ -30,6 +30,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/ObjectRef.h>
+#include <osmscout/Point.h>
 #include <osmscout/Types.h>
 
 #include <osmscout/util/Exception.h>
@@ -113,6 +114,7 @@ namespace osmscout {
     void WriteInvalidCoord();
 
     void Write(const std::vector<GeoCoord>& nodes);
+    void Write(const std::vector<Point>& nodes, bool writeIds);
 
     void WriteTypeId(TypeId id, uint8_t maxBytes);
 
