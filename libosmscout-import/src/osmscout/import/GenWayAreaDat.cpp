@@ -222,7 +222,7 @@ namespace osmscout {
 
     ring.SetFeatures(rawWay.GetFeatureValueBuffer());
 
-    ring.ring=Area::outerRingId;
+    ring.MarkAsOuterRing();
     ring.ids.resize(rawWay.GetNodeCount());
     ring.nodes.resize(rawWay.GetNodeCount());
 

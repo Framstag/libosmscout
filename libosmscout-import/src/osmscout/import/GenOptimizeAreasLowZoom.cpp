@@ -196,7 +196,7 @@ namespace osmscout
 
       size_t r=0;
       while (r<area->rings.size()) {
-        if (area->rings[r].ring!=Area::masterRingId) {
+        if (!area->rings[r].IsMasterRing()) {
           polygon.TransformArea(projection,
                                 optimizeWayMethod,
                                 area->rings[r].nodes,
@@ -211,7 +211,7 @@ namespace osmscout
             size_t s=r;
 
             while (s+1<area->rings.size() &&
-                   area->rings[s+1].ring>area->rings[r].ring) {
+                   area->rings[s+1].GetRing()>area->rings[r].GetRing()) {
               s++;
             }
 
@@ -224,7 +224,7 @@ namespace osmscout
 
         newRings.back().nodes.clear();
 
-        if (area->rings[r].ring!=Area::masterRingId) {
+        if (!area->rings[r].IsMasterRing()) {
           for (size_t i=polygon.GetStart();
                i<=polygon.GetEnd();
                i++) {

@@ -102,6 +102,16 @@ namespace osmscout {
       return (ids[0]!=0 && ids[0]==ids[ids.size()-1]);
     }
 
+    inline Id GetId(size_t index) const
+    {
+      return ids[index];
+    }
+
+    inline const GeoCoord& GetCoord(size_t index) const
+    {
+      return nodes[index];
+    }
+
     inline void GetBoundingBox(GeoBox& boundingBox) const
     {
       osmscout::GetBoundingBox(nodes,

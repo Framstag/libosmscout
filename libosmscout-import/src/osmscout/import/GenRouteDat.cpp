@@ -1205,10 +1205,10 @@ namespace osmscout {
         nextNode=0;
       }
 
-      distance=GetSphericalDistance(way.nodes[currentNode].GetLon(),
-                                    way.nodes[currentNode].GetLat(),
-                                    way.nodes[nextNode].GetLon(),
-                                    way.nodes[nextNode].GetLat());
+      distance=GetSphericalDistance(way.GetCoord(currentNode).GetLon(),
+                                    way.GetCoord(currentNode).GetLat(),
+                                    way.GetCoord(nextNode).GetLon(),
+                                    way.GetCoord(nextNode).GetLat());
 
       while (nextNode!=currentNode &&
           nodeObjectsMap.find(way.ids[nextNode])==nodeObjectsMap.end()) {
@@ -1220,10 +1220,10 @@ namespace osmscout {
         }
 
         if (nextNode!=currentNode) {
-          distance+=GetSphericalDistance(way.nodes[lastNode].GetLon(),
-                                         way.nodes[lastNode].GetLat(),
-                                         way.nodes[nextNode].GetLon(),
-                                         way.nodes[nextNode].GetLat());
+          distance+=GetSphericalDistance(way.GetCoord(lastNode).GetLon(),
+                                         way.GetCoord(lastNode).GetLat(),
+                                         way.GetCoord(nextNode).GetLon(),
+                                         way.GetCoord(nextNode).GetLat());
         }
       }
 

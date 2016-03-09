@@ -44,10 +44,11 @@ namespace osmscout {
   public:
     class OSMSCOUT_API Ring
     {
-    public:
+    private:
       FeatureValueBuffer    featureValueBuffer; //!< List of features
-
       uint8_t               ring;               //!< The ring hierarchy number (0...n)
+
+    public:
       std::vector<Id>       ids;                //!< The array of ids for a coordinate
       std::vector<GeoCoord> nodes;              //!< The array of coordinates
 
@@ -93,6 +94,31 @@ namespace osmscout {
         return featureValueBuffer;
       }
 
+      inline bool IsMasterRing() const
+      {
+        return ring==masterRingId;
+      }
+
+      inline bool IsOuterRing() const
+      {
+        return ring==outerRingId;
+      }
+
+      inline uint8_t GetRing() const
+      {
+        return ring;
+      }
+
+      inline Id GetId(size_t index) const
+      {
+        return ids[index];
+      }
+
+      inline const GeoCoord& GetCoord(size_t index) const
+      {
+        return nodes[index];
+      }
+
       bool GetCenter(GeoCoord& center) const;
 
       void GetBoundingBox(GeoBox& boundingBox) const;
@@ -106,6 +132,23 @@ namespace osmscout {
       {
         featureValueBuffer.Set(buffer);
       }
+
+      inline void MarkAsMasterRing()
+      {
+        ring=masterRingId;
+      }
+
+      inline void MarkAsOuterRing()
+      {
+        ring=outerRingId;
+      }
+
+      inline void SetRing(uint8_t)
+      {
+        this->ring=ring;
+      }
+
+      friend class Area;
     };
 
   private:

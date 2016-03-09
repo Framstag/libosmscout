@@ -469,7 +469,7 @@ int main(int argc, char* argv[])
       way.Read(typeConfig,scanner);
 
       for (size_t n =0; n<way.nodes.size(); n++) {
-        std::cout << way.nodes[n].GetDisplayText() << " ";
+        std::cout << way.GetCoord(n).GetDisplayText() << " ";
       }
       std::cout << std::endl;
 

@@ -1000,7 +1000,7 @@ namespace osmscout {
       bool candidate=false;
 
       for (size_t r=0; r<area->rings.size(); r++) {
-        if (area->rings[r].ring!=Area::outerRingId) {
+        if (!area->rings[r].IsOuterRing()) {
           continue;
         }
 
@@ -1218,7 +1218,7 @@ namespace osmscout {
         }
 
         for (size_t r=0; r<area->rings.size(); r++) {
-          if (area->rings[r].ring==Area::outerRingId) {
+          if (area->rings[r].IsOuterRing()) {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;
@@ -1366,7 +1366,7 @@ namespace osmscout {
 
     for (const auto& area : areas) {
       for (const auto& ring : area->rings) {
-        if (ring.ring==Area::outerRingId) {
+        if (ring.IsOuterRing()) {
           if (!atPlace && IsCoordInArea(location,
                                         ring.nodes)) {
             atPlace=true;

@@ -265,12 +265,12 @@ namespace osmscout
               if (way->ids.front()==(*otherWay)->ids.front()) {
                 for (size_t i=(*otherWay)->nodes.size()-1; i>0; i--) {
                   newIds.push_back((*otherWay)->ids[i]);
-                  newNodes.push_back((*otherWay)->nodes[i]);
+                  newNodes.push_back((*otherWay)->GetCoord(i));
                 }
 
                 for (size_t i=0; i<way->nodes.size(); i++) {
                   newIds.push_back(way->ids[i]);
-                  newNodes.push_back(way->nodes[i]);
+                  newNodes.push_back(way->GetCoord(i));
                 }
 
                 way->ids=newIds;
@@ -279,12 +279,12 @@ namespace osmscout
               else {
                 for (size_t i=0; i<(*otherWay)->nodes.size(); i++) {
                   newIds.push_back((*otherWay)->ids[i]);
-                  newNodes.push_back((*otherWay)->nodes[i]);
+                  newNodes.push_back((*otherWay)->GetCoord(i));
                 }
 
                 for (size_t i=1; i<way->nodes.size(); i++) {
                   newIds.push_back(way->ids[i]);
-                  newNodes.push_back(way->nodes[i]);
+                  newNodes.push_back(way->GetCoord(i));
                 }
 
                 way->ids=newIds;
@@ -335,7 +335,7 @@ namespace osmscout
               if (way->ids.back()==(*otherWay)->ids.front()) {
                 for (size_t i=1; i<(*otherWay)->nodes.size(); i++) {
                   way->ids.push_back((*otherWay)->ids[i]);
-                  way->nodes.push_back((*otherWay)->nodes[i]);
+                  way->nodes.push_back((*otherWay)->GetCoord(i));
                 }
               }
               else {
@@ -343,7 +343,7 @@ namespace osmscout
                   size_t idx=(*otherWay)->nodes.size()-1-i;
 
                   way->ids.push_back((*otherWay)->ids[idx]);
-                  way->nodes.push_back((*otherWay)->nodes[idx]);
+                  way->nodes.push_back((*otherWay)->GetCoord(idx));
                 }
               }
 
@@ -485,7 +485,7 @@ namespace osmscout
            i<=polygon.GetEnd();
            i++) {
         if (polygon.points[i].draw) {
-          newNodes.push_back(way->nodes[i]);
+          newNodes.push_back(way->GetCoord(i));
         }
       }
 

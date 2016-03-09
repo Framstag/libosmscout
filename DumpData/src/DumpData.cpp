@@ -527,11 +527,11 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
       std::cout << "  node[" << n << "] {";
 
       if (n<way->ids.size() &&
-          way->ids[n]!=0) {
-        std::cout << " id: " << way->ids[n];
+          way->GetId(n)!=0) {
+        std::cout << " id: " << way->GetId(n);
       }
 
-      std::cout << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << " }" << std::endl;
+      std::cout << " lat: " << way->GetCoord(n).GetLat() << " lon: "<< way->GetCoord(n).GetLon() << " }" << std::endl;
     }
   }
 
@@ -582,11 +582,11 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
 
-    if (area->rings[r].ring==osmscout::Area::outerRingId) {
+    if (area->rings[r].IsOuterRing()) {
       std::cout << "    outer" << std::endl;
     }
     else {
-      std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
+      std::cout << "    ring: " << (size_t)area->rings[r].GetRing() << std::endl;
     }
     std::cout << "    type: " << area->rings[r].GetType()->GetName() << std::endl;
     std::cout << "    boundingBox: " << boundingBox.GetDisplayText() << std::endl;

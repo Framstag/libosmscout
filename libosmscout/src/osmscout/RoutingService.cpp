@@ -231,7 +231,7 @@ namespace osmscout {
     // TODO: What if the way is a roundabout?
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
-      routeNodeDataFile.Get(way->ids[i],
+      routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
       if (routeNode) {
@@ -258,7 +258,7 @@ namespace osmscout {
     }
 
     for (long i=nodeIndex-1; i>=0; i--) {
-      routeNodeDataFile.Get(way->ids[i],
+      routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
       if (routeNode) {
@@ -284,7 +284,7 @@ namespace osmscout {
     }
 
     for (long i=nodeIndex-1; i>=0; i--) {
-      routeNodeDataFile.Get(way->ids[i],
+      routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
       if (routeNode) {
@@ -307,7 +307,7 @@ namespace osmscout {
     // TODO: What if the way is a roundabout?
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
-      routeNodeDataFile.Get(way->ids[i],
+      routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
       if (routeNode) {
@@ -810,7 +810,7 @@ namespace osmscout {
       startLat=way->nodes[nodeIndex].GetLat();
 
       // Check, if the current node is already the route node
-      routeNodeDataFile.Get(way->ids[nodeIndex],
+      routeNodeDataFile.Get(way->GetId(nodeIndex),
                             forwardRouteNode);
 
       if (forwardRouteNode) {
@@ -935,7 +935,7 @@ namespace osmscout {
       targetLat=way->nodes[nodeIndex].GetLat();
 
       // Check, if the current node is already the route node
-      routeNodeDataFile.Get(way->ids[nodeIndex],
+      routeNodeDataFile.Get(way->GetId(nodeIndex),
                             forwardNode);
 
       if (!forwardNode) {
@@ -1473,14 +1473,14 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.ids.push_back(a->rings.front().ids[index]);
-            way.nodes.push_back(a->rings.front().nodes[index]);
+            way.ids.push_back(a->rings.front().GetId(index));
+            way.nodes.push_back(a->rings.front().GetCoord(index));
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.ids.push_back(a->rings.front().ids[index]);
-          way.nodes.push_back(a->rings.front().nodes[index]);
+          way.ids.push_back(a->rings.front().GetId(index));
+          way.nodes.push_back(a->rings.front().GetCoord(index));
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           WayRef w;
@@ -1493,14 +1493,14 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.ids.push_back(w->ids[index]);
-            way.nodes.push_back(w->nodes[index]);
+            way.ids.push_back(w->GetId(index));
+            way.nodes.push_back(w->GetCoord(index));
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.ids.push_back(w->ids[index]);
-          way.nodes.push_back(w->nodes[index]);
+          way.ids.push_back(w->GetId(index));
+          way.nodes.push_back(w->GetCoord(index));
         }
       }
     }
@@ -1579,17 +1579,15 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            points.push_back(Point(w->ids[index],
-                                   w->nodes[index].GetLat(),
-                                   w->nodes[index].GetLon()));
+            points.push_back(Point(w->GetId(index),
+                                   w->GetCoord(index)));
           }
 
           // target node of current path
           size_t index=iter->GetTargetNodeIndex();
 
-          points.push_back(Point(w->ids[index],
-                                 w->nodes[index].GetLat(),
-                                 w->nodes[index].GetLon()));
+          points.push_back(Point(w->GetId(index),
+                                 w->GetCoord(index)));
         }
       }
     }

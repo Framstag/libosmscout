@@ -134,12 +134,12 @@ namespace osmscout {
           continue;
         }
 
-        if (ring->ring==Area::masterRingId &&
+        if (ring->IsMasterRing() &&
             ring->nodes.empty()) {
           for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
                r!=area.rings.end();
                ++r) {
-            if (r->ring==Area::outerRingId) {
+            if (r->IsOuterRing()) {
               writer.WriteFileOffset(offset);
               writer.WriteNumber(ring->GetType()->GetAreaId());
               writer.Write(name);
@@ -333,7 +333,7 @@ namespace osmscout {
 
           if (area.rings.size()==0 ||
               (area.rings.size()==1 &&
-               area.rings[0].ring==Area::masterRingId)) {
+               area.rings[0].IsMasterRing())) {
             save=false;
             return true;
           }

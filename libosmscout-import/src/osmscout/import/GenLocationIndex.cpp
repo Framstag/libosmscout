@@ -476,7 +476,7 @@ namespace osmscout {
           for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
                ring!=area.rings.end();
                ++ring) {
-            if (ring->ring==Area::outerRingId) {
+            if (ring->IsOuterRing()) {
               boundary.areas.push_back(ring->nodes);
             }
           }
@@ -580,7 +580,7 @@ namespace osmscout {
         region->name=nameValue->GetName();
 
         for (const auto& ring : area.rings) {
-          if (ring.ring==Area::outerRingId) {
+          if (ring.IsOuterRing()) {
             region->areas.push_back(ring.nodes);
           }
         }
@@ -796,10 +796,10 @@ namespace osmscout {
                                                        const std::string& name,
                                                        const RegionIndex& regionIndex)
   {
-    if (ring.ring==Area::masterRingId &&
+    if (ring.IsMasterRing() &&
         ring.nodes.empty()) {
       for (const auto& r : area.rings) {
-        if (r.ring==Area::outerRingId) {
+        if (r.IsOuterRing()) {
           GeoBox boundingBox;
 
           r.GetBoundingBox(boundingBox);

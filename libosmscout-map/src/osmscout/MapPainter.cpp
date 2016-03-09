@@ -220,7 +220,7 @@ namespace osmscout {
       for (const auto& ring : area->rings) {
         entry.coordCount+=ring.nodes.size();
 
-        if (ring.ring==Area::masterRingId) {
+        if (ring.IsMasterRing()) {
           IconStyleRef iconStyle;
 
           styleConfig->GetAreaTextStyles(area->GetType(),
@@ -249,7 +249,7 @@ namespace osmscout {
       for (const auto& ring : area->rings) {
         entry.coordCount+=ring.nodes.size();
 
-        if (ring.ring==Area::masterRingId) {
+        if (ring.IsMasterRing()) {
           IconStyleRef iconStyle;
 
           styleConfig->GetAreaTextStyles(area->GetType(),
@@ -1497,7 +1497,7 @@ namespace osmscout {
 
       for (size_t i=0; i<area->rings.size(); i++) {
         // The master ring does not have any nodes, skipping...
-        if (area->rings[i].ring==Area::masterRingId) {
+        if (area->rings[i].IsMasterRing()) {
           continue;
         }
 
@@ -1517,11 +1517,11 @@ namespace osmscout {
         for (size_t i=0; i<area->rings.size(); i++) {
           const Area::Ring& ring=area->rings[i];
 
-          if (ring.ring==ringId) {
+          if (ring.GetRing()==ringId) {
             TypeInfoRef  type;
             FillStyleRef fillStyle;
 
-            if (ring.ring==Area::outerRingId) {
+            if (ring.IsOuterRing()) {
               type=area->GetType();
             }
             else if (!ring.GetType()->GetIgnore()) {
@@ -1558,7 +1558,7 @@ namespace osmscout {
             // in the list with ring+1.
             size_t j=i+1;
             while (j<area->rings.size() &&
-                   area->rings[j].ring==ringId+1 &&
+                   area->rings[j].GetRing()==ringId+1 &&
                    area->rings[j].GetType()->GetIgnore()) {
               a.clippings.push_back(data[j]);
 

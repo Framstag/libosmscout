@@ -96,7 +96,7 @@ namespace osmscout {
     bool start=true;
 
     for (const auto& ring : rings) {
-      if (ring.ring==Area::outerRingId) {
+      if (ring.IsOuterRing()) {
         for (size_t j=0; j<ring.nodes.size(); j++) {
           if (start) {
             minLat=ring.nodes[j].GetLat();
@@ -133,7 +133,7 @@ namespace osmscout {
     boundingBox.Invalidate();
 
     for (const auto& role : rings) {
-      if (role.ring==Area::outerRingId) {
+      if (role.IsOuterRing()) {
         if (!boundingBox.IsValid()) {
           role.GetBoundingBox(boundingBox);
         }

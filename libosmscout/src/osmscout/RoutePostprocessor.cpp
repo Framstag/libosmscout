@@ -1230,7 +1230,7 @@ namespace osmscout {
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      return way->ids[nodeIndex];
+      return way->GetId(nodeIndex);
     }
     else {
       assert(false);
@@ -1381,7 +1381,7 @@ namespace osmscout {
     else if (nodeObject.GetType()==refWay) {
       WayRef way=GetWay(nodeObject.GetFileOffset());
 
-      nodeId=way->ids[nodeIndex];
+      nodeId=way->GetId(nodeIndex);
     }
     else {
       assert(false);

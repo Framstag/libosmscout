@@ -141,7 +141,7 @@ namespace osmscout {
     while (sub!=rings.end()) {
       state.SetUsed(subIndex);
       groups.push_back(*sub);
-      groups.back().role.ring=id;
+      groups.back().role.SetRing(id);
 
       ConsumeSubs(rings,groups,state,subIndex,id+1);
 
@@ -223,7 +223,7 @@ namespace osmscout {
         Id                           backId;
 
         ring.role.SetType(typeConfig.typeInfoIgnore);
-        ring.role.ring=Area::outerRingId;
+        ring.role.MarkAsOuterRing();
         ring.ways=part->ways;
 
         ringParts.push_back(part);
@@ -393,7 +393,7 @@ namespace osmscout {
       state.SetUsed(topIndex);
 
       groups.push_back(*top);
-      groups.back().role.ring=Area::outerRingId;
+      groups.back().role.MarkAsOuterRing();
 
       if (state.HasIncludes(topIndex)) {
         ConsumeSubs(parts,groups,state,topIndex,Area::outerRingId+1);
@@ -454,7 +454,7 @@ namespace osmscout {
         MultipolygonPart part;
 
         part.role.SetType(typeConfig.typeInfoIgnore);
-        part.role.ring=Area::masterRingId;
+        part.role.MarkAsMasterRing();
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
 
@@ -558,7 +558,7 @@ namespace osmscout {
 
         MultipolygonPart part;
 
-        part.role.ring=Area::masterRingId;
+        part.role.MarkAsMasterRing();
         part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
@@ -885,7 +885,7 @@ namespace osmscout {
 
         childRing++;
         while (childRing!=parts.end() &&
-               childRing->role.ring==ring->role.ring+1) {
+               childRing->role.GetRing()==ring->role.GetRing()+1) {
 
           if (childRing->IsArea() &&
               ring->role.GetType()==childRing->role.GetType()) {
@@ -916,11 +916,11 @@ namespace osmscout {
     Area::Ring masterRing;
 
     masterRing.SetFeatures(rawRelation.GetFeatureValueBuffer());
-    masterRing.ring=Area::masterRingId;
+    masterRing.MarkAsMasterRing();
 
     if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
       for (auto& ring : parts) {
-        if (ring.role.ring==Area::outerRingId &&
+        if (ring.role.IsOuterRing() &&
             ring.IsArea() &&
             ring.role.GetType()!=typeConfig.typeInfoIgnore) {
           if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
@@ -1122,7 +1122,7 @@ namespace osmscout {
         bool dense=true;
 
         for (const auto& ring : rel.rings) {
-          if (ring.ring!=Area::masterRingId) {
+          if (!ring.IsMasterRing()) {
             if (ring.nodes.size()<3) {
               valid=false;
 
@@ -1153,7 +1153,7 @@ namespace osmscout {
 
         areaTypeCount[rel.GetType()->GetIndex()]++;
         for (const auto& ring: rel.rings) {
-          if (ring.ring==Area::outerRingId) {
+          if (ring.IsOuterRing()) {
             areaNodeTypeCount[rel.GetType()->GetIndex()]+=ring.nodes.size();
           }
         }
