@@ -34,6 +34,11 @@ namespace osmscout {
 
   /**
    * Resolved and enhanced OSM geo coordinate
+   *
+   * Different OSM nodes with the same coordinate will get a serial number. The serial
+   * number normally start with 1 (the next node with the same coordinate will get 2,...).
+   *
+   * This way we can 0 as a special flag for nodes without any identity.
    */
   struct OSMSCOUT_API Coord
   {

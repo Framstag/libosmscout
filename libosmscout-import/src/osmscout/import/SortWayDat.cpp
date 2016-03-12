@@ -238,7 +238,7 @@ namespace osmscout {
             reduced=true;
           }
           else if (way.GetId(n-1)==0) {
-            way.nodes[n-1].SetId(way.GetId(n));
+            way.nodes[n-1]=way.nodes[n];
             duplicateCount++;
             reduced=true;
           }

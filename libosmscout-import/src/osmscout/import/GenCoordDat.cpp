@@ -135,7 +135,7 @@ namespace osmscout {
 
             if (id==lastId) {
               if (!flaged) {
-                duplicates[id]=0;
+                duplicates[id]=1;
                 flaged=true;
               }
             }
@@ -256,7 +256,7 @@ namespace osmscout {
           entry.second.sort(SortCoordsByOSMId);
 
           for (auto& osmCoord : entry.second) {
-            uint8_t serial=0;
+            uint8_t serial=1;
             auto    duplicateEntry=duplicates.find(osmCoord.GetId());
 
             if (duplicateEntry!=duplicates.end()) {

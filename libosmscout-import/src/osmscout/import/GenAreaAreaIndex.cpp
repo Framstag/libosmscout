@@ -290,7 +290,7 @@ namespace osmscout {
               reduced=true;
             }
             else if (ring->GetId(n-1)==0) {
-              ring->SetId(n-1,ring->GetId(n));
+              ring->nodes[n-1]=ring->nodes[n];
               reduced=true;
             }
             else if (ring->GetId(n-1)==ring->GetId(n)) {
