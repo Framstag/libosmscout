@@ -73,7 +73,7 @@ public:
     // no code
   }
 
-  void Measure(const std::vector<osmscout::GeoCoord>& coords)
+  void Measure(const std::vector<osmscout::Point>& coords)
   {
     numberOfVectors++;
     coordCount+=coords.size();
@@ -189,7 +189,7 @@ public:
     // no code
   }
 
-  virtual void Encode(osmscout::FileOffset offset, const std::vector<osmscout::GeoCoord>& coords) = 0;
+  virtual void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords) = 0;
 };
 
 /**
@@ -206,7 +206,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::GeoCoord>& coords)
+  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -237,7 +237,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::GeoCoord>& coords)
+  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -245,7 +245,7 @@ public:
       return;
     }
 
-    osmscout::GeoCoord minCoord=coords[0];
+    osmscout::GeoCoord minCoord=coords[0].GetCoord();
 
     for (size_t i=1; i<coords.size(); i++) {
       minCoord.Set(std::min(minCoord.GetLat(),coords[i].GetLat()),
@@ -277,7 +277,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::GeoCoord>& coords)
+  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -327,7 +327,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::GeoCoord>& coords)
+  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
   {
     if (coords.empty()) {
       bytesNeeded++;

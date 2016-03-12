@@ -293,7 +293,7 @@ namespace osmscout {
   }
 
   bool MapPainter::IsVisibleArea(const Projection& projection,
-                                 const std::vector<GeoCoord>& nodes,
+                                 const std::vector<Point>& nodes,
                                  double pixelOffset) const
   {
     if (nodes.empty()) {
@@ -351,7 +351,7 @@ namespace osmscout {
   }
 
   bool MapPainter::IsVisibleWay(const Projection& projection,
-                                const std::vector<GeoCoord>& nodes,
+                                const std::vector<Point>& nodes,
                                 double pixelOffset) const
   {
     if (nodes.empty()) {
@@ -587,14 +587,14 @@ namespace osmscout {
       return;
     }
 
-    FillStyleRef          seaFill;
-    FillStyleRef          coastFill;
-    FillStyleRef          unknownFill;
-    LineStyleRef          coastlineLine;
-    std::vector<GeoCoord> points;
-    size_t                start=0; // Make the compiler happy
-    size_t                end=0;   // Make the compiler happy
-    double                errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
+    FillStyleRef       seaFill;
+    FillStyleRef       coastFill;
+    FillStyleRef       unknownFill;
+    LineStyleRef       coastlineLine;
+    std::vector<Point> points;
+    size_t             start=0; // Make the compiler happy
+    size_t             end=0;   // Make the compiler happy
+    double             errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
 
     styleConfig.GetSeaFillStyle(projection,
                                 seaFill);
@@ -647,10 +647,10 @@ namespace osmscout {
       if (tile->coords.empty()) {
         points.resize(5);
 
-        points[0].Set(areaData.boundingBox.minCoord.GetLat(),areaData.boundingBox.minCoord.GetLon());
-        points[1].Set(areaData.boundingBox.minCoord.GetLat(),areaData.boundingBox.maxCoord.GetLon());
-        points[2].Set(areaData.boundingBox.maxCoord.GetLat(),areaData.boundingBox.maxCoord.GetLon());
-        points[3].Set(areaData.boundingBox.maxCoord.GetLat(),areaData.boundingBox.minCoord.GetLon());
+        points[0].SetCoord(areaData.boundingBox.minCoord);
+        points[1].SetCoord(GeoCoord(areaData.boundingBox.minCoord.GetLat(),areaData.boundingBox.maxCoord.GetLon()));
+        points[2].SetCoord(areaData.boundingBox.maxCoord);
+        points[3].SetCoord(GeoCoord(areaData.boundingBox.maxCoord.GetLat(),areaData.boundingBox.minCoord.GetLon()));
         points[4]=points[0];
 
         transBuffer.transPolygon.TransformArea(projection,
@@ -686,7 +686,7 @@ namespace osmscout {
           lat=areaData.boundingBox.minCoord.GetLat()+tile->coords[i].y*tile->cellHeight/GroundTile::Coord::CELL_MAX;
           lon=areaData.boundingBox.minCoord.GetLon()+tile->coords[i].x*tile->cellWidth/GroundTile::Coord::CELL_MAX;
 
-          points[i].Set(lat,lon);
+          points[i].SetCoord(GeoCoord(lat,lon));
         }
 
         transBuffer.transPolygon.TransformArea(projection,
@@ -1592,8 +1592,7 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
                                      const FeatureValueBuffer& buffer,
-                                     const std::vector<GeoCoord>& nodes,
-                                     const std::vector<Id>& ids)
+                                     const std::vector<Point>& nodes)
   {
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
@@ -1678,8 +1677,8 @@ namespace osmscout {
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
       data.wayPriority=styleConfig.GetWayPrio(buffer.GetType());
-      data.startIsClosed=ids.empty() || ids[0]==0;
-      data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
+      data.startIsClosed=nodes[0].GetId()==0;
+      data.endIsClosed=nodes[nodes.size()-1].GetId()==0;
 
       LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
 
@@ -1717,8 +1716,7 @@ namespace osmscout {
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
                         way->GetFeatureValueBuffer(),
-                        way->nodes,
-                        way->ids);
+                        way->nodes);
     }
 
     for (const auto& way : data.poiWays) {
@@ -1727,8 +1725,7 @@ namespace osmscout {
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
                         way->GetFeatureValueBuffer(),
-                        way->nodes,
-                        way->ids);
+                        way->nodes);
     }
 
     wayData.sort();

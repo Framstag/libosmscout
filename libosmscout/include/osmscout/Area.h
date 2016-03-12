@@ -23,6 +23,7 @@
 #include <memory>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Point.h>
 
 #include <osmscout/TypeConfig.h>
 
@@ -38,8 +39,8 @@ namespace osmscout {
   class OSMSCOUT_API Area
   {
   public:
-    static const size_t masterRingId = 0;
-    static const size_t outerRingId = 1;
+    static const size_t masterRingId;
+    static const size_t outerRingId;
 
   public:
     class OSMSCOUT_API Ring
@@ -49,8 +50,7 @@ namespace osmscout {
       uint8_t               ring;               //!< The ring hierarchy number (0...n)
 
     public:
-      std::vector<Id>       ids;                //!< The array of ids for a coordinate
-      std::vector<GeoCoord> nodes;              //!< The array of coordinates
+      std::vector<Point>    nodes;              //!< The array of coordinates
 
     public:
       inline Ring()
@@ -111,12 +111,22 @@ namespace osmscout {
 
       inline Id GetId(size_t index) const
       {
-        return ids[index];
+        return nodes[index].GetId();
+      }
+
+      inline Id GetFrontId() const
+      {
+        return nodes.front().GetId();
+      }
+
+      inline Id GetBackId() const
+      {
+        return nodes.back().GetId();
       }
 
       inline const GeoCoord& GetCoord(size_t index) const
       {
-        return nodes[index];
+        return nodes[index].GetCoord();
       }
 
       bool GetCenter(GeoCoord& center) const;
@@ -143,9 +153,14 @@ namespace osmscout {
         ring=outerRingId;
       }
 
-      inline void SetRing(uint8_t)
+      inline void SetRing(uint8_t ring)
       {
         this->ring=ring;
+      }
+
+      inline void SetId(size_t index, Id id)
+      {
+        nodes[index].SetId(id);
       }
 
       friend class Area;
@@ -156,14 +171,6 @@ namespace osmscout {
 
   public:
     std::vector<Ring> rings;
-
-  private:
-    void ReadIds(FileScanner& scanner,
-                 uint32_t nodesCount,
-                 std::vector<Id>& ids);
-
-    void WriteIds(FileWriter& writer,
-                  const std::vector<Id>& ids) const;
 
   public:
     inline Area()

@@ -122,7 +122,7 @@ namespace osmscout {
     void FlushCurrentBlockWithZeros(size_t blockSize);
   };
 
-  extern OSMSCOUT_API bool IsValidToWrite(const std::vector<GeoCoord>& nodes);
+  extern OSMSCOUT_API bool IsValidToWrite(const std::vector<Point>& nodes);
 
   /**
    * Efficiently (in disk space handling) write a number of (sorted by file offset) ObjectFileRefs.

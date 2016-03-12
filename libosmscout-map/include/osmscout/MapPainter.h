@@ -332,8 +332,7 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const ObjectFileRef& ref,
                            const FeatureValueBuffer& buffer,
-                           const std::vector<GeoCoord>& nodes,
-                           const std::vector<Id>& ids);
+                           const std::vector<Point>& nodes);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,
@@ -405,11 +404,11 @@ namespace osmscout {
      */
     //@{
     bool IsVisibleArea(const Projection& projection,
-                       const std::vector<GeoCoord>& nodes,
+                       const std::vector<Point>& nodes,
                        double pixelOffset) const;
 
     bool IsVisibleWay(const Projection& projection,
-                      const std::vector<GeoCoord>& nodes,
+                      const std::vector<Point>& nodes,
                       double pixelOffset) const;
 
     void Transform(const Projection& projection,

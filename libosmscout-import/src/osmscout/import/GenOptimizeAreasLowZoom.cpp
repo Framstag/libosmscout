@@ -246,7 +246,7 @@ namespace osmscout
 
       copiedArea->rings=newRings;
 
-      optimizedAreas.push_back(copiedArea);
+      optimizedAreas.push_back(area/*copiedArea*/);
     }
   }
 
@@ -292,6 +292,7 @@ namespace osmscout
         entryCount+=cell->second;
         max=std::max(max,cell->second);
       }
+
 
       double average=entryCount*1.0/cellFillCount.size();
 

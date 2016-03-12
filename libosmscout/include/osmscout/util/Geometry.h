@@ -33,6 +33,7 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Point.h>
 #include <osmscout/Types.h>
 
 #include <osmscout/util/GeoBox.h>
@@ -318,14 +319,16 @@ namespace osmscout {
    * If -1 returned, the point is outside the area, if 0, the point is on the area boundary, 1
    * the point is within the area.
    */
-  inline int GetRelationOfPointToArea(const GeoCoord& point,
-                                      const std::vector<GeoCoord>& nodes)
+  template<typename N,typename M>
+  inline int GetRelationOfPointToArea(const N& point,
+                                      const std::vector<M>& nodes)
   {
     size_t i,j;
     bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if (point==nodes[i]) {
+      if (point.GetLat()==nodes[i].GetLat() &&
+          point.GetLon()==nodes[i].GetLon()) {
         return 0;
       }
 
@@ -707,12 +710,87 @@ namespace osmscout {
    *
    * See http://en.wikipedia.org/wiki/Curve_orientation.
    */
-  extern OSMSCOUT_API bool AreaIsClockwise(const std::vector<GeoCoord>& edges);
+  template<typename N>
+  bool AreaIsClockwise(const std::vector<N>& edges)
+  {
+    assert(edges.size()>=3);
+    // based on http://en.wikipedia.org/wiki/Curve_orientation
+    // and http://local.wasp.uwa.edu.au/~pbourke/geometry/clockwise/
+
+    // note: polygon must be simple
+
+    size_t ptIdx=0;
+
+    for (size_t i=1; i<edges.size(); i++) {
+      // find the point with the smallest y value,
+      if (edges[i].GetLat()<edges[ptIdx].GetLat()) {
+        ptIdx=i;
+      }
+        // if y values are equal save the point with greatest x
+      else if (edges[i].GetLat()==edges[ptIdx].GetLat()) {
+        if (edges[i].GetLon()<edges[ptIdx].GetLon()) {
+          ptIdx=i;
+        }
+      }
+    }
+
+    size_t prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
+    size_t nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
+
+    double signedArea=(edges[ptIdx].GetLon()-edges[prevIdx].GetLon())*
+                      (edges[nextIdx].GetLat()-edges[ptIdx].GetLat())-
+                      (edges[ptIdx].GetLat()-edges[prevIdx].GetLat())*
+                      (edges[nextIdx].GetLon()-edges[ptIdx].GetLon());
+
+    return signedArea<0.0;
+  }
 
 
-  extern OSMSCOUT_API double CalculateDistancePointToLineSegment(const GeoCoord& p,
-                                                                 const GeoCoord& a,
-                                                                 const GeoCoord& b);
+  /**
+   * Calculates the distance between a point p and a line defined by the points a and b.
+   * @param p
+   *    The point in distance to a line
+   * @param a
+   *    One point defining the line
+   * @param b
+   *    Another point defining the line
+   * @return
+   *    The distance
+   */
+  template<typename N>
+  double CalculateDistancePointToLineSegment(const N& p,
+                                             const N& a,
+                                             const N& b)
+  {
+    double xdelta=b.GetLon()-a.GetLon();
+    double ydelta=b.GetLat()-a.GetLat();
+
+    if (xdelta==0 && ydelta==0) {
+      return std::numeric_limits<double>::infinity();
+    }
+
+    double u=((p.GetLon()-a.GetLon())*xdelta+(p.GetLat()-a.GetLat())*ydelta)/(xdelta*xdelta+ydelta*ydelta);
+
+    double cx,cy;
+
+    if (u<0) {
+      cx=a.GetLon();
+      cy=a.GetLat();
+    }
+    else if (u>1) {
+      cx=b.GetLon();
+      cy=b.GetLat();
+    }
+    else {
+      cx=a.GetLon()+u*xdelta;
+      cy=a.GetLat()+u*ydelta;
+    }
+
+    double dx=cx-p.GetLon();
+    double dy=cy-p.GetLat();
+
+    return sqrt(dx*dx+dy*dy);
+  }
 
   extern OSMSCOUT_API double CalculateDistancePointToLineSegment(const GeoCoord& p,
                                                                  const GeoCoord& a,
@@ -813,12 +891,6 @@ namespace osmscout {
   class OSMSCOUT_API PolygonMerger
   {
   private:
-    struct Node
-    {
-      GeoCoord coord;
-      Id       id;
-    };
-
     struct Edge
     {
       size_t fromIndex;
@@ -828,13 +900,12 @@ namespace osmscout {
   public:
     struct Polygon
     {
-      std::vector<GeoCoord> coords;
-      std::vector<Id>       ids;
+      std::vector<Point> coords;
     };
 
   private:
     std::unordered_map<Id,size_t>                               nodeIdIndexMap;
-    std::vector<Node>                                           nodes;
+    std::vector<Point>                                          nodes;
     std::list<Edge>                                             edges;
     std::unordered_map<Id,std::list<std::list<Edge>::iterator>> idEdgeMap;
 
@@ -842,8 +913,7 @@ namespace osmscout {
     void RemoveEliminatingEdges();
 
   public:
-    void AddPolygon(const std::vector<GeoCoord>& polygonsCoords,
-                    const std::vector<Id>& polygonsIds);
+    void AddPolygon(const std::vector<Point>& polygonsCoords);
 
     bool Merge(std::list<Polygon>& result);
   };

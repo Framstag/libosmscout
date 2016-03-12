@@ -198,12 +198,12 @@ namespace osmscout
     progress.Info("Merging "+NumberToString(ways.size())+" ways");
 
     for (const auto &way : ways) {
-      if (way->ids.front()!=0) {
-        waysByJoin[way->ids.front()].push_back(way);
+      if (way->GetFrontId()!=0) {
+        waysByJoin[way->GetFrontId()].push_back(way);
       }
 
-      if (way->ids.back()!=0) {
-        waysByJoin[way->ids.back()].push_back(way);
+      if (way->GetBackId()!=0) {
+        waysByJoin[way->GetBackId()].push_back(way);
       }
     }
 
@@ -225,7 +225,7 @@ namespace osmscout
         while (true) {
           std::map<Id, std::list<WayRef> >::iterator match;
 
-          match=waysByJoin.find(way->ids.front());
+          match=waysByJoin.find(way->GetFrontId());
           if (match!=waysByJoin.end()) {
             std::list<WayRef>::iterator otherWay;
 
@@ -256,38 +256,30 @@ namespace osmscout
             }
 
             if (otherWay!=match->second.end()) {
-              std::vector<Id>       newIds;
-              std::vector<GeoCoord> newNodes;
+              std::vector<Point> newNodes;
 
-              newIds.reserve(way->ids.size()+(*otherWay)->ids.size()-1);
               newNodes.reserve(way->nodes.size()+(*otherWay)->nodes.size()-1);
 
-              if (way->ids.front()==(*otherWay)->ids.front()) {
+              if (way->GetFrontId()==(*otherWay)->GetFrontId()) {
                 for (size_t i=(*otherWay)->nodes.size()-1; i>0; i--) {
-                  newIds.push_back((*otherWay)->ids[i]);
-                  newNodes.push_back((*otherWay)->GetCoord(i));
+                  newNodes.push_back((*otherWay)->nodes[i]);
                 }
 
                 for (size_t i=0; i<way->nodes.size(); i++) {
-                  newIds.push_back(way->ids[i]);
-                  newNodes.push_back(way->GetCoord(i));
+                  newNodes.push_back(way->nodes[i]);
                 }
 
-                way->ids=newIds;
                 way->nodes=newNodes;
               }
               else {
                 for (size_t i=0; i<(*otherWay)->nodes.size(); i++) {
-                  newIds.push_back((*otherWay)->ids[i]);
-                  newNodes.push_back((*otherWay)->GetCoord(i));
+                  newNodes.push_back((*otherWay)->nodes[i]);
                 }
 
                 for (size_t i=1; i<way->nodes.size(); i++) {
-                  newIds.push_back(way->ids[i]);
-                  newNodes.push_back(way->GetCoord(i));
+                  newNodes.push_back(way->nodes[i]);
                 }
 
-                way->ids=newIds;
                 way->nodes=newNodes;
               }
 
@@ -298,7 +290,7 @@ namespace osmscout
             }
           }
 
-          match=waysByJoin.find(way->ids.back());
+          match=waysByJoin.find(way->GetBackId());
           if (match!=waysByJoin.end()) {
             std::list<WayRef>::iterator otherWay;
 
@@ -329,21 +321,18 @@ namespace osmscout
             }
 
             if (otherWay!=match->second.end()) {
-              way->ids.reserve(way->ids.size()+(*otherWay)->ids.size()-1);
               way->nodes.reserve(way->nodes.size()+(*otherWay)->nodes.size()-1);
 
-              if (way->ids.back()==(*otherWay)->ids.front()) {
+              if (way->GetBackId()==(*otherWay)->GetFrontId()) {
                 for (size_t i=1; i<(*otherWay)->nodes.size(); i++) {
-                  way->ids.push_back((*otherWay)->ids[i]);
-                  way->nodes.push_back((*otherWay)->GetCoord(i));
+                  way->nodes.push_back((*otherWay)->nodes[i]);
                 }
               }
               else {
                 for (size_t i=1; i<(*otherWay)->nodes.size(); i++) {
                   size_t idx=(*otherWay)->nodes.size()-1-i;
 
-                  way->ids.push_back((*otherWay)->ids[idx]);
-                  way->nodes.push_back((*otherWay)->GetCoord(idx));
+                  way->nodes.push_back((*otherWay)->nodes[idx]);
                 }
               }
 
@@ -460,12 +449,12 @@ namespace osmscout
     projection.Set(0,0,magnification,dpi,width,height);
 
     for (auto &way :ways) {
-      TransPolygon          polygon;
-      std::vector<GeoCoord> newNodes;
-      double                xmin;
-      double                xmax;
-      double                ymin;
-      double                ymax;
+      TransPolygon       polygon;
+      std::vector<Point> newNodes;
+      double             xmin;
+      double             xmax;
+      double             ymin;
+      double             ymax;
 
       polygon.TransformWay(projection,
                            optimizeWayMethod,
@@ -485,7 +474,7 @@ namespace osmscout
            i<=polygon.GetEnd();
            i++) {
         if (polygon.points[i].draw) {
-          newNodes.push_back(way->GetCoord(i));
+          newNodes.push_back(way->nodes[i]);
         }
       }
 

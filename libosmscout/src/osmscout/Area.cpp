@@ -28,6 +28,9 @@
 
 namespace osmscout {
 
+  const size_t Area::masterRingId = 0;
+  const size_t Area::outerRingId = 1;
+
   bool Area::Ring::GetCenter(GeoCoord& center) const
   {
     double minLat=0.0;
@@ -148,42 +151,6 @@ namespace osmscout {
     }
   }
 
-  void Area::ReadIds(FileScanner& scanner,
-                     uint32_t nodesCount,
-                     std::vector<Id>& ids)
-  {
-    ids.resize(nodesCount);
-
-    Id minId;
-
-    scanner.ReadNumber(minId);
-
-    if (minId>0) {
-      size_t idCurrent=0;
-
-      while (idCurrent<ids.size()) {
-        uint8_t bitset;
-        size_t  bitmask=1;
-
-        scanner.Read(bitset);
-
-        for (size_t i=0; i<8 && idCurrent<ids.size(); i++) {
-          if (bitset & bitmask) {
-            scanner.ReadNumber(ids[idCurrent]);
-
-            ids[idCurrent]+=minId;
-          }
-          else {
-            ids[idCurrent]=0;
-          }
-
-          bitmask*=2;
-          idCurrent++;
-        }
-      }
-    }
-  }
-
   /**
    * Reads data from the given Filescanner. Node ids will only be read
    * if not thought to be required for this area.
@@ -227,14 +194,8 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    scanner.Read(rings[0].nodes);
-
-    if (!rings[0].nodes.empty() &&
-        rings[0].GetType()->CanRoute()) {
-      ReadIds(scanner,
-              rings[0].nodes.size(),
-              rings[0].ids);
-    }
+    scanner.Read(rings[0].nodes,
+                 rings[0].GetType()->CanRoute());
 
     for (size_t i=1; i<ringCount; i++) {
       scanner.ReadTypeId(ringType,
@@ -249,15 +210,9 @@ namespace osmscout {
       }
 
       scanner.Read(rings[i].ring);
-      scanner.Read(rings[i].nodes);
-
-      if (!rings[i].nodes.empty() &&
-          rings[i].GetType()->GetAreaId()!=typeIgnore &&
-          rings[i].GetType()->CanRoute()) {
-        ReadIds(scanner,
-                rings[i].nodes.size(),
-                rings[i].ids);
-      }
+      scanner.Read(rings[i].nodes,
+                   rings[i].GetType()->GetAreaId()!=typeIgnore &&
+                   rings[i].GetType()->CanRoute());
     }
   }
 
@@ -303,13 +258,8 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    scanner.Read(rings[0].nodes);
-
-    if (!rings[0].nodes.empty()) {
-      ReadIds(scanner,
-              rings[0].nodes.size(),
-              rings[0].ids);
-    }
+    scanner.Read(rings[0].nodes,
+                 true);
 
     for (size_t i=1; i<ringCount; i++) {
       scanner.ReadTypeId(ringType,
@@ -324,15 +274,9 @@ namespace osmscout {
       }
 
       scanner.Read(rings[i].ring);
-      scanner.Read(rings[i].nodes);
-
-      if (!rings[i].nodes.empty() &&
-          (rings[i].ring==outerRingId ||
-           rings[i].GetType()->GetAreaId()!=typeIgnore)) {
-        ReadIds(scanner,
-                rings[i].nodes.size(),
-                rings[i].ids);
-      }
+      scanner.Read(rings[i].nodes,
+                   rings[i].GetType()->GetAreaId()!=typeIgnore ||
+                   rings[i].ring==outerRingId);
     }
   }
 
@@ -378,7 +322,8 @@ namespace osmscout {
       rings[0].ring=outerRingId;
     }
 
-    scanner.Read(rings[0].nodes);
+    scanner.Read(rings[0].nodes,
+                 false);
 
     for (size_t i=1; i<ringCount; i++) {
       scanner.ReadTypeId(ringType,
@@ -393,56 +338,8 @@ namespace osmscout {
       }
 
       scanner.Read(rings[i].ring);
-      scanner.Read(rings[i].nodes);
-    }
-  }
-
-  void Area::WriteIds(FileWriter& writer,
-                      const std::vector<Id>& ids) const
-  {
-    Id minId=0;
-
-    for (size_t i=0; i<ids.size(); i++) {
-      if (ids[i]!=0) {
-        if (minId==0) {
-          minId=ids[i];
-        }
-        else {
-          minId=std::min(minId,ids[i]);
-        }
-      }
-    }
-
-    writer.WriteNumber(minId);
-
-    if (minId>0) {
-      size_t idCurrent=0;
-
-      while (idCurrent<ids.size()) {
-        uint8_t bitset=0;
-        uint8_t bitMask=1;
-        size_t  idEnd=std::min(idCurrent+8,ids.size());
-
-        for (size_t i=idCurrent; i<idEnd; i++) {
-          if (ids[i]!=0) {
-            bitset=bitset | bitMask;
-          }
-
-          bitMask*=2;
-        }
-
-        writer.Write(bitset);
-
-        for (size_t i=idCurrent; i<idEnd; i++) {
-          if (ids[i]!=0) {
-            writer.WriteNumber(ids[i]-minId);
-          }
-
-          bitMask=bitMask*2;
-        }
-
-        idCurrent+=8;
-      }
+      scanner.Read(rings[i].nodes,
+                   false);
     }
   }
 
@@ -470,13 +367,8 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(ring->nodes);
-
-    if (!ring->nodes.empty() &&
-        ring->GetType()->CanRoute()) {
-      WriteIds(writer,
-               ring->ids);
-    }
+    writer.Write(ring->nodes,
+                 ring->GetType()->CanRoute());
 
     ++ring;
 
@@ -491,14 +383,9 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(ring->nodes);
-
-      if (!ring->nodes.empty() &&
-          ring->GetType()->GetAreaId()!=typeIgnore &&
-          ring->GetType()->CanRoute()) {
-        WriteIds(writer,
-                 ring->ids);
-      }
+      writer.Write(ring->nodes,
+                   ring->GetType()->GetAreaId()!=typeIgnore &&
+                   ring->GetType()->CanRoute());
 
       ++ring;
     }
@@ -515,7 +402,7 @@ namespace osmscout {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
-    // Outer or master ring
+    // Outer ring
 
     writer.WriteTypeId(ring->GetType()->GetAreaId(),
                        typeConfig.GetAreaTypeIdBytes());
@@ -527,12 +414,8 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(ring->nodes);
-
-    if (!ring->nodes.empty()) {
-      WriteIds(writer,
-               ring->ids);
-    }
+    writer.Write(ring->nodes,
+                 true);
 
     ++ring;
 
@@ -547,14 +430,9 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(ring->nodes);
-
-      if (!ring->nodes.empty() &&
-          (ring->ring==outerRingId ||
-           ring->GetType()->GetAreaId()!=typeIgnore)) {
-        WriteIds(writer,
-                 ring->ids);
-      }
+      writer.Write(ring->nodes,
+                   ring->GetType()->GetAreaId()!=typeIgnore ||
+                   ring->ring==outerRingId);
 
       ++ring;
     }
@@ -583,7 +461,8 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(ring->nodes);
+    writer.Write(ring->nodes,
+                 false);
 
     ++ring;
 
@@ -598,7 +477,8 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(ring->nodes);
+      writer.Write(ring->nodes,
+                   false);
 
       ++ring;
     }

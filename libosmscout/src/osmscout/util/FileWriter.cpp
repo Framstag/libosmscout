@@ -1280,7 +1280,7 @@ namespace osmscout {
     }
   }
 
-  bool IsValidToWrite(const std::vector<GeoCoord>& nodes)
+  bool IsValidToWrite(const std::vector<Point>& nodes)
   {
     if (nodes.size()<=1) {
       return true;

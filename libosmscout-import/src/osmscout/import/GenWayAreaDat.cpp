@@ -223,7 +223,6 @@ namespace osmscout {
     ring.SetFeatures(rawWay.GetFeatureValueBuffer());
 
     ring.MarkAsOuterRing();
-    ring.ids.resize(rawWay.GetNodeCount());
     ring.nodes.resize(rawWay.GetNodeCount());
 
     bool success=true;
@@ -239,8 +238,8 @@ namespace osmscout {
         break;
       }
 
-      ring.ids[n]=coord->second->GetOSMScoutId();
-      ring.nodes[n]=coord->second->GetCoord();
+      ring.nodes[n].Set(coord->second->GetOSMScoutId(),
+                        coord->second->GetCoord());
     }
 
     if (!success) {

@@ -181,8 +181,8 @@ namespace osmscout {
         rings.push_back(part);
       }
       else {
-        partsByEnd[part.role.ids.front()].push_back(&part);
-        partsByEnd[part.role.ids.back()].push_back(&part);
+        partsByEnd[part.role.GetFrontId()].push_back(&part);
+        partsByEnd[part.role.GetBackId()].push_back(&part);
       }
     }
 
@@ -223,12 +223,11 @@ namespace osmscout {
         Id                           backId;
 
         ring.role.SetType(typeConfig.typeInfoIgnore);
-        ring.role.MarkAsOuterRing();
         ring.ways=part->ways;
 
         ringParts.push_back(part);
         nodeCount=part->role.nodes.size();
-        backId=part->role.ids.back();
+        backId=part->role.GetBackId();
 
         while (true) {
           std::map<Id, std::list<MultipolygonPart*> >::iterator match=partsByEnd.find(backId);
@@ -244,11 +243,11 @@ namespace osmscout {
             }
 
             if (otherPart!=match->second.end()) {
-              if (backId==(*otherPart)->role.ids.front()) {
-                backId=(*otherPart)->role.ids.back();
+              if (backId==(*otherPart)->role.GetFrontId()) {
+                backId=(*otherPart)->role.GetBackId();
               }
               else {
-                backId=(*otherPart)->role.ids.front();
+                backId=(*otherPart)->role.GetFrontId();
               }
 
               ring.ways.push_back((*otherPart)->ways.front());
@@ -267,7 +266,6 @@ namespace osmscout {
           break;
         }
 
-        ring.role.ids.reserve(nodeCount);
         ring.role.nodes.reserve(nodeCount);
 
         for (std::list<MultipolygonPart*>::const_iterator p=ringParts.begin();
@@ -277,13 +275,11 @@ namespace osmscout {
 
           if (p==ringParts.begin()) {
             for (size_t i=0; i<part->role.nodes.size(); i++) {
-              ring.role.ids.push_back(part->role.ids[i]);
               ring.role.nodes.push_back(part->role.nodes[i]);
             }
           }
-          else if (ring.role.ids.back()==part->role.ids.front()) {
+          else if (ring.role.GetBackId()==part->role.GetFrontId()) {
             for (size_t i=1; i<part->role.nodes.size(); i++) {
-              ring.role.ids.push_back(part->role.ids[i]);
               ring.role.nodes.push_back(part->role.nodes[i]);
             }
           }
@@ -291,7 +287,6 @@ namespace osmscout {
             for (size_t i=1; i<part->role.nodes.size(); i++) {
               size_t idx=part->role.nodes.size()-1-i;
 
-              ring.role.ids.push_back(part->role.ids[idx]);
               ring.role.nodes.push_back(part->role.nodes[idx]);
             }
           }
@@ -299,8 +294,7 @@ namespace osmscout {
 
         // During concatenation we might define a closed ring with start==end, but everywhere else
         // in the code we store areas without repeating the start, so we remove the final node again
-        if (ring.role.ids.back()==ring.role.ids.front()) {
-          ring.role.ids.pop_back();
+        if (ring.role.GetBackId()==ring.role.GetFrontId()) {
           ring.role.nodes.pop_back();
         }
 
@@ -393,10 +387,11 @@ namespace osmscout {
       state.SetUsed(topIndex);
 
       groups.push_back(*top);
+
       groups.back().role.MarkAsOuterRing();
 
       if (state.HasIncludes(topIndex)) {
-        ConsumeSubs(parts,groups,state,topIndex,Area::outerRingId+1);
+        ConsumeSubs(parts,groups,state,topIndex,Area::outerRingId+1/*groups.back().role.GetRing()+1*/);
       }
     }
 
@@ -455,10 +450,10 @@ namespace osmscout {
 
         part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.MarkAsMasterRing();
-        part.role.ids.reserve(way->GetNodeCount());
-        part.role.nodes.reserve(way->GetNodeCount());
+        part.role.nodes.resize(way->GetNodeCount());
 
-        for (const auto& osmId : way->GetNodes()) {
+        for (size_t n=0; n<way->GetNodeCount(); n++) {
+          OSMId                                    osmId=way->GetNodeId(n);
           CoordDataFile::ResultMap::const_iterator coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
@@ -472,8 +467,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.ids.push_back(coordEntry->second->GetOSMScoutId());
-          part.role.nodes.push_back(coordEntry->second->GetCoord());
+          part.role.nodes[n].Set(coordEntry->second->GetOSMScoutId(),
+                                 coordEntry->second->GetCoord());
         }
 
         part.ways.push_back(way);
@@ -558,12 +553,12 @@ namespace osmscout {
 
         MultipolygonPart part;
 
-        part.role.MarkAsMasterRing();
         part.role.SetType(typeConfig.typeInfoIgnore);
-        part.role.ids.reserve(way->GetNodeCount());
-        part.role.nodes.reserve(way->GetNodeCount());
+        part.role.MarkAsMasterRing();
+        part.role.nodes.resize(way->GetNodeCount());
 
-        for (const auto& osmId : way->GetNodes()) {
+        for (size_t n=0; n<way->GetNodeCount(); n++) {
+          OSMId                                    osmId=way->GetNodeId(n);
           CoordDataFile::ResultMap::const_iterator coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
@@ -577,8 +572,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.ids.push_back(coordEntry->second->GetOSMScoutId());
-          part.role.nodes.push_back(coordEntry->second->GetCoord());
+          part.role.nodes[n].Set(coordEntry->second->GetOSMScoutId(),
+                                 coordEntry->second->GetCoord());
         }
 
         part.ways.push_back(way);

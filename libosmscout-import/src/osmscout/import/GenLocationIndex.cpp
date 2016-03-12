@@ -473,11 +473,15 @@ namespace osmscout {
           boundary.name=nameValue->GetName();
           boundary.level=adminLevelValue->GetAdminLevel();
 
-          for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
-               ring!=area.rings.end();
-               ++ring) {
-            if (ring->IsOuterRing()) {
-              boundary.areas.push_back(ring->nodes);
+          for (const auto& ring : area.rings) {
+            if (ring.IsOuterRing()) {
+              std::vector<GeoCoord> coords;
+
+              for (const auto& node : ring.nodes) {
+                coords.push_back(node.GetCoord());
+              }
+
+              boundary.areas.push_back(coords);
             }
           }
 
@@ -581,7 +585,13 @@ namespace osmscout {
 
         for (const auto& ring : area.rings) {
           if (ring.IsOuterRing()) {
-            region->areas.push_back(ring.nodes);
+            std::vector<GeoCoord> coords;
+
+            for (const auto& node : ring.nodes) {
+              coords.push_back(node.GetCoord());
+            }
+
+            region->areas.push_back(coords);
           }
         }
 
@@ -741,7 +751,7 @@ namespace osmscout {
 
   bool LocationIndexGenerator::AddLocationAreaToRegion(Region& region,
                                                        const Area& area,
-                                                       const std::vector<GeoCoord>& nodes,
+                                                       const std::vector<Point>& nodes,
                                                        const std::string& name,
                                                        double minlon,
                                                        double minlat,

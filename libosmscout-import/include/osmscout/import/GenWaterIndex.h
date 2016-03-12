@@ -138,12 +138,12 @@ namespace osmscout {
      */
     struct Coast
     {
-      Id                    id;
-      bool                  isArea;
-      double                sortCriteria;
-      Id                    frontNodeId;
-      Id                    backNodeId;
-      std::vector<GeoCoord> coast;
+      Id                 id;
+      bool               isArea;
+      double             sortCriteria;
+      Id                 frontNodeId;
+      Id                 backNodeId;
+      std::vector<Point> coast;
     };
 
     typedef std::shared_ptr<Coast> CoastRef;
@@ -206,7 +206,7 @@ namespace osmscout {
                   std::set<Pixel>& cellIntersections);
 
     void GetCells(const Level& level,
-                  const std::vector<GeoCoord>& points,
+                  const std::vector<Point>& points,
                   std::set<Pixel>& cellIntersections);
 
     void GetCellIntersections(const Level& level,

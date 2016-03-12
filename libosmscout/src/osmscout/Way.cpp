@@ -58,21 +58,11 @@ namespace osmscout {
     // attributes.SetLayer(std::numeric_limits<int8_t>::max());
   }
 
-  void Way::GetCoordinates(size_t nodeIndex,
-                           double& lat,
-                           double& lon) const
-  {
-    assert(nodeIndex<nodes.size());
-
-    lat=nodes[nodeIndex].GetLat();
-    lon=nodes[nodeIndex].GetLon();
-  }
-
   bool Way::GetNodeIndexByNodeId(Id id,
                                  size_t& index) const
   {
-    for (size_t i=0; i<ids.size(); i++) {
-      if (ids[i]==id) {
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (nodes[i].GetId()==id) {
         index=i;
 
         return true;
@@ -80,40 +70,6 @@ namespace osmscout {
     }
 
     return false;
-  }
-
-  void Way::ReadIds(FileScanner& scanner)
-  {
-    ids.resize(nodes.size());
-
-    Id minId;
-
-    scanner.ReadNumber(minId);
-
-    if (minId>0) {
-      size_t idCurrent=0;
-
-      while (idCurrent<ids.size()) {
-        uint8_t bitset;
-        size_t  bitmask=1;
-
-        scanner.Read(bitset);
-
-        for (size_t i=0; i<8 && idCurrent<ids.size(); i++) {
-          if (bitset & bitmask) {
-            scanner.ReadNumber(ids[idCurrent]);
-
-            ids[idCurrent]+=minId;
-          }
-          else {
-            ids[idCurrent]=0;
-          }
-
-          bitmask*=2;
-          idCurrent++;
-        }
-      }
-    }
   }
 
   /**
@@ -137,12 +93,8 @@ namespace osmscout {
 
     featureValueBuffer.Read(scanner);
 
-    scanner.Read(nodes);
-
-    if (type->CanRoute() ||
-        type->GetOptimizeLowZoom()) {
-      ReadIds(scanner);
-    }
+    scanner.Read(nodes,type->CanRoute() ||
+                       type->GetOptimizeLowZoom());
   }
 
   /**
@@ -164,55 +116,7 @@ namespace osmscout {
 
     featureValueBuffer.Read(scanner);
 
-    scanner.Read(nodes);
-  }
-
-  void Way::WriteIds(FileWriter& writer) const
-  {
-    Id minId=0;
-
-    for (size_t i=0; i<ids.size(); i++) {
-      if (ids[i]!=0) {
-        if (minId==0) {
-          minId=ids[i];
-        }
-        else {
-          minId=std::min(minId,ids[i]);
-        }
-      }
-    }
-
-    writer.WriteNumber(minId);
-
-    if (minId>0) {
-      size_t idCurrent=0;
-
-      while (idCurrent<ids.size()) {
-        uint8_t bitset=0;
-        uint8_t bitMask=1;
-        size_t  idEnd=std::min(idCurrent+8,ids.size());
-
-        for (size_t i=idCurrent; i<idEnd; i++) {
-          if (ids[i]!=0) {
-            bitset=bitset | bitMask;
-          }
-
-          bitMask*=2;
-        }
-
-        writer.Write(bitset);
-
-        for (size_t i=idCurrent; i<idEnd; i++) {
-          if (ids[i]!=0) {
-            writer.WriteNumber(ids[i]-minId);
-          }
-
-          bitMask=bitMask*2;
-        }
-
-        idCurrent+=8;
-      }
-    }
+    scanner.Read(nodes,false);
   }
 
   /**
@@ -230,12 +134,8 @@ namespace osmscout {
 
     featureValueBuffer.Write(writer);
 
-    writer.Write(nodes);
-
-    if (featureValueBuffer.GetType()->CanRoute() ||
-        featureValueBuffer.GetType()->GetOptimizeLowZoom()) {
-      WriteIds(writer);
-    }
+    writer.Write(nodes,featureValueBuffer.GetType()->CanRoute() ||
+                       featureValueBuffer.GetType()->GetOptimizeLowZoom());
   }
 
   /**
@@ -253,6 +153,6 @@ namespace osmscout {
 
     featureValueBuffer.Write(writer);
 
-    writer.Write(nodes);
+    writer.Write(nodes,false);
   }
 }

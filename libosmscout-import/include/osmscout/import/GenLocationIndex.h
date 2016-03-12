@@ -255,7 +255,7 @@ namespace osmscout {
 
     bool AddLocationAreaToRegion(Region& region,
                                  const Area& area,
-                                 const std::vector<GeoCoord>& nodes,
+                                 const std::vector<Point>& nodes,
                                  const std::string& name,
                                  double minlon,
                                  double minlat,

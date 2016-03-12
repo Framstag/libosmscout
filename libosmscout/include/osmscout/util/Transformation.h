@@ -70,7 +70,7 @@ namespace osmscout {
 
   private:
     void TransformGeoToPixel(const Projection& projection,
-                             const std::vector<GeoCoord>& nodes);
+                             const std::vector<Point>& nodes);
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
@@ -101,12 +101,12 @@ namespace osmscout {
 
     void TransformArea(const Projection& projection,
                        OptimizeMethod optimize,
-                       const std::vector<GeoCoord>& nodes,
+                       const std::vector<Point>& nodes,
                        double optimizeErrorTolerance);
 
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
-                      const std::vector<GeoCoord>& nodes,
+                      const std::vector<Point>& nodes,
                       double optimizeErrorTolerance);
 
     bool GetBoundingBox(double& xmin, double& ymin,
@@ -329,12 +329,12 @@ namespace osmscout {
 
     void TransformArea(const Projection& projection,
                        TransPolygon::OptimizeMethod optimize,
-                       const std::vector<GeoCoord>& nodes,
+                       const std::vector<Point>& nodes,
                        size_t& start, size_t &end,
                        double optimizeErrorTolerance);
     bool TransformWay(const Projection& projection,
                       TransPolygon::OptimizeMethod optimize,
-                      const std::vector<GeoCoord>& nodes,
+                      const std::vector<Point>& nodes,
                       size_t& start, size_t &end,
                       double optimizeErrorTolerance);
   };

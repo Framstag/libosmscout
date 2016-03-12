@@ -221,7 +221,8 @@ namespace osmscout {
             coast->backNodeId=coord->second->GetOSMScoutId();
           }
 
-          coast->coast[n]=coord->second->GetCoord();
+          coast->coast[n].Set(coord->second->GetOSMScoutId(),
+                              coord->second->GetCoord());
         }
 
         if (!processingError) {
@@ -897,11 +898,11 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::GetCells(const Level& level,
-                                     const std::vector<GeoCoord>& points,
+                                     const std::vector<Point>& points,
                                      std::set<Pixel>& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
-      GetCells(level,points[p],points[p+1],cellIntersections);
+      GetCells(level,points[p].GetCoord(),points[p+1].GetCoord(),cellIntersections);
     }
   }
 

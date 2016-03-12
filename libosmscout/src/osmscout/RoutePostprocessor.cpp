@@ -124,10 +124,10 @@ namespace osmscout {
           assert(false);
           break;
         case refArea:
-          curCoord=area->rings.front().nodes[node.GetCurrentNodeIndex()];
+          curCoord=area->rings.front().GetCoord(node.GetCurrentNodeIndex());
           break;
         case refWay:
-          curCoord=way->nodes[node.GetCurrentNodeIndex()];
+          curCoord=way->GetCoord(node.GetCurrentNodeIndex());
         }
 
         // There is no delta for the first route node
@@ -557,14 +557,11 @@ namespace osmscout {
            return false;
          }
 
-         double      lat,lon;
+         GeoCoord    coord=way->GetCoord(node.GetCurrentNodeIndex());
          TypeInfoSet loadedTypes;
 
-         way->GetCoordinates(node.GetCurrentNodeIndex(),
-                             lat,lon);
-
-         GeoBox boundingBox(GeoCoord(lat-delta,lon-delta),
-                            GeoCoord(lat+delta,lon+delta));
+         GeoBox boundingBox(GeoCoord(coord.GetLat()-delta,coord.GetLon()-delta),
+                            GeoCoord(coord.GetLat()+delta,coord.GetLon()+delta));
 
          nodeOffsets.clear();
          if (!areaNodeIndex->GetOffsets(boundingBox,
@@ -589,8 +586,8 @@ namespace osmscout {
          }
 
          for (size_t i=0; i<nodes.size(); i++) {
-           if (fabs(nodes[i]->GetCoords().GetLat() - lat) < delta &&
-               fabs(nodes[i]->GetCoords().GetLon() - lon) < delta) {
+           if (fabs(nodes[i]->GetCoords().GetLat() - coord.GetLat()) < delta &&
+               fabs(nodes[i]->GetCoords().GetLon() - coord.GetLon()) < delta) {
              RefFeatureValue *refFeatureValue=refReader.GetValue(nodes[i]->GetFeatureValueBuffer());
 
              if (refFeatureValue!=NULL) {
@@ -1225,7 +1222,7 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return area->rings.front().ids[nodeIndex];
+      return area->rings.front().nodes[nodeIndex].GetId();
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
@@ -1245,8 +1242,8 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      for (size_t i=0; i<area->rings.front().ids.size(); i++) {
-        if (area->rings.front().ids[i]==nodeId) {
+      for (size_t i=0; i<area->rings.front().nodes.size(); i++) {
+        if (area->rings.front().nodes[i].GetId()==nodeId) {
           return i;
         }
 
@@ -1376,7 +1373,7 @@ namespace osmscout {
     if (nodeObject.GetType()==refArea) {
       AreaRef area=GetArea(nodeObject.GetFileOffset());
 
-      nodeId=area->rings.front().ids[nodeIndex];
+      nodeId=area->rings.front().GetId(nodeIndex);
     }
     else if (nodeObject.GetType()==refWay) {
       WayRef way=GetWay(nodeObject.GetFileOffset());
@@ -1395,8 +1392,8 @@ namespace osmscout {
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
 
-      return way->ids.front()==nodeId ||
-             way->ids.back()==nodeId;
+      return way->GetFrontId()==nodeId ||
+             way->GetBackId()==nodeId;
     }
     else {
       assert(false);
@@ -1413,15 +1410,17 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      lat=area->rings.front().nodes[nodeIndex].lat;
-      lon=area->rings.front().nodes[nodeIndex].lon;
+      GeoCoord coord=area->rings.front().GetCoord(nodeIndex);
+
+      lat=coord.GetLat();
+      lon=coord.GetLon();
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef   way=GetWay(object.GetFileOffset());
+      GeoCoord coord=way->GetCoord(nodeIndex);
 
-      way->GetCoordinates(nodeIndex,
-                          lat,
-                          lon);
+      lat=coord.GetLat();
+      lon=coord.GetLon();
     }
     else {
       assert(false);

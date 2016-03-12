@@ -465,7 +465,6 @@ namespace osmscout {
 
     way.SetFeatures(rawWay.GetFeatureValueBuffer());
 
-    way.ids.resize(rawWay.GetNodeCount());
     way.nodes.resize(rawWay.GetNodeCount());
 
     bool success=true;
@@ -481,8 +480,8 @@ namespace osmscout {
         break;
       }
 
-      way.ids[n]=coord->second->GetOSMScoutId();
-      way.nodes[n]=coord->second->GetCoord();
+      way.nodes[n].Set(coord->second->GetOSMScoutId(),
+                       coord->second->GetCoord());
     }
 
     if (!success) {

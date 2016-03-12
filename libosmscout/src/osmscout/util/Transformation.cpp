@@ -183,7 +183,7 @@ namespace osmscout {
   }
 
   void TransPolygon::TransformGeoToPixel(const Projection& projection,
-                                         const std::vector<GeoCoord>& nodes)
+                                         const std::vector<Point>& nodes)
   {
     Projection::BatchTransformer batchTransformer(projection);
 
@@ -351,7 +351,7 @@ namespace osmscout {
 
   void TransPolygon::TransformArea(const Projection& projection,
                                    OptimizeMethod optimize,
-                                   const std::vector<GeoCoord>& nodes,
+                                   const std::vector<Point>& nodes,
                                    double optimizeErrorTolerance)
   {
     if (nodes.size()<2) {
@@ -405,7 +405,7 @@ namespace osmscout {
 
   void TransPolygon::TransformWay(const Projection& projection,
                                   OptimizeMethod optimize,
-                                  const std::vector<GeoCoord>& nodes,
+                                  const std::vector<Point>& nodes,
                                   double optimizeErrorTolerance)
   {
     if (nodes.empty()) {
@@ -529,7 +529,7 @@ namespace osmscout {
 
   void TransBuffer::TransformArea(const Projection& projection,
                                   TransPolygon::OptimizeMethod optimize,
-                                  const std::vector<GeoCoord>& nodes,
+                                  const std::vector<Point>& nodes,
                                   size_t& start, size_t &end,
                                   double optimizeErrorTolerance)
   {
@@ -556,7 +556,7 @@ namespace osmscout {
 
   bool TransBuffer::TransformWay(const Projection& projection,
                                  TransPolygon::OptimizeMethod optimize,
-                                 const std::vector<GeoCoord>& nodes,
+                                 const std::vector<Point>& nodes,
                                  size_t& start, size_t &end,
                                  double optimizeErrorTolerance)
   {

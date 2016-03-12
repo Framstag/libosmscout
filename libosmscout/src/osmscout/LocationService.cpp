@@ -1222,7 +1222,12 @@ namespace osmscout {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;
-            searchEntry.coords=area->rings[r].nodes;
+
+            searchEntry.coords.resize(area->rings[r].nodes.size());
+
+            for (size_t i=0; i<area->rings[r].nodes.size(); i++) {
+              searchEntry.coords[i]=area->rings[r].nodes[i].GetCoord();
+            }
 
             adminRegionVisitor.AddSearchEntry(searchEntry);
           }
@@ -1239,7 +1244,12 @@ namespace osmscout {
         AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
         searchEntry.object=object;
-        searchEntry.coords=way->nodes;
+
+        searchEntry.coords.resize(way->nodes.size());
+
+        for (size_t i=0; i<way->nodes.size(); i++) {
+          searchEntry.coords[i]=way->nodes[i].GetCoord();
+        }
 
         adminRegionVisitor.AddSearchEntry(searchEntry);
       }
@@ -1382,12 +1392,12 @@ namespace osmscout {
             GeoCoord intersection;
 
             if (i>0) {
-              a=ring.nodes[i-1];
-              b=ring.nodes[i];
+              a=ring.nodes[i-1].GetCoord();
+              b=ring.nodes[i].GetCoord();
             }
             else {
-              a=ring.nodes[ring.nodes.size()-1];
-              b=ring.nodes[i];
+              a=ring.nodes[ring.nodes.size()-1].GetCoord();
+              b=ring.nodes[i].GetCoord();
             }
 
             currentDistance=CalculateDistancePointToLineSegment(location,

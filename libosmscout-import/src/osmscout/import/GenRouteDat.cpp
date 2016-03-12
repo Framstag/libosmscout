@@ -641,7 +641,9 @@ namespace osmscout {
 
         std::set<Id> nodeIds;
 
-        for (const auto& id : way.ids) {
+        for (const auto& node : way.nodes) {
+          Id id=node.GetId();
+
           if (id==0) {
             continue;
           }
@@ -688,7 +690,9 @@ namespace osmscout {
 
         std::set<Id> nodeIds;
 
-        for (const auto& id : area.rings.front().ids) {
+        for (const auto& node : area.rings.front().nodes) {
+          Id id=node.GetId();
+
           if (id==0) {
             continue;
           }
@@ -751,7 +755,9 @@ namespace osmscout {
 
         std::set<Id> nodeIds;
 
-        for (auto id : way.ids) {
+        for (auto& node : way.nodes) {
+          Id id=node.GetId();
+
           if (id==0) {
             continue;
           }
@@ -803,7 +809,9 @@ namespace osmscout {
 
         std::set<Id> nodeIds;
 
-        for (auto id : area.rings.front().ids) {
+        for (auto& node : area.rings.front().nodes) {
+          Id id=node.GetId();
+
           if (id==0) {
             continue;
           }
@@ -958,14 +966,14 @@ namespace osmscout {
 
         // Find current route node in area
         while (currentNode<(int)way->nodes.size() &&
-              way->ids[currentNode]!=id) {
+              way->GetId(currentNode)!=id) {
           currentNode++;
         }
 
         // Make sure we found it
         assert(currentNode<(int)way->nodes.size());
 
-        coord=way->nodes[currentNode];
+        coord=way->nodes[currentNode].GetCoord();
 
         return true;
       }
@@ -984,14 +992,14 @@ namespace osmscout {
 
         // Find current route node in area
         while (currentNode<(int)ring.nodes.size() &&
-              ring.ids[currentNode]!=id) {
+              ring.GetId(currentNode)!=id) {
           currentNode++;
         }
 
         // Make sure we found it
         assert(currentNode<(int)ring.nodes.size());
 
-        coord=ring.nodes[currentNode];
+        coord=ring.nodes[currentNode].GetCoord();
 
         return true;
       }
@@ -1052,7 +1060,7 @@ namespace osmscout {
 
     // Find current route node in area
     while (currentNode<(int)ring.nodes.size() &&
-          ring.ids[currentNode]!=routeNode.id) {
+          ring.GetId(currentNode)!=routeNode.id) {
       currentNode++;
     }
 
@@ -1073,7 +1081,7 @@ namespace osmscout {
                                   ring.nodes[nextNode].GetLat());
 
     while (nextNode!=currentNode &&
-           nodeObjectsMap.find(ring.ids[nextNode])==nodeObjectsMap.end()) {
+           nodeObjectsMap.find(ring.GetId(nextNode))==nodeObjectsMap.end()) {
       int lastNode=nextNode;
       nextNode++;
 
@@ -1091,9 +1099,9 @@ namespace osmscout {
 
     // Found next routing node in order
     if (nextNode!=currentNode &&
-        ring.ids[nextNode]!=routeNode.id) {
+        ring.GetId(nextNode)!=routeNode.id) {
       RouteNode::Path                 path;
-      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.ids[nextNode]);
+      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.GetId(nextNode));
 
       if (pathNodeOffset!=nodeIdOffsetMap.end()) {
         path.offset=pathNodeOffset->second;
@@ -1104,7 +1112,7 @@ namespace osmscout {
         pendingOffset.routeNodeOffset=routeNodeOffset;
         pendingOffset.index=routeNode.paths.size();
 
-        pendingOffsetsMap[ring.ids[nextNode]].push_back(pendingOffset);
+        pendingOffsetsMap[ring.GetId(nextNode)].push_back(pendingOffset);
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea),
@@ -1130,7 +1138,7 @@ namespace osmscout {
                                   ring.nodes[prevNode].GetLat());
 
     while (prevNode!=currentNode &&
-        nodeObjectsMap.find(ring.ids[prevNode])==nodeObjectsMap.end()) {
+        nodeObjectsMap.find(ring.GetId(prevNode))==nodeObjectsMap.end()) {
       int lastNode=prevNode;
       prevNode--;
 
@@ -1150,9 +1158,9 @@ namespace osmscout {
 
     if (prevNode!=currentNode &&
         prevNode!=nextNode &&
-        ring.ids[prevNode]!=routeNode.id) {
+        ring.GetId(prevNode)!=routeNode.id) {
       RouteNode::Path                 path;
-      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.ids[prevNode]);
+      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.GetId(prevNode));
 
       if (pathNodeOffset!=nodeIdOffsetMap.end()) {
         path.offset=pathNodeOffset->second;
@@ -1163,7 +1171,7 @@ namespace osmscout {
         pendingOffset.routeNodeOffset=routeNodeOffset;
         pendingOffset.index=routeNode.paths.size();
 
-        pendingOffsetsMap[ring.ids[prevNode]].push_back(pendingOffset);
+        pendingOffsetsMap[ring.GetId(prevNode)].push_back(pendingOffset);
       }
 
       path.objectIndex=routeNode.AddObject(ObjectFileRef(area.GetFileOffset(),refArea),
@@ -1190,7 +1198,7 @@ namespace osmscout {
     // Search for current route node
 
     while (currentNode<(int)way.nodes.size() &&
-          way.ids[currentNode]!=routeNode.id) {
+          way.GetId(currentNode)!=routeNode.id) {
       currentNode++;
     }
 
@@ -1211,7 +1219,7 @@ namespace osmscout {
                                     way.GetCoord(nextNode).GetLat());
 
       while (nextNode!=currentNode &&
-          nodeObjectsMap.find(way.ids[nextNode])==nodeObjectsMap.end()) {
+          nodeObjectsMap.find(way.GetId(nextNode))==nodeObjectsMap.end()) {
         int lastNode=nextNode;
         nextNode++;
 
@@ -1228,9 +1236,9 @@ namespace osmscout {
       }
 
       if (nextNode!=currentNode &&
-          way.ids[nextNode]!=routeNode.id) {
+          way.GetId(nextNode)!=routeNode.id) {
         RouteNode::Path                 path;
-        NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.ids[nextNode]);
+        NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(nextNode));
 
         if (pathNodeOffset!=nodeIdOffsetMap.end()) {
           path.offset=pathNodeOffset->second;
@@ -1241,7 +1249,7 @@ namespace osmscout {
           pendingOffset.routeNodeOffset=routeNodeOffset;
           pendingOffset.index=routeNode.paths.size();
 
-          pendingOffsetsMap[way.ids[nextNode]].push_back(pendingOffset);
+          pendingOffsetsMap[way.GetId(nextNode)].push_back(pendingOffset);
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
@@ -1269,7 +1277,7 @@ namespace osmscout {
                                     way.nodes[prevNode].GetLat());
 
       while (prevNode!=currentNode &&
-          nodeObjectsMap.find(way.ids[prevNode])==nodeObjectsMap.end()) {
+          nodeObjectsMap.find(way.GetId(prevNode))==nodeObjectsMap.end()) {
         int lastNode=prevNode;
         prevNode--;
 
@@ -1287,9 +1295,9 @@ namespace osmscout {
 
       if (prevNode!=currentNode &&
           prevNode!=nextNode &&
-          way.ids[prevNode]!=routeNode.id) {
+          way.GetId(prevNode)!=routeNode.id) {
         RouteNode::Path                 path;
-        NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.ids[prevNode]);
+        NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(prevNode));
 
         if (pathNodeOffset!=nodeIdOffsetMap.end()) {
           path.offset=pathNodeOffset->second;
@@ -1300,7 +1308,7 @@ namespace osmscout {
           pendingOffset.routeNodeOffset=routeNodeOffset;
           pendingOffset.index=routeNode.paths.size();
 
-          pendingOffsetsMap[way.ids[prevNode]].push_back(pendingOffset);
+          pendingOffsetsMap[way.GetId(prevNode)].push_back(pendingOffset);
         }
 
         path.objectIndex=routeNode.AddObject(ObjectFileRef(way.GetFileOffset(),refWay),
@@ -1323,7 +1331,7 @@ namespace osmscout {
                                              PendingRouteNodeOffsetsMap& pendingOffsetsMap)
   {
     for (size_t i=0; i<way.nodes.size(); i++) {
-      if (way.ids[i]==routeNode.id) {
+      if (way.GetId(i)==routeNode.id) {
         // Route backward
         if (GetAccess(way).CanRouteBackward() &&
             i>0) {
@@ -1331,7 +1339,7 @@ namespace osmscout {
 
           // Search for previous routing node on way
           while (j>=0) {
-            if (nodeObjectsMap.find(way.ids[j])!=nodeObjectsMap.end()) {
+            if (nodeObjectsMap.find(way.GetId(j))!=nodeObjectsMap.end()) {
               break;
             }
 
@@ -1339,9 +1347,9 @@ namespace osmscout {
           }
 
           if (j>=0 &&
-              way.ids[j]!=routeNode.id) {
+              way.GetId(j)!=routeNode.id) {
             RouteNode::Path                 path;
-            NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.ids[j]);
+            NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(j));
 
             if (pathNodeOffset!=nodeIdOffsetMap.end()) {
               path.offset=pathNodeOffset->second;
@@ -1352,7 +1360,7 @@ namespace osmscout {
               pendingOffset.routeNodeOffset=routeNodeOffset;
               pendingOffset.index=routeNode.paths.size();
 
-              pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
+              pendingOffsetsMap[way.GetId(j)].push_back(pendingOffset);
 
               path.offset=0;
             }
@@ -1381,7 +1389,7 @@ namespace osmscout {
 
           // Search for next routing node on way
           while (j<way.nodes.size()) {
-            if (nodeObjectsMap.find(way.ids[j])!=nodeObjectsMap.end()) {
+            if (nodeObjectsMap.find(way.GetId(j))!=nodeObjectsMap.end()) {
               break;
             }
 
@@ -1389,9 +1397,9 @@ namespace osmscout {
           }
 
           if (j<way.nodes.size() &&
-              way.ids[j]!=routeNode.id) {
+              way.GetId(j)!=routeNode.id) {
             RouteNode::Path                 path;
-            NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.ids[j]);
+            NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(j));
 
             if (pathNodeOffset!=nodeIdOffsetMap.end()) {
               path.offset=pathNodeOffset->second;
@@ -1403,7 +1411,7 @@ namespace osmscout {
               pendingOffset.routeNodeOffset=routeNodeOffset;
               pendingOffset.index=routeNode.paths.size();
 
-              pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
+              pendingOffsetsMap[way.GetId(j)].push_back(pendingOffset);
 
               path.offset=0;
             }

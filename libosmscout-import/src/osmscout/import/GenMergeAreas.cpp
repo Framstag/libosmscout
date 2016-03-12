@@ -49,8 +49,8 @@ namespace osmscout {
   {
     for (size_t r = 0; r<area.rings.size(); r++) {
       if (area.rings[r].IsOuterRing()) {
-        for (const auto& ringId : area.rings[r].ids) {
-          if (ringId==id) {
+        for (const auto& node : area.rings[r].nodes) {
+          if (node.GetId()==id) {
             return r;
           }
         }
@@ -68,7 +68,8 @@ namespace osmscout {
   {
     for (const auto& ring: area->rings) {
       if (ring.IsOuterRing()) {
-        for (const auto id : ring.ids) {
+        for (const auto node : ring.nodes) {
+          Id id=node.GetId();
           if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
             idAreaMap[id].erase(area);
           }
@@ -119,7 +120,9 @@ namespace osmscout {
 
       for (const auto& ring: data.rings) {
         if (ring.IsOuterRing()) {
-          for (const auto id : ring.ids) {
+          for (const auto node : ring.nodes) {
+            Id id=node.GetId();
+
             if (nodeIds.find(id)==nodeIds.end()) {
               nodeUseMap[data.GetType()->GetIndex()].SetNodeUsed(id);
               nodeIds.insert(id);
@@ -204,8 +207,8 @@ namespace osmscout {
           continue;
         }
 
-        for (const auto id: ring.ids) {
-          if (nodeUseMap[area->GetType()->GetIndex()].IsNodeUsedAtLeastTwice(id)) {
+        for (const auto node : ring.nodes) {
+          if (nodeUseMap[area->GetType()->GetIndex()].IsNodeUsedAtLeastTwice(node.GetId())) {
             isMergeCandidate=true;
             break;
           }
@@ -268,7 +271,9 @@ namespace osmscout {
 
       for (const auto& ring: area->rings) {
         if (ring.IsOuterRing()) {
-          for (const auto id: ring.ids) {
+          for (const auto node : ring.nodes) {
+            Id id=node.GetId();
+
             if (nodeIds.find(id)==nodeIds.end() &&
                 nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
               idAreaMap[id].insert(area);
@@ -294,7 +299,9 @@ namespace osmscout {
       std::unordered_set<Id> nodeIds;
       std::set<AreaRef>      visitedAreas; // It is possible that two areas intersect in multiple nodes, to avoid multiple merge tests, we monitor the visited areas
 
-      for (const auto id : ring.ids) {
+      for (const auto node : ring.nodes) {
+        Id id=node.GetId();
+
         if(finishedIds.find(id)!=finishedIds.end()) {
           continue;
         }
@@ -367,11 +374,9 @@ namespace osmscout {
 
           PolygonMerger merger;
 
-          merger.AddPolygon(area.rings[firstOuterRing].nodes,
-                            area.rings[firstOuterRing].ids);
+          merger.AddPolygon(area.rings[firstOuterRing].nodes);
 
-          merger.AddPolygon(candidateArea->rings[secondOuterRing].nodes,
-                            candidateArea->rings[secondOuterRing].ids);
+          merger.AddPolygon(candidateArea->rings[secondOuterRing].nodes);
 
           std::list<PolygonMerger::Polygon> result;
 
@@ -380,7 +385,6 @@ namespace osmscout {
               //std::cout << "MERGE areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
 
               area.rings[firstOuterRing].nodes=result.front().coords;
-              area.rings[firstOuterRing].ids=result.front().ids;
 
               EraseAreaInCache(nodeUseMap,
                                candidateArea,

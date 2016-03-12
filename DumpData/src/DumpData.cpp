@@ -526,8 +526,7 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
     for (size_t n=0; n<way->nodes.size(); n++) {
       std::cout << "  node[" << n << "] {";
 
-      if (n<way->ids.size() &&
-          way->GetId(n)!=0) {
+      if (way->GetId(n)!=0) {
         std::cout << " id: " << way->GetId(n);
       }
 
@@ -567,9 +566,8 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
     for (size_t n=0; n<area->rings.front().nodes.size(); n++) {
       std::cout << "  node[" << n << "] {";
 
-      if (n<area->rings.front().ids.size() &&
-          area->rings.front().ids[n]!=0) {
-        std::cout << " id: " << area->rings.front().ids[n];
+      if (area->rings.front().GetId(n)!=0) {
+        std::cout << " id: " << area->rings.front().GetId(n);
       }
 
       std::cout << " lat: " << area->rings.front().nodes[n].GetLat() << " lon: "<< area->rings.front().nodes[n].GetLon() << " }" << std::endl;
@@ -601,9 +599,8 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
       for (size_t n=0; n<area->rings[r].nodes.size(); n++) {
         std::cout << "    node[" << n << "] {";
 
-        if (n<area->rings[r].ids.size() &&
-            area->rings[r].ids[n]!=0) {
-          std::cout << " id: " << area->rings[r].ids[n];
+        if (area->rings[r].GetId(n)!=0) {
+          std::cout << " id: " << area->rings[r].GetId(n);
         }
 
         std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;

@@ -105,10 +105,10 @@ namespace osmscout {
     return filenamebase+".idx";
   }
 
-  bool RoutingService::HasNodeWithId(const std::vector<Id>& ids) const
+  bool RoutingService::HasNodeWithId(const std::vector<Point>& nodes) const
   {
-    for (const auto id : ids) {
-      if (id!=0) {
+    for (const auto node : nodes) {
+      if (node.GetId()!=0) {
         return true;
       }
     }
@@ -455,7 +455,7 @@ namespace osmscout {
     std::unordered_map<FileOffset,AreaRef>      areaMap;
     std::unordered_map<FileOffset,WayRef>       wayMap;
 
-    std::vector<Id>                             *ids=NULL;
+    std::vector<Point>                          *ids=NULL;
     bool                                        oneway=false;
 
     if (!areaDataFile ||
@@ -465,11 +465,7 @@ namespace osmscout {
 
     // Collect all route node file offsets on the path and also
     // all area/way file offsets on the path
-    for (std::list<RNodeRef>::const_iterator n=nodes.begin();
-        n!=nodes.end();
-        n++) {
-      RNodeRef node(*n);
-
+    for (const auto& node : nodes) {
       routeNodeOffsets.insert(node->nodeOffset);
 
       if (node->object.Valid()) {
@@ -523,12 +519,15 @@ namespace osmscout {
       return false;
     }
 
+    assert(startObject.GetType()==refArea ||
+           startObject.GetType()==refWay);
+
     if (startObject.GetType()==refArea) {
       std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(startObject.GetFileOffset());
 
       assert(entry!=areaMap.end());
 
-      ids=&entry->second->rings.front().ids;
+      ids=&entry->second->rings.front().nodes;
       oneway=false;
     }
     else if (startObject.GetType()==refWay) {
@@ -536,11 +535,8 @@ namespace osmscout {
 
       assert(entry!=wayMap.end());
 
-      ids=&entry->second->ids;
+      ids=&entry->second->nodes;
       oneway=!profile.CanUseBackward(*entry->second);
-    }
-    else {
-      assert(false);
     }
 
     if (nodes.empty()) {
@@ -548,7 +544,7 @@ namespace osmscout {
       assert(startObject==targetObject);
 
       AddNodes(route,
-               (*ids)[startNodeIndex],
+               (*ids)[startNodeIndex].GetId(),
                startNodeIndex,
                startObject,
                ids->size(),
@@ -567,10 +563,10 @@ namespace osmscout {
     //
     // Add The path from the start node to the first routing node
     //
-    if ((*ids)[startNodeIndex]!=initialNode->GetId()) {
+    if ((*ids)[startNodeIndex].GetId()!=initialNode->GetId()) {
       size_t routeNodeIndex=0;
 
-      while ((*ids)[routeNodeIndex]!=initialNode->GetId() &&
+      while ((*ids)[routeNodeIndex].GetId()!=initialNode->GetId() &&
           routeNodeIndex<ids->size()) {
         routeNodeIndex++;
       }
@@ -578,7 +574,7 @@ namespace osmscout {
 
       // Start node to initial route node
       AddNodes(route,
-               (*ids)[startNodeIndex],
+               (*ids)[startNodeIndex].GetId(),
                startNodeIndex,
                startObject,
                ids->size(),
@@ -604,12 +600,15 @@ namespace osmscout {
       // target node itself
       //
       if (nn==nodes.end()) {
+        assert(targetObject.GetType()==refArea ||
+               targetObject.GetType()==refWay);
+
         if (targetObject.GetType()==refArea) {
           std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(targetObject.GetFileOffset());
 
           assert(entry!=areaMap.end());
 
-          ids=&entry->second->rings.front().ids;
+          ids=&entry->second->rings.front().nodes;
           oneway=false;
         }
         else if (targetObject.GetType()==refWay) {
@@ -617,16 +616,13 @@ namespace osmscout {
 
           assert(entry!=wayMap.end());
 
-          ids=&entry->second->ids;
+          ids=&entry->second->nodes;
           oneway=!profile.CanUseBackward(*entry->second);
-        }
-        else {
-          assert(false);
         }
 
         size_t currentNodeIndex=0;
 
-        while ((*ids)[currentNodeIndex]!=node->GetId() &&
+        while ((*ids)[currentNodeIndex].GetId()!=node->GetId() &&
             currentNodeIndex<ids->size()) {
           currentNodeIndex++;
         }
@@ -634,7 +630,7 @@ namespace osmscout {
 
         if (currentNodeIndex!=targetNodeIndex) {
           AddNodes(route,
-                   (*ids)[currentNodeIndex],
+                   (*ids)[currentNodeIndex].GetId(),
                    currentNodeIndex,
                    targetObject,
                    ids->size(),
@@ -652,12 +648,15 @@ namespace osmscout {
 
       RouteNodeRef nextNode=routeNodeMap.find((*nn)->nodeOffset)->second;
 
+      assert((*nn)->object.GetType()==refArea ||
+             (*nn)->object.GetType()==refWay);
+
       if ((*nn)->object.GetType()==refArea) {
         std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*nn)->object.GetFileOffset());
 
         assert(entry!=areaMap.end());
 
-        ids=&entry->second->rings.front().ids;
+        ids=&entry->second->rings.front().nodes;
         oneway=false;
       }
       else if ((*nn)->object.GetType()==refWay) {
@@ -665,16 +664,13 @@ namespace osmscout {
 
         assert(entry!=wayMap.end());
 
-        ids=&entry->second->ids;
+        ids=&entry->second->nodes;
         oneway=!profile.CanUseBackward(*entry->second);
-      }
-      else {
-        assert(false);
       }
 
       size_t currentNodeIndex=0;
 
-      while ((*ids)[currentNodeIndex]!=node->id &&
+      while ((*ids)[currentNodeIndex].GetId()!=node->id &&
           currentNodeIndex<ids->size()) {
         currentNodeIndex++;
       }
@@ -682,14 +678,14 @@ namespace osmscout {
 
       size_t nextNodeIndex=0;
 
-      while ((*ids)[nextNodeIndex]!=nextNode->id &&
+      while ((*ids)[nextNodeIndex].GetId()!=nextNode->id &&
           nextNodeIndex<ids->size()) {
         nextNodeIndex++;
       }
       assert(nextNodeIndex<ids->size());
 
       AddNodes(route,
-               (*ids)[currentNodeIndex],
+               (*ids)[currentNodeIndex].GetId(),
                currentNodeIndex,
                (*nn)->object,
                ids->size(),
@@ -1473,14 +1469,12 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.ids.push_back(a->rings.front().GetId(index));
-            way.nodes.push_back(a->rings.front().GetCoord(index));
+            way.nodes.push_back(a->rings.front().nodes[index]);
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.ids.push_back(a->rings.front().GetId(index));
-          way.nodes.push_back(a->rings.front().GetCoord(index));
+          way.nodes.push_back(a->rings.front().nodes[index]);
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           WayRef w;
@@ -1493,14 +1487,12 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.ids.push_back(w->GetId(index));
-            way.nodes.push_back(w->GetCoord(index));
+            way.nodes.push_back(w->nodes[index]);
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.ids.push_back(w->GetId(index));
-          way.nodes.push_back(w->GetCoord(index));
+          way.nodes.push_back(w->nodes[index]);
         }
       }
     }
@@ -1554,17 +1546,13 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            points.push_back(Point(a->rings.front().ids[index],
-                                   a->rings.front().nodes[index].GetLat(),
-                                   a->rings.front().nodes[index].GetLon()));
+            points.push_back(a->rings.front().nodes[index]);
           }
 
           // target node of current path
           size_t index=iter->GetTargetNodeIndex();
 
-          points.push_back(Point(a->rings.front().ids[index],
-                                 a->rings.front().nodes[index].GetLat(),
-                                 a->rings.front().nodes[index].GetLon()));
+          points.push_back(a->rings.front().nodes[index]);
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           if (!w ||
@@ -1738,7 +1726,7 @@ namespace osmscout {
     double minDistance=std::numeric_limits<double>::max();
 
     for (const auto& area : areas) {
-      if (!HasNodeWithId(area->rings[0].ids)) {
+      if (!HasNodeWithId(area->rings[0].nodes)) {
         continue;
       }
 
@@ -1756,7 +1744,7 @@ namespace osmscout {
     }
 
     for (const auto& way : ways) {
-      if (!HasNodeWithId(way->ids)) {
+      if (!HasNodeWithId(way->nodes)) {
         continue;
       }
 

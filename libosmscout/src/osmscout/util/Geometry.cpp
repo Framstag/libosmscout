@@ -48,85 +48,6 @@ namespace osmscout {
     return res;
   }
 
-  bool AreaIsClockwise(const std::vector<GeoCoord>& edges)
-  {
-    assert(edges.size()>=3);
-    // based on http://en.wikipedia.org/wiki/Curve_orientation
-    // and http://local.wasp.uwa.edu.au/~pbourke/geometry/clockwise/
-
-    // note: polygon must be simple
-
-    size_t ptIdx=0;
-
-    for (size_t i=1; i<edges.size(); i++) {
-      // find the point with the smallest y value,
-      if (edges[i].GetLat()<edges[ptIdx].GetLat()) {
-        ptIdx=i;
-      }
-      // if y values are equal save the point with greatest x
-      else if (edges[i].GetLat()==edges[ptIdx].GetLat()) {
-        if (edges[i].GetLon()<edges[ptIdx].GetLon()) {
-          ptIdx=i;
-        }
-      }
-    }
-
-    size_t prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
-    size_t nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
-
-    double signedArea=(edges[ptIdx].GetLon()-edges[prevIdx].GetLon())*
-                      (edges[nextIdx].GetLat()-edges[ptIdx].GetLat())-
-                      (edges[ptIdx].GetLat()-edges[prevIdx].GetLat())*
-                      (edges[nextIdx].GetLon()-edges[ptIdx].GetLon());
-
-    return signedArea<0.0;
-  }
-
-  /**
-   * Calculates the distance between a point p and a line defined by the points a and b.
-   * @param p
-   *    The point in distance to a line
-   * @param a
-   *    One point defining the line
-   * @param b
-   *    Another point defining the line
-   * @return
-   *    The distance
-   */
-  double CalculateDistancePointToLineSegment(const GeoCoord& p,
-                                             const GeoCoord& a,
-                                             const GeoCoord& b)
-  {
-    double xdelta=b.lon-a.lon;
-    double ydelta=b.lat-a.lat;
-
-    if (xdelta==0 && ydelta==0) {
-      return std::numeric_limits<double>::infinity();
-    }
-
-    double u=((p.lon-a.lon)*xdelta+(p.lat-a.lat)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
-
-    double cx,cy;
-
-    if (u<0) {
-      cx=a.lon;
-      cy=a.lat;
-    }
-    else if (u>1) {
-      cx=b.lon;
-      cy=b.lat;
-    }
-    else {
-      cx=a.lon+u*xdelta;
-      cy=a.lat+u*ydelta;
-    }
-
-    double dx=cx-p.lon;
-    double dy=cy-p.lat;
-
-    return sqrt(dx*dx+dy*dy);
-  }
-
   /**
    * Calculates the distance between a point p and a line defined by the points a and b.
    * @param p
@@ -604,18 +525,14 @@ namespace osmscout {
     }
   }
 
-  void PolygonMerger::AddPolygon(const std::vector<GeoCoord>& polygonCoords,
-                                 const std::vector<Id>& polygonIds)
+  void PolygonMerger::AddPolygon(const std::vector<Point>& polygonCoords)
   {
     assert(polygonCoords.size()>=3);
-    assert(polygonCoords.size()==polygonIds.size());
 
-    std::vector<GeoCoord> coords(polygonCoords);
-    std::vector<Id>       ids(polygonIds);
+    std::vector<Point> coords(polygonCoords);
 
     if (!AreaIsClockwise(polygonCoords)) {
       std::reverse(coords.begin(),coords.end());
-      std::reverse(ids.begin(),ids.end());
     }
 
     nodes.reserve(nodes.size()+coords.size());
@@ -627,29 +544,23 @@ namespace osmscout {
       size_t current=i;
       size_t next=(i+1==coords.size()) ? 0 : i+1;
 
-      auto currentNode=nodeIdIndexMap.find(ids[current]);
-      auto nextNode=nodeIdIndexMap.find(ids[next]);
+      auto currentNode=nodeIdIndexMap.find(coords[current].GetId());
+      auto nextNode=nodeIdIndexMap.find(coords[next].GetId());
 
       if (currentNode==nodeIdIndexMap.end()) {
-        Node node;
-
-        node.coord=coords[current];
-        node.id=ids[current];
+        Point node=coords[current];
 
         nodes.push_back(node);
 
-        currentNode=nodeIdIndexMap.insert(std::make_pair(node.id,nodes.size()-1)).first;
+        currentNode=nodeIdIndexMap.insert(std::make_pair(node.GetId(),nodes.size()-1)).first;
       }
 
       if (nextNode==nodeIdIndexMap.end()) {
-        Node node;
-
-        node.coord=coords[next];
-        node.id=ids[next];
+        Point node=coords[next];
 
         nodes.push_back(node);
 
-        nextNode=nodeIdIndexMap.insert(std::make_pair(node.id,nodes.size()-1)).first;
+        nextNode=nodeIdIndexMap.insert(std::make_pair(node.GetId(),nodes.size()-1)).first;
       }
 
       Edge edge;
@@ -779,8 +690,7 @@ namespace osmscout {
       result.push_back(Polygon());
 
       for (const auto& edge : polygon) {
-        result.back().coords.push_back(nodes[edge.fromIndex].coord);
-        result.back().ids.push_back(nodes[edge.fromIndex].id);
+        result.back().coords.push_back(nodes[edge.fromIndex]);
       }
     }
 

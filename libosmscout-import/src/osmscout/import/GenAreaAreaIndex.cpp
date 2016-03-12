@@ -145,7 +145,7 @@ namespace osmscout {
               writer.Write(name);
               writer.Write(location);
               writer.Write(address);
-              writer.Write(r->nodes);
+              writer.Write(r->nodes,false);
 
               overallDataCount++;
             }
@@ -157,7 +157,7 @@ namespace osmscout {
           writer.Write(name);
           writer.Write(location);
           writer.Write(address);
-          writer.Write(ring->nodes);
+          writer.Write(ring->nodes,false);
 
           overallDataCount++;
         }
@@ -202,11 +202,10 @@ namespace osmscout {
   class AreaNodeReductionProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
   {
   private:
-    std::vector<GeoCoord> nodeBuffer;
-    std::vector<Id>       idBuffer;
-    size_t                duplicateCount;
-    size_t                redundantCount;
-    size_t                overallCount;
+    std::vector<Point> nodeBuffer;
+    size_t             duplicateCount;
+    size_t             redundantCount;
+    size_t             overallCount;
 
   private:
     bool IsEqual(const unsigned char buffer1[],
@@ -277,38 +276,28 @@ namespace osmscout {
         size_t currentIndex=1;
 
         nodeBuffer.clear();
-        idBuffer.clear();
 
-        ring->nodes[0].EncodeToBuffer(buffers[0]);
+        ring->GetCoord(0).EncodeToBuffer(buffers[0]);
 
         nodeBuffer.push_back(ring->nodes[0]);
-        if (!ring->ids.empty()) {
-          idBuffer.push_back(ring->ids[0]);
-        }
 
         for (size_t n=1; n<ring->nodes.size(); n++) {
-          ring->nodes[n].EncodeToBuffer(buffers[currentIndex]);
+          ring->GetCoord(n).EncodeToBuffer(buffers[currentIndex]);
 
           if (IsEqual(buffers[lastIndex],
                       buffers[currentIndex])) {
-            if (n>=ring->ids.size() ||
-                ring->ids[n]==0) {
+            if (ring->GetId(n)==0) {
               reduced=true;
             }
-            else if ((n-1)>=ring->ids.size() ||
-                     ring->ids[n-1]==0) {
-              ring->ids[n-1]=ring->ids[n];
+            else if (ring->GetId(n-1)==0) {
+              ring->SetId(n-1,ring->GetId(n));
               reduced=true;
             }
-            else if (n<ring->ids.size() &&
-                     ring->ids[n-1]==ring->ids[n]) {
+            else if (ring->GetId(n-1)==ring->GetId(n)) {
               reduced=true;
             }
             else {
               nodeBuffer.push_back(ring->nodes[n]);
-              if (n<ring->ids.size()) {
-                idBuffer.push_back(ring->ids[n]);
-              }
 
               lastIndex=currentIndex;
               currentIndex=(lastIndex+1)%2;
@@ -316,9 +305,6 @@ namespace osmscout {
           }
           else {
             nodeBuffer.push_back(ring->nodes[n]);
-            if (n<ring->ids.size()) {
-              idBuffer.push_back(ring->ids[n]);
-            }
 
             lastIndex=currentIndex;
             currentIndex=(lastIndex+1)%2;
@@ -340,7 +326,6 @@ namespace osmscout {
         }
         else {
           ring->nodes=nodeBuffer;
-          ring->ids=idBuffer;
           ++ring;
         }
       }
@@ -364,16 +349,12 @@ namespace osmscout {
       }
 
       nodeBuffer.clear();
-      idBuffer.clear();
 
       size_t last=0;
       size_t current=1;
       bool   reduced=false;
 
       nodeBuffer.push_back(ring.nodes[0]);
-      if (!ring.ids.empty()) {
-        idBuffer.push_back(ring.ids[0]);
-      }
 
       while (current+1<ring.nodes.size()) {
         double distance=CalculateDistancePointToLineSegment(ring.nodes[current],
@@ -381,16 +362,13 @@ namespace osmscout {
                                                             ring.nodes[current+1]);
 
         if (distance<1/latConversionFactor &&
-            (current>=ring.ids.size() || ring.ids[current]==0)) {
+            ring.GetId(current)==0) {
           reduced=true;
           redundantCount++;
           current++;
         }
         else {
           nodeBuffer.push_back(ring.nodes[current]);
-          if (!ring.ids.empty()) {
-            idBuffer.push_back(ring.ids[current]);
-          }
 
           last++;
           current++;
@@ -398,9 +376,6 @@ namespace osmscout {
       }
 
       nodeBuffer.push_back(ring.nodes[current]);
-      if (!ring.ids.empty()) {
-        idBuffer.push_back(ring.ids[current]);
-      }
 
       if (reduced && nodeBuffer.size()<3) {
         reduced=false;
@@ -408,7 +383,6 @@ namespace osmscout {
 
       if (reduced) {
         ring.nodes=nodeBuffer;
-        ring.ids=idBuffer;
       }
     }
 

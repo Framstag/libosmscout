@@ -84,7 +84,9 @@ namespace osmscout {
           }
 
           std::unordered_set<Id> nodeIds;
-          for (const auto id: ring.ids) {
+          for (const auto node : ring.nodes) {
+            Id id=node.GetId();
+
             if (nodeIds.find(id)==nodeIds.end()) {
               nodeUseMap.SetNodeUsed(id);
               nodeIds.insert(id);
@@ -145,7 +147,9 @@ namespace osmscout {
 
         std::unordered_set<Id> nodeIds;
 
-        for (const auto& id : data.ids) {
+        for (const auto& node : data.nodes) {
+          Id id=node.GetId();
+
           if (nodeIds.find(id)==nodeIds.end()) {
             nodeUseMap.SetNodeUsed(id);
             nodeIds.insert(id);
@@ -158,7 +162,7 @@ namespace osmscout {
         // is not dropped later on, and we cannot detect
         // circular ways anymore
         if (data.IsCircular()) {
-          nodeUseMap.SetNodeUsed(data.ids.back());
+          nodeUseMap.SetNodeUsed(data.GetBackId());
           circularWayCount++;
         }
       }
@@ -214,9 +218,9 @@ namespace osmscout {
                         scanner);
 
         for (auto& ring : data.rings) {
-          for (auto& id : ring.ids) {
-            if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-              id=0;
+          for (auto& node : ring.nodes) {
+            if (!nodeUseMap.IsNodeUsedAtLeastTwice(node.GetId())) {
+              node.ClearSerial();
               idClearedCount++;
             }
           }
@@ -288,9 +292,9 @@ namespace osmscout {
         data.Read(typeConfig,
                   scanner);
 
-        for (auto& id : data.ids) {
-          if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
-            id=0;
+        for (auto& node : data.nodes) {
+          if (!nodeUseMap.IsNodeUsedAtLeastTwice(node.GetId())) {
+            node.ClearSerial();
             idClearedCount++;
           }
         }
