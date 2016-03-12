@@ -27,14 +27,16 @@ namespace osmscout {
   {
     fileOffset=scanner.GetPos();
 
-    scanner.Read(id);
+    scanner.Read(osmId);
+    scanner.Read(serial);
     scanner.ReadCoord(coord);
   }
 
   void Coord::Write(const TypeConfig& /*typeConfig*/,
                     FileWriter& writer) const
   {
-    writer.Write(id);
+    writer.Write(osmId);
+    writer.Write(serial);
     writer.WriteCoord(coord);
   }
 }

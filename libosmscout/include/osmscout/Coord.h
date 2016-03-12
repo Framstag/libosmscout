@@ -38,9 +38,10 @@ namespace osmscout {
   struct OSMSCOUT_API Coord
   {
   private:
-    FileOffset fileOffset;
-    OSMId      id;
-    GeoCoord   coord;
+    FileOffset fileOffset; //!< File offset of this coordinate in the data file
+    OSMId      osmId;      //!< OSM id
+    uint8_t    serial;     //!< Serial id in relation to all coordinates witht he same coord value
+    GeoCoord   coord;      //!< The geographic coordinate
 
   public:
     /**
@@ -51,8 +52,9 @@ namespace osmscout {
       // no code
     }
 
-    inline Coord(OSMId id, const GeoCoord& coord)
-    : id(id),
+    inline Coord(OSMId id, uint8_t serial, const GeoCoord& coord)
+    : osmId(id),
+      serial(serial),
       coord(coord)
     {
       // no code
@@ -63,14 +65,9 @@ namespace osmscout {
       return fileOffset;
     }
 
-    inline void SetId(OSMId id)
-    {
-      this->id=id;
-    }
-
     inline OSMId GetId() const
     {
-      return id;
+      return osmId;
     }
 
     /**

@@ -256,10 +256,23 @@ namespace osmscout {
           entry.second.sort(SortCoordsByOSMId);
 
           for (auto& osmCoord : entry.second) {
-            Coord coord;
+            uint8_t serial=0;
+            auto    duplicateEntry=duplicates.find(osmCoord.GetId());
 
-            coord.SetId(osmCoord.GetId());
-            coord.SetCoord(osmCoord.GetCoord());
+            if (duplicateEntry!=duplicates.end()) {
+              serial=duplicateEntry->second;
+
+              if (serial==255) {
+                progress.Error("Coordinate " + osmCoord.GetCoord().GetDisplayText()+" has more than 256 nodes");
+                return false;
+              }
+
+              duplicateEntry->second++;
+            }
+
+            Coord coord(osmCoord.GetId(),
+                        serial,
+                        osmCoord.GetCoord());
 
             coord.Write(typeConfig,writer);
           }
