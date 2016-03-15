@@ -47,7 +47,8 @@ namespace osmscout {
   {
     FileScanner scanner;
     FileWriter  writer;
-    uint32_t    dataCount=0;
+    uint32_t    wayDataCount=0;
+    uint32_t    relDataCount=0;
     uint32_t    dataWritten=0;
 
     try {
@@ -63,14 +64,14 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetAreaDataMemoryMaped());
 
-      scanner.Read(dataCount);
+      scanner.Read(wayDataCount);
 
-      for (uint32_t current=1; current<=dataCount; current++) {
+      for (uint32_t current=1; current<=wayDataCount; current++) {
         uint8_t type;
         Id      id;
         Area    data;
 
-        progress.SetProgress(current,dataCount);
+        progress.SetProgress(current,wayDataCount);
 
         scanner.Read(type);
         scanner.Read(id);
@@ -94,14 +95,14 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetAreaDataMemoryMaped());
 
-      scanner.Read(dataCount);
+      scanner.Read(relDataCount);
 
-      for (uint32_t current=1; current<=dataCount; current++) {
+      for (uint32_t current=1; current<=relDataCount; current++) {
         uint8_t type;
         Id      id;
         Area    data;
 
-        progress.SetProgress(current,dataCount);
+        progress.SetProgress(current,relDataCount);
 
         scanner.Read(type);
         scanner.Read(id);
@@ -122,6 +123,9 @@ namespace osmscout {
       writer.Write(dataWritten);
 
       writer.Close();
+
+      progress.Info("Merged "+NumberToString(wayDataCount)+ " ways and "+NumberToString(relDataCount)+" relations to "+
+                    NumberToString(dataWritten)+" areas");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());

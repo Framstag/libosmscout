@@ -176,6 +176,7 @@ namespace osmscout {
     FileScanner scanner;
     FileWriter  writer;
     uint32_t    areaCount=0;
+    uint32_t    idClearedCount=0;
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -194,13 +195,13 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=areaCount; current++) {
         uint8_t type;
-        Id      id;
+        Id osmscoutId;
         Area    data;
 
         progress.SetProgress(current,areaCount);
 
         scanner.Read(type);
-        scanner.Read(id);
+        scanner.Read(osmscoutId);
 
         data.ReadImport(typeConfig,
                         scanner);
@@ -209,14 +210,15 @@ namespace osmscout {
           std::unordered_set<Id> nodeIds;
 
           for (auto& id : ring.ids) {
-            if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            if (!nodeUseMap.IsNodeUsedAtLeastTwice(osmscoutId)) {
               id=0;
+              idClearedCount++;
             }
           }
         }
 
         writer.Write(type);
-        writer.Write(id);
+        writer.Write(osmscoutId);
 
         data.Write(typeConfig,
                    writer);
@@ -228,6 +230,8 @@ namespace osmscout {
       writer.Write(areaCount);
 
       writer.Close();
+
+      progress.Info(NumberToString(idClearedCount)+" node ids cleared");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -249,6 +253,7 @@ namespace osmscout {
     FileScanner scanner;
     FileWriter  writer;
     uint32_t    dataCount=0;
+    uint32_t    idClearedCount=0;
 
     progress.SetAction("Copy data from 'wayway.tmp' to 'ways.tmp'");
 
@@ -267,25 +272,26 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=dataCount; current++) {
         uint8_t type;
-        Id      id;
+        Id osmscoutId;
         Way     data;
 
         progress.SetProgress(current,dataCount);
 
         scanner.Read(type);
-        scanner.Read(id);
+        scanner.Read(osmscoutId);
 
         data.Read(typeConfig,
                   scanner);
 
         for (auto& id : data.ids) {
-          if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+          if (!nodeUseMap.IsNodeUsedAtLeastTwice(osmscoutId)) {
             id=0;
+            idClearedCount++;
           }
         }
 
         writer.Write(type);
-        writer.Write(id);
+        writer.Write(osmscoutId);
 
         data.Write(typeConfig,
                    writer);
@@ -293,6 +299,8 @@ namespace osmscout {
 
       scanner.Close();
       writer.Close();
+
+      progress.Info(NumberToString(idClearedCount)+" node ids cleared");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -327,6 +335,8 @@ namespace osmscout {
                        nodeUseMap)) {
       return false;
     }
+
+    progress.Info("Found "+NumberToString(nodeUseMap.GetNodeUsedCount())+" nodes as possible connection points");
 
     if (!CopyAreas(parameter,
                    progress,

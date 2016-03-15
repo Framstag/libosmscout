@@ -419,6 +419,8 @@ namespace osmscout {
                         job.areas,
                         idAreaMap);
 
+    progress.Info("Found "+NumberToString(idAreaMap.size())+" nodes as possible connection points for areas");
+
     while (!job.areas.empty()) {
       AreaRef area;
 
@@ -561,6 +563,14 @@ namespace osmscout {
         return false;
       }
 
+      uint32_t nodeCount=0;
+
+      for (const auto& map : nodeUseMap) {
+        nodeCount+=map.GetNodeUsedCount();
+      }
+
+      progress.Info("Found "+NumberToString(nodeCount)+" nodes as possible connection points for areas");
+
       /* ------ */
 
       while (true) {
@@ -592,6 +602,7 @@ namespace osmscout {
 
         for (const auto& type : loadedTypes) {
           if (!mergeJob[type->GetIndex()].areas.empty()) {
+            progress.Info("Merging areas of type "+type->GetName());
             MergeAreas(progress,
                        nodeUseMap[type->GetIndex()],
                        mergeJob[type->GetIndex()]);

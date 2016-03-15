@@ -541,6 +541,8 @@ namespace osmscout
               continue;
             }
 
+            progress.Info("Optimized from "+NumberToString(allAreas[type->GetIndex()].size())+" to "+NumberToString(optimizedAreas.size())+" areas");
+
             /*
             size_t optAreas=optimizedAreas.size();
             size_t optRoles=0;
