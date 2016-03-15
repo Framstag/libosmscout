@@ -32,83 +32,81 @@ namespace osmscout {
   class OSMSCOUT_API Point
   {
   private:
-    Id       id;
-    GeoCoord coords;
+    uint8_t  serial;
+    GeoCoord coord;
 
   public:
     inline Point()
-    : id(0)
+    : serial(0)
     {
       // no code
     }
 
-    inline Point(Id id,
+    inline Point(uint8_t serial,
                  const GeoCoord& coords)
-     : id(id),
-       coords(coords)
+     : serial(serial),
+       coord(coords)
      {
        // no code
      }
 
-    inline Point(Id id,
-                 double lat,
-                 double lon)
-    : id(id),
-      coords(lat,lon)
-    {
-      // no code
-    }
-
-    inline void Set(Id id,
+    inline void Set(uint8_t serial,
                     const GeoCoord& coords)
     {
-      this->id=id;
-      this->coords=coords;
+      this->serial=serial;
+      this->coord=coords;
     }
 
-    inline void SetId(Id id)
+    inline void SetSerial(uint8_t serial)
     {
-      this->id=id;
+      this->serial=serial;
+    }
+
+    inline void ClearSerial()
+    {
+      serial=0;
     }
 
     inline void SetCoord(const GeoCoord& coords)
     {
-      this->coords=coords;
+      this->coord=coords;
     }
 
-    inline Id GetId() const
+    uint8_t GetSerial() const
     {
-      return id;
+      return serial;
     }
+
+    Id GetId() const;
 
     inline const GeoCoord& GetCoord() const
     {
-      return coords;
+      return coord;
     }
 
     inline double GetLat() const
     {
-      return coords.GetLat();
+      return coord.GetLat();
     }
 
     inline double GetLon() const
     {
-      return coords.GetLon();
+      return coord.GetLon();
     }
 
     inline bool IsIdentical(const Point& other) const
     {
-      return id==other.id;
+      return serial==other.serial && coord==other.coord;
     }
 
     inline bool IsSame(const Point& other) const
     {
-      return coords==other.coords;
+      return coord==other.coord;
     }
 
     inline bool IsEqual(const Point& other) const
     {
-      return id==other.id || (coords==other.coords);
+      return serial==other.serial || (coord==other.coord);
     }
   };
 }

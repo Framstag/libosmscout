@@ -572,7 +572,7 @@ namespace osmscout {
             return false;
           }
 
-          part.role.nodes[n].Set(coordEntry->second->GetOSMScoutId(),
+          part.role.nodes[n].Set(coordEntry->second->GetSerial(),
                                  coordEntry->second->GetCoord());
         }
 

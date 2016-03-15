@@ -21,4 +21,23 @@
 
 namespace osmscout {
 
+  Id Point::GetId() const
+  {
+    Id id;
+
+    uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
+
+    id=latValue;
+
+    id= id << 27;
+
+    id|=lonValue;
+
+    id << 8;
+
+    id|=serial;
+
+    return id;
+  }
 }

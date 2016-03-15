@@ -238,7 +238,7 @@ namespace osmscout {
         break;
       }
 
-      ring.nodes[n].Set(coord->second->GetOSMScoutId(),
+      ring.nodes[n].Set(coord->second->GetSerial(),
                         coord->second->GetCoord());
     }
 

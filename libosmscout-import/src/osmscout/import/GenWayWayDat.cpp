@@ -480,7 +480,7 @@ namespace osmscout {
         break;
       }
 
-      way.nodes[n].Set(coord->second->GetOSMScoutId(),
+      way.nodes[n].Set(coord->second->GetSerial(),
                        coord->second->GetCoord());
     }
 

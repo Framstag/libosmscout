@@ -1164,31 +1164,27 @@ namespace osmscout {
     Write((char*)byteBuffer.data(),byteBuffer.size());
 
     if (writeIds) {
-      Id minId=0;
+      bool hasNodes=false;
 
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (nodes[i].GetId()!=0) {
-          if (minId==0) {
-            minId=nodes[i].GetId();
-          }
-          else {
-            minId=std::min(minId,nodes[i].GetId());
-          }
+      for (const auto& node : nodes) {
+        if (node.GetSerial()!=0) {
+          hasNodes=true;
+          break;
         }
       }
 
-      WriteNumber(minId);
+      Write(hasNodes);
 
-      if (minId>0) {
+      if (hasNodes) {
         size_t idCurrent=0;
 
         while (idCurrent<nodes.size()) {
           uint8_t bitset=0;
           uint8_t bitMask=1;
-          size_t  idEnd=std::min(idCurrent+8,nodes.size());
+          size_t idEnd=std::min(idCurrent+8,nodes.size());
 
           for (size_t i=idCurrent; i<idEnd; i++) {
-            if (nodes[i].GetId()!=0) {
+            if (nodes[i].GetSerial()!=0) {
               bitset=bitset | bitMask;
             }
 
@@ -1198,8 +1194,8 @@ namespace osmscout {
           Write(bitset);
 
           for (size_t i=idCurrent; i<idEnd; i++) {
-            if (nodes[i].GetId()!=0) {
-              WriteNumber(nodes[i].GetId()-minId);
+            if (nodes[i].GetSerial()!=0) {
+              Write(nodes[i].GetSerial());
             }
 
             bitMask=bitMask*2;
@@ -1208,6 +1204,16 @@ namespace osmscout {
           idCurrent+=8;
         }
       }
+
+      /*
+      size_t bytes=nodes.size();
+
+      byteBuffer.resize(bytes);
+      for (size_t i=0; i<bytes; i++) {
+        byteBuffer[i]=nodes[i].GetSerial();
+      }
+
+      Write((char*)byteBuffer.data(),bytes);*/
     }
   }
 

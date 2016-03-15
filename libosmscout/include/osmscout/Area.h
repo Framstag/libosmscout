@@ -109,6 +109,11 @@ namespace osmscout {
         return ring;
       }
 
+      inline Id GetSerial(size_t index) const
+      {
+        return nodes[index].GetSerial();
+      }
+
       inline Id GetId(size_t index) const
       {
         return nodes[index].GetId();
@@ -158,9 +163,9 @@ namespace osmscout {
         this->ring=ring;
       }
 
-      inline void SetId(size_t index, Id id)
+      inline void SetSerial(size_t index, uint8_t serial)
       {
-        nodes[index].SetId(id);
+        nodes[index].SetSerial(serial);
       }
 
       friend class Area;

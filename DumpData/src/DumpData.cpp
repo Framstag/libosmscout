@@ -255,7 +255,8 @@ static void DumpCoord(const osmscout::Coord& coord)
 {
 
   std::cout << "Coord {" << std::endl;
-  std::cout << "  id: " << coord.GetId() << std::endl;
+  std::cout << "  OSMId: " << coord.GetId() << std::endl;
+  std::cout << "  Serial: " << coord.GetSerial() << std::endl;
   std::cout << "  OSMScoutId: " << coord.GetOSMScoutId() << std::endl;
 
   std::streamsize         oldPrecision=std::cout.precision(5);
@@ -526,8 +527,8 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
     for (size_t n=0; n<way->nodes.size(); n++) {
       std::cout << "  node[" << n << "] {";
 
-      if (way->GetId(n)!=0) {
-        std::cout << " id: " << way->GetId(n);
+      if (way->GetSerial(n)!=0) {
+        std::cout << " serial: " << way->GetSerial(n);
       }
 
       std::cout << " lat: " << way->GetCoord(n).GetLat() << " lon: "<< way->GetCoord(n).GetLon() << " }" << std::endl;
@@ -566,8 +567,8 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
     for (size_t n=0; n<area->rings.front().nodes.size(); n++) {
       std::cout << "  node[" << n << "] {";
 
-      if (area->rings.front().GetId(n)!=0) {
-        std::cout << " id: " << area->rings.front().GetId(n);
+      if (area->rings.front().GetSerial(n)!=0) {
+        std::cout << " serial: " << area->rings.front().GetSerial(n);
       }
 
       std::cout << " lat: " << area->rings.front().nodes[n].GetLat() << " lon: "<< area->rings.front().nodes[n].GetLon() << " }" << std::endl;
@@ -599,8 +600,8 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
       for (size_t n=0; n<area->rings[r].nodes.size(); n++) {
         std::cout << "    node[" << n << "] {";
 
-        if (area->rings[r].GetId(n)!=0) {
-          std::cout << " id: " << area->rings[r].GetId(n);
+        if (area->rings[r].GetSerial(n)!=0) {
+          std::cout << " serial: " << area->rings[r].GetSerial(n);
         }
 
         std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;

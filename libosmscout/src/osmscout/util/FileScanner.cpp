@@ -2440,29 +2440,26 @@ namespace osmscout {
     }
 
     if (readIds) {
-      Id minId;
+      bool hasNodes;
 
-      ReadNumber(minId);
+      Read(hasNodes);
 
-      if (minId>0) {
+      if (hasNodes) {
         size_t idCurrent=0;
 
         while (idCurrent<nodes.size()) {
           uint8_t bitset;
-          size_t  bitmask=1;
+          size_t bitmask=1;
 
           Read(bitset);
 
           for (size_t i=0; i<8 && idCurrent<nodes.size(); i++) {
             if (bitset & bitmask) {
-              Id id;
-              ReadNumber(id);
+              uint8_t serial;
 
-              nodes[idCurrent].SetId(id+minId);
+              Read(serial);
 
-            }
-            else {
-              nodes[idCurrent].SetId(0);
+              nodes[idCurrent].SetSerial(serial);
             }
 
             bitmask*=2;
@@ -2470,6 +2467,15 @@ namespace osmscout {
           }
         }
       }
+
+      /*
+      uint8_t serial;
+
+      for (size_t i=0; i<nodes.size(); i++) {
+        Read(serial);
+
+        nodes[i].SetSerial(serial);
+      }*/
     }
   }
 

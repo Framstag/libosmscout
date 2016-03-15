@@ -99,6 +99,11 @@ namespace osmscout {
              nodes[0].GetId()==nodes[nodes.size()-1].GetId();
     }
 
+    inline Id GetSerial(size_t index) const
+    {
+      return nodes[index].GetSerial();
+    }
+
     inline Id GetId(size_t index) const
     {
       return nodes[index].GetId();

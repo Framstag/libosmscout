@@ -21,6 +21,27 @@
 
 namespace osmscout {
 
+  Id Coord::GetOSMScoutId() const
+  {
+    uint64_t latValue=(uint64_t)round((coord.GetLat()+90.0)*latConversionFactor);
+    uint64_t lonValue=(uint64_t)round((coord.GetLon()+180.0)*lonConversionFactor);
+    uint64_t number=0;
+
+    for (size_t i=0; i<27; i++) {
+      size_t bit=26-i;
+
+      number=number << 1;
+      number=number+((latValue >> bit) & 0x01);
+
+      number=number << 1;
+      number=number+((lonValue >> bit) & 0x01);
+
+      number=number << 8;
+      number=number | serial;
+    }
+
+    return number;
+  }
 
   void Coord::Read(const TypeConfig& /*typeConfig*/,
                    FileScanner& scanner)

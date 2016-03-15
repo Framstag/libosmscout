@@ -75,22 +75,21 @@ namespace osmscout {
       return osmId;
     }
 
-    /**
-     * Returns the libosmscout-internal substitution id for the given OSMId
-     */
-    inline Id GetOSMScoutId() const
+    inline uint8_t GetSerial() const
     {
-      return (fileOffset-sizeof(uint32_t))/coordByteSize;
-    }
-
-    inline void SetCoord(const GeoCoord& coord)
-    {
-      this->coord=coord;
+      return serial;
     }
 
     inline const GeoCoord& GetCoord() const
     {
       return coord;
+    }
+
+    Id GetOSMScoutId() const;
+
+    inline void SetCoord(const GeoCoord& coord)
+    {
+      this->coord=coord;
     }
 
     inline bool operator==(const Coord& other) const
