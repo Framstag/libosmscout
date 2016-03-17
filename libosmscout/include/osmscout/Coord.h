@@ -57,8 +57,8 @@ namespace osmscout {
       // no code
     }
 
-    inline Coord(OSMId id, uint8_t serial, const GeoCoord& coord)
-    : osmId(id),
+    inline Coord(OSMId osmId,uint8_t serial,const GeoCoord& coord)
+    : osmId(osmId),
       serial(serial),
       coord(coord)
     {
@@ -70,10 +70,36 @@ namespace osmscout {
       return fileOffset;
     }
 
+    /**
+     * Relevant id for indexing the coordinate
+     */
     inline OSMId GetId() const
     {
       return osmId;
     }
+
+    /**
+     * The return the OSM id for the given coordinate
+     */
+    inline OSMId GetOSMId() const
+    {
+      return osmId;
+    }
+
+    /**
+     * Returns a fast calculable unique id for the coordinate. Coordinates with have
+     * the same latitude and longitude value in the supported resolution wil have the same
+     * id.
+     *
+     * The id does not have any semantics regarding sorting. Coordinates with close ids
+     * do not need to be close in location.
+     */
+    Id GetOSMScoutId() const;
+
+    /**
+     * Encode the coordinate value into a number (the number has hash character).
+     */
+    Id GetHash() const;
 
     inline uint8_t GetSerial() const
     {
@@ -84,8 +110,6 @@ namespace osmscout {
     {
       return coord;
     }
-
-    Id GetOSMScoutId() const;
 
     inline void SetCoord(const GeoCoord& coord)
     {

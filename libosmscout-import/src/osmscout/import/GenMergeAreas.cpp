@@ -70,6 +70,7 @@ namespace osmscout {
       if (ring.IsOuterRing()) {
         for (const auto node : ring.nodes) {
           Id id=node.GetId();
+
           if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
             idAreaMap[id].erase(area);
           }
@@ -375,7 +376,6 @@ namespace osmscout {
           PolygonMerger merger;
 
           merger.AddPolygon(area.rings[firstOuterRing].nodes);
-
           merger.AddPolygon(candidateArea->rings[secondOuterRing].nodes);
 
           std::list<PolygonMerger::Polygon> result;

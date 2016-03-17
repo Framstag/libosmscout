@@ -77,6 +77,14 @@ namespace osmscout {
       return serial;
     }
 
+    /**
+     * Returns a fast calculable unique id for the coordinate under consideration
+     * that different OSM nodes with the same coordinate will have different ids if the
+     * identity of the node is important - else th serial id will 0.
+     *
+     * The id does not have any semantics regarding sorting. Coordinates with close ids
+     * do not need to be close in location.
+     */
     Id GetId() const;
 
     inline const GeoCoord& GetCoord() const

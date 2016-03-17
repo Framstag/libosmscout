@@ -33,12 +33,12 @@ namespace osmscout {
 
   static inline bool SortCoordsByCoordId(const RawCoord& a, const RawCoord& b)
   {
-    return a.GetCoord().ToNumber()<b.GetCoord().ToNumber();
+    return a.GetCoord().GetId()<b.GetCoord().GetId();
   }
 
   static inline bool SortCoordsByOSMId(const RawCoord& a, const RawCoord& b)
   {
-    return a.GetId()<b.GetId();
+    return a.GetOSMId()<b.GetOSMId();
   }
 
   CoordDataGenerator::CoordDataGenerator()
@@ -55,7 +55,7 @@ namespace osmscout {
 
     uint32_t    coordPageSize=100000;
     uint32_t    coordBlockSize=30000000;
-    Id          maxId=GeoCoord(90.0,180.0).ToNumber();
+    Id          maxId=GeoCoord(90.0,180.0).GetId();
     Id          currentLowerLimit=0;
     Id          currentUpperLimit=maxId/coordPageSize;
     FileScanner scanner;
@@ -90,7 +90,7 @@ namespace osmscout {
 
           coord.Read(typeConfig,scanner);
 
-          Id id=coord.GetCoord().ToNumber();
+          Id id=coord.GetCoord().GetId();
           Id pageId=id/coordPageSize;
 
           if (pageId<currentLowerLimit || pageId>currentUpperLimit) {
@@ -124,6 +124,8 @@ namespace osmscout {
           }
         }
 
+        progress.Info("Sorting coordinates");
+
         for (auto& entry : coordPages) {
           entry.second.sort(SortCoordsByCoordId);
 
@@ -131,7 +133,7 @@ namespace osmscout {
 
           bool flaged=false;
           for (auto& coord : entry.second) {
-            Id id=coord.GetCoord().ToNumber();
+            Id id=coord.GetCoord().GetId();
 
             if (id==lastId) {
               if (!flaged) {
@@ -218,7 +220,7 @@ namespace osmscout {
 
           coord.Read(typeConfig,scanner);
 
-          OSMId id=coord.GetId();
+          OSMId id=coord.GetOSMId();
           OSMId pageId=id/coordPageSize;
 
           if (pageId<currentLowerLimit || pageId>currentUpperLimit) {
@@ -252,12 +254,14 @@ namespace osmscout {
           }
         }
 
+        progress.Info("Sorting coordinates");
+
         for (auto& entry : coordPages) {
           entry.second.sort(SortCoordsByOSMId);
 
           for (auto& osmCoord : entry.second) {
             uint8_t serial=1;
-            auto    duplicateEntry=duplicates.find(osmCoord.GetId());
+            auto    duplicateEntry=duplicates.find(osmCoord.GetCoord().GetId());
 
             if (duplicateEntry!=duplicates.end()) {
               serial=duplicateEntry->second;
@@ -270,7 +274,7 @@ namespace osmscout {
               duplicateEntry->second++;
             }
 
-            Coord coord(osmCoord.GetId(),
+            Coord coord(osmCoord.GetOSMId(),
                         serial,
                         osmCoord.GetCoord());
 

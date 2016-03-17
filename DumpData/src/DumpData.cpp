@@ -255,7 +255,7 @@ static void DumpCoord(const osmscout::Coord& coord)
 {
 
   std::cout << "Coord {" << std::endl;
-  std::cout << "  OSMId: " << coord.GetId() << std::endl;
+  std::cout << "  OSMId: " << coord.GetHash() << std::endl;
   std::cout << "  Serial: " << coord.GetSerial() << std::endl;
   std::cout << "  OSMScoutId: " << coord.GetOSMScoutId() << std::endl;
 

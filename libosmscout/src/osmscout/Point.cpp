@@ -30,11 +30,11 @@ namespace osmscout {
 
     id=latValue;
 
-    id= id << 27;
+    id=id << 27;
 
     id|=lonValue;
 
-    id << 8;
+    id=id << 8;
 
     id|=serial;
 

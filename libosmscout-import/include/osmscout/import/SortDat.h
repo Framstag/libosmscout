@@ -264,7 +264,7 @@ namespace osmscout {
                                                            id,
                                                            source,
                                                            data.GetFileOffset(),
-                                                           coord.ToNumber()));
+                                                           coord.GetHash()));
               currentEntries++;
             }
 

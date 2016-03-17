@@ -32,7 +32,7 @@ namespace osmscout {
     // no code
   }
 
-  void RawCoord::SetId(OSMId id)
+  void RawCoord::SetOSMId(OSMId id)
   {
     this->id=id;
   }

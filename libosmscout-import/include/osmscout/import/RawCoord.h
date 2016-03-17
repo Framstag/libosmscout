@@ -38,7 +38,7 @@ namespace osmscout {
     RawCoord();
     virtual ~RawCoord();
 
-    inline OSMId GetId() const
+    inline OSMId GetOSMId() const
     {
       return id;
     }
@@ -63,7 +63,7 @@ namespace osmscout {
       return id==other.id || coord==other.coord;
     }
 
-    void SetId(OSMId id);
+    void SetOSMId(OSMId id);
 
     void SetCoord(const GeoCoord& coord);
     void Read(const TypeConfig& typeConfig,

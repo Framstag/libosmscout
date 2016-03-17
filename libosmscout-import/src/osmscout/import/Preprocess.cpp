@@ -285,7 +285,7 @@ namespace osmscout {
 
     RawCoord rawCoord;
 
-    rawCoord.SetId(id);
+    rawCoord.SetOSMId(id);
     rawCoord.SetCoord(coord);
 
     rawCoord.Write(*typeConfig,rawCoordWriter);

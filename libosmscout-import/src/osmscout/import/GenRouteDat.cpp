@@ -642,11 +642,11 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (const auto& node : way.nodes) {
-          Id id=node.GetId();
-
-          if (id==0) {
+          if (node.GetSerial()==0) {
             continue;
           }
+
+          Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
             nodeUseMap.SetNodeUsed(id);
@@ -691,11 +691,11 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (const auto& node : area.rings.front().nodes) {
-          Id id=node.GetId();
-
-          if (id==0) {
+          if (node.GetSerial()==0) {
             continue;
           }
+
+          Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
             nodeUseMap.SetNodeUsed(id);
@@ -756,11 +756,11 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (auto& node : way.nodes) {
-          Id id=node.GetId();
-
-          if (id==0) {
+          if (node.GetSerial()==0) {
             continue;
           }
+
+          Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
             if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
@@ -810,11 +810,11 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (auto& node : area.rings.front().nodes) {
-          Id id=node.GetId();
-
-          if (id==0) {
+          if (node.GetSerial()==0) {
             continue;
           }
+
+          Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
             if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {

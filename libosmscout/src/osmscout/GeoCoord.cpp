@@ -26,6 +26,22 @@ namespace osmscout {
   const double latConversionFactor=134217727.0/180.0; // 27 Bit
   const double lonConversionFactor=134217727.0/360.0; // 27 Bit
 
+  Id GeoCoord::GetId() const
+  {
+    Id id;
+
+    uint32_t latValue=(uint32_t)round((lat+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((lon+180.0)*lonConversionFactor);
+
+    id=latValue;
+
+    id=id << 27;
+
+    id|=lonValue;
+
+    return id;
+  }
+
   std::string GeoCoord::GetDisplayText() const
   {
     std::ostringstream      stream;

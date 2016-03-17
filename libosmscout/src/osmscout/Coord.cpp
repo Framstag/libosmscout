@@ -23,6 +23,26 @@ namespace osmscout {
 
   Id Coord::GetOSMScoutId() const
   {
+    Id id;
+
+    uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
+
+    id=latValue;
+
+    id=id << 27;
+
+    id|=lonValue;
+
+    id=id << 8;
+
+    id|=serial;
+
+    return id;
+  }
+
+  Id Coord::GetHash() const
+  {
     uint64_t latValue=(uint64_t)round((coord.GetLat()+90.0)*latConversionFactor);
     uint64_t lonValue=(uint64_t)round((coord.GetLon()+180.0)*lonConversionFactor);
     uint64_t number=0;

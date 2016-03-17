@@ -113,6 +113,16 @@ namespace osmscout {
     std::string GetDisplayText() const;
 
     /**
+     * Returns a fast calculable unique id for the coordinate. Coordinates with have
+     * the same latitude and longitude value in the supported resolution wil have the same
+     * id.
+     *
+     * The id does not have any semantics regarding sorting. Coordinates with close ids
+     * do not need to be close in location.
+     */
+    Id GetId() const;
+
+    /**
      * Encode the coordinate value into a buffer (with at least a size of coordByteSize).
      */
     inline void EncodeToBuffer(unsigned char buffer[]) const
@@ -134,7 +144,7 @@ namespace osmscout {
     /**
      * Encode the coordinate value into a number (the number has hash character).
      */
-    inline Id ToNumber() const
+    inline Id GetHash() const
     {
       uint64_t latValue=(uint64_t)round((lat+90.0)*latConversionFactor);
       uint64_t lonValue=(uint64_t)round((lon+180.0)*lonConversionFactor);
