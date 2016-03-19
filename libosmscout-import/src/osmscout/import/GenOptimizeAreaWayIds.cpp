@@ -53,6 +53,7 @@ namespace osmscout {
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
+    uint32_t    idCount=0;
 
     progress.SetAction("Scanning ids from 'areas2.tmp'");
 
@@ -66,33 +67,34 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=dataCount; current++) {
         uint8_t type;
-        Id      id;
+        OSMId   osmId;
         Area    data;
 
         progress.SetProgress(current,dataCount);
 
         scanner.Read(type);
-        scanner.Read(id);
+        scanner.Read(osmId);
 
         data.ReadImport(typeConfig,
                         scanner);
 
         for (const auto& ring: data.rings) {
-          std::unordered_set<Id> nodeIds;
-
           if (!ring.GetType()->CanRoute()) {
             continue;
           }
 
+          std::unordered_set<Id> nodeIds;
           for (const auto id: ring.ids) {
             if (nodeIds.find(id)==nodeIds.end()) {
               nodeUseMap.SetNodeUsed(id);
-
               nodeIds.insert(id);
+              idCount++;
             }
           }
         }
       }
+
+      progress.Info(NumberToString(dataCount)+" areas, "+NumberToString(idCount)+" ids found");
 
       scanner.Close();
     }
@@ -111,6 +113,8 @@ namespace osmscout {
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
+    uint32_t    idCount=0;
+    uint32_t    circularWayCount=0;
 
     progress.SetAction("Scanning ids from 'wayway.tmp'");
 
@@ -124,13 +128,13 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=dataCount; current++) {
         uint8_t type;
-        Id      id;
+        OSMId   osmId;
         Way     data;
 
         progress.SetProgress(current,dataCount);
 
         scanner.Read(type);
-        scanner.Read(id);
+        scanner.Read(osmId);
 
         data.Read(typeConfig,
                   scanner);
@@ -144,8 +148,8 @@ namespace osmscout {
         for (const auto& id : data.ids) {
           if (nodeIds.find(id)==nodeIds.end()) {
             nodeUseMap.SetNodeUsed(id);
-
             nodeIds.insert(id);
+            idCount++;
           }
         }
 
@@ -153,10 +157,13 @@ namespace osmscout {
         // to make sure, that the node id of the first node
         // is not dropped later on, and we cannot detect
         // circular ways anymore
-        if (data.ids.front()==data.ids.back()) {
+        if (data.IsCircular()) {
           nodeUseMap.SetNodeUsed(data.ids.back());
+          circularWayCount++;
         }
       }
+
+      progress.Info(NumberToString(dataCount)+" ways, "+NumberToString(idCount)+" ids, "+NumberToString(circularWayCount)+" circular ways found");
 
       scanner.Close();
     }
@@ -195,22 +202,20 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=areaCount; current++) {
         uint8_t type;
-        Id osmscoutId;
+        OSMId   osmId;
         Area    data;
 
         progress.SetProgress(current,areaCount);
 
         scanner.Read(type);
-        scanner.Read(osmscoutId);
+        scanner.Read(osmId);
 
         data.ReadImport(typeConfig,
                         scanner);
 
         for (auto& ring : data.rings) {
-          std::unordered_set<Id> nodeIds;
-
           for (auto& id : ring.ids) {
-            if (!nodeUseMap.IsNodeUsedAtLeastTwice(osmscoutId)) {
+            if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
               id=0;
               idClearedCount++;
             }
@@ -218,7 +223,7 @@ namespace osmscout {
         }
 
         writer.Write(type);
-        writer.Write(osmscoutId);
+        writer.Write(osmId);
 
         data.Write(typeConfig,
                    writer);
@@ -231,7 +236,7 @@ namespace osmscout {
 
       writer.Close();
 
-      progress.Info(NumberToString(idClearedCount)+" node ids cleared");
+      progress.Info(NumberToString(idClearedCount)+" node serials cleared");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -272,26 +277,26 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=dataCount; current++) {
         uint8_t type;
-        Id osmscoutId;
+        OSMId   osmId;
         Way     data;
 
         progress.SetProgress(current,dataCount);
 
         scanner.Read(type);
-        scanner.Read(osmscoutId);
+        scanner.Read(osmId);
 
         data.Read(typeConfig,
                   scanner);
 
         for (auto& id : data.ids) {
-          if (!nodeUseMap.IsNodeUsedAtLeastTwice(osmscoutId)) {
+          if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
             id=0;
             idClearedCount++;
           }
         }
 
         writer.Write(type);
-        writer.Write(osmscoutId);
+        writer.Write(osmId);
 
         data.Write(typeConfig,
                    writer);
@@ -300,7 +305,7 @@ namespace osmscout {
       scanner.Close();
       writer.Close();
 
-      progress.Info(NumberToString(idClearedCount)+" node ids cleared");
+      progress.Info(NumberToString(idClearedCount)+" node serial cleared");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -336,7 +341,7 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info("Found "+NumberToString(nodeUseMap.GetNodeUsedCount())+" nodes as possible connection points");
+    progress.Info("Found "+NumberToString(nodeUseMap.GetNodeUsedCount())+" relevant nodes, "+NumberToString(nodeUseMap.GetDuplicateCount())+" of it at least used twice");
 
     if (!CopyAreas(parameter,
                    progress,
