@@ -49,6 +49,7 @@ namespace osmscout {
   {
   private:
     size_t                                    nodeCount;
+    size_t                                    duplicateCount;
     typedef std::bitset<4096>                 Bitset;
     typedef std::unordered_map<PageId,Bitset> Map;
 
@@ -62,6 +63,7 @@ namespace osmscout {
     void SetNodeUsed(Id id);
     bool IsNodeUsedAtLeastTwice(Id id) const;
     size_t GetNodeUsedCount() const;
+    size_t GetDuplicateCount() const;
 
     void Clear();
   };

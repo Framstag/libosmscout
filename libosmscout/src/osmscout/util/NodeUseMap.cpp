@@ -24,7 +24,8 @@
 namespace osmscout {
 
   NodeUseMap::NodeUseMap()
-  : nodeCount(0)
+  : nodeCount(0),
+    duplicateCount(0)
   {
     // no code
   }
@@ -52,6 +53,7 @@ namespace osmscout {
     }
     else if (entry->second[index]) {
       entry->second.set(index+1);
+      duplicateCount++;
     }
     else {
       nodeCount++;
@@ -82,9 +84,15 @@ namespace osmscout {
     return nodeCount;
   }
 
+  size_t NodeUseMap::GetDuplicateCount() const
+  {
+    return duplicateCount;
+  }
+
   void NodeUseMap::Clear()
   {
     nodeUseMap.clear();
     nodeCount=0;
+    duplicateCount=0;
   }
 }
