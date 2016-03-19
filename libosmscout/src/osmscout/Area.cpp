@@ -327,7 +327,8 @@ namespace osmscout {
       scanner.Read(rings[i].nodes);
 
       if (!rings[i].nodes.empty() &&
-          rings[i].GetType()->GetAreaId()!=typeIgnore) {
+          (rings[i].ring==outerRingId ||
+           rings[i].GetType()->GetAreaId()!=typeIgnore)) {
         ReadIds(scanner,
                 rings[i].nodes.size(),
                 rings[i].ids);
@@ -514,7 +515,7 @@ namespace osmscout {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
-    // Outer ring
+    // Outer or master ring
 
     writer.WriteTypeId(ring->GetType()->GetAreaId(),
                        typeConfig.GetAreaTypeIdBytes());
@@ -549,7 +550,8 @@ namespace osmscout {
       writer.Write(ring->nodes);
 
       if (!ring->nodes.empty() &&
-          ring->GetType()->GetAreaId()!=typeIgnore) {
+          (ring->ring==outerRingId ||
+           ring->GetType()->GetAreaId()!=typeIgnore)) {
         WriteIds(writer,
                  ring->ids);
       }
