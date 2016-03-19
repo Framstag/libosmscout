@@ -325,7 +325,7 @@ namespace osmscout {
       }
 
       if (!coordDataFile.Get(nodeIds,coordsMap)) {
-        std::cerr << "Cannot read nodes!" << std::endl;
+        progress.Error("Cannot read nodes!");
         return false;
       }
 
