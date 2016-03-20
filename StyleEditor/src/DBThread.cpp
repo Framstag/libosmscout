@@ -73,7 +73,8 @@ DBThread::DBThread()
    currentRenderRequest(),
    doRender(false),
    renderBreaker(new QBreaker()),
-   renderBreakerRef(renderBreaker)
+   renderBreakerRef(renderBreaker),
+   renderError(false)
 {
     osmscout::log.Debug() << "DBThread::DBThread()";
 
@@ -318,34 +319,38 @@ void DBThread::TriggerMapRendering()
 
     p.end();
 
+    renderError = false;
     drawTimer.Stop();
     overallTimer.Stop();
 
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
-  }
-  else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig << std::endl;
 
-    QPainter p;
+  } else {
+    if(!renderError){
+        renderError = true;
+        std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig << std::endl;
 
-    p.begin(currentImage);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setRenderHint(QPainter::TextAntialiasing);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
+        QPainter p;
 
-    p.fillRect(0,0,request.width,request.height,
-               QColor::fromRgbF(0.0,0.0,0.0,1.0));
+        p.begin(currentImage);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setRenderHint(QPainter::TextAntialiasing);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    p.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
+        p.fillRect(0,0,request.width,request.height,
+           QColor::fromRgbF(0.0,0.0,0.0,1.0));
 
-    QString text("not initialized (yet)");
+        p.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
 
-    p.drawText(QRect(0,0,request.width,request.height),
-               Qt::AlignCenter|Qt::AlignVCenter,
-               text,
-               NULL);
+        QString text("not initialized (yet)");
 
-    p.end();
+        p.drawText(QRect(0,0,request.width,request.height),
+            Qt::AlignCenter|Qt::AlignVCenter,
+            text,
+            NULL);
+
+        p.end();
+      }
   }
 
   QMutexLocker locker(&mutex);

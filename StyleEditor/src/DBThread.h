@@ -124,6 +124,8 @@ private:
   QBreaker*                     renderBreaker;
   osmscout::BreakerRef          renderBreakerRef;
 
+  bool                          renderError;
+
 private:
   DBThread();
   virtual ~DBThread();
