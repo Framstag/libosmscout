@@ -599,7 +599,7 @@ namespace osmscout {
                   t = QTransform::fromTranslate(x2, y2);
                   t.rotateRadians(slope);
                   painter->setTransform(t);
-                  DrawSymbol(projection, parameter, symbol, 0, height);
+                  DrawSymbol(projection, parameter, symbol, 0, -height*2);
                   loop = FollowPath(followPathHnd, space, origin);
               }
            }
