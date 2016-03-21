@@ -309,7 +309,7 @@ namespace osmscout {
       scanner.Close();
       writer.Close();
 
-      progress.Info(NumberToString(idClearedCount)+" node serial cleared");
+      progress.Info(NumberToString(idClearedCount)+" node serials cleared");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
