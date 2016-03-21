@@ -233,11 +233,11 @@ namespace osmscout {
 
         if (IsEqual(buffers[lastIndex],
                     buffers[currentIndex])) {
-          if (way.GetId(n)==0) {
+          if (way.GetSerial(n)==0) {
             duplicateCount++;
             reduced=true;
           }
-          else if (way.GetId(n-1)==0) {
+          else if (way.GetSerial(n-1)==0) {
             way.nodes[n-1]=way.nodes[n];
             duplicateCount++;
             reduced=true;
@@ -296,7 +296,7 @@ namespace osmscout {
                                                           way.nodes[current+1]);
 
       if (distance<1/latConversionFactor &&
-          way.GetId(current)==0) {
+          way.GetSerial(current)==0) {
         reduced=true;
         redundantCount++;
         current++;

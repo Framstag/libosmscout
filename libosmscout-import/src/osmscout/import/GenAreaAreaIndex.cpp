@@ -286,14 +286,14 @@ namespace osmscout {
 
           if (IsEqual(buffers[lastIndex],
                       buffers[currentIndex])) {
-            if (ring->GetId(n)==0) {
+            if (ring->GetSerial(n)==0) {
               reduced=true;
             }
-            else if (ring->GetId(n-1)==0) {
+            else if (ring->GetSerial(n-1)==0) {
               ring->nodes[n-1]=ring->nodes[n];
               reduced=true;
             }
-            else if (ring->GetId(n-1)==ring->GetId(n)) {
+            else if (ring->GetSerial(n-1)==ring->GetSerial(n)) {
               reduced=true;
             }
             else {
@@ -362,7 +362,7 @@ namespace osmscout {
                                                             ring.nodes[current+1]);
 
         if (distance<1/latConversionFactor &&
-            ring.GetId(current)==0) {
+            ring.GetSerial(current)==0) {
           reduced=true;
           redundantCount++;
           current++;
