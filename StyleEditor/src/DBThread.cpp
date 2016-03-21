@@ -184,6 +184,11 @@ void DBThread::ReloadStyle(const QString &suffix){
         styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     }
     if (!styleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
+        std::list<std::string> errors = styleConfig->GetErrors();
+        qDebug() << "Error in stylesheet :";
+        for(std::list<std::string>::iterator it = errors.begin(); it != errors.end(); it++){
+            qDebug() <<  QString::fromStdString(*it);
+        }
         styleConfig=NULL;
 
     } else {
