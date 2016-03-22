@@ -26,6 +26,7 @@
 #include <QMutexLocker>
 #include <QDebug>
 #include <QDir>
+#include <QRegExp>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
@@ -54,6 +55,40 @@ void QBreaker::Reset()
   aborted = false;
 }
 
+StyleError::StyleError(QString msg){
+    QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
+    if(rx.exactMatch(msg)){
+        line = rx.cap(1).toInt();
+        column = rx.cap(2).toInt();
+        if(rx.cap(3) == "Symbol"){
+            type = Symbol;
+        } else if(rx.cap(3) == "Error"){
+            type = Error;
+        } else if(rx.cap(3) == "Warning"){
+            type = Warning;
+        } else {
+            type = Exception;
+        }
+        text = rx.cap(4);
+    }
+}
+
+QString StyleError::GetTypeName() const {
+    switch(type){
+    case Symbol:
+        return QString("symbol");
+        break;
+    case Error:
+        return QString("error");
+        break;
+    case Warning:
+        return QString("warning");
+        break;
+    case Exception:
+        return QString("exception");
+        break;
+    }
+}
 
 DBThread::DBThread()
  : database(new osmscout::Database(databaseParameter)),
@@ -176,23 +211,25 @@ void DBThread::Initialize()
   emit InitialisationFinished(response);
 }
 
-void DBThread::ReloadStyle(const QString &suffix){
+bool DBThread::ReloadStyle(const QString &suffix){
     if(stylesheetFilename.isNull()){
-        return;
+        return false;
     }
     if (!styleConfig) {
         styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     }
+    styleErrors.clear();
     if (!styleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
         std::list<std::string> errors = styleConfig->GetErrors();
-        qDebug() << "Error in stylesheet :";
         for(std::list<std::string>::iterator it = errors.begin(); it != errors.end(); it++){
-            qDebug() <<  QString::fromStdString(*it);
+            styleErrors.append(StyleError(QString::fromStdString(*it)));
         }
         styleConfig=NULL;
+        return false;
 
     } else {
         painter=new osmscout::MapPainterQt(styleConfig);
+        return true;
     }
 }
 

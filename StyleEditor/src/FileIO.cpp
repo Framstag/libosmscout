@@ -49,10 +49,14 @@ void FileIO::read()
                                             Q_RETURN_ARG(QVariant, returnedValue),
                                             Q_ARG(QVariant, QVariant(0)),
                                             Q_ARG(QVariant, length));
+            m_lineOffsets.clear();
+            m_lineOffsets.push_back(1);
         }
         do {
             line = t.readLine();
-            line.replace("<","&lt;").replace(">","&gt;").replace(" ","&nbsp;").replace("\t","        ");
+            line.replace("\t","        ");
+            m_lineOffsets.push_back(line.length()+1);
+            line.replace("<","&lt;").replace(">","&gt;").replace(" ","&nbsp;");
             ret = QMetaObject::invokeMethod(m_target, "append",
                                             Q_RETURN_ARG(QVariant, returnedValue),
                                             Q_ARG(QVariant, QVariant(line)));
@@ -127,4 +131,13 @@ void FileIO::setTarget(QQuickItem *target)
         return;
 
     emit targetChanged();
+}
+
+int FileIO::lineOffset(int l)
+{
+    int s = 0;
+    for(int i=0; i<std::min(l, m_lineOffsets.count()); i++){
+        s += m_lineOffsets[i];
+    }
+    return s;
 }

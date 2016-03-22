@@ -50,6 +50,23 @@ Rectangle {
         }
     }
 
+    function goTo(l,c) {
+        textArea.cursorPosition = styleFile.lineOffset(l-1) + c - 1;
+    }
+
+    function checkForErrors() {
+        if(map.stylesheetHasErrors){
+            goTo(map.stylesheetErrorLine, map.stylesheetErrorColumn)
+            textArea.height = textPanel.height - 24;
+            statusText.remove(0, statusText.length)
+            statusText.append("Line "+ map.stylesheetErrorLine + " column " + map.stylesheetErrorColumn + " " + map.stylesheetErrorDescription)
+            statusText.visible = true
+        } else {
+            statusText.visible = false
+            textArea.height = textPanel.height;
+        }
+    }
+
     ToolBar {
         id: toolBar
         anchors.top: parent.top
@@ -64,6 +81,7 @@ Rectangle {
                     onTriggered: {
                         styleFile.writeTmp()
                         map.reloadTmpStyle()
+                        checkForErrors()
                     }
                 }
             }
@@ -77,6 +95,7 @@ Rectangle {
                         styleFile.read()
                         map.reloadStyle()
                         textArea.cursorPosition = savedTextPosition
+                        checkForErrors()
                     }
                 }
             }
@@ -88,6 +107,7 @@ Rectangle {
                     onTriggered: {
                         styleFile.write()
                         map.reloadStyle()
+                        checkForErrors()
                     }
                 }
             }
@@ -134,27 +154,43 @@ Rectangle {
         }
     }
 
-    TextArea {
-        Accessible.name: "document"
-        id: textArea
-        frameVisible: false
+    Column {
+        id: textPanel
         anchors.top: toolBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        //baseUrl: "qrc:/"
-        font.family: "Courier"
-        textFormat: Qt.RichText
+        TextArea {
+            Accessible.name: "document"
+            id: textArea
+            frameVisible: false
+            height: parent.height
+            width: parent.width
+            font.family: "Courier"
+            textFormat: Qt.RichText
+        }
+        TextArea {
+            id: statusText
+            visible: false
+            frameVisible: false
+            width: parent.width
+            height: 20
+            textColor: "#ff0000"
+            font.family: "Courier"
+            font.bold: true
+            textFormat: Qt.RichText
+        }
     }
 
     FileIO {
         id: styleFile
         onError: console.log(msg)
+        target: textArea
         onSourceChanged: {
-            target=textArea
             read()
             textArea.cursorPosition=0
             textArea.forceActiveFocus()
         }
     }
+
 }

@@ -5,6 +5,11 @@ import net.sf.libosmscout.map 1.0
 
 Rectangle {
     property alias stylesheetFilename: mapView.stylesheetFilename
+    property alias stylesheetHasErrors: mapView.stylesheetHasErrors
+    property alias stylesheetErrorLine: mapView.stylesheetErrorLine
+    property alias stylesheetErrorColumn: mapView.stylesheetErrorColumn
+    property alias stylesheetErrorDescription: mapView.stylesheetErrorDescription
+
     width: 100
     height: 62
 

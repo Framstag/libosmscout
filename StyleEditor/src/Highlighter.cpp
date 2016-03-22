@@ -54,7 +54,7 @@ void Highlighter::updateRules()
     highlightingRules.append(rule);
 
     kwTYPEFormat.setFontWeight(QFont::Bold);
-    kwTYPEFormat.setForeground(QColor("#ff5000"));
+    kwTYPEFormat.setForeground(QColor("#994000"));
     rule.pattern = QRegExp("TYPE");
     rule.pattern.setMinimal(true);
     rule.format = kwTYPEFormat;
@@ -82,14 +82,14 @@ void Highlighter::updateRules()
     highlightingRules.append(rule);
 
     kwTEXTICONFormat.setFontWeight(QFont::Bold);
-    kwTEXTICONFormat.setForeground(QColor("#ffff50"));
+    kwTEXTICONFormat.setForeground(QColor("#ffb33d"));
     rule.pattern = QRegExp("TEXT|ICON");
     rule.pattern.setMinimal(true);
     rule.format = kwTEXTICONFormat;
     highlightingRules.append(rule);
 
     kwTUNNELBRIDGEFormat.setFontWeight(QFont::Bold);
-    kwTUNNELBRIDGEFormat.setForeground(QColor("#50ff50"));
+    kwTUNNELBRIDGEFormat.setForeground(QColor("#25a13b"));
     rule.pattern = QRegExp("TUNNEL|BRIDGE");
     rule.pattern.setMinimal(true);
     rule.format = kwTUNNELBRIDGEFormat;

@@ -35,6 +35,10 @@ class MapWidget : public QQuickPaintedItem
   Q_PROPERTY(int zoomLevel READ zoomLevel NOTIFY zoomLevelChanged)
   Q_PROPERTY(QString zoomLevelName READ zoomLevelName NOTIFY zoomLevelNameChanged)
   Q_PROPERTY(QString stylesheetFilename READ stylesheetFilename NOTIFY stylesheetFilenameChanged)
+  Q_PROPERTY(bool stylesheetHasErrors READ stylesheetHasErrors WRITE setStylesheetHasErrors NOTIFY stylesheetHasErrorsChanged)
+  Q_PROPERTY(int stylesheetErrorLine READ stylesheetErrorLine CONSTANT)
+  Q_PROPERTY(int stylesheetErrorColumn READ stylesheetErrorColumn CONSTANT)
+  Q_PROPERTY(QString stylesheetErrorDescription READ stylesheetErrorDescription CONSTANT)
 
 private:
   osmscout::GeoCoord            center;
@@ -48,6 +52,12 @@ private:
   // Controlling rerendering...
   bool                          requestNewMap;
 
+  // Errors in stylesheet
+  int                           errorLine;
+  int                           errorColumn;
+  bool                          hasErrors;
+  QString                       errorDescription;
+
 signals:
   void TriggerMapRenderingSignal();
   void latChanged();
@@ -55,6 +65,7 @@ signals:
   void zoomLevelChanged();
   void zoomLevelNameChanged();
   void stylesheetFilenameChanged();
+  void stylesheetHasErrorsChanged();
 
 public slots:
   void initialisationFinished(const DatabaseLoadedResponse& response);
@@ -97,6 +108,29 @@ public:
   QString zoomLevelName();
 
   QString stylesheetFilename();
+
+  inline bool stylesheetHasErrors() const
+  {
+      return hasErrors;
+  }
+  void setStylesheetHasErrors(bool value) {
+    if(value != hasErrors){
+        hasErrors = value;
+        emit stylesheetHasErrorsChanged();
+    }
+  }
+  inline int stylesheetErrorLine() const
+  {
+      return errorLine;
+  }
+  inline int stylesheetErrorColumn() const
+  {
+      return errorColumn;
+  }
+  inline const QString &stylesheetErrorDescription() const
+  {
+      return errorDescription;
+  }
 
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);

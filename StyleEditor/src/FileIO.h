@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QtQuick>
 #include <QQuickItem>
+#include <QVector>
 
 #include "Highlighter.h"
 
@@ -39,6 +40,7 @@ public:
     Q_INVOKABLE bool write();
     Q_INVOKABLE void read();
     Q_INVOKABLE bool writeTmp();
+    Q_INVOKABLE int lineOffset(int l);
 
     QQuickItem *target() { return m_target; }
     void setTarget(QQuickItem *target);
@@ -65,6 +67,7 @@ private:
     QQuickItem *m_target;
     QTextDocument *m_doc;
     Highlighter *m_highlighter;
+    QVector<int> m_lineOffsets;
 };
 
 #endif // FILEIO_H
