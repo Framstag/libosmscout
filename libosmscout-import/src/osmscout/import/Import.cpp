@@ -130,7 +130,8 @@ namespace osmscout {
      optimizationCellSizeMax(255),
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
-     assumeLand(true)
+     assumeLand(true),
+     langOrder({"#"})
   {
     // no code
   }
@@ -328,6 +329,16 @@ namespace osmscout {
   bool ImportParameter::GetAssumeLand() const
   {
     return assumeLand;
+  }
+
+  const std::vector<std::string>& ImportParameter::GetLangOrder() const
+  {
+    return this->langOrder;
+  }
+
+  const std::vector<std::string>& ImportParameter::GetAltLangOrder() const
+  {
+    return this->altLangOrder;
   }
 
   void ImportParameter::SetMapfiles(const std::list<std::string>& mapfiles)
@@ -534,7 +545,17 @@ namespace osmscout {
   {
     this->assumeLand=assumeLand;
   }
+    
+  void ImportParameter::SetLangOrder(const std::vector<std::string>& langOrder)
+  {
+    this->langOrder = langOrder;
+  }
 
+  void ImportParameter::SetAltLangOrder(const std::vector<std::string>& altLangOrder)
+  {
+    this->altLangOrder = altLangOrder;
+  }
+    
   void ImportModuleDescription::SetName(const std::string& name)
   {
     this->name=name;
@@ -893,14 +914,36 @@ namespace osmscout {
 
     DumpTypeConfigData(*typeConfig,
                        progress);
-
-    typeConfig->RegisterNameTag("name",0);
-    typeConfig->RegisterNameTag("place_name",1);
-
-    /*
-    typeConfig->RegisterNameAltTag("name:ru",0);
-    typeConfig->RegisterNameAltTag("place_name:ru",1);
-    */
+      
+    progress.Info("Parsed language(s) :");
+    int langIndex = 0;
+    for(const auto& lang : parameter.GetLangOrder()){
+      if(lang=="#"){
+        progress.Info("  default");
+        typeConfig->RegisterNameTag("name", langIndex);
+        typeConfig->RegisterNameTag("place_name", langIndex+1);
+      } else {
+          progress.Info("  " + lang);
+          typeConfig->RegisterNameTag("name:"+lang, langIndex);
+          typeConfig->RegisterNameTag("place_name:"+lang, langIndex+1);
+      }
+      langIndex+=2;
+    }
+      
+    progress.Info("Parsed alt language(s) :");
+    langIndex = 0;
+    for(const auto& lang : parameter.GetAltLangOrder()){
+      if(lang=="#"){
+        progress.Info("  default");
+        typeConfig->RegisterNameAltTag("name", langIndex);
+        typeConfig->RegisterNameAltTag("place_name", langIndex+1);
+      } else {
+        progress.Info("  " + lang);
+        typeConfig->RegisterNameAltTag("name:"+lang, langIndex);
+        typeConfig->RegisterNameAltTag("place_name:"+lang, langIndex+1);
+      }
+      langIndex+=2;
+    }
 
     bool result=ExecuteModules(typeConfig,
                                progress);

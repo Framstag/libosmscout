@@ -141,6 +141,9 @@ namespace osmscout {
 
     bool                         assumeLand;               //<! During sea/land detection,we either trust coastlines only or make some
                                                            //<! assumptions which tiles are sea and which are land.
+    std::vector<std::string>     langOrder;                //<! languages used when parsing name[:lang] and
+                                                           //<! place_name[:lang] tags
+    std::vector<std::string>     altLangOrder;             //<! the same as langOrder but for a alt (second) lang
 
   public:
     ImportParameter();
@@ -201,7 +204,10 @@ namespace osmscout {
     size_t GetRouteNodeBlockSize() const;
 
     bool GetAssumeLand() const;
-
+      
+    const std::vector<std::string>& GetLangOrder () const;
+    const std::vector<std::string>& GetAltLangOrder () const;
+      
     void SetMapfiles(const std::list<std::string>& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
@@ -261,6 +267,10 @@ namespace osmscout {
     void SetRouteNodeBlockSize(size_t blockSize);
 
     void SetAssumeLand(bool assumeLand);
+
+    void SetLangOrder(const std::vector<std::string>& langOrder);
+    void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
+
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription
