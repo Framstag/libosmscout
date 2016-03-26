@@ -75,7 +75,7 @@ namespace osmscout {
      debugPerformance(parameter.IsDebugPerformance()),
      routeNodeDataFile(GetDataFilename(filenamebase),
                        GetIndexFilename(filenamebase),
-                       6000),
+                       12000),
      junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
                       RoutingService::FILENAME_INTERSECTIONS_IDX,
                       6000)
@@ -262,7 +262,7 @@ namespace osmscout {
                             routeNode);
 
       if (routeNode) {
-        routeNodeIndex=i;
+        routeNodeIndex=(size_t)i;
         return;
       }
     }
@@ -436,7 +436,7 @@ namespace osmscout {
         route.AddEntry(0,
                        i,
                        object,
-                       i-1);
+                       (size_t)i-1);
       }
 
       route.AddEntry(0,
@@ -680,7 +680,7 @@ namespace osmscout {
 
       size_t currentNodeIndex=0;
 
-      while ((*ids)[currentNodeIndex].GetId()!=node->id &&
+      while ((*ids)[currentNodeIndex].GetId()!=node->GetId() &&
           currentNodeIndex<ids->size()) {
         currentNodeIndex++;
       }
@@ -688,7 +688,7 @@ namespace osmscout {
 
       size_t nextNodeIndex=0;
 
-      while ((*ids)[nextNodeIndex].GetId()!=nextNode->id &&
+      while ((*ids)[nextNodeIndex].GetId()!=nextNode->GetId() &&
           nextNodeIndex<ids->size()) {
         nextNodeIndex++;
       }
@@ -843,7 +843,7 @@ namespace osmscout {
       }
 
       if (forwardRouteNode) {
-        if (!routeNodeDataFile.GetOffset(forwardRouteNode->id,
+        if (!routeNodeDataFile.GetOffset(forwardRouteNode->GetId(),
                                          forwardOffset)) {
           log.Error() << "Cannot get offset of startForwardRouteNode";
 
@@ -870,7 +870,7 @@ namespace osmscout {
       }
 
       if (backwardRouteNode) {
-        if (!routeNodeDataFile.GetOffset(backwardRouteNode->id,
+        if (!routeNodeDataFile.GetOffset(backwardRouteNode->GetId(),
                                          backwardOffset)) {
           log.Error() << "Cannot get offset of startBackwardRouteNode";
 
@@ -964,7 +964,7 @@ namespace osmscout {
       if (forwardNode) {
         FileOffset forwardRouteNodeOffset;
 
-        if (!routeNodeDataFile.GetOffset(forwardNode->id,
+        if (!routeNodeDataFile.GetOffset(forwardNode->GetId(),
                                          forwardRouteNodeOffset)) {
           log.Error() << "Cannot get offset of targetForwardRouteNode";
         }
@@ -973,7 +973,7 @@ namespace osmscout {
       if (backwardNode) {
         FileOffset backwardRouteNodeOffset;
 
-        if (!routeNodeDataFile.GetOffset(backwardNode->id,
+        if (!routeNodeDataFile.GetOffset(backwardNode->GetId(),
                                          backwardRouteNodeOffset)) {
           log.Error() << "Cannot get offset of targetBackwardRouteNode";
         }
@@ -1280,8 +1280,8 @@ namespace osmscout {
           }
         }
 
-        double distanceToTarget=GetSphericalDistance(nextNode->coord.GetLon(),
-                                                     nextNode->coord.GetLat(),
+        double distanceToTarget=GetSphericalDistance(nextNode->GetCoord().GetLon(),
+                                                     nextNode->GetCoord().GetLat(),
                                                      targetLon,
                                                      targetLat);
         // Estimate costs for the rest of the distance to the target
@@ -1360,8 +1360,8 @@ namespace osmscout {
       }
 #endif
     } while (!openList.empty() &&
-             (!targetForwardRouteNode || current->nodeOffset!=targetForwardRouteNode->fileOffset) &&
-             (!targetBackwardRouteNode || current->nodeOffset!=targetBackwardRouteNode->fileOffset));
+             (!targetForwardRouteNode || current->nodeOffset!=targetForwardRouteNode->GetFileOffset()) &&
+             (!targetBackwardRouteNode || current->nodeOffset!=targetBackwardRouteNode->GetFileOffset()));
 
     clock.Stop();
 
@@ -1396,8 +1396,8 @@ namespace osmscout {
       std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
     }
 
-    if (!((targetForwardRouteNode && currentRouteNode->GetId()==targetForwardRouteNode->id) ||
-          (targetBackwardRouteNode && currentRouteNode->GetId()==targetBackwardRouteNode->id))) {
+    if (!((targetForwardRouteNode && currentRouteNode->GetId()==targetForwardRouteNode->GetId()) ||
+          (targetBackwardRouteNode && currentRouteNode->GetId()==targetBackwardRouteNode->GetId()))) {
       std::cout << "No route found!" << std::endl;
       route.Clear();
 

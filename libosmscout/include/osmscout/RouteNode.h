@@ -117,22 +117,33 @@ namespace osmscout {
       }
     };
 
-  public:
+  private:
     FileOffset              fileOffset; //!< FileOffset of the route node
-    Id                      id;         //!< Id of the route node, equal the id of the underlying node
-    GeoCoord                coord;      //!< Coordinate of the route node
+    Point                   point;      //!< NodeThe route node
+
+  public:
     std::vector<ObjectData> objects;    //!< List of objects (ways, areas) that cross this route node
     std::vector<Path>       paths;      //!< List of paths that can in principle be used from this node
     std::vector<Exclude>    excludes;   //!< List of potential excludes regarding use of paths
 
-    inline Id GetId() const
-    {
-      return id;
-    }
-
     inline FileOffset GetFileOffset() const
     {
       return fileOffset;
+    }
+
+    inline Id GetId() const
+    {
+      return point.GetId();
+    }
+
+    inline GeoCoord GetCoord() const
+    {
+      return point.GetCoord();
+    }
+
+    inline void SetPoint(const Point& point)
+    {
+      this->point=point;
     }
 
     uint32_t AddObject(const ObjectFileRef& object,

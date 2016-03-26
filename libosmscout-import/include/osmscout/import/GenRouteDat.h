@@ -193,12 +193,12 @@ namespace osmscout {
                    const std::set<FileOffset>& fileOffsets,
                    std::unordered_map<FileOffset,AreaRef>& areasMap);
 
-    bool GetRouteNodeCoord(Progress& progress,
+    bool GetRouteNodePoint(Progress& progress,
                            Id id,
                            const std::list<ObjectFileRef>& objects,
                            std::unordered_map<FileOffset,WayRef>& waysMap,
                            std::unordered_map<FileOffset,AreaRef>& areasMap,
-                           GeoCoord& coord) const;
+                           Point& point) const;
 
     /*
     uint8_t CalculateEncodedBearing(const Way& way,

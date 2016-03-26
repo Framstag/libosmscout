@@ -299,8 +299,8 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
   std::streamsize         oldPrecision=std::cout.precision(5);
   std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
 
-  std::cout << "  lat: " << routeNode.coord.GetLat() << std::endl;
-  std::cout << "  lon: " << routeNode.coord.GetLon() << std::endl;
+  std::cout << "  lat: " << routeNode.GetCoord().GetLat() << std::endl;
+  std::cout << "  lon: " << routeNode.GetCoord().GetLon() << std::endl;
 
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);

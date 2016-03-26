@@ -100,14 +100,19 @@ namespace osmscout {
    */
   void RouteNode::Read(FileScanner& scanner)
   {
+    uint8_t  serial;
+    GeoCoord coord;
     uint32_t objectCount;
     uint32_t pathCount;
     uint32_t excludesCount;
 
     fileOffset=scanner.GetPos();
 
-    scanner.ReadNumber(id);
+    scanner.Read(serial);
     scanner.ReadCoord(coord);
+
+    point.Set(serial,coord);
+
     scanner.ReadNumber(objectCount);
     scanner.ReadNumber(pathCount);
     scanner.ReadNumber(excludesCount);
@@ -181,8 +186,8 @@ namespace osmscout {
    */
   void RouteNode::Write(FileWriter& writer) const
   {
-    writer.WriteNumber(id);
-    writer.WriteCoord(coord);
+    writer.Write(point.GetSerial());
+    writer.WriteCoord(point.GetCoord());
 
     writer.WriteNumber((uint32_t)objects.size());
     writer.WriteNumber((uint32_t)paths.size());

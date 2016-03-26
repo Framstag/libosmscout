@@ -953,12 +953,12 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::GetRouteNodeCoord(Progress& progress,
+  bool RouteDataGenerator::GetRouteNodePoint(Progress& progress,
                                              Id id,
                                              const std::list<ObjectFileRef>& objects,
                                              std::unordered_map<FileOffset,WayRef>& waysMap,
                                              std::unordered_map<FileOffset,AreaRef>& areasMap,
-                                             GeoCoord& coord) const
+                                             Point& point) const
   {
     for (const auto& ref : objects) {
       if (ref.GetType()==refWay) {
@@ -982,7 +982,7 @@ namespace osmscout {
         // Make sure we found it
         assert(currentNode<(int)way->nodes.size());
 
-        coord=way->nodes[currentNode].GetCoord();
+        point=way->nodes[currentNode];
 
         return true;
       }
@@ -1008,7 +1008,7 @@ namespace osmscout {
         // Make sure we found it
         assert(currentNode<(int)ring.nodes.size());
 
-        coord=ring.nodes[currentNode].GetCoord();
+        point=ring.nodes[currentNode];
 
         return true;
       }
@@ -1069,7 +1069,7 @@ namespace osmscout {
 
     // Find current route node in area
     while (currentNode<(int)ring.nodes.size() &&
-          ring.GetId(currentNode)!=routeNode.id) {
+          ring.GetId(currentNode)!=routeNode.GetId()) {
       currentNode++;
     }
 
@@ -1108,7 +1108,7 @@ namespace osmscout {
 
     // Found next routing node in order
     if (nextNode!=currentNode &&
-        ring.GetId(nextNode)!=routeNode.id) {
+        ring.GetId(nextNode)!=routeNode.GetId()) {
       RouteNode::Path                 path;
       NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.GetId(nextNode));
 
@@ -1167,7 +1167,7 @@ namespace osmscout {
 
     if (prevNode!=currentNode &&
         prevNode!=nextNode &&
-        ring.GetId(prevNode)!=routeNode.id) {
+        ring.GetId(prevNode)!=routeNode.GetId()) {
       RouteNode::Path                 path;
       NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.GetId(prevNode));
 
@@ -1207,7 +1207,7 @@ namespace osmscout {
     // Search for current route node
 
     while (currentNode<(int)way.nodes.size() &&
-          way.GetId(currentNode)!=routeNode.id) {
+          way.GetId(currentNode)!=routeNode.GetId()) {
       currentNode++;
     }
 
@@ -1245,7 +1245,7 @@ namespace osmscout {
       }
 
       if (nextNode!=currentNode &&
-          way.GetId(nextNode)!=routeNode.id) {
+          way.GetId(nextNode)!=routeNode.GetId()) {
         RouteNode::Path                 path;
         NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(nextNode));
 
@@ -1304,7 +1304,7 @@ namespace osmscout {
 
       if (prevNode!=currentNode &&
           prevNode!=nextNode &&
-          way.GetId(prevNode)!=routeNode.id) {
+          way.GetId(prevNode)!=routeNode.GetId()) {
         RouteNode::Path                 path;
         NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(prevNode));
 
@@ -1340,7 +1340,7 @@ namespace osmscout {
                                              PendingRouteNodeOffsetsMap& pendingOffsetsMap)
   {
     for (size_t i=0; i<way.nodes.size(); i++) {
-      if (way.GetId(i)==routeNode.id) {
+      if (way.GetId(i)==routeNode.GetId()) {
         // Route backward
         if (GetAccess(way).CanRouteBackward() &&
             i>0) {
@@ -1356,7 +1356,7 @@ namespace osmscout {
           }
 
           if (j>=0 &&
-              way.GetId(j)!=routeNode.id) {
+              way.GetId(j)!=routeNode.GetId()) {
             RouteNode::Path                 path;
             NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(j));
 
@@ -1406,7 +1406,7 @@ namespace osmscout {
           }
 
           if (j<way.nodes.size() &&
-              way.GetId(j)!=routeNode.id) {
+              way.GetId(j)!=routeNode.GetId()) {
             RouteNode::Path                 path;
             NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(way.GetId(j));
 
@@ -1742,17 +1742,18 @@ namespace osmscout {
           }
 
           RouteNode routeNode;
+          Point     point;
 
-          routeNode.id=node->first;
-
-          if (!GetRouteNodeCoord(progress,
+          if (!GetRouteNodePoint(progress,
                                  node->first,
                                  node->second,
                                  waysMap,
                                  areasMap,
-                                 routeNode.coord)) {
+                                 point)) {
             continue;
           }
+
+          routeNode.SetPoint(point);
 
           //
           // Calculate all outgoing paths
