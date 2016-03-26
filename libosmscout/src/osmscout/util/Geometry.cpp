@@ -122,6 +122,28 @@ namespace osmscout {
   }
 
   /**
+    Calculating basic cost for the A* algorithm based on the
+    spherical distance of two points on earth
+    */
+  double GetSphericalDistance(const GeoCoord& a,
+                              const GeoCoord& b)
+  {
+    double r=6371.01; // Average radius of earth
+    double dLat=(b.GetLat()-a.GetLat())*M_PI/180;
+    double dLon=(b.GetLon()-a.GetLon())*M_PI/180;
+
+    double sindLonDiv2;
+    double cosdLonDiv2;
+    sincos(dLon/2, sindLonDiv2, cosdLonDiv2);
+
+    double aa = sin(dLat/2)*sin(dLat/2)+cosdLonDiv2*cosdLonDiv2*sindLonDiv2*sindLonDiv2;
+
+    double c = 2*atan2(sqrt(aa),sqrt(1-aa));
+
+    return r*c;
+  }
+
+  /**
     Calculating Vincenty's inverse for getting the ellipsoidal distance
     of two points on earth.
     */

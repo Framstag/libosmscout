@@ -804,6 +804,15 @@ namespace osmscout {
    */
   extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
                                                   double bLon, double bLat);
+
+  /**
+   * \ingroup Geometry
+   * Calculates the spherical distance between the two given points
+   * on the sphere.
+   */
+  extern OSMSCOUT_API double GetSphericalDistance(const GeoCoord& a,
+                                                  const GeoCoord& b);
+
   /**
    * \ingroup Geometry
    * Calculates the ellipsoidal (WGS-84) distance between the two given points
