@@ -23,6 +23,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/DebugDatabase.h>
 
+#include <osmscout/RouteNode.h>
 #include <osmscout/TypeFeatures.h>
 
 #include <list>
@@ -64,10 +65,11 @@ static bool ParseArguments(int argc,
                            char* argv[],
                            std::string& map,
                            std::set<osmscout::OSMId>& coordIds,
+                           std::set<osmscout::OSMId>& routeNodeIds,
                            std::list<Job>& jobs)
 {
   if (argc<2) {
-    std::cerr << "DumpData <map directory> {-c <OSMId>|-n <OSMId>|-no <FileOffset>|-w <OSMId>|-wo <FileOffset>|-r <OSMId>|-ro <FileOffset>}" << std::endl;
+    std::cerr << "DumpData <map directory> {-c <OSMId>|-n <OSMId>|-no <FileOffset>|-w <OSMId>|-wo <FileOffset>|-r <OSMId>|-ao <FileOffset>|-rn <OSMId>}" << std::endl;
     return false;
   }
 
@@ -155,6 +157,24 @@ static bool ParseArguments(int argc,
 
       arg++;
     }
+    else if (strcmp(argv[arg],"-rn")==0) {
+      unsigned long id;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -rn requires parameter!" << std::endl;
+        return false;
+      }
+
+      if (sscanf(argv[arg],"%lu",&id)!=1) {
+        std::cerr << "Route node id is not numeric!" << std::endl;
+        return false;
+      }
+
+      routeNodeIds.insert(id);
+
+      arg++;
+    }
 
     //
     // libosmscout types (nodes, ways, areas)
@@ -201,12 +221,12 @@ static bool ParseArguments(int argc,
 
       arg++;
       if (arg>=argc) {
-        std::cerr << "Option -ro requires parameter!" << std::endl;
+        std::cerr << "Option -ao requires parameter!" << std::endl;
         return false;
       }
 
       if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Relation file offset is not numeric!" << std::endl;
+        std::cerr << "Area file offset is not numeric!" << std::endl;
         return false;
       }
 
@@ -267,6 +287,37 @@ static void DumpCoord(const osmscout::Coord& coord)
 
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);
+
+  std::cout << "}" << std::endl;
+}
+
+static void DumpRouteNode(const osmscout::RouteNode& routeNode)
+{
+  std::cout << "RouteNode {" << std::endl;
+  std::cout << "  OSMScoutId: " << routeNode.GetId() << std::endl;
+
+  std::streamsize         oldPrecision=std::cout.precision(5);
+  std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
+
+  std::cout << "  lat: " << routeNode.coord.GetLat() << std::endl;
+  std::cout << "  lon: " << routeNode.coord.GetLon() << std::endl;
+
+  std::cout.setf(oldFlags,std::ios::floatfield);
+  std::cout.precision(oldPrecision);
+
+  bool firstPath=true;
+  for (auto path : routeNode.paths) {
+
+    if (!firstPath) {
+      std::cout << std::endl;
+    }
+
+    std::cout << "  path {" << std::endl;
+    std::cout << "     object: " << routeNode.objects[path.objectIndex].object.GetName() << std::endl;
+    std::cout << "  }" << std::endl;
+
+    firstPath=false;
+  }
 
   std::cout << "}" << std::endl;
 }
@@ -480,7 +531,7 @@ static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
                      osmscout::Id id)
 {
   std::cout << "Node {" << std::endl;
-  std::cout << "  id: " << id << std::endl;
+  std::cout << "  OSM id: " << id << std::endl;
   std::cout << "  fileOffset: " << node->GetFileOffset() << std::endl;
   std::cout << "  type: " << node->GetType()->GetName() << std::endl;
 
@@ -509,7 +560,7 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
 
   std::cout << "Way {" << std::endl;
 
-  std::cout << "  id: " << id << std::endl;
+  std::cout << "  OSM id: " << id << std::endl;
   std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
   std::cout << "  type: " << way->GetType()->GetName() << std::endl;
   std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
@@ -529,6 +580,7 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
 
       if (way->GetSerial(n)!=0) {
         std::cout << " serial: " << way->GetSerial(n);
+        std::cout << " id: " << way->GetId(n);
       }
 
       std::cout << " lat: " << way->GetCoord(n).GetLat() << " lon: "<< way->GetCoord(n).GetLon() << " }" << std::endl;
@@ -549,7 +601,7 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
 
   std::cout << "Area {" << std::endl;
 
-  std::cout << "  id: " << id << std::endl;
+  std::cout << "  OSM id: " << id << std::endl;
   std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
   std::cout << "  type: " << area->GetType()->GetName() << std::endl;
   std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
@@ -619,6 +671,8 @@ int main(int argc, char* argv[])
   std::string                    map;
   std::list<Job>                 jobs;
   std::set<osmscout::OSMId>      coordIds;
+  std::set<osmscout::OSMId>      routeNodeCoordIds;
+  std::set<osmscout::Id>         routeNodeIds;
 
   try {
     std::locale globalLocale("");
@@ -631,6 +685,7 @@ int main(int argc, char* argv[])
                       argv,
                       map,
                       coordIds,
+                      routeNodeCoordIds,
                       jobs)) {
     return 1;
   }
@@ -640,6 +695,10 @@ int main(int argc, char* argv[])
   osmscout::DebugDatabaseParameter debugDatabaseParameter;
   osmscout::DebugDatabase          debugDatabase(debugDatabaseParameter);
 
+  osmscout::IndexedDataFile<osmscout::Id,osmscout::RouteNode> routeNodeDataFile("router.dat",
+                                                                                "router.idx",
+                                                                                6000);
+
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
   }
@@ -648,30 +707,35 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open debug database" << std::endl;
   }
 
+  if (!routeNodeDataFile.Open(database.GetTypeConfig(),
+                              map,
+                              osmscout::FileScanner::FastRandom,true,
+                              osmscout::FileScanner::FastRandom,true)) {
+    std::cerr << "Cannot open routing database" << std::endl;
+  }
+
   // OSM ids
   std::set<osmscout::ObjectOSMRef>  osmRefs;
   std::set<osmscout::ObjectFileRef> fileRefs;
 
-  for (std::list<Job>::const_iterator job=jobs.begin();
-       job!=jobs.end();
-       ++job) {
-    switch (job->osmRef.GetType()) {
+  for (const auto& job : jobs) {
+    switch (job.osmRef.GetType()) {
     case osmscout::osmRefNone:
       break;
     case osmscout::osmRefNode:
     case osmscout::osmRefWay:
     case osmscout::osmRefRelation:
-      osmRefs.insert(job->osmRef);
+      osmRefs.insert(job.osmRef);
       break;
     }
 
-    switch (job->fileRef.GetType()) {
+    switch (job.fileRef.GetType()) {
     case osmscout::refNone:
       break;
     case osmscout::refNode:
     case osmscout::refArea:
     case osmscout::refWay:
-      fileRefs.insert(job->fileRef);
+      fileRefs.insert(job.fileRef);
       break;
     }
   }
@@ -694,11 +758,22 @@ int main(int argc, char* argv[])
   std::vector<osmscout::AreaRef>     areas;
   std::vector<osmscout::WayRef>      ways;
 
+  osmscout::CoordDataFile::ResultMap                      routeCoordsMap;
+  std::unordered_map<osmscout::Id,osmscout::RouteNodeRef> routeNodeMap;
+
   if (!coordIds.empty()) {
 
     if (!debugDatabase.GetCoords(coordIds,
                                  coordsMap)) {
       std::cerr << "Error whole loading coords by id" << std::endl;
+    }
+  }
+
+  if (!routeNodeCoordIds.empty()) {
+
+    if (!debugDatabase.GetCoords(routeNodeCoordIds,
+                                 routeCoordsMap)) {
+      std::cerr << "Error whole loading route node coords by id" << std::endl;
     }
   }
 
@@ -739,7 +814,7 @@ int main(int argc, char* argv[])
   if (!fileOffsetIdMap.empty()) {
     std::list<osmscout::FileOffset> offsets;
 
-    for (std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef>::const_iterator entry=fileOffsetIdMap.begin();
+    for (auto entry=fileOffsetIdMap.begin();
          entry!=fileOffsetIdMap.end();
          ++entry) {
       if (entry->first.GetType()==osmscout::refWay) {
@@ -753,23 +828,59 @@ int main(int argc, char* argv[])
     }
   }
 
-  for (std::set<osmscout::OSMId>::const_iterator id=coordIds.begin();
-       id!=coordIds.end();
-       ++id) {
-    osmscout::CoordDataFile::ResultMap::const_iterator coordsEntry;
+  for (const auto id : routeNodeCoordIds) {
+    auto coordsEntry=routeCoordsMap.find(id);
 
-    coordsEntry=coordsMap.find(*id);
+    if (coordsEntry!=routeCoordsMap.end()) {
+      routeNodeIds.insert(coordsEntry->second->GetOSMScoutId());
+    }
+    else {
+      std::cerr << "Cannot find route node coord with id " << id << std::endl;
+    }
+  }
+
+  if (!routeNodeIds.empty() &&
+      routeNodeDataFile.IsOpen()) {
+    if (!routeNodeDataFile.Get(routeNodeIds,
+                               routeNodeMap)) {
+      std::cerr << "Error loading route nodes by id" << std::endl;
+    }
+  }
+
+  bool firstCoord=true;
+  for (const auto id : coordIds) {
+    auto coordsEntry=coordsMap.find(id);
 
     if (coordsEntry!=coordsMap.end()) {
-      if (id!=coordIds.begin()) {
+      if (!firstCoord) {
         std::cout << std::endl;
       }
 
       DumpCoord(*coordsEntry->second);
     }
     else {
-      std::cerr << "Cannot find coord with id " << *id << std::endl;
+      std::cerr << "Cannot find coord with id " << id << std::endl;
     }
+
+    firstCoord=false;
+  }
+
+  bool firstRouteNode=true;
+  for (const auto id : routeNodeIds) {
+    auto routeNodeEntry=routeNodeMap.find(id);
+
+    if (routeNodeEntry!=routeNodeMap.end()) {
+      if (!firstRouteNode) {
+        std::cout << std::endl;
+      }
+
+      DumpRouteNode(*routeNodeEntry->second);
+    }
+    else {
+      std::cerr << "Cannot find route node with id " << id << std::endl;
+    }
+
+    firstRouteNode=false;
   }
 
   std::streamsize         oldPrecision=std::cout.precision(5);
