@@ -196,6 +196,7 @@ namespace osmscout {
 
       number|=static_cast<N>(val) << shift;
     }
+
     return bytes;
   }
 
@@ -227,6 +228,7 @@ namespace osmscout {
       shift+=7;
     }
 
+    // Only for the compiler...
     return bytes;
   }
 
