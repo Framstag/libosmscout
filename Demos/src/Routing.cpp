@@ -38,19 +38,22 @@
   Examples for the nordrhein-westfalen.osm:
 
   Long: "In den Hüchten" Dortmund => Promenadenweg Bonn
-    51.5717798, 7.4587852  50.6890143 7.1360549
+    51.5717798 7.4587852  50.6890143 7.1360549
 
   Medium: "In den Hüchten" Dortmund => "Zur Taubeneiche" Arnsberg
-     51.5717798, 7.4587852  51.3846946 8.0771719
+     51.5717798 7.4587852  51.3846946 8.0771719
 
   Short: "In den Hüchten" Dortmund => "An der Dorndelle" Bergkamen
-     51.5717798, 7.4587852  51.6217831 7.6026704
+     51.5717798 7.4587852  51.6217831 7.6026704
 
   Roundabout: "Am Hohen Kamp" Bergkamen => Opferweg Bergkamen
-     51.6163438, 7.5952355  51.6237998 7.6419474
+     51.6163438 7.5952355  51.6237998 7.6419474
 
   Oneway Routing: Viktoriastraße Dortmund => Schwanenwall Dortmund
-     51.5130296, 7.4681888  51.5146904 7.4725241
+     51.5130296 7.4681888  51.5146904 7.4725241
+
+  Very short: "In den Hüchten" Dortmund => "Kaiserstrasse" Dortmund
+     51.5717798 7.4587852  51.5143553 7.4932118
 */
 
 static std::string TimeToString(double time)
