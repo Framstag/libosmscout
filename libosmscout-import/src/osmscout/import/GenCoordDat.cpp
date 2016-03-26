@@ -31,9 +31,12 @@
 
 namespace osmscout {
 
-  static inline bool SortCoordsByCoordId(const RawCoord& a, const RawCoord& b)
+  static uint32_t coordPageSize=5000000;
+  static uint32_t coordBlockSize=60000000;
+
+  static inline bool SortCoordsByCoordId(const Id& a, const Id& b)
   {
-    return a.GetCoord().GetId()<b.GetCoord().GetId();
+    return a<b;
   }
 
   static inline bool SortCoordsByOSMId(const RawCoord& a, const RawCoord& b)
@@ -53,8 +56,6 @@ namespace osmscout {
   {
     progress.SetAction("Searching for duplicate coordinates");
 
-    uint32_t    coordPageSize=100000;
-    uint32_t    coordBlockSize=30000000;
     Id          maxId=GeoCoord(90.0,180.0).GetId();
     Id          currentLowerLimit=0;
     Id          currentUpperLimit=maxId/coordPageSize;
@@ -74,8 +75,8 @@ namespace osmscout {
       scanner.Read(coordCount);
 
       while (loadedCoordCount<coordCount) {
-        std::map<Id,std::list<RawCoord>> coordPages;
-        uint32_t                         currentCoordCount=0;
+        std::map<Id,std::vector<Id>> coordPages;
+        uint32_t                     currentCoordCount=0;
 
         progress.Info("Searching for coordinates with page id >= "+NumberToString(currentLowerLimit));
 
@@ -83,10 +84,10 @@ namespace osmscout {
 
         scanner.Read(coordCount);
 
+        RawCoord coord;
+
         for (uint32_t i=1; i<=coordCount; i++) {
           progress.SetProgress(i,coordCount);
-
-          RawCoord coord;
 
           coord.Read(typeConfig,scanner);
 
@@ -97,7 +98,7 @@ namespace osmscout {
             continue;
           }
 
-          coordPages[pageId].push_back(coord);
+          coordPages[pageId].push_back(id);
           currentCoordCount++;
           loadedCoordCount++;
 
@@ -126,15 +127,18 @@ namespace osmscout {
 
         progress.Info("Sorting coordinates");
 
+        // TODO: Sort in parallel, no side effect!
         for (auto& entry : coordPages) {
-          entry.second.sort(SortCoordsByCoordId);
+          std::sort(entry.second.begin(),
+                    entry.second.end(),
+                    SortCoordsByCoordId);
+        }
 
+        for (auto& entry : coordPages) {
           Id lastId=std::numeric_limits<Id>::max();
 
           bool flaged=false;
-          for (auto& coord : entry.second) {
-            Id id=coord.GetCoord().GetId();
-
+          for (auto& id : entry.second) {
             if (id==lastId) {
               if (!flaged) {
                 duplicates[id]=1;
@@ -177,8 +181,6 @@ namespace osmscout {
   {
     progress.SetAction("Storing coordinates");
 
-    uint32_t    coordPageSize=100000;
-    uint32_t    coordBlockSize=30000000;
     OSMId       maxId=std::numeric_limits<OSMId>::max();
     OSMId       currentLowerLimit=std::numeric_limits<OSMId>::min()/coordPageSize;
     OSMId       currentUpperLimit=maxId/coordPageSize;
@@ -204,8 +206,8 @@ namespace osmscout {
       scanner.Read(coordCount);
 
       while (loadedCoordCount<coordCount) {
-        std::map<Id,std::list<RawCoord>> coordPages;
-        uint32_t                         currentCoordCount=0;
+        std::map<Id,std::vector<RawCoord>> coordPages;
+        uint32_t                           currentCoordCount=0;
 
         progress.Info("Search for coordinates with page id >= "+NumberToString(currentLowerLimit));
 
@@ -213,10 +215,10 @@ namespace osmscout {
 
         scanner.Read(coordCount);
 
+        RawCoord coord;
+
         for (uint32_t i=1; i<=coordCount; i++) {
           progress.SetProgress(i,coordCount);
-
-          RawCoord coord;
 
           coord.Read(typeConfig,scanner);
 
@@ -256,9 +258,14 @@ namespace osmscout {
 
         progress.Info("Sorting coordinates");
 
+        // TODO: Sort in parallel, no side effect!
         for (auto& entry : coordPages) {
-          entry.second.sort(SortCoordsByOSMId);
+          std::sort(entry.second.begin(),
+                    entry.second.end(),
+                    SortCoordsByOSMId);
+        }
 
+        for (auto& entry : coordPages) {
           for (auto& osmCoord : entry.second) {
             uint8_t serial=1;
             auto    duplicateEntry=duplicates.find(osmCoord.GetCoord().GetId());
