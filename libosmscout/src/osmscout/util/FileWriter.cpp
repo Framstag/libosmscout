@@ -1167,7 +1167,7 @@ namespace osmscout {
       bool hasNodes=false;
 
       for (const auto& node : nodes) {
-        if (node.GetSerial()!=0) {
+        if (node.IsRelevant()) {
           hasNodes=true;
           break;
         }
@@ -1184,7 +1184,7 @@ namespace osmscout {
           size_t idEnd=std::min(idCurrent+8,nodes.size());
 
           for (size_t i=idCurrent; i<idEnd; i++) {
-            if (nodes[i].GetSerial()!=0) {
+            if (nodes[i].IsRelevant()) {
               bitset=bitset | bitMask;
             }
 
@@ -1194,7 +1194,7 @@ namespace osmscout {
           Write(bitset);
 
           for (size_t i=idCurrent; i<idEnd; i++) {
-            if (nodes[i].GetSerial()!=0) {
+            if (nodes[i].IsRelevant()) {
               Write(nodes[i].GetSerial());
             }
 
