@@ -136,12 +136,11 @@ namespace osmscout {
 
       writer.FlushCurrentBlockWithZeros(pageSize);
 
-      N          lastId=0;
-      FileOffset lastPos=0;
-
       progress.Info(std::string("Writing level ")+NumberToString(1)+" ("+NumberToString(dataCount)+" entries)");
 
-      uint32_t currentPageSize=0;
+      N          lastId=0;
+      FileOffset lastPos=0;
+      uint32_t   currentPageSize=0;
 
       for (uint32_t d=0; d<dataCount; d++) {
         progress.SetProgress(d,dataCount);
@@ -154,6 +153,14 @@ namespace osmscout {
         ReadData(*typeConfig,
                  scanner,
                  data);
+
+        if (d>0) {
+          if (data.GetId()<=lastId) {
+            progress.Error("Current id "+NumberToString(data.GetId())+" <= last id "+NumberToString(lastId));
+          }
+          assert(data.GetId()>lastId);
+          assert(readPos>lastPos);
+        }
 
         if (currentPageSize>0) {
           char         b1[10];
@@ -185,9 +192,7 @@ namespace osmscout {
         }
 
         if (currentPageSize==0) {
-          FileOffset writePos;
-
-          writePos=writer.GetPos();
+          FileOffset writePos=writer.GetPos();
 
           startingIds.push_back(data.GetId());
           pageStarts.push_back(writePos);
@@ -218,7 +223,6 @@ namespace osmscout {
         size_t currentPageSize=0;
 
         for (size_t i=0; i<si.size(); i++) {
-
           if (currentPageSize>0) {
             char         b1[10];
             char         b2[10];
