@@ -163,8 +163,8 @@ namespace osmscout {
 
     if (!routeNodeDataFile.Open(database->GetTypeConfig(),
                                 path,
-                                FileScanner::FastRandom,true,
-                                FileScanner::FastRandom,true)) {
+                                true,
+                                true)) {
       log.Error() << "Cannot open '" <<  path << "'!";
       return false;
     }
@@ -723,9 +723,7 @@ namespace osmscout {
 
       if (!junctionDataFile.Open(database->GetTypeConfig(),
                                  path,
-                                 FileScanner::FastRandom,
                                  false,
-                                 FileScanner::FastRandom,
                                  false)) {
         return false;
       }

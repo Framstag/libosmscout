@@ -82,8 +82,6 @@ namespace osmscout {
     std::string                         filename;             //!< Complete file name including directory
 
     mutable FileScanner                  scanner;             //!< FileScanner instance for file access
-    bool                                 memoryMaped;         //!< File access is memory maped
-    FileScanner::Mode                    mode;                //!< File access mode
 
     unsigned long                        cacheSize;           //!< Maximum umber of index pages cached
     uint32_t                             pageSize;            //!< Size of one page as stated by the actual index file
@@ -109,7 +107,6 @@ namespace osmscout {
     virtual ~NumericIndex();
 
     bool Open(const std::string& path,
-              FileScanner::Mode mode,
               bool memoryMaped);
     bool Close();
 
@@ -127,8 +124,6 @@ namespace osmscout {
   NumericIndex<N>::NumericIndex(const std::string& filename,
                                 unsigned long cacheSize)
    : filepart(filename),
-     memoryMaped(false),
-     mode(FileScanner::Normal),
      cacheSize(cacheSize),
      pageSize(0),
      levels(0),
@@ -274,7 +269,6 @@ namespace osmscout {
 
   template <class N>
   bool NumericIndex<N>::Open(const std::string& path,
-                             FileScanner::Mode mode,
                              bool memoryMaped)
   {
     uint32_t    entries;
@@ -282,11 +276,11 @@ namespace osmscout {
     FileOffset  indexPageCountsOffset;
 
     filename=AppendFileToDir(path,filepart);
-    this->memoryMaped=memoryMaped;
-    this->mode=mode;
 
     try {
-       scanner.Open(filename,mode,memoryMaped);
+       scanner.Open(filename,
+                    FileScanner::FastRandom,
+                    memoryMaped);
 
       scanner.ReadNumber(pageSize);                  // Size of one index page
       scanner.ReadNumber(entries);                   // Number of entries in data file

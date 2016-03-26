@@ -203,7 +203,6 @@ namespace osmscout {
 
       if (!nodeDataFile->Open(typeConfig,
                               path,
-                              FileScanner::LowMemRandom,
                               true)) {
         log.Error() << "Cannot open 'nodes.dat'!";
         return NULL;
@@ -234,7 +233,6 @@ namespace osmscout {
 
       if (!areaDataFile->Open(typeConfig,
                               path,
-                              FileScanner::LowMemRandom,
                               true)) {
         log.Error() << "Cannot open 'areas.dat'!";
         return NULL;
@@ -265,7 +263,6 @@ namespace osmscout {
 
       if (!wayDataFile->Open(typeConfig,
                              path,
-                             FileScanner::LowMemRandom,
                              true)) {
         log.Error() << "Cannot open 'ways.dat'!";
         return NULL;

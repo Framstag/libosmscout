@@ -8,7 +8,7 @@
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+  version 2.1 of the License, or (at youbase option) any later version.
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -76,8 +76,6 @@ namespace osmscout {
   private:
     std::string         datafile;        //!< Basename part of the data file name
     std::string         datafilename;    //!< complete filename for data file
-    FileScanner::Mode   modeData;        //!< Type of file access
-    bool                memoryMapedData; //!< Use memory mapped files for data access
 
     mutable FileScanner scanner;         //!< File stream to the data file
 
@@ -102,7 +100,6 @@ namespace osmscout {
 
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path,
-              FileScanner::Mode modeData,
               bool memoryMapedData);
     virtual bool IsOpen() const;
     virtual bool Close();
@@ -128,9 +125,7 @@ namespace osmscout {
 
   template <class N>
   DataFile<N>::DataFile(const std::string& datafile)
-  : datafile(datafile),
-    modeData(FileScanner::LowMemRandom),
-    memoryMapedData(false)
+  : datafile(datafile)
   {
     // no code
   }
@@ -200,18 +195,16 @@ namespace osmscout {
   template <class N>
   bool DataFile<N>::Open(const TypeConfigRef& typeConfig,
                          const std::string& path,
-                         FileScanner::Mode modeData,
                          bool memoryMapedData)
   {
     this->typeConfig=typeConfig;
 
     datafilename=AppendFileToDir(path,datafile);
 
-    this->memoryMapedData=memoryMapedData;
-    this->modeData=modeData;
-
     try {
-      scanner.Open(datafilename,modeData,memoryMapedData);
+      scanner.Open(datafilename,
+                   FileScanner::LowMemRandom,
+                   memoryMapedData);
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
@@ -508,9 +501,7 @@ namespace osmscout {
 
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path,
-              FileScanner::Mode modeIndex,
               bool memoryMapedIndex,
-              FileScanner::Mode modeData,
               bool memoryMapedData);
     bool Close();
 
@@ -549,20 +540,16 @@ namespace osmscout {
   template <class I, class N>
   bool IndexedDataFile<I,N>::Open(const TypeConfigRef& typeConfig,
                                   const std::string& path,
-                                  FileScanner::Mode modeIndex,
                                   bool memoryMapedIndex,
-                                  FileScanner::Mode modeData,
                                   bool memoryMapedData)
   {
     if (!DataFile<N>::Open(typeConfig,
                            path,
-                           modeData,
                            memoryMapedData)) {
       return false;
     }
 
     return index.Open(path,
-                      modeIndex,
                       memoryMapedIndex);
   }
 

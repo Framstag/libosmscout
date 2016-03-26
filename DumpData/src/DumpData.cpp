@@ -709,8 +709,8 @@ int main(int argc, char* argv[])
 
   if (!routeNodeDataFile.Open(database.GetTypeConfig(),
                               map,
-                              osmscout::FileScanner::FastRandom,true,
-                              osmscout::FileScanner::FastRandom,true)) {
+                              true,
+                              true)) {
     std::cerr << "Cannot open routing database" << std::endl;
   }
 

@@ -1026,9 +1026,7 @@ namespace osmscout {
 
     if (!coordDataFile.Open(typeConfig,
                             parameter.GetDestinationDirectory(),
-                            FileScanner::FastRandom,
                             true,
-                            FileScanner::FastRandom,
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data files!" << std::endl;
       return false;
@@ -1036,9 +1034,7 @@ namespace osmscout {
 
     if (!wayDataFile.Open(typeConfig,
                           parameter.GetDestinationDirectory(),
-                          FileScanner::FastRandom,
                           parameter.GetRawWayIndexMemoryMaped(),
-                          FileScanner::FastRandom,
                           parameter.GetRawWayDataMemoryMaped())) {
       std::cerr << "Cannot open raw way data files!" << std::endl;
       return false;
@@ -1046,9 +1042,7 @@ namespace osmscout {
 
     if (!relDataFile.Open(typeConfig,
                           parameter.GetDestinationDirectory(),
-                          FileScanner::FastRandom,
                           true,
-                          FileScanner::FastRandom,
                           true)) {
       std::cerr << "Cannot open raw relation data files!" << std::endl;
       return false;

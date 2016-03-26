@@ -158,9 +158,7 @@ namespace osmscout {
 
       if (!coordDataFile.Open(typeConfig,
                               parameter.GetDestinationDirectory(),
-                              FileScanner::FastRandom,
                               true,
-                              FileScanner::FastRandom,
                               parameter.GetCoordDataMemoryMaped())) {
         progress.Error("Cannot open coord file!");
         return false;

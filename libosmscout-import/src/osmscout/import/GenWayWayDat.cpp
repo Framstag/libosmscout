@@ -632,9 +632,7 @@ namespace osmscout {
 
     if (!coordDataFile.Open(typeConfig,
                             parameter.GetDestinationDirectory(),
-                            FileScanner::FastRandom,
                             true,
-                            FileScanner::FastRandom,
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data file!" << std::endl;
       return false;

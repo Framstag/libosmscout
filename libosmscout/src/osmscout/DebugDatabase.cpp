@@ -90,9 +90,7 @@ namespace osmscout {
 
     if (!dataFile.Open(typeConfig,
                        path,
-                       FileScanner::FastRandom,
                        true,
-                       FileScanner::FastRandom,
                        true)) {
       return false;
     }
