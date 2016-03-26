@@ -4,7 +4,7 @@
 
 int errors=0;
 
-bool CheckEncode(unsigned long value,
+bool CheckEncode(uint64_t value,
                  const char* expected, size_t expectedLength)
 {
   const size_t bufferLength=5;
@@ -21,6 +21,12 @@ bool CheckEncode(unsigned long value,
     for (size_t i=0; i<bytes; i++) {
       if (expected[i]!=buffer[i]) {
         std::cerr << "Encoding of '" << value << "' returned wrong data at offset " << i << " - expected " << std::hex << (unsigned short int)expected[i] << " actual " << std::hex << (unsigned short int)buffer[i] << std::endl;
+
+        for (size_t i=0; i<bytes; i++) {
+          std::cerr << std::hex << (unsigned int)buffer[i] << " ";
+        }
+        std::cerr << std::endl;
+
         return false;
       }
     }
@@ -29,9 +35,9 @@ bool CheckEncode(unsigned long value,
   return true;
 }
 
-bool CheckDecode(const char* buffer, unsigned long expected, size_t bytesExpected)
+bool CheckDecode(const char* buffer, uint64_t expected, size_t bytesExpected)
 {
-  uint32_t value;
+  uint64_t value;
   size_t   bytes;
 
   bytes=osmscout::DecodeNumber(buffer,value);
@@ -112,6 +118,22 @@ int main()
   }
 
   if (!CheckDecode("\xff\xff\x03",65535,3)) {
+    errors++;
+  }
+
+  if (!CheckEncode(3622479373539965697,"\x81\xf6\x9d\xd0\xc2\xb9\xe8\xa2\x32",9)) {
+    errors++;
+  }
+
+  if (!CheckDecode("\x81\xf6\x9d\xd0\xc2\xb9\xe8\xa2\x32", 3622479373539965697,9)) {
+    errors++;
+  }
+
+  if (!CheckEncode(3627142814677078785,"\x81\xa6\xc0\xd3\xc2\xe5\x8c\xab\x32",9)) {
+    errors++;
+  }
+
+  if (!CheckDecode("\x81\xa6\xc0\xd3\xc2\xe5\x8c\xab\x32",3627142814677078785,9)) {
     errors++;
   }
 
