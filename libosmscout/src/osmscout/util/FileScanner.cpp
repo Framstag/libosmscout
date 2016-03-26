@@ -1875,9 +1875,9 @@ namespace osmscout {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=(buffer[offset] & 127) << shift;
+        number|=static_cast<uint16_t>(buffer[offset] & 0x7f) << shift;
 
-        if ((buffer[offset] & 128)==0) {
+        if ((buffer[offset] & 0x80)==0) {
           offset++;
           return;
         }
@@ -1900,9 +1900,9 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number|=static_cast<uint16_t>(buffer & '\x7f') << shift;
+      number|=static_cast<uint16_t>(buffer & 0x7f) << shift;
 
-      if ((buffer & '\x80')==0) {
+      if ((buffer & 0x80)==0) {
         return;
       }
 
@@ -1928,9 +1928,9 @@ namespace osmscout {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=(buffer[offset] & 127) << shift;
+        number|=static_cast<uint32_t>(buffer[offset] & 0x7f) << shift;
 
-        if ((buffer[offset] & 128)==0) {
+        if ((buffer[offset] & 0x80)==0) {
           offset++;
           return;
         }
@@ -1953,9 +1953,9 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number|=static_cast<uint32_t>(buffer & '\x7f') << shift;
+      number|=static_cast<uint32_t>(buffer & 0x7f) << shift;
 
-      if ((buffer & '\x80')==0) {
+      if ((buffer & 0x80)==0) {
         return;
       }
 
@@ -1981,9 +1981,9 @@ namespace osmscout {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=(buffer[offset] & 127) << shift;
+        number|=static_cast<uint64_t>(buffer[offset] & 0x7f) << shift;
 
-        if ((buffer[offset] & 128)==0) {
+        if ((buffer[offset] & 0x80)==0) {
           offset++;
           return;
         }
@@ -2006,9 +2006,9 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number|=static_cast<uint64_t>(buffer & '\x7f') << shift;
+      number|=static_cast<uint64_t>(buffer & 0x7f) << shift;
 
-      if ((buffer & '\x80')==0) {
+      if ((buffer & 0x80)==0) {
         return;
       }
 
