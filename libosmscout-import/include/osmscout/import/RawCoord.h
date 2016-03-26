@@ -28,36 +28,55 @@
 
 namespace osmscout {
 
+  /**
+   * Represation of a type-less OSM node, just representing a geographic
+   * coordinate.
+   */
   class RawCoord
   {
   private:
-    OSMId    id;
-    GeoCoord coord;
+    OSMId    id;    //<! OSM id of the corresponding node
+    GeoCoord coord; //<! The actual coordinate
 
   public:
     RawCoord();
     virtual ~RawCoord();
 
+    /**
+     * Return the OSM node id
+     */
     inline OSMId GetOSMId() const
     {
       return id;
     }
 
+    /**
+     * Retutrn the geographic coordinate
+     */
     inline const GeoCoord& GetCoord() const
     {
       return coord;
     }
 
+    /**
+     * Return true, if both nodes have the same OSM id
+     */
     inline bool IsIdentical(const RawCoord& other) const
     {
       return id==other.id;
     }
 
+    /**
+     * Return true, if both nodes have the same geographic coordinate
+     */
     inline bool IsSame(const RawCoord& other) const
     {
       return coord==other.coord;
     }
 
+    /**
+     * return if the nodes are either identicial or the same
+     */
     inline bool IsEqual(const RawCoord& other) const
     {
       return id==other.id || coord==other.coord;
