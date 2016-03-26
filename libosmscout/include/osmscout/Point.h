@@ -72,9 +72,14 @@ namespace osmscout {
       this->coord=coords;
     }
 
-    uint8_t GetSerial() const
+    inline uint8_t GetSerial() const
     {
       return serial;
+    }
+
+    inline bool IsRelevant() const
+    {
+      return serial!=0;
     }
 
     /**
