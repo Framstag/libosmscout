@@ -55,10 +55,10 @@ namespace osmscout {
         Forbit = 1
       };
 
-      FileOffset fromWayOffset;
-      Id         viaNodeId;
-      FileOffset toWayOffset;
-      Type       type;
+      FileOffset fromWayOffset; //!< FileOffset of the from way
+      Id         viaNodeId;     //!< Libosmscout specific Id for the via node, from and to way should have a node with this id
+      FileOffset toWayOffset;   //!< FileOffset of the from way
+      Type       type;          //!< Type of restriction
     };
 
     struct PendingOffset

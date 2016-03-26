@@ -366,7 +366,7 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(resolveCount)+" id(s) resolved");
+      progress.Info(NumberToString(wayIdOffsetMap.size())+" turn restriction way(s) found, "+NumberToString(resolveCount)+" way(s) resolved");
 
       scanner.Close();
     }
@@ -425,7 +425,7 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info(NumberToString(resolveCount)+" id(s) resolved");
+    progress.Info(NumberToString(nodeIds.size())+" via node(s) found, "+NumberToString(resolveCount)+" node(s) resolved");
 
     return true;
   }
@@ -642,7 +642,7 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (const auto& node : way.nodes) {
-          if (node.GetSerial()==0) {
+          if (!node.IsRelevant()) {
             continue;
           }
 
@@ -650,7 +650,6 @@ namespace osmscout {
 
           if (nodeIds.find(id)==nodeIds.end()) {
             nodeUseMap.SetNodeUsed(id);
-
             nodeIds.insert(id);
           }
         }
@@ -663,7 +662,7 @@ namespace osmscout {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
-                   parameter.GetWayDataMemoryMaped());
+                   parameter.GetAreaDataMemoryMaped());
 
       scanner.Read(dataCount);
 
@@ -683,7 +682,7 @@ namespace osmscout {
           continue;
         }
 
-        // We currently route only on simple areas, multipolygon relations
+        // We currently route only on simple areas, multipolygon relations we skip
         if (!area.IsSimple()) {
           continue;
         }
@@ -691,7 +690,7 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (const auto& node : area.rings.front().nodes) {
-          if (node.GetSerial()==0) {
+          if (!node.IsRelevant()) {
             continue;
           }
 
@@ -706,6 +705,9 @@ namespace osmscout {
       }
 
       scanner.Close();
+
+      progress.Info("Found "+NumberToString(nodeUseMap.GetNodeUsedCount())+" possible routing nodes, "+
+                    NumberToString(nodeUseMap.GetDuplicateCount())+" at least used twice");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -723,6 +725,8 @@ namespace osmscout {
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
+    uint32_t    junctionWayCount=0;
+    uint32_t    junctionAreaCount=0;
 
     progress.Info("Scanning ways");
 
@@ -756,7 +760,7 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (auto& node : way.nodes) {
-          if (node.GetSerial()==0) {
+          if (!node.IsRelevant()) {
             continue;
           }
 
@@ -765,6 +769,7 @@ namespace osmscout {
           if (nodeIds.find(id)==nodeIds.end()) {
             if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
               nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refWay));
+              junctionWayCount++;
             }
 
             nodeIds.insert(id);
@@ -779,7 +784,7 @@ namespace osmscout {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
-                   parameter.GetWayDataMemoryMaped());
+                   parameter.GetAreaDataMemoryMaped());
 
       scanner.Read(dataCount);
 
@@ -810,7 +815,7 @@ namespace osmscout {
         std::set<Id> nodeIds;
 
         for (auto& node : area.rings.front().nodes) {
-          if (node.GetSerial()==0) {
+          if (!node.IsRelevant()) {
             continue;
           }
 
@@ -819,12 +824,16 @@ namespace osmscout {
           if (nodeIds.find(id)==nodeIds.end()) {
             if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
               nodeObjectsMap[id].push_back(ObjectFileRef(fileOffset,refArea));
+              junctionAreaCount++;
             }
 
             nodeIds.insert(id);
           }
         }
       }
+
+      progress.Info("Found "+NumberToString(nodeObjectsMap.size())+" routing nodes, with in sum "+
+                    NumberToString(junctionWayCount)+" ways and "+NumberToString(junctionAreaCount)+" areas");
 
       scanner.Close();
     }
@@ -1634,7 +1643,7 @@ namespace osmscout {
       areaScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        AreaDataFile::AREAS_DAT),
                        FileScanner::Sequential,
-                       parameter.GetWayDataMemoryMaped());
+                       parameter.GetAreaDataMemoryMaped());
 
       std::vector<NodeIdObjectsMap::const_iterator> block(parameter.GetRouteNodeBlockSize());
 
@@ -1955,8 +1964,6 @@ namespace osmscout {
 
     // We now have the nodeObjectsMap, we do not need this information anymore
     nodeUseMap.Clear();
-
-    progress.Info(NumberToString(nodeObjectsMap.size())+ " route nodes collected");
 
     progress.SetAction("Postprocessing intersections");
 
