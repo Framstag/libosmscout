@@ -153,6 +153,8 @@ namespace osmscout {
   {
     size_t size=page.entries.size();
 
+    //std::cout << "Lookup in page: " << page.entries[0].startId << " " << id << " " << page.entries[page.entries.size()-1].startId << std::endl;
+
     if (size>0) {
       size_t left=0;
       size_t right=size-1;
@@ -201,28 +203,33 @@ namespace osmscout {
     N          prevId=0;
     FileOffset prefFileOffset=0;
 
+    //std::cout << "Page: " << offset << std::endl;
+
     while (currentPos<pageSize &&
            buffer[currentPos]!=0) {
-      unsigned int bytes;
+      unsigned int idBytes;
+      unsigned int fileOffsetBytes;
       N            curId;
       FileOffset   curFileOffset;
       Entry        entry;
 
-      bytes=DecodeNumber(&buffer[currentPos],
-                         curId);
+      idBytes=DecodeNumber(&buffer[currentPos],
+                           curId);
 
-      currentPos+=bytes;
+      currentPos+=idBytes;
 
-      bytes=DecodeNumber(&buffer[currentPos],
-                         curFileOffset);
+      fileOffsetBytes=DecodeNumber(&buffer[currentPos],
+                                   curFileOffset);
 
-      currentPos+=bytes;
+      currentPos+=fileOffsetBytes;
 
-      prevId+=curId;
-      prefFileOffset+=curFileOffset;
+      entry.startId=prevId+curId;
+      entry.fileOffset=prefFileOffset+curFileOffset;
 
-      entry.startId=prevId;
-      entry.fileOffset=prefFileOffset;
+      //std::cout << "- " << entry.startId << " " << idBytes << " " << entry.fileOffset << " " << fileOffsetBytes << std::endl;
+
+      prevId=entry.startId;
+      prefFileOffset=entry.fileOffset;
 
       page->entries.push_back(entry);
     }
@@ -303,7 +310,7 @@ namespace osmscout {
       delete [] buffer;
       buffer=new char[pageSize];
 
-      //std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
+      //std::cout << "Index " << filename << ": " << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
 
       ReadPage(lastLevelPageStart,root);
 
@@ -353,6 +360,9 @@ namespace osmscout {
     try
     {
       std::lock_guard<std::mutex> lock(accessMutex);
+
+      //std::cout << "Looking up " << id << " in index...." << std::endl;
+
       size_t                      r=GetPageIndex(*root,id);
       PageRef                     pageRef;
 
@@ -363,10 +373,13 @@ namespace osmscout {
 
       const Entry& rootEntry=root->entries[r];
 
+      //std::cout << "Root entry index: " << r << " " << rootEntry.startId << " " << rootEntry.fileOffset << std::endl;
+
       offset=rootEntry.fileOffset;
 
       N startId=rootEntry.startId;
       for (size_t level=0; level+2<=levels; level++) {
+        //std::cout << "Level " << level << "/" << levels << std::endl;
         if (level<=simpleCacheMaxLevel) {
           auto cacheRef=simplePageCache[level].find(startId);
 
@@ -406,14 +419,15 @@ namespace osmscout {
 
         const Entry& entry=page.entries[i];
 
+        //std::cout << "Sub entry index: " << i << " " << entry.startId << " " << entry.fileOffset << std::endl;
+
         startId=entry.startId;
         offset=entry.fileOffset;
       }
 
-      /*
       if (startId!=id) {
-        std::cerr << "Id " << id << " not found in leaf index level!"  << " " << levels << std::endl;
-      }*/
+        //std::cerr << "Id " << id << " not found in leaf index level (" << levels << " levels)" << std::endl;
+      }
 
       return startId==id;
     }
