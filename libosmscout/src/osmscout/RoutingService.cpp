@@ -108,7 +108,7 @@ namespace osmscout {
   bool RoutingService::HasNodeWithId(const std::vector<Point>& nodes) const
   {
     for (const auto node : nodes) {
-      if (node.GetId()!=0) {
+      if (node.IsRelevant()) {
         return true;
       }
     }
@@ -268,6 +268,11 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Return the route node that allows navigating to the given node
+   * in forward direction. In result the returned routing node
+   * will have a smaller index then the given node index.
+   */
   void RoutingService::GetTargetForwardRouteNode(const RoutingProfile& profile,
                                                  const WayRef& way,
                                                  size_t nodeIndex,
@@ -293,6 +298,11 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Return the route node that allows navigating to the given node
+   * in backward direction. In result the returned routing node
+   * will have a bigger or equal index then the given node index.
+   */
   void RoutingService::GetTargetBackwardRouteNode(const RoutingProfile& profile,
                                                   const WayRef& way,
                                                   size_t nodeIndex,
@@ -1625,6 +1635,9 @@ namespace osmscout {
    * Returns the closed routeable object (area or way) relative
    * to the given coordinate.
    *
+   * @note The returned node may in fact not be routable, it is just
+   * the closest node to the given position on a routable way or area.
+   *
    * @note The actual object may not be within the given radius
    * due to internal search index resolution.
    *
@@ -1652,6 +1665,7 @@ namespace osmscout {
                                               size_t& nodeIndex) const
   {
     object.Invalidate();
+    nodeIndex=std::numeric_limits<size_t>::max();
 
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
