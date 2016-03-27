@@ -102,8 +102,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
 
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
 
-  std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
+  std::cout << " --rawCoordBlockSize <number>         number of raw coords resolved in block (default: " << parameter.GetRawCoordBlockSize() << ")" << std::endl;
 
   std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
 
@@ -114,6 +113,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
 
   std::cout << " --noSort                             do not sort objects" << std::endl;
   std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
+
+  std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
 
   std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
@@ -488,27 +490,14 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"--coordDataMemoryMaped")==0) {
-      bool coordDataMemoryMaped;
-
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            coordDataMemoryMaped)) {
-        parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
-      }
-      else {
-        parameterError=true;
-      }
-    }
-    else if (strcmp(argv[i],"--coordIndexCacheSize")==0) {
-      size_t coordIndexCacheSize;
+    else if (strcmp(argv[i],"--rawCoordBlockSize")==0) {
+      size_t rawCoordBlockSize;
 
       if (ParseSizeTArgument(argc,
                              argv,
                              i,
-                             coordIndexCacheSize)) {
-        parameter.SetCoordIndexCacheSize(coordIndexCacheSize);
+                             rawCoordBlockSize)) {
+        parameter.SetRawCoordBlockSize(rawCoordBlockSize);
       }
       else {
         parameterError=true;
@@ -592,6 +581,32 @@ int main(int argc, char* argv[])
                              i,
                              sortBlockSize)) {
         parameter.SetSortBlockSize(sortBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--coordDataMemoryMaped")==0) {
+      bool coordDataMemoryMaped;
+
+      if (ParseBoolArgument(argc,
+                            argv,
+                            i,
+                            coordDataMemoryMaped)) {
+        parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--coordIndexCacheSize")==0) {
+      size_t coordIndexCacheSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             coordIndexCacheSize)) {
+        parameter.SetCoordIndexCacheSize(coordIndexCacheSize);
       }
       else {
         parameterError=true;
@@ -739,10 +754,8 @@ int main(int argc, char* argv[])
   progress.Info(std::string("NumericIndexPageSize: ")+
                 osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
 
-  progress.Info(std::string("CoordDataMemoryMaped: ")+
-                (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("CoordIndexCacheSize: ")+
-                osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
+  progress.Info(std::string("RawCoordBlockSize: ")+
+                osmscout::NumberToString(parameter.GetRawCoordBlockSize()));
 
   progress.Info(std::string("RawNodeDataMemoryMaped: ")+
                 (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
@@ -761,6 +774,11 @@ int main(int argc, char* argv[])
                 (parameter.GetSortObjects() ? "true" : "false"));
   progress.Info(std::string("SortBlockSize: ")+
                 osmscout::NumberToString(parameter.GetSortBlockSize()));
+
+  progress.Info(std::string("CoordDataMemoryMaped: ")+
+                (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("CoordIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
 
   progress.Info(std::string("AreaDataMemoryMaped: ")+
                 (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));

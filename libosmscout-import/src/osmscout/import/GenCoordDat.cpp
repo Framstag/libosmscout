@@ -32,7 +32,6 @@
 namespace osmscout {
 
   static uint32_t coordPageSize=5000000;
-  static uint32_t coordBlockSize=60000000;
 
   static inline bool SortCoordsByCoordId(const Id& a, const Id& b)
   {
@@ -106,11 +105,11 @@ namespace osmscout {
             break;
           }
 
-          if (currentCoordCount>coordBlockSize
+          if (currentCoordCount>parameter.GetRawCoordBlockSize()
               && coordPages.size()>1) {
             Id oldUpperLimit=currentUpperLimit;
 
-            while (currentCoordCount>coordBlockSize
+            while (currentCoordCount>parameter.GetRawCoordBlockSize()
                    && coordPages.size()>1) {
               auto pageEntry=coordPages.rbegin();
               Id highestPageId=pageEntry->first;
@@ -237,11 +236,11 @@ namespace osmscout {
             break;
           }
 
-          if (currentCoordCount>coordBlockSize
+          if (currentCoordCount>parameter.GetRawCoordBlockSize()
               && coordPages.size()>1) {
             OSMId oldUpperLimit=currentUpperLimit;
 
-            while (currentCoordCount>coordBlockSize
+            while (currentCoordCount>parameter.GetRawCoordBlockSize()
                    && coordPages.size()>1) {
               auto pageEntry=coordPages.rbegin();
               OSMId highestPageId=pageEntry->first;

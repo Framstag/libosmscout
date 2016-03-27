@@ -102,8 +102,7 @@ namespace osmscout {
 
     size_t                       numericIndexPageSize;     //<! Size of an numeric index page in bytes
 
-    bool                         coordDataMemoryMaped;     //<! Use memory mapping for coord data file access
-    size_t                       coordIndexCacheSize;      //<! Size of the coord index cache
+    size_t                       rawCoordBlockSize;        //<! Number of raw coords loaded during import in one go
 
     bool                         rawNodeDataMemoryMaped;   //<! Use memory mapping for raw node data file access
 
@@ -111,6 +110,9 @@ namespace osmscout {
     bool                         rawWayDataMemoryMaped;    //<! Use memory mapping for raw way data file access
     size_t                       rawWayIndexCacheSize;     //<! Size of the raw way index cache
     size_t                       rawWayBlockSize;          //<! Number of ways loaded during import until nodes get resolved
+
+    bool                         coordDataMemoryMaped;     //<! Use memory mapping for coord data file access
+    size_t                       coordIndexCacheSize;      //<! Size of the coord index cache
 
     bool                         areaDataMemoryMaped;      //<! Use memory mapping for area data file access
     size_t                       areaDataCacheSize;        //<! Size of the area data cache
@@ -167,8 +169,7 @@ namespace osmscout {
 
     size_t GetNumericIndexPageSize() const;
 
-    bool GetCoordDataMemoryMaped() const;
-    size_t GetCoordIndexCacheSize() const;
+    size_t GetRawCoordBlockSize() const;
 
     bool GetRawNodeDataMemoryMaped() const;
 
@@ -176,6 +177,9 @@ namespace osmscout {
     bool GetRawWayDataMemoryMaped() const;
     size_t GetRawWayIndexCacheSize() const;
     size_t GetRawWayBlockSize() const;
+
+    bool GetCoordDataMemoryMaped() const;
+    size_t GetCoordIndexCacheSize() const;
 
     bool GetAreaDataMemoryMaped() const;
     size_t GetAreaDataCacheSize() const;
@@ -229,8 +233,7 @@ namespace osmscout {
 
     void SetNumericIndexPageSize(size_t numericIndexPageSize);
 
-    void SetCoordDataMemoryMaped(bool memoryMaped);
-    void SetCoordIndexCacheSize(size_t coordIndexCacheSize);
+    void SetRawCoordBlockSize(size_t blockSize);
 
     void SetRawNodeDataMemoryMaped(bool memoryMaped);
     void SetRawNodeDataCacheSize(size_t nodeDataCacheSize);
@@ -240,6 +243,9 @@ namespace osmscout {
     void SetRawWayDataCacheSize(size_t wayDataCacheSize);
     void SetRawWayIndexCacheSize(size_t wayIndexCacheSize);
     void SetRawWayBlockSize(size_t blockSize);
+
+    void SetCoordDataMemoryMaped(bool memoryMaped);
+    void SetCoordIndexCacheSize(size_t coordIndexCacheSize);
 
     void SetAreaDataMemoryMaped(bool memoryMaped);
     void SetAreaDataCacheSize(size_t areaDataCacheSize);

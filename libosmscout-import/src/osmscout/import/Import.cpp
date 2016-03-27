@@ -107,13 +107,14 @@ namespace osmscout {
      sortBlockSize(40000000),
      sortTileMag(14),
      numericIndexPageSize(1024),
-     coordDataMemoryMaped(false),
-     coordIndexCacheSize(1000000),
+     rawCoordBlockSize(60000000),
      rawNodeDataMemoryMaped(false),
      rawWayIndexMemoryMaped(true),
      rawWayDataMemoryMaped(false),
      rawWayIndexCacheSize(10000),
      rawWayBlockSize(500000),
+     coordDataMemoryMaped(false),
+     coordIndexCacheSize(1000000),
      areaDataMemoryMaped(false),
      areaDataCacheSize(0),
      wayDataMemoryMaped(false),
@@ -200,14 +201,9 @@ namespace osmscout {
     return numericIndexPageSize;
   }
 
-  bool ImportParameter::GetCoordDataMemoryMaped() const
+  size_t ImportParameter::GetRawCoordBlockSize() const
   {
-    return coordDataMemoryMaped;
-  }
-
-  size_t ImportParameter::GetCoordIndexCacheSize() const
-  {
-    return coordIndexCacheSize;
+    return rawCoordBlockSize;
   }
 
   bool ImportParameter::GetRawNodeDataMemoryMaped() const
@@ -233,6 +229,16 @@ namespace osmscout {
   size_t ImportParameter::GetRawWayBlockSize() const
   {
     return rawWayBlockSize;
+  }
+
+  bool ImportParameter::GetCoordDataMemoryMaped() const
+  {
+    return coordDataMemoryMaped;
+  }
+
+  size_t ImportParameter::GetCoordIndexCacheSize() const
+  {
+    return coordIndexCacheSize;
   }
 
   size_t ImportParameter::GetAreaDataCacheSize() const
@@ -417,14 +423,9 @@ namespace osmscout {
     this->numericIndexPageSize=numericIndexPageSize;
   }
 
-  void ImportParameter::SetCoordDataMemoryMaped(bool memoryMaped)
+  void ImportParameter::SetRawCoordBlockSize(size_t blockSize)
   {
-    this->coordDataMemoryMaped=memoryMaped;
-  }
-
-  void ImportParameter::SetCoordIndexCacheSize(size_t coordIndexCacheSize)
-  {
-    this->coordIndexCacheSize=coordIndexCacheSize;
+    this->rawCoordBlockSize=blockSize;
   }
 
   void ImportParameter::SetRawNodeDataMemoryMaped(bool memoryMaped)
@@ -450,6 +451,16 @@ namespace osmscout {
   void ImportParameter::SetRawWayBlockSize(size_t blockSize)
   {
     this->rawWayBlockSize=blockSize;
+  }
+
+  void ImportParameter::SetCoordDataMemoryMaped(bool memoryMaped)
+  {
+    this->coordDataMemoryMaped=memoryMaped;
+  }
+
+  void ImportParameter::SetCoordIndexCacheSize(size_t coordIndexCacheSize)
+  {
+    this->coordIndexCacheSize=coordIndexCacheSize;
   }
 
   void ImportParameter::SetAreaDataMemoryMaped(bool memoryMaped)

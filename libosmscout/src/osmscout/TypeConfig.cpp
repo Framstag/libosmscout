@@ -1276,14 +1276,14 @@ namespace osmscout {
       return false;
     }
 
-    for (const auto &type : types) {
+    for (const auto& type : types) {
       if (!((type->CanBeWay() ||
              type->CanBeArea()) &&
              type->HasConditions())) {
         continue;
       }
 
-      for (const auto &cond : type->GetConditions()) {
+      for (const auto& cond : type->GetConditions()) {
         if (!((cond.types & TypeInfo::typeWay) ||
               (cond.types & TypeInfo::typeArea))) {
           continue;
