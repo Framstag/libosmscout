@@ -26,6 +26,7 @@
 #include <QMutexLocker>
 #include <QDebug>
 #include <QDir>
+#include <QRegExp>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
@@ -54,6 +55,40 @@ void QBreaker::Reset()
   aborted = false;
 }
 
+StyleError::StyleError(QString msg){
+    QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
+    if(rx.exactMatch(msg)){
+        line = rx.cap(1).toInt();
+        column = rx.cap(2).toInt();
+        if(rx.cap(3) == "Symbol"){
+            type = Symbol;
+        } else if(rx.cap(3) == "Error"){
+            type = Error;
+        } else if(rx.cap(3) == "Warning"){
+            type = Warning;
+        } else {
+            type = Exception;
+        }
+        text = rx.cap(4);
+    }
+}
+
+QString StyleError::GetTypeName() const {
+    switch(type){
+    case Symbol:
+        return QString("symbol");
+        break;
+    case Error:
+        return QString("error");
+        break;
+    case Warning:
+        return QString("warning");
+        break;
+    case Exception:
+        return QString("exception");
+        break;
+    }
+}
 
 DBThread::DBThread()
  : database(new osmscout::Database(databaseParameter)),
@@ -73,7 +108,8 @@ DBThread::DBThread()
    currentRenderRequest(),
    doRender(false),
    renderBreaker(new QBreaker()),
-   renderBreakerRef(renderBreaker)
+   renderBreakerRef(renderBreaker),
+   renderError(false)
 {
     osmscout::log.Debug() << "DBThread::DBThread()";
 
@@ -175,18 +211,25 @@ void DBThread::Initialize()
   emit InitialisationFinished(response);
 }
 
-void DBThread::ReloadStyle(const QString &suffix){
+bool DBThread::ReloadStyle(const QString &suffix){
     if(stylesheetFilename.isNull()){
-        return;
+        return false;
     }
     if (!styleConfig) {
         styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     }
+    styleErrors.clear();
     if (!styleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
+        std::list<std::string> errors = styleConfig->GetErrors();
+        for(std::list<std::string>::iterator it = errors.begin(); it != errors.end(); it++){
+            styleErrors.append(StyleError(QString::fromStdString(*it)));
+        }
         styleConfig=NULL;
+        return false;
 
     } else {
         painter=new osmscout::MapPainterQt(styleConfig);
+        return true;
     }
 }
 
@@ -318,34 +361,38 @@ void DBThread::TriggerMapRendering()
 
     p.end();
 
+    renderError = false;
     drawTimer.Stop();
     overallTimer.Stop();
 
     std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
-  }
-  else {
-    std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig << std::endl;
 
-    QPainter p;
+  } else {
+    if(!renderError){
+        renderError = true;
+        std::cout << "Cannot draw map: " << database->IsOpen() << " " << styleConfig << std::endl;
 
-    p.begin(currentImage);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setRenderHint(QPainter::TextAntialiasing);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
+        QPainter p;
 
-    p.fillRect(0,0,request.width,request.height,
-               QColor::fromRgbF(0.0,0.0,0.0,1.0));
+        p.begin(currentImage);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setRenderHint(QPainter::TextAntialiasing);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    p.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
+        p.fillRect(0,0,request.width,request.height,
+           QColor::fromRgbF(0.0,0.0,0.0,1.0));
 
-    QString text("not initialized (yet)");
+        p.setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
 
-    p.drawText(QRect(0,0,request.width,request.height),
-               Qt::AlignCenter|Qt::AlignVCenter,
-               text,
-               NULL);
+        QString text("not initialized (yet)");
 
-    p.end();
+        p.drawText(QRect(0,0,request.width,request.height),
+            Qt::AlignCenter|Qt::AlignVCenter,
+            text,
+            NULL);
+
+        p.end();
+      }
   }
 
   QMutexLocker locker(&mutex);

@@ -64,7 +64,9 @@ QString MapWidget::stylesheetFilename() {
 
 void MapWidget::redraw()
 {
-    update();
+    if(!hasErrors){
+        update();
+    }
 }
 
 void MapWidget::initialisationFinished(const DatabaseLoadedResponse& response)
@@ -402,12 +404,28 @@ void MapWidget::showLocation(Location* location)
 
 void MapWidget::reloadStyle() {
     DBThread* dbThread=DBThread::GetInstance();
-    dbThread->ReloadStyle();
-    TriggerMapRendering();
+    if(dbThread->ReloadStyle()){
+        TriggerMapRendering();
+        hasErrors = false;
+    } else {
+        StyleError err = dbThread->GetStyleErrors().at(0);
+        errorLine = err.GetLine();
+        errorColumn = err.GetColumn();
+        errorDescription = err.GetTypeName()+": "+err.GetText();
+        hasErrors = true;
+    }
 }
 
 void MapWidget::reloadTmpStyle() {
     DBThread* dbThread=DBThread::GetInstance();
-    dbThread->ReloadStyle(TMP_SUFFIX);
-    TriggerMapRendering();
+    if(dbThread->ReloadStyle(TMP_SUFFIX)){
+        TriggerMapRendering();
+        hasErrors = false;
+    } else {
+        StyleError err = dbThread->GetStyleErrors().at(0);
+        errorLine = err.GetLine();
+        errorColumn = err.GetColumn();
+        errorDescription = err.GetTypeName()+": "+err.GetText();
+        hasErrors = true;
+    }
 }

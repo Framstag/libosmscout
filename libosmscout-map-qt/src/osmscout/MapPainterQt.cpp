@@ -421,6 +421,7 @@ namespace osmscout {
     painter->setFont(font);
 
     QPainterPath p;
+    double fontHeight = metrics.height();
 
     if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
@@ -468,8 +469,8 @@ namespace osmscout {
       qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
 
       // Rotation
-      qreal newX=(cosa*point.x())-(sina*point.y());
-      qreal newY=(cosa*point.y())+(sina*point.x());
+      qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
+      qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
 
       // Aditional offseting
       qreal deltaPenX=cosa*pen.width();
@@ -598,7 +599,7 @@ namespace osmscout {
                   t = QTransform::fromTranslate(x2, y2);
                   t.rotateRadians(slope);
                   painter->setTransform(t);
-                  DrawSymbol(projection, parameter, symbol, 0, height);
+                  DrawSymbol(projection, parameter, symbol, 0, -height*2);
                   loop = FollowPath(followPathHnd, space, origin);
               }
            }

@@ -2557,6 +2557,29 @@ namespace osmscout {
 
       success=!parser->errors->hasErrors;
 
+      errors.clear();
+      if(!success){
+	for(std::list<oss::Errors::Err>::iterator it=parser->errors->errors.begin(); it != parser->errors->errors.end(); ++it){
+	  oss::Errors::Err err = *it;
+	  switch(err.type){
+	  case oss::Errors::Err::Symbol: 
+	    errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
+            break;
+	  case oss::Errors::Err::Error: 
+	    errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
+            break;
+	  case oss::Errors::Err::Warning: 
+	    errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
+            break;
+	  case oss::Errors::Err::Exception: 
+	    errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
+            break;
+          default:
+            break;
+          }
+        }
+      }
+
       delete parser;
       delete scanner;
 
@@ -2572,5 +2595,10 @@ namespace osmscout {
 
     return success;
   }
+
+  const std::list<std::string>& StyleConfig::GetErrors() {
+    return errors;
+  }
+
 }
 

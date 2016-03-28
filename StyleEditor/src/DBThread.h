@@ -24,6 +24,7 @@
 #include <QThread>
 #include <QMetaType>
 #include <QMutex>
+#include <QList>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
@@ -70,6 +71,30 @@ public:
   void Reset();
 };
 
+class StyleError
+{
+    enum StyleErrorType {
+        Symbol, Error, Warning, Exception
+    };
+
+public:
+    StyleError(StyleErrorType type, int line, int column, const QString &text) :
+        type(type), line(line), column(column), text(text){}
+    StyleError(QString msg);
+
+    StyleErrorType GetType(){ return type; }
+    QString GetTypeName() const;
+    int GetLine(){ return line; }
+    int GetColumn(){ return column; }
+    const QString &GetText(){ return text; }
+
+private:
+    StyleErrorType  type;
+    int             line;
+    int             column;
+    QString         text;
+};
+
 class DBThread : public QObject
 {
   Q_OBJECT
@@ -85,7 +110,7 @@ public slots:
   void TriggerMapRendering();
   void Initialize();
   void Finalize();
-  void ReloadStyle(const QString &suffix="");
+  bool ReloadStyle(const QString &suffix="");
 
 private:
   double                        dpi;
@@ -124,6 +149,9 @@ private:
   QBreaker*                     renderBreaker;
   osmscout::BreakerRef          renderBreakerRef;
 
+  bool                          renderError;
+  QList<StyleError>             styleErrors;
+
 private:
   DBThread();
   virtual ~DBThread();
@@ -132,6 +160,10 @@ private:
   bool AssureRouter(osmscout::Vehicle vehicle);
 public:
   QString GetStylesheetFilename() const;
+  const QList<StyleError> &GetStyleErrors() const
+  {
+      return styleErrors;
+  }
 
   void GetProjection(osmscout::MercatorProjection& projection);
 

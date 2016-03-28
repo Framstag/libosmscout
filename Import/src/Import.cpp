@@ -22,6 +22,9 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
@@ -118,6 +121,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
 
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
+  std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
+            << "                                      # is the default language (no :language) (default: #)" << std::endl;
+  std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
 }
 
 bool ParseBoolArgument(int argc,
@@ -255,6 +261,42 @@ osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
   }
 
   return std::make_shared<osmscout::ImportParameter::Router>(vehicleMask,filenamebase);
+}
+
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, elems);
+    return elems;
+}
+
+std::vector<std::string> ParseLangOrderArgument(int argc,
+                                                char* argv[],
+                                                int& currentIndex)
+{
+    std::vector<std::string> langVec;
+    int                      parameterIndex=currentIndex;
+    int                      argumentIndex=currentIndex+1;
+    
+    currentIndex+=2;
+    
+    if (argumentIndex>=argc) {
+        std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+        return langVec;
+    }
+    
+    std::string argument=argv[argumentIndex];
+    langVec = split(argument, ',');
+
+    return langVec;
 }
 
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
@@ -605,6 +647,32 @@ int main(int argc, char* argv[])
       else {
         parameterError=true;
       }
+    }
+    else if (strcmp(argv[i],"--langOrder")==0) {
+        std::vector<std::string> langOrder;
+        
+        langOrder = ParseLangOrderArgument(argc,
+                                           argv,
+                                           i);
+        if (langOrder.size() > 0) {
+            parameter.SetLangOrder(langOrder);
+        }
+        else {
+            parameterError=true;
+        }
+    }
+    else if (strcmp(argv[i],"--altLangOrder")==0) {
+        std::vector<std::string> langOrder;
+        
+        langOrder = ParseLangOrderArgument(argc,
+                                           argv,
+                                           i);
+        if (langOrder.size() > 0) {
+            parameter.SetAltLangOrder(langOrder);
+        }
+        else {
+            parameterError=true;
+        }
     }
     else if (strncmp(argv[i],"--",2)==0) {
       std::cerr << "Unknown option: " << argv[i] << std::endl;
