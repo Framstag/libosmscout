@@ -49,6 +49,7 @@ namespace osmscout {
   private:
     void SignalStop();
     void BackgroundJob();
+    void Measure();
 
   public:
     MemoryMonitor();

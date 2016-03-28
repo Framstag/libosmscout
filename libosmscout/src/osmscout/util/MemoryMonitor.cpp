@@ -55,26 +55,14 @@ namespace osmscout {
 
       {
         std::lock_guard<std::mutex> lock(mutex);
+
+        Measure();
       }
     }
   }
-  /**
-   * Sinal the backgound thread to stop.
-   */
-  void MemoryMonitor::SignalStop()
-  {
-    quit=true;
-  }
 
-  /**
-   * Return the maximum measured memory usage. If there is no implementation
-   * for your OS, both values return are 0.0.
-   */
-  void MemoryMonitor::GetMaxValue(double& vmUsage,
-                                  double& residentSet)
+  void MemoryMonitor::Measure()
   {
-    std::lock_guard<std::mutex> lock(mutex);
-
     double currentVMUsage=0.0;
     double currentResidentSet=0.0;
 
@@ -95,6 +83,26 @@ namespace osmscout {
 
     maxVMUsage=std::max(maxVMUsage,currentVMUsage);
     maxResidentSet=std::max(maxResidentSet,currentResidentSet);
+  }
+
+  /**
+   * Sinal the backgound thread to stop.
+   */
+  void MemoryMonitor::SignalStop()
+  {
+    quit=true;
+  }
+
+  /**
+   * Return the maximum measured memory usage. If there is no implementation
+   * for your OS, both values return are 0.0.
+   */
+  void MemoryMonitor::GetMaxValue(double& vmUsage,
+                                  double& residentSet)
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    Measure();
 
     vmUsage=maxVMUsage;
     residentSet=maxResidentSet;
