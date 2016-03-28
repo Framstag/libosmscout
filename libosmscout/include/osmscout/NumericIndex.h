@@ -190,7 +190,7 @@ namespace osmscout {
       page->entries.clear();
     }
 
-    page->entries.reserve(pageSize);
+    page->entries.reserve(pageSize/4);
 
     scanner.SetPos(offset);
 
