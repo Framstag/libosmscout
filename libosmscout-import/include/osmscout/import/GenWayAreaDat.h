@@ -58,11 +58,6 @@ namespace osmscout {
                           Progress& progress,
                           BlacklistSet& wayBlacklist) const;
 
-    bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
-                              Progress& progress,
-                              const ImportParameter& parameter,
-                              std::vector<Distribution>& typeDistribution) const;
-
     bool GetAreas(const ImportParameter& parameter,
                  Progress& progress,
                  const TypeConfig& typeConfig,
@@ -78,16 +73,6 @@ namespace osmscout {
                   uint32_t& writtenWayCount,
                   const CoordDataFile::ResultMap& coordsMap,
                   const RawWay& rawWay);
-
-    bool HandleLowMemoryFallback(const ImportParameter& parameter,
-                                 Progress& progress,
-                                 const TypeConfig& typeConfig,
-                                 FileScanner& scanner,
-                                 const TypeInfoSet& types,
-                                 const BlacklistSet& blacklist,
-                                 FileWriter& writer,
-                                 uint32_t& writtenWayCount,
-                                 const CoordDataFile& coordDataFile);
 
   public:
     void GetDescription(const ImportParameter& parameter,
