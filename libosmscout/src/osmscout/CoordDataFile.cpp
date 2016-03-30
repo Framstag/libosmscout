@@ -27,13 +27,128 @@
 namespace osmscout {
 
   const char* CoordDataFile::COORD_DAT="coord.dat";
-  const char* CoordDataFile::COORD_IDX="coord.idx";
 
-  CoordDataFile::CoordDataFile(unsigned long indexCacheSize)
-  : IndexedDataFile<OSMId,Coord>(COORD_DAT,
-                                 COORD_IDX,
-                                 indexCacheSize)
+  CoordDataFile::CoordDataFile()
+    : isOpen(false),
+      pageSize(0)
   {
     // no code
+  }
+
+  CoordDataFile::~CoordDataFile()
+  {
+    if (isOpen) {
+      Close();
+    }
+  }
+
+  bool CoordDataFile::Open(const std::string& path,
+                           bool memoryMapedData)
+  {
+    datafilename=AppendFileToDir(path,COORD_DAT);
+
+    isOpen=false;
+    pageFileOffsetMap.clear();
+
+    try {
+      scanner.Open(datafilename,
+                   FileScanner::FastRandom,
+                   memoryMapedData);
+
+      FileOffset mapOffset;
+
+      scanner.Read(mapOffset);
+      scanner.Read(pageSize);
+
+      scanner.SetPos(mapOffset);
+
+      uint32_t mapSize;
+
+      scanner.Read(mapSize);
+
+      for (size_t i=1; i<=mapSize; i++) {
+        PageId     pageId;
+        FileOffset offset;
+
+        scanner.Read(pageId);
+        scanner.Read(offset);
+
+        pageFileOffsetMap[pageId]=offset;
+      }
+
+      isOpen=true;
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
+    }
+
+    return true;
+  }
+
+  bool CoordDataFile::Close()
+  {
+    pageFileOffsetMap.clear();
+
+    try {
+      if (scanner.IsOpen()) {
+        scanner.Close();
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      isOpen=false;
+      return false;
+    }
+
+    return true;
+  }
+
+  bool CoordDataFile::Get(const std::set<OSMId>& ids, ResultMap& resultMap) const
+  {
+    assert(isOpen);
+
+    resultMap.clear();
+    resultMap.reserve(ids.size());
+
+    try {
+      for (const auto& id : ids) {
+        PageId relatedId=id+std::numeric_limits<OSMId>::min();
+        PageId pageId=relatedId/pageSize;
+
+        PageIdFileOffsetMap::const_iterator pageOffset=pageFileOffsetMap.find(pageId);
+
+        if (pageOffset==pageFileOffsetMap.end()) {
+          continue;
+        }
+
+        FileOffset offset=pageOffset->second+(relatedId%pageSize)*(coordByteSize+1);
+
+        scanner.SetPos(offset);
+
+        uint8_t  serial;
+        bool     isSet;
+        GeoCoord coord;
+
+        scanner.Read(serial);
+        scanner.ReadConditionalCoord(coord,
+                                     isSet);
+
+        if (!isSet) {
+          continue;
+        }
+
+        resultMap.insert(std::make_pair(id,
+                                        Coord(serial,
+                                              coord)));
+      }
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
+
+    return true;
   }
 }

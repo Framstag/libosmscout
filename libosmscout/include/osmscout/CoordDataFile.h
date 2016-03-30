@@ -30,17 +30,35 @@ namespace osmscout {
   /**
    * \ingroup Database
    */
-  class OSMSCOUT_API CoordDataFile : public IndexedDataFile<OSMId,Coord>
+  class OSMSCOUT_API CoordDataFile
   {
   public:
     static const char* COORD_DAT;
-    static const char* COORD_IDX;
+
+  private:
+    typedef std::unordered_map<PageId,FileOffset> PageIdFileOffsetMap;
 
   public:
-    typedef std::unordered_map<OSMId,CoordRef> ResultMap;
+    typedef std::unordered_map<OSMId,Coord> ResultMap;
+
+  private:
+    bool                isOpen;             //!< If true,the data file is opened
+    std::string         datafilename;       //!< complete filename for data file
+    mutable FileScanner scanner;            //!< File stream to the data file
+    uint32_t            pageSize;
+    PageIdFileOffsetMap pageFileOffsetMap;
 
   public:
-    CoordDataFile(unsigned long indexCacheSize);
+    CoordDataFile();
+    virtual ~CoordDataFile();
+
+    bool Open(const std::string& path,
+              bool memoryMapedData);
+    bool Close();
+
+    std::string GetFilename() const;
+
+    bool Get(const std::set<OSMId>& ids, ResultMap& resultMap) const;
   };
 }
 

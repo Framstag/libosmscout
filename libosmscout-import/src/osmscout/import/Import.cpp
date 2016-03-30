@@ -42,7 +42,6 @@
 #include <osmscout/import/Preprocess.h>
 
 #include <osmscout/import/GenCoordDat.h>
-#include <osmscout/import/GenCoordIndex.h>
 
 #include <osmscout/import/GenNodeDat.h>
 #include <osmscout/import/SortNodeDat.h>
@@ -84,9 +83,9 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=25;
-#else
   static const size_t defaultEndStep=24;
+#else
+  static const size_t defaultEndStep=23;
 #endif
 
   ImportParameter::Router::Router(uint8_t vehicleMask,
@@ -700,69 +699,67 @@ namespace osmscout {
 
     /* 3 */
     modules.push_back(std::make_shared<CoordDataGenerator>());
-    /* 4 */
-    modules.push_back(std::make_shared<CoordIndexGenerator>());
 
-    /* 5 */
+    /* 4 */
     modules.push_back(std::make_shared<RawWayIndexGenerator>());
-    /* 6 */
+    /* 5 */
     modules.push_back(std::make_shared<RawRelationIndexGenerator>());
-    /* 7 */
+    /* 6 */
     modules.push_back(std::make_shared<RelAreaDataGenerator>());
 
-    /* 8 */
+    /* 7 */
     modules.push_back(std::make_shared<WayAreaDataGenerator>());
 
-    /* 9 */
+    /* 8 */
     modules.push_back(std::make_shared<MergeAreaDataGenerator>());
 
-    /* 10 */
+    /* 9 */
     modules.push_back(std::make_shared<MergeAreasGenerator>());
 
-    /* 11 */
+    /* 10 */
     modules.push_back(std::make_shared<WayWayDataGenerator>());
 
-    /* 12 */
+    /* 11 */
     modules.push_back(std::make_shared<OptimizeAreaWayIdsGenerator>());
 
-    /* 13 */
+    /* 12 */
     modules.push_back(std::make_shared<NodeDataGenerator>());
 
-    /* 14 */
+    /* 13 */
     modules.push_back(std::make_shared<SortNodeDataGenerator>());
 
-    /* 15 */
+    /* 14 */
     modules.push_back(std::make_shared<SortWayDataGenerator>());
 
-    /* 16 */
+    /* 15 */
     modules.push_back(std::make_shared<AreaNodeIndexGenerator>());
 
-    /* 17 */
+    /* 16 */
     modules.push_back(std::make_shared<AreaWayIndexGenerator>());
 
-    /* 18 */
+    /* 17 */
     modules.push_back(std::make_shared<AreaAreaIndexGenerator>());
 
-    /* 19 */
+    /* 18 */
     modules.push_back(std::make_shared<WaterIndexGenerator>());
 
-    /* 20 */
+    /* 19 */
     modules.push_back(std::make_shared<OptimizeAreasLowZoomGenerator>());
 
-    /* 21 */
+    /* 20 */
     modules.push_back(std::make_shared<OptimizeWaysLowZoomGenerator>());
 
-    /* 22 */
+    /* 21 */
     modules.push_back(std::make_shared<LocationIndexGenerator>());
 
-    /* 23 */
+    /* 22 */
     modules.push_back(std::make_shared<RouteDataGenerator>());
 
-    /* 24 */
+    /* 23 */
     modules.push_back(std::make_shared<IntersectionIndexGenerator>());
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 25 */
+    /* 24 */
     modules.push_back(std::make_shared<TextIndexGenerator>());
 #endif
   }

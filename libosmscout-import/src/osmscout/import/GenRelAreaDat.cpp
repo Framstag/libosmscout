@@ -467,8 +467,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.nodes[n].Set(coordEntry->second->GetSerial(),
-                                 coordEntry->second->GetCoord());
+          part.role.nodes[n].Set(coordEntry->second.GetSerial(),
+                                 coordEntry->second.GetCoord());
         }
 
         part.ways.push_back(way);
@@ -572,8 +572,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.nodes[n].Set(coordEntry->second->GetSerial(),
-                                 coordEntry->second->GetCoord());
+          part.role.nodes[n].Set(coordEntry->second.GetSerial(),
+                                 coordEntry->second.GetCoord());
         }
 
         part.ways.push_back(way);
@@ -1001,7 +1001,6 @@ namespace osmscout {
     description.SetDescription("Resolves raw relations to areas");
 
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
-    description.AddRequiredFile(CoordDataFile::COORD_IDX);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(Preprocess::RAWRELS_DAT);
     description.AddRequiredFile(RawWayIndexGenerator::RAWWAY_IDX);
@@ -1017,16 +1016,14 @@ namespace osmscout {
   {
     IdSet                      wayAreaIndexBlacklist;
 
-    CoordDataFile              coordDataFile(parameter.GetCoordIndexCacheSize());
+    CoordDataFile              coordDataFile;
 
     RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayIndexCacheSize());
 
     RawRelationIndexedDataFile relDataFile(parameter.GetRawWayIndexCacheSize());
     FeatureRef                 featureName(typeConfig->GetFeature(RefFeature::NAME));
 
-    if (!coordDataFile.Open(typeConfig,
-                            parameter.GetDestinationDirectory(),
-                            true,
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data files!" << std::endl;
       return false;

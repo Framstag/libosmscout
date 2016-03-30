@@ -52,7 +52,6 @@ namespace osmscout {
     description.SetDescription("Generate routing graph(s)");
 
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
-    description.AddRequiredFile(CoordDataFile::COORD_IDX);
 
     description.AddRequiredFile(WayDataFile::WAYS_DAT);
     description.AddRequiredFile(AreaDataFile::AREAS_DAT);
@@ -378,19 +377,16 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::ResolveNodeIds(const TypeConfigRef& typeConfig,
-                                          const ImportParameter& parameter,
+  bool RouteDataGenerator::ResolveNodeIds(const ImportParameter& parameter,
                                           Progress& progress,
                                           std::map<OSMId,Id>& nodeIdMap)
   {
     progress.Info("Resolving turn restriction OSM node ids to node ids");
 
-    CoordDataFile coordDataFile(parameter.GetCoordIndexCacheSize());
+    CoordDataFile coordDataFile;
     uint32_t      resolveCount=0;
 
-    if (!coordDataFile.Open(typeConfig,
-                            parameter.GetDestinationDirectory(),
-                            true,
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
       progress.Error("Cannot open coord file!");
       return false;
@@ -413,7 +409,7 @@ namespace osmscout {
       auto nodeIdEntry=nodeIdMap.find(entry.first);
 
       if (nodeIdEntry!=nodeIdMap.end()) {
-        nodeIdEntry->second=entry.second->GetOSMScoutId();
+        nodeIdEntry->second=entry.second.GetOSMScoutId();
         resolveCount++;
       }
     }
@@ -513,8 +509,7 @@ namespace osmscout {
     return true;
   }
 
-  bool RouteDataGenerator::ReadTurnRestrictions(const TypeConfigRef& typeConfig,
-                                                const ImportParameter& parameter,
+  bool RouteDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
                                                 Progress& progress,
                                                 ViaTurnRestrictionMap& restrictions)
   {
@@ -546,10 +541,9 @@ namespace osmscout {
     // Now map node ids to file offsets
     //
 
-    if (!ResolveNodeIds(typeConfig,
-                        parameter,
-                       progress,
-                       nodeIdMap)) {
+    if (!ResolveNodeIds(parameter,
+                        progress,
+                        nodeIdMap)) {
       return false;
     }
 
@@ -1925,8 +1919,7 @@ namespace osmscout {
 
     progress.SetAction("Scanning for restriction relations");
 
-    if (!ReadTurnRestrictions(typeConfig,
-                              parameter,
+    if (!ReadTurnRestrictions(parameter,
                               progress,
                               restrictions)) {
       return false;

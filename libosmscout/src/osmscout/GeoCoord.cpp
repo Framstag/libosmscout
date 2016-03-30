@@ -45,7 +45,7 @@ namespace osmscout {
   std::string GeoCoord::GetDisplayText() const
   {
     std::ostringstream      stream;
-    std::streamsize         oldPrecision=stream.precision(5);
+    std::streamsize         oldPrecision=stream.precision(7);
     std::ios_base::fmtflags oldFlags=stream.setf(std::ios::fixed,std::ios::floatfield);
 
     stream.imbue(std::locale());

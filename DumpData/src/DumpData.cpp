@@ -271,11 +271,11 @@ static void DumpIndent(size_t indent)
   }
 }
 
-static void DumpCoord(const osmscout::Coord& coord)
+static void DumpCoord(osmscout::OSMId osmId, const osmscout::Coord& coord)
 {
 
   std::cout << "Coord {" << std::endl;
-  std::cout << "  OSMId: " << coord.GetHash() << std::endl;
+  std::cout << "  OSMId: " << osmId << std::endl;
   std::cout << "  Serial: " << coord.GetSerial() << std::endl;
   std::cout << "  OSMScoutId: " << coord.GetOSMScoutId() << std::endl;
 
@@ -832,7 +832,7 @@ int main(int argc, char* argv[])
     auto coordsEntry=routeCoordsMap.find(id);
 
     if (coordsEntry!=routeCoordsMap.end()) {
-      routeNodeIds.insert(coordsEntry->second->GetOSMScoutId());
+      routeNodeIds.insert(coordsEntry->second.GetOSMScoutId());
     }
     else {
       std::cerr << "Cannot find route node coord with id " << id << std::endl;
@@ -856,7 +856,8 @@ int main(int argc, char* argv[])
         std::cout << std::endl;
       }
 
-      DumpCoord(*coordsEntry->second);
+      DumpCoord(coordsEntry->first,
+                coordsEntry->second);
     }
     else {
       std::cerr << "Cannot find coord with id " << id << std::endl;

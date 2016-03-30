@@ -554,11 +554,6 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  AREAS2_TMP));
-
-      writer.Write(areasWritten);
-
       if (!ScanAreaNodeIds(progress,
                            *typeConfig,
                            scanner,
@@ -577,8 +572,13 @@ namespace osmscout {
 
       /* ------ */
 
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  AREAS2_TMP));
+
+      writer.Write(areasWritten);
+
       while (true) {
-        TypeInfoSet           loadedTypes;
+        TypeInfoSet                loadedTypes;
         std::vector<AreaMergeData> mergeJob(typeConfig->GetTypeCount());
 
         //

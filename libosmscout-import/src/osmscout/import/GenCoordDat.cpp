@@ -31,12 +31,9 @@
 
 namespace osmscout {
 
-  static uint32_t coordPageSize=5000000;
-
-  static inline bool SortCoordsByCoordId(const Id& a, const Id& b)
-  {
-    return a<b;
-  }
+  static uint32_t coordSortPageSize=5000000;
+  static uint32_t coordDiskPageSize=64;
+  static uint32_t coordDiskSize=8;
 
   static inline bool SortCoordsByOSMId(const RawCoord& a, const RawCoord& b)
   {
@@ -57,7 +54,7 @@ namespace osmscout {
 
     Id          maxId=GeoCoord(90.0,180.0).GetId();
     Id          currentLowerLimit=0;
-    Id          currentUpperLimit=maxId/coordPageSize;
+    Id          currentUpperLimit=maxId/coordSortPageSize;
     FileScanner scanner;
     uint32_t    loadedCoordCount=0;
 
@@ -91,7 +88,8 @@ namespace osmscout {
           coord.Read(typeConfig,scanner);
 
           Id id=coord.GetCoord().GetId();
-          Id pageId=id/coordPageSize;
+          Id pageId=id/coordSortPageSize;
+
 
           if (pageId<currentLowerLimit || pageId>currentUpperLimit) {
             continue;
@@ -124,14 +122,10 @@ namespace osmscout {
           }
         }
 
-        progress.Info("Sorting coordinates");
-
-        // TODO: Sort in parallel, no side effect!
-        for (auto& entry : coordPages) {
-          std::sort(entry.second.begin(),
-                    entry.second.end(),
-                    SortCoordsByCoordId);
-        }
+        // We currently assume that coordinates are ordered by increasing id
+        // So if we have to nodes with the same coordinate we can expect them
+        // to have the same serial, as long as above is true and nodes
+        // for a coordinate are either all part of the import file - or all are left out.
 
         for (auto& entry : coordPages) {
           Id lastId=std::numeric_limits<Id>::max();
@@ -155,7 +149,7 @@ namespace osmscout {
         progress.Info("Loaded "+NumberToString(currentCoordCount)+" coords (" +NumberToString(loadedCoordCount)+"/"+NumberToString(coordCount)+")");
 
         currentLowerLimit=currentUpperLimit+1;
-        currentUpperLimit=maxId/coordPageSize;
+        currentUpperLimit=maxId/coordSortPageSize;
       }
 
       progress.Info("Found "+NumberToString(duplicates.size())+" duplicate cordinates");
@@ -172,6 +166,37 @@ namespace osmscout {
     return true;
   }
 
+  bool CoordDataGenerator::DumpCurrentPage(FileWriter& writer,
+                                           std::vector<bool>& isSetInPage,
+                                           std::vector<Coord>& page) const
+  {
+    bool somethingToStore=false;
+
+    for (const auto isSet : isSetInPage) {
+      if (isSet) {
+        somethingToStore=true;
+        break;
+      }
+    }
+
+    if (!somethingToStore) {
+      return false;
+    }
+
+    for (size_t i=0; i<isSetInPage.size(); i++) {
+      if (isSetInPage[i]) {
+        writer.Write(page[i].GetSerial());
+        writer.WriteCoord(page[i].GetCoord());
+      }
+      else {
+        writer.Write((uint8_t)0);
+        writer.WriteInvalidCoord();
+      }
+    }
+
+    return true;
+  }
+
 
   bool CoordDataGenerator::StoreCoordinates(const TypeConfig& typeConfig,
                                             const ImportParameter& parameter,
@@ -180,18 +205,26 @@ namespace osmscout {
   {
     progress.SetAction("Storing coordinates");
 
-    OSMId       maxId=std::numeric_limits<OSMId>::max();
-    OSMId       currentLowerLimit=std::numeric_limits<OSMId>::min()/coordPageSize;
-    OSMId       currentUpperLimit=maxId/coordPageSize;
-    FileScanner scanner;
-    FileWriter  writer;
-    uint32_t    loadedCoordCount=0;
+    OSMId              maxId=std::numeric_limits<OSMId>::max();
+    OSMId              currentLowerLimit=std::numeric_limits<OSMId>::min()/coordSortPageSize;
+    OSMId              currentUpperLimit=maxId/coordSortPageSize;
+    FileScanner        scanner;
+    FileWriter         writer;
+    uint32_t           loadedCoordCount=0;
+
+    PageId             currentPageId=0;
+    std::vector<bool>  isSetInPage(coordDiskPageSize,false);
+    std::vector<Coord> page(coordDiskPageSize);
+
+    std::unordered_map<OSMId,FileOffset> pageIndex;
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   CoordDataFile::COORD_DAT));
 
-      writer.Write(loadedCoordCount);
+      writer.WriteFileOffset(0);
+      writer.Write(coordDiskPageSize);
+      writer.FlushCurrentBlockWithZeros(coordSortPageSize*coordDiskSize);
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    Preprocess::RAWCOORDS_DAT),
@@ -222,7 +255,7 @@ namespace osmscout {
           coord.Read(typeConfig,scanner);
 
           OSMId id=coord.GetOSMId();
-          OSMId pageId=id/coordPageSize;
+          OSMId pageId=id/coordSortPageSize;
 
           if (pageId<currentLowerLimit || pageId>currentUpperLimit) {
             continue;
@@ -280,24 +313,60 @@ namespace osmscout {
               duplicateEntry->second++;
             }
 
-            Coord coord(osmCoord.GetOSMId(),
-                        serial,
-                        osmCoord.GetCoord());
+            PageId relatedId=osmCoord.GetOSMId()+std::numeric_limits<OSMId>::min();
+            PageId pageId=relatedId/coordDiskPageSize;
 
-            coord.Write(typeConfig,writer);
+            if (currentPageId!=pageId) {
+              FileOffset pageOffset=writer.GetPos();
+
+              if (DumpCurrentPage(writer,
+                                  isSetInPage,
+                                  page)) {
+                pageIndex[currentPageId]=pageOffset;
+              }
+
+              isSetInPage.assign(coordDiskPageSize,false);
+              currentPageId=pageId;
+            }
+
+            size_t pageIndex=relatedId%coordDiskPageSize;
+
+            isSetInPage[pageIndex]=true;
+            page[pageIndex]=Coord(serial,
+                                  osmCoord.GetCoord());
           }
+        }
+
+        FileOffset pageOffset=writer.GetPos();
+
+        if (DumpCurrentPage(writer,
+                            isSetInPage,
+                            page)) {
+          pageIndex[currentPageId]=pageOffset;
         }
 
         progress.Info("Loaded "+NumberToString(currentCoordCount)+" coords (" +NumberToString(loadedCoordCount)+"/"+NumberToString(coordCount)+")");
 
         currentLowerLimit=currentUpperLimit+1;
-        currentUpperLimit=maxId/coordPageSize;
+        currentUpperLimit=maxId/coordSortPageSize;
       }
+
+      FileOffset indexStartOffset=writer.GetPos();
+
+      progress.SetAction("Writing "+NumberToString(pageIndex.size())+" index entries to disk");
+
+      writer.Write((uint32_t)pageIndex.size());
+
+      for (const auto entry : pageIndex) {
+        writer.Write(entry.first);
+        writer.Write(entry.second);
+      }
+
 
       scanner.Close();
 
       writer.GotoBegin();
-      writer.Write(loadedCoordCount);
+      writer.WriteFileOffset(indexStartOffset);
       writer.Close();
     }
     catch (IOException& e) {

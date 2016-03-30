@@ -480,8 +480,8 @@ namespace osmscout {
         break;
       }
 
-      way.nodes[n].Set(coord->second->GetSerial(),
-                       coord->second->GetCoord());
+      way.nodes[n].Set(coord->second.GetSerial(),
+                       coord->second.GetCoord());
     }
 
     if (!success) {
@@ -628,11 +628,9 @@ namespace osmscout {
       return false;
     }
 
-    CoordDataFile coordDataFile(parameter.GetCoordIndexCacheSize());
+    CoordDataFile coordDataFile;
 
-    if (!coordDataFile.Open(typeConfig,
-                            parameter.GetDestinationDirectory(),
-                            true,
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data file!" << std::endl;
       return false;

@@ -55,7 +55,6 @@ namespace osmscout {
 
     description.AddRequiredFile(Preprocess::DISTRIBUTION_DAT);
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
-    description.AddRequiredFile(CoordDataFile::COORD_IDX);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(RelAreaDataGenerator::WAYAREABLACK_DAT);
 
@@ -209,8 +208,8 @@ namespace osmscout {
         break;
       }
 
-      ring.nodes[n].Set(coord->second->GetSerial(),
-                        coord->second->GetCoord());
+      ring.nodes[n].Set(coord->second.GetSerial(),
+                        coord->second.GetCoord());
     }
 
     if (!success) {
@@ -249,7 +248,7 @@ namespace osmscout {
 
     BlacklistSet              wayBlacklist; //! Set of ways that should not be handled
 
-    CoordDataFile             coordDataFile(parameter.GetCoordIndexCacheSize());
+    CoordDataFile             coordDataFile;
 
     FileScanner               scanner;
     uint32_t                  rawWayCount=0;
@@ -273,9 +272,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!coordDataFile.Open(typeConfig,
-                            parameter.GetDestinationDirectory(),
-                            true,
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data file!" << std::endl;
       return false;

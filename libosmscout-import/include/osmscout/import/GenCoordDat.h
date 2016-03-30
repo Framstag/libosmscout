@@ -20,7 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/GenNumericIndex.h>
+#include <osmscout/Coord.h>
+
+#include <osmscout/import/Import.h>
 #include <osmscout/import/RawNode.h>
 
 namespace osmscout {
@@ -32,6 +34,11 @@ namespace osmscout {
                                   const ImportParameter& parameter,
                                   Progress& progress,
                                   std::unordered_map<Id,uint8_t>& duplicates) const;
+
+    bool DumpCurrentPage(FileWriter& writer,
+                         std::vector<bool>& isSetInPage,
+                         std::vector<Coord>& page) const;
+
     bool StoreCoordinates(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,
                           Progress& progress,

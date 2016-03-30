@@ -62,22 +62,4 @@ namespace osmscout {
 
     return number;
   }
-
-  void Coord::Read(const TypeConfig& /*typeConfig*/,
-                   FileScanner& scanner)
-  {
-    fileOffset=scanner.GetPos();
-
-    scanner.Read(osmId);
-    scanner.Read(serial);
-    scanner.ReadCoord(coord);
-  }
-
-  void Coord::Write(const TypeConfig& /*typeConfig*/,
-                    FileWriter& writer) const
-  {
-    writer.Write(osmId);
-    writer.Write(serial);
-    writer.WriteCoord(coord);
-  }
 }

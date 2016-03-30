@@ -43,8 +43,6 @@ namespace osmscout {
   struct OSMSCOUT_API Coord
   {
   private:
-    FileOffset fileOffset; //!< File offset of this coordinate in the data file
-    OSMId      osmId;      //!< OSM id
     uint8_t    serial;     //!< Serial id in relation to all coordinates witht he same coord value
     GeoCoord   coord;      //!< The geographic coordinate
 
@@ -57,33 +55,11 @@ namespace osmscout {
       // no code
     }
 
-    inline Coord(OSMId osmId,uint8_t serial,const GeoCoord& coord)
-    : osmId(osmId),
-      serial(serial),
+    inline Coord(uint8_t serial,const GeoCoord& coord)
+    : serial(serial),
       coord(coord)
     {
       // no code
-    }
-
-    inline FileOffset GetFileOffset() const
-    {
-      return fileOffset;
-    }
-
-    /**
-     * Relevant id for indexing the coordinate
-     */
-    inline OSMId GetId() const
-    {
-      return osmId;
-    }
-
-    /**
-     * The return the OSM id for the given coordinate
-     */
-    inline OSMId GetOSMId() const
-    {
-      return osmId;
     }
 
     /**
@@ -125,11 +101,6 @@ namespace osmscout {
     {
       return coord<other.coord;
     }
-
-    void Read(const TypeConfig& typeConfig,
-              FileScanner& scanner);
-    void Write(const TypeConfig& typeConfig,
-              FileWriter& writer) const;
   };
 
   typedef std::shared_ptr<Coord> CoordRef;

@@ -325,6 +325,16 @@ namespace osmscout {
     RawWay      way;
     bool        isCoastline=false;
 
+    if (id==10414977) {
+      std::cout << "RAW WAY {" << std::endl;
+
+      for (const auto nodeId : nodes) {
+        std::cout << "  " << nodeId << std::endl;
+      }
+
+      std::cout << "}" << std::endl;
+    }
+
     if (nodes.size()<2) {
       progress.Warning("Way "+
                        NumberToString(id)+

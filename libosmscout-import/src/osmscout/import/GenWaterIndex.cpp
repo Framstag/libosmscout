@@ -118,8 +118,7 @@ namespace osmscout {
     SetState(x-cellXStart,y-cellYStart,state);
   }
 
-  bool WaterIndexGenerator::LoadCoastlines(const TypeConfigRef& typeConfig,
-                                           const ImportParameter& parameter,
+  bool WaterIndexGenerator::LoadCoastlines(const ImportParameter& parameter,
                                            Progress& progress,
                                            std::list<CoastRef>& coastlines)
   {
@@ -154,11 +153,9 @@ namespace osmscout {
 
       progress.SetAction("Resolving nodes of coastline");
 
-      CoordDataFile coordDataFile(parameter.GetCoordIndexCacheSize());
+      CoordDataFile coordDataFile;
 
-      if (!coordDataFile.Open(typeConfig,
-                              parameter.GetDestinationDirectory(),
-                              true,
+      if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                               parameter.GetCoordDataMemoryMaped())) {
         progress.Error("Cannot open coord file!");
         return false;
@@ -212,15 +209,15 @@ namespace osmscout {
           }
 
           if (n==0) {
-            coast->frontNodeId=coord->second->GetOSMScoutId();
+            coast->frontNodeId=coord->second.GetOSMScoutId();
           }
 
           if (n==coastline->GetNodeCount()-1) {
-            coast->backNodeId=coord->second->GetOSMScoutId();
+            coast->backNodeId=coord->second.GetOSMScoutId();
           }
 
-          coast->coast[n].Set(coord->second->GetOSMScoutId(),
-                              coord->second->GetCoord());
+          coast->coast[n].Set(coord->second.GetOSMScoutId(),
+                              coord->second.GetCoord());
         }
 
         if (!processingError) {
@@ -1412,10 +1409,10 @@ namespace osmscout {
       latMin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
       latMax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
 
-      borderPoints[0]=Coord(1,0,GeoCoord(latMax,lonMin)); // top left
-      borderPoints[1]=Coord(2,0,GeoCoord(latMax,lonMax)); // top right
-      borderPoints[2]=Coord(3,0,GeoCoord(latMin,lonMax)); // bottom right
-      borderPoints[3]=Coord(4,0,GeoCoord(latMin,lonMin)); // bottom left
+      borderPoints[0]=Coord(0,GeoCoord(latMax,lonMin)); // top left
+      borderPoints[1]=Coord(0,GeoCoord(latMax,lonMax)); // top right
+      borderPoints[2]=Coord(0,GeoCoord(latMin,lonMax)); // bottom right
+      borderPoints[3]=Coord(0,GeoCoord(latMin,lonMin)); // bottom left
 
       borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                           // top left
       borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
@@ -1604,7 +1601,6 @@ namespace osmscout {
     description.AddRequiredFile(Preprocess::RAWCOASTLINE_DAT);
 
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
-    description.AddRequiredFile(CoordDataFile::COORD_IDX);
 
     description.AddRequiredFile(WayDataFile::WAYS_DAT);
 
@@ -1674,8 +1670,7 @@ namespace osmscout {
     // Load and merge coastlines
     //
 
-    if (!LoadCoastlines(typeConfig,
-                        parameter,
+    if (!LoadCoastlines(parameter,
                         progress,
                         coastlines)) {
       return false;
