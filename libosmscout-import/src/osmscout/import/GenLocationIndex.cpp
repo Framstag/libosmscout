@@ -52,7 +52,7 @@
 
 namespace osmscout {
 
-  static const size_t REGION_INDEX_LEVEL=16;
+  static const size_t REGION_INDEX_LEVEL=14;
 
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
                                                                                           const GeoCoord& coord) const
