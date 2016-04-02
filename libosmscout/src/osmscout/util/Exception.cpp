@@ -59,7 +59,7 @@ namespace osmscout {
     }
   }
 
-  const char* IOException::what() const noexcept
+  const char* IOException::what() const OSMSCOUT_NOEXCEPT
   {
     return description.c_str();
   }
