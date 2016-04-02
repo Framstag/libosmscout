@@ -7,7 +7,7 @@ int errors=0;
 bool CheckEncode(uint64_t value,
                  const char* expected, size_t expectedLength)
 {
-  const size_t bufferLength=5;
+  const size_t bufferLength=10;
   char         buffer[bufferLength];
   size_t       bytes;
 
