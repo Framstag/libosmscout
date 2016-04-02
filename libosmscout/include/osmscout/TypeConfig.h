@@ -999,7 +999,7 @@ namespace osmscout {
     bool operator!=(const FeatureValueBuffer& other) const;
   };
 
-  static const uint32_t FILE_FORMAT_VERSION = 3;
+  static const uint32_t FILE_FORMAT_VERSION = 4;
 
   /**
    * \ingroup type
