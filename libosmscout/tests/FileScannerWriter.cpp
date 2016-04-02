@@ -313,7 +313,7 @@ int main()
 
     scanner.Read(inCoords1);
     if (!Equals(inCoords1,outCoords1)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>): Expected ";
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 1: Expected ";
 
       DumpGeoCoords(outCoords1);
 
@@ -327,7 +327,7 @@ int main()
 
     scanner.Read(inCoords2);
     if (!Equals(inCoords2,outCoords2)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>): Expected ";
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 2: Expected ";
 
       DumpGeoCoords(outCoords2);
 
@@ -341,7 +341,7 @@ int main()
 
     scanner.Read(inCoords3);
     if (!Equals(inCoords3,outCoords3)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>): Expected ";
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 3: Expected ";
 
       DumpGeoCoords(outCoords3);
 
@@ -355,7 +355,7 @@ int main()
 
     scanner.Read(inCoords4);
     if (!Equals(inCoords4,outCoords4)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>): Expected ";
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 4: Expected ";
 
       DumpGeoCoords(outCoords4);
 
@@ -369,7 +369,7 @@ int main()
 
     scanner.Read(inCoords5);
     if (!Equals(inCoords5,outCoords5)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>): Expected ";
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 5: Expected ";
 
       DumpGeoCoords(outCoords5);
 
@@ -383,7 +383,7 @@ int main()
 
     scanner.Read(inCoords6);
     if (!Equals(inCoords6,outCoords6)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>): Expected ";
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 6: Expected ";
 
       DumpGeoCoords(outCoords6);
 
