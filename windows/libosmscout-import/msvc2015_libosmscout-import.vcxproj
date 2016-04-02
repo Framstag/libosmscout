@@ -163,6 +163,7 @@
     <ClCompile Include="src\osmscout\import\Preprocessor.cpp" />
     <ClCompile Include="src\osmscout\import\PreprocessOSM.cpp" />
     <ClCompile Include="src\osmscout\import\RawCoastline.cpp" />
+    <ClCompile Include="src\osmscout\import\RawCoord.cpp" />
     <ClCompile Include="src\osmscout\import\RawNode.cpp" />
     <ClCompile Include="src\osmscout\import\RawRelation.cpp" />
     <ClCompile Include="src\osmscout\import\RawRelIndexedDataFile.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="include\osmscout\import\Preprocessor.h" />
     <ClInclude Include="include\osmscout\import\PreprocessOSM.h" />
     <ClInclude Include="include\osmscout\import\RawCoastline.h" />
+    <ClInclude Include="include\osmscout\import\RawCoord.h" />
     <ClInclude Include="include\osmscout\import\RawNode.h" />
     <ClInclude Include="include\osmscout\import\RawRelation.h" />
     <ClInclude Include="include\osmscout\import\RawRelIndexedDataFile.h" />
