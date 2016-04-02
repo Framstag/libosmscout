@@ -1,0 +1,669 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E5A8274016F2717400EE4C78 /* GenAreaAreaIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826BE16F2717300EE4C78 /* GenAreaAreaIndex.cpp */; };
+		E5A8274216F2717400EE4C78 /* GenAreaNodeIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826C116F2717300EE4C78 /* GenAreaNodeIndex.cpp */; };
+		E5A8274416F2717400EE4C78 /* GenAreaWayIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826C416F2717300EE4C78 /* GenAreaWayIndex.cpp */; };
+		E5A8274816F2717400EE4C78 /* GenNodeDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826CA16F2717300EE4C78 /* GenNodeDat.cpp */; };
+		E5A8274A16F2717400EE4C78 /* GenNumericIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826CD16F2717300EE4C78 /* GenNumericIndex.cpp */; };
+		E5A8275016F2717400EE4C78 /* GenRouteDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826D616F2717300EE4C78 /* GenRouteDat.cpp */; };
+		E5A8275416F2717400EE4C78 /* GenTypeDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826DC16F2717300EE4C78 /* GenTypeDat.cpp */; };
+		E5A8275616F2717400EE4C78 /* GenWaterIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826DF16F2717300EE4C78 /* GenWaterIndex.cpp */; };
+		E5A8275A16F2717400EE4C78 /* Import.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826E516F2717300EE4C78 /* Import.cpp */; };
+		E5A8275E16F2717400EE4C78 /* fileformat.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = E5A826F216F2717300EE4C78 /* fileformat.pb.cc */; };
+		E5A8276016F2717400EE4C78 /* osmformat.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = E5A826F516F2717300EE4C78 /* osmformat.pb.cc */; };
+		E5A8276216F2717400EE4C78 /* Preprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826F816F2717300EE4C78 /* Preprocess.cpp */; };
+		E5A8276416F2717400EE4C78 /* PreprocessOSM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826FB16F2717300EE4C78 /* PreprocessOSM.cpp */; };
+		E5A8276516F2717400EE4C78 /* PreprocessPBF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826FC16F2717300EE4C78 /* PreprocessPBF.cpp */; };
+		E5A8276716F2717400EE4C78 /* RawCoastline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A826FF16F2717300EE4C78 /* RawCoastline.cpp */; };
+		E5A8276916F2717400EE4C78 /* RawNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A8270216F2717300EE4C78 /* RawNode.cpp */; };
+		E5A8276B16F2717400EE4C78 /* RawRelation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A8270516F2717300EE4C78 /* RawRelation.cpp */; };
+		E5A8276D16F2717400EE4C78 /* RawWay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A8270816F2717300EE4C78 /* RawWay.cpp */; };
+		E5A8276F16F2717400EE4C78 /* SortDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A8270B16F2717300EE4C78 /* SortDat.cpp */; };
+		E5A8277116F2717400EE4C78 /* SortNodeDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A8270E16F2717300EE4C78 /* SortNodeDat.cpp */; };
+		E5A8277516F2717400EE4C78 /* SortWayDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5A8271416F2717300EE4C78 /* SortWayDat.cpp */; };
+		E5A8277716F2717400EE4C78 /* fileformat.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = E5A8271816F2717300EE4C78 /* fileformat.pb.cc */; };
+		E5A8277816F2717400EE4C78 /* fileformat.pb.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8271916F2717300EE4C78 /* fileformat.pb.h */; };
+		E5A8277A16F2717400EE4C78 /* osmformat.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = E5A8271E16F2717400EE4C78 /* osmformat.pb.cc */; };
+		E5A8277B16F2717400EE4C78 /* osmformat.pb.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8271F16F2717400EE4C78 /* osmformat.pb.h */; };
+		E5A8288416F27E9600EE4C78 /* GenAreaAreaIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8285D16F27E9600EE4C78 /* GenAreaAreaIndex.h */; };
+		E5A8288516F27E9600EE4C78 /* GenAreaNodeIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8285E16F27E9600EE4C78 /* GenAreaNodeIndex.h */; };
+		E5A8288616F27E9600EE4C78 /* GenAreaWayIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8285F16F27E9600EE4C78 /* GenAreaWayIndex.h */; };
+		E5A8288816F27E9600EE4C78 /* GenNodeDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286116F27E9600EE4C78 /* GenNodeDat.h */; };
+		E5A8288916F27E9600EE4C78 /* GenNumericIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286216F27E9600EE4C78 /* GenNumericIndex.h */; };
+		E5A8288C16F27E9600EE4C78 /* GenRouteDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286516F27E9600EE4C78 /* GenRouteDat.h */; };
+		E5A8288E16F27E9600EE4C78 /* GenTypeDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286716F27E9600EE4C78 /* GenTypeDat.h */; };
+		E5A8288F16F27E9600EE4C78 /* GenWaterIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286816F27E9600EE4C78 /* GenWaterIndex.h */; };
+		E5A8289116F27E9600EE4C78 /* Import.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286A16F27E9600EE4C78 /* Import.h */; };
+		E5A8289216F27E9600EE4C78 /* fileformat.pb.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286D16F27E9600EE4C78 /* fileformat.pb.h */; };
+		E5A8289316F27E9600EE4C78 /* osmformat.pb.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286E16F27E9600EE4C78 /* osmformat.pb.h */; };
+		E5A8289416F27E9600EE4C78 /* Preprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8286F16F27E9600EE4C78 /* Preprocess.h */; };
+		E5A8289516F27E9600EE4C78 /* PreprocessOSM.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287016F27E9600EE4C78 /* PreprocessOSM.h */; };
+		E5A8289616F27E9600EE4C78 /* PreprocessPBF.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287116F27E9600EE4C78 /* PreprocessPBF.h */; };
+		E5A8289716F27E9600EE4C78 /* RawCoastline.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287216F27E9600EE4C78 /* RawCoastline.h */; };
+		E5A8289816F27E9600EE4C78 /* RawNode.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287316F27E9600EE4C78 /* RawNode.h */; };
+		E5A8289916F27E9600EE4C78 /* RawRelation.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287416F27E9600EE4C78 /* RawRelation.h */; };
+		E5A8289A16F27E9600EE4C78 /* RawWay.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287516F27E9600EE4C78 /* RawWay.h */; };
+		E5A8289B16F27E9600EE4C78 /* SortDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287616F27E9600EE4C78 /* SortDat.h */; };
+		E5A8289C16F27E9600EE4C78 /* SortNodeDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287716F27E9600EE4C78 /* SortNodeDat.h */; };
+		E5A8289E16F27E9600EE4C78 /* SortWayDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287916F27E9600EE4C78 /* SortWayDat.h */; };
+		E5A8289F16F27E9600EE4C78 /* ImportFeatures.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287A16F27E9600EE4C78 /* ImportFeatures.h */; };
+		E5A828A016F27E9600EE4C78 /* Config.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287D16F27E9600EE4C78 /* Config.h */; };
+		E5A828A116F27E9600EE4C78 /* ImportImportExport.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A8287F16F27E9600EE4C78 /* ImportImportExport.h */; };
+		E5E3A2AB1CAFFE7F003302CA /* GenIntersectionIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A29A1CAFFE7F003302CA /* GenIntersectionIndex.cpp */; };
+		E5E3A2AC1CAFFE7F003302CA /* GenLocationIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A29B1CAFFE7F003302CA /* GenLocationIndex.cpp */; };
+		E5E3A2AD1CAFFE7F003302CA /* GenMergeAreas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A29C1CAFFE7F003302CA /* GenMergeAreas.cpp */; };
+		E5E3A2AE1CAFFE7F003302CA /* GenOptimizeAreasLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A29D1CAFFE7F003302CA /* GenOptimizeAreasLowZoom.cpp */; };
+		E5E3A2AF1CAFFE7F003302CA /* GenOptimizeAreaWayIds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A29E1CAFFE7F003302CA /* GenOptimizeAreaWayIds.cpp */; };
+		E5E3A2B01CAFFE7F003302CA /* GenOptimizeWaysLowZoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A29F1CAFFE7F003302CA /* GenOptimizeWaysLowZoom.cpp */; };
+		E5E3A2B11CAFFE7F003302CA /* GenRawNodeIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A01CAFFE7F003302CA /* GenRawNodeIndex.cpp */; };
+		E5E3A2B21CAFFE7F003302CA /* GenRawRelIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A11CAFFE7F003302CA /* GenRawRelIndex.cpp */; };
+		E5E3A2B31CAFFE7F003302CA /* GenRawWayIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A21CAFFE7F003302CA /* GenRawWayIndex.cpp */; };
+		E5E3A2B41CAFFE7F003302CA /* GenRelAreaDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A31CAFFE7F003302CA /* GenRelAreaDat.cpp */; };
+		E5E3A2B51CAFFE7F003302CA /* GenTextIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A41CAFFE7F003302CA /* GenTextIndex.cpp */; };
+		E5E3A2B61CAFFE7F003302CA /* GenWayAreaDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A51CAFFE7F003302CA /* GenWayAreaDat.cpp */; };
+		E5E3A2B71CAFFE7F003302CA /* GenWayWayDat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A61CAFFE7F003302CA /* GenWayWayDat.cpp */; };
+		E5E3A2B81CAFFE7F003302CA /* MergeAreaData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A71CAFFE7F003302CA /* MergeAreaData.cpp */; };
+		E5E3A2B91CAFFE7F003302CA /* Preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A81CAFFE7F003302CA /* Preprocessor.cpp */; };
+		E5E3A2BA1CAFFE7F003302CA /* RawRelIndexedDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2A91CAFFE7F003302CA /* RawRelIndexedDataFile.cpp */; };
+		E5E3A2BB1CAFFE7F003302CA /* RawWayIndexedDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5E3A2AA1CAFFE7F003302CA /* RawWayIndexedDataFile.cpp */; };
+		E5E3A2CF1CAFFF25003302CA /* GenIntersectionIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2BD1CAFFF25003302CA /* GenIntersectionIndex.h */; };
+		E5E3A2D01CAFFF25003302CA /* GenLocationIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2BE1CAFFF25003302CA /* GenLocationIndex.h */; };
+		E5E3A2D11CAFFF25003302CA /* GenMergeAreas.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2BF1CAFFF25003302CA /* GenMergeAreas.h */; };
+		E5E3A2D21CAFFF25003302CA /* GenOptimizeAreasLowZoom.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C01CAFFF25003302CA /* GenOptimizeAreasLowZoom.h */; };
+		E5E3A2D31CAFFF25003302CA /* GenOptimizeAreaWayIds.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C11CAFFF25003302CA /* GenOptimizeAreaWayIds.h */; };
+		E5E3A2D41CAFFF25003302CA /* GenOptimizeWaysLowZoom.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C21CAFFF25003302CA /* GenOptimizeWaysLowZoom.h */; };
+		E5E3A2D51CAFFF25003302CA /* GenRawNodeIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C31CAFFF25003302CA /* GenRawNodeIndex.h */; };
+		E5E3A2D61CAFFF25003302CA /* GenRawRelIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C41CAFFF25003302CA /* GenRawRelIndex.h */; };
+		E5E3A2D71CAFFF25003302CA /* GenRawWayIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C51CAFFF25003302CA /* GenRawWayIndex.h */; };
+		E5E3A2D81CAFFF25003302CA /* GenRelAreaDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C61CAFFF25003302CA /* GenRelAreaDat.h */; };
+		E5E3A2D91CAFFF25003302CA /* GenTextIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C71CAFFF25003302CA /* GenTextIndex.h */; };
+		E5E3A2DA1CAFFF25003302CA /* GenWayAreaDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C81CAFFF25003302CA /* GenWayAreaDat.h */; };
+		E5E3A2DB1CAFFF25003302CA /* GenWayWayDat.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2C91CAFFF25003302CA /* GenWayWayDat.h */; };
+		E5E3A2DC1CAFFF25003302CA /* MergeAreaData.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2CA1CAFFF25003302CA /* MergeAreaData.h */; };
+		E5E3A2DD1CAFFF25003302CA /* Preprocessor.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2CB1CAFFF25003302CA /* Preprocessor.h */; };
+		E5E3A2DE1CAFFF25003302CA /* RawRelIndexedDataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2CC1CAFFF25003302CA /* RawRelIndexedDataFile.h */; };
+		E5E3A2DF1CAFFF25003302CA /* RawWayIndexedDataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5E3A2CD1CAFFF25003302CA /* RawWayIndexedDataFile.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E5A8262216F2706600EE4C78 /* libosmscoutimport.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscoutimport.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5A826BE16F2717300EE4C78 /* GenAreaAreaIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenAreaAreaIndex.cpp; sourceTree = "<group>"; };
+		E5A826C116F2717300EE4C78 /* GenAreaNodeIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenAreaNodeIndex.cpp; sourceTree = "<group>"; };
+		E5A826C416F2717300EE4C78 /* GenAreaWayIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenAreaWayIndex.cpp; sourceTree = "<group>"; };
+		E5A826CA16F2717300EE4C78 /* GenNodeDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenNodeDat.cpp; sourceTree = "<group>"; };
+		E5A826CD16F2717300EE4C78 /* GenNumericIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenNumericIndex.cpp; sourceTree = "<group>"; };
+		E5A826D616F2717300EE4C78 /* GenRouteDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenRouteDat.cpp; sourceTree = "<group>"; };
+		E5A826DC16F2717300EE4C78 /* GenTypeDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenTypeDat.cpp; sourceTree = "<group>"; };
+		E5A826DF16F2717300EE4C78 /* GenWaterIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenWaterIndex.cpp; sourceTree = "<group>"; };
+		E5A826E516F2717300EE4C78 /* Import.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Import.cpp; sourceTree = "<group>"; };
+		E5A826F216F2717300EE4C78 /* fileformat.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fileformat.pb.cc; sourceTree = "<group>"; };
+		E5A826F516F2717300EE4C78 /* osmformat.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = osmformat.pb.cc; sourceTree = "<group>"; };
+		E5A826F816F2717300EE4C78 /* Preprocess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Preprocess.cpp; sourceTree = "<group>"; };
+		E5A826FB16F2717300EE4C78 /* PreprocessOSM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PreprocessOSM.cpp; sourceTree = "<group>"; };
+		E5A826FC16F2717300EE4C78 /* PreprocessPBF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PreprocessPBF.cpp; sourceTree = "<group>"; };
+		E5A826FF16F2717300EE4C78 /* RawCoastline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawCoastline.cpp; sourceTree = "<group>"; };
+		E5A8270216F2717300EE4C78 /* RawNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawNode.cpp; sourceTree = "<group>"; };
+		E5A8270516F2717300EE4C78 /* RawRelation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawRelation.cpp; sourceTree = "<group>"; };
+		E5A8270816F2717300EE4C78 /* RawWay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawWay.cpp; sourceTree = "<group>"; };
+		E5A8270B16F2717300EE4C78 /* SortDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SortDat.cpp; sourceTree = "<group>"; };
+		E5A8270E16F2717300EE4C78 /* SortNodeDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SortNodeDat.cpp; sourceTree = "<group>"; };
+		E5A8271416F2717300EE4C78 /* SortWayDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SortWayDat.cpp; sourceTree = "<group>"; };
+		E5A8271816F2717300EE4C78 /* fileformat.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fileformat.pb.cc; sourceTree = "<group>"; };
+		E5A8271916F2717300EE4C78 /* fileformat.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileformat.pb.h; sourceTree = "<group>"; };
+		E5A8271A16F2717300EE4C78 /* fileformat.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fileformat.proto; sourceTree = "<group>"; };
+		E5A8271E16F2717400EE4C78 /* osmformat.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = osmformat.pb.cc; sourceTree = "<group>"; };
+		E5A8271F16F2717400EE4C78 /* osmformat.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = osmformat.pb.h; sourceTree = "<group>"; };
+		E5A8272016F2717400EE4C78 /* osmformat.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = osmformat.proto; sourceTree = "<group>"; };
+		E5A8285D16F27E9600EE4C78 /* GenAreaAreaIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenAreaAreaIndex.h; sourceTree = "<group>"; };
+		E5A8285E16F27E9600EE4C78 /* GenAreaNodeIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenAreaNodeIndex.h; sourceTree = "<group>"; };
+		E5A8285F16F27E9600EE4C78 /* GenAreaWayIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenAreaWayIndex.h; sourceTree = "<group>"; };
+		E5A8286116F27E9600EE4C78 /* GenNodeDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenNodeDat.h; sourceTree = "<group>"; };
+		E5A8286216F27E9600EE4C78 /* GenNumericIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenNumericIndex.h; sourceTree = "<group>"; };
+		E5A8286516F27E9600EE4C78 /* GenRouteDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenRouteDat.h; sourceTree = "<group>"; };
+		E5A8286716F27E9600EE4C78 /* GenTypeDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenTypeDat.h; sourceTree = "<group>"; };
+		E5A8286816F27E9600EE4C78 /* GenWaterIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenWaterIndex.h; sourceTree = "<group>"; };
+		E5A8286A16F27E9600EE4C78 /* Import.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Import.h; sourceTree = "<group>"; };
+		E5A8286C16F27E9600EE4C78 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		E5A8286D16F27E9600EE4C78 /* fileformat.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileformat.pb.h; sourceTree = "<group>"; };
+		E5A8286E16F27E9600EE4C78 /* osmformat.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = osmformat.pb.h; sourceTree = "<group>"; };
+		E5A8286F16F27E9600EE4C78 /* Preprocess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Preprocess.h; sourceTree = "<group>"; };
+		E5A8287016F27E9600EE4C78 /* PreprocessOSM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreprocessOSM.h; sourceTree = "<group>"; };
+		E5A8287116F27E9600EE4C78 /* PreprocessPBF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreprocessPBF.h; sourceTree = "<group>"; };
+		E5A8287216F27E9600EE4C78 /* RawCoastline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawCoastline.h; sourceTree = "<group>"; };
+		E5A8287316F27E9600EE4C78 /* RawNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawNode.h; sourceTree = "<group>"; };
+		E5A8287416F27E9600EE4C78 /* RawRelation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawRelation.h; sourceTree = "<group>"; };
+		E5A8287516F27E9600EE4C78 /* RawWay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawWay.h; sourceTree = "<group>"; };
+		E5A8287616F27E9600EE4C78 /* SortDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortDat.h; sourceTree = "<group>"; };
+		E5A8287716F27E9600EE4C78 /* SortNodeDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortNodeDat.h; sourceTree = "<group>"; };
+		E5A8287916F27E9600EE4C78 /* SortWayDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortWayDat.h; sourceTree = "<group>"; };
+		E5A8287A16F27E9600EE4C78 /* ImportFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImportFeatures.h; sourceTree = "<group>"; };
+		E5A8287B16F27E9600EE4C78 /* ImportFeatures.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ImportFeatures.h.in; sourceTree = "<group>"; };
+		E5A8287D16F27E9600EE4C78 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		E5A8287E16F27E9600EE4C78 /* Config.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Config.h.in; sourceTree = "<group>"; };
+		E5A8287F16F27E9600EE4C78 /* ImportImportExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImportImportExport.h; sourceTree = "<group>"; };
+		E5E3A29A1CAFFE7F003302CA /* GenIntersectionIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenIntersectionIndex.cpp; sourceTree = "<group>"; };
+		E5E3A29B1CAFFE7F003302CA /* GenLocationIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenLocationIndex.cpp; sourceTree = "<group>"; };
+		E5E3A29C1CAFFE7F003302CA /* GenMergeAreas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenMergeAreas.cpp; sourceTree = "<group>"; };
+		E5E3A29D1CAFFE7F003302CA /* GenOptimizeAreasLowZoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenOptimizeAreasLowZoom.cpp; sourceTree = "<group>"; };
+		E5E3A29E1CAFFE7F003302CA /* GenOptimizeAreaWayIds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenOptimizeAreaWayIds.cpp; sourceTree = "<group>"; };
+		E5E3A29F1CAFFE7F003302CA /* GenOptimizeWaysLowZoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenOptimizeWaysLowZoom.cpp; sourceTree = "<group>"; };
+		E5E3A2A01CAFFE7F003302CA /* GenRawNodeIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenRawNodeIndex.cpp; sourceTree = "<group>"; };
+		E5E3A2A11CAFFE7F003302CA /* GenRawRelIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenRawRelIndex.cpp; sourceTree = "<group>"; };
+		E5E3A2A21CAFFE7F003302CA /* GenRawWayIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenRawWayIndex.cpp; sourceTree = "<group>"; };
+		E5E3A2A31CAFFE7F003302CA /* GenRelAreaDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenRelAreaDat.cpp; sourceTree = "<group>"; };
+		E5E3A2A41CAFFE7F003302CA /* GenTextIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenTextIndex.cpp; sourceTree = "<group>"; };
+		E5E3A2A51CAFFE7F003302CA /* GenWayAreaDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenWayAreaDat.cpp; sourceTree = "<group>"; };
+		E5E3A2A61CAFFE7F003302CA /* GenWayWayDat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenWayWayDat.cpp; sourceTree = "<group>"; };
+		E5E3A2A71CAFFE7F003302CA /* MergeAreaData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MergeAreaData.cpp; sourceTree = "<group>"; };
+		E5E3A2A81CAFFE7F003302CA /* Preprocessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Preprocessor.cpp; sourceTree = "<group>"; };
+		E5E3A2A91CAFFE7F003302CA /* RawRelIndexedDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawRelIndexedDataFile.cpp; sourceTree = "<group>"; };
+		E5E3A2AA1CAFFE7F003302CA /* RawWayIndexedDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RawWayIndexedDataFile.cpp; sourceTree = "<group>"; };
+		E5E3A2BD1CAFFF25003302CA /* GenIntersectionIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenIntersectionIndex.h; sourceTree = "<group>"; };
+		E5E3A2BE1CAFFF25003302CA /* GenLocationIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenLocationIndex.h; sourceTree = "<group>"; };
+		E5E3A2BF1CAFFF25003302CA /* GenMergeAreas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenMergeAreas.h; sourceTree = "<group>"; };
+		E5E3A2C01CAFFF25003302CA /* GenOptimizeAreasLowZoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenOptimizeAreasLowZoom.h; sourceTree = "<group>"; };
+		E5E3A2C11CAFFF25003302CA /* GenOptimizeAreaWayIds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenOptimizeAreaWayIds.h; sourceTree = "<group>"; };
+		E5E3A2C21CAFFF25003302CA /* GenOptimizeWaysLowZoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenOptimizeWaysLowZoom.h; sourceTree = "<group>"; };
+		E5E3A2C31CAFFF25003302CA /* GenRawNodeIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenRawNodeIndex.h; sourceTree = "<group>"; };
+		E5E3A2C41CAFFF25003302CA /* GenRawRelIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenRawRelIndex.h; sourceTree = "<group>"; };
+		E5E3A2C51CAFFF25003302CA /* GenRawWayIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenRawWayIndex.h; sourceTree = "<group>"; };
+		E5E3A2C61CAFFF25003302CA /* GenRelAreaDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenRelAreaDat.h; sourceTree = "<group>"; };
+		E5E3A2C71CAFFF25003302CA /* GenTextIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenTextIndex.h; sourceTree = "<group>"; };
+		E5E3A2C81CAFFF25003302CA /* GenWayAreaDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenWayAreaDat.h; sourceTree = "<group>"; };
+		E5E3A2C91CAFFF25003302CA /* GenWayWayDat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenWayWayDat.h; sourceTree = "<group>"; };
+		E5E3A2CA1CAFFF25003302CA /* MergeAreaData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MergeAreaData.h; sourceTree = "<group>"; };
+		E5E3A2CB1CAFFF25003302CA /* Preprocessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Preprocessor.h; sourceTree = "<group>"; };
+		E5E3A2CC1CAFFF25003302CA /* RawRelIndexedDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawRelIndexedDataFile.h; sourceTree = "<group>"; };
+		E5E3A2CD1CAFFF25003302CA /* RawWayIndexedDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RawWayIndexedDataFile.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E5A8261F16F2706600EE4C78 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E5A8261916F2706600EE4C78 = {
+			isa = PBXGroup;
+			children = (
+				E5A8262916F270FB00EE4C78 /* libosmscoutimport */,
+				E5A8262316F2706600EE4C78 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E5A8262316F2706600EE4C78 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8262216F2706600EE4C78 /* libosmscoutimport.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E5A8262916F270FB00EE4C78 /* libosmscoutimport */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8285616F27E9600EE4C78 /* include */,
+				E5A8267616F2717200EE4C78 /* src */,
+			);
+			name = libosmscoutimport;
+			sourceTree = "<group>";
+		};
+		E5A8267616F2717200EE4C78 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8268116F2717200EE4C78 /* osmscout */,
+				E5A8271716F2717300EE4C78 /* protobuf */,
+			);
+			name = src;
+			path = "../../../libosmscout-import/src";
+			sourceTree = "<group>";
+		};
+		E5A8268116F2717200EE4C78 /* osmscout */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8268216F2717200EE4C78 /* import */,
+			);
+			path = osmscout;
+			sourceTree = "<group>";
+		};
+		E5A8268216F2717200EE4C78 /* import */ = {
+			isa = PBXGroup;
+			children = (
+				E5E3A29A1CAFFE7F003302CA /* GenIntersectionIndex.cpp */,
+				E5E3A29B1CAFFE7F003302CA /* GenLocationIndex.cpp */,
+				E5E3A29C1CAFFE7F003302CA /* GenMergeAreas.cpp */,
+				E5E3A29D1CAFFE7F003302CA /* GenOptimizeAreasLowZoom.cpp */,
+				E5E3A29E1CAFFE7F003302CA /* GenOptimizeAreaWayIds.cpp */,
+				E5E3A29F1CAFFE7F003302CA /* GenOptimizeWaysLowZoom.cpp */,
+				E5E3A2A01CAFFE7F003302CA /* GenRawNodeIndex.cpp */,
+				E5E3A2A11CAFFE7F003302CA /* GenRawRelIndex.cpp */,
+				E5E3A2A21CAFFE7F003302CA /* GenRawWayIndex.cpp */,
+				E5E3A2A31CAFFE7F003302CA /* GenRelAreaDat.cpp */,
+				E5E3A2A41CAFFE7F003302CA /* GenTextIndex.cpp */,
+				E5E3A2A51CAFFE7F003302CA /* GenWayAreaDat.cpp */,
+				E5E3A2A61CAFFE7F003302CA /* GenWayWayDat.cpp */,
+				E5E3A2A71CAFFE7F003302CA /* MergeAreaData.cpp */,
+				E5E3A2A81CAFFE7F003302CA /* Preprocessor.cpp */,
+				E5E3A2A91CAFFE7F003302CA /* RawRelIndexedDataFile.cpp */,
+				E5E3A2AA1CAFFE7F003302CA /* RawWayIndexedDataFile.cpp */,
+				E5A826BE16F2717300EE4C78 /* GenAreaAreaIndex.cpp */,
+				E5A826C116F2717300EE4C78 /* GenAreaNodeIndex.cpp */,
+				E5A826C416F2717300EE4C78 /* GenAreaWayIndex.cpp */,
+				E5A826CA16F2717300EE4C78 /* GenNodeDat.cpp */,
+				E5A826CD16F2717300EE4C78 /* GenNumericIndex.cpp */,
+				E5A826D616F2717300EE4C78 /* GenRouteDat.cpp */,
+				E5A826DC16F2717300EE4C78 /* GenTypeDat.cpp */,
+				E5A826DF16F2717300EE4C78 /* GenWaterIndex.cpp */,
+				E5A826E516F2717300EE4C78 /* Import.cpp */,
+				E5A826E816F2717300EE4C78 /* pbf */,
+				E5A826F816F2717300EE4C78 /* Preprocess.cpp */,
+				E5A826FB16F2717300EE4C78 /* PreprocessOSM.cpp */,
+				E5A826FC16F2717300EE4C78 /* PreprocessPBF.cpp */,
+				E5A826FF16F2717300EE4C78 /* RawCoastline.cpp */,
+				E5A8270216F2717300EE4C78 /* RawNode.cpp */,
+				E5A8270516F2717300EE4C78 /* RawRelation.cpp */,
+				E5A8270816F2717300EE4C78 /* RawWay.cpp */,
+				E5A8270B16F2717300EE4C78 /* SortDat.cpp */,
+				E5A8270E16F2717300EE4C78 /* SortNodeDat.cpp */,
+				E5A8271416F2717300EE4C78 /* SortWayDat.cpp */,
+			);
+			path = import;
+			sourceTree = "<group>";
+		};
+		E5A826E816F2717300EE4C78 /* pbf */ = {
+			isa = PBXGroup;
+			children = (
+				E5A826F216F2717300EE4C78 /* fileformat.pb.cc */,
+				E5A826F516F2717300EE4C78 /* osmformat.pb.cc */,
+			);
+			path = pbf;
+			sourceTree = "<group>";
+		};
+		E5A8271716F2717300EE4C78 /* protobuf */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8271816F2717300EE4C78 /* fileformat.pb.cc */,
+				E5A8271916F2717300EE4C78 /* fileformat.pb.h */,
+				E5A8271A16F2717300EE4C78 /* fileformat.proto */,
+				E5A8271E16F2717400EE4C78 /* osmformat.pb.cc */,
+				E5A8271F16F2717400EE4C78 /* osmformat.pb.h */,
+				E5A8272016F2717400EE4C78 /* osmformat.proto */,
+			);
+			path = protobuf;
+			sourceTree = "<group>";
+		};
+		E5A8285616F27E9600EE4C78 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8285A16F27E9600EE4C78 /* osmscout */,
+			);
+			name = include;
+			path = "../../../libosmscout-import/include";
+			sourceTree = "<group>";
+		};
+		E5A8285A16F27E9600EE4C78 /* osmscout */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8285B16F27E9600EE4C78 /* import */,
+				E5A8287A16F27E9600EE4C78 /* ImportFeatures.h */,
+				E5A8287B16F27E9600EE4C78 /* ImportFeatures.h.in */,
+				E5A8287C16F27E9600EE4C78 /* private */,
+			);
+			path = osmscout;
+			sourceTree = "<group>";
+		};
+		E5A8285B16F27E9600EE4C78 /* import */ = {
+			isa = PBXGroup;
+			children = (
+				E5E3A2BD1CAFFF25003302CA /* GenIntersectionIndex.h */,
+				E5E3A2BE1CAFFF25003302CA /* GenLocationIndex.h */,
+				E5E3A2BF1CAFFF25003302CA /* GenMergeAreas.h */,
+				E5E3A2C01CAFFF25003302CA /* GenOptimizeAreasLowZoom.h */,
+				E5E3A2C11CAFFF25003302CA /* GenOptimizeAreaWayIds.h */,
+				E5E3A2C21CAFFF25003302CA /* GenOptimizeWaysLowZoom.h */,
+				E5E3A2C31CAFFF25003302CA /* GenRawNodeIndex.h */,
+				E5E3A2C41CAFFF25003302CA /* GenRawRelIndex.h */,
+				E5E3A2C51CAFFF25003302CA /* GenRawWayIndex.h */,
+				E5E3A2C61CAFFF25003302CA /* GenRelAreaDat.h */,
+				E5E3A2C71CAFFF25003302CA /* GenTextIndex.h */,
+				E5E3A2C81CAFFF25003302CA /* GenWayAreaDat.h */,
+				E5E3A2C91CAFFF25003302CA /* GenWayWayDat.h */,
+				E5E3A2CA1CAFFF25003302CA /* MergeAreaData.h */,
+				E5E3A2CB1CAFFF25003302CA /* Preprocessor.h */,
+				E5E3A2CC1CAFFF25003302CA /* RawRelIndexedDataFile.h */,
+				E5E3A2CD1CAFFF25003302CA /* RawWayIndexedDataFile.h */,
+				E5A8285D16F27E9600EE4C78 /* GenAreaAreaIndex.h */,
+				E5A8285E16F27E9600EE4C78 /* GenAreaNodeIndex.h */,
+				E5A8285F16F27E9600EE4C78 /* GenAreaWayIndex.h */,
+				E5A8286116F27E9600EE4C78 /* GenNodeDat.h */,
+				E5A8286216F27E9600EE4C78 /* GenNumericIndex.h */,
+				E5A8286516F27E9600EE4C78 /* GenRouteDat.h */,
+				E5A8286716F27E9600EE4C78 /* GenTypeDat.h */,
+				E5A8286816F27E9600EE4C78 /* GenWaterIndex.h */,
+				E5A8286A16F27E9600EE4C78 /* Import.h */,
+				E5A8286B16F27E9600EE4C78 /* pbf */,
+				E5A8286F16F27E9600EE4C78 /* Preprocess.h */,
+				E5A8287016F27E9600EE4C78 /* PreprocessOSM.h */,
+				E5A8287116F27E9600EE4C78 /* PreprocessPBF.h */,
+				E5A8287216F27E9600EE4C78 /* RawCoastline.h */,
+				E5A8287316F27E9600EE4C78 /* RawNode.h */,
+				E5A8287416F27E9600EE4C78 /* RawRelation.h */,
+				E5A8287516F27E9600EE4C78 /* RawWay.h */,
+				E5A8287616F27E9600EE4C78 /* SortDat.h */,
+				E5A8287716F27E9600EE4C78 /* SortNodeDat.h */,
+				E5A8287916F27E9600EE4C78 /* SortWayDat.h */,
+			);
+			path = import;
+			sourceTree = "<group>";
+		};
+		E5A8286B16F27E9600EE4C78 /* pbf */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8286C16F27E9600EE4C78 /* .gitignore */,
+				E5A8286D16F27E9600EE4C78 /* fileformat.pb.h */,
+				E5A8286E16F27E9600EE4C78 /* osmformat.pb.h */,
+			);
+			path = pbf;
+			sourceTree = "<group>";
+		};
+		E5A8287C16F27E9600EE4C78 /* private */ = {
+			isa = PBXGroup;
+			children = (
+				E5A8287D16F27E9600EE4C78 /* Config.h */,
+				E5A8287E16F27E9600EE4C78 /* Config.h.in */,
+				E5A8287F16F27E9600EE4C78 /* ImportImportExport.h */,
+			);
+			path = private;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		E5A8262016F2706600EE4C78 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5A8277816F2717400EE4C78 /* fileformat.pb.h in Headers */,
+				E5E3A2CF1CAFFF25003302CA /* GenIntersectionIndex.h in Headers */,
+				E5E3A2D31CAFFF25003302CA /* GenOptimizeAreaWayIds.h in Headers */,
+				E5A8277B16F2717400EE4C78 /* osmformat.pb.h in Headers */,
+				E5A8288416F27E9600EE4C78 /* GenAreaAreaIndex.h in Headers */,
+				E5A8288516F27E9600EE4C78 /* GenAreaNodeIndex.h in Headers */,
+				E5A8288616F27E9600EE4C78 /* GenAreaWayIndex.h in Headers */,
+				E5A8288816F27E9600EE4C78 /* GenNodeDat.h in Headers */,
+				E5A8288916F27E9600EE4C78 /* GenNumericIndex.h in Headers */,
+				E5A8288C16F27E9600EE4C78 /* GenRouteDat.h in Headers */,
+				E5A8288E16F27E9600EE4C78 /* GenTypeDat.h in Headers */,
+				E5E3A2DD1CAFFF25003302CA /* Preprocessor.h in Headers */,
+				E5A8288F16F27E9600EE4C78 /* GenWaterIndex.h in Headers */,
+				E5A8289116F27E9600EE4C78 /* Import.h in Headers */,
+				E5A8289216F27E9600EE4C78 /* fileformat.pb.h in Headers */,
+				E5A8289316F27E9600EE4C78 /* osmformat.pb.h in Headers */,
+				E5E3A2DC1CAFFF25003302CA /* MergeAreaData.h in Headers */,
+				E5A8289416F27E9600EE4C78 /* Preprocess.h in Headers */,
+				E5E3A2DE1CAFFF25003302CA /* RawRelIndexedDataFile.h in Headers */,
+				E5E3A2DF1CAFFF25003302CA /* RawWayIndexedDataFile.h in Headers */,
+				E5A8289516F27E9600EE4C78 /* PreprocessOSM.h in Headers */,
+				E5E3A2DA1CAFFF25003302CA /* GenWayAreaDat.h in Headers */,
+				E5E3A2D91CAFFF25003302CA /* GenTextIndex.h in Headers */,
+				E5A8289616F27E9600EE4C78 /* PreprocessPBF.h in Headers */,
+				E5A8289716F27E9600EE4C78 /* RawCoastline.h in Headers */,
+				E5E3A2D51CAFFF25003302CA /* GenRawNodeIndex.h in Headers */,
+				E5A8289816F27E9600EE4C78 /* RawNode.h in Headers */,
+				E5E3A2D01CAFFF25003302CA /* GenLocationIndex.h in Headers */,
+				E5E3A2D11CAFFF25003302CA /* GenMergeAreas.h in Headers */,
+				E5A8289916F27E9600EE4C78 /* RawRelation.h in Headers */,
+				E5E3A2D41CAFFF25003302CA /* GenOptimizeWaysLowZoom.h in Headers */,
+				E5A8289A16F27E9600EE4C78 /* RawWay.h in Headers */,
+				E5E3A2D61CAFFF25003302CA /* GenRawRelIndex.h in Headers */,
+				E5E3A2D21CAFFF25003302CA /* GenOptimizeAreasLowZoom.h in Headers */,
+				E5A8289B16F27E9600EE4C78 /* SortDat.h in Headers */,
+				E5A8289C16F27E9600EE4C78 /* SortNodeDat.h in Headers */,
+				E5E3A2DB1CAFFF25003302CA /* GenWayWayDat.h in Headers */,
+				E5A8289E16F27E9600EE4C78 /* SortWayDat.h in Headers */,
+				E5A8289F16F27E9600EE4C78 /* ImportFeatures.h in Headers */,
+				E5A828A016F27E9600EE4C78 /* Config.h in Headers */,
+				E5E3A2D81CAFFF25003302CA /* GenRelAreaDat.h in Headers */,
+				E5A828A116F27E9600EE4C78 /* ImportImportExport.h in Headers */,
+				E5E3A2D71CAFFF25003302CA /* GenRawWayIndex.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		E5A8262116F2706600EE4C78 /* libosmscoutimport */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5A8262616F2706600EE4C78 /* Build configuration list for PBXNativeTarget "libosmscoutimport" */;
+			buildPhases = (
+				E5A8261E16F2706600EE4C78 /* Sources */,
+				E5A8261F16F2706600EE4C78 /* Frameworks */,
+				E5A8262016F2706600EE4C78 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libosmscoutimport;
+			productName = libosmscoutimport;
+			productReference = E5A8262216F2706600EE4C78 /* libosmscoutimport.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E5A8261A16F2706600EE4C78 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = libosmscout;
+			};
+			buildConfigurationList = E5A8261D16F2706600EE4C78 /* Build configuration list for PBXProject "libosmscoutimport" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = E5A8261916F2706600EE4C78;
+			productRefGroup = E5A8262316F2706600EE4C78 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E5A8262116F2706600EE4C78 /* libosmscoutimport */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E5A8261E16F2706600EE4C78 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5E3A2BA1CAFFE7F003302CA /* RawRelIndexedDataFile.cpp in Sources */,
+				E5A8274016F2717400EE4C78 /* GenAreaAreaIndex.cpp in Sources */,
+				E5A8274216F2717400EE4C78 /* GenAreaNodeIndex.cpp in Sources */,
+				E5E3A2BB1CAFFE7F003302CA /* RawWayIndexedDataFile.cpp in Sources */,
+				E5A8274416F2717400EE4C78 /* GenAreaWayIndex.cpp in Sources */,
+				E5A8274816F2717400EE4C78 /* GenNodeDat.cpp in Sources */,
+				E5E3A2B01CAFFE7F003302CA /* GenOptimizeWaysLowZoom.cpp in Sources */,
+				E5E3A2B31CAFFE7F003302CA /* GenRawWayIndex.cpp in Sources */,
+				E5E3A2B11CAFFE7F003302CA /* GenRawNodeIndex.cpp in Sources */,
+				E5E3A2AE1CAFFE7F003302CA /* GenOptimizeAreasLowZoom.cpp in Sources */,
+				E5A8274A16F2717400EE4C78 /* GenNumericIndex.cpp in Sources */,
+				E5E3A2B71CAFFE7F003302CA /* GenWayWayDat.cpp in Sources */,
+				E5A8275016F2717400EE4C78 /* GenRouteDat.cpp in Sources */,
+				E5A8275416F2717400EE4C78 /* GenTypeDat.cpp in Sources */,
+				E5A8275616F2717400EE4C78 /* GenWaterIndex.cpp in Sources */,
+				E5A8275A16F2717400EE4C78 /* Import.cpp in Sources */,
+				E5E3A2AB1CAFFE7F003302CA /* GenIntersectionIndex.cpp in Sources */,
+				E5A8275E16F2717400EE4C78 /* fileformat.pb.cc in Sources */,
+				E5E3A2B41CAFFE7F003302CA /* GenRelAreaDat.cpp in Sources */,
+				E5E3A2B81CAFFE7F003302CA /* MergeAreaData.cpp in Sources */,
+				E5A8276016F2717400EE4C78 /* osmformat.pb.cc in Sources */,
+				E5A8276216F2717400EE4C78 /* Preprocess.cpp in Sources */,
+				E5E3A2B61CAFFE7F003302CA /* GenWayAreaDat.cpp in Sources */,
+				E5A8276416F2717400EE4C78 /* PreprocessOSM.cpp in Sources */,
+				E5A8276516F2717400EE4C78 /* PreprocessPBF.cpp in Sources */,
+				E5E3A2B91CAFFE7F003302CA /* Preprocessor.cpp in Sources */,
+				E5A8276716F2717400EE4C78 /* RawCoastline.cpp in Sources */,
+				E5E3A2B21CAFFE7F003302CA /* GenRawRelIndex.cpp in Sources */,
+				E5A8276916F2717400EE4C78 /* RawNode.cpp in Sources */,
+				E5E3A2B51CAFFE7F003302CA /* GenTextIndex.cpp in Sources */,
+				E5A8276B16F2717400EE4C78 /* RawRelation.cpp in Sources */,
+				E5A8276D16F2717400EE4C78 /* RawWay.cpp in Sources */,
+				E5E3A2AF1CAFFE7F003302CA /* GenOptimizeAreaWayIds.cpp in Sources */,
+				E5A8276F16F2717400EE4C78 /* SortDat.cpp in Sources */,
+				E5E3A2AC1CAFFE7F003302CA /* GenLocationIndex.cpp in Sources */,
+				E5A8277116F2717400EE4C78 /* SortNodeDat.cpp in Sources */,
+				E5A8277516F2717400EE4C78 /* SortWayDat.cpp in Sources */,
+				E5E3A2AD1CAFFE7F003302CA /* GenMergeAreas.cpp in Sources */,
+				E5A8277716F2717400EE4C78 /* fileformat.pb.cc in Sources */,
+				E5A8277A16F2717400EE4C78 /* osmformat.pb.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E5A8262416F2706600EE4C78 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		E5A8262516F2706600EE4C78 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../../libosmscout/include;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+		E5A8262716F2706600EE4C78 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = "";
+				GCC_VERSION = "";
+				HEADER_SEARCH_PATHS = (
+					"../../../libosmscout-import/include",
+					../../../libosmscout/include,
+					"../../../../../protobuf-2.4.1/src/",
+					/usr/include/libxml2/,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../libosmscout-import/src/.libs\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		E5A8262816F2706600EE4C78 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = "";
+				GCC_VERSION = "";
+				HEADER_SEARCH_PATHS = (
+					"../../../libosmscout-import/include",
+					../../../libosmscout/include,
+					"../../../../../protobuf-2.4.1/src/",
+					/usr/include/libxml2/,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../libosmscout-import/src/.libs\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E5A8261D16F2706600EE4C78 /* Build configuration list for PBXProject "libosmscoutimport" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5A8262416F2706600EE4C78 /* Debug */,
+				E5A8262516F2706600EE4C78 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E5A8262616F2706600EE4C78 /* Build configuration list for PBXNativeTarget "libosmscoutimport" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5A8262716F2706600EE4C78 /* Debug */,
+				E5A8262816F2706600EE4C78 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E5A8261A16F2706600EE4C78 /* Project object */;
+}
