@@ -17,8 +17,6 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifdef OSMSCOUT_IMPORT_HAVE_LIB_MARISA
-
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/Node.h>
@@ -585,5 +583,3 @@ namespace osmscout
     return true;
   }
 }
-
-#endif
