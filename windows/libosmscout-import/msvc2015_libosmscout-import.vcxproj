@@ -142,6 +142,7 @@
     <ClCompile Include="src\osmscout\import\GenIntersectionIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenLocationIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenMergeAreas.cpp" />
+    <ClCompile Include="src\osmscout\import\GenCoordDat.cpp" />
     <ClCompile Include="src\osmscout\import\GenNodeDat.cpp" />
     <ClCompile Include="src\osmscout\import\GenNumericIndex.cpp" />
     <ClCompile Include="src\osmscout\import\GenOptimizeAreasLowZoom.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="include\osmscout\import\GenIntersectionIndex.h" />
     <ClInclude Include="include\osmscout\import\GenLocationIndex.h" />
     <ClInclude Include="include\osmscout\import\GenMergeAreas.h" />
+    <ClInclude Include="include\osmscout\import\GenCoordDat.h" />
     <ClInclude Include="include\osmscout\import\GenNodeDat.h" />
     <ClInclude Include="include\osmscout\import\GenNumericIndex.h" />
     <ClInclude Include="include\osmscout\import\GenOptimizeAreasLowZoom.h" />
