@@ -318,7 +318,6 @@ class StaticOptimizedDeltaEncoder : public Encoder
 {
 private:
   std::vector<int32_t> deltaBuffer;
-  char                 buffer[10]; // Enough for 64bit values
 
 public:
   StaticOptimizedDeltaEncoder()
