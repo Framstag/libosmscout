@@ -317,8 +317,8 @@ namespace osmscout {
               serial=duplicateEntry->second;
 
               if (serial==255) {
-                progress.Error("Coordinate " + osmCoord.GetCoord().GetDisplayText()+" has more than 256 nodes");
-                return false;
+                progress.Error("Coordinate "+NumberToString(osmCoord.GetOSMId())+" "+osmCoord.GetCoord().GetDisplayText()+" has more than 256 nodes");
+                continue;
               }
 
               duplicateEntry->second++;
