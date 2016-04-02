@@ -31,7 +31,7 @@ namespace osmscout {
   const char* MergeAreasGenerator::AREAS2_TMP="areas2.tmp";
 
   void MergeAreasGenerator::GetDescription(const ImportParameter& /*parameter*/,
-                                              ImportModuleDescription& description) const
+                                           ImportModuleDescription& description) const
   {
     description.SetName("MergeAreasGenerator");
     description.SetDescription("Merge areas into bigger areas");
@@ -62,7 +62,7 @@ namespace osmscout {
     return 0;
   }
 
-  void MergeAreasGenerator::EraseAreaInCache(const NodeUseMap& nodeUseMap,
+  void MergeAreasGenerator::EraseAreaInCache(const std::unordered_set<Id>& nodeUseMap,
                                              const AreaRef& area,
                                              std::unordered_map<Id,std::set<AreaRef> >& idAreaMap)
   {
@@ -71,7 +71,7 @@ namespace osmscout {
         for (const auto node : ring.nodes) {
           Id id=node.GetId();
 
-          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+          if (nodeUseMap.find(id)!=nodeUseMap.end()) {
             idAreaMap[id].erase(area);
           }
         }
@@ -87,7 +87,7 @@ namespace osmscout {
                                             const TypeConfig& typeConfig,
                                             FileScanner& scanner,
                                             const TypeInfoSet& mergeTypes,
-                                            std::vector<NodeUseMap>& nodeUseMap)
+                                            std::unordered_set<Id>& nodeUseMap)
   {
     uint32_t areaCount=0;
 
@@ -97,11 +97,13 @@ namespace osmscout {
 
     scanner.Read(areaCount);
 
-    for (uint32_t current=1; current<=areaCount; current++) {
-      uint8_t type;
-      Id      id;
-      Area    data;
+    uint8_t type;
+    Id      id;
+    Area    data;
 
+    std::unordered_set<Id> usedOnceSet;
+
+    for (uint32_t current=1; current<=areaCount; current++) {
       progress.SetProgress(current,areaCount);
 
       scanner.Read(type);
@@ -120,14 +122,23 @@ namespace osmscout {
       std::unordered_set<Id> nodeIds;
 
       for (const auto& ring: data.rings) {
-        if (ring.IsOuterRing()) {
-          for (const auto node : ring.nodes) {
-            Id id=node.GetId();
+        if (!ring.IsOuterRing()) {
+          continue;
+        }
 
-            if (nodeIds.find(id)==nodeIds.end()) {
-              nodeUseMap[data.GetType()->GetIndex()].SetNodeUsed(id);
-              nodeIds.insert(id);
+        for (const auto node : ring.nodes) {
+          Id id=node.GetId();
+
+          if (nodeIds.find(id)==nodeIds.end()) {
+            auto entry=usedOnceSet.find(id);
+
+            if (entry!=usedOnceSet.end()) {
+              nodeUseMap.insert(id);
             }
+            else {
+              usedOnceSet.insert(id);
+            }
+            nodeIds.insert(id);
           }
         }
       }
@@ -149,7 +160,7 @@ namespace osmscout {
                                      const TypeConfig& typeConfig,
                                      const TypeInfoSet& candidateTypes,
                                      TypeInfoSet& loadedTypes,
-                                     const std::vector<NodeUseMap>& nodeUseMap,
+                                     const std::unordered_set<Id>& nodeUseMap,
                                      FileScanner& scanner,
                                      FileWriter& writer,
                                      std::vector<AreaMergeData>& mergeJob,
@@ -209,7 +220,7 @@ namespace osmscout {
         }
 
         for (const auto node : ring.nodes) {
-          if (nodeUseMap[area->GetType()->GetIndex()].IsNodeUsedAtLeastTwice(node.GetId())) {
+          if (nodeUseMap.find(node.GetId())!=nodeUseMap.end()) {
             isMergeCandidate=true;
             break;
           }
@@ -263,7 +274,7 @@ namespace osmscout {
     return true;
   }
 
-  void MergeAreasGenerator::IndexAreasByNodeIds(const NodeUseMap& nodeUseMap,
+  void MergeAreasGenerator::IndexAreasByNodeIds(const std::unordered_set<Id>& nodeUseMap,
                                                 const std::list<AreaRef>& areas,
                                                 std::unordered_map<Id,std::set<AreaRef> >& idAreaMap)
   {
@@ -276,7 +287,7 @@ namespace osmscout {
             Id id=node.GetId();
 
             if (nodeIds.find(id)==nodeIds.end() &&
-                nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+                nodeUseMap.find(id)!=nodeUseMap.end()) {
               idAreaMap[id].insert(area);
               nodeIds.insert(id);
             }
@@ -286,7 +297,7 @@ namespace osmscout {
     }
   }
 
-  bool MergeAreasGenerator::TryMerge(const NodeUseMap& nodeUseMap,
+  bool MergeAreasGenerator::TryMerge(const std::unordered_set<Id>& nodeUseMap,
                                      Area& area,
                                      std::unordered_map<Id,std::set<AreaRef> >& idAreaMap,
                                      std::set<Id>& finishedIds,
@@ -316,7 +327,7 @@ namespace osmscout {
         nodeIds.insert(id);
 
         // Uninteresting node
-        if (!nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+        if (nodeUseMap.find(id)==nodeUseMap.end()) {
           continue;
         }
 
@@ -399,7 +410,7 @@ namespace osmscout {
             }
           }
           else {
-            //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
+            //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " at " << index << " " << node.GetCoord().GetDisplayText() << std::endl;
           }
 
           candidate++;
@@ -413,7 +424,7 @@ namespace osmscout {
   }
 
   void MergeAreasGenerator::MergeAreas(Progress& progress,
-                                       const NodeUseMap& nodeUseMap,
+                                       const std::unordered_set<Id>& nodeUseMap,
                                        AreaMergeData& job)
   {
     std::unordered_map<Id,std::set<AreaRef> > idAreaMap;
@@ -544,9 +555,7 @@ namespace osmscout {
       }
     }
 
-    std::vector<NodeUseMap> nodeUseMap;
-
-    nodeUseMap.resize(typeConfig->GetTypeCount());
+    std::unordered_set<Id> nodeUseMap;
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -562,11 +571,7 @@ namespace osmscout {
         return false;
       }
 
-      uint32_t nodeCount=0;
-
-      for (const auto& map : nodeUseMap) {
-        nodeCount+=map.GetNodeUsedCount();
-      }
+      uint32_t nodeCount=nodeUseMap.size();
 
       progress.Info("Found "+NumberToString(nodeCount)+" nodes as possible connection points for areas");
 
@@ -608,7 +613,7 @@ namespace osmscout {
           if (!mergeJob[type->GetIndex()].areas.empty()) {
             progress.Info("Merging areas of type "+type->GetName());
             MergeAreas(progress,
-                       nodeUseMap[type->GetIndex()],
+                       nodeUseMap,
                        mergeJob[type->GetIndex()]);
             progress.Info("Reduced areas of '"+type->GetName()+"' from "+NumberToString(mergeJob[type->GetIndex()].areaCount)+" to "+NumberToString(mergeJob[type->GetIndex()].areaCount-mergeJob[type->GetIndex()].mergedAway.size()));
 

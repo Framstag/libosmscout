@@ -41,22 +41,24 @@ namespace osmscout {
     bool ScanAreaIds(const ImportParameter& parameter,
                      Progress& progress,
                      const TypeConfig& typeConfig,
-                     NodeUseMap& nodeUseMap);
+                     std::unordered_set<Id>& usedIdSet,
+                     std::unordered_set<Id>& usedIdAtLeastTwiceSet);
 
     bool ScanWayIds(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,
-                    NodeUseMap& nodeUseMap);
+                    std::unordered_set<Id>& usedIdSet,
+                    std::unordered_set<Id>& usedIdAtLeastTwiceSet);
 
     bool CopyAreas(const ImportParameter& parameter,
                    Progress& progress,
                    const TypeConfig& typeConfig,
-                   NodeUseMap& nodeUseMap);
+                   const std::unordered_set<Id>& usedIdAtLeastTwiceSet);
 
     bool CopyWays(const ImportParameter& parameter,
                   Progress& progress,
                   const TypeConfig& typeConfig,
-                  NodeUseMap& nodeUseMap);
+                  const std::unordered_set<Id>& usedIdAtLeastTwiceSet);
   public:
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const;

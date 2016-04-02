@@ -64,7 +64,7 @@ namespace osmscout {
     size_t GetFirstOuterRingWithId(const Area& area,
                                    Id id) const;
 
-    void EraseAreaInCache(const NodeUseMap& nodeUseMap,
+    void EraseAreaInCache(const std::unordered_set<Id>& nodeUseMap,
                           const AreaRef& area,
                           std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
 
@@ -91,7 +91,7 @@ namespace osmscout {
                          const TypeConfig& typeConfig,
                          FileScanner& scanner,
                          const TypeInfoSet& mergeTypes,
-                         std::vector<NodeUseMap>& nodeUseMap);
+                         std::unordered_set<Id>& nodeUseMap);
 
     /**
      * Load all areas which have at least one of the "used at least twice"
@@ -130,7 +130,7 @@ namespace osmscout {
                   const TypeConfig& typeConfig,
                   const TypeInfoSet& candidateTypes,
                   TypeInfoSet& loadedTypes,
-                  const std::vector<NodeUseMap>& nodeUseMap,
+                  const std::unordered_set<Id>& nodeUseMap,
                   FileScanner& scanner,
                   FileWriter& writer,
                   std::vector<AreaMergeData>& mergeJob,
@@ -147,11 +147,11 @@ namespace osmscout {
      *    list of areas that hold this node in on of their outer
      *    rings.
      */
-    void IndexAreasByNodeIds(const NodeUseMap& nodeUseMap,
+    void IndexAreasByNodeIds(const std::unordered_set<Id>& nodeUseMap,
                              const std::list<AreaRef>& areas,
                              std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
 
-    bool TryMerge(const NodeUseMap& nodeUseMap,
+    bool TryMerge(const std::unordered_set<Id>& nodeUseMap,
                   Area& area,
                   std::unordered_map<Id,std::set<AreaRef> >& idAreaMap,
                   std::set<Id>& finishedIds,
@@ -166,7 +166,7 @@ namespace osmscout {
      * @param blacklist
      */
     void MergeAreas(Progress& progress,
-                    const NodeUseMap& nodeUseMap,
+                    const std::unordered_set<Id>& nodeUseMap,
                     AreaMergeData& job);
 
     bool WriteMergeResult(Progress& progress,

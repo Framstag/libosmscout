@@ -48,13 +48,13 @@ namespace osmscout {
   class OSMSCOUT_API NodeUseMap
   {
   private:
-    size_t                                    nodeCount;
-    size_t                                    duplicateCount;
     typedef std::bitset<4096>                 Bitset;
     typedef std::unordered_map<PageId,Bitset> Map;
 
   private:
-    Map nodeUseMap;
+    Map                                       nodeUseMap;
+    size_t                                    nodeCount;
+    size_t                                    duplicateCount;
 
   public:
     NodeUseMap();

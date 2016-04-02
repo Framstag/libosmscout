@@ -49,7 +49,8 @@ namespace osmscout {
   bool OptimizeAreaWayIdsGenerator::ScanAreaIds(const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const TypeConfig& typeConfig,
-                                                NodeUseMap& nodeUseMap)
+                                                std::unordered_set<Id>& usedIdSet,
+                                                std::unordered_set<Id>& usedIdAtLeastTwiceSet)
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
@@ -88,7 +89,13 @@ namespace osmscout {
             Id id=node.GetId();
 
             if (nodeIds.find(id)==nodeIds.end()) {
-              nodeUseMap.SetNodeUsed(id);
+              if (usedIdSet.find(id)!=usedIdSet.end()) {
+                usedIdAtLeastTwiceSet.insert(id);
+              }
+              else {
+                usedIdSet.insert(id);
+              }
+
               nodeIds.insert(id);
               idCount++;
             }
@@ -111,7 +118,8 @@ namespace osmscout {
   bool OptimizeAreaWayIdsGenerator::ScanWayIds(const ImportParameter& parameter,
                                                Progress& progress,
                                                const TypeConfig& typeConfig,
-                                               NodeUseMap& nodeUseMap)
+                                               std::unordered_set<Id>& usedIdSet,
+                                               std::unordered_set<Id>& usedIdAtLeastTwiceSet)
   {
     FileScanner scanner;
     uint32_t    dataCount=0;
@@ -151,7 +159,13 @@ namespace osmscout {
           Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
-            nodeUseMap.SetNodeUsed(id);
+            if (usedIdSet.find(id)!=usedIdSet.end()) {
+              usedIdAtLeastTwiceSet.insert(id);
+            }
+            else {
+              usedIdSet.insert(id);
+            }
+
             nodeIds.insert(id);
             idCount++;
           }
@@ -162,7 +176,7 @@ namespace osmscout {
         // is not dropped later on, and we cannot detect
         // circular ways anymore
         if (data.IsCircular()) {
-          nodeUseMap.SetNodeUsed(data.GetBackId());
+          usedIdAtLeastTwiceSet.insert(data.GetBackId());
           circularWayCount++;
         }
       }
@@ -182,7 +196,7 @@ namespace osmscout {
   bool OptimizeAreaWayIdsGenerator::CopyAreas(const ImportParameter& parameter,
                                               Progress& progress,
                                               const TypeConfig& typeConfig,
-                                              NodeUseMap& nodeUseMap)
+                                              const std::unordered_set<Id>& usedIdAtLeastTwiceSet)
   {
     FileScanner scanner;
     FileWriter  writer;
@@ -219,7 +233,7 @@ namespace osmscout {
 
         for (auto& ring : data.rings) {
           for (auto& node : ring.nodes) {
-            if (!nodeUseMap.IsNodeUsedAtLeastTwice(node.GetId())) {
+            if (usedIdAtLeastTwiceSet.find(node.GetId())==usedIdAtLeastTwiceSet.end()) {
               node.ClearSerial();
               idClearedCount++;
             }
@@ -257,7 +271,7 @@ namespace osmscout {
   bool OptimizeAreaWayIdsGenerator::CopyWays(const ImportParameter& parameter,
                                              Progress& progress,
                                              const TypeConfig& typeConfig,
-                                             NodeUseMap& nodeUseMap)
+                                             const std::unordered_set<Id>& usedIdAtLeastTwiceSet)
   {
     FileScanner scanner;
     FileWriter  writer;
@@ -293,7 +307,7 @@ namespace osmscout {
                   scanner);
 
         for (auto& node : data.nodes) {
-          if (!nodeUseMap.IsNodeUsedAtLeastTwice(node.GetId())) {
+          if (usedIdAtLeastTwiceSet.find(node.GetId())==usedIdAtLeastTwiceSet.end()) {
             node.ClearSerial();
             idClearedCount++;
           }
@@ -329,35 +343,40 @@ namespace osmscout {
   {
     progress.SetAction("Optimize ids for areas and ways");
 
-    NodeUseMap nodeUseMap;
+    std::unordered_set<Id> usedIdSet;
+    std::unordered_set<Id> usedIdAtLeastTwiceSet;
 
     if (!ScanAreaIds(parameter,
-                        progress,
-                        *typeConfig,
-                        nodeUseMap)) {
+                     progress,
+                     *typeConfig,
+                     usedIdSet,
+                     usedIdAtLeastTwiceSet)) {
       return false;
     }
 
     if (!ScanWayIds(parameter,
-                       progress,
-                       *typeConfig,
-                       nodeUseMap)) {
+                    progress,
+                    *typeConfig,
+                    usedIdSet,
+                    usedIdAtLeastTwiceSet)) {
       return false;
     }
 
-    progress.Info("Found "+NumberToString(nodeUseMap.GetNodeUsedCount())+" relevant nodes, "+NumberToString(nodeUseMap.GetDuplicateCount())+" of it at least used twice");
+    progress.Info("Found "+NumberToString(usedIdSet.size())+" relevant nodes, "+NumberToString(usedIdAtLeastTwiceSet.size())+" of it at least used twice");
+
+    usedIdSet.clear();
 
     if (!CopyAreas(parameter,
                    progress,
                    *typeConfig,
-                   nodeUseMap)) {
+                   usedIdAtLeastTwiceSet)) {
       return false;
     }
 
     if (!CopyWays(parameter,
                     progress,
                     *typeConfig,
-                    nodeUseMap)) {
+                  usedIdAtLeastTwiceSet)) {
       return false;
     }
 

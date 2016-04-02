@@ -122,6 +122,15 @@ namespace osmscout {
           }
         }
 
+        progress.Info("Sorting coordinates");
+
+        // TODO: Sort in parallel, no side effect!
+        for (auto& entry : coordPages) {
+          std::sort(entry.second.begin(),entry.second.end());
+        }
+
+        progress.Info("Detect duplicates");
+
         // We currently assume that coordinates are ordered by increasing id
         // So if we have to nodes with the same coordinate we can expect them
         // to have the same serial, as long as above is true and nodes
@@ -296,6 +305,8 @@ namespace osmscout {
                     entry.second.end(),
                     SortCoordsByOSMId);
         }
+
+        progress.Info("Write coordinates");
 
         for (auto& entry : coordPages) {
           for (auto& osmCoord : entry.second) {

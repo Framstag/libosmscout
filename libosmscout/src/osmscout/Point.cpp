@@ -25,14 +25,17 @@ namespace osmscout {
   {
     Id id;
 
-    uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
-    uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
+    uint64_t latValue=(uint64_t)round((coord.GetLat()+90.0)*latConversionFactor);
+    uint64_t lonValue=(uint64_t)round((coord.GetLon()+180.0)*lonConversionFactor);
 
-    id=latValue;
-
-    id=id << 27;
-
-    id|=lonValue;
+    id=((latValue & 0x000000ff) <<  8)+  // 0 => 8
+       ((lonValue & 0x000000ff) <<  0)+  // 0 => 0
+       ((latValue & 0x0000ff00) << 16)+  // 8 => 24
+       ((lonValue & 0x0000ff00) <<  8)+  // 8 => 16
+       ((latValue & 0x00ff0000) << 24)+  // 16 => 40
+       ((lonValue & 0x00ff0000) << 16)+  // 16 => 32
+       ((latValue & 0x07000000) << 27)+  // 24 => 51
+       ((lonValue & 0x07000000) << 24);  // 24 => 48
 
     id=id << 8;
 
