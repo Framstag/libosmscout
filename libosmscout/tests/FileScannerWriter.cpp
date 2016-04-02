@@ -61,6 +61,8 @@ int main()
   osmscout::FileOffset  outfo2=std::numeric_limits<osmscout::FileOffset>::max()/2;
   osmscout::FileOffset  outfo3=std::numeric_limits<osmscout::FileOffset>::max();
 
+  osmscout::GeoCoord    outCoord1(51.57231,7.46418);
+
   std::vector<osmscout::GeoCoord> outCoords1;
   std::vector<osmscout::GeoCoord> outCoords2;
   std::vector<osmscout::GeoCoord> outCoords3;
@@ -74,6 +76,8 @@ int main()
   uint64_t              in64u;
 
   osmscout::FileOffset  info;
+
+  osmscout::GeoCoord    inCoord1;
 
   std::vector<osmscout::GeoCoord> inCoords1;
   std::vector<osmscout::GeoCoord> inCoords2;
@@ -155,6 +159,8 @@ int main()
     writer.WriteFileOffset(outfo1);
     writer.WriteFileOffset(outfo2);
     writer.WriteFileOffset(outfo3);
+
+    writer.WriteCoord(outCoord1);
 
     writer.Write(outCoords1);
     writer.Write(outCoords2);
@@ -308,6 +314,13 @@ int main()
     scanner.ReadFileOffset(info);
     if (info!=outfo3) {
       std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo3 << ", got " << info << std::endl;
+      errors++;
+    }
+
+    scanner.ReadCoord(inCoord1);
+
+    if (inCoord1.GetDisplayText()!=outCoord1.GetDisplayText()) {
+      std::cerr << "Read/WriteCoord(GeoCoord) 1: Expected " << outCoord1.GetDisplayText() << ", got " << inCoord1.GetDisplayText() << std::endl;
       errors++;
     }
 
