@@ -577,7 +577,7 @@ namespace osmscout
       for (uint8_t i = 0; i < offsetSizeBytes; i++) {
         keyString.push_back(buffer[i]);
       }
-      delete buffer;
+      delete [] buffer;
     }
 
     return true;
