@@ -453,7 +453,7 @@ namespace osmscout {
     return true;
   }
 
-  bool WayWayDataGenerator::WriteWay(Progress& progress,
+  void WayWayDataGenerator::WriteWay(Progress& progress,
                                      const TypeConfig& typeConfig,
                                      FileWriter& writer,
                                      uint32_t& writtenWayCount,
@@ -467,7 +467,6 @@ namespace osmscout {
 
     way.nodes.resize(rawWay.GetNodeCount());
 
-    bool success=true;
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
       auto coord=coordsMap.find(rawWay.GetNodeId(n));
 
@@ -475,23 +474,19 @@ namespace osmscout {
         progress.Error("Cannot resolve node with id "+
                        NumberToString(rawWay.GetNodeId(n))+
                        " for Way "+
-                       NumberToString(wayId));
-        success=false;
-        break;
+                       NumberToString(wayId)+
+                       ", skipping");
+        return;
       }
 
       way.nodes[n].Set(coord->second.GetSerial(),
                        coord->second.GetCoord());
     }
 
-    if (!success) {
-      return false;
-    }
-
     if (!IsValidToWrite(way.nodes)) {
       progress.Error("Way coordinates are not dense enough to be written for Way "+
-                     NumberToString(wayId));
-      return false;
+                     NumberToString(wayId)+", skipping");
+      return;
     }
 
     writer.Write((uint8_t)osmRefWay);
@@ -500,8 +495,6 @@ namespace osmscout {
               writer);
 
     writtenWayCount++;
-
-    return true;
   }
 
   bool WayWayDataGenerator::HandleLowMemoryFallback(Progress& progress,
@@ -560,14 +553,12 @@ namespace osmscout {
 
       nodeIds.clear();
 
-      if (!WriteWay(progress,
-                    typeConfig,
-                    writer,
-                    writtenWayCount,
-                    coordsMap,
-                    *way)) {
-        return false;
-      }
+      WriteWay(progress,
+               typeConfig,
+               writer,
+               writtenWayCount,
+               coordsMap,
+               *way);
     }
 
     progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(types.Size())+" types");
@@ -718,14 +709,12 @@ namespace osmscout {
 
         for (size_t type=0; type<waysByType.size(); type++) {
           for (const auto &rawWay : waysByType[type]) {
-            if (!WriteWay(progress,
-                          *typeConfig,
-                          wayWriter,
-                          writtenWayCount,
-                          coordsMap,
-                          *rawWay)) {
-              return false;
-            }
+            WriteWay(progress,
+                     *typeConfig,
+                     wayWriter,
+                     writtenWayCount,
+                     coordsMap,
+                     *rawWay);
           }
 
           waysByType[type].clear();
