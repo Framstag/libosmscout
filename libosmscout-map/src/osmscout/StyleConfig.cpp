@@ -55,8 +55,9 @@ namespace osmscout {
 
     assert(feature);
     assert(feature->HasLabel());
-    assert(feature->GetLabelIndex(labelName,
-                                  labelIndex));
+
+    feature->GetLabelIndex(labelName,
+                           labelIndex);
 
     this->featureName=featureName;
     this->labelName=labelName;
