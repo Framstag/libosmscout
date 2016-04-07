@@ -15,12 +15,29 @@ environment:
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
     BIT: 64
+    BUILDTOOL: msbuild
+  - COMPILER: msvc2015
+    PLATFORM: x64
+    CONFIGURATION: Debug
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    BIT: 64
+    BUILDTOOL: cmake
   - COMPILER: msys2
     PLATFORM: x64
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
     BIT: 64
+    BUILDTOOL: autoconf
+  - COMPILER: msys2
+    PLATFORM: x64
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    BIT: 64
+    BUILDTOOL: cmake
 
 install:
   - set
