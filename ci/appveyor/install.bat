@@ -18,8 +18,7 @@ IF %COMPILER%==msys2 (
   
   IF %BUILDTOOL%==autoconf (
   bash -lc "pacman -S --needed --noconfirm git autoconf automake make"
-  )
-  ELSE (
+  ) ELSE (
   bash -lc "pacman -S --needed --noconfirm git make cmake"
   )
   

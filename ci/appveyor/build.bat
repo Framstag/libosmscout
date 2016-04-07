@@ -41,8 +41,7 @@ IF %COMPILER%==msvc2015 (
     copy windows\msvc2015_libosmscout.sln libosmscout.sln   
 
     "C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe" /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% libosmscout.sln   
-  )
-  ELSE (
+  ) ELSE (
     mkdir build
     cd build
     cmake .. -G "Visual Studio 14 2015 Win64"
