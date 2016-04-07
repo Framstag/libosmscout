@@ -13,16 +13,17 @@ echo Bits: %BIT%
 IF %COMPILER%==msys2 (
   @echo on
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+  
   IF %BUILDTOOL%==autoconf (
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
-  )
-  ELSE (
+  ) ELSE (
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && cmake .. && make"
   )  
 )
 
 IF %COMPILER%==msvc2015 (
   @echo on
+  
   IF %BUILDTOOL%==msbuild (
     copy windows\libosmscout\include\osmscout\CoreFeatures.h libosmscout\include\osmscout\CoreFeatures.h 
     copy windows\libosmscout\include\osmscout\private\Config.h  libosmscout\include\osmscout\private\Config.h 
