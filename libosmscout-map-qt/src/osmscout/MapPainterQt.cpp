@@ -208,7 +208,7 @@ namespace osmscout {
       line.setLineWidth(proposedWidth);
       height+=leading;
       line.setPosition(QPointF(0.0,height));
-      width=std::max(width,line.naturalTextWidth());
+      width=std::max(width,(double)line.naturalTextWidth());
       height+=line.height();
     }
     textLayout.endLayout();
