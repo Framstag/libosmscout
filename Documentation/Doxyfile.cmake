@@ -152,7 +152,9 @@ FULL_PATH_NAMES        = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        = @OSMSCOUT_BASE_DIR_SOURCE@
+STRIP_FROM_PATH        = @OSMSCOUT_BASE_DIR_SOURCE@ \
+                         @OSMSCOUT_BASE_DIR_BUILD@/include \
+						 @CMAKE_CURRENT_BINARY_DIR@
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -161,7 +163,9 @@ STRIP_FROM_PATH        = @OSMSCOUT_BASE_DIR_SOURCE@
 # specify the list of include paths that are normally passed to the compiler
 # using the -I flag.
 
-STRIP_FROM_INC_PATH    = @OSMSCOUT_BASE_DIR_SOURCE@
+STRIP_FROM_INC_PATH    = @OSMSCOUT_BASE_DIR_SOURCE@ \
+                         @OSMSCOUT_BASE_DIR_BUILD@/include \
+						 @CMAKE_CURRENT_BINARY_DIR@
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter (but
 # less readable) file names. This can be useful is your file systems doesn't
@@ -434,7 +438,7 @@ EXTRACT_PACKAGE        = NO
 # included in the documentation.
 # The default value is: NO.
 
-EXTRACT_STATIC         = NO
+EXTRACT_STATIC         = YES
 
 # If the EXTRACT_LOCAL_CLASSES tag is set to YES, classes (and structs) defined
 # locally in source files will be included in the documentation. If set to NO,
@@ -737,7 +741,7 @@ WARN_IF_DOC_ERROR      = YES
 # parameter documentation, but not about the absence of documentation.
 # The default value is: NO.
 
-WARN_NO_PARAMDOC       = NO
+WARN_NO_PARAMDOC       = YES
 
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which
@@ -753,7 +757,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           =
+WARN_LOGFILE           = @CMAKE_CURRENT_BINARY_DIR@/doxygen.log
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -767,7 +771,8 @@ WARN_LOGFILE           =
 
 INPUT                  = @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout/include \
 						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-import/include \
-						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-map/include
+						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-map/include \
+						 @CMAKE_CURRENT_BINARY_DIR@/pages.dox
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -792,7 +797,9 @@ INPUT_ENCODING         = UTF-8
 # *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd,
 # *.vhdl, *.ucf, *.qsf, *.as and *.js.
 
-FILE_PATTERNS          = *.h
+FILE_PATTERNS          = *.h \
+                         *.dox \
+                         *.md
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -807,7 +814,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                =
+EXCLUDE                = @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-import/include/osmscout/import/pbf
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -840,14 +847,14 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           =
+EXAMPLE_PATH           = @OSMSCOUT_BASE_DIR_SOURCE@/Demos/src
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
 # *.h) to filter out the source-files in the directories. If left blank all
 # files are included.
 
-EXAMPLE_PATTERNS       =
+EXAMPLE_PATTERNS       = *.cpp
 
 # If the EXAMPLE_RECURSIVE tag is set to YES then subdirectories will be
 # searched for input files to be used with the \include or \dontinclude commands
@@ -1980,7 +1987,8 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           =
+INCLUDE_PATH           = @OSMSCOUT_BASE_DIR_BUILD@/include \
+                         @OSMSCOUT_BASE_DIR_BUILD@/include/osmscout
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
@@ -1998,7 +2006,9 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             =
+PREDEFINED             = OSMSCOUT_EXPORT_SYMBOLS \
+                         OSMSCOUT_IMPORT_EXPORT_SYMBOLS \
+                         OSMSCOUT_MAP_EXPORT_SYMBOLS
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -2335,7 +2345,7 @@ PLANTUML_INCLUDE_PATH  =
 # Minimum value: 0, maximum value: 10000, default value: 50.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_GRAPH_MAX_NODES    = 100
+DOT_GRAPH_MAX_NODES    = 10000
 
 # The MAX_DOT_GRAPH_DEPTH tag can be used to set the maximum depth of the graphs
 # generated by dot. A depth value of 3 means that only nodes reachable from the
