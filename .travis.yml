@@ -30,10 +30,6 @@ matrix:
       env: BUILDTOOL=autoconf
     - os: osx
       osx_image: xcode7.2
-      compiler: gcc
-      env: BUILDTOOL=cmake
-    - os: osx
-      osx_image: xcode7.2
       compiler: clang
       env: BUILDTOOL=autoconf
 
