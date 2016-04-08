@@ -28,7 +28,7 @@ set(HEADER_FILES
     include/osmscout/import/GenRawWayIndex.h
     include/osmscout/import/GenRelAreaDat.h
     include/osmscout/import/GenRouteDat.h
-    include/osmscout/import/GenTextIndex.h
+    #include/osmscout/import/GenTextIndex.h
     include/osmscout/import/GenTypeDat.h
     include/osmscout/import/GenWaterIndex.h
     include/osmscout/import/GenWayAreaDat.h
@@ -74,7 +74,7 @@ set(SOURCE_FILES
     src/osmscout/import/GenRawWayIndex.cpp
     src/osmscout/import/GenRelAreaDat.cpp
     src/osmscout/import/GenRouteDat.cpp
-    src/osmscout/import/GenTextIndex.cpp
+    #src/osmscout/import/GenTextIndex.cpp
     src/osmscout/import/GenTypeDat.cpp
     src/osmscout/import/GenWaterIndex.cpp
     src/osmscout/import/GenWayAreaDat.cpp
@@ -97,6 +97,11 @@ set(SOURCE_FILES
     src/osmscout/import/SortWayDat.cpp
 )
 
+if(MARISA_FOUND)
+    list(APPEND HEADER_FILES include/osmscout/import/GenTextIndex.h)
+    list(APPEND SOURCE_FILES src/osmscout/import/GenTextIndex.cpp)
+endif()
+
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
 
 add_library(libosmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
@@ -110,16 +115,18 @@ target_include_directories(libosmscout_import PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${ZLIB_INCLUDE_DIRS}
 		${LIBXML2_INCLUDE_DIR}
-		${PROTOBUF_INCLUDE_DIRS}
-		${MARISA_INCLUDE_DIRS})
+		${PROTOBUF_INCLUDE_DIRS})
 target_link_libraries(libosmscout_import
 		libosmscout
 		${ZLIB_LIBRARIES}
 		${LIBXML2_LIBRARIES}
 		${PROTOBUF_LIBRARIES}
 		${PROTOBUF_PROTOC_LIBRARIES}
-		${PROTOBUF_LITE_LIBRARIES}
-		${MARISA_LIBRARIES})
+		${PROTOBUF_LITE_LIBRARIES})
+if(MARISA_FOUND)
+    target_include_directories(libosmscout_import PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(libosmscout_import ${MARISA_LIBRARIES})
+endif()
 if(WIN32)
   target_link_libraries(libosmscout_import Ws2_32.lib)
   target_compile_definitions(libosmscout_import PRIVATE -DPROTOBUF_USE_DLLS)
@@ -129,5 +136,9 @@ install(TARGETS libosmscout_import
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+if(MARISA_FOUND)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+else()
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE PATTERN GenTextIndex.h EXCLUDE)
+endif()
 install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h DESTINATION include/osmscout)

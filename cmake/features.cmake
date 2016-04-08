@@ -92,7 +92,7 @@ check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
 
 # check libraries and tools
-find_package(Marisa REQUIRED)
+find_package(Marisa QUIET)
 find_package(LibXml2 QUIET)
 find_package(MyProtobuf QUIET) # Modified FindProtobuf
 find_package(ZLIB QUIET)

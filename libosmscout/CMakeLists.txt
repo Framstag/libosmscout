@@ -1,6 +1,3 @@
-if(NOT MARISA_FOUND)
-	message(FATAL_ERROR "Marisa is required for main library")
-endif()
 set(OSMSCOUT_BUILD_CORE ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
@@ -72,7 +69,7 @@ set(HEADER_FILES
     include/osmscout/RoutingService.h
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
-    include/osmscout/TextSearchIndex.h
+    #include/osmscout/TextSearchIndex.h
     include/osmscout/TurnRestriction.h
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeatures.h
@@ -142,7 +139,7 @@ set(SOURCE_FILES
     src/osmscout/RoutingService.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
-    src/osmscout/TextSearchIndex.cpp
+    #src/osmscout/TextSearchIndex.cpp
     src/osmscout/TurnRestriction.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeatures.cpp
@@ -150,24 +147,30 @@ set(SOURCE_FILES
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
-#    tests/AccessParse.cpp
- #   tests/EncodeNumber.cpp
-#    tests/FileScannerWriter.cpp
-#    tests/GeoCoordParse.cpp
-#    tests/NumberSet.cpp
-#    tests/ScanConversion.cpp
 )
+
+if(MARISA_FOUND)
+    list(APPEND HEADER_FILES include/osmscout/TextSearchIndex.h)
+    list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
+endif()
 
 add_library(libosmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET libosmscout PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout")
-target_include_directories(libosmscout PRIVATE include ${MARISA_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/include)
-target_link_libraries(libosmscout ${MARISA_LIBRARIES})
+target_include_directories(libosmscout PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
+if(MARISA_FOUND)
+    target_include_directories(libosmscout PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(libosmscout ${MARISA_LIBRARIES})
+endif()
 target_compile_definitions(libosmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
 install(TARGETS libosmscout
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+if(MARISA_FOUND)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+else()
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE PATTERN TextSearchIndex.h EXCLUDE)
+endif()
 install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h DESTINATION include/osmscout)

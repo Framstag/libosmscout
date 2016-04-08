@@ -47,7 +47,7 @@ foreach(PAGE_INDEX RANGE 0 ${PAGES_COUNT})
 endforeach()
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/pages.dox "\n*/\n")
 
-add_custom_target(doc
+add_custom_target(doc ALL
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen"
