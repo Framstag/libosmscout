@@ -31,11 +31,15 @@ target_link_libraries(LookupPOI libosmscout)
 install(TARGETS LookupPOI RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 #---- LookupText
-add_executable(LookupText src/LookupText.cpp)
-set_property(TARGET LookupText PROPERTY CXX_STANDARD 11)
-target_include_directories(LookupText PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include ${MARISA_INCLUDE_DIRS})
-target_link_libraries(LookupText libosmscout)
-install(TARGETS LookupText RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+if(MARISA_FOUND)
+    add_executable(LookupText src/LookupText.cpp)
+    set_property(TARGET LookupText PROPERTY CXX_STANDARD 11)
+    target_include_directories(LookupText PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(LookupText libosmscout)
+    install(TARGETS LookupText RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+else()
+	message("Skip LookupText demo, marisa dependency is missing.")
+endif()
 
 #---- PerformanceTest
 if(${OSMSCOUT_BUILD_MAP})
