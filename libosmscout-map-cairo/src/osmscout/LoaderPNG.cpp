@@ -20,6 +20,7 @@
 #include <osmscout/LoaderPNG.h>
 
 #include <cstdio>
+#include <cstdlib>
 
 #include <png.h>
 
