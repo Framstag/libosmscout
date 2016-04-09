@@ -314,7 +314,8 @@ namespace osmscout {
      offset(0.0),
      joinCap(capRound),
      endCap(capRound),
-     priority(0)
+     priority(0),
+     zIndex(0)
   {
     // no code
   }
@@ -330,7 +331,8 @@ namespace osmscout {
     joinCap(style.joinCap),
     endCap(style.endCap),
     dash(style.dash),
-    priority(style.priority)
+    priority(style.priority),
+    zIndex(style.zIndex)
   {
     // no code
   }
@@ -412,6 +414,13 @@ namespace osmscout {
     return *this;
   }
 
+  LineStyle& LineStyle::SetZIndex(int zIndex)
+  {
+    this->zIndex=zIndex;
+
+    return *this;
+  }
+
   void LineStyle::CopyAttributes(const LineStyle& other,
                                  const std::set<Attribute>& attributes)
   {
@@ -446,6 +455,9 @@ namespace osmscout {
         break;
       case attrPriority:
         priority=other.priority;
+        break;
+      case attrZIndex:
+        zIndex=other.zIndex;
         break;
       }
     }
@@ -493,7 +505,11 @@ namespace osmscout {
       return false;
     }
 
-    return priority==other.priority;
+    if (priority!=other.priority) {
+      return false;
+    }
+
+    return zIndex==other.zIndex;
   }
 
   bool LineStyle::operator!=(const LineStyle& other) const
@@ -543,7 +559,11 @@ namespace osmscout {
       return dash<other.dash;
     }
 
-    return priority<other.priority;
+    if (priority!=other.priority) {
+      return priority<other.priority;
+    }
+
+    return zIndex<other.zIndex;
   }
 
   FillStyle::FillStyle()

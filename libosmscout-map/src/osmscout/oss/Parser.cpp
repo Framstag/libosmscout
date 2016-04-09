@@ -145,7 +145,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OSS() {
-		while (!(la->kind == _EOF || la->kind == 7 /* "OSS" */)) {SynErr(92); Get();}
+		while (!(la->kind == _EOF || la->kind == 7 /* "OSS" */)) {SynErr(93); Get();}
 		Expect(7 /* "OSS" */);
 		state=true; 
 		while (la->kind == 9 /* "FLAG" */) {
@@ -167,13 +167,13 @@ void Parser::OSS() {
 }
 
 void Parser::FLAGSECTION() {
-		while (!(la->kind == _EOF || la->kind == 9 /* "FLAG" */)) {SynErr(93); Get();}
+		while (!(la->kind == _EOF || la->kind == 9 /* "FLAG" */)) {SynErr(94); Get();}
 		Expect(9 /* "FLAG" */);
 		FLAGBLOCK(true);
 }
 
 void Parser::WAYORDER() {
-		while (!(la->kind == _EOF || la->kind == 17 /* "ORDER" */)) {SynErr(94); Get();}
+		while (!(la->kind == _EOF || la->kind == 17 /* "ORDER" */)) {SynErr(95); Get();}
 		Expect(17 /* "ORDER" */);
 		Expect(18 /* "WAYS" */);
 		size_t priority=1;
@@ -184,13 +184,13 @@ void Parser::WAYORDER() {
 }
 
 void Parser::CONSTSECTION() {
-		while (!(la->kind == _EOF || la->kind == 26 /* "CONST" */)) {SynErr(95); Get();}
+		while (!(la->kind == _EOF || la->kind == 26 /* "CONST" */)) {SynErr(96); Get();}
 		Expect(26 /* "CONST" */);
 		CONSTBLOCK(true);
 }
 
 void Parser::SYMBOLSECTION() {
-		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(96); Get();}
+		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(97); Get();}
 		Expect(21 /* "SYMBO" */);
 		std::string name;
 		
@@ -287,7 +287,7 @@ void Parser::IFCOND(bool& state) {
 		std::string flag;
 		bool        negate=false;
 		
-		if (la->kind == 90 /* "!" */) {
+		if (la->kind == 91 /* "!" */) {
 			Get();
 			negate=true; 
 		}
@@ -336,7 +336,7 @@ void Parser::BOOL(bool& value) {
 }
 
 void Parser::WAYGROUP(size_t priority) {
-		while (!(la->kind == _EOF || la->kind == 19 /* "GROUP" */)) {SynErr(97); Get();}
+		while (!(la->kind == _EOF || la->kind == 19 /* "GROUP" */)) {SynErr(98); Get();}
 		Expect(19 /* "GROUP" */);
 		if (la->kind == _ident) {
 			std::string wayTypeName;
@@ -384,7 +384,7 @@ void Parser::WAYGROUP(size_t priority) {
 }
 
 void Parser::POLYGON(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 22 /* "POLYGON" */)) {SynErr(98); Get();}
+		while (!(la->kind == _EOF || la->kind == 22 /* "POLYGON" */)) {SynErr(99); Get();}
 		Expect(22 /* "POLYGON" */);
 		StyleFilter         filter;
 		FillPartialStyle    style;
@@ -399,19 +399,19 @@ void Parser::POLYGON(Symbol& symbol) {
 			COORD(coord);
 			polygon->AddCoord(coord); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(99); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(100); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(1)) {
 			FILLSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 2);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(100); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(101); Get();}
 		Expect(12 /* "}" */);
 		symbol.AddPrimitive(polygon); 
 }
 
 void Parser::RECTANGLE(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 23 /* "RECTANGLE" */)) {SynErr(101); Get();}
+		while (!(la->kind == _EOF || la->kind == 23 /* "RECTANGLE" */)) {SynErr(102); Get();}
 		Expect(23 /* "RECTANGLE" */);
 		StyleFilter       filter;
 		FillPartialStyle  style;
@@ -423,13 +423,13 @@ void Parser::RECTANGLE(Symbol& symbol) {
 		UDOUBLE(width);
 		Expect(24 /* "x" */);
 		UDOUBLE(height);
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(102); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(103); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(1)) {
 			FILLSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 2);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(103); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(104); Get();}
 		Expect(12 /* "}" */);
 		symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
 		                                                        width,height,
@@ -438,7 +438,7 @@ void Parser::RECTANGLE(Symbol& symbol) {
 }
 
 void Parser::CIRCLE(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 25 /* "CIRCLE" */)) {SynErr(104); Get();}
+		while (!(la->kind == _EOF || la->kind == 25 /* "CIRCLE" */)) {SynErr(105); Get();}
 		Expect(25 /* "CIRCLE" */);
 		Vertex2D          center;
 		double            radius;
@@ -447,13 +447,13 @@ void Parser::CIRCLE(Symbol& symbol) {
 		
 		COORD(center);
 		UDOUBLE(radius);
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(105); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(106); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(1)) {
 			FILLSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 2);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(106); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(107); Get();}
 		Expect(12 /* "}" */);
 		symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
 		                                                     radius,
@@ -483,7 +483,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			
 			break;
 		}
-		case 65 /* "pattern" */: {
+		case 66 /* "pattern" */: {
 			std::string patternName; 
 			Get();
 			Expect(43 /* ":" */);
@@ -493,7 +493,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			
 			break;
 		}
-		case 66 /* "patternMinMag" */: {
+		case 67 /* "patternMinMag" */: {
 			Magnification minMag; 
 			Get();
 			Expect(43 /* ":" */);
@@ -503,7 +503,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			
 			break;
 		}
-		case 67 /* "borderColor" */: {
+		case 68 /* "borderColor" */: {
 			Color borderColor; 
 			Get();
 			Expect(43 /* ":" */);
@@ -513,7 +513,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			
 			break;
 		}
-		case 68 /* "borderWidth" */: {
+		case 69 /* "borderWidth" */: {
 			double width; 
 			Get();
 			Expect(43 /* ":" */);
@@ -523,7 +523,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			
 			break;
 		}
-		case 69 /* "borderDash" */: {
+		case 70 /* "borderDash" */: {
 			std::vector<double> dashes;
 			double              dash;
 			
@@ -541,7 +541,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			
 			break;
 		}
-		default: SynErr(107); break;
+		default: SynErr(108); break;
 		}
 }
 
@@ -562,7 +562,7 @@ void Parser::UDOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else SynErr(108);
+		} else SynErr(109);
 }
 
 void Parser::DOUBLE(double& value) {
@@ -587,7 +587,7 @@ void Parser::DOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else SynErr(109);
+		} else SynErr(110);
 		if (negate) {
 		 value=-value;
 		}
@@ -650,7 +650,7 @@ void Parser::CONSTDEF() {
 			MAGCONSTDEF();
 		} else if (la->kind == 29 /* "UINT" */) {
 			UINTCONSTDEF();
-		} else SynErr(110);
+		} else SynErr(111);
 }
 
 void Parser::COLORCONSTDEF() {
@@ -729,14 +729,14 @@ void Parser::UINTCONSTDEF() {
 }
 
 void Parser::COLOR(Color& color) {
-		if (la->kind == 86 /* "lighten" */) {
+		if (la->kind == 87 /* "lighten" */) {
 			double factor; 
 			Get();
-			Expect(87 /* "(" */);
+			Expect(88 /* "(" */);
 			COLOR(color);
 			Expect(20 /* "," */);
 			UDOUBLE(factor);
-			Expect(88 /* ")" */);
+			Expect(89 /* ")" */);
 			if (factor>=0.0 && factor<=1.0) {
 			 color=color.Lighten(factor);
 			}
@@ -746,14 +746,14 @@ void Parser::COLOR(Color& color) {
 			 SemErr(e.c_str());
 			}
 			
-		} else if (la->kind == 89 /* "darken" */) {
+		} else if (la->kind == 90 /* "darken" */) {
 			double factor; 
 			Get();
-			Expect(87 /* "(" */);
+			Expect(88 /* "(" */);
 			COLOR(color);
 			Expect(20 /* "," */);
 			UDOUBLE(factor);
-			Expect(88 /* ")" */);
+			Expect(89 /* ")" */);
 			if (factor>=0.0 && factor<=1.0) {
 			 color=color.Darken(factor);
 			}
@@ -801,7 +801,7 @@ void Parser::COLOR(Color& color) {
 			 color=colorConstant->GetColor();
 			}
 			
-		} else SynErr(111);
+		} else SynErr(112);
 }
 
 void Parser::MAG(Magnification& magnification) {
@@ -847,7 +847,7 @@ void Parser::MAG(Magnification& magnification) {
 			 magnification=magConstant->GetMag();
 			}
 			
-		} else SynErr(112);
+		} else SynErr(113);
 }
 
 void Parser::UINT(size_t& value) {
@@ -880,7 +880,7 @@ void Parser::UINT(size_t& value) {
 			 value=uintConstant->GetUInt();
 			}
 			
-		} else SynErr(113);
+		} else SynErr(114);
 }
 
 void Parser::STYLEBLOCK(StyleFilter filter, bool state) {
@@ -903,7 +903,7 @@ void Parser::STYLE(StyleFilter filter, bool state) {
 			Expect(12 /* "}" */);
 		} else if (la->kind == 46 /* "NODE" */ || la->kind == 51 /* "WAY" */ || la->kind == 53 /* "AREA" */) {
 			STYLEDEF(filter,state);
-		} else SynErr(114);
+		} else SynErr(115);
 }
 
 void Parser::STYLECONDBLOCK(StyleFilter filter, bool state) {
@@ -983,7 +983,7 @@ void Parser::STYLEDEF(StyleFilter filter, bool state) {
 			WAYSTYLEDEF(filter,state);
 		} else if (la->kind == 53 /* "AREA" */) {
 			AREASTYLEDEF(filter,state);
-		} else SynErr(115);
+		} else SynErr(116);
 }
 
 void Parser::STYLEFILTER_GROUP(StyleFilter& filter) {
@@ -1253,18 +1253,18 @@ void Parser::SIZECONDITION(SizeConditionRef& condition) {
 }
 
 void Parser::NODESTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 46 /* "NODE" */)) {SynErr(116); Get();}
+		while (!(la->kind == _EOF || la->kind == 46 /* "NODE" */)) {SynErr(117); Get();}
 		Expect(46 /* "NODE" */);
 		Expect(47 /* "." */);
 		if (la->kind == 48 /* "TEXT" */) {
 			NODETEXTSTYLE(filter,state);
 		} else if (la->kind == 50 /* "ICON" */) {
 			NODEICONSTYLE(filter,state);
-		} else SynErr(117);
+		} else SynErr(118);
 }
 
 void Parser::WAYSTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 51 /* "WAY" */)) {SynErr(118); Get();}
+		while (!(la->kind == _EOF || la->kind == 51 /* "WAY" */)) {SynErr(119); Get();}
 		Expect(51 /* "WAY" */);
 		if (la->kind == 11 /* "{" */ || la->kind == 49 /* "#" */) {
 			WAYSTYLE(filter,state);
@@ -1276,12 +1276,12 @@ void Parser::WAYSTYLEDEF(StyleFilter filter, bool state) {
 				WAYPATHSYMBOLSTYLE(filter,state);
 			} else if (la->kind == 52 /* "SHIELD" */) {
 				WAYSHIELDSTYLE(filter,state);
-			} else SynErr(119);
-		} else SynErr(120);
+			} else SynErr(120);
+		} else SynErr(121);
 }
 
 void Parser::AREASTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 53 /* "AREA" */)) {SynErr(121); Get();}
+		while (!(la->kind == _EOF || la->kind == 53 /* "AREA" */)) {SynErr(122); Get();}
 		Expect(53 /* "AREA" */);
 		if (la->kind == 11 /* "{" */) {
 			AREASTYLE(filter,state);
@@ -1291,12 +1291,12 @@ void Parser::AREASTYLEDEF(StyleFilter filter, bool state) {
 				AREATEXTSTYLE(filter,state);
 			} else if (la->kind == 50 /* "ICON" */) {
 				AREAICONSTYLE(filter,state);
-			} else SynErr(122);
-		} else SynErr(123);
+			} else SynErr(123);
+		} else SynErr(124);
 }
 
 void Parser::NODETEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(124); Get();}
+		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(125); Get();}
 		Expect(48 /* "TEXT" */);
 		TextPartialStyle style;
 		std::string      slot;
@@ -1306,13 +1306,13 @@ void Parser::NODETEXTSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(125); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(126); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(6)) {
 			TEXTSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 7);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(126); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(127); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddNodeTextStyle(filter,style);
@@ -1321,17 +1321,17 @@ void Parser::NODETEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::NODEICONSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(127); Get();}
+		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(128); Get();}
 		Expect(50 /* "ICON" */);
 		IconPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(128); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(129); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 75 /* "position" */ || la->kind == 78 /* "symbol" */ || la->kind == 80 /* "name" */) {
+		while (la->kind == 76 /* "position" */ || la->kind == 79 /* "symbol" */ || la->kind == 81 /* "name" */) {
 			ICONSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 8);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(129); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(130); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddNodeIconStyle(filter,style);
@@ -1341,7 +1341,7 @@ void Parser::NODEICONSTYLE(StyleFilter filter, bool state) {
 
 void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 		switch (la->kind) {
-		case 70 /* "label" */: {
+		case 71 /* "label" */: {
 			LabelProviderRef label; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1353,7 +1353,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			
 			break;
 		}
-		case 71 /* "style" */: {
+		case 72 /* "style" */: {
 			TextStyle::Style labelStyle; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1373,7 +1373,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			
 			break;
 		}
-		case 72 /* "size" */: {
+		case 73 /* "size" */: {
 			double size; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1383,7 +1383,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			
 			break;
 		}
-		case 73 /* "scaleMag" */: {
+		case 74 /* "scaleMag" */: {
 			Magnification scaleMag; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1393,7 +1393,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			
 			break;
 		}
-		case 74 /* "autoSize" */: {
+		case 75 /* "autoSize" */: {
 			bool autoSize; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1413,7 +1413,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			
 			break;
 		}
-		case 75 /* "position" */: {
+		case 76 /* "position" */: {
 			size_t position; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1423,12 +1423,12 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			
 			break;
 		}
-		default: SynErr(130); break;
+		default: SynErr(131); break;
 		}
 }
 
 void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
-		if (la->kind == 78 /* "symbol" */) {
+		if (la->kind == 79 /* "symbol" */) {
 			std::string name;
 			SymbolRef   symbol;
 			
@@ -1447,7 +1447,7 @@ void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
 			 style.attributes.insert(IconStyle::attrSymbol);
 			}
 			
-		} else if (la->kind == 80 /* "name" */) {
+		} else if (la->kind == 81 /* "name" */) {
 			std::string name; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1455,7 +1455,7 @@ void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
 			style.style->SetIconName(name);
 			style.attributes.insert(IconStyle::attrIconName);
 			
-		} else if (la->kind == 75 /* "position" */) {
+		} else if (la->kind == 76 /* "position" */) {
 			size_t position; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1463,7 +1463,7 @@ void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
 			style.style->SetPosition(position);
 			style.attributes.insert(IconStyle::attrPosition);
 			
-		} else SynErr(131);
+		} else SynErr(132);
 }
 
 void Parser::WAYSTYLE(StyleFilter filter, bool state) {
@@ -1475,13 +1475,13 @@ void Parser::WAYSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(132); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(133); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(9)) {
 			LINESTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 10);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(133); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(134); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayLineStyle(filter,style);
@@ -1490,17 +1490,17 @@ void Parser::WAYSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::WAYPATHTEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(134); Get();}
+		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(135); Get();}
 		Expect(48 /* "TEXT" */);
 		PathTextPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(135); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(136); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 54 /* "color" */ || la->kind == 70 /* "label" */ || la->kind == 72 /* "size" */) {
+		while (la->kind == 54 /* "color" */ || la->kind == 71 /* "label" */ || la->kind == 73 /* "size" */) {
 			PATHTEXTSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 11);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(136); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(137); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayPathTextStyle(filter,style);
@@ -1509,17 +1509,17 @@ void Parser::WAYPATHTEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(137); Get();}
+		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(138); Get();}
 		Expect(21 /* "SYMBO" */);
 		PathSymbolPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(138); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(139); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 78 /* "symbol" */ || la->kind == 79 /* "symbolSpace" */) {
+		while (la->kind == 79 /* "symbol" */ || la->kind == 80 /* "symbolSpace" */) {
 			PATHSYMBOLSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 12);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(139); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(140); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayPathSymbolStyle(filter,style);
@@ -1528,17 +1528,17 @@ void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::WAYSHIELDSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 52 /* "SHIELD" */)) {SynErr(140); Get();}
+		while (!(la->kind == _EOF || la->kind == 52 /* "SHIELD" */)) {SynErr(141); Get();}
 		Expect(52 /* "SHIELD" */);
 		PathShieldPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(141); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(142); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(13)) {
 			PATHSHIELDSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 14);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(142); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(143); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayPathShieldStyle(filter,style);
@@ -1669,12 +1669,22 @@ void Parser::LINESTYLEATTR(LinePartialStyle& style) {
 			
 			break;
 		}
-		default: SynErr(143); break;
+		case 65 /* "zIndex" */: {
+			int zIndex; 
+			Get();
+			Expect(43 /* ":" */);
+			INT(zIndex);
+			style.style->SetZIndex(zIndex);
+			style.attributes.insert(LineStyle::attrZIndex);
+			
+			break;
+		}
+		default: SynErr(144); break;
 		}
 }
 
 void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
-		if (la->kind == 70 /* "label" */) {
+		if (la->kind == 71 /* "label" */) {
 			LabelProviderRef label; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1692,7 +1702,7 @@ void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
 			style.style->SetTextColor(textColor);
 			style.attributes.insert(PathTextStyle::attrTextColor);
 			
-		} else if (la->kind == 72 /* "size" */) {
+		} else if (la->kind == 73 /* "size" */) {
 			double size; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1700,11 +1710,11 @@ void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
 			style.style->SetSize(size);
 			style.attributes.insert(PathTextStyle::attrSize);
 			
-		} else SynErr(144);
+		} else SynErr(145);
 }
 
 void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
-		if (la->kind == 78 /* "symbol" */) {
+		if (la->kind == 79 /* "symbol" */) {
 			std::string name;
 			SymbolRef   symbol;
 			
@@ -1723,7 +1733,7 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 			 style.attributes.insert(PathSymbolStyle::attrSymbol);
 			}
 			
-		} else if (la->kind == 79 /* "symbolSpace" */) {
+		} else if (la->kind == 80 /* "symbolSpace" */) {
 			double symbolSpace; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1731,12 +1741,12 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 			style.style->SetSymbolSpace(symbolSpace);
 			style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
 			
-		} else SynErr(145);
+		} else SynErr(146);
 }
 
 void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 		switch (la->kind) {
-		case 70 /* "label" */: {
+		case 71 /* "label" */: {
 			LabelProviderRef label; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1758,7 +1768,7 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			
 			break;
 		}
-		case 76 /* "backgroundColor" */: {
+		case 77 /* "backgroundColor" */: {
 			Color bgColor; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1768,7 +1778,7 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			
 			break;
 		}
-		case 67 /* "borderColor" */: {
+		case 68 /* "borderColor" */: {
 			Color borderColor; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1778,7 +1788,7 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			
 			break;
 		}
-		case 72 /* "size" */: {
+		case 73 /* "size" */: {
 			double size; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1806,7 +1816,7 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			
 			break;
 		}
-		case 77 /* "shieldSpace" */: {
+		case 78 /* "shieldSpace" */: {
 			double shieldSpace; 
 			Get();
 			Expect(43 /* ":" */);
@@ -1816,20 +1826,20 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 			
 			break;
 		}
-		default: SynErr(146); break;
+		default: SynErr(147); break;
 		}
 }
 
 void Parser::AREASTYLE(StyleFilter filter, bool state) {
 		FillPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(147); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(148); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(1)) {
 			FILLSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 2);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(148); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(149); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaFillStyle(filter,style);
@@ -1838,7 +1848,7 @@ void Parser::AREASTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREATEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(149); Get();}
+		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(150); Get();}
 		Expect(48 /* "TEXT" */);
 		TextPartialStyle style;
 		std::string      slot;
@@ -1848,13 +1858,13 @@ void Parser::AREATEXTSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(150); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(151); Get();}
 		Expect(11 /* "{" */);
 		while (StartOf(6)) {
 			TEXTSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 7);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(151); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(152); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaTextStyle(filter,style);
@@ -1863,17 +1873,17 @@ void Parser::AREATEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREAICONSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(152); Get();}
+		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(153); Get();}
 		Expect(50 /* "ICON" */);
 		IconPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(153); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(154); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 75 /* "position" */ || la->kind == 78 /* "symbol" */ || la->kind == 80 /* "name" */) {
+		while (la->kind == 76 /* "position" */ || la->kind == 79 /* "symbol" */ || la->kind == 81 /* "name" */) {
 			ICONSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 8);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(154); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(155); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaIconStyle(filter,style);
@@ -1902,16 +1912,16 @@ void Parser::MAPSIZE(double& value) {
 }
 
 void Parser::CAPSTYLE(LineStyle::CapStyle& style) {
-		if (la->kind == 81 /* "butt" */) {
+		if (la->kind == 82 /* "butt" */) {
 			Get();
 			style=LineStyle::capButt; 
-		} else if (la->kind == 82 /* "round" */) {
+		} else if (la->kind == 83 /* "round" */) {
 			Get();
 			style=LineStyle::capRound; 
-		} else if (la->kind == 83 /* "square" */) {
+		} else if (la->kind == 84 /* "square" */) {
 			Get();
 			style=LineStyle::capSquare; 
-		} else SynErr(155);
+		} else SynErr(156);
 }
 
 void Parser::INT(int& value) {
@@ -1948,10 +1958,10 @@ void Parser::TEXTLABEL(LabelProviderRef& label) {
 			Get();
 			if (la->kind == _ident) {
 				IDENT(labelName);
-			} else if (la->kind == 80 /* "name" */) {
+			} else if (la->kind == 81 /* "name" */) {
 				Get();
 				labelName="name"; 
-			} else SynErr(156);
+			} else SynErr(157);
 		}
 		if (!labelName.empty()) {
 		 FeatureRef feature;
@@ -2000,13 +2010,13 @@ void Parser::TEXTLABEL(LabelProviderRef& label) {
 }
 
 void Parser::LABELSTYLE(TextStyle::Style& style) {
-		if (la->kind == 84 /* "normal" */) {
+		if (la->kind == 85 /* "normal" */) {
 			Get();
 			style=TextStyle::normal; 
-		} else if (la->kind == 85 /* "emphasize" */) {
+		} else if (la->kind == 86 /* "emphasize" */) {
 			Get();
 			style=TextStyle::emphasize; 
-		} else SynErr(157);
+		} else SynErr(158);
 }
 
 
@@ -2025,7 +2035,7 @@ Parser::Parser(Scanner *scanner,
                StyleConfig& config)
  : config(config)
 {
-	maxT = 91;
+	maxT = 92;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -2040,22 +2050,22 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[15][93] = {
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,T, x,x,T,x, T,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, T,x,x,T, x,x,T,x, T,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
+	static bool set[15][94] = {
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,x,T, x,T,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,x,T, x,T,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 	};
 
 
@@ -2143,99 +2153,100 @@ void Errors::SynErr(int line, int col, int n)
 			case 62: s = coco_string_create("\"joinCap\" expected"); break;
 			case 63: s = coco_string_create("\"endCap\" expected"); break;
 			case 64: s = coco_string_create("\"priority\" expected"); break;
-			case 65: s = coco_string_create("\"pattern\" expected"); break;
-			case 66: s = coco_string_create("\"patternMinMag\" expected"); break;
-			case 67: s = coco_string_create("\"borderColor\" expected"); break;
-			case 68: s = coco_string_create("\"borderWidth\" expected"); break;
-			case 69: s = coco_string_create("\"borderDash\" expected"); break;
-			case 70: s = coco_string_create("\"label\" expected"); break;
-			case 71: s = coco_string_create("\"style\" expected"); break;
-			case 72: s = coco_string_create("\"size\" expected"); break;
-			case 73: s = coco_string_create("\"scaleMag\" expected"); break;
-			case 74: s = coco_string_create("\"autoSize\" expected"); break;
-			case 75: s = coco_string_create("\"position\" expected"); break;
-			case 76: s = coco_string_create("\"backgroundColor\" expected"); break;
-			case 77: s = coco_string_create("\"shieldSpace\" expected"); break;
-			case 78: s = coco_string_create("\"symbol\" expected"); break;
-			case 79: s = coco_string_create("\"symbolSpace\" expected"); break;
-			case 80: s = coco_string_create("\"name\" expected"); break;
-			case 81: s = coco_string_create("\"butt\" expected"); break;
-			case 82: s = coco_string_create("\"round\" expected"); break;
-			case 83: s = coco_string_create("\"square\" expected"); break;
-			case 84: s = coco_string_create("\"normal\" expected"); break;
-			case 85: s = coco_string_create("\"emphasize\" expected"); break;
-			case 86: s = coco_string_create("\"lighten\" expected"); break;
-			case 87: s = coco_string_create("\"(\" expected"); break;
-			case 88: s = coco_string_create("\")\" expected"); break;
-			case 89: s = coco_string_create("\"darken\" expected"); break;
-			case 90: s = coco_string_create("\"!\" expected"); break;
-			case 91: s = coco_string_create("??? expected"); break;
-			case 92: s = coco_string_create("this symbol not expected in OSS"); break;
-			case 93: s = coco_string_create("this symbol not expected in FLAGSECTION"); break;
-			case 94: s = coco_string_create("this symbol not expected in WAYORDER"); break;
-			case 95: s = coco_string_create("this symbol not expected in CONSTSECTION"); break;
-			case 96: s = coco_string_create("this symbol not expected in SYMBOLSECTION"); break;
-			case 97: s = coco_string_create("this symbol not expected in WAYGROUP"); break;
-			case 98: s = coco_string_create("this symbol not expected in POLYGON"); break;
+			case 65: s = coco_string_create("\"zIndex\" expected"); break;
+			case 66: s = coco_string_create("\"pattern\" expected"); break;
+			case 67: s = coco_string_create("\"patternMinMag\" expected"); break;
+			case 68: s = coco_string_create("\"borderColor\" expected"); break;
+			case 69: s = coco_string_create("\"borderWidth\" expected"); break;
+			case 70: s = coco_string_create("\"borderDash\" expected"); break;
+			case 71: s = coco_string_create("\"label\" expected"); break;
+			case 72: s = coco_string_create("\"style\" expected"); break;
+			case 73: s = coco_string_create("\"size\" expected"); break;
+			case 74: s = coco_string_create("\"scaleMag\" expected"); break;
+			case 75: s = coco_string_create("\"autoSize\" expected"); break;
+			case 76: s = coco_string_create("\"position\" expected"); break;
+			case 77: s = coco_string_create("\"backgroundColor\" expected"); break;
+			case 78: s = coco_string_create("\"shieldSpace\" expected"); break;
+			case 79: s = coco_string_create("\"symbol\" expected"); break;
+			case 80: s = coco_string_create("\"symbolSpace\" expected"); break;
+			case 81: s = coco_string_create("\"name\" expected"); break;
+			case 82: s = coco_string_create("\"butt\" expected"); break;
+			case 83: s = coco_string_create("\"round\" expected"); break;
+			case 84: s = coco_string_create("\"square\" expected"); break;
+			case 85: s = coco_string_create("\"normal\" expected"); break;
+			case 86: s = coco_string_create("\"emphasize\" expected"); break;
+			case 87: s = coco_string_create("\"lighten\" expected"); break;
+			case 88: s = coco_string_create("\"(\" expected"); break;
+			case 89: s = coco_string_create("\")\" expected"); break;
+			case 90: s = coco_string_create("\"darken\" expected"); break;
+			case 91: s = coco_string_create("\"!\" expected"); break;
+			case 92: s = coco_string_create("??? expected"); break;
+			case 93: s = coco_string_create("this symbol not expected in OSS"); break;
+			case 94: s = coco_string_create("this symbol not expected in FLAGSECTION"); break;
+			case 95: s = coco_string_create("this symbol not expected in WAYORDER"); break;
+			case 96: s = coco_string_create("this symbol not expected in CONSTSECTION"); break;
+			case 97: s = coco_string_create("this symbol not expected in SYMBOLSECTION"); break;
+			case 98: s = coco_string_create("this symbol not expected in WAYGROUP"); break;
 			case 99: s = coco_string_create("this symbol not expected in POLYGON"); break;
 			case 100: s = coco_string_create("this symbol not expected in POLYGON"); break;
-			case 101: s = coco_string_create("this symbol not expected in RECTANGLE"); break;
+			case 101: s = coco_string_create("this symbol not expected in POLYGON"); break;
 			case 102: s = coco_string_create("this symbol not expected in RECTANGLE"); break;
 			case 103: s = coco_string_create("this symbol not expected in RECTANGLE"); break;
-			case 104: s = coco_string_create("this symbol not expected in CIRCLE"); break;
+			case 104: s = coco_string_create("this symbol not expected in RECTANGLE"); break;
 			case 105: s = coco_string_create("this symbol not expected in CIRCLE"); break;
 			case 106: s = coco_string_create("this symbol not expected in CIRCLE"); break;
-			case 107: s = coco_string_create("invalid FILLSTYLEATTR"); break;
-			case 108: s = coco_string_create("invalid UDOUBLE"); break;
-			case 109: s = coco_string_create("invalid DOUBLE"); break;
-			case 110: s = coco_string_create("invalid CONSTDEF"); break;
-			case 111: s = coco_string_create("invalid COLOR"); break;
-			case 112: s = coco_string_create("invalid MAG"); break;
-			case 113: s = coco_string_create("invalid UINT"); break;
-			case 114: s = coco_string_create("invalid STYLE"); break;
-			case 115: s = coco_string_create("invalid STYLEDEF"); break;
-			case 116: s = coco_string_create("this symbol not expected in NODESTYLEDEF"); break;
-			case 117: s = coco_string_create("invalid NODESTYLEDEF"); break;
-			case 118: s = coco_string_create("this symbol not expected in WAYSTYLEDEF"); break;
-			case 119: s = coco_string_create("invalid WAYSTYLEDEF"); break;
+			case 107: s = coco_string_create("this symbol not expected in CIRCLE"); break;
+			case 108: s = coco_string_create("invalid FILLSTYLEATTR"); break;
+			case 109: s = coco_string_create("invalid UDOUBLE"); break;
+			case 110: s = coco_string_create("invalid DOUBLE"); break;
+			case 111: s = coco_string_create("invalid CONSTDEF"); break;
+			case 112: s = coco_string_create("invalid COLOR"); break;
+			case 113: s = coco_string_create("invalid MAG"); break;
+			case 114: s = coco_string_create("invalid UINT"); break;
+			case 115: s = coco_string_create("invalid STYLE"); break;
+			case 116: s = coco_string_create("invalid STYLEDEF"); break;
+			case 117: s = coco_string_create("this symbol not expected in NODESTYLEDEF"); break;
+			case 118: s = coco_string_create("invalid NODESTYLEDEF"); break;
+			case 119: s = coco_string_create("this symbol not expected in WAYSTYLEDEF"); break;
 			case 120: s = coco_string_create("invalid WAYSTYLEDEF"); break;
-			case 121: s = coco_string_create("this symbol not expected in AREASTYLEDEF"); break;
-			case 122: s = coco_string_create("invalid AREASTYLEDEF"); break;
+			case 121: s = coco_string_create("invalid WAYSTYLEDEF"); break;
+			case 122: s = coco_string_create("this symbol not expected in AREASTYLEDEF"); break;
 			case 123: s = coco_string_create("invalid AREASTYLEDEF"); break;
-			case 124: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
+			case 124: s = coco_string_create("invalid AREASTYLEDEF"); break;
 			case 125: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
 			case 126: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
-			case 127: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
+			case 127: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
 			case 128: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
 			case 129: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
-			case 130: s = coco_string_create("invalid TEXTSTYLEATTR"); break;
-			case 131: s = coco_string_create("invalid ICONSTYLEATTR"); break;
-			case 132: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
+			case 130: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
+			case 131: s = coco_string_create("invalid TEXTSTYLEATTR"); break;
+			case 132: s = coco_string_create("invalid ICONSTYLEATTR"); break;
 			case 133: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
-			case 134: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
+			case 134: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
 			case 135: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
 			case 136: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
-			case 137: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
+			case 137: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
 			case 138: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
 			case 139: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
-			case 140: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
+			case 140: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
 			case 141: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
 			case 142: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
-			case 143: s = coco_string_create("invalid LINESTYLEATTR"); break;
-			case 144: s = coco_string_create("invalid PATHTEXTSTYLEATTR"); break;
-			case 145: s = coco_string_create("invalid PATHSYMBOLSTYLEATTR"); break;
-			case 146: s = coco_string_create("invalid PATHSHIELDSTYLEATTR"); break;
-			case 147: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
+			case 143: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
+			case 144: s = coco_string_create("invalid LINESTYLEATTR"); break;
+			case 145: s = coco_string_create("invalid PATHTEXTSTYLEATTR"); break;
+			case 146: s = coco_string_create("invalid PATHSYMBOLSTYLEATTR"); break;
+			case 147: s = coco_string_create("invalid PATHSHIELDSTYLEATTR"); break;
 			case 148: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
-			case 149: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
+			case 149: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
 			case 150: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
 			case 151: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
-			case 152: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
+			case 152: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
 			case 153: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
 			case 154: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
-			case 155: s = coco_string_create("invalid CAPSTYLE"); break;
-			case 156: s = coco_string_create("invalid TEXTLABE"); break;
-			case 157: s = coco_string_create("invalid LABELSTYLE"); break;
+			case 155: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
+			case 156: s = coco_string_create("invalid CAPSTYLE"); break;
+			case 157: s = coco_string_create("invalid TEXTLABE"); break;
+			case 158: s = coco_string_create("invalid LABELSTYLE"); break;
 
     default:
     {

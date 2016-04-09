@@ -754,7 +754,7 @@ namespace osmscout {
               data.buffer=&coastlineSegmentAttributes;
               data.layer=0;
               data.lineStyle=coastlineLine;
-              data.wayPriority=std::numeric_limits<size_t>::max();
+              data.wayPriority=std::numeric_limits<int>::max();
               data.transStart=start+lineStart;
               data.transEnd=start+lineEnd;
               data.lineWidth=GetProjectedWidth(projection,

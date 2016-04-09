@@ -462,7 +462,8 @@ namespace osmscout {
       attrJoinCap,
       attrEndCap,
       attrDashes,
-      attrPriority
+      attrPriority,
+      attrZIndex
     };
 
   private:
@@ -477,6 +478,7 @@ namespace osmscout {
     CapStyle            endCap;
     std::vector<double> dash;
     int                 priority;
+    int                 zIndex;
 
   public:
     LineStyle();
@@ -494,6 +496,7 @@ namespace osmscout {
     LineStyle& SetEndCap(CapStyle endCap);
     LineStyle& SetDashes(const std::vector<double> dashes);
     LineStyle& SetPriority(int priority);
+    LineStyle& SetZIndex(int zIndex);
 
     inline bool IsVisible() const
     {
@@ -560,6 +563,11 @@ namespace osmscout {
     inline int GetPriority() const
     {
       return priority;
+    }
+
+    inline int GetZIndex() const
+    {
+      return zIndex;
     }
 
     void CopyAttributes(const LineStyle& other,

@@ -1175,6 +1175,12 @@ PRODUCTIONS
                      style.style->SetPriority(priority);
                      style.attributes.insert(LineStyle::attrPriority);
                   .)
+                | (. int zIndex; .)
+                  "zIndex" ":" INT<zIndex>
+                  (.
+                     style.style->SetZIndex(zIndex);
+                     style.attributes.insert(LineStyle::attrZIndex);
+                  .)
                 )
                 .
 

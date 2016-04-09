@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 91;
-	noSym = 91;
+	maxT = 92;
+	noSym = 92;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -220,29 +220,30 @@ void Scanner::Init() {
 	keywords.set("joinCap", 62);
 	keywords.set("endCap", 63);
 	keywords.set("priority", 64);
-	keywords.set("pattern", 65);
-	keywords.set("patternMinMag", 66);
-	keywords.set("borderColor", 67);
-	keywords.set("borderWidth", 68);
-	keywords.set("borderDash", 69);
-	keywords.set("label", 70);
-	keywords.set("style", 71);
-	keywords.set("size", 72);
-	keywords.set("scaleMag", 73);
-	keywords.set("autoSize", 74);
-	keywords.set("position", 75);
-	keywords.set("backgroundColor", 76);
-	keywords.set("shieldSpace", 77);
-	keywords.set("symbol", 78);
-	keywords.set("symbolSpace", 79);
-	keywords.set("name", 80);
-	keywords.set("butt", 81);
-	keywords.set("round", 82);
-	keywords.set("square", 83);
-	keywords.set("normal", 84);
-	keywords.set("emphasize", 85);
-	keywords.set("lighten", 86);
-	keywords.set("darken", 89);
+	keywords.set("zIndex", 65);
+	keywords.set("pattern", 66);
+	keywords.set("patternMinMag", 67);
+	keywords.set("borderColor", 68);
+	keywords.set("borderWidth", 69);
+	keywords.set("borderDash", 70);
+	keywords.set("label", 71);
+	keywords.set("style", 72);
+	keywords.set("size", 73);
+	keywords.set("scaleMag", 74);
+	keywords.set("autoSize", 75);
+	keywords.set("position", 76);
+	keywords.set("backgroundColor", 77);
+	keywords.set("shieldSpace", 78);
+	keywords.set("symbol", 79);
+	keywords.set("symbolSpace", 80);
+	keywords.set("name", 81);
+	keywords.set("butt", 82);
+	keywords.set("round", 83);
+	keywords.set("square", 84);
+	keywords.set("normal", 85);
+	keywords.set("emphasize", 86);
+	keywords.set("lighten", 87);
+	keywords.set("darken", 90);
 
 
   tvalLength = 128;
@@ -490,11 +491,11 @@ TokenRef Scanner::NextToken() {
 		case 29:
 			{t->kind = 47; break;}
 		case 30:
-			{t->kind = 87; break;}
-		case 31:
 			{t->kind = 88; break;}
+		case 31:
+			{t->kind = 89; break;}
 		case 32:
-			{t->kind = 90; break;}
+			{t->kind = 91; break;}
 		case 33:
 			recEnd = pos; recKind = 49;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
