@@ -19,10 +19,10 @@ IF %COMPILER%==msys2 (
   IF %BUILDTOOL%==autoconf (
   bash -lc "pacman -S --needed --noconfirm git autoconf automake make"
   ) ELSE (
-  bash -lc "pacman -S --needed --noconfirm git make cmake"
+  bash -lc "pacman -S --needed --noconfirm git make mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules"
   )
   
-  bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-protobuf mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cairo mingw-w64-x86_64-pango mingw-w64-x86_64-qt5 mingw-w64-x86_64-ccache"
+  bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-protobuf mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cairo mingw-w64-x86_64-pango mingw-w64-x86_64-qt5"
 )
 
 IF %COMPILER%==msvc2015 (

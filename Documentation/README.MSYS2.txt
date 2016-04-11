@@ -38,6 +38,10 @@ For the cairo backend you need additionally:
 For the Qt5 backend you need additionally:
 * mingw-w64-x86_64-qt5
 
+For cmake you need additionally:
+* mingw-w64-x86_64-cmake
+* mingw-w64-x86_64-cmake-extra-modules
+
 packages can be installed using
 
   pacman -S <package>
