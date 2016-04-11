@@ -57,6 +57,8 @@ namespace osmscout {
 
   class OSMSCOUT_API SilentProgress : public Progress
   {
+  public:
+    virtual ~SilentProgress();
   };
 
   class OSMSCOUT_API ConsoleProgress : public Progress
