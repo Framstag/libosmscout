@@ -672,10 +672,10 @@ namespace osmscout {
    * \ingroup Geometry
    *
    */
-  OSMSCOUT_API inline void Normalize(double x,
-                                     double y,
-                                     double& nx,
-                                     double& ny)
+  inline void Normalize(double x,
+                        double y,
+                        double& nx,
+                        double& ny)
   {
     double length=sqrt(x*x+y*y);
 
@@ -687,10 +687,10 @@ namespace osmscout {
    * \ingroup Geometry
    * Calculates the determinant of the line between the given points.
    */
-  OSMSCOUT_API inline double Det(double x1,
-                                 double y1,
-                                 double x2,
-                                 double y2)
+  inline double Det(double x1,
+                    double y1,
+                    double x2,
+                    double y2)
   {
     return x1*y2-y1*x2;
   }
