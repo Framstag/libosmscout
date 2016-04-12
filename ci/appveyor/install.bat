@@ -13,7 +13,7 @@ echo Bits: %BIT%
 IF %COMPILER%==msys2 (
   @echo on
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-  bash -lc "pacman --noconfirm --sync pacman-mirrors"
+  bash -lc "pacman -S --needed --noconfirm --sync pacman-mirrors"
   bash -lc "pacman -S --needed --noconfirm git"
   
   IF %BUILDTOOL%==autoconf (
