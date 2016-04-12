@@ -39,7 +39,7 @@ target_link_libraries(libosmscout_map_cairo
 		${PNG_LIBRARIES})
 if(PANGOCAIRO_FOUND)
   target_include_directories(libosmscout_map_cairo PRIVATE ${PANGO_INCLUDE_DIRS})
-  target_link_libraries(libosmscout_map_cairo ${PANGO_LIBRARIES})
+  target_link_libraries(libosmscout_map_cairo ${GLIB2_LIBRARIES} ${PANGO_LIBRARIES})
 endif()
 target_compile_definitions(libosmscout_map_cairo PRIVATE -DOSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS ${PNG_DEFINITIONS})
 install(TARGETS libosmscout_map_cairo
