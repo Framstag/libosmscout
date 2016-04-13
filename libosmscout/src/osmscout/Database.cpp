@@ -499,7 +499,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+      log.Warn() << "Retrieving 1 node by offset took " << time.ResultString();
     }
 
     return result;
@@ -521,7 +521,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << nodes.size() << " nodes by offset took " << time.ResultString();
     }
 
     return result;
@@ -543,7 +543,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << nodes.size() << " nodes by offset took " << time.ResultString();
     }
 
     return result;
@@ -565,7 +565,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << nodes.size() << " nodes by offset took " << time.ResultString();
     }
 
     return result;
@@ -587,7 +587,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving nodes by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << dataMap.size() << " nodes by offset took " << time.ResultString();
     }
 
     return result;
@@ -609,7 +609,7 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+      log.Warn() << "Retrieving 1 area by offset took " << time.ResultString();
     }
 
     return result;
@@ -629,7 +629,7 @@ namespace osmscout {
     bool result=areaDataFile->GetByOffset(offsets,areas);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
     }
 
     return result;
@@ -649,7 +649,7 @@ namespace osmscout {
     bool result=areaDataFile->GetByOffset(offsets,areas);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
     }
 
     return result;
@@ -669,7 +669,7 @@ namespace osmscout {
     bool result=areaDataFile->GetByOffset(offsets,areas);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
     }
 
     return result;
@@ -689,7 +689,7 @@ namespace osmscout {
     bool result=areaDataFile->GetByOffset(offsets,dataMap);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving areas by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << dataMap.size() << " areas by offset took " << time.ResultString();
     }
 
     return result;
@@ -733,7 +733,7 @@ namespace osmscout {
     bool result=wayDataFile->GetByOffset(offset,way);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+      log.Warn() << "Retrieving 1 way by offset took " << time.ResultString();
     }
 
     return result;
@@ -753,7 +753,7 @@ namespace osmscout {
     bool result=wayDataFile->GetByOffset(offsets,ways);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
     }
 
     return result;
@@ -773,7 +773,7 @@ namespace osmscout {
     bool result=wayDataFile->GetByOffset(offsets,ways);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
     }
 
     return result;
@@ -793,7 +793,7 @@ namespace osmscout {
     bool result=wayDataFile->GetByOffset(offsets,ways);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
     }
 
     return result;
@@ -813,7 +813,7 @@ namespace osmscout {
     bool result=wayDataFile->GetByOffset(offsets,dataMap);
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving ways by offset took " << time.ResultString();
+      log.Warn() << "Retrieving " << dataMap.size() << " ways by offset took " << time.ResultString();
     }
 
     return result;
