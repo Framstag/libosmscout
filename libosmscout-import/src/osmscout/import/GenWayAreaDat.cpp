@@ -224,7 +224,7 @@ namespace osmscout {
 
     if (parameter.GetStrictAreas() &&
         !AreaIsSimple(ring.nodes)) {
-      progress.Error("Area "+NumberToString(wayId)+" of type '"+area.GetType()->GetName()+"' is not simple");
+      progress.Error("Area "+NumberToString(wayId)+" of type '"+ring.GetType()->GetName()+"' is not simple");
       return true;
     }
 
