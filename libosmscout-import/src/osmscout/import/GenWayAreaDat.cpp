@@ -325,8 +325,7 @@ namespace osmscout {
         rawWays.push_back(way);
 
         if (rawWays.size()>=rawWayBlockSize ||
-            nodeIds.size()>=nodeBlockSize ||
-            w==rawWayCount) {
+            nodeIds.size()>=nodeBlockSize) {
           CoordDataFile::ResultMap coordsMap;
 
           if (!coordDataFile.Get(nodeIds,
@@ -348,6 +347,26 @@ namespace osmscout {
           }
 
           rawWays.clear();
+        }
+      }
+
+      if (rawWays.size() != 0) {
+        CoordDataFile::ResultMap coordsMap;
+
+        if (!coordDataFile.Get(nodeIds,
+                               coordsMap)) {
+          std::cerr << "Cannot read nodes!" << std::endl;
+          return false;
+        }
+
+        for (const auto& rawWay : rawWays) {
+          WriteArea(parameter,
+                    progress,
+                    *typeConfig,
+                    areaWriter,
+                    writtenWayCount,
+                    coordsMap,
+                    *rawWay);
         }
       }
 
