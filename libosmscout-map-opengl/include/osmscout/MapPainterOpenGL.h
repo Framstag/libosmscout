@@ -26,12 +26,16 @@
 
 #include <osmscout/MapPainter.h>
 
-#if defined(OSMSCOUT_MAP_OPENGL_HAVE_GL_GLUT_H)
-#  include <GL/glut.h>
-#elif defined(OSMSCOUT_MAP_OPENGL_HAVE_GLUT_GLUT_H)
-#  include <GLUT/glut.h>
+#if defined(__APPLE__) && defined(__MACH__)
+  #include <GLUT/glut.h>
 #else
-#  error "no glut.h"
+  #if defined(OSMSCOUT_MAP_OPENGL_HAVE_GL_GLUT_H)
+    #include <GL/glut.h>
+  #elif defined(OSMSCOUT_MAP_OPENGL_HAVE_GLUT_GLUT_H)
+    #include <GLUT/glut.h>
+  #else
+    #error "no glut.h"
+  #endif
 #endif
 
 namespace osmscout {
