@@ -53,11 +53,43 @@ PKG_CHECK_MODULES(LIBFREETYPE, [freetype2],
 AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
 
 PKG_CHECK_MODULES(LIBAGG, [libagg],
-                  [if test "$HASLIBFREETYPE" = "true"; then
-                     LIBAGG_LIBS="-laggfontfreetype $LIBAGG_LIBS"
-                   fi
-                   AC_SUBST(LIBAGG_CFLAGS)
+                  [AC_SUBST(LIBAGG_CFLAGS)
                    AC_SUBST(LIBAGG_LIBS)])
+
+dnl The name dof the agg freetype support library differs between Linux distributions
+dnl Since the library is not returned by pkg-config, we have to find the correct
+dnl name ourself :-/
+if test "$HASLIBFREETYPE" == "true"; then
+  DAVED_CXXFLAGS=$CXXFLAGS
+  SAVED_LDFLAGS=$LDFLAGS
+  CXXFLAGS="$SAVED_CXXFLAGS $LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS"
+
+  HASAGGFREETYPE="false"
+
+  AC_MSG_CHECKING([for libagg support library 'aggfontfreetype_pic'])
+  LDFLAGS="$SAVED_LDFLAGS -laggfontfreetype_pic"
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
+                     [ agg::font_engine_freetype_int32 fontEngine;])],
+    [AC_MSG_RESULT([yes])
+     LIBAGG_LIBS="$LIBAGG_LIBS -laggfontfreetype_pic"
+     HASAGGFREETYPE=true],
+    [AC_MSG_RESULT([no])])
+
+  if test "$HASAGGFREETYPE" == "false"; then
+    LDFLAGS="$SAVED_LDFLAGS -laggfontfreetype"
+    AC_MSG_CHECKING([for libagg support library 'aggfontfreetype'])
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
+                       [ agg::font_engine_freetype_int32 fontEngine;])],
+      [AC_MSG_RESULT([yes])
+       LIBAGG_LIBS="$LIBAGG_LIBS -laggfontfreetype"],
+      [AC_MSG_RESULT([no])])
+  fi
+
+  LDFLAGS=$SAVED_LDFLAGS
+  CXXFLAGS=$SAVED_CXXFLAGS
+fi
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
