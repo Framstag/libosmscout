@@ -22,9 +22,9 @@
 
 #include <list>
 #include <memory>
-#include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <osmscout/private/CoreImportExport.h>
 
@@ -78,7 +78,10 @@ namespace osmscout {
   public:
     TagNotCondition(const TagConditionRef& condition);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    inline bool Evaluate(const TagMap& tagMap) const
+    {
+      return !condition->Evaluate(tagMap);
+    }
   };
 
   /**
@@ -127,7 +130,10 @@ namespace osmscout {
   public:
     TagExistsCondition(TagId tag);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    inline bool Evaluate(const TagMap& tagMap) const
+    {
+      return tagMap.find(tag)!=tagMap.end();
+    }
   };
 
   /**
@@ -171,8 +177,8 @@ namespace osmscout {
   class OSMSCOUT_API TagIsInCondition : public TagCondition
   {
   private:
-    TagId                 tag;
-    std::set<std::string> tagValues;
+    TagId                           tag;
+    std::unordered_set<std::string> tagValues;
 
   public:
     TagIsInCondition(TagId tag);

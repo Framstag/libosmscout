@@ -36,11 +36,6 @@ namespace osmscout {
     // no code
   }
 
-  bool TagNotCondition::Evaluate(const TagMap& tagMap) const
-  {
-    return !condition->Evaluate(tagMap);
-  }
-
   TagBoolCondition::TagBoolCondition(Type type)
   : type(type)
   {
@@ -82,11 +77,6 @@ namespace osmscout {
   : tag(tag)
   {
     // no code
-  }
-
-  bool TagExistsCondition::Evaluate(const TagMap& tagMap) const
-  {
-    return tagMap.find(tag)!=tagMap.end();
   }
 
   TagBinaryCondition::TagBinaryCondition(TagId tag,
