@@ -321,10 +321,8 @@ void Parser::TAGCONDITION(TagConditionRef& condition) {
 		else {
 		 TagBoolConditionRef orCondition=std::make_shared<TagBoolCondition>(TagBoolCondition::boolOr);
 		
-		 for (std::list<TagConditionRef>::const_iterator c=conditions.begin();
-		      c!=conditions.end();
-		      ++c) {
-		   orCondition->AddCondition(*c);
+		 for (const auto& c : conditions) {
+		   orCondition->AddCondition(c);
 		 }
 		
 		 condition=orCondition;
@@ -391,10 +389,8 @@ void Parser::TAGANDCOND(TagConditionRef& condition) {
 		else {
 		 TagBoolConditionRef andCondition=std::make_shared<TagBoolCondition>(TagBoolCondition::boolAnd);
 		
-		 for (std::list<TagConditionRef>::const_iterator c=conditions.begin();
-		      c!=conditions.end();
-		      ++c) {
-		   andCondition->AddCondition(*c);
+		 for (const auto& c : conditions) {
+		   andCondition->AddCondition(c);
 		 }
 		
 		 condition=andCondition;
@@ -604,10 +600,8 @@ void Parser::TAGISINCOND(const std::string& tagName,TagConditionRef& condition) 
 		else {
 		 TagIsInConditionRef isInCondition=std::make_shared<TagIsInCondition>(tagId);
 		
-		 for (std::list<std::string>::const_iterator s=values.begin();
-		      s!=values.end();
-		      ++s) {
-		   isInCondition->AddTagValue(*s);
+		 for (const auto& s : values) {
+		   isInCondition->AddTagValue(s);
 		 }
 		
 		 condition=isInCondition;
