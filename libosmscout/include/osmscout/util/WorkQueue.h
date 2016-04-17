@@ -24,6 +24,7 @@
 #include <deque>
 #include <future>
 #include <memory>
+#include <limits>
 #include <thread>
 
 #include <osmscout/private/CoreImportExport.h>
@@ -38,12 +39,15 @@ namespace osmscout {
 
   private:
     std::mutex              mutex;
-    std::condition_variable condition;
+    std::condition_variable pushCondition;
+    std::condition_variable popCondition;
     std::deque<Task>        tasks;
+    size_t                  queueLimit;
     bool                    running;
 
   public:
     WorkQueue();
+    WorkQueue(size_t queueLimit);
     ~WorkQueue();
 
     void PushTask(Task& task);
@@ -54,7 +58,16 @@ namespace osmscout {
 
   template<class R>
   WorkQueue<R>::WorkQueue()
-  : running(true)
+  : queueLimit(std::numeric_limits<size_t>::max()),
+    running(true)
+  {
+    // no code
+  }
+
+  template<class R>
+  WorkQueue<R>::WorkQueue(size_t queueLimit)
+    : queueLimit(queueLimit),
+      running(true)
   {
     // no code
   }
@@ -68,11 +81,13 @@ namespace osmscout {
   template<class R>
   void WorkQueue<R>::PushTask(Task& task)
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
+
+    pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
 
     tasks.push_back(std::move(task));
 
-    condition.notify_one();
+    popCondition.notify_one();
   }
 
   template<class R>
@@ -80,7 +95,7 @@ namespace osmscout {
   {
     std::unique_lock<std::mutex> lock(mutex);
 
-    condition.wait(lock,[this]{return !tasks.empty() || !running;});
+    popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
 
     if (!running) {
       return false;
@@ -88,6 +103,8 @@ namespace osmscout {
 
     task=std::move(tasks.front());
     tasks.pop_front();
+
+    pushCondition.notify_one();
 
     return true;
   }
@@ -99,7 +116,7 @@ namespace osmscout {
 
     running=false;
 
-    condition.notify_all();
+    popCondition.notify_all();
   }
 }
 
