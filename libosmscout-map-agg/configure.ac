@@ -60,7 +60,7 @@ dnl The name dof the agg freetype support library differs between Linux distribu
 dnl Since the library is not returned by pkg-config, we have to find the correct
 dnl name ourself :-/
 if test "$HASLIBFREETYPE" == "true"; then
-  DAVED_CXXFLAGS=$CXXFLAGS
+  SAVED_CXXFLAGS=$CXXFLAGS
   SAVED_LDFLAGS=$LDFLAGS
   CXXFLAGS="$SAVED_CXXFLAGS $LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS"
 
