@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <future>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -81,6 +82,9 @@ namespace osmscout {
     void ReadRelations(const TypeConfig& typeConfig,
                        const PBF::PrimitiveBlock& block,
                        const PBF::PrimitiveGroup &group);
+
+    void ProcessBlock(const TypeConfig& typeConfig,
+                      const PBF::PrimitiveBlock& block);
 
   public:
     PreprocessPBF(PreprocessorCallback& callback);

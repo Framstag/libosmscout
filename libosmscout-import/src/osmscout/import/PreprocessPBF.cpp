@@ -444,6 +444,37 @@ namespace osmscout {
     delete buffer;
   }
 
+  void PreprocessPBF::ProcessBlock(const TypeConfig& typeConfig,
+                                   const PBF::PrimitiveBlock& block)
+  {
+    for (int currentGroup=0;
+         currentGroup<block.primitivegroup_size();
+         currentGroup++) {
+      const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
+
+      if (group.nodes_size()>0) {
+        ReadNodes(typeConfig,
+                  block,
+                  group);
+      }
+      else if (group.ways_size()>0) {
+        ReadWays(typeConfig,
+                 block,
+                 group);
+      }
+      else if (group.relations_size()>0) {
+        ReadRelations(typeConfig,
+                      block,
+                      group);
+      }
+      else if (group.has_dense()) {
+        ReadDenseNodes(typeConfig,
+                       block,
+                       group);
+      }
+    }
+  }
+
   bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
                              const ImportParameter& /*parameter*/,
                              Progress& progress,
@@ -504,6 +535,8 @@ namespace osmscout {
       nodes.reserve(20000);
       members.reserve(2000);
 
+      std::future<void> currentBlockTask;
+
       while (true) {
         PBF::BlockHeader blockHeader;
 
@@ -541,32 +574,17 @@ namespace osmscout {
           return false;
         }
 
-        for (int currentGroup=0;
-             currentGroup<block.primitivegroup_size();
-             currentGroup++) {
-          const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
-
-          if (group.nodes_size()>0) {
-            ReadNodes(*typeConfig,
-                      block,
-                      group);
-          }
-          else if (group.ways_size()>0) {
-            ReadWays(*typeConfig,
-                     block,
-                     group);
-          }
-          else if (group.relations_size()>0) {
-            ReadRelations(*typeConfig,
-                          block,
-                          group);
-          }
-          else if (group.has_dense()) {
-            ReadDenseNodes(*typeConfig,
-                           block,
-                           group);
-          }
+        if (currentBlockTask.valid()) {
+          currentBlockTask.get();
         }
+
+        currentBlockTask=std::async(std::launch::async,
+                                    &PreprocessPBF::ProcessBlock,this,
+                                    std::ref(*typeConfig),block);
+      }
+
+      if (currentBlockTask.valid()) {
+        currentBlockTask.get();
       }
     }
     catch (IOException& e) {
