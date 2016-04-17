@@ -121,6 +121,12 @@ namespace osmscout {
                  bool area);
     void SetNodes(const std::vector<OSMId>& nodes);
 
+    template<typename Iterator>
+    void SetNodes(Iterator first, Iterator end)
+    {
+      nodes.assign(first,end);
+    }
+
     void Parse(Progress& progress,
                const TypeConfig& typeConfig,
                const TagMap& tags);

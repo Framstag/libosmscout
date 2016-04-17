@@ -207,10 +207,8 @@ namespace osmscout {
     std::string name;
 
   public:
-    TagInfo();
-    TagInfo(const std::string& name);
-
-    TagInfo& SetId(TagId id);
+    TagInfo(TagId id,
+            const std::string& name);
 
     inline std::string GetName() const
     {

@@ -27,6 +27,7 @@
 #include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/WorkQueue.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/Preprocessor.h>
@@ -50,40 +51,40 @@ namespace osmscout {
     class Callback : public PreprocessorCallback
     {
     private:
-      const TypeConfigRef    typeConfig;
-      const ImportParameter& parameter;
-      Progress&              progress;
+      const TypeConfigRef      typeConfig;
+      const ImportParameter&   parameter;
+      Progress&                progress;
 
-      FileWriter             rawCoordWriter;
-      FileWriter             nodeWriter;
-      FileWriter             wayWriter;
-      FileWriter             coastlineWriter;
-      FileWriter             turnRestrictionWriter;
-      FileWriter             multipolygonWriter;
+      FileWriter               rawCoordWriter;
+      FileWriter               nodeWriter;
+      FileWriter               wayWriter;
+      FileWriter               coastlineWriter;
+      FileWriter               turnRestrictionWriter;
+      FileWriter               multipolygonWriter;
 
-      uint32_t               coordCount;
-      uint32_t               nodeCount;
-      uint32_t               wayCount;
-      uint32_t               areaCount;
-      uint32_t               relationCount;
-      uint32_t               coastlineCount;
-      uint32_t               turnRestrictionCount;
-      uint32_t               multipolygonCount;
+      uint32_t                 coordCount;
+      uint32_t                 nodeCount;
+      uint32_t                 wayCount;
+      uint32_t                 areaCount;
+      uint32_t                 relationCount;
+      uint32_t                 coastlineCount;
+      uint32_t                 turnRestrictionCount;
+      uint32_t                 multipolygonCount;
 
-      OSMId                  lastNodeId;
-      OSMId                  lastWayId;
-      OSMId                  lastRelationId;
+      OSMId                    lastNodeId;
+      OSMId                    lastWayId;
+      OSMId                    lastRelationId;
 
-      bool                   nodeSortingError;
-      bool                   waySortingError;
-      bool                   relationSortingError;
+      bool                     nodeSortingError;
+      bool                     waySortingError;
+      bool                     relationSortingError;
 
-      GeoCoord               minCoord;
-      GeoCoord               maxCoord;
+      GeoCoord                 minCoord;
+      GeoCoord                 maxCoord;
 
-      std::vector<uint32_t>  nodeStat;
-      std::vector<uint32_t>  areaStat;
-      std::vector<uint32_t>  wayStat;
+      std::vector<uint32_t>    nodeStat;
+      std::vector<uint32_t>    areaStat;
+      std::vector<uint32_t>    wayStat;
 
     private:
       bool IsTurnRestriction(const TagMap& tags,
@@ -103,10 +104,22 @@ namespace osmscout {
       bool DumpDistribution();
       bool DumpBoundingBox();
 
+      void NodeTask(const OSMId& id,
+                    const double& lon,
+                    const double& lat,
+                    const TagMap& tags);
+      void WayTask(const OSMId& id,
+                   const std::vector<OSMId>& nodes,
+                   const TagMap& tags);
+      void RelationTask(const OSMId& id,
+                        const std::vector<RawRelation::Member>& members,
+                        const TagMap& tags);
+
     public:
       Callback(const TypeConfigRef& typeConfig,
                const ImportParameter& parameter,
                Progress& progress);
+      virtual ~Callback();
 
       bool Initialize();
 

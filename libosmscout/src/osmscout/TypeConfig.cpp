@@ -989,16 +989,9 @@ namespace osmscout {
       return mapping->second;
     }
 
-    TagInfo tagInfo(tagName);
+    TagInfo tagInfo(nextTagId,tagName);
 
-    if (tagInfo.GetId()==0) {
-      tagInfo.SetId(nextTagId);
-
-      nextTagId++;
-    }
-    else {
-      nextTagId=std::max(nextTagId,(TagId)(tagInfo.GetId()+1));
-    }
+    nextTagId++;
 
     tags.push_back(tagInfo);
     stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();

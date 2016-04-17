@@ -167,8 +167,6 @@ namespace osmscout {
   {
     RawRelation relation;
 
-    areaStat[type->GetIndex()]++;
-
     relation.SetId(id);
 
     if (type->GetIgnore()) {
@@ -183,6 +181,9 @@ namespace osmscout {
     relation.Parse(progress,
                    *typeConfig,
                    tags);
+
+    areaStat[type->GetIndex()]++;
+
     relation.Write(*typeConfig,
                    multipolygonWriter);
 
@@ -218,6 +219,10 @@ namespace osmscout {
     wayStat.resize(typeConfig->GetTypeCount(),0);
   }
 
+  Preprocess::Callback::~Callback()
+  {
+    // no code
+  }
 
   bool Preprocess::Callback::Initialize()
   {
@@ -262,18 +267,13 @@ namespace osmscout {
     return true;
   }
 
-  void Preprocess::Callback::ProcessNode(const OSMId& id,
-                                         const double& lon,
-                                         const double& lat,
-                                         const TagMap& tagMap)
+  void Preprocess::Callback::NodeTask(const OSMId& id,
+                                      const double& lon,
+                                      const double& lat,
+                                      const TagMap& tagMap)
   {
-    RawNode      node;
     ObjectOSMRef object(id,
                         osmRefNode);
-
-    if (id<lastNodeId) {
-      nodeSortingError=true;
-    }
 
     minCoord.Set(std::min(minCoord.GetLat(),lat),
                  std::min(minCoord.GetLon(),lon));
@@ -288,15 +288,14 @@ namespace osmscout {
     rawCoord.SetOSMId(id);
     rawCoord.SetCoord(coord);
 
-    rawCoord.Write(*typeConfig,rawCoordWriter);
-
-    coordCount++;
-
     TypeInfoRef type=typeConfig->GetNodeType(tagMap);
 
-    nodeStat[type->GetIndex()]++;
+    rawCoord.Write(*typeConfig,rawCoordWriter);
+    coordCount++;
 
     if (!type->GetIgnore()) {
+      RawNode node;
+
       node.SetId(id);
       node.SetType(type);
       node.SetCoords(lon,lat);
@@ -308,15 +307,14 @@ namespace osmscout {
       node.Write(*typeConfig,
                  nodeWriter);
 
+      nodeStat[type->GetIndex()]++;
       nodeCount++;
     }
-
-    lastNodeId=id;
   }
 
-  void Preprocess::Callback::ProcessWay(const OSMId& id,
-                                        std::vector<OSMId>& nodes,
-                                        const TagMap& tagMap)
+  void Preprocess::Callback::WayTask(const OSMId& id,
+                                     const std::vector<OSMId>& nodes,
+                                     const TagMap& tagMap)
   {
     TypeInfoRef areaType;
     TypeInfoRef wayType;
@@ -330,10 +328,6 @@ namespace osmscout {
                        NumberToString(id)+
                        " has less than two nodes!");
       return;
-    }
-
-    if (id<lastWayId) {
-      waySortingError=true;
     }
 
     way.SetId(id);
@@ -387,7 +381,7 @@ namespace osmscout {
         isArea=-1;
       }
       else if (nodes.size()>3 &&
-         nodes.front()==nodes.back()) {
+               nodes.front()==nodes.back()) {
         isArea=1;
       }
       else {
@@ -415,12 +409,13 @@ namespace osmscout {
 
       if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
-        nodes.pop_back();
+        //nodes.pop_back();
+        way.SetNodes(nodes.begin(),--nodes.end());
+      }
+      else {
+        way.SetNodes(nodes.begin(),nodes.end());
       }
 
-      areaStat[areaType->GetIndex()]++;
-
-      areaCount++;
       break;
     case -1:
       if (wayType==typeConfig->typeInfoIgnore &&
@@ -438,24 +433,28 @@ namespace osmscout {
         way.SetType(wayType,false);
       }
 
-      wayStat[wayType->GetIndex()]++;
+      way.SetNodes(nodes.begin(),nodes.end());
 
-      wayCount++;
       break;
     default:
       assert(false);
     }
 
-    way.SetNodes(nodes);
-
     way.Parse(progress,
               *typeConfig,
               tagMap);
 
+    if (isArea==1) {
+      areaStat[areaType->GetIndex()]++;
+      areaCount++;
+    }
+    else {
+      wayStat[wayType->GetIndex()]++;
+      wayCount++;
+    }
+
     way.Write(*typeConfig,
               wayWriter);
-
-    lastWayId=id;
 
     if (isCoastline) {
       RawCoastline coastline;
@@ -470,14 +469,10 @@ namespace osmscout {
     }
   }
 
-  void Preprocess::Callback::ProcessRelation(const OSMId& id,
-                                             const std::vector<RawRelation::Member>& members,
-                                             const TagMap& tagMap)
+  void Preprocess::Callback::RelationTask(const OSMId& id,
+                                          const std::vector<RawRelation::Member>& members,
+                                          const TagMap& tagMap)
   {
-    if (id<lastRelationId) {
-      relationSortingError=true;
-    }
-
     if (members.empty()) {
       progress.Warning("Relation "+
                        NumberToString(id)+
@@ -502,23 +497,49 @@ namespace osmscout {
                           id,
                           multipolygonType);
     }
+  }
 
-    /*
-    RawRelation relation;
-    TypeId      type;
+  void Preprocess::Callback::ProcessNode(const OSMId& id,
+                                         const double& lon,
+                                         const double& lat,
+                                         const TagMap& tagMap)
+  {
+    if (id<lastNodeId) {
+      nodeSortingError=true;
+    }
 
-    relation.SetId(id);
-    relation.members=members;
+    lastNodeId=id;
 
-    typeConfig.GetRelationTypeId(tagMap,type);
-    typeConfig.ResolveTags(tagMap,relation.tags);
+    // Things will get much slower if we delegate processing of nodes to some other thread
+    NodeTask(id,lon,lat,tagMap);
+  }
 
-    relation.SetType(type);
+  void Preprocess::Callback::ProcessWay(const OSMId& id,
+                                        std::vector<OSMId>& nodes,
+                                        const TagMap& tagMap)
+  {
+    if (id<lastWayId) {
+      waySortingError=true;
+    }
 
-    relation.Write(relationWriter);*/
+    lastWayId=id;
+
+    WayTask(id,nodes,tagMap);
+  }
+
+  void Preprocess::Callback::ProcessRelation(const OSMId& id,
+                                             const std::vector<RawRelation::Member>& members,
+                                             const TagMap& tagMap)
+  {
+    if (id<lastRelationId) {
+      relationSortingError=true;
+    }
+
+    lastRelationId=id;
 
     relationCount++;
-    lastRelationId=id;
+
+    RelationTask(id,members,tagMap);
   }
 
   bool Preprocess::Callback::DumpDistribution()

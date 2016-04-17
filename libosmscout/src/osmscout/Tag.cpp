@@ -186,22 +186,11 @@ namespace osmscout {
     return tagValues.find(t->second)!=tagValues.end();
   }
 
-  TagInfo::TagInfo()
-   : id(0)
-  {
-  }
-
-  TagInfo::TagInfo(const std::string& name)
-   : id(0),
+  TagInfo::TagInfo(TagId id,
+                   const std::string& name)
+   : id(id),
      name(name)
   {
     // no code
-  }
-
-  TagInfo& TagInfo::SetId(TagId id)
-  {
-    this->id=id;
-
-    return *this;
   }
 }
