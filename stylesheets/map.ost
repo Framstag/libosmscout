@@ -225,7 +225,7 @@ TYPES
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_residential
-    = WAY AREA ("highway"=="residential")
+    = WAY AREA ("highway"=="residential") // OR AREA ("area:highway"=="residential")
       {Name, NameAlt, Ref}
       PATH[FOOT BICYCLE CAR] LOCATION
       
@@ -249,7 +249,7 @@ TYPES
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
       {Name, NameAlt}
-      PATH[FOOT] LOCATION PIN_WAY
+      PATH[FOOT] LOCATION PIN_WAY MERGE_AREAS
       
   TYPE highway_path
     = WAY ("highway"=="path")
@@ -262,7 +262,7 @@ TYPES
       PATH[BICYCLE] PIN_WAY
       
   TYPE highway_footway
-    = WAY AREA ("highway"=="footway")
+    = WAY AREA ("highway"=="footway") OR AREA ("area:highway"=="footway")
       {Name, NameAlt}
       PATH[FOOT] LOCATION PIN_WAY
       
