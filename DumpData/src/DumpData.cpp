@@ -613,54 +613,69 @@ static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
   DumpFeatureValueBuffer(area->rings.front().GetFeatureValueBuffer(),
                          IDENT);
 
-  if (!area->rings.front().nodes.empty()) {
-    std::cout << std::endl;
-
-    for (size_t n=0; n<area->rings.front().nodes.size(); n++) {
-      std::cout << "  node[" << n << "] {";
-
-      if (area->rings.front().GetSerial(n)!=0) {
-        std::cout << " serial: " << area->rings.front().GetSerial(n);
-      }
-
-      std::cout << " lat: " << area->rings.front().nodes[n].GetLat() << " lon: "<< area->rings.front().nodes[n].GetLon() << " }" << std::endl;
+  for (size_t r=0; r<area->rings.size(); r++) {
+    if (!area->rings[r].nodes.empty()) {
+      area->rings[r].GetBoundingBox(boundingBox);
     }
-  }
-
-  for (size_t r=1; r<area->rings.size(); r++) {
-    area->rings[r].GetBoundingBox(boundingBox);
 
     std::cout << std::endl;
-    std::cout << "  role[" << r << "] {" << std::endl;
 
-    if (area->rings[r].IsOuterRing()) {
-      std::cout << "    outer" << std::endl;
+    size_t ident;
+    if (area->rings[r].IsMasterRing()) {
+      ident=IDENT;
     }
     else {
-      std::cout << "    ring: " << (size_t)area->rings[r].GetRing() << std::endl;
+      std::cout << "  role[" << r << "] {" << std::endl;
+      ident=IDENT+2;
     }
-    std::cout << "    type: " << area->rings[r].GetType()->GetName() << std::endl;
-    std::cout << "    boundingBox: " << boundingBox.GetDisplayText() << std::endl;
-    std::cout << "    center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
+
+    if (area->rings[r].IsMasterRing()) {
+      DumpIndent(ident);
+      std::cout << "master" << std::endl;
+    }
+    else if (area->rings[r].IsOuterRing()) {
+      DumpIndent(ident);
+      std::cout << "outer" << std::endl;
+      DumpIndent(ident);
+      std::cout << "type: " << area->rings[r].GetType()->GetName() << std::endl;
+    }
+    else {
+      DumpIndent(ident);
+      std::cout << "ring: " << (size_t)area->rings[r].GetRing() << std::endl;
+      DumpIndent(ident);
+      std::cout << "type: " << area->rings[r].GetType()->GetName() << std::endl;
+    }
+
+    if (!area->rings[r].nodes.empty()) {
+      DumpIndent(ident);
+      std::cout << "boundingBox: " << boundingBox.GetDisplayText() << std::endl;
+      DumpIndent(ident);
+      std::cout << "center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
+    }
 
     DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
-                           IDENT+2);
+                           ident);
 
     if (!area->rings[r].nodes.empty()) {
       std::cout << std::endl;
 
       for (size_t n=0; n<area->rings[r].nodes.size(); n++) {
-        std::cout << "    node[" << n << "] {";
+        DumpIndent(ident);
+        std::cout << "node[" << n << "] {";
 
         if (area->rings[r].GetSerial(n)!=0) {
-          std::cout << " serial: " << area->rings[r].GetSerial(n);
+          std::cout << "serial: " << area->rings[r].GetSerial(n);
         }
 
         std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;
       }
     }
 
-    std::cout << "  }" << std::endl;
+    if (!area->rings[r].IsMasterRing()) {
+      ident-=2;
+      DumpIndent(ident);
+      std::cout << "}" << std::endl;
+    }
   }
 
   std::cout << "}" << std::endl;
