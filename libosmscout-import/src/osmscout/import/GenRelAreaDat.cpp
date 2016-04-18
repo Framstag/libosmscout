@@ -835,60 +835,12 @@ namespace osmscout {
       return false;
     }
 
-    /*
-    if (rawRelation.tags.size()>0) {
-      size_t outerRings=0;
-
-      for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-           ring!=parts.end();
-           ring++) {
-        if (ring->role.ring==0) {
-          outerRings++;
-        }
-      }
-
-      if (outerRings==1) {
-        for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-             ring!=parts.end();
-             ring++) {
-          if (ring->role.ring==0 &&
-              ring->ways.size()==1 &&
-              ring->ways.front()->GetTags().size()>0) {
-            std::cout << "!!! Relation " << rawRelation.GetId() << " has tags at relation and outer ring!" << std::endl;
-          }
-        }
-      }
-    }*/
-
     // Resolve SegmentAttributes for each ring
 
     for (auto& ring : parts) {
       if (ring.IsArea() &&
           ring.ways.front()->GetType()!=typeConfig.typeInfoIgnore) {
         ring.role.SetFeatures(ring.ways.front()->GetFeatureValueBuffer());
-      }
-    }
-
-    // If a ring and the direct child ring have the same type, this is old school style for
-    // the child ring being a clip region. We set the type of the child to typeIgnore then...
-
-    for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-        ring!=parts.end();
-        ++ring) {
-      if (ring->IsArea()) {
-        std::list<MultipolygonPart>::iterator childRing=ring;
-
-        childRing++;
-        while (childRing!=parts.end() &&
-               childRing->role.GetRing()==ring->role.GetRing()+1) {
-
-          if (childRing->IsArea() &&
-              ring->role.GetType()==childRing->role.GetType()) {
-            childRing->role.SetType(typeConfig.typeInfoIgnore);
-          }
-
-          childRing++;
-        }
       }
     }
 
@@ -926,7 +878,6 @@ namespace osmscout {
             }
 
             masterRing.SetFeatures(ring.role.GetFeatureValueBuffer());
-            ring.role.SetType(typeConfig.typeInfoIgnore);
           }
           else if (masterRing.GetType()!=ring.role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
@@ -962,13 +913,55 @@ namespace osmscout {
 
     // (Re)create roles for relation
 
-    relation.rings.push_back(masterRing);
+    bool optimizeAwayMaster=false;
+
+    if (masterRing.HasAnyFeaturesSet()) {
+      bool outerRingsClean=true;
+
+      for (const auto& ring : parts) {
+        if (ring.role.IsOuterRing()) {
+          if (ring.role.GetType()!=masterRing.GetType()) {
+            outerRingsClean=false;
+            break;
+          }
+        }
+      }
+
+      if (outerRingsClean) {
+        optimizeAwayMaster=true;
+      }
+    }
+
+    if (!optimizeAwayMaster) {
+      relation.rings.push_back(masterRing);
+    }
 
     relation.rings.reserve(parts.size());
     for (const auto& ring : parts) {
       assert(!ring.role.nodes.empty());
 
       relation.rings.push_back(ring.role);
+    }
+
+    if (!optimizeAwayMaster) {
+      for (auto& ring : relation.rings) {
+        if (ring.IsOuterRing() && ring.GetType()==masterRing.GetType()) {
+          ring.SetType(typeConfig.typeInfoIgnore);
+        }
+      }
+    }
+
+    // If a ring and the direct child ring have the same type, this is old school style for
+    // the child ring being a clip region. We set the type of the child to typeIgnore then...
+    for (size_t r=0; r<relation.rings.size(); r++) {
+      size_t s=r+1;
+
+      while (s<relation.rings.size() &&
+             relation.rings[s].GetRing()==relation.rings[r].GetRing()+1 &&
+             relation.rings[s].GetType()==relation.rings[r].GetType()) {
+        relation.rings[s].SetType(typeConfig.typeInfoIgnore);
+        s++;
+      }
     }
 
     assert(!relation.rings.empty());

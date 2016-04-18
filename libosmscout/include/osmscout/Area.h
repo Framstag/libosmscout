@@ -74,6 +74,8 @@ namespace osmscout {
         return featureValueBuffer.HasFeature(idx);
       }
 
+      bool HasAnyFeaturesSet() const;
+
       inline const FeatureInstance& GetFeature(size_t idx) const
       {
         return featureValueBuffer.GetType()->GetFeature(idx);

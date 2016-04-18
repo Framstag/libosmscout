@@ -31,6 +31,17 @@ namespace osmscout {
   const size_t Area::masterRingId = 0;
   const size_t Area::outerRingId = 1;
 
+  bool Area::Ring::HasAnyFeaturesSet() const
+  {
+    for (size_t f=0; f<featureValueBuffer.GetType()->GetFeatureCount(); f++) {
+      if (featureValueBuffer.HasFeature(f)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool Area::Ring::GetCenter(GeoCoord& center) const
   {
     double minLat=0.0;
@@ -188,7 +199,7 @@ namespace osmscout {
     rings[0].featureValueBuffer=std::move(featureValueBuffer);
 
     if (ringCount>1) {
-      rings[0].ring=masterRingId;
+      scanner.Read(rings[0].ring);
     }
     else {
       rings[0].ring=outerRingId;
@@ -252,7 +263,7 @@ namespace osmscout {
     rings[0].featureValueBuffer=featureValueBuffer;
 
     if (ringCount>1) {
-      rings[0].ring=masterRingId;
+      scanner.Read(rings[0].ring);
     }
     else {
       rings[0].ring=outerRingId;
@@ -316,7 +327,7 @@ namespace osmscout {
     rings[0].featureValueBuffer=featureValueBuffer;
 
     if (ringCount>1) {
-      rings[0].ring=masterRingId;
+      scanner.Read(rings[0].ring);
     }
     else {
       rings[0].ring=outerRingId;
@@ -355,6 +366,13 @@ namespace osmscout {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
 
+    // TODO: We would like to have a bit flag here, if we have a simple area,
+    // an area with one master (and multiple rings) or an area with
+    // multiple outer but no master
+    //
+    // Also for each ring we would like to have a bit flag, if
+    // we stor eids or not
+
     // Outer ring
 
     writer.WriteTypeId(ring->GetType()->GetAreaId(),
@@ -365,6 +383,7 @@ namespace osmscout {
 
     if (multipleRings) {
       writer.WriteNumber((uint32_t)(rings.size()-1));
+      writer.Write(ring->ring);
     }
 
     writer.Write(ring->nodes,
@@ -412,6 +431,7 @@ namespace osmscout {
 
     if (multipleRings) {
       writer.WriteNumber((uint32_t)(rings.size()-1));
+      writer.Write(ring->ring);
     }
 
     writer.Write(ring->nodes,
@@ -459,6 +479,7 @@ namespace osmscout {
 
     if (multipleRings) {
       writer.WriteNumber((uint32_t)(rings.size()-1));
+      writer.Write(ring->ring);
     }
 
     writer.Write(ring->nodes,
