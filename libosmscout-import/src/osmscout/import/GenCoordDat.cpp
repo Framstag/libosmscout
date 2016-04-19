@@ -425,5 +425,3 @@ namespace osmscout {
     return true;
   }
 }
-
-                                   ;

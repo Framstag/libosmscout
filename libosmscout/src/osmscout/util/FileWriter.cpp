@@ -744,7 +744,7 @@ namespace osmscout {
       throw IOException(filename,"Cannot write coordinate","File already in error state");
     }
 
-    char buffer[coordByteSize];
+    unsigned char buffer[coordByteSize];
 
     buffer[0]=0xff;
     buffer[1]=0xff;
