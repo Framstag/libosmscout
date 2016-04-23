@@ -1025,7 +1025,7 @@ namespace osmscout {
                                                       const FileOffset& fileOffset,
                                                       const std::string& location,
                                                       const std::string& address,
-                                                      const std::vector<GeoCoord>& nodes,
+                                                      const std::vector<Point>& nodes,
                                                       double minlon,
                                                       double minlat,
                                                       double maxlon,
@@ -1082,7 +1082,7 @@ namespace osmscout {
                                                   Region& region,
                                                   const FileOffset& fileOffset,
                                                   const std::string& name,
-                                                  const std::vector<GeoCoord>& nodes,
+                                                  const std::vector<Point>& nodes,
                                                   double minlon,
                                                   double minlat,
                                                   double maxlon,
@@ -1146,7 +1146,7 @@ namespace osmscout {
       std::string           name;
       std::string           location;
       std::string           address;
-      std::vector<GeoCoord> nodes;
+      std::vector<Point>    nodes;
 
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
@@ -1157,7 +1157,7 @@ namespace osmscout {
         scanner.Read(name);
         scanner.Read(location);
         scanner.Read(address);
-        scanner.Read(nodes);
+        scanner.Read(nodes,false);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetAreaTypeInfo(typeId);
@@ -1242,7 +1242,7 @@ namespace osmscout {
                                                      const FileOffset& fileOffset,
                                                      const std::string& location,
                                                      const std::string& address,
-                                                     const std::vector<GeoCoord>& nodes,
+                                                     const std::vector<Point>& nodes,
                                                      double minlon,
                                                      double minlat,
                                                      double maxlon,
@@ -1316,7 +1316,7 @@ namespace osmscout {
                                                  Region& region,
                                                  const FileOffset& fileOffset,
                                                  const std::string& name,
-                                                 const std::vector<GeoCoord>& nodes,
+                                                 const std::vector<Point>& nodes,
                                                  double minlon,
                                                  double minlat,
                                                  double maxlon,
@@ -1397,7 +1397,7 @@ namespace osmscout {
       TypeInfoRef           type;
       std::string           name;
       std::string           location;
-      std::vector<GeoCoord> nodes;
+      std::vector<Point>    nodes;
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
@@ -1406,7 +1406,7 @@ namespace osmscout {
         scanner.ReadNumber(tmpType);
         scanner.Read(name);
         scanner.Read(location);
-        scanner.Read(nodes);
+        scanner.Read(nodes,false);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetWayTypeInfo(typeId);
