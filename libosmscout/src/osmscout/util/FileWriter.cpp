@@ -778,8 +778,10 @@ namespace osmscout {
       return;
     }
 
+    size_t nodesSize=nodes.size();
+
     // A lat and a lon delta for each coordinate delta
-    deltaBuffer.resize((nodes.size()-1)*2);
+    deltaBuffer.resize((nodesSize-1)*2);
 
     //
     // Calculate deltas and required space
@@ -790,7 +792,7 @@ namespace osmscout {
     size_t   deltaBufferPos=0;
     size_t   coordBitSize=16;
 
-    for (size_t i=1; i<nodes.size(); i++) {
+    for (size_t i=1; i<nodesSize; i++) {
       uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
       uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
 
@@ -838,70 +840,54 @@ namespace osmscout {
       lastLon=currentLon;
     }
 
-    size_t bytesNeeded=(nodes.size()-1)*coordBitSize/8; // all coordinates in the same encoding
+    size_t bytesNeeded=(nodesSize-1)*coordBitSize/8; // all coordinates in the same encoding
 
     //
     // Write starting length / signal bit section
     //
 
-    if (nodes.size()<32) {
-      uint8_t size;
-      uint8_t nodeSize=(nodes.size() & 0x1f) << 2;
+    uint8_t coordSizeFlags;
 
-      if (coordBitSize==16) {
-        size=0x00 | nodeSize;
-      }
-      else if (coordBitSize==32) {
-        size=0x01 | nodeSize;
-      }
-      else {
-        size=0x02 | nodeSize;
-      }
+    if (coordBitSize==16) {
+      coordSizeFlags=0x00;
+    }
+    else if (coordBitSize==32) {
+      coordSizeFlags=0x01;
+    }
+    else {
+      coordSizeFlags=0x02;
+    }
+
+    if (nodesSize<32) {
+      uint8_t nodeSize1=(nodesSize & 0x1f) << 2;
+      uint8_t size=coordSizeFlags | nodeSize1;
 
       Write(size);
     }
-    else if (nodes.size()<4096) {
+    else if (nodesSize<4096) {
       uint8_t size[2];
-      uint8_t nodeSize1=((nodes.size() & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
-      uint8_t nodeSize2=nodes.size() >> 5; // The final bits
+      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=nodesSize >> 5; // The final bits
 
-      if (coordBitSize==16) {
-        size[0]=0x00 | nodeSize1;
-      }
-      else if (coordBitSize==32) {
-        size[0]=0x01 | nodeSize1;
-      }
-      else {
-        size[0]=0x02 | nodeSize1;
-      }
-
+      size[0]=coordSizeFlags | nodeSize1;
       size[1]=nodeSize2;
 
       Write((char*)size,2);
     }
     else {
       uint8_t size[3];
-      uint8_t nodeSize1=((nodes.size() & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
-      uint8_t nodeSize2=((nodes.size() >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
-      uint8_t nodeSize3=nodes.size() >> 12; // The final bits
+      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+      uint8_t nodeSize3=nodesSize >> 12; // The final bits
 
-      if (coordBitSize==16) {
-        size[0]=0x00 | nodeSize1;
-      }
-      else if (coordBitSize==32) {
-        size[0]=0x01 | nodeSize1;
-      }
-      else {
-        size[0]=0x02 | nodeSize1;
-      }
-
+      size[0]=coordSizeFlags | nodeSize1;
       size[1]=nodeSize2;
       size[2]=nodeSize3;
 
       Write((char*)size,3);
     }
 
-    //std::cout << "Write " << std::dec << nodes.size() << " nodes, " << coordBitSize << " bits per coordinate pair" << std::endl;
+    //std::cout << "Write " << std::dec << nodesSize << " nodes, " << coordBitSize << " bits per coordinate pair" << std::endl;
 
     /*
     std::cout << "Write - Calculated deltas: ";
