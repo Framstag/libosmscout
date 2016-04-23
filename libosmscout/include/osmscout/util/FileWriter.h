@@ -113,7 +113,6 @@ namespace osmscout {
     void WriteCoord(const GeoCoord& coord);
     void WriteInvalidCoord();
 
-    void Write(const std::vector<GeoCoord>& nodes);
     void Write(const std::vector<Point>& nodes, bool writeIds);
 
     void WriteTypeId(TypeId id, uint8_t maxBytes);
