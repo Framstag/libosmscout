@@ -303,7 +303,7 @@ namespace osmscout {
 
   /**
    * Reads the FeatureValueBuffer to the given FileScanner.
-   * It also reads the value of the special flag as passed to teh Write method.
+   * It also reads the value of the special flag as passed to the Write method.
    *
    * @throws IOException
    */
@@ -314,7 +314,7 @@ namespace osmscout {
       scanner.Read(featureBits[i]);
     }
 
-    if (type->GetFeatureCount()%8!=0) {
+    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+1)) {
       specialFlag=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
     }
     else {
@@ -323,6 +323,45 @@ namespace osmscout {
       scanner.Read(addByte);
 
       specialFlag=(addByte & 0x80)!=0;
+    }
+
+    for (const auto &feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+
+      if (HasFeature(idx) &&
+          feature.GetFeature()->HasValue()) {
+        FeatureValue* value=feature.GetFeature()->AllocateValue(GetValue(idx));
+
+        value->Read(scanner);
+      }
+    }
+  }
+
+  /**
+   * Reads the FeatureValueBuffer to the given FileScanner.
+   * It also reads the value of two special flags as passed to the Write method.
+   *
+   * @throws IOException
+   */
+  void FeatureValueBuffer::Read(FileScanner& scanner,
+                                bool& specialFlag1,
+                                bool& specialFlag2)
+  {
+    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+      scanner.Read(featureBits[i]);
+    }
+
+    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+2)) {
+      specialFlag1=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
+      specialFlag2=(featureBits[type->GetFeatureMaskBytes()-1] & 0x40)!=0;
+    }
+    else {
+      uint8_t addByte;
+
+      scanner.Read(addByte);
+
+      specialFlag1=(addByte & 0x80)!=0;
+      specialFlag2=(addByte & 0x40)!=0;
     }
 
     for (const auto &feature : type->GetFeatures()) {
@@ -370,7 +409,7 @@ namespace osmscout {
   void FeatureValueBuffer::Write(FileWriter& writer,
                                  bool specialFlag) const
   {
-    if (type->GetFeatureCount()%8!=0) {
+    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+1)) {
       if (specialFlag) {
         featureBits[type->GetFeatureMaskBytes()-1]|=0x80;
       }
@@ -388,6 +427,65 @@ namespace osmscout {
       }
 
       uint8_t addByte=specialFlag ? 0x80 : 0x00;
+
+      writer.Write(addByte);
+    }
+
+    for (const auto &feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+
+      if (HasFeature(idx) &&
+          feature.GetFeature()->HasValue()) {
+        FeatureValue* value=GetValue(idx);
+
+        value->Write(writer);
+      }
+    }
+  }
+
+  /**
+   * Writes the FeatureValueBuffer to the given FileWriter.
+   * It also writes the value of the special flag passed. The flag can later be retrieved
+   * by using the matching Read method.
+   *
+   * @throws IOException
+   */
+  void FeatureValueBuffer::Write(FileWriter& writer,
+                                 bool specialFlag1,
+                                 bool specialFlag2) const
+  {
+    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+2)) {
+      if (specialFlag1) {
+        featureBits[type->GetFeatureMaskBytes()-1]|=0x80;
+      }
+      else {
+        featureBits[type->GetFeatureMaskBytes()-1]&=~0x80;
+      }
+
+      if (specialFlag2) {
+        featureBits[type->GetFeatureMaskBytes()-1]|=0x40;
+      }
+      else {
+        featureBits[type->GetFeatureMaskBytes()-1]&=~0x40;
+      }
+
+      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+        writer.Write(featureBits[i]);
+      }
+    }
+    else {
+      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+        writer.Write(featureBits[i]);
+      }
+
+      uint8_t addByte=0;
+
+      if (specialFlag1) {
+        addByte|= 0x80;
+      }
+      if (specialFlag1) {
+        addByte|= 0x40;
+      }
 
       writer.Write(addByte);
     }
