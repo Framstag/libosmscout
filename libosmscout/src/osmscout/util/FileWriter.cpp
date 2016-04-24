@@ -839,6 +839,21 @@ namespace osmscout {
     size_t bytesNeeded=(nodesSize-1)*coordBitSize/8; // all coordinates in the same encoding
 
     //
+    // do we need to store node ids?
+    //
+
+    bool hasNodes=false;
+
+    if (writeIds) {
+      for (const auto& node : nodes) {
+        if (node.IsRelevant()) {
+          hasNodes=true;
+          break;
+        }
+      }
+    }
+
+    //
     // Write starting length / signal bit section
     //
 
@@ -856,33 +871,67 @@ namespace osmscout {
       coordSizeFlags=0x02;
     }
 
-    if (nodesSize<32) {
-      uint8_t nodeSize1=(nodesSize & 0x1f) << 2;
-      uint8_t size=coordSizeFlags | nodeSize1;
+    if (writeIds) {
+      uint8_t hasNodesFlags=hasNodes ? 0x04 : 0x00;
 
-      Write(size);
-    }
-    else if (nodesSize<4096) {
-      uint8_t size[2];
-      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
-      uint8_t nodeSize2=nodesSize >> 5; // The final bits
+      if (nodesSize<16) {
+        uint8_t nodeSize1=(nodesSize & 0x0f) << 3;
+        uint8_t size=coordSizeFlags | hasNodesFlags | nodeSize1;
 
-      size[0]=coordSizeFlags | nodeSize1;
-      size[1]=nodeSize2;
+        Write(size);
+      }
+      else if (nodesSize<2048) {
+        uint8_t size[2];
+        uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
+        uint8_t nodeSize2=nodesSize >> 4;                   // The final bits
 
-      Write((char*)size,2);
+        size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
+        size[1]=nodeSize2;
+
+        Write((char*)size,2);
+      }
+      else {
+        uint8_t size[3];
+        uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
+        uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+        uint8_t nodeSize3=nodesSize >> 11;                  // The final bits
+
+        size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
+        size[1]=nodeSize2;
+        size[2]=nodeSize3;
+
+        Write((char*)size,3);
+      }
     }
     else {
-      uint8_t size[3];
-      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
-      uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
-      uint8_t nodeSize3=nodesSize >> 12; // The final bits
+      if (nodesSize<32) {
+        uint8_t nodeSize1=(nodesSize & 0x1f) << 2;
+        uint8_t size=coordSizeFlags | nodeSize1;
 
-      size[0]=coordSizeFlags | nodeSize1;
-      size[1]=nodeSize2;
-      size[2]=nodeSize3;
+        Write(size);
+      }
+      else if (nodesSize<4096) {
+        uint8_t size[2];
+        uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+        uint8_t nodeSize2=nodesSize >> 5; // The final bits
 
-      Write((char*)size,3);
+        size[0]=coordSizeFlags | nodeSize1;
+        size[1]=nodeSize2;
+
+        Write((char*)size,2);
+      }
+      else {
+        uint8_t size[3];
+        uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+        uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+        uint8_t nodeSize3=nodesSize >> 12; // The final bits
+
+        size[0]=coordSizeFlags | nodeSize1;
+        size[1]=nodeSize2;
+        size[2]=nodeSize3;
+
+        Write((char*)size,3);
+      }
     }
 
     //
@@ -940,46 +989,33 @@ namespace osmscout {
 
     Write((char*)byteBuffer.data(),byteBuffer.size());
 
-    if (writeIds) {
-      bool hasNodes=false;
+    if (hasNodes) {
+      size_t idCurrent=0;
 
-      for (const auto& node : nodes) {
-        if (node.IsRelevant()) {
-          hasNodes=true;
-          break;
-        }
-      }
+      while (idCurrent<nodesSize) {
+        uint8_t bitset=0;
+        uint8_t bitMask=1;
+        size_t idEnd=std::min(idCurrent+8,nodesSize);
 
-      Write(hasNodes);
-
-      if (hasNodes) {
-        size_t idCurrent=0;
-
-        while (idCurrent<nodesSize) {
-          uint8_t bitset=0;
-          uint8_t bitMask=1;
-          size_t idEnd=std::min(idCurrent+8,nodesSize);
-
-          for (size_t i=idCurrent; i<idEnd; i++) {
-            if (nodes[i].IsRelevant()) {
-              bitset=bitset | bitMask;
-            }
-
-            bitMask*=2;
+        for (size_t i=idCurrent; i<idEnd; i++) {
+          if (nodes[i].IsRelevant()) {
+            bitset=bitset | bitMask;
           }
 
-          Write(bitset);
+          bitMask*=2;
+        }
 
-          for (size_t i=idCurrent; i<idEnd; i++) {
-            if (nodes[i].IsRelevant()) {
-              Write(nodes[i].GetSerial());
-            }
+        Write(bitset);
 
-            bitMask=bitMask*2;
+        for (size_t i=idCurrent; i<idEnd; i++) {
+          if (nodes[i].IsRelevant()) {
+            Write(nodes[i].GetSerial());
           }
 
-          idCurrent+=8;
+          bitMask=bitMask*2;
         }
+
+        idCurrent+=8;
       }
 
       /*

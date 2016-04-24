@@ -2168,27 +2168,61 @@ namespace osmscout {
       return;
     }
 
-    if ((sizeByte & 0x03) == 0) {
-      coordBitSize=16;
-    }
-    else if ((sizeByte & 0x03) == 1) {
-      coordBitSize=32;
-    }
-    else {
-      coordBitSize=48;
-    }
+    bool   hasNodes;
+    size_t nodeCount;
 
-    size_t nodeCount=(sizeByte & 0x7c) >> 2;
+    if (readIds) {
+      hasNodes=sizeByte & 0x04;
 
-    if ((sizeByte & 0x80) != 0) {
-      Read(sizeByte);
+      if ((sizeByte & 0x03) == 0) {
+        coordBitSize=16;
+      }
+      else if ((sizeByte & 0x03) == 1) {
+        coordBitSize=32;
+      }
+      else {
+        coordBitSize=48;
+      }
 
-      nodeCount|=(sizeByte & 0x7f) << 5;
+      nodeCount=(sizeByte & 0x78) >> 3;
 
       if ((sizeByte & 0x80) != 0) {
         Read(sizeByte);
 
-        nodeCount|=sizeByte << 12;
+        nodeCount|=(sizeByte & 0x7f) << 4;
+
+        if ((sizeByte & 0x80) != 0) {
+          Read(sizeByte);
+
+          nodeCount|=sizeByte << 11;
+        }
+      }
+    }
+    else {
+      hasNodes=false;
+
+      if ((sizeByte & 0x03) == 0) {
+        coordBitSize=16;
+      }
+      else if ((sizeByte & 0x03) == 1) {
+        coordBitSize=32;
+      }
+      else {
+        coordBitSize=48;
+      }
+
+      nodeCount=(sizeByte & 0x7c) >> 2;
+
+      if ((sizeByte & 0x80) != 0) {
+        Read(sizeByte);
+
+        nodeCount|=(sizeByte & 0x7f) << 5;
+
+        if ((sizeByte & 0x80) != 0) {
+          Read(sizeByte);
+
+          nodeCount|=sizeByte << 12;
+        }
       }
     }
 
@@ -2291,32 +2325,26 @@ namespace osmscout {
       }
     }
 
-    if (readIds) {
-      bool hasNodes;
+    if (hasNodes) {
+      size_t idCurrent=0;
 
-      Read(hasNodes);
+      while (idCurrent<nodeCount) {
+        uint8_t bitset;
+        size_t bitmask=1;
 
-      if (hasNodes) {
-        size_t idCurrent=0;
+        Read(bitset);
 
-        while (idCurrent<nodeCount) {
-          uint8_t bitset;
-          size_t bitmask=1;
+        for (size_t i=0; i<8 && idCurrent<nodeCount; i++) {
+          if (bitset & bitmask) {
+            uint8_t serial;
 
-          Read(bitset);
+            Read(serial);
 
-          for (size_t i=0; i<8 && idCurrent<nodeCount; i++) {
-            if (bitset & bitmask) {
-              uint8_t serial;
-
-              Read(serial);
-
-              nodes[idCurrent].SetSerial(serial);
-            }
-
-            bitmask*=2;
-            idCurrent++;
+            nodes[idCurrent].SetSerial(serial);
           }
+
+          bitmask*=2;
+          idCurrent++;
         }
       }
 
