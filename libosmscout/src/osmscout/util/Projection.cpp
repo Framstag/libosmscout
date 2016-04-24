@@ -280,6 +280,14 @@ namespace osmscout {
       return false;
     }
 
+    if (lat <-85.0511 || lat>85.0511) {
+      return false;
+    }
+
+    if (lon<-180.0 || lon>180.0) {
+      return false;
+    }
+
     return Set(lon,lat,
                angle,
                magnification,
