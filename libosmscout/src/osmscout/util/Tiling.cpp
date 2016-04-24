@@ -41,7 +41,7 @@ namespace osmscout {
   double TileXToLon(int x,
                     const Magnification& magnification)
   {
-    return x / magnification.GetMagnification() * 360.0 - 180;
+    return x / magnification.GetMagnification() * 360.0 - 180.0;
   }
 
   double TileYToLat(int y,
