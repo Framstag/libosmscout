@@ -46,9 +46,9 @@ namespace osmscout {
     featureValueBuffer.SetType(type);
   }
 
-  void RawNode::SetCoords(double lon, double lat)
+  void RawNode::SetCoord(const GeoCoord& coord)
   {
-    coords.Set(lat,lon);
+    this->coord=coord;
   }
 
   void RawNode::UnsetFeature(size_t idx)
@@ -92,7 +92,7 @@ namespace osmscout {
       featureValueBuffer.Read(scanner);
     }
 
-    scanner.ReadCoord(coords);
+    scanner.ReadCoord(coord);
   }
 
   /**
@@ -112,7 +112,7 @@ namespace osmscout {
       featureValueBuffer.Write(writer);
     }
 
-    writer.WriteCoord(coords);
+    writer.WriteCoord(coord);
   }
 }
 

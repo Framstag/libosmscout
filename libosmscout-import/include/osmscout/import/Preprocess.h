@@ -105,8 +105,7 @@ namespace osmscout {
       bool DumpBoundingBox();
 
       void NodeTask(const OSMId& id,
-                    const double& lon,
-                    const double& lat,
+                    const GeoCoord& coord,
                     const TagMap& tags);
       void WayTask(const OSMId& id,
                    const std::vector<OSMId>& nodes,
@@ -126,7 +125,7 @@ namespace osmscout {
       bool Cleanup(bool success);
 
       void ProcessNode(const OSMId& id,
-                       const double& lon, const double& lat,
+                       const GeoCoord& coord,
                        const TagMap& tags);
       void ProcessWay(const OSMId& id,
                       std::vector<OSMId>& nodes,

@@ -38,7 +38,7 @@ namespace osmscout {
     virtual ~PreprocessorCallback();
 
     virtual void ProcessNode(const OSMId& id,
-                             const double& lon, const double& lat,
+                             const GeoCoord& coord,
                              const TagMap& tags) = 0;
 
     virtual void ProcessWay(const OSMId& id,

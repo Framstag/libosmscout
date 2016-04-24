@@ -268,20 +268,17 @@ namespace osmscout {
   }
 
   void Preprocess::Callback::NodeTask(const OSMId& id,
-                                      const double& lon,
-                                      const double& lat,
+                                      const GeoCoord& coord,
                                       const TagMap& tagMap)
   {
     ObjectOSMRef object(id,
                         osmRefNode);
 
-    minCoord.Set(std::min(minCoord.GetLat(),lat),
-                 std::min(minCoord.GetLon(),lon));
+    minCoord.Set(std::min(minCoord.GetLat(),coord.GetLat()),
+                 std::min(minCoord.GetLon(),coord.GetLon()));
 
-    maxCoord.Set(std::max(maxCoord.GetLat(),lat),
-                 std::max(maxCoord.GetLon(),lon));
-
-    GeoCoord coord(lat,lon);
+    maxCoord.Set(std::max(maxCoord.GetLat(),coord.GetLat()),
+                 std::max(maxCoord.GetLon(),coord.GetLon()));
 
     RawCoord rawCoord;
 
@@ -298,7 +295,7 @@ namespace osmscout {
 
       node.SetId(id);
       node.SetType(type);
-      node.SetCoords(lon,lat);
+      node.SetCoord(coord);
 
       node.Parse(progress,
                  *typeConfig,
@@ -500,8 +497,7 @@ namespace osmscout {
   }
 
   void Preprocess::Callback::ProcessNode(const OSMId& id,
-                                         const double& lon,
-                                         const double& lat,
+                                         const GeoCoord& coord,
                                          const TagMap& tagMap)
   {
     if (id<lastNodeId) {
@@ -511,7 +507,7 @@ namespace osmscout {
     lastNodeId=id;
 
     // Things will get much slower if we delegate processing of nodes to some other thread
-    NodeTask(id,lon,lat,tagMap);
+    NodeTask(id,coord,tagMap);
   }
 
   void Preprocess::Callback::ProcessWay(const OSMId& id,

@@ -264,8 +264,7 @@ namespace osmscout {
       try {
         if (strcmp((const char*)name,"node")==0) {
           callback.ProcessNode(id,
-                               lon,
-                               lat,
+                               GeoCoord(lat,lon),
                                tags);
           tags.clear();
           context=contextUnknown;

@@ -37,7 +37,7 @@ namespace osmscout {
   {
   private:
     OSMId              id;
-    GeoCoord           coords;
+    GeoCoord           coord;
     FeatureValueBuffer featureValueBuffer;
 
   private:
@@ -68,17 +68,17 @@ namespace osmscout {
 
     inline const GeoCoord& GetCoords() const
     {
-      return coords;
+      return coord;
     }
 
     inline double GetLat() const
     {
-      return coords.GetLat();
+      return coord.GetLat();
     }
 
     inline double GetLon() const
     {
-      return coords.GetLon();
+      return coord.GetLon();
     }
 
     inline size_t GetFeatureCount() const
@@ -113,18 +113,18 @@ namespace osmscout {
 
     inline bool IsSame(const RawNode& other) const
     {
-      return coords==other.coords;
+      return coord==other.coord;
     }
 
     inline bool IsEqual(const RawNode& other) const
     {
-      return id==other.id || coords==other.coords;
+      return id==other.id || coord==other.coord;
     }
 
     void SetId(OSMId id);
     void SetType(const TypeInfoRef& type);
 
-    void SetCoords(double lon, double lat);
+    void SetCoord(const GeoCoord& coord);
 
     void UnsetFeature(size_t idx);
 

@@ -303,8 +303,8 @@ namespace osmscout {
       }
 
       callback.ProcessNode(inputNode.id(),
-                           (inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
-                           (inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
+                           GeoCoord((inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
+                                    (inputNode.lon()*block.granularity()+block.lon_offset())/NANO),
                            tagMap);
     }
   }
@@ -346,8 +346,8 @@ namespace osmscout {
       }
 
       callback.ProcessNode(dId,
-                           (dLon*block.granularity()+block.lon_offset())/NANO,
-                           (dLat*block.granularity()+block.lat_offset())/NANO,
+                           GeoCoord((dLat*block.granularity()+block.lat_offset())/NANO,
+                                    (dLon*block.granularity()+block.lon_offset())/NANO),
                            tagMap);
     }
   }
