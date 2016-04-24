@@ -109,11 +109,11 @@ PRODUCTIONS
   TYPE        = (.
                   std::string     name;
                   TagConditionRef condition=NULL;
-                  TypeInfoRef     typeInfo(new TypeInfo());
+                  TypeInfoRef     typeInfo;
                   unsigned char   types;
                 .)
                 SYNC "TYPE"
-                IDENT<name>                       (. typeInfo->SetType(name); .)
+                IDENT<name>                       (. typeInfo=std::make_shared<TypeInfo>(name); .)
                 [
                   "IGNORE"                        (. typeInfo->SetIgnore(true); .)
                 ]

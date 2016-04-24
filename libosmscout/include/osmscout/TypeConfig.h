@@ -271,6 +271,8 @@ namespace osmscout {
     std::string                            name;                    //!< Name of the type
     size_t                                 index;                   //!< Internal unique index of the type
 
+    bool                                   internal;                //!< This typ eis only internally used, there is no OSM date for this type
+
     std::list<TypeCondition>               conditions;              //!< One of this conditions must be fulfilled for a object to match this type
     std::unordered_map<std::string,size_t> nameToFeatureMap;
     std::vector<FeatureInstance>           features;                //!< List of feature this type has
@@ -303,7 +305,7 @@ namespace osmscout {
     TypeInfo(const TypeInfo& other);
 
   public:
-    TypeInfo();
+    TypeInfo(const std::string& name);
     virtual ~TypeInfo();
 
     /**
@@ -325,6 +327,11 @@ namespace osmscout {
      * Set the index of this type. The index is assured to in the interval [0..GetTypeCount()[
      */
     TypeInfo& SetIndex(size_t index);
+
+    /**
+     * Mark this type as internal
+     */
+    TypeInfo& SetInternal();
 
     /**
      * The the name of this type
@@ -443,6 +450,14 @@ namespace osmscout {
     inline size_t GetIndex() const
     {
       return index;
+    }
+
+    /**
+     * Return true, if this is a internal type, else false
+     */
+    inline bool IsInternal() const
+    {
+      return internal;
     }
 
     /**
@@ -1076,12 +1091,12 @@ namespace osmscout {
     TagId                                       tagJunction;
 
     TypeInfoRef                                 typeInfoIgnore;
-    TypeInfoRef                                 typeInfoTileLand;
-    TypeInfoRef                                 typeInfoTileSea;
-    TypeInfoRef                                 typeInfoTileCoast;
-    TypeInfoRef                                 typeInfoTileUnknown;
-    TypeInfoRef                                 typeInfoCoastline;
-    TypeInfoRef                                 typeInfoOSMTileBorder;
+    TypeInfoRef                                 typeInfoTileLand;      //!< Internal type for ground tiles of type "land"
+    TypeInfoRef                                 typeInfoTileSea;       //!< Internal type for ground tiles of type "sea"
+    TypeInfoRef                                 typeInfoTileCoast;     //!< Internal type for ground tiles of type "coast"
+    TypeInfoRef                                 typeInfoTileUnknown;   //!< Internal type for ground tiles of type "unknown"
+    TypeInfoRef                                 typeInfoCoastline;     //!< Internal type for coastlines
+    TypeInfoRef                                 typeInfoOSMTileBorder; //!< Internal type for OSM tile borders
 
   public:
     TypeConfig();

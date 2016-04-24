@@ -240,13 +240,13 @@ void Parser::GRADE() {
 void Parser::TYPE() {
 		std::string     name;
 		TagConditionRef condition=NULL;
-		TypeInfoRef     typeInfo(new TypeInfo());
+		TypeInfoRef     typeInfo;
 		unsigned char   types;
 		
 		while (!(la->kind == _EOF || la->kind == 17 /* "TYPE" */)) {SynErr(60); Get();}
 		Expect(17 /* "TYPE" */);
 		IDENT(name);
-		typeInfo->SetType(name); 
+		typeInfo=std::make_shared<TypeInfo>(name); 
 		if (la->kind == 18 /* "IGNORE" */) {
 			Get();
 			typeInfo->SetIgnore(true); 

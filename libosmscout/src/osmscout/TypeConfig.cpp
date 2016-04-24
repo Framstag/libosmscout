@@ -543,34 +543,36 @@ namespace osmscout {
 
   const char* TypeConfig::FILE_TYPES_DAT="types.dat";
 
-  TypeInfo::TypeInfo()
-   : nodeId(0),
-     wayId(0),
-     areaId(0),
-     index(0),
-     featureMaskBytes(0),
-     specialFeatureMaskBytes(0),
-     valueBufferSize(0),
-     canBeNode(false),
-     canBeWay(false),
-     canBeArea(false),
-     canBeRelation(false),
-     isPath(false),
-     canRouteFoot(false),
-     canRouteBicycle(false),
-     canRouteCar(false),
-     indexAsAddress(false),
-     indexAsLocation(false),
-     indexAsRegion(false),
-     indexAsPOI(false),
-     optimizeLowZoom(false),
-     multipolygon(false),
-     pinWay(false),
-     mergeAreas(false),
-     ignoreSeaLand(false),
-     ignore(false)
+  TypeInfo::TypeInfo(const std::string& name)
+    : nodeId(0),
+      wayId(0),
+      areaId(0),
+      name(name),
+      index(0),
+      internal(false),
+      featureMaskBytes(0),
+      specialFeatureMaskBytes(0),
+      valueBufferSize(0),
+      canBeNode(false),
+      canBeWay(false),
+      canBeArea(false),
+      canBeRelation(false),
+      isPath(false),
+      canRouteFoot(false),
+      canRouteBicycle(false),
+      canRouteCar(false),
+      indexAsAddress(false),
+      indexAsLocation(false),
+      indexAsRegion(false),
+      indexAsPOI(false),
+      optimizeLowZoom(false),
+      multipolygon(false),
+      pinWay(false),
+      mergeAreas(false),
+      ignoreSeaLand(false),
+      ignore(false)
   {
-    // no code
+
   }
 
   /**
@@ -612,6 +614,13 @@ namespace osmscout {
   TypeInfo& TypeInfo::SetIndex(size_t index)
   {
     this->index=index;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetInternal()
+  {
+    this->internal=true;
 
     return *this;
   }
@@ -999,8 +1008,7 @@ namespace osmscout {
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
-    typeInfoIgnore=std::make_shared<TypeInfo>();
-    typeInfoIgnore->SetType("");
+    typeInfoIgnore=std::make_shared<TypeInfo>("");
     typeInfoIgnore->SetIgnore(true);
 
     RegisterType(typeInfoIgnore);
@@ -1010,48 +1018,40 @@ namespace osmscout {
     // Internal type for showing routes
     //
 
-    TypeInfoRef route=std::make_shared<TypeInfo>();
-
-    route->SetType("_route")
-          .CanBeWay(true);
+    TypeInfoRef route=std::make_shared<TypeInfo>("_route");
+    route->SetInternal().CanBeWay(true);
     RegisterType(route);
 
     //
     // Internal types for the land/sea/coast tiles building the base layer for map drawing
     //
 
-    typeInfoTileLand=std::make_shared<TypeInfo>();
-    typeInfoTileLand->SetType("_tile_land")
-              .CanBeArea(true);
+    typeInfoTileLand=std::make_shared<TypeInfo>("_tile_land");
+    typeInfoTileLand->SetInternal().CanBeArea(true);
     RegisterType(typeInfoTileLand);
 
 
-    typeInfoTileSea=std::make_shared<TypeInfo>();
-    typeInfoTileSea->SetType("_tile_sea")
-             .CanBeArea(true);
+    typeInfoTileSea=std::make_shared<TypeInfo>("_tile_sea");
+    typeInfoTileSea->SetInternal().CanBeArea(true);
     RegisterType(typeInfoTileSea);
 
 
-    typeInfoTileCoast=std::make_shared<TypeInfo>();
-    typeInfoTileCoast->SetType("_tile_coast")
-               .CanBeArea(true);
+    typeInfoTileCoast=std::make_shared<TypeInfo>("_tile_coast");
+    typeInfoTileCoast->SetInternal().CanBeArea(true);
     RegisterType(typeInfoTileCoast);
 
 
-    typeInfoTileUnknown=std::make_shared<TypeInfo>();
-    typeInfoTileUnknown->SetType("_tile_unknown")
-                .CanBeArea(true);
+    typeInfoTileUnknown=std::make_shared<TypeInfo>("_tile_unknown");
+    typeInfoTileUnknown->SetInternal().CanBeArea(true);
     RegisterType(typeInfoTileUnknown);
 
 
-    typeInfoCoastline=std::make_shared<TypeInfo>();
-    typeInfoCoastline->SetType("_tile_coastline")
-                   .CanBeWay(true);
+    typeInfoCoastline=std::make_shared<TypeInfo>("_tile_coastline");
+    typeInfoCoastline->SetInternal().CanBeWay(true);
     RegisterType(typeInfoCoastline);
 
-    typeInfoOSMTileBorder=std::make_shared<TypeInfo>();
-    typeInfoOSMTileBorder->SetType("_osm_tile_border")
-                         .CanBeWay(true);
+    typeInfoOSMTileBorder=std::make_shared<TypeInfo>("_osm_tile_border");
+    typeInfoOSMTileBorder->SetInternal().CanBeWay(true);
     RegisterType(typeInfoOSMTileBorder);
 
     tagArea=GetTagId("area");
@@ -1213,6 +1213,7 @@ namespace osmscout {
     types.push_back(typeInfo);
 
     if (!typeInfo->GetIgnore() &&
+        !typeInfo->IsInternal() &&
         (typeInfo->CanBeNode() ||
          typeInfo->CanBeWay() ||
          typeInfo->CanBeArea())) {
@@ -1699,9 +1700,7 @@ namespace osmscout {
         scanner.Read(ignoreSeaLand);
         scanner.Read(ignore);
 
-        TypeInfoRef typeInfo=std::make_shared<TypeInfo>();
-
-        typeInfo->SetType(name);
+        TypeInfoRef typeInfo=std::make_shared<TypeInfo>(name);
 
         typeInfo->CanBeNode(canBeNode);
         typeInfo->CanBeWay(canBeWay);
@@ -1837,9 +1836,21 @@ namespace osmscout {
         }
       }
 
-      writer.WriteNumber((uint32_t)GetTypes().size());
+      uint32_t typeCount=0;
 
       for (auto type : GetTypes()) {
+        if (!type->IsInternal()) {
+          typeCount++;
+        }
+      }
+
+      writer.WriteNumber(typeCount);
+
+      for (auto type : GetTypes()) {
+        if (type->IsInternal()) {
+          continue;
+        }
+
         writer.Write(type->GetName());
         writer.Write(type->CanBeNode());
         writer.Write(type->CanBeWay());
