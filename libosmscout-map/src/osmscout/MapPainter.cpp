@@ -26,6 +26,7 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
+#include <osmscout/util/Tiling.h>
 
 //#define DEBUG_GROUNDTILES
 
@@ -594,7 +595,6 @@ namespace osmscout {
     std::vector<Point> points;
     size_t             start=0; // Make the compiler happy
     size_t             end=0;   // Make the compiler happy
-    double             errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
 
     styleConfig.GetSeaFillStyle(projection,
                                 seaFill);
@@ -1482,13 +1482,125 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawOSMTiles(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter)
+  {
+    LineStyleRef osmTileLine;
+
+    styleConfig.GetOSMTileBorderLineStyle(projection,
+                                          osmTileLine);
+
+    if (!osmTileLine) {
+      return;
+    }
+
+    Magnification magnification=projection.GetMagnification();
+    GeoBox        boundingBox;
+
+    magnification.SetLevel(magnification.GetLevel()+3);
+
+    projection.GetDimensions(boundingBox);
+
+    size_t startTileX=LonToTileX(boundingBox.GetMinLon(),
+                                 magnification);
+    size_t endTileX=LonToTileX(boundingBox.GetMaxLon(),
+                               magnification)+1;
+
+    size_t startTileY=LatToTileY(boundingBox.GetMaxLat(),
+                                 magnification);
+    size_t endTileY=LatToTileY(boundingBox.GetMinLat(),
+                               magnification)+1;
+
+    if (startTileX>0) {
+      startTileX--;
+    }
+    if (startTileY>0) {
+      startTileY--;
+    }
+
+    std::cout << startTileX << "," << startTileY << " - " << endTileX << "," << endTileY << std::endl;
+
+    std::vector<Point> points;
+
+    // Horizontal lines
+
+    for (size_t y=startTileY; y<=endTileY; y++) {
+      points.resize(endTileX-startTileX+1);
+
+      for (size_t x=startTileX; x<=endTileX; x++) {
+        points[x-startTileX].Set(0,GeoCoord(TileYToLat(y,magnification),
+                                            TileXToLon(x,magnification)));
+      }
+
+      size_t transStart;
+      size_t transEnd;
+
+      transBuffer.TransformWay(projection,
+                               parameter.GetOptimizeWayNodes(),
+                               points,
+                               transStart,
+                               transEnd,
+                               errorTolerancePixel);
+
+      WayData data;
+
+      data.buffer=&coastlineSegmentAttributes;
+      data.layer=0;
+      data.lineStyle=osmTileLine;
+      data.wayPriority=std::numeric_limits<int>::max();
+      data.transStart=transStart;
+      data.transEnd=transEnd;
+      data.lineWidth=GetProjectedWidth(projection,
+                                       projection.ConvertWidthToPixel(osmTileLine->GetDisplayWidth()),
+                                       osmTileLine->GetWidth());
+      data.startIsClosed=false;
+      data.endIsClosed=false;
+      wayData.push_back(data);
+    }
+
+    // Vertical lines
+
+    for (size_t x=startTileX; x<=endTileX; x++) {
+      points.resize(endTileY-startTileY+1);
+
+      for (size_t y=startTileY; y<=endTileY; y++) {
+        points[y-startTileY].Set(0,GeoCoord(TileYToLat(y,magnification),
+                                            TileXToLon(x,magnification)));
+      }
+
+      size_t transStart;
+      size_t transEnd;
+
+      transBuffer.TransformWay(projection,
+                               parameter.GetOptimizeWayNodes(),
+                               points,
+                               transStart,
+                               transEnd,
+                               errorTolerancePixel);
+
+      WayData data;
+
+      data.buffer=&coastlineSegmentAttributes;
+      data.layer=0;
+      data.lineStyle=osmTileLine;
+      data.wayPriority=std::numeric_limits<int>::max();
+      data.transStart=transStart;
+      data.transEnd=transEnd;
+      data.lineWidth=GetProjectedWidth(projection,
+                                       projection.ConvertWidthToPixel(osmTileLine->GetDisplayWidth()),
+                                       osmTileLine->GetWidth());
+      data.startIsClosed=false;
+      data.endIsClosed=false;
+      wayData.push_back(data);
+    }
+  }
+
   void MapPainter::PrepareAreas(const StyleConfig& styleConfig,
                                 const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
-    double errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
-
     areaData.clear();
 
     //Areas
@@ -1605,7 +1717,6 @@ namespace osmscout {
     bool   transformed=false;
     size_t transStart=0; // Make the compiler happy
     size_t transEnd=0;   // Make the compiler happy
-    double errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
 
     for (const auto& lineStyle : lineStyles) {
       double       lineWidth=0.0;
@@ -1764,6 +1875,8 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const MapData& data)
   {
+    errorTolerancePixel=parameter.GetOptimizeErrorToleranceMm()*projection.GetDPI()/25.4;
+
     waysSegments=0;
     waysDrawn=0;
     waysLabelDrawn=0;
@@ -1860,6 +1973,14 @@ namespace osmscout {
                     projection,
                     parameter,
                     data);
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    DrawOSMTiles(*styleConfig,
+                 projection,
+                 parameter);
 
     if (parameter.IsAborted()) {
       return false;

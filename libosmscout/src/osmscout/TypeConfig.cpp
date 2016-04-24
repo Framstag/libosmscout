@@ -1014,7 +1014,6 @@ namespace osmscout {
 
     route->SetType("_route")
           .CanBeWay(true);
-
     RegisterType(route);
 
     //
@@ -1022,44 +1021,38 @@ namespace osmscout {
     //
 
     typeInfoTileLand=std::make_shared<TypeInfo>();
-
     typeInfoTileLand->SetType("_tile_land")
               .CanBeArea(true);
-
     RegisterType(typeInfoTileLand);
 
 
     typeInfoTileSea=std::make_shared<TypeInfo>();
-
     typeInfoTileSea->SetType("_tile_sea")
              .CanBeArea(true);
-
     RegisterType(typeInfoTileSea);
 
 
     typeInfoTileCoast=std::make_shared<TypeInfo>();
-
     typeInfoTileCoast->SetType("_tile_coast")
                .CanBeArea(true);
-
     RegisterType(typeInfoTileCoast);
 
 
     typeInfoTileUnknown=std::make_shared<TypeInfo>();
-
     typeInfoTileUnknown->SetType("_tile_unknown")
                 .CanBeArea(true);
-
     RegisterType(typeInfoTileUnknown);
 
 
-    typeInfoTileCoastline=std::make_shared<TypeInfo>();
-
-    typeInfoTileCoastline->SetType("_tile_coastline")
+    typeInfoCoastline=std::make_shared<TypeInfo>();
+    typeInfoCoastline->SetType("_tile_coastline")
                    .CanBeWay(true);
+    RegisterType(typeInfoCoastline);
 
-    RegisterType(typeInfoTileCoastline);
-
+    typeInfoOSMTileBorder=std::make_shared<TypeInfo>();
+    typeInfoOSMTileBorder->SetType("_osm_tile_border")
+                         .CanBeWay(true);
+    RegisterType(typeInfoOSMTileBorder);
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");

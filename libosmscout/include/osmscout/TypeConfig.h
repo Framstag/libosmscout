@@ -1080,7 +1080,8 @@ namespace osmscout {
     TypeInfoRef                                 typeInfoTileSea;
     TypeInfoRef                                 typeInfoTileCoast;
     TypeInfoRef                                 typeInfoTileUnknown;
-    TypeInfoRef                                 typeInfoTileCoastline;
+    TypeInfoRef                                 typeInfoCoastline;
+    TypeInfoRef                                 typeInfoOSMTileBorder;
 
   public:
     TypeConfig();

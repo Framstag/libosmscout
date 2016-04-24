@@ -1351,7 +1351,8 @@ namespace osmscout {
     FeatureValueBuffer                         tileSeaBuffer;          //!< Fake FeatureValueBuffer for sea tiles
     FeatureValueBuffer                         tileCoastBuffer;        //!< Fake FeatureValueBuffer for coast tiles
     FeatureValueBuffer                         tileUnknownBuffer;      //!< Fake FeatureValueBuffer for unknown tiles
-    FeatureValueBuffer                         tileCoastlineBuffer;    //!< Fake FeatureValueBuffer for coastlines
+    FeatureValueBuffer                         coastlineBuffer;        //!< Fake FeatureValueBuffer for coastlines
+    FeatureValueBuffer                         osmTileBorderBuffer;    //!< Fake FeatureValueBuffer for OSM tile borders
 
     std::unordered_map<std::string,LabelProviderFactoryRef> labelFactories; //!< Map of Label Factories
 
@@ -1535,6 +1536,8 @@ namespace osmscout {
                              FillStyleRef& fillStyle) const;
     void GetCoastlineLineStyle(const Projection& projection,
                                LineStyleRef& lineStyle) const;
+    void GetOSMTileBorderLineStyle(const Projection& projection,
+                                   LineStyleRef& lineStyle) const;
     //@}
 
     /**

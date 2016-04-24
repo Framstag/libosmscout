@@ -197,6 +197,8 @@ namespace osmscout {
   private:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
 
+    double                       errorTolerancePixel;
+
     std::list<AreaData>          areaData;
     std::list<WayData>           wayData;
     std::list<WayPathData>       wayPathData;
@@ -399,6 +401,10 @@ namespace osmscout {
     void DrawLabels(const StyleConfig& styleConfig,
                     const Projection& projection,
                     const MapParameter& parameter);
+
+    void DrawOSMTiles(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter);
     //@}
 
   protected:

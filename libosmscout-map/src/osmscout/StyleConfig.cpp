@@ -1575,7 +1575,8 @@ namespace osmscout {
     tileSeaBuffer.SetType(typeConfig->typeInfoTileSea);
     tileCoastBuffer.SetType(typeConfig->typeInfoTileCoast);
     tileUnknownBuffer.SetType(typeConfig->typeInfoTileUnknown);
-    tileCoastlineBuffer.SetType(typeConfig->typeInfoTileCoastline);
+    coastlineBuffer.SetType(typeConfig->typeInfoCoastline);
+    osmTileBorderBuffer.SetType(typeConfig->typeInfoOSMTileBorder);
 
     LabelProviderFactoryRef labelProviderFactory=std::make_shared<INameLabelProviderFactory>();
 
@@ -2476,10 +2477,30 @@ namespace osmscout {
   {
     for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][tileCoastlineBuffer.GetType()->GetIndex()],
-                      tileCoastlineBuffer,
+                      wayLineStyleSelectors[slot][coastlineBuffer.GetType()->GetIndex()],
+                      coastlineBuffer,
                       projection,
                       lineStyle);
+
+      if (lineStyle) {
+        return;
+      }
+    }
+  }
+
+  void StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection,
+                                              LineStyleRef& lineStyle) const
+  {
+    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+      GetFeatureStyle(styleResolveContext,
+                      wayLineStyleSelectors[slot][osmTileBorderBuffer.GetType()->GetIndex()],
+                      osmTileBorderBuffer,
+                      projection,
+                      lineStyle);
+
+      if (lineStyle) {
+        return;
+      }
     }
   }
 
