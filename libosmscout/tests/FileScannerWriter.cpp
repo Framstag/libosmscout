@@ -9,7 +9,7 @@
 
 int errors=0;
 
-void DumpGeoCoords(const std::vector<osmscout::GeoCoord>& coords)
+void DumpGeoCoords(const std::vector<osmscout::Point>& coords)
 {
   std::cout << "[";
   for (size_t i=0; i<coords.size(); i++) {
@@ -17,19 +17,19 @@ void DumpGeoCoords(const std::vector<osmscout::GeoCoord>& coords)
       std::cout << ", ";
     }
 
-    std::cout << coords[i].GetDisplayText();
+    std::cout << coords[i].GetCoord().GetDisplayText();
   }
   std::cout << "]";
 }
 
-bool Equals(const std::vector<osmscout::GeoCoord>& coordsA, const std::vector<osmscout::GeoCoord>& coordsB)
+bool Equals(const std::vector<osmscout::Point>& coordsA, const std::vector<osmscout::Point>& coordsB)
 {
   if (coordsA.size()!=coordsB.size()) {
     return false;
   }
 
   for (size_t i=0; i<coordsA.size(); i++) {
-    if (coordsA[i].GetDisplayText()!=coordsB[i].GetDisplayText()) {
+    if (coordsA[i].GetCoord().GetDisplayText()!=coordsB[i].GetCoord().GetDisplayText()) {
       return false;
     }
   }
@@ -63,12 +63,12 @@ int main()
 
   osmscout::GeoCoord    outCoord1(51.57231,7.46418);
 
-  std::vector<osmscout::GeoCoord> outCoords1;
-  std::vector<osmscout::GeoCoord> outCoords2;
-  std::vector<osmscout::GeoCoord> outCoords3;
-  std::vector<osmscout::GeoCoord> outCoords4;
-  std::vector<osmscout::GeoCoord> outCoords5;
-  std::vector<osmscout::GeoCoord> outCoords6;
+  std::vector<osmscout::Point> outCoords1;
+  std::vector<osmscout::Point> outCoords2;
+  std::vector<osmscout::Point> outCoords3;
+  std::vector<osmscout::Point> outCoords4;
+  std::vector<osmscout::Point> outCoords5;
+  std::vector<osmscout::Point> outCoords6;
 
   bool                  inBool;
   uint16_t              in16u;
@@ -79,50 +79,50 @@ int main()
 
   osmscout::GeoCoord    inCoord1;
 
-  std::vector<osmscout::GeoCoord> inCoords1;
-  std::vector<osmscout::GeoCoord> inCoords2;
-  std::vector<osmscout::GeoCoord> inCoords3;
-  std::vector<osmscout::GeoCoord> inCoords4;
-  std::vector<osmscout::GeoCoord> inCoords5;
-  std::vector<osmscout::GeoCoord> inCoords6;
+  std::vector<osmscout::Point> inCoords1;
+  std::vector<osmscout::Point> inCoords2;
+  std::vector<osmscout::Point> inCoords3;
+  std::vector<osmscout::Point> inCoords4;
+  std::vector<osmscout::Point> inCoords5;
+  std::vector<osmscout::Point> inCoords6;
 
-  outCoords1.push_back(osmscout::GeoCoord(51.57231,7.46418));
-  outCoords1.push_back(osmscout::GeoCoord(51.57233,7.46430));
-  outCoords1.push_back(osmscout::GeoCoord(51.57261,7.46563));
-  outCoords1.push_back(osmscout::GeoCoord(51.57269,7.46594));
+  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57231,7.46418)));
+  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57233,7.46430)));
+  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57261,7.46563)));
+  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57269,7.46594)));
 
   outCoords2=outCoords1;
   std::reverse(outCoords2.begin(),outCoords2.end());
 
-  outCoords3.push_back(osmscout::GeoCoord(51.58549,7.55493));
-  outCoords3.push_back(osmscout::GeoCoord(51.58549,7.55494));
-  outCoords3.push_back(osmscout::GeoCoord(51.58550,7.55496));
-  outCoords3.push_back(osmscout::GeoCoord(51.58547,7.55504));
-  outCoords3.push_back(osmscout::GeoCoord(51.58544,7.55506));
-  outCoords3.push_back(osmscout::GeoCoord(51.58544,7.55507));
-  outCoords3.push_back(osmscout::GeoCoord(51.58543,7.55508));
-  outCoords3.push_back(osmscout::GeoCoord(51.58542,7.55508));
-  outCoords3.push_back(osmscout::GeoCoord(51.58540,7.55508));
-  outCoords3.push_back(osmscout::GeoCoord(51.58539,7.55508));
-  outCoords3.push_back(osmscout::GeoCoord(51.58538,7.55500));
-  outCoords3.push_back(osmscout::GeoCoord(51.58538,7.55498));
-  outCoords3.push_back(osmscout::GeoCoord(51.58539,7.55495));
-  outCoords3.push_back(osmscout::GeoCoord(51.58540,7.55494));
-  outCoords3.push_back(osmscout::GeoCoord(51.58540,7.55488));
-  outCoords3.push_back(osmscout::GeoCoord(51.58541,7.55484));
-  outCoords3.push_back(osmscout::GeoCoord(51.58542,7.55484));
-  outCoords3.push_back(osmscout::GeoCoord(51.58544,7.55483));
-  outCoords3.push_back(osmscout::GeoCoord(51.58546,7.55484));
-  outCoords3.push_back(osmscout::GeoCoord(51.58547,7.55485));
-  outCoords3.push_back(osmscout::GeoCoord(51.58548,7.55488));
-  outCoords3.push_back(osmscout::GeoCoord(51.58549,7.55492));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55493)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55494)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58550,7.55496)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58547,7.55504)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58544,7.55506)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58544,7.55507)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58543,7.55508)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58542,7.55508)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58540,7.55508)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58539,7.55508)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58538,7.55500)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58538,7.55498)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58539,7.55495)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58540,7.55494)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58540,7.55488)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58541,7.55484)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58542,7.55484)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58544,7.55483)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58546,7.55484)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58547,7.55485)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58548,7.55488)));
+  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55492)));
 
   outCoords4=outCoords3;
   std::reverse(outCoords4.begin(),outCoords4.end());
 
-  outCoords5.push_back(osmscout::GeoCoord(5.0,-5.0));
-  outCoords5.push_back(osmscout::GeoCoord(5.0,5.0));
-  outCoords5.push_back(osmscout::GeoCoord(-5.0,5.0));
+  outCoords5.push_back(osmscout::Point(0,osmscout::GeoCoord(5.0,-5.0)));
+  outCoords5.push_back(osmscout::Point(0,osmscout::GeoCoord(5.0,5.0)));
+  outCoords5.push_back(osmscout::Point(0,osmscout::GeoCoord(-5.0,5.0)));
 
   outCoords6=outCoords5;
   std::reverse(outCoords6.begin(),outCoords6.end());
@@ -162,12 +162,12 @@ int main()
 
     writer.WriteCoord(outCoord1);
 
-    writer.Write(outCoords1);
-    writer.Write(outCoords2);
-    writer.Write(outCoords3);
-    writer.Write(outCoords4);
-    writer.Write(outCoords5);
-    writer.Write(outCoords6);
+    writer.Write(outCoords1,false);
+    writer.Write(outCoords2,false);
+    writer.Write(outCoords3,false);
+    writer.Write(outCoords4,false);
+    writer.Write(outCoords5,false);
+    writer.Write(outCoords6,false);
 
     writer.Close();
 
@@ -324,7 +324,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords1);
+    scanner.Read(inCoords1,false);
     if (!Equals(inCoords1,outCoords1)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 1: Expected ";
 
@@ -338,7 +338,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords2);
+    scanner.Read(inCoords2,false);
     if (!Equals(inCoords2,outCoords2)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 2: Expected ";
 
@@ -352,7 +352,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords3);
+    scanner.Read(inCoords3,false);
     if (!Equals(inCoords3,outCoords3)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 3: Expected ";
 
@@ -366,7 +366,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords4);
+    scanner.Read(inCoords4,false);
     if (!Equals(inCoords4,outCoords4)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 4: Expected ";
 
@@ -380,7 +380,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords5);
+    scanner.Read(inCoords5,false);
     if (!Equals(inCoords5,outCoords5)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 5: Expected ";
 
@@ -394,7 +394,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords6);
+    scanner.Read(inCoords6,false);
     if (!Equals(inCoords6,outCoords6)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 6: Expected ";
 
