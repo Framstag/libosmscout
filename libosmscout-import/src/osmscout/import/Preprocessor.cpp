@@ -24,11 +24,11 @@ namespace osmscout {
   PreprocessorCallback::~PreprocessorCallback()
   {
     // no code
-  };
+  }
 
   Preprocessor::~Preprocessor()
   {
     // no code
-  };
+  }
 }
 
