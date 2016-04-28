@@ -1021,7 +1021,7 @@ namespace osmscout {
         objects.push_back(targetObject);
       }
 
-      for (int index=0; index<nodeIndexes.size()-1; index++) {
+      for (int index=0; index<(int)nodeIndexes.size()-1; index++) {
         size_t                  fromNodeIndex=nodeIndexes.at(index);
         osmscout::ObjectFileRef fromObject=objects.at(index);
         size_t                  toNodeIndex=nodeIndexes.at(index+1);
@@ -1043,7 +1043,7 @@ namespace osmscout {
 
         /* In intermediary via points the end of the previous part is the start of the */
         /* next part, we need to remove the duplicate point in the calculated route */
-        if (index<nodeIndexes.size()-2) {
+        if (index<(int)nodeIndexes.size()-2) {
           routePart->PopEntry();
         }
 
