@@ -34,11 +34,20 @@
 
 namespace osmscout {
 
+#if defined(_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable:4275)
+#endif
+
   class OSMSCOUT_API OSMScoutException : public std::exception
   {
   public:
     virtual std::string GetDescription() const;
   };
+
+#if defined(_MSC_VER)
+#pragma warning (pop)
+#endif
 
   class OSMSCOUT_API IOException : public OSMScoutException
   {
@@ -55,7 +64,7 @@ namespace osmscout {
                 const std::string& semanticError,
                 const std::string& errorMsg);
 
-	const char* what() const OSMSCOUT_NOEXCEPT;
+    const char* what() const OSMSCOUT_NOEXCEPT;
 
     std::string GetFilename() const;
     std::string GetSemanticError() const;
