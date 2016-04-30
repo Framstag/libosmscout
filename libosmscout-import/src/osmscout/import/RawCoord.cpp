@@ -65,5 +65,16 @@ namespace osmscout {
     writer.WriteNumber(id);
     writer.WriteCoord(coord);
   }
+
+  /**
+   * Writes the data to the given FileWriter
+   *
+   * @throws IOException
+   */
+  void RawCoord::Write(FileWriter& writer) const
+  {
+    writer.WriteNumber(id);
+    writer.WriteCoord(coord);
+  }
 }
 

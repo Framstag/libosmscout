@@ -89,6 +89,7 @@ namespace osmscout {
               FileScanner& scanner);
     void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;
+    void Write(FileWriter& writer) const;
   };
 
   typedef std::shared_ptr<RawCoord> RawCoordRef;
