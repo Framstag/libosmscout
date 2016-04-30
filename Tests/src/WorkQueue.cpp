@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   std::vector<std::future<int>> futures;
 
   std::cout << std::this_thread::get_id() << ": Pushing work..." << std::endl;
-  for (size_t i=1; i<=100; i++) {
+  for (int i=1; i<=100; i++) {
     std::cout << "Pushing task #" << i << std::endl;
     futures.push_back(worker.PushWork(i,i*2));
   }
