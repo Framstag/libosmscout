@@ -287,10 +287,19 @@ namespace osmscout {
 
   void PreprocessPBF::ReadNodes(const TypeConfig& typeConfig,
                                 const PBF::PrimitiveBlock& block,
-                                const PBF::PrimitiveGroup& group)
+                                const PBF::PrimitiveGroup& group,
+                                PreprocessorCallback::RawBlockData& data)
   {
+    data.nodeData.reserve(data.nodeData.size()+group.nodes_size());
+
     for (int n=0; n<group.nodes_size(); n++) {
+      PreprocessorCallback::RawNodeData nodeData;
+
       const PBF::Node &inputNode=group.nodes(n);
+
+      nodeData.id=inputNode.id();
+      nodeData.coord.Set((inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
+                         (inputNode.lon()*block.granularity()+block.lon_offset())/NANO);
 
       tagMap.clear();
 
@@ -298,20 +307,18 @@ namespace osmscout {
         TagId id=typeConfig.GetTagId(block.stringtable().s(inputNode.keys(t)));
 
         if (id!=tagIgnore) {
-          tagMap[id]=block.stringtable().s(inputNode.vals(t));
+          nodeData.tags[id]=block.stringtable().s(inputNode.vals(t));
         }
       }
 
-      callback.ProcessNode(inputNode.id(),
-                           GeoCoord((inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
-                                    (inputNode.lon()*block.granularity()+block.lon_offset())/NANO),
-                           tagMap);
+      data.nodeData.push_back(std::move(nodeData));
     }
   }
 
   void PreprocessPBF::ReadDenseNodes(const TypeConfig& typeConfig,
                                      const PBF::PrimitiveBlock& block,
-                                     const PBF::PrimitiveGroup& group)
+                                     const PBF::PrimitiveGroup& group,
+                                     PreprocessorCallback::RawBlockData& data)
   {
     const PBF::DenseNodes& dense=group.dense();
     Id                     dId=0;
@@ -319,12 +326,18 @@ namespace osmscout {
     double                 dLon=0;
     int                    t=0;
 
+    data.nodeData.reserve(data.nodeData.size()+dense.id_size());
+
     for (int d=0; d<dense.id_size();d++) {
+      PreprocessorCallback::RawNodeData nodeData;
+
       dId+=dense.id(d);
       dLat+=dense.lat(d);
       dLon+=dense.lon(d);
 
-      tagMap.clear();
+      nodeData.id=dId;
+      nodeData.coord.Set((dLat*block.granularity()+block.lat_offset())/NANO,
+                     (dLon*block.granularity()+block.lon_offset())/NANO);
 
       while (true) {
         if (t>=dense.keys_vals_size()) {
@@ -339,67 +352,76 @@ namespace osmscout {
         TagId id=typeConfig.GetTagId(block.stringtable().s(dense.keys_vals(t)));
 
         if (id!=tagIgnore) {
-          tagMap[id]=block.stringtable().s(dense.keys_vals(t+1));
+          nodeData.tags[id]=block.stringtable().s(dense.keys_vals(t+1));
         }
 
         t+=2;
       }
 
-      callback.ProcessNode(dId,
-                           GeoCoord((dLat*block.granularity()+block.lat_offset())/NANO,
-                                    (dLon*block.granularity()+block.lon_offset())/NANO),
-                           tagMap);
+      data.nodeData.push_back(std::move(nodeData));
     }
   }
 
   void PreprocessPBF::ReadWays(const TypeConfig& typeConfig,
                                const PBF::PrimitiveBlock& block,
-                               const PBF::PrimitiveGroup& group)
+                               const PBF::PrimitiveGroup& group,
+                               PreprocessorCallback::RawBlockData& data)
   {
+    data.wayData.reserve(data.wayData.size()+group.ways_size());
+
     for (int w=0; w<group.ways_size(); w++) {
+      PreprocessorCallback::RawWayData wayData;
+
       const PBF::Way &inputWay=group.ways(w);
 
-      nodes.clear();
-      tagMap.clear();
+      wayData.id=inputWay.id();
 
       for (int t=0; t<inputWay.keys_size(); t++) {
         TagId id=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)));
 
         if (id!=tagIgnore) {
-          tagMap[id]=block.stringtable().s(inputWay.vals(t));
+          wayData.tags[id]=block.stringtable().s(inputWay.vals(t));
         }
       }
+
+      wayData.nodes.reserve(inputWay.refs_size());
 
       unsigned long ref=0;
       for (int r=0; r<inputWay.refs_size(); r++) {
         ref+=inputWay.refs(r);
 
-        nodes.push_back(ref);
+        wayData.nodes.push_back(ref);
       }
 
-      callback.ProcessWay(inputWay.id(),
-                          nodes,
-                          tagMap);
+      data.wayData.push_back(std::move(wayData));
     }
   }
 
   void PreprocessPBF::ReadRelations(const TypeConfig& typeConfig,
                                     const PBF::PrimitiveBlock& block,
-                                    const PBF::PrimitiveGroup& group)
+                                    const PBF::PrimitiveGroup& group,
+                                    PreprocessorCallback::RawBlockData& data)
   {
+    data.relationData.reserve(data.relationData.size()+group.relations_size());
+
     for (int r=0; r<group.relations_size(); r++) {
+      PreprocessorCallback::RawRelationData relationData;
+
       const PBF::Relation &inputRelation=group.relations(r);
 
+      relationData.id=inputRelation.id();
+
       members.clear();
-      tagMap.clear();
 
       for (int t=0; t<inputRelation.keys_size(); t++) {
         TagId id=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)));
 
         if (id!=tagIgnore) {
-          tagMap[id]=block.stringtable().s(inputRelation.vals(t));
+          relationData.tags[id]=block.stringtable().s(inputRelation.vals(t));
         }
       }
+
+      relationData.members.reserve(inputRelation.types_size());
 
       Id ref=0;
       for (int m=0; m<inputRelation.types_size(); m++) {
@@ -422,12 +444,10 @@ namespace osmscout {
         member.id=ref;
         member.role=block.stringtable().s(inputRelation.roles_sid(m));
 
-        members.push_back(member);
+        relationData.members.push_back(member);
       }
 
-      callback.ProcessRelation(inputRelation.id(),
-                               members,
-                               tagMap);
+      data.relationData.push_back(std::move(relationData));
     }
   }
 
@@ -444,35 +464,43 @@ namespace osmscout {
     delete buffer;
   }
 
-  void PreprocessPBF::ProcessBlock(const TypeConfig& typeConfig,
-                                   const PBF::PrimitiveBlock& block)
+  void PreprocessPBF::ProcessBlock(const TypeConfigRef& typeConfig,
+                                   std::unique_ptr<PBF::PrimitiveBlock>&& block)
   {
+    PreprocessorCallback::RawBlockDataRef blockData(new PreprocessorCallback::RawBlockData());
+
     for (int currentGroup=0;
-         currentGroup<block.primitivegroup_size();
+         currentGroup<block->primitivegroup_size();
          currentGroup++) {
-      const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
+      const PBF::PrimitiveGroup &group=block->primitivegroup(currentGroup);
 
       if (group.nodes_size()>0) {
-        ReadNodes(typeConfig,
-                  block,
-                  group);
-      }
-      else if (group.ways_size()>0) {
-        ReadWays(typeConfig,
-                 block,
-                 group);
-      }
-      else if (group.relations_size()>0) {
-        ReadRelations(typeConfig,
-                      block,
-                      group);
+        ReadNodes(*typeConfig,
+                  *block,
+                  group,
+                  *blockData);
       }
       else if (group.has_dense()) {
-        ReadDenseNodes(typeConfig,
-                       block,
-                       group);
+        ReadDenseNodes(*typeConfig,
+                       *block,
+                       group,
+                       *blockData);
+      }
+      else if (group.ways_size()>0) {
+        ReadWays(*typeConfig,
+                 *block,
+                 group,
+                 *blockData);
+      }
+      else if (group.relations_size()>0) {
+        ReadRelations(*typeConfig,
+                      *block,
+                      group,
+                      *blockData);
       }
     }
+
+    callback.ProcessBlock(std::move(blockData));
   }
 
   bool PreprocessPBF::Import(const TypeConfigRef& typeConfig,
@@ -564,12 +592,12 @@ namespace osmscout {
           return false;
         }
 
-        PBF::PrimitiveBlock block;
+        std::unique_ptr<PBF::PrimitiveBlock> block(new PBF::PrimitiveBlock());
 
         if (!ReadPrimitiveBlock(progress,
                                 file,
                                 blockHeader,
-                                block)) {
+                                *block)) {
           fclose(file);
           return false;
         }
@@ -580,7 +608,8 @@ namespace osmscout {
 
         currentBlockTask=std::async(std::launch::async,
                                     &PreprocessPBF::ProcessBlock,this,
-                                    std::ref(*typeConfig),block);
+                                    typeConfig,
+                                    std::move(block));
       }
 
       if (currentBlockTask.valid()) {

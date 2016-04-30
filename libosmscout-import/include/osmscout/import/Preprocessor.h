@@ -35,20 +35,41 @@ namespace osmscout {
   class PreprocessorCallback
   {
   public:
+    struct RawNodeData
+    {
+      OSMId    id;
+      GeoCoord coord;
+      TagMap   tags;
+    };
+
+    struct RawWayData
+    {
+      OSMId              id;
+      TagMap             tags;
+      std::vector<OSMId> nodes;
+    };
+
+    struct RawRelationData
+    {
+      OSMId                            id;
+      TagMap                           tags;
+      std::vector<RawRelation::Member> members;
+    };
+
+    struct RawBlockData
+    {
+      std::vector<RawNodeData>     nodeData;
+      std::vector<RawWayData>      wayData;
+      std::vector<RawRelationData> relationData;
+    };
+
+    // Should be unique_ptr but I get compiler errors if passing it to the WriteWorkerQueue
+    typedef std::shared_ptr<RawBlockData> RawBlockDataRef;
+
+  public:
     virtual ~PreprocessorCallback();
 
-    virtual void ProcessNode(const OSMId& id,
-                             const GeoCoord& coord,
-                             const TagMap& tags) = 0;
-
-    virtual void ProcessWay(const OSMId& id,
-                            std::vector<OSMId>& nodes,
-                            const TagMap& tags) = 0;
-
-    virtual void ProcessRelation(const OSMId& id,
-                                 const std::vector<RawRelation::Member>& members,
-                                 const TagMap& tags) = 0;
-
+    virtual void ProcessBlock(RawBlockDataRef data) = 0;
   };
 
   class Preprocessor

@@ -31,6 +31,10 @@
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/Preprocessor.h>
+#include <osmscout/import/RawCoastline.h>
+#include <osmscout/import/RawCoord.h>
+#include <osmscout/import/RawNode.h>
+#include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
 
 
@@ -51,68 +55,90 @@ namespace osmscout {
     class Callback : public PreprocessorCallback
     {
     private:
-      const TypeConfigRef      typeConfig;
-      const ImportParameter&   parameter;
-      Progress&                progress;
+      struct ProcessedData
+      {
+        std::vector<RawCoord>        rawCoords;
+        std::vector<RawNode>         rawNodes;
+        std::vector<RawWay>          rawWays;
+        std::vector<RawCoastline>    rawCoastlines;
+        std::vector<RawRelation>     rawRelations;
+        std::vector<TurnRestriction> turnRestriction;
+      };
 
-      FileWriter               rawCoordWriter;
-      FileWriter               nodeWriter;
-      FileWriter               wayWriter;
-      FileWriter               coastlineWriter;
-      FileWriter               turnRestrictionWriter;
-      FileWriter               multipolygonWriter;
+      // Should be unique_ptr but I get compiler errors if passing it to the WriteWorkerQueue
+      typedef std::shared_ptr<ProcessedData> ProcessedDataRef;
 
-      uint32_t                 coordCount;
-      uint32_t                 nodeCount;
-      uint32_t                 wayCount;
-      uint32_t                 areaCount;
-      uint32_t                 relationCount;
-      uint32_t                 coastlineCount;
-      uint32_t                 turnRestrictionCount;
-      uint32_t                 multipolygonCount;
+    private:
+      const TypeConfigRef                      typeConfig;
+      const ImportParameter&                   parameter;
+      Progress&                                progress;
 
-      OSMId                    lastNodeId;
-      OSMId                    lastWayId;
-      OSMId                    lastRelationId;
+      WorkQueue<ProcessedDataRef>              blockWorkerQueue;
+      std::vector<std::thread>                 blockWorkerThreads;
+      WorkQueue<void>                          writeWorkerQueue;
+      std::thread                              writeWorkerThread;
+      FileWriter                               rawCoordWriter;
+      FileWriter                               nodeWriter;
+      FileWriter                               wayWriter;
+      FileWriter                               coastlineWriter;
+      FileWriter                               turnRestrictionWriter;
+      FileWriter                               multipolygonWriter;
 
-      bool                     nodeSortingError;
-      bool                     waySortingError;
-      bool                     relationSortingError;
+      uint32_t                                 coordCount;
+      uint32_t                                 nodeCount;
+      uint32_t                                 wayCount;
+      uint32_t                                 areaCount;
+      uint32_t                                 relationCount;
+      uint32_t                                 coastlineCount;
+      uint32_t                                 turnRestrictionCount;
+      uint32_t                                 multipolygonCount;
 
-      GeoCoord                 minCoord;
-      GeoCoord                 maxCoord;
+      OSMId                                    lastNodeId;
+      OSMId                                    lastWayId;
+      OSMId                                    lastRelationId;
 
-      std::vector<uint32_t>    nodeStat;
-      std::vector<uint32_t>    areaStat;
-      std::vector<uint32_t>    wayStat;
+      bool                                     nodeSortingError;
+      bool                                     waySortingError;
+      bool                                     relationSortingError;
+
+      GeoCoord                                 minCoord;
+      GeoCoord                                 maxCoord;
+
+      std::vector<uint32_t>                    nodeStat;
+      std::vector<uint32_t>                    areaStat;
+      std::vector<uint32_t>                    wayStat;
 
     private:
       bool IsTurnRestriction(const TagMap& tags,
                              TurnRestriction::Type& type) const;
 
-      void ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
-                                  TurnRestriction::Type type);
 
       bool IsMultipolygon(const TagMap& tags,
                           TypeInfoRef& type);
 
-      void ProcessMultipolygon(const TagMap& tags,
-                               const std::vector<RawRelation::Member>& members,
-                               OSMId id,
-                               const TypeInfoRef& type);
-
       bool DumpDistribution();
       bool DumpBoundingBox();
 
-      void NodeTask(const OSMId& id,
-                    const GeoCoord& coord,
-                    const TagMap& tags);
-      void WayTask(const OSMId& id,
-                   const std::vector<OSMId>& nodes,
-                   const TagMap& tags);
-      void RelationTask(const OSMId& id,
-                        const std::vector<RawRelation::Member>& members,
-                        const TagMap& tags);
+      void NodeSubTask(const RawNodeData& data,
+                       ProcessedData& processed);
+      void WaySubTask(const RawWayData& data,
+                      ProcessedData& processed);
+      void TurnRestrictionSubTask(const std::vector<RawRelation::Member>& members,
+                                  TurnRestriction::Type type,
+                                  ProcessedData& processed);
+      void MultipolygonSubTask(const TagMap& tags,
+                               const std::vector<RawRelation::Member>& members,
+                               OSMId id,
+                               const TypeInfoRef& type,
+                               ProcessedData& processed);
+      void RelationSubTask(const RawRelationData& data,
+                           ProcessedData& processed);
+
+      ProcessedDataRef BlockTask(RawBlockDataRef data);
+      void BlockWorkerLoop();
+
+      void WriteTask(std::future<ProcessedDataRef>& processed);
+      void WriteWorkerLoop();
 
     public:
       Callback(const TypeConfigRef& typeConfig,
@@ -122,17 +148,9 @@ namespace osmscout {
 
       bool Initialize();
 
-      bool Cleanup(bool success);
+      void ProcessBlock(RawBlockDataRef data);
 
-      void ProcessNode(const OSMId& id,
-                       const GeoCoord& coord,
-                       const TagMap& tags);
-      void ProcessWay(const OSMId& id,
-                      std::vector<OSMId>& nodes,
-                      const TagMap& tags);
-      void ProcessRelation(const OSMId& id,
-                           const std::vector<RawRelation::Member>& members,
-                           const TagMap& tags);
+      bool Cleanup(bool success);
     };
 
   private:

@@ -69,22 +69,26 @@ namespace osmscout {
 
     void ReadNodes(const TypeConfig& typeConfig,
                    const PBF::PrimitiveBlock& block,
-                   const PBF::PrimitiveGroup &group);
+                   const PBF::PrimitiveGroup &group,
+                   PreprocessorCallback::RawBlockData& data);
 
     void ReadDenseNodes(const TypeConfig& typeConfig,
                         const PBF::PrimitiveBlock& block,
-                        const PBF::PrimitiveGroup &group);
+                        const PBF::PrimitiveGroup &group,
+                        PreprocessorCallback::RawBlockData& data);
 
     void ReadWays(const TypeConfig& typeConfig,
                   const PBF::PrimitiveBlock& block,
-                  const PBF::PrimitiveGroup &group);
+                  const PBF::PrimitiveGroup &group,
+                  PreprocessorCallback::RawBlockData& data);
 
     void ReadRelations(const TypeConfig& typeConfig,
                        const PBF::PrimitiveBlock& block,
-                       const PBF::PrimitiveGroup &group);
+                       const PBF::PrimitiveGroup &group,
+                       PreprocessorCallback::RawBlockData& data);
 
-    void ProcessBlock(const TypeConfig& typeConfig,
-                      const PBF::PrimitiveBlock& block);
+    void ProcessBlock(const TypeConfigRef& typeConfig,
+                      std::unique_ptr<PBF::PrimitiveBlock>&& block);
 
   public:
     PreprocessPBF(PreprocessorCallback& callback);

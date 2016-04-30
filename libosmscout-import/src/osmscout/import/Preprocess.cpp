@@ -94,50 +94,6 @@ namespace osmscout {
     return false;
   }
 
-  void Preprocess::Callback::ProcessTurnRestriction(const std::vector<RawRelation::Member>& members,
-                                                    TurnRestriction::Type type)
-  {
-    Id from=0;
-    Id via=0;
-    Id to=0;
-
-    for (std::vector<RawRelation::Member>::const_iterator member=members.begin();
-         member!=members.end();
-         ++member) {
-      if (member->type==RawRelation::memberWay &&
-          member->role=="from") {
-        from=member->id;
-      }
-      else if (member->type==RawRelation::memberNode &&
-               member->role=="via") {
-        via=member->id;
-      }
-      else if (member->type==RawRelation::memberWay &&
-               member->role=="to") {
-        to=member->id;
-      }
-
-      // finished collection data
-      if (from!=0 &&
-          via!=0 &&
-          to!=0) {
-        break;
-      }
-    }
-
-    if (from!=0 &&
-        via!=0 &&
-        to!=0) {
-      TurnRestriction restriction(type,
-                                  from,
-                                  via,
-                                  to);
-
-      restriction.Write(turnRestrictionWriter);
-      turnRestrictionCount++;
-    }
-  }
-
   bool Preprocess::Callback::IsMultipolygon(const TagMap& tags,
                                             TypeInfoRef& type)
   {
@@ -160,42 +116,15 @@ namespace osmscout {
     return isArea;
   }
 
-  void Preprocess::Callback::ProcessMultipolygon(const TagMap& tags,
-                                                 const std::vector<RawRelation::Member>& members,
-                                                 OSMId id,
-                                                 const TypeInfoRef& type)
-  {
-    RawRelation relation;
-
-    relation.SetId(id);
-
-    if (type->GetIgnore()) {
-      relation.SetType(typeConfig->typeInfoIgnore);
-    }
-    else {
-      relation.SetType(type);
-    }
-
-    relation.members=members;
-
-    relation.Parse(progress,
-                   *typeConfig,
-                   tags);
-
-    areaStat[type->GetIndex()]++;
-
-    relation.Write(*typeConfig,
-                   multipolygonWriter);
-
-    multipolygonCount++;
-  }
-
   Preprocess::Callback::Callback(const TypeConfigRef& typeConfig,
                                  const ImportParameter& parameter,
                                  Progress& progress)
   : typeConfig(typeConfig),
     parameter(parameter),
     progress(progress),
+    blockWorkerQueue(1000),
+    writeWorkerQueue(1000),
+    writeWorkerThread(&Preprocess::Callback::WriteWorkerLoop,this),
     coordCount(0),
     nodeCount(0),
     wayCount(0),
@@ -213,6 +142,14 @@ namespace osmscout {
   {
     minCoord.Set(90.0,180.0);
     maxCoord.Set(-90.0,-180.0);
+
+    size_t blockWorkerCount=std::max((unsigned int)1,std::thread::hardware_concurrency());
+
+    progress.Info("Using "+NumberToString(blockWorkerCount)+" block worker threads");
+
+    for (size_t t=1; t<=blockWorkerCount; t++) {
+      blockWorkerThreads.push_back(std::thread(&Preprocess::Callback::BlockWorkerLoop,this));
+    }
 
     nodeStat.resize(typeConfig->GetTypeCount(),0);
     areaStat.resize(typeConfig->GetTypeCount(),0);
@@ -267,51 +204,38 @@ namespace osmscout {
     return true;
   }
 
-  void Preprocess::Callback::NodeTask(const OSMId& id,
-                                      const GeoCoord& coord,
-                                      const TagMap& tagMap)
+  void Preprocess::Callback::NodeSubTask(const RawNodeData& data,
+                                         ProcessedData& processed)
   {
-    ObjectOSMRef object(id,
+    ObjectOSMRef object(data.id,
                         osmRefNode);
-
-    minCoord.Set(std::min(minCoord.GetLat(),coord.GetLat()),
-                 std::min(minCoord.GetLon(),coord.GetLon()));
-
-    maxCoord.Set(std::max(maxCoord.GetLat(),coord.GetLat()),
-                 std::max(maxCoord.GetLon(),coord.GetLon()));
 
     RawCoord rawCoord;
 
-    rawCoord.SetOSMId(id);
-    rawCoord.SetCoord(coord);
+    rawCoord.SetOSMId(data.id);
+    rawCoord.SetCoord(data.coord);
 
-    TypeInfoRef type=typeConfig->GetNodeType(tagMap);
+    processed.rawCoords.push_back(std::move(rawCoord));
 
-    rawCoord.Write(*typeConfig,rawCoordWriter);
-    coordCount++;
+    TypeInfoRef type=typeConfig->GetNodeType(data.tags);
 
     if (!type->GetIgnore()) {
       RawNode node;
 
-      node.SetId(id);
+      node.SetId(data.id);
       node.SetType(type);
-      node.SetCoord(coord);
+      node.SetCoord(data.coord);
 
       node.Parse(progress,
                  *typeConfig,
-                 tagMap);
+                 data.tags);
 
-      node.Write(*typeConfig,
-                 nodeWriter);
-
-      nodeStat[type->GetIndex()]++;
-      nodeCount++;
+      processed.rawNodes.push_back(std::move(node));
     }
   }
 
-  void Preprocess::Callback::WayTask(const OSMId& id,
-                                     const std::vector<OSMId>& nodes,
-                                     const TagMap& tagMap)
+  void Preprocess::Callback::WaySubTask(const RawWayData& data,
+                                        ProcessedData& processed)
   {
     TypeInfoRef areaType;
     TypeInfoRef wayType;
@@ -320,25 +244,25 @@ namespace osmscout {
     RawWay      way;
     bool        isCoastline=false;
 
-    if (nodes.size()<2) {
+    if (data.nodes.size()<2) {
       progress.Warning("Way "+
-                       NumberToString(id)+
+                       NumberToString(data.id)+
                        " has less than two nodes!");
       return;
     }
 
-    way.SetId(id);
+    way.SetId(data.id);
 
-    auto naturalTag=tagMap.find(typeConfig->tagNatural);
+    auto naturalTag=data.tags.find(typeConfig->tagNatural);
 
-    if (naturalTag!=tagMap.end() &&
+    if (naturalTag!=data.tags.end() &&
         naturalTag->second=="coastline") {
       isCoastline=true;
     }
 
     if (isCoastline) {
-      isCoastlineArea=nodes.size()>3 &&
-                      (nodes.front()==nodes.back() ||
+      isCoastlineArea=data.nodes.size()>3 &&
+                      (data.nodes.front()==data.nodes.back() ||
                        isArea==1);
     }
 
@@ -346,14 +270,14 @@ namespace osmscout {
     // Way/Area object type detection
     //
 
-    typeConfig->GetWayAreaType(tagMap,
+    typeConfig->GetWayAreaType(data.tags,
                                wayType,
                                areaType);
 
     // Evaluate the isArea tag
-    auto areaTag=tagMap.find(typeConfig->tagArea);
+    auto areaTag=data.tags.find(typeConfig->tagArea);
 
-    if (areaTag==tagMap.end()) {
+    if (areaTag==data.tags.end()) {
       isArea=0;
     }
     else if (areaTag->second=="no" ||
@@ -366,9 +290,9 @@ namespace osmscout {
     }
 
     // Evaluate the junction=roundabout tag
-    auto junctionTag=tagMap.find(typeConfig->tagJunction);
+    auto junctionTag=data.tags.find(typeConfig->tagJunction);
 
-    if (junctionTag!=tagMap.end() &&
+    if (junctionTag!=data.tags.end() &&
         junctionTag->second=="roundabout") {
       isArea=-1;
     }
@@ -377,8 +301,8 @@ namespace osmscout {
       if (wayType->GetPinWay()) {
         isArea=-1;
       }
-      else if (nodes.size()>3 &&
-               nodes.front()==nodes.back()) {
+      else if (data.nodes.size()>3 &&
+               data.nodes.front()==data.nodes.back()) {
         isArea=1;
       }
       else {
@@ -390,9 +314,9 @@ namespace osmscout {
     case 1:
       if (areaType==typeConfig->typeInfoIgnore &&
           wayType!=typeConfig->typeInfoIgnore) {
-        progress.Warning("Way "+
-                         NumberToString(id)+
-                         " of type '" + wayType->GetName()+"' should be way but is area => ignoring type");
+        progress.Debug("Way "+
+                       NumberToString(data.id)+
+                       " of type '" + wayType->GetName()+"' should be way but is area => ignoring type");
       }
 
       if (areaType==typeConfig->typeInfoIgnore ||
@@ -404,22 +328,22 @@ namespace osmscout {
         way.SetType(areaType,true);
       }
 
-      if (nodes.size()>3 &&
-          nodes.front()==nodes.back()) {
+      if (data.nodes.size()>3 &&
+          data.nodes.front()==data.nodes.back()) {
         //nodes.pop_back();
-        way.SetNodes(nodes.begin(),--nodes.end());
+        way.SetNodes(data.nodes.begin(),--data.nodes.end());
       }
       else {
-        way.SetNodes(nodes.begin(),nodes.end());
+        way.SetNodes(data.nodes.begin(),data.nodes.end());
       }
 
       break;
     case -1:
       if (wayType==typeConfig->typeInfoIgnore &&
           areaType!=typeConfig->typeInfoIgnore) {
-        progress.Warning("Way "+
-                         NumberToString(id)+
-                         " of type '" + areaType->GetName()+"' should be area but is way => ignoring type!");
+        progress.Debug("Way "+
+                       NumberToString(data.id)+
+                       " of type '" + areaType->GetName()+"' should be area but is way => ignoring type!");
       }
 
       if (wayType==typeConfig->typeInfoIgnore ||
@@ -430,7 +354,7 @@ namespace osmscout {
         way.SetType(wayType,false);
       }
 
-      way.SetNodes(nodes.begin(),nodes.end());
+      way.SetNodes(data.nodes.begin(),data.nodes.end());
 
       break;
     default:
@@ -439,19 +363,9 @@ namespace osmscout {
 
     way.Parse(progress,
               *typeConfig,
-              tagMap);
+              data.tags);
 
-    if (isArea==1) {
-      areaStat[areaType->GetIndex()]++;
-      areaCount++;
-    }
-    else {
-      wayStat[wayType->GetIndex()]++;
-      wayCount++;
-    }
-
-    way.Write(*typeConfig,
-              wayWriter);
+    processed.rawWays.push_back(std::move(way));
 
     if (isCoastline) {
       RawCoastline coastline;
@@ -460,83 +374,274 @@ namespace osmscout {
       coastline.SetType(isCoastlineArea);
       coastline.SetNodes(way.GetNodes());
 
-      coastline.Write(coastlineWriter);
-
-      coastlineCount++;
+      processed.rawCoastlines.push_back(std::move(coastline));
     }
   }
 
-  void Preprocess::Callback::RelationTask(const OSMId& id,
-                                          const std::vector<RawRelation::Member>& members,
-                                          const TagMap& tagMap)
+  void Preprocess::Callback::TurnRestrictionSubTask(const std::vector<RawRelation::Member>& members,
+                                                    TurnRestriction::Type type,
+                                                    ProcessedData& processed)
   {
-    if (members.empty()) {
+    Id from=0;
+    Id via=0;
+    Id to=0;
+
+    for (std::vector<RawRelation::Member>::const_iterator member=members.begin();
+         member!=members.end();
+         ++member) {
+      if (member->type==RawRelation::memberWay &&
+          member->role=="from") {
+        from=member->id;
+      }
+      else if (member->type==RawRelation::memberNode &&
+               member->role=="via") {
+        via=member->id;
+      }
+      else if (member->type==RawRelation::memberWay &&
+               member->role=="to") {
+        to=member->id;
+      }
+
+      // finished collection data
+      if (from!=0 &&
+          via!=0 &&
+          to!=0) {
+        break;
+      }
+    }
+
+    if (from!=0 &&
+        via!=0 &&
+        to!=0) {
+      TurnRestriction restriction(type,
+                                  from,
+                                  via,
+                                  to);
+
+      processed.turnRestriction.push_back(std::move(restriction));
+    }
+  }
+
+  void Preprocess::Callback::MultipolygonSubTask(const TagMap& tags,
+                                                 const std::vector<RawRelation::Member>& members,
+                                                 OSMId id,
+                                                 const TypeInfoRef& type,
+                                                 ProcessedData& processed)
+  {
+    RawRelation relation;
+
+    relation.SetId(id);
+
+    if (type->GetIgnore()) {
+      relation.SetType(typeConfig->typeInfoIgnore);
+    }
+    else {
+      relation.SetType(type);
+    }
+
+    relation.members=members;
+
+    relation.Parse(progress,
+                   *typeConfig,
+                   tags);
+
+    processed.rawRelations.push_back(std::move(relation));
+  }
+
+  void Preprocess::Callback::RelationSubTask(const RawRelationData& data,
+                                             ProcessedData& processed)
+  {
+    if (data.members.empty()) {
       progress.Warning("Relation "+
-                       NumberToString(id)+
+                       NumberToString(data.id)+
                        " does not have any members!");
       return;
     }
 
     TurnRestriction::Type turnRestrictionType;
 
-    if (IsTurnRestriction(tagMap,
+    if (IsTurnRestriction(data.tags,
                           turnRestrictionType)) {
-      ProcessTurnRestriction(members,
-                             turnRestrictionType);
+      TurnRestrictionSubTask(data.members,
+                             turnRestrictionType,
+                             processed);
     }
 
     TypeInfoRef multipolygonType;
 
-    if (IsMultipolygon(tagMap,
+    if (IsMultipolygon(data.tags,
                        multipolygonType)) {
-      ProcessMultipolygon(tagMap,
-                          members,
-                          id,
-                          multipolygonType);
+      MultipolygonSubTask(data.tags,
+                          data.members,
+                          data.id,
+                          multipolygonType,
+                          processed);
     }
   }
 
-  void Preprocess::Callback::ProcessNode(const OSMId& id,
-                                         const GeoCoord& coord,
-                                         const TagMap& tagMap)
+  Preprocess::Callback::ProcessedDataRef Preprocess::Callback::BlockTask(RawBlockDataRef data)
   {
-    if (id<lastNodeId) {
-      nodeSortingError=true;
+    ProcessedDataRef processed(new ProcessedData());
+
+    processed->rawCoastlines.reserve(10000);
+    processed->rawCoords.reserve(10000);
+    processed->rawNodes.reserve(10000);
+    processed->rawWays.reserve(10000);
+    processed->rawRelations.reserve(10000);
+    processed->turnRestriction.reserve(10000);
+
+    //std::cout << "Poping block " << data->nodeData.size() << " " << data->wayData.size() << " " << data->relationData.size() << std::endl;
+
+    for (const auto& entry : data->nodeData) {
+      NodeSubTask(entry,
+                  *processed);
     }
 
-    lastNodeId=id;
+    for (const auto& entry : data->wayData) {
+      WaySubTask(entry,
+                 *processed);
+    }
 
-    // Things will get much slower if we delegate processing of nodes to some other thread
-    NodeTask(id,coord,tagMap);
+    for (const auto& entry : data->relationData) {
+      RelationSubTask(entry,
+                      *processed);
+    }
+
+    return processed;
   }
 
-  void Preprocess::Callback::ProcessWay(const OSMId& id,
-                                        std::vector<OSMId>& nodes,
-                                        const TagMap& tagMap)
+  void Preprocess::Callback::BlockWorkerLoop()
   {
-    if (id<lastWayId) {
-      waySortingError=true;
+    std::packaged_task<ProcessedDataRef()> task;
+
+    while (blockWorkerQueue.PopTask(task)) {
+      task();
     }
-
-    lastWayId=id;
-
-    WayTask(id,nodes,tagMap);
   }
 
-  void Preprocess::Callback::ProcessRelation(const OSMId& id,
-                                             const std::vector<RawRelation::Member>& members,
-                                             const TagMap& tagMap)
+  void Preprocess::Callback::WriteTask(std::future<ProcessedDataRef>& p)
   {
-    if (id<lastRelationId) {
-      relationSortingError=true;
+    ProcessedDataRef processed=p.get();
+
+    for (const auto& coastline : processed->rawCoastlines) {
+      coastline.Write(coastlineWriter);
+
+      coastlineCount++;
     }
 
-    lastRelationId=id;
+    for (const auto& coord : processed->rawCoords) {
+      coord.Write(rawCoordWriter);
+      coordCount++;
+    }
 
-    relationCount++;
+    for (const auto& node : processed->rawNodes) {
+      node.Write(*typeConfig,
+                 nodeWriter);
 
-    RelationTask(id,members,tagMap);
+      TypeInfoRef type=node.GetType();
+
+      nodeStat[type->GetIndex()]++;
+      nodeCount++;
+    }
+
+    for (const auto& way : processed->rawWays) {
+      if (way.IsArea()) {
+        areaStat[way.GetType()->GetIndex()]++;
+        areaCount++;
+      }
+      else {
+        wayStat[way.GetType()->GetIndex()]++;
+        wayCount++;
+      }
+
+      way.Write(*typeConfig,
+                wayWriter);
+    }
+
+    for (const auto& relation : processed->rawRelations) {
+      areaStat[relation.GetType()->GetIndex()]++;
+
+      relation.Write(*typeConfig,
+                     multipolygonWriter);
+
+      multipolygonCount++;
+    }
+
+    for (const auto& turnRestriction : processed->turnRestriction) {
+      turnRestriction.Write(turnRestrictionWriter);
+      turnRestrictionCount++;
+    }
   }
+
+  void Preprocess::Callback::WriteWorkerLoop()
+  {
+    std::packaged_task<void()> task;
+
+    while (writeWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  void Preprocess::Callback::ProcessBlock(RawBlockDataRef data)
+  {
+    //
+    // Synchronous processing block, because of access to shared data
+    //
+
+    for (const auto& entry : data->nodeData) {
+      if (entry.id<lastNodeId) {
+        nodeSortingError=true;
+      }
+
+      lastNodeId=entry.id;
+
+      minCoord.Set(std::min(minCoord.GetLat(),entry.coord.GetLat()),
+                   std::min(minCoord.GetLon(),entry.coord.GetLon()));
+
+      maxCoord.Set(std::max(maxCoord.GetLat(),entry.coord.GetLat()),
+                   std::max(maxCoord.GetLon(),entry.coord.GetLon()));
+    }
+
+    for (const auto& entry : data->wayData) {
+      if (entry.id<lastWayId) {
+        waySortingError=true;
+      }
+
+      lastWayId=entry.id;
+    }
+
+    for (const auto& entry : data->relationData) {
+      if (entry.id<lastRelationId) {
+        relationSortingError=true;
+      }
+
+      lastRelationId=entry.id;
+      relationCount++;
+    }
+
+    //
+    // Delegate rest of data processing to asynchronous Worker
+    //
+
+    //std::cout << "Pushing block " << data->nodeData.size() << " " << data->wayData.size() << " " << data->relationData.size() << std::endl;
+
+    std::packaged_task<ProcessedDataRef()> blockTask(std::bind(&Preprocess::Callback::BlockTask,this,
+                                                               std::move(data)));
+    std::future<ProcessedDataRef> processingResult=blockTask.get_future();
+
+
+    blockWorkerQueue.PushTask(blockTask);
+
+    //
+    // Pass the (future of the) result of the processing back to the asynchronous writer
+    //
+
+    std::packaged_task<void()> writeTask(std::bind(&Preprocess::Callback::WriteTask,this,
+                                                   std::move(processingResult)));
+
+    writeWorkerQueue.PushTask(writeTask);
+  }
+
 
   bool Preprocess::Callback::DumpDistribution()
   {
@@ -595,6 +700,18 @@ namespace osmscout {
 
   bool Preprocess::Callback::Cleanup(bool success)
   {
+    progress.Info("Waiting for block processor...");
+    blockWorkerQueue.Stop();
+    for (auto& thread : blockWorkerThreads) {
+      thread.join();
+    }
+    progress.Info("Waiting for block processor done.");
+
+    progress.Info("Waiting for write processor...");
+    writeWorkerQueue.Stop();
+    writeWorkerThread.join();
+    progress.Info("Waiting for write processor done.");
+
     rawCoordWriter.SetPos(0);
     rawCoordWriter.Write(coordCount);
 

@@ -48,15 +48,17 @@ namespace osmscout {
     };
 
   private:
-    const TypeConfig&                typeConfig;
-    Progress&                        progress;
-    PreprocessorCallback&            callback;
-    Context                          context;
-    OSMId                            id;
-    double                           lon,lat;
-    TagMap                           tags;
-    std::vector<OSMId>               nodes;
-    std::vector<RawRelation::Member> members;
+    const TypeConfig&                     typeConfig;
+    Progress&                             progress;
+    PreprocessorCallback&                 callback;
+    Context                               context;
+    OSMId                                 id;
+    double                                lon,lat;
+    TagMap                                tags;
+    std::vector<OSMId>                    nodes;
+    std::vector<RawRelation::Member>      members;
+    size_t                                blockDataSize;
+    PreprocessorCallback::RawBlockDataRef blockData;
 
   public:
     Parser(const TypeConfig& typeConfig,
@@ -72,6 +74,14 @@ namespace osmscout {
 
     void StartElement(const xmlChar *name, const xmlChar **atts)
     {
+      if (!blockData) {
+        blockData=std::unique_ptr<PreprocessorCallback::RawBlockData>(new PreprocessorCallback::RawBlockData());
+        blockDataSize=0;
+        blockData->nodeData.reserve(10000);
+        blockData->wayData.reserve(10000);
+        blockData->relationData.reserve(10000);
+      }
+
       if (strcmp((const char*)name,"node")==0) {
         const xmlChar *idValue=NULL;
         const xmlChar *latValue=NULL;
@@ -263,31 +273,56 @@ namespace osmscout {
     {
       try {
         if (strcmp((const char*)name,"node")==0) {
-          callback.ProcessNode(id,
-                               GeoCoord(lat,lon),
-                               tags);
-          tags.clear();
+          PreprocessorCallback::RawNodeData data;
+
+          data.id=id;
+          data.coord.Set(lat,lon);
+          data.tags=std::move(tags);
+
+          blockData->nodeData.push_back(std::move(data));
+          blockDataSize++;
+
           context=contextUnknown;
         }
         else if (strcmp((const char*)name,"way")==0) {
-          callback.ProcessWay(id,
-                              nodes,
-                              tags);
-          nodes.clear();
-          tags.clear();
+          PreprocessorCallback::RawWayData data;
+
+          data.id=id;
+          data.nodes=std::move(nodes);
+          data.tags=std::move(tags);
+
+          blockData->wayData.push_back(std::move(data));
+          blockDataSize++;
+
           context=contextUnknown;
         }
         else if (strcmp((const char*)name,"relation")==0) {
-          callback.ProcessRelation(id,
-                                   members,
-                                   tags);
-          members.clear();
-          tags.clear();
+          PreprocessorCallback::RawRelationData data;
+
+          data.id=id;
+          data.members=std::move(members);
+          data.tags=std::move(tags);
+
+          blockData->relationData.push_back(std::move(data));
+          blockDataSize++;
+
           context=contextUnknown;
+        }
+
+        if (blockDataSize>10000) {
+          callback.ProcessBlock(std::move(blockData));
+          blockData=NULL;
         }
       }
       catch (IOException& e) {
         progress.Error(e.GetDescription());
+      }
+    }
+
+    void EndDocument()
+    {
+      if (blockData) {
+        callback.ProcessBlock(std::move(blockData));
       }
     }
   };
@@ -326,9 +361,11 @@ namespace osmscout {
     // no code, for temporary debugging purposes
   }
 
-  static void EndDocumentHandler(void* /*data*/)
+  static void EndDocumentHandler(void* data)
   {
-    // no code, for temporary debugging purposes
+    Parser* parser=static_cast<Parser*>(data);
+
+    parser->EndDocument();
   }
 
   PreprocessOSM::PreprocessOSM(PreprocessorCallback& callback)
