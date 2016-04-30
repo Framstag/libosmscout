@@ -97,7 +97,8 @@ namespace osmscout {
 
     popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
 
-    if (!running) {
+    if (tasks.empty() &&
+        !running) {
       return false;
     }
 
