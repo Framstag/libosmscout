@@ -119,6 +119,11 @@ namespace osmscout {
       return nodes.back().GetId();
     }
 
+    inline const Point& GetPoint(size_t index) const
+    {
+      return nodes[index];
+    }
+
     inline const GeoCoord& GetCoord(size_t index) const
     {
       return nodes[index].GetCoord();
