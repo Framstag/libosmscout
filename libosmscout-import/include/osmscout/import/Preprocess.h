@@ -137,7 +137,7 @@ namespace osmscout {
       ProcessedDataRef BlockTask(RawBlockDataRef data);
       void BlockWorkerLoop();
 
-      void WriteTask(std::future<ProcessedDataRef>& processed);
+      void WriteTask(std::shared_future<ProcessedDataRef>& processed);
       void WriteWorkerLoop();
 
     public:

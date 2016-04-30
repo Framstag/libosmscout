@@ -519,7 +519,7 @@ namespace osmscout {
     }
   }
 
-  void Preprocess::Callback::WriteTask(std::future<ProcessedDataRef>& p)
+  void Preprocess::Callback::WriteTask(std::shared_future<ProcessedDataRef>& p)
   {
     ProcessedDataRef processed=p.get();
 
@@ -626,8 +626,10 @@ namespace osmscout {
     //std::cout << "Pushing block " << data->nodeData.size() << " " << data->wayData.size() << " " << data->relationData.size() << std::endl;
 
     std::packaged_task<ProcessedDataRef()> blockTask(std::bind(&Preprocess::Callback::BlockTask,this,
-                                                               std::move(data)));
-    std::future<ProcessedDataRef> processingResult=blockTask.get_future();
+                                                               data));
+    // We use a shared_future because packaged_task does not work an all system with future, because future
+    // is only moveable.
+    std::shared_future<ProcessedDataRef>   processingResult(blockTask.get_future());
 
 
     blockWorkerQueue.PushTask(blockTask);
@@ -637,7 +639,7 @@ namespace osmscout {
     //
 
     std::packaged_task<void()> writeTask(std::bind(&Preprocess::Callback::WriteTask,this,
-                                                   std::move(processingResult)));
+                                                   processingResult));
 
     writeWorkerQueue.PushTask(writeTask);
   }
