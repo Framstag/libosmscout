@@ -27,6 +27,7 @@
 
 #include <osmscout/DataFile.h>
 #include <osmscout/CoordDataFile.h>
+#include <osmscout/TypeFeatures.h>
 #include <osmscout/WaterIndex.h>
 
 #include <osmscout/system/Assert.h>
@@ -141,10 +142,12 @@ namespace osmscout {
 
       scanner.Read(coastlineCount);
 
+      progress.Info(NumberToString(coastlineCount)+" coastlines");
+
       for (uint32_t c=1; c<=coastlineCount; c++) {
         progress.SetProgress(c,coastlineCount);
 
-        RawCoastlineRef coastline(new RawCoastline());
+        RawCoastlineRef coastline=std::make_shared<RawCoastline>();
 
         coastline->Read(scanner);
 
@@ -173,7 +176,7 @@ namespace osmscout {
 
       if (!coordDataFile.Get(nodeIds,
                              coordsMap)) {
-        std::cerr << "Cannot read nodes!" << std::endl;
+        progress.Error("Cannot read nodes!");
         return false;
       }
 
@@ -216,7 +219,7 @@ namespace osmscout {
             coast->backNodeId=coord->second.GetOSMScoutId();
           }
 
-          coast->coast[n].Set(coord->second.GetOSMScoutId(),
+          coast->coast[n].Set(coord->second.GetSerial(),
                               coord->second.GetCoord());
         }
 
@@ -259,16 +262,16 @@ namespace osmscout {
     while( c!=coastlines.end()) {
       CoastRef coast=*c;
 
-      if (!coast->isArea) {
-        coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
-
-        c++;
-      }
-      else {
+      if (coast->isArea) {
         areaCoastCount++;
         mergedCoastlines.push_back(coast);
 
         c=coastlines.erase(c);
+      }
+      else {
+        coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
+
+        c++;
       }
     }
 
@@ -316,6 +319,11 @@ namespace osmscout {
       }
       else {
         wayCoastCount++;
+      }
+
+      if (coastline->coast.size()<=2) {
+        progress.Warning("Dropping to short coastline");
+        continue;
       }
 
       mergedCoastlines.push_back(coastline);
@@ -531,9 +539,10 @@ namespace osmscout {
   {
     progress.Info("Assume land");
 
-    FileScanner scanner;
-
-    uint32_t    wayCount=0;
+    BridgeFeatureReader bridgeFeatureRader(typeConfig);
+    TunnelFeatureReader tunnelFeatureRader(typeConfig);
+    FileScanner         scanner;
+    uint32_t            wayCount=0;
 
     // We do not yet know if we handle borders as ways or areas
 
@@ -554,20 +563,21 @@ namespace osmscout {
                  scanner);
 
         if (way.GetType()!=typeConfig.typeInfoIgnore &&
-            !way.GetType()->GetIgnoreSeaLand()) {
-          if (way.nodes.size()>=2) {
-            std::set<Pixel> coords;
+            !way.GetType()->GetIgnoreSeaLand() &&
+            !tunnelFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
+            !bridgeFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
+            way.nodes.size()>=2) {
+          std::set<Pixel> coords;
 
-            GetCells(level,way.nodes,coords);
+          GetCells(level,way.nodes,coords);
 
-            for (const auto& coord : coords) {
-              if (level.IsInAbsolute(coord.x,coord.y)) {
-                if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
+          for (const auto& coord : coords) {
+            if (level.IsInAbsolute(coord.x,coord.y)) {
+              if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-                  std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
+                std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
-                  level.SetStateAbsolute(coord.x,coord.y,land);
-                }
+                level.SetStateAbsolute(coord.x,coord.y,land);
               }
             }
           }
