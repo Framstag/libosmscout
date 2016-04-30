@@ -2172,7 +2172,7 @@ namespace osmscout {
     size_t nodeCount;
 
     if (readIds) {
-      hasNodes=sizeByte & 0x04;
+      hasNodes=(sizeByte & 0x04)!=0;
 
       if ((sizeByte & 0x03) == 0) {
         coordBitSize=16;

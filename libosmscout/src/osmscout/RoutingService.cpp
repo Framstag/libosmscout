@@ -257,7 +257,7 @@ namespace osmscout {
       return;
     }
 
-    for (long i=nodeIndex-1; i>=0; i--) {
+    for (long i=(long)nodeIndex-1; i>=0; i--) {
       routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
@@ -288,7 +288,7 @@ namespace osmscout {
       return;
     }
 
-    for (long i=nodeIndex-1; i>=0; i--) {
+    for (long i=(long)nodeIndex-1; i>=0; i--) {
       routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
@@ -432,7 +432,7 @@ namespace osmscout {
                      object,
                      startNodeIndex-1);
 
-      for (long i=startNodeIndex-1; i>(long)targetNodeIndex+1; i--) {
+      for (long i=(long)startNodeIndex-1; i>(long)targetNodeIndex+1; i--) {
         route.AddEntry(0,
                        i,
                        object,
@@ -1575,15 +1575,13 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            points.push_back(Point(w->GetId(index),
-                                   w->GetCoord(index)));
+            points.push_back(w->GetPoint(index));
           }
 
           // target node of current path
           size_t index=iter->GetTargetNodeIndex();
 
-          points.push_back(Point(w->GetId(index),
-                                 w->GetCoord(index)));
+          points.push_back(w->GetPoint(index));
         }
       }
     }

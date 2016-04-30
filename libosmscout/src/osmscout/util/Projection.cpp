@@ -154,22 +154,22 @@ namespace osmscout {
     double tlLat;
     double tlLon;
 
-    PixelToGeo(0,height,tlLon,tlLat);
+    PixelToGeo(0.0,(double)height,tlLon,tlLat);
 
     double trLat;
     double trLon;
 
-    PixelToGeo(width,height,trLon,trLat);
+    PixelToGeo((double)width,(double)height,trLon,trLat);
 
     double blLat;
     double blLon;
 
-    PixelToGeo(0,0,blLon,blLat);
+    PixelToGeo(0.0,0.0,blLon,blLat);
 
     double brLat;
     double brLon;
 
-    PixelToGeo(width,0,brLon,brLat);
+    PixelToGeo((double)width,0.0,brLon,brLat);
 
     latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
     latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
@@ -190,7 +190,7 @@ namespace osmscout {
   }
 
   bool MercatorProjection::PixelToGeo(double x, double y,
-                                       double& lon, double& lat) const
+                                      double& lon, double& lat) const
   {
     assert(valid);
 
