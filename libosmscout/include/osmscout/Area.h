@@ -39,8 +39,8 @@ namespace osmscout {
   class OSMSCOUT_API Area
   {
   public:
-    static const size_t masterRingId;
-    static const size_t outerRingId;
+    static const uint8_t masterRingId;
+    static const uint8_t outerRingId;
 
   public:
     class OSMSCOUT_API Ring

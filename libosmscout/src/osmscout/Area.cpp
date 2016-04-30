@@ -28,8 +28,8 @@
 
 namespace osmscout {
 
-  const size_t Area::masterRingId = 0;
-  const size_t Area::outerRingId = 1;
+  const uint8_t Area::masterRingId=0;
+  const uint8_t Area::outerRingId=1;
 
   bool Area::Ring::HasAnyFeaturesSet() const
   {
