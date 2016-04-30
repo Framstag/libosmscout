@@ -101,7 +101,7 @@ bool CheckParseSuccess(bool canFoot,
 {
   osmscout::SilentProgress                        progress;
   osmscout::TypeConfig                            typeConfig;
-  osmscout::TypeInfoRef                           testType=std::make_shared<osmscout::TypeInfo>();
+  osmscout::TypeInfoRef                           testType=std::make_shared<osmscout::TypeInfo>("TestType");
   osmscout::FeatureRef                            accessFeature;
   size_t                                          featureInstanceIndex;
   std::unordered_map<osmscout::TagId,std::string> tags;
@@ -114,7 +114,6 @@ bool CheckParseSuccess(bool canFoot,
 
   accessFeature=typeConfig.GetFeature(osmscout::AccessFeature::NAME);
 
-  testType->SetType("TestType");
   testType->CanRouteFoot(canFoot);
   testType->CanRouteBicycle(canBicycle);
   testType->CanRouteCar(canCar);
