@@ -330,7 +330,6 @@ namespace osmscout {
 
       if (data.nodes.size()>3 &&
           data.nodes.front()==data.nodes.back()) {
-        //nodes.pop_back();
         way.SetNodes(data.nodes.begin(),--data.nodes.end());
       }
       else {
@@ -365,8 +364,6 @@ namespace osmscout {
               *typeConfig,
               data.tags);
 
-    processed.rawWays.push_back(std::move(way));
-
     if (isCoastline) {
       RawCoastline coastline;
 
@@ -376,6 +373,8 @@ namespace osmscout {
 
       processed.rawCoastlines.push_back(std::move(coastline));
     }
+
+    processed.rawWays.push_back(std::move(way));
   }
 
   void Preprocess::Callback::TurnRestrictionSubTask(const std::vector<RawRelation::Member>& members,
