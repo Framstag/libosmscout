@@ -41,20 +41,8 @@ namespace osmscout {
     FeatureValueBuffer featureValueBuffer;
 
   private:
-    /**
-     * Private copy constructor to forbid copying of RawNodes
-     *
-     * @param other
-     *    The original node to copy from
-     */
-    inline RawNode(const RawNode& /*other*/)
-    {
-      // no code
-    }
-
   public:
     RawNode();
-    virtual ~RawNode();
 
     inline OSMId GetId() const
     {

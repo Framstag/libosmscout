@@ -29,11 +29,6 @@ namespace osmscout {
     // no code
   }
 
-  RawNode::~RawNode()
-  {
-    // no code
-  }
-
   void RawNode::SetId(OSMId id)
   {
     this->id=id;
