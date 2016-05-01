@@ -126,9 +126,9 @@ namespace osmscout {
     }
 
     // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level
-    double resolution=tileSizeZoom0Aquator/256*cos(lat*gradtorad)/magnification.GetMagnification();
+    double equatorResolution=tileSizeZoom0Aquator/256/magnification.GetMagnification();
 
-    double groundWidthMeter=width*tileDPI/dpi*resolution;
+    double groundWidthMeter=width*tileDPI/dpi*equatorResolution;
 
     //
     // Calculation of bounds and scaling factors
