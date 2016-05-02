@@ -112,6 +112,12 @@ namespace osmscout {
      */
     std::string GetDisplayText() const;
 
+    inline std::ostream& operator<<(std::ostream& stream)
+    {
+      stream << GetDisplayText();
+      return stream;
+    }
+
     /**
      * Returns a fast calculable unique id for the coordinate. Coordinates with have
      * the same latitude and longitude value in the supported resolution wil have the same
@@ -248,6 +254,34 @@ namespace osmscout {
      */
     static bool Parse(const std::string& text,
                       GeoCoord& coord);
+
+    /**
+     * Get distance between two coordinates.
+	 * @param target
+     *    Target coordinate to measure distance
+     * @return
+     *    Point to point distance to target coordinates in meters
+	 * @note
+	 *    The difference in height between the two points is neglected.
+     */
+    double GetDistance(GeoCoord target);
+    inline double operator-(GeoCoord other)
+    {
+        return GetDistance(other);
+    }
+
+    /**
+    * Get coordinate of position + course and distance.
+	* @param bearing
+	*    Target course in degree
+	* @param distance
+	*    Target distance in meters
+	* @return
+	*    Target coordinates
+	* @note
+	*    The difference in height between the two points is neglected.
+	*/
+    GeoCoord Add(double bearing, double distance);
   };
 }
 

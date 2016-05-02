@@ -319,4 +319,97 @@ namespace osmscout {
       return false;
     }
   }
+
+  double GeoCoord::GetDistance(GeoCoord target)
+  {
+      double a = 6378137.0;
+      double b = 6.3568e+06;
+      double f = 0.0034;
+      double a2b2b2 = (a * a - b * b) / (b * b);
+      double omega = (target.lon - lon) * M_PI / 180.0;
+      double U1 = atan((1.0 - f) * tan(lat * M_PI / 180.0));
+      double sinU1 = sin(U1);
+      double cosU1 = cos(U1);
+      double U2 = atan((1.0 - f) * tan(target.lat * M_PI / 180.0));
+      double sinU2 = sin(U2);
+      double cosU2 = cos(U2);
+      double sinU1sinU2 = sinU1 * sinU2;
+      double cosU1sinU2 = cosU1 * sinU2;
+      double sinU1cosU2 = sinU1 * cosU2;
+      double cosU1cosU2 = cosU1 * cosU2;
+      double lambda = omega;
+      double A = 0.0;
+      double B = 0.0;
+      double sigma = 0.0;
+      double deltasigma = 0.0;
+      double lambda0;
+      for (int i = 0; i < 20; i++)
+      {
+          lambda0 = lambda;
+          double sinlambda = sin(lambda);
+          double coslambda = cos(lambda);
+          double sin2sigma = (cosU2 * sinlambda * cosU2 * sinlambda) + pow(cosU1sinU2 - sinU1cosU2 * coslambda, 2.0);
+          double sinsigma = sqrt(sin2sigma);
+          double cossigma = sinU1sinU2 + (cosU1cosU2 * coslambda);
+          sigma = atan2(sinsigma, cossigma);
+          double sinalpha = (sin2sigma == 0) ? 0.0 : cosU1cosU2 * sinlambda / sinsigma;
+          double alpha = asin(sinalpha);
+          double cosalpha = cos(alpha);
+          double cos2alpha = cosalpha * cosalpha;
+          double cos2sigmam = cos2alpha == 0.0 ? 0.0 : cossigma - 2 * sinU1sinU2 / cos2alpha;
+          double u2 = cos2alpha * a2b2b2;
+          double cos2sigmam2 = cos2sigmam * cos2sigmam;
+          A = 1.0 + u2 / 16384.0 * (4096.0 + u2 * (-768.0 + u2 * (320.0 - 175.0 * u2)));
+          B = u2 / 1024.0 * (256.0 + u2 * (-128.0 + u2 * (74.0 - 47.0 * u2)));
+          deltasigma = B * sinsigma * (cos2sigmam + B / 4 * (cossigma * (-1.0 + 2.0 * cos2sigmam2) - B / 6.0 * cos2sigmam * (-3.0 + 4.0 * sin2sigma) * (-3.0 + 4.0 * cos2sigmam2)));
+          double C = f / 16.0 * cos2alpha * (4.0 + f * (4.0 - 3.0 * cos2alpha));
+          lambda = omega + (1.0 - C) * f * sinalpha * (sigma + C * sinsigma * (cos2sigmam + C * cossigma * (-1.0 + 2.0 * cos2sigmam2)));
+          if ((i > 1) && (abs((lambda - lambda0) / lambda) < 0.0000000000001)) break;
+      }
+      return b * A * (sigma - deltasigma);
+  }
+
+  GeoCoord GeoCoord::Add(double bearing, double distance)
+  {
+      if (distance == 0.0) return *this;
+      double a = 6378137;
+      double b = 6.3568e+06;
+      double f = 0.0034;
+      double alpha1 = bearing * M_PI / 180.0;
+      double cosAlpha1 = cos(alpha1);
+      double sinAlpha1 = sin(alpha1);
+      double s = distance;
+      double tanU1 = (1.0 - f) * tan(lat * M_PI / 180.0);
+      double cosU1 = 1.0 / sqrt(1.0 + tanU1 * tanU1);
+      double sinU1 = tanU1 * cosU1;
+      double sigma1 = atan2(tanU1, cosAlpha1);
+      double sinAlpha = cosU1 * sinAlpha1;
+      double sin2Alpha = sinAlpha * sinAlpha;
+      double cos2Alpha = 1.0 - sin2Alpha;
+      double uSquared = cos2Alpha * (a * a - b * b) / (b * b);
+      double A = 1.0 + (uSquared / 16384.0) * (4096.0 + uSquared * (-768.0 + uSquared * (320.0 - 175.0 * uSquared)));
+      double B = (uSquared / 1024.0) * (256.0 + uSquared * (-128.0 + uSquared * (74.0 - 47.0 * uSquared)));
+      double sOverbA = s / (b * A);
+      double sigma = sOverbA;
+      double sinSigma;
+      double prevSigma = sOverbA;
+      double cosSigmaM2;
+      for (;;)
+      {
+          cosSigmaM2 = cos(2.0 * sigma1 + sigma);
+          sinSigma = sin(sigma);
+          double cosSignma = cos(sigma);
+          sigma = sOverbA + (B * sinSigma * (cosSigmaM2 + (B / 4.0) * (cosSignma * (-1.0 + 2.0 * cosSigmaM2 * cosSigmaM2) - (B / 6.0) * cosSigmaM2 * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0 + 4.0 * cosSigmaM2 * cosSigmaM2))));
+          if (abs(sigma - prevSigma) < 0.0000000000001) break;
+          prevSigma = sigma;
+      }
+      cosSigmaM2 = cos(2.0 * sigma1 + sigma);
+      double cosSigma = cos(sigma);
+      sinSigma = sin(sigma);
+      double phi2 = atan2(sinU1 * cosSigma + cosU1 * sinSigma * cosAlpha1, (1.0 - f) * sqrt(sin2Alpha + pow(sinU1 * sinSigma - cosU1 * cosSigma * cosAlpha1, 2.0)));
+      double lambda = atan2(sinSigma * sinAlpha1, cosU1 * cosSigma - sinU1 * sinSigma * cosAlpha1);
+      double C = (f / 16.0) * cos2Alpha * (4.0 + f * (4.0 - 3.0 * cos2Alpha));
+      double L = lambda - (1.0 - C) * f * sinAlpha * (sigma + C * sinSigma * (cosSigmaM2 + C * cosSigma * (-1.0 + 2.0 * cosSigmaM2 * cosSigmaM2)));
+      return GeoCoord(phi2 * 180.0 / M_PI, ((lon * M_PI / 180.0) + L) * 180.0 / M_PI);
+  }
 }
