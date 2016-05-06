@@ -257,12 +257,12 @@ namespace osmscout {
 
     /**
      * Get distance between two coordinates.
-	 * @param target
+     * @param target
      *    Target coordinate to measure distance
      * @return
      *    Point to point distance to target coordinates in meters
-	 * @note
-	 *    The difference in height between the two points is neglected.
+     * @note
+     *    The difference in height between the two points is neglected.
      */
     double GetDistance(GeoCoord target);
     inline double operator-(GeoCoord other)
@@ -272,15 +272,15 @@ namespace osmscout {
 
     /**
     * Get coordinate of position + course and distance.
-	* @param bearing
-	*    Target course in degree
-	* @param distance
-	*    Target distance in meters
-	* @return
-	*    Target coordinates
-	* @note
-	*    The difference in height between the two points is neglected.
-	*/
+    * @param bearing
+    *    Target course in degree
+    * @param distance
+    *    Target distance in meters
+    * @return
+    *    Target coordinates
+    * @note
+    *    The difference in height between the two points is neglected.
+    */
     GeoCoord Add(double bearing, double distance);
   };
 }

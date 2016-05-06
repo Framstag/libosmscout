@@ -32,8 +32,8 @@ int main(int argc, char* argv[])
 	//    23.291215942614333 nm
 	osmscout::GeoCoord location1(51.43170928, 6.80131361);
 	osmscout::GeoCoord location2(51.48510151, 7.4160216);
-	double distance_m = location2 - location1;
-	std::cout << "Distance between " << location1.GetDisplayText() << " and " << location2.GetDisplayText() << ": " << (distance_m / 1000.0) << " km" << std::endl;
+	double distance_km = location2 - location1;
+	std::cout << "Distance between " << location1.GetDisplayText() << " and " << location2.GetDisplayText() << ": " << distance_km << " km" << std::endl;
 
 	// Target:
 	//    Latitude: 51°27'48" N (51.463397)
