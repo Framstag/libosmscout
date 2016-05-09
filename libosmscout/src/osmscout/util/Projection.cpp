@@ -200,10 +200,10 @@ namespace osmscout {
     std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
     std::cout << "Screen dimension: " << width << "x" << height << " " << dpi << " DPI " << std::endl;
 
-    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthMeter << " " << std::endl;
+    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthVisibleMeter << " " << std::endl;
 
-    std::cout << "Scale: 1 : " << scale << std::endl;*/
-
+    std::cout << "Scale: 1 : " << scale << std::endl;
+    */
     return true;
   }
 
