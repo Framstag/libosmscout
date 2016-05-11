@@ -57,14 +57,14 @@ target_include_directories(StyleEditor PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include)
 
 target_link_libraries(StyleEditor
-        libosmscout
-        libosmscout_map
+        osmscout
+        osmscout_map
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
         Qt5::Qml
         Qt5::Quick
         Qt5::Svg
-        libosmscout_map_qt)
+        osmscout_map_qt)
 
 set_property(TARGET StyleEditor PROPERTY CXX_STANDARD 11)

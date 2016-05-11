@@ -19,24 +19,24 @@ set(SOURCE_FILES
     src/osmscout/MapPainterAgg.cpp
 )
 
-add_library(libosmscout_map_agg SHARED ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET libosmscout_map_agg PROPERTY CXX_STANDARD 11)
+add_library(osmscout_map_agg SHARED ${SOURCE_FILES} ${HEADER_FILES})
+set_property(TARGET osmscout_map_agg PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapAggFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-agg")
-target_include_directories(libosmscout_map_agg PRIVATE 
+target_include_directories(osmscout_map_agg PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${LIBAGG_INCLUDE_DIRS}
 		${FREETYPE_INCLUDE_DIRS})
-target_link_libraries(libosmscout_map_agg
-		libosmscout
-		libosmscout_map
+target_link_libraries(osmscout_map_agg
+		osmscout
+		osmscout_map
 		${LIBAGG_LIBRARIES}
 		${FREETYPE_LIBRARIES})
-target_compile_definitions(libosmscout_map_agg PRIVATE -DOSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
-install(TARGETS libosmscout_map_agg
+target_compile_definitions(osmscout_map_agg PRIVATE -DOSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
+install(TARGETS osmscout_map_agg
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

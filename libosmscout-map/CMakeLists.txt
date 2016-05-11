@@ -25,17 +25,17 @@ set(SOURCE_FILES
 	src/osmscout/MapPainterNoOp.cpp
 )
 
-add_library(libosmscout_map SHARED ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET libosmscout_map PROPERTY CXX_STANDARD 11)
+add_library(osmscout_map SHARED ${SOURCE_FILES} ${HEADER_FILES})
+set_property(TARGET osmscout_map PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map")
-target_include_directories(libosmscout_map PRIVATE 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map")
+target_include_directories(osmscout_map PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
-target_link_libraries(libosmscout_map libosmscout)
-target_compile_definitions(libosmscout_map PRIVATE -DOSMSCOUT_MAP_EXPORT_SYMBOLS)
-install(TARGETS libosmscout_map
+target_link_libraries(osmscout_map osmscout)
+target_compile_definitions(osmscout_map PRIVATE -DOSMSCOUT_MAP_EXPORT_SYMBOLS)
+install(TARGETS osmscout_map
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
