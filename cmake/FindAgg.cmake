@@ -23,7 +23,7 @@ FIND_PATH(LIBAGG_INCLUDE_DIRS
 )
 
 FIND_LIBRARY(LIBAGG_LIBRARIES
-    NAMES libagg agg libagg-2.5 agg-2.5
+    NAMES agg_pic libagg agg libagg-2.5 agg-2.5
     HINTS ${PC_LIBAGG_LIBDIR}
           ${PC_LIBAGG_LIBRARY_DIRS}
           $ENV{LIBAGG_HOME}/lib
@@ -41,7 +41,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBAGG DEFAULT_MSG LIBAGG_INCLUDE_DIRS LIBAGG_
 IF(LIBAGG_FOUND)
     PKG_CHECK_MODULES(PC_LIBAGGFT2 QUIET LIBAGGFT2)
     FIND_LIBRARY(LIBAGGFT2_LIBRARIES
-        NAMES aggfontfreetype libaggfontfreetype
+        NAMES aggfontfreetype_pic aggfontfreetype libaggfontfreetype
         HINTS ${PC_LIBAGG_LIBDIR}
               ${PC_LIBAGG_LIBRARY_DIRS}
               $ENV{LIBAGG_HOME}/lib
