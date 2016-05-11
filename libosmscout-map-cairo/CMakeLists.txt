@@ -21,28 +21,28 @@ set(SOURCE_FILES
     src/osmscout/MapPainterCairo.cpp
 )
 
-add_library(libosmscout_map_cairo SHARED ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET libosmscout_map_cairo PROPERTY CXX_STANDARD 11)
+add_library(osmscout_map_cairo SHARED ${SOURCE_FILES} ${HEADER_FILES})
+set_property(TARGET osmscout_map_cairo PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapCairoFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapCairoFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-cairo")
-target_include_directories(libosmscout_map_cairo PRIVATE 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-cairo")
+target_include_directories(osmscout_map_cairo PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${CAIRO_INCLUDE_DIRS}
 		${PNG_INCLUDE_DIRS})
-target_link_libraries(libosmscout_map_cairo
-		libosmscout
-		libosmscout_map
+target_link_libraries(osmscout_map_cairo
+		osmscout
+		osmscout_map
 		${CAIRO_LIBRARIES}
 		${PNG_LIBRARIES})
 if(PANGOCAIRO_FOUND)
-  target_include_directories(libosmscout_map_cairo PRIVATE ${PANGO_INCLUDE_DIRS})
-  target_link_libraries(libosmscout_map_cairo ${PANGO_LIBRARIES})
+  target_include_directories(osmscout_map_cairo PRIVATE ${PANGO_INCLUDE_DIRS})
+  target_link_libraries(osmscout_map_cairo ${PANGO_LIBRARIES})
 endif()
-target_compile_definitions(libosmscout_map_cairo PRIVATE -DOSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS ${PNG_DEFINITIONS})
-install(TARGETS libosmscout_map_cairo
+target_compile_definitions(osmscout_map_cairo PRIVATE -DOSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS ${PNG_DEFINITIONS})
+install(TARGETS osmscout_map_cairo
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

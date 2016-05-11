@@ -56,8 +56,8 @@ target_include_directories(OSMScout2 PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include)
 
 target_link_libraries(OSMScout2
-        libosmscout
-        libosmscout_map
+        osmscout
+        osmscout_map
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
@@ -65,6 +65,6 @@ target_link_libraries(OSMScout2
         Qt5::Quick
         Qt5::Svg
         Qt5::Positioning
-        libosmscout_map_qt)
+        osmscout_map_qt)
 
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)
