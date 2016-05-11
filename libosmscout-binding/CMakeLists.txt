@@ -13,19 +13,19 @@ if(MSVC)
   set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} -Fmicrosoft)
 endif()
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i PROPERTIES CPLUSPLUS ON)
-swig_add_module(libosmscout_binding Java ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
-swig_link_libraries(libosmscout_binding libosmscout ${JNI_LIBRARIES})
-target_include_directories(libosmscout_binding PRIVATE 
+swig_add_module(osmscout_binding Java ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
+swig_link_libraries(osmscout_binding osmscout ${JNI_LIBRARIES})
+target_include_directories(osmscout_binding PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${JNI_INCLUDE_DIRS}
 		${JAVA_INCLUDE_PATH})
-target_link_libraries(libosmscout_binding
-		libosmscout
+target_link_libraries(osmscout_binding
+		osmscout
 		${JNI_LIBRARIES})
-set_property(TARGET libosmscout_binding PROPERTY CXX_STANDARD 11)
-install(TARGETS libosmscout_binding
+set_property(TARGET osmscout_binding PROPERTY CXX_STANDARD 11)
+install(TARGETS osmscout_binding
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

@@ -13,7 +13,7 @@ target_include_directories(Import PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include)
-target_link_libraries(Import libosmscout libosmscout_import)
+target_link_libraries(Import osmscout osmscout_import)
 install(TARGETS Import
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

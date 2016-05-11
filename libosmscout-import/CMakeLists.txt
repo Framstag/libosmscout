@@ -104,11 +104,11 @@ endif()
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
 
-add_library(libosmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
-set_property(TARGET libosmscout_import PROPERTY CXX_STANDARD 11)
+add_library(osmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
+set_property(TARGET osmscout_import PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ImportFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-import")
-target_include_directories(libosmscout_import PRIVATE 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-import")
+target_include_directories(osmscout_import PRIVATE 
 		include
 		include/osmscout/import/pbf
 		${CMAKE_CURRENT_BINARY_DIR}/include
@@ -116,23 +116,23 @@ target_include_directories(libosmscout_import PRIVATE
 		${ZLIB_INCLUDE_DIRS}
 		${LIBXML2_INCLUDE_DIR}
 		${PROTOBUF_INCLUDE_DIRS})
-target_link_libraries(libosmscout_import
-		libosmscout
+target_link_libraries(osmscout_import
+		osmscout
 		${ZLIB_LIBRARIES}
 		${LIBXML2_LIBRARIES}
 		${PROTOBUF_LIBRARIES}
 		${PROTOBUF_PROTOC_LIBRARIES}
 		${PROTOBUF_LITE_LIBRARIES})
 if(MARISA_FOUND)
-    target_include_directories(libosmscout_import PRIVATE ${MARISA_INCLUDE_DIRS})
-    target_link_libraries(libosmscout_import ${MARISA_LIBRARIES})
+    target_include_directories(osmscout_import PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(osmscout_import ${MARISA_LIBRARIES})
 endif()
 if(WIN32)
-  target_link_libraries(libosmscout_import Ws2_32.lib)
-  target_compile_definitions(libosmscout_import PRIVATE -DPROTOBUF_USE_DLLS)
+  target_link_libraries(osmscout_import Ws2_32.lib)
+  target_compile_definitions(osmscout_import PRIVATE -DPROTOBUF_USE_DLLS)
 endif()
-target_compile_definitions(libosmscout_import PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
-install(TARGETS libosmscout_import
+target_compile_definitions(osmscout_import PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
+install(TARGETS osmscout_import
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

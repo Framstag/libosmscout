@@ -154,17 +154,17 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
 endif()
 
-add_library(libosmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET libosmscout PROPERTY CXX_STANDARD 11)
+add_library(osmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
+set_property(TARGET osmscout PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout")
-target_include_directories(libosmscout PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout")
+target_include_directories(osmscout PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
 if(MARISA_FOUND)
-    target_include_directories(libosmscout PRIVATE ${MARISA_INCLUDE_DIRS})
-    target_link_libraries(libosmscout ${MARISA_LIBRARIES})
+    target_include_directories(osmscout PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(osmscout ${MARISA_LIBRARIES})
 endif()
-target_compile_definitions(libosmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
-install(TARGETS libosmscout
+target_compile_definitions(osmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
+install(TARGETS osmscout
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
