@@ -1482,23 +1482,13 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawOSMTiles(const StyleConfig& styleConfig,
+  void MapPainter::DrawOSMTiles(const StyleConfig& /*styleConfig*/,
                                 const Projection& projection,
-                                const MapParameter& parameter)
+                                const MapParameter& parameter,
+                                const Magnification& magnification,
+                                const LineStyleRef& osmTileLine)
   {
-    LineStyleRef osmTileLine;
-
-    styleConfig.GetOSMTileBorderLineStyle(projection,
-                                          osmTileLine);
-
-    if (!osmTileLine) {
-      return;
-    }
-
-    Magnification magnification=projection.GetMagnification();
-    GeoBox        boundingBox;
-
-    magnification.SetLevel(magnification.GetLevel()+3);
+    GeoBox boundingBox;
 
     projection.GetDimensions(boundingBox);
 
@@ -1518,8 +1508,6 @@ namespace osmscout {
     if (startTileY>0) {
       startTileY--;
     }
-
-    std::cout << startTileX << "," << startTileY << " - " << endTileX << "," << endTileY << std::endl;
 
     std::vector<Point> points;
 
@@ -1593,6 +1581,45 @@ namespace osmscout {
       data.startIsClosed=false;
       data.endIsClosed=false;
       wayData.push_back(data);
+    }
+  }
+
+  void MapPainter::DrawOSMTiles(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter)
+  {
+    LineStyleRef osmSubTileLine;
+
+    styleConfig.GetOSMSubTileBorderLineStyle(projection,
+                                             osmSubTileLine);
+
+    if (osmSubTileLine) {
+      Magnification magnification=projection.GetMagnification();
+
+      magnification.SetLevel(magnification.GetLevel()+1);
+
+      DrawOSMTiles(styleConfig,
+                   projection,
+                   parameter,
+                   magnification,
+                   osmSubTileLine);
+    }
+
+    LineStyleRef osmTileLine;
+
+    styleConfig.GetOSMTileBorderLineStyle(projection,
+                                          osmTileLine);
+
+    if (osmTileLine) {
+      Magnification magnification=projection.GetMagnification();
+
+      magnification.SetLevel(magnification.GetLevel());
+
+      DrawOSMTiles(styleConfig,
+                   projection,
+                   parameter,
+                   magnification,
+                   osmTileLine);
     }
   }
 

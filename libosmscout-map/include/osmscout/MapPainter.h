@@ -404,6 +404,12 @@ namespace osmscout {
 
     void DrawOSMTiles(const StyleConfig& styleConfig,
                       const Projection& projection,
+                      const MapParameter& parameter,
+                      const Magnification& magnification,
+                      const LineStyleRef& osmTileLine);
+
+    void DrawOSMTiles(const StyleConfig& styleConfig,
+                      const Projection& projection,
                       const MapParameter& parameter);
     //@}
 

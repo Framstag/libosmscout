@@ -1054,6 +1054,10 @@ namespace osmscout {
     typeInfoOSMTileBorder->SetInternal().CanBeWay(true);
     RegisterType(typeInfoOSMTileBorder);
 
+    typeInfoOSMSubTileBorder=std::make_shared<TypeInfo>("_osm_subtile_border");
+    typeInfoOSMSubTileBorder->SetInternal().CanBeWay(true);
+    RegisterType(typeInfoOSMSubTileBorder);
+
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
     tagType=GetTagId("type");

@@ -1091,12 +1091,13 @@ namespace osmscout {
     TagId                                       tagJunction;
 
     TypeInfoRef                                 typeInfoIgnore;
-    TypeInfoRef                                 typeInfoTileLand;      //!< Internal type for ground tiles of type "land"
-    TypeInfoRef                                 typeInfoTileSea;       //!< Internal type for ground tiles of type "sea"
-    TypeInfoRef                                 typeInfoTileCoast;     //!< Internal type for ground tiles of type "coast"
-    TypeInfoRef                                 typeInfoTileUnknown;   //!< Internal type for ground tiles of type "unknown"
-    TypeInfoRef                                 typeInfoCoastline;     //!< Internal type for coastlines
-    TypeInfoRef                                 typeInfoOSMTileBorder; //!< Internal type for OSM tile borders
+    TypeInfoRef                                 typeInfoTileLand;         //!< Internal type for ground tiles of type "land"
+    TypeInfoRef                                 typeInfoTileSea;          //!< Internal type for ground tiles of type "sea"
+    TypeInfoRef                                 typeInfoTileCoast;        //!< Internal type for ground tiles of type "coast"
+    TypeInfoRef                                 typeInfoTileUnknown;      //!< Internal type for ground tiles of type "unknown"
+    TypeInfoRef                                 typeInfoCoastline;        //!< Internal type for coastlines
+    TypeInfoRef                                 typeInfoOSMTileBorder;    //!< Internal type for OSM tile borders
+    TypeInfoRef                                 typeInfoOSMSubTileBorder; //!< Internal type for OSM tile borders
 
   public:
     TypeConfig();
