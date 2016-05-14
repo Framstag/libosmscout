@@ -130,7 +130,7 @@ namespace osmscout {
     }
 
     // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level
-    double resolution=tileWidthZoom0Aquator/256*cos(lat*gradtorad)/magnification.GetMagnification();
+    double resolution=tileWidthZoom0Aquator/256.0*cos(lat*gradtorad)/magnification.GetMagnification();
 
     double groundWidthMeter=width*tileDPI/dpi*resolution;
 
@@ -149,7 +149,7 @@ namespace osmscout {
     scaleGradtorad = scale * gradtorad;
 
     pixelSize=groundWidthMeter/width;
-    meterInPixel=1/pixelSize;
+    meterInPixel=1.0/pixelSize;
     meterInMM=meterInPixel*25.4/pixelSize;
 
     // Absolute Y mercator coordinate for latitude
@@ -382,7 +382,7 @@ namespace osmscout {
     pixelSize=groundWidthVisibleMeter/width;
 
     // How many pixel are one meter?
-    meterInPixel=1/pixelSize;
+    meterInPixel=1.0/pixelSize;
 
     // 1 meter on the ground is how many millimeter on display?
     meterInMM=meterInPixel*25.4/pixelSize;
