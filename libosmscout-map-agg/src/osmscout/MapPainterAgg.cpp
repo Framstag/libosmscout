@@ -302,9 +302,9 @@ namespace osmscout {
     }
   }
 
-  bool MapPainterAgg::HasIcon(const StyleConfig& styleConfig,
-                             const MapParameter& parameter,
-                             IconStyle& style)
+  bool MapPainterAgg::HasIcon(const StyleConfig& /*styleConfig*/,
+                             const MapParameter& /*parameter*/,
+                             IconStyle& /*style*/)
   {
     //TODO
 
@@ -478,17 +478,17 @@ namespace osmscout {
     }
   }
 
-  void MapPainterAgg::DrawContourSymbol(const Projection& projection,
-                                        const MapParameter& parameter,
-                                        const Symbol& symbol,
-                                        double space,
-                                        size_t transStart, size_t transEnd)
+  void MapPainterAgg::DrawContourSymbol(const Projection& /*projection*/,
+                                        const MapParameter& /*parameter*/,
+                                        const Symbol& /*symbol*/,
+                                        double /*space*/,
+                                        size_t /*transStart*/, size_t /*transEnd*/)
   {
     // Not implemented
   }
 
-  void MapPainterAgg::DrawIcon(const IconStyle* style,
-                              double x, double y)
+  void MapPainterAgg::DrawIcon(const IconStyle* /*style*/,
+                              double /*x*/, double /*y*/)
   {
     // Not implemented
   }
@@ -588,8 +588,8 @@ namespace osmscout {
     }
   }
 
-  void MapPainterAgg::DrawPath(const Projection& projection,
-                               const MapParameter& parameter,
+  void MapPainterAgg::DrawPath(const Projection& /*projection*/,
+                               const MapParameter& /*parameter*/,
                                const Color& color,
                                double width,
                                const std::vector<double>& dash,
@@ -715,7 +715,7 @@ namespace osmscout {
   }
 
   void MapPainterAgg::DrawGround(const Projection& projection,
-                                 const MapParameter& parameter,
+                                 const MapParameter& /*parameter*/,
                                  const FillStyle& style)
   {
     agg::path_storage path;

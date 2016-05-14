@@ -52,11 +52,11 @@ public:
   }
 
 private:
-  Data2(Data2& other)
+  Data2(Data2& /*other*/)
   {
   }
 
-  void operator=(Data2& other)
+  void operator=(Data2& /*other*/)
   {
   }
 
@@ -170,7 +170,7 @@ void TestData()
   std::cout << "Copy time: "  << copyTimer << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   TestData();
 

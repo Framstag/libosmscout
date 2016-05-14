@@ -34,7 +34,7 @@
 
 #define ID_COUNT 10000000
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   std::vector<osmscout::Id> ids;
 

@@ -23,7 +23,7 @@ AX_CXX_COMPILE_STDCXX_11([],[mandatory])
 
 AX_CXXFLAGS_WARN_ALL
 AS_IF([test "x$GXX" = xyes],
-      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long -Wunused-variable"])
 
 AC_ARG_WITH([protoc],
             [AS_HELP_STRING([--with-protoc=PATH],

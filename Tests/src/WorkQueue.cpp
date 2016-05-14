@@ -79,7 +79,7 @@ public:
   }
 };
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   Worker                        worker;
   std::vector<std::future<int>> futures;

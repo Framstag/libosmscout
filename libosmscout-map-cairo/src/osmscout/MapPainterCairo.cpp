@@ -506,7 +506,7 @@ namespace osmscout {
     }
   }
 
-  bool MapPainterCairo::HasIcon(const StyleConfig& styleConfig,
+  bool MapPainterCairo::HasIcon(const StyleConfig& /*styleConfig*/,
                                 const MapParameter& parameter,
                                 IconStyle& style)
   {
@@ -1087,7 +1087,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawPrimitivePath(const Projection& projection,
-                                          const MapParameter& parameter,
+                                          const MapParameter& /*parameter*/,
                                           const DrawPrimitiveRef& p,
                                           double x, double y,
                                           double minX,
@@ -1183,8 +1183,8 @@ namespace osmscout {
     cairo_paint(draw);
   }
 
-  void MapPainterCairo::DrawPath(const Projection& projection,
-                                 const MapParameter& parameter,
+  void MapPainterCairo::DrawPath(const Projection& /*projection*/,
+                                 const MapParameter& /*parameter*/,
                                  const Color& color,
                                  double width,
                                  const std::vector<double>& dash,
@@ -1307,7 +1307,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawGround(const Projection& projection,
-                                   const MapParameter& parameter,
+                                   const MapParameter& /*parameter*/,
                                    const FillStyle& style)
   {
     cairo_set_source_rgba(draw,

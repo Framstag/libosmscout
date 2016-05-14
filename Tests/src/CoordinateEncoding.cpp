@@ -206,7 +206,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -237,7 +237,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -277,7 +277,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -326,7 +326,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
   {
     if (coords.empty()) {
       bytesNeeded++;

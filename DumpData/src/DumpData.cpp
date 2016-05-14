@@ -247,7 +247,7 @@ static bool ParseArguments(int argc,
 
 static uint32_t CalculateCellLevel(const osmscout::GeoBox& boundingBox)
 {
-  size_t level=25;
+  uint32_t level=25;
   while (true) {
     if (boundingBox.GetWidth()<=osmscout::cellDimension[level].width &&
         boundingBox.GetHeight()<=osmscout::cellDimension[level].height) {
@@ -526,8 +526,7 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
   }
 }
 
-static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
-                     const osmscout::NodeRef node,
+static void DumpNode(const osmscout::NodeRef node,
                      osmscout::Id id)
 {
   std::cout << "Node {" << std::endl;
@@ -549,12 +548,10 @@ static void DumpNode(const osmscout::TypeConfigRef& typeConfig,
 
 }
 
-static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
-                    const osmscout::WayRef way,
+static void DumpWay(const osmscout::WayRef way,
                     osmscout::Id id)
 {
-  osmscout::GeoBox   boundingBox;
-  osmscout::GeoCoord center;
+  osmscout::GeoBox boundingBox;
 
   way->GetBoundingBox(boundingBox);
 
@@ -590,8 +587,7 @@ static void DumpWay(const osmscout::TypeConfigRef& typeConfig,
   std::cout << "}" << std::endl;
 }
 
-static void DumpArea(const osmscout::TypeConfigRef& typeConfig,
-                     const osmscout::AreaRef area,
+static void DumpArea(const osmscout::AreaRef area,
                      osmscout::Id id)
 {
   osmscout::GeoBox   boundingBox;
@@ -924,7 +920,7 @@ int main(int argc, char* argv[])
       case osmscout::refNode:
         for (size_t i=0; i<nodes.size(); i++) {
           if (reference->second.GetFileOffset()==nodes[i]->GetFileOffset()) {
-            DumpNode(debugDatabase.GetTypeConfig(),nodes[i],reference->first.GetId());
+            DumpNode(nodes[i],reference->first.GetId());
             break;
           }
         }
@@ -932,7 +928,7 @@ int main(int argc, char* argv[])
       case osmscout::refArea:
         for (size_t i=0; i<areas.size(); i++) {
           if (reference->second.GetFileOffset()==areas[i]->GetFileOffset()) {
-            DumpArea(debugDatabase.GetTypeConfig(),areas[i],reference->first.GetId());
+            DumpArea(areas[i],reference->first.GetId());
             break;
           }
         }
@@ -940,7 +936,7 @@ int main(int argc, char* argv[])
       case osmscout::refWay:
         for (size_t i=0; i<ways.size(); i++) {
           if (reference->second.GetFileOffset()==ways[i]->GetFileOffset()) {
-            DumpWay(debugDatabase.GetTypeConfig(),ways[i],reference->first.GetId());
+            DumpWay(ways[i],reference->first.GetId());
             break;
           }
         }
@@ -961,7 +957,7 @@ int main(int argc, char* argv[])
       case osmscout::refNode:
         for (size_t i=0; i<nodes.size(); i++) {
           if (reference->first.GetFileOffset()==nodes[i]->GetFileOffset()) {
-            DumpNode(debugDatabase.GetTypeConfig(),nodes[i],reference->second.GetId());
+            DumpNode(nodes[i],reference->second.GetId());
             break;
           }
         }
@@ -969,7 +965,7 @@ int main(int argc, char* argv[])
       case osmscout::refArea:
         for (size_t i=0; i<areas.size(); i++) {
           if (reference->first.GetFileOffset()==areas[i]->GetFileOffset()) {
-            DumpArea(debugDatabase.GetTypeConfig(),areas[i],reference->second.GetId());
+            DumpArea(areas[i],reference->second.GetId());
             break;
           }
         }
@@ -977,7 +973,7 @@ int main(int argc, char* argv[])
       case osmscout::refWay:
         for (size_t i=0; i<ways.size(); i++) {
           if (reference->first.GetFileOffset()==ways[i]->GetFileOffset()) {
-            DumpWay(debugDatabase.GetTypeConfig(),ways[i],reference->second.GetId());
+            DumpWay(ways[i],reference->second.GetId());
             break;
           }
         }

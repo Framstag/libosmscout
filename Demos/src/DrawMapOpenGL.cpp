@@ -200,7 +200,7 @@ void OnResize(int width, int height)
   ::height=height;
 }
 
-void OnKeyPressed(unsigned char key, int x, int y)
+void OnKeyPressed(unsigned char key, int /*x*/, int /*y*/)
 {
   /* avoid thrashing this procedure */
   //usleep(100);

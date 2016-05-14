@@ -84,99 +84,99 @@ namespace osmscout {
 
 
 
-  bool MapPainterOpenGL::HasIcon(const StyleConfig& styleConfig,
-                                 const MapParameter& parameter,
-                                 IconStyle& style)
+  bool MapPainterOpenGL::HasIcon(const StyleConfig& /*styleConfig*/,
+                                 const MapParameter& /*parameter*/,
+                                 IconStyle& /*style*/)
   {
     // TODO
     return false;
   }
 
-  bool MapPainterOpenGL::HasPattern(const MapParameter& parameter,
-                                    const FillStyle& style)
+  bool MapPainterOpenGL::HasPattern(const MapParameter& /*parameter*/,
+                                    const FillStyle& /*style*/)
   {
     // TODO
     return false;
   }
 
-  void MapPainterOpenGL::GetFontHeight(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       double fontSize,
-                                       double& height)
+  void MapPainterOpenGL::GetFontHeight(const Projection& /*projection*/,
+                                       const MapParameter& /*parameter*/,
+                                       double /*fontSize*/,
+                                       double& /*height*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::GetTextDimension(const Projection& projection,
-                                          const MapParameter& parameter,
-                                          double fontSize,
-                                          const std::string& text,
-                                          double& xOff,
-                                          double& yOff,
-                                          double& width,
-                                          double& height)
+  void MapPainterOpenGL::GetTextDimension(const Projection& /*projection*/,
+                                          const MapParameter& /*parameter*/,
+                                          double /*fontSize*/,
+                                          const std::string& /*text*/,
+                                          double& /*xOff*/,
+                                          double& /*yOff*/,
+                                          double& /*width*/,
+                                          double& /*height*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawContourSymbol(const Projection& projection,
-                                           const MapParameter& parameter,
-                                           const Symbol& symbol,
-                                           double space,
-                                           size_t transStart, size_t transEnd)
+  void MapPainterOpenGL::DrawContourSymbol(const Projection& /*projection*/,
+                                           const MapParameter& /*parameter*/,
+                                           const Symbol& /*symbol*/,
+                                           double /*space*/,
+                                           size_t /*transStart*/, size_t /*transEnd*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawLabel(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const LabelData& label)
+  void MapPainterOpenGL::DrawLabel(const Projection& /*projection*/,
+                                   const MapParameter& /*parameter*/,
+                                   const LabelData& /*label*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawContourLabel(const Projection& projection,
-                                          const MapParameter& parameter,
-                                          const PathTextStyle& style,
-                                          const std::string& text,
-                                          size_t transStart, size_t transEnd)
+  void MapPainterOpenGL::DrawContourLabel(const Projection& /*projection*/,
+                                          const MapParameter& /*parameter*/,
+                                          const PathTextStyle& /*style*/,
+                                          const std::string& /*text*/,
+                                          size_t /*transStart*/, size_t /*transEnd*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawPrimitivePath(const Projection& projection,
-                                           const MapParameter& parameter,
-                                           const DrawPrimitiveRef& p,
-                                           double x, double y,
-                                           double minX,
-                                           double minY,
-                                           double maxX,
-                                           double maxY)
+  void MapPainterOpenGL::DrawPrimitivePath(const Projection& /*projection*/,
+                                           const MapParameter& /*parameter*/,
+                                           const DrawPrimitiveRef& /*p*/,
+                                           double /*x*/, double /*y*/,
+                                           double /*minX*/,
+                                           double /*minY*/,
+                                           double /*maxX*/,
+                                           double /*maxY*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawSymbol(const Projection& projection,
-                                    const MapParameter& parameter,
-                                    const Symbol& symbol,
-                                    double x, double y)
+  void MapPainterOpenGL::DrawSymbol(const Projection& /*projection*/,
+                                    const MapParameter& /*parameter*/,
+                                    const Symbol& /*symbol*/,
+                                    double /*x*/, double /*y*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawIcon(const IconStyle* style,
-                                  double x, double y)
+  void MapPainterOpenGL::DrawIcon(const IconStyle* /*style*/,
+                                  double /*x*/, double /*y*/)
   {
     // TODO
   }
 
-  void MapPainterOpenGL::DrawPath(const Projection& projection,
-                                  const MapParameter& parameter,
+  void MapPainterOpenGL::DrawPath(const Projection& /*projection*/,
+                                  const MapParameter& /*parameter*/,
                                   const Color& color,
                                   double width,
-                                  const std::vector<double>& dash,
-                                  LineStyle::CapStyle startCap,
-                                  LineStyle::CapStyle endCap,
+                                  const std::vector<double>& /*dash*/,
+                                  LineStyle::CapStyle /*startCap*/,
+                                  LineStyle::CapStyle /*endCap*/,
                                   size_t transStart, size_t transEnd)
   {
     // TODO:
@@ -202,7 +202,7 @@ namespace osmscout {
   }
 
   void MapPainterOpenGL::DrawArea(const Projection& projection,
-                                  const MapParameter& parameter,
+                                  const MapParameter& /*parameter*/,
                                   const MapPainter::AreaData& area)
   {
     if (area.fillStyle->GetFillColor().IsVisible()) {
@@ -275,7 +275,7 @@ namespace osmscout {
   }
 
   void MapPainterOpenGL::DrawGround(const Projection& projection,
-                                    const MapParameter& parameter,
+                                    const MapParameter& /*parameter*/,
                                     const FillStyle& style)
   {
     glColor4d(style.GetFillColor().GetR(),

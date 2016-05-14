@@ -97,7 +97,7 @@ namespace osmscout {
 
 DECLARE_COEFFS(SINECOEFF_SSE)
 DECLARE_COEFFS(COSINECOEFF_SSE)
-DECLARE_COEFFS(LOGCOEFF);
+DECLARE_COEFFS(LOGCOEFF)
 
 /* declare some SSE constants */
 #define _PS_CONST(Name)                                            \

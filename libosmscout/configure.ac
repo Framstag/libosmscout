@@ -42,7 +42,7 @@ AC_ARG_ENABLE([marisa-support],
 
 AX_CXXFLAGS_WARN_ALL
 AS_IF([test "x$GXX" = xyes],
-      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long"])
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long -Wunused-variable"])
 
 dnl Support for XintXX_T constants
 

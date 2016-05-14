@@ -31,7 +31,7 @@
   Call this program repeately to avoid different timing because of OS file caching.
 */
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   std::string           wayFilename="ways.dat";
 

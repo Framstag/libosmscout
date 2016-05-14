@@ -244,7 +244,7 @@ static void DumpTargetDescription(size_t& lineCount,
 }
 
 static void DumpTurnDescription(size_t& lineCount,
-                                const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+                                const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
                                 const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
                                 const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                                 const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
@@ -277,7 +277,7 @@ static void DumpTurnDescription(size_t& lineCount,
 }
 
 static void DumpRoundaboutEnterDescription(size_t& lineCount,
-                                           const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+                                           const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
                                            const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
   std::string crossingWaysString;

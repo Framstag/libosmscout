@@ -7,7 +7,7 @@
 
 #include <osmscout/system/Math.h>
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   double earthPerimeter=osmscout::GetEllipsoidalDistance(0.0,0.0,180.0,0.0);
 

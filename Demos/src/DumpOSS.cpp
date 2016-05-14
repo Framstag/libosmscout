@@ -54,7 +54,7 @@ void DumpTextStyleAttributes(const std::set<osmscout::TextStyle::Attribute> attr
   std::cout << "}";
 }
 
-void DumpType(const osmscout::TypeConfigRef& typeConfig,
+void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
               const osmscout::StyleConfigRef& styleConfig,
               size_t level,
               const osmscout::TypeInfoRef& type)

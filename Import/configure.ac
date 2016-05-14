@@ -22,9 +22,8 @@ AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11([],[mandatory])
 
 AX_CXXFLAGS_WARN_ALL
-if test "$GXX" = yes; then
-  CXXFLAGS="$CXXFLAGS -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
-fi
+AS_IF([test "x$GXX" = xyes],
+      [CXXFLAGS="$CXXFLAGS -Wextra -Wpointer-arith -Wundef -Wcast-qual -Wcast-align -Wredundant-decls -Wno-long-long -Wunused-variable"])
 
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-import])
 AC_SUBST(LIBOSMSCOUT_CFLAGS)
