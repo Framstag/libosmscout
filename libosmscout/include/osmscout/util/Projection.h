@@ -315,6 +315,108 @@ namespace osmscout {
    * tiles were designed for 96 DPI displays.
    *
    */
+  class OSMSCOUT_API MercatorProjectionOld : public Projection
+  {
+  protected:
+    bool   valid;          //!< projection is valid
+
+    double latOffset;      //!< Absolute and untransformed screen position of lat coordinate
+    double angleSin;
+    double angleCos;
+    double angleNegSin;
+    double angleNegCos;
+
+    double scale;
+    double scaleGradtorad; //!< Precalculated scale*Gradtorad
+
+  public:
+    MercatorProjectionOld();
+
+    inline bool CanBatch() const
+    {
+      return false;
+    }
+
+    inline bool IsValid() const
+    {
+      return valid;
+    }
+
+    inline bool Set(double lon,double lat,
+                    const Magnification& magnification,
+                    size_t width,size_t height)
+    {
+      return Set(lon,lat,0,magnification,GetDPI(),width,height);
+    }
+
+    inline bool Set(double lon, double lat,
+                    double angle,
+                    const Magnification& magnification,
+                    size_t width, size_t height)
+    {
+      return Set(lon,lat,angle,magnification,GetDPI(),width,height);
+    }
+
+    inline bool Set(double lon, double lat,
+                    const Magnification& magnification,
+                    double dpi,
+                    size_t width, size_t height)
+    {
+      return Set(lon,lat,0,magnification,dpi,width,height);
+    }
+
+    bool Set(double lon, double lat,
+             double angle,
+             const Magnification& magnification,
+             double dpi,
+             size_t width, size_t height);
+
+    bool PixelToGeo(double x, double y,
+                    double& lon, double& lat) const;
+
+    void GeoToPixel(double lon, double lat,
+                    double& x, double& y) const;
+
+    void GeoToPixel(const GeoCoord& coord,
+                    double& x, double& y) const;
+
+    bool Move(double horizPixel,
+              double vertPixel);
+
+    inline bool MoveUp(double pixel)
+    {
+      return Move(0,pixel);
+    }
+
+    inline bool MoveDown(double pixel)
+    {
+      return Move(0,-pixel);
+    }
+
+    inline bool MoveLeft(double pixel)
+    {
+      return Move(-pixel,0);
+    }
+
+    inline bool MoveRight(double pixel)
+    {
+      return Move(pixel,0);
+    }
+
+  protected:
+     void GeoToPixel(const BatchTransformer& transformData) const;
+  };
+
+  /**
+   * Mercator projection that tries to render the resulting map in the same
+   * physical size on all devices. If the physical DPI of the device is
+   * correctly given, objects on any device has the same size. Bigger devices
+   * will show "more" map thus.
+   *
+   * Scale is calculated based on the assumption that the original OpenStreetMap
+   * tiles were designed for 96 DPI displays.
+   *
+   */
   class OSMSCOUT_API MercatorProjection : public Projection
   {
   protected:
@@ -404,7 +506,7 @@ namespace osmscout {
     }
 
   protected:
-     void GeoToPixel(const BatchTransformer& transformData) const;
+    void GeoToPixel(const BatchTransformer& transformData) const;
   };
 
   /**
@@ -424,7 +526,7 @@ namespace osmscout {
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
 #ifdef OSMSCOUT_HAVE_SSE2
-      //some extra vars for special sse needs
+    //some extra vars for special sse needs
       v2df              sse2LonOffset;
       v2df              sse2LatOffset;
       v2df              sse2Scale;
@@ -453,8 +555,8 @@ namespace osmscout {
     }
 
     inline bool Set(size_t tileX, size_t tileY,
-             const Magnification& magnification,
-             size_t width, size_t height)
+                    const Magnification& magnification,
+                    size_t width, size_t height)
     {
       return Set(tileX,tileY,magnification,GetDPI(),width,height);
     }
@@ -481,7 +583,7 @@ namespace osmscout {
 
   protected:
 
-     void GeoToPixel(const BatchTransformer& transformData) const;
+    void GeoToPixel(const BatchTransformer& transformData) const;
   };
 }
 
