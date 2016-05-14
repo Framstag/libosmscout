@@ -1815,8 +1815,8 @@ namespace osmscout {
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
       data.wayPriority=styleConfig.GetWayPrio(buffer.GetType());
-      data.startIsClosed=nodes[0].GetId()==0;
-      data.endIsClosed=nodes[nodes.size()-1].GetId()==0;
+      data.startIsClosed=nodes[0].GetSerial()==0;
+      data.endIsClosed=nodes[nodes.size()-1].GetSerial()==0;
 
       LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
 
