@@ -20,7 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cmath>
 #include <list>
 #include <memory>
 #include <unordered_map>
@@ -31,6 +30,7 @@
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
 

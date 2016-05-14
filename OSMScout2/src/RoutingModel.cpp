@@ -19,10 +19,11 @@
 
 #include "RoutingModel.h"
 
-#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+
+#include <osmscout/system/Math.h>
 
 static QString DistanceToString(double distance)
 {

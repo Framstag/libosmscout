@@ -19,7 +19,6 @@
 
 #include "DBThread.h"
 
-#include <cmath>
 #include <iostream>
 
 #include <QApplication>
@@ -29,6 +28,8 @@
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
+
+#include <osmscout/system/Math.h>
 
 // Timeout for the first rendering after rerendering was triggered (render what ever data is available)
 static int INITIAL_DATA_RENDERING_TIMEOUT = 10;

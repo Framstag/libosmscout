@@ -19,7 +19,6 @@
 
 #include "DBThread.h"
 
-#include <cmath>
 #include <iostream>
 
 #include <QApplication>
@@ -30,6 +29,8 @@
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
+
+#include <osmscout/system/Math.h>
 
 QBreaker::QBreaker()
   :osmscout::Breaker()
