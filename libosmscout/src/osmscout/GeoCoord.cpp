@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/util/Geometry.h>
 
 #include <sstream>
 
@@ -318,5 +319,19 @@ namespace osmscout {
     else {
       return false;
     }
+  }
+
+  double GeoCoord::GetDistance(GeoCoord target)
+  {
+      return GetEllipsoidalDistance(GetLon(), GetLat(), target.GetLon(), target.GetLat());
+  }
+
+  GeoCoord GeoCoord::Add(double bearing, double distance)
+  {
+      if (distance == 0.0) return GeoCoord(GetLat(), GetLon());
+      double lat = GetLat();
+      double lon = GetLon();
+      GetEllipsoidalDistance(GetLat(), GetLon(), bearing, distance, lat, lon);
+      return GeoCoord(lat, lon);
   }
 }

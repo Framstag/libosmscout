@@ -12,6 +12,13 @@ target_include_directories(CalculateResolution PRIVATE ${OSMSCOUT_BASE_DIR_SOURC
 target_link_libraries(CalculateResolution osmscout)
 install(TARGETS CalculateResolution RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
+#---- CoordinateCalculations
+add_executable(CoordinateCalculations src/CoordinateCalculations.cpp)
+set_property(TARGET CoordinateCalculations PROPERTY CXX_STANDARD 11)
+target_include_directories(CoordinateCalculations PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(CoordinateCalculations osmscout)
+install(TARGETS CoordinateCalculations RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
 #---- CoordinateEncoding
 add_executable(CoordinateEncoding src/CoordinateEncoding.cpp)
 set_property(TARGET CoordinateEncoding PROPERTY CXX_STANDARD 11)
