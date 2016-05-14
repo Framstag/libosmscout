@@ -40,9 +40,13 @@ namespace osmscout {
    * http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
    */
 
-  static const double earthRadius=6378137.0; // Meter
-  static const double earthExtent=2*M_PI*earthRadius;// Meter
-  static const double tileSizeZoom0Aquator=earthExtent;
+  //< Radius of the earth in meter
+  static const double earthRadiusMeter=6378137.0;
+  //< Extent of the earth in meter
+  static const double earthExtentMeter=2*M_PI*earthRadiusMeter;
+  //< Width of a tile at the equator for zoom level 0 in meter (equal to extent of the earth at the equator
+  static const double tileWidthZoom0Aquator=earthExtentMeter;
+  //< DPI of a classical OSM tile
   static const double tileDPI=96.0;
 
 #ifdef OSMSCOUT_HAVE_SSE2
@@ -125,10 +129,24 @@ namespace osmscout {
       angleNegCos=-1;
     }
 
-    // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level
-    double resolution=tileSizeZoom0Aquator/256*cos(lat*gradtorad)/magnification.GetMagnification();
+    // Width in meter of a tile of the given magnification at the equator
+    double equatorTileWidth=tileWidthZoom0Aquator/magnification.GetMagnification();
 
-    double groundWidthMeter=width*tileDPI/dpi*resolution;
+    // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level at the equator
+    double equatorTileResolution=equatorTileWidth/256.0;
+
+    // Modified resolution (meter/pixel) at the equator based on our actual DPI instead of the standard tile DPI
+    double equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/dpi;
+
+    // Width of the visible area at the equator
+    double groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
+
+    // Resulting projection scale factor
+    scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
+    scaleGradtorad=scale*gradtorad;
+
+    // Width of the visible area in meter
+    double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
 
     //
     // Calculation of bounds and scaling factors
@@ -139,13 +157,13 @@ namespace osmscout {
     // * Projection of X and Y coordinate as result of mercator projection to on screen coordinates
     //
 
-    double boxWidth=360.0*groundWidthMeter/earthExtent; // Part of the full earth circle that has to be shown, in degree
+    // Size of one pixel in meter
+    pixelSize=groundWidthVisibleMeter/width;
 
-    scale=width/(gradtorad*boxWidth);
-    scaleGradtorad = scale * gradtorad;
-
-    pixelSize=groundWidthMeter/width;
+    // How many pixel are one meter?
     meterInPixel=1/pixelSize;
+
+    // 1 meter on the ground is how many millimeter on display?
     meterInMM=meterInPixel*25.4/pixelSize;
 
     // Absolute Y mercator coordinate for latitude
@@ -182,10 +200,10 @@ namespace osmscout {
     std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
     std::cout << "Screen dimension: " << width << "x" << height << " " << dpi << " DPI " << std::endl;
 
-    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthMeter << " " << std::endl;
+    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthVisibleMeter << " " << std::endl;
 
-    std::cout << "Scale: 1 : " << scale << std::endl;*/
-
+    std::cout << "Scale: 1 : " << scale << std::endl;
+    */
     return true;
   }
 
@@ -346,7 +364,7 @@ namespace osmscout {
     lonOffset=lonMin*scaleGradtorad;
     latOffset=scale*atanh(sin(latMin*gradtorad));
 
-    pixelSize=earthExtent/magnification.GetMagnification()/width;
+    pixelSize=earthExtentMeter/magnification.GetMagnification()/width;
     meterInPixel=1/pixelSize;
     meterInMM=meterInPixel*25.4/pixelSize;
 
