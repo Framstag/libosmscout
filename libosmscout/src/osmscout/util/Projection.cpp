@@ -150,7 +150,7 @@ namespace osmscout {
 
     pixelSize=groundWidthMeter/width;
     meterInPixel=1.0/pixelSize;
-    meterInMM=meterInPixel*25.4/pixelSize;
+    meterInMM=meterInPixel*25.4/dpi;
 
     // Absolute Y mercator coordinate for latitude
     latOffset=atanh(sin(lat*gradtorad));
@@ -369,15 +369,6 @@ namespace osmscout {
     // Width of the visible area in meter
     double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
 
-    //
-    // Calculation of bounds and scaling factors
-    //
-    // We have three projections:
-    // * Mercator projection of longitude to X-coordinate
-    // * Mercator projection of latitude to Y-coordinate
-    // * Projection of X and Y coordinate as result of mercator projection to on screen coordinates
-    //
-
     // Size of one pixel in meter
     pixelSize=groundWidthVisibleMeter/width;
 
@@ -385,10 +376,12 @@ namespace osmscout {
     meterInPixel=1.0/pixelSize;
 
     // 1 meter on the ground is how many millimeter on display?
-    meterInMM=meterInPixel*25.4/pixelSize;
+    meterInMM=meterInPixel*25.4/dpi;
 
     // Absolute Y mercator coordinate for latitude
     latOffset=atanh(sin(lat*gradtorad));
+
+    //std::cout << "Pixel size " << pixelSize << " meterInPixel " << meterInPixel << " meterInMM " << meterInMM << std::endl;
 
     double tlLat;
     double tlLon;
@@ -423,8 +416,8 @@ namespace osmscout {
 
     std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthVisibleMeter << " " << std::endl;
 
-    std::cout << "Scale: 1 : " << scale << std::endl;
-    */
+    std::cout << "Scale: 1 : " << scale << std::endl;*/
+
     return true;
   }
 
