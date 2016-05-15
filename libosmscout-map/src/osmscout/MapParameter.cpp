@@ -27,7 +27,7 @@ namespace osmscout {
     lineMinWidthPixel(0.2),
     optimizeWayNodes(TransPolygon::none),
     optimizeAreaNodes(TransPolygon::none),
-    optimizeErrorToleranceMm(0.25),
+    optimizeErrorToleranceMm(0.5),
     drawFadings(true),
     drawWaysWithFixedWidth(false),
     labelLineCharCount(1000/*20*/),
