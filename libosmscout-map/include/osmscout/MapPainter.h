@@ -250,7 +250,7 @@ namespace osmscout {
     double                       shieldLabelSpace;
     double                       sameLabelSpace;
     double                       standardFontSize;
-    double                       oneMMInPixel;
+    double                       areaMinDimension;
     //@}
 
   protected:

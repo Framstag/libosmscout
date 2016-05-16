@@ -43,6 +43,7 @@ namespace osmscout {
     std::list<std::string>       patternPaths;              //!< List of paths to search for images for patterns
 
     double                       lineMinWidthPixel;         //!< Minimum width of an line to be drawn
+    double                       areaMinDimensionMM;        //!< Minimum dimension (either width or height) of an area in mm
 
     TransPolygon::OptimizeMethod optimizeWayNodes;          //!< Try to reduce the number of nodes for
     TransPolygon::OptimizeMethod optimizeAreaNodes;         //!< Try to reduce the number of nodes for
@@ -77,6 +78,7 @@ namespace osmscout {
     void SetPatternPaths(const std::list<std::string>& paths);
 
     void SetLineMinWidthPixel(double lineMinWidthPixel);
+    void SetAreaMinDimensionMM(double areaMinDimensionMM);
 
     void SetOptimizeWayNodes(TransPolygon::OptimizeMethod optimize);
     void SetOptimizeAreaNodes(TransPolygon::OptimizeMethod optimize);
@@ -125,6 +127,11 @@ namespace osmscout {
     inline double GetLineMinWidthPixel() const
     {
       return lineMinWidthPixel;
+    }
+
+    inline double GetAreaMinDimensionMM() const
+    {
+      return areaMinDimensionMM;
     }
 
     inline TransPolygon::OptimizeMethod GetOptimizeWayNodes() const
