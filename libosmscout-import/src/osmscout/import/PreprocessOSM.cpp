@@ -327,11 +327,6 @@ namespace osmscout {
     }
   };
 
-  static xmlEntityPtr GetEntity(void* /*data*/, const xmlChar *name)
-  {
-    return xmlGetPredefinedEntity(name);
-  }
-
   static void StartElement(void *data, const xmlChar *name, const xmlChar **atts)
   {
     Parser* parser=static_cast<Parser*>(data);
@@ -346,9 +341,19 @@ namespace osmscout {
     parser->EndElement(name);
   }
 
+  static xmlEntityPtr GetEntity(void* /*data*/, const xmlChar *name)
+  {
+    return xmlGetPredefinedEntity(name);
+  }
+
   static void StructuredErrorHandler(void* /*data*/, xmlErrorPtr error)
   {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
+  }
+
+  static void WarningHandler(void* /*data*/, const char* msg,...)
+  {
+    std::cerr << "XML warning:" << msg << std::endl;
   }
 
   static void ErrorHandler(void* /*data*/, const char* msg,...)
@@ -358,7 +363,7 @@ namespace osmscout {
 
   static void StartDocumentHandler(void* /*data*/)
   {
-    // no code, for temporary debugging purposes
+    // no code, only for temporary debugging purposes
   }
 
   static void EndDocumentHandler(void* data)
@@ -384,22 +389,62 @@ namespace osmscout {
     Parser        parser(*typeConfig,
                          progress,
                          callback);
-    xmlSAXHandler saxParser;
+    FILE             *file;
+    xmlSAXHandler    saxParser;
+    xmlParserCtxtPtr ctxt;
 
     memset(&saxParser,0,sizeof(xmlSAXHandler));
+    saxParser.initialized=XML_SAX2_MAGIC;
+
     saxParser.startDocument=StartDocumentHandler;
     saxParser.endDocument=EndDocumentHandler;
-    saxParser.initialized=XML_SAX2_MAGIC;
     saxParser.getEntity=GetEntity;
     saxParser.startElement=StartElement;
     saxParser.endElement=EndElement;
+    saxParser.warning=WarningHandler;
     saxParser.error=ErrorHandler;
     saxParser.fatalError=ErrorHandler;
     saxParser.serror=StructuredErrorHandler;
 
-    xmlSAXUserParseFile(&saxParser,
-                        &parser,
-                        filename.c_str());
+    file=fopen(filename.c_str(),"rb");
+
+    if (file==NULL) {
+      return false;
+    }
+
+    char chars[1024];
+
+    int res=fread(chars,1,4,file);
+    if (res!=4) {
+      fclose(file);
+      return false;
+    }
+
+    ctxt=xmlCreatePushParserCtxt(&saxParser,&parser,chars,res,NULL);
+
+    // Resolve entities, do not do any network communication
+    xmlCtxtUseOptions(ctxt,XML_PARSE_NOENT|XML_PARSE_NONET);
+
+    while ((res=fread(chars,1,sizeof(chars),file))>0) {
+      if (xmlParseChunk(ctxt,chars,res,0)!=0) {
+        xmlParserError(ctxt,"xmlParseChunk");
+        xmlFreeParserCtxt(ctxt);
+        fclose(file);
+
+        return false;
+      }
+    }
+
+    if (xmlParseChunk(ctxt,chars,0,1)!=0) {
+      xmlParserError(ctxt,"xmlParseChunk");
+      xmlFreeParserCtxt(ctxt);
+      fclose(file);
+
+      return false;
+    }
+
+    xmlFreeParserCtxt(ctxt);
+    fclose(file);
 
     return true;
   }
