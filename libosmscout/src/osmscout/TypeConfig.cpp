@@ -162,7 +162,10 @@ namespace osmscout {
 
   void FeatureValueBuffer::Set(const FeatureValueBuffer& other)
   {
-    if (other.GetType()) {
+    if (type) {
+      DeleteData();
+    }
+    if (other.GetType()) {    
       SetType(other.GetType());
 
       for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
@@ -181,9 +184,6 @@ namespace osmscout {
           }
         }
       }
-    }
-    else if (type) {
-      DeleteData();
     }
   }
 
