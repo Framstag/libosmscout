@@ -60,6 +60,7 @@ set(HEADER_FILES
     include/osmscout/Path.h
     include/osmscout/Pixel.h
     include/osmscout/Point.h
+    include/osmscout/PointSequence.h
     include/osmscout/POIService.h
     include/osmscout/Route.h
     include/osmscout/RouteData.h
@@ -130,6 +131,7 @@ set(SOURCE_FILES
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp
     src/osmscout/Point.cpp
+    src/osmscout/PointSequence.cpp
     src/osmscout/POIService.cpp
     src/osmscout/Route.cpp
     src/osmscout/RouteData.cpp
