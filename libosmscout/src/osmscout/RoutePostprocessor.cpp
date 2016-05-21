@@ -1222,7 +1222,7 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      return area->rings.front().nodes[nodeIndex].GetId();
+      return area->rings.front().GetNodes()[nodeIndex].GetId();
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(object.GetFileOffset());
@@ -1242,8 +1242,8 @@ namespace osmscout {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      for (size_t i=0; i<area->rings.front().nodes.size(); i++) {
-        if (area->rings.front().nodes[i].GetId()==nodeId) {
+      for (size_t i=0; i<area->rings.front().GetNodes().size(); i++) {
+        if (area->rings.front().GetNodes()[i].GetId()==nodeId) {
           return i;
         }
 
@@ -1320,7 +1320,7 @@ namespace osmscout {
         assert(false);
       }
 
-      return fromNodeIndex!=way->nodes.size()-1 &&
+      return fromNodeIndex!=way->GetNodes().size()-1 &&
              profile.CanUseForward(*way);
     }
     else {

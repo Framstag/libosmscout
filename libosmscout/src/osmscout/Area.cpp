@@ -51,20 +51,20 @@ namespace osmscout {
 
     bool start=true;
 
-    for (size_t j=0; j<nodes.size(); j++) {
+    for (size_t j=0; j<nodes->size(); j++) {
       if (start) {
-        minLat=nodes[j].GetLat();
-        minLon=nodes[j].GetLon();
-        maxLat=nodes[j].GetLat();
-        maxLon=nodes[j].GetLon();
+        minLat=(*nodes)[j].GetLat();
+        minLon=(*nodes)[j].GetLon();
+        maxLat=(*nodes)[j].GetLat();
+        maxLon=(*nodes)[j].GetLon();
 
         start=false;
       }
       else {
-        minLat=std::min(minLat,nodes[j].GetLat());
-        minLon=std::min(minLon,nodes[j].GetLon());
-        maxLat=std::max(maxLat,nodes[j].GetLat());
-        maxLon=std::max(maxLon,nodes[j].GetLon());
+        minLat=std::min(minLat,(*nodes)[j].GetLat());
+        minLon=std::min(minLon,(*nodes)[j].GetLon());
+        maxLat=std::max(maxLat,(*nodes)[j].GetLat());
+        maxLon=std::max(maxLon,(*nodes)[j].GetLon());
       }
     }
 
@@ -80,18 +80,18 @@ namespace osmscout {
 
   void Area::Ring::GetBoundingBox(GeoBox& boundingBox) const
   {
-    assert(!nodes.empty());
+    assert(!nodes->empty());
 
-    double minLon=nodes[0].GetLon();
+    double minLon=(*nodes)[0].GetLon();
     double maxLon=minLon;
-    double minLat=nodes[0].GetLat();
+    double minLat=(*nodes)[0].GetLat();
     double maxLat=minLat;
 
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
-      minLat=std::min(minLat,nodes[i].GetLat());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
+    for (size_t i=1; i<nodes->size(); i++) {
+      minLon=std::min(minLon,(*nodes)[i].GetLon());
+      maxLon=std::max(maxLon,(*nodes)[i].GetLon());
+      minLat=std::min(minLat,(*nodes)[i].GetLat());
+      maxLat=std::max(maxLat,(*nodes)[i].GetLat());
     }
 
     boundingBox.Set(GeoCoord(minLat,minLon),
@@ -111,20 +111,20 @@ namespace osmscout {
 
     for (const auto& ring : rings) {
       if (ring.IsOuterRing()) {
-        for (size_t j=0; j<ring.nodes.size(); j++) {
+        for (size_t j=0; j<ring.nodes->size(); j++) {
           if (start) {
-            minLat=ring.nodes[j].GetLat();
+            minLat=(*ring.nodes)[j].GetLat();
             maxLat=minLat;
-            minLon=ring.nodes[j].GetLon();
+            minLon=(*ring.nodes)[j].GetLon();
             maxLon=minLon;
 
             start=false;
           }
           else {
-            minLat=std::min(minLat,ring.nodes[j].GetLat());
-            minLon=std::min(minLon,ring.nodes[j].GetLon());
-            maxLat=std::max(maxLat,ring.nodes[j].GetLat());
-            maxLon=std::max(maxLon,ring.nodes[j].GetLon());
+            minLat=std::min(minLat,(*ring.nodes)[j].GetLat());
+            minLon=std::min(minLon,(*ring.nodes)[j].GetLon());
+            maxLat=std::max(maxLat,(*ring.nodes)[j].GetLat());
+            maxLon=std::max(maxLon,(*ring.nodes)[j].GetLon());
           }
         }
       }
@@ -393,7 +393,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(ring->nodes,
+    writer.Write(*ring->nodes,
                  ring->GetType()->CanRoute());
 
     ++ring;
@@ -409,7 +409,7 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(ring->nodes,
+      writer.Write(*ring->nodes,
                    ring->GetType()->GetAreaId()!=typeIgnore &&
                    ring->GetType()->CanRoute());
 
@@ -442,7 +442,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(ring->nodes,
+    writer.Write(*ring->nodes,
                  true);
 
     ++ring;
@@ -458,7 +458,7 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(ring->nodes,
+      writer.Write(*ring->nodes,
                    ring->GetType()->GetAreaId()!=typeIgnore ||
                    ring->ring==outerRingId);
 
@@ -491,7 +491,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(ring->nodes,
+    writer.Write(*ring->nodes,
                  false);
 
     ++ring;
@@ -507,7 +507,7 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(ring->nodes,
+      writer.Write(*ring->nodes,
                    false);
 
       ++ring;

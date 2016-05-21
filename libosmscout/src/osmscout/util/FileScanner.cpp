@@ -2358,6 +2358,16 @@ namespace osmscout {
       }*/
     }
   }
+  
+  void FileScanner::Read(PointSequence*& pointSequence, bool readIds)
+  {
+      std::vector<Point> nodes;
+      Read(nodes, readIds);
+      if (pointSequence != NULL)
+          delete pointSequence;
+      pointSequence = new VectorPointSequence(nodes);
+  }
+
 
   void FileScanner::ReadBox(GeoBox& box)
   {

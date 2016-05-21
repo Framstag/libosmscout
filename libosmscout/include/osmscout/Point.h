@@ -92,7 +92,7 @@ namespace osmscout {
      */
     Id GetId() const;
 
-    inline const GeoCoord& GetCoord() const
+    inline const GeoCoord GetCoord() const
     {
       return coord;
     }

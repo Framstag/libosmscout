@@ -24,6 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
@@ -41,16 +42,31 @@ namespace osmscout {
     FeatureValueBuffer featureValueBuffer; //!< List of features
 
     FileOffset         fileOffset;         //!< Offset into the data file fo this way
-
-
-  public:
-    std::vector<Point> nodes;              //!< List of nodes
+    PointSequence      *nodes;             //!< List of nodes
 
   public:
     inline Way()
-    : fileOffset(0)
+    : fileOffset(0), nodes(NULL)
     {
       // no code
+    }
+    
+    inline ~Way()
+    {
+      if (this->nodes != NULL)
+        delete this->nodes;        
+    }
+
+    inline const PointSequence& GetNodes() const 
+    {
+      return *nodes;
+    }
+    
+    inline void SetNodes(PointSequence *nodes) 
+    {
+      if (this->nodes != NULL)
+        delete this->nodes;
+      this->nodes = nodes;
     }
 
     inline FileOffset GetFileOffset() const
@@ -95,43 +111,43 @@ namespace osmscout {
 
     inline bool IsCircular() const
     {
-      return nodes[0].GetId()!=0 &&
-             nodes[0].GetId()==nodes[nodes.size()-1].GetId();
+      return (*nodes)[0].GetId()!=0 &&
+             (*nodes)[0].GetId()==(*nodes)[nodes->size()-1].GetId();
     }
 
     inline Id GetSerial(size_t index) const
     {
-      return nodes[index].GetSerial();
+      return (*nodes)[index].GetSerial();
     }
 
     inline Id GetId(size_t index) const
     {
-      return nodes[index].GetId();
+      return (*nodes)[index].GetId();
     }
 
     inline Id GetFrontId() const
     {
-      return nodes.front().GetId();
+      return nodes->front().GetId();
     }
 
     inline Id GetBackId() const
     {
-      return nodes.back().GetId();
+      return nodes->back().GetId();
     }
 
-    inline const Point& GetPoint(size_t index) const
+    inline const Point GetPoint(size_t index) const
     {
-      return nodes[index];
+      return (*nodes)[index];
     }
 
-    inline const GeoCoord& GetCoord(size_t index) const
+    inline const GeoCoord GetCoord(size_t index) const
     {
-      return nodes[index].GetCoord();
+      return (*nodes)[index].GetCoord();
     }
 
     inline void GetBoundingBox(GeoBox& boundingBox) const
     {
-      osmscout::GetBoundingBox(nodes,
+      osmscout::GetBoundingBox(*nodes,
                                boundingBox);
     }
 

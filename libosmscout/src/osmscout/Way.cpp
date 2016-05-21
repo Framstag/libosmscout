@@ -30,20 +30,20 @@ namespace osmscout {
 
   bool Way::GetCenter(GeoCoord& center) const
   {
-    if (nodes.empty()) {
+    if (nodes == NULL || nodes->empty()) {
       return false;
     }
 
-    double minLat=nodes[0].GetLat();
-    double minLon=nodes[0].GetLon();
-    double maxLat=nodes[0].GetLat();
-    double maxLon=nodes[0].GetLon();
+    double minLat=(*nodes)[0].GetLat();
+    double minLon=(*nodes)[0].GetLon();
+    double maxLat=(*nodes)[0].GetLat();
+    double maxLon=(*nodes)[0].GetLon();
 
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLat=std::min(minLat,nodes[i].GetLat());
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
+    for (size_t i=1; i<nodes->size(); i++) {
+      minLat=std::min(minLat,(*nodes)[i].GetLat());
+      minLon=std::min(minLon,(*nodes)[i].GetLon());
+      maxLat=std::max(maxLat,(*nodes)[i].GetLat());
+      maxLon=std::max(maxLon,(*nodes)[i].GetLon());
     }
 
     center.Set(minLat+(maxLat-minLat)/2,
@@ -61,8 +61,12 @@ namespace osmscout {
   bool Way::GetNodeIndexByNodeId(Id id,
                                  size_t& index) const
   {
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].GetId()==id) {
+    if (nodes == NULL || nodes->empty()) {
+      return false;
+    }
+      
+    for (size_t i=0; i<nodes->size(); i++) {
+      if ((*nodes)[i].GetId()==id) {
         index=i;
 
         return true;
@@ -127,14 +131,14 @@ namespace osmscout {
   void Way::Write(const TypeConfig& typeConfig,
                   FileWriter& writer) const
   {
-    assert(!nodes.empty());
+    assert(nodes != NULL && !nodes->empty());
 
     writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
                        typeConfig.GetWayTypeIdBytes());
 
     featureValueBuffer.Write(writer);
 
-    writer.Write(nodes,featureValueBuffer.GetType()->CanRoute() ||
+    writer.Write(GetNodes(),featureValueBuffer.GetType()->CanRoute() ||
                        featureValueBuffer.GetType()->GetOptimizeLowZoom());
   }
 
@@ -146,13 +150,13 @@ namespace osmscout {
   void Way::WriteOptimized(const TypeConfig& typeConfig,
                            FileWriter& writer) const
   {
-    assert(!nodes.empty());
+    assert(nodes != NULL && !nodes->empty());
 
     writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
                        typeConfig.GetWayTypeIdBytes());
 
     featureValueBuffer.Write(writer);
 
-    writer.Write(nodes,false);
+    writer.Write(GetNodes(),false);
   }
 }

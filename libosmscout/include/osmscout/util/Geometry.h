@@ -34,6 +34,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 #include <osmscout/Types.h>
 
 #include <osmscout/util/GeoBox.h>
@@ -107,6 +108,41 @@ namespace osmscout {
       maxLon=std::max(maxLon,nodes[i].GetLon());
       minLat=std::min(minLat,nodes[i].GetLat());
       maxLat=std::max(maxLat,nodes[i].GetLat());
+    }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
+  }
+
+  /**
+   * \ingroup Geometry
+   * Calculate the bounding box of the (non empty) vector of geo coords
+   *
+   * @param nodes
+   *    The geo coordinates
+   * @param minLon
+   * @param maxLon
+   * @param minLat
+   * @param maxLat
+   */
+  inline void GetBoundingBox(const PointSequence& nodes,
+                      GeoBox& boundingBox)
+  {
+    assert(!nodes.empty());
+
+    PointSequenceIterator it = nodes.begin();
+    Point node = *it;
+    double minLon=node.GetLon();
+    double maxLon=node.GetLon();
+    double minLat=node.GetLat();
+    double maxLat=node.GetLat();
+
+    for (++it; it!=nodes.end(); ++it) {
+      node = *it;
+      minLon=std::min(minLon,node.GetLon());
+      maxLon=std::max(maxLon,node.GetLon());
+      minLat=std::min(minLat,node.GetLat());
+      maxLat=std::max(maxLat,node.GetLat());
     }
 
     boundingBox.Set(GeoCoord(minLat,minLon),
@@ -280,38 +316,7 @@ namespace osmscout {
 
     return wn!=0;
   }*/
-
-  /**
-   * \ingroup Geometry
-   *
-   * Returns true, if point in on the area border or within the area.
-   *
-   * See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-   */
-  template<typename N, typename M>
-  inline bool IsCoordInArea(const N& point,
-                            const std::vector<M>& nodes)
-  {
-    size_t i,j;
-    bool   c=false;
-
-    for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if (point.GetLat()==nodes[i].GetLat() &&
-          point.GetLon()==nodes[i].GetLon()) {
-        return true;
-      }
-
-      if ((((nodes[i].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[j].GetLat())) ||
-           ((nodes[j].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[i].GetLat()))) &&
-          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat())/(nodes[j].GetLat()-nodes[i].GetLat())+
-           nodes[i].GetLon())) {
-        c=!c;
-      }
-    }
-
-    return c;
-  }
-
+  
   /**
    * \ingroup Geometry
    * Gives information about the position of the point in relation to the area.
@@ -342,6 +347,56 @@ namespace osmscout {
 
     return c ? 1 : -1;
   }
+  
+  template<typename N>
+  inline int GetRelationOfPointToArea(const N& point,
+                                      const PointSequence& nodes)
+  {
+    bool   c=false;
+
+    PointSequenceIterator it = nodes.begin();
+    Point a = *it;
+    Point b = nodes[nodes.size() -1];
+    
+    for (;  it != nodes.end(); b = a, ++it) {
+      
+      if (point.GetLat()==a.GetLat() &&
+          point.GetLon()==a.GetLon()) {
+        return 0;
+      }
+
+      if ((((a.GetLat()<=point.GetLat()) && (point.GetLat()<b.GetLat())) ||
+           ((b.GetLat()<=point.GetLat()) && (point.GetLat()<a.GetLat()))) &&
+          (point.GetLon()<(b.GetLon()-a.GetLon())*(point.GetLat()-a.GetLat())/(b.GetLat()-a.GetLat())+
+           a.GetLon())) {
+        c=!c;
+      }
+    }
+
+    return c ? 1 : -1;
+  }
+  
+
+  /**
+   * \ingroup Geometry
+   *
+   * Returns true, if point in on the area border or within the area.
+   *
+   * See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+   */
+  template<typename N, typename M>
+  inline bool IsCoordInArea(const N& point,
+                            const std::vector<M>& nodes)
+  {
+    return GetRelationOfPointToArea(point, nodes) >= 0;
+  }
+  
+  template<typename N>
+  inline bool IsCoordInArea(const N& point,
+                            const PointSequence& nodes)
+  {
+    return GetRelationOfPointToArea(point, nodes) >= 0;
+  }
 
   /**
    * \ingroup Geometry
@@ -367,6 +422,23 @@ namespace osmscout {
   template<typename N,typename M>
   inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
                                         const std::vector<M>& b)
+  {
+    for (const auto& node : a) {
+      if (GetRelationOfPointToArea(node,b)>=0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * \ingroup Geometry
+   * Return true, if at least one point of area a in within area b
+   */
+  template<typename N>
+  inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
+                                        const PointSequence& b)
   {
     for (const auto& node : a) {
       if (GetRelationOfPointToArea(node,b)>=0) {

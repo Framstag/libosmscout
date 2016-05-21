@@ -183,7 +183,7 @@ namespace osmscout {
   }
 
   void TransPolygon::TransformGeoToPixel(const Projection& projection,
-                                         const std::vector<Point>& nodes)
+                                         const PointSequence& nodes)
   {
     Projection::BatchTransformer batchTransformer(projection);
 
@@ -354,6 +354,14 @@ namespace osmscout {
                                    const std::vector<Point>& nodes,
                                    double optimizeErrorTolerance)
   {
+      return TransformArea(projection, optimize, TempVectorPointSequence(&nodes), optimizeErrorTolerance);
+  }
+  
+  void TransPolygon::TransformArea(const Projection& projection,
+                                   OptimizeMethod optimize,
+                                   const PointSequence& nodes,
+                                   double optimizeErrorTolerance)
+  {
     if (nodes.size()<2) {
       length=0;
 
@@ -406,6 +414,14 @@ namespace osmscout {
   void TransPolygon::TransformWay(const Projection& projection,
                                   OptimizeMethod optimize,
                                   const std::vector<Point>& nodes,
+                                  double optimizeErrorTolerance)
+  {
+      return TransformWay(projection, optimize, TempVectorPointSequence(&nodes), optimizeErrorTolerance);
+  }
+  
+  void TransPolygon::TransformWay(const Projection& projection,
+                                  OptimizeMethod optimize,
+                                  const PointSequence& nodes,
                                   double optimizeErrorTolerance)
   {
     if (nodes.empty()) {
@@ -533,6 +549,16 @@ namespace osmscout {
                                   size_t& start, size_t &end,
                                   double optimizeErrorTolerance)
   {
+      return TransformArea(projection, optimize, TempVectorPointSequence(&nodes), 
+              start, end, optimizeErrorTolerance);
+  }
+  
+  void TransBuffer::TransformArea(const Projection& projection,
+                                  TransPolygon::OptimizeMethod optimize,
+                                  const PointSequence& nodes,
+                                  size_t& start, size_t &end,
+                                  double optimizeErrorTolerance)
+  {
     transPolygon.TransformArea(projection,
                                optimize,
                                nodes,
@@ -557,6 +583,16 @@ namespace osmscout {
   bool TransBuffer::TransformWay(const Projection& projection,
                                  TransPolygon::OptimizeMethod optimize,
                                  const std::vector<Point>& nodes,
+                                 size_t& start, size_t &end,
+                                 double optimizeErrorTolerance)
+  {
+    return TransformWay(projection, optimize, TempVectorPointSequence(&nodes), 
+            start, end, optimizeErrorTolerance);
+  }
+
+  bool TransBuffer::TransformWay(const Projection& projection,
+                                 TransPolygon::OptimizeMethod optimize,
+                                 const PointSequence& nodes,
                                  size_t& start, size_t &end,
                                  double optimizeErrorTolerance)
   {

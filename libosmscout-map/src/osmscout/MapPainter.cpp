@@ -167,7 +167,7 @@ namespace osmscout {
       DataStatistic& entry=statistics[way->GetType()];
 
       entry.wayCount++;
-      entry.coordCount+=way->nodes.size();
+      entry.coordCount+=way->GetNodes().size();
 
       PathShieldStyleRef shieldStyle;
       PathTextStyleRef   pathTextStyle;
@@ -192,7 +192,7 @@ namespace osmscout {
       DataStatistic& entry=statistics[way->GetType()];
 
       entry.wayCount++;
-      entry.coordCount+=way->nodes.size();
+      entry.coordCount+=way->GetNodes().size();
 
       PathShieldStyleRef shieldStyle;
       PathTextStyleRef   pathTextStyle;
@@ -219,7 +219,7 @@ namespace osmscout {
       entry.areaCount++;
 
       for (const auto& ring : area->rings) {
-        entry.coordCount+=ring.nodes.size();
+        entry.coordCount+=ring.GetNodes().size();
 
         if (ring.IsMasterRing()) {
           IconStyleRef iconStyle;
@@ -248,7 +248,7 @@ namespace osmscout {
       entry.areaCount++;
 
       for (const auto& ring : area->rings) {
-        entry.coordCount+=ring.nodes.size();
+        entry.coordCount+=ring.GetNodes().size();
 
         if (ring.IsMasterRing()) {
           IconStyleRef iconStyle;
@@ -295,6 +295,13 @@ namespace osmscout {
 
   bool MapPainter::IsVisibleArea(const Projection& projection,
                                  const std::vector<Point>& nodes,
+                                 double pixelOffset) const
+  {
+      return IsVisibleArea(projection, TempVectorPointSequence(&nodes), pixelOffset);
+  }
+  
+  bool MapPainter::IsVisibleArea(const Projection& projection,
+                                 const PointSequence& nodes,
                                  double pixelOffset) const
   {
     if (nodes.empty()) {
@@ -353,6 +360,13 @@ namespace osmscout {
 
   bool MapPainter::IsVisibleWay(const Projection& projection,
                                 const std::vector<Point>& nodes,
+                                double pixelOffset) const
+  {
+      return IsVisibleWay(projection, TempVectorPointSequence(&nodes), pixelOffset);
+  }
+  
+  bool MapPainter::IsVisibleWay(const Projection& projection,
+                                const PointSequence& nodes,
                                 double pixelOffset) const
   {
     if (nodes.empty()) {
@@ -1642,7 +1656,7 @@ namespace osmscout {
 
         transBuffer.TransformArea(projection,
                                   parameter.GetOptimizeAreaNodes(),
-                                  area->rings[i].nodes,
+                                  area->rings[i].GetNodes(),
                                   data[i].transStart,data[i].transEnd,
                                   errorTolerancePixel);
       }
@@ -1682,7 +1696,7 @@ namespace osmscout {
             foundRing=true;
 
             if (!IsVisibleArea(projection,
-                               ring.nodes,
+                               ring.GetNodes(),
                                fillStyle->GetBorderWidth()/2)) {
               continue;
             }
@@ -1731,7 +1745,7 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
                                      const FeatureValueBuffer& buffer,
-                                     const std::vector<Point>& nodes)
+                                     const PointSequence& nodes)
   {
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
@@ -1854,7 +1868,7 @@ namespace osmscout {
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
                         way->GetFeatureValueBuffer(),
-                        way->nodes);
+                        way->GetNodes());
     }
 
     for (const auto& way : data.poiWays) {
@@ -1863,7 +1877,7 @@ namespace osmscout {
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
                         way->GetFeatureValueBuffer(),
-                        way->nodes);
+                        way->GetNodes());
     }
 
     wayData.sort();

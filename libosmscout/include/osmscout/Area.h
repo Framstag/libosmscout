@@ -24,6 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 
 #include <osmscout/TypeConfig.h>
 
@@ -48,15 +49,33 @@ namespace osmscout {
     private:
       FeatureValueBuffer    featureValueBuffer; //!< List of features
       uint8_t               ring;               //!< The ring hierarchy number (0...n)
+      PointSequence         *nodes;
 
     public:
-      std::vector<Point>    nodes;              //!< The array of coordinates
+      //std::vector<Point>    nodes;              //!< The array of coordinates
 
     public:
       inline Ring()
-      : ring(0)
+      : ring(0), nodes(NULL)
       {
         // no code
+      }
+      inline ~Ring()
+      {
+        if (this->nodes != NULL)
+          delete this->nodes;        
+      }
+      
+      inline const PointSequence& GetNodes() const 
+      {
+        return *nodes;
+      }
+      
+      inline void SetNodes(PointSequence *nodes) 
+      {
+        if (this->nodes != NULL)
+          delete this->nodes;
+        this->nodes = nodes;
       }
 
       inline TypeInfoRef GetType() const
@@ -113,27 +132,27 @@ namespace osmscout {
 
       inline Id GetSerial(size_t index) const
       {
-        return nodes[index].GetSerial();
+        return (*nodes)[index].GetSerial();
       }
 
       inline Id GetId(size_t index) const
       {
-        return nodes[index].GetId();
+        return (*nodes)[index].GetId();
       }
 
       inline Id GetFrontId() const
       {
-        return nodes.front().GetId();
+        return nodes->front().GetId();
       }
 
       inline Id GetBackId() const
       {
-        return nodes.back().GetId();
+        return nodes->back().GetId();
       }
 
-      inline const GeoCoord& GetCoord(size_t index) const
+      inline const GeoCoord GetCoord(size_t index) const
       {
-        return nodes[index].GetCoord();
+        return (*nodes)[index].GetCoord();
       }
 
       bool GetCenter(GeoCoord& center) const;
@@ -165,10 +184,13 @@ namespace osmscout {
         this->ring=ring;
       }
 
+      // const!
+      /* 
       inline void SetSerial(size_t index, uint8_t serial)
       {
         nodes[index].SetSerial(serial);
       }
+       */
 
       friend class Area;
     };
