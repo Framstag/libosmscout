@@ -64,7 +64,7 @@ namespace osmscout {
       throw IOException(filename,"Seeking end of file");
     }
 
-    unsigned long pos=ftell(file);
+    long int pos=ftell(file);
 
     if (pos==-1) {
       fclose(file);
