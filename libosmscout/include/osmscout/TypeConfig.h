@@ -956,7 +956,14 @@ namespace osmscout {
 
   private:
     void DeleteData();
-    void AllocateData();
+    void AllocateBits();
+    void AllocateValueBufferLazy();
+
+    inline FeatureValue* GetValueAndAllocateBuffer(size_t idx)
+    {
+      AllocateValueBufferLazy();
+      return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
+    }
 
   public:
     FeatureValueBuffer();
@@ -989,8 +996,15 @@ namespace osmscout {
       return (featureBits[featureBit/8] & (1 << featureBit%8))!=0;
     }
 
+    /**
+     * Can return NULL value!
+     * HasFeature(idx) && GetFeature(idx).GetFeature()->HasValue()
+     *  should be called before accessing the value.
+     */
     inline FeatureValue* GetValue(size_t idx) const
     {
+      if (featureValueBuffer == NULL)
+        return NULL;
       return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
     }
 
