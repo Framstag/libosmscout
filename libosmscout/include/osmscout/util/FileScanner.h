@@ -90,6 +90,7 @@ namespace osmscout {
   private:
     void AssureByteBufferSize(size_t size);
     void FreeBuffer();
+    void ReadPointSequenceSetup(size_t &coordBitSize, bool &hasNodes, size_t &nodeCount, bool readIds);
 
   public:
     FileScanner();

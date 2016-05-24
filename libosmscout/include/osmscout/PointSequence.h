@@ -120,7 +120,11 @@ namespace osmscout {
       virtual inline bool empty() const {return nodes.empty(); };
   };
   
-  class OSMSCOUT_API TempVectorPointSequence : public PointSequence
+  /**
+   * Like VectorPointSequence, but it don't create own copy of node vector,
+   * it retrieve pointer to node vector but don't take its ownership!
+   */
+  class TempVectorPointSequence : public PointSequence
   {
   private:
       const std::vector<Point>    *nodes;
@@ -138,13 +142,72 @@ namespace osmscout {
       
       virtual inline PointSequenceIterator end() const 
       {
-          return PointSequenceIterator( new VectorPointSequence::VectorPointSequenceIteratorPriv(nodes->end()));
+          return PointSequenceIterator(new VectorPointSequence::VectorPointSequenceIteratorPriv(nodes->end()));
       };
       
       virtual inline const Point front() const {return nodes->front();};
       virtual inline const Point back() const {return nodes->back();};
       virtual inline size_t size() const { return nodes->size(); }
       virtual inline bool empty() const {return nodes->empty(); };
+  };
+  
+  class MMapPointSequence : public PointSequence
+  {
+  private:
+    char *ptr;
+    size_t coordBitSize;
+    bool   hasNodes;
+    size_t nodeCount;      
+          
+    class MMapPointSequenceIteratorPriv: public PointSequenceIteratorPriv
+    {
+        friend class MMapPointSequence;
+        
+    private:
+        const MMapPointSequence *sequence;
+        size_t position;
+        uint32_t latValue;
+        uint32_t lonValue;
+        char *nodeSerialPtr;
+        uint8_t serialBits;
+        
+        inline uint8_t serialMask() const { return (1 << (position % 8));};
+        void readCoordDelta16(int32_t &latDelta, int32_t &lonDelta);
+        void readCoordDelta32(int32_t &latDelta, int32_t &lonDelta);
+        void readCoordDelta48(int32_t &latDelta, int32_t &lonDelta);
+        
+    public:
+        MMapPointSequenceIteratorPriv(const MMapPointSequence *sequence);
+        MMapPointSequenceIteratorPriv(const MMapPointSequence *sequence, 
+            size_t position, uint32_t latValue, uint32_t lonValue,  
+            char *nodeSerialPtr, uint8_t serialBits);
+        virtual inline ~MMapPointSequenceIteratorPriv(){};
+        
+        virtual const Point operator*() const ;
+        virtual void operator++();
+        virtual bool operator==(const PointSequenceIteratorPriv *another) const;
+    };
+    friend class MMapPointSequenceIteratorPriv;
+
+    mutable MMapPointSequenceIteratorPriv *internalIterator;
+    mutable Point *frontPoint;
+    mutable Point *backPoint;
+    
+    const static Point createPoint(uint8_t serial, uint32_t latValue, uint32_t lonValue);
+    
+  public:
+    MMapPointSequence(char *ptr, size_t coordBitSize, bool hasNodes, size_t nodeCount);    
+    virtual ~MMapPointSequence();
+    virtual const Point operator[](size_t i) const ;
+    
+    virtual PointSequenceIterator begin() const ;      
+    virtual PointSequenceIterator end() const ;
+
+    virtual const Point front() const ;
+    virtual const Point back() const ;
+    virtual inline size_t size() const { return nodeCount; }
+    virtual inline bool empty() const {return nodeCount == 0; };
+
   };
 }
 

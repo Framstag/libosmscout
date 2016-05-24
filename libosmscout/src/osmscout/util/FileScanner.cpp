@@ -2155,21 +2155,21 @@ namespace osmscout {
       isSet=true;
     }
   }
-
-  void FileScanner::Read(std::vector<Point>& nodes,bool readIds)
+  
+  void FileScanner::ReadPointSequenceSetup(size_t &coordBitSize, bool &hasNodes, size_t &nodeCount, bool readIds)
   {
-    size_t  coordBitSize;
+      
     uint8_t sizeByte;
 
     Read(sizeByte);
 
     // Fast exit for empty arrays
     if (sizeByte==0) {
-      return;
+        coordBitSize = 0;
+        hasNodes = false;
+        nodeCount = 0;
+        return;
     }
-
-    bool   hasNodes;
-    size_t nodeCount;
 
     if (readIds) {
       hasNodes=(sizeByte & 0x04)!=0;
@@ -2225,6 +2225,14 @@ namespace osmscout {
         }
       }
     }
+  }
+  
+  void FileScanner::Read(std::vector<Point>& nodes,bool readIds)
+  {
+    size_t  coordBitSize;
+    bool   hasNodes;
+    size_t nodeCount;
+    ReadPointSequenceSetup(coordBitSize, hasNodes, nodeCount, readIds);
 
     nodes.resize(nodeCount);
 
@@ -2361,11 +2369,79 @@ namespace osmscout {
   
   void FileScanner::Read(PointSequence*& pointSequence, bool readIds)
   {
-      std::vector<Point> nodes;
-      Read(nodes, readIds);
-      if (pointSequence != NULL)
-          delete pointSequence;
-      pointSequence = new VectorPointSequence(nodes);
+    if (pointSequence != NULL){
+        delete pointSequence;
+    }
+    
+    //FileOffset startOffset = offset;
+    if (buffer!=NULL) {
+        size_t  coordBitSize;
+        bool   hasNodes;
+        size_t nodeCount;
+        ReadPointSequenceSetup(coordBitSize, hasNodes, nodeCount, readIds);
+        
+        if (nodeCount == 0){
+            std::vector<Point> nodes;
+            pointSequence = new VectorPointSequence(nodes);            
+        }else{
+
+            size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
+            if (HasError()) {
+                throw IOException(filename,"Cannot read byte array","File already in error state");
+            }
+            if (offset + (FileOffset)coordByteSize + (FileOffset)byteBufferSize - 1 >= size) {
+                hasError=true;
+                throw IOException(filename,"Cannot read byte array","Cannot read beyond end of file");
+            }
+            pointSequence = new MMapPointSequence(buffer + offset, coordBitSize, hasNodes, nodeCount);
+            // move offset
+            offset += (FileOffset)coordByteSize + (FileOffset)byteBufferSize;
+            if (hasNodes){
+                // TODO: it is necessary move offset behind serial area?
+                size_t idCurrent=0;
+                while (idCurrent<nodeCount) {
+                  uint8_t bitset;
+                  uint8_t serial;
+                  size_t bitmask=1;
+                  Read(bitset);
+                  for (size_t i=0; i<8 && idCurrent<nodeCount; i++) {
+                    if (bitset & bitmask) {
+                      Read(serial);
+                    }
+
+                    bitmask*=2;
+                    idCurrent++;
+                  }
+                }
+            }
+            
+            // check
+            /*
+            FileOffset endOffset = offset;
+            offset = startOffset;        
+            
+            std::vector<Point> nodes;
+            Read(nodes, readIds);
+            PointSequence *pointSequence2 = new VectorPointSequence(nodes);
+            assert(offset == endOffset);
+            assert(pointSequence->size() == pointSequence2->size());
+            for (size_t i = 0; i < pointSequence->size(); i++){
+                Point p1 = pointSequence->operator[](i);
+                Point p2 = pointSequence2->operator[](i);
+                assert(p1.GetSerial() == p2.GetSerial());
+                //assert(abs(p1.GetCoord().GetLat() - p2.GetCoord().GetLat()) < 0.1);
+                //assert(abs(p1.GetCoord().GetLon() - p2.GetCoord().GetLon()) < 0.1);
+                assert(p1.GetCoord().GetLat() == p2.GetCoord().GetLat());
+                assert(p1.GetCoord().GetLon() == p2.GetCoord().GetLon());
+            }
+            delete pointSequence2;
+             */
+        }
+    }else{
+        std::vector<Point> nodes;
+        Read(nodes, readIds);
+        pointSequence = new VectorPointSequence(nodes);
+    }
   }
 
 
