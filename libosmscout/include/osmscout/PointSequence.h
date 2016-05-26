@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/Point.h>
 
 namespace osmscout {
@@ -64,8 +65,16 @@ namespace osmscout {
 
   class OSMSCOUT_API PointSequence
   {
+  protected:
+      mutable GeoBox *bboxPtr;
+
   public:
-      virtual inline ~PointSequence(){};
+      inline PointSequence(): bboxPtr(NULL) {}
+      virtual inline ~PointSequence() 
+      {
+          if (bboxPtr!=NULL)
+              delete bboxPtr;
+      };
       
       virtual const Point operator[](size_t i) const = 0;
       virtual PointSequenceIterator begin() const = 0;
@@ -74,6 +83,7 @@ namespace osmscout {
       virtual const Point back() const = 0;
       virtual size_t size() const = 0;
       virtual bool empty() const = 0;
+      virtual const GeoBox bbox() const;
   };  
   
   class OSMSCOUT_API VectorPointSequence : public PointSequence
@@ -212,6 +222,7 @@ namespace osmscout {
     virtual inline size_t size() const { return nodeCount; }
     virtual inline bool empty() const {return nodeCount == 0; };
 
+    virtual const GeoBox bbox() const;
   };
 }
 

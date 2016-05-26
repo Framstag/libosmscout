@@ -22,7 +22,36 @@
 
 #include <osmscout/PointSequence.h>
 
+#include "osmscout/util/GeoBox.h"
+
 namespace osmscout {
+
+  const GeoBox PointSequence::bbox() const
+  {
+    if (bboxPtr != NULL){
+        return *bboxPtr;
+    }
+    
+    PointSequenceIterator it = begin();
+    Point point = *it;
+    
+    // Bounding box
+    double lonMin=point.GetLon();
+    double lonMax=lonMin;
+    double latMin=point.GetLat();
+    double latMax=latMin;
+
+    for (++it; it!=end(); ++it) {
+      point = *it;
+      
+      lonMin=std::min(lonMin,point.GetLon());
+      lonMax=std::max(lonMax,point.GetLon());
+      latMin=std::min(latMin,point.GetLat());
+      latMax=std::max(latMax,point.GetLat());
+    }
+    bboxPtr = new GeoBox(GeoCoord(latMin, lonMin), GeoCoord(latMax, lonMax));
+    return *bboxPtr;
+  }
 
   MMapPointSequence::MMapPointSequence(char *ptr, size_t coordBitSize, bool hasNodes, size_t nodeCount):
           ptr(ptr),
@@ -261,5 +290,30 @@ namespace osmscout {
     return this->sequence == mmapBased->sequence && this->position == mmapBased->position;
   }
 
+  const GeoBox MMapPointSequence::bbox() const
+  {
+    if (bboxPtr != NULL){
+        return *bboxPtr;
+    }
+    
+    MMapPointSequenceIteratorPriv it(this);
+
+    uint32_t lonMin=it.lonValue;
+    uint32_t lonMax=lonMin;
+    uint32_t latMin=it.latValue;
+    uint32_t latMax=latMin;
+
+    for (++it; it.position < nodeCount; ++it) {
+        
+      lonMin=std::min(lonMin,it.lonValue);
+      lonMax=std::max(lonMax,it.lonValue);
+      latMin=std::min(latMin,it.latValue);
+      latMax=std::max(latMax,it.latValue);
+    }
+    bboxPtr = new GeoBox( 
+            createPoint(0, latMin, lonMin).GetCoord(), 
+            createPoint(0, latMax, lonMax).GetCoord());
+    return *bboxPtr;
+  }  
 }
 

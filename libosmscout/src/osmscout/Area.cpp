@@ -82,20 +82,9 @@ namespace osmscout {
   {
     assert(!nodes->empty());
 
-    double minLon=(*nodes)[0].GetLon();
-    double maxLon=minLon;
-    double minLat=(*nodes)[0].GetLat();
-    double maxLat=minLat;
-
-    for (size_t i=1; i<nodes->size(); i++) {
-      minLon=std::min(minLon,(*nodes)[i].GetLon());
-      maxLon=std::max(maxLon,(*nodes)[i].GetLon());
-      minLat=std::min(minLat,(*nodes)[i].GetLat());
-      maxLat=std::max(maxLat,(*nodes)[i].GetLat());
-    }
-
-    boundingBox.Set(GeoCoord(minLat,minLon),
-                    GeoCoord(maxLat,maxLon));
+    const GeoBox bbox = nodes->bbox();
+    
+    boundingBox.Set(bbox.GetMinCoord(), bbox.GetMaxCoord());
   }
 
   bool Area::GetCenter(GeoCoord& center) const

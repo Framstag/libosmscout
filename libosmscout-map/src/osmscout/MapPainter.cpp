@@ -308,31 +308,20 @@ namespace osmscout {
       return false;
     }
 
-    // Bounding box
-    double lonMin=nodes[0].GetLon();
-    double lonMax=lonMin;
-    double latMin=nodes[0].GetLat();
-    double latMax=latMin;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      lonMin=std::min(lonMin,nodes[i].GetLon());
-      lonMax=std::max(lonMax,nodes[i].GetLon());
-      latMin=std::min(latMin,nodes[i].GetLat());
-      latMax=std::max(latMax,nodes[i].GetLat());
-    }
+    const GeoBox bbox = nodes.bbox();
 
     double x1;
     double x2;
     double y1;
     double y2;
 
-    projection.GeoToPixel(lonMin,
-                          latMin,
+    projection.GeoToPixel(bbox.GetMinLon(),
+                          bbox.GetMinLat(),
                           x1,
                           y1);
 
-    projection.GeoToPixel(lonMax,
-                          latMax,
+    projection.GeoToPixel(bbox.GetMaxLon(),
+                          bbox.GetMaxLat(),
                           x2,
                           y2);
 
@@ -374,33 +363,23 @@ namespace osmscout {
     }
 
     // Bounding box
-    double lonMin=nodes[0].GetLon();
-    double lonMax=lonMin;
-    double latMin=nodes[0].GetLat();
-    double latMax=latMin;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      lonMin=std::min(lonMin,nodes[i].GetLon());
-      lonMax=std::max(lonMax,nodes[i].GetLon());
-      latMin=std::min(latMin,nodes[i].GetLat());
-      latMax=std::max(latMax,nodes[i].GetLat());
-    }
+    const GeoBox bbox = nodes.bbox();
 
     double x1;
     double x2;
     double y1;
     double y2;
 
-    projection.GeoToPixel(lonMin,
-                          latMin,
+    projection.GeoToPixel(bbox.GetMinLon(),
+                          bbox.GetMinLat(),
                           x1,
                           y1);
 
-    projection.GeoToPixel(lonMax,
-                          latMax,
+    projection.GeoToPixel(bbox.GetMaxLon(),
+                          bbox.GetMaxLat(),
                           x2,
-                          y2);
-
+                          y2);    
+    
     double xMin=std::min(x1,x2);
     double xMax=std::max(x1,x2);
     double yMin=std::min(y1,y2);
