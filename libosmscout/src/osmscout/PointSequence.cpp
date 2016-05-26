@@ -258,7 +258,7 @@ namespace osmscout {
     const MMapPointSequenceIteratorPriv *mmapBased = dynamic_cast<const MMapPointSequenceIteratorPriv*> (another);
     if (mmapBased==NULL)
         return false;
-    return mmapBased->sequence == mmapBased->sequence && mmapBased->position == mmapBased->position;
+    return this->sequence == mmapBased->sequence && this->position == mmapBased->position;
   }
 
 }
