@@ -171,6 +171,10 @@ namespace osmscout {
         char *nodeSerialPtr;
         uint8_t serialBits;
         
+        // cached last value to avoid creating many temporary Points
+        mutable size_t lastPosition;
+        mutable Point lastPoint;
+        
         inline uint8_t serialMask() const { return (1 << (position % 8));};
         void readCoordDelta16(int32_t &latDelta, int32_t &lonDelta);
         void readCoordDelta32(int32_t &latDelta, int32_t &lonDelta);
@@ -193,7 +197,7 @@ namespace osmscout {
     mutable Point *frontPoint;
     mutable Point *backPoint;
     
-    const static Point createPoint(uint8_t serial, uint32_t latValue, uint32_t lonValue);
+    const inline static Point createPoint(uint8_t serial, uint32_t latValue, uint32_t lonValue);
     
   public:
     MMapPointSequence(char *ptr, size_t coordBitSize, bool hasNodes, size_t nodeCount);    

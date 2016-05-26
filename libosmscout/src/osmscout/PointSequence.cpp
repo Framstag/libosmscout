@@ -111,7 +111,7 @@ namespace osmscout {
   }
 
   MMapPointSequence::MMapPointSequenceIteratorPriv::MMapPointSequenceIteratorPriv(const MMapPointSequence *sequence):
-      sequence(sequence), position(0)
+      sequence(sequence), position(0), lastPosition(-1)
   {
 
       if (sequence->nodeCount >0){
@@ -145,20 +145,27 @@ namespace osmscout {
           latValue(latValue),
           lonValue(lonValue), 
           nodeSerialPtr(nodeSerialPtr), 
-          serialBits(serialBits)
+          serialBits(serialBits),
+          lastPosition(-1)
   {
       
   }
 
   const Point MMapPointSequence::MMapPointSequenceIteratorPriv::operator*() const 
   {
+      if (position == lastPosition){
+          return lastPoint;
+      }
+
       uint8_t serial = 0;
       if (sequence->hasNodes) {
           if (serialBits & serialMask()){
               serial = *nodeSerialPtr;
           }
       }
-      return sequence->createPoint(serial, latValue, lonValue);
+      lastPoint = MMapPointSequence::createPoint(serial, latValue, lonValue);
+      lastPosition = position;
+      return lastPoint;
   }
   
   void MMapPointSequence::MMapPointSequenceIteratorPriv::operator++()
