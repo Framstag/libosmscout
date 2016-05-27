@@ -233,8 +233,10 @@ namespace osmscout {
 
   void FeatureValueBuffer::AllocateValueBufferLazy()
   {
-    if (featureValueBuffer == NULL && type && type->HasFeatures()){
-        featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
+    if (featureValueBuffer==NULL &&
+        type &&
+        type->HasFeatures()) {
+      featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
     }
   }
 
