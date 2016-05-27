@@ -116,7 +116,7 @@ namespace osmscout {
                        double dpi,
                        double pixel,
                        const Magnification& magnification,
-                       TransPolygon::OptimizeMethod optimizeWayMethod);
+                       TransPolygon::OptimizeMethod optimizeAreaMethod);
 
   public:
     void GetDescription(const ImportParameter& parameter,

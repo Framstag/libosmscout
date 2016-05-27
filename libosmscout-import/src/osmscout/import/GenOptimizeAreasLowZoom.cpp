@@ -180,7 +180,7 @@ namespace osmscout
                                                     double dpi,
                                                     double pixel,
                                                     const Magnification& magnification,
-                                                    TransPolygon::OptimizeMethod optimizeWayMethod)
+                                                    TransPolygon::OptimizeMethod optimizeAreaMethod)
   {
     MercatorProjection projection;
 
@@ -198,7 +198,7 @@ namespace osmscout
       while (r<area->rings.size()) {
         if (!area->rings[r].IsMasterRing()) {
           polygon.TransformArea(projection,
-                                optimizeWayMethod,
+                                optimizeAreaMethod,
                                 area->rings[r].nodes,
                                 pixel/8.0);
 
@@ -246,7 +246,7 @@ namespace osmscout
 
       copiedArea->rings=newRings;
 
-      optimizedAreas.push_back(area/*copiedArea*/);
+      optimizedAreas.push_back(copiedArea);
     }
   }
 
