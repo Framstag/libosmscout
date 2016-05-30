@@ -40,6 +40,8 @@
 #if defined(HAVE_LIB_GPERFTOOLS)
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
+#else
+#include <malloc.h>
 #endif
 
 #include <osmscout/MapPainterNoOp.h>
