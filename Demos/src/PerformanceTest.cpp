@@ -37,6 +37,11 @@
 #include <osmscout/MapPainterQt.h>
 #endif
 
+#if defined(HAVE_LIB_GPERFTOOLS)
+#include <gperftools/tcmalloc.h>
+#include <gperftools/heap-profiler.h>
+#endif
+
 #include <osmscout/MapPainterNoOp.h>
 
 #include <osmscout/system/Math.h>
@@ -67,6 +72,9 @@ struct LevelStats
   double drawMinTime;
   double drawMaxTime;
   double drawTotalTime;
+  
+  double allocMax;
+  double allocSum;
 
   size_t nodeCount;
   size_t wayCount;
@@ -82,6 +90,8 @@ struct LevelStats
     drawMinTime(std::numeric_limits<double>::max()),
     drawMaxTime(0.0),
     drawTotalTime(0.0),
+    allocMax(0.0),
+    allocSum(0.0),
     nodeCount(0),
     wayCount(0),
     areaCount(0),
@@ -90,6 +100,22 @@ struct LevelStats
     // no code
   }
 };
+
+std::string formatAlloc(double size)
+{
+    std::string units = " bytes";
+    if (size > 1024){
+        units = " KiB";
+        size = size / 1024;
+    }
+    if (size > 1024){
+        units = " MiB";
+        size = size / 1024;
+    }
+    std::ostringstream buff;
+    buff << std::setprecision(6) << size << units;
+    return buff.str();
+}
 
 int main(int argc, char* argv[])
 {
@@ -101,17 +127,29 @@ int main(int argc, char* argv[])
   unsigned int  tileWidth;
   unsigned int  tileHeight;
   std::string   driver;
+  bool          heapProfile;
+  std::string   heapProfilePrefix;
 
-  if (argc!=12) {
+  if (argc<12) {
     std::cerr << "DrawMap " << std::endl;
     std::cerr << "  <map directory> <style-file> " << std::endl;
     std::cerr << "  <lat_top> <lon_left> <lat_bottom> <lon_right> " << std::endl;
     std::cerr << "  <start zoom> <end zoom>" << std::endl;
     std::cerr << "  <tile width> <tile height>" << std::endl;
     std::cerr << "  <cairo|Qt|noop|none>" << std::endl;
+#if defined(HAVE_LIB_GPERFTOOLS)    
+    std::cerr << "  [heap profile prefix]" << std::endl;    
+#endif
     return 1;
   }
-
+  heapProfile = false;
+#if defined(HAVE_LIB_GPERFTOOLS)    
+  if (argc>12) {
+      heapProfile = true;
+      heapProfilePrefix = argv[12];
+  }
+#endif
+  
   map=argv[1];
   style=argv[2];
 
@@ -239,6 +277,12 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
     return 1;
   }
+  
+#if defined(HAVE_LIB_GPERFTOOLS)  
+  if (heapProfile){
+    HeapProfilerStart(heapProfilePrefix.c_str());
+  }
+#endif
 
   osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
@@ -328,6 +372,21 @@ int main(int argc, char* argv[])
         stats.wayCount+=data.ways.size();
         stats.areaCount+=data.areas.size();
 
+
+#if defined(HAVE_LIB_GPERFTOOLS)
+        if (heapProfile){
+            std::ostringstream buff;
+            buff << "load-" << level << "-" << x << "-" << y;
+            HeapProfilerDump(buff.str().c_str());
+        }
+        struct mallinfo alloc_info = tc_mallinfo();
+#else         
+        struct mallinfo alloc_info = mallinfo();
+#endif  
+        std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
+        stats.allocMax = std::max(stats.allocMax, (double)alloc_info.uordblks);
+        stats.allocSum = stats.allocSum + (double)alloc_info.uordblks;
+        
         dbTimer.Stop();
 
         double dbTime=dbTimer.GetMilliseconds();
@@ -381,29 +440,39 @@ int main(int argc, char* argv[])
 
     statistics.push_back(stats);
   }
+  
+#if defined(HAVE_LIB_GPERFTOOLS)  
+  if (heapProfile){
+    HeapProfilerStop();
+  }
+#endif  
 
   std::cout << "==========" << std::endl;
 
   for (const auto& stats : statistics) {
     std::cout << "Level: " << stats.level << std::endl;
 
-    std::cout << " Tot. data: ";
+    std::cout << " Used memory: ";
+    std::cout << "max: " << formatAlloc(stats.allocMax) << " ";
+    std::cout << "avg: " << formatAlloc(stats.allocSum / stats.tileCount) << std::endl;
+    
+    std::cout << " Tot. data  : ";
     std::cout << "nodes: " << stats.nodeCount << " ";
     std::cout << "way: " << stats.wayCount << " ";
     std::cout << "areas: " << stats.areaCount << std::endl;
 
-    std::cout << " Avg. data: ";
+    std::cout << " Avg. data  : ";
     std::cout << "nodes: " << stats.nodeCount/stats.tileCount << " ";
     std::cout << "way: " << stats.wayCount/stats.tileCount << " ";
     std::cout << "areas: " << stats.areaCount/stats.tileCount << std::endl;
 
-    std::cout << " DB       : ";
+    std::cout << " DB         : ";
     std::cout << "total: " << stats.dbTotalTime << " ";
     std::cout << "min: " << stats.dbMinTime << " ";
     std::cout << "avg: " << stats.dbTotalTime/stats.tileCount << " ";
     std::cout << "max: " << stats.dbMaxTime << " " << std::endl;
 
-    std::cout << " Map      : ";
+    std::cout << " Map        : ";
     std::cout << "total: " << stats.drawTotalTime << " ";
     std::cout << "min: " << stats.drawMinTime << " ";
     std::cout << "avg: " << stats.drawTotalTime/stats.tileCount << " ";

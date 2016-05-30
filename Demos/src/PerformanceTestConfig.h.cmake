@@ -1,5 +1,5 @@
-#ifndef LIBOSMSCOUT_MAP_CAIRO_PRIVATE_CONFIG_H
-#define LIBOSMSCOUT_MAP_CAIRO_PRIVATE_CONFIG_H
+#ifndef LIBOSMSCOUT_PERFORMANCETEST_PRIVATE_CONFIG_H
+#define LIBOSMSCOUT_PERFORMANCETEST_PRIVATE_CONFIG_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
@@ -16,6 +16,9 @@
 #ifdef HAVE_LIB_CAIRO
 #define HAVE_LIB_OSMSCOUTMAPCAIRO 1
 #endif
+
+/* Gperftools detected */
+#cmakedefine HAVE_LIB_GPERFTOOLS 1
 
 /* pango detected */
 #cmakedefine OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO 1
