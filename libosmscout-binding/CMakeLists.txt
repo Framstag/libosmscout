@@ -15,7 +15,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
   endif()
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i PROPERTIES CPLUSPLUS ON)
   swig_add_module(osmscout_binding Java ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
-  swig_link_libraries(osmscout_binding libosmscout ${JNI_LIBRARIES})
+  swig_link_libraries(osmscout_binding osmscout ${JNI_LIBRARIES})
   target_include_directories(osmscout_binding PRIVATE
     include
     ${CMAKE_CURRENT_BINARY_DIR}/include
