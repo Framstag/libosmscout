@@ -90,6 +90,7 @@ check_function_exists(fseeko HAVE_FSEEKO)
 check_function_exists(mmap HAVE_MMAP)
 check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
+check_function_exists(mallinfo HAVE_MALLINFO)
 
 # check libraries and tools
 find_package(Marisa QUIET)

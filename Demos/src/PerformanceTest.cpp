@@ -41,7 +41,9 @@
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
 #else
-#include <stdlib.h> // mallinfo 
+#if defined(HAVE_MALLINFO)
+#include <malloc.h> // mallinfo
+#endif
 #endif
 
 #include <osmscout/MapPainterNoOp.h>
@@ -382,13 +384,17 @@ int main(int argc, char* argv[])
             HeapProfilerDump(buff.str().c_str());
         }
         struct mallinfo alloc_info = tc_mallinfo();
-#else         
+#else
+#if defined(HAVE_MALLINFO)
         struct mallinfo alloc_info = mallinfo();
-#endif  
+#endif
+#endif
+#if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
         std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
         stats.allocMax = std::max(stats.allocMax, (double)alloc_info.uordblks);
         stats.allocSum = stats.allocSum + (double)alloc_info.uordblks;
-        
+#endif
+
         dbTimer.Stop();
 
         double dbTime=dbTimer.GetMilliseconds();
@@ -454,9 +460,11 @@ int main(int argc, char* argv[])
   for (const auto& stats : statistics) {
     std::cout << "Level: " << stats.level << std::endl;
 
+#if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
     std::cout << " Used memory: ";
     std::cout << "max: " << formatAlloc(stats.allocMax) << " ";
     std::cout << "avg: " << formatAlloc(stats.allocSum / stats.tileCount) << std::endl;
+#endif
     
     std::cout << " Tot. data  : ";
     std::cout << "nodes: " << stats.nodeCount << " ";
