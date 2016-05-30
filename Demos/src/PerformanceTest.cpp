@@ -41,7 +41,7 @@
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
 #else
-#include <malloc.h>
+#include <stdlib.h> // mallinfo 
 #endif
 
 #include <osmscout/MapPainterNoOp.h>
