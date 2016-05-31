@@ -188,6 +188,10 @@ namespace osmscout {
     Projection::BatchTransformer batchTransformer(projection);
 
     if (!nodes.empty()) {
+      start=0;
+      length=nodes.size();
+      end=length-1;
+      
       size_t i=0;
       for (PointSequenceIterator it = nodes.begin(); it!=nodes.end(); ++it) {
         Point point = *it;          
