@@ -368,6 +368,10 @@ int main(int argc, char* argv[])
 
         std::list<osmscout::TileRef> tiles;
 
+        // set cache size almost unlimited, 
+        // for better estimate of peak memory usage by tile loading
+        mapService->SetCacheSize(10000000);
+        
         mapService->LookupTiles(magnification,dataBoundingBox,tiles);
         mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
         mapService->ConvertTilesToMapData(tiles,data);
@@ -395,6 +399,8 @@ int main(int argc, char* argv[])
         stats.allocSum = stats.allocSum + (double)alloc_info.uordblks;
 #endif
 
+        // set cache size back to default
+        mapService->SetCacheSize(25);
         dbTimer.Stop();
 
         double dbTime=dbTimer.GetMilliseconds();
