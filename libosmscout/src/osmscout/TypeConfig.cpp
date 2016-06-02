@@ -259,15 +259,16 @@ namespace osmscout {
 
   void FeatureValueBuffer::FreeValue(size_t idx)
   {
-    size_t featureBit=GetFeature(idx).GetFeatureBit();
-    size_t byteIdx=featureBit/8;
+    if (HasFeature(idx)){
+      if (type->GetFeature(idx).GetFeature()->HasValue()) {
+          FeatureValue* value=GetValue(idx);
+          value->~FeatureValue();
+      }
 
-    featureBits[byteIdx]=featureBits[byteIdx] & ~(1 << featureBit%8);
-
-    if (HasFeature(idx) && type->GetFeature(idx).GetFeature()->HasValue()) {
-      FeatureValue* value=GetValue(idx);
-
-      value->~FeatureValue();
+      // clear feature bit
+      size_t featureBit = GetFeature(idx).GetFeatureBit();
+      size_t byteIdx = featureBit / 8;
+      featureBits[byteIdx] = featureBits[byteIdx] & ~(1 << featureBit % 8);
     }
   }
 
