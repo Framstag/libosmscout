@@ -959,6 +959,10 @@ namespace osmscout {
     void AllocateBits();
     void AllocateValueBufferLazy();
 
+    /**
+     * Return a raw pointer to the value (as reserved in the internal featureValueBuffer). If the
+     * featureValueBuffer doe snot yet exist, it will be created lazy.
+     */
     inline FeatureValue* GetValueAndAllocateBuffer(size_t idx)
     {
       AllocateValueBufferLazy();
@@ -979,16 +983,25 @@ namespace osmscout {
       return type;
     }
 
+    /**
+     * Return the numbe rof features defined for this type
+     */
     inline size_t GetFeatureCount() const
     {
       return type->GetFeatureCount();
     }
 
+    /**
+     * Get a feature description for the feature with the given index ([0..featureCount[)
+     */
     inline FeatureInstance GetFeature(size_t idx) const
     {
       return type->GetFeature(idx);
     }
 
+    /**
+     * Return true, if the given feature is set (available), else false.
+     */
     inline bool HasFeature(size_t idx) const
     {
       size_t featureBit=type->GetFeature(idx).GetFeatureBit();
@@ -997,6 +1010,9 @@ namespace osmscout {
     }
 
     /**
+     * Return a raw pointer to the value (as reserved in the internal featureValueBuffer)
+     *
+     * Note:
      * Can return NULL value!
      * HasFeature(idx) && GetFeature(idx).GetFeature()->HasValue()
      *  should be called before accessing the value.

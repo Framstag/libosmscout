@@ -64,7 +64,7 @@ addons:
     - libagg-dev
     - libfreetype6-dev
     - libcairo2-dev
-    - libpangocairo
+    - libpangocairo-1.0-0
     - libpango1.0-dev
     - qt5-default
     - qtdeclarative5-dev

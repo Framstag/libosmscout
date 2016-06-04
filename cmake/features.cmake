@@ -90,6 +90,7 @@ check_function_exists(fseeko HAVE_FSEEKO)
 check_function_exists(mmap HAVE_MMAP)
 check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
+check_function_exists(mallinfo HAVE_MALLINFO)
 
 # check libraries and tools
 find_package(Marisa QUIET)
@@ -120,6 +121,7 @@ find_package(SWIG QUIET)
 find_package(JNI QUIET)
 set(Matlab_FIND_COMPONENTS MX_LIBRARY)
 find_package(MATLAB QUIET)
+find_package(Gperftools QUIET)
 
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})
@@ -137,6 +139,7 @@ set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(HAVE_LIB_PNG ${PNG_FOUND})
 set(HAVE_LIB_OPENGL ${OPENGL_FOUND})
 set(HAVE_LIB_GLUT ${GLUT_FOUND})
+set(HAVE_LIB_GPERFTOOLS ${GPERFTOOLS_FOUND})
 set(CMAKE_AUTOMOC OFF)
 set(HAVE_LIB_QT5_GUI ${Qt5Gui_FOUND})
 set(HAVE_LIB_QT5_WIDGETS ${Qt5Widgets_FOUND})
