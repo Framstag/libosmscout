@@ -16,6 +16,7 @@
 %include <osmscout/GeoCoord.i>
 %include <osmscout/ObjectRef.i>
 %include <osmscout/Point.i>
+%include <osmscout/PointSequence.i>
 
 %include <osmscout/util/GeoBox.i>
 %include <osmscout/util/FileScanner.i>

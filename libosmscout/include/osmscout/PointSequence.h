@@ -66,7 +66,7 @@ namespace osmscout {
   class OSMSCOUT_API PointSequence
   {
   protected:
-      mutable GeoBox *bboxPtr;
+      mutable osmscout::GeoBox *bboxPtr;
 
   public:
       inline PointSequence(): bboxPtr(NULL) {}
@@ -83,7 +83,7 @@ namespace osmscout {
       virtual const Point back() const = 0;
       virtual size_t size() const = 0;
       virtual bool empty() const = 0;
-      virtual const GeoBox bbox() const;
+      virtual const osmscout::GeoBox bbox() const;
   };  
   
   class OSMSCOUT_API VectorPointSequence : public PointSequence
@@ -207,7 +207,9 @@ namespace osmscout {
     mutable Point *frontPoint;
     mutable Point *backPoint;
     
+#ifndef SWIG // It seems that Swig has problems with inline methods: "Error: Syntax error in input"
     const inline static Point createPoint(uint8_t serial, uint32_t latValue, uint32_t lonValue);
+#endif
     
   public:
     MMapPointSequence(char *ptr, size_t coordBitSize, bool hasNodes, size_t nodeCount);    
@@ -222,7 +224,7 @@ namespace osmscout {
     virtual inline size_t size() const { return nodeCount; }
     virtual inline bool empty() const {return nodeCount == 0; };
 
-    virtual const GeoBox bbox() const;
+    virtual const osmscout::GeoBox bbox() const;
   };
 }
 

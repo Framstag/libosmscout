@@ -27,6 +27,7 @@ SWIG_SOURCES=osmscout/util/FileScanner.i\
              osmscout/OptimizeAreasLowZoom.i\
              osmscout/OptimizeWaysLowZoom.i\
              osmscout/Point.i\
+             osmscout/PointSequence.i\
              osmscout/Route.i\
              osmscout/RouteData.i\
              osmscout/RouteNode.i\
