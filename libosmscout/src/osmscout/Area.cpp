@@ -78,15 +78,6 @@ namespace osmscout {
     return true;
   }
 
-  void Area::Ring::GetBoundingBox(GeoBox& boundingBox) const
-  {
-    assert(!nodes->empty());
-
-    const GeoBox bbox = nodes->bbox();
-    
-    boundingBox.Set(bbox.GetMinCoord(), bbox.GetMaxCoord());
-  }
-
   bool Area::GetCenter(GeoCoord& center) const
   {
     assert(!rings.empty());

@@ -39,7 +39,7 @@
 
 #include <osmscout/util/GeoBox.h>
 
-namespace osmscout {
+namespace osmscout { 
 
   /**
    * \defgroup Geometry Geometric helper
@@ -403,10 +403,44 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
+   * Return true, if area a is completely in area b
+   */
+  template<typename M>
+  inline bool IsAreaCompletelyInArea(const PointSequence& a,
+                                     const std::vector<M>& b)
+  {
+    for (const auto& node : a) {
+      if (GetRelationOfPointToArea(node,b)<0) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * \ingroup Geometry
    * Return true, if at least one point of area a in within area b
    */
   template<typename N,typename M>
   inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
+                                        const std::vector<M>& b)
+  {
+    for (const auto& node : a) {
+      if (GetRelationOfPointToArea(node,b)>=0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * \ingroup Geometry
+   * Return true, if at least one point of area a in within area b
+   */
+  template<typename M>
+  inline bool IsAreaAtLeastPartlyInArea(const PointSequence& a,
                                         const std::vector<M>& b)
   {
     for (const auto& node : a) {
@@ -460,6 +494,31 @@ namespace osmscout {
 
     return false;
   }
+
+  /**
+   * \ingroup Geometry
+   * Assumes that the given areas do not intersect.
+   *
+   * Returns true, of area a is within b (because at least
+   * one point of area a is in b), else (at least one point
+   * of area a is outside area b) false
+   */
+  inline bool IsAreaSubOfArea(const PointSequence& a,
+                              const PointSequence& b)
+  {
+    for (const auto& node : a) {
+      int relPos=GetRelationOfPointToArea(node,b);
+
+      if (relPos>0) {
+        return true;
+      }
+      else if (relPos<0) {
+        return false;
+      }
+    }
+
+    return false;
+  }  
 
   /**
    * \ingroup Geometry
@@ -980,6 +1039,7 @@ namespace osmscout {
     void RemoveEliminatingEdges();
 
   public:
+    void AddPolygon(const PointSequence& polygonsCoords);
     void AddPolygon(const std::vector<Point>& polygonsCoords);
 
     bool Merge(std::list<Polygon>& result);

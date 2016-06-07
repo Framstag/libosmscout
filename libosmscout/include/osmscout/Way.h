@@ -36,37 +36,23 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_API Way
+  class OSMSCOUT_API Way : public PointSequenceContainer
   {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features
 
     FileOffset         fileOffset;         //!< Offset into the data file fo this way
-    PointSequence      *nodes;             //!< List of nodes
+
 
   public:
     inline Way()
-    : fileOffset(0), nodes(NULL)
+    : PointSequenceContainer(), fileOffset(0)
     {
       // no code
     }
     
-    inline ~Way()
-    {
-      if (this->nodes != NULL)
-        delete this->nodes;        
-    }
-
-    inline const PointSequence& GetNodes() const 
-    {
-      return *nodes;
-    }
-    
-    inline void SetNodes(PointSequence *nodes) 
-    {
-      if (this->nodes != NULL)
-        delete this->nodes;
-      this->nodes = nodes;
+    virtual inline ~Way()
+    {  
     }
 
     inline FileOffset GetFileOffset() const
@@ -113,42 +99,6 @@ namespace osmscout {
     {
       return (*nodes)[0].GetId()!=0 &&
              (*nodes)[0].GetId()==(*nodes)[nodes->size()-1].GetId();
-    }
-
-    inline Id GetSerial(size_t index) const
-    {
-      return (*nodes)[index].GetSerial();
-    }
-
-    inline Id GetId(size_t index) const
-    {
-      return (*nodes)[index].GetId();
-    }
-
-    inline Id GetFrontId() const
-    {
-      return nodes->front().GetId();
-    }
-
-    inline Id GetBackId() const
-    {
-      return nodes->back().GetId();
-    }
-
-    inline const Point GetPoint(size_t index) const
-    {
-      return (*nodes)[index];
-    }
-
-    inline const GeoCoord GetCoord(size_t index) const
-    {
-      return (*nodes)[index].GetCoord();
-    }
-
-    inline void GetBoundingBox(GeoBox& boundingBox) const
-    {
-      osmscout::GetBoundingBox(*nodes,
-                               boundingBox);
     }
 
     bool GetCenter(GeoCoord& center) const;

@@ -84,15 +84,30 @@ namespace osmscout {
       virtual size_t size() const = 0;
       virtual bool empty() const = 0;
       virtual const osmscout::GeoBox bbox() const;
+      virtual const std::vector<Point> asVector() const;
   };  
+
+  class OSMSCOUT_API MutablePointSequence : public PointSequence
+  {
+  public:
+      inline MutablePointSequence(): PointSequence() {};
+      virtual inline ~MutablePointSequence(){};
+      virtual Point& operator[](size_t i) = 0;    
+      virtual void reserve(size_t size) = 0;
+      virtual void resize(size_t size) = 0;
+      virtual void push_back(Point p) = 0;
+      virtual void pop_back() = 0;
+  };
   
-  class OSMSCOUT_API VectorPointSequence : public PointSequence
+  class OSMSCOUT_API VectorPointSequence : public MutablePointSequence
   {
   private:
       std::vector<Point>    nodes;
   public:
+      inline VectorPointSequence(): 
+        MutablePointSequence(), nodes(){};
       inline VectorPointSequence(std::vector<Point> nodes): 
-        PointSequence(), nodes(nodes){};
+        MutablePointSequence(), nodes(nodes){};
       virtual inline ~VectorPointSequence(){};
 
       class VectorPointSequenceIteratorPriv: public PointSequenceIteratorPriv
@@ -113,6 +128,7 @@ namespace osmscout {
       };
         
       virtual inline const Point operator[](size_t i) const {return nodes[i];}
+      virtual inline Point& operator[](size_t i) {return nodes[i];}
       
       virtual inline PointSequenceIterator begin() const 
       {
@@ -128,6 +144,11 @@ namespace osmscout {
       virtual inline const Point back() const {return nodes.back();};
       virtual inline size_t size() const { return nodes.size(); }
       virtual inline bool empty() const {return nodes.empty(); };
+      virtual inline const std::vector<Point> asVector() const {return nodes; };      
+      virtual inline void reserve(size_t size){ nodes.reserve(size); };
+      virtual inline void resize(size_t size){ nodes.resize(size); };
+      virtual inline void push_back(Point p){ nodes.push_back(p); };
+      virtual inline void pop_back(){ nodes.pop_back(); };
   };
   
   /**
@@ -225,6 +246,93 @@ namespace osmscout {
     virtual inline bool empty() const {return nodeCount == 0; };
 
     virtual const osmscout::GeoBox bbox() const;
+  };
+  
+  class OSMSCOUT_API PointSequenceContainer
+  {
+  protected:
+    PointSequence      *nodes;             //!< List of nodes
+    
+  public:
+    inline PointSequenceContainer(): nodes(NULL) {}
+    
+    virtual inline ~PointSequenceContainer()
+    {
+       if (this->nodes != NULL)
+        delete this->nodes;
+    }
+
+    virtual inline const PointSequence& GetNodes() const 
+    {
+      return *nodes;
+    }
+    
+    virtual inline MutablePointSequence& MutableNodes()
+    {
+      MutablePointSequence *mutableNodes = dynamic_cast<MutablePointSequence*> (nodes);
+      if (mutableNodes==NULL){
+        if (nodes!=NULL){
+          mutableNodes = new VectorPointSequence(nodes->asVector());
+        }else{
+          mutableNodes = new VectorPointSequence();
+        }
+        SetNodes(mutableNodes);
+      }
+      return *mutableNodes;      
+    }
+
+    virtual inline void SetNodes(PointSequence *nodes) 
+    {
+      if (this->nodes != NULL)
+        delete this->nodes;
+      this->nodes = nodes;
+    }
+
+    virtual inline void SetNodes(const std::vector<Point> &nodes) 
+    {
+      SetNodes(new VectorPointSequence(nodes));
+    }
+    
+    virtual inline Id GetSerial(size_t index) const
+    {
+      return (*nodes)[index].GetSerial();
+    }
+
+    virtual inline Id GetId(size_t index) const
+    {
+      return (*nodes)[index].GetId();
+    }
+
+    virtual inline Id GetFrontId() const
+    {
+      return nodes->front().GetId();
+    }
+
+    virtual inline Id GetBackId() const
+    {
+      return nodes->back().GetId();
+    }
+
+    virtual inline const Point GetPoint(size_t index) const
+    {
+      return (*nodes)[index];
+    }
+
+    virtual inline const GeoCoord GetCoord(size_t index) const
+    {
+      return (*nodes)[index].GetCoord();
+    }
+
+    virtual void GetBoundingBox(GeoBox& boundingBox) const;
+
+      // const!
+      /* 
+      inline void SetSerial(size_t index, uint8_t serial)
+      {
+        nodes[index].SetSerial(serial);
+      }
+       */
+
   };
 }
 

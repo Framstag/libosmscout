@@ -22,6 +22,7 @@
 
 #include <osmscout/PointSequence.h>
 
+#include <osmscout/util/Geometry.h>
 #include "osmscout/util/GeoBox.h"
 
 namespace osmscout {
@@ -51,6 +52,15 @@ namespace osmscout {
     }
     bboxPtr = new GeoBox(GeoCoord(latMin, lonMin), GeoCoord(latMax, lonMax));
     return *bboxPtr;
+  }
+   
+  const std::vector<Point> PointSequence::asVector() const
+  {
+      std::vector<Point> result;
+      for (const auto& p: *this){
+          result.push_back(p);
+      }
+      return result;
   }
 
   MMapPointSequence::MMapPointSequence(char *ptr, size_t coordBitSize, bool hasNodes, size_t nodeCount):
@@ -314,6 +324,11 @@ namespace osmscout {
             createPoint(0, latMin, lonMin).GetCoord(), 
             createPoint(0, latMax, lonMax).GetCoord());
     return *bboxPtr;
+  }
+  
+  void PointSequenceContainer::GetBoundingBox(GeoBox& boundingBox) const
+  {
+    osmscout::GetBoundingBox(*nodes, boundingBox);
   }  
 }
 

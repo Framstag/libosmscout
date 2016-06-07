@@ -1099,7 +1099,7 @@ namespace osmscout {
     }
   }
 
-  bool IsValidToWrite(const std::vector<Point>& nodes)
+  bool IsValidToWrite(const PointSequence& nodes)
   {
     if (nodes.size()<=1) {
       return true;
