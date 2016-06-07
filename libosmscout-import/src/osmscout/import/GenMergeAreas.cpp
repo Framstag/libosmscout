@@ -49,7 +49,7 @@ namespace osmscout {
   {
     for (size_t r = 0; r<area.rings.size(); r++) {
       if (area.rings[r].IsOuterRing()) {
-        for (const auto& node : area.rings[r].nodes) {
+        for (const auto& node : area.rings[r].GetNodes()) {
           if (node.GetId()==id) {
             return r;
           }
@@ -68,7 +68,7 @@ namespace osmscout {
   {
     for (const auto& ring: area->rings) {
       if (ring.IsOuterRing()) {
-        for (const auto node : ring.nodes) {
+        for (const auto node : ring.GetNodes()) {
           Id id=node.GetId();
 
           if (nodeUseMap.find(id)!=nodeUseMap.end()) {
@@ -126,7 +126,7 @@ namespace osmscout {
           continue;
         }
 
-        for (const auto node : ring.nodes) {
+        for (const auto node : ring.GetNodes()) {
           Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
@@ -219,7 +219,7 @@ namespace osmscout {
           continue;
         }
 
-        for (const auto node : ring.nodes) {
+        for (const auto node : ring.GetNodes()) {
           if (nodeUseMap.find(node.GetId())!=nodeUseMap.end()) {
             isMergeCandidate=true;
             break;
@@ -283,7 +283,7 @@ namespace osmscout {
 
       for (const auto& ring: area->rings) {
         if (ring.IsOuterRing()) {
-          for (const auto node : ring.nodes) {
+          for (const auto node : ring.GetNodes()) {
             Id id=node.GetId();
 
             if (nodeIds.find(id)==nodeIds.end() &&
@@ -311,7 +311,7 @@ namespace osmscout {
       std::unordered_set<Id> nodeIds;
       std::set<AreaRef>      visitedAreas; // It is possible that two areas intersect in multiple nodes, to avoid multiple merge tests, we monitor the visited areas
 
-      for (const auto node : ring.nodes) {
+      for (const auto node : ring.GetNodes()) {
         Id id=node.GetId();
 
         if(finishedIds.find(id)!=finishedIds.end()) {
@@ -386,8 +386,8 @@ namespace osmscout {
 
           PolygonMerger merger;
 
-          merger.AddPolygon(area.rings[firstOuterRing].nodes);
-          merger.AddPolygon(candidateArea->rings[secondOuterRing].nodes);
+          merger.AddPolygon(area.rings[firstOuterRing].GetNodes());
+          merger.AddPolygon(candidateArea->rings[secondOuterRing].GetNodes());
 
           std::list<PolygonMerger::Polygon> result;
 
@@ -395,7 +395,7 @@ namespace osmscout {
             if (result.size()==1) {
               //std::cout << "MERGE areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
 
-              area.rings[firstOuterRing].nodes=result.front().coords;
+              area.rings[firstOuterRing].SetNodes(new VectorPointSequence(result.front().coords));
 
               EraseAreaInCache(nodeUseMap,
                                candidateArea,

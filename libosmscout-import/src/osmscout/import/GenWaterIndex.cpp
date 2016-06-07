@@ -566,10 +566,10 @@ namespace osmscout {
             !way.GetType()->GetIgnoreSeaLand() &&
             !tunnelFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
             !bridgeFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
-            way.nodes.size()>=2) {
+            way.GetNodes().size()>=2) {
           std::set<Pixel> coords;
 
-          GetCells(level,way.nodes,coords);
+          GetCells(level,way.GetNodes().asVector(),coords);
 
           for (const auto& coord : coords) {
             if (level.IsInAbsolute(coord.x,coord.y)) {

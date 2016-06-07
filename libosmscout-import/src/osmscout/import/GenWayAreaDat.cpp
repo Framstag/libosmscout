@@ -193,7 +193,7 @@ namespace osmscout {
     ring.SetFeatures(rawWay.GetFeatureValueBuffer());
 
     ring.MarkAsOuterRing();
-    ring.nodes.resize(rawWay.GetNodeCount());
+    ring.MutableNodes().resize(rawWay.GetNodeCount());
 
     bool success=true;
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
@@ -208,7 +208,7 @@ namespace osmscout {
         break;
       }
 
-      ring.nodes[n].Set(coord->second.GetSerial(),
+      ring.MutableNodes()[n].Set(coord->second.GetSerial(),
                         coord->second.GetCoord());
     }
 
@@ -216,14 +216,14 @@ namespace osmscout {
       return true;
     }
 
-    if (!IsValidToWrite(ring.nodes)) {
+    if (!IsValidToWrite(ring.GetNodes())) {
       progress.Error("Area coordinates are not dense enough to be written for area "+
                      NumberToString(wayId));
       return false;
     }
 
     if (parameter.GetStrictAreas() &&
-        !AreaIsSimple(ring.nodes)) {
+        !AreaIsSimple(ring.GetNodes().asVector())) {
       progress.Error("Area "+NumberToString(wayId)+" of type '"+ring.GetType()->GetName()+"' is not simple");
       return true;
     }

@@ -108,7 +108,7 @@ namespace osmscout {
       writer.WriteNumber(way.GetType()->GetWayId());
       writer.Write(name);
       writer.Write(location);
-      writer.Write(way.nodes,false);
+      writer.Write(way.GetNodes(),false);
 
       overallDataCount++;
     }
@@ -217,19 +217,19 @@ namespace osmscout {
 
     bool reduced=false;
 
-    if (way.nodes.size()>=2) {
+    if (way.GetNodes().size()>=2) {
       size_t lastIndex=0;
       size_t currentIndex=1;
 
       nodeBuffer.clear();
 
       // Prefill with the first coordinate
-      way.nodes[0].GetCoord().EncodeToBuffer(buffers[0]);
+      way.GetNodes()[0].GetCoord().EncodeToBuffer(buffers[0]);
 
-      nodeBuffer.push_back(way.nodes[0]);
+      nodeBuffer.push_back(way.GetNodes()[0]);
 
-      for (size_t n=1; n<way.nodes.size(); n++) {
-        way.nodes[n].GetCoord().EncodeToBuffer(buffers[currentIndex]);
+      for (size_t n=1; n<way.GetNodes().size(); n++) {
+        way.GetNodes()[n].GetCoord().EncodeToBuffer(buffers[currentIndex]);
 
         if (IsEqual(buffers[lastIndex],
                     buffers[currentIndex])) {
@@ -238,19 +238,19 @@ namespace osmscout {
             reduced=true;
           }
           else if (way.GetSerial(n-1)==0) {
-            way.nodes[n-1]=way.nodes[n];
+            way.MutableNodes()[n-1]=way.GetNodes()[n];
             duplicateCount++;
             reduced=true;
           }
           else {
-            nodeBuffer.push_back(way.nodes[n]);
+            nodeBuffer.push_back(way.GetNodes()[n]);
 
             lastIndex=currentIndex;
             currentIndex=(lastIndex+1)%2;
           }
         }
         else {
-          nodeBuffer.push_back(way.nodes[n]);
+          nodeBuffer.push_back(way.GetNodes()[n]);
 
           lastIndex=currentIndex;
           currentIndex=(lastIndex+1)%2;
@@ -265,7 +265,7 @@ namespace osmscout {
         return true;
       }
       else {
-        way.nodes=nodeBuffer;
+        way.SetNodes(nodeBuffer);
       }
     }
 
@@ -278,7 +278,7 @@ namespace osmscout {
                                                              bool& /*save*/)
   {
     // In this case there is nothing to optimize
-    if (way.nodes.size()<3) {
+    if (way.GetNodes().size()<3) {
       return true;
     }
 
@@ -288,12 +288,12 @@ namespace osmscout {
     size_t current=1;
     bool   reduced=false;
 
-    nodeBuffer.push_back(way.nodes[0]);
+    nodeBuffer.push_back(way.GetNodes()[0]);
 
-    while (current+1<way.nodes.size()) {
-      double distance=CalculateDistancePointToLineSegment(way.nodes[current],
+    while (current+1<way.GetNodes().size()) {
+      double distance=CalculateDistancePointToLineSegment(way.GetNodes()[current],
                                                           nodeBuffer[last],
-                                                          way.nodes[current+1]);
+                                                          way.GetNodes()[current+1]);
 
       if (distance<1/latConversionFactor &&
           way.GetSerial(current)==0) {
@@ -302,17 +302,17 @@ namespace osmscout {
         current++;
       }
       else {
-        nodeBuffer.push_back(way.nodes[current]);
+        nodeBuffer.push_back(way.GetNodes()[current]);
 
         last++;
         current++;
       }
     }
 
-    nodeBuffer.push_back(way.nodes[current]);
+    nodeBuffer.push_back(way.GetNodes()[current]);
 
     if (reduced) {
-      way.nodes=nodeBuffer;
+      way.SetNodes(nodeBuffer);
     }
 
     return true;
@@ -323,7 +323,7 @@ namespace osmscout {
                                                 Way& way,
                                                 bool& save)
   {
-    overallCount+=way.nodes.size();
+    overallCount+=way.GetNodes().size();
 
     if (!RemoveDuplicateNodes(progress,
                               offset,
@@ -409,11 +409,11 @@ namespace osmscout {
   void SortWayDataGenerator::GetTopLeftCoordinate(const Way& data,
                                                   GeoCoord& coord)
   {
-    coord=data.nodes[0].GetCoord();
+    coord=data.GetNodes()[0].GetCoord();
 
-    for (size_t n=1; n<data.nodes.size(); n++) {
-      coord.Set(std::max(coord.GetLat(),data.nodes[n].GetLat()),
-                std::min(coord.GetLon(),data.nodes[n].GetLon()));
+    for (size_t n=1; n<data.GetNodes().size(); n++) {
+      coord.Set(std::max(coord.GetLat(),data.GetNodes()[n].GetLat()),
+                std::min(coord.GetLon(),data.GetNodes()[n].GetLon()));
     }
   }
 
