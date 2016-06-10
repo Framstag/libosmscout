@@ -887,16 +887,16 @@ namespace osmscout {
 
       //---
 
-      tile->GetOptimizedWayData().CopyPrefillData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
-      tile->GetOptimizedWayData().CopyData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
+      tile->GetOptimizedWayData().CopyPrefillData([&optimizedWayMap](const WayRef& way) {optimizedWayMap[way->GetFileOffset()]=way;});
+      tile->GetOptimizedWayData().CopyData([&optimizedWayMap](const WayRef& way) {optimizedWayMap[way->GetFileOffset()]=way;});
 
       tile->GetWayData().CopyPrefillData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
       tile->GetWayData().CopyData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
 
       //---
 
-      tile->GetOptimizedAreaData().CopyPrefillData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
-      tile->GetOptimizedAreaData().CopyData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
+      tile->GetOptimizedAreaData().CopyPrefillData([&optimizedAreaMap](const AreaRef& area) {optimizedAreaMap[area->GetFileOffset()]=area;});
+      tile->GetOptimizedAreaData().CopyData([&optimizedAreaMap](const AreaRef& area) {optimizedAreaMap[area->GetFileOffset()]=area;});
 
       tile->GetAreaData().CopyPrefillData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
       tile->GetAreaData().CopyData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
