@@ -2233,6 +2233,9 @@ namespace osmscout {
     bool   hasNodes;
     size_t nodeCount;
     ReadPointSequenceSetup(coordBitSize, hasNodes, nodeCount, readIds);
+    if (nodeCount==0) {
+        return;
+    }
 
     nodes.resize(nodeCount);
 
