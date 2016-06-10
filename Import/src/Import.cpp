@@ -91,7 +91,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -h|--help                            show this help" << std::endl;
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
-  std::cout << " -s <end step>                        set final step" << std::endl;
+  std::cout << " -e <end step>                        set final step" << std::endl;
   std::cout << " --eco                                do delete temporary fiels ASAP" << std::endl;
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
