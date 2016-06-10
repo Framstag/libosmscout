@@ -505,7 +505,7 @@ namespace osmscout {
    */
   inline bool IsAreaSubOfArea(const PointSequence& a,
                               const PointSequence& b)
-  {
+  {    
     for (const auto& node : a) {
       int relPos=GetRelationOfPointToArea(node,b);
 

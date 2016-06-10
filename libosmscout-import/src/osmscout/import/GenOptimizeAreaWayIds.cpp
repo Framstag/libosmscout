@@ -243,7 +243,7 @@ namespace osmscout {
             }
           }
           if (cleared){
-            ring.SetNodes(new VectorPointSequence(nodes));
+            ring.SetNodes(nodes);
           }
         }
 
@@ -324,7 +324,7 @@ namespace osmscout {
           }
         }
         if (cleared){
-          data.SetNodes(new VectorPointSequence(nodes));
+          data.SetNodes(nodes);
         }
 
         writer.Write(type);

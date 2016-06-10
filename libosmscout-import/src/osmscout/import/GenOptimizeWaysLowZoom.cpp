@@ -269,7 +269,7 @@ namespace osmscout
                   newNodes.push_back(way->GetNodes()[i]);
                 }
 
-                way->SetNodes(new VectorPointSequence(newNodes));
+                way->SetNodes(newNodes);
               }
               else {
                 for (size_t i=0; i<(*otherWay)->GetNodes().size(); i++) {
@@ -280,7 +280,7 @@ namespace osmscout
                   newNodes.push_back(way->GetNodes()[i]);
                 }
 
-                way->SetNodes(new VectorPointSequence(newNodes));
+                way->SetNodes(newNodes);
               }
 
               usedWays.insert((*otherWay)->GetFileOffset());

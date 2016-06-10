@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
@@ -70,6 +71,15 @@ namespace osmscout {
 
   public:
       inline PointSequence(): bboxPtr(NULL) {}
+      inline PointSequence(const PointSequence &that)
+      {
+        if (that.bboxPtr==NULL){
+          bboxPtr = NULL;
+        }else{
+          bboxPtr = new osmscout::GeoBox(*that.bboxPtr);
+        }
+      }
+      
       virtual inline ~PointSequence() 
       {
           if (bboxPtr!=NULL)
@@ -108,6 +118,8 @@ namespace osmscout {
         MutablePointSequence(), nodes(){};
       inline VectorPointSequence(std::vector<Point> nodes): 
         MutablePointSequence(), nodes(nodes){};
+      inline VectorPointSequence(const VectorPointSequence &that): 
+        MutablePointSequence(), nodes(that.nodes){};
       virtual inline ~VectorPointSequence(){};
 
       class VectorPointSequenceIteratorPriv: public PointSequenceIteratorPriv
@@ -234,6 +246,7 @@ namespace osmscout {
     
   public:
     MMapPointSequence(char *ptr, size_t coordBitSize, bool hasNodes, size_t nodeCount);    
+    MMapPointSequence(const MMapPointSequence &that);
     virtual ~MMapPointSequence();
     virtual const Point operator[](size_t i) const ;
     
@@ -247,23 +260,38 @@ namespace osmscout {
 
     virtual const osmscout::GeoBox bbox() const;
   };
-  
+    
   class OSMSCOUT_API PointSequenceContainer
   {
   protected:
+    static VectorPointSequence emptySequence;
     PointSequence      *nodes;             //!< List of nodes
+    
+    virtual bool CopyNodes(PointSequence *nodes);    
+    virtual void SetNodes(PointSequence *nodes);
     
   public:
     inline PointSequenceContainer(): nodes(NULL) {}
     
+    PointSequenceContainer(const PointSequenceContainer& that);
+    PointSequenceContainer(PointSequenceContainer&& that);
+    
     virtual inline ~PointSequenceContainer()
     {
-       if (this->nodes != NULL)
+      if (this->nodes != NULL){
         delete this->nodes;
+        this->nodes = NULL;
+      }
     }
+    
+    PointSequenceContainer& operator=(const PointSequenceContainer& that);
+    PointSequenceContainer& operator=(PointSequenceContainer&& that);
 
     virtual inline const PointSequence& GetNodes() const 
     {
+      if (nodes == NULL)
+        return emptySequence;
+      
       return *nodes;
     }
     
@@ -279,13 +307,6 @@ namespace osmscout {
         SetNodes(mutableNodes);
       }
       return *mutableNodes;      
-    }
-
-    virtual inline void SetNodes(PointSequence *nodes) 
-    {
-      if (this->nodes != NULL)
-        delete this->nodes;
-      this->nodes = nodes;
     }
 
     virtual inline void SetNodes(const std::vector<Point> &nodes) 

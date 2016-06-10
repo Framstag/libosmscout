@@ -395,7 +395,7 @@ namespace osmscout {
             if (result.size()==1) {
               //std::cout << "MERGE areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
 
-              area.rings[firstOuterRing].SetNodes(new VectorPointSequence(result.front().coords));
+              area.rings[firstOuterRing].SetNodes(result.front().coords);
 
               EraseAreaInCache(nodeUseMap,
                                candidateArea,

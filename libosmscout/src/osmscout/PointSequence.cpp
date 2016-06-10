@@ -75,6 +75,22 @@ namespace osmscout {
   {
       
   }
+  
+  MMapPointSequence::MMapPointSequence(const MMapPointSequence &that):
+          PointSequence(that),
+          
+          ptr(that.ptr),
+          coordBitSize(that.coordBitSize), 
+          hasNodes(that.hasNodes), 
+          nodeCount(that.nodeCount),
+          
+          internalIterator(NULL),
+          frontPoint(NULL), 
+          backPoint(NULL)
+  {
+      
+  }
+  
   MMapPointSequence::~MMapPointSequence()
   {
       if (internalIterator != NULL)
@@ -325,10 +341,75 @@ namespace osmscout {
             createPoint(0, latMax, lonMax).GetCoord());
     return *bboxPtr;
   }
+    
+
+
+  PointSequenceContainer::PointSequenceContainer(const PointSequenceContainer& that):
+    nodes(NULL)
+  {
+    assert(CopyNodes(that.nodes));      
+  }
   
+  PointSequenceContainer::PointSequenceContainer(PointSequenceContainer&& that)
+  {
+      this->nodes = that.nodes;
+      that.nodes = NULL;
+  }
+
+  void PointSequenceContainer::SetNodes(PointSequence *nodes) 
+  {
+    if (this->nodes != NULL){
+      delete this->nodes;
+    }
+    this->nodes = nodes;
+  }
+    
+  bool PointSequenceContainer::CopyNodes(PointSequence *nodes)
+  {
+    if (this->nodes != NULL){
+        delete this->nodes;
+    }
+    if (nodes == NULL){
+        this->nodes = NULL;
+        return true;
+    }
+          
+    const MMapPointSequence *mmapBased = dynamic_cast<const MMapPointSequence*> (nodes);
+    if (mmapBased!=NULL){
+        this->nodes = new MMapPointSequence(*mmapBased);
+        return true;
+    }
+    
+    const VectorPointSequence *vectorBased = dynamic_cast<const VectorPointSequence*> (nodes);
+    if (vectorBased!=NULL){
+        this->nodes = new VectorPointSequence(*vectorBased);
+        return true;
+    }
+    return false;
+  }
+
+  
+  PointSequenceContainer& PointSequenceContainer::operator=(const PointSequenceContainer& that)
+  {
+      assert(CopyNodes(that.nodes)); 
+      
+      return *this;
+  }
+  
+  PointSequenceContainer& PointSequenceContainer::operator=(PointSequenceContainer&& that)
+  {
+      SetNodes(that.nodes);
+      that.nodes = NULL;
+      
+      return *this;
+  }
+     
   void PointSequenceContainer::GetBoundingBox(GeoBox& boundingBox) const
   {
     osmscout::GetBoundingBox(*nodes, boundingBox);
   }  
+  
+  VectorPointSequence PointSequenceContainer::emptySequence = VectorPointSequence();
+
 }
 

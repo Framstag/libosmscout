@@ -233,7 +233,7 @@ namespace osmscout
             }
           }
         }
-        newRings.back().SetNodes(new VectorPointSequence(newNodes));
+        newRings.back().SetNodes(newNodes);
 
         r++;
       }

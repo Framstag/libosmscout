@@ -939,7 +939,7 @@ namespace osmscout {
     relation.rings.reserve(parts.size());
     for (const auto& ring : parts) {
       assert(!ring.role.GetNodes().empty());
-
+      
       relation.rings.push_back(ring.role);
     }
 

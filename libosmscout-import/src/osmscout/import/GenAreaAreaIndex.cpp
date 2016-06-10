@@ -326,7 +326,7 @@ namespace osmscout {
           }
         }
         else {
-          ring->SetNodes(new VectorPointSequence(nodeBuffer));
+          ring->SetNodes(nodeBuffer);
           ++ring;
         }
       }
@@ -383,7 +383,7 @@ namespace osmscout {
       }
 
       if (reduced) {
-        ring.SetNodes(new VectorPointSequence(nodeBuffer));
+        ring.SetNodes(nodeBuffer);
       }
     }
 

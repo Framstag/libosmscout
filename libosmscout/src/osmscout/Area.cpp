@@ -373,7 +373,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(*ring->nodes,
+    writer.Write(ring->GetNodes(),
                  ring->GetType()->CanRoute());
 
     ++ring;
@@ -389,7 +389,7 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(*ring->nodes,
+      writer.Write(ring->GetNodes(),
                    ring->GetType()->GetAreaId()!=typeIgnore &&
                    ring->GetType()->CanRoute());
 
@@ -422,8 +422,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(*ring->nodes,
-                 true);
+    writer.Write(ring->GetNodes(), true);
 
     ++ring;
 
@@ -438,7 +437,7 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(*ring->nodes,
+      writer.Write(ring->GetNodes(),
                    ring->GetType()->GetAreaId()!=typeIgnore ||
                    ring->ring==outerRingId);
 
@@ -471,8 +470,7 @@ namespace osmscout {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
-    writer.Write(*ring->nodes,
-                 false);
+    writer.Write(ring->GetNodes(), false);
 
     ++ring;
 
@@ -487,8 +485,7 @@ namespace osmscout {
       }
 
       writer.Write(ring->ring);
-      writer.Write(*ring->nodes,
-                   false);
+      writer.Write(ring->GetNodes(), false);
 
       ++ring;
     }

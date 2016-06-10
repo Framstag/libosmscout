@@ -1500,7 +1500,7 @@ namespace osmscout {
           WayRef w;
 
           if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
-            way.SetNodes(new VectorPointSequence(nodes));
+            way.SetNodes(nodes);
             return false;
           }
 
@@ -1518,7 +1518,7 @@ namespace osmscout {
       }
     }
 
-    way.SetNodes(new VectorPointSequence(nodes));
+    way.SetNodes(nodes);
     return true;
   }
 
