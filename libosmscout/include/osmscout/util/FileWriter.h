@@ -116,6 +116,11 @@ namespace osmscout {
 
     void Write(const PointSequence& nodes, bool writeIds);
 
+    inline void Write(const std::vector<Point>& nodes, bool writeIds)
+    {
+      Write(VectorPointSequence(nodes), writeIds);
+    }
+
     void WriteTypeId(TypeId id, uint8_t maxBytes);
 
     void Flush();
