@@ -120,9 +120,7 @@ target_link_libraries(osmscout_import
 		osmscout
 		${ZLIB_LIBRARIES}
 		${LIBXML2_LIBRARIES}
-		${PROTOBUF_LIBRARIES}
-		${PROTOBUF_PROTOC_LIBRARIES}
-		${PROTOBUF_LITE_LIBRARIES})
+		${PROTOBUF_LIBRARIES})
 if(MARISA_FOUND)
     target_include_directories(osmscout_import PRIVATE ${MARISA_INCLUDE_DIRS})
     target_link_libraries(osmscout_import ${MARISA_LIBRARIES})
