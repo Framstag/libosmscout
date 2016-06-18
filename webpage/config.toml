@@ -1,0 +1,44 @@
+baseurl = "http://libosmscout.sourceforge.net/"
+languageCode = "en-us"
+title = "libosmscout"
+disableRSS = true
+disableSitemap = true
+pluralizeListTitles = false
+PygmentsCodeFences = true
+pygmentsuseclasses = true
+
+[[menu.main]]
+    name = "Main"
+    weight = 1
+    identifier = "main"
+    url = "/"
+
+[[menu.main]]
+    name = "Features"
+    weight = 2
+    identifier = "features"
+    url = "/features/"
+
+[[menu.main]]
+    name = "Documentation"
+    weight = 3
+    identifier = "documentation"
+    url = "/documentation/"
+    
+[[menu.main]]
+    name = "Tutorials"
+    weight = 4
+    identifier = "tutorials"
+    url = "/tutorials/"
+    
+[[menu.main]]
+    name = "Examples"
+    weight = 5
+    identifier = "examples"
+    url = "/examples/"
+    
+[[menu.main]]
+    name = "Contact"
+    weight = 6
+    identifier = "contact"
+    url = "/documentation/contact"    

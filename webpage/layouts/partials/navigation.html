@@ -1,0 +1,42 @@
+<nav>
+  <div id="leftnav">
+    <ul>
+      {{ $currentNode := . }}
+      {{ range .Site.Menus.main }}
+        {{ if .HasChildren }}
+        <li {{if $currentNode.IsMenuCurrent "main" . }}class="active"{{end}}>
+          {{if $currentNode.IsMenuCurrent "main" . }}
+            <span>{{ .Name }}</span>
+          {{else}}
+            <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
+          {{end}}
+          {{if or ($currentNode.IsMenuCurrent "main" .) ($currentNode.HasMenuCurrent "main" .) }}
+          <ul>
+            {{ range .Children }}
+            <li{{if $currentNode.IsMenuCurrent "main" . }} class="active"{{end}}>
+              {{if $currentNode.IsMenuCurrent "main" . }}
+              <span>{{ .Name }}</span>
+              {{else}}
+              <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
+              {{end}}
+            </li>
+            {{ end }}
+          </ul>
+            {{ end }}
+        {{else}}
+        <li {{if $currentNode.IsMenuCurrent "main" . }}class="active"{{end}}>
+          {{if $currentNode.IsMenuCurrent "main" . }}
+            <span>{{ .Name }}</span>
+            {{else}}
+            <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
+          {{end}}
+        {{end}}
+        </li>
+      {{end}}
+      <li>
+<a href="https://sourceforge.net/p/libosmscout/" rel="nofollow"><span><img alt="Project page" src="https://sourceforge.net/sflogo.php?type=10&group_id=268607"></span></a>
+      <li>
+    </ul>
+    
+  </div>
+</nav>
