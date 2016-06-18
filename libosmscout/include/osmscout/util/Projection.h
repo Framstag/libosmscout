@@ -296,8 +296,11 @@ namespace osmscout {
     /**
      * Converts a geo coordinate to a pixel coordinate
      */
-    virtual void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const = 0;
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
 
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
@@ -377,8 +380,14 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -479,8 +488,14 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -578,8 +593,14 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
 
   protected:
 

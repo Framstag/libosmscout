@@ -239,28 +239,6 @@ namespace osmscout {
     x+=width/2;
   }
 
-  void MercatorProjectionOld::GeoToPixel(const GeoCoord& coord,
-                                         double& x, double& y) const
-  {
-    assert(valid);
-
-    // Screen coordinate relative to center of image
-    x=(coord.GetLon()-this->lon)*scaleGradtorad;
-    y=(atanh(sin(coord.GetLat()*gradtorad))-latOffset)*scale;
-
-    if (angle!=0.0) {
-      double xn=x*angleNegCos-y*angleNegSin;
-      double yn=x*angleNegSin+y*angleNegCos;
-
-      x=xn;
-      y=yn;
-    }
-
-    // Transform to canvas coordinate
-    y=height/2-y;
-    x+=width/2;
-  }
-
   void MercatorProjectionOld::GeoToPixel(const BatchTransformer& /*transformData*/) const
   {
     assert(false); //should not be called
@@ -467,28 +445,6 @@ namespace osmscout {
     x+=width/2;
   }
 
-  void MercatorProjection::GeoToPixel(const GeoCoord& coord,
-                                      double& x, double& y) const
-  {
-    assert(valid);
-
-    // Screen coordinate relative to center of image
-    x=(coord.GetLon()-this->lon)*scaleGradtorad;
-    y=(atanh(sin(coord.GetLat()*gradtorad))-latOffset)*scale;
-
-    if (angle!=0.0) {
-      double xn=x*angleNegCos-y*angleNegSin;
-      double yn=x*angleNegSin+y*angleNegCos;
-
-      x=xn;
-      y=yn;
-    }
-
-    // Transform to canvas coordinate
-    y=height/2-y;
-    x+=width/2;
-  }
-
   void MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
   {
     assert(false); //should not be called
@@ -648,13 +604,6 @@ namespace osmscout {
       y=height-(scale*atanh_sin_pd(lat*gradtorad)-latOffset);
     }
 
-    void TileProjection::GeoToPixel(const GeoCoord& coord,
-                                    double& x, double& y) const
-    {
-      x=coord.GetLon()*scaleGradtorad-lonOffset;
-      y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
-    }
-
     //this basically transforms 2 coordinates in 1 call
     void TileProjection::GeoToPixel(const BatchTransformer& transformData) const
     {
@@ -676,13 +625,6 @@ namespace osmscout {
     {
       x=lon*scaleGradtorad-lonOffset;
       y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
-    }
-
-    void TileProjection::GeoToPixel(const GeoCoord& coord,
-                                    double& x, double& y) const
-    {
-      x=coord.GetLon()*scaleGradtorad-lonOffset;
-      y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
     }
 
     void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
