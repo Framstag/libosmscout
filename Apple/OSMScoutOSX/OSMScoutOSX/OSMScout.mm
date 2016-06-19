@@ -34,7 +34,7 @@ namespace osmscout {
         if (!styleConfig){
             std::string style = map.c_str();
             style += "/standard.oss";
-            styleConfig=new StyleConfig(database->GetTypeConfig());
+            styleConfig=StyleConfigRef(new StyleConfig(database->GetTypeConfig()));
             if (!styleConfig->Load(style)) {
                 std::cerr << "Cannot open style" << std::endl;
                 return false;
@@ -53,10 +53,9 @@ namespace osmscout {
             drawParameter.SetPatternPaths(paths);
             drawParameter.SetRenderSeaLand(true);
             drawParameter.SetDebugPerformance(false);
-            drawBreaker = new MyBreaker();
+            drawBreaker = std::shared_ptr<MyBreaker>(new MyBreaker());
             drawParameter.SetBreaker(drawBreaker);
             drawParameter.SetDropNotVisiblePointLabels(false);
-            searchParameter.SetMaximumNodes(30000);
             searchParameter.SetBreaker(drawBreaker);
             isMapPainterConfigured = true;
         }
@@ -67,66 +66,18 @@ namespace osmscout {
         assert(isMapPainterConfigured);
         Magnification mag(zoom);
         projection.Set(x, y, mag, dpi, (width+1), (height+1));
-        
-        TypeSet              nodeTypes;
-        std::vector<TypeSet> wayTypes;
-        TypeSet              areaTypes;
-        
-        styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(), nodeTypes);
-        styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(), wayTypes);
-        styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(), areaTypes);
-        
-        double lon1,lat1,lon2,lat2;
         GeoBox boundingBox;
-        projection.GetDimensions(boundingBox);
-        lon1 = boundingBox.GetMinLon();
-        lat1 = boundingBox.GetMinLat();
-        lon2 = boundingBox.GetMaxLon();
-        lat2 = boundingBox.GetMaxLat();
-        if(projection.GetMagnification() == loadedMagnification &&
-           !(lon2>loadedLonMax ||
-             lon1<loadedLonMin ||
-             lat2>loadedLatMax ||
-             lat1<loadedLatMin)){
-               std::cout<<"DrawMap tile ("<<x<<","<<y<<") using cached data"<<std::endl;
-           } else {
-               loadedLonMin = lon1;
-               loadedLatMin = lat1;
-               loadedLonMax = lon2;
-               loadedLatMax = lat2;
-               double deltaLon = loadedLonMax - loadedLonMin;
-               loadedLonMin -= 2*deltaLon;
-               loadedLonMax += 2*deltaLon;
-               double deltaLat = loadedLatMax - loadedLatMin;
-               loadedLatMin -= 2*deltaLat;
-               loadedLatMax += 2*deltaLat;
-               loadedMagnification = projection.GetMagnification();
-               std::cout<<"DrawMap tile ("<<x<<","<<y<<") loading data for ("<<loadedLonMin<<","<<loadedLatMin<<"),(" <<loadedLonMax<<","<<loadedLatMax<<")"<<std::endl;
-               database->FlushCache();
-               
-               boundingBox.Set(GeoCoord(loadedLatMin, loadedLonMin), GeoCoord(loadedLatMax, loadedLonMax));
-               mapService->GetObjects(searchParameter,
-                                      loadedMagnification,
-                                      
-                                      nodeTypes,
-                                      boundingBox,
-                                      data.nodes,
-                                      
-                                      wayTypes,
-                                      boundingBox,
-                                      data.ways,
-                                      
-                                      areaTypes,
-                                      boundingBox,
-                                      data.areas);
-               
-               if (drawParameter.GetRenderSeaLand()) {
-                   mapService->GetGroundTiles(boundingBox,
-                                              loadedMagnification,
-                                              data.groundTiles);
-                   
-               }
-           }
+        
+        std::list<osmscout::TileRef> tiles;
+        mapService->LookupTiles(projection,tiles);
+        mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+        mapService->ConvertTilesToMapData(tiles,data);
+        if (drawParameter.GetRenderSeaLand()) {
+            mapService->GetGroundTiles(boundingBox,
+                                       mag,
+                                       data.groundTiles);
+        }
+        
         mapPainter->DrawMap(*styleConfig, projection, drawParameter, data, paintCG);
     }
     
