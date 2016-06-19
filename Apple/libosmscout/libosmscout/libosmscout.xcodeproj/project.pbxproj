@@ -149,8 +149,6 @@
 		F58399451AF6E1C400F79DFF /* GeoBox.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399421AF6E1C400F79DFF /* GeoBox.h */; };
 		F58399461AF6E1C400F79DFF /* Logger.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399431AF6E1C400F79DFF /* Logger.h */; };
 		F58399471AF6E1C400F79DFF /* Tiling.h in Headers */ = {isa = PBXBuildFile; fileRef = F58399441AF6E1C400F79DFF /* Tiling.h */; };
-		F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
-		F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
 		F5B6E3161C046F1500A3EC39 /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B6E3151C046F1500A3EC39 /* Exception.cpp */; };
 		F5CA00151B9FB524003B0EF6 /* Parsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CA00141B9FB524003B0EF6 /* Parsing.cpp */; };
 		F5CA00161B9FB604003B0EF6 /* Parsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CA00141B9FB524003B0EF6 /* Parsing.cpp */; };
@@ -761,7 +759,6 @@
 				F56129AE1C5FEBEE00EA29EA /* AreaDataFile.cpp in Sources */,
 				F54DAA491815DA6500625DDA /* Area.cpp in Sources */,
 				F51E3F2B161A5FEC00D51926 /* StopClock.cpp in Sources */,
-				F58399481AF6E20600F79DFF /* TextSearchIndex.cpp in Sources */,
 				F54FD00C186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F56129AF1C5FEBEE00EA29EA /* WayDataFile.cpp in Sources */,
 				F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */,
@@ -832,7 +829,6 @@
 				F54DAA551815DA8000625DDA /* Coord.cpp in Sources */,
 				F54DAA531815DA7800625DDA /* Area.cpp in Sources */,
 				F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */,
-				F58399491AF6E20700F79DFF /* TextSearchIndex.cpp in Sources */,
 				F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
 				F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */,

@@ -10,7 +10,6 @@
 #define OSMScout_h
 
 #if __cplusplus
-#include <osmscout/TypeSet.h>
 #include <osmscout/Database.h>
 #include <osmscout/Way.h>
 #include <osmscout/Tag.h>
@@ -43,16 +42,15 @@ namespace osmscout {
     class OSMScoutCpp {
     private:
         std::string         map;
-        TypeSet             types;
         RoutingProfile      *routingProfile;
         DatabaseParameter   databaseParameter;
         DatabaseRef         database;
         bool                isDatabaseOpened;
-        StyleConfig         *styleConfig;
+        StyleConfigRef      styleConfig;
         MapPainterIOS       *mapPainter;
         TileProjection      projection;
         MapParameter        drawParameter;
-        MyBreaker           *drawBreaker;
+        std::shared_ptr<MyBreaker> drawBreaker;
         double              loadedLatMin;
         double              loadedLonMin;
         double              loadedLatMax;

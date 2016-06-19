@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html>
+{{ partial "head.html" . }}
+
+<body>
+{{ partial "header.html" . }}
+{{ partial "navigation.html" . }}
+
+<div id="content">
+<h1>{{ .Title }}</h1>
+
+<main>
+  {{ .Content }}
+</main>
+</div>
+
+{{partial "footer.html" . }}
+
+</body>
+</html>

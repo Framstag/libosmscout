@@ -34,7 +34,9 @@ target_link_libraries(osmscout_map_opengl
 		osmscout
 		osmscout_map
 		${OPENGL_LIBRARIES}
-		${GLUT_LIBRARIES})
+		${GLUT_glut_LIBRARY}  # NOTE: We should use GLUT_LIBRARIES, but FindGLUT.cmake contains bug: https://gitlab.kitware.com/cmake/cmake/issues/14060
+                          #       It puts NOTFOUND keyword to GLUT_LIBRARIES when Xi or Xmu library not found.
+)
 target_compile_definitions(osmscout_map_opengl PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
 install(TARGETS osmscout_map_opengl
         RUNTIME DESTINATION bin
