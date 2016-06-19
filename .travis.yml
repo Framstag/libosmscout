@@ -13,30 +13,44 @@ matrix:
       dist: trusty
       sudo: required
       compiler: gcc
-      env: BUILDTOOL=autoconf
+      env:
+        - BUILDTOOL=autoconf
+        - TARGET=build
     - os: linux
       dist: trusty
       sudo: required
       compiler: gcc
-      env: BUILDTOOL=cmake
+      env:
+        - BUILDTOOL=cmake
+        - TARGET=build
     - os: linux
       dist: trusty
       sudo: required
       compiler: clang
-      env: BUILDTOOL=autoconf
+      env:
+        - BUILDTOOL=autoconf
+        - TARGET=build
     - os: osx
-      osx_image: xcode7.2
+      osx_image: xcode7.3
       compiler: clang
-      env: BUILDTOOL=autoconf
+      env:
+        - BUILDTOOL=autoconf
+        - TARGET=build
     - os: osx
-      osx_image: xcode7.2
+      osx_image: xcode7.3
       compiler: clang
-      env: BUILDTOOL=cmake
+      env:
+        - BUILDTOOL=cmake
+        - TARGET=build
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - TARGET=website
 
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then (brew update); fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then (brew install cmake protobuf qt5); fi
+  - $TRAVIS_BUILD_DIR/ci/travis/install.sh
 
 before_script:
   - . setupAutoconf.sh
@@ -52,25 +66,4 @@ notifications:
       - tim@framstag.com
     on_success: change
     on_failure: always
-
-addons:
-  apt:
-    packages:
-    - autoconf
-    - pkg-config
-    - libxml2-dev
-    - libprotobuf-dev
-    - protobuf-compiler
-    - libagg-dev
-    - libfreetype6-dev
-    - libcairo2-dev
-    - libpangocairo-1.0-0
-    - libpango1.0-dev
-    - qt5-default
-    - qtdeclarative5-dev
-    - libqt5svg5-dev
-    - qtlocation5-dev
-    - freeglut3
-    - freeglut3-dev
-    - libmarisa-dev
 
