@@ -67,6 +67,10 @@ OST
   to numeric values again.
 */
 MAX SPEEDS
+  SPEED "CZ:urban"         =  50 km/h
+  SPEED "CZ:rural"         =  90 km/h
+  SPEED "CZ:motorway"      = 130 km/h
+
   SPEED "DE:living_street" =  10 km/h
   SPEED "DE:urban"         =  50 km/h
   SPEED "DE:rural"         = 100 km/h
@@ -75,6 +79,10 @@ MAX SPEEDS
   SPEED "FR:urban"         =  50 km/h
   SPEED "FR:rural"         =  90 km/h
   SPEED "FR:motorway"      = 130 km/h
+
+  SPEED "SK:urban"         =  50 km/h
+  SPEED "SK:rural"         =  90 km/h
+  SPEED "SK:motorway"      = 130 km/h
 
 /*
   Allows you to map surface descriptions to a grade value ([1-5]).
