@@ -5,8 +5,6 @@ echo "OS:         " $TRAVIS_OS_NAME
 echo "Build tool: " $BUILDTOOL
 echo "Compiler:   " $CXX
 
-set -x
-
 export DEBIAN_FRONTEND=noninteractive
 
 if [ "$TARGET" = "build" ]; then
@@ -14,11 +12,9 @@ if [ "$TARGET" = "build" ]; then
     sudo apt-get -qq update
     
     if [ "$BUILDTOOL" = "autoconf" ]; then
-      sudo apt-get install -y \
-        autoconf 
+      sudo apt-get install -y autoconf 
     elif [ "$BUILDTOOL" = "cmake" ]; then
-      sudo apt-get install -y \
-        cmake
+      sudo apt-get install -y cmake
     fi
     
     sudo apt-get install -y \
@@ -41,5 +37,11 @@ if [ "$TARGET" = "build" ]; then
   fi
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
+  
+  wget https://github.com/spf13/hugo/releases/download/v0.16/hugo_0.16-1_amd64.deb
+  sudo dpkg -i hugo_0.16-1_amd64.deb
+
+  sudo apt-get -qq update
+  sudo apt-get install -y python3-pygments lftp
 fi
 
