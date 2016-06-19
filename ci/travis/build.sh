@@ -12,7 +12,7 @@ if [ "$TARGET" = "build" ]; then
   fi
 elif [ "$TARGET" = "website" ]; then
   echo "Building website..."
-  cd website
+  cd webpage
   hugo --verbose
 fi
 
