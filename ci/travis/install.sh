@@ -9,13 +9,13 @@ echo "Installation start time: `date`"
 
 export DEBIAN_FRONTEND=noninteractive
 
-if [ "$TARGET" = "build" ]; then
+if [ "$TARGET" == "build" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get -qq update
     
-    if [ "$BUILDTOOL" = "autoconf" ]; then
+    if [ "$BUILDTOOL" == "autoconf" ]; then
       sudo apt-get install -y autoconf 
-    elif [ "$BUILDTOOL" = "cmake" ]; then
+    elif [ "$BUILDTOOL" == "cmake" ]; then
       sudo apt-get install -y cmake
     fi
     
@@ -28,16 +28,16 @@ if [ "$TARGET" = "build" ]; then
       qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev \
       freeglut3 freeglut3-dev \
       libmarisa-dev      
-  elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
+  elif  [ "$TRAVIS_OS_NAME" == "osx" ]; then
     brew update
     
-    if [ "$BUILDTOOL" = "cmake" ]; then
+    if [ "$BUILDTOOL" == "cmake" ]; then
       brew install cmake
     fi
     
     brew install protobuf qt5
   fi
-elif [ "$TARGET" = "website" ]; then
+elif [ "$TARGET" == "website" ]; then
   echo "Installing dependencies for website..."
   
   wget https://github.com/spf13/hugo/releases/download/v0.16/hugo_0.16-1_amd64.deb
