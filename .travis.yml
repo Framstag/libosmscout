@@ -51,9 +51,7 @@ matrix:
 
 before_install:
   - env
-  - echo "Installation start time: `date`"
   - $TRAVIS_BUILD_DIR/ci/travis/install.sh
-  - echo "Installation end time: `date`"
 
 before_script:
   - . setupAutoconf.sh
@@ -61,9 +59,7 @@ before_script:
   - pkg-config --list-all | sort
   
 script:
-  - echo "Build start time: `date`"
   - $TRAVIS_BUILD_DIR/ci/travis/build.sh
-  - echo "Build end time: `date`"
 
 notifications:
   email:
