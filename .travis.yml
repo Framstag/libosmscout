@@ -50,6 +50,7 @@ matrix:
 
 
 before_install:
+  - env
   - echo "Installation start time: `date`"
   - $TRAVIS_BUILD_DIR/ci/travis/install.sh
   - echo "Installation end time: `date`"
