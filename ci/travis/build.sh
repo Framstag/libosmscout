@@ -2,19 +2,19 @@
 
 echo "Build start time: `date`"
 
-if [ "$TARGET" == "build" ]; then
-  if [ "$BUILDTOOL" == "autoconf" ]; then
+if [ "$TARGET" = "build" ]; then
+  if [ "$BUILDTOOL" = "autoconf" ]; then
     make full
     (cd libosmscout/tests && make check)
-  elif [ "$BUILDTOOL" == "cmake" ]; then
+  elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
     cmake ..
     make
   fi
-elif [ "$TARGET" == "website" ]; then
+elif [ "$TARGET" = "website" ]; then
   echo "Building website..."
-  if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "TRAVIS_BRANCH" == "master" ]; then
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then
     cd webpage
     hugo --verbose
     
