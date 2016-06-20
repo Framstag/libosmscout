@@ -31,6 +31,8 @@
 
 namespace osmscout {
 
+#define MAG_LEVEL_LINEAR_OPT_THRESHOLD 10
+
   /**
    * \ingroup Geometry
    *
@@ -525,6 +527,61 @@ namespace osmscout {
   };
 
   /**
+   * MercatorProjection that use some approximations on higher magnification levels.
+   */
+  class OSMSCOUT_API ApproximateMercatorProjection : public MercatorProjection
+  {
+  protected:
+    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
+
+  public:
+    inline ApproximateMercatorProjection(): MercatorProjection()
+    {
+    };
+
+    inline bool Set(double lon,double lat,
+                    const Magnification& magnification,
+                    size_t width,size_t height)
+    {
+      return Set(lon,lat,0,magnification,GetDPI(),width,height);
+    }
+
+    inline bool Set(double lon, double lat,
+                    double angle,
+                    const Magnification& magnification,
+                    size_t width, size_t height)
+    {
+      return Set(lon,lat,angle,magnification,GetDPI(),width,height);
+    }
+
+    inline bool Set(double lon, double lat,
+                    const Magnification& magnification,
+                    double dpi,
+                    size_t width, size_t height)
+    {
+      return Set(lon,lat,0,magnification,dpi,width,height);
+    }
+
+    bool Set(double lon, double lat,
+             double angle,
+             const Magnification& magnification,
+             double dpi,
+             size_t width, size_t height);
+
+    void GeoToPixel(double lon, double lat,
+                    double& x, double& y) const;
+
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
+  };
+
+  /**
    * Mercator projection as used by the OpenStreetMap tile rendering code.
    *
    * The TileProjection simplifies the general Mercator projection code to
@@ -549,8 +606,8 @@ namespace osmscout {
       v2df              sse2Height;
 #endif
 
-  private:
-    bool SetInternal(double lonMin,double latMin,
+  protected:
+    virtual bool SetInternal(double lonMin,double latMin,
                      double lonMax,double latMax,
                      const Magnification& magnification,
                      double dpi,
@@ -605,6 +662,39 @@ namespace osmscout {
   protected:
 
     void GeoToPixel(const BatchTransformer& transformData) const;
+  };
+
+  /**
+   * TileProjection that use some approximations on higher magnification levels.
+   */
+  class OSMSCOUT_API ApproximateTileProjection : public TileProjection
+  {
+  protected:
+    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
+
+    virtual bool SetInternal(double lonMin,double latMin,
+                     double lonMax,double latMax,
+                     const Magnification& magnification,
+                     double dpi,
+                     size_t width,size_t height);
+
+  public:
+    inline ApproximateTileProjection(): TileProjection()
+    {
+    }
+
+    void GeoToPixel(double lon, double lat,
+                    double& x, double& y) const;
+
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
+
   };
 }
 
