@@ -5,6 +5,8 @@ echo "OS:         " $TRAVIS_OS_NAME
 echo "Build tool: " $BUILDTOOL
 echo "Compiler:   " $CXX
 
+echo "Installation start time: `date`"
+
 export DEBIAN_FRONTEND=noninteractive
 
 if [ "$TARGET" = "build" ]; then
@@ -42,6 +44,8 @@ elif [ "$TARGET" = "website" ]; then
   sudo dpkg -i hugo_0.16-1_amd64.deb
 
   sudo apt-get -qq update
-  sudo apt-get install -y python3-pygments lftp
+  sudo apt-get install -y python-pygments lftp
 fi
+
+echo "Installation end time: `date`"
 

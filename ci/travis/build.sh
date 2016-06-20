@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Build start time: `date`"
+
 if [ "$TARGET" = "build" ]; then
   if [ "$BUILDTOOL" = "autoconf" ]; then
     make full
@@ -15,4 +17,6 @@ elif [ "$TARGET" = "website" ]; then
   cd webpage
   hugo --verbose
 fi
+
+echo "Build end time: `date`"
 
