@@ -288,10 +288,10 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  osmscout::TileProjection      projection;
-  osmscout::MapParameter        drawParameter;
-  osmscout::AreaSearchParameter searchParameter;
-  std::list<LevelStats>         statistics;
+  osmscout::ApproximateTileProjection   projection;
+  osmscout::MapParameter                drawParameter;
+  osmscout::AreaSearchParameter         searchParameter;
+  std::list<LevelStats>                 statistics;
 
   searchParameter.SetUseMultithreading(true);
 
