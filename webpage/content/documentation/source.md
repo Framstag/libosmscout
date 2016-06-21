@@ -53,8 +53,14 @@ You can also find detailed build instructions
 In the top level directory type:
 
 ```bash
+  $ . setupAutoconf.sh
   $ make full
 ```
+
+The `setupAutoconf.sh script` will extend `PKG_CONFIG_PATH` and
+`LD_LIBRARY_PATH` so that the individual library projects are found during
+the `configure` step and that the libraries are found by the loader
+after they have been build.
 
 The top level Makefile should first generate the configure scripts for all
 project subdirectories, then it calls the configure scripts for all
@@ -80,3 +86,15 @@ afterwards build them.
 The OSMScout2 Qt based demo is build using qmake if autoconf is used. The
 CMake build uses it own build file.
 
+### Running applications
+
+To run the various tools and demos which are part of the libosmscout build
+you must  make sure, that the libosmsocut libraries are found by the loader.
+
+#### Linux/Mac OS
+For this `LD_LIBRARY_PATH` has to be extended. See the `setupAutoconf.sh`
+script in the top level directory for how to do it.
+
+### Windows
+Libraries are search via `PATH` or mst be in the same directory as the
+executable that requires it.
