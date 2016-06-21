@@ -24,21 +24,28 @@ pygmentsuseclasses = true
     weight = 3
     identifier = "documentation"
     url = "/documentation/"
-    
+
+[[menu.main]]
+    name = "API Documentation"
+    weight = 4
+    identifier = "api-doc"
+    url = "/api-doc/html/index.html"
+
 [[menu.main]]
     name = "Tutorials"
-    weight = 4
+    weight = 5
     identifier = "tutorials"
     url = "/tutorials/"
-    
+
 [[menu.main]]
     name = "Examples"
-    weight = 5
+    weight = 6
     identifier = "examples"
     url = "/examples/"
-    
+
 [[menu.main]]
     name = "Contact"
-    weight = 6
+    weight = 7
     identifier = "contact"
-    url = "/documentation/contact"    
+    url = "/documentation/contact"
+

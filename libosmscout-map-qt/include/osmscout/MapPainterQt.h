@@ -37,6 +37,9 @@ namespace osmscout {
         size_t direction;
     } FollowPathHandle;
 
+  /**
+    Implementation of MapPainter for Qt
+   */
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
   private:
