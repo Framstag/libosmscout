@@ -104,7 +104,7 @@ private:
   osmscout::LocationServiceRef  locationService;
   osmscout::MapServiceRef       mapService;
   osmscout::MapService::CallbackId callbackId;
-  osmscout::MercatorProjection  projection;
+  osmscout::ApproximateMercatorProjection projection;
   osmscout::RouterParameter     routerParameter;
   osmscout::RoutingServiceRef   router;
   osmscout::RoutePostprocessor  routePostprocessor;

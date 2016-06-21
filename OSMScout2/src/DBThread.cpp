@@ -573,7 +573,7 @@ bool DBThread::RenderMap(QPainter& painter,
     return true;
   }
 
-  osmscout::MercatorProjection projection;
+  osmscout::ApproximateMercatorProjection projection;
 
   projection.Set(finishedLon,
                  finishedLat,
