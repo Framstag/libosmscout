@@ -573,7 +573,7 @@ bool DBThread::RenderMap(QPainter& painter,
     return true;
   }
 
-  osmscout::ApproximateMercatorProjection projection;
+  osmscout::MercatorProjection projection;
 
   projection.Set(finishedLon,
                  finishedLat,
@@ -582,6 +582,8 @@ bool DBThread::RenderMap(QPainter& painter,
                  dpi,
                  finishedImage->width(),
                  finishedImage->height());
+
+  projection.SetLinearInterpolationUsage(finishedMagnification.GetLevel() >= 10);
 
   osmscout::GeoBox boundingBox;
 

@@ -282,7 +282,8 @@ namespace osmscout {
   : valid(false),
     latOffset(0.0),
     scale(1),
-    scaleGradtorad(0)
+    scaleGradtorad(0),
+    useLinearInterpolation(false)
   {
     // no code
   }
@@ -387,6 +388,10 @@ namespace osmscout {
     lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
     lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
 
+    // derivation of "latToYPixel" function in projection center
+    double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    scaledLatDeriv = latDeriv * gradtorad * scale;
+
     /*
     std::cout << "Center: " << lat << "° lat " << lon << "° lon" << std::endl;
     std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
@@ -430,7 +435,12 @@ namespace osmscout {
 
     // Screen coordinate relative to center of image
     x=(lon-this->lon)*scaleGradtorad;
-    y=(atanh(sin(lat*gradtorad))-latOffset)*scale;
+
+    if (!useLinearInterpolation){
+      y = (atanh(sin(lat*gradtorad))-latOffset)*scale;
+    }else{
+      y = (lat - this->lat) * scaledLatDeriv;
+    }
 
     if (angle!=0.0) {
       double xn=x*angleNegCos-y*angleNegSin;
@@ -484,54 +494,13 @@ namespace osmscout {
                height);
   }
 
-  bool ApproximateMercatorProjection::Set(double lon, double lat,
-             double angle,
-             const Magnification& magnification,
-             double dpi,
-             size_t width, size_t height)
-  {
-    bool valid = MercatorProjection::Set(lon, lat, angle, magnification, dpi, width, height);
-
-    // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
-    scaledLatDeriv = latDeriv * gradtorad * scale;
-
-    return valid;
-  }
-
-  void ApproximateMercatorProjection::GeoToPixel(double lon, double lat,
-                    double& x, double& y) const
-  {
-    assert(valid);
-
-    // Screen coordinate relative to center of image
-    x=(lon-this->lon)*scaleGradtorad;
-
-    if (magnification.GetLevel() < MAG_LEVEL_LINEAR_OPT_THRESHOLD){
-      y = (atanh(sin(lat*gradtorad))-latOffset)*scale;
-    }else{
-      y = (lat - this->lat) * scaledLatDeriv;
-    }
-
-    if (angle!=0.0) {
-      double xn=x*angleNegCos-y*angleNegSin;
-      double yn=x*angleNegSin+y*angleNegCos;
-
-      x=xn;
-      y=yn;
-    }
-
-    // Transform to canvas coordinate
-    y=height/2-y;
-    x+=width/2;
-  }
-
   TileProjection::TileProjection()
   : valid(false),
     lonOffset(0.0),
     latOffset(0.0),
     scale(1),
-    scaleGradtorad(0)
+    scaleGradtorad(0),
+    useLinearInterpolation(false)
   {
     // no code
   }
@@ -579,6 +548,10 @@ namespace osmscout {
     pixelSize=earthExtentMeter/magnification.GetMagnification()/width;
     meterInPixel=1/pixelSize;
     meterInMM=meterInPixel*25.4/pixelSize;
+
+    // derivation of "latToYPixel" function in projection center
+    double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    scaledLatDeriv = latDeriv * gradtorad * scale;
 
 #ifdef OSMSCOUT_HAVE_SSE2
     sse2LonOffset      = _mm_set1_pd(lonOffset);
@@ -666,7 +639,12 @@ namespace osmscout {
                                     double& x, double& y) const
     {
       x=lon*scaleGradtorad-lonOffset;
-      y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
+
+      if (!useLinearInterpolation){
+          y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
+      }else{
+          y = (height / 2) - ((lat - this->lat) * scaledLatDeriv);
+      }
     }
 
     void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
@@ -676,33 +654,4 @@ namespace osmscout {
 
   #endif
 
-  bool ApproximateTileProjection::SetInternal(double lonMin,double latMin,
-                     double lonMax,double latMax,
-                     const Magnification& magnification,
-                     double dpi,
-                     size_t width,size_t height)
-  {
-    bool valid = TileProjection::SetInternal(lonMin, latMin,
-                     lonMax, latMax,
-                     magnification,
-                     dpi,
-                     width, height);
-
-    // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
-    scaledLatDeriv = latDeriv * gradtorad * scale;
-
-    return valid;
-  }
-
-  void ApproximateTileProjection::GeoToPixel(double lon, double lat,
-                                  double& x, double& y) const
-  {
-    if (magnification.GetLevel() < MAG_LEVEL_LINEAR_OPT_THRESHOLD){
-      TileProjection::GeoToPixel(lon, lat, x, y);
-    }else{
-      x = lon*scaleGradtorad-lonOffset;
-      y = (height / 2) - ((lat - this->lat) * scaledLatDeriv);
-    }
-  }
 }

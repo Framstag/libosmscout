@@ -288,10 +288,10 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  osmscout::ApproximateTileProjection   projection;
-  osmscout::MapParameter                drawParameter;
-  osmscout::AreaSearchParameter         searchParameter;
-  std::list<LevelStats>                 statistics;
+  osmscout::TileProjection      projection;
+  osmscout::MapParameter        drawParameter;
+  osmscout::AreaSearchParameter searchParameter;
+  std::list<LevelStats>         statistics;
 
   searchParameter.SetUseMultithreading(true);
 
@@ -360,6 +360,7 @@ int main(int argc, char* argv[])
                        tileHeight);
 
         projection.GetDimensions(boundingBox);
+        projection.SetLinearInterpolationUsage(level >= 10);
 
         osmscout::StopClock dbTimer;
 
