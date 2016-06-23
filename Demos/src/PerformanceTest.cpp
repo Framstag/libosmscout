@@ -360,6 +360,7 @@ int main(int argc, char* argv[])
                        tileHeight);
 
         projection.GetDimensions(boundingBox);
+        projection.SetLinearInterpolationUsage(level >= 10);
 
         osmscout::StopClock dbTimer;
 
