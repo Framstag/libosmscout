@@ -441,7 +441,7 @@ namespace osmscout {
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
     double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
-    bool useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
+    bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
 
   public:
     MercatorProjection();
@@ -523,7 +523,8 @@ namespace osmscout {
       return Move(pixel,0);
     }
 
-    virtual inline bool IsLinearInterpolationEnabled(){
+    inline bool IsLinearInterpolationEnabled()
+    {
       return useLinearInterpolation;
     }
 
@@ -531,8 +532,9 @@ namespace osmscout {
      * Switch to enable/disable linear interpolation of latitude to pixel computation.
      * It speedup GeoToPixel calculation with fractional error on small render area.
      */
-    virtual inline void SetLinearInterpolationUsage(bool b){
-      useLinearInterpolation = b;
+    inline void SetLinearInterpolationUsage(bool b)
+    {
+      useLinearInterpolation=b;
     }
 
   protected:
@@ -557,7 +559,7 @@ namespace osmscout {
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
     double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
-    bool useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
+    bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
 
 #ifdef OSMSCOUT_HAVE_SSE2
     //some extra vars for special sse needs
@@ -621,7 +623,8 @@ namespace osmscout {
       GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
     }
 
-    virtual inline bool IsLinearInterpolationEnabled(){
+    inline bool IsLinearInterpolationEnabled()
+    {
       return useLinearInterpolation;
     }
 
@@ -629,7 +632,8 @@ namespace osmscout {
      * Switch to enable/disable linear interpolation of latitude to pixel computation.
      * It speedup GeoToPixel calculation with fractional error on small render area.
      */
-    virtual inline void SetLinearInterpolationUsage(bool b){
+    inline void SetLinearInterpolationUsage(bool b)
+    {
       useLinearInterpolation = b;
     }
 

@@ -436,10 +436,11 @@ namespace osmscout {
     // Screen coordinate relative to center of image
     x=(lon-this->lon)*scaleGradtorad;
 
-    if (!useLinearInterpolation){
-      y = (atanh(sin(lat*gradtorad))-latOffset)*scale;
-    }else{
-      y = (lat - this->lat) * scaledLatDeriv;
+    if (!useLinearInterpolation) {
+      y=(atanh(sin(lat*gradtorad))-latOffset)*scale;
+    }
+    else {
+      y=(lat-this->lat)*scaledLatDeriv;
     }
 
     if (angle!=0.0) {
@@ -640,10 +641,11 @@ namespace osmscout {
     {
       x=lon*scaleGradtorad-lonOffset;
 
-      if (!useLinearInterpolation){
-          y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
-      }else{
-          y = (height / 2) - ((lat - this->lat) * scaledLatDeriv);
+      if (!useLinearInterpolation) {
+        y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
+      }
+      else {
+        y=(height/2)-((lat-this->lat)*scaledLatDeriv);
       }
     }
 
