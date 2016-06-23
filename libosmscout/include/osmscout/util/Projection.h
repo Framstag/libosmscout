@@ -296,8 +296,8 @@ namespace osmscout {
     /**
      * Converts a geo coordinate to a pixel coordinate
      */
-    virtual inline void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const
+    inline void GeoToPixel(const GeoCoord& coord,
+                           double& x, double& y) const
     {
       GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
     }
@@ -491,15 +491,6 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    /**
-     * Converts a geo coordinate to a pixel coordinate
-     */
-    virtual inline void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const
-    {
-      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
-    }
-
     bool Move(double horizPixel,
               double vertPixel);
 
@@ -613,15 +604,6 @@ namespace osmscout {
 
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
-
-    /**
-     * Converts a geo coordinate to a pixel coordinate
-     */
-    virtual inline void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const
-    {
-      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
-    }
 
     inline bool IsLinearInterpolationEnabled()
     {
