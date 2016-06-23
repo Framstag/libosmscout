@@ -583,6 +583,8 @@ bool DBThread::RenderMap(QPainter& painter,
                  finishedImage->width(),
                  finishedImage->height());
 
+  projection.SetLinearInterpolationUsage(finishedMagnification.GetLevel() >= 10);
+
   osmscout::GeoBox boundingBox;
 
   projection.GetDimensions(boundingBox);
