@@ -296,8 +296,11 @@ namespace osmscout {
     /**
      * Converts a geo coordinate to a pixel coordinate
      */
-    virtual void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const = 0;
+    inline void GeoToPixel(const GeoCoord& coord,
+                           double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
 
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
@@ -377,8 +380,14 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
+    virtual inline void GeoToPixel(const GeoCoord& coord,
+                            double& x, double& y) const
+    {
+      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
+    }
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -431,6 +440,9 @@ namespace osmscout {
     double scale;
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
+    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
+    bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
+
   public:
     MercatorProjection();
 
@@ -479,9 +491,6 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
-
     bool Move(double horizPixel,
               double vertPixel);
 
@@ -505,9 +514,24 @@ namespace osmscout {
       return Move(pixel,0);
     }
 
+    inline bool IsLinearInterpolationEnabled()
+    {
+      return useLinearInterpolation;
+    }
+
+    /**
+     * Switch to enable/disable linear interpolation of latitude to pixel computation.
+     * It speedup GeoToPixel calculation with fractional error on small render area.
+     */
+    inline void SetLinearInterpolationUsage(bool b)
+    {
+      useLinearInterpolation=b;
+    }
+
   protected:
     void GeoToPixel(const BatchTransformer& transformData) const;
   };
+
 
   /**
    * Mercator projection as used by the OpenStreetMap tile rendering code.
@@ -525,6 +549,9 @@ namespace osmscout {
     double scale;
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
+    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
+    bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
+
 #ifdef OSMSCOUT_HAVE_SSE2
     //some extra vars for special sse needs
       v2df              sse2LonOffset;
@@ -534,8 +561,8 @@ namespace osmscout {
       v2df              sse2Height;
 #endif
 
-  private:
-    bool SetInternal(double lonMin,double latMin,
+  protected:
+    virtual bool SetInternal(double lonMin,double latMin,
                      double lonMax,double latMax,
                      const Magnification& magnification,
                      double dpi,
@@ -578,13 +605,25 @@ namespace osmscout {
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+    inline bool IsLinearInterpolationEnabled()
+    {
+      return useLinearInterpolation;
+    }
+
+    /**
+     * Switch to enable/disable linear interpolation of latitude to pixel computation.
+     * It speedup GeoToPixel calculation with fractional error on small render area.
+     */
+    inline void SetLinearInterpolationUsage(bool b)
+    {
+      useLinearInterpolation = b;
+    }
 
   protected:
 
     void GeoToPixel(const BatchTransformer& transformData) const;
   };
+
 }
 
 #endif
