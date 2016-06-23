@@ -377,6 +377,8 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
+    using Projection::GeoToPixel;	// make every GeoToPixel available
+
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
 
@@ -487,6 +489,8 @@ namespace osmscout {
 
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
+
+    using Projection::GeoToPixel;	// make every GeoToPixel available
 
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
@@ -601,6 +605,8 @@ namespace osmscout {
 
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
+
+    using Projection::GeoToPixel;	// make every GeoToPixel available
 
     void GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
