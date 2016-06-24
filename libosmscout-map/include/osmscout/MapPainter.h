@@ -428,8 +428,7 @@ namespace osmscout {
 
     void Transform(const Projection& projection,
                    const MapParameter& parameter,
-                   double lon,
-                   double lat,
+                   const GeoCoord& coord,
                    double& x,
                    double& y);
 

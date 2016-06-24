@@ -111,10 +111,12 @@ namespace osmscout {
           }
         }
         else {
-          projection.GeoToPixel(lon,lat,x,y);
+          projection.GeoToPixel(GeoCoord(lat,lon),
+                                x,y);
         }
 #else
-        projection.GeoToPixel(lon,lat,x,y);
+        projection.GeoToPixel(GeoCoord(lat,lon),
+                              x,y);
 #endif
       }
 
@@ -123,8 +125,8 @@ namespace osmscout {
 #ifdef OSMSCOUT_HAVE_SSE2
         if (count!=0) {
           count=0;
-          projection.GeoToPixel(lon[0],
-                                lat[0],
+          projection.GeoToPixel(GeoCoord(lat[0],
+                                         lon[0]),
                                 *xPointer[0],
                                 *yPointer[0]);
         }
@@ -290,17 +292,8 @@ namespace osmscout {
     /**
      * Converts a geo coordinate to a pixel coordinate
      */
-    virtual void GeoToPixel(double lon, double lat,
+    virtual void GeoToPixel(const GeoCoord& coord,
                             double& x, double& y) const = 0;
-
-    /**
-     * Converts a geo coordinate to a pixel coordinate
-     */
-    inline void GeoToPixel(const GeoCoord& coord,
-                           double& x, double& y) const
-    {
-      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
-    }
 
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
@@ -377,17 +370,8 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(double lon, double lat,
+    void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
-
-    /**
-     * Converts a geo coordinate to a pixel coordinate
-     */
-    virtual inline void GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const
-    {
-      GeoToPixel(coord.GetLon(), coord.GetLat(), x, y);
-    }
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -456,30 +440,30 @@ namespace osmscout {
       return valid;
     }
 
-    inline bool Set(double lon,double lat,
+    inline bool Set(const GeoCoord& coord,
                     const Magnification& magnification,
                     size_t width,size_t height)
     {
-      return Set(lon,lat,0,magnification,GetDPI(),width,height);
+      return Set(coord,0.0,magnification,GetDPI(),width,height);
     }
 
-    inline bool Set(double lon, double lat,
+    inline bool Set(const GeoCoord& coord,
                     double angle,
                     const Magnification& magnification,
                     size_t width, size_t height)
     {
-      return Set(lon,lat,angle,magnification,GetDPI(),width,height);
+      return Set(coord,angle,magnification,GetDPI(),width,height);
     }
 
-    inline bool Set(double lon, double lat,
+    inline bool Set(const GeoCoord& coord,
                     const Magnification& magnification,
                     double dpi,
                     size_t width, size_t height)
     {
-      return Set(lon,lat,0,magnification,dpi,width,height);
+      return Set(coord,0.0,magnification,dpi,width,height);
     }
 
-    bool Set(double lon, double lat,
+    bool Set(const GeoCoord& coord,
              double angle,
              const Magnification& magnification,
              double dpi,
@@ -488,7 +472,7 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(double lon, double lat,
+    void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     bool Move(double horizPixel,
@@ -523,9 +507,9 @@ namespace osmscout {
      * Switch to enable/disable linear interpolation of latitude to pixel computation.
      * It speedup GeoToPixel calculation with fractional error on small render area.
      */
-    inline void SetLinearInterpolationUsage(bool b)
+    inline void SetLinearInterpolationUsage(bool useLinearInterpolation)
     {
-      useLinearInterpolation=b;
+      this->useLinearInterpolation=useLinearInterpolation;
     }
 
   protected:
@@ -602,7 +586,7 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(double lon, double lat,
+    void GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     inline bool IsLinearInterpolationEnabled()

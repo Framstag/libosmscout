@@ -92,8 +92,7 @@ void MapWidget::TriggerMapRendering()
     DBThread         *dbThread=DBThread::GetInstance();
     RenderMapRequest request;
 
-    request.lat=center.GetLat();
-    request.lon=center.GetLon();
+    request.coord=center;
     request.angle=angle;
     request.magnification=magnification;
     request.width=width();
@@ -177,8 +176,7 @@ void MapWidget::paint(QPainter *painter)
         RenderMapRequest request;
         QRectF           boundingBox=contentsBoundingRect();
 
-        request.lat=center.GetLat();
-        request.lon=center.GetLon();
+        request.coord=center;
         request.angle=angle;
         request.magnification=magnification;
         request.width=boundingBox.width();

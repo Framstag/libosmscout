@@ -117,8 +117,7 @@ int main(int argc, char* argv[])
   drawParameter.SetFontSize(2.0);
   drawParameter.SetDebugPerformance(true);
 
-  projection.Set(lon,
-                 lat,
+  projection.Set(osmscout::GeoCoord(lat,lon),
                  osmscout::Magnification(zoom),
                  width,
                  height);

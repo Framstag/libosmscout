@@ -144,8 +144,8 @@ int main(int argc, char* argv[])
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
 
-      projection.Set(action->lon,
-                     action->lat,
+      projection.Set(osmscout::GeoCoord(action->lat,
+                                        action->lon),
                      osmscout::Magnification(action->magnification),
                      96.0,
                      width,

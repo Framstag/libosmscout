@@ -74,7 +74,8 @@ StyleError::StyleError(QString msg){
     }
 }
 
-QString StyleError::GetTypeName() const {
+QString StyleError::GetTypeName() const
+{
     switch(type){
     case Symbol:
         return QString("symbol");
@@ -88,6 +89,8 @@ QString StyleError::GetTypeName() const {
     case Exception:
         return QString("exception");
         break;
+    default:
+      return QString("???");
     }
 }
 
@@ -98,13 +101,11 @@ DBThread::DBThread()
    painter(NULL),
    iconDirectory(),
    currentImage(NULL),
-   currentLat(0.0),
-   currentLon(0.0),
+   currentCoord(0.0,0.0),
    currentAngle(0.0),
    currentMagnification(0),
    finishedImage(NULL),
-   finishedLat(0.0),
-   finishedLon(0.0),
+   finishedCoord(0.0,0.0),
    finishedMagnification(0),
    currentRenderRequest(),
    doRender(false),
@@ -292,8 +293,7 @@ void DBThread::TriggerMapRendering()
     currentImage=new QImage(QSize(request.width,request.height),QImage::Format_RGB32);
   }
 
-  currentLon=request.lon;
-  currentLat=request.lat;
+  currentCoord=request.coord;
   currentAngle=request.angle;
   currentMagnification=request.magnification;
 
@@ -323,8 +323,7 @@ void DBThread::TriggerMapRendering()
 
     osmscout::StopClock overallTimer;
 
-    projection.Set(currentLon,
-                   currentLat,
+    projection.Set(currentCoord,
                    currentAngle,
                    currentMagnification,
                    dpi,
@@ -403,8 +402,7 @@ void DBThread::TriggerMapRendering()
   }
 
   std::swap(currentImage,finishedImage);
-  std::swap(currentLon,finishedLon);
-  std::swap(currentLat,finishedLat);
+  std::swap(currentCoord,finishedCoord);
   std::swap(currentAngle,finishedAngle);
   std::swap(currentMagnification,finishedMagnification);
 
@@ -431,7 +429,7 @@ bool DBThread::RenderMap(QPainter& painter,
     return false;
   }
 
-  projection.Set(finishedLon,finishedLat,
+  projection.Set(finishedCoord,
                  finishedAngle,
                  finishedMagnification,
                  finishedImage->width(),
@@ -469,15 +467,13 @@ bool DBThread::RenderMap(QPainter& painter,
 
   double dx=0;
   double dy=0;
-  if (request.lon!=finishedLon || request.lat!=finishedLat) {
+  if (request.coord!=finishedCoord) {
     double rx,ry,fx,fy;
 
-    projection.GeoToPixel(request.lon,
-                          request.lat,
+    projection.GeoToPixel(request.coord,
                           rx,
                           ry);
-    projection.GeoToPixel(finishedLon,
-                          finishedLat,
+    projection.GeoToPixel(finishedCoord,
                           fx,
                           fy);
     dx=fx-rx;
@@ -513,8 +509,7 @@ bool DBThread::RenderMap(QPainter& painter,
 
   return finishedImage->width()==(int)request.width &&
          finishedImage->height()==(int)request.height &&
-         finishedLon==request.lon &&
-         finishedLat==request.lat &&
+         finishedCoord==request.coord &&
          finishedAngle==request.angle &&
          finishedMagnification==request.magnification;
 }

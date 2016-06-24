@@ -130,8 +130,7 @@ int main(int argc, char* argv[])
 
   drawParameter.SetFontName("/usr/share/fonts/TTF/LiberationSans-Regular.ttf");
 
-  projection.Set(lon,
-                 lat,
+  projection.Set(osmscout::GeoCoord(lat,lon),
                  osmscout::Magnification(zoom),
                  DPI,
                  width,

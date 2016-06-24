@@ -151,8 +151,7 @@ void OnDisplay()
 {
   osmscout::MapData data;
 
-  projection.Set(lon,
-                 lat,
+  projection.Set(osmscout::GeoCoord(lat,lon),
                  osmscout::Magnification(zoom),
                  DPI,
                  width,
