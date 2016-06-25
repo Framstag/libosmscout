@@ -437,7 +437,7 @@ namespace osmscout {
     x=(coord.GetLon()-this->lon)*scaleGradtorad;
 
     if (useLinearInterpolation) {
-      y=(lat-this->lat)*scaledLatDeriv;
+      y=(coord.GetLat()-this->lat)*scaledLatDeriv;
     }
     else {
       y=(atanh(sin(coord.GetLat()*gradtorad))-latOffset)*scale;
