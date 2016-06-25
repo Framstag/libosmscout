@@ -28,6 +28,7 @@
 
 namespace osmscout {
 
+
   /**
    * \defgroup File Platform independent file access
    *
@@ -75,6 +76,32 @@ namespace osmscout {
    * @throws IOException
    */
   extern OSMSCOUT_API uint8_t BytesNeededToAddressFileData(const std::string& filename);
+
+  /**
+   * \ingroup File
+   *
+   * Returns true of the given filename exists in the filesystem. Else it returns false.
+   *
+   * Note that this function returns, does not tell you anything about the type of the
+   * filesystem entry. It you still be a regular file, a directory, a pipe or something
+   * completely different.
+   *
+   * Also not ethat there is no differenciation in error codes. If there was an error
+   * during access to the file entry while though the file entry does in fact exists,
+   * false ist still returned.
+   *
+   * @throws IOException if the function is not implemented.
+   */
+  extern OSMSCOUT_API bool ExistsInFilesystem(const std::string& filename);
+
+  /**
+   * \ingroup File
+   *
+   * Returns true of the given filename points to a directory. Else it returns false.
+   *
+   * @throws IOException if there was an error or if the function is not implemented.
+   */
+  extern OSMSCOUT_API bool IsDirectory(const std::string& filename);
 }
 
 #endif
