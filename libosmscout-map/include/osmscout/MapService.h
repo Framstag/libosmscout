@@ -43,9 +43,12 @@
 namespace osmscout {
 
   /**
-    Parameter to influence the search result for searching for (drawable)
-    objects in a given area.
-    */
+   * \ingroup Service
+   * \ingroup Renderer
+   *
+   * Parameter to influence the search result for searching for (drawable)
+   * objects in a given area.
+   */
   class OSMSCOUT_MAP_API AreaSearchParameter
   {
   private:
@@ -76,6 +79,8 @@ namespace osmscout {
 
   /**
    * \ingroup Service
+   * \ingroup Renderer
+   *
    * MapService offers services for retrieving data in a way that is
    * helpful for drawing maps.
    *

@@ -45,6 +45,8 @@
 namespace osmscout {
 
   /**
+   * \ingroup Stylesheet
+   *
    * Interface one must implement to provider a label for the map.
    */
   class OSMSCOUT_MAP_API LabelProvider
@@ -71,6 +73,10 @@ namespace osmscout {
 
   typedef std::shared_ptr<LabelProvider> LabelProviderRef;
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API LabelProviderFactory
   {
   public:
@@ -81,6 +87,10 @@ namespace osmscout {
 
   typedef std::shared_ptr<LabelProviderFactory> LabelProviderFactoryRef;
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API INameLabelProviderFactory : public LabelProviderFactory
   {
   private:
@@ -110,6 +120,8 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Stylesheet
+   *
    * Generates a label based on a given feature name and label name.
    *
    * Example:
@@ -148,6 +160,10 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API StyleResolveContext
   {
   private:
@@ -171,6 +187,10 @@ namespace osmscout {
     bool IsOneway(const FeatureValueBuffer& buffer) const;
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API StyleConstant
   {
   public:
@@ -180,6 +200,10 @@ namespace osmscout {
 
   typedef std::shared_ptr<StyleConstant> StyleConstantRef;
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API StyleConstantColor : public StyleConstant
   {
   private:
@@ -194,6 +218,10 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API StyleConstantMag : public StyleConstant
   {
   private:
@@ -208,6 +236,10 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API StyleConstantUInt : public StyleConstant
   {
   private:
@@ -222,6 +254,10 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API SizeCondition
   {
   private:
@@ -252,6 +288,8 @@ namespace osmscout {
   typedef std::shared_ptr<SizeCondition> SizeConditionRef;
 
   /**
+   * \ingroup Stylesheet
+   *
    * Holds the all accumulated filter conditions as defined in the style sheet
    * for a style.
    */
@@ -329,6 +367,8 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Stylesheet
+   *
    * Holds all filter criteria (minus type and zoomlevel criteria which are
    * directly handled by the lookup table) for a concrete style which have to
    * evaluated during runtime.
@@ -383,6 +423,7 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Stylesheet
    * A Style together with a set of the attributes that are explicitly
    * set in the stye.
    */
@@ -400,6 +441,8 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Stylesheet
+   *
    * A line in a style sheet. Connecting a set of filter criteria together with
    * a partial style definition.
    */
@@ -419,6 +462,8 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Stylesheet
+   *
    * Correlation of a StyleFilter and a PartialStyle. For an object
    * (node, way, area) all ConditionalStyle styles matching the criteria
    * are summed up to build the final style attribute set.
@@ -441,6 +486,8 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Stylesheet
+   *
    * Style options for a line.
    */
   class OSMSCOUT_MAP_API LineStyle
@@ -586,6 +633,8 @@ namespace osmscout {
   typedef std::vector<std::vector<LineStyleSelectorList> > LineStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * Style options for filling an area.
    */
   class OSMSCOUT_MAP_API FillStyle
@@ -689,6 +738,8 @@ namespace osmscout {
   typedef std::vector<std::vector<FillStyleSelectorList> > FillStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * Abstract base class for all (point) labels. All point labels have priority
    * and a alpha value.
    */
@@ -723,6 +774,8 @@ namespace osmscout {
   typedef std::shared_ptr<LabelStyle> LabelStyleRef;
 
   /**
+   * \ingroup Stylesheet
+   *
    * A textual label.
    */
   class OSMSCOUT_MAP_API TextStyle : public LabelStyle
@@ -830,6 +883,8 @@ namespace osmscout {
   typedef std::vector<std::vector<TextStyleSelectorList> > TextStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * A shield or plate label (text placed on a plate).
    */
   class OSMSCOUT_MAP_API ShieldStyle : public LabelStyle
@@ -904,6 +959,8 @@ namespace osmscout {
   typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * A style defining repretive drawing of a shield label along a path. It consists
    * mainly of the attributes of the shield itself (it internally holds a shield
    * label for this) and some more attributes defining the way of repetition.
@@ -999,6 +1056,8 @@ namespace osmscout {
   typedef std::vector<std::vector<PathShieldStyleSelectorList> >       PathShieldStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * A style for drawing text onto a path, the text following the
    * contour of the path.
    */
@@ -1056,6 +1115,10 @@ namespace osmscout {
   typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList; //! List of selectors
   typedef std::vector<std::vector<PathTextStyleSelectorList> >     PathTextStyleLookupTable;  //!Index selectors by type and level
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API DrawPrimitive
   {
   private:
@@ -1078,6 +1141,10 @@ namespace osmscout {
 
   typedef std::shared_ptr<DrawPrimitive> DrawPrimitiveRef;
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
   {
   private:
@@ -1101,6 +1168,10 @@ namespace osmscout {
 
   typedef std::shared_ptr<PolygonPrimitive> PolygonPrimitiveRef;
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API RectanglePrimitive : public DrawPrimitive
   {
   private:
@@ -1137,6 +1208,10 @@ namespace osmscout {
 
   typedef std::shared_ptr<RectanglePrimitive> RectanglePrimitiveRef;
 
+  /**
+   * \ingroup Stylesheet
+   *
+   */
   class OSMSCOUT_MAP_API CirclePrimitive : public DrawPrimitive
   {
   private:
@@ -1167,6 +1242,8 @@ namespace osmscout {
   typedef std::shared_ptr<CirclePrimitive> CirclePrimitiveRef;
 
   /**
+   * \ingroup Stylesheet
+   *
    * Definition of a symbol. A symbol consists of a list of DrawPrimitives
    * with with assigned rendeirng styes.
    */
@@ -1221,6 +1298,8 @@ namespace osmscout {
   typedef std::shared_ptr<Symbol> SymbolRef;
 
   /**
+   * \ingroup Stylesheet
+   *
    * The icon style allow the rendering of external images or internal symbols.
    */
   class OSMSCOUT_MAP_API IconStyle
@@ -1285,6 +1364,8 @@ namespace osmscout {
   typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * Style for repetive drawing of symbols on top of a path.
    */
   class OSMSCOUT_MAP_API PathSymbolStyle
@@ -1334,6 +1415,8 @@ namespace osmscout {
   typedef std::vector<std::vector<PathSymbolStyleSelectorList> >       PathSymbolStyleLookupTable;  //!Index selectors by type and level
 
   /**
+   * \ingroup Stylesheet
+   *
    * A complete style definition
    *
    * Internals:
@@ -1568,6 +1651,12 @@ namespace osmscout {
   };
 
   typedef std::shared_ptr<StyleConfig> StyleConfigRef;
+
+  /**
+   * \defgroup Stylesheet Stylesheet definition
+   *
+   * Classes and methods related to stylesheet definition for the renderer.
+   */
 }
 
 #endif

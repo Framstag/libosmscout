@@ -31,6 +31,8 @@
 namespace osmscout {
 
   /**
+   * \ingroup Renderer
+   *
    * Collection of Parameter that parametrize and influence drawing of the map.
    */
   class OSMSCOUT_MAP_API MapParameter
