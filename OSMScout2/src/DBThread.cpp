@@ -490,12 +490,23 @@ void DBThread::DrawMap()
     drawParameter.SetRenderBackground(true);
     drawParameter.SetRenderSeaLand(true);
 
-    mapService->LookupTiles(projection,tiles);
+    // create copy of projection
+    osmscout::MercatorProjection renderProjection;
+    renderProjection.Set(projection.GetCenter(),
+                   projection.GetAngle(),
+                   projection.GetMagnification(),
+                   projection.GetDPI(),
+                   projection.GetWidth(),
+                   projection.GetHeight());
+
+    renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
+    
+    mapService->LookupTiles(renderProjection,tiles);
 
     mapService->ConvertTilesToMapData(tiles,data);
 
     if (drawParameter.GetRenderSeaLand()) {
-      mapService->GetGroundTiles(projection,
+      mapService->GetGroundTiles(renderProjection,
                                  data.groundTiles);
     }
 
@@ -506,7 +517,7 @@ void DBThread::DrawMap()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    bool success=painter->DrawMap(projection,
+    bool success=painter->DrawMap(renderProjection,
                                   drawParameter,
                                   data,
                                   &p);
