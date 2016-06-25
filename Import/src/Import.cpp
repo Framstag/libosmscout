@@ -726,6 +726,21 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  try {
+    if (!osmscout::ExistsInFilesystem(parameter.GetDestinationDirectory())) {
+      std::cerr << "Destination directory does not exist!" << std::endl;
+      return 1;
+    }
+
+    if (!osmscout::IsDirectory(parameter.GetDestinationDirectory())) {
+      std::cerr << "Destination ist not a directory!" << std::endl;
+      return 1;
+    }
+  }
+  catch (osmscout::IOException& e) {
+    // we ignore this exception, since it is likely a "not implemented" exception
+  }
+
   parameter.SetMapfiles(mapfiles);
 
   parameter.SetOptimizationWayMethod(osmscout::TransPolygon::quality);
