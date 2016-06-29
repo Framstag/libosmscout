@@ -479,7 +479,7 @@ namespace osmscout {
       return false;
     }
 
-    if (lat <-85.0511 || lat>85.0511) {
+    if (lat<-85.0511 || lat>85.0511) {
       return false;
     }
 
