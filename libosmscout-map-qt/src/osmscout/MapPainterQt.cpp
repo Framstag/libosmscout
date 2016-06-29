@@ -573,48 +573,53 @@ namespace osmscout {
                                        size_t transStart,
                                        size_t transEnd)
   {
-      double minX;
-      double minY;
-      double maxX;
-      double maxY;
+    double           minX;
+    double           minY;
+    double           maxX;
+    double           maxY;
 
-      symbol.GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-      double widthPx=projection.ConvertWidthToPixel(maxX-minX);
-      double height=maxY-minY;
+    double           widthPx=projection.ConvertWidthToPixel(maxX-minX);
+    double           height=maxY-minY;
+    bool             isClosed=false;
+    Vertex2D         origin;
+    double           x1,y1,x2,y2,x3,y3,slope;
+    FollowPathHandle followPathHnd;
 
-      bool isClosed = false;
-      Vertex2D origin;
-      double x1,y1,x2,y2,x3,y3,slope;
-      FollowPathHandle followPathHnd;
-      FollowPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
-      if(!isClosed && !FollowPath(followPathHnd, space/2, origin)){
-              return;
+    FollowPathInit(followPathHnd,origin,transStart,transEnd,isClosed,true);
+
+    if (!isClosed && !FollowPath(followPathHnd, space/2, origin)) {
+      return;
+    }
+
+    QTransform savedTransform=painter->transform();
+    QTransform t;
+    bool       loop=true;
+
+    while (loop) {
+      x1=origin.GetX();
+      y1=origin.GetY();
+      loop=FollowPath(followPathHnd, widthPx/2, origin);
+
+      if (loop) {
+        x2=origin.GetX();
+        y2=origin.GetY();
+        loop=FollowPath(followPathHnd, widthPx/2, origin);
+
+        if (loop) {
+          x3=origin.GetX();
+          y3=origin.GetY();
+          slope=atan2(y3-y1,x3-x1);
+          t=QTransform::fromTranslate(x2, y2);
+          t.rotateRadians(slope);
+          painter->setTransform(t);
+          DrawSymbol(projection, parameter, symbol, 0, -height*2);
+          loop=FollowPath(followPathHnd, space, origin);
+        }
       }
-      QTransform savedTransform = painter->transform();
-      QTransform t;
-      bool loop = true;
-      while (loop){
-          x1 = origin.GetX();
-          y1 = origin.GetY();
-          loop = FollowPath(followPathHnd, widthPx/2, origin);
-          if(loop){
-              x2 = origin.GetX();
-              y2 = origin.GetY();
-              loop = FollowPath(followPathHnd, widthPx/2, origin);
-              if(loop){
-                  x3 = origin.GetX();
-                  y3 = origin.GetY();
-                  slope = atan2(y3-y1,x3-x1);
-                  t = QTransform::fromTranslate(x2, y2);
-                  t.rotateRadians(slope);
-                  painter->setTransform(t);
-                  DrawSymbol(projection, parameter, symbol, 0, -height*2);
-                  loop = FollowPath(followPathHnd, space, origin);
-              }
-           }
-      }
-      painter->setTransform(savedTransform);
+    }
+    painter->setTransform(savedTransform);
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
