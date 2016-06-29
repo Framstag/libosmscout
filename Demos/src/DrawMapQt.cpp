@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
       osmscout::MapPainterQt        mapPainter(styleConfig);
-      double                        application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
+      double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
 
       drawParameter.SetFontSize(3.0);
 
