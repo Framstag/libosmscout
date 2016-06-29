@@ -36,6 +36,8 @@ namespace osmscout {
     plateLabelSpace(5.0),
     sameLabelSpace(40.0),
     dropNotVisiblePointLabels(true),
+    contourLabelOffset(5.0),
+    contourLabelSpace(30.0),
     renderBackground(true),
     renderSeaLand(false),
     debugData(false),
@@ -129,6 +131,17 @@ namespace osmscout {
   {
     this->dropNotVisiblePointLabels=dropNotVisiblePointLabels;
   }
+
+  void MapParameter::SetContourLabelOffset(double contourLabelOffset)
+  {
+    this->contourLabelOffset=contourLabelOffset;
+  }
+
+  void MapParameter::SetContourLabelSpace(double contourLabelSpace)
+  {
+    this->contourLabelSpace=contourLabelSpace;
+  }
+
 
   void MapParameter::SetRenderBackground(bool render)
   {

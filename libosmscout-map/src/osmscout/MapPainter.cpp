@@ -1905,6 +1905,8 @@ namespace osmscout {
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
     sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
     areaMinDimension=projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
+    contourLabelOffset=projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
+    contourLabelSpace=projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
 
     waysSegments=0;
     waysDrawn=0;

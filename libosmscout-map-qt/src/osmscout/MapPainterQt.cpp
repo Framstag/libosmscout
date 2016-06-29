@@ -421,8 +421,9 @@ namespace osmscout {
     painter->setFont(font);
 
     QPainterPath p;
-    double fontHeight = metrics.height();
+    qreal        fontHeight=metrics.height();
 
+    // Calculate length of path
     if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
@@ -450,46 +451,55 @@ namespace osmscout {
       }
     }
 
-    if (p.length()<stringLength) {
-      // Text is longer than path to draw on
+    qreal spaceLeft=p.length()-stringLength-2*contourLabelOffset;
+
+    // If space around labels left is < offset on both sides, do not render at all
+    if (spaceLeft<0.0) {
       return;
     }
 
-    qreal offset=(p.length()-stringLength)/2;
+    spaceLeft=fmod(spaceLeft,stringLength+contourLabelSpace);
+
+    qreal labelInstanceOffset=spaceLeft/2+contourLabelOffset;
+    qreal offset=labelInstanceOffset;
 
     QTransform tran;
 
-    for (int i=0; i<string.size(); i++) {
-      QPointF point=p.pointAtPercent(p.percentAtLength(offset));
-      qreal angle=p.angleAtPercent(p.percentAtLength(offset));
+    while (offset<p.length()) {
+      for (int i=0; i<string.size(); i++) {
+        QPointF point=p.pointAtPercent(p.percentAtLength(offset));
+        qreal   angle=p.angleAtPercent(p.percentAtLength(offset));
 
-      // rotation matrix components
+        // rotation matrix components
 
-      qreal sina=sin[lround((360-angle)*10)%sin.size()];
-      qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
+        qreal sina=sin[lround((360-angle)*10)%sin.size()];
+        qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
 
-      // Rotation
-      qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
-      qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
+        // Rotation
+        qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
+        qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
 
-      // Aditional offseting
-      qreal deltaPenX=cosa*pen.width();
-      qreal deltaPenY=sina*pen.width();
+        // Aditional offseting
+        qreal deltaPenX=cosa*pen.width();
+        qreal deltaPenY=sina*pen.width();
 
-      // Getting the delta distance for the translation part of the transformation
-      qreal deltaX=newX-point.x();
-      qreal deltaY=newY-point.y();
+        // Getting the delta distance for the translation part of the transformation
+        qreal deltaX=newX-point.x();
+        qreal deltaY=newY-point.y();
 
-      // Applying rotation and translation.
-      tran.setMatrix(cosa,sina,0.0,
-                     -sina,cosa,0.0,
-                     -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
+        // Applying rotation and translation.
+        tran.setMatrix(cosa,sina,0.0,
+                       -sina,cosa,0.0,
+                       -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
 
-      painter->setTransform(tran);
+        painter->setTransform(tran);
 
-      painter->drawText(point,QString(string[i]));
+        painter->drawText(point,QString(string[i]));
 
-      offset+=metrics.width(string[i]);
+        offset+=metrics.width(string[i]);
+      }
+
+      offset+=contourLabelSpace;
     }
 
     painter->resetTransform();

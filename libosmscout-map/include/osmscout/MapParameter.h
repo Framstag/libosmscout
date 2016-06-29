@@ -53,11 +53,17 @@ namespace osmscout {
     bool                         drawFadings;               //!< Draw label fadings (default: true)
     bool                         drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
+    // Node and area labels
     size_t                       labelLineCharCount;        //!< Labels will be word wrapped if  they are longer then the given characters
     double                       labelSpace;                //!< Space between point labels in mm (default 3).
     double                       plateLabelSpace;           //!< Space between plates in mm (default 5).
     double                       sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
     bool                         dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
+
+  private:
+// Contour labels
+    double                       contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
+    double                       contourLabelSpace;         //!< Space in mm between repetive labels on the same contour
 
     bool                         renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                         renderSeaLand;             //!< Rendering of sea/land tiles
@@ -94,6 +100,9 @@ namespace osmscout {
     void SetPlateLabelSpace(double plateLabelSpace);
     void SetSameLabelSpace(double sameLabelSpace);
     void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
+
+    void SetContourLabelOffset(double contourLabelOffset);
+    void SetContourLabelSpace(double contourLabelSpace);
 
     void SetRenderBackground(bool render);
     void SetRenderSeaLand(bool render);
@@ -184,6 +193,16 @@ namespace osmscout {
     inline bool GetDropNotVisiblePointLabels() const
     {
       return dropNotVisiblePointLabels;
+    }
+
+    inline double GetContourLabelOffset() const
+    {
+      return contourLabelOffset;
+    }
+
+    inline double GetContourLabelSpace() const
+    {
+      return contourLabelSpace;
     }
 
     inline double GetRenderBackground() const
