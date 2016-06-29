@@ -264,7 +264,7 @@ namespace osmscout {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
   static void DrawContourLabelPangoCairo(cairo_t *draw,
                                          cairo_path_t *path,
-                                         double pathLength,
+                                         double offset,
                                          PangoLayout *layout,
                                          const PangoRectangle& extends)
   {
@@ -278,7 +278,7 @@ namespace osmscout {
     MapPathOnPath(draw,
                   textPath,
                   path,
-                  (pathLength-extends.width)/2-extends.x,
+                  offset,
                   -0.5*extends.height);
 
     cairo_path_destroy(textPath);
@@ -290,9 +290,7 @@ namespace osmscout {
 #else
   static void DrawContourLabelCairo(cairo_t *draw,
                                     cairo_path_t *path,
-                                    double pathLength,
-                                    double xOffset,
-                                    double textWidth,
+                                    double offset,
                                     double textHeight,
                                     const std::string& text)
   {
@@ -307,7 +305,7 @@ namespace osmscout {
     MapPathOnPath(draw,
                   textPath,
                   path,
-                  (pathLength-textWidth)/2-xOffset,
+                  offset,
                   0.5*textHeight);
 
     cairo_path_destroy(textPath);
@@ -1011,39 +1009,53 @@ namespace osmscout {
                           text.length());
     pango_layout_get_pixel_extents(layout,&extends,NULL);
 
-    if (extends.width<=lineLength) {
-      cairo_path_t *path;
+    double spaceLeft=lineLength-extends.width-2*contourLabelOffset;
 
-      /* Decrease tolerance a bit, since it's going to be magnified */
-      //cairo_set_tolerance (cr, 0.01);
+    // If space around labels left is < offset on both sides, do not render at all
+    if (spaceLeft<0.0) {
+      g_object_unref(layout);
+      return;
+    }
 
-      /* Using cairo_copy_path() here shows our deficiency in handling
-        * Bezier curves, specially around sharper curves.
-        *
-        * Using cairo_copy_path_flat() on the other hand, magnifies the
-        * flattening error with large off-path values. We decreased
-        * tolerance for that reason. Increase tolerance to see that
-        * artifact.
-      */
+    spaceLeft=fmod(spaceLeft,extends.width+contourLabelSpace);
 
-      // Make a copy of the path of the line we should draw along
-      path=cairo_copy_path_flat(draw);
+    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
+    double       offset=labelInstanceOffset;
+    cairo_path_t *path;
 
-      cairo_set_source_rgba(draw,
-                            style.GetTextColor().GetR(),
-                            style.GetTextColor().GetG(),
-                            style.GetTextColor().GetB(),
-                            style.GetTextColor().GetA());
+    /* Decrease tolerance a bit, since it's going to be magnified */
+    //cairo_set_tolerance (cr, 0.01);
 
+    /* Using cairo_copy_path() here shows our deficiency in handling
+      * Bezier curves, specially around sharper curves.
+      *
+      * Using cairo_copy_path_flat() on the other hand, magnifies the
+      * flattening error with large off-path values. We decreased
+      * tolerance for that reason. Increase tolerance to see that
+      * artifact.
+    */
+
+    // Make a copy of the path of the line we should draw along
+    path=cairo_copy_path_flat(draw);
+
+    cairo_set_source_rgba(draw,
+                          style.GetTextColor().GetR(),
+                          style.GetTextColor().GetG(),
+                          style.GetTextColor().GetB(),
+                          style.GetTextColor().GetA());
+
+    while (offset<lineLength) {
       DrawContourLabelPangoCairo(draw,
                                  path,
-                                 lineLength,
+                                 offset-extends.x,
                                  layout,
                                  extends);
 
-      cairo_path_destroy(path);
+
+      offset=offset+extends.width+contourLabelSpace;
     }
 
+    cairo_path_destroy(path);
     g_object_unref(layout);
 
 #else
@@ -1056,33 +1068,45 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    if (textExtents.width<=lineLength) {
-      cairo_font_extents_t fontExtents;
-      cairo_path_t         *path;
+    double spaceLeft=lineLength-textExtents.width-2*contourLabelOffset;
 
-      cairo_scaled_font_extents(font,
-                                &fontExtents);
+    // If space around labels left is < offset on both sides, do not render at all
+    if (spaceLeft<0.0) {
+      return;
+    }
 
-      path=cairo_copy_path_flat(draw);
+    spaceLeft=fmod(spaceLeft,textExtents.width+contourLabelSpace);
 
-      cairo_set_source_rgba(draw,
-                            style.GetTextColor().GetR(),
-                            style.GetTextColor().GetG(),
-                            style.GetTextColor().GetB(),
-                            style.GetTextColor().GetA());
+    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
+    double       offset=labelInstanceOffset;
 
-      cairo_set_scaled_font(draw,font);
+    cairo_font_extents_t fontExtents;
+    cairo_path_t         *path;
 
+    cairo_scaled_font_extents(font,
+                              &fontExtents);
+
+    path=cairo_copy_path_flat(draw);
+
+    cairo_set_source_rgba(draw,
+                          style.GetTextColor().GetR(),
+                          style.GetTextColor().GetG(),
+                          style.GetTextColor().GetB(),
+                          style.GetTextColor().GetA());
+
+    cairo_set_scaled_font(draw,font);
+
+    while (offset<lineLength) {
       DrawContourLabelCairo(draw,
                             path,
-                            lineLength,
-                            textExtents.x_bearing,
-                            textExtents.width,
+                            offset-textExtents.x_bearing,
                             textExtents.height,
                             text);
 
-      cairo_path_destroy(path);
+      offset=offset+textExtents.width+contourLabelSpace;
     }
+
+    cairo_path_destroy(path);
 #endif
   }
 
