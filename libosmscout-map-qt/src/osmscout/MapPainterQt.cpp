@@ -669,14 +669,12 @@ namespace osmscout {
     centerX=(minX+maxX)/2;
     centerY=(minY+maxY)/2;
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-         p!=symbol.GetPrimitives().end();
-         ++p) {
-      DrawPrimitive* primitive=p->get();
+    for (const auto& primitive : symbol.GetPrimitives()) {
+      const DrawPrimitive *primitivePtr=primitive.get();
 
-      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-        FillStyleRef      style=polygon->GetFillStyle();
+      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=NULL) {
+        const PolygonPrimitive *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+        FillStyleRef           style=polygon->GetFillStyle();
 
         SetFill(projection,
                 parameter,
@@ -699,9 +697,9 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-        FillStyleRef        style=rectangle->GetFillStyle();
+      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=NULL) {
+        const RectanglePrimitive *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+        FillStyleRef             style=rectangle->GetFillStyle();
 
         SetFill(projection,
                 parameter,
@@ -716,9 +714,9 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-        CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-        FillStyleRef     style=circle->GetFillStyle();
+      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=NULL) {
+        const CirclePrimitive *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+        FillStyleRef          style=circle->GetFillStyle();
 
         QPointF center(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
                        y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY));
