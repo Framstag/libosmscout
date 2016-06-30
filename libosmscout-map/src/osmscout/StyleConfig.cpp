@@ -1614,9 +1614,11 @@ namespace osmscout {
     areaFillStyleConditionals.clear();
     areaTextStyleConditionals.clear();
     areaIconStyleConditionals.clear();
+    areaBorderTextStyleConditionals.clear();
     areaFillStyleSelectors.clear();
     areaTextStyleSelectors.clear();
     areaIconStyleSelectors.clear();
+    areaBorderTextStyleSelectors.clear();
     areaTypeSets.clear();
 
     constants.clear();
@@ -1986,6 +1988,8 @@ namespace osmscout {
                               maxLevel);
     GetMaxLevelInConditionals(areaIconStyleConditionals,
                               maxLevel);
+    GetMaxLevelInConditionals(areaBorderTextStyleConditionals,
+                              maxLevel);
 
     SortInConditionals(*typeConfig,
                        areaFillStyleConditionals,
@@ -2015,6 +2019,11 @@ namespace osmscout {
                        maxLevel,
                        areaIconStyleSelectors);
 
+    SortInConditionals(*typeConfig,
+                       areaBorderTextStyleConditionals,
+                       maxLevel,
+                       areaBorderTextStyleSelectors);
+
     areaTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
@@ -2033,10 +2042,15 @@ namespace osmscout {
                        areaIconStyleConditionals,
                        maxLevel,
                        areaTypeSets);
+    CalculateUsedTypes(*typeConfig,
+                       areaBorderTextStyleConditionals,
+                       maxLevel,
+                       areaTypeSets);
 
     areaFillStyleConditionals.clear();
     areaTextStyleConditionals.clear();
     areaIconStyleConditionals.clear();
+    areaBorderTextStyleConditionals.clear();
   }
 
   void StyleConfig::PostprocessIconId()
@@ -2212,6 +2226,14 @@ namespace osmscout {
     IconConditionalStyle conditional(filter,style);
 
     areaIconStyleConditionals.push_back(conditional);
+  }
+
+  void StyleConfig::AddAreaBorderTextStyle(const StyleFilter& filter,
+                                           PathTextPartialStyle& style)
+  {
+    PathTextConditionalStyle conditional(filter,style);
+
+    areaBorderTextStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::GetNodeTypesWithMaxMag(const Magnification& maxMag,
@@ -2431,6 +2453,18 @@ namespace osmscout {
                     buffer,
                     projection,
                     iconStyle);
+  }
+
+  void StyleConfig::GetAreaBorderTextStyle(const TypeInfoRef& type,
+                                           const FeatureValueBuffer& buffer,
+                                           const Projection& projection,
+                                           PathTextStyleRef& pathTextStyle) const
+  {
+    GetFeatureStyle(styleResolveContext,
+                    areaBorderTextStyleSelectors[type->GetIndex()],
+                    buffer,
+                    projection,
+                    pathTextStyle);
   }
 
   void StyleConfig::GetLandFillStyle(const Projection& projection,

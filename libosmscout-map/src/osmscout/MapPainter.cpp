@@ -1224,18 +1224,17 @@ namespace osmscout {
   void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
-                                 const TypeInfoRef& type,
-                                 const FeatureValueBuffer& buffer,
-                                 const GeoBox& boundingBox)
+                                 const AreaData& areaData)
   {
-    IconStyleRef iconStyle;
+    IconStyleRef     iconStyle;
 
-    styleConfig.GetAreaTextStyles(type,
-                                  buffer,
+    styleConfig.GetAreaTextStyles(areaData.type,
+                                  *areaData.buffer,
                                   projection,
                                   textStyles);
-    styleConfig.GetAreaIconStyle(type,
-                                 buffer,
+
+    styleConfig.GetAreaIconStyle(areaData.type,
+                                 *areaData.buffer,
                                  projection,
                                  iconStyle);
 
@@ -1248,20 +1247,52 @@ namespace osmscout {
     double minY;
     double maxY;
 
-    projection.GeoToPixel(boundingBox.GetMinCoord(),
+    projection.GeoToPixel(areaData.boundingBox.GetMinCoord(),
                           minX,minY);
 
-    projection.GeoToPixel(boundingBox.GetMaxCoord(),
+    projection.GeoToPixel(areaData.boundingBox.GetMaxCoord(),
                           maxX,maxY);
 
     LayoutPointLabels(projection,
                       parameter,
-                      buffer,
+                      *areaData.buffer,
                       iconStyle,
                       textStyles,
                       (minX+maxX)/2,
                       (minY+maxY)/2,
                       maxY-minY);
+  }
+
+  void MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
+                                       const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const AreaData& areaData)
+  {
+    PathTextStyleRef borderTextStyle;
+
+    styleConfig.GetAreaBorderTextStyle(areaData.type,
+                                       *areaData.buffer,
+                                       projection,
+                                       borderTextStyle);
+
+    if (!borderTextStyle) {
+      return;
+    }
+
+    std::string label=borderTextStyle->GetLabel()->GetLabel(parameter,
+                                                            *areaData.buffer);
+
+    if (label.empty()) {
+      return;
+    }
+
+
+    DrawContourLabel(projection,
+                     parameter,
+                     *borderTextStyle,
+                     label,
+                     areaData.transStart,
+                     areaData.transEnd);
   }
 
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
@@ -1273,9 +1304,12 @@ namespace osmscout {
       DrawAreaLabel(styleConfig,
                     projection,
                     parameter,
-                    area.type,
-                    *area.buffer,
-                    area.boundingBox);
+                    area);
+
+      DrawAreaBorderLabel(styleConfig,
+                          projection,
+                          parameter,
+                          area);
 
       areasDrawn++;
     }
