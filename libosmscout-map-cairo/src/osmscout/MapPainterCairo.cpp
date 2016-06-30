@@ -740,10 +740,8 @@ namespace osmscout {
     double width=projection.ConvertWidthToPixel(maxX-minX);
     double height=projection.ConvertWidthToPixel(maxY-minY);
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-         p!=symbol.GetPrimitives().end();
-         ++p) {
-      FillStyleRef fillStyle=(*p)->GetFillStyle();
+    for (const auto& primitive : symbol.GetPrimitives()) {
+      FillStyleRef fillStyle=primitive->GetFillStyle();
 
       size_t offset=space/2;
 
@@ -752,7 +750,7 @@ namespace osmscout {
       while (offset+width<lineLength) {
         DrawPrimitivePath(projection,
                           parameter,
-                          *p,
+                          primitive,
                           offset+width/2,0,
                           minX,
                           minY,

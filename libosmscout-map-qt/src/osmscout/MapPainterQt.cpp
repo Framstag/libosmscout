@@ -506,64 +506,75 @@ namespace osmscout {
   }
 
 
-  void MapPainterQt::FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
-                                     bool isClosed, bool keepOrientation) {
-      hnd.i = 0;
-      hnd.nVertex = transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
-      bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
-      if (isClosed && !isReallyClosed) {
-          hnd.nVertex++;
-          hnd.closeWay = true;
-      }
-      else {
-          hnd.closeWay = false;
-      }
+  void MapPainterQt::FollowPathInit(FollowPathHandle &hnd,
+                                    Vertex2D &origin,
+                                    size_t transStart,
+                                    size_t transEnd,
+                                    bool isClosed,
+                                    bool keepOrientation)
+  {
+    hnd.i=0;
+    hnd.nVertex=transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
+    bool isReallyClosed=(coordBuffer->buffer[transStart]==coordBuffer->buffer[transEnd]);
 
-      if (keepOrientation ||
-          coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
-          hnd.transStart = transStart;
-          hnd.transEnd = transEnd;
-      }
-      else {
-          hnd.transStart = transEnd;
-          hnd.transEnd = transStart;
-      }
+    if (isClosed && !isReallyClosed) {
+      hnd.nVertex++;
+      hnd.closeWay=true;
+    }
+    else {
+      hnd.closeWay=false;
+    }
 
-      hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
-      origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
+    if (keepOrientation ||
+        coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
+      hnd.transStart=transStart;
+      hnd.transEnd=transEnd;
+    }
+    else {
+      hnd.transStart=transEnd;
+      hnd.transEnd=transStart;
+    }
+
+    hnd.direction=(hnd.transStart < hnd.transEnd) ? 1 : -1;
+    origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
   }
 
-  bool MapPainterQt::FollowPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
+  bool MapPainterQt::FollowPath(FollowPathHandle &hnd,
+                                double l,
+                                Vertex2D &origin)
+  {
+    double x=origin.GetX();
+    double y=origin.GetY();
+    double x2,y2;
+    double deltaX,deltaY,len,fracToGo;
 
-      double x = origin.GetX();
-      double y = origin.GetY();
-      double x2,y2;
-      double deltaX, deltaY, len, fracToGo;
-      while(hnd.i < hnd.nVertex) {
-          if(hnd.closeWay && hnd.nVertex - hnd.i == 1){
-              x2 = coordBuffer->buffer[hnd.transStart].GetX();
-              y2 = coordBuffer->buffer[hnd.transStart].GetY();
-          } else {
-              x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-              y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
-          }
-          deltaX = (x2 - x);
-          deltaY = (y2 - y);
-          len = sqrt(deltaX*deltaX + deltaY*deltaY);
-
-          fracToGo = l/len;
-          if(fracToGo <= 1.0) {
-              origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
-              return true;
-          }
-
-          //advance to next point on the path
-          l -= len;
-          x = x2;
-          y = y2;
-          hnd.i++;
+    while (hnd.i<hnd.nVertex) {
+      if (hnd.closeWay && hnd.nVertex-hnd.i==1) {
+        x2=coordBuffer->buffer[hnd.transStart].GetX();
+        y2=coordBuffer->buffer[hnd.transStart].GetY();
       }
-      return false;
+      else {
+        x2=coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+        y2=coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+      }
+      deltaX=(x2-x);
+      deltaY=(y2-y);
+      len=sqrt(deltaX*deltaX + deltaY*deltaY);
+
+      fracToGo=l/len;
+      if (fracToGo<=1.0) {
+        origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
+        return true;
+      }
+
+      //advance to next point on the path
+      l-=len;
+      x=x2;
+      y=y2;
+      hnd.i++;
+    }
+
+    return false;
   }
 
   void MapPainterQt::DrawContourSymbol(const Projection& projection,
@@ -587,9 +598,15 @@ namespace osmscout {
     double           x1,y1,x2,y2,x3,y3,slope;
     FollowPathHandle followPathHnd;
 
-    FollowPathInit(followPathHnd,origin,transStart,transEnd,isClosed,true);
+    FollowPathInit(followPathHnd,
+                   origin,
+                   transStart,
+                   transEnd,
+                   isClosed,
+                   true);
 
-    if (!isClosed && !FollowPath(followPathHnd, space/2, origin)) {
+    if (!isClosed &&
+        !FollowPath(followPathHnd,space/2,origin)) {
       return;
     }
 
