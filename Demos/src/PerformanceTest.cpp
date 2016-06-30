@@ -40,6 +40,7 @@
 #if defined(HAVE_LIB_GPERFTOOLS)
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
+#include <malloc.h> // mallinfo
 #else
 #if defined(HAVE_MALLINFO)
 #include <malloc.h> // mallinfo
