@@ -118,6 +118,32 @@ namespace osmscout {
                                       const MapData& data)
   {
     std::map<TypeInfoRef,DataStatistic> statistics;
+    TypeInfoSet                         types;
+
+    // Prefilling all possible types from style sheet
+
+    styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                        types);
+
+    for (const auto& type : types) {
+      DataStatistic& entry=statistics[type];
+    }
+
+    styleConfig->GetWayTypesWithMaxMag(projection.GetMagnification(),
+                                       types);
+
+    for (const auto& type : types) {
+      DataStatistic& entry=statistics[type];
+    }
+
+    styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                        types);
+
+    for (const auto& type : types) {
+      DataStatistic& entry=statistics[type];
+    }
+
+    // Now analyse the actual data
 
     for (const auto& node : data.nodes) {
       DataStatistic& entry=statistics[node->GetType()];
@@ -288,8 +314,11 @@ namespace osmscout {
     log.Info() << "Type|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
     for (const auto& entry : statisticList) {
       log.Info() << entry.type->GetName() << " "
-          << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " " << entry.coordCount << " "
-          << entry.labelCount << " " << entry.iconCount;
+          << entry.objectCount << " "
+          << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " "
+          << entry.coordCount << " "
+          << entry.labelCount << " "
+          << entry.iconCount;
     }
   }
 
