@@ -86,10 +86,31 @@ a tunnel always below a "tunneled" ways.
 
 ## Section `CONST`
 
-This (currently) allows you to define named constants for colors. Named
-colors can be used anywhere you can use "raw" rgb(a) values using the
+This (currently) allows you to define named constants for magnification levels,
+numerical values and colors.
+
+magnification values and numeric values just get a "name" as alias. Their values
+can be used anywhere a magnification or a numerical value can be used.
+
+Named colors can be used anywhere you can use "raw" rgb(a) values using the
 "@"<colorname> syntax. Note it is possible to enhance the CONST section
 to support constants for other types, too. Just make a feature request!
+
+Example:
+```
+  // Magnification aliases
+  MAG stepsMag                     = veryClose;
+  MAG labelPathsMag                = veryClose;
+
+  // Label priority aliases
+  UINT labelPrioContinent          = 1;
+  UINT labelPrioIsland             = 1;
+
+  // Building color aliases
+  COLOR buildingColor              = #d9d9d9;
+  COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
+  COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
+```
 
 ## Section `SYMBOL`
 
