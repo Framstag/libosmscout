@@ -246,19 +246,19 @@ TYPES
     = WAY AREA ("highway"=="service")
       {Name, NameAlt}
       PATH[FOOT BICYCLE CAR] LOCATION
-  
+
   // Ways with main designation different to car
-  
+
   TYPE highway_track
     = WAY ("highway"=="track")
       {Name, NameAlt}
       PATH[FOOT BICYCLE] LOCATION PIN_WAY
-      
+
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
       {Name, NameAlt}
       PATH[FOOT] LOCATION PIN_WAY MERGE_AREAS
-      
+
   TYPE highway_path
     = WAY ("highway"=="path")
       {Name, NameAlt}
@@ -268,17 +268,17 @@ TYPES
     = WAY ("highway"=="cycleway")
       {Name, NameAlt}
       PATH[BICYCLE] PIN_WAY
-      
+
   TYPE highway_footway
     = WAY AREA ("highway"=="footway") OR AREA ("area:highway"=="footway")
       {Name, NameAlt}
       PATH[FOOT] LOCATION PIN_WAY
-      
+
   TYPE highway_bridleway
     = WAY ("highway"=="bridleway")
       {Name, NameAlt}
       PATH PIN_WAY
-    
+
   TYPE highway_steps
     = WAY ("highway"=="steps")
       {Name, NameAlt}
