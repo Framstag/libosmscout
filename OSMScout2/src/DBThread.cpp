@@ -414,7 +414,6 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     if (database->IsOpen() &&
         styleConfig) {
-      osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
 
       searchParameter.SetBreaker(dataLoadingBreaker);
