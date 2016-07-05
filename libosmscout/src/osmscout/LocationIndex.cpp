@@ -379,7 +379,7 @@ namespace osmscout {
 
       scanner.Read(address.name);
       objectFileRefReader.Read(address.object);
-
+      
       if (!visitor.Visit(region,
                          location,
                          address)) {
@@ -495,6 +495,7 @@ namespace osmscout {
                                        location,
                                        visitor,
                                        stopped)) {
+        scanner.Close();
         return false;
       }
 
