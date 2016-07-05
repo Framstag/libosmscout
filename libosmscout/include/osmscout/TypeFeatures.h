@@ -260,6 +260,11 @@ namespace osmscout {
       return location;
     }
 
+    inline std::string GetLabel() const
+    {
+      return location;
+    }
+
     void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
