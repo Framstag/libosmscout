@@ -83,8 +83,16 @@ namespace osmscout {
       LocationFeatureValue *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
       AddressFeatureValue  *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
 
-      bool isAddress=addressValue!=NULL;
-      bool isPoi=nameValue!=NULL;
+      bool isAddress=false;
+      bool isPoi=false;
+
+      if (node.GetType()->GetIndexAsAddress()) {
+        isAddress=addressValue!=NULL;
+      }
+
+      if (node.GetType()->GetIndexAsPOI()) {
+        isPoi=nameValue!=NULL;
+      }
 
       std::string name;
       std::string location;
@@ -100,16 +108,15 @@ namespace osmscout {
       }
 
       if (locationValue!=NULL) {
+        // We do not need the location info here anymore, it is only relevant for
+        // the location index and that one will be build using the here generated
+        // location file.
         size_t locationIndex;
 
         if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
                                      locationIndex)) {
           node.UnsetFeature(locationIndex);
         }
-      }
-
-      if (!node.GetType()->GetIndexAsPOI()) {
-        return true;
       }
 
       if (!isAddress && !isPoi) {
