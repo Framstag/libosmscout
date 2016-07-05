@@ -361,6 +361,12 @@ namespace osmscout {
                                                   AddressVisitor& visitor,
                                                   bool& stopped) const
   {
+    if (location.addressesOffset == 0){
+      // see LocationIndex::LoadRegionDataEntry
+      // if location don't have addresses, offset is set to 0
+      return true;
+    }
+
     uint32_t addressCount;
 
     scanner.SetPos(location.addressesOffset);
