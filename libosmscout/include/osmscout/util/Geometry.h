@@ -848,7 +848,7 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
-   *Calculates the initial bearing for a line from one coordinate two the other coordinate
+   *Calculates the initial bearing for a line from one coordinate to the other coordinate
    *on a sphere.
    */
   extern OSMSCOUT_API double GetSphericalBearingInitial(const GeoCoord& a,
