@@ -19,9 +19,11 @@
 
 #include <osmscout/import/GenLocationIndex.h>
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <locale>
 #include <list>
 #include <map>
 #include <set>
@@ -1054,15 +1056,13 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
-
-    if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Area "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
-
+    RegionLocation *loc = NULL;
+    if (!FindLocation(progress, region.locations, location, &loc)){
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
       return;
     }
-
-    for (const auto& regionAddress : loc->second.addresses) {
+    
+    for (const auto& regionAddress : loc->addresses) {
       if (regionAddress.name==address) {
         return;
       }
@@ -1073,7 +1073,7 @@ namespace osmscout {
     regionAddress.name=address;
     regionAddress.object.Set(fileOffset,refArea);
 
-    loc->second.addresses.push_back(regionAddress);
+    loc->addresses.push_back(regionAddress);
 
     added=true;
   }
@@ -1281,13 +1281,12 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
-
-    if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Way "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
+    RegionLocation *loc = NULL;
+    if (!FindLocation(progress, region.locations, location, &loc)){
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
     }
     else {
-      for (const auto& regionAddress : loc->second.addresses) {
+      for (const auto& regionAddress : loc->addresses) {
         if (regionAddress.name==address) {
           return false;
         }
@@ -1298,7 +1297,7 @@ namespace osmscout {
       regionAddress.name=address;
       regionAddress.object.Set(fileOffset,refWay);
 
-      loc->second.addresses.push_back(regionAddress);
+      loc->addresses.push_back(regionAddress);
 
       added=true;
     }
@@ -1489,6 +1488,36 @@ namespace osmscout {
     return true;
   }
 
+  bool LocationIndexGenerator::FindLocation(Progress& progress,
+                                            std::map<std::string,RegionLocation> &locations, 
+                                            const std::string &locationName,
+                                            RegionLocation **location)
+  {
+    std::map<std::string,RegionLocation>::iterator loc=locations.find(locationName);
+
+    if (loc!=locations.end()) {
+      // exact match
+      *location = &loc->second;
+      return true;
+    }
+
+    std::wstring wLocation(UTF8StringToWString(locationName));
+    std::transform(wLocation.begin(), wLocation.end(), wLocation.begin(), ::tolower);
+    //std::cout << "  not found location " << locationName << "available:" << std::endl;
+    for (auto &entry: locations){
+      //std::cout << "    '" << entry.first << "'" << std::endl;
+      std::wstring wLocation2(UTF8StringToWString(entry.first));
+      std::transform(wLocation2.begin(), wLocation2.end(), wLocation2.begin(), ::tolower);
+      if (wLocation == wLocation2){
+        progress.Debug(std::string("Using address '") + entry.first + "' instead of '" + locationName + "'");
+        *location = &entry.second;          
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   void LocationIndexGenerator::AddAddressNodeToRegion(Progress& progress,
                                                       Region& region,
                                                       const FileOffset& fileOffset,
@@ -1496,14 +1525,13 @@ namespace osmscout {
                                                       const std::string& address,
                                                       bool& added)
   {
-    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
-
-    if (loc==region.locations.end()) {
+    RegionLocation *loc = NULL;
+    if (!FindLocation(progress, region.locations, location, &loc)){
       progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
       return;
     }
-
-    for (const auto& regionAddress : loc->second.addresses) {
+      
+    for (const auto& regionAddress : loc->addresses) {
       if (regionAddress.name==address) {
         return;
       }
@@ -1514,7 +1542,7 @@ namespace osmscout {
     regionAddress.name=address;
     regionAddress.object.Set(fileOffset,refNode);
 
-    loc->second.addresses.push_back(regionAddress);
+    loc->addresses.push_back(regionAddress);
 
     added=true;
   }

@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
     std::cerr << "lat is not numeric!" << std::endl;
     return 1;
   }
+  osmscout::log.Debug(false);
 
   osmscout::GeoCoord location(lat,lon);
 
@@ -87,14 +88,28 @@ int main(int argc, char* argv[])
   }
 
   if (atAddressDescription) {
+    osmscout::Place place = atAddressDescription->GetPlace();
     if (atAddressDescription->IsAtPlace()) {
-      std::cout << "Is at address: " << atAddressDescription->GetPlace().GetDisplayString() << std::endl;
+      std::cout << "Is at address: " << place.GetDisplayString() << std::endl;
     }
     else {
       std::cout.precision(1);
       std::cout << std::fixed << atAddressDescription->GetDistance() << "m ";
       std::cout << osmscout::BearingDisplayString(atAddressDescription->GetBearing());
-      std::cout << " of address: " << atAddressDescription->GetPlace().GetDisplayString() << std::endl;
+      std::cout << " of address: " << place.GetDisplayString() << std::endl;
+    }
+    
+    if (place.GetPOI()){
+        std::cout << "    POI:      " << place.GetPOI()->name << std::endl;
+    }
+    if (place.GetAddress()){
+        std::cout << "    address:  " << place.GetAddress()->name << std::endl;
+    }
+    if (place.GetLocation()){
+        std::cout << "    location: " << place.GetLocation()->name << std::endl;
+    }
+    if (place.GetAdminRegion()){
+        std::cout << "    region:   " << place.GetAdminRegion()->name << std::endl;
     }
   }
 

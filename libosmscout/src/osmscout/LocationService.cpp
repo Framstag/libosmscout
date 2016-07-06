@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <algorithm>
+
 #include <osmscout/LocationService.h>
 
 #include <osmscout/util/Geometry.h>
@@ -1192,7 +1194,6 @@ namespace osmscout {
                                                        result);
 
     for (const auto& object : objects) {
-      std::vector<GeoCoord> coords;
 
       if (object.GetType()==refNode) {
         NodeRef node;
@@ -1317,8 +1318,8 @@ namespace osmscout {
                                 result);
   }
 
-  bool LocationService::DescribeLocationByAddress(const GeoCoord& location,
-                                                  LocationDescription& description)
+  bool LocationService::LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
+                                      std::vector<LocationDescriptionCandicate> &candidates)
   {
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
@@ -1328,59 +1329,40 @@ namespace osmscout {
         !areaAreaIndex) {
       return false;
     }
-
-    TypeInfoSet addressTypes;
-
-    for (const auto& type : typeConfig->GetTypes()) {
-      if (type->CanBeArea() &&
-          type->HasFeature(AddressFeature::NAME)) {
-        addressTypes.Set(type);
-      }
-    }
-
-    if (addressTypes.Empty()) {
-      return true;
-    }
-
     std::vector<DataBlockSpan> areaSpans;
-    TypeInfoSet                loadedAddressTypes;
+    TypeInfoSet                loadedTypes;
 
     if (!areaAreaIndex->GetAreasInArea(*typeConfig,
                                        box100,
                                        std::numeric_limits<size_t>::max(),
-                                       addressTypes,
+                                       types,
                                        areaSpans,
-                                       loadedAddressTypes)) {
+                                       loadedTypes)) {
       return false;
     }
+
+    std::vector<AreaRef> areas;
 
     if (areaSpans.empty()) {
       return true;
     }
-
-    std::vector<AreaRef> areas;
 
     if (!database->GetAreasByBlockSpans(areaSpans,
                                         areas)) {
       return false;
     }
 
-    if (areas.empty()) {
-      return true;
-    }
-
-    bool    atPlace=false;
-    AreaRef placeArea;
-    double  distance=std::numeric_limits<double>::max(); // In Km
-    double  bearing;
-
     for (const auto& area : areas) {
+      bool    atPlace=false;
+      double  distance=std::numeric_limits<double>::max(); // In Km
+      double  bearing=0;
+
       for (const auto& ring : area->rings) {
         if (ring.IsOuterRing()) {
           if (!atPlace && IsCoordInArea(location,
                                         ring.nodes)) {
             atPlace=true;
-            placeArea=area;
+            //placeArea=area;
             distance=0.0;
             bearing=0;
           }
@@ -1409,7 +1391,6 @@ namespace osmscout {
 
             if (!atPlace &&
                 currentDistance<distance) {
-              placeArea=area;
               distance=currentDistance;
               //distance=GetEllipsoidalDistance(location,intersection);
               bearing=GetSphericalBearingInitial(intersection,location);
@@ -1417,33 +1398,133 @@ namespace osmscout {
           }
         }
       }
+      candidates.push_back(LocationDescriptionCandicate(
+        ObjectFileRef(area->GetFileOffset(), refArea), distance, bearing, atPlace));
+    }
+    osmscout::log.Debug() << "Found " << areas.size() << " areas near " << location.GetDisplayText();
+
+    return true;
+  }
+
+  bool LocationService::LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types, 
+                                      std::vector<LocationDescriptionCandicate> &candidates)
+  {
+    TypeConfigRef    typeConfig=database->GetTypeConfig();
+    AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
+    GeoBox           box100=GeoBox::BoxByCenterAndRadius(location,100);
+
+    if (!typeConfig ||
+        !areaNodeIndex) {
+      return false;
+    }
+    std::vector<FileOffset>  offsets;
+    TypeInfoSet              loadedAddressTypes;
+
+    if (!areaNodeIndex->GetOffsets(box100, types, offsets, loadedAddressTypes)) {
+      return false;
+    }
+    if (offsets.empty()){
+      return true;
     }
 
-    if (placeArea) {
+    std::vector<NodeRef> nodes;
+    if (!database->GetNodesByOffset(offsets, nodes)){
+      return false;
+    }
+    if (nodes.empty()){
+      return true;
+    }
+    for (const auto &node: nodes){
+      double  distance=GetEllipsoidalDistance(location, node.get()->GetCoords()); // In Km
+      double  bearing=GetSphericalBearingInitial(node.get()->GetCoords(),location);
+
+      candidates.push_back(LocationDescriptionCandicate(
+        ObjectFileRef(node->GetFileOffset(), refNode), distance, bearing, false));
+    }
+    osmscout::log.Debug() << "Found " << nodes.size() << " nodes near " << location.GetDisplayText();
+
+    return true;
+  }
+
+  bool LocationService::DistanceComparator(const LocationDescriptionCandicate &a,
+                                           const LocationDescriptionCandicate &b)
+  {
+    return (a.GetDistance() < b.GetDistance());
+  }
+
+  bool LocationService::DescribeLocationByAddress(const GeoCoord& location,
+                                                  LocationDescription& description)
+  {
+    // search all addressable areas and nodes, sort it by distance, get first with address
+    TypeConfigRef typeConfig=database->GetTypeConfig();
+
+    if (!typeConfig) {
+      return false;
+    }
+
+    std::vector<LocationDescriptionCandicate> candidates;
+
+    TypeInfoSet addressTypes;
+
+    // near addressable areas
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeArea() &&
+          type->HasFeature(AddressFeature::NAME)) {
+        addressTypes.Set(type);
+      }
+    }
+    if (!addressTypes.Empty()) {
+      if (!LoadNearAreas(location, addressTypes, candidates)){
+        return false;
+      }
+    }
+
+    // near addressable nodes
+    addressTypes.Clear();
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeNode() &&
+          type->HasFeature(AddressFeature::NAME)) {
+        addressTypes.Set(type);
+      }
+    }
+    if (!addressTypes.Empty()) {
+      if (!LoadNearNodes(location, addressTypes, candidates)){
+        return false;
+      }
+    }
+
+    if (candidates.empty()){
+      return true;
+    }
+
+    // sort all candidates by its distance from location
+    std::sort(candidates.begin(), candidates.end(), DistanceComparator);
+
+    for (const auto &candidate : candidates){
       std::list<ReverseLookupResult> result;
 
-      if (!ReverseLookupObject(ObjectFileRef(placeArea->GetFileOffset(),
-                                             refArea),
-                               result)) {
+      if (!ReverseLookupObject(candidate.GetRef(), result)) {
         return false;
       }
 
       if (!result.empty()) {
+        // setup description by nearest candidate with setup address
         Place place=Place(result.front().object,
                           result.front().adminRegion,
                           result.front().poi,
                           result.front().location,
                           result.front().address);
 
-        if (atPlace) {
+        if (candidate.IsAtPlace()) {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place));
         }
         else {
-          description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,distance*1000,bearing));
+          description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,
+                            candidate.GetDistance()*1000, candidate.GetBearing()));
         }
+        return true;
       }
     }
-
     return true;
   }
 
