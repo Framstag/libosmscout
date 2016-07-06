@@ -38,7 +38,7 @@
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/WorkQueue.h>
 
-#include <osmscout/TiledDataCache.h>
+#include <osmscout/DataTileCache.h>
 
 namespace osmscout {
 
@@ -112,7 +112,7 @@ namespace osmscout {
     mutable std::mutex           stateMutex;           //!< Mutex to protect internal state
 
     DatabaseRef                  database;             //!< The reference to the database
-    mutable TiledDataCache       cache;                //!< Data cache
+    mutable DataTileCache       cache;                //!< Data cache
     TypeDefinitionRef            typeDefinition;       //<! Last used and cached TypeDefinition
 
     mutable WorkQueue<bool>      nodeWorkerQueue;

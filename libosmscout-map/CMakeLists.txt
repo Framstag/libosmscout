@@ -10,7 +10,9 @@ set(HEADER_FILES
 	include/osmscout/MapParameter.h
 	include/osmscout/MapService.h
 	include/osmscout/StyleConfig.h
-	include/osmscout/TiledDataCache.h
+	include/osmscout/TileId.h
+	include/osmscout/DataTileCache.h
+	include/osmscout/MapTileCache.h
 	include/osmscout/MapPainterNoOp.h
 )
 
@@ -21,7 +23,9 @@ set(SOURCE_FILES
 	src/osmscout/MapParameter.cpp
 	src/osmscout/MapService.cpp
 	src/osmscout/StyleConfig.cpp
-	src/osmscout/TiledDataCache.cpp
+	src/osmscout/TileId.cpp
+	src/osmscout/DataTileCache.cpp
+	src/osmscout/MapTileCache.cpp
 	src/osmscout/MapPainterNoOp.cpp
 )
 

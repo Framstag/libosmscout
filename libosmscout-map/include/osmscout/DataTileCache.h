@@ -37,73 +37,9 @@
 #include <osmscout/util/Magnification.h>
 #include <osmscout/system/Assert.h>
 
+#include <osmscout/TileId.h>
+
 namespace osmscout {
-
-  /**
-   * \ingroup tiledcache
-   *
-   * A Tile id, uniquely identifing a tile by its level and (unique for the given level) tile coordinates.
-   *
-   * Note that this are libosmscout tiles, that evenly split the whole world into - for each level -
-   * equaly sized (regarding their latitude and longitude interval) rectangles.
-   *
-   * Classic OSM tiles are calculated differently.
-   */
-  class OSMSCOUT_MAP_API TileId
-  {
-  private:
-    Magnification magnification; //!< the zoom level (0..n)
-    size_t        x;             //!< The x coordinate of the tile in relation to the zoom level
-    size_t        y;             //!< The y coordinate of the tile in relation to the zoom level
-    GeoBox        boundingBox;   //!< Bounding box of the tile
-
-  public:
-    TileId(const Magnification& magnification,
-           size_t x,
-           size_t y);
-
-    /**
-     * Return the zoom level of the tile
-     */
-    inline size_t GetLevel() const
-    {
-      return magnification.GetLevel();
-    }
-
-    /**
-     * Return the X coordinate fo the tile
-     */
-    inline size_t GetX() const
-    {
-      return x;
-    }
-
-    /**
-     * Return the y coordinate fo the tile
-     */
-    inline size_t GetY() const
-    {
-      return y;
-    }
-
-    /**
-     * Return the bounding box of the tile
-     */
-    inline const GeoBox& GetBoundingBox() const
-    {
-      return boundingBox;
-    }
-
-    std::string DisplayText() const;
-
-    TileId GetParent() const;
-
-    bool operator==(const TileId& other) const;
-
-    bool operator!=(const TileId& other) const;
-
-    bool operator<(const TileId& other) const;
-  };
 
   /**
    * \ingroup tiledcache
@@ -251,8 +187,8 @@ namespace osmscout {
    */
   typedef TileData<AreaRef> TileAreaData;
 
-  // Forward declaration of TiledDataCache for friend declaration in Tile
-  class TiledDataCache;
+  // Forward declaration of DataTileCache for friend declaration in Tile
+  class DataTileCache;
 
   /**
    * \ingroup tiledcache
@@ -275,7 +211,7 @@ namespace osmscout {
     Tile(const TileId& id);
 
   public:
-    friend class TiledDataCache;
+    friend class DataTileCache;
 
     ~Tile();
 
@@ -418,11 +354,11 @@ namespace osmscout {
    * The cache will free least recently used tiles first,
    *
    */
-  class OSMSCOUT_MAP_API TiledDataCache
+  class OSMSCOUT_MAP_API DataTileCache
   {
   private:
     /**
-     * Internaly used cache entry
+     * Internally used cache entry
      */
     struct OSMSCOUT_MAP_API CacheEntry
     {
@@ -478,7 +414,7 @@ namespace osmscout {
                                 const TypeInfoSet& areaTypes);
 
   public:
-    TiledDataCache(size_t cacheSize);
+    DataTileCache(size_t cacheSize);
 
     void SetSize(size_t cacheSize);
 
@@ -502,9 +438,9 @@ namespace osmscout {
   /**
    * \ingroup tiledcache
    *
-   * Reference counted reference to a TiledDataCache instance
+   * Reference counted reference to a DataTileCache instance
    */
-  typedef std::shared_ptr<TiledDataCache> TiledDataCacheRef;
+  typedef std::shared_ptr<DataTileCache> TiledDataCacheRef;
 
   /**
    * \defgroup tiledcache Classes for caching map data per tile

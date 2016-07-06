@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TiledDataCache.h>
+#include <osmscout/DataTileCache.h>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
@@ -25,86 +25,6 @@
 
 #include <iostream>
 namespace osmscout {
-
-  /**
-   * Ceate a new tile by passing magnification and tile coordinates
-   */
-  TileId::TileId(const Magnification& magnification,
-                 size_t x,
-                 size_t y)
-  : magnification(magnification),
-    x(x),
-    y(y),
-    boundingBox(GeoCoord(y*cellDimension[magnification.GetLevel()].height-90.0,
-                         x*cellDimension[magnification.GetLevel()].width-180.0),
-                GeoCoord((y+1)*cellDimension[magnification.GetLevel()].height-90.0,
-                         (x+1)*cellDimension[magnification.GetLevel()].width-180.0))
-  {
-    // no code
-  }
-
-  /**
-   * Return a short human readable description of the tile id
-   */
-  std::string TileId::DisplayText() const
-  {
-    return NumberToString(magnification.GetLevel())+ "." + NumberToString(y) + "." + NumberToString(x);
-  }
-
-  /**
-   * Return the parent tile.
-   *
-   * Note that the parent tile will cover a 4 times bigger region than the current tile.
-   *
-   * Note that for tiles with level 0 no parent tile will exist. The method will assert in this case!
-   */
-  TileId TileId::GetParent() const
-  {
-    Magnification zoomedOutMagnification;
-
-    assert(magnification.GetLevel()>0);
-
-    zoomedOutMagnification.SetLevel(magnification.GetLevel()-1);
-
-    return TileId(zoomedOutMagnification,x/2,y/2);
-  }
-
-  /**
-   * Compare tile ids for equality
-   */
-  bool TileId::operator==(const TileId& other) const
-  {
-    return magnification==other.magnification &&
-           y==other.y &&
-           x==other.x;
-  }
-
-  /**
-   * Compare tile ids for inequality
-   */
-  bool TileId::operator!=(const TileId& other) const
-  {
-    return magnification!=other.magnification ||
-           y!=other.y ||
-           x!=other.x;
-  }
-
-  /**
-   * Compare tile ids by their order. Needed for sorting tile ids and placing them into (some)
-   * containers.
-   */
-  bool TileId::operator<(const TileId& other) const
-  {
-    if (magnification!=other.magnification) {
-      return magnification<other.magnification;
-    }
-
-    if (y!=other.y) {
-      return y<other.y;
-    }
-
-    return x<other.x;
-  }
 
   /**
    * Create a new tile with the given id.
@@ -123,7 +43,7 @@ namespace osmscout {
   /**
    * Create a new tile cache with the given cache size
    */
-  TiledDataCache::TiledDataCache(size_t cacheSize)
+  DataTileCache::DataTileCache(size_t cacheSize)
   : cacheSize(cacheSize)
   {
     // no code
@@ -132,7 +52,7 @@ namespace osmscout {
   /**
    * Change the size of the cache. Cache will be cleaned immediately.
    */
-  void TiledDataCache::SetSize(size_t cacheSize)
+  void DataTileCache::SetSize(size_t cacheSize)
   {
     bool cleanupCache=cacheSize<this->cacheSize;
 
@@ -147,7 +67,7 @@ namespace osmscout {
    * Cleanup the cache. Free least recently used tiles until the given maximum cache
    * size is reached again.
    */
-  void TiledDataCache::CleanupCache()
+  void DataTileCache::CleanupCache()
   {
     if (tileCache.size()>cacheSize) {
       auto currentEntry=tileCache.rbegin();
@@ -173,7 +93,7 @@ namespace osmscout {
    * Return the cache tiles with the given id. If the tiles is not cache,
    * an empty reference will be returned.
    */
-  TileRef TiledDataCache::GetCachedTile(const TileId& id) const
+  TileRef DataTileCache::GetCachedTile(const TileId& id) const
   {
     std::map<TileId,CacheRef>::iterator existingEntry=tileIndex.find(id);
 
@@ -191,7 +111,7 @@ namespace osmscout {
    * Return the tile with the given id. If the tile is not currently cached
    * return an empty and unassigned tile and move it to the front of the cache.
    */
-  TileRef TiledDataCache::GetTile(const TileId& id) const
+  TileRef DataTileCache::GetTile(const TileId& id) const
   {
     std::map<TileId,CacheRef>::iterator existingEntry=tileIndex.find(id);
 
@@ -217,7 +137,7 @@ namespace osmscout {
   /**
    * Return all tile necessary for covering the given boundingbox using the given magnification.
    */
-  void TiledDataCache::GetTilesForBoundingBox(const Magnification& magnification,
+  void DataTileCache::GetTilesForBoundingBox(const Magnification& magnification,
                                               const GeoBox& boundingBox,
                                               std::list<TileRef>& tiles) const
   {
@@ -242,7 +162,7 @@ namespace osmscout {
     }
   }
 
-  void TiledDataCache::ResolveNodesFromParent(Tile& tile,
+  void DataTileCache::ResolveNodesFromParent(Tile& tile,
                                               const Tile& parentTile,
                                               const GeoBox& boundingBox,
                                               const TypeInfoSet& nodeTypes)
@@ -269,7 +189,7 @@ namespace osmscout {
     }
   }
 
-  void TiledDataCache::ResolveOptimizedWaysFromParent(Tile& tile,
+  void DataTileCache::ResolveOptimizedWaysFromParent(Tile& tile,
                                                       const Tile& parentTile,
                                                       const GeoBox& boundingBox,
                                                       const TypeInfoSet& optimizedWayTypes,
@@ -301,7 +221,7 @@ namespace osmscout {
     }
   }
 
-  void TiledDataCache::ResolveWaysFromParent(Tile& tile,
+  void DataTileCache::ResolveWaysFromParent(Tile& tile,
                                              const Tile& parentTile,
                                              const GeoBox& boundingBox,
                                              const TypeInfoSet& wayTypes)
@@ -332,7 +252,7 @@ namespace osmscout {
     }
   }
 
-  void TiledDataCache::ResolveOptimizedAreasFromParent(Tile& tile,
+  void DataTileCache::ResolveOptimizedAreasFromParent(Tile& tile,
                                                        const Tile& parentTile,
                                                        const GeoBox& boundingBox,
                                                        const TypeInfoSet& optimizedAreaTypes,
@@ -365,7 +285,7 @@ namespace osmscout {
 
   }
 
-  void TiledDataCache::ResolveAreasFromParent(Tile& tile,
+  void DataTileCache::ResolveAreasFromParent(Tile& tile,
                                               const Tile& parentTile,
                                               const GeoBox& boundingBox,
                                               const TypeInfoSet& areaTypes)
@@ -402,7 +322,7 @@ namespace osmscout {
    * Currently prefill is done by looking for the parent tile in the cache
    * and copying data that intersects the bounding box of the given tile.
    */
-  void TiledDataCache::PrefillDataFromCache(Tile& tile,
+  void DataTileCache::PrefillDataFromCache(Tile& tile,
                                             const TypeInfoSet& nodeTypes,
                                             const TypeInfoSet& wayTypes,
                                             const TypeInfoSet& areaTypes,
