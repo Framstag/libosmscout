@@ -100,13 +100,16 @@ int main(int argc, char* argv[])
     }
     
     if (place.GetPOI()){
-        std::cout << "    POI:     " << place.GetPOI()->name << std::endl;
+        std::cout << "    POI:      " << place.GetPOI()->name << std::endl;
     }
     if (place.GetAddress()){
-        std::cout << "    address: " << place.GetAddress()->name << std::endl;
+        std::cout << "    address:  " << place.GetAddress()->name << std::endl;
+    }
+    if (place.GetLocation()){
+        std::cout << "    location: " << place.GetLocation()->name << std::endl;
     }
     if (place.GetAdminRegion()){
-        std::cout << "    region:  " << place.GetAdminRegion()->name << std::endl;
+        std::cout << "    region:   " << place.GetAdminRegion()->name << std::endl;
     }
   }
 
