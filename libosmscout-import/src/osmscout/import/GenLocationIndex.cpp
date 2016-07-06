@@ -1056,8 +1056,8 @@ namespace osmscout {
       }
     }
 
-    RegionLocation *loc = NULL;
-    if (!FindLocation(progress, region.locations, location, &loc)){
+    RegionLocation *loc=NULL;
+    if (!FindLocation(progress,region.locations,location,&loc)) {
       progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
       return;
     }
@@ -1281,8 +1281,8 @@ namespace osmscout {
       }
     }
 
-    RegionLocation *loc = NULL;
-    if (!FindLocation(progress, region.locations, location, &loc)){
+    RegionLocation *loc=NULL;
+    if (!FindLocation(progress,region.locations,location,&loc)) {
       progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
     }
     else {
@@ -1491,26 +1491,31 @@ namespace osmscout {
   bool LocationIndexGenerator::FindLocation(Progress& progress,
                                             std::map<std::string,RegionLocation> &locations, 
                                             const std::string &locationName,
-                                            RegionLocation **location)
+                                            RegionLocation** location)
   {
     std::map<std::string,RegionLocation>::iterator loc=locations.find(locationName);
 
     if (loc!=locations.end()) {
       // exact match
-      *location = &loc->second;
+      *location=&loc->second;
       return true;
     }
 
+    // Fallback: look if any other location does match case insensitive
+
     std::wstring wLocation(UTF8StringToWString(locationName));
-    std::transform(wLocation.begin(), wLocation.end(), wLocation.begin(), ::tolower);
-    //std::cout << "  not found location " << locationName << "available:" << std::endl;
-    for (auto &entry: locations){
-      //std::cout << "    '" << entry.first << "'" << std::endl;
+
+    std::transform(wLocation.begin(),wLocation.end(),wLocation.begin(),::tolower);
+
+    for (auto &entry: locations) {
       std::wstring wLocation2(UTF8StringToWString(entry.first));
-      std::transform(wLocation2.begin(), wLocation2.end(), wLocation2.begin(), ::tolower);
-      if (wLocation == wLocation2){
+
+      std::transform(wLocation2.begin(),wLocation2.end(),wLocation2.begin(),::tolower);
+
+      if (wLocation==wLocation2) {
         progress.Debug(std::string("Using address '") + entry.first + "' instead of '" + locationName + "'");
-        *location = &entry.second;          
+        *location=&entry.second;
+
         return true;
       }
     }
@@ -1525,12 +1530,12 @@ namespace osmscout {
                                                       const std::string& address,
                                                       bool& added)
   {
-    RegionLocation *loc = NULL;
-    if (!FindLocation(progress, region.locations, location, &loc)){
+    RegionLocation *loc=NULL;
+    if (!FindLocation(progress,region.locations,location,&loc)) {
       progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
       return;
     }
-      
+
     for (const auto& regionAddress : loc->addresses) {
       if (regionAddress.name==address) {
         return;

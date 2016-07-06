@@ -1318,7 +1318,8 @@ namespace osmscout {
                                 result);
   }
 
-  bool LocationService::LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
+  bool LocationService::LoadNearAreas(const GeoCoord& location,
+                                      const TypeInfoSet &types,
                                       std::vector<LocationDescriptionCandicate> &candidates)
   {
     TypeConfigRef    typeConfig=database->GetTypeConfig();
@@ -1474,7 +1475,9 @@ namespace osmscout {
       }
     }
     if (!addressTypes.Empty()) {
-      if (!LoadNearAreas(location, addressTypes, candidates)){
+      if (!LoadNearAreas(location,
+                         addressTypes,
+                         candidates)){
         return false;
       }
     }
@@ -1488,7 +1491,9 @@ namespace osmscout {
       }
     }
     if (!addressTypes.Empty()) {
-      if (!LoadNearNodes(location, addressTypes, candidates)){
+      if (!LoadNearNodes(location,
+                         addressTypes,
+                         candidates)){
         return false;
       }
     }
@@ -1498,7 +1503,7 @@ namespace osmscout {
     }
 
     // sort all candidates by its distance from location
-    std::sort(candidates.begin(), candidates.end(), DistanceComparator);
+    std::sort(candidates.begin(),candidates.end(),DistanceComparator);
 
     for (const auto &candidate : candidates){
       std::list<ReverseLookupResult> result;

@@ -56,8 +56,14 @@ namespace osmscout {
     double        bearing;
     bool          atPlace;
   public:
-    inline LocationDescriptionCandicate(const ObjectFileRef &ref, const double distance, const double bearing, const bool atPlace):
-      ref(ref), distance(distance), bearing(bearing), atPlace(atPlace)
+    inline LocationDescriptionCandicate(const ObjectFileRef &ref,
+                                        const double distance,
+                                        const double bearing,
+                                        const bool atPlace)
+    : ref(ref),
+      distance(distance),
+      bearing(bearing),
+      atPlace(atPlace)
     {
     }
 
