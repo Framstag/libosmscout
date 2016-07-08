@@ -338,6 +338,13 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const N& point,
                                       const PointSequence& nodes)
   {
+      return GetRelationOfPointToArea(point, nodes.asVector());
+  }  
+  /* // THIS METHOD IS BROKEN PROBABLY
+  template<typename N>
+  inline int GetRelationOfPointToArea(const N& point,
+                                      const PointSequence& nodes)
+  {
     bool   c=false;
 
     PointSequenceIterator it = nodes.begin();
@@ -361,6 +368,7 @@ namespace osmscout {
 
     return c ? 1 : -1;
   }
+   */
   
 
   /**
