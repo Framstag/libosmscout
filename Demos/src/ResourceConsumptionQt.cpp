@@ -165,8 +165,7 @@ int main(int argc, char* argv[])
     std::cout << "-------------------" << std::endl;
     std::cout << "# Rendering " << action->lat << "," << action->lon << " with zoom " << action->magnification << " and size " << width << "x" << height << std::endl;
 
-    projection.Set(action->lon,
-                   action->lat,
+    projection.Set(osmscout::GeoCoord(action->lat,action->lon),
                    osmscout::Magnification(action->magnification),
                    DPI,
                    width,

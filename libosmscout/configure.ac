@@ -55,7 +55,7 @@ AC_CHECK_SIZEOF([wchar_t])
 
 AC_CHECK_TYPES([std::shared_mutex],[AC_DEFINE([OSMSCOUT_HAVE_SHARED_MUTEX],[1],[std::shared_mutex is available])],,[#include <shared_mutex>])
 
-AC_CHECK_HEADERS([fcntl.h])
+AC_CHECK_HEADERS([fcntl.h sys/stat.h])
       
 dnl c++ 11 extensions
 

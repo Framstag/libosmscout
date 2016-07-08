@@ -28,17 +28,22 @@
 
 namespace osmscout {
 
-    typedef struct {
-        bool closeWay;
-        size_t transStart;
-        size_t transEnd;
-        size_t i;
-        size_t nVertex;
-        size_t direction;
-    } FollowPathHandle;
-
+  /**
+    Implementation of MapPainter for Qt
+   */
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
+  private:
+    struct FollowPathHandle
+    {
+      bool   closeWay;
+      size_t transStart;
+      size_t transEnd;
+      size_t i;
+      size_t nVertex;
+      size_t direction;
+    };
+
   private:
     CoordBufferImpl<Vertex2D> *coordBuffer;
 

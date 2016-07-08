@@ -1035,6 +1035,7 @@ PRODUCTIONS
                   (
                     AREATEXTSTYLE<filter,state>
                   | AREAICONSTYLE<filter,state>
+                  | AREABORDERTEXTSTYLE<filter,state>
                   )
                 )
                 .
@@ -1095,6 +1096,23 @@ PRODUCTIONS
                 .)
                 .
 
+
+  AREABORDERTEXTSTYLE<StyleFilter filter, bool state>
+              = SYNC "BORDERTEXT"
+                (.
+                  PathTextPartialStyle style;
+                .)
+                SYNC "{"
+                {
+                  PATHTEXTSTYLEATTR<style> WEAK ";"
+                }
+                SYNC "}"
+                (.
+                  if (state) {
+                    config.AddAreaBorderTextStyle(filter,style);
+                  }
+                .)
+                .
 
   LINESTYLEATTR<LinePartialStyle& style>
               = (

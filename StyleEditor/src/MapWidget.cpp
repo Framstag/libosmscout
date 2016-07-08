@@ -98,8 +98,7 @@ void MapWidget::TriggerMapRendering()
     DBThread         *dbThread=DBThread::GetInstance();
     RenderMapRequest request;
 
-    request.lat=center.GetLat();
-    request.lon=center.GetLon();
+    request.coord=center;
     request.angle=angle;
     request.magnification=magnification;
     request.width=width();
@@ -187,8 +186,7 @@ void MapWidget::paint(QPainter *painter)
     DBThread         *dbThread=DBThread::GetInstance();
     QRectF           boundingBox=contentsBoundingRect();
 
-    request.lat=center.GetLat();
-    request.lon=center.GetLon();
+    request.coord=center;
     request.magnification=magnification;
     request.width=boundingBox.width();
     request.height=boundingBox.height();
@@ -276,8 +274,7 @@ void MapWidget::left()
     osmscout::MercatorProjection projection;
     osmscout::GeoBox             boundingBox;
 
-    projection.Set(center.GetLon(),
-                   center.GetLat(),
+    projection.Set(center,
                    magnification,
                    width(),height());
 
@@ -294,8 +291,7 @@ void MapWidget::right()
     osmscout::MercatorProjection projection;
     osmscout::GeoBox             boundingBox;
 
-    projection.Set(center.GetLon(),
-                   center.GetLat(),
+    projection.Set(center,
                    magnification,
                    width(),height());
 
@@ -312,8 +308,7 @@ void MapWidget::up()
     osmscout::MercatorProjection projection;
     osmscout::GeoBox             boundingBox;
 
-    projection.Set(center.GetLon(),
-                   center.GetLat(),
+    projection.Set(center,
                    magnification,
                    width(),height());
 
@@ -330,8 +325,7 @@ void MapWidget::down()
     osmscout::MercatorProjection projection;
     osmscout::GeoBox             boundingBox;
 
-    projection.Set(center.GetLon(),
-                   center.GetLat(),
+    projection.Set(center,
                    magnification,
                    width(),height());
 

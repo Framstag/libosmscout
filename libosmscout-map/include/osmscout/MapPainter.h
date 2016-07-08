@@ -47,6 +47,8 @@
 namespace osmscout {
 
   /**
+   * \ingroup Renderer
+   *
    * This is the data structure holding all to be rendered data.
    */
   struct OSMSCOUT_MAP_API MapData
@@ -266,21 +268,23 @@ namespace osmscout {
      * Attribute readers
      */
     //@{
-    NameFeatureValueReader       nameReader;
-    NameAltFeatureValueReader    nameAltReader;
-    RefFeatureValueReader        refReader;
-    LayerFeatureValueReader      layerReader;
-    WidthFeatureValueReader      widthReader;
-    AddressFeatureValueReader    addressReader;
+    NameFeatureValueReader       nameReader;         //!< Value reader for the 'name' feature
+    NameAltFeatureValueReader    nameAltReader;      //!< Value reader for the 'alternative name' feature
+    RefFeatureValueReader        refReader;          //!< Value reader for the 'ref' feature
+    LayerFeatureValueReader      layerReader;        //!< Value reader for the 'layer' feature
+    WidthFeatureValueReader      widthReader;        //!< Value reader for the 'width' feature
+    AddressFeatureValueReader    addressReader;      //!< Value reader for the 'address' feature
     //@}
 
     /**
-      Presets and similar
+      Presets, precalculations and similar
      */
     //@{
-    std::vector<double>          emptyDash;         //!< Empty dash array
-    std::vector<double>          tunnelDash;        //!< Dash array for drawing tunnel border
-    FillStyle                    areaMarkStyle;     //!< Marker fill style for internal debugging
+    std::vector<double>          emptyDash;          //!< Empty dash array
+    std::vector<double>          tunnelDash;         //!< Dash array for drawing tunnel border
+    FillStyle                    areaMarkStyle;      //!< Marker fill style for internal debugging
+    double                       contourLabelOffset; //!< Same value as in MapParameter but converted to pixel
+    double                       contourLabelSpace;  //!< Same value as in MapParameter but converted to pixel
     //@}
 
   private:
@@ -385,9 +389,12 @@ namespace osmscout {
     void DrawAreaLabel(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
-                       const TypeInfoRef& type,
-                       const FeatureValueBuffer& buffer,
-                       const GeoBox& boundingBox);
+                       const AreaData& areaData);
+
+    void DrawAreaBorderLabel(const StyleConfig& styleConfig,
+                             const Projection& projection,
+                             const MapParameter& parameter,
+                             const AreaData& areaData);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
@@ -436,8 +443,7 @@ namespace osmscout {
 
     void Transform(const Projection& projection,
                    const MapParameter& parameter,
-                   double lon,
-                   double lat,
+                   const GeoCoord& coord,
                    double& x,
                    double& y);
 
@@ -647,6 +653,12 @@ namespace osmscout {
                CoordBuffer *buffer);
     virtual ~MapPainter();
   };
+
+  /**
+   * \defgroup Renderer Map rendering
+   *
+   * Classes and methods related to rendering of maps.
+   */
 }
 
 #endif

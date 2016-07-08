@@ -40,8 +40,7 @@
 
 struct RenderMapRequest
 {
-  double                  lon;
-  double                  lat;
+  osmscout::GeoCoord      coord;
   double                  angle;
   osmscout::Magnification magnification;
   size_t                  width;
@@ -133,14 +132,12 @@ private:
   QString                       stylesheetFilename;
 
   QImage                        *currentImage;
-  double                        currentLat;
-  double                        currentLon;
+  osmscout::GeoCoord            currentCoord;
   double                        currentAngle;
   osmscout::Magnification       currentMagnification;
 
   QImage                        *finishedImage;
-  double                        finishedLat;
-  double                        finishedLon;
+  osmscout::GeoCoord            finishedCoord;
   double                        finishedAngle;
   osmscout::Magnification       finishedMagnification;
 

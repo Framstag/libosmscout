@@ -174,7 +174,30 @@ a.screenshot img {
   border-style: none;
 }
 
-/* Tables */
+/* General tables */
+
+table {
+  border-collapse:collapse;
+  border-style:solid;
+  border-color:black;
+  border-width:1px 1px 1px 1px;
+}
+
+table tr th {
+  font-weight: bold;
+  background-color: #eeeeee;
+  border-style:solid;
+  border-color:black;
+  border-width:1px 1px 1px 1px;
+}
+
+table tr td {
+  border-style:solid;
+  border-color:black;
+  border-width:1px 1px 1px 1px;
+}
+
+/* Tables sheets */
 
 table.sheet {
   border-collapse:collapse;

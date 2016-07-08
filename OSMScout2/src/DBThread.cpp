@@ -75,13 +75,11 @@ DBThread::DBThread()
    iconDirectory(),
    pendingRenderingTimer(this),
    currentImage(NULL),
-   currentLat(0.0),
-   currentLon(0.0),
+   currentCoord(0.0,0.0),
    currentAngle(0.0),
    currentMagnification(0),
    finishedImage(NULL),
-   finishedLat(0.0),
-   finishedLon(0.0),
+   finishedCoord(0.0,0.0),
    finishedMagnification(0),
    dataLoadingBreaker(std::make_shared<QBreaker>())
 {
@@ -311,7 +309,12 @@ void DBThread::GetProjection(osmscout::MercatorProjection& projection)
 {
     QMutexLocker locker(&mutex);
 
-    projection=this->projection;
+    projection.Set(this->projection.GetCenter(),
+                   this->projection.GetAngle(),
+                   this->projection.GetMagnification(),
+                   this->projection.GetDPI(),
+                   this->projection.GetWidth(),
+                   this->projection.GetHeight());
 }
 
 void DBThread::CancelCurrentDataLoading()
@@ -405,14 +408,12 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     currentWidth=request.width;
     currentHeight=request.height;
-    currentLon=request.lon;
-    currentLat=request.lat;
+    currentCoord=request.coord;
     currentAngle=request.angle;
     currentMagnification=request.magnification;
 
     if (database->IsOpen() &&
         styleConfig) {
-      osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
 
       searchParameter.SetBreaker(dataLoadingBreaker);
@@ -427,8 +428,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
       searchParameter.SetUseMultithreading(true);
       searchParameter.SetUseLowZoomOptimization(true);
 
-      projection.Set(currentLon,
-                     currentLat,
+      projection.Set(currentCoord,
                      currentAngle,
                      currentMagnification,
                      dpi,
@@ -489,12 +489,23 @@ void DBThread::DrawMap()
     drawParameter.SetRenderBackground(true);
     drawParameter.SetRenderSeaLand(true);
 
-    mapService->LookupTiles(projection,tiles);
+    // create copy of projection
+    osmscout::MercatorProjection renderProjection;
+    renderProjection.Set(projection.GetCenter(),
+                   projection.GetAngle(),
+                   projection.GetMagnification(),
+                   projection.GetDPI(),
+                   projection.GetWidth(),
+                   projection.GetHeight());
+
+    renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
+    
+    mapService->LookupTiles(renderProjection,tiles);
 
     mapService->ConvertTilesToMapData(tiles,data);
 
     if (drawParameter.GetRenderSeaLand()) {
-      mapService->GetGroundTiles(projection,
+      mapService->GetGroundTiles(renderProjection,
                                  data.groundTiles);
     }
 
@@ -505,7 +516,7 @@ void DBThread::DrawMap()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    bool success=painter->DrawMap(projection,
+    bool success=painter->DrawMap(renderProjection,
                                   drawParameter,
                                   data,
                                   &p);
@@ -519,8 +530,7 @@ void DBThread::DrawMap()
 
     std::swap(currentImage,finishedImage);
 
-    finishedLon=currentLon;
-    finishedLat=currentLat;
+    finishedCoord=currentCoord;
     finishedAngle=currentAngle;
     finishedMagnification=currentMagnification;
 
@@ -575,13 +585,14 @@ bool DBThread::RenderMap(QPainter& painter,
 
   osmscout::MercatorProjection projection;
 
-  projection.Set(finishedLon,
-                 finishedLat,
+  projection.Set(finishedCoord,
                  finishedAngle,
                  finishedMagnification,
                  dpi,
                  finishedImage->width(),
                  finishedImage->height());
+
+  projection.SetLinearInterpolationUsage(finishedMagnification.GetLevel() >= 10);
 
   osmscout::GeoBox boundingBox;
 
@@ -615,15 +626,13 @@ bool DBThread::RenderMap(QPainter& painter,
 
   double dx=0;
   double dy=0;
-  if (request.lon!=finishedLon || request.lat!=finishedLat) {
+  if (request.coord!=finishedCoord) {
     double rx,ry,fx,fy;
 
-    projection.GeoToPixel(request.lon,
-                          request.lat,
+    projection.GeoToPixel(request.coord,
                           rx,
                           ry);
-    projection.GeoToPixel(finishedLon,
-                          finishedLat,
+    projection.GeoToPixel(finishedCoord,
                           fx,
                           fy);
     dx=fx-rx;
@@ -659,8 +668,7 @@ bool DBThread::RenderMap(QPainter& painter,
 
   bool needsNoRepaint=finishedImage->width()==(int) request.width &&
                       finishedImage->height()==(int) request.height &&
-                      finishedLon==request.lon &&
-                      finishedLat==request.lat &&
+                      finishedCoord==request.coord &&
                       finishedAngle==request.angle &&
                       finishedMagnification==request.magnification;
 

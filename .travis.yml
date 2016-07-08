@@ -47,15 +47,14 @@ matrix:
       sudo: required
       env:
         - TARGET=website
-
+        - secure: "pJvtHQlza3h6Zl39BdOcLCICGwtoSFHQsICM+jpjFy3BjXdlYrHWV9X7yvYZnSFCBrBOmx7zKdXo8KnRqJi536Ibh7s0irQzdqWet/XxtWJuR9af2h/T7Ajs0q+3r9S6ayFcd8sSe0t4pTezcKm0JK9c3w44mohgP+OCXo4odjJglBx8dwSjxJ9CcVqzIIgcHaO/eKEkjWvxK/Wtr2U+Z9/lmWkIGwNnfnYGxg6py5L+E+2x6wbeUKWS7/a45l/qDFDdNgJlqHlE/cmWgBUnLrdMDb+qBmcrARzW6Vy8X1vVB9Fxa/72bPvDTS7Q/D0icfkC9wScGynF/HYeQDmbQCA3fUN8LnZFqqEo1yH8VzBvjmE2s4FeRr699Mvw0CXmT0b58zLZUQ9Qg8Kz5AJoWRRKjhpRyb/VzvE4Kd+c7KMr6dbEk7u6GVsVV2hbzvdSweBeqRsgSc7BBrE81Rlc3xIHb2jibRK9pe7hIqF0sZRicJRF+Rf8y3j3RFDzQfTKfFc7taAMF3ndMvVgfYJEn/8SUzNHWlrMj9UY88AdO4b6USnaXa1duWAuz7olMsiwDaBUiA+eP7Z8MAojEO17g5mgYmNFg6N5NBNTqtyX3S9WtI/EmwfIFu2fmFJcETfbY9rzkmi/uat4PNxjbqBpySL6sjaADkXfz+MdU8TdXrE="
+        - secure: "n0staubhRBIAMkEH6i35X1t69+UqQ7sWY07ceYTibHbM48zJ5kUy7L2y8bEk2Oresex/kUhGSRs79IgGJRk14Ii4i59K0s3gfz/QnhFrlqwr0Xs8UAXn+HtvtmDnJaei8PrWlDsYjXqiBR6CEQowFNU9+m8Z8lLkg4x8PviiV0XHtVgmYoeG21rVuEuf8GmuGJ93P/PN/L6H8VjCDsCJPIeWuN+K3Keava5pir+vcTNE2iZl0tEPpR0QCi5NqLOqyd1N1do8toXw0yg18LOycNYbCT7ZOQ3fjtvs639XNeJojYi1yOe/A7Vjzk3kKj2GrRbpQsV1fP50aZ8JhdbQHpwLbS2OV2GIQeQ7Pw5oCLRkI2u1kI8YYABb/qGwOd8LcGOxInYvHrDx827L/Yzno6i2KClt74VPPDFjJsy7Po6nQis5Pj4dcgzTWJp+INW98OPshdntH93fyp30sP/Y/Vl9px05zwIgrBZ6q9+B+gAe+7PJXBtL28eTktOeLE2/o5KOG4yW9EiKALd6kXCcbp8SZ8DCufwJof0YuMvdkbPXDEYvWGd6gnZA0Qrm+gop7SLNFrP7kmkQJZAnKgcwCZdfLhuEF6az6r7eSEnQCV7TJLLq8lZdyhOY8yGwdaPIFW2WaUfKNo5l8jIF4fUwOkmOyUbnz7jW3fX/USuKcl0="
 
 before_install:
   - $TRAVIS_BUILD_DIR/ci/travis/install.sh
 
 before_script:
   - . setupAutoconf.sh
-  - env
-  - pkg-config --list-all | sort
   
 script:
   - $TRAVIS_BUILD_DIR/ci/travis/build.sh

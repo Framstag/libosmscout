@@ -384,7 +384,7 @@ namespace osmscout {
 
     agg::path_storage path;
 
-    double length=0;
+    double pathLength=0;
     double xo=0;
     double yo=0;
 
@@ -397,7 +397,7 @@ namespace osmscout {
         else {
           path.line_to(coordBuffer->buffer[j].GetX(),
                        coordBuffer->buffer[j].GetY());
-          length+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
+          pathLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
                        pow(coordBuffer->buffer[j].GetY()-yo,2));
         }
 
@@ -416,7 +416,7 @@ namespace osmscout {
         else {
           path.line_to(coordBuffer->buffer[idx].GetX(),
                        coordBuffer->buffer[idx].GetY());
-          length+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
+          pathLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
                        pow(coordBuffer->buffer[idx].GetY()-yo,2));
         }
 
@@ -425,14 +425,22 @@ namespace osmscout {
       }
     }
 
-    double width;
-    double height;
+    double textWidth;
+    double textHeight;
 
-    GetTextDimension(wideText,width,height);
+    GetTextDimension(wideText,textWidth,textHeight);
 
-    if (width>length) {
+    double spaceLeft=pathLength-textWidth-2*contourLabelOffset;
+
+    // If space around labels left is < offset on both sides, do not render at all
+    if (spaceLeft<0.0) {
       return;
     }
+
+    spaceLeft=fmod(spaceLeft,textWidth+contourLabelSpace);
+
+    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
+    double       offset=labelInstanceOffset;
 
     /*
     typedef agg::conv_bspline<agg::path_storage> conv_bspline_type;
@@ -452,29 +460,32 @@ namespace osmscout {
 
     fsegm.approximation_scale(3.0);
 
-    double x=(length-width)/2;
-    double y=-height/2+fontEngine->ascender();
+    double y=-textHeight/2+fontEngine->ascender();
 
-    for (size_t i=0; i<wideText.length(); i++) {
-      const agg::glyph_cache* glyph = fontCacheManager->glyph(wideText[i]);
+    while (offset<pathLength) {
+      for (size_t i=0; i<wideText.length(); i++) {
+        const agg::glyph_cache* glyph=fontCacheManager->glyph(wideText[i]);
 
-      if (glyph!=NULL) {
-        fontCacheManager->add_kerning(&x, &y);
-        fontCacheManager->init_embedded_adaptors(glyph,x,y);
+        if (glyph!=NULL) {
+          fontCacheManager->add_kerning(&offset,&y);
+          fontCacheManager->init_embedded_adaptors(glyph,offset,y);
 
-        if (glyph->data_type==agg::glyph_data_outline) {
-          rasterizer->reset();
-          rasterizer->add_path(ftrans);
-          renderer_aa->color(agg::rgba(r,g,b,a));
-          agg::render_scanlines(*rasterizer,
-                                *scanlineP8,
-                                *renderer_aa);
+          if (glyph->data_type==agg::glyph_data_outline) {
+            rasterizer->reset();
+            rasterizer->add_path(ftrans);
+            renderer_aa->color(agg::rgba(r,g,b,a));
+            agg::render_scanlines(*rasterizer,
+                                  *scanlineP8,
+                                  *renderer_aa);
+          }
+
+          // increment pen position
+          offset+=glyph->advance_x;
+          y+=glyph->advance_y;
         }
-
-        // increment pen position
-        x += glyph->advance_x;
-        y += glyph->advance_y;
       }
+
+      offset+=contourLabelSpace;
     }
   }
 

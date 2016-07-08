@@ -40,6 +40,7 @@
 #if defined(HAVE_LIB_GPERFTOOLS)
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
+#include <malloc.h> // mallinfo
 #else
 #if defined(HAVE_MALLINFO)
 #include <malloc.h> // mallinfo
@@ -131,8 +132,11 @@ int main(int argc, char* argv[])
   unsigned int  tileWidth;
   unsigned int  tileHeight;
   std::string   driver;
+
+#if defined(HAVE_LIB_GPERFTOOLS)
   bool          heapProfile;
   std::string   heapProfilePrefix;
+#endif
 
   if (argc<12) {
     std::cerr << "DrawMap " << std::endl;
@@ -146,8 +150,10 @@ int main(int argc, char* argv[])
 #endif
     return 1;
   }
+
+#if defined(HAVE_LIB_GPERFTOOLS)
   heapProfile = false;
-#if defined(HAVE_LIB_GPERFTOOLS)    
+
   if (argc>12) {
       heapProfile = true;
       heapProfilePrefix = argv[12];
@@ -360,6 +366,7 @@ int main(int argc, char* argv[])
                        tileHeight);
 
         projection.GetDimensions(boundingBox);
+        projection.SetLinearInterpolationUsage(level >= 10);
 
         osmscout::StopClock dbTimer;
 

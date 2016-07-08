@@ -421,8 +421,9 @@ namespace osmscout {
     painter->setFont(font);
 
     QPainterPath p;
-    double fontHeight = metrics.height();
+    qreal        fontHeight=metrics.height();
 
+    // Calculate length of path
     if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
@@ -450,110 +451,130 @@ namespace osmscout {
       }
     }
 
-    if (p.length()<stringLength) {
-      // Text is longer than path to draw on
+    qreal spaceLeft=p.length()-stringLength-2*contourLabelOffset;
+
+    // If space around labels left is < offset on both sides, do not render at all
+    if (spaceLeft<0.0) {
       return;
     }
 
-    qreal offset=(p.length()-stringLength)/2;
+    spaceLeft=fmod(spaceLeft,stringLength+contourLabelSpace);
+
+    qreal labelInstanceOffset=spaceLeft/2+contourLabelOffset;
+    qreal offset=labelInstanceOffset;
 
     QTransform tran;
 
-    for (int i=0; i<string.size(); i++) {
-      QPointF point=p.pointAtPercent(p.percentAtLength(offset));
-      qreal angle=p.angleAtPercent(p.percentAtLength(offset));
+    while (offset<p.length()) {
+      for (int i=0; i<string.size(); i++) {
+        QPointF point=p.pointAtPercent(p.percentAtLength(offset));
+        qreal   angle=p.angleAtPercent(p.percentAtLength(offset));
 
-      // rotation matrix components
+        // rotation matrix components
 
-      qreal sina=sin[lround((360-angle)*10)%sin.size()];
-      qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
+        qreal sina=sin[lround((360-angle)*10)%sin.size()];
+        qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
 
-      // Rotation
-      qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
-      qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
+        // Rotation
+        qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
+        qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
 
-      // Aditional offseting
-      qreal deltaPenX=cosa*pen.width();
-      qreal deltaPenY=sina*pen.width();
+        // Aditional offseting
+        qreal deltaPenX=cosa*pen.width();
+        qreal deltaPenY=sina*pen.width();
 
-      // Getting the delta distance for the translation part of the transformation
-      qreal deltaX=newX-point.x();
-      qreal deltaY=newY-point.y();
+        // Getting the delta distance for the translation part of the transformation
+        qreal deltaX=newX-point.x();
+        qreal deltaY=newY-point.y();
 
-      // Applying rotation and translation.
-      tran.setMatrix(cosa,sina,0.0,
-                     -sina,cosa,0.0,
-                     -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
+        // Applying rotation and translation.
+        tran.setMatrix(cosa,sina,0.0,
+                       -sina,cosa,0.0,
+                       -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
 
-      painter->setTransform(tran);
+        painter->setTransform(tran);
 
-      painter->drawText(point,QString(string[i]));
+        painter->drawText(point,QString(string[i]));
 
-      offset+=metrics.width(string[i]);
+        offset+=metrics.width(string[i]);
+      }
+
+      offset+=contourLabelSpace;
     }
 
     painter->resetTransform();
   }
 
 
-  void MapPainterQt::FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
-                                     bool isClosed, bool keepOrientation) {
-      hnd.i = 0;
-      hnd.nVertex = transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
-      bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
-      if (isClosed && !isReallyClosed) {
-          hnd.nVertex++;
-          hnd.closeWay = true;
-      }
-      else {
-          hnd.closeWay = false;
-      }
+  void MapPainterQt::FollowPathInit(FollowPathHandle &hnd,
+                                    Vertex2D &origin,
+                                    size_t transStart,
+                                    size_t transEnd,
+                                    bool isClosed,
+                                    bool keepOrientation)
+  {
+    hnd.i=0;
+    hnd.nVertex=transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
+    bool isReallyClosed=(coordBuffer->buffer[transStart]==coordBuffer->buffer[transEnd]);
 
-      if (keepOrientation ||
-          coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
-          hnd.transStart = transStart;
-          hnd.transEnd = transEnd;
-      }
-      else {
-          hnd.transStart = transEnd;
-          hnd.transEnd = transStart;
-      }
+    if (isClosed && !isReallyClosed) {
+      hnd.nVertex++;
+      hnd.closeWay=true;
+    }
+    else {
+      hnd.closeWay=false;
+    }
 
-      hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
-      origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
+    if (keepOrientation ||
+        coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
+      hnd.transStart=transStart;
+      hnd.transEnd=transEnd;
+    }
+    else {
+      hnd.transStart=transEnd;
+      hnd.transEnd=transStart;
+    }
+
+    hnd.direction=(hnd.transStart < hnd.transEnd) ? 1 : -1;
+    origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
   }
 
-  bool MapPainterQt::FollowPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
+  bool MapPainterQt::FollowPath(FollowPathHandle &hnd,
+                                double l,
+                                Vertex2D &origin)
+  {
+    double x=origin.GetX();
+    double y=origin.GetY();
+    double x2,y2;
+    double deltaX,deltaY,len,fracToGo;
 
-      double x = origin.GetX();
-      double y = origin.GetY();
-      double x2,y2;
-      double deltaX, deltaY, len, fracToGo;
-      while(hnd.i < hnd.nVertex) {
-          if(hnd.closeWay && hnd.nVertex - hnd.i == 1){
-              x2 = coordBuffer->buffer[hnd.transStart].GetX();
-              y2 = coordBuffer->buffer[hnd.transStart].GetY();
-          } else {
-              x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-              y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
-          }
-          deltaX = (x2 - x);
-          deltaY = (y2 - y);
-          len = sqrt(deltaX*deltaX + deltaY*deltaY);
-
-          fracToGo = l/len;
-          if(fracToGo <= 1.0) {
-              origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
-              return true;
-          }
-
-          //advance to next point on the path
-          l -= len;
-          x = x2;
-          y = y2;
-          hnd.i++;
+    while (hnd.i<hnd.nVertex) {
+      if (hnd.closeWay && hnd.nVertex-hnd.i==1) {
+        x2=coordBuffer->buffer[hnd.transStart].GetX();
+        y2=coordBuffer->buffer[hnd.transStart].GetY();
       }
-      return false;
+      else {
+        x2=coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+        y2=coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+      }
+      deltaX=(x2-x);
+      deltaY=(y2-y);
+      len=sqrt(deltaX*deltaX + deltaY*deltaY);
+
+      fracToGo=l/len;
+      if (fracToGo<=1.0) {
+        origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
+        return true;
+      }
+
+      //advance to next point on the path
+      l-=len;
+      x=x2;
+      y=y2;
+      hnd.i++;
+    }
+
+    return false;
   }
 
   void MapPainterQt::DrawContourSymbol(const Projection& projection,
@@ -563,48 +584,59 @@ namespace osmscout {
                                        size_t transStart,
                                        size_t transEnd)
   {
-      double minX;
-      double minY;
-      double maxX;
-      double maxY;
+    double           minX;
+    double           minY;
+    double           maxX;
+    double           maxY;
 
-      symbol.GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-      double widthPx=projection.ConvertWidthToPixel(maxX-minX);
-      double height=maxY-minY;
+    double           widthPx=projection.ConvertWidthToPixel(maxX-minX);
+    double           height=maxY-minY;
+    bool             isClosed=false;
+    Vertex2D         origin;
+    double           x1,y1,x2,y2,x3,y3,slope;
+    FollowPathHandle followPathHnd;
 
-      bool isClosed = false;
-      Vertex2D origin;
-      double x1,y1,x2,y2,x3,y3,slope;
-      FollowPathHandle followPathHnd;
-      FollowPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
-      if(!isClosed && !FollowPath(followPathHnd, space/2, origin)){
-              return;
+    FollowPathInit(followPathHnd,
+                   origin,
+                   transStart,
+                   transEnd,
+                   isClosed,
+                   true);
+
+    if (!isClosed &&
+        !FollowPath(followPathHnd,space/2,origin)) {
+      return;
+    }
+
+    QTransform savedTransform=painter->transform();
+    QTransform t;
+    bool       loop=true;
+
+    while (loop) {
+      x1=origin.GetX();
+      y1=origin.GetY();
+      loop=FollowPath(followPathHnd, widthPx/2, origin);
+
+      if (loop) {
+        x2=origin.GetX();
+        y2=origin.GetY();
+        loop=FollowPath(followPathHnd, widthPx/2, origin);
+
+        if (loop) {
+          x3=origin.GetX();
+          y3=origin.GetY();
+          slope=atan2(y3-y1,x3-x1);
+          t=QTransform::fromTranslate(x2, y2);
+          t.rotateRadians(slope);
+          painter->setTransform(t);
+          DrawSymbol(projection, parameter, symbol, 0, -height*2);
+          loop=FollowPath(followPathHnd, space, origin);
+        }
       }
-      QTransform savedTransform = painter->transform();
-      QTransform t;
-      bool loop = true;
-      while (loop){
-          x1 = origin.GetX();
-          y1 = origin.GetY();
-          loop = FollowPath(followPathHnd, widthPx/2, origin);
-          if(loop){
-              x2 = origin.GetX();
-              y2 = origin.GetY();
-              loop = FollowPath(followPathHnd, widthPx/2, origin);
-              if(loop){
-                  x3 = origin.GetX();
-                  y3 = origin.GetY();
-                  slope = atan2(y3-y1,x3-x1);
-                  t = QTransform::fromTranslate(x2, y2);
-                  t.rotateRadians(slope);
-                  painter->setTransform(t);
-                  DrawSymbol(projection, parameter, symbol, 0, -height*2);
-                  loop = FollowPath(followPathHnd, space, origin);
-              }
-           }
-      }
-      painter->setTransform(savedTransform);
+    }
+    painter->setTransform(savedTransform);
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
@@ -637,14 +669,12 @@ namespace osmscout {
     centerX=(minX+maxX)/2;
     centerY=(minY+maxY)/2;
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-         p!=symbol.GetPrimitives().end();
-         ++p) {
-      DrawPrimitive* primitive=p->get();
+    for (const auto& primitive : symbol.GetPrimitives()) {
+      const DrawPrimitive *primitivePtr=primitive.get();
 
-      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-        FillStyleRef      style=polygon->GetFillStyle();
+      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=NULL) {
+        const PolygonPrimitive *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+        FillStyleRef           style=polygon->GetFillStyle();
 
         SetFill(projection,
                 parameter,
@@ -667,9 +697,9 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-        FillStyleRef        style=rectangle->GetFillStyle();
+      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=NULL) {
+        const RectanglePrimitive *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+        FillStyleRef             style=rectangle->GetFillStyle();
 
         SetFill(projection,
                 parameter,
@@ -684,9 +714,9 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-        CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-        FillStyleRef     style=circle->GetFillStyle();
+      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=NULL) {
+        const CirclePrimitive *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+        FillStyleRef          style=circle->GetFillStyle();
 
         QPointF center(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
                        y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY));

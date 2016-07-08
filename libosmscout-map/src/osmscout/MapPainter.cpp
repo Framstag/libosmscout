@@ -118,6 +118,32 @@ namespace osmscout {
                                       const MapData& data)
   {
     std::map<TypeInfoRef,DataStatistic> statistics;
+    TypeInfoSet                         types;
+
+    // Prefilling all possible types from style sheet
+
+    styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                        types);
+
+    for (const auto& type : types) {
+      DataStatistic& entry=statistics[type];
+    }
+
+    styleConfig->GetWayTypesWithMaxMag(projection.GetMagnification(),
+                                       types);
+
+    for (const auto& type : types) {
+      DataStatistic& entry=statistics[type];
+    }
+
+    styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                        types);
+
+    for (const auto& type : types) {
+      DataStatistic& entry=statistics[type];
+    }
+
+    // Now analyse the actual data
 
     for (const auto& node : data.nodes) {
       DataStatistic& entry=statistics[node->GetType()];
@@ -288,8 +314,11 @@ namespace osmscout {
     log.Info() << "Type|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
     for (const auto& entry : statisticList) {
       log.Info() << entry.type->GetName() << " "
-          << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " " << entry.coordCount << " "
-          << entry.labelCount << " " << entry.iconCount;
+          << entry.objectCount << " "
+          << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " "
+          << entry.coordCount << " "
+          << entry.labelCount << " "
+          << entry.iconCount;
     }
   }
 
@@ -315,13 +344,11 @@ namespace osmscout {
     double y1;
     double y2;
 
-    projection.GeoToPixel(bbox.GetMinLon(),
-                          bbox.GetMinLat(),
+    projection.GeoToPixel(bbox.GetMinCoord (),
                           x1,
                           y1);
 
-    projection.GeoToPixel(bbox.GetMaxLon(),
-                          bbox.GetMaxLat(),
+    projection.GeoToPixel(bbox.GetMaxCoord(),
                           x2,
                           y2);
 
@@ -370,13 +397,11 @@ namespace osmscout {
     double y1;
     double y2;
 
-    projection.GeoToPixel(bbox.GetMinLon(),
-                          bbox.GetMinLat(),
+    projection.GeoToPixel(bbox.GetMinCoord(),
                           x1,
                           y1);
 
-    projection.GeoToPixel(bbox.GetMaxLon(),
-                          bbox.GetMaxLat(),
+    projection.GeoToPixel(bbox.GetMaxCoord(),
                           x2,
                           y2);    
     
@@ -506,12 +531,11 @@ namespace osmscout {
 
   void MapPainter::Transform(const Projection& projection,
                              const MapParameter& /*parameter*/,
-                             double lon,
-                             double lat,
+                             const GeoCoord& coord,
                              double& x,
                              double& y)
   {
-    projection.GeoToPixel(lon,lat,
+    projection.GeoToPixel(coord,
                           x,y);
   }
 
@@ -1218,18 +1242,17 @@ namespace osmscout {
   void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
-                                 const TypeInfoRef& type,
-                                 const FeatureValueBuffer& buffer,
-                                 const GeoBox& boundingBox)
+                                 const AreaData& areaData)
   {
-    IconStyleRef iconStyle;
+    IconStyleRef     iconStyle;
 
-    styleConfig.GetAreaTextStyles(type,
-                                  buffer,
+    styleConfig.GetAreaTextStyles(areaData.type,
+                                  *areaData.buffer,
                                   projection,
                                   textStyles);
-    styleConfig.GetAreaIconStyle(type,
-                                 buffer,
+
+    styleConfig.GetAreaIconStyle(areaData.type,
+                                 *areaData.buffer,
                                  projection,
                                  iconStyle);
 
@@ -1242,20 +1265,52 @@ namespace osmscout {
     double minY;
     double maxY;
 
-    projection.GeoToPixel(boundingBox.GetMinCoord(),
+    projection.GeoToPixel(areaData.boundingBox.GetMinCoord(),
                           minX,minY);
 
-    projection.GeoToPixel(boundingBox.GetMaxCoord(),
+    projection.GeoToPixel(areaData.boundingBox.GetMaxCoord(),
                           maxX,maxY);
 
     LayoutPointLabels(projection,
                       parameter,
-                      buffer,
+                      *areaData.buffer,
                       iconStyle,
                       textStyles,
                       (minX+maxX)/2,
                       (minY+maxY)/2,
                       maxY-minY);
+  }
+
+  void MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
+                                       const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const AreaData& areaData)
+  {
+    PathTextStyleRef borderTextStyle;
+
+    styleConfig.GetAreaBorderTextStyle(areaData.type,
+                                       *areaData.buffer,
+                                       projection,
+                                       borderTextStyle);
+
+    if (!borderTextStyle) {
+      return;
+    }
+
+    std::string label=borderTextStyle->GetLabel()->GetLabel(parameter,
+                                                            *areaData.buffer);
+
+    if (label.empty()) {
+      return;
+    }
+
+
+    DrawContourLabel(projection,
+                     parameter,
+                     *borderTextStyle,
+                     label,
+                     areaData.transStart,
+                     areaData.transEnd);
   }
 
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
@@ -1267,9 +1322,12 @@ namespace osmscout {
       DrawAreaLabel(styleConfig,
                     projection,
                     parameter,
-                    area.type,
-                    *area.buffer,
-                    area.boundingBox);
+                    area);
+
+      DrawAreaBorderLabel(styleConfig,
+                          projection,
+                          parameter,
+                          area);
 
       areasDrawn++;
     }
@@ -1293,8 +1351,7 @@ namespace osmscout {
 
     Transform(projection,
               parameter,
-              node->GetCoords().GetLon(),
-              node->GetCoords().GetLat(),
+              node->GetCoords(),
               x,y);
 
     LayoutPointLabels(projection,
@@ -1900,6 +1957,8 @@ namespace osmscout {
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
     sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
     areaMinDimension=projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
+    contourLabelOffset=projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
+    contourLabelSpace=projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
 
     waysSegments=0;
     waysDrawn=0;

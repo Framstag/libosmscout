@@ -110,8 +110,7 @@ int main(int argc, char* argv[])
 
       drawParameter.SetFontSize(3.0);
 
-      projection.Set(lon,
-                     lat,
+      projection.Set(osmscout::GeoCoord(lat,lon),
                      osmscout::Magnification(zoom),
                      DPI,
                      width,

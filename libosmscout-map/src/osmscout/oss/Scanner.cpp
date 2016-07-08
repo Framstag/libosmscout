@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 92;
-	noSym = 92;
+	maxT = 93;
+	noSym = 93;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -209,41 +209,42 @@ void Scanner::Init() {
 	keywords.set("WAY", 51);
 	keywords.set("SHIELD", 52);
 	keywords.set("AREA", 53);
-	keywords.set("color", 54);
-	keywords.set("dash", 55);
-	keywords.set("gapColor", 56);
-	keywords.set("displayWidth", 57);
-	keywords.set("width", 58);
-	keywords.set("displayOffset", 59);
-	keywords.set("offset", 60);
-	keywords.set("cap", 61);
-	keywords.set("joinCap", 62);
-	keywords.set("endCap", 63);
-	keywords.set("priority", 64);
-	keywords.set("zIndex", 65);
-	keywords.set("pattern", 66);
-	keywords.set("patternMinMag", 67);
-	keywords.set("borderColor", 68);
-	keywords.set("borderWidth", 69);
-	keywords.set("borderDash", 70);
-	keywords.set("label", 71);
-	keywords.set("style", 72);
-	keywords.set("size", 73);
-	keywords.set("scaleMag", 74);
-	keywords.set("autoSize", 75);
-	keywords.set("position", 76);
-	keywords.set("backgroundColor", 77);
-	keywords.set("shieldSpace", 78);
-	keywords.set("symbol", 79);
-	keywords.set("symbolSpace", 80);
-	keywords.set("name", 81);
-	keywords.set("butt", 82);
-	keywords.set("round", 83);
-	keywords.set("square", 84);
-	keywords.set("normal", 85);
-	keywords.set("emphasize", 86);
-	keywords.set("lighten", 87);
-	keywords.set("darken", 90);
+	keywords.set("BORDERTEXT", 54);
+	keywords.set("color", 55);
+	keywords.set("dash", 56);
+	keywords.set("gapColor", 57);
+	keywords.set("displayWidth", 58);
+	keywords.set("width", 59);
+	keywords.set("displayOffset", 60);
+	keywords.set("offset", 61);
+	keywords.set("cap", 62);
+	keywords.set("joinCap", 63);
+	keywords.set("endCap", 64);
+	keywords.set("priority", 65);
+	keywords.set("zIndex", 66);
+	keywords.set("pattern", 67);
+	keywords.set("patternMinMag", 68);
+	keywords.set("borderColor", 69);
+	keywords.set("borderWidth", 70);
+	keywords.set("borderDash", 71);
+	keywords.set("label", 72);
+	keywords.set("style", 73);
+	keywords.set("size", 74);
+	keywords.set("scaleMag", 75);
+	keywords.set("autoSize", 76);
+	keywords.set("position", 77);
+	keywords.set("backgroundColor", 78);
+	keywords.set("shieldSpace", 79);
+	keywords.set("symbol", 80);
+	keywords.set("symbolSpace", 81);
+	keywords.set("name", 82);
+	keywords.set("butt", 83);
+	keywords.set("round", 84);
+	keywords.set("square", 85);
+	keywords.set("normal", 86);
+	keywords.set("emphasize", 87);
+	keywords.set("lighten", 88);
+	keywords.set("darken", 91);
 
 
   tvalLength = 128;
@@ -491,11 +492,11 @@ TokenRef Scanner::NextToken() {
 		case 29:
 			{t->kind = 47; break;}
 		case 30:
-			{t->kind = 88; break;}
-		case 31:
 			{t->kind = 89; break;}
+		case 31:
+			{t->kind = 90; break;}
 		case 32:
-			{t->kind = 91; break;}
+			{t->kind = 92; break;}
 		case 33:
 			recEnd = pos; recKind = 49;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}

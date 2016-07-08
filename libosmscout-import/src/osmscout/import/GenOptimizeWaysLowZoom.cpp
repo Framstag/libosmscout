@@ -446,7 +446,7 @@ namespace osmscout
   {
     MercatorProjection projection;
 
-    projection.Set(0,0,magnification,dpi,width,height);
+    projection.Set(GeoCoord(0.0,0.0),magnification,dpi,width,height);
 
     for (auto &way :ways) {
       TransPolygon       polygon;

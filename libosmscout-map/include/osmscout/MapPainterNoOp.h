@@ -22,6 +22,16 @@
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
+  /**
+   * \ingroup Renderer
+   *
+   * Simple renderer that does nothing. All required callback methods are implemented
+   * in one of the following ways:
+   * * Signal that Feature not implemented
+   * * Does nothing if this does not influence the rendering algorithms
+   * * Return some sensible default, if required
+   *
+   */
   class OSMSCOUT_MAP_API MapPainterNoOp : public MapPainter
   {
   private:
