@@ -48,6 +48,46 @@ namespace osmscout {
   //! Reference counted reference to a LocationCoordDescription instance
   typedef std::shared_ptr<LocationCoordDescription> LocationCoordDescriptionRef;
 
+  class OSMSCOUT_API LocationDescriptionCandicate
+  {
+  private:
+    ObjectFileRef ref;
+    double        distance;
+    double        bearing;
+    bool          atPlace;
+  public:
+    inline LocationDescriptionCandicate(const ObjectFileRef &ref,
+                                        const double distance,
+                                        const double bearing,
+                                        const bool atPlace)
+    : ref(ref),
+      distance(distance),
+      bearing(bearing),
+      atPlace(atPlace)
+    {
+    }
+
+    inline ObjectFileRef GetRef() const
+    {
+      return ref;
+    }
+
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+
+    inline double GetBearing() const
+    {
+      return bearing;
+    }
+
+    inline bool IsAtPlace() const
+    {
+      return atPlace;
+    }
+  };
+
   /**
    * \ingroup Location
    *
@@ -360,6 +400,9 @@ namespace osmscout {
     DatabaseRef database;
 
   private:
+    static bool DistanceComparator(const LocationDescriptionCandicate &a,
+                                   const LocationDescriptionCandicate &b);
+
     bool HandleAdminRegion(const LocationSearch& search,
                            const LocationSearch::Entry& searchEntry,
                            const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
@@ -381,6 +424,12 @@ namespace osmscout {
                                           const LocationMatchVisitor::LocationResult& locationResult,
                                           const AddressMatchVisitor::AddressResult& addressResult,
                                           LocationSearchResult& result) const;
+
+    bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
+                       std::vector<LocationDescriptionCandicate> &candidates);
+
+    bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
+                       std::vector<LocationDescriptionCandicate> &candidates);
 
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description);

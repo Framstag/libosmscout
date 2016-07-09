@@ -346,6 +346,22 @@ namespace osmscout {
                           RegionRef& rootRegion,
                           const RegionIndex& regionIndex);
 
+    /**
+     * Find location by its name in locations map.
+     *
+     * OSM data dont have strict rules how data should be organized.
+     * Sometimes tag "addr:street" (`locationName` in this method) contains
+     * not existent place (entry in `locations` map don't exists),
+     * many times it contains typos or lowercase/uppercase errors.
+     *
+     * This method try to fix some simple errors at least.
+     *
+     * @retrun true if success, false otherwise
+     */
+    std::map<std::string,RegionLocation>::iterator FindLocation(Progress& progress,
+                                                                std::map<std::string,RegionLocation> &locations,
+                                                                const std::string &locationName);
+    
     void AddAddressNodeToRegion(Progress& progress,
                                 Region& region,
                                 const FileOffset& fileOffset,

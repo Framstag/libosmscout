@@ -24,7 +24,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
-#include <iostream>
+
 namespace osmscout {
 
   const char* const LocationIndex::FILENAME_LOCATION_IDX = "location.idx";
@@ -124,7 +124,7 @@ namespace osmscout {
                              bytesForWayFileOffset);
       break;
     default:
-      std::cout << "type: " << (int) type << std::endl;
+      //std::cout << "type: " << (int) type << std::endl;
       throw IOException(scanner.GetFilename(),"Cannot read ObjectFileRef","Unknown object file type");
     }
 
@@ -361,6 +361,12 @@ namespace osmscout {
                                                   AddressVisitor& visitor,
                                                   bool& stopped) const
   {
+    if (location.addressesOffset==0) {
+      // see LocationIndex::LoadRegionDataEntry
+      // if location don't have addresses, offset is set to 0
+      return true;
+    }
+
     uint32_t addressCount;
 
     scanner.SetPos(location.addressesOffset);
@@ -495,6 +501,7 @@ namespace osmscout {
                                        location,
                                        visitor,
                                        stopped)) {
+        scanner.Close();
         return false;
       }
 

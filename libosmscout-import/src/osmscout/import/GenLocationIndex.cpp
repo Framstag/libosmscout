@@ -19,9 +19,11 @@
 
 #include <osmscout/import/GenLocationIndex.h>
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <locale>
 #include <list>
 #include <map>
 #include <set>
@@ -1054,14 +1056,13 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
+    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Area "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
-
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
       return;
     }
-
+    
     for (const auto& regionAddress : loc->second.addresses) {
       if (regionAddress.name==address) {
         return;
@@ -1281,10 +1282,10 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
+    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Way "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
+      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
     }
     else {
       for (const auto& regionAddress : loc->second.addresses) {
@@ -1489,6 +1490,38 @@ namespace osmscout {
     return true;
   }
 
+  std::map<std::string,LocationIndexGenerator::RegionLocation>::iterator LocationIndexGenerator::FindLocation(Progress& progress,
+                                                                                                              std::map<std::string,RegionLocation> &locations,
+                                                                                                              const std::string &locationName)
+  {
+    std::map<std::string,RegionLocation>::iterator loc=locations.find(locationName);
+
+    if (loc!=locations.end()) {
+      // exact match
+      return loc;
+    }
+
+    // Fallback: look if any other location does match case insensitive
+
+    std::wstring wLocation(UTF8StringToWString(locationName));
+
+    std::transform(wLocation.begin(),wLocation.end(),wLocation.begin(),::tolower);
+
+    for (loc=locations.begin(); loc!=locations.end(); loc++) {
+      std::wstring wLocation2(UTF8StringToWString(loc->first));
+
+      std::transform(wLocation2.begin(),wLocation2.end(),wLocation2.begin(),::tolower);
+
+      if (wLocation==wLocation2) {
+        progress.Debug(std::string("Using address '") + loc->first + "' instead of '" + locationName + "'");
+
+        return loc;
+      }
+    }
+    
+    return locations.end();
+  }
+
   void LocationIndexGenerator::AddAddressNodeToRegion(Progress& progress,
                                                       Region& region,
                                                       const FileOffset& fileOffset,
@@ -1496,7 +1529,7 @@ namespace osmscout {
                                                       const std::string& address,
                                                       bool& added)
   {
-    std::map<std::string,RegionLocation>::iterator loc=region.locations.find(location);
+    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
       progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
