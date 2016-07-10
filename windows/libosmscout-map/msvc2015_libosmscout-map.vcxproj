@@ -138,6 +138,7 @@
     <ClCompile Include="src\osmscout\MapPainter.cpp" />
     <ClCompile Include="src\osmscout\MapParameter.cpp" />
     <ClCompile Include="src\osmscout\MapService.cpp" />
+    <ClCompile Include="src\osmscout\TileId.cpp" />
     <ClCompile Include="src\osmscout\DataTileCache.cpp" />
     <ClCompile Include="src\osmscout\MapTileCache.cpp" />
     <ClCompile Include="src\osmscout\oss\Parser.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="include\osmscout\MapPainter.h" />
     <ClInclude Include="include\osmscout\MapParameter.h" />
     <ClInclude Include="include\osmscout\MapService.h" />
+    <ClInclude Include="include\osmscout\TileId.h" />
     <ClInclude Include="include\osmscout\DataTileCache.h" />
     <ClInclude Include="include\osmscout\MapTileCache.h" />
     <ClInclude Include="include\osmscout\oss\Parser.h" />
