@@ -116,6 +116,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
 
   std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
+  std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
 
   std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
@@ -612,6 +613,19 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--coordBlockSize")==0) {
+      size_t coordBlockSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             coordBlockSize)) {
+        parameter.SetCoordBlockSize(coordBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--areaDataMemoryMaped")==0) {
       bool areaDataMemoryMaped;
 
@@ -794,6 +808,8 @@ int main(int argc, char* argv[])
                 (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("CoordIndexCacheSize: ")+
                 osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
+  progress.Info(std::string("CoordBlockSize: ")+
+                osmscout::NumberToString(parameter.GetCoordBlockSize()));
 
   progress.Info(std::string("AreaDataMemoryMaped: ")+
                 (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));

@@ -34,9 +34,6 @@
 
 namespace osmscout {
 
-  static const uint32_t rawWayBlockSize=100000;
-  static const uint32_t nodeBlockSize=250000;
-
   const char* WayAreaDataGenerator::WAYAREA_TMP="wayarea.tmp";
 
   WayAreaDataGenerator::Distribution::Distribution()
@@ -258,7 +255,7 @@ namespace osmscout {
     FileWriter                areaWriter;
     uint32_t                  writtenWayCount=0;
 
-    rawWays.reserve(rawWayBlockSize);
+    rawWays.reserve(parameter.GetRawWayBlockSize());
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing
@@ -324,13 +321,13 @@ namespace osmscout {
 
         rawWays.push_back(way);
 
-        if (rawWays.size()>=rawWayBlockSize ||
-            nodeIds.size()>=nodeBlockSize) {
+        if (rawWays.size()>=parameter.GetRawWayBlockSize() ||
+            nodeIds.size()>=parameter.GetCoordBlockSize()) {
           CoordDataFile::ResultMap coordsMap;
 
           if (!coordDataFile.Get(nodeIds,
                                  coordsMap)) {
-            std::cerr << "Cannot read nodes!" << std::endl;
+            std::cerr << "Cannot read coordinates!" << std::endl;
             return false;
           }
 
@@ -350,7 +347,7 @@ namespace osmscout {
         }
       }
 
-      if (rawWays.size() != 0) {
+      if (!rawWays.empty()) {
         CoordDataFile::ResultMap coordsMap;
 
         if (!coordDataFile.Get(nodeIds,

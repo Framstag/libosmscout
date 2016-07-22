@@ -114,6 +114,7 @@ namespace osmscout {
      rawWayBlockSize(500000),
      coordDataMemoryMaped(false),
      coordIndexCacheSize(1000000),
+     coordBlockSize(250000),
      areaDataMemoryMaped(false),
      areaDataCacheSize(0),
      wayDataMemoryMaped(false),
@@ -238,6 +239,11 @@ namespace osmscout {
   size_t ImportParameter::GetCoordIndexCacheSize() const
   {
     return coordIndexCacheSize;
+  }
+
+  size_t ImportParameter::GetCoordBlockSize() const
+  {
+    return coordBlockSize;
   }
 
   size_t ImportParameter::GetAreaDataCacheSize() const
@@ -462,6 +468,11 @@ namespace osmscout {
     this->coordIndexCacheSize=coordIndexCacheSize;
   }
 
+  void ImportParameter::SetCoordBlockSize(size_t coordBlockSize)
+  {
+    this->coordBlockSize=coordBlockSize;
+  }
+
   void ImportParameter::SetAreaDataMemoryMaped(bool memoryMaped)
   {
     this->areaDataMemoryMaped=memoryMaped;
@@ -471,7 +482,6 @@ namespace osmscout {
   {
     this->areaDataCacheSize=areaDataCacheSize;
   }
-
 
   void ImportParameter::SetWayDataMemoryMaped(bool memoryMaped)
   {
