@@ -258,7 +258,7 @@ namespace osmscout {
     FileWriter                areaWriter;
     uint32_t                  writtenWayCount=0;
 
-    rawWays.reserve(rawWayBlockSize*rawWayBlockSize/5);
+    rawWays.reserve(rawWayBlockSize);
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing
