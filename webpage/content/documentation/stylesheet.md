@@ -1,7 +1,7 @@
 ---
 date: "2016-06-30T19:50:42+02:00"
 title: "Style sheet syntax"
-description: "Description of the style sheet syntax"
+description: "Description of the style sheet syntax in *.oss files"
 weight: 8
 
 menu:
@@ -9,6 +9,7 @@ menu:
     Parent: "documentation"
     Weight: 8
 ---
+
 
 The OSS file defines how data is visualized on the map. It is using a
 cascading style sheet syntax (CSS) like as it is known from HTML.
