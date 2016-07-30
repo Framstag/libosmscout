@@ -34,7 +34,7 @@ namespace osmscout {
   class OSMSCOUT_API RouteData
   {
   public:
-    class RouteEntry
+    class OSMSCOUT_API RouteEntry
     {
     private:
       Id                         currentNodeId;

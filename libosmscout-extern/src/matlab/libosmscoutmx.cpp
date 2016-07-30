@@ -454,7 +454,7 @@ void DrawMapCairo(std::string map_directory, std::string style_file, size_t widt
 			osmscout::MapData             data;
 			osmscout::MapPainterCairo     painter(styleConfig);
 			drawParameter.SetFontSize(3.0);
-			projection.Set(location.GetLon(), location.GetLat(), osmscout::Magnification(zoom), DPI, width, height);
+			projection.Set(location, osmscout::Magnification(zoom), DPI, width, height);
 			std::list<osmscout::TileRef> tiles;
 			mapService->LookupTiles(projection, tiles);
 			mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
