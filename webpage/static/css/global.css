@@ -237,10 +237,14 @@ table.log {
   border-width:0px 0px 0px 0px;
 }
 
-/* Defintion texts */
+/* Defintion of text */
 
 dt {
   font-weight: bold;
+}
+
+blockquote {
+  font-style: italic;
 }
 
 #sflogo {
