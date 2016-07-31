@@ -126,21 +126,21 @@ namespace osmscout {
                                         types);
 
     for (const auto& type : types) {
-      DataStatistic& entry=statistics[type];
+      /* ignore */ statistics[type];
     }
 
     styleConfig->GetWayTypesWithMaxMag(projection.GetMagnification(),
                                        types);
 
     for (const auto& type : types) {
-      DataStatistic& entry=statistics[type];
+      /* ignore */ statistics[type];
     }
 
     styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
                                         types);
 
     for (const auto& type : types) {
-      DataStatistic& entry=statistics[type];
+      /* ignore */ statistics[type];
     }
 
     // Now analyse the actual data
