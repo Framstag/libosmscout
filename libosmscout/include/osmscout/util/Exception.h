@@ -24,6 +24,7 @@
 #include <string>
 
 #include <osmscout/private/CoreImportExport.h>
+#include <system_error>
 
 #if defined(_MSC_VER)
 #include <yvals.h>
@@ -58,6 +59,9 @@ namespace osmscout {
     std::string description;
 
   public:
+    IOException(const std::string& filename,
+                const std::string& semanticError,
+                const std::system_error& error);
     IOException(const std::string& filename,
                 const std::string& semanticError);
     IOException(const std::string& filename,
