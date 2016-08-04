@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
           doxygen \
+          swig openjdk-8-jdk \
     && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 
 RUN apt-get update && apt-get install -y \
           autoconf automake \

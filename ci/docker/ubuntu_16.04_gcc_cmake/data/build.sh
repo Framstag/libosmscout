@@ -7,6 +7,6 @@ env
 cd libosmscout
 mkdir build
 cd build
-cmake ..
+cmake -DOSMSCOUT_BUILD_BINDING_CSHARP=off ..
 make
 
