@@ -61,12 +61,16 @@ dnl name ourself :-/
 if test "$HASLIBFREETYPE" == "true"; then
   SAVED_CXXFLAGS=$CXXFLAGS
   SAVED_LDFLAGS=$LDFLAGS
+  SAVED_LIBS=$LIBS
+
   CXXFLAGS="$SAVED_CXXFLAGS $LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS"
+  LDFLAGS="$SAVED_LDFLAGS $LIBAGG_LDFLAGS $LIBFREETYPE_LDFLAGS"
 
   HASAGGFREETYPE="false"
 
   AC_MSG_CHECKING([for libagg support library 'aggfontfreetype_pic'])
-  LDFLAGS="$SAVED_LDFLAGS -laggfontfreetype_pic $LIBAGG_LIBS"
+  LIBS="$SAVED_LIBS -laggfontfreetype_pic $LIBAGG_LIBS $LIBFREETYPE_LIBS"
+
   AC_LINK_IFELSE(
     [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
                      [ agg::font_engine_freetype_int32 fontEngine;])],
@@ -76,16 +80,19 @@ if test "$HASLIBFREETYPE" == "true"; then
     [AC_MSG_RESULT([no])])
 
   if test "$HASAGGFREETYPE" == "false"; then
-    LDFLAGS="$SAVED_LDFLAGS -laggfontfreetype $LIBAGG_LIBS"
+
     AC_MSG_CHECKING([for libagg support library 'aggfontfreetype'])
+    LIBS="$SAVED_LIBS -laggfontfreetype $LIBAGG_LIBS $LIBFREETYPE_LIBS"
     AC_LINK_IFELSE(
       [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
                        [ agg::font_engine_freetype_int32 fontEngine;])],
       [AC_MSG_RESULT([yes])
-       LIBAGG_LIBS="-laggfontfreetype $LIBAGG_LIBS"],
+       LIBAGG_LIBS="-laggfontfreetype $LIBAGG_LIBS"
+       HASAGGFREETYPE=true],
       [AC_MSG_RESULT([no])])
   fi
 
+  LIBS=$SAVED_LIBS
   LDFLAGS=$SAVED_LDFLAGS
   CXXFLAGS=$SAVED_CXXFLAGS
 fi
@@ -94,7 +101,7 @@ CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [libosmscout libosmscout-map],
-                         [-losmscoutmapagg $LIBAGG_LIBS $LIBFREETYPE_LIBS],
+                         [-losmscoutmapagg $LIBAGG_LIBS],
                          [libosmscout map rendering agg backend library],
                          [$LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS],
                          [])
