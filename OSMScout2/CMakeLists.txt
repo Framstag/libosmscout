@@ -26,22 +26,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-    src/DBThread.h
-    src/MapWidget.h
-    src/RoutingModel.h
-    src/SearchLocationModel.h
-    src/Settings.h
     src/Theme.h
 )
 
 set(SOURCE_FILES
-    src/DBThread.cpp
-    src/MapWidget.cpp
-    src/OSMScout.cpp
-    src/RoutingModel.cpp
-    src/SearchLocationModel.cpp
-    src/Settings.cpp
     src/Theme.cpp
+    src/OSMScout.cpp
 )
 
 set(RESOURCE_FILES
@@ -53,7 +43,9 @@ add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 target_include_directories(OSMScout2 PRIVATE 
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include)
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
+)
 
 target_link_libraries(OSMScout2
         osmscout
@@ -65,6 +57,7 @@ target_link_libraries(OSMScout2
         Qt5::Quick
         Qt5::Svg
         Qt5::Positioning
-        osmscout_map_qt)
+        osmscout_map_qt
+        osmscout_client_qt)
 
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)

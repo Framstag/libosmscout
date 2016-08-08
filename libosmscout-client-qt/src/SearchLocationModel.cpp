@@ -17,11 +17,11 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "SearchLocationModel.h"
+#include "osmscout/SearchLocationModel.h"
 
 #include <iostream>
 
-#include "DBThread.h"
+#include "osmscout/DBThread.h"
 
 Location::Location(Type type,
                    const QString& name,
