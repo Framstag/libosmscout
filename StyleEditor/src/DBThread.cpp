@@ -214,6 +214,14 @@ void DBThread::Initialize()
 }
 
 bool DBThread::ReloadStyle(const QString &suffix){
+    QMutexLocker locker(&mutex);
+    renderBreaker->Break();
+
+    // it is not safe to reload styleConfig now
+    // we should wait to the moment when rendering task will stop using current styleConfig
+    // we don't have any standard mechanism for that, we will sleep a bit as workaround
+    QThread::msleep(1000);
+
     if(stylesheetFilename.isNull()){
         return false;
     }
