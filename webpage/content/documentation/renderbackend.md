@@ -1,5 +1,5 @@
 ---
-date: "2016-07-31T17:47:00+02:00"
+date: "2016-08-10T19:48:00+02:00"
 title: "Render backend requirements"
 description: "Requires to full for render backends"
 weight: 10
@@ -87,3 +87,16 @@ appear and remove them once they disapear from the view point.
 
 Using Vulcan situation will be even more complex, since it looks like, the code
 to visual effect ration in Vulcan is even worse than in OpenGL.
+
+# Possible alternative backends
+
+This is a list of possible alternative gui libraries, frameworks etc...
+that could be base for new, alternative backends. There was not yet an in
+deep analysis, if these libraries fit all criteria, nor implies this
+list, that there is an actual plan.
+
+* [Magnum](http://mosra.cz/blog/magnum-doc/)
+* [Visualization Library](http://www.visualizationlibrary.org/documentation/pag_learning.html)
+* [nanovg](https://github.com/memononen/nanovg)
+* [Skia](https://skia.org/)
+* [Blend2D](http://blend2d.com/)
