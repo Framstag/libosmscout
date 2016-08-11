@@ -2,7 +2,7 @@ TEMPLATE = lib
 
 QT_CONFIG -= no-pkg-config
 
-CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
+CONFIG += qt warn_on debug link_pkgconfig create_pc create_prl no_install_prl thread c++11 silent
 
 QT += core gui widgets qml quick
 
@@ -28,23 +28,19 @@ MOC_DIR = $$DESTDIR/
 RCC_DIR = $$DESTDIR/
 UI_DIR = $$DESTDIR/
 
-SOURCES = src/OSMScout.cpp \
-          src/Settings.cpp \
+SOURCES = src/Settings.cpp \
           src/DBThread.cpp \
           src/MapWidget.cpp \
           src/SearchLocationModel.cpp \
           src/RoutingModel.cpp
 
-HEADERS = src/Settings.h \
-          src/DBThread.h \
-          src/MapWidget.h \
-          src/SearchLocationModel.h \
-          src/RoutingModel.h
+HEADERS = include/osmscout/Settings.h \
+          include/osmscout/DBThread.h \
+          include/osmscout/MapWidget.h \
+          include/osmscout/SearchLocationModel.h \
+          include/osmscout/RoutingModel.h
 
-# DISTFILES += \
-
-RESOURCES += \
-    res.qrc
+INCLUDEPATH += include
 
 ANDROID_EXTRA_LIBS = ../libosmscout/src/.libs/libosmscout.so \
                      ../libosmscout-map/src/.libs//libosmscoutmap.so \

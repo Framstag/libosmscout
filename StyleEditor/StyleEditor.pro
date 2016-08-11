@@ -4,7 +4,7 @@ CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
 
 QT += core gui widgets qml quick
 
-PKGCONFIG += libosmscout-map-qt
+PKGCONFIG += libosmscout-map-qt # libosmscout-client-qt
 
 macx: {
     PKGCONFIG -= libosmscout-map-qt
@@ -14,7 +14,10 @@ macx: {
 
 gcc:QMAKE_CXXFLAGS += -fopenmp
 
-INCLUDEPATH = src
+# libosmscout-client-qt is builded by qmake after configuring THIS. 
+# We cannot use its pkgconfig files, we have to add its includes explicitly
+INCLUDEPATH = src ../libosmscout-client-qt/include
+LIBS += -L$$PWD/../libosmscout-client-qt/debug -losmscout-client-qt
 
 release: DESTDIR = release
 debug:   DESTDIR = debug
@@ -25,23 +28,15 @@ RCC_DIR = $$DESTDIR/
 UI_DIR = $$DESTDIR/
 
 SOURCES = \
-  src/Settings.cpp \
-  src/DBThread.cpp \
-  src/MapWidget.cpp \
   src/MainWindow.cpp \
   src/SettingsDialog.cpp \
-  src/SearchLocationModel.cpp \
   src/FileIO.cpp \
   src/Highlighter.cpp \
   src/StyleEditor.cpp
 
 HEADERS = \
-  src/Settings.h \
-  src/DBThread.h \
-  src/MapWidget.h \
   src/MainWindow.h \
   src/SettingsDialog.h \
-  src/SearchLocationModel.h \
   src/FileIO.h \
   src/Highlighter.h
 
@@ -64,6 +59,6 @@ RESOURCES += \
 
 macx: {
     LIBS += -L$$PWD/../libosmscout-map-qt/build -llibosmscout-map-qt
-    INCLUDEPATH += ../libosmscout/include ../libosmscout-map/include ../libosmscout-map-qt/include
+    INCLUDEPATH += ../libosmscout/include ../libosmscout-map/include ../libosmscout-map-qt/include ../libosmscout-client-qt/include
     PRE_TARGETDEPS += $$PWD/../libosmscout-map-qt/build/liblibosmscout-map-qt.a
 }
