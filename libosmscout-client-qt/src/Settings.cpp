@@ -29,6 +29,11 @@ Settings::~Settings()
   // no code
 }
 
+void Settings::SetDPI(size_t dpi)
+{
+  settings.setValue("settings/dpi", (uint)dpi);
+}
+
 size_t Settings::GetDPI() const
 {
   return (size_t)settings.value("settings/dpi",92).toUInt();

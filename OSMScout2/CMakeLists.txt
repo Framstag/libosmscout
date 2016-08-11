@@ -58,6 +58,7 @@ target_link_libraries(OSMScout2
         Qt5::Svg
         Qt5::Positioning
         osmscout_map_qt
-        osmscout_client_qt)
+        osmscout_client_qt
+)
 
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)

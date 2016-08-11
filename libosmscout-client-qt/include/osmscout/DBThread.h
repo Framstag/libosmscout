@@ -71,9 +71,34 @@ public:
   void Reset();
 };
 
+class StyleError
+{
+    enum StyleErrorType {
+        Symbol, Error, Warning, Exception
+    };
+
+public:
+    StyleError(StyleErrorType type, int line, int column, const QString &text) :
+        type(type), line(line), column(column), text(text){}
+    StyleError(QString msg);
+
+    StyleErrorType GetType(){ return type; }
+    QString GetTypeName() const;
+    int GetLine(){ return line; }
+    int GetColumn(){ return column; }
+    const QString &GetText(){ return text; }
+
+private:
+    StyleErrorType  type;
+    int             line;
+    int             column;
+    QString         text;
+};
+
 class DBThread : public QObject
 {
   Q_OBJECT
+  Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename)
 
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
@@ -82,10 +107,11 @@ signals:
   void TriggerDrawMap();
   void Redraw();
   void TileStatusChanged(const osmscout::TileRef& tile);
+  void stylesheetFilenameChanged();
 
 public slots:
   void ToggleDaylight();
-  void ReloadStyle();
+  bool ReloadStyle(const QString &suffix="");
   void HandleInitialRenderingRequest();
   void HandleTileStatusChanged(const osmscout::TileRef& changedTile);
   void DrawMap();
@@ -132,6 +158,9 @@ private:
 
   osmscout::BreakerRef          dataLoadingBreaker;
 
+  bool                          renderError;
+  QList<StyleError>             styleErrors;
+
 private:
   DBThread();
   virtual ~DBThread();
@@ -141,7 +170,14 @@ private:
 
   void TileStateCallback(const osmscout::TileRef& changedTile);
 
-public:
+public:  
+  QString GetStylesheetFilename() const;
+
+  const QList<StyleError> &GetStyleErrors() const
+  {
+      return styleErrors;
+  }
+
   void GetProjection(osmscout::MercatorProjection& projection);
 
   void CancelCurrentDataLoading();
