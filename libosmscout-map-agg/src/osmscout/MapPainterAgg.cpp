@@ -752,6 +752,8 @@ namespace osmscout {
                               const MapData& data,
                               AggPixelFormat* pf)
   {
+    std::lock_guard<std::mutex> guard(mutex);
+
     this->pf=pf;
 
     renderer_base=new AggRenderBase(*pf);
@@ -784,4 +786,3 @@ namespace osmscout {
     return true;
   }
 }
-
