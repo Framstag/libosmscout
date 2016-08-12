@@ -848,10 +848,12 @@ namespace osmscout {
     for (auto& ring : parts) {
       if (ring.role.GetType()!=typeConfig.typeInfoIgnore &&
           !ring.role.GetType()->CanBeArea()) {
-        progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
-                         " has ring of type "+
-                         ring.role.GetType()->GetName()+
-                         " which is not an area type");
+        parameter.GetErrorReporter()->ReportRelation(rawRelation.GetId(),
+                                                     rawRelation.GetType(),
+                                                     "Has ring of type "+
+                                                     ring.role.GetType()->GetName()+
+                                                     " which is not an area type");
+
         ring.role.SetType(typeConfig.typeInfoIgnore);
       }
     }
@@ -880,17 +882,20 @@ namespace osmscout {
             masterRing.SetFeatures(ring.role.GetFeatureValueBuffer());
           }
           else if (masterRing.GetType()!=ring.role.GetType()) {
-            progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
-                             " has conflicting types for outer boundary ("+
-                             masterRing.GetType()->GetName()+
-                             " vs. "+ring.ways.front()->GetType()->GetName()+")");
+            parameter.GetErrorReporter()->ReportRelation(rawRelation.GetId(),
+                                                         rawRelation.GetType(),
+                                                         "Conflicting types for outer ring ("+
+                                                         masterRing.GetType()->GetName()+
+                                                         " vs. "+ring.ways.front()->GetType()->GetName()+")");
           }
         }
       }
     }
 
     if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
-      progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+" does not have a type, skipping");
+      parameter.GetErrorReporter()->ReportRelation(rawRelation.GetId(),
+                                                   rawRelation.GetType(),
+                                                   "No type");
       return false;
     }
 
@@ -1119,6 +1124,9 @@ namespace osmscout {
                            NumberToString(rawRel.GetId())+" "+
                            rel.GetType()->GetName()+" "+
                            name+" has ring with less than three nodes, skipping");
+          parameter.GetErrorReporter()->ReportRelation(rawRel.GetId(),
+                                                       rel.GetType(),
+                                                       "Ring with less than three nodes (no area)");
           continue;
         }
 

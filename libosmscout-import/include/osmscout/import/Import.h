@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <mutex>
 #include <string>
 
 #include <osmscout/ImportFeatures.h>
@@ -28,6 +29,8 @@
 #include <osmscout/private/ImportImportExport.h>
 
 #include <osmscout/TypeConfig.h>
+
+#include <osmscout/import/ImportErrorReporter.h>
 
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Transformation.h>
@@ -89,6 +92,9 @@ namespace osmscout {
     std::list<std::string>       mapfiles;                 //<! Name of the files containing map data (either *.osm or *.osm.pbf)
     std::string                  typefile;                 //<! Name and path ff type definition file (map.ost.xml)
     std::string                  destinationDirectory;     //<! Name of the destination directory
+
+    ImportErrorReporterRef       errorReporter;            //<! Class for reporting certain import errors to
+
     size_t                       startStep;                //<! Starting step for import
     size_t                       endStep;                  //<! End step for import
     bool                         eco;                      //<! Eco modus, deletes temporary files ASAP
@@ -151,10 +157,13 @@ namespace osmscout {
 
   public:
     ImportParameter();
+    virtual ~ImportParameter();
 
     const std::list<std::string>& GetMapfiles() const;
     std::string GetTypefile() const;
     std::string GetDestinationDirectory() const;
+
+    ImportErrorReporterRef GetErrorReporter() const;
 
     size_t GetStartStep() const;
     size_t GetEndStep() const;
@@ -220,6 +229,8 @@ namespace osmscout {
     void SetMapfiles(const std::list<std::string>& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
+
+    void SetErrorReporter(const ImportErrorReporterRef& errorReporter);
 
     void SetStartStep(size_t startStep);
     void SetSteps(size_t startStep, size_t endStep);

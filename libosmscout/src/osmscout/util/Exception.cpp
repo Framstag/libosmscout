@@ -46,6 +46,22 @@ namespace osmscout {
   }
 
   IOException::IOException(const std::string& filename,
+                           const std::string& semanticError,
+                           const std::exception& error)
+    : filename(filename),
+      semanticError(semanticError)
+  {
+    errorMsg=error.what();
+
+    if (!errorMsg.empty()) {
+      description="File '" + filename +"' - " + semanticError+": " + errorMsg;
+    }
+    else {
+      description="File '" + filename +"' - " + semanticError;
+    }
+  }
+
+  IOException::IOException(const std::string& filename,
                            const std::string& semanticError)
   : filename(filename),
     semanticError(semanticError)

@@ -20,6 +20,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/File.cpp \
                         osmscout/util/FileScanner.cpp \
                         osmscout/util/FileWriter.cpp \
+                        osmscout/util/HTMLWriter.cpp \
                         osmscout/util/GeoBox.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/Logger.cpp \

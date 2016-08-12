@@ -141,6 +141,11 @@ namespace osmscout {
     // no code
   }
 
+  ImportParameter::~ImportParameter()
+  {
+
+  }
+
   const std::list<std::string>& ImportParameter::GetMapfiles() const
   {
     return mapfiles;
@@ -154,6 +159,11 @@ namespace osmscout {
   std::string ImportParameter::GetDestinationDirectory() const
   {
     return destinationDirectory;
+  }
+
+  ImportErrorReporterRef ImportParameter::GetErrorReporter() const
+  {
+    return errorReporter;
   }
 
   size_t ImportParameter::GetStartStep() const
@@ -374,6 +384,11 @@ namespace osmscout {
   void ImportParameter::SetDestinationDirectory(const std::string& destinationDirectory)
   {
     this->destinationDirectory=destinationDirectory;
+  }
+
+  void ImportParameter::SetErrorReporter(const ImportErrorReporterRef& errorReporter)
+  {
+    this->errorReporter=errorReporter;
   }
 
   void ImportParameter::SetStartStep(size_t startStep)
@@ -982,8 +997,16 @@ namespace osmscout {
       langIndex+=2;
     }
 
+    ImportErrorReporterRef errorReporter=std::make_shared<ImportErrorReporter>(progress,
+                                                                               typeConfig,
+                                                                               parameter.GetDestinationDirectory());
+
+    parameter.SetErrorReporter(errorReporter);
+
     bool result=ExecuteModules(typeConfig,
                                progress);
+
+    parameter.SetErrorReporter(NULL);
 
     return result;
   }

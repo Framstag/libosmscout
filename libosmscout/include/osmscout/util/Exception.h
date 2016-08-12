@@ -63,6 +63,9 @@ namespace osmscout {
                 const std::string& semanticError,
                 const std::system_error& error);
     IOException(const std::string& filename,
+                const std::string& semanticError,
+                const std::exception& error);
+    IOException(const std::string& filename,
                 const std::string& semanticError);
     IOException(const std::string& filename,
                 const std::string& semanticError,

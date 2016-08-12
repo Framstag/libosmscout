@@ -17,6 +17,7 @@ set(HEADER_FILES
     include/osmscout/util/File.h
     include/osmscout/util/FileScanner.h
     include/osmscout/util/FileWriter.h
+    include/osmscout/util/HTMLWriter.h
     include/osmscout/util/GeoBox.h
     include/osmscout/util/Geometry.h
     include/osmscout/util/Logger.h
@@ -90,6 +91,7 @@ set(SOURCE_FILES
     src/osmscout/util/File.cpp
     src/osmscout/util/FileScanner.cpp
     src/osmscout/util/FileWriter.cpp
+    src/osmscout/util/HTMLWriter.cpp
     src/osmscout/util/GeoBox.cpp
     src/osmscout/util/Geometry.cpp
     src/osmscout/util/Logger.cpp

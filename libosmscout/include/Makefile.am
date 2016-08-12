@@ -11,6 +11,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/File.h \
                         osmscout/util/FileScanner.h \
                         osmscout/util/FileWriter.h \
+                        osmscout/util/HTMLWriter.h \
                         osmscout/util/GeoBox.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/Logger.h \
