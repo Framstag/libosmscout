@@ -22,6 +22,7 @@
 
 #include <osmscout/MapCairoFeatures.h>
 
+#include <mutex>
 #include <unordered_map>
 
 #if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
@@ -58,6 +59,8 @@ namespace osmscout {
     std::vector<cairo_pattern_t*>          patterns;         //! cairo pattern structure for patterns
     FontMap                                fonts;            //! Cached scaled font
     double                                 minimumLineWidth; //! Minimum width a line must have to be visible
+
+    std::mutex                             mutex;            //! Mutex for locking concurrent calls
 
   private:
     Font GetFont(const Projection& projection,
