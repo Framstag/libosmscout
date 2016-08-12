@@ -233,7 +233,12 @@ TYPES
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       
   TYPE highway_residential
-    = WAY AREA ("highway"=="residential") // OR AREA ("area:highway"=="residential")
+    = WAY AREA ("highway"=="residential")
+      {Name, NameAlt, Ref}
+      PATH[FOOT BICYCLE CAR] LOCATION
+
+  TYPE highway_area__residential IGNORE
+    = WAY AREA ("area:highway"=="residential")
       {Name, NameAlt, Ref}
       PATH[FOOT BICYCLE CAR] LOCATION
       
@@ -799,14 +804,19 @@ TYPES
   // Man made
   //
 
-  TYPE man_made_wastewater_plant
-    = NODE AREA ("man_made"=="wastewater_plant")
+  TYPE man_made_bridge IGNORE
+    = AREA ("man_made"=="bridge")
       {Name, NameAlt}
       MERGE_AREAS
     
   TYPE man_made_pier
     = WAY AREA ("man_made"=="pier")
       {Name, NameAlt, Width}
+      MERGE_AREAS
+
+  TYPE man_made_wastewater_plant
+    = NODE AREA ("man_made"=="wastewater_plant")
+      {Name, NameAlt}
       MERGE_AREAS
 
   //
