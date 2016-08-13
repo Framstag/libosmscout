@@ -763,7 +763,7 @@ namespace osmscout {
     }
   }
 
-  void FileWriter::Write(const std::vector<Point>& nodes, bool writeIds)
+  void FileWriter::Write(const PointSequence& nodes, bool writeIds)
   {
     // Quick exit for empty vector arrays
     if (nodes.empty()) {
@@ -1099,7 +1099,7 @@ namespace osmscout {
     }
   }
 
-  bool IsValidToWrite(const std::vector<Point>& nodes)
+  bool IsValidToWrite(const PointSequence& nodes)
   {
     if (nodes.size()<=1) {
       return true;

@@ -135,7 +135,7 @@ namespace osmscout {
         }
 
         if (ring->IsMasterRing() &&
-            ring->nodes.empty()) {
+            ring->GetNodes().empty()) {
           for (std::vector<Area::Ring>::const_iterator r=area.rings.begin();
                r!=area.rings.end();
                ++r) {
@@ -145,7 +145,7 @@ namespace osmscout {
               writer.Write(name);
               writer.Write(location);
               writer.Write(address);
-              writer.Write(r->nodes,false);
+              writer.Write(r->GetNodes(),false);
 
               overallDataCount++;
             }
@@ -157,7 +157,7 @@ namespace osmscout {
           writer.Write(name);
           writer.Write(location);
           writer.Write(address);
-          writer.Write(ring->nodes,false);
+          writer.Write(ring->GetNodes(),false);
 
           overallDataCount++;
         }
@@ -271,7 +271,7 @@ namespace osmscout {
     while (ring!=area.rings.end()) {
       bool reduced=false;
 
-      if (ring->nodes.size()>=2) {
+      if (ring->GetNodes().size()>=2) {
         size_t lastIndex=0;
         size_t currentIndex=1;
 
@@ -279,9 +279,9 @@ namespace osmscout {
 
         ring->GetCoord(0).EncodeToBuffer(buffers[0]);
 
-        nodeBuffer.push_back(ring->nodes[0]);
+        nodeBuffer.push_back(ring->GetNodes()[0]);
 
-        for (size_t n=1; n<ring->nodes.size(); n++) {
+        for (size_t n=1; n<ring->GetNodes().size(); n++) {
           ring->GetCoord(n).EncodeToBuffer(buffers[currentIndex]);
 
           if (IsEqual(buffers[lastIndex],
@@ -290,21 +290,22 @@ namespace osmscout {
               reduced=true;
             }
             else if (ring->GetSerial(n-1)==0) {
-              ring->nodes[n-1]=ring->nodes[n];
+              // FIXME: nodes will be overrided if reduced == true, it is correct?
+              ring->MutableNodes()[n-1]=ring->MutableNodes()[n];
               reduced=true;
             }
             else if (ring->GetSerial(n-1)==ring->GetSerial(n)) {
               reduced=true;
             }
             else {
-              nodeBuffer.push_back(ring->nodes[n]);
+              nodeBuffer.push_back(ring->GetNodes()[n]);
 
               lastIndex=currentIndex;
               currentIndex=(lastIndex+1)%2;
             }
           }
           else {
-            nodeBuffer.push_back(ring->nodes[n]);
+            nodeBuffer.push_back(ring->GetNodes()[n]);
 
             lastIndex=currentIndex;
             currentIndex=(lastIndex+1)%2;
@@ -325,7 +326,7 @@ namespace osmscout {
           }
         }
         else {
-          ring->nodes=nodeBuffer;
+          ring->SetNodes(nodeBuffer);
           ++ring;
         }
       }
@@ -344,7 +345,7 @@ namespace osmscout {
   {
     for (auto &ring : area.rings) {
       // In this case there is nothing to optimize
-      if (ring.nodes.size()<3) {
+      if (ring.GetNodes().size()<3) {
         continue;
       }
 
@@ -354,12 +355,12 @@ namespace osmscout {
       size_t current=1;
       bool   reduced=false;
 
-      nodeBuffer.push_back(ring.nodes[0]);
+      nodeBuffer.push_back(ring.GetNodes()[0]);
 
-      while (current+1<ring.nodes.size()) {
-        double distance=CalculateDistancePointToLineSegment(ring.nodes[current],
+      while (current+1<ring.GetNodes().size()) {
+        double distance=CalculateDistancePointToLineSegment(ring.GetNodes()[current],
                                                             nodeBuffer[last],
-                                                            ring.nodes[current+1]);
+                                                            ring.GetNodes()[current+1]);
 
         if (distance<1/latConversionFactor &&
             ring.GetSerial(current)==0) {
@@ -368,21 +369,21 @@ namespace osmscout {
           current++;
         }
         else {
-          nodeBuffer.push_back(ring.nodes[current]);
+          nodeBuffer.push_back(ring.GetNodes()[current]);
 
           last++;
           current++;
         }
       }
 
-      nodeBuffer.push_back(ring.nodes[current]);
+      nodeBuffer.push_back(ring.GetNodes()[current]);
 
       if (reduced && nodeBuffer.size()<3) {
         reduced=false;
       }
 
       if (reduced) {
-        ring.nodes=nodeBuffer;
+        ring.SetNodes(nodeBuffer);
       }
     }
 
@@ -395,7 +396,7 @@ namespace osmscout {
                                                  bool& save)
   {
     for (const auto &ring : area.rings) {
-      overallCount+=ring.nodes.size();
+      overallCount+=ring.GetNodes().size();
     }
 
     if (!RemoveDuplicateNodes(progress,

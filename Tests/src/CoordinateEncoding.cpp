@@ -73,7 +73,7 @@ public:
     // no code
   }
 
-  void Measure(const std::vector<osmscout::Point>& coords)
+  void Measure(const osmscout::PointSequence& coords)
   {
     numberOfVectors++;
     coordCount+=coords.size();
@@ -189,7 +189,7 @@ public:
     // no code
   }
 
-  virtual void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords) = 0;
+  virtual void Encode(osmscout::FileOffset offset, const osmscout::PointSequence& coords) = 0;
 };
 
 /**
@@ -206,7 +206,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const osmscout::PointSequence& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -237,7 +237,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const osmscout::PointSequence& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -277,7 +277,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const osmscout::PointSequence& coords)
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -326,7 +326,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const osmscout::PointSequence& coords)
   {
     if (coords.empty()) {
       bytesNeeded++;
@@ -467,15 +467,15 @@ int main(int argc, char* argv[])
 
       way.Read(typeConfig,scanner);
 
-      for (size_t n =0; n<way.nodes.size(); n++) {
+      for (size_t n =0; n<way.GetNodes().size(); n++) {
         std::cout << way.GetCoord(n).GetDisplayText() << " ";
       }
       std::cout << std::endl;
 
-      statistics.Measure(way.nodes);
+      statistics.Measure(way.GetNodes());
 
       for (auto& encoder : encoders) {
-        encoder->Encode(way.GetFileOffset(),way.nodes);
+        encoder->Encode(way.GetFileOffset(),way.GetNodes());
       }
     }
 

@@ -226,7 +226,7 @@ namespace osmscout {
         ring.ways=part->ways;
 
         ringParts.push_back(part);
-        nodeCount=part->role.nodes.size();
+        nodeCount=part->role.GetNodes().size();
         backId=part->role.GetBackId();
 
         while (true) {
@@ -253,7 +253,7 @@ namespace osmscout {
               ring.ways.push_back((*otherPart)->ways.front());
 
               ringParts.push_back(*otherPart);
-              nodeCount+=(*otherPart)->role.nodes.size()-1;
+              nodeCount+=(*otherPart)->role.GetNodes().size()-1;
 
               usedParts.insert(*otherPart);
               match->second.erase(otherPart);
@@ -266,7 +266,7 @@ namespace osmscout {
           break;
         }
 
-        ring.role.nodes.reserve(nodeCount);
+        ring.role.MutableNodes().reserve(nodeCount);
 
         for (std::list<MultipolygonPart*>::const_iterator p=ringParts.begin();
             p!=ringParts.end();
@@ -274,20 +274,20 @@ namespace osmscout {
           MultipolygonPart* part=*p;
 
           if (p==ringParts.begin()) {
-            for (size_t i=0; i<part->role.nodes.size(); i++) {
-              ring.role.nodes.push_back(part->role.nodes[i]);
+            for (size_t i=0; i<part->role.GetNodes().size(); i++) {
+              ring.role.MutableNodes().push_back(part->role.GetNodes()[i]);
             }
           }
           else if (ring.role.GetBackId()==part->role.GetFrontId()) {
-            for (size_t i=1; i<part->role.nodes.size(); i++) {
-              ring.role.nodes.push_back(part->role.nodes[i]);
+            for (size_t i=1; i<part->role.GetNodes().size(); i++) {
+              ring.role.MutableNodes().push_back(part->role.GetNodes()[i]);
             }
           }
           else {
-            for (size_t i=1; i<part->role.nodes.size(); i++) {
-              size_t idx=part->role.nodes.size()-1-i;
+            for (size_t i=1; i<part->role.GetNodes().size(); i++) {
+              size_t idx=part->role.GetNodes().size()-1-i;
 
-              ring.role.nodes.push_back(part->role.nodes[idx]);
+              ring.role.MutableNodes().push_back(part->role.GetNodes()[idx]);
             }
           }
         }
@@ -295,11 +295,11 @@ namespace osmscout {
         // During concatenation we might define a closed ring with start==end, but everywhere else
         // in the code we store areas without repeating the start, so we remove the final node again
         if (ring.role.GetBackId()==ring.role.GetFrontId()) {
-          ring.role.nodes.pop_back();
+          ring.role.MutableNodes().pop_back();
         }
 
         if (parameter.GetStrictAreas() &&
-            !AreaIsSimple(ring.role.nodes)) {
+            !AreaIsSimple(ring.role.GetNodes().asVector())) {
           progress.Error("Resolved ring including way "+NumberToString(ring.ways.front()->GetId())+
                          " is not simple for multipolygon relation "+NumberToString(id)+" "+
                          name);
@@ -354,8 +354,8 @@ namespace osmscout {
       size_t jx=0;
       for (const auto& r2 : parts) {
         if (ix!=jx) {
-          if (IsAreaSubOfArea(r2.role.nodes,
-                              r1.role.nodes)) {
+          if (IsAreaSubOfArea(r2.role.GetNodes(),
+                              r1.role.GetNodes())) {
             state.SetIncluded(ix,jx);
           }
         }
@@ -450,7 +450,7 @@ namespace osmscout {
 
         part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.MarkAsMasterRing();
-        part.role.nodes.resize(way->GetNodeCount());
+        part.role.MutableNodes().resize(way->GetNodeCount());
 
         for (size_t n=0; n<way->GetNodeCount(); n++) {
           OSMId                                    osmId=way->GetNodeId(n);
@@ -467,7 +467,7 @@ namespace osmscout {
             return false;
           }
 
-          part.role.nodes[n].Set(coordEntry->second.GetSerial(),
+          part.role.MutableNodes()[n].Set(coordEntry->second.GetSerial(),
                                  coordEntry->second.GetCoord());
         }
 
@@ -555,7 +555,7 @@ namespace osmscout {
 
         part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.MarkAsMasterRing();
-        part.role.nodes.resize(way->GetNodeCount());
+        part.role.MutableNodes().resize(way->GetNodeCount());
 
         for (size_t n=0; n<way->GetNodeCount(); n++) {
           OSMId                                    osmId=way->GetNodeId(n);
@@ -572,7 +572,7 @@ namespace osmscout {
             return false;
           }
 
-          part.role.nodes[n].Set(coordEntry->second.GetSerial(),
+          part.role.MutableNodes()[n].Set(coordEntry->second.GetSerial(),
                                  coordEntry->second.GetCoord());
         }
 
@@ -943,8 +943,8 @@ namespace osmscout {
 
     relation.rings.reserve(parts.size());
     for (const auto& ring : parts) {
-      assert(!ring.role.nodes.empty());
-
+      assert(!ring.role.GetNodes().empty());
+      
       relation.rings.push_back(ring.role);
     }
 
@@ -1107,13 +1107,13 @@ namespace osmscout {
 
         for (const auto& ring : rel.rings) {
           if (!ring.IsMasterRing()) {
-            if (ring.nodes.size()<3) {
+            if (ring.GetNodes().size()<3) {
               valid=false;
 
               break;
             }
 
-            if (!IsValidToWrite(ring.nodes)) {
+            if (!IsValidToWrite(ring.GetNodes())) {
               dense=false;
             }
           }
@@ -1141,7 +1141,7 @@ namespace osmscout {
         areaTypeCount[rel.GetType()->GetIndex()]++;
         for (const auto& ring: rel.rings) {
           if (ring.IsOuterRing()) {
-            areaNodeTypeCount[rel.GetType()->GetIndex()]+=ring.nodes.size();
+            areaNodeTypeCount[rel.GetType()->GetIndex()]+=ring.GetNodes().size();
           }
         }
 

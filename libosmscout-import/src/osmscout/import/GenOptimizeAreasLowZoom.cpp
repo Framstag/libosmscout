@@ -199,7 +199,7 @@ namespace osmscout
         if (!area->rings[r].IsMasterRing()) {
           polygon.TransformArea(projection,
                                 optimizeAreaMethod,
-                                area->rings[r].nodes,
+                                area->rings[r].GetNodes(),
                                 pixel/8.0);
 
           polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
@@ -222,17 +222,18 @@ namespace osmscout
 
         newRings.push_back(area->rings[r]);
 
-        newRings.back().nodes.clear();
+        std::vector<Point> newNodes;
 
         if (!area->rings[r].IsMasterRing()) {
           for (size_t i=polygon.GetStart();
                i<=polygon.GetEnd();
                i++) {
             if (polygon.points[i].draw) {
-              newRings.back().nodes.push_back(area->rings[r].nodes[i]);
+              newNodes.push_back(area->rings[r].GetNodes()[i]);
             }
           }
         }
+        newRings.back().SetNodes(newNodes);
 
         r++;
       }

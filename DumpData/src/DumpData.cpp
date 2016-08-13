@@ -569,10 +569,10 @@ static void DumpWay(const osmscout::WayRef way,
   DumpFeatureValueBuffer(way->GetFeatureValueBuffer(),
                          IDENT);
 
-  if (!way->nodes.empty()) {
+  if (!way->GetNodes().empty()) {
     std::cout << std::endl;
 
-    for (size_t n=0; n<way->nodes.size(); n++) {
+    for (size_t n=0; n<way->GetNodes().size(); n++) {
       std::cout << "  node[" << n << "] {";
 
       if (way->GetSerial(n)!=0) {
@@ -610,7 +610,7 @@ static void DumpArea(const osmscout::AreaRef area,
                          IDENT);
 
   for (size_t r=0; r<area->rings.size(); r++) {
-    if (!area->rings[r].nodes.empty()) {
+    if (!area->rings[r].GetNodes().empty()) {
       area->rings[r].GetBoundingBox(boundingBox);
     }
 
@@ -642,7 +642,7 @@ static void DumpArea(const osmscout::AreaRef area,
       std::cout << "type: " << area->rings[r].GetType()->GetName() << std::endl;
     }
 
-    if (!area->rings[r].nodes.empty()) {
+    if (!area->rings[r].GetNodes().empty()) {
       DumpIndent(ident);
       std::cout << "boundingBox: " << boundingBox.GetDisplayText() << std::endl;
       DumpIndent(ident);
@@ -652,10 +652,10 @@ static void DumpArea(const osmscout::AreaRef area,
     DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
                            ident);
 
-    if (!area->rings[r].nodes.empty()) {
+    if (!area->rings[r].GetNodes().empty()) {
       std::cout << std::endl;
 
-      for (size_t n=0; n<area->rings[r].nodes.size(); n++) {
+      for (size_t n=0; n<area->rings[r].GetNodes().size(); n++) {
         DumpIndent(ident);
         std::cout << "node[" << n << "] {";
 
@@ -663,7 +663,7 @@ static void DumpArea(const osmscout::AreaRef area,
           std::cout << "serial: " << area->rings[r].GetSerial(n);
         }
 
-        std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;
+        std::cout << " lat: " << area->rings[r].GetNodes()[n].GetLat() << " lon: "<< area->rings[r].GetNodes()[n].GetLon() << " }" << std::endl;
       }
     }
 

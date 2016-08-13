@@ -546,7 +546,11 @@ namespace osmscout {
         }
     }
   }
-
+  void PolygonMerger::AddPolygon(const PointSequence& polygonCoords)
+  {
+    AddPolygon(polygonCoords.asVector());
+  }
+  
   void PolygonMerger::AddPolygon(const std::vector<Point>& polygonCoords)
   {
     assert(polygonCoords.size()>=3);

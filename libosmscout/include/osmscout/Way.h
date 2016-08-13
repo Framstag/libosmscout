@@ -24,6 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
@@ -35,7 +36,7 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_API Way
+  class OSMSCOUT_API Way : public PointSequenceContainer
   {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features
@@ -44,13 +45,14 @@ namespace osmscout {
 
 
   public:
-    std::vector<Point> nodes;              //!< List of nodes
-
-  public:
     inline Way()
-    : fileOffset(0)
+    : PointSequenceContainer(), fileOffset(0)
     {
       // no code
+    }
+    
+    virtual inline ~Way()
+    {  
     }
 
     inline FileOffset GetFileOffset() const
@@ -95,44 +97,8 @@ namespace osmscout {
 
     inline bool IsCircular() const
     {
-      return nodes[0].GetId()!=0 &&
-             nodes[0].GetId()==nodes[nodes.size()-1].GetId();
-    }
-
-    inline Id GetSerial(size_t index) const
-    {
-      return nodes[index].GetSerial();
-    }
-
-    inline Id GetId(size_t index) const
-    {
-      return nodes[index].GetId();
-    }
-
-    inline Id GetFrontId() const
-    {
-      return nodes.front().GetId();
-    }
-
-    inline Id GetBackId() const
-    {
-      return nodes.back().GetId();
-    }
-
-    inline const Point& GetPoint(size_t index) const
-    {
-      return nodes[index];
-    }
-
-    inline const GeoCoord& GetCoord(size_t index) const
-    {
-      return nodes[index].GetCoord();
-    }
-
-    inline void GetBoundingBox(GeoBox& boundingBox) const
-    {
-      osmscout::GetBoundingBox(nodes,
-                               boundingBox);
+      return (*nodes)[0].GetId()!=0 &&
+             (*nodes)[0].GetId()==(*nodes)[nodes->size()-1].GetId();
     }
 
     bool GetCenter(GeoCoord& center) const;

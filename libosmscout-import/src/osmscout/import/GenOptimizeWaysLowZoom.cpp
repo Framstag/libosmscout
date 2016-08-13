@@ -258,29 +258,29 @@ namespace osmscout
             if (otherWay!=match->second.end()) {
               std::vector<Point> newNodes;
 
-              newNodes.reserve(way->nodes.size()+(*otherWay)->nodes.size()-1);
+              newNodes.reserve(way->GetNodes().size()+(*otherWay)->GetNodes().size()-1);
 
               if (way->GetFrontId()==(*otherWay)->GetFrontId()) {
-                for (size_t i=(*otherWay)->nodes.size()-1; i>0; i--) {
-                  newNodes.push_back((*otherWay)->nodes[i]);
+                for (size_t i=(*otherWay)->GetNodes().size()-1; i>0; i--) {
+                  newNodes.push_back((*otherWay)->GetNodes()[i]);
                 }
 
-                for (size_t i=0; i<way->nodes.size(); i++) {
-                  newNodes.push_back(way->nodes[i]);
+                for (size_t i=0; i<way->GetNodes().size(); i++) {
+                  newNodes.push_back(way->GetNodes()[i]);
                 }
 
-                way->nodes=newNodes;
+                way->SetNodes(newNodes);
               }
               else {
-                for (size_t i=0; i<(*otherWay)->nodes.size(); i++) {
-                  newNodes.push_back((*otherWay)->nodes[i]);
+                for (size_t i=0; i<(*otherWay)->GetNodes().size(); i++) {
+                  newNodes.push_back((*otherWay)->GetNodes()[i]);
                 }
 
-                for (size_t i=1; i<way->nodes.size(); i++) {
-                  newNodes.push_back(way->nodes[i]);
+                for (size_t i=1; i<way->GetNodes().size(); i++) {
+                  newNodes.push_back(way->GetNodes()[i]);
                 }
 
-                way->nodes=newNodes;
+                way->SetNodes(newNodes);
               }
 
               usedWays.insert((*otherWay)->GetFileOffset());
@@ -321,18 +321,18 @@ namespace osmscout
             }
 
             if (otherWay!=match->second.end()) {
-              way->nodes.reserve(way->nodes.size()+(*otherWay)->nodes.size()-1);
+              way->MutableNodes().reserve(way->GetNodes().size()+(*otherWay)->GetNodes().size()-1);
 
               if (way->GetBackId()==(*otherWay)->GetFrontId()) {
-                for (size_t i=1; i<(*otherWay)->nodes.size(); i++) {
-                  way->nodes.push_back((*otherWay)->nodes[i]);
+                for (size_t i=1; i<(*otherWay)->GetNodes().size(); i++) {
+                  way->MutableNodes().push_back((*otherWay)->GetNodes()[i]);
                 }
               }
               else {
-                for (size_t i=1; i<(*otherWay)->nodes.size(); i++) {
-                  size_t idx=(*otherWay)->nodes.size()-1-i;
+                for (size_t i=1; i<(*otherWay)->GetNodes().size(); i++) {
+                  size_t idx=(*otherWay)->GetNodes().size()-1-i;
 
-                  way->nodes.push_back((*otherWay)->nodes[idx]);
+                  way->MutableNodes().push_back((*otherWay)->GetNodes()[idx]);
                 }
               }
 
@@ -458,7 +458,7 @@ namespace osmscout
 
       polygon.TransformWay(projection,
                            optimizeWayMethod,
-                           way->nodes,
+                           way->GetNodes(),
                            pixel/8);
 
       polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
@@ -474,13 +474,13 @@ namespace osmscout
            i<=polygon.GetEnd();
            i++) {
         if (polygon.points[i].draw) {
-          newNodes.push_back(way->nodes[i]);
+          newNodes.push_back(way->GetNodes()[i]);
         }
       }
 
       WayRef copiedWay=std::make_shared<Way>(*way);
 
-      copiedWay->nodes=newNodes;
+      copiedWay->SetNodes(newNodes);
 
       optimizedWays.push_back(copiedWay);
     }

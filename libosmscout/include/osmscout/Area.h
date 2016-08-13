@@ -24,6 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 
 #include <osmscout/TypeConfig.h>
 
@@ -43,22 +44,22 @@ namespace osmscout {
     static const uint8_t outerRingId;
 
   public:
-    class OSMSCOUT_API Ring
+    class OSMSCOUT_API Ring : public PointSequenceContainer
     {
     private:
       FeatureValueBuffer    featureValueBuffer; //!< List of features
       uint8_t               ring;               //!< The ring hierarchy number (0...n)
 
     public:
-      std::vector<Point>    nodes;              //!< The array of coordinates
-
-    public:
       inline Ring()
-      : ring(0)
+      : PointSequenceContainer(), ring(0)
       {
         // no code
       }
-
+      virtual inline ~Ring()
+      {
+      }
+      
       inline TypeInfoRef GetType() const
       {
         return featureValueBuffer.GetType();
@@ -111,34 +112,7 @@ namespace osmscout {
         return ring;
       }
 
-      inline Id GetSerial(size_t index) const
-      {
-        return nodes[index].GetSerial();
-      }
-
-      inline Id GetId(size_t index) const
-      {
-        return nodes[index].GetId();
-      }
-
-      inline Id GetFrontId() const
-      {
-        return nodes.front().GetId();
-      }
-
-      inline Id GetBackId() const
-      {
-        return nodes.back().GetId();
-      }
-
-      inline const GeoCoord& GetCoord(size_t index) const
-      {
-        return nodes[index].GetCoord();
-      }
-
       bool GetCenter(GeoCoord& center) const;
-
-      void GetBoundingBox(GeoBox& boundingBox) const;
 
       inline void SetType(const TypeInfoRef& type)
       {
@@ -163,11 +137,6 @@ namespace osmscout {
       inline void SetRing(uint8_t ring)
       {
         this->ring=ring;
-      }
-
-      inline void SetSerial(size_t index, uint8_t serial)
-      {
-        nodes[index].SetSerial(serial);
       }
 
       friend class Area;

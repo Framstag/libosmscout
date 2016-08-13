@@ -116,6 +116,17 @@ namespace osmscout {
     return false;
   }
 
+  bool RoutingService::HasNodeWithId(const PointSequence& nodes) const
+  {
+    for (const auto node : nodes) {
+      if (node.IsRelevant()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool RoutingService::LoadObjectVariantData(const std::string& filename,
                                              std::vector<ObjectVariantData>& objectVariantData) const
   {
@@ -230,7 +241,7 @@ namespace osmscout {
 
     // TODO: What if the way is a roundabout?
 
-    for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
+    for (size_t i=nodeIndex; i<way->GetNodes().size(); i++) {
       routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
@@ -249,7 +260,7 @@ namespace osmscout {
   {
     routeNode=NULL;
 
-    if (nodeIndex>=way->nodes.size()) {
+    if (nodeIndex>=way->GetNodes().size()) {
       return;
     }
 
@@ -280,7 +291,7 @@ namespace osmscout {
   {
     routeNode=NULL;
 
-    if (nodeIndex>=way->nodes.size()) {
+    if (nodeIndex>=way->GetNodes().size()) {
       return;
     }
 
@@ -316,7 +327,7 @@ namespace osmscout {
 
     // TODO: What if the way is a roundabout?
 
-    for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
+    for (size_t i=nodeIndex; i<way->GetNodes().size(); i++) {
       routeNodeDataFile.Get(way->GetId(i),
                             routeNode);
 
@@ -465,7 +476,7 @@ namespace osmscout {
     std::unordered_map<FileOffset,AreaRef>      areaMap;
     std::unordered_map<FileOffset,WayRef>       wayMap;
 
-    std::vector<Point>                          *ids=NULL;
+    const PointSequence                         *ids=NULL;
     bool                                        oneway=false;
 
     if (!areaDataFile ||
@@ -537,7 +548,7 @@ namespace osmscout {
 
       assert(entry!=areaMap.end());
 
-      ids=&entry->second->rings.front().nodes;
+      ids=&entry->second->rings.front().GetNodes();
       oneway=false;
     }
     else if (startObject.GetType()==refWay) {
@@ -545,7 +556,7 @@ namespace osmscout {
 
       assert(entry!=wayMap.end());
 
-      ids=&entry->second->nodes;
+      ids=&entry->second->GetNodes();
       oneway=!profile.CanUseBackward(*entry->second);
     }
 
@@ -618,7 +629,7 @@ namespace osmscout {
 
           assert(entry!=areaMap.end());
 
-          ids=&entry->second->rings.front().nodes;
+          ids=&entry->second->rings.front().GetNodes();
           oneway=false;
         }
         else if (targetObject.GetType()==refWay) {
@@ -626,7 +637,7 @@ namespace osmscout {
 
           assert(entry!=wayMap.end());
 
-          ids=&entry->second->nodes;
+          ids=&entry->second->GetNodes();
           oneway=!profile.CanUseBackward(*entry->second);
         }
 
@@ -665,8 +676,8 @@ namespace osmscout {
         std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*nn)->object.GetFileOffset());
 
         assert(entry!=areaMap.end());
-
-        ids=&entry->second->rings.front().nodes;
+        
+        ids=&entry->second->rings.front().GetNodes();
         oneway=false;
       }
       else if ((*nn)->object.GetType()==refWay) {
@@ -674,7 +685,7 @@ namespace osmscout {
 
         assert(entry!=wayMap.end());
 
-        ids=&entry->second->nodes;
+        ids=&entry->second->GetNodes();
         oneway=!profile.CanUseBackward(*entry->second);
       }
 
@@ -805,13 +816,13 @@ namespace osmscout {
         return false;
       }
 
-      if (nodeIndex>=way->nodes.size()) {
-        log.Error() << "Given start node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1;
+      if (nodeIndex>=way->GetNodes().size()) {
+        log.Error() << "Given start node index " << nodeIndex << " is not within valid range [0," << way->GetNodes().size()-1;
         return false;
       }
 
-      startLon=way->nodes[nodeIndex].GetLon();
-      startLat=way->nodes[nodeIndex].GetLat();
+      startLon=way->GetNodes()[nodeIndex].GetLon();
+      startLat=way->GetNodes()[nodeIndex].GetLat();
 
       // Check, if the current node is already the route node
       routeNodeDataFile.Get(way->GetId(nodeIndex),
@@ -855,8 +866,8 @@ namespace osmscout {
         node->currentCost=profile.GetCosts(*way,
                                            GetSphericalDistance(startLon,
                                                                 startLat,
-                                                                way->nodes[forwardNodePos].GetLon(),
-                                                                way->nodes[forwardNodePos].GetLat()));
+                                                                way->GetNodes()[forwardNodePos].GetLon(),
+                                                                way->GetNodes()[forwardNodePos].GetLat()));
         node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
                                                                  startLat,
                                                                  targetLon,
@@ -882,8 +893,8 @@ namespace osmscout {
         node->currentCost=profile.GetCosts(*way,
                                            GetSphericalDistance(startLon,
                                                                 startLat,
-                                                                way->nodes[backwardNodePos].GetLon(),
-                                                                way->nodes[backwardNodePos].GetLat()));
+                                                                way->GetNodes()[backwardNodePos].GetLon(),
+                                                                way->GetNodes()[backwardNodePos].GetLat()));
         node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
                                                                  startLat,
                                                                  targetLon,
@@ -930,13 +941,13 @@ namespace osmscout {
         return false;
       }
 
-      if (nodeIndex>=way->nodes.size()) {
-        log.Error() << "Given target node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1;
+      if (nodeIndex>=way->GetNodes().size()) {
+        log.Error() << "Given target node index " << nodeIndex << " is not within valid range [0," << way->GetNodes().size()-1;
         return false;
       }
 
-      targetLon=way->nodes[nodeIndex].GetLon();
-      targetLat=way->nodes[nodeIndex].GetLat();
+      targetLon=way->GetNodes()[nodeIndex].GetLon();
+      targetLat=way->GetNodes()[nodeIndex].GetLat();
 
       // Check, if the current node is already the route node
       routeNodeDataFile.Get(way->GetId(nodeIndex),
@@ -1440,7 +1451,8 @@ namespace osmscout {
     AreaDataFileRef areaDataFile(database->GetAreaDataFile());
     WayDataFileRef  wayDataFile(database->GetWayDataFile());
 
-    Way             tmp;
+    Way                tmp;
+    std::vector<Point> nodes;
 
     if (!typeConfig ||
         !areaDataFile ||
@@ -1456,7 +1468,7 @@ namespace osmscout {
 
     way.SetType(routeType);
     way.SetLayerToMax();
-    way.nodes.reserve(data.Entries().size());
+    nodes.reserve(data.Entries().size());
 
     if (data.Entries().empty()) {
       return true;
@@ -1477,17 +1489,18 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.nodes.push_back(a->rings.front().nodes[index]);
+            nodes.push_back(a->rings.front().GetNodes()[index]);
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.nodes.push_back(a->rings.front().nodes[index]);
+          nodes.push_back(a->rings.front().GetNodes()[index]);
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           WayRef w;
 
           if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
+            way.SetNodes(nodes);
             return false;
           }
 
@@ -1495,16 +1508,17 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.nodes.push_back(w->nodes[index]);
+            nodes.push_back(w->GetNodes()[index]);
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.nodes.push_back(w->nodes[index]);
+          nodes.push_back(w->GetNodes()[index]);
         }
       }
     }
 
+    way.SetNodes(nodes);
     return true;
   }
 
@@ -1554,13 +1568,13 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            points.push_back(a->rings.front().nodes[index]);
+            points.push_back(a->rings.front().GetNodes()[index]);
           }
 
           // target node of current path
           size_t index=iter->GetTargetNodeIndex();
 
-          points.push_back(a->rings.front().nodes[index]);
+          points.push_back(a->rings.front().GetNodes()[index]);
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           if (!w ||
@@ -1736,13 +1750,13 @@ namespace osmscout {
     double minDistance=std::numeric_limits<double>::max();
 
     for (const auto& area : areas) {
-      if (!HasNodeWithId(area->rings[0].nodes)) {
+      if (!HasNodeWithId(area->rings[0].GetNodes())) {
         continue;
       }
 
-      for (size_t i=0; i<area->rings[0].nodes.size(); i++) {
-        double distance=sqrt((area->rings[0].nodes[i].GetLat()-lat)*(area->rings[0].nodes[i].GetLat()-lat)+
-                             (area->rings[0].nodes[i].GetLon()-lon)*(area->rings[0].nodes[i].GetLon()-lon));
+      for (size_t i=0; i<area->rings[0].GetNodes().size(); i++) {
+        double distance=sqrt((area->rings[0].GetNodes()[i].GetLat()-lat)*(area->rings[0].GetNodes()[i].GetLat()-lat)+
+                             (area->rings[0].GetNodes()[i].GetLon()-lon)*(area->rings[0].GetNodes()[i].GetLon()-lon));
 
         if (distance<minDistance) {
           minDistance=distance;
@@ -1754,13 +1768,13 @@ namespace osmscout {
     }
 
     for (const auto& way : ways) {
-      if (!HasNodeWithId(way->nodes)) {
+      if (!HasNodeWithId(way->GetNodes())) {
         continue;
       }
 
-      for (size_t i=0;  i<way->nodes.size(); i++) {
-        double distance=sqrt((way->nodes[i].GetLat()-lat)*(way->nodes[i].GetLat()-lat)+
-                             (way->nodes[i].GetLon()-lon)*(way->nodes[i].GetLon()-lon));
+      for (size_t i=0;  i<way->GetNodes().size(); i++) {
+        double distance=sqrt((way->GetNodes()[i].GetLat()-lat)*(way->GetNodes()[i].GetLat()-lat)+
+                             (way->GetNodes()[i].GetLon()-lon)*(way->GetNodes()[i].GetLon()-lon));
         if (distance<minDistance) {
           minDistance=distance;
 

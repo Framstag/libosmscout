@@ -31,6 +31,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 #include <osmscout/Types.h>
 
 #include <osmscout/util/Exception.h>
@@ -89,6 +90,7 @@ namespace osmscout {
   private:
     void AssureByteBufferSize(size_t size);
     void FreeBuffer();
+    void ReadPointSequenceSetup(size_t &coordBitSize, bool &hasNodes, size_t &nodeCount, bool readIds);
 
   public:
     FileScanner();
@@ -157,6 +159,7 @@ namespace osmscout {
                               bool& isSet);
 
     void Read(std::vector<Point>& nodes, bool readIds);
+    void Read(PointSequence*& nodes, bool readIds);
 
     void ReadBox(GeoBox& box);
 

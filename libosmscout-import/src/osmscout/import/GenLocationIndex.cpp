@@ -479,7 +479,7 @@ namespace osmscout {
             if (ring.IsOuterRing()) {
               std::vector<GeoCoord> coords;
 
-              for (const auto& node : ring.nodes) {
+              for (const auto& node : ring.GetNodes()) {
                 coords.push_back(node.GetCoord());
               }
 
@@ -589,7 +589,7 @@ namespace osmscout {
           if (ring.IsOuterRing()) {
             std::vector<GeoCoord> coords;
 
-            for (const auto& node : ring.nodes) {
+            for (const auto& node : ring.GetNodes()) {
               coords.push_back(node.GetCoord());
             }
 
@@ -753,7 +753,7 @@ namespace osmscout {
 
   bool LocationIndexGenerator::AddLocationAreaToRegion(Region& region,
                                                        const Area& area,
-                                                       const std::vector<Point>& nodes,
+                                                       const PointSequence& nodes,
                                                        const std::string& name,
                                                        double minlon,
                                                        double minlat,
@@ -809,7 +809,7 @@ namespace osmscout {
                                                        const RegionIndex& regionIndex)
   {
     if (ring.IsMasterRing() &&
-        ring.nodes.empty()) {
+        ring.GetNodes().empty()) {
       for (const auto& r : area.rings) {
         if (r.IsOuterRing()) {
           GeoBox boundingBox;
@@ -821,7 +821,7 @@ namespace osmscout {
 
           AddLocationAreaToRegion(*region,
                                   area,
-                                  r.nodes,
+                                  r.GetNodes(),
                                   name,
                                   boundingBox.GetMinLon(),
                                   boundingBox.GetMinLat(),
@@ -840,7 +840,7 @@ namespace osmscout {
 
       AddLocationAreaToRegion(*region,
                               area,
-                              ring.nodes,
+                              ring.GetNodes(),
                               name,
                               boundingBox.GetMinLon(),
                               boundingBox.GetMinLat(),
@@ -928,7 +928,7 @@ namespace osmscout {
           !(minlat>childRegion->maxlat)) {
         // Check if one point is in the area
         for (size_t i=0; i<childRegion->areas.size(); i++) {
-          bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
+          bool match=IsAreaAtLeastPartlyInArea(way.GetNodes(),childRegion->areas[i]);
 
           if (match) {
             bool completeMatch=AddLocationWayToRegion(*childRegion,way,name,minlon,minlat,maxlon,maxlat);
@@ -947,7 +947,7 @@ namespace osmscout {
     region.locations[name].objects.push_back(ObjectFileRef(way.GetFileOffset(),refWay));
 
     for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
+      if (IsAreaCompletelyInArea(way.GetNodes(),region.areas[i])) {
         return true;
       }
     }

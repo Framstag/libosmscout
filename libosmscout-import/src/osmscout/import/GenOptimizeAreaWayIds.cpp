@@ -85,7 +85,7 @@ namespace osmscout {
           }
 
           std::unordered_set<Id> nodeIds;
-          for (const auto node : ring.nodes) {
+          for (const auto node : ring.GetNodes()) {
             Id id=node.GetId();
 
             if (nodeIds.find(id)==nodeIds.end()) {
@@ -155,7 +155,7 @@ namespace osmscout {
 
         std::unordered_set<Id> nodeIds;
 
-        for (const auto& node : data.nodes) {
+        for (const auto& node : data.GetNodes()) {
           Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
@@ -232,11 +232,18 @@ namespace osmscout {
                         scanner);
 
         for (auto& ring : data.rings) {
-          for (auto& node : ring.nodes) {
+          std::vector<Point> nodes;
+          bool cleared = false;
+          for (const auto& node : ring.GetNodes()) {
+            nodes.push_back(node);
             if (usedIdAtLeastTwiceSet.find(node.GetId())==usedIdAtLeastTwiceSet.end()) {
-              node.ClearSerial();
+              cleared |= true;
+              nodes.back().ClearSerial();
               idClearedCount++;
             }
+          }
+          if (cleared){
+            ring.SetNodes(nodes);
           }
         }
 
@@ -306,11 +313,18 @@ namespace osmscout {
         data.Read(typeConfig,
                   scanner);
 
-        for (auto& node : data.nodes) {
+        std::vector<Point> nodes;
+        bool cleared = false;
+        for (const auto& node : data.GetNodes()) {
+          nodes.push_back(node);
           if (usedIdAtLeastTwiceSet.find(node.GetId())==usedIdAtLeastTwiceSet.end()) {
-            node.ClearSerial();
+            cleared |= true;
+            nodes.back().ClearSerial();
             idClearedCount++;
           }
+        }
+        if (cleared){
+          data.SetNodes(nodes);
         }
 
         writer.Write(type);

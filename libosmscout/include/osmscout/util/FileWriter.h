@@ -31,6 +31,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Point.h>
+#include <osmscout/PointSequence.h>
 #include <osmscout/Types.h>
 
 #include <osmscout/util/Exception.h>
@@ -113,7 +114,12 @@ namespace osmscout {
     void WriteCoord(const GeoCoord& coord);
     void WriteInvalidCoord();
 
-    void Write(const std::vector<Point>& nodes, bool writeIds);
+    void Write(const PointSequence& nodes, bool writeIds);
+
+    inline void Write(const std::vector<Point>& nodes, bool writeIds)
+    {
+      Write(VectorPointSequence(nodes), writeIds);
+    }
 
     void WriteTypeId(TypeId id, uint8_t maxBytes);
 
@@ -121,7 +127,7 @@ namespace osmscout {
     void FlushCurrentBlockWithZeros(size_t blockSize);
   };
 
-  extern OSMSCOUT_API bool IsValidToWrite(const std::vector<Point>& nodes);
+  extern OSMSCOUT_API bool IsValidToWrite(const PointSequence& nodes);
 
   /**
    * Efficiently (in disk space handling) write a number of (sorted by file offset) ObjectFileRefs.

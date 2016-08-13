@@ -1009,13 +1009,13 @@ namespace osmscout {
         for (const auto& entry : searchEntries) {
           if (entry.coords.size()==1) {
             if (!IsCoordInArea(entry.coords.front(),
-                               area->rings[r].nodes)) {
+                               area->rings[r].GetNodes())) {
               continue;
             }
           }
           else {
             if (!IsAreaAtLeastPartlyInArea(entry.coords,
-                                           area->rings[r].nodes)) {
+                                           area->rings[r].GetNodes())) {
               continue;
             }
           }
@@ -1224,10 +1224,10 @@ namespace osmscout {
 
             searchEntry.object=object;
 
-            searchEntry.coords.resize(area->rings[r].nodes.size());
+            searchEntry.coords.resize(area->rings[r].GetNodes().size());
 
-            for (size_t i=0; i<area->rings[r].nodes.size(); i++) {
-              searchEntry.coords[i]=area->rings[r].nodes[i].GetCoord();
+            for (size_t i=0; i<area->rings[r].GetNodes().size(); i++) {
+              searchEntry.coords[i]=area->rings[r].GetNodes()[i].GetCoord();
             }
 
             adminRegionVisitor.AddSearchEntry(searchEntry);
@@ -1246,10 +1246,10 @@ namespace osmscout {
 
         searchEntry.object=object;
 
-        searchEntry.coords.resize(way->nodes.size());
+        searchEntry.coords.resize(way->GetNodes().size());
 
-        for (size_t i=0; i<way->nodes.size(); i++) {
-          searchEntry.coords[i]=way->nodes[i].GetCoord();
+        for (size_t i=0; i<way->GetNodes().size(); i++) {
+          searchEntry.coords[i]=way->GetNodes()[i].GetCoord();
         }
 
         adminRegionVisitor.AddSearchEntry(searchEntry);
@@ -1361,26 +1361,26 @@ namespace osmscout {
       for (const auto& ring : area->rings) {
         if (ring.IsOuterRing()) {
           if (!atPlace && IsCoordInArea(location,
-                                        ring.nodes)) {
+                                        ring.GetNodes())) {
             atPlace=true;
             //placeArea=area;
             distance=0.0;
             bearing=0;
           }
 
-          for (size_t i=0; i<ring.nodes.size(); i++) {
+          for (size_t i=0; i<ring.GetNodes().size(); i++) {
             double   currentDistance;
             GeoCoord a;
             GeoCoord b;
             GeoCoord intersection;
 
             if (i>0) {
-              a=ring.nodes[i-1].GetCoord();
-              b=ring.nodes[i].GetCoord();
+              a=ring.GetNodes()[i-1].GetCoord();
+              b=ring.GetNodes()[i].GetCoord();
             }
             else {
-              a=ring.nodes[ring.nodes.size()-1].GetCoord();
-              b=ring.nodes[i].GetCoord();
+              a=ring.GetNodes()[ring.GetNodes().size()-1].GetCoord();
+              b=ring.GetNodes()[i].GetCoord();
             }
 
             currentDistance=CalculateDistancePointToLineSegment(location,

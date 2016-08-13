@@ -465,7 +465,7 @@ namespace osmscout {
 
     way.SetFeatures(rawWay.GetFeatureValueBuffer());
 
-    way.nodes.resize(rawWay.GetNodeCount());
+    way.MutableNodes().resize(rawWay.GetNodeCount());
 
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
       auto coord=coordsMap.find(rawWay.GetNodeId(n));
@@ -479,11 +479,11 @@ namespace osmscout {
         return;
       }
 
-      way.nodes[n].Set(coord->second.GetSerial(),
+      way.MutableNodes()[n].Set(coord->second.GetSerial(),
                        coord->second.GetCoord());
     }
 
-    if (!IsValidToWrite(way.nodes)) {
+    if (!IsValidToWrite(way.GetNodes())) {
       progress.Error("Way coordinates are not dense enough to be written for Way "+
                      NumberToString(wayId)+", skipping");
       return;
