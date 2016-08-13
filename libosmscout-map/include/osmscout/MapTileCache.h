@@ -80,12 +80,12 @@ namespace osmscout {
 
     void CleanupCache();
 
-    MapTileCache<T>::TRef GetCachedTile(const TileId& id) const;
-    MapTileCache<T>::TRef GetTile(const TileId& id) const;
+    typename MapTileCache<T>::TRef GetCachedTile(const TileId& id) const;
+    typename MapTileCache<T>::TRef GetTile(const TileId& id) const;
 
     void GetTilesForBoundingBox(const Magnification& magnification,
                                 const GeoBox& boundingBox,
-                                std::list<MapTileCache<T>::TRef>& tiles) const;
+                                std::list<typename MapTileCache<T>::TRef>& tiles) const;
   };
 
   /**
