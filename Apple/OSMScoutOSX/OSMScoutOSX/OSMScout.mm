@@ -47,8 +47,10 @@ namespace osmscout {
             drawParameter.SetFontName("GillSans");
             drawParameter.SetFontSize(1.5);
             std::list<std::string> paths;
-            NSString *path = [[[NSBundle mainBundle] resourcePath] stringByAppendingString:@"/"];
+            NSString *path = NSSearchPathForDirectoriesInDomains (NSDocumentDirectory, NSUserDomainMask, YES)[0];
             paths.push_back([path UTF8String]);
+            NSString *imagePath = [[path stringByAppendingPathComponent: @"icons"] stringByAppendingString:@"/"];
+            paths.push_back([imagePath UTF8String]);
             drawParameter.SetIconPaths(paths);
             drawParameter.SetPatternPaths(paths);
             drawParameter.SetRenderSeaLand(true);
@@ -67,6 +69,7 @@ namespace osmscout {
         Magnification mag(zoom);
         projection.Set(x, y, mag, dpi, (width+1), (height+1));
         GeoBox boundingBox;
+        projection.GetDimensions(boundingBox);
         
         std::list<osmscout::TileRef> tiles;
         mapService->LookupTiles(projection,tiles);
