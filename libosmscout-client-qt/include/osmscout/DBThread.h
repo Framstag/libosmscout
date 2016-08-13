@@ -73,7 +73,7 @@ public:
   void Reset();
 };
 
-class StyleError
+class OSMSCOUT_CLIENT_QT_API StyleError
 {
     enum StyleErrorType {
         Symbol, Error, Warning, Exception
