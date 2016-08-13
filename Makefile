@@ -181,7 +181,7 @@ OSMScout2: libosmscout libosmscout-map libosmscout-map-qt libosmscout-client-qt
 	  (cd OSMScout2 && $(MAKE)) \
 	fi
 
-StyleEditor: libosmscout libosmscout-map libosmscout-map-qt
+StyleEditor: libosmscout libosmscout-map libosmscout-map-qt libosmscout-client-qt
 	if [ -f StyleEditor/Makefile ]; then \
 	  (cd StyleEditor && $(MAKE)) \
 	fi

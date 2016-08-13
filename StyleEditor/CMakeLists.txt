@@ -23,24 +23,16 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-	src/DBThread.h
 	src/FileIO.h
 	src/Highlighter.h
 	src/MainWindow.h
-	src/MapWidget.h
-	src/SearchLocationModel.h
-	src/Settings.h
 	src/SettingsDialog.h
 )
 
 set(SOURCE_FILES
-	src/DBThread.cpp
 	src/FileIO.cpp
 	src/Highlighter.cpp
 	src/MainWindow.cpp
-	src/MapWidget.cpp
-	src/SearchLocationModel.cpp
-	src/Settings.cpp
 	src/SettingsDialog.cpp
 	src/StyleEditor.cpp
 )
@@ -54,7 +46,9 @@ add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 target_include_directories(StyleEditor PRIVATE 
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include)
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
+)
 
 target_link_libraries(StyleEditor
         osmscout
@@ -65,6 +59,8 @@ target_link_libraries(StyleEditor
         Qt5::Qml
         Qt5::Quick
         Qt5::Svg
-        osmscout_map_qt)
+        osmscout_map_qt
+        osmscout_client_qt
+)
 
 set_property(TARGET StyleEditor PROPERTY CXX_STANDARD 11)
