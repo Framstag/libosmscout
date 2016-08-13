@@ -902,7 +902,7 @@ namespace osmscout {
     // Something is an overlay, if its alpha is <0.8
     bool overlay=alpha<0.8;
 
-    // Reset all marks on labels, because we needs marks
+    // Reset all marks on labels, because we need marks
     // for our internal collision handling
     if (overlay) {
       ClearLabelMarks(overlayLabels);
