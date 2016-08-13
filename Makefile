@@ -8,6 +8,7 @@ programs = libosmscout \
            libosmscout-map-iOSX \
            libosmscout-map-opengl \
            libosmscout-map-qt \
+           libosmscout-client-qt \
            libosmscout-map-svg \
            DumpData \
            Demos \
@@ -25,6 +26,7 @@ programs = libosmscout \
         libosmscout-map-iOSX \
         libosmscout-map-opengl \
         libosmscout-map-qt \
+        libosmscout-client-qt \
         libosmscout-map-svg \
         DumpData \
         Demos \
@@ -41,6 +43,7 @@ all: libosmscout \
      libosmscout-map-iOSX \
      libosmscout-map-opengl \
      libosmscout-map-qt \
+     libosmscout-client-qt \
      libosmscout-map-svg \
      DumpData \
      Demos \
@@ -135,6 +138,11 @@ libosmscout-map-opengl: libosmscout libosmscout-map
 libosmscout-map-qt: libosmscout libosmscout-map
 	if [ -f libosmscout-map-qt/Makefile ]; then \
 	  (cd libosmscout-map-qt && $(MAKE)) \
+	fi
+
+libosmscout-client-qt: libosmscout libosmscout-map libosmscout-map-qt
+	if [ -f libosmscout-client-qt/Makefile ]; then \
+	  (cd libosmscout-client-qt && $(MAKE)) \
 	fi
 
 libosmscout-map-iOSX: libosmscout libosmscout-map
