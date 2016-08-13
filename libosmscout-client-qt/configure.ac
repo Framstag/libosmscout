@@ -46,7 +46,7 @@ PKG_CHECK_MODULES(LIBQT, [Qt5Gui >= 5.0.0, Qt5Quick >= 5.0.0, Qt5Widgets >= 5.0.
                   [AC_SUBST(LIBQT_CFLAGS)
                    AC_SUBST(LIBQT_LIBS)])
 
-AC_CHECK_PROGS(MOC, [moc-qt5])
+AC_CHECK_PROGS(MOC, [moc-qt5 moc])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
