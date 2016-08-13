@@ -22,15 +22,17 @@
 #include <QQuickView>
 
 // Custom QML objects
-#include "MapWidget.h"
-#include "SearchLocationModel.h"
+#include "osmscout/MapWidget.h"
+#include "osmscout/SearchLocationModel.h"
 #include "FileIO.h"
 
 // Application settings
-#include "Settings.h"
+#include "osmscout/Settings.h"
 
 // Main Window
 #include "MainWindow.h"
+
+Q_DECLARE_METATYPE(osmscout::TileRef)
 
 int main(int argc, char* argv[])
 {
@@ -49,8 +51,9 @@ int main(int argc, char* argv[])
 
   settings=std::make_shared<Settings>();
 
-  //qRegisterMetaType<RenderMapRequest>();
+  qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
+  qRegisterMetaType<osmscout::TileRef>();
 
   qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
   qmlRegisterType<Location>("net.sf.libosmscout.map", 1, 0, "Location");
