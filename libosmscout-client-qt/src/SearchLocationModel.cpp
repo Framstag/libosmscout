@@ -17,30 +17,50 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "SearchLocationModel.h"
+#include "osmscout/SearchLocationModel.h"
 
 #include <iostream>
 
-#include "DBThread.h"
+#include "osmscout/DBThread.h"
 
-Location::Location(const QString& name,
+Location::Location(Type type,
+                   const QString& name,
+                   const QString& label,
                    QObject* parent)
     : QObject(parent),
-      name(name)
+      type(type),
+      name(name),
+      label(label)
+{
+    // no code
+}
+
+Location::Location(const QString& name,
+                   const QString& label,
+                   const osmscout::GeoCoord& coord,
+                   QObject* parent)
+    : QObject(parent),
+      type(typeCoordinate),
+      name(name),
+      label(label),
+      coord(coord)
 {
     // no code
 }
 
 Location::Location(QObject* parent)
-    : QObject(parent)
+    : QObject(parent),
+      type(typeNone)
 {
     // no code
 }
 
 Location::Location(const Location& other)
  : QObject(other.parent()),
+   type(other.type),
    name(other.name),
-   references(other.references)
+   references(other.references),
+   coord(other.coord)
 {
     // no code
 }
@@ -52,12 +72,28 @@ Location::~Location()
 
 void Location::addReference(const osmscout::ObjectFileRef reference)
 {
+    assert(type==typeObject);
     references.push_back(reference);
+}
+
+Location::Type Location::getType() const
+{
+    return type;
 }
 
 QString Location::getName() const
 {
     return name;
+}
+
+QString Location::getLabel() const
+{
+    return label;
+}
+
+osmscout::GeoCoord Location::getCoord() const
+{
+    return coord;
 }
 
 const QList<osmscout::ObjectFileRef>& Location::getReferences() const
@@ -159,6 +195,36 @@ QString GetAdminRegionLabel(std::map<osmscout::FileOffset,
   return label;
 }
 
+QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
+{
+    if (object.GetType()==osmscout::RefType::refNode) {
+      osmscout::NodeRef node;
+
+      if (DBThread::GetInstance()->GetNodeByOffset(object.GetFileOffset(),
+                                                   node)) {
+        return QString::fromUtf8(node->GetType()->GetName().c_str());
+      }
+    }
+    else if (object.GetType()==osmscout::RefType::refArea) {
+      osmscout::AreaRef area;
+
+      if (DBThread::GetInstance()->GetAreaByOffset(object.GetFileOffset(),
+                                                   area)) {
+        return QString::fromUtf8(area->GetType()->GetName().c_str());
+      }
+    }
+    else if (object.GetType()==osmscout::RefType::refWay) {
+      osmscout::WayRef way;
+
+      if (DBThread::GetInstance()->GetWayByOffset(object.GetFileOffset(),
+                                                  way)) {
+        return QString::fromUtf8(way->GetType()->GetName().c_str());
+      }
+    }
+
+    return "";
+}
+
 void LocationListModel::setPattern(const QString& pattern)
 {
   beginResetModel();
@@ -174,6 +240,19 @@ void LocationListModel::setPattern(const QString& pattern)
   osmscout::LocationSearchResult searchResult;
 
   std::string osmPattern=pattern.toUtf8().constData();
+
+  osmscout::GeoCoord coord;
+
+  if (osmscout::GeoCoord::Parse(osmPattern,
+                                coord)) {
+      QString name=QString::fromLocal8Bit(coord.GetDisplayText().c_str());
+      QString label=name;
+
+      Location *location=new Location(name,
+                                      label,
+                                      coord);
+      locations.append(location);
+  }
 
   std::cout << "Searching for '" << osmPattern << "'" << std::endl;
 
@@ -191,31 +270,66 @@ void LocationListModel::setPattern(const QString& pattern)
     if (entry->adminRegion &&
         entry->location &&
         entry->address) {
-      QString label=QString::fromUtf8(entry->location->name.c_str());
+      QString adminRegion=GetAdminRegionLabel(adminRegionMap,
+                                              entry->adminRegion);
+      QString loc=QString::fromUtf8(entry->location->name.c_str());
+      QString address=QString::fromUtf8(entry->address->name.c_str());
+      QString name;
+      QString label;
 
+      name+=loc;
+      name+=" ";
+      name+=address;
+      name+=" ";
+      name+=adminRegion;
+
+      label+="<b>";
+      label+=loc;
       label+=" ";
-      label+=QString::fromUtf8(entry->address->name.c_str());
-
+      label+=address;
+      label+="</b>";
       label+=" ";
-      label+=GetAdminRegionLabel(adminRegionMap,
-                                 entry->adminRegion);
+      label+=adminRegion;
+      label+="<br/>";
+      label+="<i>";
+      label+=GetObjectTypLabel(entry->address->object);
+      label+="</i>";
 
-      std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+      std::cout << "- " << name.toLocal8Bit().data() << std::endl;
 
-      location=new Location(label);
+      location=new Location(Location::typeObject,
+                            name,
+                            label);
       location->addReference(entry->address->object);
     }
     else if (entry->adminRegion &&
              entry->location) {
-      QString label=QString::fromUtf8(entry->location->name.c_str());
+      QString adminRegion=GetAdminRegionLabel(adminRegionMap,
+                                              entry->adminRegion);
+      QString loc=QString::fromUtf8(entry->location->name.c_str());
+      QString name;
+      QString label;
 
+      name+=loc;
+      name+=" ";
+      name+=adminRegion;
+
+      label+="<b>";
+      label+=loc;
+      label+="</b>";
       label+=" ";
-      label+=GetAdminRegionLabel(adminRegionMap,
-                                 entry->adminRegion);
+      label+=adminRegion;
 
-      std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+      label+="<br/>";
+      label+="<i>";
+      label+=GetObjectTypLabel(entry->location->objects.front());
+      label+="</i>";
 
-      location=new Location(label);
+      std::cout << "- " << name.toLocal8Bit().data() << std::endl;
+
+      location=new Location(Location::typeObject,
+                            name,
+                            label);
 
       for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry->location->objects.begin();
           object!=entry->location->objects.end();
@@ -225,24 +339,62 @@ void LocationListModel::setPattern(const QString& pattern)
     }
     else if (entry->adminRegion &&
              entry->poi) {
-      QString label=QString::fromUtf8(entry->poi->name.c_str());
+      QString adminRegion=GetAdminRegionLabel(adminRegionMap,
+                                              entry->adminRegion);
+      QString poi=QString::fromUtf8(entry->poi->name.c_str());
+      QString name;
+      QString label;
+
+      name+=poi;
+
+      name+=" ";
+      name+=adminRegion;
+
+      label+="<b>";
+      label+=poi;
+      label+="</b>";
 
       label+=" ";
-      label+=GetAdminRegionLabel(adminRegionMap,
-                                 entry->adminRegion);
+      label+=adminRegion;
 
-      std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+      label+="<br/>";
+      label+="<i>";
+      label+=GetObjectTypLabel(entry->poi->object);
+      label+="</i>";
 
-      location=new Location(label);
+      std::cout << "- " << name.toLocal8Bit().data() << std::endl;
+
+      location=new Location(Location::typeObject,
+                            name,
+                            label);
       location->addReference(entry->poi->object);
     }
     else if (entry->adminRegion) {
-        QString label=GetAdminRegionLabel(adminRegionMap,
-                                          entry->adminRegion);
+        QString adminRegion=GetAdminRegionLabel(adminRegionMap,
+                                                entry->adminRegion);
+        QString name;
+        QString label;
 
-        location=new Location(label);
+        name+=adminRegion;
 
-        std::cout << "- " << label.toLocal8Bit().data() << std::endl;
+        label+="<b>";
+        label+=adminRegion;
+        label+="</b>";
+        label+="<br/>";
+        label+="<i>";
+        if (entry->adminRegion->aliasObject.Valid()) {
+            label+=GetObjectTypLabel(entry->adminRegion->aliasObject);
+        }
+        else {
+            label+=GetObjectTypLabel(entry->adminRegion->object);
+        }
+        label+="</i>";
+
+        location=new Location(Location::typeObject,
+                              name,
+                              label);
+
+        std::cout << "- " << name.toLocal8Bit().data() << std::endl;
 
         if (entry->adminRegion->aliasObject.Valid()) {
             location->addReference(entry->adminRegion->aliasObject);
@@ -275,8 +427,10 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Qt::DisplayRole:
-    case LabelRole:
+    case TextRole:
         return location->getName();
+    case LabelRole:
+        return location->getLabel();
     default:
         break;
     }

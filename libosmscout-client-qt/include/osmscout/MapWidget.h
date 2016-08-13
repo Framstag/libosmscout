@@ -23,6 +23,7 @@
 #include <QQuickPaintedItem>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/util/GeoBox.h>
 
 #include "DBThread.h"
 #include "SearchLocationModel.h"
@@ -41,16 +42,19 @@ class MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString stylesheetErrorDescription READ stylesheetErrorDescription CONSTANT)
 
 private:
-  osmscout::GeoCoord            center;
-  double                        angle;
-  osmscout::Magnification       magnification;
+  osmscout::GeoCoord           center;
+  double                       angle;
+  osmscout::Magnification      magnification;
 
   // Drag and drop
-  int                           startX,startY;
-  osmscout::MercatorProjection  startProjection;
+  int                          startX;
+  int                          startY;
+  osmscout::MercatorProjection startProjection;
 
   // Controlling rerendering...
-  bool                          requestNewMap;
+  bool                         mouseDragging;
+  bool                         dbInitialized;
+  bool                         hasBeenPainted;
 
   // Errors in stylesheet
   int                           errorLine;
@@ -59,7 +63,7 @@ private:
   QString                       errorDescription;
 
 signals:
-  void TriggerMapRenderingSignal();
+  void TriggerMapRenderingSignal(const RenderMapRequest& request);
   void latChanged();
   void lonChanged();
   void zoomLevelChanged();
@@ -76,10 +80,15 @@ public slots:
   void right();
   void up();
   void down();
-  void showCoordinates(double lat, double lon);
-  void showLocation(Location* location);
+  void rotateLeft();
+  void rotateRight();
+
+  void toggleDaylight();
   void reloadStyle();
   void reloadTmpStyle();
+
+  void showCoordinates(double lat, double lon);
+  void showLocation(Location* location);
 
 private:
   void TriggerMapRendering();
@@ -99,7 +108,6 @@ public:
   {
       return center.GetLon();
   }
-
   inline double zoomLevel() const
   {
       return magnification.GetLevel();

@@ -17,7 +17,7 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DBThread.h"
+#include "osmscout/DBThread.h"
 
 #include <iostream>
 
@@ -25,6 +25,7 @@
 #include <QMutexLocker>
 #include <QDebug>
 #include <QDir>
+#include <QRegExp>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
@@ -65,6 +66,43 @@ void QBreaker::Reset()
   aborted=false;
 }
 
+StyleError::StyleError(QString msg){
+    QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
+    if(rx.exactMatch(msg)){
+        line = rx.cap(1).toInt();
+        column = rx.cap(2).toInt();
+        if(rx.cap(3) == "Symbol"){
+            type = Symbol;
+        } else if(rx.cap(3) == "Error"){
+            type = Error;
+        } else if(rx.cap(3) == "Warning"){
+            type = Warning;
+        } else {
+            type = Exception;
+        }
+        text = rx.cap(4);
+    }
+}
+
+QString StyleError::GetTypeName() const
+{
+    switch(type){
+    case Symbol:
+        return QString("symbol");
+        break;
+    case Error:
+        return QString("error");
+        break;
+    case Warning:
+        return QString("warning");
+        break;
+    case Exception:
+        return QString("exception");
+        break;
+    default:
+      return QString("???");
+    }
+}
 
 DBThread::DBThread()
  : database(std::make_shared<osmscout::Database>(databaseParameter)),
@@ -81,7 +119,8 @@ DBThread::DBThread()
    finishedImage(NULL),
    finishedCoord(0.0,0.0),
    finishedMagnification(0),
-   dataLoadingBreaker(std::make_shared<QBreaker>())
+   dataLoadingBreaker(std::make_shared<QBreaker>()),
+   renderError(false)
 {
   osmscout::log.Debug() << "DBThread::DBThread()";
 
@@ -252,6 +291,7 @@ void DBThread::Initialize()
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
 #endif
 
+  emit stylesheetFilenameChanged();
   if (database->Open(databaseDirectory.toLocal8Bit().data())) {
     osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
@@ -359,27 +399,31 @@ void DBThread::ToggleDaylight()
   }
 }
 
-void DBThread::ReloadStyle()
+bool DBThread::ReloadStyle(const QString &suffix)
 {
   qDebug() << "Reloading style...";
 
   QMutexLocker locker(&mutex);
 
   if (!database->IsOpen()) {
-    return;
+    return false;
+  }
+  if(stylesheetFilename.isNull()){
+    return false;
   }
 
   osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
   if (!typeConfig) {
-    return;
+    return false;
   }
 
   osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
   newStyleConfig->AddFlag("daylight",daylight);
-
-  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+  
+  styleErrors.clear();
+  if (newStyleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
     // Tear down
     delete painter;
     painter=NULL;
@@ -391,7 +435,20 @@ void DBThread::ReloadStyle()
     mapService->FlushTileCache();
 
     qDebug() << "Reloading style done.";
+    return true;
+  }else{
+    std::list<std::string> errors = newStyleConfig->GetErrors();
+    for(std::list<std::string>::iterator it = errors.begin(); it != errors.end(); it++){
+        styleErrors.append(StyleError(QString::fromStdString(*it)));
+    }
+    styleConfig=NULL;
+
+    return false;
   }
+}
+
+QString DBThread::GetStylesheetFilename() const {
+    return stylesheetFilename;
 }
 
 /**

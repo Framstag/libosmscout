@@ -17,9 +17,11 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "MapWidget.h"
+#include "osmscout/MapWidget.h"
 
 #include <iostream>
+
+#define TMP_SUFFIX ".tmp"
 
 //! We rotate in 16 steps
 static double DELTA_ANGLE=2*M_PI/16.0;
@@ -51,11 +53,19 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     connect(dbThread,SIGNAL(Redraw()),
             this,SLOT(redraw()));
+
+    connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
+            this,SIGNAL(stylesheetFilenameChanged()));
 }
 
 MapWidget::~MapWidget()
 {
     // no code
+}
+
+QString MapWidget::stylesheetFilename() {
+    DBThread *dbThread=DBThread::GetInstance();
+    return dbThread->GetStylesheetFilename();
 }
 
 void MapWidget::redraw()
@@ -209,6 +219,8 @@ void MapWidget::zoomIn(double zoomFactor)
     }
 
     TriggerMapRendering();
+    emit zoomLevelChanged();
+    emit zoomLevelNameChanged();
 }
 
 void MapWidget::zoomOut(double zoomFactor)
@@ -221,6 +233,49 @@ void MapWidget::zoomOut(double zoomFactor)
     }
 
     TriggerMapRendering();
+    emit zoomLevelChanged();
+    emit zoomLevelNameChanged();
+}
+
+QString MapWidget::zoomLevelName() {
+    double level = magnification.GetMagnification();
+    if(level>=osmscout::Magnification::magWorld && level < osmscout::Magnification::magContinent){
+        return "World";
+    } else if(level>=osmscout::Magnification::magContinent && level < osmscout::Magnification::magState){
+        return "Continent";
+    } else if(level>=osmscout::Magnification::magState && level < osmscout::Magnification::magStateOver){
+        return "State";
+    } else if(level>=osmscout::Magnification::magStateOver && level < osmscout::Magnification::magCounty){
+        return "StateOver";
+    } else if(level>=osmscout::Magnification::magCounty && level < osmscout::Magnification::magRegion){
+        return "County";
+    } else if(level>=osmscout::Magnification::magRegion && level < osmscout::Magnification::magProximity){
+        return "Region";
+    } else if(level>=osmscout::Magnification::magProximity && level < osmscout::Magnification::magCityOver){
+        return "Proximity";
+    } else if(level>=osmscout::Magnification::magCityOver && level < osmscout::Magnification::magCity){
+        return "CityOver";
+    } else if(level>=osmscout::Magnification::magCity && level < osmscout::Magnification::magSuburb){
+        return "City";
+    } else if(level>=osmscout::Magnification::magSuburb && level < osmscout::Magnification::magDetail){
+        return "Suburb";
+    } else if(level>=osmscout::Magnification::magDetail && level < osmscout::Magnification::magClose){
+        return "Detail";
+    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magVeryClose){
+        return "Close";
+    } else if(level>=osmscout::Magnification::magVeryClose && level < osmscout::Magnification::magBlock){
+        return "VeryClose";
+    } else if(level>=osmscout::Magnification::magBlock && level < osmscout::Magnification::magStreet){
+        return "Block";
+    } else if(level>=osmscout::Magnification::magStreet && level < osmscout::Magnification::magHouse){
+        return "Street";
+    } else if(level>=osmscout::Magnification::magHouse){
+        return "House";
+    }
+
+    assert(false);
+
+    return "";
 }
 
 void MapWidget::left()
@@ -329,14 +384,6 @@ void MapWidget::toggleDaylight()
     TriggerMapRendering();
 }
 
-void MapWidget::reloadStyle()
-{
-    DBThread *dbThread=DBThread::GetInstance();
-
-    dbThread->ReloadStyle();
-    TriggerMapRendering();
-}
-
 void MapWidget::showCoordinates(double lat, double lon)
 {
     center=osmscout::GeoCoord(lat,lon);
@@ -405,5 +452,40 @@ void MapWidget::showLocation(Location* location)
         this->magnification=osmscout::Magnification::magVeryClose;
 
         TriggerMapRendering();
+    }
+}
+
+void MapWidget::reloadStyle() {
+    DBThread* dbThread=DBThread::GetInstance();
+    if(dbThread->ReloadStyle()){
+        TriggerMapRendering();
+        hasErrors = false;
+    } else {
+        StyleError err = dbThread->GetStyleErrors().at(0);
+        errorLine = err.GetLine();
+        errorColumn = err.GetColumn();
+        errorDescription = err.GetTypeName()+": "+err.GetText();
+        hasErrors = true;
+    }
+}
+
+void MapWidget::reloadTmpStyle() {
+    DBThread* dbThread=DBThread::GetInstance();
+    if(dbThread->ReloadStyle(TMP_SUFFIX)){
+        TriggerMapRendering();
+        hasErrors = false;
+    } else {
+        hasErrors = true;
+        QList<StyleError> errors = dbThread->GetStyleErrors();
+        if (!errors.isEmpty()){
+            StyleError err = errors.at(0);
+            errorLine = err.GetLine();
+            errorColumn = err.GetColumn();
+            errorDescription = err.GetTypeName()+": "+err.GetText();
+        }else{
+            errorLine = 0;
+            errorColumn = 0;
+            errorDescription = "unknown error";            
+        }
     }
 }

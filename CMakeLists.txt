@@ -178,23 +178,32 @@ option(OSMSCOUT_BUILD_TOOL_IMPORT "Enable build of import applications" ${OSMSCO
 if(OSMSCOUT_BUILD_TOOL_IMPORT)
   add_subdirectory(Import)
 endif()
+
 option(OSMSCOUT_BUILD_DEMOS "Enable build of demo applications" TRUE)
 if(OSMSCOUT_BUILD_DEMOS)
   add_subdirectory(Demos)
 endif()
+
 option(OSMSCOUT_BUILD_TOOL_DUMPDATA "Enable build of dump tool" ${OSMSCOUT_BUILD_IMPORT})
 if(OSMSCOUT_BUILD_TOOL_DUMPDATA)
   add_subdirectory(DumpData)
+endif()
+
+option(OSMSCOUT_BUILD_CLIENT_QT "Enable build of Qt client library" ${OSMSCOUT_BUILD_MAP_QT_CACHE})
+if(OSMSCOUT_BUILD_CLIENT_QT)
+  add_subdirectory(libosmscout-client-qt)
 endif()
 
 option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMScout2 applications" ${OSMSCOUT_BUILD_MAP_QT_CACHE})
 if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
   add_subdirectory(OSMScout2)
 endif()
+
 option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR "Enable build of style editor applications" ${OSMSCOUT_BUILD_MAP_QT_CACHE})
 if(OSMSCOUT_BUILD_TOOL_STYLEEDITOR)
   add_subdirectory(StyleEditor)
 endif()
+
 option(OSMSCOUT_BUILD_TESTS "Enable build of test applications" ON)
 if(OSMSCOUT_BUILD_TESTS)
   add_subdirectory(Tests)
@@ -243,6 +252,8 @@ message(STATUS " - OpenGL map drawing backend:           ${OSMSCOUT_BUILD_MAP_OP
 message(STATUS " - Qt map drawing backend:               ${OSMSCOUT_BUILD_MAP_QT}")
 message(STATUS " - SVG map drawing backend:              ${OSMSCOUT_BUILD_MAP_SVG}")
 message(STATUS " - Map drawing backend for iOS and OS X: ${OSMSCOUT_BUILD_MAP_IOSX}")
+message(STATUS "client libraries:")
+message(STATUS " - Qt client library:                    ${OSMSCOUT_BUILD_CLIENT_QT}")
 message(STATUS "tools:")
 message(STATUS " - Import:                               ${OSMSCOUT_BUILD_TOOL_IMPORT}")
 message(STATUS " - DumpData:                             ${OSMSCOUT_BUILD_TOOL_DUMPDATA}")
