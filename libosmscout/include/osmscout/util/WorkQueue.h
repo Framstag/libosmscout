@@ -31,7 +31,7 @@
 
 namespace osmscout {
 
-  template<class R>
+  template<typename R>
   class WorkQueue
   {
   private:
