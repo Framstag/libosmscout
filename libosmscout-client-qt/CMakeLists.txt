@@ -14,6 +14,9 @@ if(NOT ${OSMSCOUT_BUILD_MAP_QT})
 	message(SEND_ERROR "The main map drawing interface is required for Qt map drawing backend")
 endif()
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 set(HEADER_FILES
     #include/osmscout/private/Config.h
     include/osmscout/private/ClientQtImportExport.h
