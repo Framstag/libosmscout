@@ -1,5 +1,5 @@
 ---
-date: "2016-05-29T19:50:42+02:00"
+date: "2016-08-14T10:15:42+02:00"
 title: "Directory structure"
 description: "Description of the directory layout of the git repository"
 weight: 2
@@ -42,6 +42,10 @@ libosmscout-map-opengl/
 
 libosmscout-map-qt/
 : Library containing the Qt render backend.
+
+libosmscout-client-qt/
+: Library containing common Qt application code (shared by OSMScout2 and
+  StyleEditor).
 
 libosmscout-map-avg/
 : Library containing the SVG render backend.
