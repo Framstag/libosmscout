@@ -69,6 +69,11 @@ namespace osmscout {
     this->atAddressDescription=description;
   }
 
+  void LocationDescription::SetAtPOIDescription(const LocationAtPlaceDescriptionRef& description)
+  {
+    this->atPOIDescription=description;
+  }
+
   LocationCoordDescriptionRef LocationDescription::GetCoordDescription() const
   {
     return coordDescription;
@@ -77,6 +82,11 @@ namespace osmscout {
   LocationAtPlaceDescriptionRef LocationDescription::GetAtAddressDescription() const
   {
     return atAddressDescription;
+  }
+
+  LocationAtPlaceDescriptionRef LocationDescription::GetAtPOIDescription() const
+  {
+    return atPOIDescription;
   }
 
   LocationService::VisitorMatcher::VisitorMatcher(const std::string& searchPattern)
@@ -415,6 +425,39 @@ namespace osmscout {
   : database(database)
   {
     assert(database);
+  }
+
+  Place LocationService::GetPlace(const std::list<ReverseLookupResult>& lookupResult)
+  {
+    ObjectFileRef  object=lookupResult.front().object;
+    AdminRegionRef adminRegion;
+    POIRef         poi;
+    LocationRef    location;
+    AddressRef     address;
+
+    for (const auto& entry : lookupResult) {
+      if (entry.adminRegion && !adminRegion) {
+        adminRegion=entry.adminRegion;
+      }
+
+      if (entry.poi && !poi) {
+        poi=entry.poi;
+      }
+
+      if (entry.location && !location) {
+        location=entry.location;
+      }
+
+      if (entry.address && !address) {
+        address=entry.address;
+      }
+    }
+
+    return Place(object,
+                 adminRegion,
+                 poi,
+                 location,
+                 address);
   }
 
   /**
@@ -1194,7 +1237,6 @@ namespace osmscout {
                                                        result);
 
     for (const auto& object : objects) {
-
       if (object.GetType()==refNode) {
         NodeRef node;
 
@@ -1474,6 +1516,7 @@ namespace osmscout {
         addressTypes.Set(type);
       }
     }
+
     if (!addressTypes.Empty()) {
       if (!LoadNearAreas(location,
                          addressTypes,
@@ -1490,6 +1533,7 @@ namespace osmscout {
         addressTypes.Set(type);
       }
     }
+
     if (!addressTypes.Empty()) {
       if (!LoadNearNodes(location,
                          addressTypes,
@@ -1498,14 +1542,14 @@ namespace osmscout {
       }
     }
 
-    if (candidates.empty()){
+    if (candidates.empty()) {
       return true;
     }
 
     // sort all candidates by its distance from location
     std::sort(candidates.begin(),candidates.end(),DistanceComparator);
 
-    for (const auto &candidate : candidates){
+    for (const auto &candidate : candidates) {
       std::list<ReverseLookupResult> result;
 
       if (!ReverseLookupObject(candidate.GetRef(), result)) {
@@ -1513,12 +1557,7 @@ namespace osmscout {
       }
 
       if (!result.empty()) {
-        // setup description by nearest candidate with setup address
-        Place place=Place(result.front().object,
-                          result.front().adminRegion,
-                          result.front().poi,
-                          result.front().location,
-                          result.front().address);
+        Place place=GetPlace(result);
 
         if (candidate.IsAtPlace()) {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place));
@@ -1530,6 +1569,84 @@ namespace osmscout {
         return true;
       }
     }
+
+    return true;
+  }
+
+  bool LocationService::DescribeLocationByPOI(const GeoCoord& location,
+                                              LocationDescription& description)
+  {
+    // search all addressable areas and nodes, sort it by distance, get first with address
+    TypeConfigRef typeConfig=database->GetTypeConfig();
+
+    if (!typeConfig) {
+      return false;
+    }
+
+    std::vector<LocationDescriptionCandicate> candidates;
+
+    TypeInfoSet poiTypes;
+
+    // near addressable areas
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeArea() &&
+          type->GetIndexAsPOI()) {
+        poiTypes.Set(type);
+      }
+    }
+
+    if (!poiTypes.Empty()) {
+      if (!LoadNearAreas(location,
+                         poiTypes,
+                         candidates)){
+        return false;
+      }
+    }
+
+    // near addressable nodes
+    poiTypes.Clear();
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeNode() &&
+          type->GetIndexAsPOI()) {
+        poiTypes.Set(type);
+      }
+    }
+    if (!poiTypes.Empty()) {
+      if (!LoadNearNodes(location,
+                         poiTypes,
+                         candidates)){
+        return false;
+      }
+    }
+
+    if (candidates.empty()) {
+      return true;
+    }
+
+    // sort all candidates by its distance from location
+    std::sort(candidates.begin(),candidates.end(),DistanceComparator);
+
+    for (const auto &candidate : candidates) {
+      std::list<ReverseLookupResult> result;
+
+      if (!ReverseLookupObject(candidate.GetRef(), result)) {
+        return false;
+      }
+
+      if (!result.empty()) {
+        Place place=GetPlace(result);
+
+        if (candidate.IsAtPlace()) {
+          description.SetAtPOIDescription(std::make_shared<LocationAtPlaceDescription>(place));
+        }
+        else {
+          description.SetAtPOIDescription(std::make_shared<LocationAtPlaceDescription>(place,
+                                                                                       candidate.GetDistance()*1000, candidate.GetBearing()));
+        }
+        return true;
+      }
+    }
+
     return true;
   }
 
@@ -1540,6 +1657,10 @@ namespace osmscout {
 
 
     if (!DescribeLocationByAddress(location,description)) {
+      return false;
+    }
+
+    if (!DescribeLocationByPOI(location,description)) {
       return false;
     }
 

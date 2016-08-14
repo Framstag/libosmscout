@@ -154,15 +154,18 @@ namespace osmscout {
   class OSMSCOUT_API LocationDescription
   {
   private:
-    LocationCoordDescriptionRef     coordDescription;
+    LocationCoordDescriptionRef   coordDescription;
     LocationAtPlaceDescriptionRef atAddressDescription;
+    LocationAtPlaceDescriptionRef atPOIDescription;
 
   public:
     void SetCoordDescription(const LocationCoordDescriptionRef& description);
     void SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description);
+    void SetAtPOIDescription(const LocationAtPlaceDescriptionRef& description);
 
     LocationCoordDescriptionRef GetCoordDescription() const;
     LocationAtPlaceDescriptionRef GetAtAddressDescription() const;
+    LocationAtPlaceDescriptionRef GetAtPOIDescription() const;
   };
 
   /**
@@ -403,6 +406,8 @@ namespace osmscout {
     static bool DistanceComparator(const LocationDescriptionCandicate &a,
                                    const LocationDescriptionCandicate &b);
 
+    Place GetPlace(const std::list<ReverseLookupResult>& lookupResult);
+
     bool HandleAdminRegion(const LocationSearch& search,
                            const LocationSearch::Entry& searchEntry,
                            const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
@@ -434,6 +439,8 @@ namespace osmscout {
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description);
 
+    bool DescribeLocationByPOI(const GeoCoord& location,
+                               LocationDescription& description);
   public:
     LocationService(const DatabaseRef& database);
 

@@ -713,7 +713,7 @@ namespace osmscout {
           NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
 
           if (nameValue==NULL) {
-            errorReporter->ReportLocation(ObjectFileRef(node.GetFileOffset(),refNode),"Mo name");
+            errorReporter->ReportLocation(ObjectFileRef(node.GetFileOffset(),refNode),"No name");
             continue;
           }
 
@@ -1529,11 +1529,9 @@ namespace osmscout {
       return;
     }
 
-    for (const auto& regionAddress : loc->second.addresses) {
-      if (regionAddress.name==address) {
-        return;
-      }
-    }
+    // It is possible that the address is already available at the location
+    // We add it anyway. It is possible that multiple nodes share the same address (because their are in the
+    // same building) and an area (the buulding) might hold the address, too.
 
     RegionAddress regionAddress;
 

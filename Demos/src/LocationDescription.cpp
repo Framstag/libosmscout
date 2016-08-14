@@ -34,6 +34,36 @@
  * src/LocationDescription ../maps/nordrhein-westfalen 51.57251 7.46506
  */
 
+void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& description)
+{
+  osmscout::Place place = description.GetPlace();
+  if (description.IsAtPlace()) {
+    std::cout << "* Is at address: " << place.GetDisplayString() << std::endl;
+  }
+  else {
+    std::cout.precision(1);
+    std::cout << "* "  << std::fixed << description.GetDistance() << "m ";
+    std::cout << osmscout::BearingDisplayString(description.GetBearing());
+    std::cout << " of address: " << place.GetDisplayString() << std::endl;
+  }
+
+  if (place.GetPOI()) {
+    std::cout << "  - POI:      " << place.GetPOI()->name << std::endl;
+  }
+
+  if (place.GetAddress()) {
+    std::cout << "  - address:  " << place.GetAddress()->name << std::endl;
+  }
+
+  if (place.GetLocation()) {
+    std::cout << "  - location: " << place.GetLocation()->name << std::endl;
+  }
+
+  if (place.GetAdminRegion()) {
+    std::cout << "  - region:   " << place.GetAdminRegion()->name << std::endl;
+  }
+}
+
 int main(int argc, char* argv[])
 {
   std::string map;
@@ -82,38 +112,18 @@ int main(int argc, char* argv[])
 
   osmscout::LocationCoordDescriptionRef coordDescription=description.GetCoordDescription();
   osmscout::LocationAtPlaceDescriptionRef atAddressDescription=description.GetAtAddressDescription();
+  osmscout::LocationAtPlaceDescriptionRef atPOIDescription=description.GetAtPOIDescription();
 
   if (coordDescription) {
     std::cout << "* Coordinate: " << coordDescription->GetLocation().GetDisplayText() << std::endl;
   }
 
   if (atAddressDescription) {
-    osmscout::Place place = atAddressDescription->GetPlace();
-    if (atAddressDescription->IsAtPlace()) {
-      std::cout << "* Is at address: " << place.GetDisplayString() << std::endl;
-    }
-    else {
-      std::cout.precision(1);
-      std::cout << "* "  << std::fixed << atAddressDescription->GetDistance() << "m ";
-      std::cout << osmscout::BearingDisplayString(atAddressDescription->GetBearing());
-      std::cout << " of address: " << place.GetDisplayString() << std::endl;
-    }
-    
-    if (place.GetPOI()) {
-        std::cout << "  - POI:      " << place.GetPOI()->name << std::endl;
-    }
+    DumpLocationAtPlaceDescription(*atAddressDescription);
+  }
 
-    if (place.GetAddress()) {
-        std::cout << "  - address:  " << place.GetAddress()->name << std::endl;
-    }
-
-    if (place.GetLocation()) {
-        std::cout << "  - location: " << place.GetLocation()->name << std::endl;
-    }
-
-    if (place.GetAdminRegion()) {
-        std::cout << "  - region:   " << place.GetAdminRegion()->name << std::endl;
-    }
+  if (atPOIDescription) {
+    DumpLocationAtPlaceDescription(*atPOIDescription);
   }
 
   database->Close();
