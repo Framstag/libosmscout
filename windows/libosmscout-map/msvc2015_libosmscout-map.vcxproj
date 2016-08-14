@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\osmscout\LabelLayouter.cpp" />
     <ClCompile Include="src\osmscout\MapPainter.cpp" />
     <ClCompile Include="src\osmscout\MapParameter.cpp" />
     <ClCompile Include="src\osmscout\MapService.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="src\osmscout\StyleConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\osmscout\LabelLayouter.h" />
     <ClInclude Include="include\osmscout\MapFeatures.h" />
     <ClInclude Include="include\osmscout\MapPainter.h" />
     <ClInclude Include="include\osmscout\MapParameter.h" />
