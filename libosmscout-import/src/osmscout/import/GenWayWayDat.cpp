@@ -394,6 +394,14 @@ namespace osmscout {
             continue;
           }
 
+          if (way->GetNodeCount()+candidate->GetNodeCount()>300) {
+            // Do not merge ways that are too big in result.
+            //  If we already had the data, we would get the resulting bounding box
+            // for a better check (different way could be very different in the desitiy
+            // of its nodes and the covered area)
+            continue;
+          }
+
           // This is a match
           hasMerged=true;
 
