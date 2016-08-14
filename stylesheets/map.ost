@@ -223,7 +223,7 @@ TYPES
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       
   TYPE highway_unclassified
-    = WAY ("highway"=="unclassified")
+    = WAY AREA ("highway"=="unclassified")
       {Name, NameAlt, Ref}
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       
@@ -255,7 +255,7 @@ TYPES
   // Ways with main designation different to car
 
   TYPE highway_track
-    = WAY ("highway"=="track")
+    = WAY AREA ("highway"=="track")
       {Name, NameAlt}
       PATH[FOOT BICYCLE] LOCATION PIN_WAY
 
@@ -265,7 +265,7 @@ TYPES
       PATH[FOOT] LOCATION PIN_WAY MERGE_AREAS
 
   TYPE highway_path
-    = WAY ("highway"=="path")
+    = WAY AREA ("highway"=="path")
       {Name, NameAlt}
       PATH[FOOT BICYCLE] IGNORESEALAND PIN_WAY
 
@@ -280,7 +280,7 @@ TYPES
       PATH[FOOT] LOCATION PIN_WAY
 
   TYPE highway_bridleway
-    = WAY ("highway"=="bridleway")
+    = WAY AREA ("highway"=="bridleway")
       {Name, NameAlt}
       PATH PIN_WAY
 
@@ -358,7 +358,7 @@ TYPES
       MERGE_AREAS
     
   TYPE waterway_canal
-    = WAY ("waterway"=="canal")
+    = WAY AREA ("waterway"=="canal")
       {Name, NameAlt, Width}
       OPTIMIZE_LOW_ZOOM IGNORESEALAND
       
@@ -389,7 +389,7 @@ TYPES
       ADDRESS
     
   TYPE waterway_weir
-    = NODE WAY ("waterway"=="weir")
+    = NODE WAY AREA ("waterway"=="weir")
       {Name, NameAlt, Width}
       IGNORESEALAND
       

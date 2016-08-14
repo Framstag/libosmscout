@@ -36,7 +36,7 @@ FLAG
 ORDER WAYS
   GROUP _route
   GROUP highway_motorway
-  GROUP waterway_river, waterway_canal, waterway_drain
+  GROUP waterway_river, waterway_canal, waterway_weir, waterway_drain
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
@@ -518,6 +518,8 @@ STYLE
             WAY {color: #ff000000;}
           }
         }
+        
+        AREA { color: @waterColor;}        
       }
 
     }
@@ -533,9 +535,12 @@ STYLE
      }
 
      [MAG detail-] {
-      [TYPE waterway_drain] {
+      [TYPE waterway_drain,
+            waterway_weir] {
         [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
         [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
+        
+        AREA { color: @waterColor;}        
       }
     }
 
@@ -548,6 +553,7 @@ STYLE
     [MAG veryClose-] {
       [TYPE waterway_stream,
             waterway_drain,
+            waterway_weir,
             waterway_river,
             waterway_canal]
         WAY.TEXT { label: Name.name; color: @waterLabelColor;}
@@ -843,6 +849,8 @@ STYLE
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
      }
+     
+     AREA {color: #90570c; borderColor: #ffffff50; borderWidth: 0.1mm;}
    }
 
    [TYPE highway_pedestrian] {
@@ -863,6 +871,8 @@ STYLE
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.4mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.4mm;}
      }
+     
+     AREA {color: #555555; borderColor: #ffffff50; borderWidth: 0.1mm;}
    }
 
    [TYPE highway_cycleway] {
@@ -892,6 +902,8 @@ STYLE
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.2mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.2mm;}
      }
+     
+     AREA {color: #90570c;}
    }
 
    [TYPE leisure_track] {
