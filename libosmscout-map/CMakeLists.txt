@@ -6,6 +6,7 @@ set(HEADER_FILES
 	#include/osmscout/private/Config.h
 	#include/osmscout/private/MapImportExport.h
 	include/osmscout/MapFeatures.h
+	include/osmscout/LabelLayouter.h
 	include/osmscout/MapPainter.h
 	include/osmscout/MapParameter.h
 	include/osmscout/MapService.h
@@ -19,6 +20,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	src/osmscout/oss/Parser.cpp
 	src/osmscout/oss/Scanner.cpp
+	src/osmscout/LabelLayouter.cpp
 	src/osmscout/MapPainter.cpp
 	src/osmscout/MapParameter.cpp
 	src/osmscout/MapService.cpp

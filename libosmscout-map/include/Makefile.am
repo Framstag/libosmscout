@@ -3,6 +3,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/oss/Scanner.h \
                         osmscout/oss/Parser.h \
                         osmscout/MapFeatures.h \
+                        osmscout/LabelLayouter.h \
                         osmscout/MapPainter.h \
                         osmscout/MapParameter.h \
                         osmscout/StyleConfig.h \

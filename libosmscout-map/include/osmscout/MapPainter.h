@@ -42,6 +42,7 @@
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Transformation.h>
 
+#include <osmscout/LabelLayouter.h>
 #include <osmscout/MapParameter.h>
 
 namespace osmscout {
@@ -169,21 +170,6 @@ namespace osmscout {
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
-    struct OSMSCOUT_MAP_API LabelData
-    {
-      bool                     mark;     //!< Labels can temporary get marked during label coverage conflict resolution
-      double                   x;        //!< Coordinate of the left, top edge of the text
-      double                   y;        //!< Coordinate of the left, top edge of the text
-      double                   bx1;      //!< Dimensions of bounding box
-      double                   by1;      //!< Dimensions of bounding box
-      double                   bx2;      //!< Dimensions of bounding box
-      double                   by2;      //!< Dimensions of bounding box
-      double                   alpha;    //!< Alpha value of the label
-      double                   fontSize; //!< Font size to be used
-      LabelStyleRef            style;    //!< Style for drawing
-      std::string              text;     //!< The label text
-    };
-
     struct OSMSCOUT_MAP_API LabelLayoutData
     {
       size_t       position;   //!< Relative position of the label
@@ -209,8 +195,9 @@ namespace osmscout {
       Temporary data structures for intelligent label positioning
       */
     //@{
-    std::list<LabelData>         labels;
-    std::list<LabelData>         overlayLabels;
+    LabelLayouter                labels;
+    LabelLayouter                overlayLabels;
+
     std::vector<ScanCell>        wayScanlines;
     std::vector<LabelLayoutData> labelLayoutData;
     //@}
@@ -248,9 +235,6 @@ namespace osmscout {
      Precalculations
       */
     //@{
-    double                       labelSpace;
-    double                       shieldLabelSpace;
-    double                       sameLabelSpace;
     double                       standardFontSize;
     double                       areaMinDimension;
     //@}
@@ -307,27 +291,6 @@ namespace osmscout {
     //@}
 
     /**
-     Label placement routines
-     */
-    //@{
-    void ClearLabelMarks(std::list<LabelData>& labels);
-    void RemoveMarkedLabels(std::list<LabelData>& labels);
-    bool MarkAllInBoundingBox(double bx1,
-                              double bx2,
-                              double by1,
-                              double by2,
-                              const LabelStyle& style,
-                              std::list<LabelData>& labels);
-    bool MarkCloseLabelsWithSameText(double bx1,
-                                     double bx2,
-                                     double by1,
-                                     double by2,
-                                     const LabelStyle& style,
-                                     const std::string& text,
-                                     std::list<LabelData>& labels);
-    //@}
-
-    /**
       Private draw algorithm implementation routines.
      */
     //@{
@@ -336,12 +299,12 @@ namespace osmscout {
                       const MapParameter& parameter,
                       const MapData& data);
 
-    void PrepareWaySegment(const StyleConfig& styleConfig,
-                           const Projection& projection,
-                           const MapParameter& parameter,
-                           const ObjectFileRef& ref,
-                           const FeatureValueBuffer& buffer,
-                           const std::vector<Point>& nodes);
+    void PrepareWay(const StyleConfig& styleConfig,
+                    const Projection& projection,
+                    const MapParameter& parameter,
+                    const ObjectFileRef& ref,
+                    const FeatureValueBuffer& buffer,
+                    const std::vector<Point>& nodes);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,
@@ -377,14 +340,23 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const MapData& data);
 
-    void DrawWayLabel(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter,
-                      const WayPathData& data);
+    void DrawWayShieldLabel(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const WayPathData& data);
 
-    void DrawWayLabels(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter);
+    void DrawWayContourLabel(const StyleConfig& styleConfig,
+                             const Projection& projection,
+                             const MapParameter& parameter,
+                             const WayPathData& data);
+
+    void DrawWayShieldLabels(const StyleConfig& styleConfig,
+                             const Projection& projection,
+                             const MapParameter& parameter);
+
+    void DrawWayContourLabels(const StyleConfig& styleConfig,
+                              const Projection& projection,
+                              const MapParameter& parameter);
 
     void DrawAreaLabel(const StyleConfig& styleConfig,
                        const Projection& projection,
@@ -523,14 +495,6 @@ namespace osmscout {
       Return the size of the frame around the label text.
      */
     virtual void GetLabelFrame(const LabelStyle& style,
-                               double& horizontal,
-                               double& vertical);
-
-    /**
-      Return the size of the frame around a labels.
-     */
-    virtual void GetLabelSpace(const LabelStyle& styleA,
-                               const LabelStyle& styleB,
                                double& horizontal,
                                double& vertical);
 
