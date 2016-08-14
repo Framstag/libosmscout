@@ -39,12 +39,17 @@ namespace osmscout {
   {
   private:
     Progress&     progress;
-    HTMLWriter    wayReport;
-    HTMLWriter    relationReport;
-    HTMLWriter    index;
 
     TypeConfigRef typeConfig;
     TagId         nameTagId;
+
+    HTMLWriter    wayReport;
+    size_t        wayErrorCount;
+
+    HTMLWriter    relationReport;
+    size_t        relationErrorCount;
+
+    HTMLWriter    index;
 
     std::mutex    mutex;
 

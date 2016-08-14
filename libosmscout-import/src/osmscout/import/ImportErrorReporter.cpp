@@ -30,7 +30,9 @@ namespace osmscout {
                                            const TypeConfigRef& typeConfig,
                                            const std::string& destinationDirectory)
     : progress(progress),
-      typeConfig(typeConfig)
+      typeConfig(typeConfig),
+      wayErrorCount(0),
+      relationErrorCount(0)
   {
     nameTagId=typeConfig->GetTagId("name");
 
@@ -69,12 +71,14 @@ namespace osmscout {
   ImportErrorReporter::~ImportErrorReporter()
   {
     relationReport.WriteListEnd();
+    relationReport.WriteText(NumberToString(relationErrorCount)+" errors");
     relationReport.WriteBodyEnd();
     relationReport.WriteDocumentEnd();
 
     relationReport.CloseFailsafe();
 
     wayReport.WriteListEnd();
+    wayReport.WriteText(NumberToString(wayErrorCount)+" errors");
     wayReport.WriteBodyEnd();
     wayReport.WriteDocumentEnd();
 
@@ -115,6 +119,8 @@ namespace osmscout {
     wayReport.WriteText(" - ");
     wayReport.WriteText(error);
     wayReport.WriteListEntryEnd();
+
+    wayErrorCount++;
   }
 
   void ImportErrorReporter::ReportRelation(OSMId id,
@@ -133,6 +139,8 @@ namespace osmscout {
     relationReport.WriteText(" - ");
     relationReport.WriteText(error);
     relationReport.WriteListEntryEnd();
+
+    relationErrorCount++;
   }
 
   void ImportErrorReporter::ReportRelation(OSMId id,
@@ -158,6 +166,8 @@ namespace osmscout {
     relationReport.WriteText(" - ");
     relationReport.WriteText(error);
     relationReport.WriteListEntryEnd();
+
+    relationErrorCount++;
   }
 }
 
