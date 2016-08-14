@@ -460,9 +460,7 @@ namespace osmscout {
         NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
         if (nameValue==NULL) {
-          progress.Warning(std::string("Boundary area ")+
-                           area.GetType()->GetName()+" "+
-                           NumberToString(area.GetFileOffset())+" has no name");
+          errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No name");
           continue;
         }
 
@@ -490,9 +488,7 @@ namespace osmscout {
           boundaryAreas.push_back(boundary);
         }
         else {
-          progress.Info("No tag 'admin_level' for relation "+
-                        area.GetType()->GetName()+" "+
-                        NumberToString(area.GetFileOffset()));
+          errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No tag 'admin_level'");
         }
       }
 
@@ -573,9 +569,7 @@ namespace osmscout {
         NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
         if (nameValue==NULL) {
-          progress.Warning(std::string("Region ")+
-                           area.GetType()->GetName()+" "+
-                           NumberToString(area.GetFileOffset())+" has no name");
+          errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No name");
           continue;
         }
 
@@ -719,7 +713,7 @@ namespace osmscout {
           NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
 
           if (nameValue==NULL) {
-            progress.Warning(std::string("Node ")+NumberToString(node.GetFileOffset())+" has no name, skipping");
+            errorReporter->ReportLocation(ObjectFileRef(node.GetFileOffset(),refNode),"Mo name");
             continue;
           }
 
@@ -1059,7 +1053,8 @@ namespace osmscout {
     std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
+      errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refArea),
+                                         std::string("Street of address '")+location +"' '"+address+"' cannot be resolved in region '"+region.name+"'");
       return;
     }
     
@@ -1285,7 +1280,8 @@ namespace osmscout {
     std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
+      errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refWay),
+                                         std::string("Street of address '")+location +"' '"+address+"' cannot be resolved in region '"+region.name+"'");
     }
     else {
       for (const auto& regionAddress : loc->second.addresses) {
@@ -1424,10 +1420,6 @@ namespace osmscout {
         double minlat;
         double maxlat;
 
-        if (nodes.size()==0) {
-          std::cerr << "Way " << fileOffset << " has no nodes" << std::endl;
-        }
-
         GetBoundingBox(nodes,
                        minlon,
                        maxlon,
@@ -1532,7 +1524,8 @@ namespace osmscout {
     std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
-      progress.Debug(std::string("Street of address '")+location +"' '"+address+"' of Node "+NumberToString(fileOffset)+" cannot be resolved in region '"+region.name+"'");
+      errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refNode),
+                                         std::string("Street of address '")+location +"' '"+address+"' cannot be resolved in region '"+region.name+"'");
       return;
     }
 
@@ -1882,6 +1875,8 @@ namespace osmscout {
     std::list<std::string>             locationIgnoreTokens;
 
     progress.SetAction("Setup");
+
+    errorReporter=parameter.GetErrorReporter();
 
     try {
       bytesForNodeFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),

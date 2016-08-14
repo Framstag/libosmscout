@@ -25,6 +25,7 @@
 
 #include <osmscout/private/ImportImportExport.h>
 
+#include <osmscout/ObjectRef.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/HTMLWriter.h>
@@ -38,20 +39,50 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API ImportErrorReporter
   {
   private:
-    Progress&     progress;
+    enum Report {
+      reportLocation
+    };
 
-    TypeConfigRef typeConfig;
-    TagId         nameTagId;
+  private:
+    struct ReportError
+    {
+      Report        report;
+      ObjectFileRef ref;
+      std::string   error;
 
-    HTMLWriter    wayReport;
-    size_t        wayErrorCount;
+      inline ReportError(Report report,
+                         const ObjectFileRef& ref,
+                         const std::string& error)
+      : report(report),
+        ref(ref),
+        error(error)
+      {
+        // no code
+      }
+    };
 
-    HTMLWriter    relationReport;
-    size_t        relationErrorCount;
+  private:
+    Progress&              progress;
 
-    HTMLWriter    index;
+    TypeConfigRef          typeConfig;
+    TagId                  nameTagId;
 
-    std::mutex    mutex;
+    std::string            destinationDirectory;
+
+    std::list<ReportError> errors;
+
+    HTMLWriter             wayReport;
+    size_t                 wayErrorCount;
+
+    HTMLWriter             relationReport;
+    size_t                 relationErrorCount;
+
+    HTMLWriter             locationReport;
+    size_t                 locationErrorCount;
+
+    HTMLWriter             index;
+
+    std::mutex             mutex;
 
   private:
     std::string GetName(const ObjectOSMRef& object,
@@ -73,6 +104,14 @@ namespace osmscout {
     void ReportRelation(OSMId id,
                         const TypeInfoRef& type,
                         const std::string& error);
+
+    void ReportLocationDebug(const ObjectFileRef& object,
+                             const std::string& error);
+
+    void ReportLocation(const ObjectFileRef& object,
+                        const std::string& error);
+
+    void FinishedImport();
   };
 
   typedef std::shared_ptr<ImportErrorReporter> ImportErrorReporterRef;

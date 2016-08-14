@@ -174,9 +174,11 @@ namespace osmscout {
     };
 
   private:
-    uint8_t bytesForNodeFileOffset;
-    uint8_t bytesForAreaFileOffset;
-    uint8_t bytesForWayFileOffset;
+    uint8_t                bytesForNodeFileOffset;
+    uint8_t                bytesForAreaFileOffset;
+    uint8_t                bytesForWayFileOffset;
+
+    ImportErrorReporterRef errorReporter;
 
   private:
     void Write(FileWriter& writer,

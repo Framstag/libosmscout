@@ -21,6 +21,8 @@
 
 #include <sstream>
 
+#include <osmscout/DebugDatabase.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
@@ -31,8 +33,10 @@ namespace osmscout {
                                            const std::string& destinationDirectory)
     : progress(progress),
       typeConfig(typeConfig),
+      destinationDirectory(destinationDirectory),
       wayErrorCount(0),
-      relationErrorCount(0)
+      relationErrorCount(0),
+      locationErrorCount(0)
   {
     nameTagId=typeConfig->GetTagId("name");
 
@@ -48,6 +52,12 @@ namespace osmscout {
     relationReport.WriteBodyStart();
     relationReport.WriteListStart();
 
+    locationReport.Open(AppendFileToDir(destinationDirectory,"location.html"));
+    locationReport.WriteDocumentStart();
+    locationReport.WriteHeader("Location format errors","Import errors related to location information","","..stylesheet.css");
+    locationReport.WriteBodyStart();
+    locationReport.WriteListStart();
+
     index.Open(AppendFileToDir(destinationDirectory,"index.html"));
     index.WriteDocumentStart();
     index.WriteHeader("Index","Index of all reports","","..stylesheet.css");
@@ -62,6 +72,10 @@ namespace osmscout {
     index.WriteLink("relation.html","List of relation import errors");
     index.WriteListEntryEnd();
 
+    index.WriteListEntryStart();
+    index.WriteLink("location.html","List of location related import errors");
+    index.WriteListEntryEnd();
+
     index.WriteListEnd();
     index.WriteBodyEnd();
     index.WriteDocumentEnd();
@@ -70,6 +84,13 @@ namespace osmscout {
 
   ImportErrorReporter::~ImportErrorReporter()
   {
+    locationReport.WriteListEnd();
+    locationReport.WriteText(NumberToString(locationErrorCount)+" errors");
+    locationReport.WriteBodyEnd();
+    locationReport.WriteDocumentEnd();
+
+    locationReport.CloseFailsafe();
+
     relationReport.WriteListEnd();
     relationReport.WriteText(NumberToString(relationErrorCount)+" errors");
     relationReport.WriteBodyEnd();
@@ -153,10 +174,10 @@ namespace osmscout {
     std::string  name;
 
     if (!type->GetIgnore()) {
-      name=std::string(object.GetTypeName())+" "+NumberToString(id)+" ("+type->GetName()+")";
+      name=object.GetName()+" ("+type->GetName()+")";
     }
     else {
-      name=std::string(object.GetTypeName())+" "+NumberToString(id);
+      name=object.GetName();
     }
 
     progress.Warning(name+" - "+error);
@@ -168,6 +189,61 @@ namespace osmscout {
     relationReport.WriteListEntryEnd();
 
     relationErrorCount++;
+  }
+
+  void ImportErrorReporter::ReportLocationDebug(const ObjectFileRef& object,
+                                                const std::string& error)
+  {
+    progress.Debug(object.GetName()+" - "+error);
+
+    errors.push_back(ReportError(reportLocation,object,error));
+  }
+
+  void ImportErrorReporter::ReportLocation(const ObjectFileRef& object,
+                                           const std::string& error)
+  {
+    progress.Warning(object.GetName()+" - "+error);
+
+    errors.push_back(ReportError(reportLocation,object,error));
+  }
+
+  void ImportErrorReporter::FinishedImport()
+  {
+    if (errors.empty()) {
+      return;
+    }
+
+    progress.SetAction("Resolving OSM objects from error reports");
+
+    DebugDatabaseParameter debugDatabaseParameter;
+    DebugDatabase          database(debugDatabaseParameter);
+
+    if (database.Open(destinationDirectory)) {
+      std::set<ObjectOSMRef>               ids;
+      std::set<ObjectFileRef>              fileOffsets;
+      std::map<ObjectOSMRef,ObjectFileRef> idFileOffsetMap;
+      std::map<ObjectFileRef,ObjectOSMRef> fileOffsetIdMap;
+
+      for (const auto& error : errors) {
+        fileOffsets.insert(error.ref);
+      }
+
+      database.ResolveReferences(ids,fileOffsets,idFileOffsetMap,fileOffsetIdMap);
+
+      for (const auto& error : errors) {
+        std::map<ObjectFileRef,ObjectOSMRef>::const_iterator entry=fileOffsetIdMap.find(error.ref);
+
+        if (entry!=fileOffsetIdMap.end()) {
+          locationReport.WriteListEntryStart();
+          locationReport.WriteOSMObjectLink(entry->second,entry->second.GetName());
+          locationReport.WriteText(" - ");
+          locationReport.WriteText(error.error);
+          locationReport.WriteListEntryEnd();
+        }
+      }
+
+      database.Close();
+    }
   }
 }
 

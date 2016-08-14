@@ -1006,6 +1006,8 @@ namespace osmscout {
     bool result=ExecuteModules(typeConfig,
                                progress);
 
+    parameter.GetErrorReporter()->FinishedImport();
+
     parameter.SetErrorReporter(NULL);
 
     return result;
