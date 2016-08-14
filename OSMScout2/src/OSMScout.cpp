@@ -23,12 +23,12 @@
 #include <QQuickView>
 
 // Custom QML objects
-#include "MapWidget.h"
-#include "SearchLocationModel.h"
-#include "RoutingModel.h"
+#include "osmscout/MapWidget.h"
+#include "osmscout/SearchLocationModel.h"
+#include "osmscout/RoutingModel.h"
 
 // Application settings
-#include "Settings.h"
+#include "osmscout/Settings.h"
 
 // Application theming
 #include "Theme.h"

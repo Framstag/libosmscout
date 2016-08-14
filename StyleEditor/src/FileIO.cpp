@@ -43,12 +43,12 @@ void FileIO::read()
         QTextStream t( &file );
         QVariant length = m_target->property("length");
         QVariant returnedValue;
-        bool ret;
+
         if(length>0){
-            ret = QMetaObject::invokeMethod(m_target, "remove",
-                                            Q_RETURN_ARG(QVariant, returnedValue),
-                                            Q_ARG(QVariant, QVariant(0)),
-                                            Q_ARG(QVariant, length));
+            QMetaObject::invokeMethod(m_target, "remove",
+                                      Q_RETURN_ARG(QVariant, returnedValue),
+                                      Q_ARG(QVariant, QVariant(0)),
+                                      Q_ARG(QVariant, length));
             m_lineOffsets.clear();
             m_lineOffsets.push_back(1);
         }
@@ -57,9 +57,9 @@ void FileIO::read()
             line.replace("\t","        ");
             m_lineOffsets.push_back(line.length()+1);
             line.replace("<","&lt;").replace(">","&gt;").replace(" ","&nbsp;");
-            ret = QMetaObject::invokeMethod(m_target, "append",
-                                            Q_RETURN_ARG(QVariant, returnedValue),
-                                            Q_ARG(QVariant, QVariant(line)));
+            QMetaObject::invokeMethod(m_target, "append",
+                                      Q_RETURN_ARG(QVariant, returnedValue),
+                                      Q_ARG(QVariant, QVariant(line)));
         } while (!t.atEnd());
 
         file.close();
@@ -89,10 +89,10 @@ bool FileIO::write(const QString &fileName)
 
     QVariant length = m_target->property("length");
     QVariant returnedValue;
-    bool ret = QMetaObject::invokeMethod(m_target, "getText",
-                                         Q_RETURN_ARG(QVariant, returnedValue),
-                                         Q_ARG(QVariant, QVariant(0)),
-                                         Q_ARG(QVariant, length));
+    QMetaObject::invokeMethod(m_target, "getText",
+                              Q_RETURN_ARG(QVariant, returnedValue),
+                              Q_ARG(QVariant, QVariant(0)),
+                              Q_ARG(QVariant, length));
     QString text = returnedValue.toString();
     text.replace(QChar(0x2029),"\n").replace(QChar(0x00a0)," ");
     QTextStream out(&file);

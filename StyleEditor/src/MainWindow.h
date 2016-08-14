@@ -22,9 +22,8 @@
 
 #include <QQmlApplicationEngine>
 
-#include "Settings.h"
-
-#include "MapWidget.h"
+#include "osmscout/Settings.h"
+#include "osmscout/MapWidget.h"
 
 class MainWindow : public QQmlApplicationEngine
 {

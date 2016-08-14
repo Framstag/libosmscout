@@ -14,11 +14,9 @@ qtHaveModule(positioning) {
  QT += positioning
 }
 
-PKGCONFIG += libosmscout-map-qt
+PKGCONFIG += libosmscout-map-qt libosmscout-client-qt
 
 gcc:QMAKE_CXXFLAGS += -fopenmp
-
-INCLUDEPATH = src
 
 release: DESTDIR = release
 debug:   DESTDIR = debug
@@ -29,19 +27,9 @@ RCC_DIR = $$DESTDIR/
 UI_DIR = $$DESTDIR/
 
 SOURCES = src/OSMScout.cpp \
-          src/Settings.cpp \
-          src/Theme.cpp \
-          src/DBThread.cpp \
-          src/MapWidget.cpp \
-          src/SearchLocationModel.cpp \
-          src/RoutingModel.cpp
+          src/Theme.cpp 
 
-HEADERS = src/Settings.h \
-          src/Theme.h \
-          src/DBThread.h \
-          src/MapWidget.h \
-          src/SearchLocationModel.h \
-          src/RoutingModel.h
+HEADERS = src/Theme.h 
 
 DISTFILES += \
     qml/custom/MapButton.qml \
@@ -62,7 +50,7 @@ RESOURCES += \
     res.qrc
 
 ANDROID_EXTRA_LIBS = ../libosmscout/src/.libs/libosmscout.so \
-                     ../libosmscout-map/src/.libs//libosmscoutmap.so \
+                     ../libosmscout-map/src/.libs/libosmscoutmap.so \
                      ../libosmscout-map-qt/src/.libs/libosmscoutmapqt.so
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
