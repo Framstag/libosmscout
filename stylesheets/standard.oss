@@ -1031,6 +1031,7 @@ STYLE
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
      [TYPE railway_narrow_gauge] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
        WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; cap: butt; }
@@ -1077,6 +1078,7 @@ STYLE
            railway_tram,
            railway_light_rail,
            railway_narrow_gauge,
+           railway_funicular,
            railway_subway,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }
 

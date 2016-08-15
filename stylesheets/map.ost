@@ -439,6 +439,11 @@ TYPES
     = WAY ("railway"=="monorail")
       PATH
     
+  TYPE railway_funicular
+    = WAY ("railway"=="funicular")
+      {Name}
+      PATH
+
   TYPE railway_station
     = NODE AREA ("railway"=="station")
       {Name, NameAlt}
