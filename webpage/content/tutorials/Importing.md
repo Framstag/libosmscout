@@ -75,7 +75,7 @@ After some preprocessing can be those data used for creating nice maps with cont
 
 Following steps are for Ubuntu 16.04.
 ```bash
-sudo apt-get install mono-runtime
+sudo apt-get install wget unzip mono-runtime libmono-system-web-extensions4.0-cil
 wget http://osm.michis-pla.net/code/Srtm2Osm-1.12.1.0.zip
 unzip Srtm2Osm-1.12.1.0.zip 
 wget https://svn.openstreetmap.org/applications/utils/osm-extract/polygons/poly2bb.pl
