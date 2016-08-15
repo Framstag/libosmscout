@@ -442,7 +442,6 @@ TYPES
   TYPE railway_funicular
     = WAY ("railway"=="funicular")
       {Name}
-      PATH
 
   TYPE railway_station
     = NODE AREA ("railway"=="station")
@@ -477,6 +476,22 @@ TYPES
                  "highway"=="platform")
       {Name, NameAlt}
       PATH[FOOT]
+
+  //
+  // Aerialway (http://wiki.openstreetmap.org/wiki/Key:aerialway)
+  //
+
+  TYPE aerialway_gondola
+    = WAY (("aerialway"=="gondola") OR ("aerialway"=="cable_car"))
+      {Name}
+
+  TYPE aerialway_chair_lift
+    = WAY (("aerialway"=="chair_lift") OR ("aerialway"=="mixed_lift"))
+      {Name}
+
+  TYPE aerialway_drag_lift
+    = WAY (("aerialway"=="drag_lift") OR ("aerialway"=="t-bar") OR ("aerialway"=="j-bar") OR ("aerialway"=="platter") OR ("aerialway"=="rope_tow") OR ("aerialway"=="magic_carpet"))
+      {Name}
 
   //
   // Water transport
