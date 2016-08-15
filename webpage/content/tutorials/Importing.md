@@ -59,8 +59,46 @@ at this file for information you missed during the import.
 You can also call the importer by hand. The minimum command line would be
 
 ```bash
-  $ .../Import/src/Import  --typefile ../stylesheets/map.ost --destinationDirectory nordrhein-westfalen nordrhein-westfalen.osm.pbf
+  $ .../Import/src/Import  \
+    --typefile ../stylesheets/map.ost \
+    --destinationDirectory nordrhein-westfalen \
+    nordrhein-westfalen.osm.pbf
 ```
+## Adding contour lines
+
+Some years ago, Nasa released data from Shuttle Radar Topography Mission ([http://en.wikipedia.org/wiki/SRTM](SRTM)) for public use.
+After some preprocessing can be those data used for creating nice maps with contour lines.
+
+<a class="screenshot" href="/images/ContourLines.png"><img src="/images/ContourLines.png" width="100%" height="100%" alt="Map with contour lines"/></a>
+
+### Required tools
+
+Following steps are for Ubuntu 16.04.
+```bash
+sudo apt-get install wget unzip mono-runtime libmono-system-web-extensions4.0-cil
+wget http://osm.michis-pla.net/code/Srtm2Osm-1.12.1.0.zip
+unzip Srtm2Osm-1.12.1.0.zip 
+wget https://svn.openstreetmap.org/applications/utils/osm-extract/polygons/poly2bb.pl
+chmod +x poly2bb.pl
+```
+
+### Preprocessing
+
+Like previous examples, this one is using `nordrhein-westfalen` region.
+```bash
+wget http://download.geofabrik.de/europe/germany/nordrhein-westfalen.poly
+BBOX=`./poly2bb.pl nordrhein-westfalen.poly | awk -F '[= ]' '{print $8" "$2" "$6" "$4}'`
+
+mono Srtm2Osm/Srtm2Osm.exe \
+  -incrementid -firstnodeid $(( 1 << 33 )) -firstwayid $(( 1 << 33 )) \
+  -cat 400 100 \
+  -bounds1 $BBOX \
+  -large \
+  -maxwaynodes 256 \
+  -o nordrhein-westfalen-contours.osm
+```
+
+Then, use both files `nordrhein-westfalen-contours.osm` and `nordrhein-westfalen-latest.osm.pbf` as input of Import tool.
 
 ## Resulting database
 
