@@ -995,7 +995,7 @@ STYLE
 
    [TYPE aerialway_gondola,
          aerialway_chair_lift,
-         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }
+         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; }
 
  }
 
@@ -1355,9 +1355,18 @@ STYLE
  
 // Aerialways
 [MAG close-] {
-     [TYPE aerialway_gondola]    WAY {color: #808080; displayWidth: 0.20mm; width: 4m;}
-     [TYPE aerialway_chair_lift] WAY {color: #808080; displayWidth: 0.15mm; width: 4m;}
-     [TYPE aerialway_drag_lift]  WAY {color: #808080; displayWidth: 0.10mm; width: 4m;}
+     [TYPE aerialway_gondola]{
+        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
+        WAY#gondola {color: #101010; dash: 1,15; cap: round; displayWidth: 0.1mm; width: 4m;}
+     }
+     [TYPE aerialway_chair_lift]{
+        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
+        WAY#chair {color: #101010; dash: 0.3,5; cap: square; displayWidth: 0.1mm; width: 4m;}
+     }
+     [TYPE aerialway_drag_lift]{
+        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        WAY#drag {color: #101010; dash: 0.2,5; cap: round; displayWidth: 0.1mm; width: 4m;}
+     }
 }
 
  // Buildings
