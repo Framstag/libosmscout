@@ -64,6 +64,11 @@ namespace osmscout {
     this->coordDescription=description;
   }
 
+  void LocationDescription::SetAtNameDescription(const LocationAtPlaceDescriptionRef& description)
+  {
+    this->atNameDescription=description;
+  }
+
   void LocationDescription::SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description)
   {
     this->atAddressDescription=description;
@@ -77,6 +82,11 @@ namespace osmscout {
   LocationCoordDescriptionRef LocationDescription::GetCoordDescription() const
   {
     return coordDescription;
+  }
+
+  LocationAtPlaceDescriptionRef LocationDescription::GetAtNameDescription() const
+  {
+    return atNameDescription;
   }
 
   LocationAtPlaceDescriptionRef LocationDescription::GetAtAddressDescription() const
@@ -1364,9 +1374,10 @@ namespace osmscout {
                                       const TypeInfoSet &types,
                                       std::vector<LocationDescriptionCandicate> &candidates)
   {
-    TypeConfigRef    typeConfig=database->GetTypeConfig();
-    AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
-    GeoBox           box100=GeoBox::BoxByCenterAndRadius(location,100);
+    TypeConfigRef           typeConfig=database->GetTypeConfig();
+    AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
+    GeoBox                  box100=GeoBox::BoxByCenterAndRadius(location,100);
+    NameFeatureLabelReader  nameFeatureLabelLeader(*typeConfig);
 
     if (!typeConfig ||
         !areaAreaIndex) {
@@ -1399,6 +1410,9 @@ namespace osmscout {
       bool    atPlace=false;
       double  distance=std::numeric_limits<double>::max(); // In Km
       double  bearing=0;
+      GeoBox  boundingBox;
+
+      area->GetBoundingBox(boundingBox);
 
       for (const auto& ring : area->rings) {
         if (ring.IsOuterRing()) {
@@ -1441,9 +1455,15 @@ namespace osmscout {
           }
         }
       }
-      candidates.push_back(LocationDescriptionCandicate(
-        ObjectFileRef(area->GetFileOffset(), refArea), distance, bearing, atPlace));
+
+      candidates.push_back(LocationDescriptionCandicate(ObjectFileRef(area->GetFileOffset(),refArea),
+                                                        nameFeatureLabelLeader.GetLabel(area->GetFeatureValueBuffer()),
+                                                        distance,
+                                                        bearing,
+                                                        atPlace,
+                                                        boundingBox.GetSize()));
     }
+
     osmscout::log.Debug() << "Found " << areas.size() << " areas near " << location.GetDisplayText();
 
     return true;
@@ -1452,9 +1472,10 @@ namespace osmscout {
   bool LocationService::LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types, 
                                       std::vector<LocationDescriptionCandicate> &candidates)
   {
-    TypeConfigRef    typeConfig=database->GetTypeConfig();
-    AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
-    GeoBox           box100=GeoBox::BoxByCenterAndRadius(location,100);
+    TypeConfigRef           typeConfig=database->GetTypeConfig();
+    AreaNodeIndexRef        areaNodeIndex=database->GetAreaNodeIndex();
+    GeoBox                  box100=GeoBox::BoxByCenterAndRadius(location,100);
+    NameFeatureLabelReader  nameFeatureLabelLeader(*typeConfig);
 
     if (!typeConfig ||
         !areaNodeIndex) {
@@ -1466,24 +1487,33 @@ namespace osmscout {
     if (!areaNodeIndex->GetOffsets(box100, types, offsets, loadedAddressTypes)) {
       return false;
     }
-    if (offsets.empty()){
+
+    if (offsets.empty()) {
       return true;
     }
 
     std::vector<NodeRef> nodes;
-    if (!database->GetNodesByOffset(offsets, nodes)){
+
+    if (!database->GetNodesByOffset(offsets, nodes)) {
       return false;
     }
-    if (nodes.empty()){
+
+    if (nodes.empty()) {
       return true;
     }
-    for (const auto &node: nodes){
-      double  distance=GetEllipsoidalDistance(location, node.get()->GetCoords()); // In Km
+
+    for (const auto &node: nodes) {
+      double  distance=GetEllipsoidalDistance(location,node.get()->GetCoords()); // In Km
       double  bearing=GetSphericalBearingInitial(node.get()->GetCoords(),location);
 
-      candidates.push_back(LocationDescriptionCandicate(
-        ObjectFileRef(node->GetFileOffset(), refNode), distance, bearing, false));
+      candidates.push_back(LocationDescriptionCandicate(ObjectFileRef(node->GetFileOffset(),refNode),
+                                                        nameFeatureLabelLeader.GetLabel(node->GetFeatureValueBuffer()),
+                                                        distance,
+                                                        bearing,
+                                                        false,
+                                                        0.0));
     }
+
     osmscout::log.Debug() << "Found " << nodes.size() << " nodes near " << location.GetDisplayText();
 
     return true;
@@ -1492,7 +1522,120 @@ namespace osmscout {
   bool LocationService::DistanceComparator(const LocationDescriptionCandicate &a,
                                            const LocationDescriptionCandicate &b)
   {
-    return (a.GetDistance() < b.GetDistance());
+    if (a.IsAtPlace() && b.IsAtPlace()) {
+      return a.GetSize()<b.GetSize();
+    }
+
+    return a.GetDistance() < b.GetDistance();
+  }
+
+  bool LocationService::DescribeLocationByName(const GeoCoord& location,
+                                               LocationDescription& description)
+  {
+    // search all addressable areas and nodes, sort it by distance, get first with name
+    TypeConfigRef typeConfig=database->GetTypeConfig();
+
+    if (!typeConfig) {
+      return false;
+    }
+
+    std::vector<LocationDescriptionCandicate> candidates;
+
+    TypeInfoSet nameTypes;
+
+    // near addressable areas
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeArea() &&
+          type->HasFeature(AddressFeature::NAME)) {
+        nameTypes.Set(type);
+      }
+    }
+
+    if (!nameTypes.Empty()) {
+      if (!LoadNearAreas(location,
+                         nameTypes,
+                         candidates)) {
+        return false;
+      }
+    }
+
+    // near addressable nodes
+    nameTypes.Clear();
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeNode() &&
+          type->HasFeature(AddressFeature::NAME)) {
+        nameTypes.Set(type);
+      }
+    }
+
+    if (!nameTypes.Empty()) {
+      if (!LoadNearNodes(location,
+                         nameTypes,
+                         candidates)) {
+        return false;
+      }
+    }
+
+    if (candidates.empty()) {
+      return true;
+    }
+
+    // sort all candidates by its distance from location
+    std::sort(candidates.begin(),candidates.end(),DistanceComparator);
+
+    for (const auto &candidate : candidates) {
+      std::list<ReverseLookupResult> result;
+
+      if (candidate.GetName().empty()) {
+        continue;
+      }
+
+      if (!ReverseLookupObject(candidate.GetRef(), result)) {
+        return false;
+      }
+
+      if (!result.empty()) {
+        Place place=GetPlace(result);
+
+        if (candidate.IsAtPlace()) {
+          description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place));
+        }
+        else {
+          description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place,
+                                                                                        candidate.GetDistance()*1000, candidate.GetBearing()));
+        }
+
+        return true;
+      }
+      else if (!candidate.GetName().empty()) {
+        AdminRegionRef adminRegion;
+        POIRef         poi=std::make_shared<POI>();
+        LocationRef    location;
+        AddressRef     address;
+
+        poi->object=candidate.GetRef();
+        poi->name=candidate.GetName();
+        poi->regionOffset=0;
+
+        Place          place(candidate.GetRef(),
+                             adminRegion,
+                             poi,
+                             location,
+                             address);
+
+        if (candidate.IsAtPlace()) {
+          description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place));
+        }
+        else {
+          description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place,
+                                                                                        candidate.GetDistance()*1000, candidate.GetBearing()));
+        }
+
+        return true;
+      }
+    }
+
+    return true;
   }
 
   bool LocationService::DescribeLocationByAddress(const GeoCoord& location,
@@ -1512,7 +1655,7 @@ namespace osmscout {
     // near addressable areas
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeArea() &&
-          type->HasFeature(AddressFeature::NAME)) {
+          type->GetIndexAsAddress()) {
         addressTypes.Set(type);
       }
     }
@@ -1529,7 +1672,7 @@ namespace osmscout {
     addressTypes.Clear();
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeNode() &&
-          type->HasFeature(AddressFeature::NAME)) {
+          type->GetIndexAsAddress()) {
         addressTypes.Set(type);
       }
     }
@@ -1558,6 +1701,10 @@ namespace osmscout {
 
       if (!result.empty()) {
         Place place=GetPlace(result);
+
+        if (!place.GetAddress()) {
+          continue;
+        }
 
         if (candidate.IsAtPlace()) {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place));
@@ -1655,12 +1802,18 @@ namespace osmscout {
   {
     description.SetCoordDescription(std::make_shared<LocationCoordDescription>(location));
 
-
-    if (!DescribeLocationByAddress(location,description)) {
+    if (!DescribeLocationByName(location,
+                                description)) {
       return false;
     }
 
-    if (!DescribeLocationByPOI(location,description)) {
+    if (!DescribeLocationByAddress(location,
+                                   description)) {
+      return false;
+    }
+
+    if (!DescribeLocationByPOI(location,
+                               description)) {
       return false;
     }
 

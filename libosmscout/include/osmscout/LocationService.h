@@ -52,24 +52,36 @@ namespace osmscout {
   {
   private:
     ObjectFileRef ref;
+    std::string   name;
     double        distance;
     double        bearing;
     bool          atPlace;
+    double        size;
+
   public:
     inline LocationDescriptionCandicate(const ObjectFileRef &ref,
+                                        const std::string& name,
                                         const double distance,
                                         const double bearing,
-                                        const bool atPlace)
+                                        const bool atPlace,
+                                        const double size)
     : ref(ref),
+      name(name),
       distance(distance),
       bearing(bearing),
-      atPlace(atPlace)
+      atPlace(atPlace),
+      size(size)
     {
     }
 
     inline ObjectFileRef GetRef() const
     {
       return ref;
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
     }
 
     inline double GetDistance() const
@@ -85,6 +97,11 @@ namespace osmscout {
     inline bool IsAtPlace() const
     {
       return atPlace;
+    }
+
+    inline double GetSize() const
+    {
+      return size;
     }
   };
 
@@ -155,16 +172,38 @@ namespace osmscout {
   {
   private:
     LocationCoordDescriptionRef   coordDescription;
+    LocationAtPlaceDescriptionRef atNameDescription;
     LocationAtPlaceDescriptionRef atAddressDescription;
     LocationAtPlaceDescriptionRef atPOIDescription;
 
   public:
     void SetCoordDescription(const LocationCoordDescriptionRef& description);
+    void SetAtNameDescription(const LocationAtPlaceDescriptionRef& description);
     void SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description);
     void SetAtPOIDescription(const LocationAtPlaceDescriptionRef& description);
 
+    /**
+     * Return the location is geo coordinates
+     * @return
+     */
     LocationCoordDescriptionRef GetCoordDescription() const;
+
+    /**
+     * Return the location in relation to a named object
+     * @return
+     */
+    LocationAtPlaceDescriptionRef GetAtNameDescription() const;
+
+    /**
+     * Return the location in relation to a close address
+     * @return
+     */
     LocationAtPlaceDescriptionRef GetAtAddressDescription() const;
+
+    /**
+     * Return the location in relation to a close POI
+     * @return
+     */
     LocationAtPlaceDescriptionRef GetAtPOIDescription() const;
   };
 
@@ -435,6 +474,9 @@ namespace osmscout {
 
     bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
                        std::vector<LocationDescriptionCandicate> &candidates);
+
+    bool DescribeLocationByName(const GeoCoord& location,
+                                LocationDescription& description);
 
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description);

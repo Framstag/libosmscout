@@ -32,6 +32,12 @@
  *
  * "is close to address"
  * src/LocationDescription ../maps/nordrhein-westfalen 51.57251 7.46506
+ *
+ * "is close to POI"
+ * src/LocationDescription ../maps/nordrhein-westfalen 51.5142273, 7.4652789
+ *
+ * "is close/at named object"
+ * src/LocationDescription ../maps/nordrhein-westfalen 51.49300 7.48255
  */
 
 void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& description)
@@ -111,11 +117,16 @@ int main(int argc, char* argv[])
   }
 
   osmscout::LocationCoordDescriptionRef coordDescription=description.GetCoordDescription();
+  osmscout::LocationAtPlaceDescriptionRef atNameDescription=description.GetAtNameDescription();
   osmscout::LocationAtPlaceDescriptionRef atAddressDescription=description.GetAtAddressDescription();
   osmscout::LocationAtPlaceDescriptionRef atPOIDescription=description.GetAtPOIDescription();
 
   if (coordDescription) {
     std::cout << "* Coordinate: " << coordDescription->GetLocation().GetDisplayText() << std::endl;
+  }
+
+  if (atNameDescription) {
+    DumpLocationAtPlaceDescription(*atNameDescription);
   }
 
   if (atAddressDescription) {
