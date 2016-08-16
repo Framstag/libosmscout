@@ -213,7 +213,7 @@ PRODUCTIONS
 
                       if (!wayType) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
-                        SemErr(e.c_str());
+                        SemWarning(e.c_str());
                       }
                       else if (!wayType->CanBeWay()) {
                         std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -237,7 +237,7 @@ PRODUCTIONS
 
                       if (!wayType) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
-                        SemErr(e.c_str());
+                        SemWarning(e.c_str());
                       }
                       else if (!wayType->CanBeWay()) {
                         std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -729,7 +729,7 @@ PRODUCTIONS
                   if (!type) {
                     std::string e="Unknown type '"+name+"'";
 
-                    SemErr(e.c_str());
+                    SemWarning(e.c_str());
                   }
                   else if (filter.HasTypes() &&
                            !filter.HasType(type)) {
@@ -751,7 +751,7 @@ PRODUCTIONS
                     if (!type) {
                       std::string e="Unknown type '"+name+"'";
 
-                      SemErr(e.c_str());
+                      SemWarning(e.c_str());
                     }
                     else if (filter.HasTypes() &&
                              !filter.HasType(type)) {
