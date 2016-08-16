@@ -1208,7 +1208,7 @@ TYPES
     = NODE AREA ("tourism"=="attraction" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
-      GROUP tourism
+      GROUP tourism, building
     
   TYPE tourism_attraction
     = NODE AREA ("tourism"=="attraction")
