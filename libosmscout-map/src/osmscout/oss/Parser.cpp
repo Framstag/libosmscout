@@ -347,7 +347,7 @@ void Parser::WAYGROUP(size_t priority) {
 			
 			if (!wayType) {
 			 std::string e="Unknown way type '"+wayTypeName+"'";
-			 SemErr(e.c_str());
+			 SemWarning(e.c_str());
 			}
 			else if (!wayType->CanBeWay()) {
 			 std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -369,7 +369,7 @@ void Parser::WAYGROUP(size_t priority) {
 			
 			if (!wayType) {
 			 std::string e="Unknown way type '"+wayTypeName+"'";
-			 SemErr(e.c_str());
+			 SemWarning(e.c_str());
 			}
 			else if (!wayType->CanBeWay()) {
 			 std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -1098,7 +1098,7 @@ void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
 		if (!type) {
 		 std::string e="Unknown type '"+name+"'";
 		
-		 SemErr(e.c_str());
+		 SemWarning(e.c_str());
 		}
 		else if (filter.HasTypes() &&
 		        !filter.HasType(type)) {
@@ -1119,7 +1119,7 @@ void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
 			if (!type) {
 			 std::string e="Unknown type '"+name+"'";
 			
-			 SemErr(e.c_str());
+			 SemWarning(e.c_str());
 			}
 			else if (filter.HasTypes() &&
 			        !filter.HasType(type)) {
