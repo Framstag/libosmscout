@@ -183,6 +183,15 @@ namespace osmscout {
     }
 
     /**
+     * Returns the size of the bounding box (width*height).
+     *
+     * @return GetWidth()*GetHeight()
+     */
+    inline double GetSize() const {
+      return GetWidth()*GetHeight();
+    }
+
+    /**
      * Return a string representation of the coordinate value in a human readable format.
      */
     std::string GetDisplayText() const;
