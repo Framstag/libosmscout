@@ -196,6 +196,11 @@ namespace osmscout {
       return rings.front().GetType();
     }
 
+    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    {
+      return rings.front().GetFeatureValueBuffer();
+    }
+
     inline bool IsSimple() const
     {
       return rings.size()==1;
