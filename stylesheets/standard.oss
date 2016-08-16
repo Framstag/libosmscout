@@ -48,7 +48,8 @@ ORDER WAYS
   GROUP railway_rail,
         aeroway_runway, aeroway_taxiway
   GROUP highway_living_street, highway_service, highway_bus_guideway,
-        railway_tram, railway_light_rail, railway_subway, public_transport_platform
+        railway_tram, railway_light_rail, railway_subway, public_transport_platform,
+        aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
         highway_footway, highway_bridleway, highway_construction,
         leisure_track,
@@ -991,6 +992,11 @@ STYLE
    [TYPE highway_pedestrian,
          highway_services,
          highway_footway] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayArea; }
+
+   [TYPE aerialway_gondola,
+         aerialway_chair_lift,
+         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; }
+
  }
 
  // Oneways
@@ -1031,6 +1037,7 @@ STYLE
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
      [TYPE railway_narrow_gauge] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
        WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; cap: butt; }
@@ -1077,6 +1084,7 @@ STYLE
            railway_tram,
            railway_light_rail,
            railway_narrow_gauge,
+           railway_funicular,
            railway_subway,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }
 
@@ -1344,6 +1352,22 @@ STYLE
 
    [TYPE barrier_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
  }
+ 
+// Aerialways
+[MAG close-] {
+     [TYPE aerialway_gondola]{
+        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
+        WAY#gondola {color: #101010; dash: 1,15; cap: round; displayWidth: 0.1mm; width: 4m;}
+     }
+     [TYPE aerialway_chair_lift]{
+        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
+        WAY#chair {color: #101010; dash: 0.3,5; cap: square; displayWidth: 0.1mm; width: 4m;}
+     }
+     [TYPE aerialway_drag_lift]{
+        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        WAY#drag {color: #101010; dash: 0.2,5; cap: round; displayWidth: 0.1mm; width: 4m;}
+     }
+}
 
  // Buildings
  [MAG @specialBuildingMag-] {
