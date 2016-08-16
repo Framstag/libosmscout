@@ -1017,6 +1017,8 @@ namespace osmscout {
                              const MapData& data,
                              QPainter* painter)
   {
+    std::lock_guard<std::mutex> guard(mutex);
+
     this->painter=painter;
 
     painter->setRenderHint(QPainter::Antialiasing);

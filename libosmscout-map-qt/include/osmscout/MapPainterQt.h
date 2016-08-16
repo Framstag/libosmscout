@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <mutex>
+
 #include <QPainter>
 
 #include <osmscout/private/MapQtImportExport.h>
@@ -54,6 +56,8 @@ namespace osmscout {
     std::vector<QBrush>       patterns;      //! vector of QBrush for fill patterns
     std::map<size_t,QFont>    fonts;         //! Cached fonts
     std::vector<double>       sin;           //! Lookup table for sin calculation
+
+    std::mutex                mutex;         //! Mutex for locking concurrent calls
 
   private:
     QFont GetFont(const Projection& projection,

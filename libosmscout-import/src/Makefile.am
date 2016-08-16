@@ -50,6 +50,7 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/SortNodeDat.cpp \
                                osmscout/import/SortWayDat.cpp \
                                osmscout/import/Import.cpp \
+                               osmscout/import/ImportErrorReporter.cpp \
                                osmscout/import/Preprocessor.cpp \
                                osmscout/import/Preprocess.cpp
 

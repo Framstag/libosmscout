@@ -2688,9 +2688,9 @@ namespace osmscout {
     return success;
   }
 
-  const std::list<std::string>& StyleConfig::GetErrors() {
+  const std::list<std::string>& StyleConfig::GetErrors()
+  {
     return errors;
   }
-
 }
 

@@ -158,6 +158,7 @@
     <ClCompile Include="src\osmscout\import\GenWayAreaDat.cpp" />
     <ClCompile Include="src\osmscout\import\GenWayWayDat.cpp" />
     <ClCompile Include="src\osmscout\import\Import.cpp" />
+    <ClCompile Include="src\osmscout\import\ImportErrorReporter.cpp" />
     <ClCompile Include="src\osmscout\import\MergeAreaData.cpp" />
     <ClCompile Include="src\osmscout\import\Preprocess.cpp" />
     <ClCompile Include="src\osmscout\import\Preprocessor.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="include\osmscout\import\GenWayAreaDat.h" />
     <ClInclude Include="include\osmscout\import\GenWayWayDat.h" />
     <ClInclude Include="include\osmscout\import\Import.h" />
+    <ClInclude Include="include\osmscout\import\ImportErrorReporter.h" />
     <ClInclude Include="include\osmscout\import\MergeAreaData.h" />
     <ClInclude Include="include\osmscout\import\Preprocess.h" />
     <ClInclude Include="include\osmscout\import\Preprocessor.h" />

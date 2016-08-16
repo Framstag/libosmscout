@@ -245,9 +245,10 @@ namespace osmscout {
     bool        isCoastline=false;
 
     if (data.nodes.size()<2) {
-      progress.Warning("Way "+
-                       NumberToString(data.id)+
-                       " has less than two nodes!");
+      parameter.GetErrorReporter()->ReportWay(data.id,
+                                              data.tags,
+                                              "Less than two nodes");
+
       return;
     }
 
@@ -280,9 +281,9 @@ namespace osmscout {
     if (areaTag==data.tags.end()) {
       isArea=0;
     }
-    else if (areaTag->second=="no" ||
-             areaTag->second=="false" ||
-             areaTag->second=="0") {
+    else if (areaTag->second=="0" ||
+             areaTag->second=="no" ||
+             areaTag->second=="false") {
       isArea=-1;
     }
     else {
@@ -314,9 +315,10 @@ namespace osmscout {
     case 1:
       if (areaType==typeConfig->typeInfoIgnore &&
           wayType!=typeConfig->typeInfoIgnore) {
-        progress.Debug("Way "+
-                       NumberToString(data.id)+
-                       " of type '" + wayType->GetName()+"' should be way but is area => ignoring type");
+
+        parameter.GetErrorReporter()->ReportWay(data.id,
+                                                data.tags,
+                                                "Should be way but is area");
       }
 
       if (areaType==typeConfig->typeInfoIgnore ||
@@ -340,9 +342,9 @@ namespace osmscout {
     case -1:
       if (wayType==typeConfig->typeInfoIgnore &&
           areaType!=typeConfig->typeInfoIgnore) {
-        progress.Debug("Way "+
-                       NumberToString(data.id)+
-                       " of type '" + areaType->GetName()+"' should be area but is way => ignoring type!");
+        parameter.GetErrorReporter()->ReportWay(data.id,
+                                                data.tags,
+                                                "Should be area but is way");
       }
 
       if (wayType==typeConfig->typeInfoIgnore ||
@@ -454,6 +456,9 @@ namespace osmscout {
       progress.Warning("Relation "+
                        NumberToString(data.id)+
                        " does not have any members!");
+      parameter.GetErrorReporter()->ReportRelation(data.id,
+                                                   data.tags,
+                                                   "Does not have any members");
       return;
     }
 

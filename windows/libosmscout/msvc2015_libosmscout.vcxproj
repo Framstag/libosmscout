@@ -191,6 +191,7 @@
     <ClCompile Include="src\osmscout\util\FileWriter.cpp" />
     <ClCompile Include="src\osmscout\util\GeoBox.cpp" />
     <ClCompile Include="src\osmscout\util\Geometry.cpp" />
+    <ClCompile Include="src\osmscout\util\HTMLWriter.cpp" />
     <ClCompile Include="src\osmscout\util\Logger.cpp" />
     <ClCompile Include="src\osmscout\util\Magnification.cpp" />
     <ClCompile Include="src\osmscout\util\MemoryMonitor.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="include\osmscout\util\FileWriter.h" />
     <ClInclude Include="include\osmscout\util\GeoBox.h" />
     <ClInclude Include="include\osmscout\util\Geometry.h" />
+    <ClInclude Include="include\osmscout\util\HTMLWriter.h" />
     <ClInclude Include="include\osmscout\util\Logger.h" />
     <ClInclude Include="include\osmscout\util\Magnification.h" />
     <ClInclude Include="include\osmscout\util\MemoryMonitor.h" />

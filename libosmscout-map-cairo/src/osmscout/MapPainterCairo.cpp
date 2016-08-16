@@ -1351,6 +1351,8 @@ namespace osmscout {
                                 const MapData& data,
                                 cairo_t *draw)
   {
+    std::lock_guard<std::mutex> guard(mutex);
+
     this->draw=draw;
 
     minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/projection.GetDPI();
