@@ -1412,6 +1412,8 @@ STYLE
        AREA { color: @parkingBuildingColor; borderColor: @parkingBuildingBorderColor; borderWidth: 0.1mm; }
      }
 
+     [TYPE tourism_attraction_building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
+
      [GROUP tourism, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
 
      [GROUP historic, building] AREA { color: @tourismBuildingColor; borderColor: @tourismBuildingBorderColor; borderWidth: 0.1mm; }
