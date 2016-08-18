@@ -36,7 +36,6 @@ FLAG
 ORDER WAYS
   GROUP _route
   GROUP highway_motorway
-  GROUP waterway_river, waterway_canal, waterway_weir, waterway_drain
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
@@ -49,12 +48,14 @@ ORDER WAYS
         aeroway_runway, aeroway_taxiway
   GROUP highway_living_street, highway_service, highway_bus_guideway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform,
+        railway_narrow_gauge,
         aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
         highway_footway, highway_bridleway, highway_construction,
-        leisure_track,
-        waterway_stream, route_ferry
+        leisure_track
   GROUP highway_steps, barrier_fence
+  GROUP waterway_weir, route_ferry
+  GROUP waterway_river, waterway_canal, waterway_drain, waterway_stream
 
 CONST
   MAG stepsMag                     = veryClose;
@@ -533,15 +534,19 @@ STYLE
         [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
         [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
       }
-     }
+    }
 
-     [MAG detail-] {
-      [TYPE waterway_drain,
-            waterway_weir] {
+    [MAG detail-] {
+      [TYPE waterway_drain] {
         [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
         [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
         
         AREA { color: @waterColor;}        
+      }
+      [TYPE waterway_weir] {
+        WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
+        
+        AREA { color: lighten(@waterColor, 0.3);}        
       }
     }
 
