@@ -323,6 +323,8 @@ CONST
   COLOR postBuildingBorderColor    = darken(@postBuildingColor, 0.3);
   COLOR postLabelColor             = darken(@postColor, 0.5);
 
+  COLOR wallColor                  = #663e1b;
+
   SYMBOL oneway_arrow
     POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
 
@@ -1333,6 +1335,15 @@ STYLE
    }
 
    [TYPE railway_station] AREA.ICON { symbol: railway_station; }
+
+
+   [TYPE barrier_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
+
+   [TYPE barrier_city_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
+   [TYPE barrier_city_wall] WAY#decor {color: @wallColor; 
+             dash: 1,5; displayOffset: 0.09mm; offset: 0.5m; cap: butt;
+             displayWidth: 0.1mm; width: 0.5m;
+   }
  }
 
  [MAG veryClose-] {

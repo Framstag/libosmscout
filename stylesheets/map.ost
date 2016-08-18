@@ -1908,7 +1908,6 @@ TYPES
       IGNORESEALAND
     
   TYPE barrier_wall
-    IGNORE
     = WAY AREA ("barrier"=="wall")
     
   TYPE barrier_ditch
@@ -1921,7 +1920,6 @@ TYPES
       IGNORESEALAND
     
   TYPE barrier_city_wall
-    IGNORE
     = WAY AREA ("barrier"=="city_wall")
       {Name, NameAlt, Width}
     
