@@ -73,6 +73,8 @@ After some preprocessing can be those data used for creating nice maps with cont
 
 ### Required tools
 
+Main tool for generating contour lines in OSM compatible format is `Srtm2Osm`.
+
 Following steps are for Ubuntu 16.04.
 ```bash
 sudo apt-get install wget unzip mono-runtime libmono-system-web-extensions4.0-cil
@@ -99,6 +101,15 @@ mono Srtm2Osm/Srtm2Osm.exe \
 ```
 
 Then, use both files `nordrhein-westfalen-contours.osm` and `nordrhein-westfalen-latest.osm.pbf` as input of Import tool.
+
+### Data notes
+
+`Srtm2Osm` downloads SRTMv2 data set from Nasa automatically. This dataset has poor quality in mountainous areas like Alps. 
+For such areas is better to download elevation data from another source, for example 
+(viewfinderpanoramas.org)[http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm]
+that is using interpolations from more sources and it is free for non-commercial usage. 
+You just need to unpack downloaded archives and copy `*.hgt` 
+files into `srtm/SrtmCache` subdirectory (relative to directory where will be `Srtm2Osm` executed).
 
 ## Resulting database
 
