@@ -328,6 +328,9 @@ CONST
   SYMBOL oneway_arrow
     POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
 
+  SYMBOL stream_arrow
+    POLYGON 0,0.5 1,0 0,-0.5 { color: @waterLabelColor; }
+
   SYMBOL natural_peak
     POLYGON 0,0 1.5,0 0.75,1.5 { color: @peakSymbolColor; }
 
@@ -565,6 +568,11 @@ STYLE
             waterway_river,
             waterway_canal]
         WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+
+      [TYPE waterway_stream,
+            waterway_river,
+            waterway_canal]
+        WAY.SYMBOL {symbol: stream_arrow; symbolSpace: 50mm;}
 
       [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}
     }
