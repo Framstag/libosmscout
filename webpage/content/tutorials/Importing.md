@@ -69,7 +69,7 @@ You can also call the importer by hand. The minimum command line would be
 Some years ago, Nasa released data from Shuttle Radar Topography Mission ([http://en.wikipedia.org/wiki/SRTM](SRTM)) for public use.
 After some preprocessing can be those data used for creating nice maps with contour lines.
 
-<a class="screenshot" href="/images/ContourLines.png"><img src="/images/ContourLines.png" width="100%" height="100%" alt="Map with contour lines"/></a>
+<a class="screenshot" href="/images/ContourLines.png"><img src="/images/ContourLines.png" width="460" height="332" alt="Map with contour lines"/></a>
 
 ### Required tools
 
