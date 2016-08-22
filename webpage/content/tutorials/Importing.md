@@ -106,7 +106,7 @@ Then, use both files `nordrhein-westfalen-contours.osm` and `nordrhein-westfalen
 
 `Srtm2Osm` downloads SRTMv2 data set from Nasa automatically. This dataset has poor quality in mountainous areas like Alps. 
 For such areas is better to download elevation data from another source, for example 
-(viewfinderpanoramas.org)[http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm]
+[viewfinderpanoramas.org](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm)
 that is using interpolations from more sources and it is free for non-commercial usage. 
 You just need to unpack downloaded archives and copy `*.hgt` 
 files into `srtm/SrtmCache` subdirectory (relative to directory where will be `Srtm2Osm` executed).
