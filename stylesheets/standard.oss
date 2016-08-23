@@ -240,6 +240,11 @@ CONST
   COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
   COLOR trunkShieldColor           = @trunkColor;
   COLOR primaryShieldColor         = @primaryColor;
+
+  COLOR viaFerrataEasyColor        = darken(#fdac44, 0.4);
+  COLOR viaFerrataModerateColor    = #fdac44;
+  COLOR viaFerrataDifficultColor   = #ec4044;
+  COLOR viaFerrataExtremeColor     = #ff0000;
   
   // Buildings
   COLOR buildingColor              = #d9d9d9;
@@ -325,8 +330,27 @@ CONST
 
   COLOR wallColor                  = #663e1b;
 
+  SYMBOL viaFerrataEasyCross
+    POLYGON -0.5,-0.5 0.5,0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataEasyColor;  }
+    POLYGON -0.5,0.5 0.5,-0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataEasyColor;  }
+
+  SYMBOL viaFerrataModerateCross
+    POLYGON -0.5,-0.5 0.5,0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataModerateColor;  }
+    POLYGON -0.5,0.5 0.5,-0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataModerateColor;  }
+
+  SYMBOL viaFerrataDifficultCross
+    POLYGON -0.5,-0.5 0.5,0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataDifficultColor;  }
+    POLYGON -0.5,0.5 0.5,-0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataDifficultColor;  }
+
+  SYMBOL viaFerrataExtremeCross
+    POLYGON -0.5,-0.5 0.5,0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataExtremeColor;  }
+    POLYGON -0.5,0.5 0.5,-0.5 { borderWidth: 0.1mm; borderColor:  @viaFerrataExtremeColor;  }
+
   SYMBOL oneway_arrow
     POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
+
+  SYMBOL stream_arrow
+    POLYGON 0,0.5 1,0 0,-0.5 { color: @waterLabelColor; }
 
   SYMBOL natural_peak
     POLYGON 0,0 1.5,0 0.75,1.5 { color: @peakSymbolColor; }
@@ -565,6 +589,11 @@ STYLE
             waterway_river,
             waterway_canal]
         WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+
+      [TYPE waterway_stream,
+            waterway_river,
+            waterway_canal]
+        WAY.SYMBOL {symbol: stream_arrow; symbolSpace: 50mm;}
 
       [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}
     }
@@ -922,6 +951,22 @@ STYLE
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
      }
    }
+   [TYPE highway_via_ferrata_easy]{
+       WAY {color: @viaFerrataEasyColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataEasyCross; symbolSpace: 2mm;}
+   }
+   [TYPE highway_via_ferrata_moderate]{
+       WAY {color: @viaFerrataModerateColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataModerateCross; symbolSpace: 2mm;}
+   }
+   [TYPE highway_via_ferrata_difficult]{
+       WAY {color: @viaFerrataDifficultColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataDifficultCross; symbolSpace: 2mm;}
+   }
+   [TYPE highway_via_ferrata_extreme]{
+       WAY {color: @viaFerrataExtremeColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataExtremeCross; symbolSpace: 2mm;}
+   }
   }
 
  [MAG @stepsMag-] {
@@ -994,7 +1039,12 @@ STYLE
          highway_cycleway,
          highway_footway,
          highway_bridleway,
-         highway_steps] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8;}
+         highway_steps,
+         highway_via_ferrata_easy,
+         highway_via_ferrata_moderate,
+         highway_via_ferrata_difficult,
+         highway_via_ferrata_extreme] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8;}
+
 
    [TYPE highway_pedestrian,
          highway_services,
