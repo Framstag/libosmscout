@@ -279,6 +279,22 @@ TYPES
       {Name, NameAlt}
       PATH[FOOT] LOCATION PIN_WAY
 
+  TYPE highway_via_ferrata_easy
+    = WAY (("highway"=="via_ferrata") AND (("via_ferrata_scale"=="0") OR ("via_ferrata_scale"=="1")))
+      {Name, NameAlt}
+
+  TYPE highway_via_ferrata_moderate
+    = WAY (("highway"=="via_ferrata") AND ("via_ferrata_scale"=="2"))
+      {Name, NameAlt}
+
+  TYPE highway_via_ferrata_difficult
+    = WAY (("highway"=="via_ferrata") AND (("via_ferrata_scale"=="3") OR ("via_ferrata_scale"=="4")))
+      {Name, NameAlt}
+
+  TYPE highway_via_ferrata_extreme
+    = WAY (("highway"=="via_ferrata") AND (("via_ferrata_scale"=="5") OR ("via_ferrata_scale"=="6")))
+      {Name, NameAlt}
+
   TYPE highway_bridleway
     = WAY AREA ("highway"=="bridleway")
       {Name, NameAlt}
