@@ -69,7 +69,7 @@ You can also call the importer by hand. The minimum command line would be
 Some years ago, Nasa released data from Shuttle Radar Topography Mission ([http://en.wikipedia.org/wiki/SRTM](SRTM)) for public use.
 After some preprocessing can be those data used for creating nice maps with contour lines.
 
-<a class="screenshot" href="/images/ContourLines.png"><img src="/images/ContourLines.png" width="100%" height="100%" alt="Map with contour lines"/></a>
+<a class="screenshot" href="/images/ContourLines.png"><img src="/images/ContourLines.png" width="460" height="332" alt="Map with contour lines"/></a>
 
 ### Required tools
 
@@ -106,7 +106,7 @@ Then, use both files `nordrhein-westfalen-contours.osm` and `nordrhein-westfalen
 
 `Srtm2Osm` downloads SRTMv2 data set from Nasa automatically. This dataset has poor quality in mountainous areas like Alps. 
 For such areas is better to download elevation data from another source, for example 
-(viewfinderpanoramas.org)[http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm]
+[viewfinderpanoramas.org](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm)
 that is using interpolations from more sources and it is free for non-commercial usage. 
 You just need to unpack downloaded archives and copy `*.hgt` 
 files into `srtm/SrtmCache` subdirectory (relative to directory where will be `Srtm2Osm` executed).
