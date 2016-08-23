@@ -891,6 +891,9 @@ namespace osmscout {
         Write((char*)size,2);
       }
       else {
+        // we are abble to store only 19 bits from nodesSize (524287 nodes)
+        assert(nodesSize >> 19 == 0);
+
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80; // Further 7 bits + continuation bit
