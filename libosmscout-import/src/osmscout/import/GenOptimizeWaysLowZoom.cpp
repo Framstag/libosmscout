@@ -578,16 +578,22 @@ namespace osmscout
     // Write the bitmap with offsets for each cell
     // We prefill with zero and only overrite cells that have data
     // So zero means "no data for this cell"
+    FileOffset cellOffset=0;
     for (size_t i=0; i<data.cellXCount*data.cellYCount; i++) {
-      FileOffset cellOffset=0;
-
       writer.WriteFileOffset(cellOffset,
                              data.dataOffsetBytes);
     }
 
     FileOffset dataStartOffset;
-
     dataStartOffset=writer.GetPos();
+
+    // Move data start by one byte. It creates little bit larger output file.
+    // But without it 0 is valid cell offset and these data will not be visible,
+    // because for reader means that this cell has no data!
+
+    // TODO: when data format will be changing, consider usage ones (0xFF..FF)
+    // as empty placeholder
+    writer.WriteFileOffset(cellOffset, 1);
 
     // Now write the list of offsets of objects for every cell with content
     for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
