@@ -1787,27 +1787,30 @@ namespace osmscout {
         FillLand(progress,
                  levels[level]);
 
+        levels[level].hasCellData=false;
+        levels[level].defaultCellData=unknown;
+
         if (levels[level].cellXCount>0 && levels[level].cellYCount>0) {
-          levels[level].hasCellData=true;
           levels[level].defaultCellData=levels[level].GetState(0,0);
 
-          for (uint32_t y=0; y<levels[level].cellYCount; y++) {
-            for (uint32_t x=0; x<levels[level].cellXCount; x++) {
-              levels[level].hasCellData=levels[level].GetState(x,y)!=levels[level].defaultCellData;
+          if (cellGroundTileMap.size()>0) {
+            levels[level].hasCellData=true;
+          }
+          else {
+            for (uint32_t y=0; y<levels[level].cellYCount; y++) {
+              for (uint32_t x=0; x<levels[level].cellXCount; x++) {
+                levels[level].hasCellData=levels[level].GetState(x,y)!=levels[level].defaultCellData;
+
+                if (levels[level].hasCellData) {
+                  break;
+                }
+              }
 
               if (levels[level].hasCellData) {
                 break;
               }
             }
-
-            if (levels[level].hasCellData) {
-              break;
-            }
           }
-        }
-        else {
-          levels[level].hasCellData=false;
-          levels[level].defaultCellData=unknown;
         }
 
         if (levels[level].hasCellData) {
@@ -1859,7 +1862,7 @@ namespace osmscout {
           }
         }
         else {
-          progress.Info("All cells have state '"+StateToString(levels[level].defaultCellData)+"', no cell index needed");
+          progress.Info("All cells have state '"+StateToString(levels[level].defaultCellData)+"' and no coastlines, no cell index needed");
         }
 
         FileOffset currentPos=writer.GetPos();
