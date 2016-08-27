@@ -45,17 +45,22 @@ namespace osmscout {
   private:
     struct Level
     {
-      FileOffset                 offset;
+      // Transient
+      double                     cellWidth;       //!< With of an cell
+      double                     cellHeight;      //!< Height of an cell
+      uint32_t                   cellXCount;      //!< Number of cells in horizontal direction (with of bounding box in cells)
+      uint32_t                   cellYCount;      //!< Number of cells in vertical direction (height of bounding box in cells)
 
-      double                     cellWidth;
-      double                     cellHeight;
+      // Persistent
 
-      uint32_t                   cellXStart;
-      uint32_t                   cellXEnd;
-      uint32_t                   cellYStart;
-      uint32_t                   cellYEnd;
-      uint32_t                   cellXCount;
-      uint32_t                   cellYCount;
+      bool                       hasCellData;      //!< If true, we have cell data
+      GroundTile::Type           defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
+      FileOffset                 indexDataOffset;  //!< File offset of start cell state data on disk
+
+      uint32_t                   cellXStart;       //!< First x-axis coordinate of cells
+      uint32_t                   cellXEnd;         //!< Last x-axis coordinate cells
+      uint32_t                   cellYStart;       //!< First y-axis coordinate of cells
+      uint32_t                   cellYEnd;         //!< Last x-axis coordinate cells
     };
 
   private:
@@ -69,6 +74,18 @@ namespace osmscout {
     mutable std::mutex         lookupMutex;
 
   private:
+    void GetGroundTileByDefault(const Level& level,
+                                uint32_t cx1,
+                                uint32_t cx2,
+                                uint32_t cy1,
+                                uint32_t cy2,
+                                std::list<GroundTile>& tiles) const;
+    void GetGroundTileFromData(const Level& level,
+                               uint32_t cx1,
+                               uint32_t cx2,
+                               uint32_t cy1,
+                               uint32_t cy2,
+                               std::list<GroundTile>& tiles) const;
 
   public:
     WaterIndex();

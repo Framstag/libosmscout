@@ -107,19 +107,26 @@ namespace osmscout {
      */
     struct Level
     {
-      FileOffset                 indexEntryOffset;
+      // Transient
 
-      double                     cellWidth;
-      double                     cellHeight;
+      FileOffset                 indexEntryOffset; //!< File offset of this entry on disk
+      double                     cellWidth;        //!< With of an cell
+      double                     cellHeight;       //!< Height of an cell
+      uint32_t                   cellXCount;       //!< Number of cells in horizontal direction (with of bounding box in cells)
+      uint32_t                   cellYCount;       //!< Number of cells in vertical direction (height of bounding box in cells)
 
-      uint32_t                   cellXStart;
-      uint32_t                   cellXEnd;
-      uint32_t                   cellYStart;
-      uint32_t                   cellYEnd;
+      // Persistent
 
-      uint32_t                   cellXCount;
-      uint32_t                   cellYCount;
-      std::vector<unsigned char> area;
+      bool                       hasCellData;      //!< If true, we have cell data
+      State                      defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
+      FileOffset                 indexDataOffset;  //!< File offset of start cell state data on disk
+
+      uint32_t                   cellXStart;       //!< First x-axis coordinate of cells
+      uint32_t                   cellXEnd;         //!< Last x-axis coordinate cells
+      uint32_t                   cellYStart;       //!< First y-axis coordinate of cells
+      uint32_t                   cellYEnd;         //!< Last x-axis coordinate cells
+
+      std::vector<unsigned char> area;             //!< Actual index data
 
       void SetBox(const GeoCoord& minCoord,
                   const GeoCoord& maxCoord,
@@ -178,6 +185,8 @@ namespace osmscout {
     };
 
   private:
+    std::string StateToString(State state) const;
+
     GroundTile::Coord Transform(const GeoCoord& point,
                                 const Level& level,
                                 double cellMinLat,
