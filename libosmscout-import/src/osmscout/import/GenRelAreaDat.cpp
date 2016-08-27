@@ -1104,17 +1104,23 @@ namespace osmscout {
 
         bool valid=true;
         bool dense=true;
+        bool big=false;
 
         for (const auto& ring : rel.rings) {
           if (!ring.IsMasterRing()) {
             if (ring.nodes.size()<3) {
               valid=false;
-
               break;
             }
 
             if (!IsValidToWrite(ring.nodes)) {
               dense=false;
+              break;
+            }
+
+            if (ring.nodes.size()>FileWriter::MAX_NODES) {
+              big=true;
+              break;
             }
           }
         }
@@ -1135,6 +1141,14 @@ namespace osmscout {
                            NumberToString(rawRel.GetId())+" "+
                            rel.GetType()->GetName()+" "+
                            name+" has ring(s) which nodes are not dense enough to be written, skipping");
+          continue;
+        }
+
+        if (big) {
+          progress.Warning("Relation "+
+                           NumberToString(rawRel.GetId())+" "+
+                           rel.GetType()->GetName()+" "+
+                           name+" has ring(s) with too many nodes, skipping");
           continue;
         }
 

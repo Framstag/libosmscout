@@ -365,16 +365,22 @@ namespace osmscout {
             continue;
           }
 
-          // Flag as visited (the areas might be registered for other
-          // nodes shared by both areas, too) and we not want to
-          // analyze it again
-          visitedAreas.insert(candidateArea);
-
           size_t firstOuterRing=GetFirstOuterRingWithId(area,
                                                         id);
 
           size_t secondOuterRing=GetFirstOuterRingWithId(*candidateArea,
                                                          id);
+
+          if (area.rings[firstOuterRing].nodes.size()+candidateArea->rings[secondOuterRing].nodes.size()>FileWriter::MAX_NODES) {
+            // We could merge, but we could not store the resulting area anymore
+            candidate++;
+            continue;
+          }
+
+          // Flag as visited (the areas might be registered for other
+          // nodes shared by both areas, too) and we not want to
+          // analyze it again
+          visitedAreas.insert(candidateArea);
 
           if (area.rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {
             //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " because of different feature values" << std::endl;

@@ -54,6 +54,9 @@ namespace osmscout {
     std::vector<uint8_t> byteBuffer;  //!< Temporary data buffer for storing of std::vector<GeoCoord>
 
   public:
+    static const uint64_t MAX_NODES;
+
+  public:
     FileWriter();
     virtual ~FileWriter();
 
