@@ -29,6 +29,7 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/private/CoreImportExport.h>
+#include <osmscout/Types.h>
 
 namespace osmscout {
 
@@ -390,6 +391,7 @@ namespace osmscout {
    * \ingroup Util
    *
    */
+  extern OSMSCOUT_API std::string ByteSizeToString(FileOffset size);
   extern OSMSCOUT_API std::string ByteSizeToString(double size);
 
 #if defined(OSMSCOUT_HAVE_STD_WSTRING)

@@ -135,6 +135,11 @@ namespace osmscout {
     return result;
   }
 
+  std::string ByteSizeToString(FileOffset value)
+  {
+    return ByteSizeToString((double)value);
+  }
+
   std::string ByteSizeToString(double value)
   {
     std::stringstream buffer;
@@ -184,7 +189,7 @@ namespace osmscout {
       wordEnd=wordBegin;
 
       while (wordEnd+1<input.length() &&
-		  !std::isspace((unsigned char)input[wordEnd + 1])) {
+             !std::isspace((unsigned char)input[wordEnd + 1])) {
         wordEnd++;
       }
 
