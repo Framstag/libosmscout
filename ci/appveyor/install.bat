@@ -36,19 +36,17 @@ IF %COMPILER%==msys2 (
 IF %COMPILER%==msvc2015 (
   @echo on
   echo MSVC2015 build...
-  echo Installing 7zip command line tools...
+  echo Installing wget...
   
   cinst wget -x86
-  cinst 7zip.commandline -x86
-  
-  echo Adding '%ChocolateyInstall%\lib\7zip.commandline\tools' to path
-  set "PATH=%ChocolateyInstall%\lib\7zip.commandline\tools;%PATH%"
 
   IF %PLATFORM%==x64 (
-    wget -q ftp://ftp.zlatkovic.com/libxml/64bit/zlib-1.2.8-win32-x86_64.7z -O zlib-1.2.8-win32-x86_64.7z
-    wget -q ftp://ftp.zlatkovic.com/libxml/64bit/iconv-1.14-win32-x86_64.7z -O iconv-1.14-win32-x86_64.7z
-    wget -q ftp://ftp.zlatkovic.com/libxml/64bit/libxml2-2.9.3-win32-x86_64.7z -O libxml2-2.9.3-win32-x86_64.7z
+    echo Downloading library dependencies...
+    wget ftp://ftp.zlatkovic.com/libxml/64bit/zlib-1.2.8-win32-x86_64.7z -O zlib-1.2.8-win32-x86_64.7z
+    wget ftp://ftp.zlatkovic.com/libxml/64bit/iconv-1.14-win32-x86_64.7z -O iconv-1.14-win32-x86_64.7z
+    wget ftp://ftp.zlatkovic.com/libxml/64bit/libxml2-2.9.3-win32-x86_64.7z -O libxml2-2.9.3-win32-x86_64.7z
 
+    echo Unpacking library dependencies...
     7z x zlib-1.2.8-win32-x86_64.7z -ozlib -y > nul
     7z x iconv-1.14-win32-x86_64.7z -oiconv -y > nul
     7z x libxml2-2.9.3-win32-x86_64.7z -olibxml2 -y > nul
