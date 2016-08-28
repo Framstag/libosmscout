@@ -10,11 +10,10 @@ echo MSYS2 system: %MSYSTEM%
 echo Configuration: %CONFIGURATION%
 echo Bits: %BIT%
 
-@echo on
-
 echo Start updating build dependencies...
 
 IF %COMPILER%==msys2 (
+  @echo on
   echo MSYS build...
   echo Extending path to MSYS...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
@@ -35,14 +34,15 @@ IF %COMPILER%==msys2 (
 )
 
 IF %COMPILER%==msvc2015 (
+  @echo on
   echo MSVC2015 build...
   echo Installing 7zip command line tools...
   
   cinst wget -x86
   cinst 7zip.commandline -x86
   
-  echo Adding '%appveyor_build_folder%\7ZipCLI\tools' to path
-  set "PATH=%appveyor_build_folder%\7ZipCLI\tools;%PATH%"
+  echo Adding '%ChocolateyInstall%\lib\7zip.commandline\tools' to path
+  set "PATH=%ChocolateyInstall%\lib\7zip.commandline\tools;%PATH%"
 
   IF %PLATFORM%==x64 (
     wget -q ftp://ftp.zlatkovic.com/libxml/64bit/zlib-1.2.8-win32-x86_64.7z -O zlib-1.2.8-win32-x86_64.7z
