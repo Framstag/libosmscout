@@ -26,9 +26,12 @@ IF %COMPILER%==msys2 (
 )
 
 IF %COMPILER%==msvc2015 (
+  echo Installing 7zip command line tools...
+  
   cinst wget -x86
   cinst 7zip.commandline -x86
   
+  echo Adding '%appveyor_build_folder%\7ZipCLI\tools' to path
   set PATH=%appveyor_build_folder%\7ZipCLI\tools;%PATH%
 
   IF %PLATFORM%==x64 (
