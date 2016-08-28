@@ -28,6 +28,8 @@ IF %COMPILER%==msys2 (
 IF %COMPILER%==msvc2015 (
   cinst wget -x86
   cinst 7zip.commandline -x86
+  
+  set PATH=%appveyor_build_folder%\7ZipCLI\tools;%PATH%
 
   IF %PLATFORM%==x64 (
     wget -q ftp://ftp.zlatkovic.com/libxml/64bit/zlib-1.2.8-win32-x86_64.7z -O zlib-1.2.8-win32-x86_64.7z
