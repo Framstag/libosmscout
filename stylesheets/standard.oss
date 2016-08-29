@@ -1102,6 +1102,19 @@ STYLE
    }
 
    [MAG closer-] {
+     [TYPE railway_tram,
+           railway_light_rail,
+           railway_narrow_gauge,
+           railway_funicular
+         SIZE 5m 0.25mm:3px<] {
+       [TUNNEL] {
+         WAY {dash: 1,1; cap: butt;}
+       } 
+       [BRIDGE] {
+         WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
+         WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
+       }
+     }
      [TYPE railway_rail SIZE 5m 0.25mm:3px<] {
        // Better rendering?
        [TUNNEL] {
