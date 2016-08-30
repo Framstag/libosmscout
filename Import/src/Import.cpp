@@ -750,6 +750,18 @@ int main(int argc, char* argv[])
       std::cerr << "Destination ist not a directory!" << std::endl;
       return 1;
     }
+
+    for (auto mapfile: mapfiles){
+      if (!osmscout::ExistsInFilesystem(mapfile)) {
+        std::cerr << "Input " << mapfile << " does not exist!" << std::endl;
+        return 1;
+      }
+
+      if (osmscout::IsDirectory(mapfile)) {
+        std::cerr << "Input " << mapfile << " is a directory!" << std::endl;
+        return 1;
+      }
+    }
   }
   catch (osmscout::IOException& e) {
     // we ignore this exception, since it is likely a "not implemented" exception
