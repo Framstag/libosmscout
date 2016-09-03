@@ -211,11 +211,13 @@ void MapWidget::zoomIn(double zoomFactor)
 
     maxMag.SetLevel(20);
 
-    if (magnification.GetMagnification()*zoomFactor>maxMag.GetMagnification()) {
+    double mag=magnification.GetMagnification()*zoomFactor;
+
+    if (std::isnan(mag) || mag>maxMag.GetMagnification()) {
         magnification.SetMagnification(maxMag.GetMagnification());
     }
     else {
-        magnification.SetMagnification(magnification.GetMagnification()*zoomFactor);
+        magnification.SetMagnification(mag);
     }
 
     TriggerMapRendering();
@@ -225,11 +227,13 @@ void MapWidget::zoomIn(double zoomFactor)
 
 void MapWidget::zoomOut(double zoomFactor)
 {
-    if (magnification.GetMagnification()/zoomFactor<1) {
+    double mag=magnification.GetMagnification()/zoomFactor;
+
+    if (std::isnan(mag) ||mag<1) {
         magnification.SetMagnification(1);
     }
     else {
-        magnification.SetMagnification(magnification.GetMagnification()/zoomFactor);
+        magnification.SetMagnification(mag);
     }
 
     TriggerMapRendering();
