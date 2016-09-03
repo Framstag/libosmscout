@@ -168,10 +168,10 @@ void MapWidget::wheelEvent(QWheelEvent* event)
     int numDegrees=event->delta()/8;
     int numSteps=numDegrees/15;
 
-    if (numSteps>=0) {
+    if (numSteps>0) {
         zoomIn(numSteps*1.35);
     }
-    else {
+    else if (numSteps<0) {
         zoomOut(-numSteps*1.35);
     }
 
