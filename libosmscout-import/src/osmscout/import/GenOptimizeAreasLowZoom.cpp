@@ -73,6 +73,7 @@ namespace osmscout
 
     for (auto &type : typeConfig.GetAreaTypes()) {
       if (!type->GetIgnore() &&
+          !type->IsInternal() &&
           type->GetOptimizeLowZoom()) {
         types.Set(type);
       }

@@ -237,6 +237,10 @@ namespace osmscout {
 
     try {
       for (TypeInfoRef type : requestedTypes) {
+        if (type->IsInternal()) {
+          continue;
+        }
+
         if (!GetOffsets(nodeTypeData[type->GetNodeId()],
                         boundingBox,
                         offsets)) {

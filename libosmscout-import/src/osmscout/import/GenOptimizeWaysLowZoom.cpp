@@ -75,6 +75,7 @@ namespace osmscout
   {
     for (auto &type : typeConfig.GetWayTypes()) {
       if (!type->GetIgnore() &&
+          !type->IsInternal() &&
           type->GetOptimizeLowZoom()) {
         types.insert(type);
       }
