@@ -368,6 +368,11 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const AreaData& areaData);
 
+    void DrawAreaBorderSymbol(const StyleConfig& styleConfig,
+                              const Projection& projection,
+                              const MapParameter& parameter,
+                              const AreaData& areaData);
+
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter);

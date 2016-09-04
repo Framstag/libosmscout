@@ -1508,11 +1508,13 @@ namespace osmscout {
     std::list<TextConditionalStyle>            areaTextStyleConditionals;
     std::list<IconConditionalStyle>            areaIconStyleConditionals;
     std::list<PathTextConditionalStyle>        areaBorderTextStyleConditionals;
+    std::list<PathSymbolConditionalStyle>      areaBorderSymbolStyleConditionals;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
     std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
     IconStyleLookupTable                       areaIconStyleSelectors;
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
+    PathSymbolStyleLookupTable                 areaBorderSymbolStyleSelectors;
 
     std::vector<TypeInfoSet>                   areaTypeSets;
 
@@ -1588,6 +1590,8 @@ namespace osmscout {
                           IconPartialStyle& style);
     void AddAreaBorderTextStyle(const StyleFilter& filter,
                                 PathTextPartialStyle& style);
+    void AddAreaBorderSymbolStyle(const StyleFilter& filter,
+                                  PathSymbolPartialStyle& style);
 
     void GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                 TypeInfoSet& types) const;
@@ -1649,6 +1653,10 @@ namespace osmscout {
                                 const FeatureValueBuffer& buffer,
                                 const Projection& projection,
                                 PathTextStyleRef& pathTextStyle) const;
+    void GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+                                  const FeatureValueBuffer& buffer,
+                                  const Projection& projection,
+                                  PathSymbolStyleRef& pathSymbolStyle) const;
 
     void GetLandFillStyle(const Projection& projection,
                           FillStyleRef& fillStyle) const;

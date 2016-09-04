@@ -1036,6 +1036,7 @@ PRODUCTIONS
                     AREATEXTSTYLE<filter,state>
                   | AREAICONSTYLE<filter,state>
                   | AREABORDERTEXTSTYLE<filter,state>
+                  | AREABORDERSYMBOLSTYLE<filter,state>
                   )
                 )
                 .
@@ -1110,6 +1111,23 @@ PRODUCTIONS
                 (.
                   if (state) {
                     config.AddAreaBorderTextStyle(filter,style);
+                  }
+                .)
+                .
+
+  AREABORDERSYMBOLSTYLE<StyleFilter filter, bool state>
+              = SYNC "BORDERSYMBOL"
+                (.
+                  PathSymbolPartialStyle style;
+                .)
+                SYNC "{"
+                {
+                  PATHSYMBOLSTYLEATTR<style> WEAK ";"
+                }
+                SYNC "}"
+                (.
+                  if (state) {
+                    config.AddAreaBorderSymbolStyle(filter,style);
                   }
                 .)
                 .

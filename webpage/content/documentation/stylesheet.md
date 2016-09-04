@@ -325,6 +325,8 @@ Name         |Type         |Description
 label        |FeatureAttr  |The name of the feature attribute to be rendered.
 color        |Color        |The color of the text
 size         |Int          |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
+displayOffset|ScreenSize   |Offset of drawn text in relation to the actual path.
+offset       |FroundSize   |Offset of the drawn text in relation to the actual path.
 
 ### IconStyle - Drawing icons for nodes and areas
 
@@ -363,11 +365,14 @@ shieldSpace    |ScreenSize   |Space between each shield on a path.
 Currently allowed instances:
 
 * `WAY.SYMBOL`
+* `AREA.BORDERSYMBOL`
 
-Name           |Type         |Description
----------------|-------------|-----------
-symbol         |String       |The name of the symbol to draw
-symbolSpace    |ScreenSize   |Space between each symbol on a path.
+Name         |Type         |Description
+-------------|-------------|-----------
+symbol       |String       |The name of the symbol to draw
+symbolSpace  |ScreenSize   |Space between each symbol on a path.
+displayOffset|ScreenSize   |Offset of drawn symbol in relation to the actual path.
+offset       |FroundSize   |Offset of the drawn symbol in relation to the actual path.
 
 ## Label and icon placement
 

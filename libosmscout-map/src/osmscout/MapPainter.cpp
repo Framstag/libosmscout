@@ -1108,6 +1108,10 @@ namespace osmscout {
     std::string label=borderTextStyle->GetLabel()->GetLabel(parameter,
                                                             *areaData.buffer);
 
+    if (label.empty()) {
+      return;
+    }
+
     if (borderTextStyle->GetOffset()!=0.0) {
       lineOffset+=GetProjectedWidth(projection,
                                     borderTextStyle->GetOffset());
@@ -1125,17 +1129,57 @@ namespace osmscout {
                                        transEnd);
     }
 
-
-    if (label.empty()) {
-      return;
-    }
-
     DrawContourLabel(projection,
                      parameter,
                      *borderTextStyle,
                      label,
                      transStart,
                      transEnd);
+  }
+
+  void MapPainter::DrawAreaBorderSymbol(const StyleConfig& styleConfig,
+                                        const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const AreaData& areaData)
+  {
+    PathSymbolStyleRef borderSymbolStyle;
+
+    styleConfig.GetAreaBorderSymbolStyle(areaData.type,
+                                         *areaData.buffer,
+                                         projection,
+                                         borderSymbolStyle);
+
+    if (!borderSymbolStyle) {
+      return;
+    }
+
+    double lineOffset=0.0;
+    size_t transStart=areaData.transStart;
+    size_t transEnd=areaData.transEnd;
+    double symbolSpace=projection.ConvertWidthToPixel(borderSymbolStyle->GetSymbolSpace());
+
+    if (borderSymbolStyle->GetOffset()!=0.0) {
+      lineOffset+=GetProjectedWidth(projection,
+                                    borderSymbolStyle->GetOffset());
+    }
+
+    if (borderSymbolStyle->GetDisplayOffset()!=0.0) {
+      lineOffset+=projection.ConvertWidthToPixel(borderSymbolStyle->GetDisplayOffset());
+    }
+
+    if (lineOffset!=0.0) {
+      coordBuffer->GenerateParallelWay(transStart,
+                                       transEnd,
+                                       lineOffset,
+                                       transStart,
+                                       transEnd);
+    }
+
+    DrawContourSymbol(projection,
+                      parameter,
+                      *borderSymbolStyle->GetSymbol(),
+                      symbolSpace,
+                      transStart,transEnd);
   }
 
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
@@ -1153,6 +1197,11 @@ namespace osmscout {
                           projection,
                           parameter,
                           area);
+
+      DrawAreaBorderSymbol(styleConfig,
+                           projection,
+                           parameter,
+                           area);
 
       areasDrawn++;
     }
