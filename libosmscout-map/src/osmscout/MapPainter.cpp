@@ -1661,48 +1661,10 @@ namespace osmscout {
       data.ref=ref;
       data.lineWidth=lineWidth;
 
-      if (data.ref.GetFileOffset()==56252645) {
-        osmscout::GeoBox boundingBox;
-
-        osmscout::GetBoundingBox(nodes,
-                                 boundingBox);
-
-        std::cout << data.ref.GetName() << " " << boundingBox.GetDisplayText() << std::endl;
-
-        double pixelOffset=lineWidth/2;
-
-        double x1;
-        double x2;
-        double y1;
-        double y2;
-
-        projection.GeoToPixel(boundingBox.GetMinCoord(),
-                              x1,
-                              y1);
-
-        projection.GeoToPixel(boundingBox.GetMaxCoord(),
-                              x2,
-                              y2);
-
-        double xMin=std::min(x1,x2)-pixelOffset;
-        double xMax=std::max(x1,x2)+pixelOffset;
-        double yMin=std::min(y1,y2)-pixelOffset;
-        double yMax=std::max(y1,y2)+pixelOffset;
-
-        std::cout << xMin << " - " << xMax << " | " << yMin << " - " << yMax << " | " << pixelOffset << std::endl;
-      }
-
       if (!IsVisibleWay(projection,
                         nodes,
                         lineWidth/2)) {
-        if (data.ref.GetFileOffset()==56252645) {
-          std::cout << " => NOT visible!" << std::endl;
-        }
         continue;
-      }
-
-      if (data.ref.GetFileOffset()==56252645) {
-        std::cout << " => visible!" << std::endl;
       }
 
       if (!transformed) {
