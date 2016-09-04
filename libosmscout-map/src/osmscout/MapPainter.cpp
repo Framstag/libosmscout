@@ -1245,15 +1245,37 @@ namespace osmscout {
                                         projection,
                                         pathSymbolStyle);
 
-      if (pathSymbolStyle) {
-        double symbolSpace=projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
-
-        DrawContourSymbol(projection,
-                          parameter,
-                          *pathSymbolStyle->GetSymbol(),
-                          symbolSpace,
-                          way.transStart,way.transEnd);
+      if (!pathSymbolStyle) {
+        continue;
       }
+
+      double lineOffset=0.0;
+      size_t transStart=way.transStart;
+      size_t transEnd=way.transEnd;
+      double symbolSpace=projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
+
+      if (pathSymbolStyle->GetOffset()!=0.0) {
+        lineOffset+=GetProjectedWidth(projection,
+                                      pathSymbolStyle->GetOffset());
+      }
+
+      if (pathSymbolStyle->GetDisplayOffset()!=0.0) {
+        lineOffset+=projection.ConvertWidthToPixel(pathSymbolStyle->GetDisplayOffset());
+      }
+
+      if (lineOffset!=0.0) {
+        coordBuffer->GenerateParallelWay(transStart,
+                                         transEnd,
+                                         lineOffset,
+                                         transStart,
+                                         transEnd);
+      }
+
+      DrawContourSymbol(projection,
+                        parameter,
+                        *pathSymbolStyle->GetSymbol(),
+                        symbolSpace,
+                        transStart,transEnd);
     }
   }
 

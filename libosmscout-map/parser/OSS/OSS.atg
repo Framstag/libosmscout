@@ -1426,6 +1426,18 @@ PRODUCTIONS
                      style.style->SetSymbolSpace(symbolSpace);
                      style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
                   .)
+                | (. double displayOffset; .)
+                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
+                  (.
+                     style.style->SetDisplayOffset(displayOffset);
+                     style.attributes.insert(PathSymbolStyle::attrDisplayOffset);
+                  .)
+                | (. double offset; .)
+                  "offset" ":" MAPSIZE<offset>
+                  (.
+                     style.style->SetOffset(offset);
+                     style.attributes.insert(PathSymbolStyle::attrOffset);
+                  .)
                 )
                 .
 

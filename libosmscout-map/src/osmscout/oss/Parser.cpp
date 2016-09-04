@@ -1517,9 +1517,9 @@ void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
 		
 		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(140); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 80 /* "symbol" */ || la->kind == 81 /* "symbolSpace" */) {
+		while (StartOf(13)) {
 			PATHSYMBOLSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 13);
+			ExpectWeak(16 /* ";" */, 14);
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(141); Get();}
 		Expect(12 /* "}" */);
@@ -1536,9 +1536,9 @@ void Parser::WAYSHIELDSTYLE(StyleFilter filter, bool state) {
 		
 		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(143); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(14)) {
+		while (StartOf(15)) {
 			PATHSHIELDSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 15);
+			ExpectWeak(16 /* ";" */, 16);
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(144); Get();}
 		Expect(12 /* "}" */);
@@ -1758,6 +1758,22 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 			UDISPLAYSIZE(symbolSpace);
 			style.style->SetSymbolSpace(symbolSpace);
 			style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
+			
+		} else if (la->kind == 60 /* "displayOffset" */) {
+			double displayOffset; 
+			Get();
+			Expect(43 /* ":" */);
+			DISPLAYSIZE(displayOffset);
+			style.style->SetDisplayOffset(displayOffset);
+			style.attributes.insert(PathSymbolStyle::attrDisplayOffset);
+			
+		} else if (la->kind == 61 /* "offset" */) {
+			double offset; 
+			Get();
+			Expect(43 /* ":" */);
+			MAPSIZE(offset);
+			style.style->SetOffset(offset);
+			style.attributes.insert(PathSymbolStyle::attrOffset);
 			
 		} else SynErr(147);
 }
@@ -2087,7 +2103,7 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[16][95] = {
+	static bool set[17][95] = {
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
@@ -2101,7 +2117,8 @@ bool Parser::StartOf(int s)
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,x, T,x,T,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,x, T,x,T,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
 	};

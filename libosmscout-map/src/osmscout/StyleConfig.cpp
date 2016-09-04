@@ -1407,6 +1407,21 @@ namespace osmscout {
     return *this;
   }
 
+  PathSymbolStyle& PathSymbolStyle::SetDisplayOffset(double value)
+  {
+    this->displayOffset=value;
+
+    return *this;
+  }
+
+  PathSymbolStyle& PathSymbolStyle::SetOffset(double value)
+  {
+    this->offset=value;
+
+    return *this;
+  }
+
+
   void PathSymbolStyle::CopyAttributes(const PathSymbolStyle& other,
                                        const std::set<Attribute>& attributes)
   {
@@ -1417,6 +1432,12 @@ namespace osmscout {
         break;
       case attrSymbolSpace:
         symbolSpace=other.symbolSpace;
+        break;
+      case attrDisplayOffset:
+        displayOffset=other.displayOffset;
+        break;
+      case attrOffset:
+        offset=other.offset;
         break;
       }
     }

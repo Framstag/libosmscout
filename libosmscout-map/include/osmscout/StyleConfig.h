@@ -1390,12 +1390,16 @@ namespace osmscout {
 
     enum Attribute {
       attrSymbol,
-      attrSymbolSpace
+      attrSymbolSpace,
+      attrDisplayOffset,
+      attrOffset
     };
 
   private:
     SymbolRef symbol;
     double    symbolSpace;
+    double    displayOffset;
+    double    offset;
 
   public:
     PathSymbolStyle();
@@ -1403,6 +1407,8 @@ namespace osmscout {
 
     PathSymbolStyle& SetSymbol(const SymbolRef& symbol);
     PathSymbolStyle& SetSymbolSpace(double space);
+    PathSymbolStyle& SetDisplayOffset(double value);
+    PathSymbolStyle& SetOffset(double value);
 
     inline bool IsVisible() const
     {
@@ -1417,6 +1423,16 @@ namespace osmscout {
     inline double GetSymbolSpace() const
     {
       return symbolSpace;
+    }
+
+    inline double GetDisplayOffset() const
+    {
+      return displayOffset;
+    }
+
+    inline double GetOffset() const
+    {
+      return offset;
     }
 
     void CopyAttributes(const PathSymbolStyle& other,
