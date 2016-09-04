@@ -1498,9 +1498,9 @@ void Parser::WAYPATHTEXTSTYLE(StyleFilter filter, bool state) {
 		
 		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(137); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 55 /* "color" */ || la->kind == 72 /* "label" */ || la->kind == 74 /* "size" */) {
+		while (StartOf(11)) {
 			PATHTEXTSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 11);
+			ExpectWeak(16 /* ";" */, 12);
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(138); Get();}
 		Expect(12 /* "}" */);
@@ -1519,7 +1519,7 @@ void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
 		Expect(11 /* "{" */);
 		while (la->kind == 80 /* "symbol" */ || la->kind == 81 /* "symbolSpace" */) {
 			PATHSYMBOLSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 12);
+			ExpectWeak(16 /* ";" */, 13);
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(141); Get();}
 		Expect(12 /* "}" */);
@@ -1536,9 +1536,9 @@ void Parser::WAYSHIELDSTYLE(StyleFilter filter, bool state) {
 		
 		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(143); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(13)) {
+		while (StartOf(14)) {
 			PATHSHIELDSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 14);
+			ExpectWeak(16 /* ";" */, 15);
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(144); Get();}
 		Expect(12 /* "}" */);
@@ -1711,6 +1711,22 @@ void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
 			UDOUBLE(size);
 			style.style->SetSize(size);
 			style.attributes.insert(PathTextStyle::attrSize);
+			
+		} else if (la->kind == 60 /* "displayOffset" */) {
+			double displayOffset; 
+			Get();
+			Expect(43 /* ":" */);
+			DISPLAYSIZE(displayOffset);
+			style.style->SetDisplayOffset(displayOffset);
+			style.attributes.insert(PathTextStyle::attrDisplayOffset);
+			
+		} else if (la->kind == 61 /* "offset" */) {
+			double offset; 
+			Get();
+			Expect(43 /* ":" */);
+			MAPSIZE(offset);
+			style.style->SetOffset(offset);
+			style.attributes.insert(PathTextStyle::attrOffset);
 			
 		} else SynErr(146);
 }
@@ -1900,9 +1916,9 @@ void Parser::AREABORDERTEXTSTYLE(StyleFilter filter, bool state) {
 		
 		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(158); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 55 /* "color" */ || la->kind == 72 /* "label" */ || la->kind == 74 /* "size" */) {
+		while (StartOf(11)) {
 			PATHTEXTSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 11);
+			ExpectWeak(16 /* ";" */, 12);
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(159); Get();}
 		Expect(12 /* "}" */);
@@ -2071,7 +2087,7 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[15][95] = {
+	static bool set[16][95] = {
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
@@ -2083,7 +2099,8 @@ bool Parser::StartOf(int s)
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,x, T,x,T,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,x, T,x,T,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}

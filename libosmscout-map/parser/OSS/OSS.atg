@@ -1385,6 +1385,18 @@ PRODUCTIONS
                      style.style->SetSize(size);
                      style.attributes.insert(PathTextStyle::attrSize);
                   .)
+                | (. double displayOffset; .)
+                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
+                  (.
+                     style.style->SetDisplayOffset(displayOffset);
+                     style.attributes.insert(PathTextStyle::attrDisplayOffset);
+                  .)
+                | (. double offset; .)
+                  "offset" ":" MAPSIZE<offset>
+                  (.
+                     style.style->SetOffset(offset);
+                     style.attributes.insert(PathTextStyle::attrOffset);
+                  .)
                 )
                 .
 

@@ -1067,13 +1067,17 @@ namespace osmscout {
     enum Attribute {
       attrLabel,
       attrSize,
-      attrTextColor
+      attrTextColor,
+      attrDisplayOffset,
+      attrOffset
     };
 
   private:
     LabelProviderRef label;
     double           size;
     Color            textColor;
+    double           displayOffset;
+    double           offset;
 
   public:
     PathTextStyle();
@@ -1082,6 +1086,8 @@ namespace osmscout {
     PathTextStyle& SetLabel(const LabelProviderRef& label);
     PathTextStyle& SetSize(double size);
     PathTextStyle& SetTextColor(const Color& color);
+    PathTextStyle& SetDisplayOffset(double value);
+    PathTextStyle& SetOffset(double value);
 
     inline bool IsVisible() const
     {
@@ -1102,6 +1108,16 @@ namespace osmscout {
     inline const Color& GetTextColor() const
     {
       return textColor;
+    }
+
+    inline double GetDisplayOffset() const
+    {
+      return displayOffset;
+    }
+
+    inline double GetOffset() const
+    {
+      return offset;
     }
 
     void CopyAttributes(const PathTextStyle& other,

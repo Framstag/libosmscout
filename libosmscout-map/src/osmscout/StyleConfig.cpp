@@ -1165,6 +1165,20 @@ namespace osmscout {
     return *this;
   }
 
+  PathTextStyle& PathTextStyle::SetDisplayOffset(double value)
+  {
+    this->displayOffset=value;
+
+    return *this;
+  }
+
+  PathTextStyle& PathTextStyle::SetOffset(double value)
+  {
+    this->offset=value;
+
+    return *this;
+  }
+
   void PathTextStyle::CopyAttributes(const PathTextStyle& other,
                                      const std::set<Attribute>& attributes)
   {
@@ -1178,6 +1192,12 @@ namespace osmscout {
         break;
       case attrTextColor:
         textColor=other.textColor;
+        break;
+      case attrDisplayOffset:
+        displayOffset=other.displayOffset;
+        break;
+      case attrOffset:
+        offset=other.offset;
         break;
       }
     }

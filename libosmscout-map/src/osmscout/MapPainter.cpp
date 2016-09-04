@@ -1102,20 +1102,40 @@ namespace osmscout {
       return;
     }
 
+    double      lineOffset=0.0;
+    size_t      transStart=areaData.transStart;
+    size_t      transEnd=areaData.transEnd;
     std::string label=borderTextStyle->GetLabel()->GetLabel(parameter,
                                                             *areaData.buffer);
+
+    if (borderTextStyle->GetOffset()!=0.0) {
+      lineOffset+=GetProjectedWidth(projection,
+                                    borderTextStyle->GetOffset());
+    }
+
+    if (borderTextStyle->GetDisplayOffset()!=0.0) {
+      lineOffset+=projection.ConvertWidthToPixel(borderTextStyle->GetDisplayOffset());
+    }
+
+    if (lineOffset!=0.0) {
+      coordBuffer->GenerateParallelWay(transStart,
+                                       transEnd,
+                                       lineOffset,
+                                       transStart,
+                                       transEnd);
+    }
+
 
     if (label.empty()) {
       return;
     }
 
-
     DrawContourLabel(projection,
                      parameter,
                      *borderTextStyle,
                      label,
-                     areaData.transStart,
-                     areaData.transEnd);
+                     transStart,
+                     transEnd);
   }
 
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
@@ -1276,19 +1296,41 @@ namespace osmscout {
                                     projection,
                                     pathTextStyle);
 
-    if (pathTextStyle) {
-      std::string textLabel=pathTextStyle->GetLabel()->GetLabel(parameter,
-                                                                *data.buffer);
+    if (!pathTextStyle) {
+      return;
+    }
 
-      if (!textLabel.empty()) {
-        DrawContourLabel(projection,
-                         parameter,
-                         *pathTextStyle,
-                         textLabel,
-                         data.transStart,
-                         data.transEnd);
-        waysLabelDrawn++;
-      }
+    double      lineOffset=0.0;
+    size_t      transStart=data.transStart;
+    size_t      transEnd=data.transEnd;
+    std::string textLabel=pathTextStyle->GetLabel()->GetLabel(parameter,
+                                                              *data.buffer);
+
+    if (pathTextStyle->GetOffset()!=0.0) {
+      lineOffset+=GetProjectedWidth(projection,
+                                    pathTextStyle->GetOffset());
+    }
+
+    if (pathTextStyle->GetDisplayOffset()!=0.0) {
+      lineOffset+=projection.ConvertWidthToPixel(pathTextStyle->GetDisplayOffset());
+    }
+
+    if (lineOffset!=0.0) {
+      coordBuffer->GenerateParallelWay(transStart,
+                                       transEnd,
+                                       lineOffset,
+                                       transStart,
+                                       transEnd);
+    }
+
+    if (!textLabel.empty()) {
+      DrawContourLabel(projection,
+                       parameter,
+                       *pathTextStyle,
+                       textLabel,
+                       transStart,
+                       transEnd);
+      waysLabelDrawn++;
     }
   }
 
