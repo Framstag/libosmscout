@@ -1045,6 +1045,11 @@ STYLE
          highway_via_ferrata_difficult,
          highway_via_ferrata_extreme] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8;}
 
+   [TYPE highway_steps,
+         highway_via_ferrata_easy,
+         highway_via_ferrata_moderate,
+         highway_via_ferrata_difficult,
+         highway_via_ferrata_extreme] WAY.TEXT { displayOffset: 2mm;}
 
    [TYPE highway_pedestrian,
          highway_services,
@@ -1052,7 +1057,7 @@ STYLE
 
    [TYPE aerialway_gondola,
          aerialway_chair_lift,
-         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; }
+         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; displayOffset: 2.5mm;}
 
  }
 
