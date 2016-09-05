@@ -1132,7 +1132,9 @@ namespace osmscout {
 
   PathTextStyle::PathTextStyle()
    : size(1),
-     textColor(0,0,0)
+     textColor(0,0,0),
+     displayOffset(0.0),
+     offset(0.0)
   {
     // no code
   }
@@ -1142,6 +1144,8 @@ namespace osmscout {
     this->label=style.label;
     this->size=style.size;
     this->textColor=style.textColor;
+    this->displayOffset=style.displayOffset;
+    this->offset=style.offset;
   }
 
   PathTextStyle& PathTextStyle::SetLabel(const LabelProviderRef& label)
@@ -1381,14 +1385,18 @@ namespace osmscout {
   }
 
   PathSymbolStyle::PathSymbolStyle()
-  : symbolSpace(15)
+  : symbolSpace(15),
+    displayOffset(0.0),
+    offset(0.0)
   {
     // no code
   }
 
   PathSymbolStyle::PathSymbolStyle(const PathSymbolStyle& style)
   : symbol(style.symbol),
-    symbolSpace(style.symbolSpace)
+    symbolSpace(style.symbolSpace),
+    displayOffset(style.displayOffset),
+    offset(style.offset)
   {
     // no code
   }
