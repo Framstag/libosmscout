@@ -89,6 +89,10 @@ namespace osmscout {
                    std::list<RawWayRef>& ways,
                    std::multimap<OSMId,TurnRestrictionRef>& restrictions);
 
+    bool SplitLongWays(Progress& progress,
+                       std::list<RawWayRef>& ways,
+                       CoordDataFile::ResultMap& coordsMap);
+
     void WriteWay(Progress& progress,
                   const TypeConfig& typeConfig,
                   FileWriter& writer,
