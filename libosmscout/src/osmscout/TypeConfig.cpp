@@ -278,10 +278,6 @@ namespace osmscout {
                                  const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-      if (type->GetIndexAsAddress() && HasFeature(idx)) {
-        log.Info() << "Parse:" << feature.GetFeature()->GetName() << HasFeature(idx) << feature.GetFeature()->HasValue();
-      }
       feature.GetFeature()->Parse(progress,
                                   typeConfig,
                                   feature,
@@ -303,9 +299,6 @@ namespace osmscout {
     }
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
-      //if (type->GetIndexAsAddress() && HasFeature(idx)) {
-      //  log.Info() << "READ:" << feature.GetFeature()->GetName() << HasFeature(idx) << feature.GetFeature()->HasValue();
-      //}
 
       if (HasFeature(idx) &&
           feature.GetFeature()->HasValue()) {
