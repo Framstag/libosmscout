@@ -1102,6 +1102,7 @@ namespace osmscout {
     FeatureRef                                  featureRef;
     FeatureRef                                  featureLocation;
     FeatureRef                                  featureAddress;
+    FeatureRef                                  featurePostalCode;
     FeatureRef                                  featureAccess;
     FeatureRef                                  featureAccessRestricted;
     FeatureRef                                  featureLayer;

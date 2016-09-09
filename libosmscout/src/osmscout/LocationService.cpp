@@ -322,7 +322,7 @@ namespace osmscout {
       result.address=std::make_shared<Address>(address);
       result.isMatch=match;
 
-      //std::cout << pattern << " =>  " << result.address->name << " " << location.name << " " << adminRegion.name << "/" << adminRegion.aliasName << " " << match << " " << candidate << " " << std::endl;
+      //std::cout << pattern << " =>  " << result.address->name << " " << result.address->postalCode << " " << location.name << " " << adminRegion.name << "/" << adminRegion.aliasName << " " << match << " " << candidate << " " << std::endl;
 
       results.push_back(result);
 

@@ -84,7 +84,7 @@ std::string GetAddress(const osmscout::LocationSearchResult::Entry& entry)
     label="~ ";
   }
 
-  label+=entry.address->name;
+  label+="Address ("+entry.address->name+" "+entry.address->postalCode+")";
 
   return label;
 }
@@ -100,7 +100,7 @@ std::string GetLocation(const osmscout::LocationSearchResult::Entry& entry)
     label="~ ";
   }
 
-  label+=entry.location->name;
+  label+="Location ("+entry.location->name+")";
 
   return label;
 }
@@ -116,7 +116,7 @@ std::string GetPOI(const osmscout::LocationSearchResult::Entry& entry)
     label=" ~ ";
   }
 
-  label+=entry.poi->name;
+  label+="POI ("+entry.poi->name+")";
 
   return label;
 }

@@ -278,6 +278,10 @@ namespace osmscout {
                                  const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
+      size_t idx=feature.GetIndex();
+      if (type->GetIndexAsAddress() && HasFeature(idx)) {
+        log.Info() << "Parse:" << feature.GetFeature()->GetName() << HasFeature(idx) << feature.GetFeature()->HasValue();
+      }
       feature.GetFeature()->Parse(progress,
                                   typeConfig,
                                   feature,
@@ -297,9 +301,11 @@ namespace osmscout {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
       scanner.Read(featureBits[i]);
     }
-
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
+      //if (type->GetIndexAsAddress() && HasFeature(idx)) {
+      //  log.Info() << "READ:" << feature.GetFeature()->GetName() << HasFeature(idx) << feature.GetFeature()->HasValue();
+      //}
 
       if (HasFeature(idx) &&
           feature.GetFeature()->HasValue()) {
@@ -1002,6 +1008,9 @@ namespace osmscout {
 
     RegisterFeature(std::make_shared<AdminLevelFeature>());
 
+    featurePostalCode = std::make_shared<PostalCodeFeature>();
+    RegisterFeature(featurePostalCode);
+
     featureBridge=std::make_shared<BridgeFeature>();
     RegisterFeature(featureBridge);
 
@@ -1166,6 +1175,9 @@ namespace osmscout {
       }
       if (!typeInfo->HasFeature(AddressFeature::NAME)) {
         typeInfo->AddFeature(featureAddress);
+      }
+      if (!typeInfo->HasFeature(PostalCodeFeature::NAME)) {
+        typeInfo->AddFeature(featurePostalCode);
       }
     }
 

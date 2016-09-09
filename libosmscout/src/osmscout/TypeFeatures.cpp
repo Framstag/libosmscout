@@ -1355,6 +1355,98 @@ namespace osmscout {
     }
   }
 
+  void PostalCodeFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(postalCode);
+  }
+
+  void PostalCodeFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(postalCode);
+  }
+
+  FeatureValue& PostalCodeFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const PostalCodeFeatureValue& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
+
+      postalCode=otherValue.postalCode;
+    }
+
+    return *this;
+  }
+
+  bool PostalCodeFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const PostalCodeFeatureValue& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
+
+    return postalCode==otherValue.postalCode;
+  }
+
+  const char* const PostalCodeFeature::NAME = "PostalCode";
+
+  void PostalCodeFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagPostalCode=typeConfig.RegisterTag("postal_code");
+    tagAddrPostCode=typeConfig.RegisterTag("addr:postcode");
+  }
+
+  std::string PostalCodeFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t PostalCodeFeature::GetValueSize() const
+  {
+    return sizeof(PostalCodeFeatureValue);
+  }
+
+  FeatureValue* PostalCodeFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) PostalCodeFeatureValue();
+  }
+
+  void PostalCodeFeature::Parse(Progress& progress,
+                                const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& object,
+                                const TagMap& tags,
+                                FeatureValueBuffer& buffer) const
+  {
+    // ignore ways for now
+    if (object.GetType() == OSMRefType::osmRefWay)
+      return;
+
+    auto postalCode=tags.find(tagPostalCode);
+    auto addrPostCode=tags.find(tagAddrPostCode);
+
+    std::string postalCodeValue;
+
+    if (postalCode!=tags.end()) {
+      postalCodeValue = postalCode->second;
+    }
+
+    if (addrPostCode!=tags.end()) {
+      postalCodeValue = addrPostCode->second;
+    }
+
+    try {
+      if (!postalCodeValue.empty()) {
+        size_t idx = feature.GetIndex();
+        FeatureValue* fv = buffer.AllocateValue(idx);
+        PostalCodeFeatureValue* value=static_cast<PostalCodeFeatureValue*>(fv);
+
+        value->SetPostalCode(postalCodeValue);
+        //progress.Info(std::string("Found postal code ")+postalCodeValue+" for "+object.GetName());
+      } else {
+        progress.Info(std::string("Postal code tag empty for "+object.GetName()));
+      }
+    }
+    catch (const std::exception &e) {
+      progress.Error(std::string("PostalCodeFeature::Parse Exception ")+e.what());
+    }
+  }
+
   const char* const BridgeFeature::NAME = "Bridge";
 
   void BridgeFeature::Initialize(TypeConfig& typeConfig)
