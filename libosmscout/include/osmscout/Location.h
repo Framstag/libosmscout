@@ -157,6 +157,7 @@ namespace osmscout {
     FileOffset    locationOffset; //!< Offset to location
     FileOffset    regionOffset;   //!< Offset of the admin region this location is in
     std::string   name;           //!< name of the address
+    std::string   postalCode;     //!< postal code of the address
     ObjectFileRef object;         //!< Object that represents the address
   };
 

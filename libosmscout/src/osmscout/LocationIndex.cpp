@@ -384,6 +384,8 @@ namespace osmscout {
       address.regionOffset=location.regionOffset;
 
       scanner.Read(address.name);
+      scanner.Read(address.postalCode);
+
       objectFileRefReader.Read(address.object);
 
       if (!visitor.Visit(region,
