@@ -1438,8 +1438,6 @@ namespace osmscout {
 
         value->SetPostalCode(postalCodeValue);
         //progress.Info(std::string("Found postal code ")+postalCodeValue+" for "+object.GetName());
-      } else {
-        progress.Info(std::string("Postal code tag empty for "+object.GetName()));
       }
     }
     catch (const std::exception &e) {
