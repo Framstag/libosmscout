@@ -469,7 +469,10 @@ namespace osmscout {
   {
     // TODO: enable OMP parallelism
     std::list<RawWayRef> newWays;
-    
+
+    size_t currentWay=1;
+    size_t wayCount=ways.size();
+
     for (auto way: ways){
       //*wayIt;
       double length=0.0;
@@ -488,6 +491,9 @@ namespace osmscout {
         }
         split = length > 30.0;
       }
+
+      progress.SetProgress(currentWay,wayCount);
+      currentWay++;
 
       if (!split){
         newWays.push_back(way);
@@ -812,6 +818,7 @@ namespace osmscout {
         
         // split too long ways again to shorter segments
     // TODO: enable OMP parallelism    
+        progress.SetAction("Splitting too long ways");
 //#pragma omp parallel for
         for (int64_t typeIdx = 0; typeIdx<(int64_t)typeConfig->GetTypeCount(); typeIdx++) {
           size_t originalWayCount=waysByType[typeIdx].size();
@@ -821,7 +828,7 @@ namespace osmscout {
             
 //#pragma omp critical
             if (waysByType[typeIdx].size()>originalWayCount) {
-              progress.Info("Split long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
+              progress.Info("Splitted long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
                             NumberToString(originalWayCount)+" to "+NumberToString(waysByType[typeIdx].size())+ " way(s)");
               mergeCount+=originalWayCount-waysByType[typeIdx].size();
             }
