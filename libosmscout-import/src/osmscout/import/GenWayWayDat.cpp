@@ -467,9 +467,11 @@ namespace osmscout {
                      std::list<RawWayRef>& ways,
                      CoordDataFile::ResultMap& coordsMap)
   {
-    // TODO: enable OMP parallelism
     std::list<RawWayRef> newWays;
-    
+
+    size_t currentWay=1;
+    size_t wayCount=ways.size();
+
     for (auto way: ways){
       //*wayIt;
       double length=0.0;
@@ -493,18 +495,20 @@ namespace osmscout {
         split = length > 30.0;
       }
 
+      progress.SetProgress(currentWay,wayCount);
+      currentWay++;
+
       if (!split){
         newWays.push_back(way);
         continue;
       }
       
-      std::cout << "  Spliting long way " << way->GetId() << 
-        " with " << way->GetNodeCount() << " nodes";
+      std::string msg = "Splitting long way " + NumberToString(way->GetId()) + 
+        " with " + NumberToString(way->GetNodeCount()) + " nodes";
       if (length > 0.0){
-        std::cout << " and real length " << length << " km";
+        msg += " and real length " + std::to_string(length) + " km";
       }
-      std::cout << std::endl;
-      //ways.erase(wayIt);
+      progress.Debug(msg);
       
       double segmentLength=0.0;
       size_t segmentNodeCnt=1;
@@ -530,7 +534,7 @@ namespace osmscout {
         if (segment->GetId() == 0){
           segment->SetId(way->GetId());
           segment->SetType(way->GetType(), way->IsArea());
-          segment->GetMutableFeatureValueBuffer().Set(way->GetFeatureValueBuffer());
+          segment->SetFeatureValueBuffer(way->GetFeatureValueBuffer());
         }
         auto current = coordsMap.find(*osmIdIt);
 
@@ -547,8 +551,8 @@ namespace osmscout {
 
           segment->SetNodes(currentSegmentStart, osmIdIt);
           newWays.push_back(segment);
-          std::cout << "  - New segment " << segment->GetId() << 
-            " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
+          //std::cout << "  - New segment " << segment->GetId() << 
+          //  " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
           
           // skip invalid nodes
           while (prev==coordsMap.end() && osmIdIt != endIt){
@@ -571,8 +575,8 @@ namespace osmscout {
       if (segment->GetId() != 0 && segmentNodeCnt >= 2){
         segment->SetNodes(segmentStart, segmentEnd);
         newWays.push_back(segment);        
-        std::cout << "  - New segment (last) " << segment->GetId() << 
-            " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
+        //std::cout << "  - New segment (last) " << segment->GetId() << 
+        //    " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
       }
     }
     
@@ -836,17 +840,17 @@ namespace osmscout {
         nodeIds.clear();
         
         // split too long ways again to shorter segments
-    // TODO: enable OMP parallelism    
-//#pragma omp parallel for
+        progress.SetAction("Splitting too long ways");
+#pragma omp parallel for
         for (int64_t typeIdx = 0; typeIdx<(int64_t)typeConfig->GetTypeCount(); typeIdx++) {
           size_t originalWayCount=waysByType[typeIdx].size();
 
           if (originalWayCount>0) {
             SplitLongWays(progress, waysByType[typeIdx], coordsMap);        
             
-//#pragma omp critical
+#pragma omp critical
             if (waysByType[typeIdx].size()>originalWayCount) {
-              progress.Info("Split long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
+              progress.Info("Splitted long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
                             NumberToString(originalWayCount)+" to "+NumberToString(waysByType[typeIdx].size())+ " way(s)");
               mergeCount+=originalWayCount-waysByType[typeIdx].size();
             }
