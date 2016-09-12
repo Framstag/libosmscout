@@ -516,7 +516,7 @@ namespace osmscout {
         if (segment->GetId() == 0){
           segment->SetId(way->GetId());
           segment->SetType(way->GetType(), way->IsArea());
-          segment->GetMutableFeatureValueBuffer().Set(way->GetFeatureValueBuffer());
+          segment->SetFeatureValueBuffer(way->GetFeatureValueBuffer());
         }
         Coord current = coordsMap[*osmIdIt];
         
