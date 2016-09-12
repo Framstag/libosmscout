@@ -522,7 +522,11 @@ namespace osmscout {
       auto prev = coordsMap.find(*osmIdIt);
       // jump to first valid node
       while (prev==coordsMap.end() && osmIdIt != endIt){
-        progress.Warning("!! Cannot resolve node with id "+NumberToString(*osmIdIt)+" for way "+NumberToString(way->GetId()));
+        progress.Error("Cannot resolve node with id "+
+                       NumberToString(*osmIdIt)+
+                       " for way "+
+                       NumberToString(way->GetId())+
+                       ", skipping");
         osmIdIt ++;    
         segmentStart = osmIdIt;
         prev = coordsMap.find(*osmIdIt);
@@ -556,7 +560,11 @@ namespace osmscout {
           
           // skip invalid nodes
           while (prev==coordsMap.end() && osmIdIt != endIt){
-            progress.Warning("!! Cannot resolve node with id "+NumberToString(*osmIdIt)+" for way "+NumberToString(way->GetId()));
+            progress.Error("Cannot resolve node with id "+
+                           NumberToString(*osmIdIt)+
+                           " for way "+
+                           NumberToString(way->GetId())+
+                           ", splitting");
             osmIdIt ++;    
             segmentStart = osmIdIt;
             prev = coordsMap.find(*osmIdIt);
