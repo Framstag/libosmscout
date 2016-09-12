@@ -1050,7 +1050,7 @@ namespace osmscout {
     bool operator!=(const FeatureValueBuffer& other) const;
   };
 
-  static const uint32_t FILE_FORMAT_VERSION = 7;
+  static const uint32_t FILE_FORMAT_VERSION = 8;
 
   /**
    * \ingroup type
