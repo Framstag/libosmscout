@@ -114,9 +114,9 @@ namespace osmscout {
       return featureValueBuffer;
     }
 
-    inline FeatureValueBuffer& GetMutableFeatureValueBuffer()
+    inline void SetFeatureValueBuffer(const FeatureValueBuffer& other)
     {
-      return featureValueBuffer;
+      featureValueBuffer.Set(other);
     }
 
     bool IsOneway() const;
