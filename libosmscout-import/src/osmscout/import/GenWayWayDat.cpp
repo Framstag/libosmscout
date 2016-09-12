@@ -817,16 +817,15 @@ namespace osmscout {
         nodeIds.clear();
         
         // split too long ways again to shorter segments
-    // TODO: enable OMP parallelism    
         progress.SetAction("Splitting too long ways");
-//#pragma omp parallel for
+#pragma omp parallel for
         for (int64_t typeIdx = 0; typeIdx<(int64_t)typeConfig->GetTypeCount(); typeIdx++) {
           size_t originalWayCount=waysByType[typeIdx].size();
 
           if (originalWayCount>0) {
             SplitLongWays(progress, waysByType[typeIdx], coordsMap);        
             
-//#pragma omp critical
+#pragma omp critical
             if (waysByType[typeIdx].size()>originalWayCount) {
               progress.Info("Splitted long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
                             NumberToString(originalWayCount)+" to "+NumberToString(waysByType[typeIdx].size())+ " way(s)");
