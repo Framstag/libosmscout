@@ -467,7 +467,6 @@ namespace osmscout {
                      std::list<RawWayRef>& ways,
                      CoordDataFile::ResultMap& coordsMap)
   {
-    // TODO: enable OMP parallelism
     std::list<RawWayRef> newWays;
 
     size_t currentWay=1;
@@ -500,13 +499,12 @@ namespace osmscout {
         continue;
       }
       
-      std::cout << "  Spliting long way " << way->GetId() << 
-        " with " << way->GetNodeCount() << " nodes";
+      std::string msg = "Splitting long way " + NumberToString(way->GetId()) + 
+        " with " + NumberToString(way->GetNodeCount()) + " nodes";
       if (length > 0.0){
-        std::cout << " and real length " << length << " km";
+        msg += " and real length " + std::to_string(length) + " km";
       }
-      std::cout << std::endl;
-      //ways.erase(wayIt);
+      progress.Debug(msg);
       
       double segmentLength=0.0;
       size_t segmentNodeCnt=1;
@@ -536,8 +534,8 @@ namespace osmscout {
 
           segment->SetNodes(currentSegmentStart, osmIdIt);
           newWays.push_back(segment);
-          std::cout << "  - New segment " << segment->GetId() << 
-            " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
+          //std::cout << "  - New segment " << segment->GetId() << 
+          //  " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
           
           // reset segment
           segmentLength=0.0;
@@ -552,8 +550,8 @@ namespace osmscout {
       if (segment->GetId() != 0 && segmentNodeCnt >= 2){
         segment->SetNodes(segmentStart, osmIdIt);
         newWays.push_back(segment);        
-        std::cout << "  - New segment (last) " << segment->GetId() << 
-            " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
+        //std::cout << "  - New segment (last) " << segment->GetId() << 
+        //    " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
       }
     }
     
