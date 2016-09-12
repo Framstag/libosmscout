@@ -478,11 +478,15 @@ namespace osmscout {
         // check real length (in km)
         auto osmIdIt = way->GetNodes().begin();
         auto endIt = way->GetNodes().end();
-        Coord prev = coordsMap[*osmIdIt];
+        auto prev = coordsMap.find(*osmIdIt);
         osmIdIt ++;
-        while (osmIdIt != endIt){
-          Coord current = coordsMap[*osmIdIt];
-          length += GetSphericalDistance(prev.GetCoord(), current.GetCoord());
+        while (osmIdIt != endIt && (!split)){
+          auto current = coordsMap.find(*osmIdIt);
+          if (prev == coordsMap.end() || current == coordsMap.end()){
+            split = true;
+          }else{
+            length += GetSphericalDistance(prev->second.GetCoord(), current->second.GetCoord());
+          }
           prev = current;
           osmIdIt ++;
         }
@@ -509,30 +513,50 @@ namespace osmscout {
       auto osmIdIt = way->GetNodes().begin();
       auto endIt = way->GetNodes().end();
       auto segmentStart = osmIdIt;
+      auto segmentEnd = osmIdIt;
       
-      Coord prev = coordsMap[*osmIdIt];
+      auto prev = coordsMap.find(*osmIdIt);
+      // jump to first valid node
+      while (prev==coordsMap.end() && osmIdIt != endIt){
+        progress.Warning("!! Cannot resolve node with id "+NumberToString(*osmIdIt)+" for way "+NumberToString(way->GetId()));
+        osmIdIt ++;    
+        segmentStart = osmIdIt;
+        prev = coordsMap.find(*osmIdIt);
+      }
       osmIdIt ++;
-      while (osmIdIt != endIt){          
+      segmentEnd=osmIdIt;
+      while (osmIdIt != endIt){    
+        
         if (segment->GetId() == 0){
           segment->SetId(way->GetId());
           segment->SetType(way->GetType(), way->IsArea());
           segment->GetMutableFeatureValueBuffer().Set(way->GetFeatureValueBuffer());
         }
-        Coord current = coordsMap[*osmIdIt];
-        
-        segmentLength += GetSphericalDistance(prev.GetCoord(), current.GetCoord());
-        segmentNodeCnt ++;
-        if (segmentNodeCnt >= 300 || segmentLength > 30.0){
+        auto current = coordsMap.find(*osmIdIt);
+
+        if (current!=coordsMap.end()){
+          segmentLength += GetSphericalDistance(prev->second.GetCoord(), current->second.GetCoord());
+          segmentNodeCnt ++;
+        }
+        if (segmentNodeCnt >= 300 || segmentLength > 30.0 || current==coordsMap.end()){
           auto currentSegmentStart = segmentStart;
           segmentStart=osmIdIt;
           prev = current;
-          osmIdIt ++;          
+          osmIdIt ++;
+          segmentEnd=osmIdIt;
 
           segment->SetNodes(currentSegmentStart, osmIdIt);
           newWays.push_back(segment);
           std::cout << "  - New segment " << segment->GetId() << 
             " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
           
+          // skip invalid nodes
+          while (prev==coordsMap.end() && osmIdIt != endIt){
+            progress.Warning("!! Cannot resolve node with id "+NumberToString(*osmIdIt)+" for way "+NumberToString(way->GetId()));
+            osmIdIt ++;    
+            segmentStart = osmIdIt;
+            prev = coordsMap.find(*osmIdIt);
+          }
           // reset segment
           segmentLength=0.0;
           segmentNodeCnt=1;
@@ -541,10 +565,11 @@ namespace osmscout {
         }else{
           prev = current;
           osmIdIt ++;          
+          segmentEnd=osmIdIt;
         }
       }
       if (segment->GetId() != 0 && segmentNodeCnt >= 2){
-        segment->SetNodes(segmentStart, osmIdIt);
+        segment->SetNodes(segmentStart, segmentEnd);
         newWays.push_back(segment);        
         std::cout << "  - New segment (last) " << segment->GetId() << 
             " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
