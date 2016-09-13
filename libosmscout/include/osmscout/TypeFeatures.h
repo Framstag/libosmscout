@@ -1082,6 +1082,11 @@ namespace osmscout {
       return postalCode;
     }
 
+    inline std::string GetLabel() const
+    {
+      return postalCode;
+    }
+
     void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
@@ -1100,6 +1105,8 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
+    PostalCodeFeature();
+
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
@@ -1373,6 +1380,11 @@ namespace osmscout {
       return website;
     }
 
+    inline std::string GetLabel() const
+    {
+      return website;
+    }
+
     void Read(FileScanner& scanner);
     void Write(FileWriter& writer);
 
@@ -1393,6 +1405,7 @@ namespace osmscout {
     static const char* const NAME_LABEL;
 
   public:
+    WebsiteFeature();
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;
@@ -1458,6 +1471,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
+    PhoneFeature();
     void Initialize(TypeConfig& typeConfig);
 
     std::string GetName() const;

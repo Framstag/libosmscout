@@ -1387,6 +1387,11 @@ namespace osmscout {
 
   const char* const PostalCodeFeature::NAME = "PostalCode";
 
+  PostalCodeFeature::PostalCodeFeature()
+  {
+      RegisterLabel(NAME, 0);
+  }
+
   void PostalCodeFeature::Initialize(TypeConfig& typeConfig)
   {
     tagPostalCode=typeConfig.RegisterTag("postal_code");
@@ -1477,6 +1482,11 @@ namespace osmscout {
 
   const char* const WebsiteFeature::NAME = "Website";
 
+  WebsiteFeature::WebsiteFeature()
+  {
+    RegisterLabel(NAME, 0);
+  }
+
   void WebsiteFeature::Initialize(TypeConfig& typeConfig)
   {
     tagWebsite=typeConfig.RegisterTag("website");
@@ -1560,6 +1570,11 @@ namespace osmscout {
   }
 
   const char* const PhoneFeature::NAME = "Phone";
+
+  PhoneFeature::PhoneFeature()
+  {
+    RegisterLabel(NAME, 0);
+  }
 
   void PhoneFeature::Initialize(TypeConfig& typeConfig)
   {
