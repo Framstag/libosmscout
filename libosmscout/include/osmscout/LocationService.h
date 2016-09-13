@@ -445,6 +445,8 @@ namespace osmscout {
     static bool DistanceComparator(const LocationDescriptionCandicate &a,
                                    const LocationDescriptionCandicate &b);
 
+    const FeatureValueBufferRef GetObjectFeatureBuffer(const ObjectFileRef &object);
+
     Place GetPlace(const std::list<ReverseLookupResult>& lookupResult);
 
     bool HandleAdminRegion(const LocationSearch& search,
@@ -469,11 +471,22 @@ namespace osmscout {
                                           const AddressMatchVisitor::AddressResult& addressResult,
                                           LocationSearchResult& result) const;
 
+    /**
+     * Load areas of given types near to location.
+     * 
+     * @param location
+     * @param types
+     * @param candidates - result buffer
+     * @param maxDistance - lookup distance in meters
+     * @return true if success (it don't indicate non-empty result)
+     */
     bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates);
+                       std::vector<LocationDescriptionCandicate> &candidates,
+                       const double maxDistance=100);
 
     bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates);
+                       std::vector<LocationDescriptionCandicate> &candidates,
+                       const double maxDistance=100);
 
     bool DescribeLocationByName(const GeoCoord& location,
                                 LocationDescription& description);

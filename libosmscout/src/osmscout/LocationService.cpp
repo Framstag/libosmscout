@@ -436,6 +436,39 @@ namespace osmscout {
   {
     assert(database);
   }
+  
+  const FeatureValueBufferRef LocationService::GetObjectFeatureBuffer(const ObjectFileRef &object)
+  {
+    FeatureValueBufferRef objectFeatureBuff;
+    NodeRef node;
+    WayRef way;
+    AreaRef area;
+    switch (object.GetType()){
+      case refNode:
+        if (database->GetNodeByOffset(object.GetFileOffset(), node)) {
+          objectFeatureBuff = std::make_shared<FeatureValueBuffer>();
+          objectFeatureBuff->Set(node->GetFeatureValueBuffer());
+        }      
+        break;
+      case refWay:
+        if (database->GetWayByOffset(object.GetFileOffset(), way)) {
+          objectFeatureBuff = std::make_shared<FeatureValueBuffer>();
+          objectFeatureBuff->Set(way->GetFeatureValueBuffer());
+        }      
+        break;
+      case refArea:
+        if (database->GetAreaByOffset(object.GetFileOffset(), area)) {
+          objectFeatureBuff = std::make_shared<FeatureValueBuffer>();
+          objectFeatureBuff->Set(area->GetFeatureValueBuffer());
+        }      
+        break;
+      case refNone:
+      default:
+        /* do nothing */
+        break;
+    }
+    return objectFeatureBuff;
+  }
 
   Place LocationService::GetPlace(const std::list<ReverseLookupResult>& lookupResult)
   {
@@ -464,6 +497,7 @@ namespace osmscout {
     }
 
     return Place(object,
+                 GetObjectFeatureBuffer(object),
                  adminRegion,
                  poi,
                  location,
@@ -1372,11 +1406,12 @@ namespace osmscout {
 
   bool LocationService::LoadNearAreas(const GeoCoord& location,
                                       const TypeInfoSet &types,
-                                      std::vector<LocationDescriptionCandicate> &candidates)
+                                      std::vector<LocationDescriptionCandicate> &candidates,
+                                      const double maxDistance)
   {
     TypeConfigRef           typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef        areaAreaIndex=database->GetAreaAreaIndex();
-    GeoBox                  box100=GeoBox::BoxByCenterAndRadius(location,100);
+    GeoBox                  box=GeoBox::BoxByCenterAndRadius(location,maxDistance);
     NameFeatureLabelReader  nameFeatureLabelLeader(*typeConfig);
 
     if (!typeConfig ||
@@ -1387,7 +1422,7 @@ namespace osmscout {
     TypeInfoSet                loadedTypes;
 
     if (!areaAreaIndex->GetAreasInArea(*typeConfig,
-                                       box100,
+                                       box,
                                        std::numeric_limits<size_t>::max(),
                                        types,
                                        areaSpans,
@@ -1456,12 +1491,14 @@ namespace osmscout {
         }
       }
 
-      candidates.push_back(LocationDescriptionCandicate(ObjectFileRef(area->GetFileOffset(),refArea),
-                                                        nameFeatureLabelLeader.GetLabel(area->GetFeatureValueBuffer()),
-                                                        distance,
-                                                        bearing,
-                                                        atPlace,
-                                                        boundingBox.GetSize()));
+      if (distance*1000 <= maxDistance){
+        candidates.push_back(LocationDescriptionCandicate(ObjectFileRef(area->GetFileOffset(),refArea),
+                                                          nameFeatureLabelLeader.GetLabel(area->GetFeatureValueBuffer()),
+                                                          distance,
+                                                          bearing,
+                                                          atPlace,
+                                                          boundingBox.GetSize()));
+      }
     }
 
     osmscout::log.Debug() << "Found " << areas.size() << " areas near " << location.GetDisplayText();
@@ -1470,11 +1507,12 @@ namespace osmscout {
   }
 
   bool LocationService::LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types, 
-                                      std::vector<LocationDescriptionCandicate> &candidates)
+                                      std::vector<LocationDescriptionCandicate> &candidates,
+                                      const double maxDistance)
   {
     TypeConfigRef           typeConfig=database->GetTypeConfig();
     AreaNodeIndexRef        areaNodeIndex=database->GetAreaNodeIndex();
-    GeoBox                  box100=GeoBox::BoxByCenterAndRadius(location,100);
+    GeoBox                  box=GeoBox::BoxByCenterAndRadius(location,maxDistance);
     NameFeatureLabelReader  nameFeatureLabelLeader(*typeConfig);
 
     if (!typeConfig ||
@@ -1484,7 +1522,7 @@ namespace osmscout {
     std::vector<FileOffset>  offsets;
     TypeInfoSet              loadedAddressTypes;
 
-    if (!areaNodeIndex->GetOffsets(box100, types, offsets, loadedAddressTypes)) {
+    if (!areaNodeIndex->GetOffsets(box, types, offsets, loadedAddressTypes)) {
       return false;
     }
 
@@ -1504,14 +1542,16 @@ namespace osmscout {
 
     for (const auto &node: nodes) {
       double  distance=GetEllipsoidalDistance(location,node.get()->GetCoords()); // In Km
-      double  bearing=GetSphericalBearingInitial(node.get()->GetCoords(),location);
+      if (distance*1000 <= maxDistance){
+        double  bearing=GetSphericalBearingInitial(node.get()->GetCoords(),location);
 
-      candidates.push_back(LocationDescriptionCandicate(ObjectFileRef(node->GetFileOffset(),refNode),
-                                                        nameFeatureLabelLeader.GetLabel(node->GetFeatureValueBuffer()),
-                                                        distance,
-                                                        bearing,
-                                                        false,
-                                                        0.0));
+        candidates.push_back(LocationDescriptionCandicate(ObjectFileRef(node->GetFileOffset(),refNode),
+                                                          nameFeatureLabelLeader.GetLabel(node->GetFeatureValueBuffer()),
+                                                          distance,
+                                                          bearing,
+                                                          false,
+                                                          0.0));
+      }
     }
 
     osmscout::log.Debug() << "Found " << nodes.size() << " nodes near " << location.GetDisplayText();
@@ -1617,11 +1657,12 @@ namespace osmscout {
         poi->name=candidate.GetName();
         poi->regionOffset=0;
 
-        Place          place(candidate.GetRef(),
-                             adminRegion,
-                             poi,
-                             location,
-                             address);
+        Place place(candidate.GetRef(),
+                    GetObjectFeatureBuffer(candidate.GetRef()),
+                    adminRegion,
+                    poi,
+                    location,
+                    address);
 
         if (candidate.IsAtPlace()) {
           description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place));
@@ -1788,7 +1829,8 @@ namespace osmscout {
         }
         else {
           description.SetAtPOIDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                       candidate.GetDistance()*1000, candidate.GetBearing()));
+                                                                                       candidate.GetDistance()*1000, 
+                                                                                       candidate.GetBearing()));
         }
         return true;
       }
