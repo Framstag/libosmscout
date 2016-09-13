@@ -55,6 +55,9 @@ void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& descri
 
   if (place.GetPOI()) {
     std::cout << "  - POI:      " << place.GetPOI()->name << std::endl;
+    if (place.GetObjectFeatures()){
+      std::cout << "  - type:     " << place.GetObjectFeatures()->GetType()->GetName() << std::endl;
+    }
   }
 
   if (place.GetAddress()) {
@@ -67,6 +70,26 @@ void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& descri
 
   if (place.GetAdminRegion()) {
     std::cout << "  - region:   " << place.GetAdminRegion()->name << std::endl;
+  }
+  
+  // print all features of this place
+  std::cout << std::endl;
+  if (place.GetObjectFeatures()){
+    for (auto featureInstance :place.GetObjectFeatures()->GetType()->GetFeatures()){
+      if (place.GetObjectFeatures()->HasFeature(featureInstance.GetIndex())){
+        osmscout::FeatureRef feature=featureInstance.GetFeature();
+        if (feature->HasValue() && feature->HasLabel()){
+          osmscout::FeatureValue *value=place.GetObjectFeatures()->GetValue(featureInstance.GetIndex());
+          if (value->GetLabel().empty()){
+            std::cout << "  + " << feature->GetName() << std::endl;
+          }else{
+            std::cout << "  + " << feature->GetName() << ": " << value->GetLabel() << std::endl;
+          }
+        }else{
+          std::cout << "  + " << feature->GetName() << std::endl;
+        }
+      }
+    }
   }
 }
 
