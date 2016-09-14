@@ -1570,7 +1570,8 @@ namespace osmscout {
   }
 
   bool LocationService::DescribeLocationByName(const GeoCoord& location,
-                                               LocationDescription& description)
+                                               LocationDescription& description,
+                                               const double lookupDistance)
   {
     // search all addressable areas and nodes, sort it by distance, get first with name
     TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -1594,7 +1595,8 @@ namespace osmscout {
     if (!nameTypes.Empty()) {
       if (!LoadNearAreas(location,
                          nameTypes,
-                         candidates)) {
+                         candidates,
+                         lookupDistance)) {
         return false;
       }
     }
@@ -1611,7 +1613,8 @@ namespace osmscout {
     if (!nameTypes.Empty()) {
       if (!LoadNearNodes(location,
                          nameTypes,
-                         candidates)) {
+                         candidates,
+                         lookupDistance)) {
         return false;
       }
     }
@@ -1680,7 +1683,8 @@ namespace osmscout {
   }
 
   bool LocationService::DescribeLocationByAddress(const GeoCoord& location,
-                                                  LocationDescription& description)
+                                                  LocationDescription& description,
+                                                  const double lookupDistance)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
     TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -1704,7 +1708,8 @@ namespace osmscout {
     if (!addressTypes.Empty()) {
       if (!LoadNearAreas(location,
                          addressTypes,
-                         candidates)){
+                         candidates, 
+                         lookupDistance)){
         return false;
       }
     }
@@ -1721,7 +1726,8 @@ namespace osmscout {
     if (!addressTypes.Empty()) {
       if (!LoadNearNodes(location,
                          addressTypes,
-                         candidates)){
+                         candidates,
+                         lookupDistance)){
         return false;
       }
     }
@@ -1762,7 +1768,8 @@ namespace osmscout {
   }
 
   bool LocationService::DescribeLocationByPOI(const GeoCoord& location,
-                                              LocationDescription& description)
+                                              LocationDescription& description,
+                                              const double lookupDistance)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
     TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -1786,7 +1793,8 @@ namespace osmscout {
     if (!poiTypes.Empty()) {
       if (!LoadNearAreas(location,
                          poiTypes,
-                         candidates)){
+                         candidates,
+                         lookupDistance)){
         return false;
       }
     }
@@ -1802,7 +1810,8 @@ namespace osmscout {
     if (!poiTypes.Empty()) {
       if (!LoadNearNodes(location,
                          poiTypes,
-                         candidates)){
+                         candidates,
+                         lookupDistance)){
         return false;
       }
     }
