@@ -55,6 +55,9 @@ void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& descri
 
   if (place.GetPOI()) {
     std::cout << "  - POI:      " << place.GetPOI()->name << std::endl;
+    if (place.GetObjectFeatures()){
+      std::cout << "  - type:     " << place.GetObjectFeatures()->GetType()->GetName() << std::endl;
+    }
   }
 
   if (place.GetAddress()) {
@@ -67,6 +70,44 @@ void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& descri
 
   if (place.GetAdminRegion()) {
     std::cout << "  - region:   " << place.GetAdminRegion()->name << std::endl;
+  }
+  
+  // print all features of this place
+  std::cout << std::endl;
+  if (place.GetObjectFeatures()){
+    for (auto featureInstance :place.GetObjectFeatures()->GetType()->GetFeatures()){
+      if (place.GetObjectFeatures()->HasFeature(featureInstance.GetIndex())){
+        osmscout::FeatureRef feature=featureInstance.GetFeature();
+        if (feature->HasValue() && feature->HasLabel()){
+          osmscout::FeatureValue *value=place.GetObjectFeatures()->GetValue(featureInstance.GetIndex());
+          if (value->GetLabel().empty()){
+            std::cout << "  + feature " << feature->GetName() << std::endl;
+          }else{
+            std::cout << "  + feature " << feature->GetName() << ": " << value->GetLabel() << std::endl;
+          }
+        }else{
+          std::cout << "  + feature " << feature->GetName() << std::endl;
+        }
+      }
+    }
+  }
+}
+
+void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
+                            const osmscout::AdminRegionRef& adminRegion)
+{
+  if (!adminRegion){
+    return;
+  }
+
+  std::cout << std::endl;
+  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regions;
+  locationService->ResolveAdminRegionHierachie(adminRegion, regions);
+  osmscout::FileOffset parentOffset = adminRegion->parentRegionOffset;
+  while (parentOffset != 0){
+    osmscout::AdminRegionRef region = regions[parentOffset];
+    std::cout << "  > parent region: " << region->name << std::endl;
+    parentOffset = region->parentRegionOffset;
   }
 }
 
@@ -127,14 +168,17 @@ int main(int argc, char* argv[])
 
   if (atNameDescription) {
     DumpLocationAtPlaceDescription(*atNameDescription);
+    DumpParentAdminRegions(locationService, atNameDescription->GetPlace().GetAdminRegion());
   }
 
   if (atAddressDescription) {
     DumpLocationAtPlaceDescription(*atAddressDescription);
+    DumpParentAdminRegions(locationService, atAddressDescription->GetPlace().GetAdminRegion());
   }
 
   if (atPOIDescription) {
     DumpLocationAtPlaceDescription(*atPOIDescription);
+    DumpParentAdminRegions(locationService, atPOIDescription->GetPlace().GetAdminRegion());
   }
 
   database->Close();

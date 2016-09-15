@@ -41,6 +41,8 @@ OST
       It automatically get the following features assigned:
       * Location
       * Address
+      * Website
+      * Phone
     ADDRESS:
       Objects should be indexed as address  
       It automatically get the following features assigned:
