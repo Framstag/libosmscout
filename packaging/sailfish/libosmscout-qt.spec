@@ -13,6 +13,7 @@ Requires: protobuf
 BuildRequires: cmake
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: protobuf-devel
+BuildRequires: libxml2-devel
 
 %description
 libosmscout qt libraries
