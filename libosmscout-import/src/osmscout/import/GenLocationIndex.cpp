@@ -363,7 +363,8 @@ namespace osmscout {
             out << " ";
           }
 
-          out << " @ " << address.name << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
+          out << " @ " << address.name << " " << address.postalCode
+              << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
         }
       }
 
@@ -1519,23 +1520,26 @@ namespace osmscout {
                                                       const FileOffset& fileOffset,
                                                       const std::string& location,
                                                       const std::string& address,
+                                                      const std::string &postalCode,
                                                       bool& added)
   {
     std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
 
     if (loc==region.locations.end()) {
       errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refNode),
-                                         std::string("Street of address '")+location +"' '"+address+"' cannot be resolved in region '"+region.name+"'");
+                                         std::string("Street of address '")+location+
+                                         "' '"+address+"' cannot be resolved in region '"+region.name+"'");
       return;
     }
 
     // It is possible that the address is already available at the location
     // We add it anyway. It is possible that multiple nodes share the same address (because their are in the
-    // same building) and an area (the buulding) might hold the address, too.
+    // same building) and an area (the building) might hold the address, too.
 
     RegionAddress regionAddress;
 
     regionAddress.name=address;
+    regionAddress.postalCode=postalCode;
     regionAddress.object.Set(fileOffset,refNode);
 
     loc->second.addresses.push_back(regionAddress);
@@ -1568,6 +1572,7 @@ namespace osmscout {
     uint32_t    nodeCount;
     size_t      addressFound=0;
     size_t      poiFound=0;
+    size_t      postalCodeFound=0;
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1584,6 +1589,7 @@ namespace osmscout {
       std::string name;
       std::string location;
       std::string address;
+      std::string postalCode;
       GeoCoord    coord;
 
       for (uint32_t n=1; n<=nodeCount; n++) {
@@ -1592,6 +1598,7 @@ namespace osmscout {
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
         scanner.Read(name);
+        scanner.Read(postalCode);
         scanner.Read(location);
         scanner.Read(address);
 
@@ -1604,6 +1611,10 @@ namespace osmscout {
                        !address.empty();
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
+        bool hasPostalCode=!postalCode.empty();
+
+        if (hasPostalCode)
+          postalCodeFound++;
 
         if (!isAddress && !isPOI) {
           continue;
@@ -1624,6 +1635,7 @@ namespace osmscout {
                                  fileOffset,
                                  location,
                                  address,
+                                 postalCode,
                                  added);
           if (added) {
             addressFound++;
@@ -1643,7 +1655,10 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(nodeCount)+" nodes analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
+      progress.Info(NumberToString(nodeCount)+" nodes analyzed, "+
+                    NumberToString(addressFound)+" addresses founds, "+
+                    NumberToString(poiFound)+" POIs founds, "+
+                    NumberToString(postalCodeFound)+" postal codes found");
 
       scanner.Close();
     }
@@ -1820,6 +1835,7 @@ namespace osmscout {
 
         for (const auto& address : location.second.addresses) {
           writer.Write(address.name);
+          writer.Write(address.postalCode);
 
           objectFileRefWriter.Write(address.object);
         }
@@ -1904,7 +1920,6 @@ namespace osmscout {
       boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
       assert(boundaryType);
       boundaryTypes.Set(boundaryType);
-
 
       //
       // Getting all areas of type 'administrative boundary'.

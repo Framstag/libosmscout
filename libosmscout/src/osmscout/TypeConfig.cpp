@@ -297,7 +297,6 @@ namespace osmscout {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
       scanner.Read(featureBits[i]);
     }
-
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
 
@@ -1002,6 +1001,15 @@ namespace osmscout {
 
     RegisterFeature(std::make_shared<AdminLevelFeature>());
 
+    featurePostalCode = std::make_shared<PostalCodeFeature>();
+    RegisterFeature(featurePostalCode);
+
+    featureWebsite = std::make_shared<WebsiteFeature>();
+    RegisterFeature(featureWebsite);
+
+    featurePhone = std::make_shared<PhoneFeature>();
+    RegisterFeature(featurePhone);
+
     featureBridge=std::make_shared<BridgeFeature>();
     RegisterFeature(featureBridge);
 
@@ -1167,6 +1175,9 @@ namespace osmscout {
       if (!typeInfo->HasFeature(AddressFeature::NAME)) {
         typeInfo->AddFeature(featureAddress);
       }
+      if (!typeInfo->HasFeature(PostalCodeFeature::NAME)) {
+        typeInfo->AddFeature(featurePostalCode);
+      }
     }
 
     // All ways have a layer
@@ -1210,7 +1221,7 @@ namespace osmscout {
     }
 
     // Something that has a name and is a POI automatically get the
-    // location and address features, too.
+    // location, address website and phone features, too.
     if (typeInfo->HasFeature(NameFeature::NAME) &&
         typeInfo->GetIndexAsPOI()) {
       if (!typeInfo->HasFeature(LocationFeature::NAME)) {
@@ -1218,6 +1229,12 @@ namespace osmscout {
       }
       if (!typeInfo->HasFeature(AddressFeature::NAME)) {
         typeInfo->AddFeature(featureAddress);
+      }
+      if (!typeInfo->HasFeature(WebsiteFeature::NAME)) {
+        typeInfo->AddFeature(featureWebsite);
+      }
+      if (!typeInfo->HasFeature(PhoneFeature::NAME)) {
+        typeInfo->AddFeature(featurePhone);
       }
     }
 

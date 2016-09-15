@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <osmscout/ObjectRef.h>
+#include <osmscout/TypeConfig.h>
 
 namespace osmscout {
   /**
@@ -157,6 +158,7 @@ namespace osmscout {
     FileOffset    locationOffset; //!< Offset to location
     FileOffset    regionOffset;   //!< Offset of the admin region this location is in
     std::string   name;           //!< name of the address
+    std::string   postalCode;     //!< postal code of the address
     ObjectFileRef object;         //!< Object that represents the address
   };
 
@@ -223,6 +225,7 @@ namespace osmscout {
   {
   private:
     ObjectFileRef  object;      //!< Object the location is in
+    FeatureValueBufferRef objectFeatures;
     AdminRegionRef adminRegion; //!< Region the object is in, if set
     POIRef         poi;         //!< POI data, if set
     LocationRef    location;    //!< Location data, if set
@@ -230,6 +233,7 @@ namespace osmscout {
 
   public:
     Place(const ObjectFileRef& object,
+          const FeatureValueBufferRef objectFeatureBuff,
           const AdminRegionRef& adminRegion,
           const POIRef& poi,
           const LocationRef& location,
@@ -238,6 +242,11 @@ namespace osmscout {
     inline ObjectFileRef GetObject() const
     {
       return object;
+    }
+
+    inline FeatureValueBufferRef GetObjectFeatures() const
+    {
+      return objectFeatures;
     }
 
     inline AdminRegionRef GetAdminRegion() const

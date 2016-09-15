@@ -35,6 +35,7 @@ namespace osmscout {
     NameFeatureValueReader     *nameReader;
     LocationFeatureValueReader *locationReader;
     AddressFeatureValueReader  *addressReader;
+    PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -58,6 +59,7 @@ namespace osmscout {
     nameReader=new NameFeatureValueReader(typeConfig);
     locationReader=new LocationFeatureValueReader(typeConfig);
     addressReader=new AddressFeatureValueReader(typeConfig);
+    postalCodeReader=new PostalCodeFeatureValueReader(typeConfig);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -79,9 +81,10 @@ namespace osmscout {
                                             bool& /*save*/)
   {
     try {
-      NameFeatureValue     *nameValue=nameReader->GetValue(node.GetFeatureValueBuffer());
-      LocationFeatureValue *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
-      AddressFeatureValue  *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
+      NameFeatureValue       *nameValue=nameReader->GetValue(node.GetFeatureValueBuffer());
+      LocationFeatureValue   *locationValue=locationReader->GetValue(node.GetFeatureValueBuffer());
+      AddressFeatureValue    *addressValue=addressReader->GetValue(node.GetFeatureValueBuffer());
+      PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(node.GetFeatureValueBuffer());
 
       bool isAddress=false;
       bool isPoi=false;
@@ -97,6 +100,7 @@ namespace osmscout {
       std::string name;
       std::string location;
       std::string address;
+      std::string postalCode;
 
       if (nameValue!=NULL) {
         name=nameValue->GetName();
@@ -105,6 +109,10 @@ namespace osmscout {
       if (addressValue!=NULL && locationValue!=NULL) {
         location=locationValue->GetLocation();
         address=addressValue->GetAddress();
+      }
+
+      if (postalCodeValue!=NULL) {
+        postalCode=postalCodeValue->GetPostalCode();
       }
 
       if (locationValue!=NULL) {
@@ -128,6 +136,7 @@ namespace osmscout {
       writer.WriteNumber(node.GetType()->GetNodeId());
 
       writer.Write(name);
+      writer.Write(postalCode);
       writer.Write(location);
       writer.Write(address);
       writer.WriteCoord(node.GetCoords());

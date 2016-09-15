@@ -1054,6 +1054,74 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API PostalCodeFeatureValue : public FeatureValue
+  {
+  private:
+    std::string postalCode;
+
+  public:
+    inline PostalCodeFeatureValue()
+    : postalCode("")
+    {
+
+    }
+
+    inline PostalCodeFeatureValue(std::string postalCode)
+    : postalCode(postalCode)
+    {
+      // no code
+    }
+
+    inline void SetPostalCode(std::string postalCode)
+    {
+      this->postalCode=postalCode;
+    }
+
+    inline std::string GetPostalCode() const
+    {
+      return postalCode;
+    }
+
+    inline std::string GetLabel() const
+    {
+      return postalCode;
+    }
+
+    void Read(FileScanner& scanner);
+    void Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API PostalCodeFeature : public Feature
+  {
+  private:
+    TagId tagPostalCode;
+    TagId tagAddrPostCode;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    PostalCodeFeature();
+
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+
   class OSMSCOUT_API BridgeFeature : public Feature
   {
   private:
@@ -1285,6 +1353,141 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API WebsiteFeatureValue : public FeatureValue
+  {
+  private:
+    std::string website;
+
+  public:
+    inline WebsiteFeatureValue()
+    {
+      // no code
+    }
+
+    inline WebsiteFeatureValue(const std::string& website)
+    : website(website)
+    {
+      // no code
+    }
+
+    inline void SetWebsite(const std::string& website)
+    {
+      this->website=website;
+    }
+
+    inline std::string GetWebsite() const
+    {
+      return website;
+    }
+
+    inline std::string GetLabel() const
+    {
+      return website;
+    }
+
+    void Read(FileScanner& scanner);
+    void Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API WebsiteFeature : public Feature
+  {
+  private:
+    TagId tagWebsite;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+  public:
+    WebsiteFeature();
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+  
+
+  class OSMSCOUT_API PhoneFeatureValue : public FeatureValue
+  {
+  private:
+    std::string phone;
+
+  public:
+    inline PhoneFeatureValue()
+    {
+      // no code
+    }
+
+    inline PhoneFeatureValue(const std::string& phone)
+    : phone(phone)
+    {
+      // no code
+    }
+
+    inline void SetPhone(const std::string& phone)
+    {
+      this->phone=phone;
+    }
+
+    inline std::string GetPhone() const
+    {
+      return phone;
+    }
+
+    inline std::string GetLabel() const
+    {
+      return phone;
+    }
+
+    void Read(FileScanner& scanner);
+    void Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API PhoneFeature : public Feature
+  {
+  private:
+    TagId tagPhone;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    PhoneFeature();
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+  
+  
   /**
    * Helper template class for easy access to flag-like Features.
    *
@@ -1464,6 +1667,7 @@ namespace osmscout {
   typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>                 MaxSpeedFeatureValueReader;
   typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
   typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
+  typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader

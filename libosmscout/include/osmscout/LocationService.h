@@ -445,6 +445,8 @@ namespace osmscout {
     static bool DistanceComparator(const LocationDescriptionCandicate &a,
                                    const LocationDescriptionCandicate &b);
 
+    const FeatureValueBufferRef GetObjectFeatureBuffer(const ObjectFileRef &object);
+
     Place GetPlace(const std::list<ReverseLookupResult>& lookupResult);
 
     bool HandleAdminRegion(const LocationSearch& search,
@@ -469,20 +471,6 @@ namespace osmscout {
                                           const AddressMatchVisitor::AddressResult& addressResult,
                                           LocationSearchResult& result) const;
 
-    bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates);
-
-    bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates);
-
-    bool DescribeLocationByName(const GeoCoord& location,
-                                LocationDescription& description);
-
-    bool DescribeLocationByAddress(const GeoCoord& location,
-                                   LocationDescription& description);
-
-    bool DescribeLocationByPOI(const GeoCoord& location,
-                               LocationDescription& description);
   public:
     LocationService(const DatabaseRef& database);
 
@@ -511,6 +499,38 @@ namespace osmscout {
 
     bool DescribeLocation(const GeoCoord& location,
                           LocationDescription& description);
+
+    /**
+     * Load areas of given types near to location.
+     * 
+     * @param location
+     * @param types
+     * @param candidates - unsorted result buffer
+     * @param maxDistance - lookup distance in meters
+     * @return true if no error (it don't indicate non-empty result)
+     */
+    bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
+                       std::vector<LocationDescriptionCandicate> &candidates,
+                       const double maxDistance=100);
+
+    /**
+     * @see LoadNearNodes
+     */
+    bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
+                       std::vector<LocationDescriptionCandicate> &candidates,
+                       const double maxDistance=100);
+
+    bool DescribeLocationByName(const GeoCoord& location,
+                                LocationDescription& description,
+                                const double lookupDistance=100);
+
+    bool DescribeLocationByAddress(const GeoCoord& location,
+                                   LocationDescription& description,
+                                   const double lookupDistance=100);
+
+    bool DescribeLocationByPOI(const GeoCoord& location,
+                               LocationDescription& description,
+                               const double lookupDistance=100);
   };
 
   //! \ingroup Service

@@ -64,8 +64,9 @@ namespace osmscout {
 
     struct RegionAddress
     {
-      ObjectFileRef object; //!< Object with the given address
-      std::string   name;   //!< The house number
+      ObjectFileRef object;     //!< Object with the given address
+      std::string   name;       //!< The house number
+      std::string   postalCode; //!< The postal code
 
       bool operator<(const RegionAddress& other) const
       {
@@ -369,6 +370,7 @@ namespace osmscout {
                                 const FileOffset& fileOffset,
                                 const std::string& location,
                                 const std::string& address,
+                                const std::string& postalCode,
                                 bool& added);
 
     void AddPOINodeToRegion(Region& region,

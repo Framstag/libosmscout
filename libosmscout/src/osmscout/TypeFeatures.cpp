@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <algorithm>
+
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/util/Logger.h>
@@ -1352,6 +1354,285 @@ namespace osmscout {
       else {
         progress.Warning(std::string("Admin level is not numeric '")+adminLevel->second+"' for "+object.GetName()+"!");
       }
+    }
+  }
+
+  void PostalCodeFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(postalCode);
+  }
+
+  void PostalCodeFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(postalCode);
+  }
+
+  FeatureValue& PostalCodeFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const PostalCodeFeatureValue& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
+
+      postalCode=otherValue.postalCode;
+    }
+
+    return *this;
+  }
+
+  bool PostalCodeFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const PostalCodeFeatureValue& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
+
+    return postalCode==otherValue.postalCode;
+  }
+
+  const char* const PostalCodeFeature::NAME = "PostalCode";
+
+  PostalCodeFeature::PostalCodeFeature()
+  {
+      RegisterLabel(NAME, 0);
+  }
+
+  void PostalCodeFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagPostalCode=typeConfig.RegisterTag("postal_code");
+    tagAddrPostCode=typeConfig.RegisterTag("addr:postcode");
+  }
+
+  std::string PostalCodeFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t PostalCodeFeature::GetValueSize() const
+  {
+    return sizeof(PostalCodeFeatureValue);
+  }
+
+  FeatureValue* PostalCodeFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) PostalCodeFeatureValue();
+  }
+
+  void PostalCodeFeature::Parse(Progress& progress,
+                                const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& object,
+                                const TagMap& tags,
+                                FeatureValueBuffer& buffer) const
+  {
+    // ignore ways for now
+    if (object.GetType() == OSMRefType::osmRefWay)
+      return;
+
+    auto postalCode=tags.find(tagPostalCode);
+    auto addrPostCode=tags.find(tagAddrPostCode);
+
+    std::string postalCodeValue;
+
+    if (postalCode!=tags.end()) {
+      postalCodeValue = postalCode->second;
+    }
+
+    if (addrPostCode!=tags.end()) {
+      postalCodeValue = addrPostCode->second;
+    }
+
+    try {
+      if (!postalCodeValue.empty()) {
+        size_t idx = feature.GetIndex();
+        FeatureValue* fv = buffer.AllocateValue(idx);
+        PostalCodeFeatureValue* value=static_cast<PostalCodeFeatureValue*>(fv);
+
+        value->SetPostalCode(postalCodeValue);
+        //progress.Info(std::string("Found postal code ")+postalCodeValue+" for "+object.GetName());
+      }
+    }
+    catch (const std::exception &e) {
+      progress.Error(std::string("PostalCodeFeature::Parse Exception ")+e.what());
+    }
+  }
+    
+  void WebsiteFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(website);
+  }
+
+  void WebsiteFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(website);
+  }
+
+  FeatureValue& WebsiteFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const WebsiteFeatureValue& otherValue=static_cast<const WebsiteFeatureValue&>(other);
+
+      website=otherValue.website;
+    }
+
+    return *this;
+  }
+
+  bool WebsiteFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const WebsiteFeatureValue& otherValue=static_cast<const WebsiteFeatureValue&>(other);
+
+    return website==otherValue.website;
+  }
+
+  const char* const WebsiteFeature::NAME = "Website";
+
+  WebsiteFeature::WebsiteFeature()
+  {
+    RegisterLabel(NAME, 0);
+  }
+
+  void WebsiteFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagWebsite=typeConfig.RegisterTag("website");
+  }
+
+  std::string WebsiteFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t WebsiteFeature::GetValueSize() const
+  {
+    return sizeof(WebsiteFeatureValue);
+  }
+
+  FeatureValue* WebsiteFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) WebsiteFeatureValue();
+  }
+
+  void WebsiteFeature::Parse(Progress& progress,
+                                const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& object,
+                                const TagMap& tags,
+                                FeatureValueBuffer& buffer) const
+  {
+    // ignore ways for now
+    if (object.GetType() == OSMRefType::osmRefWay)
+      return;
+
+    auto website=tags.find(tagWebsite);
+
+    std::string strValue;
+
+    if (website!=tags.end()) {
+      strValue = website->second;
+    }
+
+    try {
+      if (!strValue.empty()) {
+        size_t idx = feature.GetIndex();
+        FeatureValue* fv = buffer.AllocateValue(idx);
+        WebsiteFeatureValue* value=static_cast<WebsiteFeatureValue*>(fv);
+
+        value->SetWebsite(strValue);
+        //progress.Info(std::string("Found website ")+strValue+" for "+object.GetName());
+      }
+    }
+    catch (const std::exception &e) {
+      progress.Error(std::string("WebsiteFeature::Parse Exception ")+e.what());
+    }
+  }
+
+  void PhoneFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(phone);
+  }
+
+  void PhoneFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(phone);
+  }
+
+  FeatureValue& PhoneFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const PhoneFeatureValue& otherValue=static_cast<const PhoneFeatureValue&>(other);
+
+      phone=otherValue.phone;
+    }
+
+    return *this;
+  }
+
+  bool PhoneFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const PhoneFeatureValue& otherValue=static_cast<const PhoneFeatureValue&>(other);
+
+    return phone==otherValue.phone;
+  }
+
+  const char* const PhoneFeature::NAME = "Phone";
+
+  PhoneFeature::PhoneFeature()
+  {
+    RegisterLabel(NAME, 0);
+  }
+
+  void PhoneFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagPhone=typeConfig.RegisterTag("phone");
+  }
+
+  std::string PhoneFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t PhoneFeature::GetValueSize() const
+  {
+    return sizeof(PhoneFeatureValue);
+  }
+
+  FeatureValue* PhoneFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) PhoneFeatureValue();
+  }
+
+  void PhoneFeature::Parse(Progress& progress,
+                                const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& object,
+                                const TagMap& tags,
+                                FeatureValueBuffer& buffer) const
+  {
+    // ignore ways for now
+    if (object.GetType() == OSMRefType::osmRefWay)
+      return;
+
+    auto phone=tags.find(tagPhone);
+
+    std::string strValue;
+
+    if (phone!=tags.end()) {
+      strValue = phone->second;
+    }
+
+    try {
+      if (!strValue.empty()) {
+        // remove invalid characters from phone number [0123456789+;,] http://wiki.openstreetmap.org/wiki/Key:phone
+        // - there can be multiple phone numbers separated by semicolon (some mappers use comma)
+        strValue.erase(
+          std::remove_if(strValue.begin(), strValue.end(), [](char x){return (x<'0'||x>'9') && x!='+' && x!=';' && x!=',';}), 
+          strValue.end());
+        
+        size_t idx = feature.GetIndex();
+        FeatureValue* fv = buffer.AllocateValue(idx);
+        PhoneFeatureValue* value=static_cast<PhoneFeatureValue*>(fv);
+
+        value->SetPhone(strValue);
+        //progress.Info(std::string("Found phone ")+strValue+" for "+object.GetName());
+      }
+    }
+    catch (const std::exception &e) {
+      progress.Error(std::string("PhoneFeature::Parse Exception ")+e.what());
     }
   }
 
