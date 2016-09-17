@@ -312,6 +312,7 @@ namespace osmscout {
   {
     tagAddrHouseNr=typeConfig.RegisterTag("addr:housenumber");
     tagAddrStreet=typeConfig.RegisterTag("addr:street");
+    tagAddrPlace=typeConfig.RegisterTag("addr:place");
   }
 
   std::string LocationFeature::GetName() const
@@ -339,7 +340,12 @@ namespace osmscout {
     auto street=tags.find(tagAddrStreet);
 
     if (street==tags.end()) {
-      return;
+      // We are cheating here, but from library view, there is no 
+      // difference in addr:street or addr:place. It is just a address.
+      street=tags.find(tagAddrPlace);
+      if (street==tags.end()) {
+        return;
+      }
     }
 
     auto houseNr=tags.find(tagAddrHouseNr);
@@ -391,7 +397,8 @@ namespace osmscout {
 
   AddressFeature::AddressFeature()
   : tagAddrHouseNr(0),
-    tagAddrStreet(0)
+    tagAddrStreet(0),
+    tagAddrPlace(0)
   {
     RegisterLabel(NAME_LABEL,
                   NAME_LABEL_INDEX);
@@ -401,6 +408,7 @@ namespace osmscout {
   {
     tagAddrHouseNr=typeConfig.RegisterTag("addr:housenumber");
     tagAddrStreet=typeConfig.RegisterTag("addr:street");
+    tagAddrPlace=typeConfig.RegisterTag("addr:place");
   }
 
   std::string AddressFeature::GetName() const
@@ -428,7 +436,12 @@ namespace osmscout {
     auto street=tags.find(tagAddrStreet);
 
     if (street==tags.end()) {
-      return;
+      // We are cheating here, but from library view, there is no 
+      // difference in addr:street or addr:place. It is just a address.
+      street=tags.find(tagAddrPlace);
+      if (street==tags.end()) {
+        return;
+      }
     }
 
     auto houseNr=tags.find(tagAddrHouseNr);
