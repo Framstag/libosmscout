@@ -277,6 +277,7 @@ namespace osmscout {
   private:
     TagId tagAddrStreet;
     TagId tagAddrHouseNr;
+    TagId tagAddrPlace;
 
   public:
     /** Name of this feature */
@@ -342,6 +343,7 @@ namespace osmscout {
   private:
     TagId tagAddrHouseNr;
     TagId tagAddrStreet;
+    TagId tagAddrPlace;
 
   public:
     /** Name of this feature */

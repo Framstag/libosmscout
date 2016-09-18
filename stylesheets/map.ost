@@ -1909,7 +1909,7 @@ TYPES
 
   // Addresses
   TYPE address
-    = NODE AREA (EXISTS "addr:street" AND EXISTS "addr:housenumber")
+    = NODE AREA ((EXISTS "addr:street" OR EXISTS "addr:place") AND EXISTS "addr:housenumber")
       ADDRESS
      
   //
