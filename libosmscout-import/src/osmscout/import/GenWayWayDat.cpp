@@ -529,7 +529,9 @@ namespace osmscout {
                        ", skipping");
         osmIdIt ++;    
         segmentStart = osmIdIt;
-        prev = coordsMap.find(*osmIdIt);
+        if (osmIdIt != endIt){
+          prev = coordsMap.find(*osmIdIt);
+        }
       }
       osmIdIt ++;
       segmentEnd=osmIdIt;
@@ -567,7 +569,9 @@ namespace osmscout {
                            ", splitting");
             osmIdIt ++;    
             segmentStart = osmIdIt;
-            prev = coordsMap.find(*osmIdIt);
+            if (osmIdIt != endIt){
+              prev = coordsMap.find(*osmIdIt);
+            }
           }
           // reset segment
           segmentLength=0.0;
