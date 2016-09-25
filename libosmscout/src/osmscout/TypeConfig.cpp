@@ -1613,76 +1613,6 @@ namespace osmscout {
         return false;
       }
 
-      // Tags
-
-      uint32_t tagCount;
-
-      scanner.ReadNumber(tagCount);
-
-      for (size_t i=1; i<=tagCount; i++) {
-        TagId       requestedId;
-        TagId       actualId;
-        std::string name;
-
-        scanner.ReadNumber(requestedId);
-        scanner.Read(name);
-
-        actualId=RegisterTag(name);
-
-        if (actualId!=requestedId) {
-          log.Error() << "Requested and actual tag id do not match";
-          return false;
-        }
-      }
-
-      // Name Tags
-
-      uint32_t nameTagCount;
-
-      scanner.ReadNumber(nameTagCount);
-
-      for (size_t i=1; i<=nameTagCount; i++) {
-        TagId       requestedId;
-        TagId       actualId;
-        std::string name;
-        uint32_t    priority = 0;
-
-        scanner.ReadNumber(requestedId);
-        scanner.Read(name);
-        scanner.ReadNumber(priority);
-
-        actualId=RegisterNameTag(name,priority);
-
-        if (actualId!=requestedId) {
-          log.Error() << "Requested and actual name tag id do not match";
-          return false;
-        }
-      }
-
-      // Alternative Name Tags
-
-      uint32_t nameAltTagCount;
-
-      scanner.ReadNumber(nameAltTagCount);
-
-      for (size_t i=1; i<=nameAltTagCount; i++) {
-        TagId       requestedId;
-        TagId       actualId;
-        std::string name;
-        uint32_t    priority = 0;
-
-        scanner.ReadNumber(requestedId);
-        scanner.Read(name);
-        scanner.ReadNumber(priority);
-
-        actualId=RegisterNameAltTag(name,priority);
-
-        if (actualId!=requestedId) {
-          log.Error() << "Requested and actual name alt tag id do not match";
-          return false;
-        }
-      }
-
       // Types
 
       uint32_t typeCount;
@@ -1822,49 +1752,6 @@ namespace osmscout {
       writer.Open(AppendFileToDir(directory,"types.dat"));
 
       writer.Write(FILE_FORMAT_VERSION);
-
-      writer.WriteNumber((uint32_t)tags.size());
-      for (const auto &tag : tags) {
-        writer.WriteNumber(tag.GetId());
-        writer.Write(tag.GetName());
-      }
-
-      uint32_t nameTagCount=0;
-      uint32_t nameAltTagCount=0;
-
-      for (const auto &tag : tags) {
-        uint32_t priority;
-
-        if (IsNameTag(tag.GetId(),priority)) {
-          nameTagCount++;
-        }
-
-        if (IsNameAltTag(tag.GetId(),priority)) {
-          nameAltTagCount++;
-        }
-      }
-
-      writer.WriteNumber(nameTagCount);
-      for (const auto &tag : tags) {
-        uint32_t priority;
-
-        if (IsNameTag(tag.GetId(),priority)) {
-          writer.WriteNumber(tag.GetId());
-          writer.Write(tag.GetName());
-          writer.WriteNumber((uint32_t)priority);
-        }
-      }
-
-      writer.WriteNumber(nameAltTagCount);
-      for (const auto &tag : tags) {
-        uint32_t priority;
-
-        if (IsNameAltTag(tag.GetId(),priority)) {
-          writer.WriteNumber(tag.GetId());
-          writer.Write(tag.GetName());
-          writer.WriteNumber((uint32_t)priority);
-        }
-      }
 
       uint32_t typeCount=0;
 
