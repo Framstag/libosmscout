@@ -1825,9 +1825,7 @@ namespace osmscout {
           }
 
           for (const auto& coord : cellGroundTileMap) {
-            FileOffset startPos;
-
-            startPos         =writer.GetPos();
+            FileOffset startPos=writer.GetPos();
 
             writer.WriteNumber((uint32_t) coord.second.size());
 
