@@ -31,77 +31,6 @@ namespace osmscout {
     // no code
   }
 
-  bool LabelData::Intersects(const LabelData& other) const
-  {
-    if (dynamic_cast<ShieldStyle*>(style.get())!=NULL &&
-      dynamic_cast<ShieldStyle*>(other.style.get())!=NULL) {
-      double horizLabelSpace=28.3282;
-      double vertLabelSpace=28.3282;
-
-      double hx1;
-      double hx2;
-      double hy1;
-      double hy2;
-
-      hx1=bx1-horizLabelSpace;
-      hx2=bx2+horizLabelSpace;
-      hy1=by1-vertLabelSpace;
-      hy2=by2+vertLabelSpace;
-
-      if (hx1>=other.bx2 ||
-          hx2<=other.bx1 ||
-          hy1>=other.by2 ||
-          hy2<=other.by1) {
-        return false;
-      }
-
-      if (text==other.text) {
-        double horizLabelSpace=226.625;
-        double vertLabelSpace=226.625;
-
-        double hx1;
-        double hx2;
-        double hy1;
-        double hy2;
-
-        hx1=bx1-horizLabelSpace;
-        hx2=bx2+horizLabelSpace;
-        hy1=by1-vertLabelSpace;
-        hy2=by2+vertLabelSpace;
-
-        if (hx1>=other.bx2 ||
-            hx2<=other.bx1 ||
-            hy1>=other.by2 ||
-            hy2<=other.by1) {
-          return false;
-        }
-      }
-    }
-    else {
-      double horizLabelSpace=5.66563;
-      double vertLabelSpace=5.66563;
-
-      double hx1;
-      double hx2;
-      double hy1;
-      double hy2;
-
-      hx1=bx1-horizLabelSpace;
-      hx2=bx2+horizLabelSpace;
-      hy1=by1-vertLabelSpace;
-      hy2=by2+vertLabelSpace;
-
-      if (hx1>=other.bx2 ||
-          hx2<=other.bx1 ||
-          hy1>=other.by2 ||
-          hy2<=other.by1) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   LabelLayouter::LabelLayouter()
   {
     // no code
@@ -276,7 +205,7 @@ namespace osmscout {
       std::cout << event->label->text << " ";
       std::cout << event->x << "," << event->y << " | ";
       std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;*/
-      if (event->label->Intersects(label)) {
+      if (Intersects(*event->label,label)) {
         if (label.priority<event->label->priority) {
           LabelDataRef oldLabel=event->label;
 
