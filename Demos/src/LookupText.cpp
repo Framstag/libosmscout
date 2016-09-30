@@ -19,7 +19,7 @@
 
 #include <iostream>
 #include <osmscout/TextSearchIndex.h>
-#include "<osmscout/Database.h>"
+#include <osmscout/Database.h>
 #include <algorithm>
 
 
