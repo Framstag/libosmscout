@@ -9,6 +9,7 @@ License: LGPL
 Source0:    %{name}-%{version}.tar.bz2
 
 Requires: protobuf
+Requires: libmarisa
 #Requires: cairo
 #Requires: pango
 
@@ -16,6 +17,7 @@ BuildRequires: cmake
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: protobuf-devel
 BuildRequires: libxml2-devel
+BuildRequires: libmarisa-devel
 #BuildRequires: cairo-devel
 #BuildRequires: pango-devel
 
