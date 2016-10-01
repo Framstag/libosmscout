@@ -31,8 +31,7 @@ namespace osmscout {
     // no code
   }
 
-  LabelLayouter::LabelLayouter():
-    maxScale(0)
+  LabelLayouter::LabelLayouter()
   {
     // no code
   }
@@ -164,6 +163,7 @@ namespace osmscout {
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
     sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
 
+    maxSpace=0.0;
     maxSpace=std::max(maxSpace,labelSpace);
     maxSpace=std::max(maxSpace,shieldLabelSpace);
     maxSpace=std::max(maxSpace,sameLabelSpace);
