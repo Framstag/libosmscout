@@ -31,7 +31,8 @@ namespace osmscout {
     // no code
   }
 
-  LabelLayouter::LabelLayouter()
+  LabelLayouter::LabelLayouter():
+    maxScale(0)
   {
     // no code
   }
