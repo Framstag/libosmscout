@@ -578,8 +578,7 @@ namespace osmscout
                              data.dataOffsetBytes);
     }
 
-    FileOffset dataStartOffset;
-    dataStartOffset=writer.GetPos();
+    FileOffset dataStartOffset=writer.GetPos();
 
     // Move data start by one byte. It creates little bit larger output file.
     // But without it 0 is valid cell offset and these data will not be visible,
