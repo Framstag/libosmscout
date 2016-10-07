@@ -104,7 +104,7 @@ namespace osmscout {
 
         images[idx]=image;
 
-        std::cout << "Loaded image '" << filename << "'" << std::endl;
+        //std::cout << "Loaded image '" << filename << "'" << std::endl;
 
         return true;
       }
@@ -153,7 +153,7 @@ namespace osmscout {
 
         patterns[idx].setTextureImage(image);
 
-        std::cout << "Loaded image '" << filename << "'" << std::endl;
+        //std::cout << "Loaded image '" << filename << "'" << std::endl;
 
         return true;
       }
