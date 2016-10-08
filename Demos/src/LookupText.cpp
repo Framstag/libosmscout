@@ -19,7 +19,9 @@
 
 #include <iostream>
 #include <osmscout/TextSearchIndex.h>
+#include <osmscout/Database.h>
 #include <algorithm>
+
 
 void badInput()
 {
@@ -28,6 +30,26 @@ void badInput()
                "  ie. text(poi,loc,region,other).dat" << std::endl;
   std::cout << "ex:" << std::endl;
   std::cout << "./LookupText /path/to/imported/map/data" << std::endl;
+}
+
+void printDetails(const osmscout::FeatureValueBuffer& features)
+{
+  std::cout << "   - type:     " << features.GetType()->GetName() << std::endl;
+  for (auto featureInstance :features.GetType()->GetFeatures()){
+    if (features.HasFeature(featureInstance.GetIndex())){
+      osmscout::FeatureRef feature=featureInstance.GetFeature();
+      if (feature->HasValue() && feature->HasLabel()){
+        osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
+        if (value->GetLabel().empty()){
+          std::cout << "   + feature " << feature->GetName() << std::endl;
+        }else{
+          std::cout << "   + feature " << feature->GetName() << ": " << value->GetLabel() << std::endl;
+        }
+      }else{
+        std::cout << "   + feature " << feature->GetName() << std::endl;
+      }
+    }
+  }
 }
 
 int main (int argc, char *argv[])
@@ -79,24 +101,43 @@ int main (int argc, char *argv[])
       continue;
     }
 
+    osmscout::DatabaseParameter databaseParameter;
+    osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+    if (!database->Open(path.c_str())) {
+      std::cerr << "Cannot open database" << std::endl;
+      return 1;
+    }
+
     // print out the results
     size_t printCount=0;
     osmscout::TextSearchIndex::ResultsMap::iterator it;
     for(it=results.begin(); it != results.end(); ++it) {
-      std::cout << "\"" <<it->first << "\" -> ";
+      std::cout << "\"" <<it->first << "\" -> " << std::endl;
       std::vector<osmscout::ObjectFileRef> &refs=it->second;
       std::size_t maxPrintedOffsets=5;
       std::size_t minRefCount=std::min(refs.size(),maxPrintedOffsets);
 
       for(size_t r=0; r < minRefCount; r++) {
         if(refs[r].GetType() == osmscout::refNode) {
-          std::cout << "N:" << refs[r].GetFileOffset() << " ";
+          std::cout << " * N:" << refs[r].GetFileOffset() << std::endl;
+          osmscout::NodeRef node;
+          if (database->GetNodeByOffset(refs[r].GetFileOffset(), node)){
+            printDetails(node->GetFeatureValueBuffer());
+          }
         }
         else if(refs[r].GetType() == osmscout::refWay) {
-          std::cout << "W:" << refs[r].GetFileOffset() << " ";
+          std::cout << " * W:" << refs[r].GetFileOffset() << std::endl;
+          osmscout::WayRef way;
+          if (database->GetWayByOffset(refs[r].GetFileOffset(), way)){
+            printDetails(way->GetFeatureValueBuffer());
+          }
         }
         else if(refs[r].GetType() == osmscout::refArea) {
-          std::cout << "A:" << refs[r].GetFileOffset() << " ";
+          std::cout << " * A:" << refs[r].GetFileOffset() << std::endl;
+          osmscout::AreaRef area;
+          if (database->GetAreaByOffset(refs[r].GetFileOffset(), area)){
+            printDetails(area->GetFeatureValueBuffer());
+          }
         }
       }
       if(refs.size() > 10) {

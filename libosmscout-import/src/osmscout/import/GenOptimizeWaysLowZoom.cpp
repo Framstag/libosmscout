@@ -413,16 +413,14 @@ namespace osmscout
           typeData.cellXEnd=typeData.cellXStart;
           typeData.cellYEnd=typeData.cellYStart;
 
-          for (std::map<Pixel,size_t>::const_iterator cell=cellFillCount.begin();
-               cell!=cellFillCount.end();
-               ++cell) {
-            typeData.indexEntries+=cell->second;
+          for (const auto& cell : cellFillCount) {
+            typeData.indexEntries+=cell.second;
 
-            typeData.cellXStart=std::min(typeData.cellXStart,cell->first.x);
-            typeData.cellXEnd=std::max(typeData.cellXEnd,cell->first.x);
+            typeData.cellXStart=std::min(typeData.cellXStart,cell.first.x);
+            typeData.cellXEnd=std::max(typeData.cellXEnd,cell.first.x);
 
-            typeData.cellYStart=std::min(typeData.cellYStart,cell->first.y);
-            typeData.cellYEnd=std::max(typeData.cellYEnd,cell->first.y);
+            typeData.cellYStart=std::min(typeData.cellYStart,cell.first.y);
+            typeData.cellYEnd=std::max(typeData.cellYEnd,cell.first.y);
           }
         }
 
@@ -543,25 +541,21 @@ namespace osmscout
     }
 
     size_t indexEntries=0;
-    size_t dataSize=0;
+    size_t dataSize=1; // Actual data will be prefixed by one empty byte
     char   buffer[10];
 
-    for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
-         cell!=cellOffsets.end();
-         ++cell) {
-      indexEntries+=cell->second.size();
+    for (const auto& cell : cellOffsets) {
+      indexEntries+=cell.second.size();
 
-      dataSize+=EncodeNumber(cell->second.size(),buffer);
+      dataSize+=EncodeNumber(cell.second.size(),buffer);
 
       FileOffset previousOffset=0;
-      for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
-           offset!=cell->second.end();
-           ++offset) {
-        FileOffset data=*offset-previousOffset;
+      for (const auto& offset : cell.second) {
+        FileOffset data=offset-previousOffset;
 
         dataSize+=EncodeNumber(data,buffer);
 
-        previousOffset=*offset;
+        previousOffset=offset;
       }
     }
 
@@ -577,32 +571,27 @@ namespace osmscout
     data.bitmapOffset=writer.GetPos();
 
     // Write the bitmap with offsets for each cell
-    // We prefill with zero and only overrite cells that have data
+    // We prefill with zero and only override cells that have data
     // So zero means "no data for this cell"
-    FileOffset cellOffset=0;
     for (size_t i=0; i<data.cellXCount*data.cellYCount; i++) {
-      writer.WriteFileOffset(cellOffset,
+      writer.WriteFileOffset((FileOffset)0,
                              data.dataOffsetBytes);
     }
 
-    FileOffset dataStartOffset;
-    dataStartOffset=writer.GetPos();
+    FileOffset dataStartOffset=writer.GetPos();
 
     // Move data start by one byte. It creates little bit larger output file.
     // But without it 0 is valid cell offset and these data will not be visible,
     // because for reader means that this cell has no data!
 
-    // TODO: when data format will be changing, consider usage ones (0xFF..FF)
-    // as empty placeholder
-    writer.WriteFileOffset(cellOffset, 1);
+    // TODO: when data format will be changing, consider usage ones (0xFF..FF) as empty placeholder
+    writer.WriteFileOffset((FileOffset)0,1);
 
     // Now write the list of offsets of objects for every cell with content
-    for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
-         cell!=cellOffsets.end();
-         ++cell) {
+    for (const auto& cell : cellOffsets) {
       FileOffset bitmapCellOffset=data.bitmapOffset+
-                                  ((cell->first.y-data.cellYStart)*data.cellXCount+
-                                   cell->first.x-data.cellXStart)*data.dataOffsetBytes;
+                                  ((cell.first.y-data.cellYStart)*data.cellXCount+
+                                   cell.first.x-data.cellXStart)*data.dataOffsetBytes;
       FileOffset previousOffset=0;
       FileOffset cellOffset;
 
@@ -615,9 +604,9 @@ namespace osmscout
 
       writer.SetPos(cellOffset);
 
-      writer.WriteNumber((uint32_t)cell->second.size());
+      writer.WriteNumber((uint32_t)cell.second.size());
 
-      for (const auto& offset : cell->second) {
+      for (const auto& offset : cell.second) {
         writer.WriteNumber((FileOffset)(offset-previousOffset));
 
         previousOffset=offset;

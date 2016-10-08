@@ -73,6 +73,7 @@ namespace osmscout {
         uint8_t state;
 
         scanner.Read(levels[idx].hasCellData);
+        scanner.Read(levels[idx].dataOffsetBytes);
         scanner.Read(state);
 
         levels[idx].defaultCellData=(GroundTile::Type)state;
@@ -86,6 +87,8 @@ namespace osmscout {
 
         levels[idx].cellXCount=levels[idx].cellXEnd-levels[idx].cellXStart+1;
         levels[idx].cellYCount=levels[idx].cellYEnd-levels[idx].cellYStart+1;
+
+        levels[idx].dataOffset=levels[idx].indexDataOffset+levels[idx].cellXCount*levels[idx].cellYCount*levels[idx].dataOffsetBytes;
       }
 
       if (scanner.HasError()) {
@@ -196,12 +199,12 @@ namespace osmscout {
         else {
           std::lock_guard<std::mutex> guard(lookupMutex);
           uint32_t                    cellId=(y-level.cellYStart)*level.cellXCount+x-level.cellXStart;
-          uint32_t                    index=cellId*8;
+          uint32_t                    index=cellId*level.dataOffsetBytes;
           FileOffset                  cell;
 
           scanner.SetPos(level.indexDataOffset+index);
 
-          scanner.Read(cell);
+          scanner.ReadFileOffset(cell,level.dataOffsetBytes);
 
           if (cell==(FileOffset)GroundTile::land ||
               cell==(FileOffset)GroundTile::water ||
@@ -220,12 +223,12 @@ namespace osmscout {
 
             tiles.push_back(tile);
 
-            scanner.SetPos(cell);
+            scanner.SetPos(level.dataOffset+cell);
             scanner.ReadNumber(tileCount);
 
-            for (size_t t=1; t<=tileCount; t++) {
-              uint8_t    tileType;
-              uint32_t   coordCount;
+            for (size_t t=0; t<tileCount; t++) {
+              uint8_t  tileType;
+              uint32_t coordCount;
 
               scanner.Read(tileType);
 

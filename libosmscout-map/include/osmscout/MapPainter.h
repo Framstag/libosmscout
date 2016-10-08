@@ -231,7 +231,7 @@ namespace osmscout {
     FeatureValueBuffer           coastlineSegmentAttributes;
     //@}
 
-    /**
+    /**                           L
      Precalculations
       */
     //@{
