@@ -139,6 +139,22 @@ location.idx (export)
 location.txt (debug only)
 : Dump of the internal location index
 
+## Find objects by name (fultext search) index
+
+Additional optional index file using maria ful text engine library
+
+textloc.dat (export, optional)
+: Index file holding names of locations
+
+textpoi.dat (export, optional)
+: Index file holding POI names
+
+textregion.dat (export, optional)
+: Index file holding names of regions
+
+textother.dat (export, optional)
+: Index file holding other objects having a name
+
 ## Is tile water or land index
 
 water.idx (export)
