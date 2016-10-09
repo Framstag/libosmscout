@@ -1051,7 +1051,7 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
+    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region,location);
 
     if (loc==region.locations.end()) {
       errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refArea),
@@ -1278,7 +1278,7 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
+    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region,location);
 
     if (loc==region.locations.end()) {
       errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refWay),
@@ -1484,9 +1484,10 @@ namespace osmscout {
   }
 
   std::map<std::string,LocationIndexGenerator::RegionLocation>::iterator LocationIndexGenerator::FindLocation(Progress& progress,
-                                                                                                              std::map<std::string,RegionLocation> &locations,
+                                                                                                              Region& region,
                                                                                                               const std::string &locationName)
   {
+    std::map<std::string,RegionLocation> &locations = region.locations;
     std::map<std::string,RegionLocation>::iterator loc=locations.find(locationName);
 
     if (loc!=locations.end()) {
@@ -1497,12 +1498,10 @@ namespace osmscout {
     // Fallback: look if any other location does match case insensitive
 
     std::wstring wLocation(UTF8StringToWString(locationName));
-
     std::transform(wLocation.begin(),wLocation.end(),wLocation.begin(),::tolower);
 
     for (loc=locations.begin(); loc!=locations.end(); loc++) {
       std::wstring wLocation2(UTF8StringToWString(loc->first));
-
       std::transform(wLocation2.begin(),wLocation2.end(),wLocation2.begin(),::tolower);
 
       if (wLocation==wLocation2) {
@@ -1512,6 +1511,30 @@ namespace osmscout {
       }
     }
     
+    // if locationName is same as region.name (or its name alias) add new location entry
+    // it is usual case for addresses without street and defined addr:place
+    std::wstring wRegionName(UTF8StringToWString(region.name));
+    std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);    
+    if (wRegionName == wLocation){
+      RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
+      newLoc.objects.push_back(region.reference);
+      locations[region.name]=newLoc;
+      progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
+      return locations.find(region.name);
+    }
+
+    for (auto &alias: region.aliases){
+      std::wstring wRegionName(UTF8StringToWString(alias.name));
+      std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);
+      if (wRegionName == wLocation){
+        RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
+        newLoc.objects.push_back(ObjectFileRef(alias.reference,refNode));
+        locations[alias.name]=newLoc;
+        progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
+        return locations.find(alias.name);
+      }
+    }
+
     return locations.end();
   }
 
@@ -1523,7 +1546,7 @@ namespace osmscout {
                                                       const std::string &postalCode,
                                                       bool& added)
   {
-    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region.locations,location);
+    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region,location);
 
     if (loc==region.locations.end()) {
       errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refNode),
