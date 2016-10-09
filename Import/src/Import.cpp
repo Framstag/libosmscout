@@ -836,6 +836,7 @@ int main(int argc, char* argv[])
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
 
+  int exitCode=0;
   try {
     osmscout::Importer importer(parameter);
 
@@ -854,11 +855,13 @@ int main(int argc, char* argv[])
     }
     else {
       progress.Error("Import failed!");
+      exitCode=1;
     }
   }
   catch (osmscout::IOException& e) {
     progress.Error("Import failed: "+e.GetDescription());
+    exitCode=1;
   }
 
-  return 0;
+  return exitCode;
 }
