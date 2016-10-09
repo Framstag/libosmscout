@@ -1511,7 +1511,7 @@ namespace osmscout {
       }
     }
     
-    // if locationName is same as region.name, add new location entry
+    // if locationName is same as region.name (or its name alias) add new location entry
     // it is usual case for addresses without street and defined addr:place
     std::wstring wRegionName(UTF8StringToWString(region.name));
     std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);    
@@ -1519,10 +1519,22 @@ namespace osmscout {
       RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
       newLoc.objects.push_back(region.reference);
       locations[region.name]=newLoc;
-      progress.Debug(std::string("Create virtual address in region '") + region.name + "'");
+      progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
       return locations.find(region.name);
     }
-    
+
+    for (auto &alias: region.aliases){
+      std::wstring wRegionName(UTF8StringToWString(alias.name));
+      std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);
+      if (wRegionName == wLocation){
+        RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
+        newLoc.objects.push_back(ObjectFileRef(alias.reference,refNode));
+        locations[alias.name]=newLoc;
+        progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
+        return locations.find(alias.name);
+      }
+    }
+
     return locations.end();
   }
 
