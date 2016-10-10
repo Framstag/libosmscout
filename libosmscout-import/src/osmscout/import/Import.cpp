@@ -1023,9 +1023,7 @@ namespace osmscout {
       }
     }
 
-    std::list<std::string> providedFiles;
-
-    std::copy(providedFileSet.begin(),providedFileSet.end(),std::back_inserter(providedFiles));
+    std::list<std::string> providedFiles(providedFileSet.begin(),providedFileSet.end());
 
     return providedFiles;
   }
@@ -1040,9 +1038,37 @@ namespace osmscout {
       }
     }
 
-    std::list<std::string> providedFiles;
+    std::list<std::string> providedFiles(providedFileSet.begin(),providedFileSet.end());
 
-    std::copy(providedFileSet.begin(),providedFileSet.end(),std::back_inserter(providedFiles));
+    return providedFiles;
+  }
+
+  std::list<std::string> Importer::GetProvidedTemporaryFiles() const
+  {
+    std::set<std::string> providedFileSet;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedTemporaryFiles()) {
+        providedFileSet.insert(file);
+      }
+    }
+
+    std::list<std::string> providedFiles(providedFileSet.begin(),providedFileSet.end());
+
+    return providedFiles;
+  }
+
+  std::list<std::string> Importer::GetProvidedDebuggingFiles() const
+  {
+    std::set<std::string> providedFileSet;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedDebuggingFiles()) {
+        providedFileSet.insert(file);
+      }
+    }
+
+    std::list<std::string> providedFiles(providedFileSet.begin(),providedFileSet.end());
 
     return providedFiles;
   }

@@ -418,6 +418,8 @@ namespace osmscout {
 
     std::list<std::string> GetProvidedFiles() const;
     std::list<std::string> GetProvidedOptionalFiles() const;
+    std::list<std::string> GetProvidedTemporaryFiles() const;
+    std::list<std::string> GetProvidedDebuggingFiles() const;
   };
 }
 
