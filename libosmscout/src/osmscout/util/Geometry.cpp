@@ -107,14 +107,16 @@ namespace osmscout {
                               double bLon, double bLat)
   {
     double r=6371.01; // Average radius of earth
-    double dLat=(bLat-aLat)*M_PI/180;
-    double dLon=(bLon-aLon)*M_PI/180;
+    double aLatRad=DegToRad(aLat);
+    double bLatRad=DegToRad(bLat);
+    double dLat=DegToRad(bLat-aLat);
+    double dLon=DegToRad(bLon-aLon);
 
-    double sindLonDiv2;
-    double cosdLonDiv2;
-    sincos(dLon/2, sindLonDiv2, cosdLonDiv2);
+    double sindLonDiv2=sin(dLon/2);
 
-    double a = sin(dLat/2)*sin(dLat/2)+cosdLonDiv2*cosdLonDiv2*sindLonDiv2*sindLonDiv2;
+    double a = sin(dLat/2)*sin(dLat/2)+
+        cos(aLatRad)*cos(bLatRad)*
+        sindLonDiv2*sindLonDiv2;
 
     double c = 2*atan2(sqrt(a),sqrt(1-a));
 
@@ -129,14 +131,16 @@ namespace osmscout {
                               const GeoCoord& b)
   {
     double r=6371.01; // Average radius of earth
-    double dLat=(b.GetLat()-a.GetLat())*M_PI/180;
-    double dLon=(b.GetLon()-a.GetLon())*M_PI/180;
+    double aLatRad=DegToRad(a.GetLat());
+    double bLatRad=DegToRad(b.GetLat());
+    double dLat=DegToRad(b.GetLat()-a.GetLat());
+    double dLon=DegToRad(b.GetLon()-a.GetLon());
 
-    double sindLonDiv2;
-    double cosdLonDiv2;
-    sincos(dLon/2, sindLonDiv2, cosdLonDiv2);
+    double sindLonDiv2=sin(dLon/2);
 
-    double aa = sin(dLat/2)*sin(dLat/2)+cosdLonDiv2*cosdLonDiv2*sindLonDiv2*sindLonDiv2;
+    double aa = sin(dLat/2)*sin(dLat/2)+
+        cos(aLatRad)*cos(bLatRad)*
+        sindLonDiv2*sindLonDiv2;
 
     double c = 2*atan2(sqrt(aa),sqrt(1-aa));
 
