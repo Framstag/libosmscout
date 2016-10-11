@@ -1406,12 +1406,16 @@ STYLE
 
 
    [TYPE barrier_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
+   [TYPE barrier_retaining_wall] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
 
    [TYPE barrier_city_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
    [TYPE barrier_city_wall] WAY#decor {color: @wallColor; 
              dash: 1,5; displayOffset: 0.09mm; offset: 0.5m; cap: butt;
              displayWidth: 0.1mm; width: 0.5m;
    }
+   [TYPE barrier_wall]           AREA {color: lighten(@wallColor, 0.5); borderColor: @wallColor; borderWidth: 0.1mm; }
+   [TYPE barrier_retaining_wall] AREA {color: lighten(@wallColor, 0.5); borderColor: @wallColor; borderWidth: 0.1mm; }
+   [TYPE barrier_city_wall]      AREA {color: lighten(@wallColor, 0.5); borderColor: @wallColor; borderWidth: 0.3mm; }
  }
 
  [MAG veryClose-] {
