@@ -23,3 +23,24 @@ the team or just make a pull request with your data added to this page.
 to common online providers. Can be used on desktop or mobile.
 
 ## Applications
+
+<table>
+  <tr>
+    <th>Project</th>
+    <th>Repository</th>
+    <th>Development Status</th>
+    <th>Features</th>
+  </tr>
+  <tr>
+    <td><strong>OSMScout for Sailfish OS</strong></td>
+    <td><a href="https://github.com/Karry/osmscout-sailfish">Github: Karry/osmscout-sailfish</a></td>
+    <td>Active</td>
+    <td>online / offline map, place address</td>
+  </tr>
+  <tr>
+    <td><strong>OSMScout for Ubuntu Touch</strong></td>
+    <td><a href="https://github.com/fransschreuder/OSMScout-ubuntu">Github: Fransschreuder/OSMScout-ubuntu</a></td>
+    <td>Low activity (3 commits in last year)</td>
+    <td>offline map, map downloads, search, routing</td>
+  </tr>
+</table>
