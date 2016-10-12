@@ -128,8 +128,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
             << "                                      # is the default language (no :language) (default: #)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
-  std::cout << " --delete-temporary-files             deletes all temporary files after execution of the importer" << std::endl;
-  std::cout << " --delete-debugging-files             deletes all debugging files after execution of the importer" << std::endl;
+  std::cout << " --delete-temporary-files true|false  deletes all temporary files after execution of the importer" << std::endl;
+  std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
 }
 
 bool ParseBoolArgument(int argc,
