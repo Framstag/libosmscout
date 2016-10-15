@@ -7,7 +7,8 @@ check_PROGRAMS = AccessParse \
                  FileScannerWriter \
                  GeoCoordParse \
                  NumberSet \
-                 ScanConversion
+                 ScanConversion \
+                 WStringStringConversion
 
 TESTS = $(check_PROGRAMS)
 
@@ -31,4 +32,7 @@ NumberSet_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
 
 ScanConversion_SOURCES = ScanConversion.cpp
 ScanConversion_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
+
+WStringStringConversion_SOURCES = WStringStringConversion.cpp
+WStringStringConversion_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
 

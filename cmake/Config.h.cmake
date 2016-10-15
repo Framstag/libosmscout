@@ -121,11 +121,6 @@
 #cmakedefine HAVE_STDLIB_H 1
 #endif
 
-/* Define to 1 if the system has the type `std::wstring'. */
-#ifndef HAVE_STD__WSTRING
-#cmakedefine HAVE_STD__WSTRING 1
-#endif
-
 /* Define to 1 if you have the <strings.h> header file. */
 #ifndef HAVE_STRINGS_H
 #cmakedefine HAVE_STRINGS_H 1
@@ -290,11 +285,6 @@
 /* Define to the version of this package. */
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "0.1"
-#endif
-
-/* The size of `wchar_t', as computed by sizeof. */
-#ifndef SIZEOF_WCHAR_T
-#define SIZEOF_WCHAR_T @SIZEOF_WCHAR_T@
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */

@@ -20,6 +20,7 @@
 #include <osmscout/util/String.h>
 
 #include <cctype>
+#include <codecvt>
 #include <iomanip>
 #include <locale>
 #include <sstream>
@@ -313,165 +314,17 @@ namespace osmscout {
     }
   }
 
-#if defined(OSMSCOUT_HAVE_STD_WSTRING)
-
-  /**
-    The following string conversion code is a modified version of code copied
-    from the source of the ConvertUTF tool, as can be found for example at
-    http://www.unicode.org/Public/PROGRAMS/CVTUTF/
-
-    It is free to copy and use.
-  */
-
-  #define UNI_SUR_HIGH_START  0xD800
-  #define UNI_SUR_HIGH_END    0xDBFF
-  #define UNI_SUR_LOW_START   0xDC00
-  #define UNI_SUR_LOW_END     0xDFFF
-  #define UNI_MAX_BMP         0x0000FFFF
-  #define UNI_MAX_UTF16       0x0010FFFF
-  #define UNI_MAX_LEGAL_UTF32 0x0010FFFF
-
-  static const unsigned long offsetsFromUTF8[6] = {
-    0x00000000UL, 0x00003080UL, 0x000E2080UL,
-    0x03C82080UL, 0xFA082080UL, 0x82082080UL
-  };
-
-  static const char trailingBytesForUTF8[256] = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
-  };
-
   std::wstring UTF8StringToWString(const std::string& text)
   {
-    std::wstring result;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
 
-    result.reserve(text.length());
-
-#if SIZEOF_WCHAR_T==4
-    const char* source=text.c_str();
-
-    while (source!=text.c_str()+text.length()) {
-      unsigned long  ch = 0;
-      unsigned short extraBytesToRead=trailingBytesForUTF8[(unsigned char)*source];
-
-      /*
-       * The cases all fall through. See "Note A" below.
-       */
-      switch (extraBytesToRead) {
-      case 5:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 4:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 3:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 2:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 1:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 0:
-        ch+=(unsigned char)(*source);
-        source++;
-      }
-      ch-=offsetsFromUTF8[extraBytesToRead];
-
-      if (ch<=UNI_MAX_LEGAL_UTF32) {
-        /*
-         * UTF-16 surrogate values are illegal in UTF-32, and anything
-         * over Plane 17 (> 0x10FFFF) is illegal.
-         */
-        if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_LOW_END) {
-          return result;
-        }
-        else {
-          result.append(1,(wchar_t)ch);
-        }
-      }
-      else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
-        return result;
-      }
-    }
-
-#elif SIZEOF_WCHAR_T==2
-    static const int halfShift=10; /* used for shifting by 10 bits */
-    static const unsigned long halfBase=0x0010000UL;
-    static const unsigned long halfMask=0x3FFUL;
-
-    size_t idx=0;
-
-    while (idx<text.length()) {
-      unsigned long  ch=0;
-      unsigned short extraBytesToRead=trailingBytesForUTF8[(unsigned char)text[idx]];
-
-      /*
-       * The cases all fall through. See "Note A" below.
-       */
-
-      switch (extraBytesToRead) {
-      case 5:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6; /* remember, illegal UTF-8 */
-      case 4:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6; /* remember, illegal UTF-8 */
-      case 3:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6;
-      case 2:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6;
-      case 1:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6;
-      case 0:
-        ch+=(unsigned char)text[idx];
-        idx++;
-      }
-      ch-=offsetsFromUTF8[extraBytesToRead];
-
-      if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
-        /* UTF-16 surrogate values are illegal in UTF-32 */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-          return result;
-        }
-        else {
-          result.append(1,(wchar_t)ch); /* normal case */
-        }
-      }
-      else if (ch > UNI_MAX_UTF16) {
-        return result;
-      }
-      else {
-        /* target is a character in range 0xFFFF - 0x10FFFF. */
-        ch -= halfBase;
-        result.append(1,(wchar_t)((ch >> halfShift) + UNI_SUR_HIGH_START));
-        result.append(1,(wchar_t)((ch & halfMask) + UNI_SUR_LOW_START));
-      }
-    }
-
-#endif
-
-    return result;
+    return conv.from_bytes(text);
   }
-#endif
+
+  std::string WStringToUTF8String(const std::wstring& text)
+  {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+
+    return conv.to_bytes(text);
+  }
 }

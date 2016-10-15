@@ -50,9 +50,6 @@ AC_CHECK_TYPES([long long, unsigned long long, int8_t, uint8_t, int16_t, uint16_
 
 dnl the agg backend needs wstring support
 
-AC_CHECK_TYPES([std::wstring],[AC_DEFINE([OSMSCOUT_HAVE_STD_WSTRING],[1],[std::wstring is available])],,[#include <string>])
-AC_CHECK_SIZEOF([wchar_t])
-
 AC_CHECK_TYPES([std::shared_mutex],[AC_DEFINE([OSMSCOUT_HAVE_SHARED_MUTEX],[1],[std::shared_mutex is available])],,[#include <shared_mutex>])
 
 AC_CHECK_HEADERS([fcntl.h sys/stat.h])

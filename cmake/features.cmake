@@ -74,16 +74,7 @@ check_type_size(uint32_t HAVE_UINT32_T)
 check_type_size(uint64_t HAVE_UINT64_T)
 check_type_size(uint8_t HAVE_UINT8_T)
 check_type_size("unsigned long long" HAVE_UNSIGNED_LONG_LONG)
-set(CMAKE_EXTRA_INCLUDE_FILES wchar.h)
-check_type_size(wchar_t SIZEOF_WCHAR_T)
 set(CMAKE_EXTRA_INCLUDE_FILES)
-check_cxx_source_compiles("
-#include <string>
-int main()
-{
-  std::wstring value=L\"Hello\";
-}
-" HAVE_STD__WSTRING)
 
 # check functions exists
 check_function_exists(fseeko HAVE_FSEEKO)

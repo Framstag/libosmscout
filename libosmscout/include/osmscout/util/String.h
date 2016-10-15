@@ -394,12 +394,11 @@ namespace osmscout {
   extern OSMSCOUT_API std::string ByteSizeToString(FileOffset size);
   extern OSMSCOUT_API std::string ByteSizeToString(double size);
 
-#if defined(OSMSCOUT_HAVE_STD_WSTRING)
   /**
    * \ingroup Util
    */
   extern OSMSCOUT_API std::wstring UTF8StringToWString(const std::string& text);
-#endif
+  extern OSMSCOUT_API std::string WStringToUTF8String(const std::wstring& text);
 }
 
 #endif
