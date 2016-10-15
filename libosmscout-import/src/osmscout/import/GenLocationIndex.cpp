@@ -56,6 +56,9 @@ namespace osmscout {
 
   static const size_t REGION_INDEX_LEVEL=14;
 
+  const char* const LocationIndexGenerator::FILENAME_LOCATION_REGION_TXT = "location_region.txt";
+  const char* const LocationIndexGenerator::FILENAME_LOCATION_FULL_TXT = "location_full.txt";
+
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
                                                                                           const GeoCoord& coord) const
   {
@@ -1895,6 +1898,9 @@ namespace osmscout {
     description.AddRequiredFile(AreaAreaIndexGenerator::AREAADDRESS_DAT);
 
     description.AddProvidedFile(LocationIndex::FILENAME_LOCATION_IDX);
+
+    description.AddProvidedAnalysisFile(FILENAME_LOCATION_REGION_TXT);
+    description.AddProvidedAnalysisFile(FILENAME_LOCATION_FULL_TXT);
   }
 
   bool LocationIndexGenerator::Import(const TypeConfigRef& typeConfig,
@@ -2095,14 +2101,14 @@ namespace osmscout {
       DumpRegionTree(progress,
                      *rootRegion,
                      AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "location_region.txt"));
+                                     FILENAME_LOCATION_REGION_TXT));
 
       progress.SetAction("Dumping location tree");
 
       DumpLocationTree(progress,
                        *rootRegion,
                        AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       "location_full.txt"));
+                                       FILENAME_LOCATION_FULL_TXT));
 
       //
       // Generate file with all areas, where areas reference parent and children by offset

@@ -130,6 +130,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
   std::cout << " --delete-temporary-files true|false  deletes all temporary files after execution of the importer" << std::endl;
   std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
+  std::cout << " --delete-analysis-files true|false   deletes all analysis files after execution of the importer" << std::endl;
+  std::cout << " --delete-report-files true|false     deletes all report files after execution of the importer" << std::endl;
 }
 
 bool ParseBoolArgument(int argc,
@@ -382,6 +384,8 @@ int main(int argc, char* argv[])
   osmscout::VehicleMask     defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
   bool                      deleteTemporaries=false;
   bool                      deleteDebugging=false;
+  bool                      deleteAnalysis=false;
+  bool                      deleteReport=false;
 
   parameter.AddRouter(osmscout::ImportParameter::Router(defaultVehicleMask,
                                                         "router"));
@@ -754,6 +758,22 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--delete-analysis-files")==0) {
+      if (!ParseBoolArgument(argc,
+                             argv,
+                             i,
+                             deleteAnalysis)) {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--delete-report-files")==0) {
+      if (!ParseBoolArgument(argc,
+                             argv,
+                             i,
+                             deleteReport)) {
+        parameterError=true;
+      }
+    }
     else if (strncmp(argv[i],"--",2)==0) {
       std::cerr << "Unknown option: " << argv[i] << std::endl;
 
@@ -909,6 +929,26 @@ int main(int argc, char* argv[])
       progress.SetAction(("Deleting debugging files"));
 
       std::list<std::string> temporaries=importer.GetProvidedDebuggingFiles();
+
+      DeleteFilesIgnoreError(parameter,
+                             temporaries,
+                             progress);
+    }
+
+    if (deleteAnalysis) {
+      progress.SetAction(("Deleting analysis files"));
+
+      std::list<std::string> temporaries=importer.GetProvidedAnalysisFiles();
+
+      DeleteFilesIgnoreError(parameter,
+                             temporaries,
+                             progress);
+    }
+
+    if (deleteReport) {
+      progress.SetAction(("Deleting report files"));
+
+      std::list<std::string> temporaries=importer.GetProvidedReportFiles();
 
       DeleteFilesIgnoreError(parameter,
                              temporaries,

@@ -36,6 +36,10 @@ namespace osmscout {
 
   class LocationIndexGenerator : public ImportModule
   {
+  public:
+    static const char* const FILENAME_LOCATION_REGION_TXT;
+    static const char* const FILENAME_LOCATION_FULL_TXT;
+
   private:
     /**
      * An area can contain an number of location nodes. Since they do not have

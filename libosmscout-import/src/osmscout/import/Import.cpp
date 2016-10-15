@@ -635,6 +635,11 @@ namespace osmscout {
     providedTemporaryFiles.push_back(providedFile);
   }
 
+  void ImportModuleDescription::AddProvidedAnalysisFile(const std::string& providedFile)
+  {
+    providedAnalysisFiles.push_back(providedFile);
+  }
+
   void ImportModuleDescription::AddRequiredFile(const std::string& requiredFile)
   {
     requiredFiles.push_back(requiredFile);
@@ -815,6 +820,9 @@ namespace osmscout {
     }
     for (const auto& filename : description.GetProvidedTemporaryFiles()) {
       progress.Info("Module provides temporary file '"+filename+"'");
+    }
+    for (const auto& filename : description.GetProvidedAnalysisFiles()) {
+      progress.Info("Module provides analysis file '"+filename+"'");
     }
   }
 
@@ -1072,5 +1080,31 @@ namespace osmscout {
 
     return providedFiles;
   }
+
+  std::list<std::string> Importer::GetProvidedAnalysisFiles() const
+  {
+    std::set<std::string> providedFileSet;
+
+    for (const auto& description : moduleDescriptions) {
+      for (const auto& file : description.GetProvidedAnalysisFiles()) {
+        providedFileSet.insert(file);
+      }
+    }
+
+    std::list<std::string> providedFiles(providedFileSet.begin(),providedFileSet.end());
+
+    return providedFiles;
+  }
+
+  std::list<std::string> Importer::GetProvidedReportFiles() const
+  {
+    std::list<std::string> providedFiles={ImportErrorReporter::FILENAME_INDEX_HTML,
+                                          ImportErrorReporter::FILENAME_WAY_HTML,
+                                          ImportErrorReporter::FILENAME_RELATION_HTML,
+                                          ImportErrorReporter::FILENAME_LOCATION_HTML};
+
+    return providedFiles;
+  }
+
 }
 
