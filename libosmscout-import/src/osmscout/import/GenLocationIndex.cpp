@@ -1490,7 +1490,7 @@ namespace osmscout {
                                                                                                               Region& region,
                                                                                                               const std::string &locationName)
   {
-    std::map<std::string,RegionLocation> &locations = region.locations;
+    std::map<std::string,RegionLocation>           &locations=region.locations;
     std::map<std::string,RegionLocation>::iterator loc=locations.find(locationName);
 
     if (loc!=locations.end()) {
@@ -1517,8 +1517,9 @@ namespace osmscout {
     // if locationName is same as region.name (or its name alias) add new location entry
     // it is usual case for addresses without street and defined addr:place
     std::wstring wRegionName(UTF8StringToWString(region.name));
-    std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);    
-    if (wRegionName == wLocation){
+    std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);
+
+    if (wRegionName==wLocation) {
       RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
       newLoc.objects.push_back(region.reference);
       locations[region.name]=newLoc;
@@ -1526,10 +1527,11 @@ namespace osmscout {
       return locations.find(region.name);
     }
 
-    for (auto &alias: region.aliases){
+    for (auto &alias: region.aliases) {
       std::wstring wRegionName(UTF8StringToWString(alias.name));
       std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);
-      if (wRegionName == wLocation){
+
+      if (wRegionName==wLocation) {
         RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
         newLoc.objects.push_back(ObjectFileRef(alias.reference,refNode));
         locations[alias.name]=newLoc;
