@@ -20,7 +20,6 @@
 #include <osmscout/util/String.h>
 
 #include <cctype>
-#include <codecvt>
 #include <iomanip>
 #include <locale>
 #include <sstream>
@@ -28,6 +27,10 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/private/Config.h>
+
+#if defined(HAVE_CODECVT)
+#include <codecvt>
+#endif
 
 namespace osmscout {
 
@@ -314,6 +317,7 @@ namespace osmscout {
     }
   }
 
+#if defined(HAVE_CODECVT)
   std::wstring UTF8StringToWString(const std::string& text)
   {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
@@ -327,4 +331,291 @@ namespace osmscout {
 
     return conv.to_bytes(text);
   }
+#else
+  /**
+    The following string conversion code is a modified version of code copied
+    from the source of the ConvertUTF tool, as can be found for example at
+    http://www.unicode.org/Public/PROGRAMS/CVTUTF/
+
+    It is free to copy and use.
+  */
+
+  #define UNI_SUR_HIGH_START  0xD800
+  #define UNI_SUR_HIGH_END    0xDBFF
+  #define UNI_SUR_LOW_START   0xDC00
+  #define UNI_SUR_LOW_END     0xDFFF
+  #define UNI_MAX_BMP         0x0000FFFF
+  #define UNI_MAX_UTF16       0x0010FFFF
+  #define UNI_MAX_LEGAL_UTF32 0x0010FFFF
+
+  static const unsigned long offsetsFromUTF8[6] = {
+    0x00000000UL, 0x00003080UL, 0x000E2080UL,
+    0x03C82080UL, 0xFA082080UL, 0x82082080UL
+  };
+
+  static const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+
+  static const char trailingBytesForUTF8[256] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
+  };
+
+  std::string WStringToUTF8String(const std::wstring& text)
+  {
+    std::string         result;
+    char                buffer[4];
+    const unsigned long byteMask=0xBF;
+    const unsigned long byteMark=0x80;
+
+    result.reserve(text.length()*4);
+
+#if SIZEOF_WCHAR_T==4
+
+    for (size_t i=0; i<text.length(); i++) {
+      wchar_t             ch=text[i];
+      unsigned short      bytesToWrite = 0;
+
+      /* UTF-16 surrogate values are illegal in UTF-32 */
+      if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_LOW_END) {
+        return result;
+      }
+
+      /*
+       * Figure out how many bytes the result will require. Turn any
+       * illegally large UTF32 things (> Plane 17) into replacement chars.
+      */
+      if (ch<0x80) {
+        bytesToWrite=1;
+      }
+      else if (ch<0x800) {
+        bytesToWrite=2;
+      }
+      else if (ch<0x10000) {
+        bytesToWrite=3;
+      }
+      else if (ch<=UNI_MAX_LEGAL_UTF32) {
+        bytesToWrite=4;
+      }
+      else {
+        return result;
+      }
+
+      switch (bytesToWrite) { /* note: everything falls through. */
+      case 4:
+        buffer[3]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 3:
+        buffer[2]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 2:
+        buffer[1]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 1:
+        buffer[0]=(char)(ch | firstByteMark[bytesToWrite]);
+      }
+
+      result.append(buffer,bytesToWrite);
+    }
+
+#elif SIZEOF_WCHAR_T==2
+
+    const wchar_t* source=text.c_str();
+
+    while (source!=text.c_str()+text.length()) {
+      wchar_t             ch;
+      unsigned short      bytesToWrite=0;
+
+      ch=*source++;
+
+      /* If we have a surrogate pair, convert to UTF32 first. */
+      if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_HIGH_END) {
+        if (source>=text.c_str()+text.length()) {
+          return result;
+        }
+        /* If the 16 bits following the high surrogate are in the source buffer... */
+        unsigned long ch2 = *source++;
+        /* If it's a low surrogate, convert to UTF32. */
+        if (ch2>=UNI_SUR_LOW_START && ch2<=UNI_SUR_LOW_END) {
+          ch=(wchar_t)(((ch-UNI_SUR_HIGH_START) << halfShift) + (ch2-UNI_SUR_LOW_START) + halfBase);
+        }
+        else { /* it's an unpaired high surrogate */
+          return result;
+        }
+      }
+      else {
+        /* UTF-16 surrogate values are illegal in UTF-32 */
+        if (ch>=UNI_SUR_LOW_START && ch<=UNI_SUR_LOW_END) {
+          return result;
+        }
+      }
+
+      /* Figure out how many bytes the result will require */
+      if (ch<0x80) {
+        bytesToWrite=1;
+      }
+      else if (ch<0x800) {
+        bytesToWrite=2;
+      }
+      else if (ch<0x10000) {
+        bytesToWrite=3;
+      }
+      else if (ch<0x110000) {
+        bytesToWrite=4;
+      }
+      else {
+        return result;
+      }
+
+      switch (bytesToWrite) { /* note: everything falls through. */
+      case 4:
+        buffer[3]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 3:
+        buffer[2]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 2:
+        buffer[1]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 1:
+        buffer[0]=(char)(ch | firstByteMark[bytesToWrite]);
+      }
+
+      result.append(buffer,bytesToWrite);
+    }
+#endif
+
+    return result;
+  }
+
+  std::wstring UTF8StringToWString(const std::string& text)
+  {
+    std::wstring result;
+
+    result.reserve(text.length());
+
+#if SIZEOF_WCHAR_T==4
+    const char* source=text.c_str();
+
+    while (source!=text.c_str()+text.length()) {
+      unsigned long  ch = 0;
+      unsigned short extraBytesToRead=trailingBytesForUTF8[(unsigned char)*source];
+
+      /*
+       * The cases all fall through. See "Note A" below.
+       */
+      switch (extraBytesToRead) {
+      case 5:
+        ch+=(unsigned char)(*source);
+        source++;
+        ch<<=6;
+      case 4:
+        ch+=(unsigned char)(*source);
+        source++;
+        ch<<=6;
+      case 3:
+        ch+=(unsigned char)(*source);
+        source++;
+        ch<<=6;
+      case 2:
+        ch+=(unsigned char)(*source);
+        source++;
+        ch<<=6;
+      case 1:
+        ch+=(unsigned char)(*source);
+        source++;
+        ch<<=6;
+      case 0:
+        ch+=(unsigned char)(*source);
+        source++;
+      }
+      ch-=offsetsFromUTF8[extraBytesToRead];
+
+      if (ch<=UNI_MAX_LEGAL_UTF32) {
+        /*
+         * UTF-16 surrogate values are illegal in UTF-32, and anything
+         * over Plane 17 (> 0x10FFFF) is illegal.
+         */
+        if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_LOW_END) {
+          return result;
+        }
+        else {
+          result.append(1,(wchar_t)ch);
+        }
+      }
+      else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
+        return result;
+      }
+    }
+#elif SIZEOF_WCHAR_T==2
+    static const int halfShift=10; /* used for shifting by 10 bits */
+    static const unsigned long halfBase=0x0010000UL;
+    static const unsigned long halfMask=0x3FFUL;
+
+    size_t idx=0;
+
+    while (idx<text.length()) {
+      unsigned long  ch=0;
+      unsigned short extraBytesToRead=trailingBytesForUTF8[(unsigned char)text[idx]];
+
+      /*
+       * The cases all fall through. See "Note A" below.
+       */
+
+      switch (extraBytesToRead) {
+      case 5:
+        ch+=(unsigned char)text[idx];
+        idx++;
+        ch<<=6; /* remember, illegal UTF-8 */
+      case 4:
+        ch+=(unsigned char)text[idx];
+        idx++;
+        ch<<=6; /* remember, illegal UTF-8 */
+      case 3:
+        ch+=(unsigned char)text[idx];
+        idx++;
+        ch<<=6;
+      case 2:
+        ch+=(unsigned char)text[idx];
+        idx++;
+        ch<<=6;
+      case 1:
+        ch+=(unsigned char)text[idx];
+        idx++;
+        ch<<=6;
+      case 0:
+        ch+=(unsigned char)text[idx];
+        idx++;
+      }
+      ch-=offsetsFromUTF8[extraBytesToRead];
+
+      if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        /* UTF-16 surrogate values are illegal in UTF-32 */
+        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+          return result;
+        }
+        else {
+          result.append(1,(wchar_t)ch); /* normal case */
+        }
+      }
+      else if (ch > UNI_MAX_UTF16) {
+        return result;
+      }
+      else {
+        /* target is a character in range 0xFFFF - 0x10FFFF. */
+        ch -= halfBase;
+        result.append(1,(wchar_t)((ch >> halfShift) + UNI_SUR_HIGH_START));
+        result.append(1,(wchar_t)((ch & halfMask) + UNI_SUR_LOW_START));
+      }
+    }
+#endif
+
+    return result;
+  }
+#endif
 }
