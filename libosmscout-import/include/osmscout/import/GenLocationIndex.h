@@ -36,6 +36,10 @@ namespace osmscout {
 
   class LocationIndexGenerator : public ImportModule
   {
+  public:
+    static const char* const FILENAME_LOCATION_REGION_TXT;
+    static const char* const FILENAME_LOCATION_FULL_TXT;
+
   private:
     /**
      * An area can contain an number of location nodes. Since they do not have
@@ -350,7 +354,7 @@ namespace osmscout {
                           const RegionIndex& regionIndex);
 
     /**
-     * Find location by its name in locations map.
+     * Find location by its name in region.locations map.
      *
      * OSM data dont have strict rules how data should be organized.
      * Sometimes tag "addr:street" (`locationName` in this method) contains
@@ -362,7 +366,7 @@ namespace osmscout {
      * @return a valid iterator to the location else locations.end()
      */
     std::map<std::string,RegionLocation>::iterator FindLocation(Progress& progress,
-                                                                std::map<std::string,RegionLocation> &locations,
+                                                                Region& region,
                                                                 const std::string &locationName);
     
     void AddAddressNodeToRegion(Progress& progress,

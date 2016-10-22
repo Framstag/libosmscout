@@ -810,6 +810,7 @@ namespace osmscout {
     for (auto& level : levels) {
       level.indexEntryOffset=writer.GetPos();
       writer.Write(level.hasCellData);
+      writer.Write(level.dataOffsetBytes);
       writer.Write((uint8_t)level.defaultCellData);
       writer.WriteFileOffset(level.indexDataOffset);
       writer.WriteNumber(level.cellXStart);
@@ -1742,8 +1743,6 @@ namespace osmscout {
 
         progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 
-        levels[level].indexDataOffset=writer.GetPos();
-
         if (!coastlines.empty()) {
           MarkCoastlineCells(progress,
                              coastlines,
@@ -1814,15 +1813,62 @@ namespace osmscout {
         }
 
         if (levels[level].hasCellData) {
-          progress.SetAction("Writing cell index for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
+
+          //
+          // Calculate size of data
+          //
+
+          size_t dataSize=4;
+          char   buffer[10];
+
+          for (const auto& coord : cellGroundTileMap) {
+            // Number of ground tiles
+            dataSize+=EncodeNumber(coord.second.size(),buffer);
+
+            for (const auto& tile : coord.second) {
+              // Type
+              dataSize++;
+
+              // Number of coordinates
+              dataSize+=EncodeNumber(tile.coords.size(),buffer);
+
+              // Data for coordinate pairs
+              dataSize+=tile.coords.size()*2*sizeof(uint16_t);
+            }
+          }
+
+          levels[level].dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
+
+          progress.Info("Writing index for level "+
+                        NumberToString(level+parameter.GetWaterIndexMinMag())+", "+
+                        NumberToString(levels[level].cellXCount*levels[level].cellXCount)+" cells, "+
+                        NumberToString(cellGroundTileMap.size())+" entries, "+
+                        NumberToString(levels[level].dataOffsetBytes)+" bytes/entry, "+
+                        ByteSizeToString(1.0*levels[level].cellXCount*levels[level].cellYCount*levels[level].dataOffsetBytes+dataSize));
+
+          //
+          // Write bitmap
+          //
+
+          levels[level].indexDataOffset=writer.GetPos();
 
           for (uint32_t y=0; y<levels[level].cellYCount; y++) {
             for (uint32_t x=0; x<levels[level].cellXCount; x++) {
               State state=levels[level].GetState(x,y);
 
-              writer.WriteFileOffset((FileOffset) state);
+              writer.WriteFileOffset((FileOffset) state,
+                                     levels[level].dataOffsetBytes);
             }
           }
+
+          //
+          // Write data
+          //
+
+          FileOffset dataOffset=writer.GetPos();
+
+          // TODO: when data format will be changing, consider usage ones (0xFF..FF) as empty placeholder
+          writer.WriteFileOffset((FileOffset)0,4);
 
           for (const auto& coord : cellGroundTileMap) {
             FileOffset startPos=writer.GetPos();
@@ -1849,13 +1895,13 @@ namespace osmscout {
 
             FileOffset endPos;
             uint32_t   cellId=coord.first.y*levels[level].cellXCount+coord.first.x;
-            size_t     index =cellId*sizeof(FileOffset);
+            size_t     index =cellId*levels[level].dataOffsetBytes;
 
             endPos=writer.GetPos();
 
             writer.SetPos(levels[level].indexDataOffset+index);
-            writer.WriteFileOffset(startPos);
-
+            writer.WriteFileOffset(startPos-dataOffset,
+                                   levels[level].dataOffsetBytes);
             writer.SetPos(endPos);
           }
         }
@@ -1867,6 +1913,7 @@ namespace osmscout {
 
         writer.SetPos(levels[level].indexEntryOffset);
         writer.Write(levels[level].hasCellData);
+        writer.Write(levels[level].dataOffsetBytes);
         writer.Write((uint8_t) levels[level].defaultCellData);
         writer.WriteFileOffset(levels[level].indexDataOffset);
         writer.SetPos(currentPos);

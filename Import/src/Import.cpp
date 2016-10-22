@@ -128,6 +128,10 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
             << "                                      # is the default language (no :language) (default: #)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
+  std::cout << " --delete-temporary-files true|false  deletes all temporary files after execution of the importer" << std::endl;
+  std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
+  std::cout << " --delete-analysis-files true|false   deletes all analysis files after execution of the importer" << std::endl;
+  std::cout << " --delete-report-files true|false     deletes all report files after execution of the importer" << std::endl;
 }
 
 bool ParseBoolArgument(int argc,
@@ -351,6 +355,23 @@ bool DumpDataSize(const osmscout::ImportParameter& parameter,
   return true;
 }
 
+static void DeleteFilesIgnoreError(const osmscout::ImportParameter& parameter,
+                                   const std::list<std::string>& filenames,
+                                   osmscout::Progress& progress)
+{
+  for (const auto& relativeFilename : filenames)
+  {
+    std::string absoluteFilename=osmscout::AppendFileToDir(parameter.GetDestinationDirectory(),relativeFilename);
+
+    if (osmscout::ExistsInFilesystem(absoluteFilename))
+    {
+      progress.Info(("Deleting '" + absoluteFilename +"'"));
+
+      osmscout::RemoveFile(absoluteFilename);
+    }
+  }
+}
+
 int main(int argc, char* argv[])
 {
   osmscout::ImportParameter parameter;
@@ -361,6 +382,10 @@ int main(int argc, char* argv[])
   std::list<std::string>    mapfiles;
 
   osmscout::VehicleMask     defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
+  bool                      deleteTemporaries=false;
+  bool                      deleteDebugging=false;
+  bool                      deleteAnalysis=false;
+  bool                      deleteReport=false;
 
   parameter.AddRouter(osmscout::ImportParameter::Router(defaultVehicleMask,
                                                         "router"));
@@ -717,6 +742,38 @@ int main(int argc, char* argv[])
             parameterError=true;
         }
     }
+    else if (strcmp(argv[i],"--delete-temporary-files")==0) {
+      if (!ParseBoolArgument(argc,
+                             argv,
+                             i,
+                             deleteTemporaries)) {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--delete-debugging-files")==0) {
+      if (!ParseBoolArgument(argc,
+                             argv,
+                             i,
+                             deleteDebugging)) {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--delete-analysis-files")==0) {
+      if (!ParseBoolArgument(argc,
+                             argv,
+                             i,
+                             deleteAnalysis)) {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--delete-report-files")==0) {
+      if (!ParseBoolArgument(argc,
+                             argv,
+                             i,
+                             deleteReport)) {
+        parameterError=true;
+      }
+    }
     else if (strncmp(argv[i],"--",2)==0) {
       std::cerr << "Unknown option: " << argv[i] << std::endl;
 
@@ -836,6 +893,7 @@ int main(int argc, char* argv[])
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
 
+  int exitCode=0;
   try {
     osmscout::Importer importer(parameter);
 
@@ -854,11 +912,54 @@ int main(int argc, char* argv[])
     }
     else {
       progress.Error("Import failed!");
+      exitCode=1;
+    }
+
+    if (deleteTemporaries) {
+      progress.SetAction(("Deleting temporary files"));
+
+      std::list<std::string> temporaries=importer.GetProvidedTemporaryFiles();
+
+      DeleteFilesIgnoreError(parameter,
+                             temporaries,
+                             progress);
+    }
+
+    if (deleteDebugging) {
+      progress.SetAction(("Deleting debugging files"));
+
+      std::list<std::string> temporaries=importer.GetProvidedDebuggingFiles();
+
+      DeleteFilesIgnoreError(parameter,
+                             temporaries,
+                             progress);
+    }
+
+    if (deleteAnalysis) {
+      progress.SetAction(("Deleting analysis files"));
+
+      std::list<std::string> temporaries=importer.GetProvidedAnalysisFiles();
+
+      DeleteFilesIgnoreError(parameter,
+                             temporaries,
+                             progress);
+    }
+
+    if (deleteReport) {
+      progress.SetAction(("Deleting report files"));
+
+      std::list<std::string> temporaries=importer.GetProvidedReportFiles();
+
+      DeleteFilesIgnoreError(parameter,
+                             temporaries,
+                             progress);
     }
   }
   catch (osmscout::IOException& e) {
     progress.Error("Import failed: "+e.GetDescription());
+    exitCode=1;
   }
 
-  return 0;
+
+  return exitCode;
 }

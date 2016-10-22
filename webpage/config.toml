@@ -44,8 +44,14 @@ pygmentsuseclasses = true
     url = "/examples/"
 
 [[menu.main]]
-    name = "Contact"
+    name = "Companion projects"
     weight = 7
+    identifier = "companion"
+    url = "/documentation/companion_projects"
+
+[[menu.main]]
+    name = "Contact"
+    weight = 8
     identifier = "contact"
     url = "/documentation/contact"
 

@@ -38,6 +38,13 @@ namespace osmscout {
    */
   class OSMSCOUT_IMPORT_API ImportErrorReporter
   {
+  public:
+    static const char* const FILENAME_INDEX_HTML;
+    static const char* const FILENAME_WAY_HTML;
+    static const char* const FILENAME_RELATION_HTML;
+    static const char* const FILENAME_LOCATION_HTML;
+
+
   private:
     enum Report {
       reportLocation
