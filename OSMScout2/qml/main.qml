@@ -87,6 +87,11 @@ Window {
         }
     }
 
+    Settings {
+        id: settings
+        //mapDPI: 50
+    }
+
     GridLayout {
         id: content
         anchors.fill: parent
@@ -102,6 +107,20 @@ Window {
                                Theme.vertSpace+searchDialog.height+Theme.vertSpace,
                                map.width-2*Theme.horizSpace,
                                map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
+            }
+
+            onTap: {
+                console.log("tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
+            }
+            onLongTap: {
+                console.log("long tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon);
+            }
+            onViewChanged: {
+                //console.log("map center "+ map.view.lat + " " + map.view.lon + "");
+                settings.mapView = map.view;
+            }
+            Component.onCompleted: {
+                map.view = settings.mapView;
             }
 
             Keys.onPressed: {
@@ -206,6 +225,15 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: recenter
+                    label: "*"
+
+                    onClicked: {
+                        map.recenter()
+                    }
+                }
 
                 MapButton {
                     id: zoomIn

@@ -2,8 +2,8 @@
 #define OSMSCOUT_CLIENT_QT_ROUTINGMODEL_H
 
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
-  Copyright (C) 2014  Tim Teulings
+ OSMScout - a Qt backend for libosmscout and libosmscout-map
+ Copyright (C) 2014  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-*/
+ */
 
 #include <map>
 

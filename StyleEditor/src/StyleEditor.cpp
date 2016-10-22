@@ -20,6 +20,7 @@
 // Qt includes
 #include <QGuiApplication>
 #include <QQuickView>
+#include <QApplication>
 
 // Custom QML objects
 #include "osmscout/MapWidget.h"
@@ -41,7 +42,6 @@ int main(int argc, char* argv[])
 #endif
 
   QGuiApplication app(argc,argv);
-  SettingsRef     settings;
   MainWindow      *window;
   int             result;
 
@@ -49,7 +49,6 @@ int main(int argc, char* argv[])
   app.setOrganizationDomain("libosmscout.sf.net");
   app.setApplicationName("OSMScout");
 
-  settings=std::make_shared<Settings>();
 
   qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
@@ -59,17 +58,63 @@ int main(int argc, char* argv[])
   qmlRegisterType<Location>("net.sf.libosmscout.map", 1, 0, "Location");
   qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
+  qmlRegisterType<QmlSettings>("harbour.osmscout.map", 1, 0, "Settings");
 
   QThread thread;
+  
+  // load online tile providers
+  Settings::GetInstance()->loadOnlineTileProviders(
+    "resources/online-tile-providers.json");
 
-  if (!DBThread::InitializeInstance(/*settings*/)) {
+  // setup paths
+  QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);  
+  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+  QStringList cmdLineArgs = QApplication::arguments();
+  
+  QStringList mapLookupDirectories;
+  if (cmdLineArgs.size() > 1){
+    mapLookupDirectories << cmdLineArgs.at(1);
+  }else{
+    mapLookupDirectories << QDir::currentPath();
+    mapLookupDirectories << documentsLocation + QDir::separator() + "Maps";
+  }
+  
+  QString stylesheetFilename;
+  if (cmdLineArgs.size() > 2){
+    stylesheetFilename = cmdLineArgs.at(2);
+  }else{
+    if (cmdLineArgs.size() > 1){
+      stylesheetFilename = cmdLineArgs.at(1) + "standard.oss";
+    }else{
+      stylesheetFilename = QString("stylesheets") + QDir::separator() + "standard.oss";
+    }
+  }
+  
+  QString iconDirectory;
+  if (cmdLineArgs.size() > 3){
+    iconDirectory = cmdLineArgs.at(3);
+  }else{
+    if (cmdLineArgs.size() > 1){
+      iconDirectory = cmdLineArgs.at(1) + "icons";
+    }else{
+      iconDirectory = "icons";
+    }
+  }
+
+  if (!DBThread::InitializeTiledInstance(
+          mapLookupDirectories,
+          stylesheetFilename, 
+          iconDirectory,
+          cacheLocation + QDir::separator() + "OSMScoutTileCache",
+          /* onlineTileCacheSize  */ 100,
+          /* offlineTileCacheSize */ 200
+      )) {
     std::cerr << "Cannot initialize DBThread" << std::endl;
   }
 
   DBThread* dbThread=DBThread::GetInstance();
 
-  window=new MainWindow(settings,
-                        dbThread);
+  window=new MainWindow(dbThread);
 
   dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
   dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
@@ -90,6 +135,7 @@ int main(int argc, char* argv[])
   thread.wait();
 
   DBThread::FreeInstance();
+  Settings::FreeInstance();
 
   return result;
 }

@@ -1,6 +1,6 @@
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
-  Copyright (C) 2010  Tim Teulings
+ OSMScout - a Qt backend for libosmscout and libosmscout-map
+ Copyright (C) 2010  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -8,7 +8,7 @@
   version 2.1 of the License, or (at your option) any later version.
 
   This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
 
@@ -122,6 +122,9 @@ bool GetAdminRegionHierachie(const osmscout::AdminRegionRef& adminRegion,
                              std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
                              std::string& path)
 {
+  // TODO: implement search with multiple databases
+  return false;
+  /*
   if (!DBThread::GetInstance()->ResolveAdminRegionHierachie(adminRegion,
                                                             adminRegionMap)) {
     return false;
@@ -162,6 +165,7 @@ bool GetAdminRegionHierachie(const osmscout::AdminRegionRef& adminRegion,
   }
 
   return true;
+   */
 }
 
 QString GetAdminRegionLabel(std::map<osmscout::FileOffset,
@@ -197,6 +201,8 @@ QString GetAdminRegionLabel(std::map<osmscout::FileOffset,
 
 QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
 {
+    // TODO: implement search with multiple database
+  /*
     if (object.GetType()==osmscout::RefType::refNode) {
       osmscout::NodeRef node;
 
@@ -221,7 +227,7 @@ QString GetObjectTypLabel(const osmscout::ObjectFileRef& object)
         return QString::fromUtf8(way->GetType()->GetName().c_str());
       }
     }
-
+*/
     return "";
 }
 

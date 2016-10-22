@@ -22,10 +22,8 @@
 #include <QGuiApplication>
 #include "SettingsDialog.h"
 
-MainWindow::MainWindow(const SettingsRef& settings,
-                       DBThread *dbThread)
+MainWindow::MainWindow(DBThread *dbThread)
  : QQmlApplicationEngine(QUrl("qrc:/qml/main.qml")),
-   settings(settings),
    dbThread(dbThread)
 {  
   connect(dbThread,

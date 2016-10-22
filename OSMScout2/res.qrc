@@ -9,10 +9,13 @@
         <file>qml/custom/MapButton.qml</file>
         <file>qml/custom/MapDialog.qml</file>
         <file>qml/custom/ScrollIndicator.qml</file>
+        
         <file>pics/DeleteText.svg</file>
         <file>pics/Minus.svg</file>
         <file>pics/Search.svg</file>
         <file>pics/Route.svg</file>
         <file>pics/Plus.svg</file>
+        
+        <file>resources/online-tile-providers.json</file>
     </qresource>
 </RCC>

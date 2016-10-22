@@ -25,6 +25,9 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+string(TIMESTAMP OSMSCOUT_VERSION_STRING "%Y-%m-%d")
+set(OSMSCOUT_USER_AGENT "OSMScout demo app %1")
+
 set(HEADER_FILES
     src/Theme.h
 )
