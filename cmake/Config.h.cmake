@@ -171,6 +171,11 @@
 #cmakedefine HAVE_UNISTD_H 1
 #endif
 
+/* Define to 1 if you have the <codecvt> header file. */
+#ifndef HAVE_CODECVT
+#cmakedefine HAVE_CODECVT 1
+#endif
+
 /* Define to 1 if the system has the type `unsigned long long'. */
 #ifndef HAVE_UNSIGNED_LONG_LONG
 #cmakedefine HAVE_UNSIGNED_LONG_LONG 1
@@ -250,6 +255,11 @@
 /* unsigned long long is available */
 #ifndef OSMSCOUT_HAVE_ULONG_LONG
 #cmakedefine OSMSCOUT_HAVE_ULONG_LONG 1
+#endif
+
+/* The size of `wchar_t', as computed by sizeof. */
+#ifndef SIZEOF_WCHAR_T
+#cmakedefine SIZEOF_WCHAR_T @SIZEOF_WCHAR_T@
 #endif
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */

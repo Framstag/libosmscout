@@ -78,7 +78,7 @@ namespace osmscout {
                        12000),
      junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
                       RoutingService::FILENAME_INTERSECTIONS_IDX,
-                      6000)
+                      10000)
   {
     assert(database);
   }
