@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<Location>("net.sf.libosmscout.map", 1, 0, "Location");
   qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
-  qmlRegisterType<QmlSettings>("harbour.osmscout.map", 1, 0, "Settings");
+  qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
 
   QThread thread;
   
