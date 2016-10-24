@@ -686,7 +686,7 @@ int main(int argc, char* argv[])
   std::set<osmscout::Id>         routeNodeIds;
 
   try {
-    std::locale globalLocale("");
+    std::locale::global(std::locale(""));
   }
   catch (std::runtime_error) {
     std::cerr << "ERROR: Cannot set locale" << std::endl;
