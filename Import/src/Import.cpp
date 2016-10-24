@@ -307,6 +307,86 @@ std::vector<std::string> ParseLangOrderArgument(int argc,
     return langVec;
 }
 
+static void InitializeLocale(osmscout::Progress& progress)
+{
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    progress.Error("Cannot set locale: \""+std::string(e.what())+"\"");
+    progress.Error("Note that (near) future version of the Importer require a working locale environment!");
+  }
+}
+
+static void DumpParameter(const osmscout::ImportParameter& parameter,
+                          osmscout::Progress& progress)
+{
+  progress.SetStep("Dump parameter");
+  for (const auto& filename : parameter.GetMapfiles()) {
+    progress.Info(std::string("Mapfile: ")+filename);
+  }
+
+  progress.Info(std::string("typefile: ")+parameter.GetTypefile());
+  progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
+  progress.Info(std::string("Steps: ")+
+                osmscout::NumberToString(parameter.GetStartStep())+
+                " - "+
+                osmscout::NumberToString(parameter.GetEndStep()));
+  progress.Info(std::string("Eco: ")+
+                (parameter.IsEco() ? "true" : "false"));
+
+  for (const auto& router : parameter.GetRouter()) {
+    progress.Info(std::string("Router: ")+VehcileMaskToString(router.GetVehicleMask())+ " - '"+router.GetFilenamebase()+"'");
+  }
+
+  progress.Info(std::string("StrictAreas: ")+
+                (parameter.GetStrictAreas() ? "true" : "false"));
+
+  progress.Info(std::string("NumericIndexPageSize: ")+
+                osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
+
+  progress.Info(std::string("RawCoordBlockSize: ")+
+                osmscout::NumberToString(parameter.GetRawCoordBlockSize()));
+
+  progress.Info(std::string("RawNodeDataMemoryMaped: ")+
+                (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
+
+  progress.Info(std::string("RawWayIndexMemoryMaped: ")+
+                (parameter.GetRawWayIndexMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("RawWayDataMemoryMaped: ")+
+                (parameter.GetRawWayDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("RawWayIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetRawWayIndexCacheSize()));
+  progress.Info(std::string("RawWayBlockSize: ")+
+                osmscout::NumberToString(parameter.GetRawWayBlockSize()));
+
+
+  progress.Info(std::string("SortObjects: ")+
+                (parameter.GetSortObjects() ? "true" : "false"));
+  progress.Info(std::string("SortBlockSize: ")+
+                osmscout::NumberToString(parameter.GetSortBlockSize()));
+
+  progress.Info(std::string("CoordDataMemoryMaped: ")+
+                (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("CoordIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
+  progress.Info(std::string("CoordBlockSize: ")+
+                osmscout::NumberToString(parameter.GetCoordBlockSize()));
+
+  progress.Info(std::string("AreaDataMemoryMaped: ")+
+                (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("AreaDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetAreaDataCacheSize()));
+
+  progress.Info(std::string("WayDataMemoryMaped: ")+
+                (parameter.GetWayDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("WayDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetWayDataCacheSize()));
+
+  progress.Info(std::string("RouteNodeBlockSize: ")+
+                osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
+}
+
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
                   const osmscout::Importer& importer,
                   osmscout::Progress& progress)
@@ -386,6 +466,8 @@ int main(int argc, char* argv[])
   bool                      deleteDebugging=false;
   bool                      deleteAnalysis=false;
   bool                      deleteReport=false;
+
+  InitializeLocale(progress);
 
   parameter.AddRouter(osmscout::ImportParameter::Router(defaultVehicleMask,
                                                         "router"));
@@ -775,7 +857,7 @@ int main(int argc, char* argv[])
       }
     }
     else if (strncmp(argv[i],"--",2)==0) {
-      std::cerr << "Unknown option: " << argv[i] << std::endl;
+      progress.Error("Unknown option: "+std::string(argv[i]));
 
       parameterError=true;
       i++;
@@ -799,23 +881,23 @@ int main(int argc, char* argv[])
 
   try {
     if (!osmscout::ExistsInFilesystem(parameter.GetDestinationDirectory())) {
-      std::cerr << "Destination directory does not exist!" << std::endl;
+      progress.Error("Destination directory does not exist!");
       return 1;
     }
 
     if (!osmscout::IsDirectory(parameter.GetDestinationDirectory())) {
-      std::cerr << "Destination ist not a directory!" << std::endl;
+      progress.Error("Destination ist not a directory!");
       return 1;
     }
 
     for (auto mapfile: mapfiles){
       if (!osmscout::ExistsInFilesystem(mapfile)) {
-        std::cerr << "Input " << mapfile << " does not exist!" << std::endl;
+        progress.Error("Input "+mapfile+" does not exist!");
         return 1;
       }
 
       if (osmscout::IsDirectory(mapfile)) {
-        std::cerr << "Input " << mapfile << " is a directory!" << std::endl;
+        progress.Error("Input "+mapfile+" is a directory!");
         return 1;
       }
     }
@@ -825,73 +907,10 @@ int main(int argc, char* argv[])
   }
 
   parameter.SetMapfiles(mapfiles);
-
   parameter.SetOptimizationWayMethod(osmscout::TransPolygon::quality);
 
-  progress.SetStep("Dump parameter");
-  for (const auto& filename : parameter.GetMapfiles()) {
-    progress.Info(std::string("Mapfile: ")+filename);
-  }
-
-  progress.Info(std::string("typefile: ")+parameter.GetTypefile());
-  progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
-  progress.Info(std::string("Steps: ")+
-                osmscout::NumberToString(parameter.GetStartStep())+
-                " - "+
-                osmscout::NumberToString(parameter.GetEndStep()));
-  progress.Info(std::string("Eco: ")+
-                (parameter.IsEco() ? "true" : "false"));
-
-  for (const auto& router : parameter.GetRouter()) {
-    progress.Info(std::string("Router: ")+VehcileMaskToString(router.GetVehicleMask())+ " - '"+router.GetFilenamebase()+"'");
-  }
-
-  progress.Info(std::string("StrictAreas: ")+
-                (parameter.GetStrictAreas() ? "true" : "false"));
-
-  progress.Info(std::string("NumericIndexPageSize: ")+
-                osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
-
-  progress.Info(std::string("RawCoordBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRawCoordBlockSize()));
-
-  progress.Info(std::string("RawNodeDataMemoryMaped: ")+
-                (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
-
-  progress.Info(std::string("RawWayIndexMemoryMaped: ")+
-                (parameter.GetRawWayIndexMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("RawWayDataMemoryMaped: ")+
-                (parameter.GetRawWayDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("RawWayIndexCacheSize: ")+
-                osmscout::NumberToString(parameter.GetRawWayIndexCacheSize()));
-  progress.Info(std::string("RawWayBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRawWayBlockSize()));
-
-
-  progress.Info(std::string("SortObjects: ")+
-                (parameter.GetSortObjects() ? "true" : "false"));
-  progress.Info(std::string("SortBlockSize: ")+
-                osmscout::NumberToString(parameter.GetSortBlockSize()));
-
-  progress.Info(std::string("CoordDataMemoryMaped: ")+
-                (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("CoordIndexCacheSize: ")+
-                osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
-  progress.Info(std::string("CoordBlockSize: ")+
-                osmscout::NumberToString(parameter.GetCoordBlockSize()));
-
-  progress.Info(std::string("AreaDataMemoryMaped: ")+
-                (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("AreaDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetAreaDataCacheSize()));
-
-  progress.Info(std::string("WayDataMemoryMaped: ")+
-                (parameter.GetWayDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("WayDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetWayDataCacheSize()));
-
-  progress.Info(std::string("RouteNodeBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
+  DumpParameter(parameter,
+                progress);
 
   int exitCode=0;
   try {
