@@ -106,7 +106,8 @@ public slots:
 
   void toggleDaylight();
   void reloadStyle();
-
+  void reloadTmpStyle();
+  
   void showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
   void showCoordinates(double lat, double lon);
   void showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Magnification magnification);

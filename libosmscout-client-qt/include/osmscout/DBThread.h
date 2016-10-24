@@ -176,9 +176,10 @@ signals:
 
 public slots:
   void ToggleDaylight();
-  void ReloadStyle();
+  void ReloadStyle(const QString &suffix="");
   void LoadStyle(QString stylesheetFilename,
-                 std::unordered_map<std::string,bool> stylesheetFlags);
+                 std::unordered_map<std::string,bool> stylesheetFlags,
+                 const QString &suffix="");
   virtual void Initialize() = 0;
   void Finalize();
   void requestLocationDescription(const osmscout::GeoCoord location);

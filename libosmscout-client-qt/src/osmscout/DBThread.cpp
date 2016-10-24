@@ -285,15 +285,16 @@ void DBThread::ToggleDaylight()
   qDebug() << "Toggling daylight done.";
 }
 
-void DBThread::ReloadStyle()
+void DBThread::ReloadStyle(const QString &suffix)
 {
   qDebug() << "Reloading style...";
-  LoadStyle(stylesheetFilename, stylesheetFlags);
+  LoadStyle(stylesheetFilename, stylesheetFlags,suffix);
   qDebug() << "Reloading style done.";
 }
 
 void DBThread::LoadStyle(QString stylesheetFilename,
-                         std::unordered_map<std::string,bool> stylesheetFlags)
+                         std::unordered_map<std::string,bool> stylesheetFlags,
+                         const QString &suffix)
 {
   QMutexLocker locker(&mutex);
 
@@ -303,9 +304,10 @@ void DBThread::LoadStyle(QString stylesheetFilename,
   bool prevErrs = !styleErrors.isEmpty();
   styleErrors.clear();
   for (auto db: databases){
-    db->LoadStyle(stylesheetFilename, stylesheetFlags, styleErrors);
+    db->LoadStyle(stylesheetFilename+suffix, stylesheetFlags, styleErrors);
   }
   if (prevErrs || (!styleErrors.isEmpty())){
+    qWarning()<<"Failed to load stylesheet"<<(stylesheetFilename+suffix);
     emit styleErrorsChanged();
   }
   emit stylesheetFilenameChanged();
@@ -347,7 +349,9 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
   }else{
     std::list<std::string> errorsStrings = newStyleConfig->GetErrors();
     for(std::list<std::string>::iterator it = errorsStrings.begin(); it != errorsStrings.end(); it++){
-        errors.append(StyleError(QString::fromStdString(*it)));
+      StyleError err(QString::fromStdString(*it));
+      qWarning() << "Style error:" << err.GetDescription();
+      errors.append(err);
     }
     styleConfig=NULL;
     return false;

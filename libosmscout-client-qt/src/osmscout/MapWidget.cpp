@@ -24,6 +24,8 @@
 #include <iostream>
 #include <sys/socket.h>
 
+#define TMP_SUFFIX ".tmp"
+
 //! We rotate in 16 steps
 static double DELTA_ANGLE=2*M_PI/16.0;
 
@@ -373,6 +375,12 @@ void MapWidget::reloadStyle()
 
     dbThread->ReloadStyle();
     redraw();
+}
+
+void MapWidget::reloadTmpStyle() {
+    DBThread* dbThread=DBThread::GetInstance();
+    dbThread->ReloadStyle(TMP_SUFFIX);
+    redraw();    
 }
 
 void MapWidget::setLockToPosition(bool lock){
