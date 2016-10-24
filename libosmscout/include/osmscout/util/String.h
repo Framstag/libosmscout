@@ -396,9 +396,53 @@ namespace osmscout {
 
   /**
    * \ingroup Util
+   *
+   * Convert the given std::string containign a UTF8 character sequence to a std::wstring
+   *
+   * @param text
+   *    String to get converted
+   * @return
+   *    corresponding std::wstring
    */
   extern OSMSCOUT_API std::wstring UTF8StringToWString(const std::string& text);
+
+  /**
+   * \ingroup Util
+   *
+   * Convert the given std::wstring to a std::string containing a corresponding UTF8 character sequence
+   *
+   * @param text
+   *    the std::wstring to get converted
+   * @return
+   *    the converted std::string
+   */
   extern OSMSCOUT_API std::string WStringToUTF8String(const std::wstring& text);
+
+  /**
+   * Convert the given std::string containing a UTF8 character sequence to upper case using
+   * the current global locale.
+   *
+   * @param text
+   *    Text to get converted
+   * @return
+   *    Converted text
+   *
+   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
+   */
+  extern OSMSCOUT_API std::string UTF8StringToUpper(const std::string& text);
+
+  /**
+   * Convert the given std::string containing a UTF8 character sequence to lower case using
+   * the current global locale.
+   *
+   * @param text
+   *    Text to get converted
+   * @return
+   *    Converted text
+   *
+   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
+   */
+  extern OSMSCOUT_API std::string UTF8StringToLower(const std::string& text);
 }
 
 #endif
