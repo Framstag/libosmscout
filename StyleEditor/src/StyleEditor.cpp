@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
   app.setOrganizationName("libosmscout");
   app.setOrganizationDomain("libosmscout.sf.net");
-  app.setApplicationName("OSMScout");
+  app.setApplicationName("StyleEditor");
 
 
   qRegisterMetaType<RenderMapRequest>();
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
   
   // load online tile providers
   Settings::GetInstance()->loadOnlineTileProviders(
-    "resources/online-tile-providers.json");
+    ":/resources/online-tile-providers.json");
 
   // setup paths
   QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);  
