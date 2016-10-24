@@ -52,6 +52,45 @@ void QBreaker::Reset()
   aborted=false;
 }
 
+StyleError::StyleError(QString msg){
+    QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
+    if(rx.exactMatch(msg)){
+        line = rx.cap(1).toInt();
+        column = rx.cap(2).toInt();
+        if(rx.cap(3) == "Symbol"){
+            type = Symbol;
+        } else if(rx.cap(3) == "Error"){
+            type = Error;
+        } else if(rx.cap(3) == "Warning"){
+            type = Warning;
+        } else {
+            type = Exception;
+        }
+        text = rx.cap(4);
+    }
+}
+
+QString StyleError::GetTypeName() const
+{
+    switch(type){
+    case Symbol:
+        return QString("symbol");
+        break;
+    case Error:
+        return QString("error");
+        break;
+    case Warning:
+        return QString("warning");
+        break;
+    case Exception:
+        return QString("exception");
+        break;
+    default:
+      return QString("???");
+    }
+}
+
+
 DBThread::DBThread(QStringList databaseLookupDirs, 
                    QString stylesheetFilename, 
                    QString iconDirectory)
@@ -201,6 +240,8 @@ bool DBThread::InitializeDatabases(osmscout::GeoBox& boundingBox)
       }
     }
   }  
+
+  emit stylesheetFilenameChanged();
   return true;
 }
 
@@ -259,24 +300,31 @@ void DBThread::LoadStyle(QString stylesheetFilename,
   this->stylesheetFilename = stylesheetFilename;
   this->stylesheetFlags = stylesheetFlags;
   
+  bool prevErrs = !styleErrors.isEmpty();
+  styleErrors.clear();
   for (auto db: databases){
-    db->LoadStyle(stylesheetFilename, stylesheetFlags);
+    db->LoadStyle(stylesheetFilename, stylesheetFlags, styleErrors);
   }
+  if (prevErrs || (!styleErrors.isEmpty())){
+    emit styleErrorsChanged();
+  }
+  emit stylesheetFilenameChanged();
 }
 
-void DBInstance::LoadStyle(QString stylesheetFilename,
-                 std::unordered_map<std::string,bool> stylesheetFlags)
+bool DBInstance::LoadStyle(QString stylesheetFilename,
+                           std::unordered_map<std::string,bool> stylesheetFlags, 
+                           QList<StyleError> &errors)
 {
 
 
   if (!database->IsOpen()) {
-    return;
+    return false;
   }
 
   osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
   if (!typeConfig) {
-    return;
+    return false;
   }
 
   mapService->FlushTileCache();
@@ -296,7 +344,16 @@ void DBInstance::LoadStyle(QString stylesheetFilename,
     // Recreate
     styleConfig=newStyleConfig;
     painter=new osmscout::MapPainterQt(styleConfig);
+  }else{
+    std::list<std::string> errorsStrings = newStyleConfig->GetErrors();
+    for(std::list<std::string>::iterator it = errorsStrings.begin(); it != errorsStrings.end(); it++){
+        errors.append(StyleError(QString::fromStdString(*it)));
+    }
+    styleConfig=NULL;
+    return false;
   }
+  
+  return true;
 }
 
 

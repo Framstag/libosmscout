@@ -49,12 +49,16 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     connect(dbThread,SIGNAL(Redraw()),
             this,SLOT(redraw()));    
-    
+    connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
+            this,SIGNAL(stylesheetFilenameChanged()));
+    connect(dbThread,SIGNAL(styleErrorsChanged()),
+            this,SIGNAL(styleErrorsChanged()));
+        
     connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(doubleTap(const QPoint)),  this, SLOT(onDoubleTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(longTap(const QPoint)),    this, SLOT(onLongTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(tapLongTap(const QPoint)), this, SLOT(onTapLongTap(const QPoint)));
-
+    
     // TODO, open last position, move to current position or get as constructor argument...
     view = new MapView(this, osmscout::GeoCoord(0.0, 0.0), /*angle*/ 0, osmscout::Magnification::magContinent);
     setupInputHandler(new InputHandler(*view));
@@ -538,4 +542,81 @@ void MapWidget::onMapDPIChange(double dpi)
     
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
+}
+
+QString MapWidget::GetStylesheetFilename() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    return dbThread->GetStylesheetFilename();
+}
+
+QString MapWidget::GetZoomLevelName() const
+{
+    double level = view->magnification.GetMagnification();
+    if(level>=osmscout::Magnification::magWorld && level < osmscout::Magnification::magContinent){
+        return "World";
+    } else if(level>=osmscout::Magnification::magContinent && level < osmscout::Magnification::magState){
+        return "Continent";
+    } else if(level>=osmscout::Magnification::magState && level < osmscout::Magnification::magStateOver){
+        return "State";
+    } else if(level>=osmscout::Magnification::magStateOver && level < osmscout::Magnification::magCounty){
+        return "StateOver";
+    } else if(level>=osmscout::Magnification::magCounty && level < osmscout::Magnification::magRegion){
+        return "County";
+    } else if(level>=osmscout::Magnification::magRegion && level < osmscout::Magnification::magProximity){
+        return "Region";
+    } else if(level>=osmscout::Magnification::magProximity && level < osmscout::Magnification::magCityOver){
+        return "Proximity";
+    } else if(level>=osmscout::Magnification::magCityOver && level < osmscout::Magnification::magCity){
+        return "CityOver";
+    } else if(level>=osmscout::Magnification::magCity && level < osmscout::Magnification::magSuburb){
+        return "City";
+    } else if(level>=osmscout::Magnification::magSuburb && level < osmscout::Magnification::magDetail){
+        return "Suburb";
+    } else if(level>=osmscout::Magnification::magDetail && level < osmscout::Magnification::magClose){
+        return "Detail";
+    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magVeryClose){
+        return "Close";
+    } else if(level>=osmscout::Magnification::magVeryClose && level < osmscout::Magnification::magBlock){
+        return "VeryClose";
+    } else if(level>=osmscout::Magnification::magBlock && level < osmscout::Magnification::magStreet){
+        return "Block";
+    } else if(level>=osmscout::Magnification::magStreet && level < osmscout::Magnification::magHouse){
+        return "Street";
+    } else if(level>=osmscout::Magnification::magHouse){
+        return "House";
+    }
+
+    assert(false);
+
+    return "";
+}
+bool MapWidget::stylesheetHasErrors() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    return !dbThread->GetStyleErrors().isEmpty();
+}
+int MapWidget::firstStylesheetErrorLine() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    QList<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.isEmpty())
+      return -1;
+    return errors.first().GetLine();
+}
+int MapWidget::firstStylesheetErrorColumn() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    QList<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.isEmpty())
+      return -1;
+    return errors.first().GetColumn();  
+}
+QString MapWidget::firstStylesheetErrorDescription() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    QList<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.isEmpty())
+      return "";
+    return errors.first().GetDescription();
 }

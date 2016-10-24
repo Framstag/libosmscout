@@ -38,10 +38,18 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(double   lat      READ GetLat      NOTIFY viewChanged)
   Q_PROPERTY(double   lon      READ GetLon      NOTIFY viewChanged)
   Q_PROPERTY(uint32_t magLevel READ GetMagLevel NOTIFY viewChanged)
+  Q_PROPERTY(int      zoomLevel READ GetMagLevel NOTIFY viewChanged)
+  Q_PROPERTY(QString  zoomLevelName READ GetZoomLevelName NOTIFY viewChanged)
   Q_PROPERTY(double   pixelSize READ GetPixelSize NOTIFY viewChanged)
   Q_PROPERTY(bool     finished READ IsFinished  NOTIFY finishedChanged)
   Q_PROPERTY(bool     showCurrentPosition READ getShowCurrentPosition WRITE setShowCurrentPosition)
   Q_PROPERTY(bool     lockToPosition READ isLockedToPosition WRITE setLockToPosition NOTIFY lockToPossitionChanged)
+  Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
+  
+  Q_PROPERTY(bool stylesheetHasErrors           READ stylesheetHasErrors              NOTIFY styleErrorsChanged)
+  Q_PROPERTY(int stylesheetErrorLine            READ firstStylesheetErrorLine         NOTIFY styleErrorsChanged)
+  Q_PROPERTY(int stylesheetErrorColumn          READ firstStylesheetErrorColumn       NOTIFY styleErrorsChanged)
+  Q_PROPERTY(QString stylesheetErrorDescription READ firstStylesheetErrorDescription  NOTIFY styleErrorsChanged)  
 
 private:
 
@@ -71,6 +79,9 @@ signals:
   void longTap(const int sceenX, const int screenY, const double lat, const double lon);
   void tapLongTap(const int sceenX, const int screenY, const double lat, const double lon);
 
+  void stylesheetFilenameChanged();
+  void styleErrorsChanged();
+  
 public slots:
   void changeView(const MapView &view);
   void redraw();
@@ -151,6 +162,10 @@ public:
       return view->center.GetLon();
   }
   
+  QString GetStylesheetFilename() const;
+
+  QString GetZoomLevelName() const;
+  
   inline int GetMagLevel() const
   {
       return view->magnification.GetLevel();
@@ -207,6 +222,11 @@ public:
   void mouseReleaseEvent(QMouseEvent* event);
   
   void paint(QPainter *painter);
+  
+  bool stylesheetHasErrors() const;
+  int firstStylesheetErrorLine() const;
+  int firstStylesheetErrorColumn() const;
+  QString firstStylesheetErrorDescription() const;
 };
 
 #endif

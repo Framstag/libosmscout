@@ -74,6 +74,31 @@ public:
   void Reset();
 };
 
+class OSMSCOUT_CLIENT_QT_API StyleError
+{
+    enum StyleErrorType {
+        Symbol, Error, Warning, Exception
+    };
+
+public:
+    StyleError(StyleErrorType type, int line, int column, const QString &text) :
+        type(type), line(line), column(column), text(text){}
+    StyleError(QString msg);
+
+    StyleErrorType GetType(){ return type; }
+    QString GetTypeName() const;
+    int GetLine(){ return line; }
+    int GetColumn(){ return column; }
+    const QString &GetText(){ return text; }
+    QString GetDescription(){return GetTypeName()+": "+GetText();}
+
+private:
+    StyleErrorType  type;
+    int             line;
+    int             column;
+    QString         text;
+};
+
 class DBInstance : public QObject
 {
   Q_OBJECT
@@ -120,8 +145,9 @@ public:
     }
   };
 
-  void LoadStyle(QString stylesheetFilename,
-                 std::unordered_map<std::string,bool> stylesheetFlags);
+  bool LoadStyle(QString stylesheetFilename,
+                 std::unordered_map<std::string,bool> stylesheetFlags, 
+                 QList<StyleError> &errors);
   
   bool AssureRouter(osmscout::Vehicle vehicle, 
                     osmscout::RouterParameter routerParameter);  
@@ -133,8 +159,8 @@ typedef std::shared_ptr<DBInstance> DBInstanceRef;
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename)
-
+  Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
+  
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
@@ -145,6 +171,8 @@ signals:
                            const osmscout::LocationDescription description,
                            const QStringList regions);
   void locationDescriptionFinished(const osmscout::GeoCoord location);
+  void stylesheetFilenameChanged();
+  void styleErrorsChanged();
 
 public slots:
   void ToggleDaylight();
@@ -178,6 +206,9 @@ protected:
   bool                          daylight;
   
   bool                          renderSea;
+
+  bool                          renderError;
+  QList<StyleError>             styleErrors;
 
 protected:
   
@@ -250,6 +281,11 @@ public:
   {
     return stylesheetFilename;
   }
+
+  const QList<StyleError> &GetStyleErrors() const
+  {
+      return styleErrors;
+  }  
 
   static bool InitializeTiledInstance(QStringList databaseDirectory, 
                                       QString stylesheetFilename, 
