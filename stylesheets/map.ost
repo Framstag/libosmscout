@@ -331,6 +331,7 @@ TYPES
   TYPE highway_bus_stop
     = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND "public_transport"=="platform"))
       {Name, NameAlt}
+      POI
     
   TYPE highway_turning_cycle
     = NODE ("highway"=="turning_cycle")
@@ -480,6 +481,7 @@ TYPES
   TYPE railway_tram_stop
     = NODE ("railway"=="tram_stop")
       {Name, NameAlt}
+      POI
     
   TYPE railway_crossing
     = NODE ("railway"=="crossing")
