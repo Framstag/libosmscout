@@ -294,6 +294,7 @@ static void DumpCoord(osmscout::OSMId osmId, const osmscout::Coord& coord)
 static void DumpRouteNode(const osmscout::RouteNode& routeNode)
 {
   std::cout << "RouteNode {" << std::endl;
+  std::cout << "  fileOffset: " << routeNode.GetFileOffset() << std::endl;
   std::cout << "  OSMScoutId: " << routeNode.GetId() << std::endl;
 
   std::streamsize         oldPrecision=std::cout.precision(5);
@@ -305,18 +306,19 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);
 
-  bool firstPath=true;
-  for (auto path : routeNode.paths) {
-
-    if (!firstPath) {
-      std::cout << std::endl;
-    }
-
+  for (const auto& path : routeNode.paths) {
+    std::cout << std::endl;
     std::cout << "  path {" << std::endl;
     std::cout << "     object: " << routeNode.objects[path.objectIndex].object.GetName() << std::endl;
     std::cout << "  }" << std::endl;
+  }
 
-    firstPath=false;
+  for (const auto& exclude : routeNode.excludes) {
+    std::cout << std::endl;
+    std::cout << "  exclude {" << std::endl;
+    std::cout << "     from: " << exclude.source.GetName() << std::endl;
+    std::cout << "     to: " << routeNode.objects[exclude.targetIndex].object.GetName() << std::endl;
+    std::cout << "  }" << std::endl;
   }
 
   std::cout << "}" << std::endl;
