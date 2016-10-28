@@ -36,7 +36,7 @@ set(SOURCE_FILES
     src/osmscout/Settings.cpp
 )
 
-add_library(osmscout_client_qt SHARED ${SOURCE_FILES} ${HEADER_FILES})
+add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_client_qt PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ClientQtFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-client-qt")

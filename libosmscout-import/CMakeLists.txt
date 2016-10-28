@@ -106,7 +106,7 @@ endif()
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
 
-add_library(osmscout_import SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
+add_library(osmscout_import ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
 set_property(TARGET osmscout_import PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ImportFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-import")
