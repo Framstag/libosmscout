@@ -8,6 +8,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
+option(BUILD_SHARED_LIBS "Shared libraries " ON)  # SHARED lib default
+
 # compiler configurations
 if(WIN32)
   set(CMAKE_USE_RELATIVE_PATHS true)
@@ -249,6 +251,7 @@ add_subdirectory(libosmscout-extern)
 
 # display build configuration
 message(STATUS "libosmscout build configuration:")
+message(STATUS "Shared libraries:                        ${BUILD_SHARED_LIBS}")
 message(STATUS "core library:                            ${OSMSCOUT_BUILD_CORE}")
 message(STATUS "import library:                          ${OSMSCOUT_BUILD_IMPORT}")
 message(STATUS "map drawing interface:                   ${OSMSCOUT_BUILD_MAP}")
