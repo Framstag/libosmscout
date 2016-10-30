@@ -1300,7 +1300,7 @@ namespace osmscout {
           node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
           openList.erase(openEntry->second);
@@ -1322,7 +1322,7 @@ namespace osmscout {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Inserting route to " << path.offset;
           std::cout <<  " (" << node->object.GetTypeName() << " " << node->object.GetFileOffset() << ")";
-          std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
           std::pair<OpenListRef,bool> result=openList.insert(node);
@@ -1349,12 +1349,12 @@ namespace osmscout {
         std::cout << "No more alternatives, stopping" << std::endl;
       }
 
-      if ((targetForwardRouteNode && current->nodeOffset==targetForwardRouteNode->fileOffset)) {
-        std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->fileOffset << " (forward)" << std::endl;
+      if ((targetForwardRouteNode && current->nodeOffset==targetForwardRouteNode->GetFileOffset())) {
+        std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->GetFileOffset() << " (forward)" << std::endl;
       }
 
-      if (targetBackwardRouteNode && current->nodeOffset==targetBackwardRouteNode->fileOffset) {
-        std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->fileOffset << " (backward)" << std::endl;
+      if (targetBackwardRouteNode && current->nodeOffset==targetBackwardRouteNode->GetFileOffset()) {
+        std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->GetFileOffset() << " (backward)" << std::endl;
       }
 #endif
     } while (!openList.empty() &&
