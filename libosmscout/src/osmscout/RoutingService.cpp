@@ -1227,7 +1227,7 @@ namespace osmscout {
 
           for (const auto& exclude : currentRouteNode->excludes) {
             if (exclude.source==current->object &&
-                exclude.targetIndex==i) {
+                currentRouteNode->objects[exclude.targetIndex].object==currentRouteNode->objects[path.objectIndex].object) {
 #if defined(DEBUG_ROUTING)
               std::cout << "  Skipping route";
               std::cout << " to " << path.offset;
