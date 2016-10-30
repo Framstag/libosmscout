@@ -52,6 +52,11 @@ namespace osmscout {
       Distribution();
     };
 
+    struct RestrictionData
+    {
+      std::multimap<OSMId,TurnRestrictionRef> restrictions;
+    };
+
     typedef std::list<RawWayRef>                     WayList;
     typedef WayList::iterator                        WayListPtr;
     typedef std::list<WayListPtr>                    WayListPtrList;
@@ -59,11 +64,11 @@ namespace osmscout {
 
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
-                              std::multimap<OSMId,TurnRestrictionRef>& restrictions);
+                              RestrictionData& restrictions);
 
     bool WriteTurnRestrictions(const ImportParameter& parameter,
                                Progress& progress,
-                               std::multimap<OSMId,TurnRestrictionRef>& restrictions);
+                               const RestrictionData& restrictions);
 
     bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
                               const ImportParameter& parameter,
@@ -77,17 +82,17 @@ namespace osmscout {
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& ways);
 
-    void UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+    void UpdateRestrictions(RestrictionData& restrictions,
                             OSMId oldId,
                             OSMId newId);
 
-    bool IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+    bool IsRestricted(const RestrictionData& restrictions,
                       OSMId wayId,
                       OSMId nodeId) const;
 
     bool MergeWays(Progress& progress,
                    std::list<RawWayRef>& ways,
-                   std::multimap<OSMId,TurnRestrictionRef>& restrictions);
+                   RestrictionData& restrictions);
 
     bool SplitLongWays(Progress& progress,
                        std::list<RawWayRef>& ways,

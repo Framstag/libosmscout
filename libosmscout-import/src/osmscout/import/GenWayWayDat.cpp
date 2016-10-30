@@ -69,7 +69,7 @@ namespace osmscout {
 
   bool WayWayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
                                                  Progress& progress,
-                                                 std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+                                                 RestrictionData& restrictions)
   {
     FileScanner scanner;
     uint32_t    restrictionCount=0;
@@ -89,8 +89,8 @@ namespace osmscout {
 
         restriction->Read(scanner);
 
-        restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
-        restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
       }
 
       progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
@@ -107,14 +107,12 @@ namespace osmscout {
 
   bool WayWayDataGenerator::WriteTurnRestrictions(const ImportParameter& parameter,
                                                   Progress& progress,
-                                                  std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+                                                  const RestrictionData& restrictions)
   {
     std::set<TurnRestrictionRef> restrictionsSet;
 
-    for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator restriction=restrictions.begin();
-        restriction!=restrictions.end();
-        ++restriction) {
-      restrictionsSet.insert(restriction->second);
+    for (const auto& restriction : restrictions.restrictions) {
+      restrictionsSet.insert(restriction.second);
     }
 
     FileWriter writer;
@@ -248,46 +246,43 @@ namespace osmscout {
     return true;
   }
 
-  void WayWayDataGenerator::UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+  void WayWayDataGenerator::UpdateRestrictions(RestrictionData& restrictions,
                                                OSMId oldId,
                                                OSMId newId)
   {
     std::list<TurnRestrictionRef> oldRestrictions;
 
-    auto hits=restrictions.equal_range(oldId);
+    auto hits=restrictions.restrictions.equal_range(oldId);
 
-    for (auto& hit=hits.first;
-        hit!=hits.second;
-        ++hit) {
+    for (auto& hit=hits.first; hit!=hits.second; ++hit) {
       oldRestrictions.push_back(hit->second);
     }
 
-    restrictions.erase(hits.first,hits.second);
+    restrictions.restrictions.erase(hits.first,hits.second);
 
     for (auto &restriction : oldRestrictions) {
       if (restriction->GetFrom()==oldId) {
         restriction->SetFrom(newId);
-        restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
       }
+
       if (restriction->GetTo()==oldId) {
         restriction->SetTo(newId);
-        restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
       }
     }
   }
 
-  bool WayWayDataGenerator::IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+  bool WayWayDataGenerator::IsRestricted(const RestrictionData& restrictions,
                                          OSMId wayId,
                                          OSMId nodeId) const
   {
     // We have an index entry for turn restriction, where the given way id is
     // "from" or "to" so we can just check for "via" == nodeId
 
-    auto hits=restrictions.equal_range(wayId);
+    auto hits=restrictions.restrictions.equal_range(wayId);
 
-    for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator hit=hits.first;
-        hit!=hits.second;
-        ++hit) {
+    for (auto hit=hits.first; hit!=hits.second; ++hit) {
       if (hit->second->GetVia()==nodeId) {
         return true;
       }
@@ -298,7 +293,7 @@ namespace osmscout {
 
   bool WayWayDataGenerator::MergeWays(Progress& progress,
                                       std::list<RawWayRef>& ways,
-                                      std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+                                      RestrictionData& restrictions)
   {
     WaysByNodeMap waysByNode;
 
@@ -472,7 +467,7 @@ namespace osmscout {
     size_t currentWay=1;
     size_t wayCount=ways.size();
 
-    for (auto way: ways){
+    for (auto way: ways) {
       //*wayIt;
       double length=0.0;
       bool split = way->GetNodeCount() > 300;
@@ -484,9 +479,10 @@ namespace osmscout {
         osmIdIt ++;
         while (osmIdIt != endIt && (!split)){
           auto current = coordsMap.find(*osmIdIt);
-          if (prev == coordsMap.end() || current == coordsMap.end()){
+          if (prev == coordsMap.end() || current == coordsMap.end()) {
             split = true;
-          }else{
+          }
+          else {
             length += GetSphericalDistance(prev->second.GetCoord(), current->second.GetCoord());
           }
           prev = current;
@@ -498,14 +494,14 @@ namespace osmscout {
       progress.SetProgress(currentWay,wayCount);
       currentWay++;
 
-      if (!split){
+      if (!split) {
         newWays.push_back(way);
         continue;
       }
-      
-      std::string msg = "Splitting long way " + NumberToString(way->GetId()) + 
+
+      std::string msg = "Splitting long way " + NumberToString(way->GetId()) +
         " with " + NumberToString(way->GetNodeCount()) + " nodes";
-      if (length > 0.0){
+      if (length > 0.0) {
         msg += " and real length " + std::to_string(length) + " km";
       }
       progress.Debug(msg);
@@ -521,7 +517,7 @@ namespace osmscout {
       
       auto prev = coordsMap.find(*osmIdIt);
       // jump to first valid node
-      while (prev==coordsMap.end() && osmIdIt != endIt){
+      while (prev==coordsMap.end() && osmIdIt != endIt) {
         progress.Error("Cannot resolve node with id "+
                        NumberToString(*osmIdIt)+
                        " for way "+
@@ -533,22 +529,25 @@ namespace osmscout {
           prev = coordsMap.find(*osmIdIt);
         }
       }
+
       osmIdIt ++;
       segmentEnd=osmIdIt;
-      while (osmIdIt != endIt){    
+      while (osmIdIt!=endIt) {
         
-        if (segment->GetId() == 0){
+        if (segment->GetId()==0) {
           segment->SetId(way->GetId());
           segment->SetType(way->GetType(), way->IsArea());
           segment->SetFeatureValueBuffer(way->GetFeatureValueBuffer());
         }
+
         auto current = coordsMap.find(*osmIdIt);
 
-        if (current!=coordsMap.end()){
+        if (current!=coordsMap.end()) {
           segmentLength += GetSphericalDistance(prev->second.GetCoord(), current->second.GetCoord());
           segmentNodeCnt ++;
         }
-        if (segmentNodeCnt >= 300 || segmentLength > 30.0 || current==coordsMap.end()){
+
+        if (segmentNodeCnt >= 300 || segmentLength > 30.0 || current==coordsMap.end()) {
           auto currentSegmentStart = segmentStart;
           segmentStart=osmIdIt;
           prev = current;
@@ -578,13 +577,14 @@ namespace osmscout {
           segmentNodeCnt=1;
           segment = std::make_shared<RawWay>();
 
-        }else{
+        }
+        else {
           prev = current;
           osmIdIt ++;          
           segmentEnd=osmIdIt;
         }
       }
-      if (segment->GetId() != 0 && segmentNodeCnt >= 2){
+      if (segment->GetId() != 0 && segmentNodeCnt >= 2) {
         segment->SetNodes(segmentStart, segmentEnd);
         newWays.push_back(segment);        
         //std::cout << "  - New segment (last) " << segment->GetId() << 
@@ -593,9 +593,11 @@ namespace osmscout {
     }
     
     ways.clear();
-    for (auto way: newWays){
+
+    for (auto way: newWays) {
       ways.push_back(way);
     }
+
     return true;
   }
 
@@ -723,8 +725,7 @@ namespace osmscout {
     TypeInfoSet                             wayTypes;
     TypeInfoSet                             slowFallbackTypes;
 
-    // List of restrictions for a way
-    std::multimap<OSMId,TurnRestrictionRef> restrictions; //! Map of restrictions
+    RestrictionData                         restrictions;
 
     FileScanner                             scanner;
     FileWriter                              wayWriter;
@@ -850,7 +851,7 @@ namespace osmscout {
         }
 
         nodeIds.clear();
-        
+
         // split too long ways again to shorter segments
         progress.SetAction("Splitting too long ways");
 #pragma omp parallel for
