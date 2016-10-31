@@ -680,7 +680,7 @@ namespace osmscout {
 
   bool Preprocess::Callback::DumpBoundingBox()
   {
-    progress.SetAction("Generating bounding.dat");
+    progress.SetAction("Generating '"+std::string(BoundingBoxDataFile::BOUNDINGBOX_DAT)+"'");
 
     FileWriter writer;
 
