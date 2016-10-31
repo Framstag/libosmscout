@@ -68,6 +68,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/RoutePostprocessor.h \
                         osmscout/RoutingProfile.h \
                         osmscout/BoundingBoxDataFile.h \
+                        osmscout/TypeDistributionDataFile.h \
                         osmscout/Database.h \
                         osmscout/DebugDatabase.h \
                         osmscout/SRTM.h \

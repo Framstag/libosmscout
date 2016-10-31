@@ -50,7 +50,6 @@ namespace osmscout {
     description.SetName("WayAreaDataGenerator");
     description.SetDescription("Resolves raw ways to areas");
 
-    description.AddRequiredFile(Preprocess::DISTRIBUTION_DAT);
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(RelAreaDataGenerator::WAYAREABLACK_DAT);

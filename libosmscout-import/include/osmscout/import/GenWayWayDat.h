@@ -43,15 +43,6 @@ namespace osmscout {
     static const char* TURNRESTR_DAT;
 
   private:
-    struct Distribution
-    {
-      uint32_t nodeCount;
-      uint32_t wayCount;
-      uint32_t areaCount;
-
-      Distribution();
-    };
-
     struct RestrictionData
     {
       std::multimap<OSMId,TurnRestrictionRef> restrictions;
@@ -69,11 +60,6 @@ namespace osmscout {
     bool WriteTurnRestrictions(const ImportParameter& parameter,
                                Progress& progress,
                                const RestrictionData& restrictions);
-
-    bool ReadTypeDistribution(const TypeConfigRef& typeConfig,
-                              const ImportParameter& parameter,
-                              Progress& progress,
-                              std::vector<Distribution>& typeDistribution) const;
 
     bool GetWays(const ImportParameter& parameter,
                  Progress& progress,

@@ -42,7 +42,6 @@ namespace osmscout {
   class Preprocess : public ImportModule
   {
   public:
-    static const char* DISTRIBUTION_DAT;
     static const char* RAWCOORDS_DAT;
     static const char* RAWNODES_DAT;
     static const char* RAWWAYS_DAT;

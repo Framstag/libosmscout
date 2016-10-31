@@ -24,6 +24,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/BoundingBoxDataFile.h>
+#include <osmscout/TypeDistributionDataFile.h>
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/File.h>
@@ -46,7 +47,6 @@
 
 namespace osmscout {
 
-  const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
   const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
   const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
   const char* Preprocess::RAWWAYS_DAT="rawways.dat";
@@ -657,7 +657,7 @@ namespace osmscout {
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  DISTRIBUTION_DAT));
+                                  TypeDistributionDataFile::DISTRIBUTION_DAT));
 
       for (const auto &type : typeConfig->GetTypes()) {
         writer.Write(nodeStat[type->GetIndex()]);
@@ -828,7 +828,7 @@ namespace osmscout {
 
     description.AddProvidedFile(BoundingBoxDataFile::BOUNDINGBOX_DAT);
 
-    description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
+    description.AddProvidedTemporaryFile(TypeDistributionDataFile::DISTRIBUTION_DAT);
     description.AddProvidedTemporaryFile(RAWCOORDS_DAT);
     description.AddProvidedTemporaryFile(RAWNODES_DAT);
     description.AddProvidedTemporaryFile(RAWWAYS_DAT);
