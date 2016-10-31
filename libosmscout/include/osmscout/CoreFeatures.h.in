@@ -1,9 +1,6 @@
 /* libosmscout uses special gcc compiler features to export symbols */
 #undef OSMSCOUT_EXPORT_SYMBOLS
 
-/* std::wstring is available */
-#undef OSMSCOUT_HAVE_STD_WSTRING
-
 /* SSE2 processor extension available */
 #undef OSMSCOUT_HAVE_SSE2
 

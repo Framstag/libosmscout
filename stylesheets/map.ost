@@ -41,6 +41,8 @@ OST
       It automatically get the following features assigned:
       * Location
       * Address
+      * Website
+      * Phone
     ADDRESS:
       Objects should be indexed as address  
       It automatically get the following features assigned:
@@ -65,6 +67,8 @@ OST
   In some country this is not (only) the case, the alias is also sometimes
   placed into "maxspeed" itself. This table helps to resolve these aliases
   to numeric values again.
+
+  https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed
 */
 MAX SPEEDS
   SPEED "CZ:urban"         =  50 km/h
@@ -83,6 +87,11 @@ MAX SPEEDS
   SPEED "SK:urban"         =  50 km/h
   SPEED "SK:rural"         =  90 km/h
   SPEED "SK:motorway"      = 130 km/h
+
+  SPEED "RU:living_street" =  20 km/h
+  SPEED "RU:urban"         =  60 km/h
+  SPEED "RU:rural"         =  90 km/h
+  SPEED "RU:motorway"      = 110 km/h
 
 /*
   Allows you to map surface descriptions to a grade value ([1-5]).
@@ -322,6 +331,7 @@ TYPES
   TYPE highway_bus_stop
     = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND "public_transport"=="platform"))
       {Name, NameAlt}
+      POI
     
   TYPE highway_turning_cycle
     = NODE ("highway"=="turning_cycle")
@@ -471,6 +481,7 @@ TYPES
   TYPE railway_tram_stop
     = NODE ("railway"=="tram_stop")
       {Name, NameAlt}
+      POI
     
   TYPE railway_crossing
     = NODE ("railway"=="crossing")
@@ -1907,7 +1918,7 @@ TYPES
 
   // Addresses
   TYPE address
-    = NODE AREA (EXISTS "addr:street" AND EXISTS "addr:housenumber")
+    = NODE AREA ((EXISTS "addr:street" OR EXISTS "addr:place") AND EXISTS "addr:housenumber")
       ADDRESS
      
   //

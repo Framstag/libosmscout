@@ -19,6 +19,7 @@
 
 #include <osmscout/util/String.h>
 
+#include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <locale>
@@ -28,6 +29,10 @@
 
 #include <osmscout/private/Config.h>
 
+#if defined(HAVE_CODECVT)
+#include <codecvt>
+#endif
+#include <iostream>
 namespace osmscout {
 
 
@@ -313,8 +318,21 @@ namespace osmscout {
     }
   }
 
-#if defined(OSMSCOUT_HAVE_STD_WSTRING)
+#if defined(HAVE_CODECVT)
+  std::wstring UTF8StringToWString(const std::string& text)
+  {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
 
+    return conv.from_bytes(text);
+  }
+
+  std::string WStringToUTF8String(const std::wstring& text)
+  {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+
+    return conv.to_bytes(text);
+  }
+#else
   /**
     The following string conversion code is a modified version of code copied
     from the source of the ConvertUTF tool, as can be found for example at
@@ -336,6 +354,8 @@ namespace osmscout {
     0x03C82080UL, 0xFA082080UL, 0x82082080UL
   };
 
+  static const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+
   static const char trailingBytesForUTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -346,6 +366,133 @@ namespace osmscout {
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
   };
+
+  std::string WStringToUTF8String(const std::wstring& text)
+  {
+    std::string         result;
+    char                buffer[4];
+    const unsigned long byteMask=0xBF;
+    const unsigned long byteMark=0x80;
+
+    result.reserve(text.length()*4);
+
+#if SIZEOF_WCHAR_T==4
+
+    for (size_t i=0; i<text.length(); i++) {
+      wchar_t             ch=text[i];
+      unsigned short      bytesToWrite = 0;
+
+      /* UTF-16 surrogate values are illegal in UTF-32 */
+      if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_LOW_END) {
+        return result;
+      }
+
+      /*
+       * Figure out how many bytes the result will require. Turn any
+       * illegally large UTF32 things (> Plane 17) into replacement chars.
+      */
+      if (ch<0x80) {
+        bytesToWrite=1;
+      }
+      else if (ch<0x800) {
+        bytesToWrite=2;
+      }
+      else if (ch<0x10000) {
+        bytesToWrite=3;
+      }
+      else if (ch<=UNI_MAX_LEGAL_UTF32) {
+        bytesToWrite=4;
+      }
+      else {
+        return result;
+      }
+
+      switch (bytesToWrite) { /* note: everything falls through. */
+      case 4:
+        buffer[3]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 3:
+        buffer[2]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 2:
+        buffer[1]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 1:
+        buffer[0]=(char)(ch | firstByteMark[bytesToWrite]);
+      }
+
+      result.append(buffer,bytesToWrite);
+    }
+
+#elif SIZEOF_WCHAR_T==2
+
+    const wchar_t* source=text.c_str();
+
+    while (source!=text.c_str()+text.length()) {
+      wchar_t             ch;
+      unsigned short      bytesToWrite=0;
+
+      ch=*source++;
+
+      /* If we have a surrogate pair, convert to UTF32 first. */
+      if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_HIGH_END) {
+        if (source>=text.c_str()+text.length()) {
+          return result;
+        }
+        /* If the 16 bits following the high surrogate are in the source buffer... */
+        unsigned long ch2 = *source++;
+        /* If it's a low surrogate, convert to UTF32. */
+        if (ch2>=UNI_SUR_LOW_START && ch2<=UNI_SUR_LOW_END) {
+          ch=(wchar_t)(((ch-UNI_SUR_HIGH_START) << halfShift) + (ch2-UNI_SUR_LOW_START) + halfBase);
+        }
+        else { /* it's an unpaired high surrogate */
+          return result;
+        }
+      }
+      else {
+        /* UTF-16 surrogate values are illegal in UTF-32 */
+        if (ch>=UNI_SUR_LOW_START && ch<=UNI_SUR_LOW_END) {
+          return result;
+        }
+      }
+
+      /* Figure out how many bytes the result will require */
+      if (ch<0x80) {
+        bytesToWrite=1;
+      }
+      else if (ch<0x800) {
+        bytesToWrite=2;
+      }
+      else if (ch<0x10000) {
+        bytesToWrite=3;
+      }
+      else if (ch<0x110000) {
+        bytesToWrite=4;
+      }
+      else {
+        return result;
+      }
+
+      switch (bytesToWrite) { /* note: everything falls through. */
+      case 4:
+        buffer[3]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 3:
+        buffer[2]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 2:
+        buffer[1]=(char)((ch | byteMark) & byteMask);
+        ch>>=6;
+      case 1:
+        buffer[0]=(char)(ch | firstByteMark[bytesToWrite]);
+      }
+
+      result.append(buffer,bytesToWrite);
+    }
+#endif
+
+    return result;
+  }
 
   std::wstring UTF8StringToWString(const std::string& text)
   {
@@ -406,7 +553,6 @@ namespace osmscout {
         return result;
       }
     }
-
 #elif SIZEOF_WCHAR_T==2
     static const int halfShift=10; /* used for shifting by 10 bits */
     static const unsigned long halfBase=0x0010000UL;
@@ -468,10 +614,39 @@ namespace osmscout {
         result.append(1,(wchar_t)((ch & halfMask) + UNI_SUR_LOW_START));
       }
     }
-
 #endif
 
     return result;
   }
 #endif
+
+  std::string UTF8StringToUpper(const std::string& text)
+  {
+    std::cout << "* O \"" << text << std::endl;
+
+    std::wstring wstr=UTF8StringToWString(text);
+    std::wcout << "* w \"" << wstr << std::endl;
+
+    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
+
+    f.toupper(&wstr[0],&wstr[0]+wstr.size());
+    std::wcout << "* c \"" << wstr << std::endl;
+
+    return WStringToUTF8String(wstr);
+  }
+
+  std::string UTF8StringToLower(const std::string& text)
+  {
+    std::cout << "* O \"" << text << std::endl;
+
+    std::wstring wstr=UTF8StringToWString(text);
+    std::wcout << "* w \"" << wstr << std::endl;
+
+    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
+
+    f.tolower(&wstr[0],&wstr[0]+wstr.size());
+    std::wcout << "* c \"" << wstr << std::endl;
+
+    return WStringToUTF8String(wstr);
+  }
 }

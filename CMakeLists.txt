@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8.11)
 project(libosmscout C CXX)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
@@ -7,6 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QT
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
+
+option(BUILD_SHARED_LIBS "Shared libraries " ON)  # SHARED lib default
 
 # compiler configurations
 if(WIN32)
@@ -20,6 +22,8 @@ if(APPLE AND NOT ANDROID)
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 endif ()
+
+add_definitions(-std=c++11)
 
 include(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" OSMSCOUT_PTR_SIZE BUILTIN_TYPES_ONLY)
@@ -247,6 +251,7 @@ add_subdirectory(libosmscout-extern)
 
 # display build configuration
 message(STATUS "libosmscout build configuration:")
+message(STATUS "Shared libraries:                        ${BUILD_SHARED_LIBS}")
 message(STATUS "core library:                            ${OSMSCOUT_BUILD_CORE}")
 message(STATUS "import library:                          ${OSMSCOUT_BUILD_IMPORT}")
 message(STATUS "map drawing interface:                   ${OSMSCOUT_BUILD_MAP}")

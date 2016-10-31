@@ -306,6 +306,7 @@ namespace osmscout {
     std::list<std::string> providedOptionalFiles;
     std::list<std::string> providedDebuggingFiles;
     std::list<std::string> providedTemporaryFiles;
+    std::list<std::string> providedAnalysisFiles;
     std::list<std::string> requiredFiles;
 
   public:
@@ -316,6 +317,7 @@ namespace osmscout {
     void AddProvidedOptionalFile(const std::string& providedFile);
     void AddProvidedDebuggingFile(const std::string& providedFile);
     void AddProvidedTemporaryFile(const std::string& providedFile);
+    void AddProvidedAnalysisFile(const std::string& providedFile);
     void AddRequiredFile(const std::string& requiredFile);
 
     inline std::string GetName() const
@@ -346,6 +348,11 @@ namespace osmscout {
     inline std::list<std::string> GetProvidedTemporaryFiles() const
     {
       return providedTemporaryFiles;
+    }
+
+    inline std::list<std::string> GetProvidedAnalysisFiles() const
+    {
+      return providedAnalysisFiles;
     }
 
     inline std::list<std::string> GetRequiredFiles() const
@@ -418,6 +425,10 @@ namespace osmscout {
 
     std::list<std::string> GetProvidedFiles() const;
     std::list<std::string> GetProvidedOptionalFiles() const;
+    std::list<std::string> GetProvidedDebuggingFiles() const;
+    std::list<std::string> GetProvidedTemporaryFiles() const;
+    std::list<std::string> GetProvidedAnalysisFiles() const;
+    std::list<std::string> GetProvidedReportFiles() const;
   };
 }
 

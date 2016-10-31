@@ -156,7 +156,7 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
 endif()
 
-add_library(osmscout SHARED ${SOURCE_FILES} ${HEADER_FILES})
+add_library(osmscout ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout")

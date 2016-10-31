@@ -50,10 +50,12 @@ namespace osmscout {
       double                     cellHeight;      //!< Height of an cell
       uint32_t                   cellXCount;      //!< Number of cells in horizontal direction (with of bounding box in cells)
       uint32_t                   cellYCount;      //!< Number of cells in vertical direction (height of bounding box in cells)
+      FileOffset                 dataOffset;      //!< FileOffset of the data after the index
 
       // Persistent
 
       bool                       hasCellData;      //!< If true, we have cell data
+      uint8_t                    dataOffsetBytes;  //!< Number of bytes per entry in bitmap
       GroundTile::Type           defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
       FileOffset                 indexDataOffset;  //!< File offset of start cell state data on disk
 

@@ -75,6 +75,9 @@ using libosmscout you can later on ask which features a object based on its
 type has, which features actually exist on the object and request the value 
 of these features.
 
+Technically access to the features of an object are handled by instances of
+the class `osmscout::FeatureValueBuffer`.
+
 ## Structure
 
 The overall structure of an OSS file is as follows:

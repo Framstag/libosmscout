@@ -118,6 +118,7 @@ namespace osmscout {
       // Persistent
 
       bool                       hasCellData;      //!< If true, we have cell data
+      uint8_t                    dataOffsetBytes;  //!< Number of bytes per entry in bitmap
       State                      defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
       FileOffset                 indexDataOffset;  //!< File offset of start cell state data on disk
 

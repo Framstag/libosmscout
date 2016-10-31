@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
           libfreetype6-dev \
           libcairo2-dev \
           libpangocairo-1.0-0 libpango1.0-dev \
-          qt5-default qtdeclarative5-dev libqt5svg5-dev \
+          qt5-default qtdeclarative5-dev libqt5svg5-dev qtpositioning5-dev \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
     && rm -rf /var/lib/apt/lists/*

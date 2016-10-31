@@ -56,6 +56,7 @@ check_include_file(sys/stat.h HAVE_SYS_STAT_H)
 check_include_file(sys/time.h HAVE_SYS_TIME_H)
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(unistd.h HAVE_UNISTD_H)
+check_include_file_cxx(codecvt HAVE_CODECVT)
 if(${HAVE_STDINT_H} AND ${HAVE_STDLIB_H} AND ${HAVE_INTTYPES_H} AND ${HAVE_STRING_H} AND ${HAVE_MEMORY_H})
   set(STDC_HEADERS ON)
 else()
@@ -77,13 +78,6 @@ check_type_size("unsigned long long" HAVE_UNSIGNED_LONG_LONG)
 set(CMAKE_EXTRA_INCLUDE_FILES wchar.h)
 check_type_size(wchar_t SIZEOF_WCHAR_T)
 set(CMAKE_EXTRA_INCLUDE_FILES)
-check_cxx_source_compiles("
-#include <string>
-int main()
-{
-  std::wstring value=L\"Hello\";
-}
-" HAVE_STD__WSTRING)
 
 # check functions exists
 check_function_exists(fseeko HAVE_FSEEKO)

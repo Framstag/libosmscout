@@ -28,6 +28,11 @@
 
 namespace osmscout {
 
+  const char* const ImportErrorReporter::FILENAME_INDEX_HTML    = "index.html";
+  const char* const ImportErrorReporter::FILENAME_WAY_HTML      = "way.html";
+  const char* const ImportErrorReporter::FILENAME_RELATION_HTML = "relation.html";
+  const char* const ImportErrorReporter::FILENAME_LOCATION_HTML = "location.html";
+
   ImportErrorReporter::ImportErrorReporter(Progress& progress,
                                            const TypeConfigRef& typeConfig,
                                            const std::string& destinationDirectory)
@@ -40,25 +45,25 @@ namespace osmscout {
   {
     nameTagId=typeConfig->GetTagId("name");
 
-    wayReport.Open(AppendFileToDir(destinationDirectory,"way.html"));
+    wayReport.Open(AppendFileToDir(destinationDirectory,FILENAME_WAY_HTML));
     wayReport.WriteDocumentStart();
     wayReport.WriteHeader("Way format errors","Import errors related to ways","","..stylesheet.css");
     wayReport.WriteBodyStart();
     wayReport.WriteListStart();
 
-    relationReport.Open(AppendFileToDir(destinationDirectory,"relation.html"));
+    relationReport.Open(AppendFileToDir(destinationDirectory,FILENAME_RELATION_HTML));
     relationReport.WriteDocumentStart();
     relationReport.WriteHeader("Relation format errors","Import errors related to relations","","..stylesheet.css");
     relationReport.WriteBodyStart();
     relationReport.WriteListStart();
 
-    locationReport.Open(AppendFileToDir(destinationDirectory,"location.html"));
+    locationReport.Open(AppendFileToDir(destinationDirectory,FILENAME_LOCATION_HTML));
     locationReport.WriteDocumentStart();
     locationReport.WriteHeader("Location format errors","Import errors related to location information","","..stylesheet.css");
     locationReport.WriteBodyStart();
     locationReport.WriteListStart();
 
-    index.Open(AppendFileToDir(destinationDirectory,"index.html"));
+    index.Open(AppendFileToDir(destinationDirectory,FILENAME_INDEX_HTML));
     index.WriteDocumentStart();
     index.WriteHeader("Index","Index of all reports","","..stylesheet.css");
     index.WriteBodyStart();

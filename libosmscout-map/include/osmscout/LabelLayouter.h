@@ -48,9 +48,6 @@ namespace osmscout {
   public:
     LabelData();
     virtual ~LabelData();
-
-
-    bool Intersects(const LabelData& other) const;
   };
 
   typedef std::list<LabelData>::iterator LabelDataRef;

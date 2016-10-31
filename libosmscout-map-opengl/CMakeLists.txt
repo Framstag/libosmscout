@@ -19,7 +19,7 @@ set(SOURCE_FILES
     src/osmscout/MapPainterOpenGL.cpp
 )
 
-add_library(osmscout_map_opengl SHARED ${SOURCE_FILES} ${HEADER_FILES})
+add_library(osmscout_map_opengl ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_map_opengl PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapOpenGLFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-opengl")

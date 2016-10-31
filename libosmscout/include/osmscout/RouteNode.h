@@ -119,7 +119,7 @@ namespace osmscout {
 
   private:
     FileOffset              fileOffset; //!< FileOffset of the route node
-    Point                   point;      //!< NodeThe route node
+    Point                   point;      //!< Coordinate and id of the route node
 
   public:
     std::vector<ObjectData> objects;    //!< List of objects (ways, areas) that cross this route node

@@ -69,7 +69,7 @@ namespace osmscout {
 
   bool WayWayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
                                                  Progress& progress,
-                                                 std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+                                                 RestrictionData& restrictions)
   {
     FileScanner scanner;
     uint32_t    restrictionCount=0;
@@ -89,8 +89,8 @@ namespace osmscout {
 
         restriction->Read(scanner);
 
-        restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
-        restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
       }
 
       progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
@@ -107,14 +107,12 @@ namespace osmscout {
 
   bool WayWayDataGenerator::WriteTurnRestrictions(const ImportParameter& parameter,
                                                   Progress& progress,
-                                                  std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+                                                  const RestrictionData& restrictions)
   {
     std::set<TurnRestrictionRef> restrictionsSet;
 
-    for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator restriction=restrictions.begin();
-        restriction!=restrictions.end();
-        ++restriction) {
-      restrictionsSet.insert(restriction->second);
+    for (const auto& restriction : restrictions.restrictions) {
+      restrictionsSet.insert(restriction.second);
     }
 
     FileWriter writer;
@@ -248,46 +246,43 @@ namespace osmscout {
     return true;
   }
 
-  void WayWayDataGenerator::UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+  void WayWayDataGenerator::UpdateRestrictions(RestrictionData& restrictions,
                                                OSMId oldId,
                                                OSMId newId)
   {
     std::list<TurnRestrictionRef> oldRestrictions;
 
-    auto hits=restrictions.equal_range(oldId);
+    auto hits=restrictions.restrictions.equal_range(oldId);
 
-    for (auto& hit=hits.first;
-        hit!=hits.second;
-        ++hit) {
+    for (auto& hit=hits.first; hit!=hits.second; ++hit) {
       oldRestrictions.push_back(hit->second);
     }
 
-    restrictions.erase(hits.first,hits.second);
+    restrictions.restrictions.erase(hits.first,hits.second);
 
     for (auto &restriction : oldRestrictions) {
       if (restriction->GetFrom()==oldId) {
         restriction->SetFrom(newId);
-        restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
       }
+
       if (restriction->GetTo()==oldId) {
         restriction->SetTo(newId);
-        restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+        restrictions.restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
       }
     }
   }
 
-  bool WayWayDataGenerator::IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+  bool WayWayDataGenerator::IsRestricted(const RestrictionData& restrictions,
                                          OSMId wayId,
                                          OSMId nodeId) const
   {
     // We have an index entry for turn restriction, where the given way id is
     // "from" or "to" so we can just check for "via" == nodeId
 
-    auto hits=restrictions.equal_range(wayId);
+    auto hits=restrictions.restrictions.equal_range(wayId);
 
-    for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator hit=hits.first;
-        hit!=hits.second;
-        ++hit) {
+    for (auto hit=hits.first; hit!=hits.second; ++hit) {
       if (hit->second->GetVia()==nodeId) {
         return true;
       }
@@ -298,7 +293,7 @@ namespace osmscout {
 
   bool WayWayDataGenerator::MergeWays(Progress& progress,
                                       std::list<RawWayRef>& ways,
-                                      std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+                                      RestrictionData& restrictions)
   {
     WaysByNodeMap waysByNode;
 
@@ -467,10 +462,12 @@ namespace osmscout {
                      std::list<RawWayRef>& ways,
                      CoordDataFile::ResultMap& coordsMap)
   {
-    // TODO: enable OMP parallelism
     std::list<RawWayRef> newWays;
-    
-    for (auto way: ways){
+
+    size_t currentWay=1;
+    size_t wayCount=ways.size();
+
+    for (auto way: ways) {
       //*wayIt;
       double length=0.0;
       bool split = way->GetNodeCount() > 300;
@@ -478,29 +475,36 @@ namespace osmscout {
         // check real length (in km)
         auto osmIdIt = way->GetNodes().begin();
         auto endIt = way->GetNodes().end();
-        Coord prev = coordsMap[*osmIdIt];
+        auto prev = coordsMap.find(*osmIdIt);
         osmIdIt ++;
-        while (osmIdIt != endIt){
-          Coord current = coordsMap[*osmIdIt];
-          length += GetSphericalDistance(prev.GetCoord(), current.GetCoord());
+        while (osmIdIt != endIt && (!split)){
+          auto current = coordsMap.find(*osmIdIt);
+          if (prev == coordsMap.end() || current == coordsMap.end()) {
+            split = true;
+          }
+          else {
+            length += GetSphericalDistance(prev->second.GetCoord(), current->second.GetCoord());
+          }
           prev = current;
           osmIdIt ++;
         }
         split = length > 30.0;
       }
 
-      if (!split){
+      progress.SetProgress(currentWay,wayCount);
+      currentWay++;
+
+      if (!split) {
         newWays.push_back(way);
         continue;
       }
-      
-      std::cout << "  Spliting long way " << way->GetId() << 
-        " with " << way->GetNodeCount() << " nodes";
-      if (length > 0.0){
-        std::cout << " and real length " << length << " km";
+
+      std::string msg = "Splitting long way " + NumberToString(way->GetId()) +
+        " with " + NumberToString(way->GetNodeCount()) + " nodes";
+      if (length > 0.0) {
+        msg += " and real length " + std::to_string(length) + " km";
       }
-      std::cout << std::endl;
-      //ways.erase(wayIt);
+      progress.Debug(msg);
       
       double segmentLength=0.0;
       size_t segmentNodeCnt=1;
@@ -509,52 +513,91 @@ namespace osmscout {
       auto osmIdIt = way->GetNodes().begin();
       auto endIt = way->GetNodes().end();
       auto segmentStart = osmIdIt;
+      auto segmentEnd = osmIdIt;
       
-      Coord prev = coordsMap[*osmIdIt];
+      auto prev = coordsMap.find(*osmIdIt);
+      // jump to first valid node
+      while (prev==coordsMap.end() && osmIdIt != endIt) {
+        progress.Error("Cannot resolve node with id "+
+                       NumberToString(*osmIdIt)+
+                       " for way "+
+                       NumberToString(way->GetId())+
+                       ", skipping");
+        osmIdIt ++;    
+        segmentStart = osmIdIt;
+        if (osmIdIt != endIt){
+          prev = coordsMap.find(*osmIdIt);
+        }
+      }
+
       osmIdIt ++;
-      while (osmIdIt != endIt){          
-        if (segment->GetId() == 0){
+      segmentEnd=osmIdIt;
+      while (osmIdIt!=endIt) {
+        
+        if (segment->GetId()==0) {
           segment->SetId(way->GetId());
           segment->SetType(way->GetType(), way->IsArea());
-          segment->GetMutableFeatureValueBuffer().Set(way->GetFeatureValueBuffer());
+          segment->SetFeatureValueBuffer(way->GetFeatureValueBuffer());
         }
-        Coord current = coordsMap[*osmIdIt];
-        
-        segmentLength += GetSphericalDistance(prev.GetCoord(), current.GetCoord());
-        segmentNodeCnt ++;
-        if (segmentNodeCnt >= 300 || segmentLength > 30.0){
+
+        auto current = coordsMap.find(*osmIdIt);
+
+        if (current!=coordsMap.end()) {
+          segmentLength += GetSphericalDistance(prev->second.GetCoord(), current->second.GetCoord());
+          segmentNodeCnt ++;
+        }
+
+        if (segmentNodeCnt >= 300 || segmentLength > 30.0 || current==coordsMap.end()) {
           auto currentSegmentStart = segmentStart;
           segmentStart=osmIdIt;
           prev = current;
-          osmIdIt ++;          
+          osmIdIt ++;
+          segmentEnd=osmIdIt;
 
           segment->SetNodes(currentSegmentStart, osmIdIt);
           newWays.push_back(segment);
-          std::cout << "  - New segment " << segment->GetId() << 
-            " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
+          //std::cout << "  - New segment " << segment->GetId() << 
+          //  " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
           
+          // skip invalid nodes
+          while (prev==coordsMap.end() && osmIdIt != endIt){
+            progress.Error("Cannot resolve node with id "+
+                           NumberToString(*osmIdIt)+
+                           " for way "+
+                           NumberToString(way->GetId())+
+                           ", splitting");
+            osmIdIt ++;    
+            segmentStart = osmIdIt;
+            if (osmIdIt != endIt){
+              prev = coordsMap.find(*osmIdIt);
+            }
+          }
           // reset segment
           segmentLength=0.0;
           segmentNodeCnt=1;
           segment = std::make_shared<RawWay>();
 
-        }else{
+        }
+        else {
           prev = current;
           osmIdIt ++;          
+          segmentEnd=osmIdIt;
         }
       }
-      if (segment->GetId() != 0 && segmentNodeCnt >= 2){
-        segment->SetNodes(segmentStart, osmIdIt);
+      if (segment->GetId() != 0 && segmentNodeCnt >= 2) {
+        segment->SetNodes(segmentStart, segmentEnd);
         newWays.push_back(segment);        
-        std::cout << "  - New segment (last) " << segment->GetId() << 
-            " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
+        //std::cout << "  - New segment (last) " << segment->GetId() << 
+        //    " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
       }
     }
     
     ways.clear();
-    for (auto way: newWays){
+
+    for (auto way: newWays) {
       ways.push_back(way);
     }
+
     return true;
   }
 
@@ -682,8 +725,7 @@ namespace osmscout {
     TypeInfoSet                             wayTypes;
     TypeInfoSet                             slowFallbackTypes;
 
-    // List of restrictions for a way
-    std::multimap<OSMId,TurnRestrictionRef> restrictions; //! Map of restrictions
+    RestrictionData                         restrictions;
 
     FileScanner                             scanner;
     FileWriter                              wayWriter;
@@ -809,19 +851,19 @@ namespace osmscout {
         }
 
         nodeIds.clear();
-        
+
         // split too long ways again to shorter segments
-    // TODO: enable OMP parallelism    
-//#pragma omp parallel for
+        progress.SetAction("Splitting too long ways");
+#pragma omp parallel for
         for (int64_t typeIdx = 0; typeIdx<(int64_t)typeConfig->GetTypeCount(); typeIdx++) {
           size_t originalWayCount=waysByType[typeIdx].size();
 
           if (originalWayCount>0) {
             SplitLongWays(progress, waysByType[typeIdx], coordsMap);        
             
-//#pragma omp critical
+#pragma omp critical
             if (waysByType[typeIdx].size()>originalWayCount) {
-              progress.Info("Split long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
+              progress.Info("Splitted long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
                             NumberToString(originalWayCount)+" to "+NumberToString(waysByType[typeIdx].size())+ " way(s)");
               mergeCount+=originalWayCount-waysByType[typeIdx].size();
             }
