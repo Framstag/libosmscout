@@ -227,6 +227,23 @@ int main()
     errors++;
   }
 
+  // Highway=motorway (CAR) with no access at all, but oneway
+
+  tags.clear();
+  tags["access"]="no";
+  tags["oneway"]="yes";
+  tags["bus"]="destination";
+  tags["psv"]="yes";
+  tags["motor_vehicle"]="private";
+
+  if (!CheckParseSuccess(false,
+                         false,
+                         false,
+                         osmscout::AccessFeatureValue::onewayForward|osmscout::AccessFeatureValue::carForward,
+                         tags)) {
+    errors++;
+  }
+
   if (errors!=0) {
     return 1;
   }
