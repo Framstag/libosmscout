@@ -724,7 +724,7 @@ namespace osmscout {
    * Restricted access means, that you can enter a restricted region, but cannot leave it again for a given
    * route. You may only enter the restricted region if you have a certain intention.
    *
-   * No acces restriction, dies not mean, that a way can be used for a given vehicle. You must still evaluate if
+   * No access restriction, does not mean that a way can be used for a given vehicle. You must still evaluate if
    * there is access at all for the vehicle.
    */
   class OSMSCOUT_API AccessRestrictedFeature : public Feature
