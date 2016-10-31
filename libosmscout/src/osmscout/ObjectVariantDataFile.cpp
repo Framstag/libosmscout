@@ -19,7 +19,7 @@
 
 #include <osmscout/ObjectVariantDataFile.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Logger.h>
 
 namespace osmscout {
@@ -35,6 +35,16 @@ namespace osmscout {
     // no code
   }
 
+  /**
+   * Load the object variant data from the given file.
+   *
+   * @param typeConfig
+   *    TypeConfig instance
+   * @param filename
+   *    Name of the file containing the object variant data
+   * @return
+   *    True on success, else false
+   */
   bool ObjectVariantDataFile::Load(const TypeConfig& typeConfig,
                                    const std::string& filename)
   {

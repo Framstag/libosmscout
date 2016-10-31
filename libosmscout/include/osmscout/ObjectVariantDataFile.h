@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/private/CoreImportExport.h>
+
 #include <osmscout/RouteNode.h>
 #include <osmscout/TypeConfig.h>
 
@@ -49,7 +51,7 @@ namespace osmscout {
     virtual ~ObjectVariantDataFile();
 
     bool Load(const TypeConfig& typeConfig,
-              const std::string& path);
+              const std::string& filename);
 
     inline bool IsLoaded() const
     {
