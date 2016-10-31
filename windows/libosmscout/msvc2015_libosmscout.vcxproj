@@ -143,6 +143,9 @@
     <ClCompile Include="src\osmscout\AreaWayIndex.cpp" />
     <ClCompile Include="src\osmscout\Coord.cpp" />
     <ClCompile Include="src\osmscout\CoordDataFile.cpp" />
+    <ClCompile Include="src\osmscout\BoundingBoxDataFile.cpp" />
+    <ClCompile Include="src\osmscout\ObjectVariantDataFile.cpp" />
+    <ClCompile Include="src\osmscout\TypeDistributionDataFile.cpp" />
     <ClCompile Include="src\osmscout\Database.cpp" />
     <ClCompile Include="src\osmscout\DebugDatabase.cpp" />
     <ClCompile Include="src\osmscout\GeoCoord.cpp" />
@@ -242,6 +245,9 @@
     <ClInclude Include="include\osmscout\Coord.h" />
     <ClInclude Include="include\osmscout\CoordDataFile.h" />
     <ClInclude Include="include\osmscout\CoreFeatures.h" />
+    <ClCompile Include="include\osmscout\BoundingBoxDataFile.h" />
+    <ClCompile Include="include\osmscout\ObjectVariantDataFile.h" />
+    <ClCompile Include="include\osmscout\TypeDistributionDataFile.h" />
     <ClInclude Include="include\osmscout\Database.h" />
     <ClInclude Include="include\osmscout\DataFile.h" />
     <ClInclude Include="include\osmscout\DebugDatabase.h" />
