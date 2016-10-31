@@ -116,37 +116,6 @@ namespace osmscout {
     return false;
   }
 
-  bool RoutingService::LoadObjectVariantData(const std::string& filename,
-                                             std::vector<ObjectVariantData>& objectVariantData) const
-  {
-    FileScanner scanner;
-
-    try {
-      scanner.Open(filename,
-                   FileScanner::FastRandom,true);
-
-      uint32_t objectVariantDataCount;
-
-      scanner.Read(objectVariantDataCount);
-
-      objectVariantData.resize(objectVariantDataCount);
-
-      for (size_t i=0; i<objectVariantDataCount; i++) {
-        objectVariantData[i].Read(*database->GetTypeConfig(),
-                                  scanner);
-      }
-
-      scanner.Close();
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      scanner.CloseFailsafe();
-      return false;
-    }
-
-    return true;
-  }
-
   /**
    * Opens the routing service. This loads the routing graph for the given vehicle
    *
@@ -173,9 +142,9 @@ namespace osmscout {
 
     log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
 
-    if (!LoadObjectVariantData(AppendFileToDir(path,
-                                               GetData2Filename(filenamebase)),
-                               objectVariantData)) {
+    if (!objectVariantDataFile.Load(*database->GetTypeConfig(),
+                                    AppendFileToDir(path,
+                                                    GetData2Filename(filenamebase)))) {
       return false;
     }
 
@@ -1199,7 +1168,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!profile.CanUse(*currentRouteNode,objectVariantData,i)) {
+        if (!profile.CanUse(*currentRouteNode,objectVariantDataFile.GetData(),i)) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path.offset;
@@ -1247,7 +1216,7 @@ namespace osmscout {
         }
 
         double currentCost=current->currentCost+
-                           profile.GetCosts(*currentRouteNode,objectVariantData,i);
+                           profile.GetCosts(*currentRouteNode,objectVariantDataFile.GetData(),i);
 
         OpenMap::iterator openEntry=openMap.find(path.offset);
 

@@ -62,6 +62,7 @@ set(HEADER_FILES
     include/osmscout/Pixel.h
     include/osmscout/Point.h
     include/osmscout/POIService.h
+    include/osmscout/ObjectVariantDataFile.h
     include/osmscout/Route.h
     include/osmscout/RouteData.h
     include/osmscout/RouteNode.h
@@ -133,6 +134,7 @@ set(SOURCE_FILES
     src/osmscout/Pixel.cpp
     src/osmscout/Point.cpp
     src/osmscout/POIService.cpp
+    src/osmscout/ObjectVariantDataFile.cpp
     src/osmscout/Route.cpp
     src/osmscout/RouteData.cpp
     src/osmscout/RouteNode.cpp

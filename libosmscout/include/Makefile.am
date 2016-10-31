@@ -61,6 +61,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/OptimizeAreasLowZoom.h \
                         osmscout/OptimizeWaysLowZoom.h \
                         osmscout/WaterIndex.h \
+                        osmscout/ObjectVariantDataFile.h \
                         osmscout/Route.h \
                         osmscout/RouteData.h \
                         osmscout/RouteNode.h \

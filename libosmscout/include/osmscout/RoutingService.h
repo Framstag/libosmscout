@@ -35,7 +35,9 @@
 #include <osmscout/RouteNode.h>
 
 // Datafiles
+#include <osmscout/DataFile.h>
 #include <osmscout/Database.h>
+#include <osmscout/ObjectVariantDataFile.h>
 
 // Routing
 #include <osmscout/Intersection.h>
@@ -192,8 +194,7 @@ namespace osmscout {
 
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile;     //!< Cached access to the 'route.dat' file
     IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-
-    std::vector<ObjectVariantData>       objectVariantData;     //!< Cached data regarding object variants
+    ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loadinfg object variant data
 
   private:
     std::string GetDataFilename(const std::string& filenamebase) const;
@@ -201,9 +202,6 @@ namespace osmscout {
     std::string GetIndexFilename(const std::string& filenamebase) const;
 
     bool HasNodeWithId(const std::vector<Point>& nodes) const;
-
-    bool LoadObjectVariantData(const std::string& filename,
-                               std::vector<ObjectVariantData>& objectVariantData) const;
 
     void GetStartForwardRouteNode(const RoutingProfile& profile,
                                   const WayRef& way,

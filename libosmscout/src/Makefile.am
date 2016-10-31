@@ -68,6 +68,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/OptimizeAreasLowZoom.cpp \
                         osmscout/OptimizeWaysLowZoom.cpp \
                         osmscout/WaterIndex.cpp \
+                        osmscout/ObjectVariantDataFile.cpp \
                         osmscout/Route.cpp \
                         osmscout/RouteData.cpp \
                         osmscout/RouteNode.cpp \
