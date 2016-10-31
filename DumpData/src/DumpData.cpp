@@ -306,18 +306,26 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);
 
+  for (const auto& object : routeNode.objects) {
+    std::cout << std::endl;
+    std::cout << "  object {" << std::endl;
+    std::cout << "    object: " << object.object.GetName() << std::endl;
+    std::cout << "    variant: " << object.objectVariantIndex << std::endl;
+    std::cout << "  }" << std::endl;
+  }
+
   for (const auto& path : routeNode.paths) {
     std::cout << std::endl;
     std::cout << "  path {" << std::endl;
-    std::cout << "     object: " << routeNode.objects[path.objectIndex].object.GetName() << std::endl;
+    std::cout << "    object: " << routeNode.objects[path.objectIndex].object.GetName() << std::endl;
     std::cout << "  }" << std::endl;
   }
 
   for (const auto& exclude : routeNode.excludes) {
     std::cout << std::endl;
     std::cout << "  exclude {" << std::endl;
-    std::cout << "     from: " << exclude.source.GetName() << std::endl;
-    std::cout << "     to: " << routeNode.objects[exclude.targetIndex].object.GetName() << std::endl;
+    std::cout << "    from: " << exclude.source.GetName() << std::endl;
+    std::cout << "    to: " << routeNode.objects[exclude.targetIndex].object.GetName() << std::endl;
     std::cout << "  }" << std::endl;
   }
 
