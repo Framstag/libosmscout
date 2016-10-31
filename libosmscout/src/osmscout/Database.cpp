@@ -90,25 +90,6 @@ namespace osmscout {
       return false;
     }
 
-    FileScanner scanner;
-
-    try {
-      scanner.Open(AppendFileToDir(path,"bounding.dat"),
-                   FileScanner::Normal,
-                   false);
-
-      scanner.ReadBox(boundingBox);
-
-      log.Debug() << "BoundingBox: " << boundingBox.GetDisplayText();
-
-      scanner.Close();
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      scanner.CloseFailsafe();
-      return false;
-    }
-
     isOpen=true;
 
     return true;
@@ -121,6 +102,8 @@ namespace osmscout {
 
   void Database::Close()
   {
+    boundingBoxDataFile=NULL;
+
     if (nodeDataFile &&
         nodeDataFile->IsOpen()) {
       nodeDataFile->Close();
@@ -184,6 +167,34 @@ namespace osmscout {
   TypeConfigRef Database::GetTypeConfig() const
   {
     return typeConfig;
+  }
+
+  BoundingBoxDataFileRef Database::GetBoundingBoxDataFile() const
+  {
+    std::lock_guard<std::mutex> guard(boundingBoxDataFileMutex);
+
+    if (!IsOpen()) {
+      return NULL;
+    }
+
+    if (!boundingBoxDataFile) {
+      boundingBoxDataFile=std::make_shared<BoundingBoxDataFile>();
+    }
+
+    if (!boundingBoxDataFile->IsLoaded()) {
+      StopClock timer;
+
+      if (!boundingBoxDataFile->Load(path)) {
+        log.Error() << "Cannot open '" << BoundingBoxDataFile::BOUNDINGBOX_DAT << "'!";
+        return NULL;
+      }
+
+      timer.Stop();
+
+      log.Debug() << "Opening BoundingBoxDataFile: " << timer.ResultString();
+    }
+
+    return boundingBoxDataFile;
   }
 
   NodeDataFileRef Database::GetNodeDataFile() const
@@ -474,11 +485,13 @@ namespace osmscout {
 
   bool Database::GetBoundingBox(GeoBox& boundingBox) const
   {
-    if (!IsOpen()) {
+    BoundingBoxDataFileRef boundingBoxDataFile=GetBoundingBoxDataFile();
+
+    if (!boundingBoxDataFile) {
       return false;
     }
 
-    boundingBox=this->boundingBox;
+    boundingBox=boundingBoxDataFile->GetBoundingBox();
 
     return true;
   }

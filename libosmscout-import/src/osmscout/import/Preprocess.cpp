@@ -23,6 +23,7 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/File.h>
@@ -45,7 +46,6 @@
 
 namespace osmscout {
 
-  const char* Preprocess::BOUNDING_DAT="bounding.dat";
   const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
   const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
   const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
@@ -686,7 +686,7 @@ namespace osmscout {
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  BOUNDING_DAT));
+                                  BoundingBoxDataFile::BOUNDINGBOX_DAT));
 
       writer.WriteCoord(minCoord);
       writer.WriteCoord(maxCoord);
@@ -826,7 +826,7 @@ namespace osmscout {
     description.SetName("Preprocess");
     description.SetDescription("Initial parsing of import file(s)");
 
-    description.AddProvidedFile(BOUNDING_DAT);
+    description.AddProvidedFile(BoundingBoxDataFile::BOUNDINGBOX_DAT);
 
     description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
     description.AddProvidedTemporaryFile(RAWCOORDS_DAT);

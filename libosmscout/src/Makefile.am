@@ -74,6 +74,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/RouteNode.cpp \
                         osmscout/RoutePostprocessor.cpp \
                         osmscout/RoutingProfile.cpp \
+                        osmscout/BoundingBoxDataFile.cpp \
                         osmscout/Database.cpp \
                         osmscout/DebugDatabase.cpp \
                         osmscout/SRTM.cpp \

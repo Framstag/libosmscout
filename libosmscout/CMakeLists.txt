@@ -42,6 +42,7 @@ set(HEADER_FILES
     include/osmscout/Coord.h
     include/osmscout/CoordDataFile.h
     #include/osmscout/CoreFeatures.h
+    include/osmscout/BoundingBoxDataFile.h
     include/osmscout/Database.h
     include/osmscout/DataFile.h
     include/osmscout/DebugDatabase.h
@@ -116,6 +117,7 @@ set(SOURCE_FILES
     src/osmscout/AreaWayIndex.cpp
     src/osmscout/Coord.cpp
     src/osmscout/CoordDataFile.cpp
+    src/osmscout/BoundingBoxDataFile.cpp
     src/osmscout/Database.cpp
     src/osmscout/DebugDatabase.cpp
     src/osmscout/GeoCoord.cpp
