@@ -301,8 +301,12 @@ namespace osmscout {
   {
     ClosedSet::const_iterator current=closedSet.find(VNode(finalRouteNode));
 
+    assert(current!=closedSet.end());
+
     while (current->previousNode!=0) {
       ClosedSet::const_iterator prev=closedSet.find(VNode(current->previousNode));
+
+      assert(prev!=closedSet.end());
 
       nodes.push_back(*current);
 
@@ -1310,6 +1314,7 @@ namespace osmscout {
                                     current->object,
                                     current->prev));
       }
+
       current->node=NULL;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
@@ -1331,6 +1336,14 @@ namespace osmscout {
     } while (!openList.empty() &&
              (!targetForwardRouteNode || current->nodeOffset!=targetForwardRouteNode->GetFileOffset()) &&
              (!targetBackwardRouteNode || current->nodeOffset!=targetBackwardRouteNode->GetFileOffset()));
+
+    // If we have keep the last node open because of access violations, add it
+    // afte rrouting is done
+    if (closedSet.find(VNode(current->nodeOffset))==closedSet.end()) {
+      closedSet.insert(VNode(current->nodeOffset,
+                             current->object,
+                             current->prev));
+    }
 
     clock.Stop();
 
