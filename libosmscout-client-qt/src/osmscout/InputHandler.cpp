@@ -52,7 +52,7 @@ void TapRecognizer::onTimeout()
 void TapRecognizer::touch(QTouchEvent *event)
 {
     // discard on multi touch
-    if (event->touchPoints().size() > 1){
+    if (event->touchPoints().size() != 1){
         state = INACTIVE;
         return;
     }
@@ -460,7 +460,7 @@ bool DragHandler::touch(QTouchEvent *event)
     if (ended)
         return false;
 
-    if (event->touchPoints().size() > 1)
+    if (event->touchPoints().size() != 1)
         return false;
     
     QTouchEvent::TouchPoint finger = event->touchPoints()[0];
