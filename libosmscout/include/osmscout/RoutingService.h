@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <functional>
 #include <list>
 #include <memory>
 #include <set>
@@ -35,7 +36,9 @@
 #include <osmscout/RouteNode.h>
 
 // Datafiles
+#include <osmscout/DataFile.h>
 #include <osmscout/Database.h>
+#include <osmscout/ObjectVariantDataFile.h>
 
 // Routing
 #include <osmscout/Intersection.h>
@@ -166,11 +169,86 @@ namespace osmscout {
       }
     };
 
+    /**
+     * Minimum required data for a node in the ClosedSet.
+     *
+     * The ClosedSet is the set of routing nodes that have been
+     * already handled.
+     *
+     * From the VNode list from the last routing node back to the start
+     * the route is recalculated by following the previousNode chain.
+     */
+    struct VNode
+    {
+      FileOffset    currentNode;   //!< FileOffset of this route node
+      FileOffset    previousNode;  //!< FileOffset of the previous route node
+      ObjectFileRef object;        //!< The object (way/area) visited from the current route node
+
+      /**
+       * Equality operator
+       * @param other
+       *    Other object to compare against
+       * @return
+       *    True, if both objects are equal. Objects are currently equal
+       *    if they have the same route node file offset.
+       */
+      inline bool operator==(const VNode& other) const
+      {
+        return currentNode==other.currentNode;
+      }
+
+      /**
+       * Simple inline constructor for searching for VNodes in the
+       * ClosedSet.
+       *
+       * @param currentNode
+       *    Offset of the node to search for
+       */
+      inline VNode(FileOffset currentNode)
+        : currentNode(currentNode),
+          previousNode(0)
+      {
+        // no code
+      }
+
+      /**
+       * Full featured constructor
+       *
+       * @param currentNode
+       *    FileOffset of the current route node
+       * @param object
+       *    Type of object used to navigate to this route node
+       * @param previousNode
+       *    FileOffset of the previous route node visited
+       */
+      VNode(FileOffset currentNode,
+                 const ObjectFileRef& object,
+                 FileOffset previousNode)
+      : currentNode(currentNode),
+        previousNode(previousNode),
+        object(object)
+      {
+        // no code
+      }
+    };
+
+    /**
+     * Helper class for calculating hash codes for
+     * VNode instances to make it usable in std::unordered_set.
+     */
+    struct ClosedNodeHasher
+    {
+      inline size_t operator()(const VNode& node) const
+      {
+        return std::hash<FileOffset>()(node.currentNode);
+      }
+    };
+
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
     typedef std::unordered_map<FileOffset,OpenListRef>    OpenMap;
-    typedef std::unordered_map<FileOffset,RNodeRef>       CloseMap;
+    typedef std::unordered_set<VNode,ClosedNodeHasher>    ClosedSet;
 
   public:
     //! Relative filename of the intersection data file
@@ -192,8 +270,7 @@ namespace osmscout {
 
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile;     //!< Cached access to the 'route.dat' file
     IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-
-    std::vector<ObjectVariantData>       objectVariantData;     //!< Cached data regarding object variants
+    ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loadinfg object variant data
 
   private:
     std::string GetDataFilename(const std::string& filenamebase) const;
@@ -201,9 +278,6 @@ namespace osmscout {
     std::string GetIndexFilename(const std::string& filenamebase) const;
 
     bool HasNodeWithId(const std::vector<Point>& nodes) const;
-
-    bool LoadObjectVariantData(const std::string& filename,
-                               std::vector<ObjectVariantData>& objectVariantData) const;
 
     void GetStartForwardRouteNode(const RoutingProfile& profile,
                                   const WayRef& way,
@@ -242,11 +316,11 @@ namespace osmscout {
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
 
-    void ResolveRNodeChainToList(const RNodeRef& end,
-                                 const CloseMap& closeMap,
-                                 std::list<RNodeRef>& nodes);
+    void ResolveRNodeChainToList(FileOffset finalRouteNode,
+                                 const ClosedSet& closedSet,
+                                 std::list<VNode>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
-                                  const std::list<RNodeRef>& nodes,
+                                  const std::list<VNode>& nodes,
                                   const ObjectFileRef& startObject,
                                   size_t startNodeIndex,
                                   const ObjectFileRef& targetObject,

@@ -21,7 +21,7 @@ set(SOURCE_FILES
     src/osmscout/MapPainterCairo.cpp
 )
 
-add_library(osmscout_map_cairo SHARED ${SOURCE_FILES} ${HEADER_FILES})
+add_library(osmscout_map_cairo ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_map_cairo PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapCairoFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapCairoFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-cairo")

@@ -26,6 +26,7 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/DataFile.h>
+#include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/WaterIndex.h>
@@ -1635,7 +1636,7 @@ namespace osmscout {
     description.SetName("WaterIndexGenerator");
     description.SetDescription("Create index for lookup of ground/see tiles");
 
-    description.AddRequiredFile(Preprocess::BOUNDING_DAT);
+    description.AddRequiredFile(BoundingBoxDataFile::BOUNDINGBOX_DAT);
 
     description.AddRequiredFile(Preprocess::RAWCOASTLINE_DAT);
 
@@ -1654,6 +1655,7 @@ namespace osmscout {
 
     FileScanner         scanner;
 
+    GeoBox              boundingBox;
     GeoCoord            minCoord;
     GeoCoord            maxCoord;
 
@@ -1667,22 +1669,17 @@ namespace osmscout {
     // Read bounding box
     //
 
-    try {
-      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   Preprocess::BOUNDING_DAT),
-                   FileScanner::Sequential,
-                   true);
+    BoundingBoxDataFile boundingBoxDataFile;
 
-      scanner.ReadCoord(minCoord);
-      scanner.ReadCoord(maxCoord);
+    if (!boundingBoxDataFile.Load(parameter.GetDestinationDirectory())) {
+      progress.Error("Error loading file '"+boundingBoxDataFile.GetFilename()+"'");
 
-      scanner.Close();
-    }
-    catch (IOException& e) {
-      progress.Error(e.GetDescription());
-      scanner.CloseFailsafe();
       return false;
     }
+
+    boundingBox=boundingBoxDataFile.GetBoundingBox();
+    minCoord=boundingBox.GetMinCoord();
+    maxCoord=boundingBox.GetMaxCoord();
 
     //
     // Initialize levels

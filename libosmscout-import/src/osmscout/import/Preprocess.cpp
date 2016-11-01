@@ -23,6 +23,8 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/BoundingBoxDataFile.h>
+#include <osmscout/TypeDistributionDataFile.h>
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/File.h>
@@ -45,8 +47,6 @@
 
 namespace osmscout {
 
-  const char* Preprocess::BOUNDING_DAT="bounding.dat";
-  const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
   const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
   const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
   const char* Preprocess::RAWWAYS_DAT="rawways.dat";
@@ -657,7 +657,7 @@ namespace osmscout {
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  DISTRIBUTION_DAT));
+                                  TypeDistributionDataFile::DISTRIBUTION_DAT));
 
       for (const auto &type : typeConfig->GetTypes()) {
         writer.Write(nodeStat[type->GetIndex()]);
@@ -680,13 +680,13 @@ namespace osmscout {
 
   bool Preprocess::Callback::DumpBoundingBox()
   {
-    progress.SetAction("Generating bounding.dat");
+    progress.SetAction("Generating '"+std::string(BoundingBoxDataFile::BOUNDINGBOX_DAT)+"'");
 
     FileWriter writer;
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  BOUNDING_DAT));
+                                  BoundingBoxDataFile::BOUNDINGBOX_DAT));
 
       writer.WriteCoord(minCoord);
       writer.WriteCoord(maxCoord);
@@ -826,9 +826,9 @@ namespace osmscout {
     description.SetName("Preprocess");
     description.SetDescription("Initial parsing of import file(s)");
 
-    description.AddProvidedFile(BOUNDING_DAT);
+    description.AddProvidedFile(BoundingBoxDataFile::BOUNDINGBOX_DAT);
 
-    description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
+    description.AddProvidedTemporaryFile(TypeDistributionDataFile::DISTRIBUTION_DAT);
     description.AddProvidedTemporaryFile(RAWCOORDS_DAT);
     description.AddProvidedTemporaryFile(RAWNODES_DAT);
     description.AddProvidedTemporaryFile(RAWWAYS_DAT);

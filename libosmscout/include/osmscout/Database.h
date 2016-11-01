@@ -33,6 +33,7 @@
 
 // Datafiles
 #include <osmscout/AreaDataFile.h>
+#include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/WayDataFile.h>
 
@@ -102,44 +103,45 @@ namespace osmscout {
   class OSMSCOUT_API Database
   {
   private:
-    DatabaseParameter               parameter;            //!< Parameterization of this database object
+    DatabaseParameter               parameter;                //!< Parameterization of this database object
 
-    std::string                     path;                 //!< Path to the directory containing all files
-    bool                            isOpen;               //!< true, if opened
+    std::string                     path;                     //!< Path to the directory containing all files
+    bool                            isOpen;                   //!< true, if opened
 
-    TypeConfigRef                   typeConfig;           //!< Type config for the currently opened map
+    TypeConfigRef                   typeConfig;               //!< Type config for the currently opened map
 
-    GeoBox                          boundingBox;          //!< Bounding box in which data is available
+    mutable BoundingBoxDataFileRef  boundingBoxDataFile;      //!< Cached access to the bounding box data file
+    mutable std::mutex              boundingBoxDataFileMutex; //!< Mutex to make lazy initialisation of node DataFile thread-safe
 
-    mutable NodeDataFileRef         nodeDataFile;         //!< Cached access to the 'nodes.dat' file
-    mutable std::mutex              nodeDataFileMutex;    //!< Mutex to make lazy initialisation of node DataFile thread-safe
+    mutable NodeDataFileRef         nodeDataFile;             //!< Cached access to the 'nodes.dat' file
+    mutable std::mutex              nodeDataFileMutex;        //!< Mutex to make lazy initialisation of node DataFile thread-safe
 
-    mutable AreaDataFileRef         areaDataFile;         //!< Cached access to the 'areas.dat' file
-    mutable std::mutex              areaDataFileMutex;    //!< Mutex to make lazy initialisation of area DataFile thread-safe
+    mutable AreaDataFileRef         areaDataFile;             //!< Cached access to the 'areas.dat' file
+    mutable std::mutex              areaDataFileMutex;        //!< Mutex to make lazy initialisation of area DataFile thread-safe
 
-    mutable WayDataFileRef          wayDataFile;          //!< Cached access to the 'ways.dat' file
-    mutable std::mutex              wayDataFileMutex;     //!< Mutex to make lazy initialisation of way DataFile thread-safe
+    mutable WayDataFileRef          wayDataFile;              //!< Cached access to the 'ways.dat' file
+    mutable std::mutex              wayDataFileMutex;         //!< Mutex to make lazy initialisation of way DataFile thread-safe
 
-    mutable AreaNodeIndexRef        areaNodeIndex;        //!< Index of nodes by containing area
-    mutable std::mutex              areaNodeIndexMutex;   //!< Mutex to make lazy initialisation of area node index thread-safe
+    mutable AreaNodeIndexRef        areaNodeIndex;            //!< Index of nodes by containing area
+    mutable std::mutex              areaNodeIndexMutex;       //!< Mutex to make lazy initialisation of area node index thread-safe
 
-    mutable AreaWayIndexRef         areaWayIndex;         //!< Index of areas by containing area
-    mutable std::mutex              areaWayIndexMutex;    //!< Mutex to make lazy initialisation of area way index thread-safe
+    mutable AreaWayIndexRef         areaWayIndex;             //!< Index of areas by containing area
+    mutable std::mutex              areaWayIndexMutex;        //!< Mutex to make lazy initialisation of area way index thread-safe
 
-    mutable AreaAreaIndexRef        areaAreaIndex;        //!< Index of ways by containing area
-    mutable std::mutex              areaAreaIndexMutex;   //!< Mutex to make lazy initialisation of area area index thread-safe
+    mutable AreaAreaIndexRef        areaAreaIndex;            //!< Index of ways by containing area
+    mutable std::mutex              areaAreaIndexMutex;       //!< Mutex to make lazy initialisation of area area index thread-safe
 
-    mutable LocationIndexRef        locationIndex;        //!< Location-based index
-    mutable std::mutex              locationIndexMutex;   //!< Mutex to make lazy initialisation of location index thread-safe
+    mutable LocationIndexRef        locationIndex;            //!< Location-based index
+    mutable std::mutex              locationIndexMutex;       //!< Mutex to make lazy initialisation of location index thread-safe
 
-    mutable WaterIndexRef           waterIndex;           //!< Index of land/sea tiles
-    mutable std::mutex              waterIndexMutex;      //!< Mutex to make lazy initialisation of water index thread-safe
+    mutable WaterIndexRef           waterIndex;               //!< Index of land/sea tiles
+    mutable std::mutex              waterIndexMutex;          //!< Mutex to make lazy initialisation of water index thread-safe
 
-    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom; //!< Optimized data for low zoom situations
-    mutable std::mutex              optimizeAreasMutex;   //!< Mutex to make lazy initialisation of optimized areas index thread-safe
+    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom;     //!< Optimized data for low zoom situations
+    mutable std::mutex              optimizeAreasMutex;       //!< Mutex to make lazy initialisation of optimized areas index thread-safe
 
-    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;  //!< Optimized data for low zoom situations
-    mutable std::mutex              optimizeWaysMutex;    //!< Mutex to make lazy initialisation of optimized ways index thread-safe
+    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;      //!< Optimized data for low zoom situations
+    mutable std::mutex              optimizeWaysMutex;        //!< Mutex to make lazy initialisation of optimized ways index thread-safe
 
   public:
     Database(const DatabaseParameter& parameter);
@@ -151,6 +153,8 @@ namespace osmscout {
 
     std::string GetPath() const;
     TypeConfigRef GetTypeConfig() const;
+
+    BoundingBoxDataFileRef GetBoundingBoxDataFile() const;
 
     NodeDataFileRef GetNodeDataFile() const;
     AreaDataFileRef GetAreaDataFile() const;

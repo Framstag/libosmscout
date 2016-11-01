@@ -19,6 +19,7 @@
 
 #include <osmscout/util/String.h>
 
+#include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <locale>
@@ -31,7 +32,7 @@
 #if defined(HAVE_CODECVT)
 #include <codecvt>
 #endif
-
+#include <iostream>
 namespace osmscout {
 
 
@@ -618,4 +619,34 @@ namespace osmscout {
     return result;
   }
 #endif
+
+  std::string UTF8StringToUpper(const std::string& text)
+  {
+    std::cout << "* O \"" << text << std::endl;
+
+    std::wstring wstr=UTF8StringToWString(text);
+    std::wcout << "* w \"" << wstr << std::endl;
+
+    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
+
+    f.toupper(&wstr[0],&wstr[0]+wstr.size());
+    std::wcout << "* c \"" << wstr << std::endl;
+
+    return WStringToUTF8String(wstr);
+  }
+
+  std::string UTF8StringToLower(const std::string& text)
+  {
+    std::cout << "* O \"" << text << std::endl;
+
+    std::wstring wstr=UTF8StringToWString(text);
+    std::wcout << "* w \"" << wstr << std::endl;
+
+    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
+
+    f.tolower(&wstr[0],&wstr[0]+wstr.size());
+    std::wcout << "* c \"" << wstr << std::endl;
+
+    return WStringToUTF8String(wstr);
+  }
 }

@@ -116,37 +116,6 @@ namespace osmscout {
     return false;
   }
 
-  bool RoutingService::LoadObjectVariantData(const std::string& filename,
-                                             std::vector<ObjectVariantData>& objectVariantData) const
-  {
-    FileScanner scanner;
-
-    try {
-      scanner.Open(filename,
-                   FileScanner::FastRandom,true);
-
-      uint32_t objectVariantDataCount;
-
-      scanner.Read(objectVariantDataCount);
-
-      objectVariantData.resize(objectVariantDataCount);
-
-      for (size_t i=0; i<objectVariantDataCount; i++) {
-        objectVariantData[i].Read(*database->GetTypeConfig(),
-                                  scanner);
-      }
-
-      scanner.Close();
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-      scanner.CloseFailsafe();
-      return false;
-    }
-
-    return true;
-  }
-
   /**
    * Opens the routing service. This loads the routing graph for the given vehicle
    *
@@ -173,9 +142,9 @@ namespace osmscout {
 
     log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
 
-    if (!LoadObjectVariantData(AppendFileToDir(path,
-                                               GetData2Filename(filenamebase)),
-                               objectVariantData)) {
+    if (!objectVariantDataFile.Load(*database->GetTypeConfig(),
+                                    AppendFileToDir(path,
+                                                    GetData2Filename(filenamebase)))) {
       return false;
     }
 
@@ -326,21 +295,21 @@ namespace osmscout {
     }
   }
 
-  void RoutingService::ResolveRNodeChainToList(const RNodeRef& end,
-                                               const CloseMap& closeMap,
-                                               std::list<RNodeRef>& nodes)
+  void RoutingService::ResolveRNodeChainToList(FileOffset finalRouteNode,
+                                               const ClosedSet& closedSet,
+                                               std::list<VNode>& nodes)
   {
-    CloseMap::const_iterator current=closeMap.find(end->nodeOffset);
+    ClosedSet::const_iterator current=closedSet.find(VNode(finalRouteNode));
 
-    while (current->second->prev!=0) {
-      CloseMap::const_iterator prev=closeMap.find(current->second->prev);
+    while (current->previousNode!=0) {
+      ClosedSet::const_iterator prev=closedSet.find(VNode(current->previousNode));
 
-      nodes.push_back(current->second);
+      nodes.push_back(*current);
 
       current=prev;
     }
 
-    nodes.push_back(current->second);
+    nodes.push_back(*current);
 
     std::reverse(nodes.begin(),nodes.end());
   }
@@ -447,7 +416,7 @@ namespace osmscout {
   }
 
   bool RoutingService::ResolveRNodesToRouteData(const RoutingProfile& profile,
-                                                const std::list<RNodeRef>& nodes,
+                                                const std::list<VNode>& nodes,
                                                 const ObjectFileRef& startObject,
                                                 size_t startNodeIndex,
                                                 const ObjectFileRef& targetObject,
@@ -476,15 +445,15 @@ namespace osmscout {
     // Collect all route node file offsets on the path and also
     // all area/way file offsets on the path
     for (const auto& node : nodes) {
-      routeNodeOffsets.insert(node->nodeOffset);
+      routeNodeOffsets.insert(node.currentNode);
 
-      if (node->object.Valid()) {
-        switch (node->object.GetType()) {
+      if (node.object.Valid()) {
+        switch (node.object.GetType()) {
         case refArea:
-          areaOffsets.insert(node->object.GetFileOffset());
+          areaOffsets.insert(node.object.GetFileOffset());
           break;
         case refWay:
-          wayOffsets.insert(node->object.GetFileOffset());
+          wayOffsets.insert(node.object.GetFileOffset());
           break;
         default:
           assert(false);
@@ -568,7 +537,7 @@ namespace osmscout {
       return true;
     }
 
-    RouteNodeRef initialNode=routeNodeMap.find(nodes.front()->nodeOffset)->second;
+    RouteNodeRef initialNode=routeNodeMap.find(nodes.front().currentNode)->second;
 
     //
     // Add The path from the start node to the first routing node
@@ -596,14 +565,14 @@ namespace osmscout {
     // Walk the routing path from route node to the next route node
     // and build entries.
     //
-    for (std::list<RNodeRef>::const_iterator n=nodes.begin();
+    for (std::list<VNode>::const_iterator n=nodes.begin();
         n!=nodes.end();
         n++) {
-      std::list<RNodeRef>::const_iterator nn=n;
+      std::list<VNode>::const_iterator nn=n;
 
       nn++;
 
-      RouteNodeRef node=routeNodeMap.find((*n)->nodeOffset)->second;
+      RouteNodeRef node=routeNodeMap.find(n->currentNode)->second;
 
       //
       // The path from the last routing node to the target node and the
@@ -656,21 +625,21 @@ namespace osmscout {
         break;
       }
 
-      RouteNodeRef nextNode=routeNodeMap.find((*nn)->nodeOffset)->second;
+      RouteNodeRef nextNode=routeNodeMap.find(nn->currentNode)->second;
 
-      assert((*nn)->object.GetType()==refArea ||
-             (*nn)->object.GetType()==refWay);
+      assert(nn->object.GetType()==refArea ||
+             nn->object.GetType()==refWay);
 
-      if ((*nn)->object.GetType()==refArea) {
-        std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*nn)->object.GetFileOffset());
+      if (nn->object.GetType()==refArea) {
+        std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(nn->object.GetFileOffset());
 
         assert(entry!=areaMap.end());
 
         ids=&entry->second->rings.front().nodes;
         oneway=false;
       }
-      else if ((*nn)->object.GetType()==refWay) {
-        std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find((*nn)->object.GetFileOffset());
+      else if (nn->object.GetType()==refWay) {
+        std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(nn->object.GetFileOffset());
 
         assert(entry!=wayMap.end());
 
@@ -697,7 +666,7 @@ namespace osmscout {
       AddNodes(route,
                (*ids)[currentNodeIndex].GetId(),
                currentNodeIndex,
-               (*nn)->object,
+               nn->object,
                ids->size(),
                oneway,
                nextNodeIndex);
@@ -1096,17 +1065,17 @@ namespace osmscout {
     OpenList                 openList;
     // Map routing nodes by id
     OpenMap                  openMap;
-    CloseMap                 closeMap;
+    ClosedSet                closedSet;
 
     size_t                   nodesLoadedCount=0;
     size_t                   nodesIgnoredCount=0;
     size_t                   maxOpenList=0;
-    size_t                   maxCloseMap=0;
+    size_t                   maxClosedSet=0;
 
     route.Clear();
 
     openMap.reserve(10000);
-    closeMap.reserve(300000);
+    closedSet.reserve(300000);
 
     if (!GetTargetNodes(profile,
                         targetObject,
@@ -1199,7 +1168,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!profile.CanUse(*currentRouteNode,objectVariantData,i)) {
+        if (!profile.CanUse(*currentRouteNode,objectVariantDataFile.GetData(),i)) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path.offset;
@@ -1211,7 +1180,7 @@ namespace osmscout {
           continue;
         }
 
-        if (closeMap.find(path.offset)!=closeMap.end()) {
+        if (closedSet.find(VNode(path.offset))!=closedSet.end()) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route";
           std::cout << " to " << path.offset;
@@ -1227,7 +1196,7 @@ namespace osmscout {
 
           for (const auto& exclude : currentRouteNode->excludes) {
             if (exclude.source==current->object &&
-                exclude.targetIndex==i) {
+                currentRouteNode->objects[exclude.targetIndex].object==currentRouteNode->objects[path.objectIndex].object) {
 #if defined(DEBUG_ROUTING)
               std::cout << "  Skipping route";
               std::cout << " to " << path.offset;
@@ -1247,7 +1216,7 @@ namespace osmscout {
         }
 
         double currentCost=current->currentCost+
-                           profile.GetCosts(*currentRouteNode,objectVariantData,i);
+                           profile.GetCosts(*currentRouteNode,objectVariantDataFile.GetData(),i);
 
         OpenMap::iterator openEntry=openMap.find(path.offset);
 
@@ -1300,7 +1269,7 @@ namespace osmscout {
           node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
           openList.erase(openEntry->second);
@@ -1322,7 +1291,7 @@ namespace osmscout {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Inserting route to " << path.offset;
           std::cout <<  " (" << node->object.GetTypeName() << " " << node->object.GetFileOffset() << ")";
-          std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
           std::pair<OpenListRef,bool> result=openList.insert(node);
@@ -1337,24 +1306,26 @@ namespace osmscout {
       //
 
       if (!accessViolation) {
-        closeMap[current->nodeOffset]=current;
+        closedSet.insert(VNode(current->nodeOffset,
+                                    current->object,
+                                    current->prev));
       }
       current->node=NULL;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
-      maxCloseMap=std::max(maxCloseMap,closeMap.size());
+      maxClosedSet=std::max(maxClosedSet,closedSet.size());
 
 #if defined(DEBUG_ROUTING)
       if (openList.empty()) {
         std::cout << "No more alternatives, stopping" << std::endl;
       }
 
-      if ((targetForwardRouteNode && current->nodeOffset==targetForwardRouteNode->fileOffset)) {
-        std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->fileOffset << " (forward)" << std::endl;
+      if ((targetForwardRouteNode && current->nodeOffset==targetForwardRouteNode->GetFileOffset())) {
+        std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->GetFileOffset() << " (forward)" << std::endl;
       }
 
-      if (targetBackwardRouteNode && current->nodeOffset==targetBackwardRouteNode->fileOffset) {
-        std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->fileOffset << " (backward)" << std::endl;
+      if (targetBackwardRouteNode && current->nodeOffset==targetBackwardRouteNode->GetFileOffset()) {
+        std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->GetFileOffset() << " (backward)" << std::endl;
       }
 #endif
     } while (!openList.empty() &&
@@ -1391,7 +1362,7 @@ namespace osmscout {
       std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
       std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
       std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;
-      std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
+      std::cout << "Max. ClosedSet size: " << maxClosedSet << std::endl;
     }
 
     if (!((targetForwardRouteNode && currentRouteNode->GetId()==targetForwardRouteNode->GetId()) ||
@@ -1402,10 +1373,10 @@ namespace osmscout {
       return true;
     }
 
-    std::list<RNodeRef> nodes;
+    std::list<VNode> nodes;
 
-    ResolveRNodeChainToList(current,
-                            closeMap,
+    ResolveRNodeChainToList(current->nodeOffset,
+                            closedSet,
                             nodes);
 
     if (!ResolveRNodesToRouteData(profile,

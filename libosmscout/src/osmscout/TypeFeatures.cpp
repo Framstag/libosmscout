@@ -806,7 +806,8 @@ namespace osmscout {
     if (accessValue!=tags.end()) {
 
       if (accessValue->second=="delivery" ||
-          accessValue->second=="destination") {
+          accessValue->second=="destination" ||
+          accessValue->second=="private") {
         access&=~(AccessRestrictedFeatureValue::foot|AccessRestrictedFeatureValue::bicycle|AccessRestrictedFeatureValue::car);
       }
     }
@@ -815,7 +816,8 @@ namespace osmscout {
 
     if (accessFootValue!=tags.end()) {
       if (accessFootValue->second=="delivery" ||
-          accessFootValue->second=="destination") {
+          accessFootValue->second=="destination" ||
+          accessFootValue->second=="private") {
         access&=~AccessRestrictedFeatureValue::foot;
       }
       else {
@@ -827,7 +829,8 @@ namespace osmscout {
 
     if (accessBicycleValue!=tags.end()) {
       if (accessBicycleValue->second=="delivery" ||
-          accessBicycleValue->second=="destination") {
+          accessBicycleValue->second=="destination" ||
+          accessBicycleValue->second=="private") {
         access&=~AccessRestrictedFeatureValue::bicycle;
       }
       else {
@@ -839,7 +842,8 @@ namespace osmscout {
 
     if (accessCarValue!=tags.end()) {
       if (accessCarValue->second=="delivery" ||
-          accessCarValue->second=="destination") {
+          accessCarValue->second=="destination" ||
+          accessCarValue->second=="private") {
         access&=~AccessRestrictedFeatureValue::car;
       }
       else {
