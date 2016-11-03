@@ -164,15 +164,20 @@ public:
       return view->center.GetLon();
   }
   
+  inline osmscout::GeoCoord GetCenter() const
+  {
+      return view->center;
+  }
+
   QString GetStylesheetFilename() const;
 
   QString GetZoomLevelName() const;
-  
+
   inline int GetMagLevel() const
   {
       return view->magnification.GetLevel();
   }
-  
+
   inline double GetPixelSize() const
   {
       return getProjection().GetPixelSize();
@@ -203,15 +208,19 @@ public:
   inline osmscout::MercatorProjection getProjection() const
   {
     osmscout::MercatorProjection projection;
-    projection.Set(osmscout::GeoCoord(GetLat(), GetLon()),
+
+    size_t w=width();
+    size_t h=height();
+    projection.Set(GetCenter(),
                view->angle,
                view->magnification,
                mapDpi,
-               width(),
-               height());
+               // to avoid invalid projection when scene is not finished yet
+               w==0? 100:w,
+               h==0? 100:h);
     return projection;
   }
-  
+
   void wheelEvent(QWheelEvent* event);
   virtual void touchEvent(QTouchEvent *event);
   
