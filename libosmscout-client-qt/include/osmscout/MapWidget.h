@@ -2,8 +2,9 @@
 #define MAPWIDGET_H
 
 /*
- OSMScout - a Qt backend for libosmscout and libosmscout-map
- Copyright (C) 2010  Tim Teulings
+  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2016  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
