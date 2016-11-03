@@ -1,14 +1,11 @@
 if(NOT Qt5Core_FOUND)
-	message(SEND_ERROR "Qt5Core is required for OSMScout2 application")
+	message(SEND_ERROR "Qt5Core is required for OSMScout Qt client library")
 endif()
 if(NOT Qt5Gui_FOUND)
-	message(SEND_ERROR "Qt5Gui is required for OSMScout2 application")
-endif()
-if(NOT Qt5Widgets_FOUND)
-	message(SEND_ERROR "Qt5Widgets is required for OSMScout2 application")
+	message(SEND_ERROR "Qt5Gui is required for OSMScout Qt client library")
 endif()
 if(NOT Qt5Quick_FOUND)
-	message(SEND_ERROR "Qt5Quick is required for OSMScout2 application")
+	message(SEND_ERROR "Qt5Quick is required for OSMScout Qt client library")
 endif()
 if(NOT ${OSMSCOUT_BUILD_MAP_QT})
 	message(SEND_ERROR "The main map drawing interface is required for Qt map drawing backend")
@@ -72,7 +69,6 @@ target_link_libraries(osmscout_client_qt
 		osmscout_map_qt
 		Qt5::Core
 		Qt5::Gui
-		Qt5::Widgets
 		Qt5::Quick)
 target_compile_definitions(osmscout_client_qt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
 install(TARGETS osmscout_client_qt

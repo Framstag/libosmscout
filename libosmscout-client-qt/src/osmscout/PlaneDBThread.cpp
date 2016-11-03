@@ -23,7 +23,6 @@
 
 #include <iostream>
 
-#include <QApplication>
 #include <QMutexLocker>
 #include <QDebug>
 #include <QDir>
