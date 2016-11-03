@@ -48,12 +48,8 @@ Settings::~Settings()
 {
     settings.sync();
     // QObject will delete view (child)
-    /*
-    if (view != NULL){
-        delete view;
-    }
-    */
 }
+
 double Settings::GetPhysicalDPI() const
 {
     return physicalDpi;
@@ -67,9 +63,7 @@ void Settings::SetMapDPI(double dpi)
 
 double Settings::GetMapDPI() const
 {
-  // With mobile device user eyes are closer to screen than PC monitor, 
-  // we render thinks a bit smaller (0.75)...
-  return (size_t)settings.value("settings/map/dpi",physicalDpi * 0.75).toDouble();
+  return (size_t)settings.value("settings/map/dpi",physicalDpi).toDouble();
 }
 
 MapView *Settings::GetMapView()
