@@ -248,7 +248,7 @@ void LocationInfoModel::onLocationDescription(const osmscout::GeoCoord location,
     // end of debug    
 }
 
-void LocationInfoModel::onLocationDescriptionFinished(const osmscout::GeoCoord)
+void LocationInfoModel::onLocationDescriptionFinished(const osmscout::GeoCoord location)
 {
     if (location != this->location){
         return; // not our request
