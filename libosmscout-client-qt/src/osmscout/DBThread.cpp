@@ -103,6 +103,12 @@ DBThread::DBThread(QStringList databaseLookupDirs,
     daylight(true),
     renderSea(true)
 {
+  // fix Qt signals with uint32_t on x86_64:
+  //
+  // QObject::connect: Cannot queue arguments of type 'uint32_t'
+  // (Make sure 'uint32_t' is registered using qRegisterMetaType().)
+  qRegisterMetaType < uint32_t >("uint32_t");
+
   QScreen *srn=QGuiApplication::screens().at(0);
 
   physicalDpi = (double)srn->physicalDotsPerInch();

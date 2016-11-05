@@ -64,12 +64,6 @@ TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
   connect(this,SIGNAL(TriggerInitialRendering()),
           this,SLOT(HandleInitialRenderingRequest()));
 
-  // fix Qt signals with uint32_t on x86_64:
-  //
-  // QObject::connect: Cannot queue arguments of type 'uint32_t'
-  // (Make sure 'uint32_t' is registered using qRegisterMetaType().)
-  qRegisterMetaType < uint32_t >("uint32_t");
-
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
