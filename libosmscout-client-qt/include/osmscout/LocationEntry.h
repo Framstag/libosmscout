@@ -53,6 +53,7 @@ private:
     QString                        database;
     QList<osmscout::ObjectFileRef> references;
     osmscout::GeoCoord             coord;
+    osmscout::GeoBox               bbox;
 
 public:
     LocationEntry(Type type,
@@ -60,6 +61,8 @@ public:
                   const QString& objectType,
                   const QStringList& adminRegionList,
                   const QString database,
+                  const osmscout::GeoCoord coord,
+                  const osmscout::GeoBox bbox,
                   QObject* parent = 0);
 
     LocationEntry(const QString& label,

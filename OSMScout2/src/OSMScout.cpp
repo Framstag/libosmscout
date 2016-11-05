@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
   qRegisterMetaType<osmscout::TileRef>();
 
   qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
-  qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "LocationEntry");
+  qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "Location");
   qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
   qmlRegisterType<RouteStep>("net.sf.libosmscout.map", 1, 0, "RouteStep");
   qmlRegisterType<RoutingListModel>("net.sf.libosmscout.map", 1, 0, "RoutingListModel");

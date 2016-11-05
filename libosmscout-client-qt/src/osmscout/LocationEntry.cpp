@@ -27,12 +27,16 @@ LocationEntry::LocationEntry(Type type,
                              const QString& objectType,
                              const QStringList& adminRegionList,
                              const QString database,
+                             const osmscout::GeoCoord coord,
+                             const osmscout::GeoBox bbox,
                              QObject* parent)
     : QObject(parent),
       type(type),
       label(label),
       objectType(objectType),
-      adminRegionList(adminRegionList)
+      adminRegionList(adminRegionList),
+      coord(coord),
+      bbox(bbox)
 {
     // no code
 }
@@ -63,7 +67,8 @@ LocationEntry::LocationEntry(const LocationEntry& other)
    adminRegionList(other.adminRegionList),
    database(other.database),
    references(other.references),
-   coord(other.coord)
+   coord(other.coord),
+   bbox(other.bbox)
 {
     // no code
 }
@@ -82,6 +87,7 @@ void LocationEntry::operator=(const LocationEntry& other)
     database=other.database;
     references=other.references;
     coord=other.coord;
+    bbox=other.bbox;
 }
 
 void LocationEntry::addReference(const osmscout::ObjectFileRef reference)

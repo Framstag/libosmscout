@@ -23,6 +23,7 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/TiledDBThread.h>
 #include <osmscout/PlaneDBThread.h>
+#include <osmscout/TextSearchIndex.h>
 
 QBreaker::QBreaker()
   : osmscout::Breaker(),
@@ -389,30 +390,81 @@ bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
   return true;
 }
 
-QString DBThread::GetObjectTypeName(DBInstanceRef db, const osmscout::ObjectFileRef& object)
+bool DBThread::GetObjectDetails(DBInstanceRef db, 
+                                const osmscout::ObjectFileRef& object,
+                                QString &typeName, 
+                                osmscout::GeoCoord& coordinates,
+                                osmscout::GeoBox& bbox
+                                )
 {
     if (object.GetType()==osmscout::RefType::refNode) {
       osmscout::NodeRef node;
 
-      if (db->database->GetNodeByOffset(object.GetFileOffset(), node)) {
-        return QString::fromUtf8(node->GetType()->GetName().c_str());
+      if (!db->database->GetNodeByOffset(object.GetFileOffset(), node)) {
+        return false;
       }
+      typeName = QString::fromUtf8(node->GetType()->GetName().c_str());
+      coordinates = node->GetCoords();
+      bbox = osmscout::GeoBox::BoxByCenterAndRadius(coordinates, 2.0);      
     }
     else if (object.GetType()==osmscout::RefType::refArea) {
       osmscout::AreaRef area;
 
-      if (db->database->GetAreaByOffset(object.GetFileOffset(), area)) {
-        return QString::fromUtf8(area->GetType()->GetName().c_str());
+      if (!db->database->GetAreaByOffset(object.GetFileOffset(), area)) {
+        return false;
       }
+      typeName = QString::fromUtf8(area->GetType()->GetName().c_str()); 
+      area->GetCenter(coordinates);
+      area->GetBoundingBox(bbox);
     }
     else if (object.GetType()==osmscout::RefType::refWay) {
       osmscout::WayRef way;
-
-      if (db->database->GetWayByOffset(object.GetFileOffset(), way)) {
-        return QString::fromUtf8(way->GetType()->GetName().c_str());
+      if (!db->database->GetWayByOffset(object.GetFileOffset(), way)) {
+        return false;
       }
+      typeName = QString::fromUtf8(way->GetType()->GetName().c_str());
+      way->GetCenter(coordinates);
+      way->GetBoundingBox(bbox);
     }
-    return "";
+    return true;
+}
+
+bool DBThread::BuildLocationEntry(const osmscout::ObjectFileRef& object,
+                                  const QString title,
+                                  DBInstanceRef db,
+                                  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                                  QList<LocationEntry> &locations
+                                  )
+{
+    QStringList adminRegionList;
+    QString objectType;
+    osmscout::GeoCoord coordinates;
+    osmscout::GeoBox bbox;
+
+    if (!GetObjectDetails(db, object, objectType, coordinates, bbox)){
+      return false;
+    }
+    qDebug() << "obj:    " << title << "(" << objectType << ")";
+
+    // This is very slow for some areas.
+    /*
+    std::list<osmscout::LocationService::ReverseLookupResult> result;
+    if (db->locationService->ReverseLookupObject(object, result)){
+        for (const osmscout::LocationService::ReverseLookupResult& entry : result){
+            if (entry.adminRegion){
+              adminRegionList = DBThread::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
+              break;
+            }
+        }
+    }
+     */
+
+    LocationEntry location(LocationEntry::typeObject, title, objectType, adminRegionList, 
+                           db->path, coordinates, bbox);
+    location.addReference(object);
+    locations.append(location);  
+
+    return true;
 }
 
 bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
@@ -426,6 +478,9 @@ bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &e
     }
 
     QStringList adminRegionList = DBThread::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
+    QString objectType;
+    osmscout::GeoCoord coordinates;
+    osmscout::GeoBox bbox;
 
     if (entry.adminRegion &&
         entry.location &&
@@ -439,11 +494,14 @@ bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &e
       label+=" ";
       label+=address;
 
-      QString objectType=GetObjectTypeName(db, entry.address->object);
+      if (!GetObjectDetails(db, entry.address->object, objectType, coordinates, bbox)){
+        return false;
+      }
 
       qDebug() << "address:  " << label;
 
-      LocationEntry location(LocationEntry::typeObject, label, objectType, adminRegionList, db->path);
+      LocationEntry location(LocationEntry::typeObject, label, objectType, adminRegionList, 
+                             db->path, coordinates, bbox);
       location.addReference(entry.address->object);
       locations.append(location);
     }
@@ -451,11 +509,14 @@ bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &e
              entry.location) {
 
       QString loc=QString::fromUtf8(entry.location->name.c_str());
-      QString objectType=GetObjectTypeName(db,entry.location->objects.front());
+      if (!GetObjectDetails(db, entry.location->objects.front(), objectType, coordinates, bbox)){
+        return false;
+      }
 
       qDebug() << "loc:      " << loc;
 
-      LocationEntry location(LocationEntry::typeObject, loc, objectType, adminRegionList, db->path);
+      LocationEntry location(LocationEntry::typeObject, loc, objectType, adminRegionList, 
+                             db->path, coordinates, bbox);
 
       for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry.location->objects.begin();
           object!=entry.location->objects.end();
@@ -468,20 +529,27 @@ bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &e
              entry.poi) {
 
       QString poi=QString::fromUtf8(entry.poi->name.c_str());
-      QString objectType=GetObjectTypeName(db,entry.poi->object);
+      if (!GetObjectDetails(db, entry.poi->object, objectType, coordinates, bbox)){
+        return false;
+      }
       qDebug() << "poi:      " << poi;
 
-      LocationEntry location(LocationEntry::typeObject, poi, objectType, adminRegionList, db->path);
+      LocationEntry location(LocationEntry::typeObject, poi, objectType, adminRegionList, 
+                             db->path, coordinates, bbox);
       location.addReference(entry.poi->object);
       locations.append(location);
     }
     else if (entry.adminRegion) {
       QString objectType;
       if (entry.adminRegion->aliasObject.Valid()) {
-          objectType+=GetObjectTypeName(db,entry.adminRegion->aliasObject);
+          if (!GetObjectDetails(db, entry.adminRegion->aliasObject, objectType, coordinates, bbox)){
+            return false;
+          }
       }
       else {
-          objectType+=GetObjectTypeName(db,entry.adminRegion->object);
+          if (!GetObjectDetails(db, entry.adminRegion->object, objectType, coordinates, bbox)){
+            return false;
+          }
       }
       QString name;
       if (!entry.adminRegion->aliasName.empty()) {
@@ -492,7 +560,8 @@ bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &e
       }
 
       //=QString::fromUtf8(entry.adminRegion->name.c_str());
-      LocationEntry location(LocationEntry::typeObject, name, objectType, adminRegionList, db->path);
+      LocationEntry location(LocationEntry::typeObject, name, objectType, adminRegionList, 
+                             db->path, coordinates, bbox);
 
       qDebug() << "region: " << name;
 
@@ -518,12 +587,14 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
   std::string stdSearchPattern=searchPattern.toUtf8().constData();
 
   for (auto db:databases){
-    osmscout::LocationSearch search;
-    search.limit=limit;
-    osmscout::LocationSearchResult result;
     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
     QList<LocationEntry> locations;
   
+    // Search by location
+    osmscout::LocationSearch search;
+    search.limit=limit;
+    osmscout::LocationSearchResult result;
+    
     if (!db->locationService->InitializeLocationSearchEntries(stdSearchPattern, search)) {
       emit searchFinished(searchPattern, /*error*/ true);
       return;
@@ -542,6 +613,48 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
     }
     
     emit searchResult(searchPattern, locations);
+    
+    // Search by free text
+    locations.clear();
+    QList<osmscout::ObjectFileRef> objectSet;
+    osmscout::TextSearchIndex textSearch;
+    if(!textSearch.Load(db->path.toStdString())){
+        qWarning("Failed to load text index files, search was for locations only");
+        continue; // silently continue, text indexes are optional in database
+    }
+    osmscout::TextSearchIndex::ResultsMap resultsTxt;
+    textSearch.Search(searchPattern.toStdString(), 
+                      /*searchPOIs*/ true, /*searchLocations*/ true, 
+                      /*searchRegions*/ true, /*searchOther*/ true, 
+                      resultsTxt);
+    osmscout::TextSearchIndex::ResultsMap::iterator it;
+    int count = 0;
+    for(it=resultsTxt.begin();
+      it != resultsTxt.end() && count < limit; 
+      ++it, ++count)
+    {
+        std::vector<osmscout::ObjectFileRef> &refs=it->second;
+
+        std::size_t maxPrintedOffsets=5;
+        std::size_t minRefCount=std::min(refs.size(),maxPrintedOffsets);
+
+        for(size_t r=0; r < minRefCount; r++){
+            if (locations.size()>=limit)
+                break;
+
+            osmscout::ObjectFileRef fref = refs[r];
+
+            if (objectSet.contains(fref))
+                continue;
+
+            objectSet << fref;
+            BuildLocationEntry(fref, QString::fromStdString(it->first), 
+                               db, adminRegionMap, locations);
+        }
+      }
+      // TODO: merge locations with same label database type
+      // bus stations can have more points for example...
+      emit searchResult(searchPattern, locations);
   }
 
   qDebug() << "Retrieve result tooks" << timer.elapsed() << "ms";

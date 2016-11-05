@@ -212,6 +212,9 @@ public slots:
    * User of this function should use Qt::QueuedConnection for invoking
    * this slot, search may generate IO load and may tooks long time.
    * 
+   * Keep in mind that entries retrieved by searchResult signal can contains 
+   * duplicates, because search may use various databases and indexes. 
+   * 
    * @param searchPattern
    * @param limit - suggested limit for count of retrieved entries from one database
    */
@@ -255,13 +258,22 @@ protected:
                                           const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
   
+  bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
+                          const QString title,
+                          DBInstanceRef db,
+                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                          QList<LocationEntry> &locations
+                          );
   bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
                           DBInstanceRef db,
                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
                           QList<LocationEntry> &locations
                           );
 
-  QString GetObjectTypeName(DBInstanceRef db, const osmscout::ObjectFileRef& object);
+  bool GetObjectDetails(DBInstanceRef db, const osmscout::ObjectFileRef& object,
+                        QString &typeName, 
+                        osmscout::GeoCoord& coordinates,
+                        osmscout::GeoBox& bbox);
   
   bool InitializeDatabases(osmscout::GeoBox& boundingBox);
   
