@@ -1048,6 +1048,23 @@ namespace osmscout {
     FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
     bool operator==(const FeatureValueBuffer& other) const;
     bool operator!=(const FeatureValueBuffer& other) const;
+
+    template<class T> const T* findValue() const
+    {
+      for (auto &featureInstance :GetType()->GetFeatures()){
+          if (HasFeature(featureInstance.GetIndex())){
+            osmscout::FeatureRef feature=featureInstance.GetFeature();
+            if (feature->HasValue()){
+              osmscout::FeatureValue *value=GetValue(featureInstance.GetIndex());
+              const T *v = dynamic_cast<const T*>(value);
+              if (v!=NULL){
+                return v;
+              }
+            }
+          }
+      }
+      return NULL;
+    }
   };
 
   typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
