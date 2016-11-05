@@ -26,6 +26,7 @@
 
 %include <osmscout/Tag.i>
 %include <osmscout/TypeConfig.i>
+%include <osmscout/BoundingBoxDataFile.i>
 
 %include <osmscout/Node.i>
 %include <osmscout/Way.i>
