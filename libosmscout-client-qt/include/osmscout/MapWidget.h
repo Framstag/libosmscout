@@ -38,7 +38,6 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QObject  *view    READ GetView     WRITE SetMapView  NOTIFY viewChanged)
   Q_PROPERTY(double   lat      READ GetLat      NOTIFY viewChanged)
   Q_PROPERTY(double   lon      READ GetLon      NOTIFY viewChanged)
-  Q_PROPERTY(uint32_t magLevel READ GetMagLevel NOTIFY viewChanged)
   Q_PROPERTY(int      zoomLevel READ GetMagLevel NOTIFY viewChanged)
   Q_PROPERTY(QString  zoomLevelName READ GetZoomLevelName NOTIFY viewChanged)
   Q_PROPERTY(double   pixelSize READ GetPixelSize NOTIFY viewChanged)
