@@ -394,14 +394,14 @@ void RoutingListModel::DumpNameChangedDescription(const osmscout::RouteDescripti
   route.routeSteps.push_back(changed);
 }
 
-void RoutingListModel::setStartAndTarget(Location* start,
-                                         Location* target)
+void RoutingListModel::setStartAndTarget(LocationEntry* start,
+                                         LocationEntry* target)
 {
   beginResetModel();
 
   route.routeSteps.clear();
 
-  std::cout << "Routing from '" << start->getName().toLocal8Bit().data() << "' to '" << target->getName().toLocal8Bit().data() << "'" << std::endl;
+  std::cout << "Routing from '" << start->getLabel().toLocal8Bit().data() << "' to '" << target->getLabel().toLocal8Bit().data() << "'" << std::endl;
 
   // TODO: implement routing with multiple databases
   osmscout::TypeConfigRef             typeConfig; // =DBThread::GetInstance()->GetTypeConfig();
@@ -474,8 +474,8 @@ void RoutingListModel::setStartAndTarget(Location* start,
                                                                 routingProfile,
                                                                 route.routeData,
                                                                 route.routeDescription,
-                                                                start->getName().toUtf8().constData(),
-                                                                target->getName().toUtf8().constData());
+                                                                start->getLabel().toUtf8().constData(),
+                                                                target->getLabel().toUtf8().constData());
 
   std::cout << "Route transformed" << std::endl;
 

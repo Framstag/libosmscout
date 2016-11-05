@@ -87,8 +87,8 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
     Q_PROPERTY(int count READ rowCount)
 
 public slots:
-    void setStartAndTarget(Location* start,
-                           Location* target);
+    void setStartAndTarget(LocationEntry* start,
+                           LocationEntry* target);
     void clear();
 
 private:

@@ -28,6 +28,7 @@
 #include <QTime>
 #include <QTimer>
 
+#include <osmscout/LocationEntry.h>
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/MapService.h>
@@ -173,6 +174,10 @@ signals:
   void locationDescriptionFinished(const osmscout::GeoCoord location);
   void stylesheetFilenameChanged();
   void styleErrorsChanged();
+  
+  void searchResult(const QString searchPattern, const QList<LocationEntry>);
+  
+  void searchFinished(const QString searchPattern, bool error);
 
 public slots:
   void ToggleDaylight();
@@ -182,11 +187,36 @@ public slots:
                  const QString &suffix="");
   virtual void Initialize() = 0;
   void Finalize();
+  
+  /**
+   * Start retrieving place informations based on objects on or near the location.
+   * 
+   * DBThread then emits locationDescription signals followed by locationDescriptionFinished.
+   * 
+   * User of this function should use Qt::QueuedConnection for invoking
+   * this slot, operation may generate IO load and may tooks long time.
+   * 
+   * @param location
+   */
   void requestLocationDescription(const osmscout::GeoCoord location);
   
   virtual void onMapDPIChange(double dpi);
   virtual void onRenderSeaChanged(bool);  
 
+  /**
+   * Start object search by some pattern. 
+   * 
+   * DBThread then emits searchResult signals followed by searchFinished 
+   * for this pattern.
+   * 
+   * User of this function should use Qt::QueuedConnection for invoking
+   * this slot, search may generate IO load and may tooks long time.
+   * 
+   * @param searchPattern
+   * @param limit - suggested limit for count of retrieved entries from one database
+   */
+  void SearchForLocations(const QString searchPattern, int limit);
+  
 protected:
   QStringList                   databaseLookupDirs;
   
@@ -221,9 +251,17 @@ protected:
 
   virtual void TileStateCallback(const osmscout::TileRef& changedTile);
  
-  QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
-                                   const osmscout::AdminRegionRef& adminRegion,
-                                   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
+  static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
+                                          const osmscout::AdminRegionRef& adminRegion,
+                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
+  
+  bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
+                          DBInstanceRef db,
+                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                          QList<LocationEntry> &locations
+                          );
+
+  QString GetObjectTypeName(DBInstanceRef db, const osmscout::ObjectFileRef& object);
   
   bool InitializeDatabases(osmscout::GeoBox& boundingBox);
   
@@ -247,10 +285,6 @@ public:
   virtual bool RenderMap(QPainter& painter,
                          const RenderMapRequest& request) = 0;
   
-  bool SearchForLocations(const std::string& searchPattern,
-                          size_t limit,
-                          osmscout::LocationSearchResult& result) const;
-
   bool CalculateRoute(osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,
                       const osmscout::ObjectFileRef& startObject,
@@ -288,6 +322,9 @@ public:
       return styleErrors;
   }  
 
+  static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
+                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
+  
   static bool InitializeTiledInstance(QStringList databaseDirectory, 
                                       QString stylesheetFilename, 
                                       QString iconDirectory,

@@ -423,7 +423,7 @@ void MapWidget::showCoordinatesInstantly(double lat, double lon)
     showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);    
 }
 
-void MapWidget::showLocation(Location* location)
+void MapWidget::showLocation(LocationEntry* location)
 {
    // TODO: how to handle with multiple databases?
   /*

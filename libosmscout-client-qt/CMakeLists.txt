@@ -19,6 +19,7 @@ set(HEADER_FILES
     #include/osmscout/ClientQtFeatures.h
     include/osmscout/DBThread.h
     include/osmscout/InputHandler.h
+    include/osmscout/LocationEntry.h
     include/osmscout/LocationInfoModel.h
     include/osmscout/MapWidget.h
     include/osmscout/OnlineTileProvider.h
@@ -38,6 +39,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
     src/osmscout/InputHandler.cpp
+    src/osmscout/LocationEntry.cpp
     src/osmscout/LocationInfoModel.cpp
     src/osmscout/MapWidget.cpp
     src/osmscout/OnlineTileProvider.cpp

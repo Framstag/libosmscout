@@ -389,26 +389,163 @@ bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
   return true;
 }
 
-bool DBThread::SearchForLocations(const std::string& searchPattern,
-                                  size_t limit,
-                                  osmscout::LocationSearchResult& result) const
+QString DBThread::GetObjectTypeName(DBInstanceRef db, const osmscout::ObjectFileRef& object)
+{
+    if (object.GetType()==osmscout::RefType::refNode) {
+      osmscout::NodeRef node;
+
+      if (db->database->GetNodeByOffset(object.GetFileOffset(), node)) {
+        return QString::fromUtf8(node->GetType()->GetName().c_str());
+      }
+    }
+    else if (object.GetType()==osmscout::RefType::refArea) {
+      osmscout::AreaRef area;
+
+      if (db->database->GetAreaByOffset(object.GetFileOffset(), area)) {
+        return QString::fromUtf8(area->GetType()->GetName().c_str());
+      }
+    }
+    else if (object.GetType()==osmscout::RefType::refWay) {
+      osmscout::WayRef way;
+
+      if (db->database->GetWayByOffset(object.GetFileOffset(), way)) {
+        return QString::fromUtf8(way->GetType()->GetName().c_str());
+      }
+    }
+    return "";
+}
+
+bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
+                                  DBInstanceRef db,
+                                  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                                  QList<LocationEntry> &locations
+                                  )
+{
+    if (entry.adminRegion){
+      db->locationService->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
+    }
+
+    QStringList adminRegionList = DBThread::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
+
+    if (entry.adminRegion &&
+        entry.location &&
+        entry.address) {
+      
+      QString loc=QString::fromUtf8(entry.location->name.c_str());
+      QString address=QString::fromUtf8(entry.address->name.c_str());
+      
+      QString label;
+      label+=loc;
+      label+=" ";
+      label+=address;
+
+      QString objectType=GetObjectTypeName(db, entry.address->object);
+
+      qDebug() << "address:  " << label;
+
+      LocationEntry location(LocationEntry::typeObject, label, objectType, adminRegionList, db->path);
+      location.addReference(entry.address->object);
+      locations.append(location);
+    }
+    else if (entry.adminRegion &&
+             entry.location) {
+
+      QString loc=QString::fromUtf8(entry.location->name.c_str());
+      QString objectType=GetObjectTypeName(db,entry.location->objects.front());
+
+      qDebug() << "loc:      " << loc;
+
+      LocationEntry location(LocationEntry::typeObject, loc, objectType, adminRegionList, db->path);
+
+      for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry.location->objects.begin();
+          object!=entry.location->objects.end();
+          ++object) {
+          location.addReference(*object);
+      }
+      locations.append(location);
+    }
+    else if (entry.adminRegion &&
+             entry.poi) {
+
+      QString poi=QString::fromUtf8(entry.poi->name.c_str());
+      QString objectType=GetObjectTypeName(db,entry.poi->object);
+      qDebug() << "poi:      " << poi;
+
+      LocationEntry location(LocationEntry::typeObject, poi, objectType, adminRegionList, db->path);
+      location.addReference(entry.poi->object);
+      locations.append(location);
+    }
+    else if (entry.adminRegion) {
+      QString objectType;
+      if (entry.adminRegion->aliasObject.Valid()) {
+          objectType+=GetObjectTypeName(db,entry.adminRegion->aliasObject);
+      }
+      else {
+          objectType+=GetObjectTypeName(db,entry.adminRegion->object);
+      }
+      QString name;
+      if (!entry.adminRegion->aliasName.empty()) {
+        name=QString::fromUtf8(entry.adminRegion->aliasName.c_str());
+      }
+      else {
+        name=QString::fromUtf8(entry.adminRegion->name.c_str());
+      }
+
+      //=QString::fromUtf8(entry.adminRegion->name.c_str());
+      LocationEntry location(LocationEntry::typeObject, name, objectType, adminRegionList, db->path);
+
+      qDebug() << "region: " << name;
+
+      if (entry.adminRegion->aliasObject.Valid()) {
+          location.addReference(entry.adminRegion->aliasObject);
+      }
+      else {
+          location.addReference(entry.adminRegion->object);
+      }
+      locations.append(location);
+    }
+    return true;
+}
+
+void DBThread::SearchForLocations(const QString searchPattern, int limit)
 {
   QMutexLocker locker(&mutex);
 
-  osmscout::LocationSearch search;
+  qDebug() << "Searching for" << searchPattern;
+  QTime timer;
+  timer.start();
 
-  search.limit=limit;
+  std::string stdSearchPattern=searchPattern.toUtf8().constData();
+
   for (auto db:databases){
-
-    if (!db->locationService->InitializeLocationSearchEntries(searchPattern, search)) {
-        return false;
+    osmscout::LocationSearch search;
+    search.limit=limit;
+    osmscout::LocationSearchResult result;
+    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
+    QList<LocationEntry> locations;
+  
+    if (!db->locationService->InitializeLocationSearchEntries(stdSearchPattern, search)) {
+      emit searchFinished(searchPattern, /*error*/ true);
+      return;
     }
 
     if (!db->locationService->SearchForLocations(search, result)){
-      return false;
+      emit searchFinished(searchPattern, /*error*/ true);
+      return;
     }
+    
+    for (auto &entry: result.results){
+      if (!BuildLocationEntry(entry, db, adminRegionMap, locations)){
+        emit searchFinished(searchPattern, /*error*/ true);
+        return;        
+      }
+    }
+    
+    emit searchResult(searchPattern, locations);
   }
-  return true;
+
+  qDebug() << "Retrieve result tooks" << timer.elapsed() << "ms";
+  emit searchFinished(searchPattern, /*error*/ false);
 }
 
 bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
@@ -585,6 +722,12 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
     */
 }
 
+QStringList DBThread::BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
+                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
+{
+  return BuildAdminRegionList(osmscout::LocationServiceRef(), adminRegion, regionMap);
+}
+
 QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
                                            const osmscout::AdminRegionRef& adminRegion,
                                            std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
@@ -594,7 +737,8 @@ QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& l
   }
 
   QStringList list;
-  locationService->ResolveAdminRegionHierachie(adminRegion, regionMap);
+  if (locationService)
+    locationService->ResolveAdminRegionHierachie(adminRegion, regionMap);
   QString name = QString::fromStdString(adminRegion->name);
   list << name;
   QString last = name;
