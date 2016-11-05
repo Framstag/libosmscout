@@ -350,7 +350,6 @@ void PlaneDBThread::DrawMap()
                    projection.GetWidth(),
                    projection.GetHeight());
 
-    // FIXME: just for debug
     renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
     
     QPainter p;
@@ -359,21 +358,8 @@ void PlaneDBThread::DrawMap()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);        
     
-    p.fillRect(0,0,currentWidth,currentHeight,QColor::fromRgb(255,255,255));
-    
     bool success=true;
     for (auto &db:databases){
-      osmscout::GeoBox box;
-      db->database->GetBoundingBox(box);
-      double x1;
-      double y1;
-      double x2;
-      double y2;
-      projection.GeoToPixel(box.minCoord, x1,y1);
-      projection.GeoToPixel(box.maxCoord, x2,y2);
-      p.drawRect(x1, y1, x2-x1, y2-y1);
-      qDebug() << "x,y: " << x1 << y1;
-
       std::list<osmscout::TileRef> tiles;
       osmscout::MapData data; // TODO: make sence cache these data?
 
