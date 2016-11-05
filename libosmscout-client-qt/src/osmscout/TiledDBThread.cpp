@@ -61,9 +61,6 @@ TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
   connect(Settings::GetInstance(), SIGNAL(RenderSeaChanged(bool)), 
           this, SLOT(onRenderSeaChanged(bool)));  
 
-  connect(this,SIGNAL(TriggerInitialRendering()),
-          this,SLOT(HandleInitialRenderingRequest()));
-
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
