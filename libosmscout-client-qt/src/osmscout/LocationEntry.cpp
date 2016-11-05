@@ -35,6 +35,7 @@ LocationEntry::LocationEntry(Type type,
       label(label),
       objectType(objectType),
       adminRegionList(adminRegionList),
+      database(database),
       coord(coord),
       bbox(bbox)
 {
@@ -109,6 +110,11 @@ QString LocationEntry::getObjectType() const
 QStringList LocationEntry::getAdminRegionList() const
 {
     return adminRegionList;
+}
+
+QString LocationEntry::getDatabase() const
+{
+    return database;
 }
 
 QString LocationEntry::getLabel() const

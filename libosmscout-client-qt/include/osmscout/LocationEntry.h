@@ -81,6 +81,7 @@ public:
     QString getObjectType() const;
     QString getLabel() const;
     QStringList getAdminRegionList() const;
+    QString getDatabase() const;
     osmscout::GeoCoord getCoord() const;
     osmscout::GeoBox getBBox() const;
     const QList<osmscout::ObjectFileRef>& getReferences() const;

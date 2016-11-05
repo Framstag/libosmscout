@@ -297,7 +297,8 @@ public:
   virtual bool RenderMap(QPainter& painter,
                          const RenderMapRequest& request) = 0;
   
-  bool CalculateRoute(osmscout::Vehicle vehicle,
+  bool CalculateRoute(const QString databasePath,
+                      osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,
                       const osmscout::ObjectFileRef& startObject,
                       size_t startNodeIndex,
@@ -305,17 +306,20 @@ public:
                       size_t targetNodeIndex,
                       osmscout::RouteData& route);
 
-  bool TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
+  bool TransformRouteDataToRouteDescription(const QString databasePath,
+                                            osmscout::Vehicle vehicle,
                                             const osmscout::RoutingProfile& routingProfile,
                                             const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,
                                             const std::string& start,
                                             const std::string& target);
-  bool TransformRouteDataToWay(osmscout::Vehicle vehicle,
+  bool TransformRouteDataToWay(const QString databasePath,
+                               osmscout::Vehicle vehicle,
                                const osmscout::RouteData& data,
                                osmscout::Way& way);
 
-  bool GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+  bool GetClosestRoutableNode(const QString databasePath,
+                              const osmscout::ObjectFileRef& refObject,
                               const osmscout::Vehicle& vehicle,
                               double radius,
                               osmscout::ObjectFileRef& object,
@@ -323,6 +327,7 @@ public:
 
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);
+  osmscout::TypeConfigRef GetTypeConfig(const QString databasePath) const;
   
   inline QString GetStylesheetFilename() const
   {

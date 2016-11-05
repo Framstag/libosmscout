@@ -397,14 +397,30 @@ void RoutingListModel::DumpNameChangedDescription(const osmscout::RouteDescripti
 void RoutingListModel::setStartAndTarget(LocationEntry* start,
                                          LocationEntry* target)
 {
-  beginResetModel();
-
-  route.routeSteps.clear();
-
   std::cout << "Routing from '" << start->getLabel().toLocal8Bit().data() << "' to '" << target->getLabel().toLocal8Bit().data() << "'" << std::endl;
 
-  // TODO: implement routing with multiple databases
-  osmscout::TypeConfigRef             typeConfig; // =DBThread::GetInstance()->GetTypeConfig();
+  // TODO:
+  //  - handle location entries with typeCoordinate that don't have database
+  //  - implement routing with multiple databases
+  //
+  // as first step, we can try to manipulate with locations from different 
+  // databases like with type coordinates...
+  if (start->getDatabase() != target->getDatabase()){
+    qWarning() << "Start and target are from different databases! It is not supported yet.";
+    qWarning() << "Start database:" << start->getDatabase();
+    qWarning() << "Target database:" << target->getDatabase();
+    return;
+  }
+  
+  beginResetModel();
+  route.routeSteps.clear();
+  
+  QString                             databasePath=start->getDatabase();
+  osmscout::TypeConfigRef             typeConfig=DBThread::GetInstance()->GetTypeConfig(databasePath);
+  if (!typeConfig){
+    qWarning() << "Can't find database:" << databasePath;
+    return;    
+  }
   osmscout::FastestPathRoutingProfile routingProfile(typeConfig);
   osmscout::Way                       routeWay;
   osmscout::Vehicle                   vehicle=osmscout::vehicleCar;//settings->GetRoutingVehicle();
@@ -433,7 +449,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   osmscout::ObjectFileRef targetObject;
   size_t                  targetNodeIndex;
 
-  if (!DBThread::GetInstance()->GetClosestRoutableNode(start->getReferences().front(),
+  if (!DBThread::GetInstance()->GetClosestRoutableNode(databasePath,
+                                                       start->getReferences().front(),
                                                        vehicle,
                                                        1000,
                                                        startObject,
@@ -445,7 +462,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
     std::cerr << "Cannot find a routing node close to the start location" << std::endl;
   }
 
-  if (!DBThread::GetInstance()->GetClosestRoutableNode(target->getReferences().front(),
+  if (!DBThread::GetInstance()->GetClosestRoutableNode(databasePath,
+                                                       target->getReferences().front(),
                                                        vehicle,
                                                        1000,
                                                        targetObject,
@@ -457,7 +475,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
     std::cerr << "Cannot find a routing node close to the target location" << std::endl;
   }
 
-  if (!DBThread::GetInstance()->CalculateRoute(vehicle,
+  if (!DBThread::GetInstance()->CalculateRoute(databasePath,
+                                               vehicle,
                                                routingProfile,
                                                startObject,
                                                startNodeIndex,
@@ -470,7 +489,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
 
   std::cout << "Route calculated" << std::endl;
 
-  DBThread::GetInstance()->TransformRouteDataToRouteDescription(vehicle,
+  DBThread::GetInstance()->TransformRouteDataToRouteDescription(databasePath,
+                                                                vehicle,
                                                                 routingProfile,
                                                                 route.routeData,
                                                                 route.routeDescription,
@@ -640,7 +660,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
     prevNode=node;
   }
 
-  if (DBThread::GetInstance()->TransformRouteDataToWay(vehicle,
+  if (DBThread::GetInstance()->TransformRouteDataToWay(databasePath,
+                                                       vehicle,
                                                        route.routeData,
                                                        routeWay)) {
     DBThread::GetInstance()->ClearRoute();
