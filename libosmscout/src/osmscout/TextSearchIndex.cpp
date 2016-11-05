@@ -22,7 +22,7 @@ namespace osmscout
       tries[i].isAvail=false;
       if(tries[i].trie){
         delete tries[i].trie;
-        tries[i].trie = 0;
+        tries[i].trie = NULL;
       }
     }
   }
@@ -62,6 +62,7 @@ namespace osmscout
         // to include a specific trie (ie. textother)
         log.Error() << "Warn, could not open " << tries[i].file << ":"  << ex.what();
         delete tries[i].trie;
+        tries[i].trie = NULL;
         tries[i].isAvail=false;
         triesAvail--;
       }
