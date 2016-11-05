@@ -49,6 +49,7 @@ public slots:
   
 private:
     QString pattern;
+    QString lastRequestPattern;
     QList<LocationEntry*> locations;
     bool searching;
 

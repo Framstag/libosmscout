@@ -58,7 +58,7 @@ LocationListModel::~LocationListModel()
 void LocationListModel::onSearchResult(const QString searchPattern, 
                                        const QList<LocationEntry> foundLocations)
 {
-  if (!this->pattern.contains(searchPattern, Qt::CaseInsensitive)){
+  if (!searchPattern.contains(this->pattern, Qt::CaseInsensitive)){
     return; // result is not for us
   }
   
@@ -74,11 +74,17 @@ void LocationListModel::onSearchResult(const QString searchPattern,
 
 void LocationListModel::onSearchFinished(const QString searchPattern, bool error)
 {
-  if (this->pattern!=searchPattern){
+  if (this->lastRequestPattern!=searchPattern){
     return; // result is not for us
   }
-  searching = false;
-  emit SearchingChanged(false);
+  if (lastRequestPattern!=pattern){
+    qDebug() << "Search postponed" << pattern;
+    lastRequestPattern=pattern;
+    emit SearchRequested(pattern, 50);
+  }else{
+    searching = false;
+    emit SearchingChanged(false);
+  }
 }
 
 void LocationListModel::setPattern(const QString& pattern)
@@ -98,8 +104,6 @@ void LocationListModel::setPattern(const QString& pattern)
   endRemoveRows();
   emit countChanged(locations.size());
 
-  osmscout::LocationSearchResult searchResult;
-
   std::string stdPattern=pattern.toUtf8().constData();
 
   osmscout::GeoCoord coord;
@@ -115,7 +119,15 @@ void LocationListModel::setPattern(const QString& pattern)
   }
   emit countChanged(locations.size());
 
+  if (searching){
+    // we are still waiting for previous request, postpone current
+    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern;
+    return;
+  }
+  
+  qDebug() << "Clear (" << locations.size() << ") search" << pattern;
   searching = true;
+  lastRequestPattern = pattern;
   emit SearchingChanged(true);
   emit SearchRequested(pattern, 50);
 }
