@@ -7,12 +7,12 @@ LineEdit {
     id: searchEdit;
 
     property Item desktop;
-    property Location location;
+    property LocationEntry location;
 
     // Internal constant
     property int listCellHeight: Theme.textFontSize*2+4
 
-    signal showLocation(Location location)
+    signal showLocation(LocationEntry location)
 
     // Public
 
@@ -24,7 +24,7 @@ LineEdit {
         suggestionModel.setPattern(searchEdit.text)
 
         if (suggestionModel.count>=1) {
-            if (searchEdit.text===suggestionModel.get(0).name) {
+            if (searchEdit.text===suggestionModel.get(0).label) {
               location=suggestionModel.get(0)
               hidePopup()
             }
@@ -43,7 +43,7 @@ LineEdit {
         suggestionModel.setPattern(searchEdit.text)
 
         if (suggestionModel.count>=1 &&
-            searchEdit.text===suggestionModel.get(0).name) {
+            searchEdit.text===suggestionModel.get(0).label) {
             location=suggestionModel.get(0)
         }
 
@@ -61,12 +61,12 @@ LineEdit {
 
     function handleTextChanged() {
         // If the text set is equal to the location, do NOT erase the location
-        if (location !=null && location.name !== text) {
+        if (location !=null && location.label !== text) {
             location = null;
         }
 
         // If the text set is equal to the location, do NOT trigger an suggestion update on timer
-        if (location === null || location.name !== text) {
+        if (location === null || location.label !== text) {
             suggestionTimer.restart()
         }
     }
@@ -83,7 +83,7 @@ LineEdit {
 
     function selectLocation(selectedLocation) {
         searchEdit.location = selectedLocation
-        searchEdit.text = selectedLocation.name
+        searchEdit.text = selectedLocation.label
         showLocation(searchEdit.location)
 
         hidePopup()
@@ -218,6 +218,9 @@ LineEdit {
 
     LocationListModel {
         id: suggestionModel
+        onCountChanged:{
+            updatePopup();
+        }
     }
 
     MouseArea {

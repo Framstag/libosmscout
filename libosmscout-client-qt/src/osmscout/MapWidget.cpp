@@ -423,7 +423,7 @@ void MapWidget::showCoordinatesInstantly(double lat, double lon)
     showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);    
 }
 
-void MapWidget::showLocation(const LocationEntry* location)
+void MapWidget::showLocation(LocationEntry* location)
 {
   if (!location){
     qWarning() << "Invalid location" << location;

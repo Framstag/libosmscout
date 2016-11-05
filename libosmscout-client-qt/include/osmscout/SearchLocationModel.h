@@ -4,6 +4,7 @@
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2014  Tim Teulings
+ Copyright (C) 2016  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -32,12 +33,13 @@
 class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(int count READ rowCount)
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
     Q_PROPERTY(bool searching READ isSearching NOTIFY SearchingChanged)
 
 signals:
     void SearchRequested(const QString searchPattern, int limit);
     void SearchingChanged(bool);
+    void countChanged(int);
 
 public slots:
     void setPattern(const QString& pattern);

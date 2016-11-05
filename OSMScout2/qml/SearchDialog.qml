@@ -13,7 +13,7 @@ FocusScope {
     property alias startLocation: searchEdit.location;
     property alias destinationLocation: destinationEdit.location;
 
-    signal showLocation(Location location)
+    signal showLocation(LocationEntry location)
 
     width: searchRectangle.width
     height: searchRectangle.height

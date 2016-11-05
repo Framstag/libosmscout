@@ -112,7 +112,7 @@ public slots:
   void showCoordinates(double lat, double lon);
   void showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Magnification magnification);
   void showCoordinatesInstantly(double lat, double lon);
-  void showLocation(const LocationEntry* location);
+  void showLocation(LocationEntry* location);
 
   void locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy);
   

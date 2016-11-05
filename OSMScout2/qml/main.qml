@@ -173,8 +173,6 @@ Window {
                 }
             }
 
-            // Use PinchArea for multipoint zoom in/out?
-
             SearchDialog {
                 id: searchDialog
 
@@ -185,6 +183,7 @@ Window {
                 desktop: map
 
                 onShowLocation: {
+                    console.log("location: "+location);
                     map.showLocation(location)
                 }
 

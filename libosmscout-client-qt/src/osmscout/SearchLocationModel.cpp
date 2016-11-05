@@ -1,6 +1,7 @@
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010  Tim Teulings
+ Copyright (C) 2016  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -62,11 +63,13 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   }
   
   for (auto &location : foundLocations) {
-    // TODO: deduplicate, sort
+    // TODO: deduplicate, sort by relevance
     emit beginInsertRows(QModelIndex(), locations.size(), locations.size());
     locations.append(new LocationEntry(location));
     emit endInsertRows();
   }  
+  emit countChanged(locations.size());
+  qDebug() << "added " << foundLocations.size() << ", model size" << locations.size();
 }
 
 void LocationListModel::onSearchFinished(const QString searchPattern, bool error)
@@ -93,6 +96,7 @@ void LocationListModel::setPattern(const QString& pattern)
 
   locations.clear();
   endRemoveRows();
+  emit countChanged(locations.size());
 
   osmscout::LocationSearchResult searchResult;
 
@@ -109,6 +113,7 @@ void LocationListModel::setPattern(const QString& pattern)
       locations.append(location);
       endInsertRows();
   }
+  emit countChanged(locations.size());
 
   searching = true;
   emit SearchingChanged(true);
