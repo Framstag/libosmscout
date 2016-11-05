@@ -121,6 +121,11 @@ osmscout::GeoCoord LocationEntry::getCoord() const
     return coord;
 }
 
+osmscout::GeoBox LocationEntry::getBBox() const
+{
+    return bbox;
+}
+
 const QList<osmscout::ObjectFileRef>& LocationEntry::getReferences() const
 {
     return references;

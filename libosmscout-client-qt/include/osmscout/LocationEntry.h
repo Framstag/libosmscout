@@ -82,6 +82,7 @@ public:
     QString getLabel() const;
     QStringList getAdminRegionList() const;
     osmscout::GeoCoord getCoord() const;
+    osmscout::GeoBox getBBox() const;
     const QList<osmscout::ObjectFileRef>& getReferences() const;
 };
 

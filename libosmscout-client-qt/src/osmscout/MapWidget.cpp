@@ -423,62 +423,51 @@ void MapWidget::showCoordinatesInstantly(double lat, double lon)
     showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);    
 }
 
-void MapWidget::showLocation(LocationEntry* location)
+void MapWidget::showLocation(const LocationEntry* location)
 {
-   // TODO: how to handle with multiple databases?
-  /*
-    if (location==NULL) {
-        qDebug() << "MapWidget::showLocation(): no location passed!";
-        return;
-    }
-
-    qDebug() << "MapWidget::showLocation(\"" << location->getName().toLocal8Bit().constData() << "\")";
-
-    if (location->getType()==Location::typeObject) {
-        osmscout::ObjectFileRef reference=location->getReferences().front();
-
-        DBThread* dbThread=DBThread::GetInstance();
-
-        if (reference.GetType()==osmscout::refNode) {
-            osmscout::NodeRef node;
-
-            if (dbThread->GetNodeByOffset(reference.GetFileOffset(),node)) {
-                showCoordinates(node->GetCoords(), osmscout::Magnification::magVeryClose);    
-            }
-        }
-        else if (reference.GetType()==osmscout::refArea) {
-            osmscout::AreaRef area;
-
-            if (dbThread->GetAreaByOffset(reference.GetFileOffset(),area)) {
-                osmscout::GeoCoord coord;
-                if (area->GetCenter(coord)) {
-                    showCoordinates(coord, osmscout::Magnification::magVeryClose);    
-                }
-            }
-        }
-        else if (reference.GetType()==osmscout::refWay) {
-            osmscout::WayRef way;
-
-            if (dbThread->GetWayByOffset(reference.GetFileOffset(),way)) {
-                osmscout::GeoCoord coord;
-                if (way->GetCenter(coord)) {
-                    showCoordinates(coord, osmscout::Magnification::magVeryClose);    
-                }
-            }
-        }
-        else {
-            assert(false);
-        }
-    }
-    else if (location->getType()==Location::typeCoordinate) {
-        osmscout::GeoCoord coord=location->getCoord();
-
-        qDebug() << "MapWidget: " << coord.GetDisplayText().c_str();
-
-        showCoordinates(coord, osmscout::Magnification::magVeryClose);    
-
-    }
-   */
+  if (!location){
+    qWarning() << "Invalid location" << location;
+    return;
+  }
+  qDebug() << "Show location: " << location;
+    
+  osmscout::GeoCoord center;
+  double dimension = 0.01; // km
+  if (location->getBBox().IsValid()){
+    center = location->getBBox().GetCenter();
+    dimension = osmscout::GetEllipsoidalDistance(location->getBBox().GetMinCoord(),
+                                                 location->getBBox().GetMaxCoord());
+  }else{
+    center = location->getCoord();
+  }
+  
+  osmscout::Magnification::Mag mag = osmscout::Magnification::magBlock;
+  if (dimension > 0.1)
+    mag = osmscout::Magnification::magVeryClose;
+  if (dimension > 0.2)
+    mag = osmscout::Magnification::magCloser;
+  if (dimension > 0.5)
+    mag = osmscout::Magnification::magClose;
+  if (dimension > 1)
+    mag = osmscout::Magnification::magDetail;
+  if (dimension > 3)
+    mag = osmscout::Magnification::magSuburb;
+  if (dimension > 7)
+    mag = osmscout::Magnification::magCity;
+  if (dimension > 15)
+    mag = osmscout::Magnification::magCityOver;
+  if (dimension > 30)
+    mag = osmscout::Magnification::magProximity;
+  if (dimension > 60)
+    mag = osmscout::Magnification::magRegion;
+  if (dimension > 120)
+    mag = osmscout::Magnification::magCounty;
+  if (dimension > 240)
+    mag = osmscout::Magnification::magStateOver;
+  if (dimension > 500)
+    mag = osmscout::Magnification::magState;
+       
+  showCoordinates(center, osmscout::Magnification(mag));
 }
 
 void MapWidget::locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy)
