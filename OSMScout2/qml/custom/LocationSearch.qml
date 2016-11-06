@@ -261,14 +261,57 @@ LineEdit {
 
                 model: suggestionModel
 
-                delegate: Text {
-                    id: text
-
+                delegate: Item{
                     width: suggestionView.width
+                    height: labelLabel.height + entryRegion.height
 
-                    text: label
-                    font.pixelSize: Theme.textFontSize
+                    Text {
+                        id: labelLabel
 
+                        width: parent.width - 2*Theme.horizSpace
+                        x: Theme.horizSpace
+
+                        text: label
+                        font.pixelSize: Theme.textFontSize
+                    }
+                    Text {
+                        id: typeLabel
+
+                        //width: parent.width - 2*Theme.horizSpace
+                        anchors.right: labelLabel.right
+
+                        text: type
+                        font.pixelSize: Theme.textFontSize * 0.8
+                        opacity: 0.6
+                    }
+                    Text {
+                        id: entryRegion
+
+                        width: parent.width - 3*Theme.horizSpace
+                        wrapMode: Text.WordWrap
+                        anchors.top: labelLabel.bottom
+                        x: 2*Theme.horizSpace
+
+                        text: {
+                            var str = "";
+                            if (region.length > 0){
+                                var start = 0;
+                                while (start < region.length && region[start] == label){
+                                    start++;
+                                }
+                                if (start < region.length){
+                                    str = region[start];
+                                    for (var i=start+1; i<region.length; i++){
+                                        str += ", "+ region[i];
+                                    }
+                                }
+                            }
+                            return str;
+                        }
+                        font.pixelSize: Theme.textFontSize * 0.8
+                        opacity: 0.9
+                        visible: region.length > 0
+                    }
                     MouseArea {
                         anchors.fill: parent
 
