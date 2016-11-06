@@ -521,6 +521,22 @@ TYPES
       {Name}
 
   //
+  // Winter sports
+  //
+
+  TYPE piste_downhill_easy
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="easy")
+      {Name}
+
+  TYPE piste_downhill_intermediate
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="intermediate")
+      {Name}
+
+  TYPE piste_downhill_advanced
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="advanced")
+      {Name}
+
+  //
   // Water transport
   // 
 
