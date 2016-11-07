@@ -39,8 +39,7 @@
 #include <osmscout/util/Breaker.h>
 
 #include "Settings.h"
-#include "TileCache.h"
-#include "OsmTileDownloader.h"
+#include "DBThread.h"
 
 class OSMSCOUT_CLIENT_QT_API PlaneDBThread : public DBThread
 {
