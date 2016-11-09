@@ -759,11 +759,7 @@ namespace osmscout {
       return false;
     }
 
-    if (object.GetType()==refArea) {
-      // TODO:
-      return false;
-    }
-    else if (object.GetType()==refWay) {
+    if (object.GetType()==refWay) {
       WayRef        way;
       double        startLon=0.0L;
       double        startLat=0.0L;
@@ -870,6 +866,7 @@ namespace osmscout {
       return true;
     }
     else {
+      log.Error() << "Unsupported object type '" << object.GetTypeName() << "' for source!";
       return false;
     }
   }
@@ -890,11 +887,7 @@ namespace osmscout {
       return false;
     }
 
-    if (object.GetType()==refArea) {
-      // TODO:
-      return false;
-    }
-    else if (object.GetType()==refWay) {
+    if (object.GetType()==refWay) {
       WayRef way;
 
       if (!wayDataFile->GetByOffset(object.GetFileOffset(),
@@ -953,6 +946,7 @@ namespace osmscout {
       return true;
     }
     else {
+      log.Error() << "Unsupported object type '" << object.GetTypeName() << "' for target!";
       return false;
     }
   }
@@ -1348,7 +1342,15 @@ namespace osmscout {
     clock.Stop();
 
     if (debugPerformance) {
-      std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset();
+      std::cout << "From:                ";
+      if (startBackwardRouteNode) {
+        std::cout << startBackwardRouteNode->GetCoord().GetDisplayText();
+      }
+      else {
+        std::cout << startForwardRouteNode->GetCoord().GetDisplayText();
+      }
+      std::cout << " ";
+      std::cout << startObject.GetTypeName() << " " << startObject.GetFileOffset();
       std::cout << "[";
       if (startBackwardRouteNode) {
         std::cout << startBackwardRouteNode->GetId() << " >* ";
@@ -1359,7 +1361,15 @@ namespace osmscout {
       }
       std::cout << "]" << std::endl;
 
-      std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
+      std::cout << "To:                  ";
+      if (targetBackwardRouteNode) {
+        std::cout << targetBackwardRouteNode->GetCoord().GetDisplayText();
+      }
+      else {
+        std::cout << targetForwardRouteNode->GetCoord().GetDisplayText();
+      }
+      std::cout << " ";
+      std::cout << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
       std::cout << "[";
       if (targetForwardRouteNode) {
         std::cout << targetForwardRouteNode->GetId() << " >* ";
@@ -1676,7 +1686,8 @@ namespace osmscout {
         }
 
         if (type->CanBeArea()) {
-          areaRoutableTypes.Set(type);
+          // TODO: Currently disabled, since router cannot handle areas as start or target node
+          //areaRoutableTypes.Set(type);
         }
       }
     }
