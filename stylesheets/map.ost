@@ -1204,6 +1204,12 @@ TYPES
     = NODE ("amenity"=="water_point")
       GROUP amenity
 
+  TYPE amenity_ferry_terminal
+    = NODE AREA ("amenity"=="ferry_terminal")
+      {Name, NameAlt}
+      POI
+      GROUP amenity
+
   // Churches
   TYPE christian_church_building
     = AREA ("amenity"=="place_of_worship" AND
