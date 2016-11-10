@@ -75,12 +75,17 @@ namespace osmscout {
       std::vector<std::thread>                 blockWorkerThreads;
       WorkQueue<void>                          writeWorkerQueue;
       std::thread                              writeWorkerThread;
+
       FileWriter                               rawCoordWriter;
       FileWriter                               nodeWriter;
       FileWriter                               wayWriter;
       FileWriter                               coastlineWriter;
       FileWriter                               turnRestrictionWriter;
       FileWriter                               multipolygonWriter;
+
+      bool                                     readNodes;
+      bool                                     readWays;
+      bool                                     readRelations;
 
       uint32_t                                 coordCount;
       uint32_t                                 nodeCount;

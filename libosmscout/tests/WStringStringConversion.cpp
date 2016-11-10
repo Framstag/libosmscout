@@ -13,7 +13,7 @@ bool CheckCharsetConversion(const std::string& oText)
   // ...and convert it back to UTF8
   std::string  uText=osmscout::WStringToUTF8String(wText);
   std::cout << "UTF8String: \"" << uText << "\"" << std::endl;
-  
+
   return oText==uText;
 }
 
@@ -46,8 +46,8 @@ int main()
 
     std::cout << "Current locale activated" << std::endl;
   }
-  catch (std::runtime_error) {
-    std::cerr << "ERROR: Cannot set locale" << std::endl;
+  catch (const std::runtime_error& e) {
+    std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
   }
 
   // ANSI

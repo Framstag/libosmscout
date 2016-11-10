@@ -106,6 +106,8 @@ namespace osmscout {
     size_t                       sortBlockSize;            //<! Number of entries loaded in one sort iteration
     size_t                       sortTileMag;              //<! Zoom level for individual sorting cells
 
+    size_t                       processingQueueSize;      //!< Size of the processing worker queues
+
     size_t                       numericIndexPageSize;     //<! Size of an numeric index page in bytes
 
     size_t                       rawCoordBlockSize;        //<! Number of raw coords loaded during import in one go
@@ -177,6 +179,8 @@ namespace osmscout {
     size_t GetSortBlockSize() const;
     size_t GetSortTileMag() const;
 
+    size_t GetProcessingQueueSize() const;
+
     size_t GetNumericIndexPageSize() const;
 
     size_t GetRawCoordBlockSize() const;
@@ -222,10 +226,10 @@ namespace osmscout {
     size_t GetRouteNodeBlockSize() const;
 
     bool GetAssumeLand() const;
-      
+
     const std::vector<std::string>& GetLangOrder () const;
     const std::vector<std::string>& GetAltLangOrder () const;
-      
+
     void SetMapfiles(const std::list<std::string>& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
@@ -244,6 +248,8 @@ namespace osmscout {
     void SetSortObjects(bool sortObjects);
     void SetSortBlockSize(size_t sortBlockSize);
     void SetSortTileMag(size_t sortTileMag);
+
+    void SetProcessingQueueSize(size_t processingQueueSize);
 
     void SetNumericIndexPageSize(size_t numericIndexPageSize);
 
@@ -294,7 +300,6 @@ namespace osmscout {
 
     void SetLangOrder(const std::vector<std::string>& langOrder);
     void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
-
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription

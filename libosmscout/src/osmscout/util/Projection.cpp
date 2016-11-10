@@ -320,7 +320,7 @@ namespace osmscout {
       angleSin=sin(angle);
       angleCos=cos(angle);
       angleNegSin=sin(-angle);
-      angleNegCos=cos(-angle); // TODO: Optimize because of symetry
+      angleNegCos=cos(-angle); // TODO: Optimize because of symmetry
     }
     else {
       angleSin=0;
@@ -393,11 +393,11 @@ namespace osmscout {
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
     /*
-    std::cout << "Center: " << lat << "° lat " << lon << "° lon" << std::endl;
+    std::cout << "Center: " << GeoCoord(lat,lon).GetDisplayText() << std::endl;
     std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
     std::cout << "Screen dimension: " << width << "x" << height << " " << dpi << " DPI " << std::endl;
 
-    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthVisibleMeter << " " << std::endl;
+    std::cout << "Box: " << GeoBox(GeoCoord(latMin,lonMin),GeoCoord(latMax,lonMax)).GetDisplayText() << ", " << groundWidthVisibleMeter << " " << std::endl;
 
     std::cout << "Scale: 1 : " << scale << std::endl;*/
 
