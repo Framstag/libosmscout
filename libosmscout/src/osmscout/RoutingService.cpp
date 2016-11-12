@@ -20,6 +20,8 @@
 #include <osmscout/RoutingService.h>
 
 #include <algorithm>
+#include <iomanip>
+#include <iostream>
 
 #include <osmscout/RoutingProfile.h>
 
@@ -755,6 +757,7 @@ namespace osmscout {
 
   bool RoutingService::GetStartNodes(const RoutingProfile& profile,
                                      const RoutePosition& position,
+                                     GeoCoord& startCoord,
                                      GeoCoord& targetCoord,
                                      RouteNodeRef& forwardRouteNode,
                                      RouteNodeRef& backwardRouteNode,
@@ -771,7 +774,6 @@ namespace osmscout {
 
     if (position.GetObjectFileRef().GetType()==refWay) {
       WayRef        way;
-      GeoCoord      startCoord;
       size_t        forwardNodePos;
       FileOffset    forwardOffset;
       size_t        backwardNodePos;
@@ -1041,6 +1043,7 @@ namespace osmscout {
     RNodeRef                 startForwardNode;
     RNodeRef                 startBackwardNode;
 
+    GeoCoord                 startCoord;
     GeoCoord                 targetCoord;
 
     RouteNodeRef             targetForwardRouteNode;
@@ -1072,6 +1075,7 @@ namespace osmscout {
 
     if (!GetStartNodes(profile,
                        start,
+                       startCoord,
                        targetCoord,
                        startForwardRouteNode,
                        startBackwardRouteNode,
@@ -1091,6 +1095,12 @@ namespace osmscout {
 
       openMap[startBackwardNode->nodeOffset]=result.first;
     }
+
+
+    double overallDistance=GetSphericalDistance(startCoord,
+                                                targetCoord);
+    double overallCost=profile.GetCosts(overallDistance);
+    double costLimit=overallCost*profile.GetCostLimitFactor();
 
     StopClock    clock;
     RNodeRef     current;
@@ -1130,6 +1140,7 @@ namespace osmscout {
 #endif
           nodesIgnoredCount++;
           i++;
+
           continue;
         }
 
@@ -1158,6 +1169,7 @@ namespace osmscout {
 #endif
           nodesIgnoredCount++;
           i++;
+
           continue;
         }
 
@@ -1169,6 +1181,7 @@ namespace osmscout {
           std::cout << " => already calculated" << std::endl;
 #endif
           i++;
+
           continue;
         }
 
@@ -1192,6 +1205,7 @@ namespace osmscout {
           if (!canTurnedInto) {
             nodesIgnoredCount++;
             i++;
+
             continue;
           }
         }
@@ -1212,6 +1226,7 @@ namespace osmscout {
           std::cout << "  => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << std::endl;
 #endif
           i++;
+
           continue;
         }
 
@@ -1220,19 +1235,32 @@ namespace osmscout {
         if (openEntry!=openMap.end()) {
           nextNode=(*openEntry->second)->node;
         }
-        else {
-          if (!routeNodeDataFile.GetByOffset(path.offset,
-                                             nextNode)) {
-            log.Error() << "Cannot load route node with id " << path.offset;
-            return false;
-          }
+        else if (!routeNodeDataFile.GetByOffset(path.offset,
+                                                nextNode)) {
+          log.Error() << "Cannot load route node with id " << path.offset;
+          return false;
         }
 
         double distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
                                                      targetCoord);
+
         // Estimate costs for the rest of the distance to the target
         double estimateCost=profile.GetCosts(distanceToTarget);
         double overallCost=currentCost+estimateCost;
+
+        if (overallCost>costLimit) {
+#if defined(DEBUG_ROUTING)
+          std::cout << "  Skipping route";
+              std::cout << " to " << path.offset;
+              std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+              std::cout << " => cost limit reached (" << overallCost << ">" << costLimit << ")" << std::endl;
+#endif
+
+          nodesIgnoredCount++;
+          i++;
+
+          continue;
+        }
 
         // If we already have the node in the open list, but the new path is cheaper,
         // update the existing entry
@@ -1363,6 +1391,10 @@ namespace osmscout {
 
       std::cout << "Time:                " << clock << std::endl;
 
+      std::cout << "Air-line distance:   " << std::fixed << std::setprecision(1) << overallDistance << "km" << std::endl;
+      std::cout << "Minimum cost:        " << overallCost << std::endl;
+      std::cout << "Actual cost:         " << current->currentCost << std::endl;
+      std::cout << "Cost limit:          " << costLimit << std::endl;
       std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
       std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
       std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;

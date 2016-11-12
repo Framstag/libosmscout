@@ -52,6 +52,11 @@ namespace osmscout {
 
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
+  /**
+   * \ingroup Routing
+   *
+   * Start or end position of a rout calculation
+   */
   class OSMSCOUT_API RoutePosition
   {
   private:
@@ -327,6 +332,7 @@ namespace osmscout {
 
     bool GetStartNodes(const RoutingProfile& profile,
                        const RoutePosition& position,
+                       GeoCoord& startCoord,
                        GeoCoord& targetCoord,
                        RouteNodeRef& forwardRouteNode,
                        RouteNodeRef& backwardRouteNode,
