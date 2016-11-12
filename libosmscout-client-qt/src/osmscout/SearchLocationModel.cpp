@@ -229,10 +229,8 @@ void LocationListModel::setPattern(const QString& pattern)
 {
   beginResetModel();
 
-  for (QList<Location*>::iterator location=locations.begin();
-       location!=locations.end();
-       ++location) {
-      delete *location;
+  for (auto& location : locations) {
+      delete location;
   }
 
   locations.clear();
@@ -331,10 +329,8 @@ void LocationListModel::setPattern(const QString& pattern)
                             name,
                             label);
 
-      for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry->location->objects.begin();
-          object!=entry->location->objects.end();
-          ++object) {
-          location->addReference(*object);
+      for (const auto& object : entry->location->objects) {
+          location->addReference(object);
       }
     }
     else if (entry->adminRegion &&
