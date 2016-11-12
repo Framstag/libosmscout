@@ -433,6 +433,7 @@ void RoutingListModel::setStartAndTarget(Location* start,
   size_t                  targetNodeIndex;
 
   if (!DBThread::GetInstance()->GetClosestRoutableNode(start->getReferences().front(),
+                                                       routingProfile,
                                                        vehicle,
                                                        1000,
                                                        startObject,
@@ -445,6 +446,7 @@ void RoutingListModel::setStartAndTarget(Location* start,
   }
 
   if (!DBThread::GetInstance()->GetClosestRoutableNode(target->getReferences().front(),
+                                                       routingProfile,
                                                        vehicle,
                                                        1000,
                                                        targetObject,

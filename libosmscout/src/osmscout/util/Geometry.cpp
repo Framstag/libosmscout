@@ -103,30 +103,6 @@ namespace osmscout {
     Calculating basic cost for the A* algorithm based on the
     spherical distance of two points on earth
     */
-  double GetSphericalDistance(double aLon, double aLat,
-                              double bLon, double bLat)
-  {
-    double r=6371.01; // Average radius of earth
-    double aLatRad=DegToRad(aLat);
-    double bLatRad=DegToRad(bLat);
-    double dLat=DegToRad(bLat-aLat);
-    double dLon=DegToRad(bLon-aLon);
-
-    double sindLonDiv2=sin(dLon/2);
-
-    double a = sin(dLat/2)*sin(dLat/2)+
-        cos(aLatRad)*cos(bLatRad)*
-        sindLonDiv2*sindLonDiv2;
-
-    double c = 2*atan2(sqrt(a),sqrt(1-a));
-
-    return r*c;
-  }
-
-  /**
-    Calculating basic cost for the A* algorithm based on the
-    spherical distance of two points on earth
-    */
   double GetSphericalDistance(const GeoCoord& a,
                               const GeoCoord& b)
   {

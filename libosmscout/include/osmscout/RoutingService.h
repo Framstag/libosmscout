@@ -301,8 +301,7 @@ namespace osmscout {
     bool GetStartNodes(const RoutingProfile& profile,
                        const ObjectFileRef& object,
                        size_t nodeIndex,
-                       double& targetLon,
-                       double& targetLat,
+                       GeoCoord& targetCoord,
                        RouteNodeRef& forwardRouteNode,
                        RouteNodeRef& backwardRouteNode,
                        RNodeRef& forwardRNode,
@@ -311,8 +310,7 @@ namespace osmscout {
     bool GetTargetNodes(const RoutingProfile& profile,
                         const ObjectFileRef& object,
                         size_t nodeIndex,
-                        double& targetLon,
-                        double& targetLat,
+                        GeoCoord& targetCoord,
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
 
@@ -375,8 +373,8 @@ namespace osmscout {
     %apply ObjectFileRef& OUTPUT {ObjectFileRef& object};
     %apply long& OUTPUT {size_t& nodeIndex};
 #endif
-    bool GetClosestRoutableNode(double lat,
-                                double lon,
+    bool GetClosestRoutableNode(const GeoCoord& coord,
+                                const RoutingProfile& profile,
                                 const Vehicle& vehicle,
                                 double radius,
                                 ObjectFileRef& object,

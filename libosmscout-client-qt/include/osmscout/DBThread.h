@@ -172,7 +172,7 @@ private:
 
   void TileStateCallback(const osmscout::TileRef& changedTile);
 
-public:  
+public:
   QString GetStylesheetFilename() const;
 
   const QList<StyleError> &GetStyleErrors() const
@@ -223,6 +223,7 @@ public:
                                osmscout::Way& way);
 
   bool GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+                              const osmscout::RoutingProfile& routingProfile,
                               const osmscout::Vehicle& vehicle,
                               double radius,
                               osmscout::ObjectFileRef& object,

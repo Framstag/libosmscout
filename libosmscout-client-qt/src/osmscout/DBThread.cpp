@@ -421,7 +421,7 @@ bool DBThread::ReloadStyle(const QString &suffix)
   osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
   newStyleConfig->AddFlag("daylight",daylight);
-  
+
   styleErrors.clear();
   if (newStyleConfig->Load((stylesheetFilename+suffix).toLocal8Bit().data())) {
     // Tear down
@@ -556,7 +556,7 @@ void DBThread::DrawMap()
                    projection.GetHeight());
 
     renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
-    
+
     mapService->LookupTiles(renderProjection,tiles);
 
     mapService->ConvertTilesToMapData(tiles,data);
@@ -895,6 +895,7 @@ void DBThread::AddRoute(const osmscout::Way& way)
 }
 
 bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+                                      const osmscout::RoutingProfile& routingProfile,
                                       const osmscout::Vehicle& vehicle,
                                       double radius,
                                       osmscout::ObjectFileRef& object,
@@ -916,8 +917,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
       return false;
     }
 
-    return router->GetClosestRoutableNode(node->GetCoords().GetLat(),
-                                          node->GetCoords().GetLon(),
+    return router->GetClosestRoutableNode(node->GetCoords(),
+                                          routingProfile,
                                           vehicle,
                                           radius,
                                           object,
@@ -935,8 +936,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
     area->GetCenter(center);
 
-    return router->GetClosestRoutableNode(center.GetLat(),
-                                          center.GetLon(),
+    return router->GetClosestRoutableNode(center,
+                                          routingProfile,
                                           vehicle,
                                           radius,
                                           object,
@@ -950,8 +951,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
       return false;
     }
 
-    return router->GetClosestRoutableNode(way->nodes[0].GetLat(),
-                                          way->nodes[0].GetLon(),
+    return router->GetClosestRoutableNode(way->nodes[0].GetCoord(),
+                                          routingProfile,
                                           vehicle,
                                           radius,
                                           object,

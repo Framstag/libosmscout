@@ -574,8 +574,8 @@ int main(int argc, char* argv[])
   osmscout::ObjectFileRef startObject;
   size_t                  startNodeIndex;
 
-  if (!router->GetClosestRoutableNode(startLat,
-                                      startLon,
+  if (!router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
+                                      routingProfile,
                                       vehicle,
                                       1000,
                                       startObject,
@@ -591,8 +591,8 @@ int main(int argc, char* argv[])
   osmscout::ObjectFileRef targetObject;
   size_t                  targetNodeIndex;
 
-  if (!router->GetClosestRoutableNode(targetLat,
-                                      targetLon,
+  if (!router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
+                                      routingProfile,
                                       vehicle,
                                       1000,
                                       targetObject,
