@@ -968,12 +968,11 @@ namespace osmscout {
       std::vector<osmscout::ObjectFileRef> objects;
 
       for (const auto& etap : via) {
-        RoutePosition           target;
+        RoutePosition target=GetClosestRoutableNode(etap,
+                                                    profile,
+                                                    radius);
 
-        if (!GetClosestRoutableNode(etap,
-                                    profile,
-                                    radius,
-                                    target)) {
+        if (!target.IsValid()) {
           return false;
         }
 
@@ -1627,18 +1626,16 @@ namespace osmscout {
    *    The index of the closed node to the search center.
    * @return
    */
-  bool RoutingService::GetClosestRoutableNode(const GeoCoord& coord,
-                                              const RoutingProfile& profile,
-                                              double radius,
-                                              RoutePosition& position) const
+  RoutePosition RoutingService::GetClosestRoutableNode(const GeoCoord& coord,
+                                                       const RoutingProfile& profile,
+                                                       double radius) const
   {
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
     AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
     AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
     WayDataFileRef   wayDataFile=database->GetWayDataFile();
-
-    position=RoutePosition();
+    RoutePosition    position;
 
     if (!typeConfig ||
         !areaAreaIndex ||
@@ -1646,7 +1643,7 @@ namespace osmscout {
         !areaDataFile ||
         !wayDataFile) {
       log.Error() << "At least one index file is invalid!";
-      return false;
+      return position;
     }
 
     GeoBox      boundingBox=GeoBox::BoxByCenterAndRadius(coord,radius);
@@ -1696,13 +1693,13 @@ namespace osmscout {
     if (!wayDataFile->GetByOffset(wayWayOffsets,
                                   ways)) {
       log.Error() << "Error reading ways in area!";
-      return false;
+      return position;
     }
 
     if (!areaDataFile->GetByBlockSpans(wayAreaSpans,
                                        areas)) {
       log.Error() << "Error reading areas in area!";
-      return false;
+      return position;
     }
 
     double minDistance=std::numeric_limits<double>::max();
@@ -1748,6 +1745,6 @@ namespace osmscout {
       }
     }
 
-    return true;
+    return position;
   }
 }

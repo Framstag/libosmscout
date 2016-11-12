@@ -389,14 +389,9 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
-#ifdef SWIG
-    %apply ObjectFileRef& OUTPUT {ObjectFileRef& object};
-    %apply long& OUTPUT {size_t& nodeIndex};
-#endif
-    bool GetClosestRoutableNode(const GeoCoord& coord,
-                                const RoutingProfile& profile,
-                                double radius,
-                                RoutePosition& position) const;
+    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
+                                         const RoutingProfile& profile,
+                                         double radius) const;
 
     void DumpStatistics();
   };

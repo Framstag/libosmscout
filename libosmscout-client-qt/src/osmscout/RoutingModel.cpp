@@ -426,33 +426,27 @@ void RoutingListModel::setStartAndTarget(Location* start,
                                      160.0);
   }
 
-  osmscout::RoutePosition startPosition;
-  osmscout::RoutePosition targetPosition;
-
-  if (!DBThread::GetInstance()->GetClosestRoutableNode(start->getReferences().front(),
-                                                       routingProfile,
-                                                       1000,
-                                                       startPosition)) {
-    std::cerr << "There was an error while routing!" << std::endl;
-  }
+  osmscout::RoutePosition startPosition=DBThread::GetInstance()->GetClosestRoutableNode(start->getReferences().front(),
+                                                                                        routingProfile,
+                                                                                        1000);
 
   if (!startPosition.IsValid()) {
     std::cerr << "Cannot find a routing node close to the start location" << std::endl;
+
+    return;
   }
 
-  if (!DBThread::GetInstance()->GetClosestRoutableNode(target->getReferences().front(),
-                                                       routingProfile,
-                                                       1000,
-                                                       targetPosition)) {
-    std::cerr << "There was an error while routing!" << std::endl;
-  }
+  osmscout::RoutePosition targetPosition=DBThread::GetInstance()->GetClosestRoutableNode(target->getReferences().front(),
+                                                                                         routingProfile,
+                                                                                         1000);
 
   if (!targetPosition.IsValid()) {
     std::cerr << "Cannot find a routing node close to the target location" << std::endl;
+
+    return;
   }
 
-  if (!DBThread::GetInstance()->CalculateRoute(vehicle,
-                                               routingProfile,
+  if (!DBThread::GetInstance()->CalculateRoute(routingProfile,
                                                startPosition,
                                                targetPosition,
                                                route.routeData)) {

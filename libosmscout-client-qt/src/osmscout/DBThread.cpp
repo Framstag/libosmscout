@@ -784,15 +784,14 @@ bool DBThread::SearchForLocations(const std::string& searchPattern,
                                              result);
 }
 
-bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
-                              const osmscout::RoutingProfile& routingProfile,
+bool DBThread::CalculateRoute(const osmscout::RoutingProfile& routingProfile,
                               const osmscout::RoutePosition& start,
                               const osmscout::RoutePosition target,
                               osmscout::RouteData& route)
 {
   QMutexLocker locker(&mutex);
 
-  if (!AssureRouter(vehicle)) {
+  if (!AssureRouter(routingProfile.GetVehicle())) {
     return false;
   }
 
@@ -889,38 +888,36 @@ void DBThread::AddRoute(const osmscout::Way& way)
   emit Redraw();
 }
 
-bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
-                                      const osmscout::RoutingProfile& routingProfile,
-                                      double radius,
-                                      osmscout::RoutePosition& position)
+osmscout::RoutePosition DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+                                                         const osmscout::RoutingProfile& routingProfile,
+                                                         double radius)
 {
   QMutexLocker locker(&mutex);
 
-  if (!AssureRouter(routingProfile.GetVehicle())) {
-    return false;
-  }
+  osmscout::RoutePosition position;
 
-  position=osmscout::RoutePosition();
+  if (!AssureRouter(routingProfile.GetVehicle())) {
+    return position;
+  }
 
   if (refObject.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
 
     if (!database->GetNodeByOffset(refObject.GetFileOffset(),
                                    node)) {
-      return false;
+      return position;
     }
 
     return router->GetClosestRoutableNode(node->GetCoords(),
                                           routingProfile,
-                                          radius,
-                                          position);
+                                          radius);
   }
   else if (refObject.GetType()==osmscout::refArea) {
     osmscout::AreaRef area;
 
     if (!database->GetAreaByOffset(refObject.GetFileOffset(),
                                    area)) {
-      return false;
+      return position;
     }
 
     osmscout::GeoCoord center;
@@ -929,25 +926,22 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
     return router->GetClosestRoutableNode(center,
                                           routingProfile,
-                                          radius,
-                                          position);
+                                          radius);
   }
   else if (refObject.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
 
     if (!database->GetWayByOffset(refObject.GetFileOffset(),
                                   way)) {
-      return false;
+      return position;
     }
 
     return router->GetClosestRoutableNode(way->nodes[0].GetCoord(),
                                           routingProfile,
-                                          radius,
-                                          position);
+                                          radius);
   }
-  else {
-    return true;
-  }
+
+  return position;
 }
 
 static DBThread* dbThreadInstance=NULL;

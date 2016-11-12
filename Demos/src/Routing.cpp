@@ -571,31 +571,29 @@ int main(int argc, char* argv[])
     break;
   }
 
-  osmscout::RoutePosition start;
+  osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
+                                                               routingProfile,
+                                                               1000);
 
-  if (!router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
-                                      routingProfile,
-                                      1000,
-                                      start)) {
+  if (!start.IsValid()) {
     std::cerr << "Error while searching for routing node near start location!" << std::endl;
     return 1;
   }
 
-  if (!start.IsValid() || start.GetObjectFileRef().GetType()==osmscout::refNode) {
+  if (start.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  osmscout::RoutePosition target;
+  osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
+                                                               routingProfile,
+                                                               1000);
 
-  if (!router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
-                                      routingProfile,
-                                      1000,
-                                      target)) {
+  if (!target.IsValid()) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
     return 1;
   }
 
-  if (!target.IsValid() || target.GetObjectFileRef().GetType()==osmscout::refNode) {
+  if (target.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 

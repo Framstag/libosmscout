@@ -204,8 +204,7 @@ public:
                           size_t limit,
                           osmscout::LocationSearchResult& result) const;
 
-  bool CalculateRoute(osmscout::Vehicle vehicle,
-                      const osmscout::RoutingProfile& routingProfile,
+  bool CalculateRoute(const osmscout::RoutingProfile& routingProfile,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition target,
                       osmscout::RouteData& route);
@@ -219,10 +218,9 @@ public:
                                const osmscout::RouteData& data,
                                osmscout::Way& way);
 
-  bool GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
-                              const osmscout::RoutingProfile& routingProfile,
-                              double radius,
-                              osmscout::RoutePosition& position);
+  osmscout::RoutePosition GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
+                                                 const osmscout::RoutingProfile& routingProfile,
+                                                 double radius);
 
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);
