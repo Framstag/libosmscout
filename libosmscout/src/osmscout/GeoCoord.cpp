@@ -323,7 +323,7 @@ namespace osmscout {
 
   double GeoCoord::GetDistance(GeoCoord target)
   {
-      return GetEllipsoidalDistance(GetLon(), GetLat(), target.GetLon(), target.GetLat());
+      return GetEllipsoidalDistance(*this, target);
   }
 
   GeoCoord GeoCoord::Add(double bearing, double distance)
