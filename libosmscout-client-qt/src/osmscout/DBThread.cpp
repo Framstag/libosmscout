@@ -786,10 +786,8 @@ bool DBThread::SearchForLocations(const std::string& searchPattern,
 
 bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
                               const osmscout::RoutingProfile& routingProfile,
-                              const osmscout::ObjectFileRef& startObject,
-                              size_t startNodeIndex,
-                              const osmscout::ObjectFileRef targetObject,
-                              size_t targetNodeIndex,
+                              const osmscout::RoutePosition& start,
+                              const osmscout::RoutePosition target,
                               osmscout::RouteData& route)
 {
   QMutexLocker locker(&mutex);
@@ -799,15 +797,12 @@ bool DBThread::CalculateRoute(osmscout::Vehicle vehicle,
   }
 
   return router->CalculateRoute(routingProfile,
-                                startObject,
-                                startNodeIndex,
-                                targetObject,
-                                targetNodeIndex,
+                                start,
+                                target,
                                 route);
 }
 
-bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
-                                                    const osmscout::RoutingProfile& routingProfile,
+bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
                                                     const osmscout::RouteData& data,
                                                     osmscout::RouteDescription& description,
                                                     const std::string& start,
@@ -815,7 +810,7 @@ bool DBThread::TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
 {
   QMutexLocker locker(&mutex);
 
-  if (!AssureRouter(vehicle)) {
+  if (!AssureRouter(routingProfile.GetVehicle())) {
     return false;
   }
 
@@ -896,18 +891,16 @@ void DBThread::AddRoute(const osmscout::Way& way)
 
 bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
                                       const osmscout::RoutingProfile& routingProfile,
-                                      const osmscout::Vehicle& vehicle,
                                       double radius,
-                                      osmscout::ObjectFileRef& object,
-                                      size_t& nodeIndex)
+                                      osmscout::RoutePosition& position)
 {
   QMutexLocker locker(&mutex);
 
-  if (!AssureRouter(vehicle)) {
+  if (!AssureRouter(routingProfile.GetVehicle())) {
     return false;
   }
 
-  object.Invalidate();
+  position=osmscout::RoutePosition();
 
   if (refObject.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
@@ -919,10 +912,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
     return router->GetClosestRoutableNode(node->GetCoords(),
                                           routingProfile,
-                                          vehicle,
                                           radius,
-                                          object,
-                                          nodeIndex);
+                                          position);
   }
   else if (refObject.GetType()==osmscout::refArea) {
     osmscout::AreaRef area;
@@ -938,10 +929,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
     return router->GetClosestRoutableNode(center,
                                           routingProfile,
-                                          vehicle,
                                           radius,
-                                          object,
-                                          nodeIndex);
+                                          position);
   }
   else if (refObject.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
@@ -953,10 +942,8 @@ bool DBThread::GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
 
     return router->GetClosestRoutableNode(way->nodes[0].GetCoord(),
                                           routingProfile,
-                                          vehicle,
                                           radius,
-                                          object,
-                                          nodeIndex);
+                                          position);
   }
   else {
     return true;

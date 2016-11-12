@@ -52,6 +52,33 @@ namespace osmscout {
 
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
+  class OSMSCOUT_API RoutePosition
+  {
+  private:
+    ObjectFileRef object;
+    size_t        nodeIndex;
+
+  public:
+    RoutePosition();
+    RoutePosition(const ObjectFileRef& object,
+                  size_t nodeIndex);
+
+    inline bool IsValid() const
+    {
+      return object.Valid();
+    }
+
+    inline ObjectFileRef GetObjectFileRef() const
+    {
+      return object;
+    }
+
+    inline size_t GetNodeIndex() const
+    {
+      return nodeIndex;
+    }
+  };
+
   /**
    * \ingroup Routing
    * Database instance initialization parameter to influence the behavior of the database
@@ -299,8 +326,7 @@ namespace osmscout {
                                     RouteNodeRef& routeNode);
 
     bool GetStartNodes(const RoutingProfile& profile,
-                       const ObjectFileRef& object,
-                       size_t nodeIndex,
+                       const RoutePosition& position,
                        GeoCoord& targetCoord,
                        RouteNodeRef& forwardRouteNode,
                        RouteNodeRef& backwardRouteNode,
@@ -308,8 +334,7 @@ namespace osmscout {
                        RNodeRef& backwardRNode);
 
     bool GetTargetNodes(const RoutingProfile& profile,
-                        const ObjectFileRef& object,
-                        size_t nodeIndex,
+                        const RoutePosition& position,
                         GeoCoord& targetCoord,
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
@@ -319,10 +344,8 @@ namespace osmscout {
                                  std::list<VNode>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
                                   const std::list<VNode>& nodes,
-                                  const ObjectFileRef& startObject,
-                                  size_t startNodeIndex,
-                                  const ObjectFileRef& targetObject,
-                                  size_t targetNodeIndex,
+                                  const RoutePosition& start,
+                                  const RoutePosition& target,
                                   RouteData& route);
 
     bool ResolveRouteDataJunctions(RouteData& route);
@@ -348,14 +371,11 @@ namespace osmscout {
     TypeConfigRef GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        const ObjectFileRef& startObject,
-                        size_t startNodeIndex,
-                        const ObjectFileRef& targetObject,
-                        size_t targetNodeIndex,
+                        const RoutePosition& start,
+                        const RoutePosition& target,
                         RouteData& route);
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        Vehicle vehicle,
                         double radius,
                         std::vector<GeoCoord> via,
                         RouteData& route);
@@ -375,10 +395,8 @@ namespace osmscout {
 #endif
     bool GetClosestRoutableNode(const GeoCoord& coord,
                                 const RoutingProfile& profile,
-                                const Vehicle& vehicle,
                                 double radius,
-                                ObjectFileRef& object,
-                                size_t& nodeIndex) const;
+                                RoutePosition& position) const;
 
     void DumpStatistics();
   };

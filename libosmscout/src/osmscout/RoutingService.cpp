@@ -33,6 +33,20 @@
 
 namespace osmscout {
 
+  RoutePosition::RoutePosition()
+  : nodeIndex(0)
+  {
+    // no code
+  }
+
+  RoutePosition::RoutePosition(const ObjectFileRef& object,
+                               size_t nodeIndex)
+  : object(object),
+    nodeIndex(nodeIndex)
+  {
+    // no code
+  }
+
   RouterParameter::RouterParameter()
   : debugPerformance(false)
   {
@@ -421,10 +435,8 @@ namespace osmscout {
 
   bool RoutingService::ResolveRNodesToRouteData(const RoutingProfile& profile,
                                                 const std::list<VNode>& nodes,
-                                                const ObjectFileRef& startObject,
-                                                size_t startNodeIndex,
-                                                const ObjectFileRef& targetObject,
-                                                size_t targetNodeIndex,
+                                                const RoutePosition& start,
+                                                const RoutePosition& target,
                                                 RouteData& route)
   {
     AreaDataFileRef                             areaDataFile(database->GetAreaDataFile());
@@ -468,12 +480,12 @@ namespace osmscout {
 
     // Collect area/way file offset for the
     // target object (not traversed by above loop)
-    switch (targetObject.GetType()) {
+    switch (target.GetObjectFileRef().GetType()) {
     case refArea:
-      areaOffsets.insert(targetObject.GetFileOffset());
+      areaOffsets.insert(target.GetObjectFileRef().GetFileOffset());
       break;
     case refWay:
-      wayOffsets.insert(targetObject.GetFileOffset());
+      wayOffsets.insert(target.GetObjectFileRef().GetFileOffset());
       break;
     default:
       assert(false);
@@ -502,19 +514,19 @@ namespace osmscout {
       return false;
     }
 
-    assert(startObject.GetType()==refArea ||
-           startObject.GetType()==refWay);
+    assert(start.GetObjectFileRef().GetType()==refArea ||
+           start.GetObjectFileRef().GetType()==refWay);
 
-    if (startObject.GetType()==refArea) {
-      std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(startObject.GetFileOffset());
+    if (start.GetObjectFileRef().GetType()==refArea) {
+      std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(start.GetObjectFileRef().GetFileOffset());
 
       assert(entry!=areaMap.end());
 
       ids=&entry->second->rings.front().nodes;
       oneway=false;
     }
-    else if (startObject.GetType()==refWay) {
-      std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(startObject.GetFileOffset());
+    else if (start.GetObjectFileRef().GetType()==refWay) {
+      std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(start.GetObjectFileRef().GetFileOffset());
 
       assert(entry!=wayMap.end());
 
@@ -524,18 +536,18 @@ namespace osmscout {
 
     if (nodes.empty()) {
       // We assume that startNode and targetNode are on the same area/way (with no routing node in between)
-      assert(startObject==targetObject);
+      assert(start.GetObjectFileRef()==target.GetObjectFileRef());
 
       AddNodes(route,
-               (*ids)[startNodeIndex].GetId(),
-               startNodeIndex,
-               startObject,
+               (*ids)[start.GetNodeIndex()].GetId(),
+               start.GetNodeIndex(),
+               start.GetObjectFileRef(),
                ids->size(),
                oneway,
-               targetNodeIndex);
+               target.GetNodeIndex());
 
       route.AddEntry(0,
-                     targetNodeIndex,
+                     target.GetNodeIndex(),
                      ObjectFileRef(),
                      0);
       return true;
@@ -546,7 +558,7 @@ namespace osmscout {
     //
     // Add The path from the start node to the first routing node
     //
-    if ((*ids)[startNodeIndex].GetId()!=initialNode->GetId()) {
+    if ((*ids)[start.GetNodeIndex()].GetId()!=initialNode->GetId()) {
       size_t routeNodeIndex=0;
 
       while ((*ids)[routeNodeIndex].GetId()!=initialNode->GetId() &&
@@ -557,9 +569,9 @@ namespace osmscout {
 
       // Start node to initial route node
       AddNodes(route,
-               (*ids)[startNodeIndex].GetId(),
-               startNodeIndex,
-               startObject,
+               (*ids)[start.GetNodeIndex()].GetId(),
+               start.GetNodeIndex(),
+               start.GetObjectFileRef(),
                ids->size(),
                oneway,
                routeNodeIndex);
@@ -583,19 +595,19 @@ namespace osmscout {
       // target node itself
       //
       if (nn==nodes.end()) {
-        assert(targetObject.GetType()==refArea ||
-               targetObject.GetType()==refWay);
+        assert(target.GetObjectFileRef().GetType()==refArea ||
+               target.GetObjectFileRef().GetType()==refWay);
 
-        if (targetObject.GetType()==refArea) {
-          std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(targetObject.GetFileOffset());
+        if (target.GetObjectFileRef().GetType()==refArea) {
+          std::unordered_map<FileOffset,AreaRef>::const_iterator entry=areaMap.find(target.GetObjectFileRef().GetFileOffset());
 
           assert(entry!=areaMap.end());
 
           ids=&entry->second->rings.front().nodes;
           oneway=false;
         }
-        else if (targetObject.GetType()==refWay) {
-          std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(targetObject.GetFileOffset());
+        else if (target.GetObjectFileRef().GetType()==refWay) {
+          std::unordered_map<FileOffset,WayRef>::const_iterator entry=wayMap.find(target.GetObjectFileRef().GetFileOffset());
 
           assert(entry!=wayMap.end());
 
@@ -611,18 +623,18 @@ namespace osmscout {
         }
         assert(currentNodeIndex<ids->size());
 
-        if (currentNodeIndex!=targetNodeIndex) {
+        if (currentNodeIndex!=target.GetNodeIndex()) {
           AddNodes(route,
                    (*ids)[currentNodeIndex].GetId(),
                    currentNodeIndex,
-                   targetObject,
+                   target.GetObjectFileRef(),
                    ids->size(),
                    oneway,
-                   targetNodeIndex);
+                   target.GetNodeIndex());
         }
 
         route.AddEntry(0,
-                       targetNodeIndex,
+                       target.GetNodeIndex(),
                        ObjectFileRef(),
                        0);
 
@@ -742,8 +754,7 @@ namespace osmscout {
   }
 
   bool RoutingService::GetStartNodes(const RoutingProfile& profile,
-                                     const ObjectFileRef& object,
-                                     size_t nodeIndex,
+                                     const RoutePosition& position,
                                      GeoCoord& targetCoord,
                                      RouteNodeRef& forwardRouteNode,
                                      RouteNodeRef& backwardRouteNode,
@@ -758,7 +769,7 @@ namespace osmscout {
       return false;
     }
 
-    if (object.GetType()==refWay) {
+    if (position.GetObjectFileRef().GetType()==refWay) {
       WayRef        way;
       GeoCoord      startCoord;
       size_t        forwardNodePos;
@@ -766,36 +777,36 @@ namespace osmscout {
       size_t        backwardNodePos;
       FileOffset    backwardOffset;
 
-      if (!wayDataFile->GetByOffset(object.GetFileOffset(),
+      if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
                                     way)) {
         log.Error() << "Cannot get start way!";
         return false;
       }
 
-      if (nodeIndex>=way->nodes.size()) {
-        log.Error() << "Given start node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1;
+      if (position.GetNodeIndex()>=way->nodes.size()) {
+        log.Error() << "Given start node index " << position.GetNodeIndex() << " is not within valid range [0," << way->nodes.size()-1;
         return false;
       }
 
-      startCoord=way->nodes[nodeIndex].GetCoord();
+      startCoord=way->nodes[position.GetNodeIndex()].GetCoord();
 
       // Check, if the current node is already the route node
-      routeNodeDataFile.Get(way->GetId(nodeIndex),
+      routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
                             forwardRouteNode);
 
       if (forwardRouteNode) {
-        forwardNodePos=nodeIndex;
+        forwardNodePos=position.GetNodeIndex();
       }
       else {
         GetStartForwardRouteNode(profile,
                                  way,
-                                 nodeIndex,
+                                 position.GetNodeIndex(),
                                  forwardRouteNode,
                                  forwardNodePos);
 
         GetStartBackwardRouteNode(profile,
                                   way,
-                                  nodeIndex,
+                                  position.GetNodeIndex(),
                                   backwardRouteNode,
                                   backwardNodePos);
       }
@@ -816,7 +827,7 @@ namespace osmscout {
 
         RNodeRef node=std::make_shared<RNode>(forwardOffset,
                                               forwardRouteNode,
-                                              object);
+                                              position.GetObjectFileRef());
 
         node->currentCost=profile.GetCosts(*way,
                                            GetSphericalDistance(startCoord,
@@ -839,7 +850,7 @@ namespace osmscout {
 
         RNodeRef node=std::make_shared<RNode>(backwardOffset,
                                               backwardRouteNode,
-                                              object);
+                                              position.GetObjectFileRef());
 
         node->currentCost=profile.GetCosts(*way,
                                            GetSphericalDistance(startCoord,
@@ -855,14 +866,13 @@ namespace osmscout {
       return true;
     }
     else {
-      log.Error() << "Unsupported object type '" << object.GetTypeName() << "' for source!";
+      log.Error() << "Unsupported object type '" << position.GetObjectFileRef().GetTypeName() << "' for source!";
       return false;
     }
   }
 
   bool RoutingService::GetTargetNodes(const RoutingProfile& profile,
-                                      const ObjectFileRef& object,
-                                      size_t nodeIndex,
+                                      const RoutePosition& position,
                                       GeoCoord& targetCoord,
                                       RouteNodeRef& forwardNode,
                                       RouteNodeRef& backwardNode)
@@ -875,34 +885,34 @@ namespace osmscout {
       return false;
     }
 
-    if (object.GetType()==refWay) {
+    if (position.GetObjectFileRef().GetType()==refWay) {
       WayRef way;
 
-      if (!wayDataFile->GetByOffset(object.GetFileOffset(),
+      if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
                                     way)) {
         log.Error() << "Cannot get end way!";
         return false;
       }
 
-      if (nodeIndex>=way->nodes.size()) {
-        log.Error() << "Given target node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1;
+      if (position.GetNodeIndex()>=way->nodes.size()) {
+        log.Error() << "Given target node index " << position.GetNodeIndex() << " is not within valid range [0," << way->nodes.size()-1;
         return false;
       }
 
-      targetCoord=way->nodes[nodeIndex].GetCoord();
+      targetCoord=way->nodes[position.GetNodeIndex()].GetCoord();
 
       // Check, if the current node is already the route node
-      routeNodeDataFile.Get(way->GetId(nodeIndex),
+      routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
                             forwardNode);
 
       if (!forwardNode) {
         GetTargetForwardRouteNode(profile,
                                   way,
-                                  nodeIndex,
+                                  position.GetNodeIndex(),
                                   forwardNode);
         GetTargetBackwardRouteNode(profile,
                                    way,
-                                   nodeIndex,
+                                   position.GetNodeIndex(),
                                    backwardNode);
       }
 
@@ -933,7 +943,7 @@ namespace osmscout {
       return true;
     }
     else {
-      log.Error() << "Unsupported object type '" << object.GetTypeName() << "' for target!";
+      log.Error() << "Unsupported object type '" << position.GetObjectFileRef().GetTypeName() << "' for target!";
       return false;
     }
   }
@@ -950,7 +960,6 @@ namespace osmscout {
    */
 
   bool RoutingService::CalculateRoute(const RoutingProfile& profile,
-                                      Vehicle vehicle,
                                       double radius,
                                       std::vector<osmscout::GeoCoord> via,
                                       RouteData& route)
@@ -959,20 +968,17 @@ namespace osmscout {
       std::vector<osmscout::ObjectFileRef> objects;
 
       for (const auto& etap : via) {
-        size_t                  targetNodeIndex;
-        osmscout::ObjectFileRef targetObject;
+        RoutePosition           target;
 
         if (!GetClosestRoutableNode(etap,
                                     profile,
-                                    vehicle,
                                     radius,
-                                    targetObject,
-                                    targetNodeIndex)) {
+                                    target)) {
           return false;
         }
 
-        nodeIndexes.push_back(targetNodeIndex);
-        objects.push_back(targetObject);
+        nodeIndexes.push_back(target.GetNodeIndex());
+        objects.push_back(target.GetObjectFileRef());
       }
 
       for (int index=0; index<(int)nodeIndexes.size()-1; index++) {
@@ -983,10 +989,8 @@ namespace osmscout {
         RouteData               *routePart=new RouteData;
 
         if (!CalculateRoute(profile,
-                            fromObject,
-                            fromNodeIndex,
-                            toObject,
-                            toNodeIndex,
+                            RoutePosition(fromObject,fromNodeIndex),
+                            RoutePosition(toObject,toNodeIndex),
                             *routePart)) {
             return false;
         }
@@ -1028,10 +1032,8 @@ namespace osmscout {
    *    True, if the engine was able to find a route, else false
    */
   bool RoutingService::CalculateRoute(const RoutingProfile& profile,
-                                      const ObjectFileRef& startObject,
-                                      size_t startNodeIndex,
-                                      const ObjectFileRef& targetObject,
-                                      size_t targetNodeIndex,
+                                      const RoutePosition& start,
+                                      const RoutePosition& target,
                                       RouteData& route)
   {
     Vehicle                  vehicle=profile.GetVehicle();
@@ -1062,8 +1064,7 @@ namespace osmscout {
     closedSet.reserve(300000);
 
     if (!GetTargetNodes(profile,
-                        targetObject,
-                        targetNodeIndex,
+                        target,
                         targetCoord,
                         targetForwardRouteNode,
                         targetBackwardRouteNode)) {
@@ -1071,8 +1072,7 @@ namespace osmscout {
     }
 
     if (!GetStartNodes(profile,
-                       startObject,
-                       startNodeIndex,
+                       start,
                        targetCoord,
                        startForwardRouteNode,
                        startBackwardRouteNode,
@@ -1332,12 +1332,12 @@ namespace osmscout {
         std::cout << startForwardRouteNode->GetCoord().GetDisplayText();
       }
       std::cout << " ";
-      std::cout << startObject.GetTypeName() << " " << startObject.GetFileOffset();
+      std::cout << start.GetObjectFileRef().GetTypeName() << " " << start.GetObjectFileRef().GetFileOffset();
       std::cout << "[";
       if (startBackwardRouteNode) {
         std::cout << startBackwardRouteNode->GetId() << " >* ";
       }
-      std::cout << startNodeIndex;
+      std::cout << start.GetNodeIndex();
       if (startForwardRouteNode) {
         std::cout << " *> " << startForwardRouteNode->GetId();
       }
@@ -1351,12 +1351,12 @@ namespace osmscout {
         std::cout << targetForwardRouteNode->GetCoord().GetDisplayText();
       }
       std::cout << " ";
-      std::cout << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset();
+      std::cout << target.GetObjectFileRef().GetTypeName() <<  " " << target.GetObjectFileRef().GetFileOffset();
       std::cout << "[";
       if (targetForwardRouteNode) {
         std::cout << targetForwardRouteNode->GetId() << " >* ";
       }
-      std::cout << targetNodeIndex;
+      std::cout << target.GetNodeIndex();
       if (targetBackwardRouteNode) {
         std::cout << " *> " << targetBackwardRouteNode->GetId();
       }
@@ -1386,10 +1386,8 @@ namespace osmscout {
 
     if (!ResolveRNodesToRouteData(profile,
                                   nodes,
-                                  startObject,
-                                  startNodeIndex,
-                                  targetObject,
-                                  targetNodeIndex,
+                                  start,
+                                  target,
                                   route)) {
       //std::cerr << "Cannot convert routing result to route data" << std::endl;
       return false;
@@ -1631,19 +1629,16 @@ namespace osmscout {
    */
   bool RoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                               const RoutingProfile& profile,
-                                              const osmscout::Vehicle& vehicle,
                                               double radius,
-                                              osmscout::ObjectFileRef& object,
-                                              size_t& nodeIndex) const
+                                              RoutePosition& position) const
   {
-    object.Invalidate();
-    nodeIndex=std::numeric_limits<size_t>::max();
-
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
     AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
     AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
     WayDataFileRef   wayDataFile=database->GetWayDataFile();
+
+    position=RoutePosition();
 
     if (!typeConfig ||
         !areaAreaIndex ||
@@ -1662,7 +1657,7 @@ namespace osmscout {
 
     for (const auto& type : database->GetTypeConfig()->GetTypes()) {
       if (!type->GetIgnore() &&
-          type->CanRoute(vehicle)) {
+          type->CanRoute(profile.GetVehicle())) {
         if (type->CanBeWay()) {
           wayRoutableTypes.Set(type);
         }
@@ -1728,8 +1723,7 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
 
-          object=area->GetObjectFileRef();
-          nodeIndex=i;
+          position=RoutePosition(area->GetObjectFileRef(),i);
         }
       }
     }
@@ -1749,8 +1743,7 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
 
-          object=way->GetObjectFileRef();
-          nodeIndex=i;
+          position=RoutePosition(way->GetObjectFileRef(),i);
         }
       }
     }

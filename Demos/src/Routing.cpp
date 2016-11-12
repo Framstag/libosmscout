@@ -571,45 +571,37 @@ int main(int argc, char* argv[])
     break;
   }
 
-  osmscout::ObjectFileRef startObject;
-  size_t                  startNodeIndex;
+  osmscout::RoutePosition start;
 
   if (!router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
                                       routingProfile,
-                                      vehicle,
                                       1000,
-                                      startObject,
-                                      startNodeIndex)) {
+                                      start)) {
     std::cerr << "Error while searching for routing node near start location!" << std::endl;
     return 1;
   }
 
-  if (startObject.Invalid() || startObject.GetType()==osmscout::refNode) {
+  if (!start.IsValid() || start.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  osmscout::ObjectFileRef targetObject;
-  size_t                  targetNodeIndex;
+  osmscout::RoutePosition target;
 
   if (!router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
                                       routingProfile,
-                                      vehicle,
                                       1000,
-                                      targetObject,
-                                      targetNodeIndex)) {
+                                      target)) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
     return 1;
   }
 
-  if (targetObject.Invalid() || targetObject.GetType()==osmscout::refNode) {
+  if (!target.IsValid() || target.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 
   if (!router->CalculateRoute(routingProfile,
-                              startObject,
-                              startNodeIndex,
-                              targetObject,
-                              targetNodeIndex,
+                              start,
+                              target,
                               data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();

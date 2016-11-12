@@ -206,14 +206,11 @@ public:
 
   bool CalculateRoute(osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,
-                      const osmscout::ObjectFileRef& startObject,
-                      size_t startNodeIndex,
-                      const osmscout::ObjectFileRef targetObject,
-                      size_t targetNodeIndex,
+                      const osmscout::RoutePosition& start,
+                      const osmscout::RoutePosition target,
                       osmscout::RouteData& route);
 
-  bool TransformRouteDataToRouteDescription(osmscout::Vehicle vehicle,
-                                            const osmscout::RoutingProfile& routingProfile,
+  bool TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
                                             const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,
                                             const std::string& start,
@@ -224,10 +221,8 @@ public:
 
   bool GetClosestRoutableNode(const osmscout::ObjectFileRef& refObject,
                               const osmscout::RoutingProfile& routingProfile,
-                              const osmscout::Vehicle& vehicle,
                               double radius,
-                              osmscout::ObjectFileRef& object,
-                              size_t& nodeIndex);
+                              osmscout::RoutePosition& position);
 
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);
