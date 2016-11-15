@@ -360,8 +360,8 @@ namespace osmscout {
     double yMin=std::min(y1,y2);
     double yMax=std::max(y1,y2);
 
-    if (x2-x1<=areaMinDimension &&
-        y2-y1<=areaMinDimension) {
+    if (xMax-xMin<=areaMinDimension &&
+        yMax-yMin<=areaMinDimension) {
       return false;
     }
 

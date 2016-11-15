@@ -825,8 +825,8 @@ int main(int argc, char** argv)
   osmscout::GeoCoord center(50.107252570499767, 14.459053009732296);
   
   int problems = 0;
+  osmscout::MercatorProjection  projection;
   for (double angle=0; angle<2*M_PI; angle+= 2*M_PI/32.0){
-    osmscout::MercatorProjection  projection;
     projection.Set(center, angle, mag,
                    dpi, width, height
                    );
