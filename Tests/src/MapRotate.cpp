@@ -778,7 +778,7 @@ static const double ringCoords[] = {
 };
 
 class TestPainter : public osmscout::MapPainterNoOp{
-public: 
+public:
   TestPainter(const osmscout::StyleConfigRef& styleConfig);
   inline ~TestPainter(){};
   bool IsVisibleAreaPublic(const osmscout::Projection& projection,
@@ -786,10 +786,10 @@ public:
                            double pixelOffset) const;
 };
 
-TestPainter::TestPainter(const osmscout::StyleConfigRef& styleConfig): 
+TestPainter::TestPainter(const osmscout::StyleConfigRef& styleConfig):
   MapPainterNoOp(styleConfig)
 {
-  
+
 }
 
 bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
@@ -799,14 +799,14 @@ bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
   return IsVisibleArea(projection, nodes, pixelOffset);
 }
 
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   osmscout::TypeConfigRef typeConfig = std::make_shared<osmscout::TypeConfig>();
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  
+
   TestPainter painter(styleConfig);
   std::vector<osmscout::Point> ring;
- 
+
   for (int i=0;;i+=2){
     double lat = ringCoords[i];
     if (lat == 0.0)
@@ -814,16 +814,16 @@ int main(int argc, char** argv)
     double lon = ringCoords[i+1];
     ring.push_back(osmscout::Point(0, osmscout::GeoCoord(lat, lon)));
   }
-  
+
   osmscout::Magnification mag;
   mag.SetLevel(15);
-  
+
   double dpi = 132.78;
   size_t width = 1358;
   size_t height = 809;
-  
+
   osmscout::GeoCoord center(50.107252570499767, 14.459053009732296);
-  
+
   int problems = 0;
   osmscout::MercatorProjection  projection;
   for (double angle=0; angle<2*M_PI; angle+= 2*M_PI/32.0){
@@ -831,16 +831,16 @@ int main(int argc, char** argv)
                    dpi, width, height
                    );
     double angleDeg = (360*(angle/(2*M_PI)));
-    
+
     bool visible = painter.IsVisibleAreaPublic(projection, ring, 0.0);
     if (!visible){
       problems+=1;
       std::cerr << "angle " << angle << " (" << angleDeg << "°) => " << visible << std::endl;
     }else{
-      std::cout << "angle " << angle << " (" << angleDeg << "°) => " << visible << std::endl;      
+      std::cout << "angle " << angle << " (" << angleDeg << "°) => " << visible << std::endl;
     }
   }
-  
+
   return problems;
 }
 
