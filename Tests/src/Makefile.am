@@ -4,7 +4,8 @@ bin_PROGRAMS = CachePerformance \
                NumberSetPerformance \
                ReaderScannerPerformance \
                ThreadedDatabase \
-               WorkQueue
+               WorkQueue \
+	       MapRotate
 
 CachePerformance_SOURCES = CachePerformance.cpp
 CachePerformance_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
@@ -33,3 +34,7 @@ ThreadedDatabase_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
 WorkQueue_SOURCES = WorkQueue.cpp
 WorkQueue_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(LIBOSMSCOUTMAP_CFLAGS)
 WorkQueue_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
+
+MapRotate_SOURCES = MapRotate.cpp
+MapRotate_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(LIBOSMSCOUTMAP_CFLAGS)
+MapRotate_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
