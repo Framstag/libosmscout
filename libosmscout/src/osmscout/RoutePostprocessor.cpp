@@ -132,10 +132,8 @@ namespace osmscout {
 
         // There is no delta for the first route node
         if (prevObject.Valid()) {
-          double deltaDistance=GetEllipsoidalDistance(prevCoord.GetLon(),
-                                                      prevCoord.GetLat(),
-                                                      curCoord.GetLon(),
-                                                      curCoord.GetLat());
+          double deltaDistance=GetEllipsoidalDistance(prevCoord,
+                                                      curCoord);
 
           double deltaTime=0.0;
 

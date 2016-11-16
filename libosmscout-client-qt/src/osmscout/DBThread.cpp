@@ -668,12 +668,9 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
 }
 
 bool DBThread::CalculateRoute(const QString databasePath,
-                              osmscout::Vehicle vehicle,
                               const osmscout::RoutingProfile& routingProfile,
-                              const osmscout::ObjectFileRef& startObject,
-                              size_t startNodeIndex,
-                              const osmscout::ObjectFileRef targetObject,
-                              size_t targetNodeIndex,
+                              const osmscout::RoutePosition& start,
+                              const osmscout::RoutePosition target,
                               osmscout::RouteData& route)
 {
   QMutexLocker locker(&mutex);
@@ -689,20 +686,17 @@ bool DBThread::CalculateRoute(const QString databasePath,
     return false;
   }
 
-  if (!AssureRouter(vehicle)) {
+  if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
     return false;
   }
 
   return database->router->CalculateRoute(routingProfile,
-                                startObject,
-                                startNodeIndex,
-                                targetObject,
-                                targetNodeIndex,
-                                route);
+                                          start,
+                                          target,
+                                          route);
 }
 
 bool DBThread::TransformRouteDataToRouteDescription(const QString databasePath,
-                                                    osmscout::Vehicle vehicle,
                                                     const osmscout::RoutingProfile& routingProfile,
                                                     const osmscout::RouteData& data,
                                                     osmscout::RouteDescription& description,
@@ -722,7 +716,7 @@ bool DBThread::TransformRouteDataToRouteDescription(const QString databasePath,
     return false;
   }
 
-  if (!AssureRouter(vehicle)) {
+  if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
     return false;
   }
 
@@ -780,7 +774,7 @@ bool DBThread::TransformRouteDataToWay(const QString databasePath,
   }
 
 
-  if (!AssureRouter(vehicle)) {
+  if (!database->AssureRouter(vehicle, routerParameter)) {
     return false;
   }
 
@@ -797,18 +791,14 @@ void DBThread::AddRoute(const osmscout::Way& way)
   emit Redraw();
 }
 
-bool DBThread::GetClosestRoutableNode(const QString databasePath,
-                                      const osmscout::ObjectFileRef& refObject,
-                                      const osmscout::Vehicle& vehicle,
-                                      double radius,
-                                      osmscout::ObjectFileRef& object,
-                                      size_t& nodeIndex)
+osmscout::RoutePosition DBThread::GetClosestRoutableNode(const QString databasePath,
+                                                         const osmscout::ObjectFileRef& refObject,
+                                                         const osmscout::RoutingProfile& routingProfile,
+                                                         double radius)
 {
   QMutexLocker locker(&mutex);
-
-  if (!AssureRouter(vehicle)) {
-    return false;
-  }
+  osmscout::RoutePosition position;
+  
   DBInstanceRef database;
   for (auto &db:databases){
     if (db->path==databasePath){
@@ -817,60 +807,52 @@ bool DBThread::GetClosestRoutableNode(const QString databasePath,
     }
   }
   if (!database){
-    return false;
+    return position;
   }
 
-  object.Invalidate();
+  if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
+    return position;
+  }
 
   if (refObject.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
 
     if (!database->database->GetNodeByOffset(refObject.GetFileOffset(), node)) {
-      return false;
+      return position;
     }
 
-    return database->router->GetClosestRoutableNode(node->GetCoords().GetLat(),
-                                          node->GetCoords().GetLon(),
-                                          vehicle,
-                                          radius,
-                                          object,
-                                          nodeIndex);
+    return database->router->GetClosestRoutableNode(node->GetCoords(),
+                                                    routingProfile,
+                                                    radius);
   }
   else if (refObject.GetType()==osmscout::refArea) {
     osmscout::AreaRef area;
 
     if (!database->database->GetAreaByOffset(refObject.GetFileOffset(), area)) {
-      return false;
+      return position;
     }
 
     osmscout::GeoCoord center;
 
     area->GetCenter(center);
 
-    return database->router->GetClosestRoutableNode(center.GetLat(),
-                                          center.GetLon(),
-                                          vehicle,
-                                          radius,
-                                          object,
-                                          nodeIndex);
+    return database->router->GetClosestRoutableNode(center,
+                                                    routingProfile,
+                                                    radius);
   }
   else if (refObject.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
 
     if (!database->database->GetWayByOffset(refObject.GetFileOffset(), way)) {
-      return false;
+      return position;
     }
 
-    return database->router->GetClosestRoutableNode(way->nodes[0].GetLat(),
-                                          way->nodes[0].GetLon(),
-                                          vehicle,
-                                          radius,
-                                          object,
-                                          nodeIndex);
+    return database->router->GetClosestRoutableNode(way->nodes[0].GetCoord(),
+                                                    routingProfile,
+                                                    radius);
   }
-  else {
-    return true;
-  }
+
+  return position;
 }
 
 QStringList DBThread::BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,

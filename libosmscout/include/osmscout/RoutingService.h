@@ -54,6 +54,38 @@ namespace osmscout {
 
   /**
    * \ingroup Routing
+   *
+   * Start or end position of a rout calculation
+   */
+  class OSMSCOUT_API RoutePosition
+  {
+  private:
+    ObjectFileRef object;
+    size_t        nodeIndex;
+
+  public:
+    RoutePosition();
+    RoutePosition(const ObjectFileRef& object,
+                  size_t nodeIndex);
+
+    inline bool IsValid() const
+    {
+      return object.Valid();
+    }
+
+    inline ObjectFileRef GetObjectFileRef() const
+    {
+      return object;
+    }
+
+    inline size_t GetNodeIndex() const
+    {
+      return nodeIndex;
+    }
+  };
+
+  /**
+   * \ingroup Routing
    * Database instance initialization parameter to influence the behavior of the database
    * instance.
    *
@@ -299,20 +331,17 @@ namespace osmscout {
                                     RouteNodeRef& routeNode);
 
     bool GetStartNodes(const RoutingProfile& profile,
-                       const ObjectFileRef& object,
-                       size_t nodeIndex,
-                       double& targetLon,
-                       double& targetLat,
+                       const RoutePosition& position,
+                       GeoCoord& startCoord,
+                       GeoCoord& targetCoord,
                        RouteNodeRef& forwardRouteNode,
                        RouteNodeRef& backwardRouteNode,
                        RNodeRef& forwardRNode,
                        RNodeRef& backwardRNode);
 
     bool GetTargetNodes(const RoutingProfile& profile,
-                        const ObjectFileRef& object,
-                        size_t nodeIndex,
-                        double& targetLon,
-                        double& targetLat,
+                        const RoutePosition& position,
+                        GeoCoord& targetCoord,
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
 
@@ -321,10 +350,8 @@ namespace osmscout {
                                  std::list<VNode>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
                                   const std::list<VNode>& nodes,
-                                  const ObjectFileRef& startObject,
-                                  size_t startNodeIndex,
-                                  const ObjectFileRef& targetObject,
-                                  size_t targetNodeIndex,
+                                  const RoutePosition& start,
+                                  const RoutePosition& target,
                                   RouteData& route);
 
     bool ResolveRouteDataJunctions(RouteData& route);
@@ -350,14 +377,11 @@ namespace osmscout {
     TypeConfigRef GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        const ObjectFileRef& startObject,
-                        size_t startNodeIndex,
-                        const ObjectFileRef& targetObject,
-                        size_t targetNodeIndex,
+                        const RoutePosition& start,
+                        const RoutePosition& target,
                         RouteData& route);
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        Vehicle vehicle,
                         double radius,
                         std::vector<GeoCoord> via,
                         RouteData& route);
@@ -371,16 +395,9 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
-#ifdef SWIG
-    %apply ObjectFileRef& OUTPUT {ObjectFileRef& object};
-    %apply long& OUTPUT {size_t& nodeIndex};
-#endif
-    bool GetClosestRoutableNode(double lat,
-                                double lon,
-                                const Vehicle& vehicle,
-                                double radius,
-                                ObjectFileRef& object,
-                                size_t& nodeIndex) const;
+    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
+                                         const RoutingProfile& profile,
+                                         double radius) const;
 
     void DumpStatistics();
   };

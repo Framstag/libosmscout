@@ -386,7 +386,7 @@ namespace osmscout {
 
       wayData.nodes.reserve(inputWay.refs_size());
 
-      unsigned long ref=0;
+      OSMId ref=0;
       for (int r=0; r<inputWay.refs_size(); r++) {
         ref+=inputWay.refs(r);
 

@@ -298,32 +298,27 @@ public:
                          const RenderMapRequest& request) = 0;
   
   bool CalculateRoute(const QString databasePath,
-                      osmscout::Vehicle vehicle,
                       const osmscout::RoutingProfile& routingProfile,
-                      const osmscout::ObjectFileRef& startObject,
-                      size_t startNodeIndex,
-                      const osmscout::ObjectFileRef targetObject,
-                      size_t targetNodeIndex,
+                      const osmscout::RoutePosition& start,
+                      const osmscout::RoutePosition target,
                       osmscout::RouteData& route);
 
   bool TransformRouteDataToRouteDescription(const QString databasePath,
-                                            osmscout::Vehicle vehicle,
                                             const osmscout::RoutingProfile& routingProfile,
                                             const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,
                                             const std::string& start,
                                             const std::string& target);
+
   bool TransformRouteDataToWay(const QString databasePath,
                                osmscout::Vehicle vehicle,
                                const osmscout::RouteData& data,
                                osmscout::Way& way);
 
-  bool GetClosestRoutableNode(const QString databasePath,
-                              const osmscout::ObjectFileRef& refObject,
-                              const osmscout::Vehicle& vehicle,
-                              double radius,
-                              osmscout::ObjectFileRef& object,
-                              size_t& nodeIndex);
+  osmscout::RoutePosition GetClosestRoutableNode(const QString databasePath,
+                                                 const osmscout::ObjectFileRef& refObject,
+                                                 const osmscout::RoutingProfile& routingProfile,
+                                                 double radius);
 
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);

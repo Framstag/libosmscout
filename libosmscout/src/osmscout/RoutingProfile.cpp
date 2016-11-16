@@ -38,6 +38,7 @@ namespace osmscout {
      maxSpeedReader(*typeConfig),
      vehicle(vehicleCar),
      vehicleRouteNodeBit(RouteNode::usableByCar),
+     costLimitFactor(5.0),
      minSpeed(0),
      maxSpeed(0),
      vehicleMaxSpeed(std::numeric_limits<double>::max())
@@ -65,6 +66,29 @@ namespace osmscout {
   void AbstractRoutingProfile::SetVehicleMaxSpeed(double maxSpeed)
   {
     vehicleMaxSpeed=maxSpeed;
+  }
+
+  /**
+   * The router tries to minimize the actual costs of the route. There is a lower limit
+   * defined by GetCosts(double distance). Applying the given factor to the minimal cost
+   * results in a upper limit for the costs.
+   *
+   * Increasing the factor results in the router trying harder to find a route by looking for
+   * bigger and even bigger detours, decreasing the factor result in the router either finding a rather direct
+   * route or none. Setting the factor below 1.0 should result in the router not finding any route at all.
+   *
+   * If there is a router the current router will find it and the router will look for the optimal route first.
+   * So, if there is a route the limit could be set to std::limits<double>::max(). If there is no route though
+   * the limit will stop the router to search for all possible detours, walking the whole graph in the end.
+   *
+   * Since this might take for ever the limit should be reasonable high. The current default value is 5.0.
+   *
+   * @param costLimitFactor
+   *    The new limit
+   */
+  void AbstractRoutingProfile::SetCostLimitFactor(double costLimitFactor)
+  {
+    this->costLimitFactor=costLimitFactor;
   }
 
   void AbstractRoutingProfile::ParametrizeForFoot(const TypeConfig& typeConfig,

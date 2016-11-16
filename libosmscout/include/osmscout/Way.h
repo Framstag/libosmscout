@@ -58,6 +58,11 @@ namespace osmscout {
       return fileOffset;
     }
 
+    inline ObjectFileRef GetObjectFileRef() const
+    {
+      return ObjectFileRef(fileOffset,refWay);
+    }
+
     inline TypeInfoRef GetType() const
     {
       return featureValueBuffer.GetType();
