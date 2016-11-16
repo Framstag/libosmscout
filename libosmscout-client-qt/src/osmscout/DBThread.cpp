@@ -294,7 +294,7 @@ void DBThread::ToggleDaylight()
 
 void DBThread::ReloadStyle(const QString &suffix)
 {
-  qDebug() << "Reloading style...";
+  qDebug() << "Reloading style" << stylesheetFilename << suffix << "...";
   LoadStyle(stylesheetFilename, stylesheetFlags,suffix);
   qDebug() << "Reloading style done.";
 }

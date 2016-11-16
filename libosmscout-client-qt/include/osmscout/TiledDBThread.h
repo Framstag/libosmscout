@@ -55,6 +55,8 @@ public slots:
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
   void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);  
 
+  void onStylesheetFilenameChanged();
+  
   void onlineTileProviderChanged();
   void onlineTilesEnabledChanged(bool);
   

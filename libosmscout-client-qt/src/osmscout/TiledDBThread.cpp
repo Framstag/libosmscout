@@ -61,6 +61,8 @@ TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
   connect(Settings::GetInstance(), SIGNAL(RenderSeaChanged(bool)), 
           this, SLOT(onRenderSeaChanged(bool)));  
 
+  connect(this, SIGNAL(stylesheetFilenameChanged()),
+          this, SLOT(onStylesheetFilenameChanged()));
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
@@ -691,6 +693,15 @@ void TiledDBThread::tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t 
     }
 }
 
+void TiledDBThread::onStylesheetFilenameChanged(){
+  // invalidate tile cache and emit Redraw
+  {
+      QMutexLocker locker(&tileCacheMutex);
+      offlineTileCache.invalidate();
+      offlineTileCache.clearPendingRequests();
+  }
+  emit Redraw();
+}
 
 void TiledDBThread::onMapDPIChange(double dpi)
 {
