@@ -376,7 +376,7 @@ void PlaneDBThread::DrawMap()
       }
       searchParameter.SetUseMultithreading(true);
       searchParameter.SetUseLowZoomOptimization(true);
-      // REMOVE
+      // FIXME: REMOVE
       db->mapService->LoadMissingTileData(searchParameter,*db->styleConfig,tiles); 
 
       db->mapService->ConvertTilesToMapData(tiles,data);
