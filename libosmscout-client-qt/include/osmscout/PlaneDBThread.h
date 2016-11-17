@@ -59,7 +59,10 @@ public slots:
   
 private:
   osmscout::MercatorProjection  projection;
-   
+
+  mutable QMutex                lastRequestMutex;
+  RenderMapRequest              lastRequest;
+
   QTime                         lastRendering;
   QTimer                        pendingRenderingTimer;
 

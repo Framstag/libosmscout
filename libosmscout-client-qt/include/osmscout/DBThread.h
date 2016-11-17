@@ -54,6 +54,15 @@ struct RenderMapRequest
 
 Q_DECLARE_METATYPE(RenderMapRequest)
 
+inline bool operator!=(const RenderMapRequest &r1, const RenderMapRequest &r2)
+{
+    return r1.coord!=r2.coord ||
+      r1.angle!=r2.angle ||
+      r1.magnification!=r2.magnification ||
+      r1.width!=r2.width ||
+      r1.height!=r2.height;
+}
+
 struct DatabaseLoadedResponse
 {
     osmscout::GeoBox boundingBox;
@@ -176,7 +185,7 @@ signals:
   void styleErrorsChanged();
   
   void searchResult(const QString searchPattern, const QList<LocationEntry>);
-  
+
   void searchFinished(const QString searchPattern, bool error);
 
 public slots:
@@ -276,7 +285,9 @@ protected:
                         osmscout::GeoBox& bbox);
   
   bool InitializeDatabases(osmscout::GeoBox& boundingBox);
-  
+
+  void CancelCurrentDataLoading();
+
 public:
   bool isInitialized(); 
   
@@ -286,8 +297,6 @@ public:
   
   double GetPhysicalDpi() const;
   
-  void CancelCurrentDataLoading();
-
   /**
    * Render map defined by request to painter 
    * @param painter

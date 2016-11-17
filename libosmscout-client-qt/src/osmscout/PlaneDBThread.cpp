@@ -65,7 +65,8 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
           this,SLOT(DrawMap()));
 
   connect(this,SIGNAL(TileStatusChanged(const osmscout::TileRef&)),
-          this,SLOT(HandleTileStatusChanged(const osmscout::TileRef&)));
+          this,SLOT(HandleTileStatusChanged(const osmscout::TileRef&)),
+          Qt::QueuedConnection);
 
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
@@ -109,7 +110,7 @@ void PlaneDBThread::Initialize()
 bool PlaneDBThread::RenderMap(QPainter& painter,
                               const RenderMapRequest& request)
 {
-  qDebug() << "RenderMap()";
+  //qDebug() << "RenderMap()";
 
   QMutexLocker locker(&finishedMutex);
 
@@ -133,6 +134,10 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
 
     // Since we assume that this is just a temporary problem, or we just were not instructed to render
     // a map yet, we trigger rendering an image...
+    {
+      QMutexLocker reqLocker(&lastRequestMutex);
+      lastRequest=request;
+    }
     emit TriggerMapRenderingSignal(request);
     return false;
   }
@@ -153,8 +158,8 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
                  finishedImage->width(),
                  finishedImage->height());
   
-  osmscout::GeoBox boundingBox;
-  finalImgProjection.GetDimensions(boundingBox);
+  osmscout::GeoBox finalImgBoundingBox;
+  finalImgProjection.GetDimensions(finalImgBoundingBox);
 
     
   double x1;
@@ -162,8 +167,8 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   double x2;
   double y2;
 
-  finalImgProjection.GeoToPixel(boundingBox.GetMaxCoord(),x2,y1); // max coord => right top
-  finalImgProjection.GeoToPixel(boundingBox.GetMinCoord(),x1,y2); // min coord => left bottom
+  requestProjection.GeoToPixel(finalImgBoundingBox.GetMaxCoord(),x2,y1); // max coord => right top
+  requestProjection.GeoToPixel(finalImgBoundingBox.GetMinCoord(),x1,y2); // min coord => left bottom
 
   if (x1>0 || y1>0 || x2<request.width || y2<request.height) {
     painter.fillRect(0,
@@ -177,7 +182,7 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   }
 
   // TODO: handle angle
-  qDebug() << "Draw final image to canvas:" << QRectF(x1,y1,x2-x1,y2-y1);
+  //qDebug() << "Draw final image to canvas:" << QRectF(x1,y1,x2-x1,y2-y1);
   painter.drawImage(QRectF(x1,y1,x2-x1,y2-y1),*finishedImage);
 
   bool needsNoRepaint=finishedImage->width()==(int) request.width &&
@@ -187,6 +192,10 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
                       finishedMagnification==request.magnification;
 
   if (!needsNoRepaint){
+    {
+      QMutexLocker reqLocker(&lastRequestMutex);
+      lastRequest=request;
+    }
     emit TriggerMapRenderingSignal(request);
   }
   
@@ -195,10 +204,17 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
 
 void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 {
-  qDebug() << "TriggerMapRendering()";
-  CancelCurrentDataLoading();
+  {
+    QMutexLocker reqLocker(&lastRequestMutex);
+    if (request!=lastRequest){
+      return;
+    }
+  }
+
+  qDebug() << "Start data loading...";
   {
     QMutexLocker locker(&mutex);
+    // CancelCurrentDataLoading();
 
     currentWidth=request.width;
     currentHeight=request.height;
@@ -211,6 +227,7 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
           db->styleConfig) {
         osmscout::AreaSearchParameter searchParameter;
 
+        db->dataLoadingBreaker->Reset();
         searchParameter.SetBreaker(db->dataLoadingBreaker);
 
         if (currentMagnification.GetLevel()>=15) {
@@ -250,14 +267,17 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 
 void PlaneDBThread::HandleInitialRenderingRequest()
 {
-  //std::cout << "Triggering initial data rendering timer..." << std::endl;
+  if (pendingRenderingTimer.isActive())
+    return; // avoid repeated draw postpone (data loading may be called very fast)
+
+  qDebug() << "Start rendering timer:" << INITIAL_DATA_RENDERING_TIMEOUT << "ms";
   pendingRenderingTimer.stop();
   pendingRenderingTimer.start(INITIAL_DATA_RENDERING_TIMEOUT);
 }
 
 void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile)
 {
-  return; // FIXME: remove this return, make loading asynchronous
+  //return; // FIXME: remove this return, make loading asynchronous
   QMutexLocker locker(&mutex);
   
   bool relevant=false;
@@ -280,23 +300,27 @@ void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile
 
   int elapsedTime=lastRendering.elapsed();
 
-  //std::cout << "Relevant tile changed " << elapsedTime << std::endl;
+  //qDebug() << "Relevant tile changed, elapsed:" << elapsedTime;
 
   if (pendingRenderingTimer.isActive()) {
-    qDebug() << "Waiting for timer in " << pendingRenderingTimer.remainingTime() ;
+    //qDebug() << "Waiting for timer in" << pendingRenderingTimer.remainingTime() ;
   }
   else if (elapsedTime>UPDATED_DATA_RENDERING_TIMEOUT) {
+    qDebug() << "TriggerDrawMap, last redring" << elapsedTime << "ms before";
     emit TriggerDrawMap();
   }
   else {
-    //std::cout << "Triggering updated data rendering timer..." << std::endl;
+    qDebug() << "Start rendering timer:" << UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime << "ms";
     pendingRenderingTimer.start(UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime);
   }
 }
 
 void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
 {
+  // parent
   DBThread::TileStateCallback(changedTile);
+  
+  //printTileInfo(changedTile);
 
   // We are in the context of one of the libosmscout worker threads
   emit TileStatusChanged(changedTile);
@@ -364,21 +388,6 @@ void PlaneDBThread::DrawMap()
       osmscout::MapData data; // TODO: make sence cache these data?
 
       db->mapService->LookupTiles(renderProjection,tiles);
-
-      // load tiles synchronous
-
-      osmscout::AreaSearchParameter searchParameter;
-      if (projection.GetMagnification().GetLevel() >= 15) {
-        searchParameter.SetMaximumAreaLevel(6);
-      }
-      else {
-        searchParameter.SetMaximumAreaLevel(4);
-      }
-      searchParameter.SetUseMultithreading(true);
-      searchParameter.SetUseLowZoomOptimization(true);
-      // FIXME: REMOVE
-      db->mapService->LoadMissingTileData(searchParameter,*db->styleConfig,tiles); 
-
       db->mapService->ConvertTilesToMapData(tiles,data);
 
       if (drawParameter.GetRenderSeaLand()) {
