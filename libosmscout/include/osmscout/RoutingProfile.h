@@ -47,7 +47,7 @@ namespace osmscout {
     virtual ~RoutingProfile();
 
     virtual Vehicle GetVehicle() const = 0;
-    virtual double GetCostLimitOffset() const = 0;
+    virtual double GetCostLimitDistance() const = 0;
     virtual double GetCostLimitFactor() const = 0;
 
     virtual bool CanUse(const RouteNode& currentNode,
@@ -116,7 +116,7 @@ namespace osmscout {
 
     void SetCostLimitDistance(double costLimitDistance);
 
-    inline double GetCostLimitOffset() const
+    inline double GetCostLimitDistance() const
     {
       return costLimitDistance;
     }
