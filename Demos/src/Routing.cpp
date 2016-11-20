@@ -591,8 +591,9 @@ int main(int argc, char* argv[])
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
-  osmscout::BreakerRef                breaker;
-  osmscout::RoutingProgressRef        progress=std::make_shared<ConsoleRoutingProgress>();
+  osmscout::RoutingParameter          parameter;
+
+  parameter.SetProgress(std::make_shared<ConsoleRoutingProgress>());
 
   switch (vehicle) {
   case osmscout::vehicleFoot:
@@ -637,23 +638,15 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 
-  if (!router->CalculateRoute(routingProfile,
-                              start,
-                              target,
-                              breaker,
-                              progress,
-                              data)) {
+  osmscout::RoutingResult result=router->CalculateRoute(routingProfile,
+                                                        start,
+                                                        target,
+                                                        parameter);
+
+  if (!result.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();
     return 1;
-  }
-
-  if (data.IsEmpty()) {
-    std::cout << "No Route found!" << std::endl;
-
-    router->Close();
-
-    return 0;
   }
 
 #ifdef DATA_DEBUG
@@ -662,7 +655,7 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  router->TransformRouteDataToRouteDescription(data,
+  router->TransformRouteDataToRouteDescription(result.GetRoute(),
                                                description);
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;

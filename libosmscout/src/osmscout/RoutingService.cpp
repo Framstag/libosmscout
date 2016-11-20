@@ -70,6 +70,23 @@ namespace osmscout {
     // no code
   }
 
+  void RoutingParameter::SetBreaker(const BreakerRef& breaker)
+  {
+    this->breaker=breaker;
+  }
+
+  void RoutingParameter::SetProgress(const RoutingProgressRef& progress)
+  {
+    this->progress=progress;
+  }
+
+  RoutingResult::RoutingResult()
+  : overallDistance(0.0),
+    currentMaxDistance(0.0)
+  {
+    // no code
+  }
+
   const char* const RoutingService::FILENAME_INTERSECTIONS_DAT   = "intersections.dat";
   const char* const RoutingService::FILENAME_INTERSECTIONS_IDX   = "intersections.idx";
 
@@ -966,59 +983,55 @@ namespace osmscout {
    *    True, if the engine was able to find a route, else false
    */
 
-  bool RoutingService::CalculateRoute(const RoutingProfile& profile,
-                                      std::vector<osmscout::GeoCoord> via,
-                                      double radius,
-                                      BreakerRef& breaker,
-                                      RoutingProgressRef& progress,
-                                      RouteData& route)
+  RoutingResult RoutingService::CalculateRoute(const RoutingProfile& profile,
+                                               std::vector<osmscout::GeoCoord> via,
+                                               double radius,
+                                               const RoutingParameter& parameter)
   {
-      std::vector<size_t>                  nodeIndexes;
-      std::vector<osmscout::ObjectFileRef> objects;
+    RoutingResult                        result;
+    std::vector<size_t>                  nodeIndexes;
+    std::vector<osmscout::ObjectFileRef> objects;
 
-      for (const auto& etap : via) {
-        RoutePosition target=GetClosestRoutableNode(etap,
-                                                    profile,
-                                                    radius);
+    for (const auto& etap : via) {
+      RoutePosition target=GetClosestRoutableNode(etap,
+                                                  profile,
+                                                  radius);
 
-        if (!target.IsValid()) {
-          return false;
-        }
-
-        nodeIndexes.push_back(target.GetNodeIndex());
-        objects.push_back(target.GetObjectFileRef());
+      if (!target.IsValid()) {
+        return result;
       }
 
-      for (int index=0; index<(int)nodeIndexes.size()-1; index++) {
-        size_t                     fromNodeIndex=nodeIndexes.at(index);
-        osmscout::ObjectFileRef    fromObject=objects.at(index);
-        size_t                     toNodeIndex=nodeIndexes.at(index+1);
-        osmscout::ObjectFileRef    toObject=objects.at(index+1);
-        std::shared_ptr<RouteData> routePart=std::make_shared<RouteData>();
+      nodeIndexes.push_back(target.GetNodeIndex());
+      objects.push_back(target.GetObjectFileRef());
+    }
 
-        if (!CalculateRoute(profile,
-                            RoutePosition(fromObject,fromNodeIndex),
-                            RoutePosition(toObject,toNodeIndex),
-                            breaker,
-                            progress,
-                            *routePart)) {
-            return false;
-        }
+    for (int index=0; index<(int)nodeIndexes.size()-1; index++) {
+      size_t                     fromNodeIndex=nodeIndexes.at(index);
+      osmscout::ObjectFileRef    fromObject=objects.at(index);
+      size_t                     toNodeIndex=nodeIndexes.at(index+1);
+      osmscout::ObjectFileRef    toObject=objects.at(index+1);
+      RoutingResult              partialResult;
 
-        if (routePart->IsEmpty()) {
-          return false;
-        }
+      partialResult=CalculateRoute(profile,
+                                   RoutePosition(fromObject,fromNodeIndex),
+                                   RoutePosition(toObject,toNodeIndex),
+                                   parameter);
+      if (!partialResult.Success()) {
+        result.GetRoute().Clear();
 
-        /* In intermediary via points the end of the previous part is the start of the */
-        /* next part, we need to remove the duplicate point in the calculated route */
-        if (index<(int)nodeIndexes.size()-2) {
-          routePart->PopEntry();
-        }
-
-        route.Append(*routePart);
+        return result;
       }
 
-      return true;
+      /* In intermediary via points the end of the previous part is the start of the */
+      /* next part, we need to remove the duplicate point in the calculated route */
+      if (index<(int)nodeIndexes.size()-2) {
+        result.GetRoute().PopEntry();
+      }
+
+      result.GetRoute().Append(partialResult.GetRoute());
+    }
+
+    return result;
   }
 
   /**
@@ -1037,13 +1050,12 @@ namespace osmscout {
    * @return
    *    True, if the engine was able to find a route, else false
    */
-  bool RoutingService::CalculateRoute(const RoutingProfile& profile,
-                                      const RoutePosition& start,
-                                      const RoutePosition& target,
-                                      BreakerRef& breaker,
-                                      RoutingProgressRef& progress,
-                                      RouteData& route)
+  RoutingResult RoutingService::CalculateRoute(const RoutingProfile& profile,
+                                               const RoutePosition& start,
+                                               const RoutePosition& target,
+                                               const RoutingParameter& parameter)
   {
+    RoutingResult            result;
     Vehicle                  vehicle=profile.GetVehicle();
     RouteNodeRef             startForwardRouteNode;
     RouteNodeRef             startBackwardRouteNode;
@@ -1067,8 +1079,6 @@ namespace osmscout {
     size_t                   maxOpenList=0;
     size_t                   maxClosedSet=0;
 
-    route.Clear();
-
     openMap.reserve(10000);
     closedSet.reserve(300000);
 
@@ -1077,7 +1087,7 @@ namespace osmscout {
                         targetCoord,
                         targetForwardRouteNode,
                         targetBackwardRouteNode)) {
-      return false;
+      return result;
     }
 
     if (!GetStartNodes(profile,
@@ -1088,7 +1098,12 @@ namespace osmscout {
                        startBackwardRouteNode,
                        startForwardNode,
                        startBackwardNode)) {
-      return false;
+      return result;
+    }
+
+    if (parameter.GetBreaker() &&
+        parameter.GetBreaker()->IsAborted()) {
+      return result;
     }
 
     if (startForwardNode) {
@@ -1110,6 +1125,9 @@ namespace osmscout {
     double overallCost=profile.GetCosts(overallDistance);
     double costLimit=profile.GetCosts(profile.GetCostLimitDistance())+overallCost*profile.GetCostLimitFactor();
 
+    result.SetOverallDistance(overallDistance);
+    result.SetCurrentMaxDistance(currentMaxDistance);
+
     StopClock    clock;
     RNodeRef     current;
     RouteNodeRef currentRouteNode;
@@ -1119,9 +1137,9 @@ namespace osmscout {
       // Take entry from open list with lowest cost
       //
 
-      if (breaker &&
-          breaker->IsAborted()) {
-        return false;
+      if (parameter.GetBreaker() &&
+          parameter.GetBreaker()->IsAborted()) {
+        return result;
       }
 
       current=*openList.begin();
@@ -1251,13 +1269,14 @@ namespace osmscout {
         else if (!routeNodeDataFile.GetByOffset(path.offset,
                                                 nextNode)) {
           log.Error() << "Cannot load route node with id " << path.offset;
-          return false;
+          return result;
         }
 
         double distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
                                                      targetCoord);
 
         currentMaxDistance=std::max(currentMaxDistance,overallDistance-distanceToTarget);
+        result.SetCurrentMaxDistance(currentMaxDistance);
 
         // Estimate costs for the rest of the distance to the target
         double estimateCost=profile.GetCosts(distanceToTarget);
@@ -1277,8 +1296,8 @@ namespace osmscout {
           continue;
         }
 
-        if (progress) {
-          progress->Progress(currentMaxDistance,overallDistance);
+        if (parameter.GetProgress()) {
+          parameter.GetProgress()->Progress(currentMaxDistance,overallDistance);
         }
 
         // If we already have the node in the open list, but the new path is cheaper,
@@ -1423,39 +1442,38 @@ namespace osmscout {
     if (!((targetForwardRouteNode && currentRouteNode->GetId()==targetForwardRouteNode->GetId()) ||
           (targetBackwardRouteNode && currentRouteNode->GetId()==targetBackwardRouteNode->GetId()))) {
       std::cout << "No route found!" << std::endl;
-      route.Clear();
 
-      return true;
+      return result;
     }
 
     std::list<VNode> nodes;
 
-    if (breaker &&
-        breaker->IsAborted()) {
-      return false;
+    if (parameter.GetBreaker() &&
+      parameter.GetBreaker()->IsAborted()) {
+      return result;
     }
 
     ResolveRNodeChainToList(current->nodeOffset,
                             closedSet,
                             nodes);
 
-    if (breaker &&
-        breaker->IsAborted()) {
-      return false;
+    if (parameter.GetBreaker() &&
+      parameter.GetBreaker()->IsAborted()) {
+      return result;
     }
 
     if (!ResolveRNodesToRouteData(profile,
                                   nodes,
                                   start,
                                   target,
-                                  route)) {
+                                  result.GetRoute())) {
       //std::cerr << "Cannot convert routing result to route data" << std::endl;
-      return false;
+      return result;
     }
 
-    ResolveRouteDataJunctions(route);
+    ResolveRouteDataJunctions(result.GetRoute());
 
-    return true;
+    return result;
   }
 
   /**

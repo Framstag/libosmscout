@@ -794,15 +794,19 @@ bool DBThread::CalculateRoute(const osmscout::RoutingProfile& routingProfile,
     return false;
   }
 
-  osmscout::BreakerRef         breaker;
-  osmscout::RoutingProgressRef progress;
+  osmscout::RoutingResult    result;
+  osmscout::RoutingParameter parameter;
 
-  return router->CalculateRoute(routingProfile,
+  result=router->CalculateRoute(routingProfile,
                                 start,
                                 target,
-                                breaker,
-                                progress,
-                                route);
+                                parameter);
+
+  bool success=result.Success();
+
+  route=std::move(result.GetRoute());
+
+  return success;
 }
 
 bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RoutingProfile& routingProfile,
