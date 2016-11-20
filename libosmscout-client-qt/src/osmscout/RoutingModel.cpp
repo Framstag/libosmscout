@@ -17,13 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/RoutingModel.h>
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 
 #include <osmscout/system/Math.h>
+#include <osmscout/RoutingModel.h>
 
 static QString DistanceToString(double distance)
 {

@@ -29,8 +29,8 @@
 #include <QImage>
 #include <QNetworkDiskCache>
 
-#include "TileCache.h"
-#include "OnlineTileProvider.h"
+#include <osmscout/TileCache.h>
+#include <osmscout/OnlineTileProvider.h>
 
 // these variables should be defined by build system
 #ifndef OSMSCOUT_VERSION_STRING

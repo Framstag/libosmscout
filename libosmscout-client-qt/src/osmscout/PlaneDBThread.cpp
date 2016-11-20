@@ -18,9 +18,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/DBThread.h>
-#include <osmscout/PlaneDBThread.h>
-
 #include <iostream>
 
 #include <QMutexLocker>
@@ -30,8 +27,10 @@
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
-
 #include <osmscout/system/Math.h>
+
+#include <osmscout/DBThread.h>
+#include <osmscout/PlaneDBThread.h>
 
 // Timeout for the first rendering after rerendering was triggered (render what ever data is available)
 static int INITIAL_DATA_RENDERING_TIMEOUT = 10;

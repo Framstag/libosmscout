@@ -17,8 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include "osmscout/OnlineTileProvider.h"
-
+#include <osmscout/OnlineTileProvider.h>
 
 OnlineTileProvider OnlineTileProvider::fromJson(QJsonValue val)
 {

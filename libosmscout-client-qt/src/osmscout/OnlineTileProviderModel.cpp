@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include "osmscout/OnlineTileProviderModel.h"
+#include <osmscout/OnlineTileProviderModel.h>
 
 QVariant OnlineTileProviderModel::data(const QModelIndex &index, int role) const
 {

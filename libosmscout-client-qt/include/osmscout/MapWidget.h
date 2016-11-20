@@ -28,9 +28,9 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
-#include "DBThread.h"
-#include "SearchLocationModel.h"
-#include "InputHandler.h"
+#include <osmscout/DBThread.h>
+#include <osmscout/SearchLocationModel.h>
+#include <osmscout/InputHandler.h>
 
 class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
 {

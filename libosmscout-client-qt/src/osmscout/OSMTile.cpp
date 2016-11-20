@@ -20,8 +20,8 @@
 #include <QString>
 #include <QDebug>
 
-#include "osmscout/OSMTile.h"
-#include "osmscout/util/GeoBox.h"
+#include <osmscout/OSMTile.h>
+#include <osmscout/util/GeoBox.h>
 
 osmscout::GeoBox OSMTile::tileBoundingBox(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
 {

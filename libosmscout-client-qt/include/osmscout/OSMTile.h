@@ -22,7 +22,7 @@
 
 #include <cmath>
 
-#include "osmscout/util/GeoBox.h"
+#include <osmscout/util/GeoBox.h>
 
 /**
  * Util class with function useful for work with OSM tiles (mercator projection)

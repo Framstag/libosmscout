@@ -22,8 +22,8 @@
 
 #include <QAbstractListModel>
 
-#include "OnlineTileProvider.h"
-#include "Settings.h"
+#include <osmscout/OnlineTileProvider.h>
+#include <osmscout/Settings.h>
 
 
 class OnlineTileProviderModel : public QAbstractListModel {

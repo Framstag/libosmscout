@@ -18,12 +18,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include "osmscout/MapWidget.h"
-#include "osmscout/InputHandler.h"
-
 #include <cmath>
 #include <iostream>
 #include <sys/socket.h>
+
+#include <osmscout/MapWidget.h>
+#include <osmscout/InputHandler.h>
 
 #define TMP_SUFFIX ".tmp"
 

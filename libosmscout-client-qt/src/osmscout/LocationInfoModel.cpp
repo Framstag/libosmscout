@@ -18,9 +18,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <qt5/QtCore/qabstractitemmodel.h>
+#include <QtCore/qabstractitemmodel.h>
 
-#include "osmscout/LocationInfoModel.h"
+#include <osmscout/LocationInfoModel.h>
 
 LocationInfoModel::LocationInfoModel(): 
 ready(false), setup(false)

@@ -20,9 +20,9 @@
 #include <QDebug>
 #include <QThread>
 
-#include "osmscout/OsmTileDownloader.h"
-#include "osmscout/OnlineTileProvider.h"
-#include "osmscout/Settings.h"
+#include <osmscout/OsmTileDownloader.h>
+#include <osmscout/OnlineTileProvider.h>
+#include <osmscout/Settings.h>
 
 OsmTileDownloader::OsmTileDownloader(QString diskCacheDir):
   serverNumber(qrand())

@@ -27,7 +27,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
 
-#include "DBThread.h"
+#include <osmscout/DBThread.h>
 
 struct ObjectKey{
  QString                  database;

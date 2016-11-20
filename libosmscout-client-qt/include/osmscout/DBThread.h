@@ -39,9 +39,9 @@
 
 #include <osmscout/util/Breaker.h>
 
-#include "Settings.h"
-#include "TileCache.h"
-#include "OsmTileDownloader.h"
+#include <osmscout/Settings.h>
+#include <osmscout/TileCache.h>
+#include <osmscout/OsmTileDownloader.h>
 
 struct RenderMapRequest
 {

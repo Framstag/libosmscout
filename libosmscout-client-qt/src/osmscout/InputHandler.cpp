@@ -23,9 +23,9 @@
 #include <QPoint>
 #include <QVector>
 
-#include "osmscout/InputHandler.h"
-#include "osmscout/OSMTile.h"
-#include "osmscout/util/Projection.h"
+#include <osmscout/InputHandler.h>
+#include <osmscout/OSMTile.h>
+#include <osmscout/util/Projection.h>
 
 void TapRecognizer::onTimeout()
 {
