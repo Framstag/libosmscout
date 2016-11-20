@@ -83,7 +83,7 @@ namespace osmscout {
   public:
     void Clear();
 
-    inline bool IsEmpty()
+    inline bool IsEmpty() const
     {
       return entries.empty();
     }
