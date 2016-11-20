@@ -20,7 +20,6 @@
 
 #include <cmath>
 #include <iostream>
-#include <sys/socket.h>
 
 #include <osmscout/MapWidget.h>
 #include <osmscout/InputHandler.h>
