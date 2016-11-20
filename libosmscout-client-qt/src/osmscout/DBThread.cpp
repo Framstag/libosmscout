@@ -23,7 +23,10 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/TiledDBThread.h>
 #include <osmscout/PlaneDBThread.h>
+#include <osmscout/private/Config.h>
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/TextSearchIndex.h>
+#endif
 
 QBreaker::QBreaker()
   : osmscout::Breaker(),
@@ -620,6 +623,7 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
     
     emit searchResult(searchPattern, locations);
     
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
     // Search by free text
     locations.clear();
     QList<osmscout::ObjectFileRef> objectSet;
@@ -661,6 +665,7 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
       // TODO: merge locations with same label database type
       // bus stations can have more points for example...
       emit searchResult(searchPattern, locations);
+#endif
   }
 
   qDebug() << "Retrieve result tooks" << timer.elapsed() << "ms";
