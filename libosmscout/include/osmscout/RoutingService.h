@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <atomic>
 #include <functional>
 #include <list>
 #include <memory>
@@ -46,10 +47,14 @@
 #include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
 
+#include <osmscout/util/Breaker.h>
 #include <osmscout/util/Cache.h>
 
 namespace osmscout {
 
+  /**
+   * \ingroup Routing
+   */
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
@@ -86,6 +91,7 @@ namespace osmscout {
 
   /**
    * \ingroup Routing
+   *
    * Database instance initialization parameter to influence the behavior of the database
    * instance.
    *
@@ -106,6 +112,117 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Routing
+   *
+   * Optional callback object for monitoring routing progress
+   */
+  class OSMSCOUT_API RoutingProgress
+  {
+  public:
+    virtual ~RoutingProgress();
+
+    /**
+     * Call, if you want to reset the progress
+     */
+    virtual void Reset() = 0;
+
+    /**
+     * Repeately called by the router while visiting routing nodes
+     * @param currentMaxDistance
+     *    current maximum distance from start
+     * @param overallDistance
+     *    distance between start and target
+     */
+    virtual void Progress(double currentMaxDistance,
+                          double overallDistance) = 0;
+  };
+
+  /**
+   * \ingroup Routing
+   */
+  typedef std::shared_ptr<RoutingProgress> RoutingProgressRef;
+
+  /**
+   * \ingroup Routing
+   *
+   * Parameter object for routing calculations. Holds all optional
+   * flags and callback objects that can be passed to the router
+   */
+  class OSMSCOUT_API RoutingParameter final
+  {
+  private:
+    BreakerRef         breaker;
+    RoutingProgressRef progress;
+
+  public:
+    void SetBreaker(const BreakerRef& breaker);
+    void SetProgress(const RoutingProgressRef& progress);
+
+    inline BreakerRef GetBreaker() const
+    {
+      return breaker;
+    }
+
+    inline RoutingProgressRef GetProgress() const
+    {
+      return progress;
+    }
+  };
+
+  /**
+   * Result of a routing calculation. This object is always returned.
+   * In case of an routing error it however may not contain a valid route
+   * (route is empty).
+   *
+   * @TODO: Make setter private and class friend to the RoutingService
+   */
+  class OSMSCOUT_API RoutingResult final
+  {
+  private:
+    RouteData route;
+    double    currentMaxDistance;
+    double    overallDistance;
+
+  public:
+    RoutingResult();
+
+    inline void SetOverallDistance(double overallDistance)
+    {
+      this->overallDistance=overallDistance;
+    }
+
+    inline void SetCurrentMaxDistance(double currentMaxDistance)
+    {
+      this->currentMaxDistance=currentMaxDistance;
+    }
+
+    inline double GetOverallDistance() const
+    {
+      return overallDistance;
+    }
+
+    inline double GetCurrentMaxDistance() const
+    {
+      return currentMaxDistance;
+    }
+
+    inline RouteData& GetRoute()
+    {
+      return route;
+    }
+
+    inline const RouteData& GetRoute() const
+    {
+      return route;
+    }
+
+    inline bool Success() const
+    {
+      return !route.IsEmpty();
+    }
+  };
+
+  /**
    * \ingroup Service
    * \ingroup Routing
    * The RoutingService implements functionality in the context of routing.
@@ -121,6 +238,8 @@ namespace osmscout {
   {
   private:
     /**
+     * \ingroup Routing
+     *
      * A path in the routing graph from one node to the next (expressed via the target object)
      * with additional information as required by the A* algorithm.
      */
@@ -202,6 +321,8 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
+     *
      * Minimum required data for a node in the ClosedSet.
      *
      * The ClosedSet is the set of routing nodes that have been
@@ -376,15 +497,15 @@ namespace osmscout {
 
     TypeConfigRef GetTypeConfig() const;
 
-    bool CalculateRoute(const RoutingProfile& profile,
-                        const RoutePosition& start,
-                        const RoutePosition& target,
-                        RouteData& route);
+    RoutingResult CalculateRoute(const RoutingProfile& profile,
+                                 const RoutePosition& start,
+                                 const RoutePosition& target,
+                                 const RoutingParameter& parameter);
 
-    bool CalculateRoute(const RoutingProfile& profile,
-                        double radius,
-                        std::vector<GeoCoord> via,
-                        RouteData& route);
+    RoutingResult CalculateRoute(const RoutingProfile& profile,
+                                 std::vector<GeoCoord> via,
+                                 double radius,
+                                 const RoutingParameter& parameter);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);

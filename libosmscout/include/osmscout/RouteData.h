@@ -81,11 +81,9 @@ namespace osmscout {
     std::list<RouteEntry> entries;
 
   public:
-    RouteData();
-
     void Clear();
 
-    inline bool IsEmpty()
+    inline bool IsEmpty() const
     {
       return entries.empty();
     }
@@ -107,10 +105,11 @@ namespace osmscout {
 
     inline void Append(RouteData routePart)
     {
-      entries.splice(entries.end() , routePart.Entries());
+      entries.splice(entries.end(),routePart.Entries());
     }
 
-    inline void PopEntry(){
+    inline void PopEntry()
+    {
       entries.pop_back();
     }
   };
