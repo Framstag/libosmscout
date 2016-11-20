@@ -65,6 +65,11 @@ namespace osmscout {
     return debugPerformance;
   }
 
+  RoutingProgress::~RoutingProgress()
+  {
+    // no code
+  }
+
   const char* const RoutingService::FILENAME_INTERSECTIONS_DAT   = "intersections.dat";
   const char* const RoutingService::FILENAME_INTERSECTIONS_IDX   = "intersections.idx";
 
@@ -962,8 +967,10 @@ namespace osmscout {
    */
 
   bool RoutingService::CalculateRoute(const RoutingProfile& profile,
-                                      double radius,
                                       std::vector<osmscout::GeoCoord> via,
+                                      double radius,
+                                      BreakerRef& breaker,
+                                      RoutingProgressRef& progress,
                                       RouteData& route)
   {
       std::vector<size_t>                  nodeIndexes;
@@ -983,15 +990,17 @@ namespace osmscout {
       }
 
       for (int index=0; index<(int)nodeIndexes.size()-1; index++) {
-        size_t                  fromNodeIndex=nodeIndexes.at(index);
-        osmscout::ObjectFileRef fromObject=objects.at(index);
-        size_t                  toNodeIndex=nodeIndexes.at(index+1);
-        osmscout::ObjectFileRef toObject=objects.at(index+1);
-        RouteData               *routePart=new RouteData;
+        size_t                     fromNodeIndex=nodeIndexes.at(index);
+        osmscout::ObjectFileRef    fromObject=objects.at(index);
+        size_t                     toNodeIndex=nodeIndexes.at(index+1);
+        osmscout::ObjectFileRef    toObject=objects.at(index+1);
+        std::shared_ptr<RouteData> routePart=std::make_shared<RouteData>();
 
         if (!CalculateRoute(profile,
                             RoutePosition(fromObject,fromNodeIndex),
                             RoutePosition(toObject,toNodeIndex),
+                            breaker,
+                            progress,
                             *routePart)) {
             return false;
         }
@@ -1007,8 +1016,6 @@ namespace osmscout {
         }
 
         route.Append(*routePart);
-
-        delete routePart;
       }
 
       return true;
@@ -1019,14 +1026,12 @@ namespace osmscout {
    *
    * @param profile
    *    Profile to use
-   * @param startObject
-   *    Start object
-   * @param startNodeIndex
-   *    Index of the node within the start object used as starting point
-   * @param targetObject
-   *    Target object
-   * @param targetNodeIndex
-   *    Index of the node within the target object used as target point
+   * @param start
+   *    Start of the route
+   * @param target
+   *    Target of teh route
+   * @param progress
+   *    Optional callback for handling routing progress
    * @param route
    *    The route object holding the resulting route on success
    * @return
@@ -1035,6 +1040,8 @@ namespace osmscout {
   bool RoutingService::CalculateRoute(const RoutingProfile& profile,
                                       const RoutePosition& start,
                                       const RoutePosition& target,
+                                      BreakerRef& breaker,
+                                      RoutingProgressRef& progress,
                                       RouteData& route)
   {
     Vehicle                  vehicle=profile.GetVehicle();
@@ -1097,6 +1104,7 @@ namespace osmscout {
     }
 
 
+    double currentMaxDistance=0.0;
     double overallDistance=GetSphericalDistance(startCoord,
                                                 targetCoord);
     double overallCost=profile.GetCosts(overallDistance);
@@ -1110,6 +1118,11 @@ namespace osmscout {
       //
       // Take entry from open list with lowest cost
       //
+
+      if (breaker &&
+          breaker->IsAborted()) {
+        return false;
+      }
 
       current=*openList.begin();
 
@@ -1244,6 +1257,8 @@ namespace osmscout {
         double distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
                                                      targetCoord);
 
+        currentMaxDistance=std::max(currentMaxDistance,overallDistance-distanceToTarget);
+
         // Estimate costs for the rest of the distance to the target
         double estimateCost=profile.GetCosts(distanceToTarget);
         double overallCost=currentCost+estimateCost;
@@ -1260,6 +1275,10 @@ namespace osmscout {
           i++;
 
           continue;
+        }
+
+        if (progress) {
+          progress->Progress(currentMaxDistance,overallDistance);
         }
 
         // If we already have the node in the open list, but the new path is cheaper,
@@ -1411,9 +1430,19 @@ namespace osmscout {
 
     std::list<VNode> nodes;
 
+    if (breaker &&
+        breaker->IsAborted()) {
+      return false;
+    }
+
     ResolveRNodeChainToList(current->nodeOffset,
                             closedSet,
                             nodes);
+
+    if (breaker &&
+        breaker->IsAborted()) {
+      return false;
+    }
 
     if (!ResolveRNodesToRouteData(profile,
                                   nodes,

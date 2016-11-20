@@ -44,12 +44,11 @@ QBreaker::QBreaker()
 {
 }
 
-bool QBreaker::Break()
+void QBreaker::Break()
 {
   QMutexLocker locker(&mutex);
-  aborted=true;
 
-  return true;
+  aborted=true;
 }
 
 bool QBreaker::IsAborted() const
@@ -795,9 +794,14 @@ bool DBThread::CalculateRoute(const osmscout::RoutingProfile& routingProfile,
     return false;
   }
 
+  osmscout::BreakerRef         breaker;
+  osmscout::RoutingProgressRef progress;
+
   return router->CalculateRoute(routingProfile,
                                 start,
                                 target,
+                                breaker,
+                                progress,
                                 route);
 }
 

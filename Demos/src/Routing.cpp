@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -55,6 +56,43 @@
   Very short: "In den Hüchten" Dortmund => "Kaiserstrasse" Dortmund
      51.5717798 7.4587852  51.5143553 7.4932118
 */
+
+class ConsoleRoutingProgress : public osmscout::RoutingProgress
+{
+private:
+  std::chrono::system_clock::time_point lastDump;
+  double                                maxPercent;
+
+public:
+  ConsoleRoutingProgress()
+  : lastDump(std::chrono::system_clock::now()),
+    maxPercent(0.0)
+  {
+    // no code
+  }
+
+  void Reset()
+  {
+    lastDump=std::chrono::system_clock::now();
+    maxPercent=0.0;
+  }
+
+  void Progress(double currentMaxDistance,
+                double overallDistance)
+  {
+    double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+
+    std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
+
+    maxPercent=std::max(maxPercent,currentPercent);
+
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now-lastDump).count()>500) {
+      std::cout << (size_t)maxPercent << "%" << std::endl;
+
+      lastDump=now;
+    }
+  }
+};
 
 static std::string TimeToString(double time)
 {
@@ -553,6 +591,8 @@ int main(int argc, char* argv[])
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
+  osmscout::BreakerRef                breaker;
+  osmscout::RoutingProgressRef        progress=std::make_shared<ConsoleRoutingProgress>();
 
   switch (vehicle) {
   case osmscout::vehicleFoot:
@@ -600,6 +640,8 @@ int main(int argc, char* argv[])
   if (!router->CalculateRoute(routingProfile,
                               start,
                               target,
+                              breaker,
+                              progress,
                               data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();

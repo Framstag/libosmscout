@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <atomic>
 #include <functional>
 #include <list>
 #include <memory>
@@ -46,10 +47,14 @@
 #include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
 
+#include <osmscout/util/Breaker.h>
 #include <osmscout/util/Cache.h>
 
 namespace osmscout {
 
+  /**
+   * \ingroup Routing
+   */
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
@@ -86,6 +91,7 @@ namespace osmscout {
 
   /**
    * \ingroup Routing
+   *
    * Database instance initialization parameter to influence the behavior of the database
    * instance.
    *
@@ -106,6 +112,38 @@ namespace osmscout {
   };
 
   /**
+   * \ingroup Routing
+   *
+   * Optional callback object for monitoring routing progress
+   */
+  class OSMSCOUT_API RoutingProgress
+  {
+  public:
+    virtual ~RoutingProgress();
+
+    /**
+     * Call, if you want to reset the progress
+     */
+    virtual void Reset() = 0;
+
+    /**
+     * Repeately called by the router while visiting routing nodes
+     * @param currentMaxDistance
+     *    current maximum distance from start
+     * @param overallDistance
+     *    distance between start and target
+     */
+    virtual void Progress(double currentMaxDistance,
+                          double overallDistance) = 0;
+  };
+
+  /**
+   * \ingroup Routing
+   */
+  typedef std::shared_ptr<RoutingProgress> RoutingProgressRef;
+
+
+  /**
    * \ingroup Service
    * \ingroup Routing
    * The RoutingService implements functionality in the context of routing.
@@ -121,6 +159,8 @@ namespace osmscout {
   {
   private:
     /**
+     * \ingroup Routing
+     *
      * A path in the routing graph from one node to the next (expressed via the target object)
      * with additional information as required by the A* algorithm.
      */
@@ -202,6 +242,8 @@ namespace osmscout {
     };
 
     /**
+     * \ingroup Routing
+     *
      * Minimum required data for a node in the ClosedSet.
      *
      * The ClosedSet is the set of routing nodes that have been
@@ -379,11 +421,15 @@ namespace osmscout {
     bool CalculateRoute(const RoutingProfile& profile,
                         const RoutePosition& start,
                         const RoutePosition& target,
+                        BreakerRef& breaker,
+                        RoutingProgressRef& progress,
                         RouteData& route);
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        double radius,
                         std::vector<GeoCoord> via,
+                        double radius,
+                        BreakerRef& breaker,
+                        RoutingProgressRef& progress,
                         RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,

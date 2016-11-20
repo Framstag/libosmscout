@@ -68,7 +68,7 @@ private:
 public:
   QBreaker();
 
-  bool Break();
+  void Break();
   bool IsAborted() const;
   void Reset();
 };

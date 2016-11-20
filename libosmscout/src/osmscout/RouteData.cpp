@@ -38,11 +38,6 @@ namespace osmscout {
     this->objects=objects;
   }
 
-  RouteData::RouteData()
-  {
-    // no code
-  }
-
   void RouteData::Clear()
   {
     entries.clear();
