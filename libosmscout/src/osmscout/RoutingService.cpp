@@ -1100,7 +1100,7 @@ namespace osmscout {
     double overallDistance=GetSphericalDistance(startCoord,
                                                 targetCoord);
     double overallCost=profile.GetCosts(overallDistance);
-    double costLimit=overallCost*profile.GetCostLimitFactor();
+    double costLimit=profile.GetCosts(profile.GetCostLimitDistance())+overallCost*profile.GetCostLimitFactor();
 
     StopClock    clock;
     RNodeRef     current;
