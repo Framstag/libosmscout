@@ -68,6 +68,7 @@ namespace osmscout {
   {
   private:
     std::atomic<bool> aborted;
+
   public:
     ThreadedBreaker();
 
