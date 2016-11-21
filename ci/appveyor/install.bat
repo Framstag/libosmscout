@@ -20,7 +20,8 @@ IF %COMPILER%==msys2 (
   echo "Updating dependencies...
   bash -lc "pacman -S --needed --noconfirm pacman-mirrors"
   bash -lc "pacman -S --needed --noconfirm git"
-  
+  bash -lc "pacman -Syyu --noconfirm"
+
   IF %BUILDTOOL%==autoconf (
   echo Installing autoconf tools...
   bash -lc "pacman -S --needed --noconfirm git autoconf automake make"
