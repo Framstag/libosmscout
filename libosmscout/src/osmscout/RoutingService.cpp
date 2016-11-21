@@ -81,8 +81,8 @@ namespace osmscout {
   }
 
   RoutingResult::RoutingResult()
-  : overallDistance(0.0),
-    currentMaxDistance(0.0)
+  : currentMaxDistance(0.0),
+    overallDistance(0.0)
   {
     // no code
   }
