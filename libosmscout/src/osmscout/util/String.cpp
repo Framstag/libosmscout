@@ -426,6 +426,9 @@ namespace osmscout {
 
 #elif SIZEOF_WCHAR_T==2
 
+    static const int halfShift=10; /* used for shifting by 10 bits */
+    static const unsigned long halfBase=0x0010000UL;
+
     const wchar_t* source=text.c_str();
 
     while (source!=text.c_str()+text.length()) {
