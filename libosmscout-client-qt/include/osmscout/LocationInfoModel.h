@@ -73,7 +73,7 @@ public:
     LocationInfoModel();
     virtual inline ~LocationInfoModel(){};
 
-    int inline rowCount(const QModelIndex &parent = QModelIndex()) const
+    int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
     {
         return model.size();
     };

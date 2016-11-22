@@ -71,7 +71,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   qDebug() << "added " << foundLocations.size() << ", model size" << locations.size();
 }
 
-void LocationListModel::onSearchFinished(const QString searchPattern, bool error)
+void LocationListModel::onSearchFinished(const QString searchPattern, bool /*error*/)
 {
   if (this->lastRequestPattern!=searchPattern){
     return; // result is not for us

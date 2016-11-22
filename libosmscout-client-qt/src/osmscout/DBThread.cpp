@@ -181,7 +181,7 @@ const DatabaseLoadedResponse DBThread::loadedResponse() const {
   return response;
 }
 
-void DBThread::TileStateCallback(const osmscout::TileRef& changedTile)
+void DBThread::TileStateCallback(const osmscout::TileRef& /*changedTile*/)
 {
   
 }
@@ -440,7 +440,7 @@ bool DBThread::GetObjectDetails(DBInstanceRef db,
 bool DBThread::BuildLocationEntry(const osmscout::ObjectFileRef& object,
                                   const QString title,
                                   DBInstanceRef db,
-                                  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                                  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/,
                                   QList<LocationEntry> &locations
                                   )
 {
@@ -799,7 +799,7 @@ void DBThread::ClearRoute()
   emit Redraw();
 }
 
-void DBThread::AddRoute(const osmscout::Way& way)
+void DBThread::AddRoute(const osmscout::Way& /*way*/)
 {
   emit Redraw();
 }

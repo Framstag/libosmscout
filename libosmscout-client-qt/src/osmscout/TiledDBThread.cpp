@@ -660,7 +660,7 @@ void TiledDBThread::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint3
     }
 }
 
-void TiledDBThread::tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData)
+void TiledDBThread::tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray /*downloadedData*/)
 {
     //QMutexLocker locker(&mutex);
   

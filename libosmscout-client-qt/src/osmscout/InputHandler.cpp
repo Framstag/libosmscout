@@ -182,28 +182,28 @@ bool InputHandler::animationInProgress()
 {
     return false;
 }
-bool InputHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
+bool InputHandler::showCoordinates(osmscout::GeoCoord /*coord*/, osmscout::Magnification /*magnification*/)
 {
     return false;
 }
-bool InputHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension)
+bool InputHandler::zoom(double /*zoomFactor*/, const QPoint /*widgetPosition*/, const QRect /*widgetDimension*/)
 {
     return false;    
 }
 
-bool InputHandler::move(QVector2D move)
+bool InputHandler::move(QVector2D /*move*/)
 {
     return false;
 }
-bool InputHandler::rotateBy(double angleStep, double angleChange)
+bool InputHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
 {
     return false;
 }
-bool InputHandler::touch(QTouchEvent *event)
+bool InputHandler::touch(QTouchEvent */*event*/)
 {
     return false;
 }
-bool InputHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition)
+bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/)
 {
     return false;
 }
@@ -211,7 +211,7 @@ bool InputHandler::isLockedToPosition()
 {
     return false;
 }
-bool InputHandler::focusOutEvent(QFocusEvent *event)
+bool InputHandler::focusOutEvent(QFocusEvent */*event*/)
 {
     return false;
 }
@@ -373,7 +373,7 @@ bool MoveHandler::moveNow(QVector2D move)
     emit viewChanged(view);
     return true;
 }
-bool MoveHandler::rotateBy(double angleStep, double angleChange)
+bool MoveHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
 {
     return false; // FIXME: rotation is broken in current version. discard rotation for now
     /*
@@ -492,18 +492,18 @@ bool DragHandler::touch(QTouchEvent *event)
     return true;
 }
 
-bool DragHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension)
+bool DragHandler::zoom(double /*zoomFactor*/, const QPoint /*widgetPosition*/, const QRect /*widgetDimension*/)
 {
     return false; 
         // TODO: finger on screen and zoom 
         // => compute geo point under finger, change magnification and then update startView
 }
 
-bool DragHandler::move(QVector2D move)
+bool DragHandler::move(QVector2D /*move*/)
 {
     return false; // finger on screen discard move
 }
-bool DragHandler::rotateBy(double angleStep, double angleChange)
+bool DragHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
 {
     return false; // finger on screen discard rotation ... TODO like zoom
 }
@@ -526,15 +526,15 @@ bool MultitouchHandler::animationInProgress()
 {
     return moving || MoveHandler::animationInProgress();
 }
-bool MultitouchHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension)
+bool MultitouchHandler::zoom(double /*zoomFactor*/, const QPoint /*widgetPosition*/, const QRect /*widgetDimension*/)
 {
     return false;
 }
-bool MultitouchHandler::move(QVector2D vector)
+bool MultitouchHandler::move(QVector2D /*vector*/)
 {
     return false;
 }
-bool MultitouchHandler::rotateBy(double angleStep, double angleChange)
+bool MultitouchHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
 {
     return false;
 }    
@@ -656,7 +656,7 @@ bool LockHandler::isLockedToPosition()
 {
     return true;
 }
-bool LockHandler::focusOutEvent(QFocusEvent *event)
+bool LockHandler::focusOutEvent(QFocusEvent */*event*/)
 {
     return true;
 }

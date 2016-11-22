@@ -42,7 +42,7 @@ public:
     IdRole = Qt::UserRole+1,
   };
 
-  int inline rowCount(const QModelIndex &parent = QModelIndex()) const
+  int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
   {
     return onlineProviders.size();
   };
