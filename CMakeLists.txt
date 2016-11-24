@@ -10,6 +10,7 @@ endif()
 
 option(BUILD_SHARED_LIBS "Shared libraries " ON)  # SHARED lib default
 option(BUILD_WITH_OPENMP "Check for OpenMP support " ON)
+option(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution " OFF)
 
 # compiler configurations
 if(WIN32)
@@ -98,6 +99,10 @@ if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_G
   endif()
 endif()
 
+# prefer static libraries if making import tool
+if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+endif()
 
 # postfix for debug builds
 if(NOT APPLE)

@@ -14,6 +14,11 @@ target_include_directories(Import PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include)
 target_link_libraries(Import osmscout osmscout_import)
+
+if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
+  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")  
+endif()
+
 install(TARGETS Import
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
