@@ -34,7 +34,7 @@ if [ "$TARGET" = "build" ]; then
     brew update
 
     if [ "$BUILDTOOL" = "cmake" ]; then
-      brew install cmake
+      brew install cmake || true
     fi
 
     brew install protobuf qt5
