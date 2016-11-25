@@ -9,6 +9,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 option(BUILD_SHARED_LIBS "Shared libraries " ON)  # SHARED lib default
+option(BUILD_WITH_OPENMP "Check for OpenMP support " ON)
 
 # compiler configurations
 if(WIN32)
