@@ -111,9 +111,11 @@ Window {
 
             onTap: {
                 console.log("tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
+                map.focus=true;
             }
             onLongTap: {
                 console.log("long tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon);
+                map.focus=true;
             }
             onViewChanged: {
                 //console.log("map center "+ map.view.lat + " " + map.view.lon + "");

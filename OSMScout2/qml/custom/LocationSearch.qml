@@ -72,12 +72,13 @@ LineEdit {
     }
 
     function handleFocusGained() {
-        //updatePopup()
+        console.log("Gain focus, update popup");
+        updatePopup()
     }
 
     function handleFocusLost() {
+        console.log("Lost focus, hide popup");
         suggestionTimer.stop()
-
         hidePopup()
     }
 
@@ -219,7 +220,9 @@ LineEdit {
     LocationListModel {
         id: suggestionModel
         onCountChanged:{
-            updatePopup();
+            if (focus){
+              updatePopup();
+            }
         }
     }
 
