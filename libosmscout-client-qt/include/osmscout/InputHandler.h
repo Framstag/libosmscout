@@ -341,6 +341,7 @@ public:
     {};
   
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
+    virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool isLockedToPosition();
     virtual bool focusOutEvent(QFocusEvent *event);
 };

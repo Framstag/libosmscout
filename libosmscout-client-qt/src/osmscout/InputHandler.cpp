@@ -646,10 +646,14 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
         projection.GeoToPixel(currentPosition, x, y);
         double distanceFromCenter = sqrt(pow(abs(500 - x), 2) + pow(abs(500 - y), 2));
         if (distanceFromCenter > moveTolerance){        
-            showCoordinates(currentPosition, view.magnification);
+            JumpHandler::showCoordinates(currentPosition, view.magnification);
         }
     }
     return true;
+}
+
+bool LockHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification){
+    return false; // lock handler can't handle it, we are locked on "currentPosition"
 }
 
 bool LockHandler::isLockedToPosition()
