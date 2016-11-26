@@ -148,7 +148,7 @@ namespace osmscout {
    * Parameter object for routing calculations. Holds all optional
    * flags and callback objects that can be passed to the router
    */
-  class OSMSCOUT_API RoutingParameter final
+  class OSMSCOUT_API RoutingParameter //final
   {
   private:
     BreakerRef         breaker;
@@ -176,7 +176,7 @@ namespace osmscout {
    *
    * @TODO: Make setter private and class friend to the RoutingService
    */
-  class OSMSCOUT_API RoutingResult final
+  class OSMSCOUT_API RoutingResult //final
   {
   private:
     RouteData route;
