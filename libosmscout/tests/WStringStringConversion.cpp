@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 
 #include <osmscout/util/String.h>
