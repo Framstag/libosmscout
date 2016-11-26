@@ -93,6 +93,10 @@ public slots:
   void showCoordinates(double lat, double lon);
   void showLocation(Location* location);
 
+
+  bool toggleDebug();
+  bool toggleInfo();
+
 private:
   void TriggerMapRendering();
 
@@ -124,20 +128,25 @@ public:
   {
       return hasErrors;
   }
-  void setStylesheetHasErrors(bool value) {
+
+  void setStylesheetHasErrors(bool value)
+  {
     if(value != hasErrors){
         hasErrors = value;
         emit stylesheetHasErrorsChanged();
     }
   }
+
   inline int stylesheetErrorLine() const
   {
       return errorLine;
   }
+
   inline int stylesheetErrorColumn() const
   {
       return errorColumn;
   }
+
   inline const QString &stylesheetErrorDescription() const
   {
       return errorDescription;

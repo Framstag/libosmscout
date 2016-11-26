@@ -73,7 +73,8 @@ int main(int argc, char* argv[])
 
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
-  osmscout::log.Debug(true);
+  osmscout::log.Debug(false);
+  osmscout::log.Info(false);
 
   settings=std::make_shared<Settings>();
 

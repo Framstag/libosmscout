@@ -489,7 +489,21 @@ void MapWidget::reloadTmpStyle() {
         }else{
             errorLine = 0;
             errorColumn = 0;
-            errorDescription = "unknown error";            
+            errorDescription = "unknown error";
         }
     }
+}
+
+bool MapWidget::toggleDebug()
+{
+    osmscout::log.Debug(!osmscout::log.IsDebug());
+
+    return osmscout::log.IsDebug();
+}
+
+bool MapWidget::toggleInfo()
+{
+    osmscout::log.Info(!osmscout::log.IsInfo());
+
+    return osmscout::log.IsInfo();
 }

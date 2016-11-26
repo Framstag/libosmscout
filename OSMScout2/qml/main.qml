@@ -152,6 +152,28 @@ Window {
                          event.key === Qt.Key_R) {
                     map.reloadStyle();
                 }
+                else if (event.modifiers===(Qt.ControlModifier | Qt.ShiftModifier) &&
+                         event.key === Qt.Key_D) {
+                    var debugState = map.toggleDebug();
+
+                    if (debugState) {
+                      console.log("DEBUG is ON");
+                    }
+                    else {
+                      console.log("DEBUG is OFF");
+                    }
+                }
+                else if (event.modifiers===(Qt.ControlModifier | Qt.ShiftModifier) &&
+                         event.key === Qt.Key_I) {
+                    var infoState = map.toggleInfo();
+
+                    if (infoState) {
+                      console.log("INFO is ON");
+                    }
+                    else {
+                      console.log("INFO is OFF");
+                    }
+                }
             }
 
             // Use PinchArea for multipoint zoom in/out?
