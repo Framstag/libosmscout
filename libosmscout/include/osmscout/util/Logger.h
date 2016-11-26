@@ -405,6 +405,26 @@ namespace osmscout {
       return *this;
     }
 
+    inline bool IsDebug() const
+    {
+      return logDebug;
+    }
+
+    inline bool IsInfo() const
+    {
+      return logInfo;
+    }
+
+    inline bool IsWarn() const
+    {
+      return logWarn;
+    }
+
+    inline bool IsError() const
+    {
+      return logError;
+    }
+
     Log& Info(bool state)
     {
       logInfo=state;
