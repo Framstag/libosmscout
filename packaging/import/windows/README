@@ -1,0 +1,15 @@
+This is a package that allows you to import OpenStreetMap maps
+distributed as PBF or OSM. To use,
+
+1. Unpack this archive
+
+2. Copy PBF or OSM into the unpacked folder libosmscout-importer
+
+3. Open terminal and change to that unpacked folder
+
+4. Follow import instructions at
+http://libosmscout.sourceforge.net/tutorials/Importing/
+
+The Import program is included in this package, in compiled form, as
+bin\Import.exe
+
