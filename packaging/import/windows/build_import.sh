@@ -33,6 +33,6 @@ cp Import/Import "$IMPDIST"/bin
 cp libosmscout/libosmscout.dll "$IMPDIST"/bin
 
 cp ../stylesheets/map.ost "$IMPDIST"/stylesheets
-cp ../packaging/import/windows/README "$IMPDIST"
+cp ../packaging/import/windows/README.txt "$IMPDIST"
 
 zip -r $IMPDIST.zip $IMPDIST
