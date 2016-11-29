@@ -65,9 +65,10 @@ PKG_CHECK_MODULES(XML2,
 
 AM_CONDITIONAL(HAVE_LIB_XML,[test "$LIB_XML_FOUND" = true])
 
+# Workaround some ugly generated protobuf code
 PKG_CHECK_MODULES(PROTOBUF,
                   [protobuf],
-                  [AC_SUBST(PROTOBUF_CFLAGS)
+                  [AC_SUBST(PROTOBUF_CFLAGS, "$PROTOBUF_CFLAGS -DPROTOBUF_INLINE_NOT_IN_HEADERS")
                    AC_SUBST(PROTOBUF_LIBS)
                    AC_DEFINE(HAVE_LIB_PROTOBUF,1,[libprotobuf detected])
                    LIB_PROTOBUF_FOUND=true],

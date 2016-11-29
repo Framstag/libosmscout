@@ -134,6 +134,11 @@ public slots:
   void addPositionMark(int id, double lat, double lon);
   void removePositionMark(int id);
 
+  bool toggleDebug();
+  bool toggleInfo();
+
+private:
+
   void onTap(const QPoint p);
   void onDoubleTap(const QPoint p);
   void onLongTap(const QPoint p);

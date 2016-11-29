@@ -617,3 +617,17 @@ QString MapWidget::firstStylesheetErrorDescription() const
       return "";
     return errors.first().GetDescription();
 }
+
+bool MapWidget::toggleDebug()
+{
+    osmscout::log.Debug(!osmscout::log.IsDebug());
+
+    return osmscout::log.IsDebug();
+}
+
+bool MapWidget::toggleInfo()
+{
+    osmscout::log.Info(!osmscout::log.IsInfo());
+
+    return osmscout::log.IsInfo();
+}

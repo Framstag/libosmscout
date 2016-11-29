@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 
 #include <osmscout/util/String.h>
@@ -46,7 +47,7 @@ int main()
 
     std::cout << "Current locale activated" << std::endl;
   }
-  catch (const std::runtime_error& e) {
+  catch (const std::exception& e) {
     std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
   }
 
