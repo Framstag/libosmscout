@@ -33,6 +33,9 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/DBThread.h>
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
 {
     Q_OBJECT
@@ -81,6 +84,9 @@ public:
   }
 };
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
 {
     Q_OBJECT

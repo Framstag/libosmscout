@@ -32,6 +32,21 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/InputHandler.h>
 
+/**
+ * \defgroup QtAPI Qt API
+ * 
+ * Classes for integration osmscout library with Qt framework.
+ */
+
+/**
+ * \ingroup QtAPI
+ * 
+ * Qt Quick widget for displaying map. 
+ * 
+ * Type should to be registered by \ref qmlRegisterType method 
+ * and \ref DBThread instance should be initialized before first usage.
+ * 
+ */
 class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
 {
   Q_OBJECT

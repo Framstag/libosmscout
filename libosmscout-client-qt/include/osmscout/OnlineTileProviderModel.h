@@ -26,6 +26,56 @@
 #include <osmscout/Settings.h>
 
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Provide Qt model with loaded online tile providers (see Settings::loadOnlineTileProviders).
+ * It should be registered by qmlRegisterType method before first usage.
+ * 
+ * Usage in QML (Silica UI example):
+ * ```
+ * import harbour.osmscout.map 1.0
+ * 
+ * Settings {
+ *   id: settings
+ * }
+ * 
+ * ComboBox {
+ *   id: onlineTileProviderComboBox
+ *   property bool initialized: false
+ * 
+ *   OnlineTileProviderModel{
+ *     id: providerModel
+ *   }
+ * 
+ *   menu: ContextMenu {
+ *     Repeater {
+ *       width: parent.width
+ *       model: providerModel
+ *       delegate: MenuItem {
+ *         text: name
+ *       }
+ *     }
+ *   }
+ * 
+ *   onCurrentItemChanged: {
+ *     if (!initialized){
+ *       return;
+ *      }
+ *     settings.onlineTileProviderId = providerModel.getId(currentIndex)
+ *   }
+ *   Component.onCompleted: {
+ *     for (var i = 0; i < providerModel.count(); i++) {
+ *       if (providerModel.getId(i) == settings.onlineTileProviderId) {
+ *         currentIndex = i
+ *         break
+ *       }
+ *     }
+ *     initialized = true;
+ *   }
+ * }
+ * ```
+ */
 class OnlineTileProviderModel : public QAbstractListModel {
   Q_OBJECT
   

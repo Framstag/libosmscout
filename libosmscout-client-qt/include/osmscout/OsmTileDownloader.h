@@ -41,6 +41,9 @@
 #define OSMSCOUT_USER_AGENT "OSMScout demo app %1"
 #endif
 
+/**
+ * \ingroup QtAPI
+ */
 class OsmTileDownloader : public QObject
 {
  Q_OBJECT

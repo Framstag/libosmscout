@@ -30,6 +30,9 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
 {
     Q_OBJECT

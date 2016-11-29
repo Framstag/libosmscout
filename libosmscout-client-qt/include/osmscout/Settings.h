@@ -31,8 +31,18 @@
 #include <osmscout/private/ClientQtImportExport.h>
 
 /**
- * Settings provide global instance that extends Qt's QSettings
- * by properties with signals
+ * \ingroup QtAPI
+ * 
+ * Settings provide global instance (singleton) that extends Qt's QSettings
+ * by properties with signals. It may be accessed via Settings::GetInstance method.
+ * 
+ * List of online tile providers should be initialized at applicaiton start.
+ * ```
+ *   Settings::GetInstance()->loadOnlineTileProviders(
+ *     ":/resources/online-tile-providers.json");
+ * ```
+ * 
+ * Before program exit, resources shoudl be released by calling Settings::FreeInstance.
  */
 class OSMSCOUT_CLIENT_QT_API Settings: public QObject
 {
@@ -99,6 +109,25 @@ public:
   static void FreeInstance();
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Provides interface to Settings object from QML. It should be registered 
+ * by qmlRegisterType before first use.
+ * 
+ * ```
+ * qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
+ * ```
+ * 
+ * It may be imported and used in QML then:
+ * ```
+ * import net.sf.libosmscout.map 1.0
+ * 
+ * Settings {
+ *   id: settings
+ * }
+ * ```
+ */
 class OSMSCOUT_CLIENT_QT_API QmlSettings: public QObject{
   Q_OBJECT
   Q_PROPERTY(double   physicalDPI READ GetPhysicalDPI CONSTANT)

@@ -36,6 +36,9 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/private/ClientQtImportExport.h>
 
+/**
+ * \ingroup QtAPI
+ */
 struct TileCacheKey
 {
     uint32_t zoomLevel;
@@ -50,6 +53,9 @@ uint qHash(const TileCacheKey &key);
 
 Q_DECLARE_METATYPE(TileCacheKey)
 
+/**
+ * \ingroup QtAPI
+ */
 struct TileCacheVal
 {
   QTime lastAccess;
@@ -58,6 +64,9 @@ struct TileCacheVal
 
 Q_DECLARE_METATYPE(TileCacheVal)
 
+/**
+ * \ingroup QtAPI
+ */
 struct RequestState
 {
     bool pending;
@@ -66,6 +75,8 @@ struct RequestState
 Q_DECLARE_METATYPE(RequestState)
 
 /**
+ * \ingroup QtAPI
+ * 
  * Cache have to be locked by its mutex() while access.
  * It owns all inserted tiles and it is responsible for its release
  */

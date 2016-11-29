@@ -25,6 +25,8 @@
 #include <osmscout/util/GeoBox.h>
 
 /**
+ * \ingroup QtAPI
+ * 
  * Util class with function useful for work with OSM tiles (mercator projection)
  * as defined here: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
  * 

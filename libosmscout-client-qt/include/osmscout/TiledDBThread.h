@@ -43,6 +43,9 @@
 #include <osmscout/OsmTileDownloader.h>
 #include <osmscout/DBThread.h>
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API TiledDBThread : public DBThread
 {
   Q_OBJECT

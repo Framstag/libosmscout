@@ -27,6 +27,11 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Online tile provider object. See OnlineTileProviderModel and Settings.
+ */
 class OnlineTileProvider: public QObject
 {
   Q_OBJECT

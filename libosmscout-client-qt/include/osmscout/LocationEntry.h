@@ -31,6 +31,8 @@
 #include <osmscout/private/ClientQtImportExport.h>
 
 /**
+ * \ingroup QtAPI
+ * 
  * Qt abstraction for various objects on map, 
  * used for search and routing
  */

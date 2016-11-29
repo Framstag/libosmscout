@@ -31,7 +31,22 @@
 #include <osmscout/util/Magnification.h>
 
 /**
- * Simple class for recognizing some gestures: tap, double tap and long-tap (aka tap-and-hold).
+ * \ingroup QtAPI
+ * 
+ * Simple class for recognizing some basic gestures: tap, double tap, long-tap and tap-and-hold.
+ * 
+ * Widget should send own \ref QTouchEvent to this object, when some tap gesture 
+ * is recognized it emits one of its signals. 
+ * 
+ *  - **Tap**: touch shorter than holdInterval (1000 ms) followed with pause longer than tapInterval (200 ms)
+ *  - **Long tap**: touch longer than holdInterval (1000 ms)
+ *  - **Double tap**: tap followed by second one within tapInterval (200 ms)
+ *  - **Tap, long tap**: tap followed by long tap within tapInterval (200 ms)
+ * 
+ * Physical DPI of display should be setup before first use. TapRecognizer use some small move 
+ * tolerance (~ 2.5 mm), it means that events are emited even that touch point is moving within 
+ * this tolerance. For double tap, when second tap is farther than this tolerance, 
+ * double-tap event is not emited.
  */
 class TapRecognizer : public QObject{
   Q_OBJECT
@@ -88,6 +103,9 @@ signals:
   void tapLongTap(const QPoint p);
 };
 
+/**
+ * \ingroup QtAPI
+ */
 struct AccumulatorEvent
 {
   QPointF pos;
@@ -95,6 +113,13 @@ struct AccumulatorEvent
 };
 Q_DECLARE_METATYPE(AccumulatorEvent)
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Helper class that accumulates move (touch events) within some time period 
+ * (time defined FIFO queue). It helps to \ref MoveHandler determine of move 
+ * vector when drag gesture ends. It is used for animate move momentum.
+ */
 class MoveAccumulator : public QObject{
   Q_OBJECT
 
@@ -122,6 +147,11 @@ public:
   QVector2D collect();
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Object thats carry information about view center, angle and magnification.
+ */
 class MapView: public QObject
 {
   Q_OBJECT
@@ -176,19 +206,22 @@ inline bool operator!=(const MapView& a, const MapView& b)
 }
 
 /**
- * Input handler retrieve all inputs from user and may change MapView. 
+ * \ingroup QtAPI
+ * 
+ * Input handler retrieve all inputs from user and may change MapView (emits viewChange signal). 
  * If handler don't accept specific action, returns false. In such case, 
  * default handler for this action should be activated.
  * 
  * Input handlers is application of behaviour pattern. It solves problems like: 
+ * 
  *  - what should happen when finger is on the screen and plus button is pressed
  *  - recognising multitouch gestures
- *      Qt provides api for register custom gesture recognizers, but it is not 
- *      available in QML world and its api don't fit to Map application requierements.
  * 
- * Handler may control map animations in future.
+ * Qt provides api for register custom gesture recognizers, but it is not 
+ * available in QML world and its api don't fit to Map application requierements.
+ * 
+ * Handler also controls map animations.
  */
-
 class InputHandler : public QObject{
     Q_OBJECT
 public:
@@ -215,7 +248,10 @@ protected:
 };
 
 /**
- * handler with support of animations
+ * \ingroup QtAPI
+ * 
+ * Handler with support of simple moves and zoom.
+ * View changes are animated, so one action may emits many of viewChange signals.
  */
 class MoveHandler : public InputHandler {
     Q_OBJECT
@@ -258,6 +294,11 @@ private:
     double dpi;
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Input handler that animates jumps to target map view.
+ */
 class JumpHandler : public InputHandler {
     Q_OBJECT
     
@@ -281,6 +322,11 @@ public:
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * InputHandler with support of dragg gesture.
+ */
 class DragHandler : public MoveHandler {
     Q_OBJECT
 public: 
@@ -305,6 +351,12 @@ private:
     MoveAccumulator moveAccumulator;
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * InputHandler with support of multitouch input. It use just first two 
+ * touch points from touch events.
+ */
 class MultitouchHandler : public MoveHandler {
     Q_OBJECT
 public: 
@@ -330,6 +382,11 @@ private:
     QTouchEvent::TouchPoint startPointB;
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Input handler that locks map view to current position.
+ */
 class LockHandler : public JumpHandler {
     Q_OBJECT
 protected:

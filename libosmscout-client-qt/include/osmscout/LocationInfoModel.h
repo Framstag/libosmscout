@@ -29,6 +29,9 @@
 
 #include <osmscout/DBThread.h>
 
+/**
+ * \ingroup QtAPI
+ */
 struct ObjectKey{
  QString                  database;
  osmscout::ObjectFileRef  ref;
@@ -36,6 +39,9 @@ struct ObjectKey{
 
 Q_DECLARE_METATYPE(ObjectKey)
 
+/**
+ * \ingroup QtAPI
+ */
 class LocationInfoModel : public QAbstractListModel
 {
     Q_OBJECT

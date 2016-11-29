@@ -43,6 +43,9 @@
 #include <osmscout/TileCache.h>
 #include <osmscout/OsmTileDownloader.h>
 
+/**
+ * \ingroup QtAPI
+ */
 struct RenderMapRequest
 {
   osmscout::GeoCoord      coord;
@@ -63,6 +66,9 @@ inline bool operator!=(const RenderMapRequest &r1, const RenderMapRequest &r2)
       r1.height!=r2.height;
 }
 
+/**
+ * \ingroup QtAPI
+ */
 struct DatabaseLoadedResponse
 {
     osmscout::GeoBox boundingBox;
@@ -70,6 +76,9 @@ struct DatabaseLoadedResponse
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API QBreaker : public osmscout::Breaker
 {
 private:
@@ -84,6 +93,9 @@ public:
   void Reset();
 };
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API StyleError
 {
     enum StyleErrorType {
@@ -109,6 +121,11 @@ private:
     QString         text;
 };
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Instance of one osmscout database and database specific objects.
+ */
 class DBInstance : public QObject
 {
   Q_OBJECT
@@ -166,6 +183,33 @@ public:
 
 typedef std::shared_ptr<DBInstance> DBInstanceRef;
 
+/**
+ * \ingroup QtAPI
+ * 
+ * Abstract object that manage osmscout database intances (\ref DBInstance) 
+ * and provides simple thread-safe, asynchronous api for it. 
+ * It don't provide map rendering, it is implented in its sublasses (\ref TiledDBThread 
+ * and \ref PlaneDBThread).
+ * 
+ * DBThread is singleton, it should be initialized at application start by calling 
+ * static function DBThread::InitializeTiledInstance or DBThread::InitializePlaneInstance 
+ * (it depends what map redering implementation do you want to use). 
+ * 
+ * After initialization, it should be moved to some non gui thread, to be sure that 
+ * database operations will not block UI.
+ * 
+ * ```
+ * QThread thread;
+ * DBThread* dbThread=DBThread::GetInstance();
+ * 
+ * dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
+ * dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
+ * 
+ * dbThread->moveToThread(&thread);
+ * ```
+ * 
+ * Before application exits, resources should be released by calling static function DBThread::FreeInstance.
+ */
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 {
   Q_OBJECT

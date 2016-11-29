@@ -41,6 +41,9 @@
 #include <osmscout/Settings.h>
 #include <osmscout/DBThread.h>
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API PlaneDBThread : public DBThread
 {
   Q_OBJECT
