@@ -121,8 +121,14 @@ Window {
                 //console.log("map center "+ map.view.lat + " " + map.view.lon + "");
                 settings.mapView = map.view;
             }
-            Component.onCompleted: {
-                map.view = settings.mapView;
+            onDatabaseLoaded: {
+                if (map.isInDatabaseBoundingBox(settings.mapView.lat, settings.mapView.lon)){
+                  map.view = settings.mapView;
+                  console.log("restore last position: " + settings.mapView.lat + " " + settings.mapView.lon);
+                }else{
+                  console.log("position " + settings.mapView.lat + " " + settings.mapView.lon + " is outside database, recenter");
+                  map.recenter();
+                }
             }
 
             Keys.onPressed: {

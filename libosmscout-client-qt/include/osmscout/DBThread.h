@@ -226,6 +226,7 @@ signals:
                            const QStringList regions);
   void locationDescriptionFinished(const osmscout::GeoCoord location);
   void stylesheetFilenameChanged();
+  void databaseLoadFinished();
   void styleErrorsChanged();
   
   void searchResult(const QString searchPattern, const QList<LocationEntry>);

@@ -250,6 +250,7 @@ bool DBThread::InitializeDatabases(osmscout::GeoBox& boundingBox)
     }
   }  
 
+  emit databaseLoadFinished();
   emit stylesheetFilenameChanged();
   return true;
 }

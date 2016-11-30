@@ -55,6 +55,8 @@ MapWidget::MapWidget(QQuickItem* parent)
             this,SIGNAL(stylesheetFilenameChanged()));
     connect(dbThread,SIGNAL(styleErrorsChanged()),
             this,SIGNAL(styleErrorsChanged()));
+    connect(dbThread,SIGNAL(databaseLoadFinished()),
+            this,SIGNAL(databaseLoaded()));
         
     connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(doubleTap(const QPoint)),  this, SLOT(onDoubleTap(const QPoint)));
@@ -277,8 +279,31 @@ void MapWidget::recenter()
 {
   DBThread *dbThread = DBThread::GetInstance();
   DatabaseLoadedResponse resp = dbThread->loadedResponse();
+  if (!resp.boundingBox.IsValid()){
+    return;
+  }
+  double dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
+                                                      resp.boundingBox.GetMaxCoord());
   
-  showCoordinates(resp.boundingBox.GetCenter(), osmscout::Magnification::magRegion);
+  showCoordinates(resp.boundingBox.GetCenter(), magnificationByDimension(dimension));
+}
+
+bool MapWidget::isDatabaseLoaded()
+{
+  DBThread *dbThread = DBThread::GetInstance();
+  DatabaseLoadedResponse resp = dbThread->loadedResponse();
+  return resp.boundingBox.IsValid();
+}
+
+bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
+{
+  DBThread *dbThread = DBThread::GetInstance();
+  DatabaseLoadedResponse resp = dbThread->loadedResponse();
+  if (!resp.boundingBox.IsValid()){
+    return false;
+  }
+  osmscout::GeoCoord coord(lat, lon);
+  return resp.boundingBox.Includes(coord);
 }
 
 void MapWidget::zoom(double zoomFactor)
@@ -422,24 +447,8 @@ void MapWidget::showCoordinatesInstantly(double lat, double lon)
     showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);    
 }
 
-void MapWidget::showLocation(LocationEntry* location)
+osmscout::Magnification MapWidget::magnificationByDimension(double dimension)
 {
-  if (!location){
-    qWarning() << "Invalid location" << location;
-    return;
-  }
-  qDebug() << "Show location: " << location;
-    
-  osmscout::GeoCoord center;
-  double dimension = 0.01; // km
-  if (location->getBBox().IsValid()){
-    center = location->getBBox().GetCenter();
-    dimension = osmscout::GetEllipsoidalDistance(location->getBBox().GetMinCoord(),
-                                                 location->getBBox().GetMaxCoord());
-  }else{
-    center = location->getCoord();
-  }
-  
   osmscout::Magnification::Mag mag = osmscout::Magnification::magBlock;
   if (dimension > 0.1)
     mag = osmscout::Magnification::magVeryClose;
@@ -465,8 +474,29 @@ void MapWidget::showLocation(LocationEntry* location)
     mag = osmscout::Magnification::magStateOver;
   if (dimension > 500)
     mag = osmscout::Magnification::magState;
+  return osmscout::Magnification(mag);
+}
+
+void MapWidget::showLocation(LocationEntry* location)
+{
+  if (!location){
+    qWarning() << "Invalid location" << location;
+    return;
+  }
+  qDebug() << "Show location: " << location;
+    
+  osmscout::GeoCoord center;
+  double dimension = 0.01; // km
+  if (location->getBBox().IsValid()){
+    center = location->getBBox().GetCenter();
+    dimension = osmscout::GetEllipsoidalDistance(location->getBBox().GetMinCoord(),
+                                                 location->getBBox().GetMaxCoord());
+  }else{
+    center = location->getCoord();
+  }
+  
        
-  showCoordinates(center, osmscout::Magnification(mag));
+  showCoordinates(center, magnificationByDimension(dimension));
 }
 
 void MapWidget::locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy)
