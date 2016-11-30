@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4DD803211DEEDF770054A504 /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B6E3151C046F1500A3EC39 /* Exception.cpp */; };
+		4DD803221DEEDFD90054A504 /* WayDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56129AD1C5FEBEE00EA29EA /* WayDataFile.cpp */; };
+		4DD803241DEEE0040054A504 /* AreaDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56129AC1C5FEBEE00EA29EA /* AreaDataFile.cpp */; };
+		4DD8032F1DEEE15C0054A504 /* BoundingBoxDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */; };
+		4DD803301DEEE15C0054A504 /* ObjectVariantDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */; };
+		4DD803311DEEE15C0054A504 /* TypeDistributionDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */; };
+		4DD803321DEEE16F0054A504 /* BoundingBoxDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */; };
+		4DD803331DEEE1730054A504 /* ObjectVariantDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */; };
+		4DD803341DEEE1730054A504 /* TypeDistributionDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */; };
 		F51E3EA3161A5F4000D51926 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F51E3EA2161A5F4000D51926 /* Foundation.framework */; };
 		F51E3EFF161A5FEC00D51926 /* AreaAreaIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */; };
 		F51E3F00161A5FEC00D51926 /* AreaNodeIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */; };
@@ -167,6 +176,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4DD803291DEEE12F0054A504 /* BoundingBoxDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingBoxDataFile.h; sourceTree = "<group>"; };
+		4DD8032A1DEEE12F0054A504 /* ObjectVariantDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectVariantDataFile.h; sourceTree = "<group>"; };
+		4DD8032B1DEEE12F0054A504 /* TypeDistributionDataFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeDistributionDataFile.h; sourceTree = "<group>"; };
+		4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BoundingBoxDataFile.cpp; path = ../../../../libosmscout/src/osmscout/BoundingBoxDataFile.cpp; sourceTree = "<group>"; };
+		4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectVariantDataFile.cpp; path = ../../../../libosmscout/src/osmscout/ObjectVariantDataFile.cpp; sourceTree = "<group>"; };
+		4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeDistributionDataFile.cpp; path = ../../../../libosmscout/src/osmscout/TypeDistributionDataFile.cpp; sourceTree = "<group>"; };
 		F51E3E9F161A5F4000D51926 /* libosmscout.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscout.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51E3EA2161A5F4000D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaAreaIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaAreaIndex.cpp; sourceTree = "<group>"; };
@@ -377,6 +392,9 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */,
+				4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */,
+				4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */,
 				F56129AC1C5FEBEE00EA29EA /* AreaDataFile.cpp */,
 				F56129AD1C5FEBEE00EA29EA /* WayDataFile.cpp */,
 				F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */,
@@ -486,6 +504,9 @@
 		F51E3F30161A604300D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				4DD803291DEEE12F0054A504 /* BoundingBoxDataFile.h */,
+				4DD8032A1DEEE12F0054A504 /* ObjectVariantDataFile.h */,
+				4DD8032B1DEEE12F0054A504 /* TypeDistributionDataFile.h */,
 				F5A66AC71A46F5BF007AD752 /* TextSearchIndex.h */,
 				F556F00219C9D00700EAAA8B /* TypeFeatures.h */,
 				F550E56219B085C700CB6072 /* Navigation.h */,
@@ -714,6 +735,7 @@
 				F54C1E5418F480AC008C5EB3 /* POIService.cpp in Sources */,
 				F51E3F05161A5FEC00D51926 /* Location.cpp in Sources */,
 				F5CA00151B9FB524003B0EF6 /* Parsing.cpp in Sources */,
+				4DD8032F1DEEE15C0054A504 /* BoundingBoxDataFile.cpp in Sources */,
 				F51E3F06161A5FEC00D51926 /* Node.cpp in Sources */,
 				F51E3F07161A5FEC00D51926 /* NumericIndex.cpp in Sources */,
 				F51E3F08161A5FEC00D51926 /* ObjectRef.cpp in Sources */,
@@ -729,6 +751,7 @@
 				F51E3F0F161A5FEC00D51926 /* Route.cpp in Sources */,
 				F51E3F10161A5FEC00D51926 /* RouteData.cpp in Sources */,
 				F51E3F11161A5FEC00D51926 /* RouteNode.cpp in Sources */,
+				4DD803301DEEE15C0054A504 /* ObjectVariantDataFile.cpp in Sources */,
 				F54DAA511815DA6500625DDA /* Pixel.cpp in Sources */,
 				F51E3F12161A5FEC00D51926 /* RoutePostprocessor.cpp in Sources */,
 				F51E3F14161A5FEC00D51926 /* RoutingProfile.cpp in Sources */,
@@ -764,6 +787,7 @@
 				F51E3F2C161A5FEC00D51926 /* String.cpp in Sources */,
 				F54DAA4C1815DA6500625DDA /* CoordDataFile.cpp in Sources */,
 				F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */,
+				4DD803311DEEE15C0054A504 /* TypeDistributionDataFile.cpp in Sources */,
 				F54C1E5518F480AC008C5EB3 /* RoutingService.cpp in Sources */,
 				F51E3F2E161A5FEC00D51926 /* WaterIndex.cpp in Sources */,
 				F51E3F2F161A5FEC00D51926 /* Way.cpp in Sources */,
@@ -776,17 +800,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				F53BD1A61638866B006C7AE1 /* AreaAreaIndex.cpp in Sources */,
+				4DD803211DEEDF770054A504 /* Exception.cpp in Sources */,
 				F58399411AF6E19B00F79DFF /* Logger.cpp in Sources */,
 				F556EFFF19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */,
 				F53BD1A71638866B006C7AE1 /* AreaNodeIndex.cpp in Sources */,
 				F53BD1A81638866B006C7AE1 /* AreaWayIndex.cpp in Sources */,
 				F53BD1AA1638866B006C7AE1 /* Database.cpp in Sources */,
 				F54DAA571815DA8900625DDA /* DebugDatabase.cpp in Sources */,
+				4DD803331DEEE1730054A504 /* ObjectVariantDataFile.cpp in Sources */,
 				F53BD1AB1638866B006C7AE1 /* GroundTile.cpp in Sources */,
 				F54C1E5B18F583BF008C5EB3 /* POIService.cpp in Sources */,
 				F53BD1AC1638866B006C7AE1 /* Location.cpp in Sources */,
 				F5CA00161B9FB604003B0EF6 /* Parsing.cpp in Sources */,
 				F53BD1AD1638866B006C7AE1 /* Node.cpp in Sources */,
+				4DD803321DEEE16F0054A504 /* BoundingBoxDataFile.cpp in Sources */,
 				F53BD1AE1638866B006C7AE1 /* NumericIndex.cpp in Sources */,
 				F53BD1AF1638866B006C7AE1 /* ObjectRef.cpp in Sources */,
 				F556F00119C6E36700EAAA8B /* TypeFeatures.cpp in Sources */,
@@ -820,14 +847,17 @@
 				F53BD1C9163886B2006C7AE1 /* File.cpp in Sources */,
 				F54DAA591815DA9000625DDA /* OptimizeAreasLowZoom.cpp in Sources */,
 				F53BD1CA163886B2006C7AE1 /* FileScanner.cpp in Sources */,
+				4DD803341DEEE1730054A504 /* TypeDistributionDataFile.cpp in Sources */,
 				F53BD1CB163886B2006C7AE1 /* FileWriter.cpp in Sources */,
 				F53BD1CC163886B2006C7AE1 /* Geometry.cpp in Sources */,
 				F53BD1CF163886B2006C7AE1 /* Number.cpp in Sources */,
 				F54DAA5A1815DA9400625DDA /* OptimizeWaysLowZoom.cpp in Sources */,
 				F53BD1D0163886B2006C7AE1 /* NumberSet.cpp in Sources */,
 				F53BD1D1163886B2006C7AE1 /* Progress.cpp in Sources */,
+				4DD803241DEEE0040054A504 /* AreaDataFile.cpp in Sources */,
 				F54DAA551815DA8000625DDA /* Coord.cpp in Sources */,
 				F54DAA531815DA7800625DDA /* Area.cpp in Sources */,
+				4DD803221DEEDFD90054A504 /* WayDataFile.cpp in Sources */,
 				F53BD1D2163886B2006C7AE1 /* Projection.cpp in Sources */,
 				F54FD00D186596AD000E8579 /* LocationIndex.cpp in Sources */,
 				F54DAA561815DA8600625DDA /* CoordDataFile.cpp in Sources */,
