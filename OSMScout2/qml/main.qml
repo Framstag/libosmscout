@@ -109,6 +109,20 @@ Window {
                                map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
             }
 
+            function setupInitialPosition(){
+                if (map.databaseLoaded){
+                  if (map.isInDatabaseBoundingBox(settings.mapView.lat, settings.mapView.lon)){
+                    map.view = settings.mapView;
+                    console.log("restore last position: " + settings.mapView.lat + " " + settings.mapView.lon);
+                  }else{
+                    console.log("position " + settings.mapView.lat + " " + settings.mapView.lon + " is outside database, recenter");
+                    map.recenter();
+                  }
+                }else{
+                  map.view = settings.mapView;
+                }
+            }
+
             onTap: {
                 console.log("tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
                 map.focus=true;
@@ -121,14 +135,11 @@ Window {
                 //console.log("map center "+ map.view.lat + " " + map.view.lon + "");
                 settings.mapView = map.view;
             }
+            Component.onCompleted: {
+                setupInitialPosition();
+            }
             onDatabaseLoaded: {
-                if (map.isInDatabaseBoundingBox(settings.mapView.lat, settings.mapView.lon)){
-                  map.view = settings.mapView;
-                  console.log("restore last position: " + settings.mapView.lat + " " + settings.mapView.lon);
-                }else{
-                  console.log("position " + settings.mapView.lat + " " + settings.mapView.lon + " is outside database, recenter");
-                  map.recenter();
-                }
+                setupInitialPosition();
             }
 
             Keys.onPressed: {
