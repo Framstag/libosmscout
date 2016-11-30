@@ -588,7 +588,6 @@ int main(int argc, char* argv[])
   }
 
   osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
-  osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
   osmscout::RoutingParameter          parameter;
@@ -650,7 +649,7 @@ int main(int argc, char* argv[])
   }
 
 #ifdef DATA_DEBUG
-  for (const auto &entry : data.Entries()) {
+  for (const auto &entry : result.GetRoute().Entries()) {
     std::cout << entry.GetPathObject().GetName() << "[" << entry.GetCurrentNodeIndex() << "]" << " = " << entry.GetCurrentNodeId() << " => " << entry.GetTargetNodeIndex() << std::endl;
   }
 #endif
@@ -684,7 +683,7 @@ int main(int argc, char* argv[])
   std::list<osmscout::Point> points;
 
   if(outputGPX) {
-    if (!router->TransformRouteDataToPoints(data,
+    if (!router->TransformRouteDataToPoints(result.GetRoute(),
                                             points)) {
       std::cerr << "Error during route conversion" << std::endl;
     }
