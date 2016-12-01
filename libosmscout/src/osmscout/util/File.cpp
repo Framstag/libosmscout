@@ -135,14 +135,11 @@ namespace osmscout {
 
   bool ExistsInFilesystem(const std::string& filename)
   {
-#if defined(HAVE_SYS_STAT_H)
-    struct stat s;
-
-    return stat(filename.c_str(),&s)==0;
-#elif defined(__WIN32__) || defined(WIN32)
+#if defined(__WIN32__) || defined(WIN32)
     return GetFileAttributes(filename.c_str())!=INVALID_FILE_ATTRIBUTES;
-
-
+#elif defined(HAVE_SYS_STAT_H)
+    struct stat s;
+    return stat(filename.c_str(),&s)==0;
 #else
     throw IOException(filename,"Is file directory","Not implemented");
 #endif
