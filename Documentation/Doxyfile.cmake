@@ -772,6 +772,8 @@ WARN_LOGFILE           = @CMAKE_CURRENT_BINARY_DIR@/doxygen.log
 INPUT                  = @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout/include \
 						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-import/include \
 						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-map/include \
+						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-map-qt/include \
+						 @OSMSCOUT_BASE_DIR_SOURCE@/libosmscout-client-qt/include \
 						 @CMAKE_CURRENT_BINARY_DIR@/pages.dox
 
 # This tag can be used to specify the character encoding of the source files

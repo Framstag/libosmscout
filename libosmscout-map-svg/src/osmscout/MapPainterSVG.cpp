@@ -129,10 +129,10 @@ namespace osmscout {
     stream << std::endl;
   }
 
-  void MapPainterSVG::AfterPreprocessing(const StyleConfig& styleConfig,
+  void MapPainterSVG::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
                                          const Projection& projection,
-                                         const MapParameter& parameter,
-                                         const MapData& data)
+                                         const MapParameter& /*parameter*/,
+                                         const MapData& /*data*/)
   {
     stream << "  <defs>" << std::endl;
     stream << "    <style type=\"text/css\">" << std::endl;
@@ -251,25 +251,25 @@ namespace osmscout {
     stream << "</svg>" << std::endl;
   }
 
-  void MapPainterSVG::BeforeDrawing(const StyleConfig& styleConfig,
-                                    const Projection& projection,
-                                    const MapParameter& parameter,
-                                    const MapData& data)
+  void MapPainterSVG::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                    const Projection& /*projection*/,
+                                    const MapParameter& /*parameter*/,
+                                    const MapData& /*data*/)
   {
     stream << "  <g id=\"map\">" << std::endl;
   }
 
-  void MapPainterSVG::AfterDrawing(const StyleConfig& styleConfig,
-                    const Projection& projection,
-                    const MapParameter& parameter,
-                    const MapData& data)
+  void MapPainterSVG::AfterDrawing(const StyleConfig& /*styleConfig*/,
+                    const Projection& /*projection*/,
+                    const MapParameter& /*parameter*/,
+                    const MapData& /*data*/)
   {
     stream << "  </g>" << std::endl;
   }
 
-  bool MapPainterSVG::HasIcon(const StyleConfig& styleConfig,
-                                const MapParameter& parameter,
-                                IconStyle& style)
+  bool MapPainterSVG::HasIcon(const StyleConfig& /*styleConfig*/,
+                              const MapParameter& /*parameter*/,
+                              IconStyle& /*style*/)
   {
     // Not implemented
 
@@ -325,15 +325,17 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawLabel(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const LabelData& label)
+                                const MapParameter& parameter,
+                                const LabelData& label)
   {
     if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
       const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
   #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+      /*
       PangoFontDescription* font=GetFont(projection,
                                          parameter,
                                          label.fontSize);
+      */
   #endif
 
       // TODO: This is not the exact placement, we cannot just move vertical by fontSize, but we must move the actual
@@ -361,9 +363,11 @@ namespace osmscout {
     else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
       const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+     /*
      PangoFontDescription* font=GetFont(projection,
                                         parameter,
                                         label.fontSize);
+     */
 #endif
      // Shield background
      stream << "    <rect";
@@ -406,45 +410,45 @@ namespace osmscout {
     }
   }
 
-  void MapPainterSVG::DrawContourLabel(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const PathTextStyle& style,
-                                       const std::string& text,
-                                       size_t transStart, size_t transEnd)
+  void MapPainterSVG::DrawContourLabel(const Projection& /*projection*/,
+                                       const MapParameter& /*parameter*/,
+                                       const PathTextStyle& /*style*/,
+                                       const std::string& /*text*/,
+                                       size_t /*transStart*/, size_t /*transEnd*/)
   {
     // Not implemented
   }
 
-  void MapPainterSVG::DrawContourSymbol(const Projection& projection,
-                                        const MapParameter& parameter,
-                                        const Symbol& symbol,
-                                        double space,
-                                        size_t transStart, size_t transEnd)
+  void MapPainterSVG::DrawContourSymbol(const Projection& /*projection*/,
+                                        const MapParameter& /*parameter*/,
+                                        const Symbol& /*symbol*/,
+                                        double /*space*/,
+                                        size_t /*transStart*/, size_t /*transEnd*/)
   {
     // Not implemented
   }
 
-  void MapPainterSVG::DrawSymbol(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const Symbol& style,
-                                 double x, double y)
+  void MapPainterSVG::DrawSymbol(const Projection& /*projection*/,
+                                 const MapParameter& /*parameter*/,
+                                 const Symbol& /*style*/,
+                                 double /*x*/, double /*y*/)
   {
     // Not implemented
   }
 
-  void MapPainterSVG::DrawIcon(const IconStyle* style,
-                                 double x, double y)
+  void MapPainterSVG::DrawIcon(const IconStyle* /*style*/,
+                                 double /*x*/, double /*y*/)
   {
     // Not implemented
   }
 
-  void MapPainterSVG::DrawPath(const Projection& projection,
-                               const MapParameter& parameter,
+  void MapPainterSVG::DrawPath(const Projection& /*projection*/,
+                               const MapParameter& /*parameter*/,
                                const Color& color,
                                double width,
-                               const std::vector<double>& dash,
-                               LineStyle::CapStyle startCap,
-                               LineStyle::CapStyle endCap,
+                               const std::vector<double>& /*dash*/,
+                               LineStyle::CapStyle /*startCap*/,
+                               LineStyle::CapStyle /*endCap*/,
                                size_t transStart, size_t transEnd)
   {
     stream << "    <polyline";
@@ -472,12 +476,12 @@ namespace osmscout {
     stream << "\" />" << std::endl;
   }
 
-  void MapPainterSVG::DrawPath(const Projection& projection,
-                               const MapParameter& parameter,
+  void MapPainterSVG::DrawPath(const Projection& /*projection*/,
+                               const MapParameter& /*parameter*/,
                                const std::string& styleName,
                                double width,
-                               LineStyle::CapStyle startCap,
-                               LineStyle::CapStyle endCap,
+                               LineStyle::CapStyle /*startCap*/,
+                               LineStyle::CapStyle /*endCap*/,
                                size_t transStart, size_t transEnd)
   {
     stream << "    <polyline";
@@ -499,7 +503,7 @@ namespace osmscout {
     stream << "\" />" << std::endl;
   }
 
-  void MapPainterSVG::DrawWay(const StyleConfig& styleConfig,
+  void MapPainterSVG::DrawWay(const StyleConfig& /*styleConfig*/,
                               const Projection& projection,
                               const MapParameter& parameter,
                               const WayData& data)
@@ -529,8 +533,8 @@ namespace osmscout {
              data.transStart,data.transEnd);
   }
 
-  void MapPainterSVG::DrawArea(const Projection& projection,
-                               const MapParameter& parameter,
+  void MapPainterSVG::DrawArea(const Projection& /*projection*/,
+                               const MapParameter& /*parameter*/,
                                const MapPainter::AreaData& area)
   {
     std::map<FillStyle,std::string>::const_iterator styleNameEntry=fillStyleNameMap.find(*area.fillStyle);
@@ -567,7 +571,7 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawGround(const Projection& projection,
-                                 const MapParameter& parameter,
+                                 const MapParameter& /*parameter*/,
                                  const FillStyle& style)
   {
     stream << "    <rect x=\"" << 0 << "\" y=\"" << 0 << "\" width=\"" << projection.GetWidth() << "\" height=\"" << projection.GetHeight() << "\"" << std::endl;

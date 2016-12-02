@@ -25,6 +25,9 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+string(TIMESTAMP OSMSCOUT_VERSION_STRING "%Y-%m-%d")
+set(OSMSCOUT_USER_AGENT "OSMScout demo app %1")
+
 set(HEADER_FILES
     src/Theme.h
 )
@@ -32,6 +35,17 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/Theme.cpp
     src/OSMScout.cpp
+
+    # qml files in CMake sources make it visible in QtCreator
+    qml/AboutDialog.qml
+    qml/main.qml
+    qml/SearchDialog.qml
+    qml/custom/MapDialog.qml
+    qml/custom/ScrollIndicator.qml
+    qml/custom/LineEdit.qml
+    qml/custom/LocationSearch.qml
+    qml/custom/DialogActionButton.qml
+    qml/custom/MapButton.qml
 )
 
 set(RESOURCE_FILES
@@ -60,5 +74,6 @@ target_link_libraries(OSMScout2
         osmscout_map_qt
         osmscout_client_qt
 )
-
+# enable QML debuger
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)

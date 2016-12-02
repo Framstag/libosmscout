@@ -1,14 +1,11 @@
 if(NOT Qt5Core_FOUND)
-	message(SEND_ERROR "Qt5Core is required for OSMScout2 application")
+	message(SEND_ERROR "Qt5Core is required for OSMScout Qt client library")
 endif()
 if(NOT Qt5Gui_FOUND)
-	message(SEND_ERROR "Qt5Gui is required for OSMScout2 application")
-endif()
-if(NOT Qt5Widgets_FOUND)
-	message(SEND_ERROR "Qt5Widgets is required for OSMScout2 application")
+	message(SEND_ERROR "Qt5Gui is required for OSMScout Qt client library")
 endif()
 if(NOT Qt5Quick_FOUND)
-	message(SEND_ERROR "Qt5Quick is required for OSMScout2 application")
+	message(SEND_ERROR "Qt5Quick is required for OSMScout Qt client library")
 endif()
 if(NOT ${OSMSCOUT_BUILD_MAP_QT})
 	message(SEND_ERROR "The main map drawing interface is required for Qt map drawing backend")
@@ -19,21 +16,42 @@ set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
     #include/osmscout/private/Config.h
-    include/osmscout/private/ClientQtImportExport.h
     #include/osmscout/ClientQtFeatures.h
     include/osmscout/DBThread.h
+    include/osmscout/InputHandler.h
+    include/osmscout/LocationEntry.h
+    include/osmscout/LocationInfoModel.h
     include/osmscout/MapWidget.h
+    include/osmscout/OnlineTileProvider.h
+    include/osmscout/OnlineTileProviderModel.h
+    include/osmscout/OsmTileDownloader.h
+    include/osmscout/OSMTile.h
+    include/osmscout/PlaneDBThread.h
+    include/osmscout/private
+    include/osmscout/private/ClientQtImportExport.h
     include/osmscout/RoutingModel.h
     include/osmscout/SearchLocationModel.h
     include/osmscout/Settings.h
+    include/osmscout/TileCache.h
+    include/osmscout/TiledDBThread.h
 )
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
+    src/osmscout/InputHandler.cpp
+    src/osmscout/LocationEntry.cpp
+    src/osmscout/LocationInfoModel.cpp
     src/osmscout/MapWidget.cpp
+    src/osmscout/OnlineTileProvider.cpp
+    src/osmscout/OnlineTileProviderModel.cpp
+    src/osmscout/OSMTile.cpp
+    src/osmscout/OsmTileDownloader.cpp
+    src/osmscout/PlaneDBThread.cpp
     src/osmscout/RoutingModel.cpp
     src/osmscout/SearchLocationModel.cpp
     src/osmscout/Settings.cpp
+    src/osmscout/TileCache.cpp
+    src/osmscout/TiledDBThread.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})
@@ -53,7 +71,6 @@ target_link_libraries(osmscout_client_qt
 		osmscout_map_qt
 		Qt5::Core
 		Qt5::Gui
-		Qt5::Widgets
 		Qt5::Quick)
 target_compile_definitions(osmscout_client_qt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
 install(TARGETS osmscout_client_qt

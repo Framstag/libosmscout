@@ -87,6 +87,11 @@ Window {
         }
     }
 
+    Settings {
+        id: settings
+        //mapDPI: 50
+    }
+
     GridLayout {
         id: content
         anchors.fill: parent
@@ -102,6 +107,39 @@ Window {
                                Theme.vertSpace+searchDialog.height+Theme.vertSpace,
                                map.width-2*Theme.horizSpace,
                                map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
+            }
+
+            function setupInitialPosition(){
+                if (map.databaseLoaded){
+                  if (map.isInDatabaseBoundingBox(settings.mapView.lat, settings.mapView.lon)){
+                    map.view = settings.mapView;
+                    console.log("restore last position: " + settings.mapView.lat + " " + settings.mapView.lon);
+                  }else{
+                    console.log("position " + settings.mapView.lat + " " + settings.mapView.lon + " is outside database, recenter");
+                    map.recenter();
+                  }
+                }else{
+                  map.view = settings.mapView;
+                }
+            }
+
+            onTap: {
+                console.log("tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
+                map.focus=true;
+            }
+            onLongTap: {
+                console.log("long tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon);
+                map.focus=true;
+            }
+            onViewChanged: {
+                //console.log("map center "+ map.view.lat + " " + map.view.lon + "");
+                settings.mapView = map.view;
+            }
+            Component.onCompleted: {
+                setupInitialPosition();
+            }
+            onDatabaseLoaded: {
+                setupInitialPosition();
             }
 
             Keys.onPressed: {
@@ -176,8 +214,6 @@ Window {
                 }
             }
 
-            // Use PinchArea for multipoint zoom in/out?
-
             SearchDialog {
                 id: searchDialog
 
@@ -188,6 +224,7 @@ Window {
                 desktop: map
 
                 onShowLocation: {
+                    console.log("location: "+location);
                     map.showLocation(location)
                 }
 
@@ -228,6 +265,15 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: recenter
+                    label: "*"
+
+                    onClicked: {
+                        map.recenter()
+                    }
+                }
 
                 MapButton {
                     id: zoomIn

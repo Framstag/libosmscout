@@ -36,7 +36,7 @@ endif ()
 
 include(CheckCXXCompilerFlag)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC)
-  set(OSMSCOUT_WARNING_FLAGS "-Wall -Winit-self -Wno-overloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-long-long")
+  set(OSMSCOUT_WARNING_FLAGS "-Wall -Winit-self -Wno-overloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-long-long")
   if(EMSCRIPTEN)
     set(OSMSCOUT_WARNING_FLAGS "${OSMSCOUT_WARNING_FLAGS} -Wno-warn-absolute-paths")
   elseif(NOT APPLE)

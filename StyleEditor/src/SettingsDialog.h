@@ -35,14 +35,14 @@ class SettingsDialog : public QQuickView
   Q_OBJECT
 
 private:
-  SettingsRef settings;
+  //SettingsRef settings;
   //QSpinBox    *dpi;
 
 public slots:
   void Save();
 
 public:
-  SettingsDialog(const SettingsRef& settings);
+  SettingsDialog();
   ~SettingsDialog();
 };
 
