@@ -3,14 +3,11 @@ distributed as PBF. To use,
 
 1. Unpack this archive
 
-2. Copy PBF into the unpacked folder libosmscout-importer
-
-3. Open terminal and change to that unpacked folder
-
-4. Run ./import.sh for each PBF map that you would want to import. For
+2. In terminal, run import.sh included in this archive with for each
+PBF map that you would want to import (one map in a time). For
 example:
 
-./import.sh estonia-latest.osm.pbf
+  libosmscout-importer.Linux.x86_64/import.sh estonia-latest.osm.pbf
 
 After that, the directory with the corresponding name will be
 created. The script strips the following suffixes from the file name:
@@ -19,4 +16,8 @@ created. The script strips the following suffixes from the file name:
 .osm.pbf
 .pbf
 
+In the example case above, a directory estonia will be created and the
+map will be imported into that directory.
 
+3. Copy the imported folder to your device (internal disk or SD card)
+and point the program using libosmscout to that folder.
