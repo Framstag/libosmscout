@@ -118,6 +118,7 @@ find_package(JNI QUIET)
 set(Matlab_FIND_COMPONENTS MX_LIBRARY)
 find_package(MATLAB QUIET)
 find_package(Gperftools QUIET)
+find_package(Direct2D QUIET)
 
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})

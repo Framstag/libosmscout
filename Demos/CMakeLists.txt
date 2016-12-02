@@ -159,3 +159,17 @@ if(${OSMSCOUT_BUILD_MAP_SVG})
 else()
 	message("Skip DrawMapSVG demo, libosmscout-map-svg is missing.")
 endif()
+
+if(${OSMSCOUT_BUILD_MAP_DIRECTX})
+	add_executable(DrawMapDirectX WIN32 src/DrawMapDirectX.cpp)
+	set_property(TARGET DrawMapDirectX PROPERTY CXX_STANDARD 11)
+	target_include_directories(DrawMapDirectX PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-directx/include
+		${CMAKE_CURRENT_BINARY_DIR}/include/DrawMapDirectX
+		${Direct2D_INCLUDE_DIRS})
+	target_link_libraries(DrawMapDirectX osmscout osmscout_map osmscout_map_directx ${Direct2D_LIBRARIES} "Shell32.lib")
+	install(TARGETS DrawMapDirectX RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+else()
+	message("Skip DrawMapDirectX demo, libosmscout-map-directx is missing.")
+endif()
