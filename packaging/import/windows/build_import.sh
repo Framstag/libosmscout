@@ -34,5 +34,6 @@ cp libosmscout/libosmscout.dll "$IMPDIST"/bin
 
 cp ../stylesheets/map.ost "$IMPDIST"/stylesheets
 cp ../packaging/import/windows/README.txt "$IMPDIST"
+cp ../packaging/import/windows/import.cmd "$IMPDIST"
 
 zip -r $IMPDIST.zip $IMPDIST
