@@ -12,7 +12,9 @@ fi
 D=${1%-latest.osm.pbf}
 D=${D%.osm.pbf}
 D=${D%.pbf} 
-D=${D%.osm} 
+D=${D%.osm}
+
+PROGPATH=$(dirname "$0")
 
 if [ "$1" == "$D" ] 
 then
@@ -21,4 +23,4 @@ fi
 
 echo Make directory: $D
 mkdir "$D"
-./bin/Import --typefile stylesheets/map.ost --delete-temporary-files true --delete-debugging-files true --delete-analysis-files true --delete-report-files true --destinationDirectory "$D" "$1"
+"$PROGPATH"/bin/Import --typefile "$PROGPATH"/stylesheets/map.ost --delete-temporary-files true --delete-debugging-files true --delete-analysis-files true --delete-report-files true --destinationDirectory "$D" "$1"
