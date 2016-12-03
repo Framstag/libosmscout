@@ -25,7 +25,7 @@ if(APPLE AND NOT ANDROID)
 endif ()
 
 if(NOT MSVC)
-  add_definitions(-std=c++11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
 include(CheckTypeSize)
@@ -157,7 +157,7 @@ option(OSMSCOUT_BUILD_MAP_OPENGL "Enable build of OpenGL map drawing backend" ${
 if(OSMSCOUT_BUILD_MAP_OPENGL)
   add_subdirectory(libosmscout-map-opengl)
 endif()
-if(Direct2D_FOUND AND OSMSCOUT_BUILD_MAP)
+if(Direct2D_FOUND AND OSMSCOUT_BUILD_MAP AND MSVC)
   set(OSMSCOUT_BUILD_MAP_DIRECTX_CACHE ON)
 else()
   set(OSMSCOUT_BUILD_MAP_DIRECTX_CACHE OFF)
