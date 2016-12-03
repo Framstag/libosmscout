@@ -24,8 +24,6 @@ if(APPLE AND NOT ANDROID)
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 endif ()
 
-add_definitions(-std=c++11)
-
 include(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" OSMSCOUT_PTR_SIZE BUILTIN_TYPES_ONLY)
 if(OSMSCOUT_PTR_SIZE EQUAL 8)
