@@ -23,9 +23,11 @@
 #include <osmscout/import/GenNumericIndex.h>
 #include <osmscout/import/RawRelation.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawRelationIndexGenerator : public NumericIndexGenerator<OSMId,RawRelation>
+  class RawRelationIndexGenerator CLASS_FINAL : public NumericIndexGenerator<OSMId,RawRelation>
   {
   public:
     static const char* RAWREL_IDX;

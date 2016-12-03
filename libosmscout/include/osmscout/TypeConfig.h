@@ -42,6 +42,8 @@
 
 #include <osmscout/system/Assert.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -177,7 +179,7 @@ namespace osmscout {
   /**
    * An instantiation of a feature for a certain type.
    */
-  class OSMSCOUT_API FeatureInstance
+  class OSMSCOUT_API FeatureInstance CLASS_FINAL
   {
   private:
     FeatureRef     feature;    //!< The feature we are an instance of
@@ -242,7 +244,7 @@ namespace osmscout {
    *
    *  \see TypeConfig
    */
-  class OSMSCOUT_API TypeInfo
+  class OSMSCOUT_API TypeInfo CLASS_FINAL
   {
   public:
     static const unsigned char typeNode     = 1 << 0; //!< Condition applies to nodes
@@ -862,7 +864,7 @@ namespace osmscout {
    * internal array was not preinitialized to it maximum size by passing a
    * TypeConfig or another TypeInfoSet in the constructor.
    */
-  class OSMSCOUT_API TypeInfoSet
+  class OSMSCOUT_API TypeInfoSet CLASS_FINAL
   {
   private:
     std::vector<TypeInfoRef> types;
@@ -947,7 +949,7 @@ namespace osmscout {
    * A FeatureValueBuffer is instantiated by an object and holds information
    * about the type of the object, the features and feature values available for the given object.
    */
-  class OSMSCOUT_API FeatureValueBuffer
+  class OSMSCOUT_API FeatureValueBuffer CLASS_FINAL
   {
   private:
     TypeInfoRef type;

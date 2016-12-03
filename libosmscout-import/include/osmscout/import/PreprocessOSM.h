@@ -22,9 +22,11 @@
 
 #include <osmscout/import/Preprocessor.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class PreprocessOSM : public Preprocessor
+  class PreprocessOSM CLASS_FINAL : public Preprocessor
   {
   private:
     PreprocessorCallback& callback;

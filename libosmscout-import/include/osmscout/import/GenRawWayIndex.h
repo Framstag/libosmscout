@@ -23,9 +23,11 @@
 #include <osmscout/import/GenNumericIndex.h>
 #include <osmscout/import/RawWay.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawWayIndexGenerator : public NumericIndexGenerator<OSMId,RawWay>
+  class RawWayIndexGenerator CLASS_FINAL : public NumericIndexGenerator<OSMId,RawWay>
   {
   public:
     static const char* RAWWAY_IDX;

@@ -24,6 +24,8 @@
 
 #include <osmscout/Types.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -41,7 +43,7 @@ namespace osmscout {
    * The polygon can consist (partly) of a coastline (Coord.coast=true) or
    * of cell boundary lines (Coord.cell=false).
    */
-  struct OSMSCOUT_API GroundTile
+  struct OSMSCOUT_API GroundTile CLASS_FINAL
   {
     enum Type {
       unknown = 0,

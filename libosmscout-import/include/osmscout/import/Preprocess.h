@@ -37,9 +37,10 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
 
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
-  class Preprocess : public ImportModule
+  class Preprocess CLASS_FINAL : public ImportModule
   {
   public:
     static const char* RAWCOORDS_DAT;

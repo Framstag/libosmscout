@@ -27,9 +27,11 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class OSMSCOUT_API TurnRestriction
+  class OSMSCOUT_API TurnRestriction CLASS_FINAL
   {
   public:
     enum Type

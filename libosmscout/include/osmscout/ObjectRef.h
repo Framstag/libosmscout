@@ -26,6 +26,8 @@
 
 #include <osmscout/Types.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   enum OSMRefType
@@ -40,7 +42,7 @@ namespace osmscout {
    * Reference to an OSM object by its type (Node, Way, Relation) and its
    * OSM object id.
    */
-  class OSMSCOUT_API ObjectOSMRef
+  class OSMSCOUT_API ObjectOSMRef CLASS_FINAL
   {
   public:
     Id         id;
@@ -127,7 +129,7 @@ namespace osmscout {
    * Reference to an libosmscout internal object by its type (area, way, node)
    * and by its file offset within its data file.
    */
-  class OSMSCOUT_API ObjectFileRef
+  class OSMSCOUT_API ObjectFileRef CLASS_FINAL
   {
   public:
     FileOffset offset;
@@ -206,7 +208,7 @@ namespace osmscout {
   /**
    * Comparator to sort ObjectFileRefs strictly by increasing file offset
    */
-  class OSMSCOUT_API ObjectFileRefByFileOffsetComparator
+  class OSMSCOUT_API ObjectFileRefByFileOffsetComparator CLASS_FINAL
   {
     public:
     inline bool operator()(const ObjectFileRef& a,

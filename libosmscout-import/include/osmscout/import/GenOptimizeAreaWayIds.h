@@ -29,9 +29,11 @@
 
 #include <osmscout/util/NodeUseMap.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class OptimizeAreaWayIdsGenerator : public ImportModule
+  class OptimizeAreaWayIdsGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* AREAS3_TMP;

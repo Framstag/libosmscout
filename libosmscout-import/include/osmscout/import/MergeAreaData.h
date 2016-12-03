@@ -29,9 +29,11 @@
 
 #include <osmscout/util/NodeUseMap.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class MergeAreaDataGenerator : public ImportModule
+  class MergeAreaDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* AREAS_TMP;

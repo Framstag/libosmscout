@@ -33,9 +33,11 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class WaterIndexGenerator : public ImportModule
+  class WaterIndexGenerator CLASS_FINAL : public ImportModule
   {
   private:
     /** State of a cell */

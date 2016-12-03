@@ -26,13 +26,15 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
    * Represation of a type-less OSM node, just representing a geographic
    * coordinate.
    */
-  class RawCoord
+  class RawCoord CLASS_FINAL
   {
   private:
     OSMId    id;    //<! OSM id of the corresponding node

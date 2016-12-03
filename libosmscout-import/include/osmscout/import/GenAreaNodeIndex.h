@@ -22,9 +22,11 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class AreaNodeIndexGenerator : public ImportModule
+  class AreaNodeIndexGenerator CLASS_FINAL : public ImportModule
   {
   private:
     struct TypeData

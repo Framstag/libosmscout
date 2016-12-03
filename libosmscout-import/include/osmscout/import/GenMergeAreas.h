@@ -33,13 +33,15 @@
 
 #include <osmscout/util/NodeUseMap.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
    * Merges areas of the same type (and where the type is flag as mergable), which
    * "touch" each other and share the same nodes (same node id).
    */
-  class MergeAreasGenerator : public ImportModule
+  class MergeAreasGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* AREAS2_TMP;

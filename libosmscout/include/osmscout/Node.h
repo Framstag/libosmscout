@@ -31,9 +31,11 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class OSMSCOUT_API Node
+  class OSMSCOUT_API Node CLASS_FINAL
   {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features

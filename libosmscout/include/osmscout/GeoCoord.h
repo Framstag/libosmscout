@@ -28,6 +28,8 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
   /**
    * \ingroup Util
@@ -58,7 +60,7 @@ namespace osmscout {
    *
    * Anonymous geographic coordinate.
    */
-  struct OSMSCOUT_API GeoCoord
+  struct OSMSCOUT_API GeoCoord CLASS_FINAL
   {
     double lat;
     double lon;

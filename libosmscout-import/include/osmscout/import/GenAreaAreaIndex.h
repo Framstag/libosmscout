@@ -32,9 +32,11 @@
 #include <osmscout/import/Import.h>
 #include <osmscout/import/SortDat.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class AreaAreaIndexGenerator : public ImportModule
+  class AreaAreaIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* AREAADDRESS_DAT;

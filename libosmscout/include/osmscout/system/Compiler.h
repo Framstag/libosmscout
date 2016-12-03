@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_IMPORT_GENRAWNODEINDEX_H
-#define OSMSCOUT_IMPORT_GENRAWNODEINDEX_H
+#ifndef OSMSCOUT_SYSTEM_COMPILER_H
+#define OSMSCOUT_SYSTEM_COMPILER_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2014  Tim Teulings
+  Copyright (C) 2016  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,24 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/GenNumericIndex.h>
-#include <osmscout/import/RawNode.h>
-
-#include <osmscout/system/Compiler.h>
-
-namespace osmscout {
-
-  class RawNodeIndexGenerator CLASS_FINAL : public NumericIndexGenerator<OSMId,RawNode>
-  {
-  public:
-    static const char* RAWNODE_IDX;
-
-  public:
-    RawNodeIndexGenerator();
-
-    void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
-  };
-}
+#if defined(SWIG)
+  #define CLASS_FINAL
+#else
+  #define CLASS_FINAL final
+#endif
 
 #endif

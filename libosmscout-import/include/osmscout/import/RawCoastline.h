@@ -28,9 +28,11 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawCoastline
+  class RawCoastline CLASS_FINAL
   {
   private:
     // Attribute availability flags (for optimized attribute storage)

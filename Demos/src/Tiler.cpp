@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   // Change this, to match your system
   drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
   drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
-  drawParameter.SetFontSize(5.0);
+  drawParameter.SetFontSize(2.0);
   // Fadings make problems with tile approach, we disable it
   drawParameter.SetDrawFadings(false);
   // To get accurate label drawing at tile borders, we take into account labels
@@ -215,8 +215,8 @@ int main(int argc, char* argv[])
 
         std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
 
-        osmscout::GeoBox dataBoundingBox(osmscout::GeoCoord(osmscout::TileYToLat(y-1,magnification),osmscout::TileXToLon(x-1,magnification)),
-                                         osmscout::GeoCoord(osmscout::TileYToLat(y+1,magnification),osmscout::TileXToLon(x+1,magnification)));
+        osmscout::GeoBox dataBoundingBox(osmscout::GeoCoord(osmscout::TileYToLat(y-4,magnification),osmscout::TileXToLon(x-4,magnification)),
+                                         osmscout::GeoCoord(osmscout::TileYToLat(y+4,magnification),osmscout::TileXToLon(x+4,magnification)));
 
         std::list<osmscout::TileRef> tiles;
 

@@ -32,11 +32,13 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Progress.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
   /**
     Representation of an (complex/multipolygon) area
     */
-  class OSMSCOUT_API Area
+  class OSMSCOUT_API Area CLASS_FINAL
   {
   public:
     static const uint8_t masterRingId;

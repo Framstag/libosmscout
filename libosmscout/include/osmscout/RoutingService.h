@@ -50,6 +50,8 @@
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Cache.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -62,7 +64,7 @@ namespace osmscout {
    *
    * Start or end position of a rout calculation
    */
-  class OSMSCOUT_API RoutePosition
+  class OSMSCOUT_API RoutePosition CLASS_FINAL
   {
   private:
     ObjectFileRef object;
@@ -98,7 +100,7 @@ namespace osmscout {
    * The following groups attributes are currently available:
    * - Switch for showing debug information
    */
-  class OSMSCOUT_API RouterParameter
+  class OSMSCOUT_API RouterParameter CLASS_FINAL
   {
   private:
     bool          debugPerformance;
@@ -148,7 +150,7 @@ namespace osmscout {
    * Parameter object for routing calculations. Holds all optional
    * flags and callback objects that can be passed to the router
    */
-  class OSMSCOUT_API RoutingParameter //final
+  class OSMSCOUT_API RoutingParameter CLASS_FINAL
   {
   private:
     BreakerRef         breaker;
@@ -176,7 +178,7 @@ namespace osmscout {
    *
    * @TODO: Make setter private and class friend to the RoutingService
    */
-  class OSMSCOUT_API RoutingResult //final
+  class OSMSCOUT_API RoutingResult CLASS_FINAL
   {
   private:
     RouteData route;

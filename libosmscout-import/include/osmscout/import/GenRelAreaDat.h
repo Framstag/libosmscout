@@ -38,9 +38,11 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawWayIndexedDataFile.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RelAreaDataGenerator : public ImportModule
+  class RelAreaDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* RELAREA_TMP;

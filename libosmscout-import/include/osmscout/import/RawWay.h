@@ -29,9 +29,11 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawWay
+  class RawWay CLASS_FINAL
   {
   private:
     OSMId              id;

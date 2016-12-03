@@ -35,6 +35,8 @@
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Transformation.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -44,13 +46,13 @@ namespace osmscout {
     * Add variable defining the output directory (and make all import modules
       respect this parameter).
     */
-  class OSMSCOUT_IMPORT_API ImportParameter
+  class OSMSCOUT_IMPORT_API ImportParameter CLASS_FINAL
   {
   public:
     /**
      * Definition of a router
      */
-    class OSMSCOUT_IMPORT_API Router
+    class OSMSCOUT_IMPORT_API Router CLASS_FINAL
     {
     private:
       VehicleMask vehicleMask;
@@ -302,7 +304,7 @@ namespace osmscout {
     void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
   };
 
-  class OSMSCOUT_IMPORT_API ImportModuleDescription
+  class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL
   {
   private:
     std::string            name;

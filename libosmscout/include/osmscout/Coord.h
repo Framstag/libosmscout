@@ -30,6 +30,8 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -40,7 +42,7 @@ namespace osmscout {
    *
    * This way we can 0 as a special flag for nodes without any identity.
    */
-  struct OSMSCOUT_API Coord
+  struct OSMSCOUT_API Coord CLASS_FINAL
   {
   private:
     uint8_t    serial;     //!< Serial id in relation to all coordinates witht he same coord value

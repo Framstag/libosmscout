@@ -24,9 +24,11 @@
 
 #include <osmscout/import/GenNumericIndex.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class IntersectionIndexGenerator : public NumericIndexGenerator<Id,Intersection>
+  class IntersectionIndexGenerator CLASS_FINAL : public NumericIndexGenerator<Id,Intersection>
   {
   public:
     IntersectionIndexGenerator();

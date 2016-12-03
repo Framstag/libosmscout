@@ -32,9 +32,11 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class LocationIndexGenerator : public ImportModule
+  class LocationIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* const FILENAME_LOCATION_REGION_TXT;
@@ -368,7 +370,7 @@ namespace osmscout {
     std::map<std::string,RegionLocation>::iterator FindLocation(Progress& progress,
                                                                 Region& region,
                                                                 const std::string &locationName);
-    
+
     void AddAddressNodeToRegion(Progress& progress,
                                 Region& region,
                                 const FileOffset& fileOffset,

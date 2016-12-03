@@ -33,9 +33,11 @@
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class WayAreaDataGenerator : public ImportModule
+  class WayAreaDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* WAYAREA_TMP;

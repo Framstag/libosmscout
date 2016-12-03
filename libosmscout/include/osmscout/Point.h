@@ -23,13 +23,15 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
    * \ingroup Geometry
    * A point is a identifiable (has an id) geo-coordinate.
    */
-  class OSMSCOUT_API Point
+  class OSMSCOUT_API Point CLASS_FINAL
   {
   private:
     uint8_t  serial;

@@ -6,6 +6,7 @@ set(HEADER_FILES
     #include/osmscout/private/Config.h
     include/osmscout/private/CoreImportExport.h
     include/osmscout/system/Assert.h
+    include/osmscout/system/Compiler.h
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
@@ -81,7 +82,7 @@ set(HEADER_FILES
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
-)
+        include/osmscout/system/Compiler.h)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
