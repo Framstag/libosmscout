@@ -101,6 +101,13 @@ namespace osmscout {
       complete=true;
     }
 
+    void SetIncomplete()
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      complete=false;
+    }
+
     /**
      * Return 'true' if there was data already assigned to the tile
      */
@@ -418,7 +425,14 @@ namespace osmscout {
 
     void SetSize(size_t cacheSize);
 
+    inline size_t GetSize() const
+    {
+      return cacheSize;
+    }
+
     void CleanupCache();
+
+    void InvalidateCache();
 
     TileRef GetCachedTile(const TileId& id) const;
     TileRef GetTile(const TileId& id) const;
