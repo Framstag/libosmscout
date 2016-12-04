@@ -240,6 +240,7 @@ public slots:
                  std::unordered_map<std::string,bool> stylesheetFlags,
                  const QString &suffix="");
   virtual void Initialize() = 0;
+  virtual void InvalidateVisualCache() = 0;
   void Finalize();
   
   /**
