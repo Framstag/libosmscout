@@ -146,14 +146,24 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
   return true;
 }
 
-bool DBThread::isInitialized(){
-  QMutexLocker locker(&mutex);
+/**
+ * check if DBThread is initialized without acquire mutex
+ *
+ * @return true if all databases are open
+ */
+bool DBThread::isInitializedInternal()
+{
   for (auto db:databases){
     if (!db->database->IsOpen()){
       return false;
     }
   }
   return true;
+}
+
+bool DBThread::isInitialized(){
+  QMutexLocker locker(&mutex);
+  return isInitializedInternal();
 }
 
 double DBThread::GetMapDpi() const
@@ -282,7 +292,7 @@ void DBThread::ToggleDaylight()
   {
     QMutexLocker locker(&mutex);
 
-    if (!isInitialized()) {
+    if (!isInitializedInternal()) {
         return;
     }
     qDebug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
@@ -904,10 +914,10 @@ QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& l
 
 void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 {
-  if (!isInitialized()){
+  QMutexLocker locker(&mutex);
+  if (!isInitializedInternal()){
       return; // ignore request if db is not initialized
   }
-  QMutexLocker locker(&mutex);
     
   osmscout::LocationDescription description;
   int count = 0;

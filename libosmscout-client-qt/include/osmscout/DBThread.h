@@ -333,6 +333,8 @@ protected:
 
   void CancelCurrentDataLoading();
 
+  bool isInitializedInternal();
+
 public:
   bool isInitialized(); 
   
