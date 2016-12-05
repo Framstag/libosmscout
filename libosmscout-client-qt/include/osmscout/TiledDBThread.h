@@ -66,9 +66,6 @@ public slots:
   void onOfflineMapChanged(bool);
   virtual void Initialize();
 
-  virtual void onMapDPIChange(double dpi);
-  virtual void onRenderSeaChanged(bool);  
-
 private:
   QString                       tileCacheDirectory;
 
@@ -114,6 +111,8 @@ public:
   virtual bool RenderMap(QPainter& painter,
                          const RenderMapRequest& request);
   
+  virtual void InvalidateVisualCache();
+
 private:
 
   /**

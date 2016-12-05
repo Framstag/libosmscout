@@ -274,6 +274,15 @@ void PlaneDBThread::HandleInitialRenderingRequest()
   pendingRenderingTimer.start(INITIAL_DATA_RENDERING_TIMEOUT);
 }
 
+void PlaneDBThread::InvalidateVisualCache()
+{
+  QMutexLocker finishedLocker(&finishedMutex);
+  qDebug() << "Invalidate finished image";
+  if (finishedImage)
+    delete finishedImage;
+  finishedImage=NULL;
+}
+
 void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile)
 {
   //return; // FIXME: remove this return, make loading asynchronous
