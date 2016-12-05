@@ -10,6 +10,9 @@ cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DOSMSCOUT_BUILD_MAP_OP
 
 make $*
 
+echo "Check which libraries are dynamically linked"
+ldd Import/Import
+
 IMPDIST=libosmscout-importer.$IMPORT_TOOL_OS.$IMPORT_TOOL_ARCH
 
 mkdir -p "$IMPDIST"/bin "$IMPDIST"/stylesheets 
