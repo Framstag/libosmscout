@@ -31,15 +31,7 @@
 
 #include <osmscout/TileCache.h>
 #include <osmscout/OnlineTileProvider.h>
-
-// these variables should be defined by build system
-#ifndef OSMSCOUT_VERSION_STRING
-#define OSMSCOUT_VERSION_STRING "v?"
-#endif
-
-#ifndef OSMSCOUT_USER_AGENT
-#define OSMSCOUT_USER_AGENT "OSMScout demo app %1"
-#endif
+#include <osmscout/Settings.h>
 
 /**
  * \ingroup QtAPI

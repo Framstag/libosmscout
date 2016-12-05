@@ -31,6 +31,15 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
+// these variables should be defined by build system
+#ifndef OSMSCOUT_VERSION_STRING
+#define OSMSCOUT_VERSION_STRING "v?"
+#endif
+
+#ifndef OSMSCOUT_USER_AGENT
+#define OSMSCOUT_USER_AGENT "OSMScout demo app %1"
+#endif
+
 /**
  * \ingroup QtAPI
  * 
@@ -109,6 +118,8 @@ public:
   
   const QString GetGpsFormat() const;
   void SetGpsFormat(const QString formatId);
+  
+  const QString GetHttpCacheDir() const;
   
   static Settings* GetInstance();
   static void FreeInstance();

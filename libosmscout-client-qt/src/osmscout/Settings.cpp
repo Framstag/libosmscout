@@ -19,6 +19,8 @@
 
 #include <QScreen>
 #include <QGuiApplication>
+#include <QStandardPaths>
+#include <QDir>
 #include <QObject>
 #include <QDebug>
 
@@ -251,6 +253,12 @@ void Settings::SetGpsFormat(const QString formatId)
     settings.setValue("gpsFormat", formatId);
     emit GpsFormatChanged(formatId);
   }
+}
+
+const QString Settings::GetHttpCacheDir() const
+{
+  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);  
+  return cacheLocation + QDir::separator() + "OSMScoutHttpCache";
 }
 
 static Settings* settingsInstance=NULL;

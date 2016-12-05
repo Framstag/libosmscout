@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QUrl>
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -39,6 +40,7 @@ class OSMSCOUT_CLIENT_QT_API MapProvider: public QObject
 private:
   bool valid;
   QString uri;
+  QString listUri;
   QString name;
   
 public:
@@ -46,10 +48,10 @@ public:
   
   inline MapProvider(const MapProvider &o):
     QObject(o.parent()),
-    valid(o.valid), uri(o.uri), name(o.name){};  
+    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};  
   
-  inline MapProvider(QString name, QString uri): 
-    valid(true), uri(uri), name(name) {}
+  inline MapProvider(QString name, QString uri, QString listUri): 
+    valid(true), uri(uri), listUri(listUri), name(name) {}
   
   inline ~MapProvider() {}
   
@@ -57,6 +59,7 @@ public:
   {
     valid = o.valid;
     uri = o.uri;
+    listUri = o.listUri;
     name = o.name;
   }  
   
@@ -68,6 +71,11 @@ public:
   inline QString getUri() const
   {
     return uri;
+  }
+  
+  inline QUrl getListUri(int fromVersion, int toVersion, QString locale="en") const
+  {
+    return uri.arg(fromVersion).arg(toVersion).arg(locale);
   }
   
   inline bool isValid() const

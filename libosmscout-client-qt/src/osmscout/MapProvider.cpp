@@ -27,9 +27,10 @@ MapProvider MapProvider::fromJson(QJsonValue val)
   QJsonObject obj = val.toObject();
   auto name = obj["name"];
   auto uri = obj["uri"];
+  auto listUri = obj["listUri"];
 
-  if (!(name.isString() && uri.isString())){
+  if (!(name.isString() && uri.isString() && listUri.isString())){
     return MapProvider();
   }
-  return MapProvider(name.toString(), uri.toString());
+  return MapProvider(name.toString(), uri.toString(), listUri.toString());
 }

@@ -21,6 +21,9 @@
 #define	AVAILABLEMAPSMODEL_H
 
 #include <QAbstractListModel>
+#include <QNetworkAccessManager>
+#include <QNetworkDiskCache>
+#include <QNetworkReply>
 
 #include <osmscout/MapProvider.h>
 #include <osmscout/Settings.h>
@@ -31,11 +34,11 @@
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractListModel {
   Q_OBJECT
   
+public slots:
+  void listDownloaded(QNetworkReply*);
+
 public:
-  inline AvailableMapsModel()
-  {
-    mapProviders = Settings::GetInstance()->GetMapProviders();
-  }
+  inline AvailableMapsModel();
 
   inline ~AvailableMapsModel()
   {
@@ -49,6 +52,7 @@ public:
     TimeRole = Qt::UserRole+4, // QTime of map creation 
     VersionRole = Qt::UserRole+5,
     SizeRole = Qt::UserRole+6,
+    ProviderUriRole = Qt::UserRole+7,
   };
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -58,7 +62,10 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
   
 private:
-  QList<MapProvider> mapProviders;
+  QNetworkAccessManager     webCtrl; 
+  QNetworkDiskCache         diskCache;
+  QList<MapProvider>        mapProviders;
+  QHash<QUrl,MapProvider>   requests;
 };
 
 #endif	/* AVAILABLEMAPMODEL_H */

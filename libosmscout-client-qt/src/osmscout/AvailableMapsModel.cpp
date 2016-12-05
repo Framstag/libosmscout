@@ -19,6 +19,50 @@
 
 #include <osmscout/AvailableMapsModel.h>
 
+AvailableMapsModel::AvailableMapsModel()
+{
+  mapProviders = Settings::GetInstance()->GetMapProviders();
+
+  connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));    
+  diskCache.setCacheDirectory(Settings::GetInstance()->GetHttpCacheDir());
+  webCtrl.setCache(&diskCache);  
+
+  QLocale locale;
+  for (auto &provider: mapProviders){
+    QUrl url = provider.getListUri(osmscout::TypeConfig::MIN_FORMAT_VERSION,
+                                   osmscout::TypeConfig::MAX_FORMAT_VERSION, 
+                                   locale.name());
+    QNetworkRequest request(url);
+    requests[url]=provider;
+    
+    request.setHeader(QNetworkRequest::UserAgentHeader, QString(OSMSCOUT_USER_AGENT).arg(OSMSCOUT_VERSION_STRING));
+    //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
+    webCtrl.get(request);
+  }
+}
+
+void AvailableMapsModel::listDownloaded(QNetworkReply* reply)
+{
+  QUrl url = reply->url();
+  if (!requests.contains(url)){
+    qWarning() << "Response from non-requested url: " << url;
+  }else{
+    MapProvider provider=requests.value(url);
+    requests.remove(url);
+    if (reply->error() != QNetworkReply::NoError){
+      qWarning() << "Downloading " << url << "failed with " << reply->errorString();
+    }else{
+      QByteArray downloadedData = reply->readAll();
+      QJsonDocument doc = QJsonDocument::fromJson(downloadedData);
+      for (auto &obj: doc.array()){
+          // TODO: load JSON
+          //MapProvider provider = MapProvider::fromJson(obj);
+      }
+    }
+  }
+  reply->deleteLater();
+}
+
 int AvailableMapsModel::rowCount(const QModelIndex &parent) const
 {
   return 0; // TODO
@@ -40,6 +84,7 @@ QHash<int, QByteArray> AvailableMapsModel::roleNames() const
     roles[TimeRole]="time";
     roles[VersionRole]="version";
     roles[SizeRole]="size";
+    roles[ProviderUriRole]="providerUri";
 
     return roles;
 }
