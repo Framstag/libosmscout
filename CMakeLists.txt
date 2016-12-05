@@ -289,3 +289,5 @@ message(STATUS " - C# binding:                           ${OSMSCOUT_BUILD_BINDIN
 message(STATUS "external interfaces:")
 message(STATUS " - MATLAB mex function:                  ${OSMSCOUT_BUILD_EXTERN_MATLAB}")
 message(STATUS "documentation:                           ${OSMSCOUT_BUILD_DOC_API}")
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share)
