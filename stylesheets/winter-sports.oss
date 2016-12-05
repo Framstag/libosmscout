@@ -158,7 +158,7 @@ CONST
   COLOR commercialColor            = #efc8c8;
   COLOR constructionColor          = #9d9d6c;
   
-  COLOR farmColor                  = #ead8bd;
+  COLOR farmColor                  = #e5f5f4;
   COLOR farmyardColor              = #f0e4d1;
   COLOR fellColor                  = #f9f9f9;
 
@@ -1262,7 +1262,7 @@ STYLE
    [MAG county-] {
      [TYPE leisure_pitch] AREA { color: @pitchColor; borderColor: @pitchBorderColor; borderWidth: 0.1mm; }
      [TYPE leisure_water_park] AREA { color: #f1eee8; borderColor: #887b7b; borderWidth: 0.1mm; }
-     [TYPE leisure_park] AREA { color: #c6f0cf; }
+     [TYPE leisure_park] AREA { color: #dbf5e0; }
      [TYPE leisure_common] AREA { color: #bde3cb; }
 
      [TYPE leisure_marina,
@@ -1464,15 +1464,15 @@ STYLE
  [MAG city-] {
      [TYPE piste_downhill_easy]{
         WAY {color: #5050ff; displayWidth: 0.5mm; width: 20m;}
-        AREA {color: lighten(#5050ff, 0.5); borderColor: #5050ff; borderWidth: 0.3mm; }
+        AREA {color: #5050ff80; borderColor: #5050ff; borderWidth: 0.3mm; }
      }
      [TYPE piste_downhill_intermediate]{
         WAY {color: #ff5050; displayWidth: 0.5mm; width: 20m;}
-        AREA {color: lighten(#ff5050, 0.5); borderColor: #ff5050; borderWidth: 0.3mm; }
+        AREA {color: #ff505080; borderColor: #ff5050; borderWidth: 0.3mm; }
      }
      [TYPE piste_downhill_advanced]{
         WAY {color: #606060; displayWidth: 0.5mm; width: 20m;}
-        AREA {color: lighten(#606060, 0.5); borderColor: #606060; borderWidth: 0.3mm; }
+        AREA {color: #60606080; borderColor: #606060; borderWidth: 0.3mm; }
      }
  }
  [MAG close-]{
