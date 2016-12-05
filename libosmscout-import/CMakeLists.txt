@@ -122,19 +122,30 @@ target_link_libraries(osmscout_import
 		osmscout
 		${PROTOBUF_LIBRARIES})
 
-if (LIBLZMA_FOUND)
+if (LIBLZMA_FOUND AND ICONV_FOUND)
   target_link_libraries(osmscout_import
                ${LIBXML2_LIBRARIES}
                ${ZLIB_LIBRARIES}
                ${ICONV_LIBRARIES}
                ${LIBLZMA_LIBRARIES}
                )
-else()
+elseif (ICONV_FOUND)
   target_link_libraries(osmscout_import
     ${LIBXML2_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ICONV_LIBRARIES}
     )
+elseif (LIBLZMA_FOUND)
+  target_link_libraries(osmscout_import
+    ${LIBXML2_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${LIBLZMA_LIBRARIES}
+    )    
+else()
+  target_link_libraries(osmscout_import
+    ${LIBXML2_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    )    
 endif()
 
 if(MARISA_FOUND)
