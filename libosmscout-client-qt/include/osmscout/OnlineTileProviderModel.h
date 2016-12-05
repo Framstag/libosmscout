@@ -76,7 +76,7 @@
  * }
  * ```
  */
-class OnlineTileProviderModel : public QAbstractListModel {
+class OSMSCOUT_CLIENT_QT_API OnlineTileProviderModel : public QAbstractListModel {
   Q_OBJECT
   
 public:
