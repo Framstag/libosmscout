@@ -80,7 +80,9 @@ int main(int argc, char* argv[])
   // load online tile providers
   Settings::GetInstance()->loadOnlineTileProviders(
     ":/resources/online-tile-providers.json");
-
+  Settings::GetInstance()->loadMapProviders(
+    ":/resources/map-providers.json");
+  
   QThread thread;
 
   // setup paths

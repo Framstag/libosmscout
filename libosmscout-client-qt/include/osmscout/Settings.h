@@ -27,6 +27,7 @@
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OnlineTileProvider.h>
+#include <osmscout/MapProvider.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -69,6 +70,7 @@ private:
   double    physicalDpi;
   MapView   *view;
   QMap<QString, OnlineTileProvider> onlineProviders;
+  QList<MapProvider> mapProviders;
 
 public:
   Settings();
@@ -90,11 +92,14 @@ public:
   
   const QList<OnlineTileProvider> GetOnlineProviders() const;
   const OnlineTileProvider GetOnlineTileProvider() const; 
-  
+
+  const QList<MapProvider> GetMapProviders() const;
+
   const QString GetOnlineTileProviderId() const; 
   void SetOnlineTileProviderId(QString id);
   
   bool loadOnlineTileProviders(QString path);
+  bool loadMapProviders(QString path);
   
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);
