@@ -38,8 +38,8 @@ static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 // Timeout for the updated rendering after rerendering was triggered (more rendering data is available)
 static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 
-PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs, 
-                             QString stylesheetFilename, 
+PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
+                             QString stylesheetFilename,
                              QString iconDirectory)
  : DBThread(databaseLookupDirs, stylesheetFilename, iconDirectory),
    pendingRenderingTimer(this),
@@ -54,12 +54,12 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
   pendingRenderingTimer.setSingleShot(true);
 
   connect(this,SIGNAL(TriggerMapRenderingSignal(const RenderMapRequest&)),
-          this,SLOT(TriggerMapRendering(const RenderMapRequest&)), 
+          this,SLOT(TriggerMapRendering(const RenderMapRequest&)),
           Qt::QueuedConnection);
 
   connect(this,SIGNAL(TriggerInitialRendering()),
           this,SLOT(HandleInitialRenderingRequest()));
-  
+
   connect(&pendingRenderingTimer,SIGNAL(timeout()),
           this,SLOT(DrawMap()));
 
@@ -79,17 +79,17 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
 
 PlaneDBThread::~PlaneDBThread()
 {
-  
+
 }
 
 void PlaneDBThread::Initialize()
 {
 
-  qDebug() << "Initialize";
+  osmscout::log.Debug() << "Initialize";
   // invalidate tile cache and init base
   osmscout::GeoBox boundingBox;
   DBThread::InitializeDatabases(boundingBox);
-  
+
   {
     QMutexLocker locker(&mutex);
     QMutexLocker finishedLocker(&finishedMutex);
@@ -102,7 +102,7 @@ void PlaneDBThread::Initialize()
       }
     }
   }
-    
+
   emit Redraw();
 }
 
@@ -119,7 +119,7 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   } else {
     backgroundColor=osmscout::Color(0,0,0);
   }
-  
+
   if (finishedImage==NULL) {
     painter.fillRect(0,
                      0,
@@ -128,7 +128,7 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
                      QColor::fromRgbF(backgroundColor.GetR(),
                                       backgroundColor.GetG(),
                                       backgroundColor.GetB(),
-                                      backgroundColor.GetA()));    
+                                      backgroundColor.GetA()));
     //RenderMessage(painter,request.width,request.height,"no image rendered (internal error?)");
 
     // Since we assume that this is just a temporary problem, or we just were not instructed to render
@@ -140,7 +140,7 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
     emit TriggerMapRenderingSignal(request);
     return false;
   }
-  
+
   osmscout::MercatorProjection requestProjection;
   requestProjection.Set(request.coord,
                  request.angle,
@@ -148,7 +148,7 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
                  mapDpi,
                  request.width,
                  request.height);
-  
+
   osmscout::MercatorProjection finalImgProjection;
   finalImgProjection.Set(finishedCoord,
                  finishedAngle,
@@ -156,11 +156,11 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
                  mapDpi,
                  finishedImage->width(),
                  finishedImage->height());
-  
+
   osmscout::GeoBox finalImgBoundingBox;
   finalImgProjection.GetDimensions(finalImgBoundingBox);
 
-    
+
   double x1;
   double y1;
   double x2;
@@ -197,7 +197,7 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
     }
     emit TriggerMapRenderingSignal(request);
   }
-  
+
   return needsNoRepaint;
 }
 
@@ -210,7 +210,7 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
     }
   }
 
-  qDebug() << "Start data loading...";
+  osmscout::log.Debug() << "Start data loading...";
   {
     QMutexLocker locker(&mutex);
     // CancelCurrentDataLoading();
@@ -250,12 +250,12 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 
         db->mapService->LookupTiles(projection,tiles);
         if (!db->mapService->LoadMissingTileDataAsync(searchParameter,*(db->styleConfig),tiles)) {
-          qDebug() << "*** Loading of data has error or was interrupted";
+          osmscout::log.Error() << "*** Loading of data has error or was interrupted";
           continue;
         }
       }
       else {
-        qDebug() << "Cannot draw map: " << db->database->IsOpen() << " " << db->styleConfig.get();
+        osmscout::log.Error() << "Cannot draw map: " << db->database->IsOpen() << " " << db->styleConfig.get();
         //QPainter p;
         //RenderMessage(p,request.width,request.height,"Database not open");
       }
@@ -269,7 +269,7 @@ void PlaneDBThread::HandleInitialRenderingRequest()
   if (pendingRenderingTimer.isActive())
     return; // avoid repeated draw postpone (data loading may be called very fast)
 
-  qDebug() << "Start rendering timer:" << INITIAL_DATA_RENDERING_TIMEOUT << "ms";
+  osmscout::log.Debug() << "Start rendering timer:" << INITIAL_DATA_RENDERING_TIMEOUT << "ms";
   pendingRenderingTimer.stop();
   pendingRenderingTimer.start(INITIAL_DATA_RENDERING_TIMEOUT);
 }
@@ -277,7 +277,7 @@ void PlaneDBThread::HandleInitialRenderingRequest()
 void PlaneDBThread::InvalidateVisualCache()
 {
   QMutexLocker finishedLocker(&finishedMutex);
-  qDebug() << "Invalidate finished image";
+  osmscout::log.Debug() << "Invalidate finished image";
   if (finishedImage)
     delete finishedImage;
   finishedImage=NULL;
@@ -287,7 +287,7 @@ void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile
 {
   //return; // FIXME: remove this return, make loading asynchronous
   QMutexLocker locker(&mutex);
-  
+
   bool relevant=false;
   for (auto &db: databases){
     std::list<osmscout::TileRef> tiles;
@@ -314,11 +314,11 @@ void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile
     //qDebug() << "Waiting for timer in" << pendingRenderingTimer.remainingTime() ;
   }
   else if (elapsedTime>UPDATED_DATA_RENDERING_TIMEOUT) {
-    qDebug() << "TriggerDrawMap, last redring" << elapsedTime << "ms before";
+    osmscout::log.Debug() << "TriggerDrawMap, last rendering" << elapsedTime << "ms before";
     emit TriggerDrawMap();
   }
   else {
-    qDebug() << "Start rendering timer:" << UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime << "ms";
+    osmscout::log.Debug() << "Start rendering timer:" << UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime << "ms";
     pendingRenderingTimer.start(UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime);
   }
 }
@@ -327,7 +327,7 @@ void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
 {
   // parent
   DBThread::TileStateCallback(changedTile);
-  
+
   //printTileInfo(changedTile);
 
   // We are in the context of one of the libosmscout worker threads
@@ -339,7 +339,7 @@ void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
  */
 void PlaneDBThread::DrawMap()
 {
-  qDebug() << "DrawMap()";
+  osmscout::log.Debug() << "DrawMap()";
   {
     QMutexLocker locker(&mutex);
     for (auto db:databases){
@@ -383,13 +383,13 @@ void PlaneDBThread::DrawMap()
                    projection.GetHeight());
 
     renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
-    
+
     QPainter p;
     p.begin(currentImage);
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::TextAntialiasing);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);        
-    
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+
     bool success=true;
     for (auto &db:databases){
       std::list<osmscout::TileRef> tiles;
@@ -402,7 +402,7 @@ void PlaneDBThread::DrawMap()
         db->mapService->GetGroundTiles(renderProjection,
                                        data.groundTiles);
       }
-      
+
       success&=db->painter->DrawMap(renderProjection,
                                     drawParameter,
                                     data,
@@ -412,10 +412,10 @@ void PlaneDBThread::DrawMap()
     p.end();
 
     if (!success)  {
-      qDebug() << "*** Rendering of data has error or was interrupted";
+      osmscout::log.Error() << "*** Rendering of data has error or was interrupted";
       return;
     }
-    {      
+    {
       QMutexLocker finishedLocker(&finishedMutex);
       std::swap(currentImage,finishedImage);
 
