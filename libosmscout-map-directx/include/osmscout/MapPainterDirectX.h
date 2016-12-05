@@ -41,6 +41,7 @@ namespace osmscout {
 		BrushMap m_Brushs;
 		typedef std::unordered_map<uint64_t, ID2D1PathGeometry*> GeometryMap;
 		GeometryMap m_Geometries;
+		GeometryMap m_Polygons;
 		typedef std::unordered_map<uint64_t, ID2D1Bitmap*> BitmapMap;
 		BitmapMap m_Bitmaps;
 		typedef std::unordered_map<uint64_t, ID2D1StrokeStyle*> StrokeStyleMap;

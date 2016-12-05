@@ -318,6 +318,13 @@ namespace osmscout
 
 	void MapPainterDirectX::AfterDrawing(const StyleConfig& styleConfig, const Projection& projection, const MapParameter& parameter, const MapData& data)
 	{
+		for (GeometryMap::const_iterator entry = m_Polygons.begin(); entry != m_Polygons.end(); ++entry) {
+			if (entry->second != NULL) {
+				entry->second->Release();
+				m_Polygons[entry->first] = NULL;
+			}
+		}
+		m_Polygons.clear();
 	}
 
 	bool MapPainterDirectX::HasIcon(const StyleConfig& styleConfig, const MapParameter& parameter, IconStyle& style)
@@ -475,7 +482,52 @@ namespace osmscout
 			if (dynamic_cast<PolygonPrimitive*>(primitive) != NULL)
 			{
 				PolygonPrimitive* polygon = dynamic_cast<PolygonPrimitive*>(primitive);
-				// Not implemented yet
+				const std::list<osmscout::Vertex2D> data = polygon->GetCoords();
+				if (data.size() > 2)
+				{
+					double* coords = new double[data.size() * 2];
+					std::list<osmscout::Vertex2D>::const_iterator iter = data.begin();
+					for (size_t uj = 0; iter != data.end(); uj++)
+					{
+						coords[uj * 2 + 0] = iter->GetX();
+						coords[uj * 2 + 1] = iter->GetY();
+						iter++;
+					}
+					uint64_t hash = crc64((const unsigned char *)coords, data.size() * sizeof(double));
+					GeometryMap::const_iterator g = m_Polygons.find(hash);
+					if (g != m_Polygons.end())
+					{
+						m_pRenderTarget->FillGeometry(g->second, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
+						if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(polygon->GetFillStyle()->GetBorderColor()), borderWidth, GetStrokeStyle(polygon->GetFillStyle()->GetBorderDash()));
+					}
+					else
+					{
+						ID2D1PathGeometry* pPathGeometry;
+						HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+						if (SUCCEEDED(hr))
+						{
+							ID2D1GeometrySink *pSink = NULL;
+							hr = pPathGeometry->Open(&pSink);
+							if (SUCCEEDED(hr))
+							{
+								pSink->BeginFigure(D2D1::Point2F(coords[0], coords[1]), D2D1_FIGURE_BEGIN_HOLLOW);
+
+								for (size_t uj = 1; uj < data.size(); uj++)
+								{
+									pSink->AddLine(D2D1::Point2F(coords[uj * 2 + 0], coords[uj * 2 + 1]));
+								}
+								pSink->EndFigure(D2D1_FIGURE_END_OPEN);
+								hr = pSink->Close();
+								pSink->Release();
+								pSink = NULL;
+							}
+						}
+						m_Polygons.insert(std::make_pair(hash, pPathGeometry));
+						m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
+						if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(polygon->GetFillStyle()->GetBorderColor()), borderWidth, GetStrokeStyle(polygon->GetFillStyle()->GetBorderDash()));
+					}
+					delete coords;
+				}
 			}
 			else if (dynamic_cast<RectanglePrimitive*>(primitive) != NULL)
 			{
@@ -675,6 +727,13 @@ namespace osmscout
 			}
 		}
 		m_Geometries.clear();
+		for (GeometryMap::const_iterator entry = m_Polygons.begin(); entry != m_Polygons.end(); ++entry) {
+			if (entry->second != NULL) {
+				entry->second->Release();
+				m_Polygons[entry->first] = NULL;
+			}
+		}
+		m_Polygons.clear();
 	}
 
 	bool MapPainterDirectX::DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, ID2D1RenderTarget* renderTarget)
