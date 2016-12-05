@@ -7,6 +7,9 @@ endif()
 if(NOT ZLIB_FOUND)
 	message(SEND_ERROR "zlib is required for import library")
 endif()
+if(MSVC AND NOT (MSVC_VERSION GREATER 1800))
+	message(SEND_ERROR "Microsoft Visual Studio 2015+ is required for import library")
+endif()
 
 set(HEADER_FILES
     #include/osmscout/import/pbf/fileformat.pb.h
