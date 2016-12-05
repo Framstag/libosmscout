@@ -91,6 +91,8 @@ find_package(Marisa QUIET)
 find_package(LibXml2 QUIET)
 find_package(MyProtobuf QUIET) # Modified FindProtobuf
 find_package(ZLIB QUIET)
+find_package(iconv QUIET)
+find_package(LibLZMA QUIET)
 find_package(PNG QUIET)
 find_package(Cairo QUIET)
 find_package(Agg QUIET)

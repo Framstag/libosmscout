@@ -8,6 +8,14 @@ os: Visual Studio 2015
 
 environment:
   matrix:
+  - COMPILER: msys2
+    PLATFORM: x64
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    BIT: 64
+    BUILDTOOL: cmake
+    TARGET: importer
   - COMPILER: msvc2015
     PLATFORM: x64
     CONFIGURATION: Debug
@@ -16,6 +24,7 @@ environment:
     MSYSTEM: MINGW64
     BIT: 64
     BUILDTOOL: msbuild
+    TARGET: build
   - COMPILER: msvc2015
     PLATFORM: x64
     CONFIGURATION: Debug
@@ -24,6 +33,7 @@ environment:
     MSYSTEM: MINGW64
     BIT: 64
     BUILDTOOL: cmake
+    TARGET: build
   - COMPILER: msys2
     PLATFORM: x64
     MSYS2_ARCH: x86_64
@@ -31,6 +41,7 @@ environment:
     MSYSTEM: MINGW64
     BIT: 64
     BUILDTOOL: autoconf
+    TARGET: build
   - COMPILER: msys2
     PLATFORM: x64
     MSYS2_ARCH: x86_64
@@ -38,6 +49,7 @@ environment:
     MSYSTEM: MINGW64
     BIT: 64
     BUILDTOOL: cmake
+    TARGET: build
 
 install:
   - set
@@ -46,6 +58,15 @@ install:
 build_script:
   - '%APPVEYOR_BUILD_FOLDER%\ci\appveyor\build.bat'
   
+deploy:
+  provider: GitHub
+  description: ''
+  auth_token: ${GITHUB_TOKEN}
+  artifact: libosmscout-importer-Windows-x86_64.zip
+  on:
+    appveyor_repo_tag: true
+    target: importer
+
 notifications:
   - provider: Email
     to:
