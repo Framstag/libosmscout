@@ -652,7 +652,7 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
     return true;
 }
 
-bool LockHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification){
+bool LockHandler::showCoordinates(osmscout::GeoCoord /*coord*/, osmscout::Magnification /*magnification*/){
     return false; // lock handler can't handle it, we are locked on "currentPosition"
 }
 
