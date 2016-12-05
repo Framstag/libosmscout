@@ -61,9 +61,11 @@ build_script:
 deploy:
   provider: GitHub
   description: ''
-  auth_token: ${GITHUB_TOKEN}
+  auth_token:
+    secure: Aj9mbq43PDgYOWS4LsWkDC3UQIgPGlL8NGdUKRTRA7GZhirzOhzDyXqM7SUIk8iU
   artifact: libosmscout-importer-Windows-x86_64.zip
   on:
+    branch: master
     appveyor_repo_tag: true
     target: importer
 
