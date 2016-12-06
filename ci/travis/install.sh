@@ -62,7 +62,7 @@ elif [ "$TARGET" = "website" ]; then
   sudo dpkg -i hugo_0.17-64bit.deb
 
   sudo apt-get -qq update
-  sudo apt-get install -y python-pygments doxygen lftp
+  sudo apt-get install -y python3-pygments python-pygments doxygen lftp
 fi
 
 echo "Installation end time: `date`"

@@ -1,5 +1,5 @@
 #ifndef OSMSCOUT_TYPEDISTRIBUTIONDATAFILE_H
-#define OSMSCOUT_TYPEDISTRIBUTIONATAFILE_H
+#define OSMSCOUT_TYPEDISTRIBUTIONDATAFILE_H
 
 /*
   This source is part of the libosmscout library
