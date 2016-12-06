@@ -101,6 +101,7 @@ AC_MSG_CHECKING([for Agg compilation])
   AC_LINK_IFELSE(
     [AC_LANG_PROGRAM(
 [[
+#include <mutex>
 #include <agg2/agg_conv_curve.h>
 #include <agg2/agg_conv_contour.h>
 #include <agg2/agg_path_storage.h>
@@ -110,6 +111,15 @@ AC_MSG_CHECKING([for Agg compilation])
 #include <agg2/agg_rendering_buffer.h>
 #include <agg2/agg_renderer_scanline.h>
 #include <agg2/agg_scanline_p.h>
+#include <agg2/agg_font_freetype.h>
+#include <agg2/agg_conv_bspline.h>
+#include <agg2/agg_conv_dash.h>
+#include <agg2/agg_conv_segmentator.h>
+#include <agg2/agg_conv_stroke.h>
+#include <agg2/agg_ellipse.h>
+#include <agg2/agg_trans_single_path.h>
+#include <iostream>
+#include <limits>
 #include <agg2/agg_conv_bspline.h>
 #include <agg2/agg_conv_dash.h>
 #include <agg2/agg_conv_segmentator.h>
