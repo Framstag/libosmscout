@@ -5,7 +5,7 @@ cache:
 
 branches:
   only:
-    - master
+    - master_aggconf
 
 matrix:
   include:
