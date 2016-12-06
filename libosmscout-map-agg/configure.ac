@@ -111,6 +111,7 @@ AC_MSG_CHECKING([for Agg compilation])
 #include <agg2/agg_rendering_buffer.h>
 #include <agg2/agg_renderer_scanline.h>
 #include <agg2/agg_scanline_p.h>
+#include <agg2/agg_scanline_u.h>
 #include <agg2/agg_conv_bspline.h>
 #include <agg2/agg_conv_dash.h>
 #include <agg2/agg_conv_segmentator.h>
