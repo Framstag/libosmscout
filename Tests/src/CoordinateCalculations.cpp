@@ -24,7 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 
-int main(int /*argc*/, char* /*argv[]*/)
+int main(int /*argc*/, char** /*argv*/)
 {
 	// Distance:
 	//    43135.331925721744 m
