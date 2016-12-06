@@ -25,6 +25,11 @@ if(APPLE AND NOT ANDROID)
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 endif ()
 
+# CXX_STANDARD property is supported from cmake 3.1, we have to define -std with old cmake
+if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.1)
+  add_definitions(-std=c++11)
+endif ()
+
 include(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" OSMSCOUT_PTR_SIZE BUILTIN_TYPES_ONLY)
 if(OSMSCOUT_PTR_SIZE EQUAL 8)
