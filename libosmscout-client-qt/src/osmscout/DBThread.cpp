@@ -146,14 +146,24 @@ bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
   return true;
 }
 
-bool DBThread::isInitialized(){
-  QMutexLocker locker(&mutex);
+/**
+ * check if DBThread is initialized without acquire mutex
+ *
+ * @return true if all databases are open
+ */
+bool DBThread::isInitializedInternal()
+{
   for (auto db:databases){
     if (!db->database->IsOpen()){
       return false;
     }
   }
   return true;
+}
+
+bool DBThread::isInitialized(){
+  QMutexLocker locker(&mutex);
+  return isInitializedInternal();
 }
 
 double DBThread::GetMapDpi() const
@@ -282,7 +292,7 @@ void DBThread::ToggleDaylight()
   {
     QMutexLocker locker(&mutex);
 
-    if (!isInitialized()) {
+    if (!isInitializedInternal()) {
         return;
     }
     qDebug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
@@ -320,7 +330,9 @@ void DBThread::LoadStyle(QString stylesheetFilename,
     qWarning()<<"Failed to load stylesheet"<<(stylesheetFilename+suffix);
     emit styleErrorsChanged();
   }
+  InvalidateVisualCache();
   emit stylesheetFilenameChanged();
+  emit Redraw();
 }
 
 bool DBInstance::LoadStyle(QString stylesheetFilename,
@@ -339,7 +351,10 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     return false;
   }
 
-  mapService->FlushTileCache();
+  // new map style may require more data types. when tile is marked as "completed"
+  // such data types are never loaded into these tiles
+  // so we mark them as "incomplete" to make sure that all types for new stylesheet are loaded
+  mapService->InvalidateTileCache();
   osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
   for (auto flag: stylesheetFlags){
@@ -904,10 +919,10 @@ QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& l
 
 void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 {
-  if (!isInitialized()){
+  QMutexLocker locker(&mutex);
+  if (!isInitializedInternal()){
       return; // ignore request if db is not initialized
   }
-  QMutexLocker locker(&mutex);
     
   osmscout::LocationDescription description;
   int count = 0;
@@ -953,18 +968,22 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 
 void DBThread::onMapDPIChange(double dpi)
 {
+  {
     QMutexLocker locker(&mutex);
     mapDpi = dpi;
-    emit Redraw();
+  }
+  InvalidateVisualCache();
+  emit Redraw();
 }
 
 void DBThread::onRenderSeaChanged(bool b)
 {
-    {
-        QMutexLocker threadLocker(&mutex);
-        renderSea = b;
-    }
-    emit Redraw();
+  {
+    QMutexLocker threadLocker(&mutex);
+    renderSea = b;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
 }
 
 osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const

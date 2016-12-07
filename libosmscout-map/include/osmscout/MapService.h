@@ -215,7 +215,9 @@ namespace osmscout {
 
     void SetCacheSize(size_t cacheSize);
 
+    void CleanupTileCache();
     void FlushTileCache();
+    void InvalidateTileCache();
 
     void LookupTiles(const Magnification& magnification,
                      const GeoBox& boundingBox,

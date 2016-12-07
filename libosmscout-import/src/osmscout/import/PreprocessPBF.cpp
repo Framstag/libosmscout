@@ -51,14 +51,14 @@ namespace osmscout {
                              FileOffset& pos) const
   {
 #if defined(__WIN32__) || defined(WIN32)
-	  const __int64 filepos = _ftelli64(file);
+    const __int64 filepos=_ftelli64(file);
 
-	  if (filepos == -1) {
-		  return false;
-	  }
-	  else {
-		  pos = (FileOffset)filepos;
-	  }
+    if (filepos==-1) {
+      return false;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
 #elif defined(HAVE_FSEEKO)
     off_t filepos=ftello(file);
 

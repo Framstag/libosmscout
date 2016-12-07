@@ -121,11 +121,36 @@ namespace osmscout {
     cache.SetSize(cacheSize);
   }
 
-  void MapService::FlushTileCache()
+  /**
+   * evict tiles from cache until tile count > cacheSize
+   */
+  void MapService::CleanupTileCache()
   {
     std::lock_guard<std::mutex> lock(stateMutex);
 
     cache.CleanupCache();
+  }
+
+  /**
+   * evict all tiles from cache
+   */
+  void MapService::FlushTileCache()
+  {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
+    size_t size=cache.GetSize();
+    cache.SetSize(0);
+    cache.SetSize(size);
+  }
+
+  /**
+   * mark all tiles in cache as incomplete
+   */
+  void MapService::InvalidateTileCache()
+  {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
+    cache.InvalidateCache();
   }
 
   MapService::TypeDefinitionRef MapService::GetTypeDefinition(const AreaSearchParameter& parameter,

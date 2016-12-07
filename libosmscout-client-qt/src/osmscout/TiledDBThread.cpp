@@ -703,15 +703,12 @@ void TiledDBThread::onStylesheetFilenameChanged(){
   emit Redraw();
 }
 
-void TiledDBThread::onMapDPIChange(double dpi)
+void TiledDBThread::InvalidateVisualCache()
 {
   // invalidate tile cache and emit Redraw
-  {
-      QMutexLocker locker(&tileCacheMutex);
-      offlineTileCache.invalidate();
-      offlineTileCache.clearPendingRequests();
-  }
-  DBThread::onMapDPIChange(dpi);
+  QMutexLocker locker(&tileCacheMutex);
+  offlineTileCache.invalidate();
+  offlineTileCache.clearPendingRequests();
 }
 
 void TiledDBThread::onlineTileProviderChanged()
@@ -749,14 +746,3 @@ void TiledDBThread::onOfflineMapChanged(bool b)
     }
     emit Redraw();    
 }
-
-void TiledDBThread::onRenderSeaChanged(bool b)
-{
-    {
-        QMutexLocker cacheLocker(&tileCacheMutex);
-        offlineTileCache.invalidate();
-        offlineTileCache.clearPendingRequests();
-    }
-    DBThread::onRenderSeaChanged(b);
-}
-

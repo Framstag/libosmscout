@@ -95,10 +95,11 @@ public:
   virtual ~PlaneDBThread();
 
   virtual void Initialize();
-  
+
   virtual bool RenderMap(QPainter& painter,
                          const RenderMapRequest& request);
   
+  virtual void InvalidateVisualCache();
 };
 
 #endif

@@ -50,20 +50,19 @@ internally).
 Later on you can create (in this case) a way, assigning the route type to it:
 
 ```C++
-    TypeConfigRef   typeConfig=database->GetTypeConfig();
+TypeConfigRef typeConfig=database->GetTypeConfig();
+Way           way;
 
-    Way             way;
+if (!typeConfig) {
+  return false;
+}
 
-    if (!typeConfig) {
-      return false;
-    }
+TypeInfoRef routeType=typeConfig->GetTypeInfo("_route");
 
-    TypeInfoRef routeType=typeConfig->GetTypeInfo("_route");
+assert(routeType!=typeConfig->typeInfoIgnore);
 
-    assert(routeType!=typeConfig->typeInfoIgnore);
-
-    way.SetType(routeType);
-    way.SetLayerToMax();
+way.SetType(routeType);
+way.SetLayerToMax();
 ```
 
 Make sure that you fill way.nodes afterwards with valid data to build the actual

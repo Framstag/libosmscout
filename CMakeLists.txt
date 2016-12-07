@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(libosmscout C CXX)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # build should fail when compiler don't support standard defined by CMAKE_CXX_STANDARD
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
 
 # default build type
@@ -10,6 +11,7 @@ endif()
 
 option(BUILD_SHARED_LIBS "Shared libraries " ON)  # SHARED lib default
 option(BUILD_WITH_OPENMP "Check for OpenMP support " ON)
+option(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution " OFF)
 
 # compiler configurations
 if(WIN32)
@@ -22,6 +24,11 @@ if(APPLE AND NOT ANDROID)
   set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "com.apple.compilers.llvm.clang.1_0")
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+endif ()
+
+# CXX_STANDARD property is supported from cmake 3.1, we have to define -std with old cmake
+if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.1)
+  add_definitions(-std=c++11)
 endif ()
 
 include(CheckTypeSize)
@@ -96,6 +103,10 @@ if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_G
   endif()
 endif()
 
+# prefer static libraries if making import tool
+if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+endif()
 
 # postfix for debug builds
 if(NOT APPLE)
@@ -115,6 +126,9 @@ add_subdirectory(libosmscout)
 if(LIBXML2_FOUND AND PROTOBUF_FOUND AND ZLIB_FOUND)
   set(OSMSCOUT_BUILD_IMPORT_CACHE ON)
 else()
+  set(OSMSCOUT_BUILD_IMPORT_CACHE OFF)
+endif()
+if(MSVC AND NOT (MSVC_VERSION GREATER 1800))
   set(OSMSCOUT_BUILD_IMPORT_CACHE OFF)
 endif()
 option(OSMSCOUT_BUILD_IMPORT "Enable build of import library" ${OSMSCOUT_BUILD_IMPORT_CACHE})
@@ -150,6 +164,15 @@ option(OSMSCOUT_BUILD_MAP_OPENGL "Enable build of OpenGL map drawing backend" ${
 if(OSMSCOUT_BUILD_MAP_OPENGL)
   add_subdirectory(libosmscout-map-opengl)
 endif()
+if(Direct2D_FOUND AND OSMSCOUT_BUILD_MAP AND MSVC)
+  set(OSMSCOUT_BUILD_MAP_DIRECTX_CACHE ON)
+else()
+  set(OSMSCOUT_BUILD_MAP_DIRECTX_CACHE OFF)
+endif()
+option(OSMSCOUT_BUILD_MAP_DIRECTX "Enable build of DirectX map drawing backend" ${OSMSCOUT_BUILD_MAP_DIRECTX_CACHE})
+if(OSMSCOUT_BUILD_MAP_DIRECTX)
+  add_subdirectory(libosmscout-map-directx)
+endif()
 if(Qt5Gui_FOUND AND OSMSCOUT_BUILD_MAP)
   set(OSMSCOUT_BUILD_MAP_QT_CACHE ON)
 else()
@@ -164,7 +187,7 @@ if(Qt5Gui_FOUND AND OSMSCOUT_BUILD_MAP_QT)
 else()
   set(OSMSCOUT_BUILD_CLIENT_QT_CACHE OFF)
 endif()
-option(OSMSCOUT_BUILD_CLIENT_QT "Enable build of Qt clien tlibrary" ${OSMSCOUT_BUILD_CLIENT_QT_CACHE})
+option(OSMSCOUT_BUILD_CLIENT_QT "Enable build of Qt client library" ${OSMSCOUT_BUILD_CLIENT_QT_CACHE})
 if(OSMSCOUT_BUILD_CLIENT_QT)
   add_subdirectory(libosmscout-client-qt)
 endif()
@@ -201,12 +224,12 @@ if(OSMSCOUT_BUILD_TOOL_DUMPDATA)
   add_subdirectory(DumpData)
 endif()
 
-option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMScout2 applications" ${OSMSCOUT_BUILD_MAP_QT_CACHE})
+option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMScout2 applications" ${OSMSCOUT_BUILD_CLIENT_QT})
 if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
   add_subdirectory(OSMScout2)
 endif()
 
-option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR "Enable build of style editor applications" ${OSMSCOUT_BUILD_MAP_QT_CACHE})
+option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR "Enable build of style editor applications" ${OSMSCOUT_BUILD_CLIENT_QT})
 if(OSMSCOUT_BUILD_TOOL_STYLEEDITOR)
   add_subdirectory(StyleEditor)
 endif()
@@ -257,6 +280,7 @@ message(STATUS "map drawing interface:                   ${OSMSCOUT_BUILD_MAP}")
 message(STATUS " - Agg map drawing backend:              ${OSMSCOUT_BUILD_MAP_AGG}")
 message(STATUS " - Cairo map drawing backend:            ${OSMSCOUT_BUILD_MAP_CAIRO}")
 message(STATUS " - OpenGL map drawing backend:           ${OSMSCOUT_BUILD_MAP_OPENGL}")
+message(STATUS " - DirectX map drawing backend:          ${OSMSCOUT_BUILD_MAP_DIRECTX}")
 message(STATUS " - Qt map drawing backend:               ${OSMSCOUT_BUILD_MAP_QT}")
 message(STATUS " - SVG map drawing backend:              ${OSMSCOUT_BUILD_MAP_SVG}")
 message(STATUS " - Map drawing backend for iOS and OS X: ${OSMSCOUT_BUILD_MAP_IOSX}")
@@ -276,3 +300,5 @@ message(STATUS " - C# binding:                           ${OSMSCOUT_BUILD_BINDIN
 message(STATUS "external interfaces:")
 message(STATUS " - MATLAB mex function:                  ${OSMSCOUT_BUILD_EXTERN_MATLAB}")
 message(STATUS "documentation:                           ${OSMSCOUT_BUILD_DOC_API}")
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share)

@@ -90,6 +90,20 @@ namespace osmscout {
   }
 
   /**
+   * Mark all tiles as in cache as "incomplete".
+   */
+  void DataTileCache::InvalidateCache()
+  {
+    for (CacheEntry &entry: tileCache){
+      entry.tile->GetAreaData().SetIncomplete();
+      entry.tile->GetNodeData().SetIncomplete();
+      entry.tile->GetWayData().SetIncomplete();
+      entry.tile->GetOptimizedAreaData().SetIncomplete();
+      entry.tile->GetOptimizedWayData().SetIncomplete();
+    }
+  }
+
+  /**
    * Return the cache tiles with the given id. If the tiles is not cache,
    * an empty reference will be returned.
    */
