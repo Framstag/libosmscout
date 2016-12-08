@@ -218,27 +218,27 @@ Labels: 260/1/261 (pcs) 0.132 (sec)
 
 with the logging code at that time:
 
-```C++
+```c++
 if (parameter.IsDebugPerformance()) {
-       log.Info()
-           << "Paths: "
-           << data.ways.size() << "/" << waysSegments << "/" <<  waysDrawn << "/" << waysLabelDrawn << " (pcs) "
-           << prepareWaysTimer << "/" << pathsTimer << "/" <<  pathLabelsTimer << " (sec)";
+  log.Info()
+     << "Paths: "
+     << data.ways.size() << "/" << waysSegments << "/" <<  waysDrawn << "/" << waysLabelDrawn << " (pcs) "
+     << prepareWaysTimer << "/" << pathsTimer << "/" <<  pathLabelsTimer << " (sec)";
 
-       log.Info()
-           << "Areas: "
-           << data.areas.size() << "/" << areasSegments << "/" <<  areasDrawn << " (pcs) "
-           << prepareAreasTimer << "/" << areasTimer << "/" <<  areaLabelsTimer << " (sec)";
+  log.Info()
+     << "Areas: "
+     << data.areas.size() << "/" << areasSegments << "/" <<  areasDrawn << " (pcs) "
+     << prepareAreasTimer << "/" << areasTimer << "/" <<  areaLabelsTimer << " (sec)";
 
-       log.Info()
-           << "Nodes: "
-           << data.nodes.size() <<"+" << data.poiNodes.size() << "/"  << nodesDrawn << " (pcs) "
-           << nodesTimer << "/" << poisTimer << " (sec)";
+  log.Info()
+     << "Nodes: "
+     << data.nodes.size() <<"+" << data.poiNodes.size() << "/"  << nodesDrawn << " (pcs) "
+     << nodesTimer << "/" << poisTimer << " (sec)";
 
-       log.Info()
-           << "Labels: " << labels.size() << "/" <<  overlayLabels.size() << "/" << labelsDrawn << " (pcs) "
-           << labelsTimer << " (sec)";
-     }
+  log.Info()
+     << "Labels: " << labels.size() << "/" <<  overlayLabels.size() << "/" << labelsDrawn << " (pcs) "
+     << labelsTimer << " (sec)";
+}
 ```
 
 #### DebugData switch
