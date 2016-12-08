@@ -31,18 +31,114 @@
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractListModel {
+class OSMSCOUT_CLIENT_QT_API AvailableMapsModelItem : public QObject {
+  Q_OBJECT
+
+private:
+  QString name;
+  QStringList path;
+  QString description;
+
+public:
+  inline AvailableMapsModelItem(QString name, QStringList path, QString description):
+    name(name), path(path), description(description){};
+
+  inline AvailableMapsModelItem(const AvailableMapsModelItem &o):
+    QObject(o.parent()),
+    name(o.name), path(o.path), description(o.description){};  
+
+  inline ~AvailableMapsModelItem(){}
+    
+  inline QString getName() const
+  {
+    return name;
+  }
+    
+  inline QStringList getPath() const
+  {
+    return path;
+  }
+  
+  inline QString getDescription() const
+  {
+    return description;
+  }
+  
+  virtual bool isDirectory() const = 0;
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API AvailableMapsModelDir : public AvailableMapsModelItem {
+  Q_OBJECT
+
+public: 
+  inline AvailableMapsModelDir(QString name, QList<QString> path, QString description):
+    AvailableMapsModelItem(name, path, description){};
+
+  inline AvailableMapsModelDir(const AvailableMapsModelDir &o):
+    AvailableMapsModelItem(o){};  
+    
+  inline ~AvailableMapsModelDir(){};  
+
+  virtual inline bool isDirectory() const
+  {
+    return true;
+  };
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelItem {
+  Q_OBJECT
+  
+private:
+  MapProvider provider;
+  size_t size;
+  QString serverDirectory;
+  QDateTime creation;
+  int version;
+
+public: 
+  inline AvailableMapsModelMap(QString name, QList<QString> path, QString description, MapProvider provider,
+                               size_t size, QString serverDirectory, QDateTime creation, int version):
+    AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory), 
+    creation(creation), version(version) {};
+
+  inline AvailableMapsModelMap(const AvailableMapsModelMap &o):
+    AvailableMapsModelItem(o), provider(o.provider), size(o.size), serverDirectory(o.serverDirectory), 
+    creation(o.creation), version(o.version) {};  
+    
+  inline ~AvailableMapsModelMap(){};  
+
+  virtual inline bool isDirectory() const
+  {
+    return false;
+  };
+  
+  MapProvider getProvider() const;
+  size_t getSize() const;
+  QString getSizeHuman() const;
+  QString getServerDirectory() const;
+  QDateTime getCreation() const;
+  int getVersion() const;
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractItemModel {
   Q_OBJECT
   
 public slots:
   void listDownloaded(QNetworkReply*);
 
 public:
-  inline AvailableMapsModel();
+  AvailableMapsModel();
 
-  inline ~AvailableMapsModel()
-  {
-  }
+  ~AvailableMapsModel();
 
   enum Roles {
     NameRole = Qt::UserRole, // localized name
@@ -51,21 +147,30 @@ public:
     ServerDirectoryRole = Qt::UserRole+3, // server path for this map
     TimeRole = Qt::UserRole+4, // QTime of map creation 
     VersionRole = Qt::UserRole+5,
-    SizeRole = Qt::UserRole+6,
+    ByteSizeRole = Qt::UserRole+6,
     ProviderUriRole = Qt::UserRole+7,
+    DescriptionRole = Qt::UserRole+8,
+    SizeRole = Qt::UserRole+9,
   };
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const;
+  QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
+  QModelIndex parent(const QModelIndex &index) const;
 
   QVariant data(const QModelIndex &index, int role) const;
   QHash<int, QByteArray> roleNames() const;
   Qt::ItemFlags flags(const QModelIndex &index) const;
   
 private:
+  void append(AvailableMapsModelItem *item);
+  QList<AvailableMapsModelItem *> findChildrenByPath(QStringList dir) const;
+
   QNetworkAccessManager     webCtrl; 
   QNetworkDiskCache         diskCache;
   QList<MapProvider>        mapProviders;
   QHash<QUrl,MapProvider>   requests;
+  QList<AvailableMapsModelItem*> items;
 };
 
 #endif	/* AVAILABLEMAPMODEL_H */

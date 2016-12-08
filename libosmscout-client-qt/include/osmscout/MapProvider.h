@@ -75,7 +75,7 @@ public:
   
   inline QUrl getListUri(int fromVersion, int toVersion, QString locale="en") const
   {
-    return uri.arg(fromVersion).arg(toVersion).arg(locale);
+    return listUri.arg(fromVersion).arg(toVersion).arg(locale);
   }
   
   inline bool isValid() const

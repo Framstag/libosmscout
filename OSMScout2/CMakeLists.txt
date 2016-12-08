@@ -43,6 +43,7 @@ set(SOURCE_FILES
     qml/AboutDialog.qml
     qml/main.qml
     qml/SearchDialog.qml
+    qml/AvailableMaps.qml
     qml/custom/MapDialog.qml
     qml/custom/ScrollIndicator.qml
     qml/custom/LineEdit.qml
