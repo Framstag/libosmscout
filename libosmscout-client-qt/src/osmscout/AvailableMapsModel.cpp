@@ -18,9 +18,7 @@
 */
 
 #include <osmscout/AvailableMapsModel.h>
-#include <qt5/QtCore/qabstractitemmodel.h>
-#include <qt4/QtCore/qlist.h>
-
+#include <osmscout/PersistentCookieJar.h>
 
 MapProvider AvailableMapsModelMap::getProvider() const
 {
@@ -70,7 +68,8 @@ AvailableMapsModel::AvailableMapsModel()
 
   connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));    
   diskCache.setCacheDirectory(Settings::GetInstance()->GetHttpCacheDir());
-  webCtrl.setCache(&diskCache);  
+  webCtrl.setCache(&diskCache);
+  webCtrl.setCookieJar(new PersistentCookieJar());
 
   QLocale locale;
   for (auto &provider: mapProviders){
@@ -175,6 +174,7 @@ void AvailableMapsModel::listDownloaded(QNetworkReply* reply)
   qSort(items.begin(), items.end(), itemLessThan);
   reply->deleteLater();
   
+  emit loaded();
   endResetModel();
 }
 

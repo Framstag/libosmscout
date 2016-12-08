@@ -132,6 +132,11 @@ public:
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractItemModel {
   Q_OBJECT
   
+  Q_PROPERTY(bool loading READ isLoading NOTIFY loaded)
+
+signals:
+  void loaded();
+
 public slots:
   void listDownloaded(QNetworkReply*);
 
@@ -162,6 +167,10 @@ public:
   QHash<int, QByteArray> roleNames() const;
   Qt::ItemFlags flags(const QModelIndex &index) const;
   
+  inline bool isLoading(){
+    return !requests.isEmpty();
+  }
+
 private:
   void append(AvailableMapsModelItem *item);
   QList<AvailableMapsModelItem *> findChildrenByPath(QStringList dir) const;

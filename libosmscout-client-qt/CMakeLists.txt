@@ -36,6 +36,7 @@ set(HEADER_FILES
     include/osmscout/TiledDBThread.h
     include/osmscout/MapProvider.h
     include/osmscout/AvailableMapsModel.h
+    include/osmscout/PersistentCookieJar.h
 )
 
 set(SOURCE_FILES
