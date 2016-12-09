@@ -24,8 +24,94 @@
 #include <QStringList>
 #include <QList>
 #include <QDir>
+#include <QTimer>
 
 #include <osmscout/private/ClientQtImportExport.h>
+
+#include <osmscout/MapProvider.h>
+#include <osmscout/AvailableMapsModel.h>
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API FileDownloadJob: public QObject
+{
+  Q_OBJECT
+  
+private:
+   QUrl url;
+   QFile file;
+   bool downloading;
+   bool downloaded;
+   QNetworkReply *reply;
+
+signals:
+  void finished();
+  void failed();
+
+public slots:
+  void onFinished(QNetworkReply* reply);
+  void onReadyRead();
+
+public:
+  FileDownloadJob(QUrl url, QFileInfo file);
+  virtual inline ~FileDownloadJob(){};
+  
+  void start(QNetworkAccessManager *webCtrl);
+
+  inline bool isDownloading()
+  {
+    return downloading;
+  };
+
+  inline bool isDownloaded()
+  {
+    return downloaded;
+  };
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
+{
+  Q_OBJECT
+  
+  QList<FileDownloadJob*> jobs;
+  QNetworkAccessManager   webCtrl;   
+  
+  MapProvider             provider;
+  AvailableMapsModelMap   map;
+  QDir                    target;
+  
+  QTimer                  backoffTimer;
+  int                     backoffInterval;
+  bool                    done;
+  bool                    started;
+
+signals:
+  void finished();
+
+public slots:
+  void onJobFailed();
+  void onJobFinished();
+  void downloadNextFile();
+
+public:
+  MapDownloadJob(MapProvider provider, AvailableMapsModelMap map, QDir target);
+  virtual ~MapDownloadJob();
+  
+  void start();
+
+  inline bool isDone()
+  {
+    return done;
+  }
+  inline bool isDownloading()
+  {
+    return started && !done;
+  }
+};
 
 /**
  * \ingroup QtAPI
@@ -37,9 +123,11 @@ class OSMSCOUT_CLIENT_QT_API MapManager: public QObject
 private:
   QStringList databaseLookupDirs;
   QList<QDir> databaseDirectories;
+  QList<MapDownloadJob*> downloadJobs;
 
 public slots:
   void lookupDatabases();
+  void onJobFinished();
   
 signals:
   void databaseListChanged(QList<QDir> databaseDirectories);
@@ -47,7 +135,31 @@ signals:
 public:
   MapManager(QStringList databaseLookupDirs);
   
-  inline ~MapManager(){};
+  virtual ~MapManager();
+
+  void downloadMap(MapProvider provider, AvailableMapsModelMap map, QDir dir);
+  void downloadNext();
+  
+  inline QStringList getLookupDirectories()
+  {
+    return databaseLookupDirs;
+  }
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API QmlMapManager: public QObject
+{
+  Q_OBJECT
+
+public:
+  inline QmlMapManager(QObject *parent=Q_NULLPTR):QObject(parent){}
+  
+  virtual inline ~QmlMapManager(){};
+  
+  Q_INVOKABLE void downloadMap(QVariant provider, QVariant map, QString dir);
+  Q_INVOKABLE QStringList getLookupDirectories();
 };
 
 #endif	/* MAPMANAGER_H */

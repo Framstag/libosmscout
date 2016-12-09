@@ -35,13 +35,15 @@ class OSMSCOUT_CLIENT_QT_API AvailableMapsModelItem : public QObject {
   Q_OBJECT
 
 private:
+  bool valid;
   QString name;
   QStringList path;
   QString description;
 
 public:
+  inline AvailableMapsModelItem():valid(false){};
   inline AvailableMapsModelItem(QString name, QStringList path, QString description):
-    name(name), path(path), description(description){};
+    valid(true), name(name), path(path), description(description){};
 
   inline AvailableMapsModelItem(const AvailableMapsModelItem &o):
     QObject(o.parent()),
@@ -62,6 +64,11 @@ public:
   inline QString getDescription() const
   {
     return description;
+  }
+  
+  inline bool isValid() const 
+  {
+    return valid;
   }
   
   virtual bool isDirectory() const = 0;
@@ -102,6 +109,8 @@ private:
   int version;
 
 public: 
+  inline AvailableMapsModelMap():AvailableMapsModelItem(){};
+
   inline AvailableMapsModelMap(QString name, QList<QString> path, QString description, MapProvider provider,
                                size_t size, QString serverDirectory, QDateTime creation, int version):
     AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory), 
@@ -125,6 +134,8 @@ public:
   QDateTime getCreation() const;
   int getVersion() const;
 };
+
+Q_DECLARE_METATYPE(AvailableMapsModelMap)
 
 /**
  * \ingroup QtAPI
@@ -156,6 +167,8 @@ public:
     ProviderUriRole = Qt::UserRole+7,
     DescriptionRole = Qt::UserRole+8,
     SizeRole = Qt::UserRole+9,
+    ProviderRole = Qt::UserRole+10,
+    ModelImtemRole = Qt::UserRole+11,
   };
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -167,6 +180,9 @@ public:
   QHash<int, QByteArray> roleNames() const;
   Qt::ItemFlags flags(const QModelIndex &index) const;
   
+  Q_INVOKABLE QVariant provider(const QModelIndex &index) const;
+  Q_INVOKABLE QVariant map(const QModelIndex &index) const;
+
   inline bool isLoading(){
     return !requests.isEmpty();
   }

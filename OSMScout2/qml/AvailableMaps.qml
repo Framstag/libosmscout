@@ -20,6 +20,10 @@ Window {
     width: 480
     height: 800
 
+    MapManager{
+        id:mapManager
+    }
+
     TreeView {
         anchors.fill: parent
 
@@ -45,6 +49,14 @@ Window {
         }
         rowDelegate: Rectangle{
             color: styleData.selected ? "#3030ff": (styleData.alternate?"#303030": "#202020")
+            /*
+            MouseArea{
+                anchors.fill: parent
+                onDoubleClicked: {
+                    console.log("Download "+provider+" "+modelItem);
+                }
+            }
+            */
         }
 
         itemDelegate: Item {
@@ -67,5 +79,17 @@ Window {
             //frame: Rectangle {color: "blue"}
             handle: Rectangle {color: "blue"}
         }
+
+        onDoubleClicked: {
+            if (index) {
+                //console.log(index.parent.row, index.row)
+                var provider=availableMapsModel.provider(index);
+                var map=availableMapsModel.map(index);
+                if (provider && map){
+                    mapManager.downloadMap(provider, map, "/tmp")
+                }
+            }
+        }
+
     }
 }

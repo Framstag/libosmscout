@@ -385,6 +385,11 @@ public:
   void AddRoute(const osmscout::Way& way);
   osmscout::TypeConfigRef GetTypeConfig(const QString databasePath) const;
   
+  inline MapManager *GetMapManager() const
+  {
+    return mapManager;
+  }
+
   inline QString GetStylesheetFilename() const
   {
     return stylesheetFilename;
