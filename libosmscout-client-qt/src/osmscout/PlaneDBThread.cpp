@@ -87,8 +87,7 @@ void PlaneDBThread::Initialize()
 
   osmscout::log.Debug() << "Initialize";
   // invalidate tile cache and init base
-  osmscout::GeoBox boundingBox;
-  DBThread::InitializeDatabases(boundingBox);
+  DBThread::InitializeDatabases();
 
   {
     QMutexLocker locker(&mutex);

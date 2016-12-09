@@ -97,7 +97,7 @@ signals:
 
   void stylesheetFilenameChanged();
   void styleErrorsChanged();
-  void databaseLoaded();
+  void databaseLoaded(osmscout::GeoBox);
   
 public slots:
   void changeView(const MapView &view);

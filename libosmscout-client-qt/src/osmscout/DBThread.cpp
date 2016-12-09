@@ -26,6 +26,9 @@
 #include <osmscout/private/Config.h>
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/TextSearchIndex.h>
+#include <qt4/QtCore/qnamespace.h>
+
+#include "osmscout/MapManager.h"
 #endif
 
 QBreaker::QBreaker()
@@ -97,7 +100,7 @@ QString StyleError::GetTypeName() const
 DBThread::DBThread(QStringList databaseLookupDirs, 
                    QString stylesheetFilename, 
                    QString iconDirectory)
-  : databaseLookupDirs(databaseLookupDirs), 
+  : mapManager(new MapManager(databaseLookupDirs)), 
     mapDpi(-1),
     physicalDpi(-1),
     stylesheetFilename(stylesheetFilename),
@@ -110,6 +113,10 @@ DBThread::DBThread(QStringList databaseLookupDirs,
   // QObject::connect: Cannot queue arguments of type 'uint32_t'
   // (Make sure 'uint32_t' is registered using qRegisterMetaType().)
   qRegisterMetaType < uint32_t >("uint32_t");
+
+  // other types used in signals/slots
+  qRegisterMetaType<QList<QDir>>("QList<QDir>");
+  qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
 
   QScreen *srn=QGuiApplication::screens().at(0);
 
@@ -124,6 +131,9 @@ DBThread::DBThread(QStringList databaseLookupDirs,
           this, SLOT(onMapDPIChange(double)),
           Qt::QueuedConnection);
   
+  connect(mapManager, SIGNAL(databaseListChanged(QList<QDir>)),
+          this, SLOT(onDatabaseListChanged(QList<QDir>)),
+          Qt::QueuedConnection);
 }
 
 DBThread::~DBThread()
@@ -131,8 +141,11 @@ DBThread::~DBThread()
   osmscout::log.Debug() << "DBThread::~TiledDBThread()";
 
   for (auto db:databases){
-    db->mapService->DeregisterTileStateCallback(db->callbackId);
+    db->close();
   }
+  databases.clear();
+  delete mapManager;
+  mapManager=NULL;
 }
 
 
@@ -196,10 +209,24 @@ void DBThread::TileStateCallback(const osmscout::TileRef& /*changedTile*/)
   
 }
 
-bool DBThread::InitializeDatabases(osmscout::GeoBox& boundingBox)
+bool DBThread::InitializeDatabases()
 {  
   QMutexLocker locker(&mutex);
-  qDebug() << "Initialize";  
+  qDebug() << "Initialize";
+  mapManager->lookupDatabases();
+  
+  return true;
+}
+
+void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
+{
+  QMutexLocker locker(&mutex);  
+
+  for (auto db:databases){
+    db->close();
+  }
+  databases.clear();
+  osmscout::GeoBox boundingBox;
   
   //stylesheetFilename = resourceDirectory + QDir::separator() + "map-styles" + QDir::separator() + "standard.oss";
   // TODO: remove last separator, it should be added by renderer (MapPainter*.cpp)
@@ -207,77 +234,63 @@ bool DBThread::InitializeDatabases(osmscout::GeoBox& boundingBox)
   if (!iconDirectory.endsWith(QDir::separator())){
     iconDirectory = iconDirectory + QDir::separator();
   }
+  
+  for (auto &databaseDirectory:databaseDirectories){
+    osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
+    osmscout::StyleConfigRef styleConfig;
+    if (database->Open(databaseDirectory.absolutePath().toLocal8Bit().data())) {
+      osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
-  for (QString lookupDir:databaseLookupDirs){
-    QDirIterator dirIt(lookupDir, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
-    while (dirIt.hasNext()) {
-      dirIt.next();
-      QFileInfo fInfo(dirIt.filePath());
-      if (fInfo.isFile() && fInfo.fileName() == osmscout::TypeConfig::FILE_TYPES_DAT){
-        qDebug() << "found database: " << fInfo.dir().absolutePath();
+      if (typeConfig) {
+        styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
-        osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
-        osmscout::StyleConfigRef styleConfig;
-        if (database->Open(fInfo.dir().absolutePath().toLocal8Bit().data())) {
-          osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
-
-          if (typeConfig) {
-            styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-
-            if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
-              qDebug() << "Cannot load style sheet!";
-              styleConfig=NULL;
-            }
-          }
-          else {
-            qDebug() << "TypeConfig invalid!";
-            styleConfig=NULL;
-          }
+        if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+          qDebug() << "Cannot load style sheet!";
+          styleConfig=NULL;
         }
-        else {
-          qWarning() << "Cannot open database!";
-          continue;
-        }
-
-        if (!database->GetBoundingBox(boundingBox)) {
-          qWarning() << "Cannot read initial bounding box";
-          database->Close();
-          continue;
-        }
-        
-        osmscout::MapService::TileStateCallback callback=[this](const osmscout::TileRef& tile) {TileStateCallback(tile);};
-        osmscout::MapServiceRef mapService = std::make_shared<osmscout::MapService>(database);
-        osmscout::MapService::CallbackId callbackId=mapService->RegisterTileStateCallback(callback);
-        
-        databases << std::make_shared<DBInstance>(fInfo.dir().absolutePath(), 
-                                                  database, 
-                                                  std::make_shared<osmscout::LocationService>(database),
-                                                  mapService,
-                                                  callbackId,
-                                                  std::make_shared<QBreaker>(),
-                                                  styleConfig);
+      }
+      else {
+        qDebug() << "TypeConfig invalid!";
+        styleConfig=NULL;
       }
     }
+    else {
+      qWarning() << "Cannot open database!";
+      continue;
+    }
+
+    if (!database->GetBoundingBox(boundingBox)) {
+      qWarning() << "Cannot read initial bounding box";
+      database->Close();
+      continue;
+    }
+
+    osmscout::MapService::TileStateCallback callback=[this](const osmscout::TileRef& tile) {TileStateCallback(tile);};
+    osmscout::MapServiceRef mapService = std::make_shared<osmscout::MapService>(database);
+    osmscout::MapService::CallbackId callbackId=mapService->RegisterTileStateCallback(callback);
+
+    databases << std::make_shared<DBInstance>(databaseDirectory.absolutePath(), 
+                                              database, 
+                                              std::make_shared<osmscout::LocationService>(database),
+                                              mapService,
+                                              callbackId,
+                                              std::make_shared<QBreaker>(),
+                                              styleConfig);
   }  
 
-  emit databaseLoadFinished();
-  emit stylesheetFilenameChanged();
-  return true;
+  emit databaseLoadFinished(boundingBox);
+  emit stylesheetFilenameChanged();  
 }
 
 void DBThread::Finalize()
 {
+  QMutexLocker locker(&mutex);
   qDebug() << "Finalize";
-  //FreeMaps();
+  
   for (auto db:databases){
-    if (db->router && db->router->IsOpen()) {
-      db->router->Close();
-    }
-
-    if (db->database->IsOpen()) {
-      db->database->Close();
-    }
+    db->close();
   }
+  databases.clear();
 }
 
 void DBThread::CancelCurrentDataLoading()
@@ -412,6 +425,21 @@ bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
   }
 
   return true;
+}
+
+void DBInstance::close()
+{
+  if (router && router->IsOpen()) {
+    router->Close();
+  }
+  
+  if (callbackId){
+    mapService->DeregisterTileStateCallback(callbackId);
+  }
+  callbackId = 0;
+  if (database->IsOpen()) {
+    database->Close();
+  }
 }
 
 bool DBThread::GetObjectDetails(DBInstanceRef db, 
@@ -995,38 +1023,6 @@ osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) cons
   }
   return osmscout::TypeConfigRef();
 }
-
-/*
-
-bool DBThread::GetNodeByOffset(osmscout::FileOffset offset,
-                               osmscout::NodeRef& node) const
-{
-  return databases->GetNodeByOffset(offset,node);
-}
-
-bool DBThread::GetAreaByOffset(osmscout::FileOffset offset,
-                               osmscout::AreaRef& area) const
-{
-  return databases->GetAreaByOffset(offset,area);
-}
-
-bool DBThread::GetWayByOffset(osmscout::FileOffset offset,
-                              osmscout::WayRef& way) const
-{
-  return databases->GetWayByOffset(offset,way);
-}
-
-bool DBThread::ResolveAdminRegionHierachie(const osmscout::AdminRegionRef& adminRegion,
-                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef >& refs) const
-{
-  QMutexLocker locker(&mutex);
-
-  return locationService->ResolveAdminRegionHierachie(adminRegion,
-                                                      refs);
-}
-*/
-
-
 
 static DBThread* dbThreadInstance=NULL;
 
