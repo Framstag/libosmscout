@@ -83,10 +83,10 @@ Window {
         onDoubleClicked: {
             if (index) {
                 //console.log(index.parent.row, index.row)
-                var provider=availableMapsModel.provider(index);
                 var map=availableMapsModel.map(index);
-                if (provider && map){
-                    mapManager.downloadMap(provider, map, "/tmp")
+                if (map){
+                    var dir=mapManager.suggestedDirectory(map);
+                    mapManager.downloadMap(map, dir)
                 }
             }
         }

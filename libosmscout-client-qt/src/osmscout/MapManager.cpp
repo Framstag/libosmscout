@@ -73,8 +73,8 @@ void FileDownloadJob::onFinished(QNetworkReply* reply)
   this->reply=NULL;
 }
 
-MapDownloadJob::MapDownloadJob(MapProvider provider, AvailableMapsModelMap map, QDir target):
-  provider(provider), map(map), target(target), backoffInterval(1000), done(false), started(false)
+MapDownloadJob::MapDownloadJob(AvailableMapsModelMap map, QDir target):
+  map(map), target(target), backoffInterval(1000), done(false), started(false)
 {
   webCtrl.setCookieJar(new PersistentCookieJar());
   // we don't use disk cache here
@@ -94,8 +94,7 @@ MapDownloadJob::~MapDownloadJob()
 void MapDownloadJob::start()
 {
   QStringList fileNames;
-  fileNames << "types.dat"
-            << "bounding.dat"
+  fileNames << "bounding.dat"
             << "nodes.dat"
             << "areas.dat"
             << "ways.dat" 
@@ -116,8 +115,12 @@ void MapDownloadJob::start()
             << "textpoi.dat"
             << "textregion.dat";
 
+  // types.dat should be last, when download is interrupted,
+  // directory is not recognized as valid map
+  fileNames << "types.dat";
+
   for (auto fileName:fileNames){
-    auto job=new FileDownloadJob(provider.getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));      
+    auto job=new FileDownloadJob(map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
     connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
     connect(job, SIGNAL(failed()), this, SLOT(onJobFailed()));
     jobs << job; 
@@ -181,9 +184,22 @@ MapManager::~MapManager(){
   downloadJobs.clear();
 }
 
-void MapManager::downloadMap(MapProvider provider, AvailableMapsModelMap map, QDir dir)
+void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir)
 {
-  auto job=new MapDownloadJob(provider, map, dir);      
+  if (dir.exists()){
+    qWarning() << "Directory already exists"<<dir.path()<<"!";
+    return;
+  }
+  if (!dir.mkdir(dir.path())){
+    qWarning() << "Can't create directory"<<dir.path()<<"!";
+    return;
+  }
+  QStorageInfo storage=QStorageInfo(dir);
+  if (storage.bytesAvailable()<(double)map.getSize()){
+    qWarning() << "Free space"<<storage.bytesAvailable()<<" bytes is less than map size ("<<map.getSize()<<")!";
+  }
+  
+  auto job=new MapDownloadJob(map, dir);
   connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
   downloadJobs<<job;
   downloadNext();
@@ -220,15 +236,34 @@ void MapManager::onJobFinished()
   downloadNext();
 }
 
-void QmlMapManager::downloadMap(QVariant providerVar, QVariant mapVar, QString dir)
+QString QmlMapManager::suggestedDirectory(QVariant mapVar)
 {
-  qDebug() << providerVar << mapVar;
-  if (providerVar.canConvert<MapProvider>() && mapVar.canConvert<AvailableMapsModelMap>()){
-    MapProvider provider=providerVar.value<MapProvider>();
+  auto mapManager=DBThread::GetInstance()->GetMapManager();
+  auto directories=mapManager->getLookupDirectories();
+  auto it=directories.begin();
+  QString path=".";
+  if (it!=directories.end()){
+    path=*it;
+  }
+
+  if (mapVar.canConvert<AvailableMapsModelMap>()){
+    AvailableMapsModelMap map=mapVar.value<AvailableMapsModelMap>();
+    path+=QDir::separator();
+    for (auto part:map.getPath()){
+      path+=part+"-";
+    }
+    path+=map.getCreation().toString("yyyyMMdd-HHmmss");
+  }
+  return path;
+}
+
+void QmlMapManager::downloadMap(QVariant mapVar, QString dir)
+{
+  if (mapVar.canConvert<AvailableMapsModelMap>()){
     AvailableMapsModelMap map=mapVar.value<AvailableMapsModelMap>();
     
     auto mapManager=DBThread::GetInstance()->GetMapManager();
-    mapManager->downloadMap(provider, map, QDir(dir));
+    mapManager->downloadMap(map, QDir(dir));
   }
 }
 
@@ -236,4 +271,10 @@ QStringList QmlMapManager::getLookupDirectories()
 {
   auto mapManager=DBThread::GetInstance()->GetMapManager();
   return mapManager->getLookupDirectories();
+}
+
+double QmlMapManager::getFreeSpace(QString dir)
+{
+  QStorageInfo storage=QStorageInfo(QDir(dir));
+  return storage.bytesAvailable();
 }

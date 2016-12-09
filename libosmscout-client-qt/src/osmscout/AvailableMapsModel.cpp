@@ -289,10 +289,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
       return map==NULL ? QVariant(): map->getProvider().getName();
     case DescriptionRole:
       return item->getDescription();
-    case ProviderRole:
-      //return map==NULL ? QVariant(): qVariantFromValue(std::make_shared<MapProvider>(map->getProvider())); // QML takes ownership
-      return map==NULL ? QVariant(): qVariantFromValue(map->getProvider()); // QML takes ownership
-    case ModelImtemRole:
+    case MapRole:
       return map==NULL ? QVariant(): qVariantFromValue(AvailableMapsModelMap(*map));
     default:
         break;
@@ -300,14 +297,9 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
   return QVariant();
 }
 
-QVariant AvailableMapsModel::provider(const QModelIndex &index) const
-{
-  return data(index,ProviderRole);
-}
-
 QVariant AvailableMapsModel::map(const QModelIndex &index) const
 {
-  return data(index,ModelImtemRole);
+  return data(index,MapRole);
 }
 
 QHash<int, QByteArray> AvailableMapsModel::roleNames() const
@@ -324,8 +316,7 @@ QHash<int, QByteArray> AvailableMapsModel::roleNames() const
   roles[SizeRole]="size";
   roles[ProviderUriRole]="providerUri";
   roles[DescriptionRole]="description";
-  roles[ProviderRole]="provider";
-  roles[ModelImtemRole]="modelItem";
+  roles[MapRole]="map";
 
   return roles;
 }

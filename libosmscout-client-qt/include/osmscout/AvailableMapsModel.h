@@ -167,8 +167,7 @@ public:
     ProviderUriRole = Qt::UserRole+7,
     DescriptionRole = Qt::UserRole+8,
     SizeRole = Qt::UserRole+9,
-    ProviderRole = Qt::UserRole+10,
-    ModelImtemRole = Qt::UserRole+11,
+    MapRole = Qt::UserRole+10,
   };
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -180,7 +179,6 @@ public:
   QHash<int, QByteArray> roleNames() const;
   Qt::ItemFlags flags(const QModelIndex &index) const;
   
-  Q_INVOKABLE QVariant provider(const QModelIndex &index) const;
   Q_INVOKABLE QVariant map(const QModelIndex &index) const;
 
   inline bool isLoading(){

@@ -80,7 +80,6 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
   QList<FileDownloadJob*> jobs;
   QNetworkAccessManager   webCtrl;   
   
-  MapProvider             provider;
   AvailableMapsModelMap   map;
   QDir                    target;
   
@@ -98,7 +97,7 @@ public slots:
   void downloadNextFile();
 
 public:
-  MapDownloadJob(MapProvider provider, AvailableMapsModelMap map, QDir target);
+  MapDownloadJob(AvailableMapsModelMap map, QDir target);
   virtual ~MapDownloadJob();
   
   void start();
@@ -137,7 +136,7 @@ public:
   
   virtual ~MapManager();
 
-  void downloadMap(MapProvider provider, AvailableMapsModelMap map, QDir dir);
+  void downloadMap(AvailableMapsModelMap map, QDir dir);
   void downloadNext();
   
   inline QStringList getLookupDirectories()
@@ -158,8 +157,10 @@ public:
   
   virtual inline ~QmlMapManager(){};
   
-  Q_INVOKABLE void downloadMap(QVariant provider, QVariant map, QString dir);
+  Q_INVOKABLE QString suggestedDirectory(QVariant mapVar);
+  Q_INVOKABLE void downloadMap(QVariant map, QString dir);
   Q_INVOKABLE QStringList getLookupDirectories();
+  Q_INVOKABLE double getFreeSpace(QString dir);
 };
 
 #endif	/* MAPMANAGER_H */
