@@ -67,7 +67,7 @@ public:
 
 public:
     LocationListModel(QObject* parent = 0);
-    ~LocationListModel();
+    virtual ~LocationListModel();
 
     QVariant data(const QModelIndex &index, int role) const;
 

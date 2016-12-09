@@ -53,7 +53,7 @@ public:
   inline MapProvider(QString name, QString uri, QString listUri): 
     valid(true), uri(uri), listUri(listUri), name(name) {}
   
-  inline ~MapProvider() {}
+  virtual inline ~MapProvider() {}
   
   inline void operator=(const MapProvider &o)
   {

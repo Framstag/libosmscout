@@ -83,7 +83,7 @@ private:
 
 public:
   Settings();
-  ~Settings();
+  virtual ~Settings();
 
   double GetPhysicalDPI() const;
   
@@ -167,7 +167,7 @@ signals:
 public:
   QmlSettings();
   
-  inline ~QmlSettings(){};
+  virtual inline ~QmlSettings(){};
 
   double GetPhysicalDPI() const;
 

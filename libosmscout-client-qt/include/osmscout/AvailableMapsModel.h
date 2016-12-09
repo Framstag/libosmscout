@@ -47,7 +47,7 @@ public:
     QObject(o.parent()),
     name(o.name), path(o.path), description(o.description){};  
 
-  inline ~AvailableMapsModelItem(){}
+  virtual inline ~AvailableMapsModelItem(){}
     
   inline QString getName() const
   {
@@ -80,7 +80,7 @@ public:
   inline AvailableMapsModelDir(const AvailableMapsModelDir &o):
     AvailableMapsModelItem(o){};  
     
-  inline ~AvailableMapsModelDir(){};  
+  virtual inline ~AvailableMapsModelDir(){};
 
   virtual inline bool isDirectory() const
   {
@@ -111,7 +111,7 @@ public:
     AvailableMapsModelItem(o), provider(o.provider), size(o.size), serverDirectory(o.serverDirectory), 
     creation(o.creation), version(o.version) {};  
     
-  inline ~AvailableMapsModelMap(){};  
+  virtual inline ~AvailableMapsModelMap(){};
 
   virtual inline bool isDirectory() const
   {
@@ -143,7 +143,7 @@ public slots:
 public:
   AvailableMapsModel();
 
-  ~AvailableMapsModel();
+  virtual ~AvailableMapsModel();
 
   enum Roles {
     NameRole = Qt::UserRole, // localized name

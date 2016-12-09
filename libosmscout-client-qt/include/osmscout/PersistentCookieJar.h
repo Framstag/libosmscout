@@ -56,7 +56,7 @@
 class OSMSCOUT_CLIENT_QT_API PersistentCookieJar : public QNetworkCookieJar {
 public:
     PersistentCookieJar(QObject *parent = Q_NULLPTR) : QNetworkCookieJar(parent) { load(); }
-    ~PersistentCookieJar() { save(); }
+    virtual ~PersistentCookieJar() { save(); }
 
     virtual QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const
     {
