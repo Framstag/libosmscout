@@ -81,29 +81,28 @@ See for example the class `osmscout::TunnelFeature`, which implements
 the feature `Tunnel` based on the tag
 [tunnel](https://wiki.openstreetmap.org/wiki/Key:tunnel).
 
-```C++
-  class OSMSCOUT_API TunnelFeature : public Feature
-  {
-  private:
-    TagId tagTunnel;
+```c++
+class OSMSCOUT_API TunnelFeature : public Feature
+{
+private:
+  TagId tagTunnel;
 
-  public:
-    /** Name of this feature */
-    static const char* const NAME;
+public:
+  /** Name of this feature */
+  static const char* const NAME;
 
-  public:
-    void Initialize(TypeConfig& typeConfig);
+public:
+  void Initialize(TypeConfig& typeConfig);
 
-    std::string GetName() const;
+  std::string GetName() const;
 
-    void Parse(Progress& progress,
-               const TypeConfig& typeConfig,
-               const FeatureInstance& feature,
-               const ObjectOSMRef& object,
-               const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
-  };
-
+  void Parse(Progress& progress,
+             const TypeConfig& typeConfig,
+             const FeatureInstance& feature,
+             const ObjectOSMRef& object,
+             const TagMap& tags,
+             FeatureValueBuffer& buffer) const;
+};
 ```
 
 After a featured is created and registered to the `TypeConfig` instance, the
@@ -112,85 +111,84 @@ After a featured is created and registered to the `TypeConfig` instance, the
  `TypeConfig` and save them. The `TunnelFeature` does this for the Tag
  `tunnel`:
  
- ```C++
- 
-  void TunnelFeature::Initialize(TypeConfig& typeConfig)
-  {
-    tagTunnel=typeConfig.RegisterTag("tunnel");
-  }
- ```
+```c++ 
+void TunnelFeature::Initialize(TypeConfig& typeConfig)
+{
+  tagTunnel=typeConfig.RegisterTag("tunnel");
+}
+```
  
  The method `GetName()` has to be implemented to return the name of the feature
  as to be used in the `OST` file. It makes sense to define a constant for the
  name of the feature.
  
- ```C++
-  const char* const TunnelFeature::NAME = "Tunnel";
+```c++
+const char* const TunnelFeature::NAME = "Tunnel";
 
-  std::string TunnelFeature::GetName() const
-  {
-    return NAME;
-  }
+std::string TunnelFeature::GetName() const
+{
+  return NAME;
+}
  ```
  
  Finally (for valueless features) you need to implement the `Parse` method
  to analyze the given object with the given map of tags for the existance of the
  feature:
  
- ```C++
-  void TunnelFeature::Parse(Progress& /*progress*/,
-                            const TypeConfig& /*typeConfig*/,
-                            const FeatureInstance& feature,
-                            const ObjectOSMRef& /*object*/,
-                            const TagMap& tags,
-                            FeatureValueBuffer& buffer) const
-  {
-    auto tunnel=tags.find(tagTunnel);
+```c++
+void TunnelFeature::Parse(Progress& /*progress*/,
+                          const TypeConfig& /*typeConfig*/,
+                          const FeatureInstance& feature,
+                          const ObjectOSMRef& /*object*/,
+                          const TagMap& tags,
+                          FeatureValueBuffer& buffer) const
+{
+  auto tunnel=tags.find(tagTunnel);
 
-    if (tunnel!=tags.end() &&
-        !(tunnel->second=="no" ||
-          tunnel->second=="false" ||
-          tunnel->second=="0")) {
-      buffer.AllocateValue(feature.GetIndex());
-    }
+  if (tunnel!=tags.end() &&
+      !(tunnel->second=="no" ||
+        tunnel->second=="false" ||
+        tunnel->second=="0")) {
+    buffer.AllocateValue(feature.GetIndex());
   }
- ```
+}
+```
  If the feature exists, you have to allocate a value for it at the index
  as defined (and managed by the `TypeConfig`) by the passed 
  `FeatureInstance`.
  
  Since the base class has the following (overwriteable) definitions:
  
-```C++
-    /**
-     * A feature, if set for an object, can hold a value. If there is no value object,
-     * this method returns 0, else it returns the C++ size of the value object.
-     */
-    inline virtual size_t GetValueSize() const
-    {
-      return 0;
-    }
+```c++
+/**
+ * A feature, if set for an object, can hold a value. If there is no value object,
+ * this method returns 0, else it returns the C++ size of the value object.
+ */
+inline virtual size_t GetValueSize() const
+{
+  return 0;
+}
 
-    /**
-     * This method returns the number of additional feature bits reserved. If there are
-     * additional features bit, 0 is returned.
-     *
-     * A feature may reserve additional feature bits. Feature bits should be used
-     * if a custom value object is too expensive. Space for feature bits is always reserved
-     * even if the feature itself is not set for a certain object.
-     */
-    inline virtual size_t GetFeatureBitCount() const
-    {
-      return 0;
-    }
+/**
+ * This method returns the number of additional feature bits reserved. If there are
+ * additional features bit, 0 is returned.
+ *
+ * A feature may reserve additional feature bits. Feature bits should be used
+ * if a custom value object is too expensive. Space for feature bits is always reserved
+ * even if the feature itself is not set for a certain object.
+ */
+inline virtual size_t GetFeatureBitCount() const
+{
+  return 0;
+}
 
-    /**
-     * Returns 'true' if the feature has an value object.
-     */
-    inline virtual bool HasValue() const
-    {
-      return GetValueSize()>0;
-    }
+/**
+ * Returns 'true' if the feature has an value object.
+ */
+inline virtual bool HasValue() const
+{
+  return GetValueSize()>0;
+}
 ```
 
 There is no actual value for the feature, since the value size is 0. In this case
@@ -201,45 +199,45 @@ you are done.
 For a feature also having a value we have to do further coding. Let`s look
 at the `NameFeature`. First the `NameFeatureValue`.
 
-```C++
-  class OSMSCOUT_API NameFeatureValue : public FeatureValue
+```c++
+class OSMSCOUT_API NameFeatureValue : public FeatureValue
+{
+private:
+  std::string name;
+
+public:
+  inline NameFeatureValue()
   {
-  private:
-    std::string name;
+    // no code
+  }
 
-  public:
-    inline NameFeatureValue()
-    {
-      // no code
-    }
+  inline NameFeatureValue(const std::string& name)
+  : name(name)
+  {
+    // no code
+  }
 
-    inline NameFeatureValue(const std::string& name)
-    : name(name)
-    {
-      // no code
-    }
+  inline void SetName(const std::string& name)
+  {
+    this->name=name;
+  }
 
-    inline void SetName(const std::string& name)
-    {
-      this->name=name;
-    }
+  inline std::string GetName() const
+  {
+    return name;
+  }
 
-    inline std::string GetName() const
-    {
-      return name;
-    }
+  inline std::string GetLabel() const
+  {
+    return name;
+  }
 
-    inline std::string GetLabel() const
-    {
-      return name;
-    }
+  void Read(FileScanner& scanner);
+  void Write(FileWriter& writer);
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
-
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
-  };
+  FeatureValue& operator=(const FeatureValue& other);
+  bool operator==(const FeatureValue& other) const;
+};
 ```
 
 The `NameFeatureValue` extends `FeatureValue` overwriting the `GetLabel()` method,
@@ -248,16 +246,16 @@ the assignment and comparison methods and the `Read()` and `Write()` methods.
 In this case the actzul value is the attribute `name` of type `std::string`.
 The corresponding ovwrriten methods are thus as expected:
 
-```C++
-  void NameFeatureValue::Read(FileScanner& scanner)
-  {
-    scanner.Read(name);
-  }
+```c++
+void NameFeatureValue::Read(FileScanner& scanner)
+{
+  scanner.Read(name);
+}
 
-  void NameFeatureValue::Write(FileWriter& writer)
-  {
-    writer.Write(name);
-  }
+void NameFeatureValue::Write(FileWriter& writer)
+{
+  writer.Write(name);
+}
 ```
 
 The `NameFeature` also offers additional `SetName()` and `GetName()` helper
@@ -270,16 +268,16 @@ representation of the feature. In this case we just return the name itself.
 To signal the engine that a feature has a value the following methods of the
 base class have to be implemented as follows:
 
-```C++
-  size_t NameFeature::GetValueSize() const
-  {
-    return sizeof(NameFeatureValue);
-  }
+```c++
+size_t NameFeature::GetValueSize() const
+{
+  return sizeof(NameFeatureValue);
+}
 
-  FeatureValue* NameFeature::AllocateValue(void* buffer)
-  {
-    return new (buffer) NameFeatureValue();
-  }
+FeatureValue* NameFeature::AllocateValue(void* buffer)
+{
+  return new (buffer) NameFeatureValue();
+}
 ```
 
 In this case the size of the value is >0 and AllocateValue uses a special variant

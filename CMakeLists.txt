@@ -27,9 +27,11 @@ if(APPLE AND NOT ANDROID)
 endif ()
 
 # CXX_STANDARD property is supported from cmake 3.1, we have to define -std with old cmake
-if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.1)
-  add_definitions(-std=c++11)
-endif ()
+if(NOT MSVC)
+  if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  endif ()
+endif()
 
 include(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" OSMSCOUT_PTR_SIZE BUILTIN_TYPES_ONLY)
