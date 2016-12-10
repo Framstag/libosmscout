@@ -78,7 +78,7 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
   Q_OBJECT
   
   QList<FileDownloadJob*> jobs;
-  QNetworkAccessManager   webCtrl;   
+  QNetworkAccessManager   *webCtrl;
   
   AvailableMapsModelMap   map;
   QDir                    target;
@@ -97,7 +97,7 @@ public slots:
   void downloadNextFile();
 
 public:
-  MapDownloadJob(AvailableMapsModelMap map, QDir target);
+  MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target);
   virtual ~MapDownloadJob();
   
   void start();
@@ -123,6 +123,7 @@ private:
   QStringList databaseLookupDirs;
   QList<QDir> databaseDirectories;
   QList<MapDownloadJob*> downloadJobs;
+  QNetworkAccessManager webCtrl;
 
 public slots:
   void lookupDatabases();

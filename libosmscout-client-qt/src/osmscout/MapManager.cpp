@@ -35,7 +35,7 @@ FileDownloadJob::FileDownloadJob(QUrl url, QFileInfo fileInfo):
 
 void FileDownloadJob::start(QNetworkAccessManager *webCtrl)
 {
-  connect(webCtrl, SIGNAL(finished(QNetworkReply*)),  this, SLOT(onFinished(QNetworkReply*)));
+  connect(webCtrl, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
   qDebug() << "Downloading "<<url.toString()<<"to"<<file.fileName();
 
   // open file
@@ -60,6 +60,9 @@ void FileDownloadJob::onFinished(QNetworkReply* reply)
   if (reply!=this->reply)
     return; // not for us
   
+  // we are finished, we don't need to be connected anymore
+  disconnect(QObject::sender(), SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
+
   downloading=false;
   file.close();
   if (reply->error() == QNetworkReply::NoError){
@@ -73,12 +76,9 @@ void FileDownloadJob::onFinished(QNetworkReply* reply)
   this->reply=NULL;
 }
 
-MapDownloadJob::MapDownloadJob(AvailableMapsModelMap map, QDir target):
-  map(map), target(target), backoffInterval(1000), done(false), started(false)
+MapDownloadJob::MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target):
+  webCtrl(webCtrl), map(map), target(target), backoffInterval(1000), done(false), started(false)
 {
-  webCtrl.setCookieJar(new PersistentCookieJar());
-  // we don't use disk cache here
-  
   backoffTimer.setSingleShot(true);
   connect(&backoffTimer, SIGNAL(timeout()), this, SLOT(downloadNextFile()));
 }
@@ -143,9 +143,10 @@ void MapDownloadJob::onJobFinished()
 
 void MapDownloadJob::downloadNextFile()
 {
+  //qDebug() << "current thread:"<<QThread::currentThread();
   for (auto job:jobs){
     if (!job->isDownloaded()){
-      job->start(&webCtrl);
+      job->start(webCtrl);
       return;
     }
   }
@@ -156,6 +157,8 @@ void MapDownloadJob::downloadNextFile()
 MapManager::MapManager(QStringList databaseLookupDirs):
   databaseLookupDirs(databaseLookupDirs)
 {
+  webCtrl.setCookieJar(new PersistentCookieJar());
+  // we don't use disk cache here
 
 }
 
@@ -199,7 +202,7 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir)
     qWarning() << "Free space"<<storage.bytesAvailable()<<" bytes is less than map size ("<<map.getSize()<<")!";
   }
   
-  auto job=new MapDownloadJob(map, dir);
+  auto job=new MapDownloadJob(&webCtrl, map, dir);
   connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
   downloadJobs<<job;
   downloadNext();
