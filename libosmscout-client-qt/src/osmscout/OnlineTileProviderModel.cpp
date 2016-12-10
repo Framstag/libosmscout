@@ -42,7 +42,6 @@ QHash<int, QByteArray> OnlineTileProviderModel::roleNames() const
     roles[IdRole]="id";
 
     return roles;
-
 }
 
 Qt::ItemFlags OnlineTileProviderModel::flags(const QModelIndex &index) const

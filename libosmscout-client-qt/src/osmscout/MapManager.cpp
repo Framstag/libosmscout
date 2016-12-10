@@ -24,13 +24,13 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/PersistentCookieJar.h>
 
-#include "osmscout/util/Logger.h"
-#include "osmscout/DBThread.h"
+#include <osmscout/util/Logger.h>
+#include <osmscout/DBThread.h>
 
 FileDownloadJob::FileDownloadJob(QUrl url, QFileInfo fileInfo):
-  url(url), file(fileInfo.filePath()), downloading(false), downloaded(false), reply(NULL)
+  url(url), file(fileInfo.filePath()), downloading(false), downloaded(false), reply(NULL), bytesDownloaded(0)
 {
-  
+  fileName=fileInfo.fileName();
 }
 
 void FileDownloadJob::start(QNetworkAccessManager *webCtrl)
@@ -48,6 +48,13 @@ void FileDownloadJob::start(QNetworkAccessManager *webCtrl)
   downloading=true;
   reply=webCtrl->get(request);
   connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+  connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(onDownloadProgress(qint64, qint64)));
+}
+
+void FileDownloadJob::onDownloadProgress(qint64 bytesReceived, qint64 /*bytesTotal*/)
+{
+  bytesDownloaded=bytesReceived;
+  emit downloadProgress();
 }
 
 void FileDownloadJob::onReadyRead()
@@ -123,6 +130,7 @@ void MapDownloadJob::start()
     auto job=new FileDownloadJob(map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
     connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
     connect(job, SIGNAL(failed()), this, SLOT(onJobFailed()));
+    connect(job, SIGNAL(downloadProgress()), this, SIGNAL(downloadProgress()));
     jobs << job; 
   }
   started=true;
@@ -152,6 +160,28 @@ void MapDownloadJob::downloadNextFile()
   }
   done=true;
   emit finished();
+}
+
+double MapDownloadJob::getProgress()
+{
+  double expected=expectedSize();
+  size_t downloaded=0;
+  for (auto job:jobs){
+    downloaded+=job->getBytesDownloaded();
+  }
+  if (expected==0.0)
+    return 0;
+  return (double)downloaded/expected;
+}
+
+QString MapDownloadJob::getDownloadingFile()
+{
+  for (auto job:jobs){
+    if (job->isDownloading()){
+      return job->getFileName();
+    }
+  }
+  return "";
 }
 
 MapManager::MapManager(QStringList databaseLookupDirs):
@@ -205,6 +235,7 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir)
   auto job=new MapDownloadJob(&webCtrl, map, dir);
   connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
   downloadJobs<<job;
+  emit downloadJobsChanged();
   downloadNext();
 }
 
@@ -234,50 +265,8 @@ void MapManager::onJobFinished()
   }
   for (auto job:finished){
     downloadJobs.removeOne(job);
+    emit downloadJobsChanged();
     delete job;
   }
   downloadNext();
-}
-
-QString QmlMapManager::suggestedDirectory(QVariant mapVar)
-{
-  auto mapManager=DBThread::GetInstance()->GetMapManager();
-  auto directories=mapManager->getLookupDirectories();
-  auto it=directories.begin();
-  QString path=".";
-  if (it!=directories.end()){
-    path=*it;
-  }
-
-  if (mapVar.canConvert<AvailableMapsModelMap>()){
-    AvailableMapsModelMap map=mapVar.value<AvailableMapsModelMap>();
-    path+=QDir::separator();
-    for (auto part:map.getPath()){
-      path+=part+"-";
-    }
-    path+=map.getCreation().toString("yyyyMMdd-HHmmss");
-  }
-  return path;
-}
-
-void QmlMapManager::downloadMap(QVariant mapVar, QString dir)
-{
-  if (mapVar.canConvert<AvailableMapsModelMap>()){
-    AvailableMapsModelMap map=mapVar.value<AvailableMapsModelMap>();
-    
-    auto mapManager=DBThread::GetInstance()->GetMapManager();
-    mapManager->downloadMap(map, QDir(dir));
-  }
-}
-
-QStringList QmlMapManager::getLookupDirectories()
-{
-  auto mapManager=DBThread::GetInstance()->GetMapManager();
-  return mapManager->getLookupDirectories();
-}
-
-double QmlMapManager::getFreeSpace(QString dir)
-{
-  QStorageInfo storage=QStorageInfo(QDir(dir));
-  return storage.bytesAvailable();
 }

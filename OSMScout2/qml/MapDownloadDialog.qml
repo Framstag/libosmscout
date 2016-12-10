@@ -17,8 +17,8 @@ MapDialog {
     label: "Map Downloader"
     fullscreen: parent.width<500 || parent.height<600
 
-    MapManager{
-        id:mapManager
+    MapDownloadsModel{
+        id:mapDownloadsModel
     }
 
     //Layout.maximumWidth: Math.max(mapDownloadDialog.width * 0.9, 800)
@@ -52,7 +52,7 @@ MapDialog {
             id: treeView
             //anchors.fill: parent
             Layout.minimumWidth: Math.min(mapDownloadDialog.width * 0.8, 500)
-            Layout.minimumHeight: Math.min(mapDownloadDialog.height * 0.8, 600)
+            Layout.minimumHeight: Math.min(mapDownloadDialog.height * 0.5, 400)
 
             TableViewColumn {
                 title: "Name"
@@ -104,8 +104,8 @@ MapDialog {
                     //console.log(index.parent.row, index.row)
                     var map=availableMapsModel.map(index);
                     if (map){
-                        var dir=mapManager.suggestedDirectory(map);
-                        mapManager.downloadMap(map, dir)
+                        var dir=mapDownloadsModel.suggestedDirectory(map);
+                        mapDownloadsModel.downloadMap(map, dir)
                     }
                 }
             }
@@ -119,5 +119,53 @@ MapDialog {
             font.pixelSize: Theme.textFontSize
             horizontalAlignment: Text.AlignHCenter
         }
+
+        Text{
+            text: "Downloads"
+            font.bold: true
+        }
+
+        TableView {
+            id: downloadsTable
+
+            Layout.minimumWidth: Math.min(mapDownloadDialog.width * 0.8, 500)
+            height: 60
+
+            model: mapDownloadsModel
+
+            style: TableViewStyle{
+                backgroundColor: "#f0f0f0"
+                highlightedTextColor : "#ffffff"
+                textColor: "#000000"
+                //frame: Rectangle {color: "blue"}
+                handle: Rectangle {color: "blue"}
+            }
+
+            TableViewColumn {
+                role: "mapName"
+                title: "Map"
+                width: 100
+            }
+            TableViewColumn {
+                //role: "progressRole"
+                title: "Progress"
+                delegate: Text {
+                    text: (model!=null) ? Math.round(model.progressRole * 100)+" %" : "?"
+                    //font.pointSize: 20
+                }
+                width: 30
+            }
+            TableViewColumn {
+                role: "progressDescription"
+                title: "Downloading"
+                width: 100
+            }
+            TableViewColumn {
+                role: "targetDirectory"
+                title: "Target Directory"
+                width: 300
+            }
+        }
+
     }
 }

@@ -28,6 +28,7 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/RoutingModel.h>
 #include <osmscout/AvailableMapsModel.h>
+#include <osmscout/MapDownloadsModel.h>
 
 // Application settings
 #include <osmscout/Settings.h>
@@ -73,7 +74,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<RoutingListModel>("net.sf.libosmscout.map", 1, 0, "RoutingListModel");
   qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
   qmlRegisterType<AvailableMapsModel>("net.sf.libosmscout.map", 1, 0, "AvailableMapsModel");
-  qmlRegisterType<QmlMapManager>("net.sf.libosmscout.map", 1, 0, "MapManager");
+  qmlRegisterType<MapDownloadsModel>("net.sf.libosmscout.map", 1, 0, "MapDownloadsModel");
 
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
