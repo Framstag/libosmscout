@@ -152,7 +152,6 @@ int main(int argc, char* argv[])
   dbThread->moveToThread(&thread);
 
   QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
-  //QQmlApplicationEngine window(QUrl("qrc:/qml/AvailableMaps.qml"));
 
   thread.start();
 

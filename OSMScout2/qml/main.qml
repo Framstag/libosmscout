@@ -28,6 +28,15 @@ Window {
         dialog.open()
     }
 
+    function openMapDownloadDialog() {
+        var component = Qt.createComponent("MapDownloadDialog.qml")
+        var dialog = component.createObject(mainWindow, {})
+
+        dialog.opened.connect(onDialogOpened)
+        dialog.closed.connect(onDialogClosed)
+        dialog.open()
+    }
+
     function showLocation(location) {
         map.showLocation(location)
     }
@@ -246,6 +255,28 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: downloadBtn
+                    Image {
+                        id: downloadIcon
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width * 0.8
+                        height: parent.height * 0.8
+
+                        source: "qrc:///pics/Download.svg"
+                        fillMode: Image.PreserveAspectFit
+                        horizontalAlignment: Image.AlignHCenter
+                        verticalAlignment: Image.AlignVCenter
+                        sourceSize.width: width
+                        sourceSize.height: height
+                    }
+                    onClicked: {
+                        openMapDownloadDialog();
+                    }
+                }
 
                 MapButton {
                     id: about
