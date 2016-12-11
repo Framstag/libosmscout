@@ -24,11 +24,9 @@
 #include <osmscout/TiledDBThread.h>
 #include <osmscout/PlaneDBThread.h>
 #include <osmscout/private/Config.h>
+#include "osmscout/MapManager.h"
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/TextSearchIndex.h>
-#include <qt4/QtCore/qnamespace.h>
-
-#include "osmscout/MapManager.h"
 #endif
 
 QBreaker::QBreaker()
