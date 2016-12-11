@@ -17,7 +17,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QStorageInfo>
 #include <QDirIterator>
 #include <QDebug>
 
@@ -228,10 +227,12 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir)
     qWarning() << "Can't create directory"<<dir.path()<<"!";
     return;
   }
+#ifdef HAS_QSTORAGE
   QStorageInfo storage=QStorageInfo(dir);
   if (storage.bytesAvailable()<(double)map.getSize()){
     qWarning() << "Free space"<<storage.bytesAvailable()<<" bytes is less than map size ("<<map.getSize()<<")!";
   }
+#endif
   
   auto job=new MapDownloadJob(&webCtrl, map, dir);
   connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));

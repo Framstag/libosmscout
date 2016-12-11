@@ -31,6 +31,12 @@
 #include <osmscout/MapProvider.h>
 #include <osmscout/AvailableMapsModel.h>
 
+#include <qconfig.h>
+#if QT_VERSION_MAJOR>=5 && QT_VERSION_MINOR>=4
+#define HAS_QSTORAGE
+#include <QStorageInfo>
+#endif
+
 /**
  * Simple utility class for download single file over http.
  * It don't support downloading restart when connection 
