@@ -69,6 +69,12 @@ MapDialog {
                 role: "description"
                 width: 300
             }
+            TableViewColumn {
+                title: "Last Update"
+                role: "time"
+                width: 200
+            }
+
             headerVisible: true
 
             AvailableMapsModel{
