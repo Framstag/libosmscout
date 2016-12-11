@@ -33,6 +33,8 @@
 #include <osmscout/DBThread.h>
 
 /**
+ * QML list model with currently downloaded maps. It provide methods
+ * (invocable from QML) for starting new map download.
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API MapDownloadsModel: public QAbstractListModel
