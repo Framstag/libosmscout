@@ -32,6 +32,9 @@
 #include <osmscout/AvailableMapsModel.h>
 
 /**
+ * Simple utility class for download single file over http.
+ * It don't support downloading restart when connection 
+ * is interrupted.
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API FileDownloadJob: public QObject
@@ -39,13 +42,13 @@ class OSMSCOUT_CLIENT_QT_API FileDownloadJob: public QObject
   Q_OBJECT
   
 private:
-   QUrl           url;
-   QFile          file;
-   bool           downloading;
-   bool           downloaded;
-   QNetworkReply  *reply;
-   qint64         bytesDownloaded;
-   QString        fileName;
+  QUrl           url;
+  QFile          file;
+  bool           downloading;
+  bool           downloaded;
+  QNetworkReply  *reply;
+  qint64         bytesDownloaded;
+  QString        fileName;
 
 signals:
   void finished();
@@ -85,6 +88,9 @@ public:
 };
 
 /**
+ * Utility class for downloading map database described by AvailableMapsModelMap
+ * over http. When connection is interrupted, downloading will be retried
+ * after some backoff period.
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
@@ -146,6 +152,8 @@ public:
 };
 
 /**
+ * Manager of map databases. It provide database lookup 
+ * (in databaseDirectories) and simple scheduler for downloading maps.
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API MapManager: public QObject

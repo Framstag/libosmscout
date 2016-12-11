@@ -29,6 +29,7 @@
 #include <osmscout/Settings.h>
 
 /**
+ * Abstract model item used in AvailableMapsModel
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelItem : public QObject {
@@ -75,6 +76,7 @@ public:
 };
 
 /**
+ * Model item representing directory in AvailableMapsModel
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelDir : public AvailableMapsModelItem {
@@ -96,6 +98,7 @@ public:
 };
 
 /**
+ * Model item representing map in AvailableMapsModel
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelItem {
@@ -138,6 +141,26 @@ public:
 Q_DECLARE_METATYPE(AvailableMapsModelMap)
 
 /**
+ * Tree model with maps available by configured providers (see Settings::GetMapProviders).
+ * Every map provider have to expose list of maps by json. Json format exammple:
+ * 
+ * <pre>
+ * [
+ *  {
+ *    "version" : 10,
+ *    "timestamp" : 1480801927,
+ *    "name" : "Czech Republic",
+ *    "directory" : "europe/czech-republic-10-20161203",
+ *    "size" : 622036876,
+ *    "map" : "europe/czech-republic"
+ *  },
+ *  {
+ *    "dir" : "europe",
+ *    "name" : "Europe"
+ *  }
+ * ]
+ * </pre>
+ * 
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractItemModel {
