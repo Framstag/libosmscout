@@ -205,7 +205,7 @@ bool Settings::loadMapProviders(QString path)
         qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
         return false;
     }
-    qDebug() << "Loading online tile providers from " << loadFile.fileName();
+    qDebug() << "Loading map providers from " << loadFile.fileName();
     
     QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
     for (auto obj: doc.array()){
