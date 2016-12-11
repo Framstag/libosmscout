@@ -25,6 +25,7 @@ MapDownloadsModel::MapDownloadsModel(QObject *parent):
 
   mapManager=DBThread::GetInstance()->GetMapManager();
   connect(mapManager, SIGNAL(downloadJobsChanged()), this, SLOT(onDownloadJobsChanged()));
+  onDownloadJobsChanged();
 }
 
 QString MapDownloadsModel::suggestedDirectory(QVariant mapVar, QString rootDirectory)
