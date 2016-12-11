@@ -36,7 +36,15 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/OSMTile.cpp \
                                  osmscout/moc_OSMTile.cpp \
                                  osmscout/TileCache.cpp \
-                                 osmscout/moc_TileCache.cpp
+                                 osmscout/moc_TileCache.cpp \
+                                 osmscout/MapProvider.cpp \
+                                 osmscout/moc_MapProvider.cpp \
+                                 osmscout/AvailableMapsModel.cpp \
+                                 osmscout/moc_AvailableMapsModel.cpp \
+                                 osmscout/MapManager.cpp \
+                                 osmscout/moc_MapManager.cpp \
+                                 osmscout/MapDownloadsModel.cpp \
+                                 osmscout/moc_MapDownloadsModel.cpp
 
 osmscout/moc_%.cpp: $(top_srcdir)/include/osmscout/%.h
 	@MOC@ -o$@ $<
