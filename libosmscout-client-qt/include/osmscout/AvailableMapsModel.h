@@ -193,14 +193,14 @@ public:
     MapRole = Qt::UserRole+10,
   };
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const;
-  QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
-  QModelIndex parent(const QModelIndex &index) const;
+  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE virtual QModelIndex parent(const QModelIndex &index) const;
 
-  QVariant data(const QModelIndex &index, int role) const;
-  QHash<int, QByteArray> roleNames() const;
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
+  virtual QHash<int, QByteArray> roleNames() const;
+  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
   
   Q_INVOKABLE QVariant map(const QModelIndex &index) const;
 

@@ -59,10 +59,10 @@ public:
     ProgressDescriptionRole = Qt::UserRole+3,
   };
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  QVariant data(const QModelIndex &index, int role) const;
-  QHash<int, QByteArray> roleNames() const;
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
+  virtual QHash<int, QByteArray> roleNames() const;
+  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
   Q_INVOKABLE QString suggestedDirectory(QVariant mapVar, QString rootDirectory = "");
   Q_INVOKABLE void downloadMap(QVariant map, QString dir);
