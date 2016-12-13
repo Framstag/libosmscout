@@ -280,7 +280,7 @@ public slots:
   void SearchForLocations(const QString searchPattern, int limit);
   
 protected:
-  MapManager                    *mapManager;
+  MapManagerRef                 mapManager;
 
   double                        mapDpi;
   double                        physicalDpi;
@@ -385,7 +385,7 @@ public:
   void AddRoute(const osmscout::Way& way);
   osmscout::TypeConfigRef GetTypeConfig(const QString databasePath) const;
   
-  inline MapManager *GetMapManager() const
+  inline MapManagerRef GetMapManager() const
   {
     return mapManager;
   }

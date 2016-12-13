@@ -198,5 +198,10 @@ public:
   }
 };
 
+/**
+ * \ingroup QtAPI
+ */
+typedef std::shared_ptr<MapManager> MapManagerRef;
+
 #endif	/* MAPMANAGER_H */
 

@@ -45,7 +45,7 @@ public slots:
   void onDownloadProgress();
 
 private:
-  MapManager *mapManager;
+  MapManagerRef mapManager;
 
 public:
   MapDownloadsModel(QObject *parent=Q_NULLPTR);

@@ -98,7 +98,7 @@ QString StyleError::GetTypeName() const
 DBThread::DBThread(QStringList databaseLookupDirs, 
                    QString stylesheetFilename, 
                    QString iconDirectory)
-  : mapManager(new MapManager(databaseLookupDirs)), 
+  : mapManager(std::make_shared<MapManager>(databaseLookupDirs)), 
     mapDpi(-1),
     physicalDpi(-1),
     stylesheetFilename(stylesheetFilename),
@@ -129,7 +129,7 @@ DBThread::DBThread(QStringList databaseLookupDirs,
           this, SLOT(onMapDPIChange(double)),
           Qt::QueuedConnection);
   
-  connect(mapManager, SIGNAL(databaseListChanged(QList<QDir>)),
+  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
           this, SLOT(onDatabaseListChanged(QList<QDir>)),
           Qt::QueuedConnection);
 }
@@ -142,8 +142,6 @@ DBThread::~DBThread()
     db->close();
   }
   databases.clear();
-  delete mapManager;
-  mapManager=NULL;
 }
 
 
