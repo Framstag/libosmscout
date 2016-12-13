@@ -27,7 +27,7 @@ Currently, Qt API (libosmscout-client-qt) supports two rendering methods:
 
 Online tile providers are loaded on application startup 
 from `resources/online-tile-providers.json`. It is JSON array of objects that
-describe single tile source. Only providers with `256px` width tiles 
+describing tile sources. Only providers with `256px` width tiles 
 are supported currently.
 
 Example for OSM Mapnik source:
@@ -59,8 +59,8 @@ website: http://libosmscout.sourceforge.net/tutorials/Importing/
 
 We (osmscout developers) provide prepared map databases for some regions, 
 you can download it directly from OSMScout2 application. Map providers are loaded
-on application startup from `resources/map-providers.json` file. It is JSON
-Array with objects described map providers:
+on application startup from `resources/map-providers.json` file. 
+It is JSON Array with objects describing map providers:
 
 ```
 [
@@ -93,7 +93,7 @@ Map list sample:
  }
 ]
 ```
-Map should be available on provider's server (`uri` in provider object) 
+Map should be available on provider's server/CDN (`uri` in provider object) 
 with relative path `directory` from map object. 
 So, `europe/czech-republic` map from previous sample can be downloaded from: 
 https://osmscout.karry.cz/europe/czech-republic-10-20161203
