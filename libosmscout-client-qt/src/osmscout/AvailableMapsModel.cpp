@@ -17,6 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <QString>
+
+#include <osmscout/util/String.h>
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/PersistentCookieJar.h>
 
@@ -32,19 +35,7 @@ size_t AvailableMapsModelMap::getSize() const
 
 QString AvailableMapsModelMap::getSizeHuman() const
 {
-  double num = size;
-  QStringList list;
-  list << "KiB" << "MiB" << "GiB" << "TiB";
-
-  QStringListIterator i(list);
-  QString unit("bytes");
-
-  while(num >= 1024.0 && i.hasNext())
-   {
-      unit = i.next();
-      num /= 1024.0;
-  }
-  return QString().setNum(num,'f',2)+" "+unit;
+  return QString::fromStdString(osmscout::ByteSizeToString((double)size));
 }
 
 QString AvailableMapsModelMap::getServerDirectory() const
