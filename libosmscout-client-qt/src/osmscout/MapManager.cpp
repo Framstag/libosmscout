@@ -221,10 +221,12 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir)
 {
   if (dir.exists()){
     qWarning() << "Directory already exists"<<dir.path()<<"!";
+    emit mapDownloadFails("Directory already exists");
     return;
   }
   if (!dir.mkdir(dir.path())){
     qWarning() << "Can't create directory"<<dir.path()<<"!";
+    emit mapDownloadFails("Can't create directory");
     return;
   }
 #ifdef HAS_QSTORAGE

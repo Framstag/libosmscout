@@ -177,6 +177,7 @@ public slots:
   void onJobFinished();
   
 signals:
+  void mapDownloadFails(QString message);
   void databaseListChanged(QList<QDir> databaseDirectories);
   void downloadJobsChanged();
 
