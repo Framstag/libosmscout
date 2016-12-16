@@ -308,7 +308,7 @@ namespace osmscout {
 
     statisticList.sort([](const DataStatistic& a, const DataStatistic& b)->bool{return a.objectCount>b.objectCount;});
 
-    log.Info() << "Type|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
+    log.Info() << "Type|ObjectCount|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
     for (const auto& entry : statisticList) {
       log.Info() << entry.type->GetName() << " "
           << entry.objectCount << " "
