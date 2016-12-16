@@ -177,6 +177,9 @@ namespace osmscout {
                          NodeRef& node) const;
     bool GetNodesByOffset(const std::vector<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
+    bool GetNodesByOffset(const std::vector<FileOffset>& offsets,
+                          const GeoBox& boundingBox,
+                          std::vector<NodeRef>& nodes) const;
     bool GetNodesByOffset(const std::set<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
     bool GetNodesByOffset(const std::list<FileOffset>& offsets,

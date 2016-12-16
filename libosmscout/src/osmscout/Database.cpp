@@ -540,6 +540,31 @@ namespace osmscout {
     return result;
   }
 
+  bool Database::GetNodesByOffset(const std::vector<FileOffset>& offsets,
+                                  const GeoBox& boundingBox,
+                                  std::vector<NodeRef>& nodes) const
+  {
+    NodeDataFileRef nodeDataFile=GetNodeDataFile();
+
+    if (!nodeDataFile) {
+      return false;
+    }
+
+    StopClock time;
+
+    bool result=nodeDataFile->GetByOffset(offsets,
+                                          boundingBox,
+                                          nodes);
+
+    time.Stop();
+
+    if (time.GetMilliseconds()>100) {
+      log.Warn() << "Retrieving " << nodes.size() << " nodes by offset took " << time.ResultString();
+    }
+
+    return result;
+  }
+
   bool Database::GetNodesByOffset(const std::set<FileOffset>& offsets,
                                   std::vector<NodeRef>& nodes) const
   {
