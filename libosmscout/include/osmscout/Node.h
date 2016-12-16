@@ -71,6 +71,19 @@ namespace osmscout {
       return coords;
     }
 
+    /**
+     * Returns true if the nodes is in the given bounding box
+     *
+     * @param boundingBox
+     *    bounding box to test for intersection
+     * @return
+     *    true on intersection, else false
+     */
+    inline bool Intersects(const GeoBox& boundingBox) const
+    {
+      return boundingBox.Includes(coords);
+    }
+
     inline size_t GetFeatureCount() const
     {
       return featureValueBuffer.GetType()->GetFeatureCount();
