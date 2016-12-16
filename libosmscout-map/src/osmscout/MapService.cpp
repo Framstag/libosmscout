@@ -256,6 +256,7 @@ namespace osmscout {
         std::vector<NodeRef> nodes;
 
         if (!database->GetNodesByOffset(offsets,
+                                        boundingBox,
                                         nodes)) {
           log.Error() << "Error reading nodes in area!";
           return false;
