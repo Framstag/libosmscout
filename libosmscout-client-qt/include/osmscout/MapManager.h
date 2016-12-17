@@ -31,8 +31,8 @@
 #include <osmscout/MapProvider.h>
 #include <osmscout/AvailableMapsModel.h>
 
-#include <qconfig.h>
-#if QT_VERSION_MAJOR>=5 && QT_VERSION_MINOR>=4
+#include <QtGlobal>
+#if QT_VERSION >= 0x050400
 #define HAS_QSTORAGE
 #include <QStorageInfo>
 #endif
