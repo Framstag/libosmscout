@@ -57,12 +57,13 @@ public slots:
   void offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
   void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);  
+  void onDatabaseLoaded(osmscout::GeoBox boundingBox);
 
   void onStylesheetFilenameChanged();
-  
+
   void onlineTileProviderChanged();
   void onlineTilesEnabledChanged(bool);
-  
+
   void onOfflineMapChanged(bool);
   virtual void Initialize();
 

@@ -67,15 +67,15 @@ public:
 
 public:
     LocationListModel(QObject* parent = 0);
-    ~LocationListModel();
+    virtual ~LocationListModel();
 
-    QVariant data(const QModelIndex &index, int role) const;
+    Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const;
+    Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-    QHash<int, QByteArray> roleNames() const;
+    virtual QHash<int, QByteArray> roleNames() const;
 
     Q_INVOKABLE LocationEntry* get(int row) const;
     

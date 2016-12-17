@@ -63,6 +63,9 @@ TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
 
   connect(this, SIGNAL(stylesheetFilenameChanged()),
           this, SLOT(onStylesheetFilenameChanged()));
+  
+  connect(this, SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
+          this, SLOT(onDatabaseLoaded(osmscout::GeoBox)));
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
@@ -106,9 +109,11 @@ void TiledDBThread::Initialize()
     
   
   // invalidate tile cache and init base
-  osmscout::GeoBox boundingBox;
-  DBThread::InitializeDatabases(boundingBox);
+  DBThread::InitializeDatabases();
+}
 
+void TiledDBThread::onDatabaseLoaded(osmscout::GeoBox boundingBox)
+{
   {
     QMutexLocker locker(&tileCacheMutex);
     onlineTileCache.invalidate(boundingBox);

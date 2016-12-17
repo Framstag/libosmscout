@@ -55,8 +55,8 @@ MapWidget::MapWidget(QQuickItem* parent)
             this,SIGNAL(stylesheetFilenameChanged()));
     connect(dbThread,SIGNAL(styleErrorsChanged()),
             this,SIGNAL(styleErrorsChanged()));
-    connect(dbThread,SIGNAL(databaseLoadFinished()),
-            this,SIGNAL(databaseLoaded()));
+    connect(dbThread,SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
+            this,SIGNAL(databaseLoaded(osmscout::GeoBox)));
         
     connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(doubleTap(const QPoint)),  this, SLOT(onDoubleTap(const QPoint)));

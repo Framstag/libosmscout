@@ -76,7 +76,7 @@
  * }
  * ```
  */
-class OnlineTileProviderModel : public QAbstractListModel {
+class OSMSCOUT_CLIENT_QT_API OnlineTileProviderModel : public QAbstractListModel {
   Q_OBJECT
   
 public:
@@ -92,14 +92,14 @@ public:
     IdRole = Qt::UserRole+1,
   };
 
-  int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
+  Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
   {
     return onlineProviders.size();
   };
 
-  QVariant data(const QModelIndex &index, int role) const;
-  QHash<int, QByteArray> roleNames() const;
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
+  virtual QHash<int, QByteArray> roleNames() const;
+  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
   Q_INVOKABLE int count() const;
   Q_INVOKABLE QString getId(int row) const;

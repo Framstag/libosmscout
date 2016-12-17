@@ -27,6 +27,8 @@
 #include <osmscout/MapWidget.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/RoutingModel.h>
+#include <osmscout/AvailableMapsModel.h>
+#include <osmscout/MapDownloadsModel.h>
 
 // Application settings
 #include <osmscout/Settings.h>
@@ -71,6 +73,8 @@ int main(int argc, char* argv[])
   qmlRegisterType<RouteStep>("net.sf.libosmscout.map", 1, 0, "RouteStep");
   qmlRegisterType<RoutingListModel>("net.sf.libosmscout.map", 1, 0, "RoutingListModel");
   qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
+  qmlRegisterType<AvailableMapsModel>("net.sf.libosmscout.map", 1, 0, "AvailableMapsModel");
+  qmlRegisterType<MapDownloadsModel>("net.sf.libosmscout.map", 1, 0, "MapDownloadsModel");
 
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
@@ -80,7 +84,9 @@ int main(int argc, char* argv[])
   // load online tile providers
   Settings::GetInstance()->loadOnlineTileProviders(
     ":/resources/online-tile-providers.json");
-
+  Settings::GetInstance()->loadMapProviders(
+    ":/resources/map-providers.json");
+  
   QThread thread;
 
   // setup paths

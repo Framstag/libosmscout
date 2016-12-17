@@ -136,7 +136,7 @@ private:
 
 public:
     RoutingListModel(QObject* parent = 0);
-    ~RoutingListModel();
+    virtual ~RoutingListModel();
 
     QVariant data(const QModelIndex &index, int role) const;
 

@@ -79,14 +79,14 @@ public:
     LocationInfoModel();
     virtual inline ~LocationInfoModel(){};
 
-    int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
+    Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
     {
         return model.size();
     };
     
-    QVariant data(const QModelIndex &index, int role) const;
-    QHash<int, QByteArray> roleNames() const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
+    Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
+    virtual QHash<int, QByteArray> roleNames() const;
+    Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
     
     bool inline isReady() const 
     {
