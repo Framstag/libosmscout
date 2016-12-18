@@ -18,6 +18,7 @@
 */
 
 #include <QString>
+#include <QtAlgorithms>
 
 #include <osmscout/util/String.h>
 #include <osmscout/AvailableMapsModel.h>
@@ -104,7 +105,8 @@ bool itemLessThan(const AvailableMapsModelItem *i1, const AvailableMapsModelItem
     return true;
   if (i2->isDirectory() && !i1->isDirectory())
     return false;
-  return i1->getName() < i2->getName();
+
+  return i1->getName().localeAwareCompare(i2->getName()) < 0;
 }
 
 void AvailableMapsModel::listDownloaded(QNetworkReply* reply)
