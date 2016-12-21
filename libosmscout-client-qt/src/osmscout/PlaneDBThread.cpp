@@ -343,7 +343,7 @@ void PlaneDBThread::DrawMap()
     QMutexLocker locker(&mutex);
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
-          qWarning() << " Not initialized! " << db->path;
+          osmscout::log.Warn() << " Not initialized! " << db->path.toLocal8Bit().data();
           return;
       }
     }
