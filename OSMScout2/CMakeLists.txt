@@ -52,13 +52,13 @@ set(SOURCE_FILES
     qml/custom/MapButton.qml
 )
 
-set(RESOURCE_FILES
+qt5_add_resources(RESOURCE_FILES
     res.qrc
 )
 
 add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
-target_include_directories(OSMScout2 PRIVATE 
+target_include_directories(OSMScout2 PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
