@@ -374,12 +374,13 @@ void PlaneDBThread::DrawMap()
 
     // create copy of projection
     osmscout::MercatorProjection renderProjection;
+
     renderProjection.Set(projection.GetCenter(),
-                   projection.GetAngle(),
-                   projection.GetMagnification(),
-                   projection.GetDPI(),
-                   projection.GetWidth(),
-                   projection.GetHeight());
+                         projection.GetAngle(),
+                         projection.GetMagnification(),
+                         projection.GetDPI(),
+                         projection.GetWidth(),
+                         projection.GetHeight());
 
     renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
 
