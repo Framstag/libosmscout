@@ -119,14 +119,14 @@ namespace osmscout {
     if (angle!=0.0) {
       angleSin=sin(angle);
       angleCos=cos(angle);
-      angleNegSin=sin(-angle);
-      angleNegCos=cos(-angle); // TODO: Optimize because of symetry
+      angleNegSin=-angleSin;
+      angleNegCos=angleCos;
     }
     else {
       angleSin=0;
       angleNegSin=0;
       angleCos=1;
-      angleNegCos=-1;
+      angleNegCos=1;
     }
 
     // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level
@@ -319,14 +319,14 @@ namespace osmscout {
     if (angle!=0.0) {
       angleSin=sin(angle);
       angleCos=cos(angle);
-      angleNegSin=sin(-angle);
-      angleNegCos=cos(-angle); // TODO: Optimize because of symmetry
+      angleNegSin=-angleSin;
+      angleNegCos=angleCos;
     }
     else {
       angleSin=0;
       angleNegSin=0;
       angleCos=1;
-      angleNegCos=-1;
+      angleNegCos=1;
     }
 
     // Width in meter of a tile of the given magnification at the equator
