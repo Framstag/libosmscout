@@ -44,7 +44,6 @@ else()
 endif()
 
 # check headers exists
-include(CheckIncludeFileCXX)
 check_include_file(dlfcn.h HAVE_DLFCN_H)
 check_include_file(fcntl.h HAVE_FCNTL_H)
 check_include_file(inttypes.h HAVE_INTTYPES_H)
