@@ -27,15 +27,11 @@
 namespace osmscout {
 
   typedef std::chrono::duration<double,std::milli> MilliDouble;
+  typedef std::chrono::duration<double,std::nano>  NanoDouble;
 
   StopClock::StopClock()
    : start(std::chrono::steady_clock::now()),
      stop(start)
-  {
-    // no code
-  }
-
-  StopClock::~StopClock()
   {
     // no code
   }
@@ -52,9 +48,9 @@ namespace osmscout {
 
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
-    double deltaMilli=clock.GetMilliseconds();
-    size_t seconds=(size_t)deltaMilli/1000;
-    size_t milliseconds=(size_t)deltaMilli-seconds*1000;
+    double   deltaMilli=clock.GetMilliseconds();
+    uint64_t seconds=(uint64_t)deltaMilli/1000;
+    uint64_t milliseconds=(uint64_t)deltaMilli-seconds*1000;
 
     stream << seconds << "." << std::setw(3) << std::setfill('0') << milliseconds;
 
@@ -63,9 +59,9 @@ namespace osmscout {
 
   std::string StopClock::ResultString() const
   {
-    double deltaMilli=GetMilliseconds();
-    size_t seconds=(size_t)deltaMilli/1000;
-    size_t milliseconds = (size_t)deltaMilli - seconds * 1000;
+    double   deltaMilli=GetMilliseconds();
+    uint64_t seconds=(uint64_t)deltaMilli/1000;
+    uint64_t milliseconds = (uint64_t)deltaMilli - seconds * 1000;
 
     std::string result;
     std::string millisString;
@@ -83,4 +79,38 @@ namespace osmscout {
 
     return result;
   }
+
+  StopClockNano::StopClockNano()
+    : start(std::chrono::high_resolution_clock::now()),
+      stop(start)
+  {
+    // no code
+  }
+
+  void StopClockNano::Stop()
+  {
+    stop=std::chrono::high_resolution_clock::now();
+  }
+
+  double StopClockNano::GetNanoseconds() const
+  {
+    return std::chrono::duration_cast<NanoDouble>(stop-start).count();
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const StopClockNano& clock)
+  {
+    double deltaNano=clock.GetNanoseconds();
+
+    stream <<  deltaNano;
+
+    return stream;
+  }
+
+  std::string StopClockNano::ResultString() const
+  {
+    double deltaNano=GetNanoseconds();
+
+    return NumberToString((uint64_t)deltaNano);
+  }
+
 }

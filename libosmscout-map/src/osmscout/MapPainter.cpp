@@ -29,6 +29,7 @@
 #include <osmscout/util/Tiling.h>
 
 //#define DEBUG_GROUNDTILES
+//#define DEBUG_NODE_DRAW
 
 namespace osmscout {
 
@@ -1000,12 +1001,39 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const MapData& data)
   {
+#if defined(DEBUG_NODE_DRAW)
+    std::vector<double> times;
+
+    times.resize(styleConfig.GetTypeConfig()->GetMaxTypeId()+1,0.0);
+#endif
+
     for (const auto& node : data.nodes) {
+#if defined(DEBUG_NODE_DRAW)
+      StopClockNano nodeTimer;
+#endif
+
       DrawNode(styleConfig,
                projection,
                parameter,
                node);
+
+#if defined(DEBUG_NODE_DRAW)
+      nodeTimer.Stop();
+
+      times[node->GetType()->GetNodeId()]+=nodeTimer.GetNanoseconds();
+#endif
     }
+
+#if defined(DEBUG_NODE_DRAW)
+    for (auto type : styleConfig.GetTypeConfig()->GetTypes())
+    {
+      double overallTime=times[type->GetNodeId()];
+
+      if (overallTime>0.0) {
+        std::cout << "Node type " << type->GetName() << " " << times[type->GetNodeId()] << " nsecs" << std::endl;
+      }
+    }
+#endif
   }
 
   void MapPainter::DrawAreas(const StyleConfig& /*styleConfig*/,
