@@ -128,7 +128,7 @@ namespace osmscout {
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      return types;
+      return prefillTypes;
     }
 
     size_t GetPrefillDataSize() const
@@ -162,7 +162,7 @@ namespace osmscout {
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      return prefillData.size();
+      return data.size();
     }
 
     void CopyData(std::function<void(const O&)> function) const
