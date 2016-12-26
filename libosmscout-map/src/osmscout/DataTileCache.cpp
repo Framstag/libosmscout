@@ -94,12 +94,12 @@ namespace osmscout {
    */
   void DataTileCache::InvalidateCache()
   {
-    for (CacheEntry &entry: tileCache){
-      entry.tile->GetAreaData().SetIncomplete();
-      entry.tile->GetNodeData().SetIncomplete();
-      entry.tile->GetWayData().SetIncomplete();
-      entry.tile->GetOptimizedAreaData().SetIncomplete();
-      entry.tile->GetOptimizedWayData().SetIncomplete();
+    for (CacheEntry &entry: tileCache) {
+      entry.tile->GetAreaData().Invalidate();
+      entry.tile->GetNodeData().Invalidate();
+      entry.tile->GetWayData().Invalidate();
+      entry.tile->GetOptimizedAreaData().Invalidate();
+      entry.tile->GetOptimizedWayData().Invalidate();
     }
   }
 
