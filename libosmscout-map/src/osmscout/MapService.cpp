@@ -157,13 +157,6 @@ namespace osmscout {
                                                               const StyleConfig& styleConfig,
                                                               const Magnification& magnification) const
   {
-    // TODO: Make sure that the styleConfig has not changed!
-
-    if (typeDefinition &&
-        typeDefinition->magnification==magnification) {
-      return typeDefinition;
-    }
-
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
     OptimizeWaysLowZoomRef  optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
@@ -744,10 +737,10 @@ namespace osmscout {
   /**
    * Load all missing data for the given tiles based on the given style config.
    */
-  bool MapService::LoadMissingTileDataInternal(const AreaSearchParameter& parameter,
-                                               const StyleConfig& styleConfig,
-                                               std::list<TileRef>& tiles,
-                                               bool async) const
+  bool MapService::LoadMissingTileDataStyleSheet(const AreaSearchParameter& parameter,
+                                                 const StyleConfig& styleConfig,
+                                                 std::list<TileRef>& tiles,
+                                                 bool async) const
   {
     std::lock_guard<std::mutex>  lock(stateMutex);
 
@@ -761,22 +754,21 @@ namespace osmscout {
       GeoBox          tileBoundingBox(tile->GetBoundingBox());
 
       if (!tile->IsComplete()) {
-        StopClock         tileLoadingTime;
-        Magnification     magnification;
-        std::future<bool> nodeResult;
-        std::future<bool> areasLowZoomResult;
-        std::future<bool> areasResult;
-        std::future<bool> waysLowZoomResult;
-        std::future<bool> waysResult;
+        StopClock     tileLoadingTime;
+        Magnification magnification;
 
         //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
 
         magnification.SetLevel(tile->GetId().GetLevel());
 
         // TODO: Cache the type definitions, perhaps already in the StyleConfig?
-        typeDefinition=GetTypeDefinition(parameter,
-                                         styleConfig,
-                                         magnification);
+
+        if (!typeDefinition ||
+            typeDefinition->magnification!=magnification) {
+          typeDefinition=GetTypeDefinition(parameter,
+                                           styleConfig,
+                                           magnification);
+        }
 
         cache.PrefillDataFromCache(*tile,
                                    typeDefinition->nodeTypes,
@@ -866,7 +858,7 @@ namespace osmscout {
                                        const StyleConfig& styleConfig,
                                        std::list<TileRef>& tiles) const
   {
-    return LoadMissingTileDataInternal(parameter,styleConfig,tiles,false);
+    return LoadMissingTileDataStyleSheet(parameter,styleConfig,tiles,false);
   }
 
   /**
@@ -882,7 +874,7 @@ namespace osmscout {
                                             std::list<TileRef>& tiles) const
   {
     auto result=std::async(std::launch::async,
-                           &MapService::LoadMissingTileDataInternal,this,
+                           &MapService::LoadMissingTileDataStyleSheet,this,
                            std::ref(parameter),
                            std::ref(styleConfig),
                            std::ref(tiles),
