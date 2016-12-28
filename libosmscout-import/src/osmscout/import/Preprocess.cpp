@@ -45,6 +45,8 @@
   #include <osmscout/import/PreprocessPBF.h>
 #endif
 
+#include <osmscout/import/PreprocessPoly.h>
+
 namespace osmscout {
 
   const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
@@ -898,6 +900,18 @@ namespace osmscout {
         progress.Error("Support for the PBF file format is not enabled!");
         return false;
 #endif
+      }
+      else if (filename.length()>=5 &&
+            filename.substr(filename.length()-5)==".poly") {
+        
+        PreprocessPoly preprocess(callback);
+
+        if (!preprocess.Import(typeConfig,
+                               parameter,
+                               progress,
+                               filename)) {
+          return false;
+        }
       }
       else {
         progress.Error("Sorry, this file type is not yet supported!");

@@ -52,7 +52,8 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/Import.cpp \
                                osmscout/import/ImportErrorReporter.cpp \
                                osmscout/import/Preprocessor.cpp \
-                               osmscout/import/Preprocess.cpp
+                               osmscout/import/Preprocess.cpp \
+                               osmscout/import/PreprocessPoly.cpp
 
 if HAVE_LIB_XML
 libosmscoutimport_la_SOURCES += osmscout/import/PreprocessOSM.cpp
