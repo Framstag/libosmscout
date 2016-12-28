@@ -218,6 +218,24 @@ namespace osmscout {
     void GetBoundingBox(GeoBox& boundingBox) const;
 
     /**
+     * Returns true if the bounding box of the object intersects the given
+     * bounding box
+     *
+     * @param boundingBox
+     *    bounding box to test for intersection
+     * @return
+     *    true on intersection, else false
+     */
+    inline bool Intersects(const GeoBox& boundingBox) const
+    {
+      GeoBox objectBoundingBox;
+
+      GetBoundingBox(objectBoundingBox);
+
+      return objectBoundingBox.Intersects(boundingBox);
+    }
+
+    /**
      * Read the area as written by Write().
      */
     void Read(const TypeConfig& typeConfig,

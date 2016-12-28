@@ -42,6 +42,7 @@
 #include <osmscout/Settings.h>
 #include <osmscout/TileCache.h>
 #include <osmscout/OsmTileDownloader.h>
+#include <osmscout/MapManager.h>
 
 /**
  * \ingroup QtAPI
@@ -167,6 +168,7 @@ public:
   
   inline ~DBInstance()
   {
+    close();
     if (painter!=NULL) {
       delete painter;
     }
@@ -179,6 +181,7 @@ public:
   bool AssureRouter(osmscout::Vehicle vehicle, 
                     osmscout::RouterParameter routerParameter);  
 
+  void close();
 };
 
 typedef std::shared_ptr<DBInstance> DBInstanceRef;
@@ -226,9 +229,9 @@ signals:
                            const QStringList regions);
   void locationDescriptionFinished(const osmscout::GeoCoord location);
   void stylesheetFilenameChanged();
-  void databaseLoadFinished();
+  void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
-  
+
   void searchResult(const QString searchPattern, const QList<LocationEntry>);
 
   void searchFinished(const QString searchPattern, bool error);
@@ -241,8 +244,9 @@ public slots:
                  const QString &suffix="");
   virtual void Initialize() = 0;
   virtual void InvalidateVisualCache() = 0;
+  void onDatabaseListChanged(QList<QDir> databaseDirectories);
   void Finalize();
-  
+
   /**
    * Start retrieving place informations based on objects on or near the location.
    * 
@@ -254,7 +258,7 @@ public slots:
    * @param location
    */
   void requestLocationDescription(const osmscout::GeoCoord location);
-  
+
   virtual void onMapDPIChange(double dpi);
   virtual void onRenderSeaChanged(bool);  
 
@@ -276,8 +280,8 @@ public slots:
   void SearchForLocations(const QString searchPattern, int limit);
   
 protected:
-  QStringList                   databaseLookupDirs;
-  
+  MapManagerRef                 mapManager;
+
   double                        mapDpi;
   double                        physicalDpi;
 
@@ -329,8 +333,8 @@ protected:
                         QString &typeName, 
                         osmscout::GeoCoord& coordinates,
                         osmscout::GeoBox& bbox);
-  
-  bool InitializeDatabases(osmscout::GeoBox& boundingBox);
+
+  bool InitializeDatabases();
 
   void CancelCurrentDataLoading();
 
@@ -381,6 +385,11 @@ public:
   void AddRoute(const osmscout::Way& way);
   osmscout::TypeConfigRef GetTypeConfig(const QString databasePath) const;
   
+  inline MapManagerRef GetMapManager() const
+  {
+    return mapManager;
+  }
+
   inline QString GetStylesheetFilename() const
   {
     return stylesheetFilename;

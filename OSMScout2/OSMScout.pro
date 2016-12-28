@@ -41,10 +41,12 @@ DISTFILES += \
     qml/custom/MapDialog.qml \
     qml/AboutDialog.qml \
     qml/SearchDialog.qml \
+    qml/MapDownloadDialog.qml \
     pics/DeleteText.svg \
     pics/Minus.svg \
     pics/Plus.svg \
-    pics/Search.svg
+    pics/Search.svg \
+    pics/Download.svg
 
 RESOURCES += \
     res.qrc

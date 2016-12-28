@@ -27,8 +27,18 @@
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OnlineTileProvider.h>
+#include <osmscout/MapProvider.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
+
+// these variables should be defined by build system
+#ifndef OSMSCOUT_VERSION_STRING
+#define OSMSCOUT_VERSION_STRING "v?"
+#endif
+
+#ifndef OSMSCOUT_USER_AGENT
+#define OSMSCOUT_USER_AGENT "OSMScout demo app %1"
+#endif
 
 /**
  * \ingroup QtAPI
@@ -69,10 +79,11 @@ private:
   double    physicalDpi;
   MapView   *view;
   QMap<QString, OnlineTileProvider> onlineProviders;
+  QList<MapProvider> mapProviders;
 
 public:
   Settings();
-  ~Settings();
+  virtual ~Settings();
 
   double GetPhysicalDPI() const;
   
@@ -90,11 +101,14 @@ public:
   
   const QList<OnlineTileProvider> GetOnlineProviders() const;
   const OnlineTileProvider GetOnlineTileProvider() const; 
-  
+
+  const QList<MapProvider> GetMapProviders() const;
+
   const QString GetOnlineTileProviderId() const; 
   void SetOnlineTileProviderId(QString id);
   
   bool loadOnlineTileProviders(QString path);
+  bool loadMapProviders(QString path);
   
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);
@@ -104,6 +118,8 @@ public:
   
   const QString GetGpsFormat() const;
   void SetGpsFormat(const QString formatId);
+  
+  const QString GetHttpCacheDir() const;
   
   static Settings* GetInstance();
   static void FreeInstance();
@@ -151,7 +167,7 @@ signals:
 public:
   QmlSettings();
   
-  inline ~QmlSettings(){};
+  virtual inline ~QmlSettings(){};
 
   double GetPhysicalDPI() const;
 

@@ -87,8 +87,7 @@ void PlaneDBThread::Initialize()
 
   osmscout::log.Debug() << "Initialize";
   // invalidate tile cache and init base
-  osmscout::GeoBox boundingBox;
-  DBThread::InitializeDatabases(boundingBox);
+  DBThread::InitializeDatabases();
 
   {
     QMutexLocker locker(&mutex);
@@ -344,7 +343,7 @@ void PlaneDBThread::DrawMap()
     QMutexLocker locker(&mutex);
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
-          qWarning() << " Not initialized! " << db->path;
+          osmscout::log.Warn() << " Not initialized! " << db->path.toLocal8Bit().data();
           return;
       }
     }
@@ -375,12 +374,13 @@ void PlaneDBThread::DrawMap()
 
     // create copy of projection
     osmscout::MercatorProjection renderProjection;
+
     renderProjection.Set(projection.GetCenter(),
-                   projection.GetAngle(),
-                   projection.GetMagnification(),
-                   projection.GetDPI(),
-                   projection.GetWidth(),
-                   projection.GetHeight());
+                         projection.GetAngle(),
+                         projection.GetMagnification(),
+                         projection.GetDPI(),
+                         projection.GetWidth(),
+                         projection.GetHeight());
 
     renderProjection.SetLinearInterpolationUsage(renderProjection.GetMagnification().GetLevel() >= 10);
 

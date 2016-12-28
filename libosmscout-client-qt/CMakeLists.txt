@@ -34,6 +34,11 @@ set(HEADER_FILES
     include/osmscout/Settings.h
     include/osmscout/TileCache.h
     include/osmscout/TiledDBThread.h
+    include/osmscout/MapProvider.h
+    include/osmscout/AvailableMapsModel.h
+    include/osmscout/PersistentCookieJar.h
+    include/osmscout/MapManager.h
+    include/osmscout/MapDownloadsModel.h
 )
 
 set(SOURCE_FILES
@@ -52,6 +57,10 @@ set(SOURCE_FILES
     src/osmscout/Settings.cpp
     src/osmscout/TileCache.cpp
     src/osmscout/TiledDBThread.cpp
+    src/osmscout/MapProvider.cpp
+    src/osmscout/AvailableMapsModel.cpp
+    src/osmscout/MapManager.cpp
+    src/osmscout/MapDownloadsModel.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})
@@ -65,6 +74,9 @@ target_include_directories(osmscout_client_qt PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
 		${Qt5Gui_INCLUDE_DIRS})
+if(MARISA_FOUND)
+    target_include_directories(osmscout_client_qt PRIVATE ${MARISA_INCLUDE_DIRS})
+endif()
 target_link_libraries(osmscout_client_qt
 		osmscout
 		osmscout_map

@@ -3,6 +3,7 @@
         <file>qml/main.qml</file>
         <file>qml/AboutDialog.qml</file>
         <file>qml/SearchDialog.qml</file>
+        <file>qml/MapDownloadDialog.qml</file>
         <file>qml/custom/DialogActionButton.qml</file>
         <file>qml/custom/LineEdit.qml</file>
         <file>qml/custom/LocationSearch.qml</file>
@@ -15,7 +16,9 @@
         <file>pics/Search.svg</file>
         <file>pics/Route.svg</file>
         <file>pics/Plus.svg</file>
+        <file>pics/Download.svg</file>
         
         <file>resources/online-tile-providers.json</file>
+        <file>resources/map-providers.json</file>
     </qresource>
 </RCC>

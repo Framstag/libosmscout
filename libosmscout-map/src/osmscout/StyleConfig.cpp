@@ -2386,6 +2386,24 @@ namespace osmscout {
     }
   }
 
+  bool StyleConfig::HasNodeTextStyles(const TypeInfoRef& type,
+                                      const Magnification& magnification) const
+  {
+    auto level=magnification.GetLevel();
+
+    for (size_t slot=0; slot<nodeTextStyleSelectors.size(); slot++) {
+      if (level>=nodeTextStyleSelectors[slot][type->GetIndex()].size()) {
+        level=nodeTextStyleSelectors[slot][type->GetIndex()].size()-1;
+      }
+
+      if (!nodeTextStyleSelectors[slot][type->GetIndex()][level].empty()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void StyleConfig::GetNodeTextStyles(const FeatureValueBuffer& buffer,
                                       const Projection& projection,
                                       std::vector<TextStyleRef>& textStyles) const
@@ -2488,6 +2506,24 @@ namespace osmscout {
                     buffer,
                     projection,
                     fillStyle);
+  }
+
+  bool StyleConfig::HasAreaTextStyles(const TypeInfoRef& type,
+                                      const Magnification& magnification) const
+  {
+    auto level=magnification.GetLevel();
+
+    for (size_t slot=0; slot<areaTextStyleSelectors.size(); slot++) {
+      if (level>=areaTextStyleSelectors[slot][type->GetIndex()].size()) {
+        level=areaTextStyleSelectors[slot][type->GetIndex()].size()-1;
+      }
+
+      if (!areaTextStyleSelectors[slot][type->GetIndex()][level].empty()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void StyleConfig::GetAreaTextStyles(const TypeInfoRef& type,

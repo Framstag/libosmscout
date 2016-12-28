@@ -106,6 +106,9 @@ namespace osmscout {
 
     bool GetByOffset(const std::vector<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
+    bool GetByOffset(const std::vector<FileOffset>& offsets,
+                     const GeoBox& boundingBox,
+                     std::vector<ValueType>& data) const;
     bool GetByOffset(const std::list<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
     bool GetByOffset(const std::set<FileOffset>& offsets,
@@ -270,6 +273,39 @@ namespace osmscout {
                     *value)) {
         log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
         return false;
+      }
+
+      data.push_back(value);
+    }
+
+    return true;
+  }
+
+  /**
+   * Read data values from the given file offsets.
+   *
+   * Method is thread-safe.
+   */
+  template <class N>
+  bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
+                                const GeoBox& boundingBox,
+                                std::vector<ValueType>& data) const
+  {
+    data.reserve(data.size()+offsets.size());
+
+    for (const auto& offset : offsets) {
+      ValueType value=std::make_shared<N>();
+
+      if (!ReadData(*typeConfig,
+                    scanner,
+                    offset,
+                    *value)) {
+        log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
+        return false;
+      }
+
+      if (!value->Intersects(boundingBox)) {
+        continue;
       }
 
       data.push_back(value);

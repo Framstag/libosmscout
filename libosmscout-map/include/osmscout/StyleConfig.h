@@ -1521,7 +1521,7 @@ namespace osmscout {
     std::unordered_map<std::string,bool>       flags;
     std::unordered_map<std::string,StyleConstantRef> constants;
     std::list<std::string>                     errors;
- 
+
   private:
     void Reset();
 
@@ -1616,6 +1616,8 @@ namespace osmscout {
      * Methods for retrieval of styles for a given object.
      */
     //@{
+    bool HasNodeTextStyles(const TypeInfoRef& type,
+                           const Magnification& magnification) const;
     void GetNodeTextStyles(const FeatureValueBuffer& buffer,
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
@@ -1641,6 +1643,8 @@ namespace osmscout {
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           FillStyleRef& fillStyle) const;
+    bool HasAreaTextStyles(const TypeInfoRef& type,
+                           const Magnification& magnification) const;
     void GetAreaTextStyles(const TypeInfoRef& type,
                            const FeatureValueBuffer& buffer,
                            const Projection& projection,

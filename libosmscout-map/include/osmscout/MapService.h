@@ -112,8 +112,7 @@ namespace osmscout {
     mutable std::mutex           stateMutex;           //!< Mutex to protect internal state
 
     DatabaseRef                  database;             //!< The reference to the database
-    mutable DataTileCache       cache;                //!< Data cache
-    TypeDefinitionRef            typeDefinition;       //<! Last used and cached TypeDefinition
+    mutable DataTileCache        cache;                //!< Data cache
 
     mutable WorkQueue<bool>      nodeWorkerQueue;
     std::thread                  nodeWorkerThread;
@@ -204,10 +203,10 @@ namespace osmscout {
 
     void NotifyTileStateCallbacks(const TileRef& tile) const;
 
-    bool LoadMissingTileDataInternal(const AreaSearchParameter& parameter,
-                                     const StyleConfig& styleConfig,
-                                     std::list<TileRef>& tiles,
-                                     bool async) const;
+    bool LoadMissingTileDataStyleSheet(const AreaSearchParameter& parameter,
+                                       const StyleConfig& styleConfig,
+                                       std::list<TileRef>& tiles,
+                                       bool async) const;
 
   public:
     MapService(const DatabaseRef& database);

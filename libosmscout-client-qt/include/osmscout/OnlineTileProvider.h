@@ -27,12 +27,14 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+#include <osmscout/private/ClientQtImportExport.h>
+
 /**
  * \ingroup QtAPI
  * 
  * Online tile provider object. See OnlineTileProviderModel and Settings.
  */
-class OnlineTileProvider: public QObject
+class OSMSCOUT_CLIENT_QT_API OnlineTileProvider: public QObject
 {
   Q_OBJECT
   

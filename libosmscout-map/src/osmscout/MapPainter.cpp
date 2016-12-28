@@ -29,6 +29,7 @@
 #include <osmscout/util/Tiling.h>
 
 //#define DEBUG_GROUNDTILES
+//#define DEBUG_NODE_DRAW
 
 namespace osmscout {
 
@@ -308,7 +309,7 @@ namespace osmscout {
 
     statisticList.sort([](const DataStatistic& a, const DataStatistic& b)->bool{return a.objectCount>b.objectCount;});
 
-    log.Info() << "Type|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
+    log.Info() << "Type|ObjectCount|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
     for (const auto& entry : statisticList) {
       log.Info() << entry.type->GetName() << " "
           << entry.objectCount << " "
@@ -911,28 +912,29 @@ namespace osmscout {
                       data.fontSize,
                       data.height);
 
-        double alpha=textStyle->GetAlpha()/factor;
-
-        if (alpha>1.0) {
-          alpha=1.0;
-        }
-
-        data.alpha=alpha;
+        data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
       else if (textStyle->GetAutoSize()) {
         double height=std::abs((objectHeight)*0.1);
 
-        if (height==0) {
+        if (height==0 || height<standardFontSize) {
           continue;
         }
 
-        if (height<standardFontSize) {
-          continue;
+        // Retricts the height of a label to maxHeight
+        double alpha = textStyle->GetAlpha();
+        double maxHeight = projection.GetHeight()/5;
+        if (height > maxHeight) {
+            // If the height exeeds maxHeight the alpha value will be decreased
+            double minAlpha = projection.GetHeight();
+            double normHeight = (height-maxHeight)/(minAlpha-maxHeight);
+            alpha *= std::min(std::max(1 - normHeight, 0.2), 1.0);
+            height = maxHeight;
         }
 
         data.fontSize=height/standardFontSize;
         data.height=height;
-        data.alpha=textStyle->GetAlpha();
+        data.alpha=alpha;
       }
       else {
         data.fontSize=textStyle->GetSize();
@@ -966,14 +968,7 @@ namespace osmscout {
     // This is the top center position of the initial label element.
     // Note that RegisterPointLabel gets passed the center of the label,
     // thus we need to convert it...
-    double offset;
-
-    if (hasSymbol) {
-     offset=y;
-    }
-    else {
-      offset=y-overallTextHeight/2;
-    }
+    double offset = hasSymbol ? y : y-overallTextHeight/2;
 
     for (const auto& data : labelLayoutData) {
       if (data.textStyle) {
@@ -1006,12 +1001,39 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const MapData& data)
   {
+#if defined(DEBUG_NODE_DRAW)
+    std::vector<double> times;
+
+    times.resize(styleConfig.GetTypeConfig()->GetMaxTypeId()+1,0.0);
+#endif
+
     for (const auto& node : data.nodes) {
+#if defined(DEBUG_NODE_DRAW)
+      StopClockNano nodeTimer;
+#endif
+
       DrawNode(styleConfig,
                projection,
                parameter,
                node);
+
+#if defined(DEBUG_NODE_DRAW)
+      nodeTimer.Stop();
+
+      times[node->GetType()->GetNodeId()]+=nodeTimer.GetNanoseconds();
+#endif
     }
+
+#if defined(DEBUG_NODE_DRAW)
+    for (auto type : styleConfig.GetTypeConfig()->GetTypes())
+    {
+      double overallTime=times[type->GetNodeId()];
+
+      if (overallTime>0.0) {
+        std::cout << "Node type " << type->GetName() << " " << times[type->GetNodeId()] << " nsecs" << std::endl;
+      }
+    }
+#endif
   }
 
   void MapPainter::DrawAreas(const StyleConfig& /*styleConfig*/,

@@ -52,10 +52,9 @@ namespace osmscout {
   private:
     mutable std::mutex mutex;
 
-    TypeInfoSet        prefillTypes;
-    std::vector<O>     prefillData;
-
     TypeInfoSet        types;
+
+    std::vector<O>     prefillData;
     std::vector<O>     data;
 
     bool               complete;
@@ -71,7 +70,18 @@ namespace osmscout {
     }
 
     /**
-     * Assign data to the tile that was derived from existing tiles
+     * Marks the tile as impcomplete again, without actually clearing data and types.
+     */
+    void Invalidate()
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      complete=false;
+    }
+
+    /**
+     * Assign data to the tile that was derived from existing tiles. Resets the list of loaded types
+     * to the list given.
      */
     void SetPrefillData(const TypeInfoSet& types,
                         const std::vector<O>& data)
@@ -79,11 +89,12 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       this->prefillData=data;
-      this->prefillTypes=types;
+      this->types=types;
+      complete=false;
     }
 
     /**
-     * Assign data to the tile that was loaded
+     * Assign data to the tile and mark teh tile as comopleted.
      */
     void SetData(const TypeInfoSet& types,
                  const std::vector<O>& data)
@@ -91,21 +102,20 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       this->data=data;
-      this->types=types;
+      this->types.Add(types);
+
+      complete=true;
     }
 
+    /**
+     * Mark the tile as completed (useful if prefill data is already complete and
+     * no more actual data has to be loaded)
+     */
     void SetComplete()
     {
       std::lock_guard<std::mutex> guard(mutex);
 
       complete=true;
-    }
-
-    void SetIncomplete()
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      complete=false;
     }
 
     /**
@@ -116,33 +126,6 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       return complete;
-    }
-
-    /**
-     * Return the list of types of the prefill data stored in the tile.
-     *
-     * Note that it is stll possibly that there is no acutal data for this type in the
-     * TileData stored.
-     */
-    const TypeInfoSet GetPrefillTypes() const
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      return types;
-    }
-
-    size_t GetPrefillDataSize() const
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      return prefillData.size();
-    }
-
-    void CopyPrefillData(std::function<void(const O&)> function) const
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      std::for_each(prefillData.begin(),prefillData.end(),function);
     }
 
     /**
@@ -162,13 +145,14 @@ namespace osmscout {
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      return prefillData.size();
+      return prefillData.size()+data.size();
     }
 
     void CopyData(std::function<void(const O&)> function) const
     {
       std::lock_guard<std::mutex> guard(mutex);
 
+      std::for_each(prefillData.begin(),prefillData.end(),function);
       std::for_each(data.begin(),data.end(),function);
     }
   };

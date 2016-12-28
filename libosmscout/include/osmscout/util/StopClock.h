@@ -23,6 +23,8 @@
 #include <chrono>
 #include <string>
 
+#include <osmscout/system/Compiler.h>
+
 #include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
@@ -31,7 +33,7 @@ namespace osmscout {
    * \ingroup Util
    * Simple stop clock implementation.
    */
-  class OSMSCOUT_API StopClock
+  class OSMSCOUT_API StopClock CLASS_FINAL
   {
   private:
     std::chrono::steady_clock::time_point start;
@@ -43,7 +45,6 @@ namespace osmscout {
 
   public:
     StopClock();
-    virtual ~StopClock();
 
     void Stop();
 
@@ -55,6 +56,34 @@ namespace osmscout {
   };
 
   extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+
+  /**
+   * Copy of the StopClock implementation but using a high_resolution timer
+   * and by default return nano seconds.
+   */
+  class OSMSCOUT_API StopClockNano CLASS_FINAL
+  {
+  private:
+    std::chrono::high_resolution_clock::time_point start;
+    std::chrono::high_resolution_clock::time_point stop;
+
+  private:
+    // We do not want you to make copies of a stop clock
+    StopClockNano(const StopClockNano& other);
+
+  public:
+    StopClockNano();
+
+    void Stop();
+
+    double GetNanoseconds() const;
+
+    std::string ResultString() const;
+
+    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClockNano& clock);
+  };
+
+  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClockNano& clock);
 
 }
 

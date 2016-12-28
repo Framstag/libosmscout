@@ -19,6 +19,8 @@
 
 #include <QScreen>
 #include <QGuiApplication>
+#include <QStandardPaths>
+#include <QDir>
 #include <QObject>
 #include <QDebug>
 
@@ -135,6 +137,11 @@ const QList<OnlineTileProvider> Settings::GetOnlineProviders() const
     return onlineProviders.values();
 }
 
+const QList<MapProvider> Settings::GetMapProviders() const
+{
+    return mapProviders;
+}
+
 const OnlineTileProvider Settings::GetOnlineTileProvider() const
 {
     if (onlineProviders.contains(GetOnlineTileProviderId())){
@@ -191,6 +198,27 @@ bool Settings::loadOnlineTileProviders(QString path)
     return true;
 }
 
+bool Settings::loadMapProviders(QString path)
+{
+    QFile loadFile(path);
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
+        return false;
+    }
+    qDebug() << "Loading map providers from " << loadFile.fileName();
+    
+    QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
+    for (auto obj: doc.array()){
+        MapProvider provider = MapProvider::fromJson(obj);
+        if (!provider.isValid()){
+            qWarning() << "Can't parse online provider from json value" << obj;
+        }else{    
+            mapProviders.append(provider);
+        }
+    }
+    return true;
+}
+
 bool Settings::GetOfflineMap() const
 {
     return settings.value("offlineMap", true).toBool();
@@ -225,6 +253,12 @@ void Settings::SetGpsFormat(const QString formatId)
     settings.setValue("gpsFormat", formatId);
     emit GpsFormatChanged(formatId);
   }
+}
+
+const QString Settings::GetHttpCacheDir() const
+{
+  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);  
+  return cacheLocation + QDir::separator() + "OSMScoutHttpCache";
 }
 
 static Settings* settingsInstance=NULL;
