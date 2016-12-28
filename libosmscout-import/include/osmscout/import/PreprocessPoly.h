@@ -28,11 +28,37 @@
 
 namespace osmscout {
 
+  /**
+   * Preprocessor of Osmosis/Polygon file.
+   * Format is described here:
+   * https://wiki.openstreetmap.org/wiki/Osmosis/Polygon_Filter_File_Format
+   *
+   * Every polygon producess RawWay with tag "datapolygon=include|exclude"
+   * Undefined area is defined same as sea by "natural=coastline",
+   * is it on the right side of way.
+   */
   class PreprocessPoly CLASS_FINAL : public Preprocessor
   {
   private:
     PreprocessorCallback&            callback;
-   
+
+    enum Context{
+     Root,
+     Section,
+     IncludedPolygon,
+     ExcludedPolygon
+    };
+
+    struct Node{
+      double x;
+      double y;
+    };
+
+    bool closePolygon(Context context,
+                      std::list<GeoCoord> &polygonNodes,
+                      OSMId &availableId,
+                      TagId polygonTagId);
+
   public:
     PreprocessPoly(PreprocessorCallback& callback);
     virtual ~PreprocessPoly();
@@ -44,4 +70,3 @@ namespace osmscout {
 }
 
 #endif /* OSMSCOUT_IMPORT_PREPROCESS_POLY_H */
-

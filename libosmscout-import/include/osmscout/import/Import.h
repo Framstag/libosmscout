@@ -159,6 +159,8 @@ namespace osmscout {
                                                            //<! place_name[:lang] tags
     std::vector<std::string>     altLangOrder;             //<! the same as langOrder but for a alt (second) lang
 
+    OSMId                        firstFreeOSMId;           //<! first id available for synthetic objects (parsed polygon files)
+
   public:
     ImportParameter();
     virtual ~ImportParameter();
@@ -228,6 +230,8 @@ namespace osmscout {
     size_t GetRouteNodeBlockSize() const;
 
     bool GetAssumeLand() const;
+
+    OSMId GetFirstFreeOSMId() const;
 
     const std::vector<std::string>& GetLangOrder () const;
     const std::vector<std::string>& GetAltLangOrder () const;
@@ -302,6 +306,8 @@ namespace osmscout {
 
     void SetLangOrder(const std::vector<std::string>& langOrder);
     void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
+
+    void SetFirstFreeOSMId(OSMId id);
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL

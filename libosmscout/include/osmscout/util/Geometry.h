@@ -675,7 +675,7 @@ namespace osmscout {
 
     int ptIdx=0;
 
-    for (int i=1; i<edges.size(); i++) {
+    for (size_t i=1; i<edges.size(); i++) {
       // find the point with the smallest y value,
       if (edges[i].y<edges[ptIdx].y) {
         ptIdx=i;
@@ -689,7 +689,7 @@ namespace osmscout {
     }
 
     int prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
-    int nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
+    int nextIdx=(ptIdx==(int)edges.size()-1) ? 0 : ptIdx+1;
 
     double signedArea=(edges[ptIdx].x-edges[prevIdx].x)*
                       (edges[nextIdx].y-edges[ptIdx].y)-

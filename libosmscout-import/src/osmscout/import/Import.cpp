@@ -137,7 +137,8 @@ namespace osmscout {
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
      assumeLand(true),
-     langOrder({"#"})
+     langOrder({"#"}),
+     firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2))
   {
     // no code
   }
@@ -365,6 +366,11 @@ namespace osmscout {
   bool ImportParameter::GetAssumeLand() const
   {
     return assumeLand;
+  }
+
+  OSMId ImportParameter::GetFirstFreeOSMId() const
+  {
+    return firstFreeOSMId;
   }
 
   const std::vector<std::string>& ImportParameter::GetLangOrder() const
@@ -614,6 +620,11 @@ namespace osmscout {
   void ImportParameter::SetAltLangOrder(const std::vector<std::string>& altLangOrder)
   {
     this->altLangOrder = altLangOrder;
+  }
+
+  void ImportParameter::SetFirstFreeOSMId(OSMId id)
+  {
+    firstFreeOSMId=id;
   }
 
   void ImportModuleDescription::SetName(const std::string& name)
