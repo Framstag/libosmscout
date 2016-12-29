@@ -54,6 +54,7 @@ namespace osmscout {
   const char* Preprocess::RAWWAYS_DAT="rawways.dat";
   const char* Preprocess::RAWRELS_DAT="rawrels.dat";
   const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
+  const char* Preprocess::RAWDATAPOLYGON_DAT="rawdatapolygon.dat";
   const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
   bool Preprocess::Callback::IsTurnRestriction(const TagMap& tags,
@@ -133,6 +134,7 @@ namespace osmscout {
     areaCount(0),
     relationCount(0),
     coastlineCount(0),
+    datapolygonCount(0),
     turnRestrictionCount(0),
     multipolygonCount(0),
     lastNodeId(std::numeric_limits<OSMId>::min()),
@@ -186,6 +188,10 @@ namespace osmscout {
                                            RAWCOASTLINE_DAT));
       coastlineWriter.Write(coastlineCount);
 
+      datapolygonWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                             RAWDATAPOLYGON_DAT));
+      datapolygonWriter.Write(datapolygonCount);
+
       turnRestrictionWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                                  RAWTURNRESTR_DAT));
       turnRestrictionWriter.Write(turnRestrictionCount);
@@ -201,6 +207,7 @@ namespace osmscout {
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();
       coastlineWriter.CloseFailsafe();
+      datapolygonWriter.CloseFailsafe();
       turnRestrictionWriter.CloseFailsafe();
       multipolygonWriter.CloseFailsafe();
 
@@ -249,6 +256,7 @@ namespace osmscout {
     bool        isCoastlineArea=false;
     RawWay      way;
     bool        isCoastline=false;
+    bool        isDataPolygon=false;
 
     if (data.nodes.size()<2) {
       parameter.GetErrorReporter()->ReportWay(data.id,
@@ -271,6 +279,11 @@ namespace osmscout {
       isCoastlineArea=data.nodes.size()>3 &&
                       (data.nodes.front()==data.nodes.back() ||
                        isArea==1);
+    }
+
+    auto dataPolygonTag=data.tags.find(typeConfig->tagDataPolygon);
+    if (dataPolygonTag!=data.tags.end()) {
+      isDataPolygon=true;
     }
 
     //
@@ -380,6 +393,15 @@ namespace osmscout {
       coastline.SetNodes(way.GetNodes());
 
       processed.rawCoastlines.push_back(std::move(coastline));
+    }
+    if (isDataPolygon){
+      RawCoastline coastline;
+
+      coastline.SetId(way.GetId());
+      coastline.SetType(true);
+      coastline.SetNodes(way.GetNodes());
+
+      processed.rawDatapolygon.push_back(std::move(coastline));
     }
 
     processed.rawWays.push_back(std::move(way));
@@ -535,8 +557,12 @@ namespace osmscout {
 
     for (const auto& coastline : processed->rawCoastlines) {
       coastline.Write(coastlineWriter);
-
       coastlineCount++;
+    }
+
+    for (const auto& polygon : processed->rawDatapolygon){
+      polygon.Write(datapolygonWriter);
+      datapolygonCount++;
     }
 
     for (const auto& coord : processed->rawCoords) {
@@ -754,6 +780,9 @@ namespace osmscout {
     coastlineWriter.SetPos(0);
     coastlineWriter.Write(coastlineCount);
 
+    datapolygonWriter.SetPos(0);
+    datapolygonWriter.Write(datapolygonCount);
+
     turnRestrictionWriter.SetPos(0);
     turnRestrictionWriter.Write(turnRestrictionCount);
 
@@ -765,6 +794,7 @@ namespace osmscout {
       nodeWriter.Close();
       wayWriter.Close();
       coastlineWriter.Close();
+      datapolygonWriter.Close();
       turnRestrictionWriter.Close();
       multipolygonWriter.Close();
     }
@@ -775,6 +805,7 @@ namespace osmscout {
       nodeWriter.CloseFailsafe();
       wayWriter.CloseFailsafe();
       coastlineWriter.CloseFailsafe();
+      datapolygonWriter.CloseFailsafe();
       turnRestrictionWriter.CloseFailsafe();
       multipolygonWriter.CloseFailsafe();
 
@@ -858,6 +889,7 @@ namespace osmscout {
     description.AddProvidedTemporaryFile(RAWWAYS_DAT);
     description.AddProvidedTemporaryFile(RAWRELS_DAT);
     description.AddProvidedTemporaryFile(RAWCOASTLINE_DAT);
+    description.AddProvidedTemporaryFile(RAWDATAPOLYGON_DAT);
     description.AddProvidedTemporaryFile(RAWTURNRESTR_DAT);
   }
 

@@ -1758,6 +1758,8 @@ namespace osmscout {
 
     description.AddRequiredFile(Preprocess::RAWCOASTLINE_DAT);
 
+    description.AddRequiredFile(Preprocess::RAWDATAPOLYGON_DAT);
+
     description.AddRequiredFile(CoordDataFile::COORD_DAT);
 
     description.AddRequiredFile(WayDataFile::WAYS_DAT);
