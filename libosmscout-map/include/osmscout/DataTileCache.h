@@ -70,7 +70,7 @@ namespace osmscout {
     }
 
     /**
-     * Marks the tile as impcomplete again, without actually clearing data and types.
+     * Marks the tile as inpcomplete again, without actually clearing data and types.
      */
     void Invalidate()
     {
@@ -94,7 +94,21 @@ namespace osmscout {
     }
 
     /**
-     * Assign data to the tile and mark teh tile as comopleted.
+     * Assign data to the tile that was derived from existing tiles. Resets the list of loaded types
+     * to the list given. This version has move semantics for the data.
+     */
+    void SetPrefillData(const TypeInfoSet& types,
+                        std::vector<O>&& data)
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      this->prefillData=std::move(data);
+      this->types=types;
+      complete=false;
+    }
+
+    /**
+     * Assign data to the tile and mark the tile as completed.
      */
     void SetData(const TypeInfoSet& types,
                  const std::vector<O>& data)
@@ -102,6 +116,20 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       this->data=data;
+      this->types.Add(types);
+
+      complete=true;
+    }
+
+    /**
+     * Assign data to the tile and mark the tile as completed.  This version has move semantics for the data.
+     */
+    void SetData(const TypeInfoSet& types,
+                 std::vector<O>&& data)
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      this->data=std::move(data);
       this->types.Add(types);
 
       complete=true;

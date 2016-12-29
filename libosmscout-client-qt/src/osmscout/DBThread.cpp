@@ -363,8 +363,8 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
   mapService->InvalidateTileCache();
   osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
-  for (auto flag: stylesheetFlags){
-    newStyleConfig->AddFlag(flag.first, flag.second);
+  for (const auto& flag : stylesheetFlags) {
+    newStyleConfig->AddFlag(flag.first,flag.second);
   }
 
   if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
@@ -377,14 +377,18 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     // Recreate
     styleConfig=newStyleConfig;
     painter=new osmscout::MapPainterQt(styleConfig);
-  }else{
-    std::list<std::string> errorsStrings = newStyleConfig->GetErrors();
-    for(std::list<std::string>::iterator it = errorsStrings.begin(); it != errorsStrings.end(); it++){
-      StyleError err(QString::fromStdString(*it));
+  }
+  else {
+    std::list<std::string> errorsStrings=newStyleConfig->GetErrors();
+
+    for(const auto& errorString : errorsStrings) {
+      StyleError err(QString::fromStdString(errorString));
       qWarning() << "Style error:" << err.GetDescription();
       errors.append(err);
     }
+
     styleConfig=NULL;
+
     return false;
   }
 
