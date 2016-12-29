@@ -41,6 +41,10 @@ namespace osmscout {
                                     OSMId &availableId,
                                     TagId polygonTagId)
   {
+    if (polygonNodes.size()>=2 && polygonNodes.front() == polygonNodes.back()){
+      // last point is same as first, remove it
+      polygonNodes.pop_back();
+    }
     std::vector<GeoCoord> v1(polygonNodes.begin(), polygonNodes.end());
     if (!AreaIsSimple(v1))
       return false;
@@ -117,7 +121,7 @@ namespace osmscout {
                   sectionName=line.substr(1);
                   context=ExcludedPolygon;
                   if (sectionName.size()==0){
-                    throw IOException(filename, "Empty section name on line "+lineNum);
+                    throw IOException(filename, "Empty section name on line "+NumberToStringUnsigned(lineNum), "");
                   }
                 }else{
                   sectionName=line;
@@ -131,7 +135,7 @@ namespace osmscout {
           case ExcludedPolygon:
             if (line=="END"){
               if (!closePolygon(context, polygonNodes, availableId, typeConfig->tagDataPolygon)){
-                throw IOException(filename, "Invalid section on line "+lineNum);
+                throw IOException(filename, "Invalid section on line "+NumberToStringUnsigned(lineNum), "");
               }
               context=Section;
               polygonNodes.clear();
@@ -141,13 +145,13 @@ namespace osmscout {
             std::list<std::string> tokens;
             SplitStringAtSpace(line, tokens);
             if (tokens.size()!=2)
-              throw IOException(filename, "Inlivalid format on line "+lineNum);
+              throw IOException(filename, "Inlivalid format on line "+NumberToStringUnsigned(lineNum), "");
             double lon;
             double lat;
             if (!StringToNumber(tokens.front(), lon))
-              throw IOException(filename, "Inlivalid number format on line "+lineNum);
+              throw IOException(filename, "Inlivalid number format on line "+NumberToStringUnsigned(lineNum), "");
             if (!StringToNumber(tokens.back(), lat))
-              throw IOException(filename, "Inlivalid number format on line "+lineNum);
+              throw IOException(filename, "Inlivalid number format on line "+NumberToStringUnsigned(lineNum), "");
 
             polygonNodes.push_back(GeoCoord(lat, lon));
             break;
