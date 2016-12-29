@@ -83,13 +83,26 @@ namespace osmscout {
      * Assign data to the tile that was derived from existing tiles. Resets the list of loaded types
      * to the list given.
      */
-    void SetPrefillData(const TypeInfoSet& types,
+    void AddPrefillData(const TypeInfoSet& types,
                         const std::vector<O>& data)
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      this->prefillData=data;
-      this->types=types;
+      if (this->types.Empty()) {
+        this->types=types;
+      }
+      else {
+        this->types.Add(types);
+      }
+
+      if (this->prefillData.empty()) {
+        this->prefillData=data;
+      }
+      else {
+        this->prefillData.reserve(this->prefillData.size()+data.size());
+        this->prefillData.insert(this->prefillData.end(),data.begin(),data.end());
+      }
+
       complete=false;
     }
 
@@ -97,13 +110,26 @@ namespace osmscout {
      * Assign data to the tile that was derived from existing tiles. Resets the list of loaded types
      * to the list given. This version has move semantics for the data.
      */
-    void SetPrefillData(const TypeInfoSet& types,
+    void AddPrefillData(const TypeInfoSet& types,
                         std::vector<O>&& data)
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      this->prefillData=std::move(data);
-      this->types=types;
+      if (this->types.Empty()) {
+        this->types=types;
+      }
+      else {
+        this->types.Add(types);
+      }
+
+      if (this->prefillData.empty()) {
+        this->prefillData=std::move(data);
+      }
+      else {
+        this->prefillData.reserve(this->prefillData.size()+data.size());
+        this->prefillData.insert(this->prefillData.end(),data.begin(),data.end());
+      }
+
       complete=false;
     }
 
@@ -416,8 +442,7 @@ namespace osmscout {
     void ResolveOptimizedWaysFromParent(Tile& tile,
                                         const Tile& parentTile,
                                         const GeoBox& boundingBox,
-                                        const TypeInfoSet& optimizedWayTypes,
-                                        const TypeInfoSet& wayTypes);
+                                        const TypeInfoSet& optimizedWayTypes);
     void ResolveWaysFromParent(Tile& tile,
                                const Tile& parentTile,
                                const GeoBox& boundingBox,
@@ -425,8 +450,7 @@ namespace osmscout {
     void ResolveOptimizedAreasFromParent(Tile& tile,
                                          const Tile& parentTile,
                                          const GeoBox& boundingBox,
-                                         const TypeInfoSet& optimizedAreaTypes,
-                                         const TypeInfoSet& areaTypes);
+                                         const TypeInfoSet& optimizedAreaTypes);
     void ResolveAreasFromParent(Tile& tile,
                                 const Tile& parentTile,
                                 const GeoBox& boundingBox,
