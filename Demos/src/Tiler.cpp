@@ -36,9 +36,10 @@
   src/Tiler ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.2 6.5 51.7 8 10 13
 */
 
-static unsigned int tileWidth=256;
-static unsigned int tileHeight=256;
-static const double DPI=96.0;
+static const unsigned int tileWidth=256;
+static const unsigned int tileHeight=256;
+static const double       DPI=96.0;
+static const int          tileRingSize=1;
 
 bool write_ppm(const agg::rendering_buffer& buffer,
                const char* file_name)
@@ -131,7 +132,6 @@ int main(int argc, char* argv[])
   osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
-  osmscout::MapData             data;
 
   // Change this, to match your system
   drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
   // of other than the current tile, too.
   drawParameter.SetDropNotVisiblePointLabels(false);
 
-  searchParameter.SetUseLowZoomOptimization(false);
+  searchParameter.SetUseLowZoomOptimization(true);
   searchParameter.SetMaximumAreaLevel(3);
 
   osmscout::MapPainterAgg painter(styleConfig);
@@ -186,24 +186,44 @@ int main(int argc, char* argv[])
     double maxTime=0.0;
     double totalTime=0.0;
 
-    osmscout::TypeInfoSet nodeTypes;
-    osmscout::TypeInfoSet wayTypes;
-    osmscout::TypeInfoSet areaTypes;
+    osmscout::MapService::TypeDefinition typeDefinition;
 
-    styleConfig->GetNodeTypesWithMaxMag(magnification,
-                                        nodeTypes);
+    for (auto type : database->GetTypeConfig()->GetTypes()) {
+      bool hasLabel=false;
 
-    styleConfig->GetWayTypesWithMaxMag(magnification,
-                                       wayTypes);
+      if (type->CanBeNode()) {
+        if (styleConfig->HasNodeTextStyles(type,
+                                           magnification)) {
+          typeDefinition.nodeTypes.Set(type);
+          hasLabel=true;
+        }
+      }
 
-    styleConfig->GetAreaTypesWithMaxMag(magnification,
-                                        areaTypes);
+      if (type->CanBeArea()) {
+        if (styleConfig->HasAreaTextStyles(type,
+                                           magnification)) {
+          if (type->GetOptimizeLowZoom() && searchParameter.GetUseLowZoomOptimization()) {
+            typeDefinition.optimizedAreaTypes.Set(type);
+          }
+          else {
+            typeDefinition.areaTypes.Set(type);
+          }
+
+          hasLabel=true;
+        }
+      }
+
+      if (hasLabel) {
+        std::cout << "TYPE " << type->GetName() << " might have labels" << std::endl;
+      }
+    }
 
     for (int y=yTileStart; y<=yTileEnd; y++) {
       for (int x=xTileStart; x<=xTileEnd; x++) {
         agg::pixfmt_rgb24   pf(rbuf);
         osmscout::StopClock timer;
         osmscout::GeoBox    boundingBox;
+        osmscout::MapData   data;
 
         projection.Set(x,y,
                        magnification,
@@ -215,14 +235,58 @@ int main(int argc, char* argv[])
 
         std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
 
-        osmscout::GeoBox dataBoundingBox(osmscout::GeoCoord(osmscout::TileYToLat(y-4,magnification),osmscout::TileXToLon(x-4,magnification)),
-                                         osmscout::GeoCoord(osmscout::TileYToLat(y+4,magnification),osmscout::TileXToLon(x+4,magnification)));
 
-        std::list<osmscout::TileRef> tiles;
+        std::list<osmscout::TileRef> centralTiles;
 
-        mapService->LookupTiles(magnification,dataBoundingBox,tiles);
-        mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-        mapService->ConvertTilesToMapData(tiles,data);
+        mapService->LookupTiles(magnification,
+                                boundingBox,
+                                centralTiles);
+
+        mapService->LoadMissingTileData(searchParameter,
+                                        *styleConfig,
+                                        centralTiles);
+
+        mapService->AddTileDataToMapData(centralTiles,
+                                         data);
+
+        std::map<osmscout::TileId, osmscout::TileRef> ringTileMap;
+
+        for (int ringY=y-tileRingSize; ringY<=y+tileRingSize; ringY++) {
+          for (int ringX=x-tileRingSize; ringX<=x+tileRingSize; ringX++) {
+            if (ringX==x && ringY==y) {
+              continue;
+            }
+
+            osmscout::GeoBox boundingBox(osmscout::GeoCoord(osmscout::TileYToLat(ringY,magnification),osmscout::TileXToLon(ringX,magnification)),
+                                         osmscout::GeoCoord(osmscout::TileYToLat(ringY+1,magnification),osmscout::TileXToLon(ringX+1,magnification)));
+
+
+            std::list<osmscout::TileRef> tiles;
+
+            mapService->LookupTiles(magnification,
+                                    boundingBox,
+                                    tiles);
+
+            for (const auto& tile : tiles) {
+              ringTileMap[tile->GetId()]=tile;
+            }
+          }
+        }
+
+        std::list<osmscout::TileRef> ringTiles;
+
+        for (const auto& tileEntry : ringTileMap) {
+          ringTiles.push_back(tileEntry.second);
+        }
+
+        mapService->LoadMissingTileData(searchParameter,
+                                        magnification,
+                                        typeDefinition,
+                                        ringTiles);
+
+        mapService->AddTileDataToMapData(ringTiles,
+                                         typeDefinition,
+                                         data);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
                             (x-xTileStart)*tileWidth*3;

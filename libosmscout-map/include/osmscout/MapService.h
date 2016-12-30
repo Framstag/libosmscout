@@ -91,15 +91,15 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API MapService
   {
-  private:
-    struct TypeDefinition
+  public:
+    class OSMSCOUT_MAP_API TypeDefinition CLASS_FINAL
     {
-      Magnification magnification;
-      TypeInfoSet   nodeTypes;
-      TypeInfoSet   wayTypes;
-      TypeInfoSet   areaTypes;
-      TypeInfoSet   optimizedAreaTypes;
-      TypeInfoSet   optimizedWayTypes;
+    public:
+      TypeInfoSet nodeTypes;
+      TypeInfoSet wayTypes;
+      TypeInfoSet areaTypes;
+      TypeInfoSet optimizedAreaTypes;
+      TypeInfoSet optimizedWayTypes;
     };
 
     typedef std::shared_ptr<TypeDefinition> TypeDefinitionRef;
@@ -218,6 +218,12 @@ namespace osmscout {
                                        std::list<TileRef>& tiles,
                                        bool async) const;
 
+    bool LoadMissingTileDataTypeDefinition(const AreaSearchParameter& parameter,
+                                           const Magnification& magnification,
+                                           const TypeDefinition& typeDefinition,
+                                           std::list<TileRef>& tiles,
+                                           bool async) const;
+
   public:
     MapService(const DatabaseRef& database);
     virtual ~MapService();
@@ -245,8 +251,22 @@ namespace osmscout {
                                   const StyleConfig& styleConfig,
                                   std::list<TileRef>& tiles) const;
 
-    void ConvertTilesToMapData(std::list<TileRef>& tiles,
-                               MapData& data) const;
+    bool LoadMissingTileData(const AreaSearchParameter& parameter,
+                             const Magnification& magnification,
+                             const TypeDefinition& typeDefinition,
+                             std::list<TileRef>& tiles) const;
+
+    bool LoadMissingTileDataAsync(const AreaSearchParameter& parameter,
+                                  const Magnification& magnification,
+                                  const TypeDefinition& typeDefinition,
+                                  std::list<TileRef>& tiles) const;
+
+    void AddTileDataToMapData(std::list<TileRef>& tiles,
+                              MapData& data) const;
+
+    void AddTileDataToMapData(std::list<TileRef>& tiles,
+                              const TypeDefinition& typeDefinition,
+                              MapData& data) const;
 
     bool GetGroundTiles(const Projection& projection,
                         std::list<GroundTile>& tiles) const;

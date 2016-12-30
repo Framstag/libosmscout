@@ -64,6 +64,16 @@ namespace osmscout {
   }
 
   /**
+   * Deletes the content hold by this instance.
+   */
+  void MapData::ClearDBData()
+  {
+    nodes.clear();
+    areas.clear();
+    ways.clear();
+  }
+
+  /**
    * Sort labels for the same object by position
    */
   static inline bool LabelLayoutDataSorter(const MapPainter::LabelLayoutData& a,

@@ -134,19 +134,17 @@ int main(int argc, char* argv[])
       std::cerr << "Cannot open style" << std::endl;
     }
 
-    for (std::vector<Action>::const_iterator action=actions.begin();
-         action!=actions.end();
-         ++action) {
+    for (const auto& action : actions) {
       std::cout << "-------------------" << std::endl;
-      std::cout << "# Rendering " << action->lat << "," << action->lon << " with zoom " << action->magnification << " and size " << width << "x" << height << std::endl;
+      std::cout << "# Rendering " << action.lat << "," << action.lon << " with zoom " << action.magnification << " and size " << width << "x" << height << std::endl;
 
       osmscout::MercatorProjection  projection;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
 
-      projection.Set(osmscout::GeoCoord(action->lat,
-                                        action->lon),
-                     osmscout::Magnification(action->magnification),
+      projection.Set(osmscout::GeoCoord(action.lat,
+                                        action.lon),
+                     osmscout::Magnification(action.magnification),
                      96.0,
                      width,
                      height);
@@ -157,7 +155,7 @@ int main(int argc, char* argv[])
 
       mapService->LookupTiles(projection,tiles);
       mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-      mapService->ConvertTilesToMapData(tiles,data);
+      mapService->AddTileDataToMapData(tiles,data);
 
       dbTimer.Stop();
 

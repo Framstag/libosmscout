@@ -69,6 +69,13 @@ namespace osmscout {
       // no code
     }
 
+    bool IsEmpty() const
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      return types.Empty();
+    }
+
     /**
      * Marks the tile as inpcomplete again, without actually clearing data and types.
      */
@@ -369,15 +376,15 @@ namespace osmscout {
     }
 
     /**
-     * Return 'true' if no data at all has been assigned
+     * Return 'true' if no data for any type has been assigned
      */
     inline bool IsEmpty() const
     {
-      return !nodeData.IsComplete() &&
-             !wayData.IsComplete() &&
-             !areaData.IsComplete() &&
-             !optimizedWayData.IsComplete() &&
-             !optimizedAreaData.IsComplete();
+      return nodeData.IsEmpty() &&
+             wayData.IsEmpty() &&
+             areaData.IsEmpty() &&
+             optimizedWayData.IsEmpty() &&
+             optimizedAreaData.IsEmpty();
     }
   };
 

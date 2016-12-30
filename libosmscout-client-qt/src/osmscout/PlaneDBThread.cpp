@@ -393,10 +393,10 @@ void PlaneDBThread::DrawMap()
     bool success=true;
     for (auto &db:databases){
       std::list<osmscout::TileRef> tiles;
-      osmscout::MapData data; // TODO: make sence cache these data?
+      osmscout::MapData            data; // TODO: make sence cache these data?
 
       db->mapService->LookupTiles(renderProjection,tiles);
-      db->mapService->ConvertTilesToMapData(tiles,data);
+      db->mapService->AddTileDataToMapData(tiles,data);
 
       if (drawParameter.GetRenderSeaLand()) {
         db->mapService->GetGroundTiles(renderProjection,
