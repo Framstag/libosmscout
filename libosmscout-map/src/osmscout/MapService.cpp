@@ -200,6 +200,7 @@ namespace osmscout {
   bool MapService::GetNodes(const AreaSearchParameter& parameter,
                             const TypeInfoSet& nodeTypes,
                             const GeoBox& boundingBox,
+                            bool prefill,
                             const TileRef& tile) const
   {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
@@ -259,11 +260,19 @@ namespace osmscout {
           return false;
         }
 
-        tile->GetNodeData().SetData(loadedNodeTypes,std::move(nodes));
+        if (prefill)
+        {
+          tile->GetNodeData().AddPrefillData(loadedNodeTypes,std::move(nodes));
+        }
+        else {
+          tile->GetNodeData().SetData(loadedNodeTypes,std::move(nodes));
+        }
       }
     }
 
-    tile->GetNodeData().SetComplete();
+    if (!prefill) {
+      tile->GetNodeData().SetComplete();
+    }
 
     NotifyTileStateCallbacks(tile);
 
@@ -274,6 +283,7 @@ namespace osmscout {
                                    const TypeInfoSet& areaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
+                                   bool prefill,
                                    const TileRef& tile) const
   {
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
@@ -318,10 +328,17 @@ namespace osmscout {
         return false;
       }
 
-      tile->GetOptimizedAreaData().SetData(loadedAreaTypes,std::move(areas));
+      if (prefill) {
+        tile->GetOptimizedAreaData().AddPrefillData(loadedAreaTypes,std::move(areas));
+      }
+      else {
+        tile->GetOptimizedAreaData().SetData(loadedAreaTypes,std::move(areas));
+      }
     }
 
-    tile->GetOptimizedAreaData().SetComplete();
+    if (!prefill) {
+      tile->GetOptimizedAreaData().SetComplete();
+    }
 
     NotifyTileStateCallbacks(tile);
 
@@ -332,6 +349,7 @@ namespace osmscout {
                             const TypeInfoSet& areaTypes,
                             const Magnification& magnification,
                             const GeoBox& boundingBox,
+                            bool prefill,
                             const TileRef& tile) const
   {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
@@ -393,11 +411,18 @@ namespace osmscout {
           return false;
         }
 
-        tile->GetAreaData().SetData(loadedAreaTypes,std::move(areas));
+        if (prefill) {
+          tile->GetAreaData().AddPrefillData(loadedAreaTypes,std::move(areas));
+        }
+        else {
+          tile->GetAreaData().SetData(loadedAreaTypes,std::move(areas));
+        }
       }
     }
 
-    tile->GetAreaData().SetComplete();
+    if (!prefill) {
+      tile->GetAreaData().SetComplete();
+    }
 
     NotifyTileStateCallbacks(tile);
 
@@ -408,6 +433,7 @@ namespace osmscout {
                                   const TypeInfoSet& wayTypes,
                                   const Magnification& magnification,
                                   const GeoBox& boundingBox,
+                                  bool prefill,
                                   const TileRef& tile) const
   {
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
@@ -452,10 +478,17 @@ namespace osmscout {
         return false;
       }
 
-      tile->GetOptimizedWayData().SetData(loadedWayTypes,std::move(ways));
+      if (prefill) {
+        tile->GetOptimizedWayData().AddPrefillData(loadedWayTypes,std::move(ways));
+      }
+      else {
+        tile->GetOptimizedWayData().SetData(loadedWayTypes,std::move(ways));
+      }
     }
 
-    tile->GetOptimizedWayData().SetComplete();
+    if (!prefill) {
+      tile->GetOptimizedWayData().SetComplete();
+    }
 
     NotifyTileStateCallbacks(tile);
 
@@ -465,6 +498,7 @@ namespace osmscout {
   bool MapService::GetWays(const AreaSearchParameter& parameter,
                            const TypeInfoSet& wayTypes,
                            const GeoBox& boundingBox,
+                           bool prefill,
                            const TileRef& tile) const
   {
     AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
@@ -523,11 +557,18 @@ namespace osmscout {
           return false;
         }
 
-        tile->GetWayData().SetData(loadedWayTypes,std::move(ways));
+        if (prefill) {
+          tile->GetWayData().AddPrefillData(loadedWayTypes,std::move(ways));
+        }
+        else {
+          tile->GetWayData().SetData(loadedWayTypes,std::move(ways));
+        }
       }
     }
 
-    tile->GetWayData().SetComplete();
+    if (!prefill) {
+      tile->GetWayData().SetComplete();
+    }
 
     NotifyTileStateCallbacks(tile);
 
@@ -582,9 +623,15 @@ namespace osmscout {
   std::future<bool> MapService::PushNodeTask(const AreaSearchParameter& parameter,
                                              const TypeInfoSet& nodeTypes,
                                              const GeoBox& boundingBox,
+                                             bool prefill,
                                              const TileRef& tile) const
   {
-    std::packaged_task<bool()> task(std::bind(&MapService::GetNodes,this,parameter,nodeTypes,boundingBox,tile));
+    std::packaged_task<bool()> task(std::bind(&MapService::GetNodes,this,
+                                              parameter,
+                                              nodeTypes,
+                                              boundingBox,
+                                              prefill,
+                                              tile));
 
     std::future<bool> future=task.get_future();
 
@@ -597,9 +644,16 @@ namespace osmscout {
                                                     const TypeInfoSet& areaTypes,
                                                     const Magnification& magnification,
                                                     const GeoBox& boundingBox,
+                                                    bool prefill,
                                                     const TileRef& tile) const
   {
-    std::packaged_task<bool()> task(std::bind(&MapService::GetAreasLowZoom,this,parameter,areaTypes,magnification,boundingBox,tile));
+    std::packaged_task<bool()> task(std::bind(&MapService::GetAreasLowZoom,this,
+                                              parameter,
+                                              areaTypes,
+                                              magnification,
+                                              boundingBox,
+                                              prefill,
+                                              tile));
 
     std::future<bool> future=task.get_future();
 
@@ -612,9 +666,16 @@ namespace osmscout {
                                              const TypeInfoSet& areaTypes,
                                              const Magnification& magnification,
                                              const GeoBox& boundingBox,
+                                             bool prefill,
                                              const TileRef& tile) const
   {
-    std::packaged_task<bool()> task(std::bind(&MapService::GetAreas,this,parameter,areaTypes,magnification,boundingBox,tile));
+    std::packaged_task<bool()> task(std::bind(&MapService::GetAreas,this,
+                                              parameter,
+                                              areaTypes,
+                                              magnification,
+                                              boundingBox,
+                                              prefill,
+                                              tile));
 
     std::future<bool> future=task.get_future();
 
@@ -627,10 +688,16 @@ namespace osmscout {
                                                    const TypeInfoSet& wayTypes,
                                                    const Magnification& magnification,
                                                    const GeoBox& boundingBox,
+                                                   bool prefill,
                                                    const TileRef& tile) const
   {
-    std::packaged_task<bool()> task(std::bind(&MapService::GetWaysLowZoom,this,parameter,
-                                              wayTypes,magnification,boundingBox,tile));
+    std::packaged_task<bool()> task(std::bind(&MapService::GetWaysLowZoom,this,
+                                              parameter,
+                                              wayTypes,
+                                              magnification,
+                                              boundingBox,
+                                              prefill,
+                                              tile));
 
     std::future<bool> future=task.get_future();
 
@@ -642,10 +709,15 @@ namespace osmscout {
   std::future<bool> MapService::PushWayTask(const AreaSearchParameter& parameter,
                                             const TypeInfoSet& wayTypes,
                                             const GeoBox& boundingBox,
+                                            bool prefill,
                                             const TileRef& tile) const
   {
-    std::packaged_task<bool()> task(std::bind(&MapService::GetWays,this,parameter,
-                                              wayTypes,boundingBox,tile));
+    std::packaged_task<bool()> task(std::bind(&MapService::GetWays,this,
+                                              parameter,
+                                              wayTypes,
+                                              boundingBox,
+                                              prefill,
+                                              tile));
 
     std::future<bool> future=task.get_future();
 
@@ -782,6 +854,7 @@ namespace osmscout {
         results.push_back(PushNodeTask(parameter,
                                        typeDefinition->nodeTypes,
                                        tileBoundingBox,
+                                       false,
                                        tile));
 
         if (parameter.GetUseLowZoomOptimization()) {
@@ -789,6 +862,7 @@ namespace osmscout {
                                                 typeDefinition->optimizedAreaTypes,
                                                 magnification,
                                                 tileBoundingBox,
+                                                false,
                                                 tile));
         }
 
@@ -796,6 +870,7 @@ namespace osmscout {
                                        typeDefinition->areaTypes,
                                        magnification,
                                        tileBoundingBox,
+                                       false,
                                        tile));
 
         if (parameter.GetUseLowZoomOptimization()) {
@@ -803,12 +878,14 @@ namespace osmscout {
                                                typeDefinition->optimizedWayTypes,
                                                magnification,
                                                tileBoundingBox,
+                                               false,
                                                tile));
         }
 
         results.push_back(PushWayTask(parameter,
                                       typeDefinition->wayTypes,
                                       tileBoundingBox,
+                                      false,
                                       tile));
 
         tileLoadingTime.Stop();

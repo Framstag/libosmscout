@@ -142,29 +142,34 @@ namespace osmscout {
     bool GetNodes(const AreaSearchParameter& parameter,
                   const TypeInfoSet& nodeTypes,
                   const GeoBox& boundingBox,
+                  bool prefill,
                   const TileRef& tile) const;
 
     bool GetAreasLowZoom(const AreaSearchParameter& parameter,
                          const TypeInfoSet& areaTypes,
                          const Magnification& magnification,
                          const GeoBox& boundingBox,
+                         bool prefill,
                          const TileRef& tile) const;
 
     bool GetAreas(const AreaSearchParameter& parameter,
                   const TypeInfoSet& areaTypes,
                   const Magnification& magnification,
                   const GeoBox& boundingBox,
+                  bool prefill,
                   const TileRef& tile) const;
 
     bool GetWaysLowZoom(const AreaSearchParameter& parameter,
                         const TypeInfoSet& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
+                        bool prefill,
                         const TileRef& tile) const;
 
     bool GetWays(const AreaSearchParameter& parameter,
                  const TypeInfoSet& wayTypes,
                  const GeoBox& boundingBox,
+                 bool prefill,
                  const TileRef& tile) const;
 
     void NodeWorkerLoop();
@@ -176,29 +181,34 @@ namespace osmscout {
     std::future<bool> PushNodeTask(const AreaSearchParameter& parameter,
                                    const TypeInfoSet& nodeTypes,
                                    const GeoBox& boundingBox,
+                                   bool prefill,
                                    const TileRef& tile) const;
 
     std::future<bool> PushAreaLowZoomTask(const AreaSearchParameter& parameter,
                                           const TypeInfoSet& areaTypes,
                                           const Magnification& magnification,
                                           const GeoBox& boundingBox,
+                                          bool prefill,
                                           const TileRef& tile) const;
 
     std::future<bool> PushAreaTask(const AreaSearchParameter& parameter,
                                    const TypeInfoSet& areaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
+                                   bool prefill,
                                    const TileRef& tile) const;
 
     std::future<bool> PushWayLowZoomTask(const AreaSearchParameter& parameter,
                                          const TypeInfoSet& wayTypes,
                                          const Magnification& magnification,
                                          const GeoBox& boundingBox,
+                                         bool prefill,
                                          const TileRef& tile) const;
 
     std::future<bool> PushWayTask(const AreaSearchParameter& parameter,
                                   const TypeInfoSet& wayTypes,
                                   const GeoBox& boundingBox,
+                                  bool prefill,
                                   const TileRef& tile) const;
 
     void NotifyTileStateCallbacks(const TileRef& tile) const;
