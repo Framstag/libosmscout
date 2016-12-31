@@ -538,6 +538,8 @@ namespace osmscout {
 
        switch (node.GetPathObject().GetType()) {
        case refNone:
+         assert(false);
+         break;
        case refNode:
          assert(false);
          break;
@@ -617,6 +619,67 @@ namespace osmscout {
 
      return true;
   }
+
+  bool RoutePostprocessor::MaxSpeedPostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                          const RoutingProfile& profile,
+                                                          RouteDescription& description,
+                                                          Database& database)
+  {
+    ObjectFileRef              prevObject;
+    ObjectFileRef              curObject;
+    AreaRef                    area;
+    WayRef                     way;
+    uint8_t                    speed=0;
+    const TypeConfigRef        typeConfig(database.GetTypeConfig());
+    MaxSpeedFeatureValueReader maxSpeedReader(*typeConfig);
+
+    for (auto& node : description.Nodes()) {
+      // The last node does not have a pathWayId set, since we are not going anywhere!
+      if (node.HasPathObject()) {
+        // Only load the next way, if it is different from the old one
+        curObject=node.GetPathObject();
+
+        if (curObject!=prevObject) {
+          switch (node.GetPathObject().GetType()) {
+          case refNone:
+            assert(false);
+            break;
+          case refNode:
+            assert(false);
+            break;
+          case refArea:
+            area=postprocessor.GetArea(node.GetPathObject().GetFileOffset());
+            speed=0;
+
+            break;
+          case refWay:
+            way=postprocessor.GetWay(node.GetPathObject().GetFileOffset());
+
+            MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(way->GetFeatureValueBuffer());
+
+            if (maxSpeedValue!=NULL) {
+              speed=maxSpeedValue->GetMaxSpeed();
+            }
+            else {
+              speed=0;
+            }
+
+            break;
+          }
+        }
+
+        if (speed!=0) {
+          node.AddDescription(RouteDescription::WAY_MAXSPEED_DESC,
+                              std::make_shared<RouteDescription::MaxSpeedDescription>(speed));
+        }
+
+        prevObject=curObject;
+      }
+    }
+
+    return true;
+  }
+
 
   RoutePostprocessor::InstructionPostprocessor::State RoutePostprocessor::InstructionPostprocessor::GetInitialState(const RoutePostprocessor& postprocessor,
                                                                                                                     RouteDescription::Node& node)
