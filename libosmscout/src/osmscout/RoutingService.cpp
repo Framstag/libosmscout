@@ -719,11 +719,9 @@ namespace osmscout {
   {
     std::set<Id> nodeIds;
 
-    for (std::list<RouteData::RouteEntry>::const_iterator routeEntry=route.Entries().begin();
-         routeEntry!=route.Entries().end();
-         ++routeEntry) {
-      if (routeEntry->GetCurrentNodeId()!=0) {
-        nodeIds.insert(routeEntry->GetCurrentNodeId());
+    for (const auto& routeEntry : route.Entries()) {
+      if (routeEntry.GetCurrentNodeId()!=0) {
+        nodeIds.insert(routeEntry.GetCurrentNodeId());
       }
     }
 
@@ -753,23 +751,17 @@ namespace osmscout {
 
     std::unordered_map<Id,JunctionRef> junctionMap;
 
-    for (std::vector<JunctionRef>::const_iterator j=junctions.begin();
-        j!=junctions.end();
-        ++j) {
-      JunctionRef junction(*j);
-
+    for (const auto& junction : junctions) {
       junctionMap.insert(std::make_pair(junction->GetId(),junction));
     }
 
     junctions.clear();
 
-    for (std::list<RouteData::RouteEntry>::iterator routeEntry=route.Entries().begin();
-         routeEntry!=route.Entries().end();
-         ++routeEntry) {
-      if (routeEntry->GetCurrentNodeId()!=0) {
-        std::unordered_map<Id,JunctionRef>::const_iterator junction=junctionMap.find(routeEntry->GetCurrentNodeId());
-        if (junction!=junctionMap.end()) {
-          routeEntry->SetObjects(junction->second->GetObjects());
+    for (auto& routeEntry : route.Entries()) {
+      if (routeEntry.GetCurrentNodeId()!=0) {
+        auto junctionEntry=junctionMap.find(routeEntry.GetCurrentNodeId());
+        if (junctionEntry!=junctionMap.end()) {
+          routeEntry.SetObjects(junctionEntry->second->GetObjects());
         }
       }
     }
@@ -777,10 +769,181 @@ namespace osmscout {
     return junctionDataFile.Close();
   }
 
+  bool RoutingService::GetRNode(const RoutingProfile& profile,
+                                const RoutePosition& position,
+                                const WayRef& way,
+                                size_t routeNodeIndex,
+                                const RouteNodeRef& routeNode,
+                                const GeoCoord& startCoord,
+                                const GeoCoord& targetCoord,
+                                RNodeRef& node)
+  {
+    FileOffset offset;
+
+    node=NULL;
+
+    if (!routeNodeDataFile.GetOffset(routeNode->GetId(),
+                                     offset)) {
+      log.Error() << "Cannot get offset of startForwardRouteNode";
+
+      return false;
+    }
+
+    node=std::make_shared<RNode>(offset,
+                                 routeNode,
+                                 position.GetObjectFileRef());
+
+    node->currentCost=profile.GetCosts(*way,
+                                       GetSphericalDistance(startCoord,
+                                                            way->nodes[routeNodeIndex].GetCoord()));
+    node->estimateCost=profile.GetCosts(GetSphericalDistance(startCoord,
+                                                             targetCoord));
+
+    node->overallCost=node->currentCost+node->estimateCost;
+
+    return true;
+  }
+
+  /**
+   * The start position is at the given way and the index of the node within
+   * the object. Return the closest route node and routing node either in the
+   * forward or backward direction or both.
+   *
+   * @param profile
+   *    The routing profile
+   * @param position
+   *    The start position
+   * @param startCoord
+   *    The coordinate of the start position
+   * @param targetCoord
+   *    The coordinate of the target position
+   * @param forwardRouteNode
+   *    Optional route node in the forward direction
+   * @param backwardRouteNode
+   *    Optional route node in the backward direction
+   * @param forwardRNode
+   *    Optional prefilled routing node for the forward direction to be used as part of the routing process
+   * @param backwardRNode
+   *    Optional prefilled routing node for the backward direction to be used as part of the routing process
+   * @return
+   *    True, if at least one route node was found. If not or in case of technical errors false is returned.
+   */
+  bool RoutingService::GetWayStartNodes(const RoutingProfile& profile,
+                                        const RoutePosition& position,
+                                        GeoCoord& startCoord,
+                                        const GeoCoord& targetCoord,
+                                        RouteNodeRef& forwardRouteNode,
+                                        RouteNodeRef& backwardRouteNode,
+                                        RNodeRef& forwardRNode,
+                                        RNodeRef& backwardRNode)
+  {
+    WayDataFileRef  wayDataFile(database->GetWayDataFile());
+
+    if (!wayDataFile) {
+      return false;
+    }
+
+    assert(position.GetObjectFileRef().GetType()==refWay);
+
+    WayRef     way;
+    size_t     forwardNodePos;
+    size_t     backwardNodePos;
+
+    if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
+                                  way)) {
+      log.Error() << "Cannot get start way!";
+      return false;
+    }
+
+    if (position.GetNodeIndex()>=way->nodes.size()) {
+      log.Error() << "Given start node index " << position.GetNodeIndex() << " is not within valid range [0," << way->nodes.size()-1;
+      return false;
+    }
+
+    startCoord=way->nodes[position.GetNodeIndex()].GetCoord();
+
+    // Check, if the current node is already the route node
+    routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
+                          forwardRouteNode);
+
+    if (forwardRouteNode) {
+      forwardNodePos=position.GetNodeIndex();
+    }
+    else {
+      GetStartForwardRouteNode(profile,
+                               way,
+                               position.GetNodeIndex(),
+                               forwardRouteNode,
+                               forwardNodePos);
+
+      GetStartBackwardRouteNode(profile,
+                                way,
+                                position.GetNodeIndex(),
+                                backwardRouteNode,
+                                backwardNodePos);
+    }
+
+    if (!forwardRouteNode &&
+        !backwardRouteNode) {
+      log.Error() << "No route node found for start way";
+      return false;
+    }
+
+    if (forwardRouteNode &&
+        !GetRNode(profile,
+                  position,
+                  way,
+                  forwardNodePos,
+                  forwardRouteNode,
+                  startCoord,
+                  targetCoord,
+                  forwardRNode)) {
+      return false;
+    }
+
+    if (backwardRouteNode &&
+        !GetRNode(profile,
+                  position,
+                  way,
+                  backwardNodePos,
+                  backwardRouteNode,
+                  startCoord,
+                  targetCoord,
+                  backwardRNode)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * The start position is at the given position defined by an object and the index of the node within
+   * the object. Return the closest route node and routing node either in the
+   * forward or backward direction or both.
+   *
+   * @param profile
+   *    The routing profile
+   * @param position
+   *    The start position
+   * @param startCoord
+   *    The coordinate of the start position
+   * @param targetCoord
+   *    The coordinate of the target position
+   * @param forwardRouteNode
+   *    Optional route node in the forward direction
+   * @param backwardRouteNode
+   *    Optional route node in the backward direction
+   * @param forwardRNode
+   *    Optional prefilled routing node for the forward direction to be used as part of the routing process
+   * @param backwardRNode
+   *    Optional prefilled routing node for the backward direction to be used as part of the routing process
+   * @return
+   *    True, if at least one route node was found. If not or in case of technical errors false is returned.
+   */
   bool RoutingService::GetStartNodes(const RoutingProfile& profile,
                                      const RoutePosition& position,
                                      GeoCoord& startCoord,
-                                     GeoCoord& targetCoord,
+                                     const GeoCoord& targetCoord,
                                      RouteNodeRef& forwardRouteNode,
                                      RouteNodeRef& backwardRouteNode,
                                      RNodeRef& forwardRNode,
@@ -795,99 +958,14 @@ namespace osmscout {
     }
 
     if (position.GetObjectFileRef().GetType()==refWay) {
-      WayRef        way;
-      size_t        forwardNodePos;
-      FileOffset    forwardOffset;
-      size_t        backwardNodePos;
-      FileOffset    backwardOffset;
-
-      if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
-                                    way)) {
-        log.Error() << "Cannot get start way!";
-        return false;
-      }
-
-      if (position.GetNodeIndex()>=way->nodes.size()) {
-        log.Error() << "Given start node index " << position.GetNodeIndex() << " is not within valid range [0," << way->nodes.size()-1;
-        return false;
-      }
-
-      startCoord=way->nodes[position.GetNodeIndex()].GetCoord();
-
-      // Check, if the current node is already the route node
-      routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
-                            forwardRouteNode);
-
-      if (forwardRouteNode) {
-        forwardNodePos=position.GetNodeIndex();
-      }
-      else {
-        GetStartForwardRouteNode(profile,
-                                 way,
-                                 position.GetNodeIndex(),
-                                 forwardRouteNode,
-                                 forwardNodePos);
-
-        GetStartBackwardRouteNode(profile,
-                                  way,
-                                  position.GetNodeIndex(),
-                                  backwardRouteNode,
-                                  backwardNodePos);
-      }
-
-      if (!forwardRouteNode &&
-          !backwardRouteNode) {
-        log.Error() << "No route node found for start way";
-        return false;
-      }
-
-      if (forwardRouteNode) {
-        if (!routeNodeDataFile.GetOffset(forwardRouteNode->GetId(),
-                                         forwardOffset)) {
-          log.Error() << "Cannot get offset of startForwardRouteNode";
-
-          return false;
-        }
-
-        RNodeRef node=std::make_shared<RNode>(forwardOffset,
-                                              forwardRouteNode,
-                                              position.GetObjectFileRef());
-
-        node->currentCost=profile.GetCosts(*way,
-                                           GetSphericalDistance(startCoord,
-                                                                way->nodes[forwardNodePos].GetCoord()));
-        node->estimateCost=profile.GetCosts(GetSphericalDistance(startCoord,
-                                                                 targetCoord));
-
-        node->overallCost=node->currentCost+node->estimateCost;
-
-        forwardRNode=node;
-      }
-
-      if (backwardRouteNode) {
-        if (!routeNodeDataFile.GetOffset(backwardRouteNode->GetId(),
-                                         backwardOffset)) {
-          log.Error() << "Cannot get offset of startBackwardRouteNode";
-
-          return false;
-        }
-
-        RNodeRef node=std::make_shared<RNode>(backwardOffset,
-                                              backwardRouteNode,
-                                              position.GetObjectFileRef());
-
-        node->currentCost=profile.GetCosts(*way,
-                                           GetSphericalDistance(startCoord,
-                                                                way->nodes[backwardNodePos].GetCoord()));
-        node->estimateCost=profile.GetCosts(GetSphericalDistance(startCoord,
-                                                                 targetCoord));
-
-        node->overallCost=node->currentCost+node->estimateCost;
-
-        backwardRNode=node;
-      }
-
-      return true;
+      return GetWayStartNodes(profile,
+                             position,
+                             startCoord,
+                             targetCoord,
+                             forwardRouteNode,
+                             backwardRouteNode,
+                             forwardRNode,
+                             backwardRNode);
     }
     else {
       log.Error() << "Unsupported object type '" << position.GetObjectFileRef().GetTypeName() << "' for source!";
@@ -895,76 +973,107 @@ namespace osmscout {
     }
   }
 
+  /**
+   * The target position is at the given position defined by an object and the index of the node within
+   * the object. Return the closest route node and routing node either in the
+   * forward or backward direction or both.
+   *
+   * @param profile
+   *    The routing profile
+   * @param position
+   *    The start position
+   * @param targetCoord
+   *    The coordinate of the target position
+   * @param forwardRouteNode
+   *    Optional route node in the forward direction
+   * @param backwardRouteNode
+   *    Optional route node in the backward direction
+   * @return
+   *    True, if at least one route node was found. If not or in case of technical errors false is returned.
+   */
+  bool RoutingService::GetWayTargetNodes(const RoutingProfile& profile,
+                                         const RoutePosition& position,
+                                         GeoCoord& targetCoord,
+                                         RouteNodeRef& forwardNode,
+                                         RouteNodeRef& backwardNode)
+  {
+    WayDataFileRef wayDataFile(database->GetWayDataFile());
+
+    if (!wayDataFile) {
+      return false;
+    }
+
+    assert(position.GetObjectFileRef().GetType()==refWay);
+
+    WayRef way;
+
+    if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
+                                  way)) {
+      log.Error() << "Cannot get end way!";
+      return false;
+    }
+
+    if (position.GetNodeIndex()>=way->nodes.size()) {
+      log.Error() << "Given target node index " << position.GetNodeIndex() << " is not within valid range [0," << way->nodes.size()-1;
+      return false;
+    }
+
+    targetCoord=way->nodes[position.GetNodeIndex()].GetCoord();
+
+    // Check, if the current node is already the route node
+    routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
+                          forwardNode);
+
+    if (!forwardNode) {
+      GetTargetForwardRouteNode(profile,
+                                way,
+                                position.GetNodeIndex(),
+                                forwardNode);
+      GetTargetBackwardRouteNode(profile,
+                                 way,
+                                 position.GetNodeIndex(),
+                                 backwardNode);
+    }
+
+    if (!forwardNode &&
+        !backwardNode) {
+      log.Error() << "No route node found for target way";
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * The target position is at the given position defined by an object and the index of the node within
+   * the object. Return the closest route node and routing node either in the
+   * forward or backward direction or both.
+   *
+   * @param profile
+   *    The routing profile
+   * @param position
+   *    The start position
+   * @param targetCoord
+   *    The coordinate of the target position
+   * @param forwardRouteNode
+   *    Optional route node in the forward direction
+   * @param backwardRouteNode
+   *    Optional route node in the backward direction
+   * @return
+   *    True, if at least one route node was found. If not or in case of technical errors false is returned.
+   */
   bool RoutingService::GetTargetNodes(const RoutingProfile& profile,
                                       const RoutePosition& position,
                                       GeoCoord& targetCoord,
                                       RouteNodeRef& forwardNode,
                                       RouteNodeRef& backwardNode)
   {
-    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
-    WayDataFileRef  wayDataFile(database->GetWayDataFile());
-
-    if (!areaDataFile ||
-        !wayDataFile) {
-      return false;
-    }
-
     if (position.GetObjectFileRef().GetType()==refWay) {
-      WayRef way;
-
-      if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
-                                    way)) {
-        log.Error() << "Cannot get end way!";
-        return false;
-      }
-
-      if (position.GetNodeIndex()>=way->nodes.size()) {
-        log.Error() << "Given target node index " << position.GetNodeIndex() << " is not within valid range [0," << way->nodes.size()-1;
-        return false;
-      }
-
-      targetCoord=way->nodes[position.GetNodeIndex()].GetCoord();
-
-      // Check, if the current node is already the route node
-      routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
-                            forwardNode);
-
-      if (!forwardNode) {
-        GetTargetForwardRouteNode(profile,
-                                  way,
-                                  position.GetNodeIndex(),
-                                  forwardNode);
-        GetTargetBackwardRouteNode(profile,
-                                   way,
-                                   position.GetNodeIndex(),
-                                   backwardNode);
-      }
-
-      if (!forwardNode &&
-          !backwardNode) {
-        log.Error() << "No route node found for target way";
-        return false;
-      }
-
-      if (forwardNode) {
-        FileOffset forwardRouteNodeOffset;
-
-        if (!routeNodeDataFile.GetOffset(forwardNode->GetId(),
-                                         forwardRouteNodeOffset)) {
-          log.Error() << "Cannot get offset of targetForwardRouteNode";
-        }
-      }
-
-      if (backwardNode) {
-        FileOffset backwardRouteNodeOffset;
-
-        if (!routeNodeDataFile.GetOffset(backwardNode->GetId(),
-                                         backwardRouteNodeOffset)) {
-          log.Error() << "Cannot get offset of targetBackwardRouteNode";
-        }
-      }
-
-      return true;
+      return GetWayTargetNodes(profile,
+                              position,
+                              targetCoord,
+                              forwardNode,
+                              backwardNode);
     }
     else {
       log.Error() << "Unsupported object type '" << position.GetObjectFileRef().GetTypeName() << "' for target!";
