@@ -63,6 +63,118 @@ bool write_ppm(const agg::rendering_buffer& buffer,
   return false;
 }
 
+void MergeTilesToMapData(const std::list<osmscout::TileRef>& centerTiles,
+                         const osmscout::MapService::TypeDefinition& ringTypeDefinition,
+                         const std::list<osmscout::TileRef>& ringTiles,
+                         osmscout::MapData& data)
+{
+  std::unordered_map<osmscout::FileOffset,osmscout::NodeRef> nodeMap(10000);
+  std::unordered_map<osmscout::FileOffset,osmscout::WayRef>  wayMap(10000);
+  std::unordered_map<osmscout::FileOffset,osmscout::AreaRef> areaMap(10000);
+  std::unordered_map<osmscout::FileOffset,osmscout::WayRef>  optimizedWayMap(10000);
+  std::unordered_map<osmscout::FileOffset,osmscout::AreaRef> optimizedAreaMap(10000);
+
+  osmscout::StopClock uniqueTime;
+
+  for (auto tile : centerTiles) {
+    tile->GetNodeData().CopyData([&nodeMap](const osmscout::NodeRef& node) {
+      nodeMap[node->GetFileOffset()]=node;
+    });
+
+    //---
+
+    tile->GetOptimizedWayData().CopyData([&optimizedWayMap](const osmscout::WayRef& way) {
+      optimizedWayMap[way->GetFileOffset()]=way;
+    });
+
+    tile->GetWayData().CopyData([&wayMap](const osmscout::WayRef& way) {
+      wayMap[way->GetFileOffset()]=way;
+    });
+
+    //---
+
+    tile->GetOptimizedAreaData().CopyData([&optimizedAreaMap](const osmscout::AreaRef& area) {
+      optimizedAreaMap[area->GetFileOffset()]=area;
+    });
+
+    tile->GetAreaData().CopyData([&areaMap](const osmscout::AreaRef& area) {
+      areaMap[area->GetFileOffset()]=area;
+    });
+  }
+
+  for (auto tile : ringTiles) {
+    tile->GetNodeData().CopyData([&ringTypeDefinition,&nodeMap](const osmscout::NodeRef& node) {
+      if (ringTypeDefinition.nodeTypes.IsSet(node->GetType())) {
+        nodeMap[node->GetFileOffset()]=node;
+      }
+    });
+
+    //---
+
+    tile->GetOptimizedWayData().CopyData([&ringTypeDefinition,&optimizedWayMap](const osmscout::WayRef& way) {
+      if (ringTypeDefinition.optimizedWayTypes.IsSet(way->GetType())) {
+        optimizedWayMap[way->GetFileOffset()]=way;
+      }
+    });
+
+    tile->GetWayData().CopyData([&ringTypeDefinition,&wayMap](const osmscout::WayRef& way) {
+      if (ringTypeDefinition.wayTypes.IsSet(way->GetType())) {
+        wayMap[way->GetFileOffset()]=way;
+      }
+    });
+
+    //---
+
+    tile->GetOptimizedAreaData().CopyData([&ringTypeDefinition,&optimizedAreaMap](const osmscout::AreaRef& area) {
+      if (ringTypeDefinition.optimizedAreaTypes.IsSet(area->GetType())) {
+        optimizedAreaMap[area->GetFileOffset()]=area;
+      }
+    });
+
+    tile->GetAreaData().CopyData([&ringTypeDefinition,&areaMap](const osmscout::AreaRef& area) {
+      if (ringTypeDefinition.areaTypes.IsSet(area->GetType())) {
+        areaMap[area->GetFileOffset()]=area;
+      }
+    });
+  }
+
+  uniqueTime.Stop();
+
+  //std::cout << "Make data unique time: " << uniqueTime.ResultString() << std::endl;
+
+  osmscout::StopClock copyTime;
+
+  data.nodes.reserve(nodeMap.size());
+  data.ways.reserve(wayMap.size()+optimizedWayMap.size());
+  data.areas.reserve(areaMap.size()+optimizedAreaMap.size());
+
+  for (const auto& nodeEntry : nodeMap) {
+    data.nodes.push_back(nodeEntry.second);
+  }
+
+  for (const auto& wayEntry : wayMap) {
+    data.ways.push_back(wayEntry.second);
+  }
+
+  for (const auto& wayEntry : optimizedWayMap) {
+    data.ways.push_back(wayEntry.second);
+  }
+
+  for (const auto& areaEntry : areaMap) {
+    data.areas.push_back(areaEntry.second);
+  }
+
+  for (const auto& areaEntry : optimizedAreaMap) {
+    data.areas.push_back(areaEntry.second);
+  }
+
+  copyTime.Stop();
+
+  if (copyTime.GetMilliseconds()>20) {
+    osmscout::log.Warn() << "Copying data from tile to MapData took " << copyTime.ResultString();
+  }
+}
+
 int main(int argc, char* argv[])
 {
   std::string  map;
@@ -236,18 +348,15 @@ int main(int argc, char* argv[])
         std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
 
 
-        std::list<osmscout::TileRef> centralTiles;
+        std::list<osmscout::TileRef> centerTiles;
 
         mapService->LookupTiles(magnification,
                                 boundingBox,
-                                centralTiles);
+                                centerTiles);
 
         mapService->LoadMissingTileData(searchParameter,
                                         *styleConfig,
-                                        centralTiles);
-
-        mapService->AddTileDataToMapData(centralTiles,
-                                         data);
+                                        centerTiles);
 
         std::map<osmscout::TileId, osmscout::TileRef> ringTileMap;
 
@@ -284,9 +393,10 @@ int main(int argc, char* argv[])
                                         typeDefinition,
                                         ringTiles);
 
-        mapService->AddTileDataToMapData(ringTiles,
-                                         typeDefinition,
-                                         data);
+        MergeTilesToMapData(centerTiles,
+                            typeDefinition,
+                            ringTiles,
+                            data);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
                             (x-xTileStart)*tileWidth*3;
