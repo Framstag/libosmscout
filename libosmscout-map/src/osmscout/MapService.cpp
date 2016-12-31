@@ -1126,19 +1126,29 @@ namespace osmscout {
     StopClock uniqueTime;
 
     for (auto tile : tiles) {
-      tile->GetNodeData().CopyData([&nodeMap](const NodeRef& node) {nodeMap[node->GetFileOffset()]=node;});
+      tile->GetNodeData().CopyData([&nodeMap](const NodeRef& node) {
+        nodeMap[node->GetFileOffset()]=node;
+      });
 
       //---
 
-      tile->GetOptimizedWayData().CopyData([&optimizedWayMap](const WayRef& way) {optimizedWayMap[way->GetFileOffset()]=way;});
+      tile->GetOptimizedWayData().CopyData([&optimizedWayMap](const WayRef& way) {
+        optimizedWayMap[way->GetFileOffset()]=way;
+      });
 
-      tile->GetWayData().CopyData([&wayMap](const WayRef& way) {wayMap[way->GetFileOffset()]=way;});
+      tile->GetWayData().CopyData([&wayMap](const WayRef& way) {
+        wayMap[way->GetFileOffset()]=way;
+      });
 
       //---
 
-      tile->GetOptimizedAreaData().CopyData([&optimizedAreaMap](const AreaRef& area) {optimizedAreaMap[area->GetFileOffset()]=area;});
+      tile->GetOptimizedAreaData().CopyData([&optimizedAreaMap](const AreaRef& area) {
+        optimizedAreaMap[area->GetFileOffset()]=area;
+      });
 
-      tile->GetAreaData().CopyData([&areaMap](const AreaRef& area) {areaMap[area->GetFileOffset()]=area;});
+      tile->GetAreaData().CopyData([&areaMap](const AreaRef& area) {
+        areaMap[area->GetFileOffset()]=area;
+      });
     }
 
     uniqueTime.Stop();
