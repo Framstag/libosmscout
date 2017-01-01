@@ -29,7 +29,7 @@
 #endif
 
 #include <osmscout/system/Assert.h>
-#include <iostream>
+
 namespace osmscout {
 
   size_t Pow(size_t a, size_t b)
@@ -668,7 +668,7 @@ namespace osmscout {
         mapEntry=idEdgeMap.find(polygons.back().back().toIndex);
 
         if (mapEntry->second.empty()) {
-          std::cerr << "No matching node found" << std::endl;
+          //std::cerr << "No matching node found" << std::endl;
           return false;
         }
 

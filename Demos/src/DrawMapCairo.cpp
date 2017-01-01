@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
       mapService->LookupTiles(projection,tiles);
       mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-      mapService->ConvertTilesToMapData(tiles,data);
+      mapService->AddTileDataToMapData(tiles,data);
 
       if (painter.DrawMap(projection,
                           drawParameter,

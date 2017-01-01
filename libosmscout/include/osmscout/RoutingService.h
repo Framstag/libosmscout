@@ -453,14 +453,38 @@ namespace osmscout {
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode);
 
+    bool GetRNode(const RoutingProfile& profile,
+                  const RoutePosition& position,
+                  const WayRef& way,
+                  size_t routeNodeIndex,
+                  const RouteNodeRef& routeNode,
+                  const GeoCoord& startCoord,
+                  const GeoCoord& targetCoord,
+                  RNodeRef& node);
+
+    bool GetWayStartNodes(const RoutingProfile& profile,
+                          const RoutePosition& position,
+                          GeoCoord& startCoord,
+                          const GeoCoord& targetCoord,
+                          RouteNodeRef& forwardRouteNode,
+                          RouteNodeRef& backwardRouteNode,
+                          RNodeRef& forwardRNode,
+                          RNodeRef& backwardRNode);
+
     bool GetStartNodes(const RoutingProfile& profile,
                        const RoutePosition& position,
                        GeoCoord& startCoord,
-                       GeoCoord& targetCoord,
+                       const GeoCoord& targetCoord,
                        RouteNodeRef& forwardRouteNode,
                        RouteNodeRef& backwardRouteNode,
                        RNodeRef& forwardRNode,
                        RNodeRef& backwardRNode);
+
+    bool GetWayTargetNodes(const RoutingProfile& profile,
+                           const RoutePosition& position,
+                           GeoCoord& targetCoord,
+                           RouteNodeRef& forwardNode,
+                           RouteNodeRef& backwardNode);
 
     bool GetTargetNodes(const RoutingProfile& profile,
                         const RoutePosition& position,

@@ -246,6 +246,11 @@ static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node
     return true;
   }
 
+  /*
+  if (node.HasDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC)) {
+    return true;
+  }*/
+
   return false;
 #endif
 }
@@ -666,6 +671,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
 
   osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
 
@@ -746,6 +752,7 @@ int main(int argc, char* argv[])
     osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
     osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
     osmscout::RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
+    osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
 
     desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
     if (desc) {
@@ -813,6 +820,11 @@ int main(int argc, char* argv[])
       motorwayJunctionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayJunctionDescription>(desc);
     }
 
+    desc=node->GetDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
+    if (desc) {
+      maxSpeedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MaxSpeedDescription>(desc);
+    }
+
     if (crossingWaysDescription &&
         roundaboutCrossingCounter>0 &&
         crossingWaysDescription->GetExitCount()>1) {
@@ -842,6 +854,15 @@ int main(int argc, char* argv[])
     else {
       std::cout << "       ";
     }
+
+    /*
+    if (maxSpeedDescription) {
+      std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
+      std::cout << (size_t)maxSpeedDescription->GetMaxSpeed() << " km/h ";
+    }
+    else {
+      std::cout << "           ";
+    }*/
 
     size_t lineCount=0;
 

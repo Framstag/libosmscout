@@ -82,6 +82,7 @@ namespace osmscout {
     double               shieldLabelSpace;
     double               sameLabelSpace;
     double               maxSpace;
+    bool                 dropNotVisiblePointLabels;
 
   private:
     void DeleteEventsForLabel(const std::set<LabelEvent>::iterator& eventRef);

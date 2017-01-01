@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
   mapService->LookupTiles(projection,tiles);
   mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-  mapService->ConvertTilesToMapData(tiles,data);
+  mapService->AddTileDataToMapData(tiles,data);
 
   painter.DrawMap(projection,
                   drawParameter,

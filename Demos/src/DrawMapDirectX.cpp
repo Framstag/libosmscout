@@ -198,7 +198,7 @@ public:
 				m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, 800, 600);
 				m_mapService->LookupTiles(m_Projection, m_Tiles);
 				m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-				m_mapService->ConvertTilesToMapData(m_Tiles, m_Data);
+				m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 
 				ShowWindow(m_hwnd, SW_SHOWNORMAL);
 				UpdateWindow(m_hwnd);
@@ -374,7 +374,7 @@ private:
 			m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, width, height);
 			m_mapService->LookupTiles(m_Projection, m_Tiles);
 			m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-			m_mapService->ConvertTilesToMapData(m_Tiles, m_Data);
+			m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 		}
 	}
 

@@ -16,7 +16,9 @@ qtHaveModule(positioning) {
 
 PKGCONFIG += libosmscout-map-qt libosmscout-client-qt
 
-gcc:QMAKE_CXXFLAGS += -fopenmp
+!macx {
+  gcc:QMAKE_CXXFLAGS += -fopenmp
+}
 
 release: DESTDIR = release
 debug:   DESTDIR = debug
@@ -27,9 +29,9 @@ RCC_DIR = $$DESTDIR/
 UI_DIR = $$DESTDIR/
 
 SOURCES = src/OSMScout.cpp \
-          src/Theme.cpp 
+          src/Theme.cpp
 
-HEADERS = src/Theme.h 
+HEADERS = src/Theme.h
 
 DISTFILES += \
     qml/custom/MapButton.qml \

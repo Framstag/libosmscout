@@ -75,6 +75,8 @@ namespace osmscout {
     static const char* const MOTORWAY_LEAVE_DESC;
     /** Constant for a description of node describing a motorway junction */
     static const char* const MOTORWAY_JUNCTION_DESC;
+    /** Constant for a description of the maximum speed for the given way */
+    static const char* const WAY_MAXSPEED_DESC;
 
   public:
     /**
@@ -443,6 +445,29 @@ namespace osmscout {
     };
 
     typedef std::shared_ptr<MotorwayJunctionDescription> MotorwayJunctionDescriptionRef;
+
+    /**
+     * \ingroup Routing
+     * A motorway junction
+     */
+    class OSMSCOUT_API MaxSpeedDescription : public RouteDescription::Description
+    {
+    private:
+      uint8_t maxSpeed;
+
+    public:
+      MaxSpeedDescription(uint8_t speed);
+
+      std::string GetDebugString() const;
+
+      inline uint8_t GetMaxSpeed() const
+      {
+        return maxSpeed;
+      }
+    };
+
+    typedef std::shared_ptr<MaxSpeedDescription> MaxSpeedDescriptionRef;
+
 
     /**
      * \ingroup Routing

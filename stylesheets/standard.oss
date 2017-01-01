@@ -17,7 +17,7 @@ FLAG
   daylight        = true;
   waterway        = true;
   wood            = true;
-  
+
   IF daylight {
     natural       = true;
     railway       = true;
@@ -145,7 +145,7 @@ CONST
   ELSE {
     COLOR allotmentsColor          = darken(#c8b084,0.5);
   }
-  
+
   COLOR beachColor                 = #eecc55;
 
   COLOR brownFieldColor            = #b6b592;//#ebd7fe;
@@ -154,7 +154,7 @@ CONST
   COLOR cemeteryColor              = #a9caae;
   COLOR commercialColor            = #efc8c8;
   COLOR constructionColor          = #9d9d6c;
-  
+
   COLOR farmColor                = #ead8bd;
   COLOR farmyardColor              = #dcbe92;
   COLOR fellColor                  = #f9f9f9;
@@ -172,14 +172,14 @@ CONST
   COLOR greenFieldColor            = #dcdcc8;
   COLOR heathColor                 = #ffffc0;
   COLOR industrialColor            = #dfd1d6;
-  
+
   IF daylight {
     COLOR landFillColor            = #b6b591;
   }
   ELSE {
     COLOR landFillColor            = darken(#b6b591, 0.5);
   }
-  
+
   COLOR marshColor                 = #efe8ff;
 
   COLOR militaryColor              = #fe989822;
@@ -219,7 +219,7 @@ CONST
     COLOR roadBColor               = #bfbfbf;
     COLOR livingStreetColor        = #bababa; // grey
     COLOR pedestrianColor          = #ededed;
-    
+
     COLOR wayLabelColor            = #000000; // black
   }
   ELSE {
@@ -232,10 +232,10 @@ CONST
     COLOR roadBColor               = darken(#bfbfbf, 0.5);
     COLOR livingStreetColor        = darken(#bababa, 0.5);
     COLOR pedestrianColor          = darken(#ededed, 0.7);
-    
+
     COLOR wayLabelColor            = #cccccc;
   }
-  
+
   COLOR motorwayShieldColor        = @motorwayColor;
   COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
   COLOR trunkShieldColor           = @trunkColor;
@@ -245,7 +245,7 @@ CONST
   COLOR viaFerrataModerateColor    = #fdac44;
   COLOR viaFerrataDifficultColor   = #ec4044;
   COLOR viaFerrataExtremeColor     = #ff0000;
-  
+
   // Buildings
   COLOR buildingColor              = #d9d9d9;
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
@@ -313,7 +313,7 @@ CONST
   }
   COLOR parkingBorderColor         = darken(@parkingColor, 0.3);
   COLOR parkingBuildingBorderColor = darken(@parkingBuildingColor, 0.3);
-  
+
   COLOR hospitalSymbolColor        = #da0092;
   COLOR hospitalColor              = darken(@amenityColor, 0.1);
   COLOR hospitalBorderColor        = darken(@hospitalColor, 0.3);
@@ -459,7 +459,7 @@ STYLE
       WAY {color: @minorContourColor; displayWidth: 0.075mm; }
     }
   }
- 
+
   // -------------------------------------------------------
   //
   // natural_* (without coastline)
@@ -505,13 +505,13 @@ STYLE
     [MAG city-] {
       [TYPE natural_peak] NODE.ICON { symbol: natural_peak; }
     }
-  }  
+  }
 
   IF wood {
     [MAG stateOver-] {
       [TYPE wood] AREA { color: @woodColor; }
     }
-    
+
     [MAG detail-] {
       [TYPE wood] {
         AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
@@ -546,8 +546,8 @@ STYLE
             WAY {color: #ff000000;}
           }
         }
-        
-        AREA { color: @waterColor;}        
+
+        AREA { color: @waterColor;}
       }
 
     }
@@ -555,7 +555,7 @@ STYLE
     [MAG suburb-] {
       [TYPE waterway_dock,
             waterway_riverbank] AREA { color: @waterColor; }
-            
+
       [TYPE waterway_stream] {
         [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
         [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
@@ -566,13 +566,13 @@ STYLE
       [TYPE waterway_drain] {
         [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
         [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
-        
-        AREA { color: @waterColor;}        
+
+        AREA { color: @waterColor;}
       }
       [TYPE waterway_weir] {
         WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
-        
-        AREA { color: lighten(@waterColor, 0.3);}        
+
+        AREA { color: lighten(@waterColor, 0.3);}
       }
     }
 
@@ -877,7 +877,7 @@ STYLE
 
  [MAG veryClose-] {
    [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
- 
+
    [TYPE highway_track] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
      WAY {color: #90570c; dash: 3,1; cap: butt; displayWidth: 0.4mm;}
@@ -886,7 +886,7 @@ STYLE
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
      }
-     
+
      AREA {color: #90570c; borderColor: #ffffff50; borderWidth: 0.1mm;}
    }
 
@@ -908,7 +908,7 @@ STYLE
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.4mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.4mm;}
      }
-     
+
      AREA {color: #555555; borderColor: #ffffff50; borderWidth: 0.1mm;}
    }
 
@@ -939,7 +939,7 @@ STYLE
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.2mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.2mm;}
      }
-     
+
      AREA {color: #90570c;}
    }
 
@@ -1028,7 +1028,7 @@ STYLE
          leisure_track] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.9; }
 
    [TYPE highway_service] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
-   
+
    [TYPE highway_bus_stop] NODE.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt;}
  }
 
@@ -1114,7 +1114,7 @@ STYLE
          SIZE 5m 0.25mm:3px<] {
        [TUNNEL] {
          WAY {dash: 1,1; cap: butt;}
-       } 
+       }
        [BRIDGE] {
          WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
          WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
@@ -1133,7 +1133,7 @@ STYLE
      }
 
    }
-   
+
    [MAG veryClose-] {
      [TYPE railway_halt] NODE.ICON { symbol: railway_halt;}
 
@@ -1146,9 +1146,9 @@ STYLE
    }
 
    [MAG close-] {
-     [TYPE railway_station] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; } 
+     [TYPE railway_station] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
    }
-   
+
    [MAG veryClose-] {
      [TYPE railway_halt] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayHalt;}
      [TYPE railway_tram_stop] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt; }
@@ -1208,7 +1208,7 @@ STYLE
 
    [MAG close-] {
      [TYPE landuse_grass] AREA { color: @grassColor; }
-     
+
      [TYPE landuse_orchard,
            landuse_meadow,
            landuse_village_green] AREA { color: #cfeca8; }
@@ -1287,7 +1287,7 @@ STYLE
    }
 
    // Labels
-   
+
    [MAG close-] {
      [TYPE leisure_sports_centre,
            leisure_golf_course,
@@ -1303,7 +1303,7 @@ STYLE
            leisure_ice_rink] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; autoSize: true; }
    }
  }
- 
+
 
  // -------------------------------------------------------
  //
@@ -1392,7 +1392,7 @@ STYLE
      NODE.ICON { symbol: amenity_parking; name: parking; }
      AREA.ICON { name: parking;}
    }
- 
+
    [TYPE amenity_parking] {
      NODE.ICON { symbol: amenity_parking; name: parking; }
      AREA.ICON { name: parking;}
@@ -1409,7 +1409,7 @@ STYLE
    [TYPE barrier_retaining_wall] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
 
    [TYPE barrier_city_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
-   [TYPE barrier_city_wall] WAY#decor {color: @wallColor; 
+   [TYPE barrier_city_wall] WAY#decor {color: @wallColor;
              dash: 1,5; displayOffset: 0.09mm; offset: 0.5m; cap: butt;
              displayWidth: 0.1mm; width: 0.5m;
    }
@@ -1440,7 +1440,7 @@ STYLE
 
    [TYPE barrier_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
  }
- 
+
 // Aerialways
 [MAG close-] {
      [TYPE aerialway_gondola]{

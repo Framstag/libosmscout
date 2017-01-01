@@ -64,6 +64,16 @@ namespace osmscout {
   }
 
   /**
+   * Deletes the content hold by this instance.
+   */
+  void MapData::ClearDBData()
+  {
+    nodes.clear();
+    areas.clear();
+    ways.clear();
+  }
+
+  /**
    * Sort labels for the same object by position
    */
   static inline bool LabelLayoutDataSorter(const MapPainter::LabelLayoutData& a,
@@ -922,14 +932,15 @@ namespace osmscout {
         }
 
         // Retricts the height of a label to maxHeight
-        double alpha = textStyle->GetAlpha();
-        double maxHeight = projection.GetHeight()/5;
-        if (height > maxHeight) {
+        double alpha=textStyle->GetAlpha();
+        double maxHeight=projection.GetHeight()/5;
+
+        if (height>maxHeight) {
             // If the height exeeds maxHeight the alpha value will be decreased
-            double minAlpha = projection.GetHeight();
-            double normHeight = (height-maxHeight)/(minAlpha-maxHeight);
-            alpha *= std::min(std::max(1 - normHeight, 0.2), 1.0);
-            height = maxHeight;
+            double minAlpha=projection.GetHeight();
+            double normHeight=(height-maxHeight)/(minAlpha-maxHeight);
+            alpha*=std::min(std::max(1-normHeight,0.2),1.0);
+            height=maxHeight;
         }
 
         data.fontSize=height/standardFontSize;
@@ -1055,7 +1066,7 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const AreaData& areaData)
   {
-    IconStyleRef     iconStyle;
+    IconStyleRef iconStyle;
 
     styleConfig.GetAreaTextStyles(areaData.type,
                                   *areaData.buffer,

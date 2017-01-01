@@ -91,15 +91,15 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API MapService
   {
-  private:
-    struct TypeDefinition
+  public:
+    class OSMSCOUT_MAP_API TypeDefinition CLASS_FINAL
     {
-      Magnification magnification;
-      TypeInfoSet   nodeTypes;
-      TypeInfoSet   wayTypes;
-      TypeInfoSet   areaTypes;
-      TypeInfoSet   optimizedAreaTypes;
-      TypeInfoSet   optimizedWayTypes;
+    public:
+      TypeInfoSet nodeTypes;
+      TypeInfoSet wayTypes;
+      TypeInfoSet areaTypes;
+      TypeInfoSet optimizedAreaTypes;
+      TypeInfoSet optimizedWayTypes;
     };
 
     typedef std::shared_ptr<TypeDefinition> TypeDefinitionRef;
@@ -142,29 +142,34 @@ namespace osmscout {
     bool GetNodes(const AreaSearchParameter& parameter,
                   const TypeInfoSet& nodeTypes,
                   const GeoBox& boundingBox,
+                  bool prefill,
                   const TileRef& tile) const;
 
     bool GetAreasLowZoom(const AreaSearchParameter& parameter,
                          const TypeInfoSet& areaTypes,
                          const Magnification& magnification,
                          const GeoBox& boundingBox,
+                         bool prefill,
                          const TileRef& tile) const;
 
     bool GetAreas(const AreaSearchParameter& parameter,
                   const TypeInfoSet& areaTypes,
                   const Magnification& magnification,
                   const GeoBox& boundingBox,
+                  bool prefill,
                   const TileRef& tile) const;
 
     bool GetWaysLowZoom(const AreaSearchParameter& parameter,
                         const TypeInfoSet& wayTypes,
                         const Magnification& magnification,
                         const GeoBox& boundingBox,
+                        bool prefill,
                         const TileRef& tile) const;
 
     bool GetWays(const AreaSearchParameter& parameter,
                  const TypeInfoSet& wayTypes,
                  const GeoBox& boundingBox,
+                 bool prefill,
                  const TileRef& tile) const;
 
     void NodeWorkerLoop();
@@ -176,29 +181,34 @@ namespace osmscout {
     std::future<bool> PushNodeTask(const AreaSearchParameter& parameter,
                                    const TypeInfoSet& nodeTypes,
                                    const GeoBox& boundingBox,
+                                   bool prefill,
                                    const TileRef& tile) const;
 
     std::future<bool> PushAreaLowZoomTask(const AreaSearchParameter& parameter,
                                           const TypeInfoSet& areaTypes,
                                           const Magnification& magnification,
                                           const GeoBox& boundingBox,
+                                          bool prefill,
                                           const TileRef& tile) const;
 
     std::future<bool> PushAreaTask(const AreaSearchParameter& parameter,
                                    const TypeInfoSet& areaTypes,
                                    const Magnification& magnification,
                                    const GeoBox& boundingBox,
+                                   bool prefill,
                                    const TileRef& tile) const;
 
     std::future<bool> PushWayLowZoomTask(const AreaSearchParameter& parameter,
                                          const TypeInfoSet& wayTypes,
                                          const Magnification& magnification,
                                          const GeoBox& boundingBox,
+                                         bool prefill,
                                          const TileRef& tile) const;
 
     std::future<bool> PushWayTask(const AreaSearchParameter& parameter,
                                   const TypeInfoSet& wayTypes,
                                   const GeoBox& boundingBox,
+                                  bool prefill,
                                   const TileRef& tile) const;
 
     void NotifyTileStateCallbacks(const TileRef& tile) const;
@@ -207,6 +217,12 @@ namespace osmscout {
                                        const StyleConfig& styleConfig,
                                        std::list<TileRef>& tiles,
                                        bool async) const;
+
+    bool LoadMissingTileDataTypeDefinition(const AreaSearchParameter& parameter,
+                                           const Magnification& magnification,
+                                           const TypeDefinition& typeDefinition,
+                                           std::list<TileRef>& tiles,
+                                           bool async) const;
 
   public:
     MapService(const DatabaseRef& database);
@@ -235,8 +251,22 @@ namespace osmscout {
                                   const StyleConfig& styleConfig,
                                   std::list<TileRef>& tiles) const;
 
-    void ConvertTilesToMapData(std::list<TileRef>& tiles,
-                               MapData& data) const;
+    bool LoadMissingTileData(const AreaSearchParameter& parameter,
+                             const Magnification& magnification,
+                             const TypeDefinition& typeDefinition,
+                             std::list<TileRef>& tiles) const;
+
+    bool LoadMissingTileDataAsync(const AreaSearchParameter& parameter,
+                                  const Magnification& magnification,
+                                  const TypeDefinition& typeDefinition,
+                                  std::list<TileRef>& tiles) const;
+
+    void AddTileDataToMapData(std::list<TileRef>& tiles,
+                              MapData& data) const;
+
+    void AddTileDataToMapData(std::list<TileRef>& tiles,
+                              const TypeDefinition& typeDefinition,
+                              MapData& data) const;
 
     bool GetGroundTiles(const Projection& projection,
                         std::list<GroundTile>& tiles) const;

@@ -183,6 +183,16 @@ namespace osmscout {
                    Database& database);
     };
 
+    class OSMSCOUT_API MaxSpeedPostprocessor : public RoutePostprocessor::Postprocessor
+    {
+    public:
+      MaxSpeedPostprocessor() : Postprocessor() {};
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
+                   RouteDescription& description,
+                   Database& database);
+    };
     /**
      * \ingroup Routing
      * Generates drive instructions
