@@ -138,11 +138,18 @@ namespace osmscout {
       return coord==other.coord;
     }
 
-    /*
+    /**
+     * Same semantics as IsSame(), implement for template compability with GeoCoord.
+     *
+     * @param other
+     *    Other point to compare against
+     * @return
+     *    true if same location, else false
+     */
     inline bool IsEqual(const Point& other) const
     {
-      return serial==other.serial || (coord==other.coord);
-    }*/
+      return coord==other.coord;
+    }
   };
 }
 
