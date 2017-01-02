@@ -796,7 +796,14 @@ bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
                                       const std::vector<osmscout::Point>& nodes,
                                       double pixelOffset) const
 {
-  return IsVisibleArea(projection, nodes, pixelOffset);
+  osmscout::GeoBox boundingBox;
+
+  osmscout::GetBoundingBox(nodes,
+                          boundingBox);
+
+  return IsVisibleArea(projection,
+                       boundingBox,
+                       pixelOffset);
 }
 
 int main(int /*argc*/, char** /*argv*/)
