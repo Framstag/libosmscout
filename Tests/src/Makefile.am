@@ -5,7 +5,8 @@ bin_PROGRAMS = CachePerformance \
                ReaderScannerPerformance \
                ThreadedDatabase \
                WorkQueue \
-	       MapRotate
+	       MapRotate \
+               MultiDBRouting
 
 CachePerformance_SOURCES = CachePerformance.cpp
 CachePerformance_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
@@ -38,3 +39,7 @@ WorkQueue_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
 MapRotate_SOURCES = MapRotate.cpp
 MapRotate_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(LIBOSMSCOUTMAP_CFLAGS)
 MapRotate_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
+
+MultiDBRouting_SOURCES = MultiDBRouting.cpp
+MultiDBRouting_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+MultiDBRouting_LDADD = $(LIBOSMSCOUT_LIBS)
