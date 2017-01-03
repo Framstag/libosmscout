@@ -24,6 +24,7 @@
 
 #include <QPainterPath>
 #include <QTextLayout>
+#include <QDebug>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -430,6 +431,9 @@ namespace osmscout {
     QFontMetricsF metrics=QFontMetricsF(font,painter->device());
     QString       string=QString::fromUtf8(text.c_str());
     double        stringLength=metrics.width(string);
+    if (string.isEmpty()){
+      return; // it is possible?
+    }
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     painter->setPen(pen);
@@ -480,10 +484,41 @@ namespace osmscout {
 
     QTransform tran;
 
+    // precompute character widths
+    std::vector<qreal> characterWidths(string.size());
+    for (int i=0; i<string.size(); i++) {
+      characterWidths[i]=metrics.width(string[i]);
+    }
+
     while (offset<p.length()) {
+
+      // compute angle variance
+      qreal charOffset=offset;
+      qreal initialAngle=p.angleAtPercent(p.percentAtLength(charOffset));
+      charOffset+=characterWidths[0];
+      bool skip=false;
+      for (int i=1; i<string.size(); i++) {
+        qreal angle=p.angleAtPercent(p.percentAtLength(charOffset));
+        qreal angleChange=std::abs(angle-initialAngle);
+        // it is in degrees
+        if (angleChange>45 /*maxAngleVariance*/){
+          // qDebug() << "skip label " << string << angle << initialAngle << "(" << angleChange << ")";
+          skip=true;
+          break;
+        }
+        charOffset+=characterWidths[i];
+      }
+
+      // skip string rendering when path is too much squiggly at this offset
+      if (skip){
+        offset+=stringLength+contourLabelSpace;
+        break;
+      }
+
       for (int i=0; i<string.size(); i++) {
-        QPointF point=p.pointAtPercent(p.percentAtLength(offset));
-        qreal   angle=p.angleAtPercent(p.percentAtLength(offset));
+        qreal   percent=p.percentAtLength(offset);
+        QPointF point=p.pointAtPercent(percent);
+        qreal   angle=p.angleAtPercent(percent);
 
         // rotation matrix components
 
@@ -511,7 +546,7 @@ namespace osmscout {
 
         painter->drawText(point,QString(string[i]));
 
-        offset+=metrics.width(string[i]);
+        offset+=characterWidths[i];
       }
 
       offset+=contourLabelSpace;
