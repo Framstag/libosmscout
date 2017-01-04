@@ -512,9 +512,9 @@ namespace osmscout {
       // skip string rendering when path is too much squiggly at this offset
       if (skip){
         offset+=stringLength+contourLabelSpace;
-        break;
+        continue;
       }
-      
+
       bool upwards=initialAngle>90 && initialAngle<270;
       bool rightToLeft=string.isRightToLeft();
       bool reverse=upwards;
