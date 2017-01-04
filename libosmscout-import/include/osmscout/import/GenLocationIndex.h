@@ -99,50 +99,21 @@ namespace osmscout {
       */
     struct Region
     {
-      FileOffset                           indexOffset; //!< Offset into the index file
-      FileOffset                           dataOffset;  //!< Offset into the index file
+      FileOffset indexOffset; //!< Offset into the index file
+      FileOffset dataOffset;  //!< Offset into the index file
 
-      ObjectFileRef                        reference;   //!< Reference to the object this area is based on
-      std::string                          name;        //!< The name of this area
+      ObjectFileRef reference;   //!< Reference to the object this area is based on
+      std::string   name;        //!< The name of this area
 
       std::list<RegionAlias>               aliases;     //!< Location that are represented by this region
       std::vector<std::vector<GeoCoord> >  areas;       //!< the geometric area of this region
-
-      double                               minlon;
-      double                               minlat;
-      double                               maxlon;
-      double                               maxlat;
-
+      GeoBox                               boundingBox; //!< bounding box of all areas building the region
       std::list<RegionPOI>                 pois;        //!< A list of POIs in this region
       std::map<std::string,RegionLocation> locations;   //!< list of indexed objects in this region
 
-      std::list<RegionRef>                 regions;     //!< A list of sub regions
+      std::list<RegionRef> regions;     //!< A list of sub regions
 
-      void CalculateMinMax()
-      {
-        bool isStart=true;
-
-        for (size_t i=0; i<areas.size(); i++) {
-          for (size_t j=0; j<areas[i].size(); j++) {
-            if (isStart) {
-              minlon=areas[i][j].GetLon();
-              maxlon=areas[i][j].GetLon();
-
-              minlat=areas[i][j].GetLat();
-              maxlat=areas[i][j].GetLat();
-
-              isStart=false;
-            }
-            else {
-              minlon=std::min(minlon,areas[i][j].GetLon());
-              maxlon=std::max(maxlon,areas[i][j].GetLon());
-
-              minlat=std::min(minlat,areas[i][j].GetLat());
-              maxlat=std::max(maxlat,areas[i][j].GetLat());
-            }
-          }
-        }
-      }
+      void CalculateMinMax();
     };
 
     struct Boundary
@@ -266,10 +237,7 @@ namespace osmscout {
                                  const Area& area,
                                  const std::vector<Point>& nodes,
                                  const std::string& name,
-                                 double minlon,
-                                 double minlat,
-                                 double maxlon,
-                                 double maxlat);
+                                 const GeoBox& boundingBox);
 
     void AddLocationAreaToRegion(RegionRef& rootRegion,
                                  const Area& area,
@@ -286,10 +254,7 @@ namespace osmscout {
     bool AddLocationWayToRegion(Region& region,
                                 const Way& way,
                                 const std::string& name,
-                                double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat);
+                                const GeoBox& boundingBox);
 
     bool IndexLocationWays(const TypeConfigRef& typeConfig,
                            const ImportParameter& parameter,
@@ -303,10 +268,7 @@ namespace osmscout {
                                 const std::string& location,
                                 const std::string& address,
                                 const std::vector<Point>& nodes,
-                                double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat,
+                                const GeoBox& boundingBox,
                                 bool& added);
 
     void AddPOIAreaToRegion(Progress& progress,
@@ -314,10 +276,7 @@ namespace osmscout {
                             const FileOffset& fileOffset,
                             const std::string& name,
                             const std::vector<Point>& nodes,
-                            double minlon,
-                            double minlat,
-                            double maxlon,
-                            double maxlat,
+                            const GeoBox& boundingBox,
                             bool& added);
 
     bool IndexAddressAreas(const TypeConfig& typeConfig,
@@ -332,10 +291,7 @@ namespace osmscout {
                                const std::string& location,
                                const std::string& address,
                                const std::vector<Point>& nodes,
-                               double minlon,
-                               double minlat,
-                               double maxlon,
-                               double maxlat,
+                               const GeoBox& boundingBox,
                                bool& added);
 
     bool AddPOIWayToRegion(Progress& progress,
@@ -343,10 +299,7 @@ namespace osmscout {
                            const FileOffset& fileOffset,
                            const std::string& name,
                            const std::vector<Point>& nodes,
-                           double minlon,
-                           double minlat,
-                           double maxlon,
-                           double maxlat,
+                           const GeoBox& boundingBox,
                            bool& added);
 
     bool IndexAddressWays(const TypeConfig& typeConfig,
