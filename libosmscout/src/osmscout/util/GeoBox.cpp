@@ -59,6 +59,12 @@ namespace osmscout {
     valid=true;
   }
 
+  /**
+   * Changes the GeoBox to include the other bounding box, too (calculation of the common rectangular hull)
+   *
+   * @param other
+   *    Other geoBox to include, too
+   */
   void GeoBox::Include(const GeoBox& other)
   {
     assert(valid);
