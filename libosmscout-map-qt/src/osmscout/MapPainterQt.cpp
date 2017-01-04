@@ -514,11 +514,17 @@ namespace osmscout {
         offset+=stringLength+contourLabelSpace;
         break;
       }
-
+      
+      bool upwards=initialAngle>90 && initialAngle<270;
+      bool rightToLeft=string.isRightToLeft();
+      bool reverse=upwards;
+      if (rightToLeft){
+        reverse=!reverse;
+      }
       for (int i=0; i<string.size(); i++) {
         qreal   percent=p.percentAtLength(offset);
         QPointF point=p.pointAtPercent(percent);
-        qreal   angle=p.angleAtPercent(percent);
+        qreal   angle=p.angleAtPercent(percent)+(upwards?180:0);
 
         // rotation matrix components
 
@@ -544,9 +550,10 @@ namespace osmscout {
 
         painter->setTransform(tran);
 
-        painter->drawText(point,QString(string[i]));
+        int ch=reverse ? (string.size()-1)-i : i;
+        painter->drawText(point,QString(string[ch]));
 
-        offset+=characterWidths[i];
+        offset+=characterWidths[ch];
       }
 
       offset+=contourLabelSpace;
