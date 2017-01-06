@@ -54,21 +54,22 @@ DrawWindow::~DrawWindow()
 
 }
 
-void DrawWindow::setupTransformation(QPainter *painter, const QPainterPath &p, const qreal offset) const
+void DrawWindow::setupTransformation(QPainter *painter, const QPainterPath &p, 
+                                     const qreal offset, const qreal baseline) const
 {
   QTransform tran;
   QPointF point=p.pointAtPercent(p.percentAtLength(offset));
   qreal   angle=p.angleAtPercent(p.percentAtLength(offset));
   qreal penWidth = painter->pen().widthF();
-  int fontHeight=painter->font().pixelSize();
+  //int fontHeight=painter->font().pixelSize();
 
   // rotation matrix components
   qreal sina=sin[lround((360-angle)*10)%sin.size()];
   qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
 
   // Rotation
-  qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
-  qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
+  qreal newX=(cosa*point.x())-(sina*(point.y()-baseline));
+  qreal newY=(cosa*(point.y()-baseline))+(sina*point.x());
 
   // Aditional offseting
   qreal deltaPenX=cosa*penWidth;
@@ -105,7 +106,7 @@ void DrawWindow::drawText1(QPainter *painter, QString string, QPainterPath p)
     for (int i=0; i<string.size() && offset<p.length(); i++) {
       QPointF point=p.pointAtPercent(p.percentAtLength(offset));
 
-      setupTransformation(painter, p, offset);
+      setupTransformation(painter, p, offset, fontHeight/4);
 
       painter->drawText(point,QString(string[i]));
 
@@ -120,8 +121,6 @@ void DrawWindow::drawText2(QPainter *painter, QString string, QPainterPath p)
 {
   QPen          pen;
   QFont         font;
-  QFontMetricsF metrics=QFontMetricsF(font,painter->device());
-  //double        stringWidth=metrics.width(string);
   double        fontHeight=12;
 
   font.setPixelSize(fontHeight);
@@ -161,7 +160,7 @@ void DrawWindow::drawText2(QPainter *painter, QString string, QPainterPath p)
 
         QPointF point=p.pointAtPercent(p.percentAtLength(glyphOffset));
 
-        setupTransformation(painter, p, glyphOffset);
+        setupTransformation(painter, p, glyphOffset, fontHeight*-1);
 
         QGlyphRun orphanGlyph;
         //orphanGlyph.setBoundingRect();

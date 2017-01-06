@@ -43,7 +43,8 @@ public:
 protected:
   virtual void paintEvent(QPaintEvent *event);
 
-  void setupTransformation(QPainter *painter, const QPainterPath &p, const qreal offset) const;
+  void setupTransformation(QPainter *painter, const QPainterPath &p,
+                           const qreal offset, const qreal baseline) const;
 
   void drawText1(QPainter *painter, QString string, QPainterPath p);
   void drawText2(QPainter *painter, QString string, QPainterPath p);
