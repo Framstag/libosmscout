@@ -30,9 +30,10 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 
-#include <osmscout/MapPainterQt.h>
+#include <osmscout/SimplifiedPath.h>
 
 #include <DrawWindow.h>
+#include <unistd.h>
 
 DrawWindow::DrawWindow(QString variant, int sinCount, QWidget *parent)
    : QWidget(parent), variant(variant), sinCount(sinCount), cnt(0)
@@ -54,14 +55,13 @@ DrawWindow::~DrawWindow()
 
 }
 
-void DrawWindow::setupTransformation(QPainter *painter, const QPainterPath &p, 
+void DrawWindow::setupTransformation(QPainter *painter, const osmscout::SimplifiedPath &p,
                                      const qreal offset, const qreal baseline) const
 {
   QTransform tran;
-  QPointF point=p.pointAtPercent(p.percentAtLength(offset));
-  qreal   angle=p.angleAtPercent(p.percentAtLength(offset));
+  QPointF point=p.PointAtLength(offset);
+  qreal   angle=p.AngleAtLengthDeg(offset);
   qreal penWidth = painter->pen().widthF();
-  //int fontHeight=painter->font().pixelSize();
 
   // rotation matrix components
   qreal sina=sin[lround((360-angle)*10)%sin.size()];
@@ -86,7 +86,7 @@ void DrawWindow::setupTransformation(QPainter *painter, const QPainterPath &p,
   painter->setTransform(tran);
 }
 
-void DrawWindow::drawText1(QPainter *painter, QString string, QPainterPath p)
+void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::SimplifiedPath &p)
 {
   QPen          pen;
   QFont         font;
@@ -102,9 +102,9 @@ void DrawWindow::drawText1(QPainter *painter, QString string, QPainterPath p)
   painter->setFont(font);
 
   qreal offset=0;
-  while (offset<p.length()){
-    for (int i=0; i<string.size() && offset<p.length(); i++) {
-      QPointF point=p.pointAtPercent(p.percentAtLength(offset));
+  while (offset<p.GetLength()){
+    for (int i=0; i<string.size() && offset<p.GetLength(); i++) {
+      QPointF point=p.PointAtLength(offset);
 
       setupTransformation(painter, p, offset, fontHeight/4);
 
@@ -115,13 +115,15 @@ void DrawWindow::drawText1(QPainter *painter, QString string, QPainterPath p)
 
     offset+=3*fontHeight;
   }
+  painter->resetTransform();
 }
 
-void DrawWindow::drawText2(QPainter *painter, QString string, QPainterPath p)
+void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::SimplifiedPath &p)
 {
   QPen          pen;
   QFont         font;
   double        fontHeight=12;
+  double        pLength=p.GetLength();
 
   font.setPixelSize(fontHeight);
   font.setStyleStrategy(QFont::PreferAntialias);
@@ -146,7 +148,7 @@ void DrawWindow::drawText2(QPainter *painter, QString string, QPainterPath p)
   double offset=0;
   QVector<quint32> indexes(1);
   QVector<QPointF> positions(1);
-  while (offset<p.length()){
+  while (offset<pLength){
     for (const QGlyphRun &glypRun: glyphs){
       for (int g=0; g<glypRun.glyphIndexes().size(); g++){
         auto index=glypRun.glyphIndexes().at(g);
@@ -155,10 +157,11 @@ void DrawWindow::drawText2(QPainter *painter, QString string, QPainterPath p)
         positions[0]=QPointF(0,pos.y());
 
         qreal glyphOffset=offset+pos.x();
-        if (glyphOffset>p.length())
+        if (glyphOffset>pLength)
           continue;
 
-        QPointF point=p.pointAtPercent(p.percentAtLength(glyphOffset));
+        //QPointF point=p.pointAtPercent(p.percentAtLength(glyphOffset));
+        QPointF point=p.PointAtLength(glyphOffset);
 
         setupTransformation(painter, p, glyphOffset, fontHeight*-1);
 
@@ -179,6 +182,30 @@ void DrawWindow::drawText2(QPainter *painter, QString string, QPainterPath p)
 
     offset+=stringWidth+3*fontHeight;
   }
+  painter->resetTransform();
+}
+
+void DrawWindow::drawLine(QPainter *painter, const osmscout::SimplifiedPath &p)
+{
+  QPen pen;
+  pen.setColor(QColor::fromRgbF(0,0,1));
+  painter->setPen(pen);
+  for (double d=0;d<p.GetLength();d+=0.5){
+    QPointF point=p.PointAtLength(d);
+    painter->drawPoint(point);
+  }
+
+  /*
+  pen.setColor(QColor::fromRgbF(1,0,0));
+  painter->setPen(pen);
+  for (double d=0;d<p.GetLength();d+=20){
+    QPointF point=p.PointAtLength(d);
+    qreal angle=p.AngleAtLength(d);
+    QPointF add(std::cos(angle), -1*std::sin(angle));
+    //qDebug() << d << p.AngleAtLengthDeg(d) << add;
+    painter->drawLine(point, point + add*10);
+  }
+  */
 }
 
 void DrawWindow::paintEvent(QPaintEvent */* event */)
@@ -190,11 +217,12 @@ void DrawWindow::paintEvent(QPaintEvent */* event */)
 
   int sinStart=0;
   for (int k=0;k<sinCount;k++){
-    QPainterPath p;
+    osmscout::SimplifiedPath p;
     // fill path with sinus
-    p.moveTo(0,height()/2);
     for (int x=0;x<width();x++){
-      p.lineTo(x,std::sin(((double)(x+sinStart)/(double)width()) *2*M_PI) * (height()/2-44) + height()/2);
+      //int y=std::cos(((double)(x+sinStart)/(double)width()) *3*M_PI) * (height()/2-44) + height()/2;
+      int y=std::sin(((double)(x+sinStart)/(double)width()) *2*M_PI) * (height()/2-44) + height()/2;
+      p.AddPoint(x,y);
     }
     sinStart+=30;
 
@@ -202,6 +230,8 @@ void DrawWindow::paintEvent(QPaintEvent */* event */)
       drawText1(&painter,string,p);
     if (variant=="bidirectional")
       drawText2(&painter,string,p);
+    if (variant=="line")
+      drawLine(&painter,p);
   }
 
   cnt++;
@@ -226,6 +256,7 @@ int main(int argc, char** argv)
     std::cout << "" << std::endl;
     std::cout << "Variant can be:" << std::endl;
     std::cout << "  noop" << std::endl;
+    std::cout << "  line" << std::endl;
     std::cout << "  simple" << std::endl;
     std::cout << "  bidirectional" << std::endl;
     return 1;

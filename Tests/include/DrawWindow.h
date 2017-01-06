@@ -28,7 +28,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 
-#include <osmscout/MapPainterQt.h>
+#include <osmscout/SimplifiedPath.h>
 
 #include <QtGui>
 
@@ -43,11 +43,13 @@ public:
 protected:
   virtual void paintEvent(QPaintEvent *event);
 
-  void setupTransformation(QPainter *painter, const QPainterPath &p,
+  void setupTransformation(QPainter *painter, const osmscout::SimplifiedPath &p,
                            const qreal offset, const qreal baseline) const;
 
-  void drawText1(QPainter *painter, QString string, QPainterPath p);
-  void drawText2(QPainter *painter, QString string, QPainterPath p);
+  void drawText1(QPainter *painter, QString string, const osmscout::SimplifiedPath &p);
+  void drawText2(QPainter *painter, QString string, const osmscout::SimplifiedPath &p);
+
+  void drawLine(QPainter *painter, const osmscout::SimplifiedPath &p);
 
   QString                   variant;
   std::vector<double>       sin;           //! Lookup table for sin calculation
