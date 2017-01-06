@@ -43,3 +43,16 @@ MapRotate_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
 MultiDBRouting_SOURCES = MultiDBRouting.cpp
 MultiDBRouting_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 MultiDBRouting_LDADD = $(LIBOSMSCOUT_LIBS)
+
+if HAVE_LIB_OSMSCOUTMAPQT
+bin_PROGRAMS += DrawTextQt
+endif
+
+DrawTextQt_SOURCES = DrawTextQt.cpp
+DrawTextQt_CXXFLAGS = -fPIC \
+                      $(LIBOSMSCOUTMAPQT_CFLAGS) \
+                      $(LIBOSMSCOUTMAP_CFLAGS) \
+                      $(LIBOSMSCOUT_CFLAGS)
+DrawTextQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
+                   $(LIBOSMSCOUTMAP_LIBS) \
+                   $(LIBOSMSCOUT_LIBS)
