@@ -10,6 +10,7 @@
 %include <std_vector.i>
 
 #define OSMSCOUT_API
+#define CLASS_FINAL
 
 %include <osmscout/Types.i>
 
