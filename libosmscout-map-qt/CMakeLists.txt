@@ -8,12 +8,13 @@ endif()
 set(HEADER_FILES
     #include/osmscout/private/Config.h
     include/osmscout/private/MapQtImportExport.h
-    #include/osmscout/MapQtFeatures.h
+    include/osmscout/SimplifiedPath.h
     include/osmscout/MapPainterQt.h
 )
 
 set(SOURCE_FILES
     src/osmscout/MapPainterQt.cpp
+    src/osmscout/SimplifiedPath.cpp
 )
 
 add_library(osmscout_map_qt ${SOURCE_FILES} ${HEADER_FILES})
