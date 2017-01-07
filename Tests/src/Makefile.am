@@ -8,6 +8,9 @@ bin_PROGRAMS = CachePerformance \
 	       MapRotate \
                MultiDBRouting
 
+AM_CPPFLAGS = $(LIB_CXXFLAGS) \
+              -I$(top_srcdir)/include
+
 CachePerformance_SOURCES = CachePerformance.cpp
 CachePerformance_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 CachePerformance_LDADD = $(LIBOSMSCOUT_LIBS)
@@ -46,9 +49,15 @@ MultiDBRouting_LDADD = $(LIBOSMSCOUT_LIBS)
 
 if HAVE_LIB_OSMSCOUTMAPQT
 bin_PROGRAMS += DrawTextQt
+
+moc_%.cpp: $(top_srcdir)/include/%.h
+	@MOC@ -o$@ $<
+
+CLEANFILES = moc_DrawWindow.cpp
 endif
 
-DrawTextQt_SOURCES = DrawTextQt.cpp
+DrawTextQt_SOURCES = DrawTextQt.cpp \
+                     moc_DrawWindow.cpp
 DrawTextQt_CXXFLAGS = -fPIC \
                       $(LIBOSMSCOUTMAPQT_CFLAGS) \
                       $(LIBOSMSCOUTMAP_CFLAGS) \

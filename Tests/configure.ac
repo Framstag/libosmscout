@@ -40,6 +40,8 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAPQT,[libosmscout-map-qt Qt5Widgets >= 5.0.0],
                    AC_DEFINE(HAVE_LIB_OSMSCOUTMAPQT,1,[libosmscout-map-qt found])],
                   [HASLIBOSMSCOUTMAPQT=false])
 
+AC_CHECK_PROGS(MOC, [moc-qt5 moc])
+
 AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPQT,[test "$HASLIBOSMSCOUTMAPQT" = "true"])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
