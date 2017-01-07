@@ -75,6 +75,11 @@ namespace osmscout {
     void FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                         bool isClosed, bool keepOrientation);
 
+    void setupTransformation(QPainter *painter,
+                             const QPointF center,
+                             const qreal angle,
+                             const qreal baseline) const;
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,

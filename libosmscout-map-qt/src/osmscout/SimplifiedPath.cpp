@@ -87,4 +87,30 @@ namespace osmscout {
   {
     return (AngleAtLength(offset) * 180) / M_PI;
   }
+
+  bool SimplifiedPath::TestAngleVariance(qreal startOffset, qreal endOffset, qreal maximumAngle)
+  {
+    qreal initialAngle=0;
+    bool initialised=false;
+    for (const Segment &seg:segments){
+      if (seg.offset>endOffset){
+        return true;
+      }
+      if (seg.offset+seg.length>startOffset){
+        if (!initialised){
+          initialAngle=seg.angle;
+          initialised=true;
+        }else{
+          qreal change=std::abs(initialAngle-seg.angle);
+          if (change>M_PI)
+            change-=M_PI;
+          if (change>maximumAngle){
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
 }

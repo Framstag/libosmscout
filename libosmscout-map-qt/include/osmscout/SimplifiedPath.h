@@ -54,6 +54,7 @@ namespace osmscout {
     qreal AngleAtLength(qreal offset) const;
     qreal AngleAtLengthDeg(qreal offset) const;
 
+    bool TestAngleVariance(qreal startOffset, qreal endOffset, qreal maximumAngle);
   private:
     const Segment& segmentBefore(qreal offset) const;
   };
