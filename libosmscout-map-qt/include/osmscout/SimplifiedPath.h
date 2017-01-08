@@ -39,6 +39,7 @@ namespace osmscout {
   private:
     qreal length;
     QVector<Segment> segments;
+    QVector<int> offsetIndex; // segment offset by length 100
     qreal minSegmentLength;
     QPointF end;
     qreal endDistance;
