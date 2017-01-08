@@ -7,4 +7,5 @@ libosmscoutmapqt_la_LDFLAGS  = -no-undefined \
                                $(LIBOSMSCOUT_LIBS) \
                                $(LIBQT_LIBS)
 
-libosmscoutmapqt_la_SOURCES = osmscout/MapPainterQt.cpp
+libosmscoutmapqt_la_SOURCES = osmscout/MapPainterQt.cpp \
+                              osmscout/SimplifiedPath.cpp
