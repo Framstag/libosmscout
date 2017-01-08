@@ -66,7 +66,7 @@ namespace osmscout {
     for (const auto& area : areas) {
       GeoBox boundingBox;
 
-      GetBoundingBox(area,boundingBox);
+      osmscout::GetBoundingBox(area,boundingBox);
 
       if (isStart) {
         this->boundingBox=boundingBox;
@@ -78,6 +78,15 @@ namespace osmscout {
     }
   }
 
+  bool LocationIndexGenerator::Region::CouldContain(const GeoBox& boundingBox) const
+  {
+    return this->boundingBox.Intersects(boundingBox);
+  }
+
+  bool LocationIndexGenerator::Region::CouldContain(const Region& region) const
+  {
+    return this->boundingBox.Intersects(region.boundingBox);
+  }
 
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
                                                                                           const GeoCoord& coord) const
@@ -438,7 +447,7 @@ namespace osmscout {
                                          const RegionRef& region)
   {
     for (const auto& childRegion : parent.regions) {
-      if (region->boundingBox.Intersects(childRegion->boundingBox)) {
+      if (region->CouldContain(*childRegion)) {
         for (const auto& regionArea : region->areas) {
           for (const auto& childRegionArea : childRegion->areas) {
             if (IsAreaSubOfAreaQuorum(regionArea,childRegionArea)) {
@@ -676,10 +685,12 @@ namespace osmscout {
   {
     for (size_t level=regionTree.size()-1; level>=1; level--) {
       for (const auto& region : regionTree[level]) {
-        uint32_t cellMinX=(uint32_t)((region->boundingBox.GetMinLon()+180.0)/regionIndex.cellWidth);
-        uint32_t cellMaxX=(uint32_t)((region->boundingBox.GetMaxLon()+180.0)/regionIndex.cellWidth);
-        uint32_t cellMinY=(uint32_t)((region->boundingBox.GetMinLat()+90.0)/regionIndex.cellHeight);
-        uint32_t cellMaxY=(uint32_t)((region->boundingBox.GetMaxLat()+90.0)/regionIndex.cellHeight);
+        GeoBox boundingBox=region->GetBoundingBox();
+
+        uint32_t cellMinX=(uint32_t)((boundingBox.GetMinLon()+180.0)/regionIndex.cellWidth);
+        uint32_t cellMaxX=(uint32_t)((boundingBox.GetMaxLon()+180.0)/regionIndex.cellWidth);
+        uint32_t cellMinY=(uint32_t)((boundingBox.GetMinLat()+90.0)/regionIndex.cellHeight);
+        uint32_t cellMaxY=(uint32_t)((boundingBox.GetMaxLat()+90.0)/regionIndex.cellHeight);
 
         for (uint32_t y=cellMinY; y<=cellMaxY; y++) {
           for (uint32_t x=cellMinX; x<=cellMaxX; x++) {
@@ -788,7 +799,7 @@ namespace osmscout {
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
-      if (boundingBox.Intersects(childRegion->boundingBox)) {
+      if (childRegion->CouldContain(boundingBox)) {
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           // Check if one point is in the area
           bool match=IsCoordInArea(nodes[0],childRegion->areas[i]);
@@ -936,7 +947,7 @@ namespace osmscout {
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
-      if (boundingBox.Intersects(childRegion->boundingBox)) {
+      if (childRegion->CouldContain(boundingBox)) {
         // Check if one point is in the area
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
@@ -1041,7 +1052,7 @@ namespace osmscout {
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
-      if (boundingBox.Intersects(childRegion->boundingBox)) {
+      if (childRegion->CouldContain(boundingBox)) {
         for (const auto& area : childRegion->areas) {
           if (IsAreaCompletelyInArea(nodes,area)) {
             AddAddressAreaToRegion(progress,
@@ -1092,7 +1103,7 @@ namespace osmscout {
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
-      if (boundingBox.Intersects(childRegion->boundingBox)) {
+      if (childRegion->CouldContain(boundingBox)) {
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           if (IsAreaCompletelyInArea(nodes,childRegion->areas[i])) {
             AddPOIAreaToRegion(progress,
@@ -1234,7 +1245,7 @@ namespace osmscout {
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
-      if (boundingBox.Intersects(childRegion->boundingBox)) {
+      if (childRegion->CouldContain(boundingBox)) {
         // Check if one point is in the area
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           bool match=IsAreaAtLeastPartlyInArea(nodes,childRegion->areas[i]);
@@ -1300,7 +1311,7 @@ namespace osmscout {
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
-      if (boundingBox.Intersects(childRegion->boundingBox)) {
+      if (childRegion->CouldContain(boundingBox)) {
         // Check if one point is in the area
         for (size_t i=0; i<childRegion->areas.size(); i++) {
           bool match=IsAreaAtLeastPartlyInArea(nodes,childRegion->areas[i]);
