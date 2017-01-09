@@ -63,10 +63,15 @@ namespace osmscout {
   {
     bool isStart=true;
 
+    boundingBoxes.reserve(areas.size());
+
     for (const auto& area : areas) {
       GeoBox boundingBox;
 
-      osmscout::GetBoundingBox(area,boundingBox);
+      osmscout::GetBoundingBox(area,
+                               boundingBox);
+
+      boundingBoxes.push_back(boundingBox);
 
       if (isStart) {
         this->boundingBox=boundingBox;
@@ -80,12 +85,26 @@ namespace osmscout {
 
   bool LocationIndexGenerator::Region::CouldContain(const GeoBox& boundingBox) const
   {
-    return this->boundingBox.Intersects(boundingBox);
+    for (const auto& bb : boundingBoxes) {
+      if (bb.Intersects(boundingBox)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   bool LocationIndexGenerator::Region::CouldContain(const Region& region) const
   {
-    return this->boundingBox.Intersects(region.boundingBox);
+    for (const auto& bb : boundingBoxes) {
+      for (const auto& rbb : region.boundingBoxes) {
+        if (bb.Intersects(rbb)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
@@ -685,21 +704,27 @@ namespace osmscout {
   {
     for (size_t level=regionTree.size()-1; level>=1; level--) {
       for (const auto& region : regionTree[level]) {
-        GeoBox boundingBox=region->GetBoundingBox();
+        for (const auto& boundingBox : region->GetAreaBoundingBoxes()) {
+          uint32_t cellMinX=(uint32_t)((boundingBox.GetMinLon()+180.0)/regionIndex.cellWidth);
+          uint32_t cellMaxX=(uint32_t)((boundingBox.GetMaxLon()+180.0)/regionIndex.cellWidth);
+          uint32_t cellMinY=(uint32_t)((boundingBox.GetMinLat()+90.0)/regionIndex.cellHeight);
+          uint32_t cellMaxY=(uint32_t)((boundingBox.GetMaxLat()+90.0)/regionIndex.cellHeight);
 
-        uint32_t cellMinX=(uint32_t)((boundingBox.GetMinLon()+180.0)/regionIndex.cellWidth);
-        uint32_t cellMaxX=(uint32_t)((boundingBox.GetMaxLon()+180.0)/regionIndex.cellWidth);
-        uint32_t cellMinY=(uint32_t)((boundingBox.GetMinLat()+90.0)/regionIndex.cellHeight);
-        uint32_t cellMaxY=(uint32_t)((boundingBox.GetMaxLat()+90.0)/regionIndex.cellHeight);
+          for (uint32_t y=cellMinY; y<=cellMaxY; y++) {
+            for (uint32_t x=cellMinX; x<=cellMaxX; x++) {
+              Pixel pixel(x,y);
 
-        for (uint32_t y=cellMinY; y<=cellMaxY; y++) {
-          for (uint32_t x=cellMinX; x<=cellMaxX; x++) {
-            Pixel pixel(x,y);
-
-            regionIndex.index[pixel].push_back(region);
+              regionIndex.index[pixel].push_back(region);
+            }
           }
         }
       }
+    }
+
+    for (auto& regionList : regionIndex.index) {
+      regionList.second.sort([](const RegionRef& a, const RegionRef& b) {
+        return a->GetBoundingBox().GetSize()<b->GetBoundingBox().GetSize();
+      });
     }
   }
 

@@ -100,21 +100,22 @@ namespace osmscout {
     class Region
     {
     private:
-      GeoBox                               boundingBox; //!< bounding box of all areas building the region
+      std::vector<GeoBox>                  boundingBoxes; //!< bounding box of each area building the region
+      GeoBox                               boundingBox;   //!< Overall bounding box of all areas
 
     public:
-      FileOffset                           indexOffset; //!< Offset into the index file
-      FileOffset                           dataOffset;  //!< Offset into the index file
+      FileOffset                           indexOffset;   //!< Offset into the index file
+      FileOffset                           dataOffset;    //!< Offset into the index file
 
-      ObjectFileRef                        reference;   //!< Reference to the object this area is based on
-      std::string                          name;        //!< The name of this area
+      ObjectFileRef                        reference;     //!< Reference to the object this area is based on
+      std::string                          name;          //!< The name of this area
 
-      std::list<RegionAlias>               aliases;     //!< Location that are represented by this region
-      std::vector<std::vector<GeoCoord> >  areas;       //!< the geometric area of this region
-      std::list<RegionPOI>                 pois;        //!< A list of POIs in this region
-      std::map<std::string,RegionLocation> locations;   //!< list of indexed objects in this region
+      std::list<RegionAlias>               aliases;       //!< Location that are represented by this region
+      std::vector<std::vector<GeoCoord> >  areas;         //!< the geometric area of this region
+      std::list<RegionPOI>                 pois;          //!< A list of POIs in this region
+      std::map<std::string,RegionLocation> locations;     //!< list of indexed objects in this region
 
-      std::list<RegionRef>                 regions;     //!< A list of sub regions
+      std::list<RegionRef>                 regions;       //!< A list of sub regions
 
     public:
       void CalculateMinMax();
@@ -124,6 +125,11 @@ namespace osmscout {
       inline GeoBox GetBoundingBox() const
       {
         return boundingBox;
+      }
+
+      inline const std::vector<GeoBox> GetAreaBoundingBoxes() const
+      {
+        return boundingBoxes;
       }
     };
 
