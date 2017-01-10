@@ -26,6 +26,7 @@ namespace osmscout {
   SimplifiedPath::SimplifiedPath(qreal minSegmentLength):
     length(0), minSegmentLength(minSegmentLength), endDistance(0)
   {
+    offsetIndex<<0;
   }
 
   SimplifiedPath::~SimplifiedPath()
@@ -49,6 +50,12 @@ namespace osmscout {
         last.length=endDistance;
         last.angle=std::atan2(last.start.y()-y,x-last.start.x());
         segments[segments.size()-1]=last;
+
+        // fill offsetIndex
+        for (int i=offsetIndex.size();i<length/100;i++){
+          offsetIndex<<segments.size()-1;
+        }
+
         Segment s={end,length,0,0};
         segments<<s;
         endDistance=0;
@@ -70,7 +77,12 @@ namespace osmscout {
 
   const Segment& SimplifiedPath::segmentBefore(qreal offset) const
   {
-    for (const Segment &seg:segments){
+    int hundred=offset/100;
+    if (hundred>=offsetIndex.size())
+      return segments.last();
+    int i=offsetIndex[hundred];
+    for (;i<segments.size();i++){
+      const Segment &seg=segments[i];
       if (offset<(seg.offset+seg.length)){
         return seg;
       }
