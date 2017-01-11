@@ -525,12 +525,19 @@ namespace osmscout {
           auto pos=glypRun.positions().at(g);
           indexes[0]=index;
           positions[0]=QPointF(0,pos.y());
+          QRectF boundingRect=glypRun.rawFont().boundingRect(index);
 
           qreal glyphOffset=upwards? (offset+stringWidth-pos.x()) : offset+pos.x();
           if (glyphOffset>pLength)
             continue;
 
           QPointF point=p.PointAtLength(glyphOffset);
+          // check if current glyph can be visible
+          qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
+          if (!painter->viewport().intersects(QRect(point.x()-diagonal, point.y()-diagonal,
+                                                    point.x()+diagonal, point.y()+diagonal))){
+            continue;
+          }
           qreal angle=p.AngleAtLengthDeg(glyphOffset);
           if (upwards){
             angle-=180;
@@ -539,7 +546,7 @@ namespace osmscout {
           setupTransformation(painter, point, angle, fontPixelSize*-0.7);
 
           QGlyphRun orphanGlyph;
-          //orphanGlyph.setBoundingRect();
+          orphanGlyph.setBoundingRect(boundingRect);
           orphanGlyph.setFlags(glypRun.flags());
           orphanGlyph.setGlyphIndexes(indexes);
           orphanGlyph.setOverline(glypRun.overline());
