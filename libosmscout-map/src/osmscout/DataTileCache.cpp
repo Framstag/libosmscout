@@ -186,7 +186,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetNodeData().GetTypes());
 
-    if (nodeTypes.Intersects(parentTile.GetNodeData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetNodeData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetNodeData().GetTypes());
 
@@ -217,7 +217,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetOptimizedWayData().GetTypes());
 
-    if (optimizedWayTypes.Intersects(parentTile.GetOptimizedWayData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetOptimizedWayData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetOptimizedWayData().GetTypes());
 
@@ -252,7 +252,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetWayData().GetTypes());
 
-    if (wayTypes.Intersects(parentTile.GetWayData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetWayData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetWayData().GetTypes());
 
@@ -287,7 +287,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetOptimizedAreaData().GetTypes());
 
-    if (optimizedAreaTypes.Intersects(parentTile.GetOptimizedAreaData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetOptimizedAreaData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetOptimizedAreaData().GetTypes());
 
@@ -323,7 +323,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetAreaData().GetTypes());
 
-    if (areaTypes.Intersects(parentTile.GetAreaData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetAreaData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetAreaData().GetTypes());
 
