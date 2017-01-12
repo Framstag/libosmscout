@@ -207,41 +207,6 @@ namespace osmscout {
     }
   }
 
-  void DataTileCache::ResolveOptimizedWaysFromParent(Tile& tile,
-                                                      const Tile& parentTile,
-                                                      const GeoBox& boundingBox,
-                                                      const TypeInfoSet& optimizedWayTypes)
-  {
-    TypeInfoSet subset(optimizedWayTypes);
-
-    // We remove all types that are already loaded
-    subset.Remove(tile.GetOptimizedWayData().GetTypes());
-
-    if (subset.Intersects(parentTile.GetOptimizedWayData().GetTypes())) {
-      // We only retrieve types that both tiles have in common
-      subset.Intersection(parentTile.GetOptimizedWayData().GetTypes());
-
-      std::vector<WayRef> data;
-
-      data.reserve(parentTile.GetOptimizedWayData().GetDataSize());
-
-      parentTile.GetOptimizedWayData().CopyData([&](const WayRef& way) {
-        if (subset.IsSet(way->GetType())) {
-          GeoBox wayBoundingBox;
-
-          way->GetBoundingBox(wayBoundingBox);
-
-          if (wayBoundingBox.Intersects(boundingBox)) {
-            data.push_back(way);
-          }
-        }
-      });
-
-      tile.GetOptimizedWayData().AddPrefillData(subset,
-                                                data);
-    }
-  }
-
   void DataTileCache::ResolveWaysFromParent(Tile& tile,
                                              const Tile& parentTile,
                                              const GeoBox& boundingBox,
@@ -275,42 +240,6 @@ namespace osmscout {
       tile.GetWayData().AddPrefillData(subset,
                                        data);
     }
-  }
-
-  void DataTileCache::ResolveOptimizedAreasFromParent(Tile& tile,
-                                                       const Tile& parentTile,
-                                                       const GeoBox& boundingBox,
-                                                       const TypeInfoSet& optimizedAreaTypes)
-  {
-    TypeInfoSet subset(optimizedAreaTypes);
-
-    // We remove all types that are already loaded
-    subset.Remove(tile.GetOptimizedAreaData().GetTypes());
-
-    if (subset.Intersects(parentTile.GetOptimizedAreaData().GetTypes())) {
-      // We only retrieve types that both tiles have in common
-      subset.Intersection(parentTile.GetOptimizedAreaData().GetTypes());
-
-      std::vector<AreaRef> data;
-
-      data.reserve(parentTile.GetOptimizedAreaData().GetDataSize());
-
-      parentTile.GetOptimizedAreaData().CopyData([&](const AreaRef& area) {
-        if (subset.IsSet(area->GetType())) {
-          GeoBox areaBoundingBox;
-
-          area->GetBoundingBox(areaBoundingBox);
-
-          if (areaBoundingBox.Intersects(boundingBox)) {
-            data.push_back(area);
-          }
-        }
-      });
-
-      tile.GetOptimizedAreaData().AddPrefillData(subset,
-                                                 data);
-    }
-
   }
 
   void DataTileCache::ResolveAreasFromParent(Tile& tile,
@@ -369,9 +298,7 @@ namespace osmscout {
 
       if (parentTile) {
         ResolveNodesFromParent(tile,*parentTile,boundingBox,nodeTypes);
-        ResolveOptimizedWaysFromParent(tile,*parentTile,boundingBox,optimizedWayTypes);
         ResolveWaysFromParent(tile,*parentTile,boundingBox,wayTypes);
-        ResolveOptimizedAreasFromParent(tile,*parentTile,boundingBox,optimizedAreaTypes);
         ResolveAreasFromParent(tile,*parentTile,boundingBox,areaTypes);
 
         return;
