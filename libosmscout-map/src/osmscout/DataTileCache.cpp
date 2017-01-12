@@ -287,8 +287,8 @@ namespace osmscout {
                                             const TypeInfoSet& nodeTypes,
                                             const TypeInfoSet& wayTypes,
                                             const TypeInfoSet& areaTypes,
-                                            const TypeInfoSet& optimizedWayTypes,
-                                            const TypeInfoSet& optimizedAreaTypes)
+                                            const TypeInfoSet& /*optimizedWayTypes*/,
+                                            const TypeInfoSet& /*optimizedAreaTypes*/)
   {
     if (tile.GetId().GetLevel()>0) {
       TileId parentTileId=tile.GetId().GetParent();
