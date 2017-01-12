@@ -469,7 +469,7 @@ namespace osmscout {
       if (region->CouldContain(*childRegion)) {
         for (const auto& regionArea : region->areas) {
           for (const auto& childRegionArea : childRegion->areas) {
-            if (IsAreaSubOfAreaQuorum(regionArea,childRegionArea)) {
+            if (IsAreaSubOfAreaOrSame(regionArea,childRegionArea)) {
               // If we already have the same name and are a "minor" reference, we skip...
               if (!(region->name==childRegion->name &&
                     region->reference.type<childRegion->reference.type)) {
