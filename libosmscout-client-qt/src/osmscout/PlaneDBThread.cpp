@@ -53,6 +53,12 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
 {
   pendingRenderingTimer.setSingleShot(true);
 
+  //
+  // Make sure that we decouple caller and receiver if SLOT method acquire locks,
+  // even if they are running in the same thread
+  // else we might get into a dead lock
+  //
+
   connect(this,SIGNAL(TriggerMapRenderingSignal(const RenderMapRequest&)),
           this,SLOT(TriggerMapRendering(const RenderMapRequest&)),
           Qt::QueuedConnection);
@@ -67,10 +73,9 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
           this,SLOT(HandleTileStatusChanged(const osmscout::TileRef&)),
           Qt::QueuedConnection);
 
-  //
-  // Make sure that we always decouple caller and receiver even if they are running in the same thread
-  // else we might get into a dead lock
-  //
+  connect(this,SIGNAL(stylesheetFilenameChanged()),
+          this,SLOT(onStylesheetFilenameChanged()),
+          Qt::QueuedConnection);
 
   connect(this,SIGNAL(TriggerDrawMap()),
           this,SLOT(DrawMap()),
@@ -88,7 +93,10 @@ void PlaneDBThread::Initialize()
   osmscout::log.Debug() << "Initialize";
   // invalidate tile cache and init base
   DBThread::InitializeDatabases();
+}
 
+void PlaneDBThread::onStylesheetFilenameChanged()
+{
   {
     QMutexLocker locker(&mutex);
     QMutexLocker finishedLocker(&finishedMutex);
@@ -284,7 +292,6 @@ void PlaneDBThread::InvalidateVisualCache()
 
 void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile)
 {
-  //return; // FIXME: remove this return, make loading asynchronous
   QMutexLocker locker(&mutex);
 
   bool relevant=false;
@@ -369,7 +376,8 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
-    drawParameter.SetRenderBackground(true); // we always render background in PlaneDBThread
+    drawParameter.SetRenderBackground(false); // we draw background before MapPainter
+    drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
 
     // create copy of projection
@@ -389,7 +397,11 @@ void PlaneDBThread::DrawMap()
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
-
+    p.fillRect(QRectF(0,0,projection.GetWidth(),projection.GetHeight()),
+                      QBrush(QColor::fromRgbF(finishedUnknownFillStyle->GetFillColor().GetR(),
+                                              finishedUnknownFillStyle->GetFillColor().GetG(),
+                                              finishedUnknownFillStyle->GetFillColor().GetB(),
+                                              1)));
     bool success=true;
     for (auto &db:databases){
       std::list<osmscout::TileRef> tiles;
