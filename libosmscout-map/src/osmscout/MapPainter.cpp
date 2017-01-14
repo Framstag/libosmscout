@@ -730,13 +730,8 @@ namespace osmscout {
                                         transEnd,
                                         wayScanlines);
 
-    double frameHoriz;
-    double frameVert;
-
-    // Get the amount of delta to add to the frame, depending on the actual style
-    GetLabelFrame(*style,
-                  frameHoriz,
-                  frameVert);
+    double frameHoriz=5;
+    double frameVert=5;
 
     double xOff,yOff,width,height;
 
@@ -1863,20 +1858,6 @@ namespace osmscout {
     }
 
     wayData.sort();
-  }
-
-  void MapPainter::GetLabelFrame(const LabelStyle& style,
-                                 double& horizontal,
-                                 double& vertical)
-  {
-    if (dynamic_cast<const ShieldStyle*>(&style)!=NULL) {
-      horizontal=5;
-      vertical=5;
-    }
-    else {
-      horizontal=0;
-      vertical=0;
-    }
   }
 
   bool MapPainter::Draw(const Projection& projection,

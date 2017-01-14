@@ -502,13 +502,6 @@ namespace osmscout {
                                   double& height) = 0;
 
     /**
-      Return the size of the frame around the label text.
-     */
-    virtual void GetLabelFrame(const LabelStyle& style,
-                               double& horizontal,
-                               double& vertical);
-
-    /**
       (Optionally) fills the area with the given default color
       for ground. In 2D backends this just fills the given area,
       3D backends might draw a sphere or an infinite plane.
