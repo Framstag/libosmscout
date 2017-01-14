@@ -32,11 +32,12 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelData
   {
   public:
+    size_t                   id;       //!< Id of this label, multiple labels with the same id do not intersect with each other
+    size_t                   priority; //!< Priority of the entry
     double                   bx1;      //!< Dimensions of bounding box
     double                   by1;      //!< Dimensions of bounding box
     double                   bx2;      //!< Dimensions of bounding box
     double                   by2;      //!< Dimensions of bounding box
-    size_t                   priority; //!< Priority of the entry
 
     double                   x;        //!< Coordinate of the left, top edge of the text
     double                   y;        //!< Coordinate of the left, top edge of the text

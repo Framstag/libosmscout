@@ -85,6 +85,11 @@ namespace osmscout {
 
   bool LabelLayouter::Intersects(const LabelData& first, const LabelData& second) const
   {
+    // Labels with the same id never intersect
+    if (first.id==second.id) {
+      return false;
+    }
+
     if (dynamic_cast<ShieldStyle*>(first.style.get())!=NULL &&
         dynamic_cast<ShieldStyle*>(second.style.get())!=NULL) {
       double horizLabelSpace=shieldLabelSpace;

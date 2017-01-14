@@ -204,6 +204,7 @@ namespace osmscout {
       Temporary data structures for intelligent label positioning
       */
     //@{
+    size_t                       nextLabelId;
     LabelLayouter                labels;
     LabelLayouter                overlayLabels;
 
@@ -330,7 +331,8 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const LabelLayoutData& data,
                             double x,
-                            double y);
+                            double y,
+                            size_t id);
 
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,

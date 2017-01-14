@@ -694,6 +694,7 @@ namespace osmscout {
 
       LabelData labelData;
 
+      labelData.id=nextLabelId++;
       labelData.x=px;
       labelData.y=py;
       labelData.alpha=0.5;
@@ -747,6 +748,7 @@ namespace osmscout {
       double    x=wayScanlines[i].x+0.5;
       double    y=wayScanlines[i].y+0.5;
 
+      labelBox.id=nextLabelId++;
       labelBox.bx1=x-width/2-frameHoriz;
       labelBox.bx2=x+width/2+frameHoriz;
       labelBox.by1=y-height/2-frameVert;
@@ -777,13 +779,15 @@ namespace osmscout {
                                       const MapParameter& /*parameter*/,
                                       const LabelLayoutData& data,
                                       double x,
-                                      double y)
+                                      double y,
+                                      size_t id)
   {
     // Something is an overlay, if its alpha is <0.8
     bool overlay=data.alpha<0.8;
 
     LabelData labelBox;
 
+    labelBox.id=id;
     labelBox.bx1=x-data.width/2;
     labelBox.bx2=x+data.width/2;
     labelBox.by1=y-data.height/2;
@@ -835,6 +839,7 @@ namespace osmscout {
                  x,y);
     }*/
 
+    size_t labelId=nextLabelId++;
     double overallTextHeight=0;
     bool   hasSymbol=false;
 
@@ -968,7 +973,8 @@ namespace osmscout {
         RegisterPointLabel(projection,
                            parameter,
                            data,
-                           x,offset+data.height/2);
+                           x,offset+data.height/2,
+                           labelId);
       }
       else if (data.icon) {
         //std::cout << "# Icon " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
@@ -1880,6 +1886,7 @@ namespace osmscout {
 
     labelsDrawn=0;
 
+    nextLabelId=0;
     labels.Initialize(projection,
                       parameter);
     overlayLabels.Initialize(projection,
