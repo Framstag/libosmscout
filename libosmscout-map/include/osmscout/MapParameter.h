@@ -67,6 +67,7 @@ namespace osmscout {
 
     bool                         renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                         renderSeaLand;             //!< Rendering of sea/land tiles
+    bool                         renderUnknowns;            //!< Unknown areas are not rendered (transparent)
 
     bool                         debugData;                 //!< Print out some performance relvant information about the data
     bool                         debugPerformance;          //!< Print out some performance information
@@ -106,6 +107,7 @@ namespace osmscout {
 
     void SetRenderBackground(bool render);
     void SetRenderSeaLand(bool render);
+    void SetRenderUnknowns(bool render);
 
     void SetDebugData(bool debug);
     void SetDebugPerformance(bool debug);
@@ -213,6 +215,11 @@ namespace osmscout {
     inline double GetRenderSeaLand() const
     {
       return renderSeaLand;
+    }
+
+    inline bool GetRenderUnknowns() const
+    {
+      return renderUnknowns;
     }
 
     inline bool IsDebugPerformance() const

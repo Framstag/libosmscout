@@ -510,6 +510,10 @@ namespace osmscout {
         ++tile) {
       AreaData areaData;
 
+      if (tile->type==GroundTile::unknown && !parameter.GetRenderUnknowns()){
+        continue;
+      }
+
       switch (tile->type) {
       case GroundTile::land:
         areaData.fillStyle=landFill;
