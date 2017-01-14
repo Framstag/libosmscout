@@ -228,7 +228,7 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
     if (boundingBox.Includes(bbox.GetMinCoord()) &&
         boundingBox.Includes(bbox.GetMaxCoord())) {
 
-      // test if some database has full coverage for this tile
+      // test if some database has full coverage for this box
       bool fullCoverage=false;
       for (const auto &db:databases){
         std::list<osmscout::GroundTile> groundTiles;
