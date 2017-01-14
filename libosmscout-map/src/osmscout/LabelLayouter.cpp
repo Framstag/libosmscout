@@ -212,7 +212,7 @@ namespace osmscout {
     while (event!=events.end() &&
            label.by2+maxSpace>=event->y) {
 #if defined(LABEL_LAYOUTER_DEBUG)
-      std::cout << "'";
+      std::cout << "---->: '";
       std::cout << event->label->text << "' ";
       std::cout << event->x << "," << event->y << " | ";
       std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
