@@ -191,8 +191,11 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   //qDebug() << "Draw final image to canvas:" << QRectF(x1,y1,x2-x1,y2-y1);
   painter.drawImage(QRectF(x1,y1,x2-x1,y2-y1),*finishedImage);
 
-  bool needsNoRepaint=finishedImage->width()==(int) request.width &&
-                      finishedImage->height()==(int) request.height &&
+  RenderMapRequest extendedRequest=request;
+  extendedRequest.width*=1.5;
+  extendedRequest.height*=1.5;
+  bool needsNoRepaint=finishedImage->width()==(int) extendedRequest.width &&
+                      finishedImage->height()==(int) extendedRequest.height &&
                       finishedCoord==request.coord &&
                       finishedAngle==request.angle &&
                       finishedMagnification==request.magnification;
@@ -200,9 +203,9 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   if (!needsNoRepaint){
     {
       QMutexLocker reqLocker(&lastRequestMutex);
-      lastRequest=request;
+      lastRequest=extendedRequest;
     }
-    emit TriggerMapRenderingSignal(request);
+    emit TriggerMapRenderingSignal(extendedRequest);
   }
 
   return needsNoRepaint;
