@@ -200,6 +200,64 @@ const DatabaseLoadedResponse DBThread::loadedResponse() const {
   return response;
 }
 
+DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magnification,
+                                            const osmscout::GeoBox &bbox)
+{
+  QMutexLocker locker(&mutex);
+
+  // TODO: use database multi-polygon, not bounding box
+  osmscout::GeoBox boundingBox;
+  for (const auto &db:databases){
+    if (boundingBox.IsValid()){
+      osmscout::GeoBox dbBox;
+      if (db->database->GetBoundingBox(dbBox)){
+        boundingBox.Include(dbBox);
+      }
+    }else{
+      db->database->GetBoundingBox(boundingBox);
+    }
+  }
+  if (boundingBox.IsValid()) {
+    /*
+    qDebug() << "Database bounding box: " <<
+                QString::fromStdString( boundingBox.GetDisplayText()) <<
+            " test bounding box: " <<
+                QString::fromStdString( tileBoundingBox.GetDisplayText() );
+     */
+
+    if (boundingBox.Includes(bbox.GetMinCoord()) &&
+        boundingBox.Includes(bbox.GetMaxCoord())) {
+
+      // test if some database has full coverage for this box
+      bool fullCoverage=false;
+      for (const auto &db:databases){
+        std::list<osmscout::GroundTile> groundTiles;
+        if (!db->mapService->GetGroundTiles(bbox,magnification,groundTiles)){
+          break;
+        }
+        bool mayContainsUnknown=false;
+        for (const auto &tile:groundTiles){
+          if (tile.type==osmscout::GroundTile::unknown ||
+              tile.type==osmscout::GroundTile::coast){
+            mayContainsUnknown=true;
+            break;
+          }
+        }
+        if (!mayContainsUnknown){
+          fullCoverage=true;
+          break;
+        }
+      }
+
+      return fullCoverage? DatabaseCoverage::Covered: DatabaseCoverage::Intersects;
+    }
+    if (boundingBox.Intersects(bbox)){
+      return DatabaseCoverage::Intersects;
+    }
+  }
+  return DatabaseCoverage::Outside;
+}
+
 void DBThread::TileStateCallback(const osmscout::TileRef& /*changedTile*/)
 {
 

@@ -51,8 +51,8 @@ class OSMSCOUT_CLIENT_QT_API TiledDBThread : public DBThread
   Q_OBJECT
 
 public slots:
-  void DrawTileMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z, 
-        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight, bool drawBackground);
+  void DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
+        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight);
   void onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
@@ -86,12 +86,6 @@ private:
 
   bool                          onlineTilesEnabled;
   bool                          offlineTilesEnabled;
-
-  enum DatabaseTileState{
-    Outside = 0,
-    Covered = 1,
-    Intersects = 2,
-  };
 
 public:
   TiledDBThread(QStringList databaseLookupDirectories, 
@@ -131,7 +125,7 @@ private:
         uint32_t zoomLevel, uint32_t xtile, uint32_t ytile, 
         uint32_t downLimit);
 
-  DatabaseTileState databaseTileState(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
+  DatabaseCoverage databaseCoverageOfTile(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
 };
 
 #endif
