@@ -40,6 +40,7 @@ namespace osmscout {
     contourLabelSpace(30.0),
     renderBackground(true),
     renderSeaLand(false),
+    renderUnknowns(false),
     debugData(false),
     debugPerformance(false),
     showAltLanguage(false)
@@ -151,6 +152,11 @@ namespace osmscout {
   void MapParameter::SetRenderSeaLand(bool render)
   {
     this->renderSeaLand=render;
+  }
+
+  void MapParameter::SetRenderUnknowns(bool render)
+  {
+    this->renderUnknowns=render;
   }
 
   void MapParameter::SetDebugData(bool debug)

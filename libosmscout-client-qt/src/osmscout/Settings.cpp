@@ -233,7 +233,7 @@ void Settings::SetOfflineMap(bool b)
 
 bool Settings::GetRenderSea() const
 {
-    return settings.value("renderSea", false).toBool();
+  return settings.value("renderSea", true).toBool();
 }
 void Settings::SetRenderSea(bool b)
 {

@@ -59,7 +59,8 @@ public slots:
   void HandleTileStatusChanged(const osmscout::TileRef& changedTile);
   void TriggerMapRendering(const RenderMapRequest& request);
   void HandleInitialRenderingRequest();
-  
+  void onStylesheetFilenameChanged();
+
 private:
   osmscout::MercatorProjection  projection;
 
