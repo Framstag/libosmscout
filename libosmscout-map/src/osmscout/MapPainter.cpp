@@ -2142,7 +2142,7 @@ namespace osmscout {
           << nodesTimer << "/" << poisTimer << " (sec)";
 
       log.Info()
-          << "Labels: " << labels.Size() << "/" << overlayLabels.Size() << "/" << labelsDrawn << " (pcs) "
+          << "Labels: " << labels.Size() << "/" << labels.GetLabelsAdded() << " " << overlayLabels.Size() << "/" << overlayLabels.GetLabelsAdded() << " " << labelsDrawn << " (pcs) "
           << labelsTimer << " (sec)";
     }
 

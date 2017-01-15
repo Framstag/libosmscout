@@ -178,11 +178,15 @@ namespace osmscout {
     maxSpace=std::max(maxSpace,sameLabelSpace);
 
     dropNotVisiblePointLabels=parameter.GetDropNotVisiblePointLabels();
+
+    labelsAdded=0;
   }
 
   bool LabelLayouter::Placelabel(const LabelData& label,
                                  LabelDataRef& labelRef)
   {
+    labelsAdded++;
+
     LabelEvent searchEvent;
 
     if (dropNotVisiblePointLabels) {
