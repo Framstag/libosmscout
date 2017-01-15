@@ -925,8 +925,16 @@ namespace osmscout {
         }
 
         data.fontSize=height/standardFontSize;
-        data.height=height;
         data.alpha=alpha;
+
+        GetTextDimension(projection,
+                         parameter,
+                         data.fontSize,
+                         label,
+                         data.xOff,
+                         data.yOff,
+                         data.width,
+                         data.height);
       }
       else {
         data.fontSize=textStyle->GetSize();
