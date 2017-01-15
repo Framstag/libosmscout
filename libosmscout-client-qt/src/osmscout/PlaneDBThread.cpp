@@ -348,14 +348,21 @@ void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
  */
 void PlaneDBThread::DrawMap()
 {
-  osmscout::log.Debug() << "DrawMap()";
+  osmscout::log.Debug() << "DrawMap()";  
   {
     QMutexLocker locker(&mutex);
+    osmscout::FillStyleRef unknownFillStyle;
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
           osmscout::log.Warn() << " Not initialized! " << db->path.toLocal8Bit().data();
           return;
       }
+      if (db->styleConfig && !unknownFillStyle){
+        db->styleConfig->GetUnknownFillStyle(projection, unknownFillStyle);
+      }
+    }
+    if (!unknownFillStyle){
+      osmscout::log.Warn() << " Can't retrieve UnknownFillStyle";
     }
 
     if (currentImage==NULL ||
@@ -401,9 +408,9 @@ void PlaneDBThread::DrawMap()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.fillRect(QRectF(0,0,projection.GetWidth(),projection.GetHeight()),
-                      QBrush(QColor::fromRgbF(finishedUnknownFillStyle->GetFillColor().GetR(),
-                                              finishedUnknownFillStyle->GetFillColor().GetG(),
-                                              finishedUnknownFillStyle->GetFillColor().GetB(),
+                      QBrush(QColor::fromRgbF(unknownFillStyle->GetFillColor().GetR(),
+                                              unknownFillStyle->GetFillColor().GetG(),
+                                              unknownFillStyle->GetFillColor().GetB(),
                                               1)));
     bool success=true;
     for (auto &db:databases){
