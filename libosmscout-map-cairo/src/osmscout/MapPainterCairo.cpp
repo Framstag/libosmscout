@@ -810,7 +810,7 @@ namespace osmscout {
       PangoFontMetrics *metrics=pango_context_get_metrics(context,
                                                           font,
                                                           pango_context_get_language(context));
-      size_t           proposedWidth=proposedWidth=std::floor(label.bx2-label.bx1)+1;
+      size_t           proposedWidth=std::floor(label.bx2-label.bx1)+1;
 
       pango_layout_set_text(layout,label.text.c_str(),label.text.length());
       pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
