@@ -50,9 +50,11 @@ namespace osmscout {
 
     searchEventTop.y=eventRef->label->by1;
     searchEventTop.x=eventRef->label->bx1;
+    searchEventTop.label=eventRef->label;
 
     searchEventBottom.y=eventRef->label->by2;
     searchEventBottom.x=eventRef->label->bx1;
+    searchEventBottom.label=eventRef->label;
 
     std::set<LabelEvent>::iterator event;
 
@@ -85,6 +87,11 @@ namespace osmscout {
 
   bool LabelLayouter::Intersects(const LabelData& first, const LabelData& second) const
   {
+    // Labels with the same id never intersect
+    if (first.id==second.id) {
+      return false;
+    }
+
     if (dynamic_cast<ShieldStyle*>(first.style.get())!=NULL &&
         dynamic_cast<ShieldStyle*>(second.style.get())!=NULL) {
       double horizLabelSpace=shieldLabelSpace;
@@ -173,11 +180,15 @@ namespace osmscout {
     maxSpace=std::max(maxSpace,sameLabelSpace);
 
     dropNotVisiblePointLabels=parameter.GetDropNotVisiblePointLabels();
+
+    labelsAdded=0;
   }
 
   bool LabelLayouter::Placelabel(const LabelData& label,
                                  LabelDataRef& labelRef)
   {
+    labelsAdded++;
+
     LabelEvent searchEvent;
 
     if (dropNotVisiblePointLabels) {
@@ -212,7 +223,7 @@ namespace osmscout {
     while (event!=events.end() &&
            label.by2+maxSpace>=event->y) {
 #if defined(LABEL_LAYOUTER_DEBUG)
-      std::cout << "'";
+      std::cout << "---->: '";
       std::cout << event->label->text << "' ";
       std::cout << event->x << "," << event->y << " | ";
       std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;

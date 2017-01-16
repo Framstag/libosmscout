@@ -18,12 +18,14 @@
 */
 
 #include <osmscout/MapPainterQt.h>
+#include <osmscout/SimplifiedPath.h>
 
 #include <iostream>
 #include <limits>
 
 #include <QPainterPath>
 #include <QTextLayout>
+#include <QDebug>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -411,6 +413,37 @@ namespace osmscout {
     }
   }
 
+  void MapPainterQt::setupTransformation(QPainter *painter,
+                                         const QPointF center,
+                                         const qreal angle,
+                                         const qreal baseline) const
+  {
+    QTransform tran;
+    qreal penWidth = painter->pen().widthF();
+
+    // rotation matrix components
+    qreal sina=sin[lround((360-angle)*10)%sin.size()];
+    qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
+
+    // Rotation
+    qreal newX=(cosa*center.x())-(sina*(center.y()-baseline));
+    qreal newY=(cosa*(center.y()-baseline))+(sina*center.x());
+
+    // Aditional offseting
+    qreal deltaPenX=cosa*penWidth;
+    qreal deltaPenY=sina*penWidth;
+
+    // Getting the delta distance for the translation part of the transformation
+    qreal deltaX=newX-center.x();
+    qreal deltaY=newY-center.y();
+
+    // Applying rotation and translation.
+    tran.setMatrix(cosa,sina,0.0,
+                   -sina,cosa,0.0,
+                   -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
+    painter->setTransform(tran);
+  }
+
   void MapPainterQt::DrawContourLabel(const Projection& projection,
                                       const MapParameter& parameter,
                                       const PathTextStyle& style,
@@ -427,94 +460,107 @@ namespace osmscout {
     QFont         font(GetFont(projection,
                                parameter,
                                fontSize));
-    QFontMetricsF metrics=QFontMetricsF(font,painter->device());
     QString       string=QString::fromUtf8(text.c_str());
-    double        stringLength=metrics.width(string);
+
+    QTextLayout textLayout(string,font,painter->device());
+    // evaluate layout
+    textLayout.beginLayout();
+    while (textLayout.createLine().isValid()){};
+    textLayout.endLayout();
+    int fontPixelSize=font.pixelSize();
+
+    QList<QGlyphRun> glyphs=textLayout.glyphRuns();
+    double stringWidth=textLayout.boundingRect().width();
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     painter->setPen(pen);
     painter->setFont(font);
 
-    QPainterPath p;
-    qreal        fontHeight=metrics.height();
-
-    // Calculate length of path
+    // build path
+    SimplifiedPath p;
     if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
-        if (j==transStart) {
-          p.moveTo(coordBuffer->buffer[j].GetX(),
+        p.AddPoint(coordBuffer->buffer[j].GetX(),
                    coordBuffer->buffer[j].GetY());
-        }
-        else {
-          p.lineTo(coordBuffer->buffer[j].GetX(),
-                   coordBuffer->buffer[j].GetY());
-        }
       }
     }
     else {
       for (size_t j=0; j<=transEnd-transStart; j++) {
         size_t idx=transEnd-j;
-
-        if (j==0) {
-          p.moveTo(coordBuffer->buffer[idx].GetX(),
+        p.AddPoint(coordBuffer->buffer[idx].GetX(),
                    coordBuffer->buffer[idx].GetY());
-        }
-        else {
-          p.lineTo(coordBuffer->buffer[idx].GetX(),
-                   coordBuffer->buffer[idx].GetY());
-        }
       }
     }
 
-    qreal spaceLeft=p.length()-stringLength-2*contourLabelOffset;
+    qreal pLength=p.GetLength();
+    qreal spaceLeft=pLength-stringWidth-2*contourLabelOffset;
 
     // If space around labels left is < offset on both sides, do not render at all
     if (spaceLeft<0.0) {
       return;
     }
 
-    spaceLeft=fmod(spaceLeft,stringLength+contourLabelSpace);
+    spaceLeft=fmod(spaceLeft,stringWidth+contourLabelSpace);
 
     qreal labelInstanceOffset=spaceLeft/2+contourLabelOffset;
     qreal offset=labelInstanceOffset;
 
-    QTransform tran;
+    QVector<quint32> indexes(1);
+    QVector<QPointF> positions(1);
+    while (offset<pLength) {
 
-    while (offset<p.length()) {
-      for (int i=0; i<string.size(); i++) {
-        QPointF point=p.pointAtPercent(p.percentAtLength(offset));
-        qreal   angle=p.angleAtPercent(p.percentAtLength(offset));
-
-        // rotation matrix components
-
-        qreal sina=sin[lround((360-angle)*10)%sin.size()];
-        qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
-
-        // Rotation
-        qreal newX=(cosa*point.x())-(sina*(point.y()-fontHeight/4));
-        qreal newY=(cosa*(point.y()-fontHeight/4))+(sina*point.x());
-
-        // Aditional offseting
-        qreal deltaPenX=cosa*pen.width();
-        qreal deltaPenY=sina*pen.width();
-
-        // Getting the delta distance for the translation part of the transformation
-        qreal deltaX=newX-point.x();
-        qreal deltaY=newY-point.y();
-
-        // Applying rotation and translation.
-        tran.setMatrix(cosa,sina,0.0,
-                       -sina,cosa,0.0,
-                       -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
-
-        painter->setTransform(tran);
-
-        painter->drawText(point,QString(string[i]));
-
-        offset+=metrics.width(string[i]);
+      // skip string rendering when path is too much squiggly at this offset
+      if (!p.TestAngleVariance(offset,offset+stringWidth,M_PI/4)){
+        offset+=stringWidth+contourLabelSpace;
+        continue;
       }
 
-      offset+=contourLabelSpace;
+      qreal initialAngle=std::abs(p.AngleAtLengthDeg(offset));
+      bool upwards=initialAngle>90 && initialAngle<270;
+
+      // draw glyphs
+      for (const QGlyphRun &glypRun: glyphs){
+        for (int g=0; g<glypRun.glyphIndexes().size(); g++){
+          auto index=glypRun.glyphIndexes().at(g);
+          auto pos=glypRun.positions().at(g);
+          indexes[0]=index;
+          positions[0]=QPointF(0,pos.y());
+          QRectF boundingRect=glypRun.rawFont().boundingRect(index);
+
+          qreal glyphOffset=upwards? (offset+stringWidth-pos.x()) : offset+pos.x();
+          if (glyphOffset>pLength)
+            continue;
+
+          QPointF point=p.PointAtLength(glyphOffset);
+          // check if current glyph can be visible
+          qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
+          if (!painter->viewport().intersects(QRect(point.x()-diagonal, point.y()-diagonal,
+                                                    point.x()+diagonal, point.y()+diagonal))){
+            continue;
+          }
+          qreal angle=p.AngleAtLengthDeg(glyphOffset);
+          if (upwards){
+            angle-=180;
+          }
+
+          setupTransformation(painter, point, angle, fontPixelSize*-0.7);
+
+          QGlyphRun orphanGlyph;
+          orphanGlyph.setBoundingRect(boundingRect);
+          orphanGlyph.setFlags(glypRun.flags());
+          orphanGlyph.setGlyphIndexes(indexes);
+          orphanGlyph.setOverline(glypRun.overline());
+          orphanGlyph.setPositions(positions);
+          orphanGlyph.setRawFont(glypRun.rawFont());
+          orphanGlyph.setRightToLeft(glypRun.isRightToLeft());
+          orphanGlyph.setStrikeOut(glypRun.strikeOut());
+          orphanGlyph.setUnderline(glypRun.underline());
+
+          painter->drawGlyphRun(point, orphanGlyph);
+        }
+      }
+
+      offset+=stringWidth+contourLabelSpace;
     }
 
     painter->resetTransform();

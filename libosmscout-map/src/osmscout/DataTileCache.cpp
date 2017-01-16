@@ -186,7 +186,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetNodeData().GetTypes());
 
-    if (nodeTypes.Intersects(parentTile.GetNodeData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetNodeData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetNodeData().GetTypes());
 
@@ -207,41 +207,6 @@ namespace osmscout {
     }
   }
 
-  void DataTileCache::ResolveOptimizedWaysFromParent(Tile& tile,
-                                                      const Tile& parentTile,
-                                                      const GeoBox& boundingBox,
-                                                      const TypeInfoSet& optimizedWayTypes)
-  {
-    TypeInfoSet subset(optimizedWayTypes);
-
-    // We remove all types that are already loaded
-    subset.Remove(tile.GetOptimizedWayData().GetTypes());
-
-    if (optimizedWayTypes.Intersects(parentTile.GetOptimizedWayData().GetTypes())) {
-      // We only retrieve types that both tiles have in common
-      subset.Intersection(parentTile.GetOptimizedWayData().GetTypes());
-
-      std::vector<WayRef> data;
-
-      data.reserve(parentTile.GetOptimizedWayData().GetDataSize());
-
-      parentTile.GetOptimizedWayData().CopyData([&](const WayRef& way) {
-        if (subset.IsSet(way->GetType())) {
-          GeoBox wayBoundingBox;
-
-          way->GetBoundingBox(wayBoundingBox);
-
-          if (wayBoundingBox.Intersects(boundingBox)) {
-            data.push_back(way);
-          }
-        }
-      });
-
-      tile.GetOptimizedWayData().AddPrefillData(subset,
-                                                data);
-    }
-  }
-
   void DataTileCache::ResolveWaysFromParent(Tile& tile,
                                              const Tile& parentTile,
                                              const GeoBox& boundingBox,
@@ -252,7 +217,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetWayData().GetTypes());
 
-    if (wayTypes.Intersects(parentTile.GetWayData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetWayData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetWayData().GetTypes());
 
@@ -277,42 +242,6 @@ namespace osmscout {
     }
   }
 
-  void DataTileCache::ResolveOptimizedAreasFromParent(Tile& tile,
-                                                       const Tile& parentTile,
-                                                       const GeoBox& boundingBox,
-                                                       const TypeInfoSet& optimizedAreaTypes)
-  {
-    TypeInfoSet subset(optimizedAreaTypes);
-
-    // We remove all types that are already loaded
-    subset.Remove(tile.GetOptimizedAreaData().GetTypes());
-
-    if (optimizedAreaTypes.Intersects(parentTile.GetOptimizedAreaData().GetTypes())) {
-      // We only retrieve types that both tiles have in common
-      subset.Intersection(parentTile.GetOptimizedAreaData().GetTypes());
-
-      std::vector<AreaRef> data;
-
-      data.reserve(parentTile.GetOptimizedAreaData().GetDataSize());
-
-      parentTile.GetOptimizedAreaData().CopyData([&](const AreaRef& area) {
-        if (subset.IsSet(area->GetType())) {
-          GeoBox areaBoundingBox;
-
-          area->GetBoundingBox(areaBoundingBox);
-
-          if (areaBoundingBox.Intersects(boundingBox)) {
-            data.push_back(area);
-          }
-        }
-      });
-
-      tile.GetOptimizedAreaData().AddPrefillData(subset,
-                                                 data);
-    }
-
-  }
-
   void DataTileCache::ResolveAreasFromParent(Tile& tile,
                                               const Tile& parentTile,
                                               const GeoBox& boundingBox,
@@ -323,7 +252,7 @@ namespace osmscout {
     // We remove all types that are already loaded
     subset.Remove(tile.GetAreaData().GetTypes());
 
-    if (areaTypes.Intersects(parentTile.GetAreaData().GetTypes())) {
+    if (subset.Intersects(parentTile.GetAreaData().GetTypes())) {
       // We only retrieve types that both tiles have in common
       subset.Intersection(parentTile.GetAreaData().GetTypes());
 
@@ -358,8 +287,8 @@ namespace osmscout {
                                             const TypeInfoSet& nodeTypes,
                                             const TypeInfoSet& wayTypes,
                                             const TypeInfoSet& areaTypes,
-                                            const TypeInfoSet& optimizedWayTypes,
-                                            const TypeInfoSet& optimizedAreaTypes)
+                                            const TypeInfoSet& /*optimizedWayTypes*/,
+                                            const TypeInfoSet& /*optimizedAreaTypes*/)
   {
     if (tile.GetId().GetLevel()>0) {
       TileId parentTileId=tile.GetId().GetParent();
@@ -369,9 +298,7 @@ namespace osmscout {
 
       if (parentTile) {
         ResolveNodesFromParent(tile,*parentTile,boundingBox,nodeTypes);
-        ResolveOptimizedWaysFromParent(tile,*parentTile,boundingBox,optimizedWayTypes);
         ResolveWaysFromParent(tile,*parentTile,boundingBox,wayTypes);
-        ResolveOptimizedAreasFromParent(tile,*parentTile,boundingBox,optimizedAreaTypes);
         ResolveAreasFromParent(tile,*parentTile,boundingBox,areaTypes);
 
         return;

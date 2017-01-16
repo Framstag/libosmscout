@@ -109,19 +109,46 @@ namespace osmscout {
       return coord.GetLon();
     }
 
+    /**
+     * Compare this and the other point for identity. Identity is defined
+     * as have the same coordinates and the same serial id per coordinate.
+     *
+     * @param other
+     *    Other point to compare against
+     * @return
+     *    true if identical, else false
+     */
     inline bool IsIdentical(const Point& other) const
     {
       return serial==other.serial && coord==other.coord;
     }
 
+    /**
+     * Compare this and the other point for "sameness". Sameness is defined as having the
+     * same coordinate but not necessarily the same serial id. THis means, that both points
+     * have the same location but are not necessarily identical.
+     *
+     * @param other
+     *    Other point to compare against
+     * @return
+     *    true if same location, else false
+     */
     inline bool IsSame(const Point& other) const
     {
       return coord==other.coord;
     }
 
+    /**
+     * Same semantics as IsSame(), implement for template compability with GeoCoord.
+     *
+     * @param other
+     *    Other point to compare against
+     * @return
+     *    true if same location, else false
+     */
     inline bool IsEqual(const Point& other) const
     {
-      return serial==other.serial || (coord==other.coord);
+      return coord==other.coord;
     }
   };
 }

@@ -328,17 +328,18 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const N& point,
                                       const std::vector<M>& nodes)
   {
+    const double tol = 1e-6;
     size_t i,j;
     bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if (point.GetLat()==nodes[i].GetLat() &&
-          point.GetLon()==nodes[i].GetLon()) {
+      if (fabs(point.GetLat()-nodes[i].GetLat())<tol &&
+          fabs(point.GetLon()-nodes[i].GetLon())<tol) {
         return 0;
       }
 
-      if ((((nodes[i].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[j].GetLat())) ||
-           ((nodes[j].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[i].GetLat()))) &&
+      if ((((nodes[i].GetLat()<point.GetLat()+tol) && (point.GetLat()<nodes[j].GetLat())) ||
+           ((nodes[j].GetLat()<point.GetLat()+tol) && (point.GetLat()<nodes[i].GetLat()))) &&
           (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat())/(nodes[j].GetLat()-nodes[i].GetLat())+
            nodes[i].GetLon())) {
         c=!c;
@@ -436,12 +437,56 @@ namespace osmscout {
         ++contra;
       }
 
+      if (count>=100 && pro/20.0>contra) {
+        return true;
+      }
+    }
+
+    return pro/20.0>contra;
+  }
+
+  /**
+   * \ingroup Geometry
+   * Assumes that the given areas do not intersect.
+   *
+   * Returns true, of area a is within b or the same as b. This
+   * version uses some heuristic based on the assumption that areas
+   * are either in another area or not - but there may be some smaller
+   * errors due to areas slightly overlapping.
+   */
+  template<typename N,typename M>
+  inline bool IsAreaSubOfAreaOrSame(const std::vector<N>& a,
+                                    const std::vector<M>& b)
+  {
+    size_t pro=0;
+    size_t contra=0;
+    size_t count=0;
+
+    pro=0;
+    contra=0;
+    count=0;
+
+    for (const auto& node : a) {
+      int relPos=GetRelationOfPointToArea(node,b);
+
+      ++count;
+
+      if (relPos>0) {
+        ++pro;
+      }
+      else if (relPos<0) {
+        ++contra;
+      }
+
       if (count>=100 && pro/20>contra) {
         return true;
       }
     }
 
-    return pro/20>contra;
+    if (pro == 0 && contra == 0 && count > 0)
+      return true;
+
+    return pro/20.0>contra;
   }
 
   /**

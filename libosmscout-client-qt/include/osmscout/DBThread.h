@@ -186,6 +186,12 @@ public:
 
 typedef std::shared_ptr<DBInstance> DBInstanceRef;
 
+enum DatabaseCoverage{
+  Outside = 0,
+  Covered = 1,
+  Intersects = 2,
+};
+
 /**
  * \ingroup QtAPI
  * 
@@ -344,7 +350,10 @@ public:
   bool isInitialized(); 
   
   const DatabaseLoadedResponse loadedResponse() const;
-  
+
+  DatabaseCoverage databaseCoverage(const osmscout::Magnification &magnification,
+                                    const osmscout::GeoBox &bbox);
+
   double GetMapDpi() const;
   
   double GetPhysicalDpi() const;

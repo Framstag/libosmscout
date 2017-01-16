@@ -621,7 +621,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::MaxSpeedPostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                          const RoutingProfile& profile,
+                                                          const RoutingProfile& /*profile*/,
                                                           RouteDescription& description,
                                                           Database& database)
   {

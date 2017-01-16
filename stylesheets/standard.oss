@@ -1575,9 +1575,6 @@ STYLE
 
      [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
 
-     [TYPE leisure_building,
-           sport_building] AREA.TEXT { label: Name.name;  priority: @labelPrioSpecialBuilding;}
-
      [GROUP tourism] {
        NODE.TEXT {label: Name.name; style: emphasize;color: @tourismLabelColor; size: 0.9; priority: @labelPrioMajorBuilding;}
        AREA.TEXT { label: Name.name; style: emphasize; color: @tourismLabelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}

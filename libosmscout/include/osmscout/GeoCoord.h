@@ -191,7 +191,7 @@ namespace osmscout {
     }
 
     /**
-     * Return true if both coordinates are equals (using == operator)
+     * Return true if both coordinates are equal (using == operator)
      */
     inline bool IsEqual(const GeoCoord& other) const
     {

@@ -5,7 +5,11 @@ bin_PROGRAMS = CachePerformance \
                ReaderScannerPerformance \
                ThreadedDatabase \
                WorkQueue \
-	       MapRotate
+	       MapRotate \
+               MultiDBRouting
+
+AM_CPPFLAGS = $(LIB_CXXFLAGS) \
+              -I$(top_srcdir)/include
 
 CachePerformance_SOURCES = CachePerformance.cpp
 CachePerformance_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
@@ -38,3 +42,26 @@ WorkQueue_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
 MapRotate_SOURCES = MapRotate.cpp
 MapRotate_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) $(LIBOSMSCOUTMAP_CFLAGS)
 MapRotate_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
+
+MultiDBRouting_SOURCES = MultiDBRouting.cpp
+MultiDBRouting_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+MultiDBRouting_LDADD = $(LIBOSMSCOUT_LIBS)
+
+if HAVE_LIB_OSMSCOUTMAPQT
+bin_PROGRAMS += DrawTextQt
+
+moc_%.cpp: $(top_srcdir)/include/%.h
+	@MOC@ -o$@ $<
+
+CLEANFILES = moc_DrawWindow.cpp
+endif
+
+DrawTextQt_SOURCES = DrawTextQt.cpp \
+                     moc_DrawWindow.cpp
+DrawTextQt_CXXFLAGS = -fPIC \
+                      $(LIBOSMSCOUTMAPQT_CFLAGS) \
+                      $(LIBOSMSCOUTMAP_CFLAGS) \
+                      $(LIBOSMSCOUT_CFLAGS)
+DrawTextQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
+                   $(LIBOSMSCOUTMAP_LIBS) \
+                   $(LIBOSMSCOUT_LIBS)

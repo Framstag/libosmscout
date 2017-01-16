@@ -446,18 +446,10 @@ namespace osmscout {
                                 const Tile& parentTile,
                                 const GeoBox& boundingBox,
                                 const TypeInfoSet& nodeTypes);
-    void ResolveOptimizedWaysFromParent(Tile& tile,
-                                        const Tile& parentTile,
-                                        const GeoBox& boundingBox,
-                                        const TypeInfoSet& optimizedWayTypes);
     void ResolveWaysFromParent(Tile& tile,
                                const Tile& parentTile,
                                const GeoBox& boundingBox,
                                const TypeInfoSet& wayTypes);
-    void ResolveOptimizedAreasFromParent(Tile& tile,
-                                         const Tile& parentTile,
-                                         const GeoBox& boundingBox,
-                                         const TypeInfoSet& optimizedAreaTypes);
     void ResolveAreasFromParent(Tile& tile,
                                 const Tile& parentTile,
                                 const GeoBox& boundingBox,

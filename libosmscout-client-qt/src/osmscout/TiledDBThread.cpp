@@ -128,8 +128,8 @@ void TiledDBThread::onDatabaseLoaded(osmscout::GeoBox boundingBox)
  *
  * have to be called with acquiered mutex
  */
-void TiledDBThread::DrawTileMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
-        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight, bool drawBackground)
+void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
+        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight)
 {
     QMutexLocker locker(&mutex);
 
@@ -164,7 +164,8 @@ void TiledDBThread::DrawTileMap(QPainter &p, const osmscout::GeoCoord center, ui
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::none);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::none);
 
-    drawParameter.SetRenderBackground(drawBackground || renderSea);
+    drawParameter.SetRenderBackground(false);
+    drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple sources
     drawParameter.SetRenderSeaLand(renderSea);
 
     // see Tiler.cpp example...
@@ -515,46 +516,12 @@ void TiledDBThread::lookupAndDrawBottomTileRecursive(TileCache& tileCache, QPain
     }
 }
 
-
-TiledDBThread::DatabaseTileState TiledDBThread::databaseTileState(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
+DatabaseCoverage TiledDBThread::databaseCoverageOfTile(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
 {
-    QMutexLocker locker(&mutex);
-
-    // TODO: use database multi-polygon, not bounding box
-    osmscout::GeoBox boundingBox;
-    for (auto db:databases){
-      if (boundingBox.IsValid()){
-        osmscout::GeoBox dbBox;
-        if (db->database->GetBoundingBox(dbBox)){
-          boundingBox.Include(dbBox);
-        }
-      }else{
-        db->database->GetBoundingBox(boundingBox);
-      }
-    }
-    if (boundingBox.IsValid()) {
-        osmscout::GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);
-        //osmscout::GeoCoord tileVisualCenter = OSMTile::tileVisualCenter(zoomLevel, xtile, ytile);
-
-        /*
-        qDebug() << "Database bounding box: " <<
-                    QString::fromStdString( boundingBox.GetDisplayText()) <<
-                " tile bounding box: " <<
-                    QString::fromStdString( tileBoundingBox.GetDisplayText() );
-         */
-
-        if (boundingBox.GetMinLat() <= tileBoundingBox.GetMinLat() &&
-                boundingBox.GetMinLon() <= tileBoundingBox.GetMinLon() &&
-                boundingBox.GetMaxLat() >= tileBoundingBox.GetMaxLat() &&
-                boundingBox.GetMaxLon() >= tileBoundingBox.GetMaxLon()) {
-
-            return DatabaseTileState::Covered;
-        }
-        if (boundingBox.Intersects(tileBoundingBox)){
-            return DatabaseTileState::Intersects;
-        }
-    }
-    return DatabaseTileState::Outside;
+  osmscout::GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);
+  osmscout::Magnification magnification;
+  magnification.SetLevel(zoomLevel);
+  return databaseCoverage(magnification,tileBoundingBox);
 }
 
 void TiledDBThread::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
@@ -566,7 +533,9 @@ void TiledDBThread::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32
     }
 
     // TODO: mutex?
-    bool requestedFromWeb = !(offlineTilesEnabled && databaseTileState(zoomLevel, xtile, ytile) == DatabaseTileState::Covered);
+    bool requestedFromWeb = onlineTilesEnabled && (!(offlineTilesEnabled &&
+          databaseCoverageOfTile(zoomLevel, xtile, ytile) == DatabaseCoverage::Covered));
+
     if (requestedFromWeb){
         QMutexLocker locker(&mutex);
         if (tileDownloader == NULL){
@@ -592,9 +561,8 @@ void TiledDBThread::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint3
             return;
     }
 
-    DatabaseTileState state = databaseTileState(zoomLevel, xtile, ytile);
-    bool render = (state != DatabaseTileState::Outside);
-
+    DatabaseCoverage state = databaseCoverageOfTile(zoomLevel, xtile, ytile);
+    bool render = (state != DatabaseCoverage::Outside);
     if (render) {
         // tile rendering have sub-linear complexity with area size
         // it means that it is advatage to merge more tile requests with same zoom
@@ -605,7 +573,9 @@ void TiledDBThread::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint3
         uint32_t yTo;
         {
             QMutexLocker locker(&tileCacheMutex);
-            offlineTileCache.mergeAndStartRequests(zoomLevel, xtile, ytile, xFrom, xTo, yFrom, yTo, 5, 5);
+            offlineTileCache.mergeAndStartRequests(zoomLevel, xtile, ytile,
+                                                   xFrom, xTo, yFrom, yTo,
+                                                   /*maxWidth*/ 5, /*maxHeight*/ 5);
         }
         uint32_t width = (xTo - xFrom + 1);
         uint32_t height = (yTo - yFrom + 1);
@@ -628,11 +598,8 @@ void TiledDBThread::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint3
         QPainter p;
         p.begin(&canvas);
 
-        // TODO: improve renderer to render background only on database multi-polygon
-        bool drawBackground = (state == DatabaseTileState::Covered);
-        DrawTileMap(p, tileVisualCenter, zoomLevel, canvas.width(), canvas.height(),
-                canvas.width() + osmTileDimension, canvas.height() + osmTileDimension,
-                drawBackground);
+        DrawMap(p, tileVisualCenter, zoomLevel, canvas.width(), canvas.height(),
+                canvas.width() + osmTileDimension, canvas.height() + osmTileDimension);
 
         p.end();
         {
