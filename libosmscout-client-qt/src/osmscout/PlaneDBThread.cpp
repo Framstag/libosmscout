@@ -392,7 +392,7 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetRenderSeaLand(renderSea);
 
     drawParameter.SetLabelLineMinCharCount(15);
-    drawParameter.SetLabelLineMaxCharCount(500);
+    drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);
     drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight())/canvasOverrun);
 

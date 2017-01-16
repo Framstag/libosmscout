@@ -177,7 +177,7 @@ void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32
     drawParameter.SetRenderSeaLand(renderSea);
 
     drawParameter.SetLabelLineMinCharCount(15);
-    drawParameter.SetLabelLineMaxCharCount(500);
+    drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);
     drawParameter.SetLabelLineFitToWidth(std::min(screenWidth, screenHeight));
 
