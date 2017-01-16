@@ -376,7 +376,7 @@ namespace osmscout
 		}
 	}
 
-	void MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double fontSize, const std::string& text, double& xOff, double& yOff, double& width, double& height)
+	void MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double objectWidth, double fontSize, const std::string& text, double& xOff, double& yOff, double& width, double& height)
 	{
 #ifdef MBUC
 		std::wstring sample = s2w(text);

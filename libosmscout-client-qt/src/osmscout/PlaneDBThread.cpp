@@ -42,6 +42,7 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
                              QString stylesheetFilename,
                              QString iconDirectory)
  : DBThread(databaseLookupDirs, stylesheetFilename, iconDirectory),
+   canvasOverrun(1.5),
    pendingRenderingTimer(this),
    currentImage(NULL),
    currentCoord(0.0,0.0),
@@ -192,8 +193,8 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   painter.drawImage(QRectF(x1,y1,x2-x1,y2-y1),*finishedImage);
 
   RenderMapRequest extendedRequest=request;
-  extendedRequest.width*=1.5;
-  extendedRequest.height*=1.5;
+  extendedRequest.width*=canvasOverrun;
+  extendedRequest.height*=canvasOverrun;
   bool needsNoRepaint=finishedImage->width()==(int) extendedRequest.width &&
                       finishedImage->height()==(int) extendedRequest.height &&
                       finishedCoord==request.coord &&
@@ -389,6 +390,11 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetRenderBackground(false); // we draw background before MapPainter
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
+
+    drawParameter.SetLabelLineMinCharCount(15);
+    drawParameter.SetLabelLineMaxCharCount(500);
+    drawParameter.SetLabelLineFitToArea(true);
+    drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight())/canvasOverrun);
 
     // create copy of projection
     osmscout::MercatorProjection renderProjection;
