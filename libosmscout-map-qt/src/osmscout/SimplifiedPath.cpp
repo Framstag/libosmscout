@@ -19,7 +19,7 @@
 
 #include <osmscout/SimplifiedPath.h>
 #include <QVector2D>
-#include <math.h>
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
 
