@@ -30,9 +30,9 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
 
-  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 1000 1000 test.svg
-  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.565 7.45 51.58 7.47 160000 1000 test.svg
-  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.48 7.45 51.50 7.47 160000 1000 test.svg
+  src/DrawMapSVG <path-to-map> ../stylesheets/standard.oss 1000 1000 51.2   6.5    1000 test.svg
+  src/DrawMapSVG <path-to-map> ../stylesheets/standard.oss 1000 1000 51.565 7.45 160000 test.svg
+  src/DrawMapSVG <path-to-map> ../stylesheets/standard.oss 1000 1000 51.48  7.45 160000 test.svg
 */
 
 int main(int argc, char* argv[])
@@ -45,10 +45,11 @@ int main(int argc, char* argv[])
   size_t        height;
   std::string   output;
 
-  if (argc!=10) {
+  if (argc!=9) {
     std::cerr << "DrawMap <map directory> <style-file> ";
-    std::cerr << "<lat_top> <lon_left> <lat_bottom> <lon_right> ";
-    std::cerr << "<zoom> <width> ";
+    std::cerr << "<width> <height> ";
+    std::cerr << "<lon> <lat> ";
+    std::cerr << "<zoom> ";
     std::cerr << "<output>" << std::endl;
     return 1;
   }
@@ -119,6 +120,7 @@ int main(int argc, char* argv[])
 
   projection.Set(osmscout::GeoCoord(lat,lon),
                  osmscout::Magnification(zoom),
+                 /*dpi*/ 150, // TODO: configurable
                  width,
                  height);
 
