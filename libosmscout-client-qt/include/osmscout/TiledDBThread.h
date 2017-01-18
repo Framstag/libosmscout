@@ -87,6 +87,9 @@ private:
   bool                          onlineTilesEnabled;
   bool                          offlineTilesEnabled;
 
+  int                           screenWidth;
+  int                           screenHeight;
+
 public:
   TiledDBThread(QStringList databaseLookupDirectories, 
                 QString stylesheetFilename, 

@@ -54,7 +54,11 @@ namespace osmscout {
     bool                         drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
     // Node and area labels
-    size_t                       labelLineCharCount;        //!< Labels will be word wrapped if  they are longer then the given characters
+    size_t                       labelLineMinCharCount;     //!< Labels will be _never_ word wrapped if they are shorter then the given characters
+    size_t                       labelLineMaxCharCount;     //!< Labels will be word wrapped if they are longer then the given characters
+    bool                         labelLineFitToArea;        //!< Labels will be word wrapped to fit object area
+    double                       labelLineFitToWidth;       //!< Labels will be word wrapped to fit given width in pixels
+
     double                       labelSpace;                //!< Space between point labels in mm (default 3).
     double                       plateLabelSpace;           //!< Space between plates in mm (default 5).
     double                       sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
@@ -96,7 +100,11 @@ namespace osmscout {
     void SetDrawFadings(bool drawFadings);
     void SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth);
 
-    void SetLabelLineCharCount(size_t labelLineCharCount);
+    void SetLabelLineMinCharCount(size_t labelLineMinCharCount);
+    void SetLabelLineMaxCharCount(size_t labelLineMaxCharCount);
+    void SetLabelLineFitToArea(bool labelLineFitToArea);
+    void SetLabelLineFitToWidth(double labelLineFitToWidth);
+
     void SetLabelSpace(double labelSpace);
     void SetPlateLabelSpace(double plateLabelSpace);
     void SetSameLabelSpace(double sameLabelSpace);
@@ -172,9 +180,24 @@ namespace osmscout {
       return drawWaysWithFixedWidth;
     }
 
-    inline size_t GetLabelLineCharCount() const
+    inline size_t GetLabelLineMinCharCount() const
     {
-      return labelLineCharCount;
+      return labelLineMinCharCount;
+    }
+
+    inline size_t GetLabelLineMaxCharCount() const
+    {
+      return labelLineMaxCharCount;
+    }
+
+    inline bool GetLabelLineFitToArea() const
+    {
+      return labelLineFitToArea;
+    }
+
+    inline double GetLabelLineFitToWidth() const
+    {
+      return labelLineFitToWidth;
     }
 
     inline double GetLabelSpace() const

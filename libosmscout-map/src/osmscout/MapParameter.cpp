@@ -31,7 +31,10 @@ namespace osmscout {
     optimizeErrorToleranceMm(0.5),
     drawFadings(true),
     drawWaysWithFixedWidth(false),
-    labelLineCharCount(1000/*20*/),
+    labelLineMinCharCount(15),
+    labelLineMaxCharCount(1000/*20*/),
+    labelLineFitToArea(true),
+    labelLineFitToWidth(8000),
     labelSpace(1.0),
     plateLabelSpace(5.0),
     sameLabelSpace(40.0),
@@ -108,9 +111,23 @@ namespace osmscout {
     this->drawWaysWithFixedWidth=drawWaysWithFixedWidth;
   }
 
-  void MapParameter::SetLabelLineCharCount(size_t labelLineCharCount)
+  void MapParameter::SetLabelLineMinCharCount(size_t labelLineMinCharCount)
   {
-    this->labelLineCharCount=labelLineCharCount;
+    this->labelLineMinCharCount=labelLineMinCharCount;
+  }
+
+  void MapParameter::SetLabelLineMaxCharCount(size_t labelLineMaxCharCount)
+  {
+    this->labelLineMaxCharCount=labelLineMaxCharCount;
+  }
+  void MapParameter::SetLabelLineFitToArea(bool labelLineFitToArea)
+  {
+    this->labelLineFitToArea=labelLineFitToArea;
+  }
+
+  void MapParameter::SetLabelLineFitToWidth(double labelLineFitToWidth)
+  {
+    this->labelLineFitToWidth=labelLineFitToWidth;
   }
 
   void MapParameter::SetLabelSpace(double labelSpace)

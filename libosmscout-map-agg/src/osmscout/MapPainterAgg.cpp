@@ -120,6 +120,7 @@ namespace osmscout {
 
   void MapPainterAgg::GetTextDimension(const Projection& projection,
                                        const MapParameter& parameter,
+                                       double /*objectWidth*/,
                                        double fontSize,
                                        const std::string& text,
                                        double& xOff,
