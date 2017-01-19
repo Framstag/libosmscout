@@ -352,6 +352,10 @@ void PlaneDBThread::DrawMap()
   osmscout::log.Debug() << "DrawMap()";  
   {
     QMutexLocker locker(&mutex);
+    if (databases.isEmpty()){
+      osmscout::log.Warn() << " No databases!";
+      return;
+    }
     osmscout::FillStyleRef unknownFillStyle;
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
@@ -364,6 +368,7 @@ void PlaneDBThread::DrawMap()
     }
     if (!unknownFillStyle){
       osmscout::log.Warn() << " Can't retrieve UnknownFillStyle";
+      return;
     }
 
     if (currentImage==NULL ||
