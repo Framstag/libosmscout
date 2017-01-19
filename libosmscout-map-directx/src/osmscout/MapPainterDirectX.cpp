@@ -370,7 +370,7 @@ namespace osmscout
 		else
 		{
 			double x, y, w, h;
-			GetTextDimension(projection, parameter, fontSize, "App", x, y, w, h);
+			GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App", x, y, w, h);
 			fontHeightMap[fontSize] = h;
 			height = h;
 		}
