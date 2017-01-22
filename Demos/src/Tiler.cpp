@@ -264,22 +264,17 @@ int main(int argc, char* argv[])
        level<=std::max(startLevel,endLevel);
        level++) {
     osmscout::Magnification magnification;
-    int                     xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
 
     magnification.SetLevel(level);
 
-    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),
-                                    magnification);
-    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),
-                                  magnification);
-    xTileCount=xTileEnd-xTileStart+1;
-
-    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),
-                                    magnification);
-    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),
-                                  magnification);
-
-    yTileCount=yTileEnd-yTileStart+1;
+    osmscout::OSMTileId     tileA(osmscout::GeoCoord(latBottom,lonLeft).GetOSMTile(magnification));
+    osmscout::OSMTileId     tileB(osmscout::GeoCoord(latTop,lonRight).GetOSMTile(magnification));
+    uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
+    uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
+    uint32_t                xTileCount=xTileEnd-xTileStart+1;
+    uint32_t                yTileStart=std::min(tileA.GetY(),tileB.GetY());
+    uint32_t                yTileEnd=std::max(tileA.GetY(),tileB.GetY());
+    uint32_t                yTileCount=yTileEnd-yTileStart+1;
 
     std::cout << "Drawing zoom " << level << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
 
@@ -330,14 +325,14 @@ int main(int argc, char* argv[])
       }
     }
 
-    for (int y=yTileStart; y<=yTileEnd; y++) {
-      for (int x=xTileStart; x<=xTileEnd; x++) {
+    for (uint32_t y=yTileStart; y<=yTileEnd; y++) {
+      for (uint32_t x=xTileStart; x<=xTileEnd; x++) {
         agg::pixfmt_rgb24   pf(rbuf);
         osmscout::StopClock timer;
         osmscout::GeoBox    boundingBox;
         osmscout::MapData   data;
 
-        projection.Set(x,y,
+        projection.Set(osmscout::OSMTileId(x,y),
                        magnification,
                        DPI,
                        tileWidth,
@@ -360,14 +355,13 @@ int main(int argc, char* argv[])
 
         std::map<osmscout::TileId, osmscout::TileRef> ringTileMap;
 
-        for (int ringY=y-tileRingSize; ringY<=y+tileRingSize; ringY++) {
-          for (int ringX=x-tileRingSize; ringX<=x+tileRingSize; ringX++) {
+        for (uint32_t ringY=y-tileRingSize; ringY<=y+tileRingSize; ringY++) {
+          for (uint32_t ringX=x-tileRingSize; ringX<=x+tileRingSize; ringX++) {
             if (ringX==x && ringY==y) {
               continue;
             }
 
-            osmscout::GeoBox boundingBox(osmscout::GeoCoord(osmscout::TileYToLat(ringY,magnification),osmscout::TileXToLon(ringX,magnification)),
-                                         osmscout::GeoCoord(osmscout::TileYToLat(ringY+1,magnification),osmscout::TileXToLon(ringX+1,magnification)));
+            osmscout::GeoBox boundingBox(osmscout::OSMTileId(ringX,ringY).GetBoundingBox(magnification));
 
 
             std::list<osmscout::TileRef> tiles;

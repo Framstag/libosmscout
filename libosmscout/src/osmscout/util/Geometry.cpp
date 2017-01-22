@@ -67,32 +67,32 @@ namespace osmscout {
                                               const GeoCoord& b,
                                               GeoCoord& intersection)
   {
-    double xdelta=b.lon-a.lon;
-    double ydelta=b.lat-a.lat;
+    double xdelta=b.GetLon()-a.GetLon();
+    double ydelta=b.GetLat()-a.GetLat();
 
     if (xdelta==0 && ydelta==0) {
       return std::numeric_limits<double>::infinity();
     }
 
-    double u=((p.lon-a.lon)*xdelta+(p.lat-a.lat)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
+    double u=((p.GetLon()-a.GetLon())*xdelta+(p.GetLat()-a.GetLat())*ydelta)/(xdelta*xdelta+ydelta*ydelta);
 
     double cx,cy;
 
     if (u<0) {
-      cx=a.lon;
-      cy=a.lat;
+      cx=a.GetLon();
+      cy=a.GetLat();
     }
     else if (u>1) {
-      cx=b.lon;
-      cy=b.lat;
+      cx=b.GetLon();
+      cy=b.GetLat();
     }
     else {
-      cx=a.lon+u*xdelta;
-      cy=a.lat+u*ydelta;
+      cx=a.GetLon()+u*xdelta;
+      cy=a.GetLat()+u*ydelta;
     }
 
-    double dx=cx-p.lon;
-    double dy=cy-p.lat;
+    double dx=cx-p.GetLon();
+    double dy=cy-p.GetLat();
 
     intersection.Set(cy,cx);
 

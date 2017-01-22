@@ -268,15 +268,15 @@ void MoveHandler::onTimeout()
 
     view.magnification = projection.GetMagnification();
     view.center=projection.GetCenter();
-    if (view.center.lon < OSMTile::minLon()){
-        view.center.lon = OSMTile::minLon();
-    }else if (view.center.lon > OSMTile::maxLon()){
-        view.center.lon = OSMTile::maxLon();
+    if (view.center.GetLon() < OSMTile::minLon()){
+        view.center.Set(view.center.GetLat(),OSMTile::minLon());
+    }else if (view.center.GetLon() > OSMTile::maxLon()){
+        view.center.Set(view.center.GetLat(),OSMTile::maxLon());
     }
-    if (view.center.lat > OSMTile::maxLat()){
-        view.center.lat = OSMTile::maxLat();
-    }else if (view.center.lat < OSMTile::minLat()){
-        view.center.lat = OSMTile::minLat();
+    if (view.center.GetLat() > OSMTile::maxLat()){
+        view.center.Set(OSMTile::maxLat(),view.center.GetLon());
+    }else if (view.center.GetLat() < OSMTile::minLat()){
+        view.center.Set(OSMTile::minLat(),view.center.GetLon());
     }
 
     emit viewChanged(view);
@@ -362,15 +362,15 @@ bool MoveHandler::moveNow(QVector2D move)
     projection.Move(move.x(), move.y() * -1.0);
 
     view.center=projection.GetCenter();
-    if (view.center.lon < OSMTile::minLon()){
-        view.center.lon = OSMTile::minLon();
-    }else if (view.center.lon > OSMTile::maxLon()){
-        view.center.lon = OSMTile::maxLon();
+    if (view.center.GetLon() < OSMTile::minLon()){
+        view.center.Set(view.center.GetLat(),OSMTile::minLon());
+    }else if (view.center.GetLon() > OSMTile::maxLon()){
+        view.center.Set(view.center.GetLat(),OSMTile::maxLon());
     }
-    if (view.center.lat > OSMTile::maxLat()){
-        view.center.lat = OSMTile::maxLat();
-    }else if (view.center.lat < OSMTile::minLat()){
-        view.center.lat = OSMTile::minLat();
+    if (view.center.GetLat() > OSMTile::maxLat()){
+        view.center.Set(OSMTile::maxLat(),view.center.GetLon());
+    }else if (view.center.GetLat() < OSMTile::minLat()){
+        view.center.Set(OSMTile::minLat(),view.center.GetLon());
     }
 
     emit viewChanged(view);

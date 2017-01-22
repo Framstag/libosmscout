@@ -18,7 +18,9 @@
 */
 
 #include <osmscout/GeoCoord.h>
+
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Tiling.h>
 
 #include <sstream>
 
@@ -333,5 +335,13 @@ namespace osmscout {
       double lon = GetLon();
       GetEllipsoidalDistance(GetLat(), GetLon(), bearing, distance, lat, lon);
       return GeoCoord(lat, lon);
+  }
+
+  OSMTileId GeoCoord::GetOSMTile(const Magnification& magnification) const
+  {
+    double latRad=lat * M_PI/180.0;
+
+    return OSMTileId((uint32_t)(floor((lon + 180.0) / 360.0 *magnification.GetMagnification())),
+                     (uint32_t)(floor((1.0 - log( tan(latRad) + 1.0 / cos(latRad)) / M_PI) / 2.0 * magnification.GetMagnification())));
   }
 }

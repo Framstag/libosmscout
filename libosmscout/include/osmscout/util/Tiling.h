@@ -20,40 +20,126 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/util/Magnification.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
-   * \defgroup Tiling Tiling Helper
+   * \defgroup OSMTile classes for handling OSM Tiles
    *
-   * Collection of classes and methods related to tiles
+   * Class for representing OSM tiles and other data structures build on top
+   * of them.
+   *
+   * \note OSM tiles walk from top left to bottom right over the earth.
+   *
+   * \note OSM tiles only cover the region that is valid for the mercator
+   * projection
+   *
+   * \see http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
+   * coordinate transformation behind OSM tiles.
    */
 
-  /**
-   * \ingroup Tiling
-   */
-  extern OSMSCOUT_API size_t LonToTileX(double lon,
-                                        const Magnification& magnification);
-  /**
-   * \ingroup Tiling
-   */
-  extern OSMSCOUT_API size_t LatToTileY(double lat,
-                                        const Magnification& magnification);
+  // forward declaration to avoid circular header includes
+  class GeoCoord;
+  class GeoBox;
 
   /**
-   * \ingroup Tiling
+   * \ingroup OSMTile
+   *
+   * Representation of the x and y coordinate of a OSM tile.
+   *
+   * \note that OSM tile coordinates are only unique in content fo the
+   * zoom level of the tile. Because in most cases the zoom level beeing
+   * redundant we have defined OSMTile without the zoom level to save in memory
+   * space.
    */
-  extern OSMSCOUT_API double TileXToLon(int x,
-                                        const Magnification& magnification);
-  /**
-   * \ingroup Tiling
-   */
-  extern OSMSCOUT_API double TileYToLat(int y,
-                                        const Magnification& magnification);
+  class OSMSCOUT_API OSMTileId CLASS_FINAL
+  {
+  private:
+    uint32_t x;
+    uint32_t y;
 
+  public:
+    OSMTileId(uint32_t x,
+              uint32_t y);
+
+    inline uint32_t GetX() const
+    {
+      return x;
+    }
+
+    inline uint32_t GetY() const
+    {
+      return y;
+    }
+
+    GeoCoord GetTopLeftCoord(const Magnification& magnification) const;
+    GeoBox GetBoundingBox(const Magnification& magnification) const;
+  };
+
+  /**
+   * \ingroup OSMTile
+   *
+   *  A bounding box defined by two tile ids that span a rectangular region (in
+   *  tile coordinate system)
+   */
+  class OSMSCOUT_API OSMTileIdBox CLASS_FINAL
+  {
+  private:
+    OSMTileId minTile;
+    OSMTileId maxTile;
+
+  public:
+    OSMTileIdBox(const OSMTileId& a,
+                 const OSMTileId& b);
+
+    inline OSMTileId GetMin() const
+    {
+      return minTile;
+    }
+
+    inline OSMTileId GetMax() const
+    {
+      return maxTile;
+    }
+
+    inline uint32_t GetMinX() const
+    {
+      return minTile.GetX();
+    }
+
+    inline uint32_t GetMaxX() const
+    {
+      return maxTile.GetX();
+    }
+
+    inline uint32_t GetMinY() const
+    {
+      return minTile.GetY();
+    }
+
+    inline uint32_t GetMaxY() const
+    {
+      return maxTile.GetY();
+    }
+
+    inline uint32_t GetWidth() const
+    {
+      return maxTile.GetX()-minTile.GetX()+1;
+    }
+
+    inline uint32_t GetHeight() const
+    {
+      return maxTile.GetY()-minTile.GetY()+1;
+    }
+
+    GeoBox GetBoundingBox(const Magnification& magnification) const;
+  };
 }
 
 #endif
