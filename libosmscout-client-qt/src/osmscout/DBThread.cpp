@@ -1010,9 +1010,9 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
       return; // ignore request if db is not initialized
   }
 
-  osmscout::LocationDescription description;
   int count = 0;
   for (auto db:databases){
+    osmscout::LocationDescription description;
     osmscout::GeoBox dbBox;
     if (!db->database->GetBoundingBox(dbBox)){
       continue;
