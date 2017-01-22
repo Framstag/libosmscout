@@ -989,7 +989,10 @@ QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& l
   QString last = name;
   osmscout::FileOffset parentOffset = adminRegion->parentRegionOffset;
   while (parentOffset != 0){
-    osmscout::AdminRegionRef region = regionMap[parentOffset];
+    const auto &it = regionMap.find(parentOffset);
+    if (it==regionMap.end())
+      break;
+    const osmscout::AdminRegionRef region=it->second;
     name = QString::fromStdString(region->name);
     if (last != name){ // skip duplicates in admin region names
       list << name;
@@ -1007,9 +1010,9 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
       return; // ignore request if db is not initialized
   }
 
-  osmscout::LocationDescription description;
   int count = 0;
   for (auto db:databases){
+    osmscout::LocationDescription description;
     osmscout::GeoBox dbBox;
     if (!db->database->GetBoundingBox(dbBox)){
       continue;

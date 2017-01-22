@@ -171,10 +171,15 @@ public:
   inline MapView(osmscout::GeoCoord center, double angle, osmscout::Magnification magnification):
     center(center), angle(angle), magnification(magnification) {}
 
+  /**
+   * This copy constructor don't transfer ownership
+   * in Qt hierarchy - it may cause troubles.
+   * @param mv
+   */
   inline MapView(const MapView &mv):
-    QObject(mv.parent()), center(mv.center), angle(mv.angle), magnification(mv.magnification) {}
+    QObject(), center(mv.center), angle(mv.angle), magnification(mv.magnification) {}
 
-  inline ~MapView(){}
+  virtual inline ~MapView(){}
 
   inline double GetLat(){ return center.GetLat(); }
   inline double GetLon(){ return center.GetLon(); }
