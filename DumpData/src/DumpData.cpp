@@ -495,7 +495,19 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           osmscout::AdminLevelFeatureValue *adminLevelValue=dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
 
           DumpIndent(indent);
-          std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel() << std::endl;
+          std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel();
+
+          if (!adminLevelValue->GetIsIn().empty()) {
+            std::cout << " is in " << adminLevelValue->GetIsIn();
+          }
+
+          std::cout << std::endl;
+        }
+        else if (dynamic_cast<osmscout::IsInFeatureValue*>(value)!=NULL) {
+          osmscout::IsInFeatureValue *isInValue=dynamic_cast<osmscout::IsInFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "IsIn: " << isInValue->GetIsIn() << std::endl;
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);
@@ -700,8 +712,8 @@ int main(int argc, char* argv[])
   }
   catch (std::runtime_error) {
     std::cerr << "ERROR: Cannot set locale" << std::endl;
-  }  
-  
+  }
+
   if (!ParseArguments(argc,
                       argv,
                       map,

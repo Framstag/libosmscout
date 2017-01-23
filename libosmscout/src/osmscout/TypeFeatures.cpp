@@ -340,7 +340,7 @@ namespace osmscout {
     auto street=tags.find(tagAddrStreet);
 
     if (street==tags.end()) {
-      // We are cheating here, but from library view, there is no 
+      // We are cheating here, but from library view, there is no
       // difference in addr:street or addr:place. It is just a address.
       street=tags.find(tagAddrPlace);
       if (street==tags.end()) {
@@ -436,7 +436,7 @@ namespace osmscout {
     auto street=tags.find(tagAddrStreet);
 
     if (street==tags.end()) {
-      // We are cheating here, but from library view, there is no 
+      // We are cheating here, but from library view, there is no
       // difference in addr:street or addr:place. It is just a address.
       street=tags.find(tagAddrPlace);
       if (street==tags.end()) {
@@ -1303,11 +1303,13 @@ namespace osmscout {
   void AdminLevelFeatureValue::Read(FileScanner& scanner)
   {
     scanner.Read(adminLevel);
+    scanner.Read(isIn);
   }
 
   void AdminLevelFeatureValue::Write(FileWriter& writer)
   {
     writer.Write(adminLevel);
+    writer.Write(isIn);
   }
 
   FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
@@ -1316,6 +1318,7 @@ namespace osmscout {
       const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
       adminLevel=otherValue.adminLevel;
+      isIn=otherValue.isIn;
     }
 
     return *this;
@@ -1325,7 +1328,7 @@ namespace osmscout {
   {
     const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
-    return adminLevel==otherValue.adminLevel;
+    return adminLevel==otherValue.adminLevel && isIn==otherValue.isIn;
   }
 
   const char* const AdminLevelFeature::NAME = "AdminLevel";
@@ -1333,6 +1336,7 @@ namespace osmscout {
   void AdminLevelFeature::Initialize(TypeConfig& typeConfig)
   {
     tagAdminLevel=typeConfig.RegisterTag("admin_level");
+    tagIsIn=typeConfig.RegisterTag("is_in");
   }
 
   std::string AdminLevelFeature::GetName() const
@@ -1367,6 +1371,12 @@ namespace osmscout {
         AdminLevelFeatureValue* value=static_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetAdminLevel(adminLevelValue);
+
+        auto isIn=tags.find(tagIsIn);
+
+        if (isIn!=tags.end()) {
+          value->SetIsIn(isIn->second);
+        }
       }
       else {
         progress.Warning(std::string("Admin level is not numeric '")+adminLevel->second+"' for "+object.GetName()+"!");
@@ -1468,7 +1478,7 @@ namespace osmscout {
       progress.Error(std::string("PostalCodeFeature::Parse Exception ")+e.what());
     }
   }
-    
+
   void WebsiteFeatureValue::Read(FileScanner& scanner)
   {
     scanner.Read(website);
@@ -1637,9 +1647,9 @@ namespace osmscout {
         // remove invalid characters from phone number [0123456789+;,] http://wiki.openstreetmap.org/wiki/Key:phone
         // - there can be multiple phone numbers separated by semicolon (some mappers use comma)
         strValue.erase(
-          std::remove_if(strValue.begin(), strValue.end(), [](char x){return (x<'0'||x>'9') && x!='+' && x!=';' && x!=',';}), 
+          std::remove_if(strValue.begin(), strValue.end(), [](char x){return (x<'0'||x>'9') && x!='+' && x!=';' && x!=',';}),
           strValue.end());
-        
+
         size_t idx = feature.GetIndex();
         FeatureValue* fv = buffer.AllocateValue(idx);
         PhoneFeatureValue* value=static_cast<PhoneFeatureValue*>(fv);
@@ -1962,6 +1972,71 @@ namespace osmscout {
           building->second=="false" ||
           building->second=="0")) {
       buffer.AllocateValue(feature.GetIndex());
+    }
+  }
+
+  void IsInFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(isIn);
+  }
+
+  void IsInFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(isIn);
+  }
+
+  FeatureValue& IsInFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const IsInFeatureValue& otherValue=static_cast<const IsInFeatureValue&>(other);
+
+      isIn=otherValue.isIn;
+    }
+
+    return *this;
+  }
+
+  bool IsInFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const IsInFeatureValue& otherValue=static_cast<const IsInFeatureValue&>(other);
+
+    return isIn==otherValue.isIn;
+  }
+
+  const char* const IsInFeature::NAME = "IsIn";
+
+  void IsInFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagIsIn=typeConfig.RegisterTag("is_in");
+  }
+
+  std::string IsInFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t IsInFeature::GetValueSize() const
+  {
+    return sizeof(IsInFeatureValue);
+  }
+
+  FeatureValue* IsInFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) IsInFeatureValue();
+  }
+
+  void IsInFeature::Parse(Progress& /*progress*/,
+                          const TypeConfig& /*typeConfig*/,
+                          const FeatureInstance& feature,
+                          const ObjectOSMRef& /*object*/,
+                          const TagMap& tags,
+                          FeatureValueBuffer& buffer) const
+  {
+    auto isIn=tags.find(tagIsIn);
+
+    if (isIn!=tags.end() && !isIn->second.empty()) {
+      IsInFeatureValue* value=static_cast<IsInFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      value->SetIsIn(isIn->second);
     }
   }
 }
