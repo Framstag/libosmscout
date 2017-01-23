@@ -19,6 +19,8 @@
 
 #include <osmscout/util/Tiling.h>
 
+#include <algorithm>
+
 #include <osmscout/GeoCoord.h>
 
 #include <osmscout/util/GeoBox.h>
