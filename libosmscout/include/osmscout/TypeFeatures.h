@@ -1742,6 +1742,7 @@ namespace osmscout {
   typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
   typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
   typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
+  typedef FeatureValueReader<IsInFeature,IsInFeatureValue>                         IsInFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader
