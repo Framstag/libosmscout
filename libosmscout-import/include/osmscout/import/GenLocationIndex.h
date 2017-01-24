@@ -137,7 +137,6 @@ namespace osmscout {
     {
       ObjectFileRef                       reference;
       std::string                         name;
-      size_t                              level;
       std::vector<std::vector<GeoCoord> > areas;
     };
 
@@ -219,12 +218,11 @@ namespace osmscout {
                           Progress& progress,
                           const TypeConfigRef& typeConfig,
                           const TypeInfoSet& boundaryTypes,
-                          std::list<Boundary>& boundaryAreas);
+                          std::vector<std::list<Boundary>>& boundaryAreas);
 
     void SortInBoundaries(Progress& progress,
                           Region& rootRegion,
-                          const std::list<Boundary>& boundaryAreas,
-                          size_t level);
+                          const std::list<Boundary>& boundaryAreas);
 
     bool IndexRegionAreas(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,
