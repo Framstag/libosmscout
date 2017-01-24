@@ -360,6 +360,19 @@ namespace osmscout {
 
   /**
    * \ingroup Util
+   * Assumes that the string consists of a number of values separated by one of the given divider.
+   * If the list consists of one entry, no divider is used.
+   *
+   * Returns the first entry in the list
+   *
+   * \note stringList must not be empty
+   * \note at least one devidier must be given
+   */
+  extern OSMSCOUT_API std::string GetFirstInStringList(const std::string& stringList,
+                                                       const std::string& divider);
+
+  /**
+   * \ingroup Util
    * Converts the given string into a list of whitespace or colon-separated strings.
    */
   extern OSMSCOUT_API void TokenizeString(const std::string& input,

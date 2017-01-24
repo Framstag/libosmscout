@@ -206,6 +206,22 @@ namespace osmscout {
     }
   }
 
+  std::string GetFirstInStringList(const std::string& stringList,
+                                   const std::string& divider)
+  {
+    assert(!stringList.empty());
+    assert(!divider.empty());
+
+    std::string::size_type pos=stringList.find_first_of(divider);
+
+    if (pos==std::string::npos) {
+      return stringList;
+    }
+    else {
+      return stringList.substr(0,pos);
+    }
+  }
+
   void TokenizeString(const std::string& input,
                       std::list<std::string>& tokens)
   {
