@@ -493,7 +493,7 @@ namespace osmscout {
                                                 Progress& progress,
                                                 const TypeConfigRef& typeConfig,
                                                 const TypeInfoSet& boundaryTypes,
-                                                std::vector<std::list<Boundary>>& boundaryAreas)
+                                                std::vector<std::list<RegionRef>>& boundaryAreas)
   {
     FileScanner                  scanner;
     NameFeatureValueReader       nameReader(*typeConfig);
@@ -535,11 +535,11 @@ namespace osmscout {
           continue;
         }
 
-        Boundary boundary;
+        RegionRef region=std::make_shared<Region>();
         size_t   level=adminLevelValue->GetAdminLevel();
 
-        boundary.reference.Set(area.GetFileOffset(),refArea);
-        boundary.name=nameValue->GetName();
+        region->reference=area.GetObjectFileRef();
+        region->name=nameValue->GetName();
 
         for (const auto& ring : area.rings) {
           if (ring.IsOuterRing()) {
@@ -549,15 +549,17 @@ namespace osmscout {
               coords.push_back(node.GetCoord());
             }
 
-            boundary.areas.push_back(coords);
+            region->areas.push_back(coords);
           }
         }
+
+        region->CalculateMinMax();
 
         if (level>=boundaryAreas.size()) {
           boundaryAreas.resize(level+1);
         }
 
-        boundaryAreas[level].push_back(boundary);
+        boundaryAreas[level].push_back(region);
       }
 
       scanner.Close();
@@ -572,24 +574,16 @@ namespace osmscout {
 
   void LocationIndexGenerator::SortInBoundaries(Progress& progress,
                                                 Region& rootRegion,
-                                                const std::list<Boundary>& boundaryAreas)
+                                                const std::list<RegionRef>& boundaryAreas)
   {
     size_t currentBoundary=0;
     size_t maxBoundary=boundaryAreas.size();
 
-    for (const auto&  boundary : boundaryAreas) {
+    for (const auto&  region : boundaryAreas) {
       currentBoundary++;
 
       progress.SetProgress(currentBoundary,
                            maxBoundary);
-
-      RegionRef region(new Region());
-
-      region->reference=boundary.reference;
-      region->name=boundary.name;
-      region->areas=boundary.areas;
-
-      region->CalculateMinMax();
 
       AddRegion(rootRegion,
                 region);
@@ -1910,13 +1904,15 @@ namespace osmscout {
     RegionIndex                        regionIndex;
     TypeInfoRef                        boundaryType;
     TypeInfoSet                        boundaryTypes(*typeConfig);
-    std::vector<std::list<Boundary>>   boundaryAreas;
+    std::vector<std::list<RegionRef>>  boundaryAreas;
     std::list<std::string>             regionIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
 
     progress.SetAction("Setup");
 
     errorReporter=parameter.GetErrorReporter();
+
+    // just from local experience, if it is not enough, GetBoundaryAreas will increase it ;-)
     boundaryAreas.resize(13);
 
     try {
