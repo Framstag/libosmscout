@@ -334,6 +334,10 @@ namespace osmscout {
       }
       out << " + " << childRegion->name << " " << childRegion->reference.GetTypeName() << " " << childRegion->reference.GetFileOffset();
 
+      if (!childRegion->isIn.empty()) {
+        out << " (in " << childRegion->isIn << ")";
+      }
+
       if (childRegion->areas.size()>1) {
         out << " " << childRegion->areas.size() << " areas";
       }
@@ -483,6 +487,11 @@ namespace osmscout {
       }
     }
 
+    if (!region->isIn.empty() &&
+      parent.name!=region->isIn) {
+      errorReporter->ReportLocation(region->reference,"Parent should be '"+region->isIn+"' but is '"+parent.name+"'");
+    }
+
     parent.regions.push_back(region);
   }
 
@@ -540,6 +549,10 @@ namespace osmscout {
 
         region->reference=area.GetObjectFileRef();
         region->name=nameValue->GetName();
+
+        if (!adminLevelValue->GetIsIn().empty()) {
+          region->isIn=GetFirstInStringList(adminLevelValue->GetIsIn(),",;");
+        }
 
         for (const auto& ring : area.rings) {
           if (ring.IsOuterRing()) {
@@ -602,6 +615,7 @@ namespace osmscout {
     uint32_t               areaCount;
     size_t                 areasFound=0;
     NameFeatureValueReader nameReader(typeConfig);
+    IsInFeatureValueReader isInReader(typeConfig);
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -630,11 +644,16 @@ namespace osmscout {
           continue;
         }
 
-
         RegionRef region=std::make_shared<Region>();
 
         region->reference.Set(area.GetFileOffset(),refArea);
         region->name=nameValue->GetName();
+
+        IsInFeatureValue *isInValue=isInReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+
+        if (isInValue!=NULL) {
+          region->isIn=GetFirstInStringList(isInValue->GetIsIn(),",;");
+        }
 
         for (const auto& ring : area.rings) {
           if (ring.IsOuterRing()) {
@@ -1907,8 +1926,6 @@ namespace osmscout {
     std::vector<std::list<RegionRef>>  boundaryAreas;
     std::list<std::string>             regionIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
-
-    progress.SetAction("Setup");
 
     errorReporter=parameter.GetErrorReporter();
 
