@@ -1,49 +1,62 @@
-# - Try to find Cairo
-# Once done, this will define
+# - try to find Cairo
+# Once done this will define
 #
 #  CAIRO_FOUND - system has Cairo
+#  CAIRO_CFLAGS - the Cairo CFlags
 #  CAIRO_INCLUDE_DIRS - the Cairo include directories
-#  CAIRO_LIBRARIES - link these to use Cairo
+#  CAIRO_LIBRARIES - Link these to use Cairo
 #
-FIND_PACKAGE(PkgConfig)
-PKG_CHECK_MODULES(PC_CAIRO QUIET cairo)
+# Copyright (C) 2007, 2010, Pino Toscano, <pino@kde.org>
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-FIND_PATH(CAIRO_INCLUDE_DIRS
-    NAMES cairo.h
-    HINTS ${PC_CAIRO_INCLUDEDIR}
-          ${PC_CAIRO_INCLUDE_DIRS}
-		  $ENV{CAIRO_HOME}/include
-		  $ENV{CAIRO_ROOT}/include
-		  /usr/local/include
-		  /usr/include
-		  /cairo/include
-    PATH_SUFFIXES cairo
+if(CAIRO_INCLUDE_DIRS AND CAIRO_LIBRARIES)
+
+  # in cache already
+  set(CAIRO_FOUND TRUE)
+
+else(CAIRO_INCLUDE_DIRS AND CAIRO_LIBRARIES)
+
+if(NOT WIN32)
+  # use pkg-config to get the directories and then use these values
+  # in the FIND_PATH() and FIND_LIBRARY() calls
+  find_package(PkgConfig REQUIRED)
+  if(Cairo_FIND_VERSION_COUNT GREATER 0)
+    set(_cairo_version_cmp ">=${Cairo_FIND_VERSION}")
+  endif(Cairo_FIND_VERSION_COUNT GREATER 0)
+  pkg_check_modules(_pc_cairo cairo${_cairo_version_cmp})
+  if(_pc_cairo_FOUND)
+    set(CAIRO_FOUND TRUE)
+  endif(_pc_cairo_FOUND)
+else(NOT WIN32)
+  # assume so, for now
+  set(CAIRO_FOUND TRUE)
+endif(NOT WIN32)
+
+if(CAIRO_FOUND)
+  # set it back as false
+  set(CAIRO_FOUND FALSE)
+
+  find_library(CAIRO_LIBRARY cairo
+               HINTS ${_pc_cairo_LIBRARY_DIRS}
+  )
+  set(CAIRO_LIBRARIES "${CAIRO_LIBRARY}")
+
+  find_path(CAIRO_INCLUDE_DIR cairo.h
+            HINTS ${_pc_cairo_INCLUDE_DIRS}
+            PATH_SUFFIXES cairo
+  )
+  set(CAIRO_INCLUDE_DIRS "${CAIRO_INCLUDE_DIR}")
+
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Cairo DEFAULT_MSG CAIRO_LIBRARIES CAIRO_INCLUDE_DIRS)
+endif(CAIRO_FOUND)
+
+endif(CAIRO_INCLUDE_DIRS AND CAIRO_LIBRARIES)
+
+mark_as_advanced(
+  CAIRO_CFLAGS
+  CAIRO_INCLUDE_DIRS
+  CAIRO_LIBRARIES
 )
-
-FIND_LIBRARY(CAIRO_LIBRARIES
-    NAMES cairo
-    HINTS ${PC_CAIRO_LIBDIR}
-          ${PC_CAIRO_LIBRARY_DIRS}
-		  $ENV{CAIRO_HOME}/lib
-		  $ENV{CAIRO_ROOT}/lib
-		  /usr/local/lib
-		  /usr/lib
-		  /lib
-		  /cairo/lib
-)
-
-IF (CAIRO_INCLUDE_DIRS)
-    IF (EXISTS "${CAIRO_INCLUDE_DIRS}/cairo-version.h")
-        FILE(READ "${CAIRO_INCLUDE_DIRS}/cairo-version.h" CAIRO_VERSION_CONTENT)
-        STRING(REGEX MATCH "#define +CAIRO_VERSION_MAJOR +([0-9]+)" _dummy "${CAIRO_VERSION_CONTENT}")
-        SET(CAIRO_VERSION_MAJOR "${CMAKE_MATCH_1}")
-        STRING(REGEX MATCH "#define +CAIRO_VERSION_MINOR +([0-9]+)" _dummy "${CAIRO_VERSION_CONTENT}")
-        SET(CAIRO_VERSION_MINOR "${CMAKE_MATCH_1}")
-        STRING(REGEX MATCH "#define +CAIRO_VERSION_MICRO +([0-9]+)" _dummy "${CAIRO_VERSION_CONTENT}")
-        SET(CAIRO_VERSION_MICRO "${CMAKE_MATCH_1}")
-        SET(CAIRO_VERSION "${CAIRO_VERSION_MAJOR}.${CAIRO_VERSION_MINOR}.${CAIRO_VERSION_MICRO}")
-    ENDIF ()
-ENDIF ()
-
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cairo DEFAULT_MSG CAIRO_INCLUDE_DIRS CAIRO_LIBRARIES CAIRO_VERSION)
