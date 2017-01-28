@@ -489,7 +489,7 @@ namespace osmscout {
 
     if (!region->isIn.empty() &&
       parent.name!=region->isIn) {
-      errorReporter->ReportLocation(region->reference,"Parent should be '"+region->isIn+"' but is '"+parent.name+"'");
+      errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
     }
 
     parent.regions.push_back(region);
