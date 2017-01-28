@@ -134,7 +134,7 @@ void Settings::SetOnlineTilesEnabled(bool b)
 
 const QList<OnlineTileProvider> Settings::GetOnlineProviders() const
 {
-    return onlineProviders.values();
+    return onlineProviders;
 }
 
 const QList<MapProvider> Settings::GetMapProviders() const
@@ -144,8 +144,8 @@ const QList<MapProvider> Settings::GetMapProviders() const
 
 const OnlineTileProvider Settings::GetOnlineTileProvider() const
 {
-    if (onlineProviders.contains(GetOnlineTileProviderId())){
-        return onlineProviders[GetOnlineTileProviderId()];
+    if (onlineProviderMap.contains(GetOnlineTileProviderId())){
+        return onlineProviderMap[GetOnlineTileProviderId()];
     }
     return OnlineTileProvider();
 }
@@ -154,7 +154,7 @@ const QString Settings::GetOnlineTileProviderId() const
 {
     QString def = "?";
     if (!onlineProviders.isEmpty()){
-        def = onlineProviders.begin().key();
+        def = onlineProviders.begin()->getId();
     }
     return settings.value("onlineTileProvider", def).toString();
 }
@@ -181,16 +181,19 @@ bool Settings::loadOnlineTileProviders(QString path)
         OnlineTileProvider provider = OnlineTileProvider::fromJson(obj);
         if (!provider.isValid()){
             qWarning() << "Can't parse online provider from json value" << obj;
-        }else{    
-            onlineProviders[provider.getId()] = provider;
+        }else{
+            if (!onlineProviderMap.contains(provider.getId())){
+              onlineProviderMap[provider.getId()] = provider;
+              onlineProviders << provider;
+            }
         }
     }
     
     // check if current provider is valid...
-    if (!onlineProviders.contains(GetOnlineTileProviderId())){
+    if (!onlineProviderMap.contains(GetOnlineTileProviderId())){
         // ...if not, setup first
         if (!onlineProviders.isEmpty()){
-            SetOnlineTileProviderId(onlineProviders.begin().key());
+            SetOnlineTileProviderId(onlineProviders.begin()->getId());
         }
     }    
     
