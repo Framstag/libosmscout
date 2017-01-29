@@ -121,6 +121,13 @@ namespace osmscout {
     cache.SetSize(cacheSize);
   }
 
+  size_t MapService::GetCacheSize() const
+  {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
+    return cache.GetSize();
+  }
+
   /**
    * Evict tiles from cache until tile count <= cacheSize
    */
