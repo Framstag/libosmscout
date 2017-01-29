@@ -2194,7 +2194,13 @@ namespace osmscout {
         if ((sizeByte & 0x80) != 0) {
           Read(sizeByte);
 
-          nodeCount|=sizeByte << 11;
+          nodeCount|=(sizeByte & 0x7f) << 11;
+            
+          if ((sizeByte & 0x80) != 0) {
+             Read(sizeByte);
+
+             nodeCount|=sizeByte << 18;
+          }
         }
       }
     }
@@ -2221,7 +2227,13 @@ namespace osmscout {
         if ((sizeByte & 0x80) != 0) {
           Read(sizeByte);
 
-          nodeCount|=sizeByte << 12;
+          nodeCount|=(sizeByte & 0x7f) << 12;
+            
+          if ((sizeByte & 0x80) != 0) {
+            Read(sizeByte);
+                
+            nodeCount|=sizeByte << 19;
+          }
         }
       }
     }
