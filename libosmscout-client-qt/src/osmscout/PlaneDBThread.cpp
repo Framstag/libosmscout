@@ -260,6 +260,12 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
         std::list<osmscout::TileRef> tiles;
 
         db->mapService->LookupTiles(projection,tiles);
+        if (tiles.size()>db->mapService->GetCacheSize()){
+          osmscout::log.Debug() << "Increase tile cache size to " << tiles.size();
+          db->mapService->SetCacheSize(tiles.size());
+          // lookup tiles again
+          db->mapService->LookupTiles(projection,tiles);
+        }
         if (!db->mapService->LoadMissingTileDataAsync(searchParameter,*(db->styleConfig),tiles)) {
           osmscout::log.Error() << "*** Loading of data has error or was interrupted";
           continue;

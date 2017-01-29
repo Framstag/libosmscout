@@ -229,6 +229,7 @@ namespace osmscout {
     virtual ~MapService();
 
     void SetCacheSize(size_t cacheSize);
+    size_t GetCacheSize() const;
 
     void CleanupTileCache();
     void FlushTileCache();
