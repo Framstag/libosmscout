@@ -1079,7 +1079,6 @@ namespace osmscout {
                            true);
 
     return result.get();
-    //return LoadMissingTileData(parameter,styleConfig,tiles,true);
   }
 
   bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,
