@@ -845,7 +845,7 @@ namespace osmscout {
         StopClock     tileLoadingTime;
         Magnification magnification;
 
-        //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
+        //std::cout << "Loading tile: " << tile->GetId().DisplayText() << std::endl;
 
         magnification.SetLevel(tile->GetId().GetLevel());
 
@@ -915,7 +915,7 @@ namespace osmscout {
 
       }
       else {
-        //std::cout << "Using cached tile: " << (std::string)tile->GetId() << std::endl;
+        //std::cout << "Using cached tile: " << tile->GetId().DisplayText() << std::endl;
       }
     }
 
