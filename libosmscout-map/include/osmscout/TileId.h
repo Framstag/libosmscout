@@ -52,7 +52,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API TileId
   {
   private:
-    Magnification magnification; //!< the zoom level (0..n)
+    uint32_t      level;         //!< the zoom level (0..n)
     size_t        x;             //!< The x coordinate of the tile in relation to the zoom level
     size_t        y;             //!< The y coordinate of the tile in relation to the zoom level
     GeoBox        boundingBox;   //!< Bounding box of the tile
@@ -67,7 +67,7 @@ namespace osmscout {
      */
     inline size_t GetLevel() const
     {
-      return magnification.GetLevel();
+      return level;
     }
 
     /**
