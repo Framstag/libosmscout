@@ -207,9 +207,9 @@ namespace osmscout {
                             const std::list<CoastRef>& coastlines,
                             Level& level);
 
-    void CalculateLandCells(Progress& progress,
-                            Level& level,
-                            const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
+    void CalculateCoastEnvironment(Progress& progress,
+                                   Level& level,
+                                   const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
     void GetCells(const Level& level,
                   const GeoCoord& a,

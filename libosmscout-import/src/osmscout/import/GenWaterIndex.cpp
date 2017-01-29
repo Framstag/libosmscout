@@ -364,7 +364,7 @@ namespace osmscout {
 
 
   /**
-   * Markes a cell as "coast", if one of the coastlines intersects with it..
+   * Markes a cell as "coast", if one of the coastlines intersects with it.
    *
    */
   void WaterIndexGenerator::MarkCoastlineCells(Progress& progress,
@@ -384,7 +384,7 @@ namespace osmscout {
         if (level.IsInAbsolute(coord.x,coord.y)) {
           if (level.GetState(coord.x-level.cellXStart,coord.y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-            std::cout << "Coastline: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << std::endl;
+            std::cout << "Coastline: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " " << coastline->id << std::endl;
 #endif
             level.SetStateAbsolute(coord.x,coord.y,coast);
           }
@@ -394,16 +394,20 @@ namespace osmscout {
     }
   }
 
-  void WaterIndexGenerator::CalculateLandCells(Progress& progress,
-                                               Level& level,
-                                               const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
+  /**
+   * Calculate the cell type for cells directly around coast cells
+   * @param progress
+   * @param level
+   * @param cellGroundTileMap
+   */
+  void WaterIndexGenerator::CalculateCoastEnvironment(Progress& progress,
+                                                      Level& level,
+                                                      const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
   {
-    progress.Info("Calculate land cells");
+    progress.Info("Calculate coast cell environment");
 
-    for (std::map<Pixel,std::list<GroundTile> >::const_iterator coord=cellGroundTileMap.begin();
-        coord!=cellGroundTileMap.end();
-        ++coord) {
-      State state[4]; // top, right, bottom, left
+    for (const auto& tileEntry : cellGroundTileMap) {
+      State state[4]; // type of the neighbouring cells: top, right, bottom, left
 
       state[0]=unknown;
       state[1]=unknown;
@@ -411,26 +415,27 @@ namespace osmscout {
       state[3]=unknown;
 
       // Preset top
-      if (coord->first.y<level.cellYCount-1) {
-        state[0]=level.GetState(coord->first.x,coord->first.y+1);
+      if (tileEntry.first.y<level.cellYCount-1) {
+        state[0]=level.GetState(tileEntry.first.x,tileEntry.first.y+1);
       }
 
       // Preset right
-      if (coord->first.x<level.cellXCount-1) {
-        state[1]=level.GetState(coord->first.x+1,coord->first.y);
+      if (tileEntry.first.x<level.cellXCount-1) {
+        state[1]=level.GetState(tileEntry.first.x+1,tileEntry.first.y);
       }
 
       // Preset bottom
-      if (coord->first.y>0) {
-        state[2]=level.GetState(coord->first.x,coord->first.y-1);
+      if (tileEntry.first.y>0) {
+        state[2]=level.GetState(tileEntry.first.x,tileEntry.first.y-1);
       }
 
       // Preset left
-      if (coord->first.x>0) {
-        state[3]=level.GetState(coord->first.x-1,coord->first.y);
+      if (tileEntry.first.x>0) {
+        state[3]=level.GetState(tileEntry.first.x-1,tileEntry.first.y);
       }
 
-      for (const auto& tile : coord->second) {
+      // Identify 'land' cells in relation to 'coast' cells
+      for (const auto& tile : tileEntry.second) {
         for (size_t c=0; c<tile.coords.size()-1;c++) {
           // Top
           if (tile.coords[c].x==0 &&
@@ -518,45 +523,75 @@ namespace osmscout {
         }
       }
 
-      if (coord->first.y<level.cellYCount-1) {
+      if (tileEntry.first.y<level.cellYCount-1 &&
+        level.GetState(tileEntry.first.x,tileEntry.first.y+1)!=unknown) {
         if (state[0]!=unknown) {
-          level.SetState(coord->first.x,coord->first.y+1,state[0]);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume " << StateToString(state[0]) << " above coast: " << tileEntry.first.x << "," << tileEntry.first.y+1 << std::endl;
+#endif
+          level.SetState(tileEntry.first.x,tileEntry.first.y+1,state[0]);
         }
         else {
-          level.SetState(coord->first.x,coord->first.y+1,water);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume water above coast: " << tileEntry.first.x << "," << tileEntry.first.y+1 << std::endl;
+#endif
+          level.SetState(tileEntry.first.x,tileEntry.first.y+1,water);
         }
       }
 
-      if (coord->first.x<level.cellXCount-1) {
+      if (tileEntry.first.x<level.cellXCount-1 &&
+        level.GetState(tileEntry.first.x+1,tileEntry.first.y)!=unknown) {
         if (state[1]!=unknown) {
-          level.SetState(coord->first.x+1,coord->first.y,state[1]);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume " << StateToString(state[1]) << " right of coast: " << tileEntry.first.x+1 << "," << tileEntry.first.y << std::endl;
+#endif
+          level.SetState(tileEntry.first.x+1,tileEntry.first.y,state[1]);
         }
         else {
-          level.SetState(coord->first.x+1,coord->first.y,water);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume water right of coast: " << tileEntry.first.x+1 << "," << tileEntry.first.y << std::endl;
+#endif
+          level.SetState(tileEntry.first.x+1,tileEntry.first.y,water);
         }
       }
 
-      if (coord->first.y>0) {
+      if (tileEntry.first.y>0 &&
+        level.GetState(tileEntry.first.x,tileEntry.first.y-1)!=unknown) {
         if (state[2]!=unknown) {
-          level.SetState(coord->first.x,coord->first.y-1,state[2]);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume " << StateToString(state[2]) << " below coast: " << tileEntry.first.x << "," << tileEntry.first.y-1 << std::endl;
+#endif
+          level.SetState(tileEntry.first.x,tileEntry.first.y-1,state[2]);
         }
         else {
-          level.SetState(coord->first.x,coord->first.y-1,water);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume water below coast: " << tileEntry.first.x << "," << tileEntry.first.y-1 << std::endl;
+#endif
+          level.SetState(tileEntry.first.x,tileEntry.first.y-1,water);
         }
       }
 
-      if (coord->first.x>0) {
+      if (tileEntry.first.x>0 &&
+        level.GetState(tileEntry.first.x-1,tileEntry.first.y)!=unknown) {
         if (state[3]!=unknown) {
-          level.SetState(coord->first.x-1,coord->first.y,state[3]);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume " << StateToString(state[3]) << " left of coast: " << tileEntry.first.x-1 << "," << tileEntry.first.y << std::endl;
+#endif
+          level.SetState(tileEntry.first.x-1,tileEntry.first.y,state[3]);
         }
         else {
-          level.SetState(coord->first.x-1,coord->first.y,water);
+#if defined(DEBUG_TILING)
+          std::cout << "Assume water left of coast: " << tileEntry.first.x-1 << "," << tileEntry.first.y << std::endl;
+#endif
+          level.SetState(tileEntry.first.x-1,tileEntry.first.y,water);
         }
       }
     }
   }
 
   /**
+   * Assume cell type 'land' for cells that intersect with 'land' object types
+   *
    * Every cell that is unknown but contains a way (that is marked
    * as "to be ignored"), must be land.
    */
@@ -623,6 +658,8 @@ namespace osmscout {
   }
 
   /**
+   * Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
+   *
    * Converts all cells of state "unknown" that touch a tile with state
    * "water" to state "water", too.
    */
@@ -682,6 +719,8 @@ namespace osmscout {
   }
 
   /**
+   * Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
+   *
    * Scanning from left to right and bottom to top: Every tile that is unknown
    * but is placed between land and coast or land cells must be land, too.
    */
@@ -821,6 +860,14 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Fills coords information for cells that completely contain a coastline
+   *
+   * @param progress
+   * @param level
+   * @param data
+   * @param cellGroundTileMap
+   */
   void WaterIndexGenerator::HandleAreaCoastlinesCompletelyInACell(Progress& progress,
                                                                   const Level& level,
                                                                   Data& data,
@@ -1376,8 +1423,7 @@ namespace osmscout {
   }
 
   /**
-   * The algorithm is as following:
-   * TODO
+   * Fills coords information for cells that intersect a coastline
    */
   void WaterIndexGenerator::HandleCoastlinesPartiallyInACell(Progress& progress,
                                                              const std::list<CoastRef>& coastlines,
@@ -1741,6 +1787,7 @@ namespace osmscout {
         progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 
         if (!coastlines.empty()) {
+          // Mark cells that intersect a coastline as coast
           MarkCoastlineCells(progress,
                              coastlines,
                              levels[level]);
@@ -1752,11 +1799,13 @@ namespace osmscout {
                            coastlines,
                            data);
 
+          // Fills coords information for cells that completely contain a coastline
           HandleAreaCoastlinesCompletelyInACell(progress,
                                                 levels[level],
                                                 data,
                                                 cellGroundTileMap);
 
+          // Fills coords information for cells that intersect a coastline
           HandleCoastlinesPartiallyInACell(progress,
                                            coastlines,
                                            levels[level],
@@ -1764,11 +1813,13 @@ namespace osmscout {
                                            data);
         }
 
-        CalculateLandCells(progress,
-                           levels[level],
-                           cellGroundTileMap);
+        // Calculate the cell type for cells directly around coast cells
+        CalculateCoastEnvironment(progress,
+                                  levels[level],
+                                  cellGroundTileMap);
 
         if (parameter.GetAssumeLand()) {
+          // Assume cell type 'land' for cells that intersect with 'land' object types
           AssumeLand(parameter,
                      progress,
                      *typeConfig,
@@ -1776,10 +1827,12 @@ namespace osmscout {
         }
 
         if (!coastlines.empty()) {
+          // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
           FillWater(progress,
                     levels[level],20);
         }
 
+        // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
         FillLand(progress,
                  levels[level]);
 
