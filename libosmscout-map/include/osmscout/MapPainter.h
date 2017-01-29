@@ -237,7 +237,7 @@ namespace osmscout {
     //@{
     FillStyleRef                 landFill;
     FillStyleRef                 seaFill;
-    LabelStyleRef                debugLabel;
+    TextStyleRef                 debugLabel;
     FeatureValueBuffer           coastlineSegmentAttributes;
     //@}
 

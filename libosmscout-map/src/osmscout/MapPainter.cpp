@@ -115,8 +115,8 @@ namespace osmscout {
 
     textStyle->SetStyle(TextStyle::normal);
     textStyle->SetPriority(0);
-    textStyle->SetTextColor(Color(0,0,0,0.5));
-    textStyle->SetSize(1.2);
+    textStyle->SetTextColor(Color(0,0,0,0.9));
+    textStyle->SetSize(0.7);
 
     debugLabel=textStyle;
   }
@@ -509,16 +509,14 @@ namespace osmscout {
       unknownFill=this->seaFill;
     }
 
-    for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
-        tile!=data.groundTiles.end();
-        ++tile) {
+    for (const auto& tile : data.groundTiles) {
       AreaData areaData;
 
-      if (tile->type==GroundTile::unknown && !parameter.GetRenderUnknowns()){
+      if (tile.type==GroundTile::unknown && !parameter.GetRenderUnknowns()){
         continue;
       }
 
-      switch (tile->type) {
+      switch (tile.type) {
       case GroundTile::land:
         areaData.fillStyle=landFill;
         break;
@@ -533,14 +531,14 @@ namespace osmscout {
         break;
       }
 
-      GeoCoord minCoord(tile->yAbs*tile->cellHeight-90.0,
-                        tile->xAbs*tile->cellWidth-180.0);
-      GeoCoord maxCoord(minCoord.GetLat()+tile->cellHeight,
-                        minCoord.GetLon()+tile->cellWidth);
+      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
+                        tile.xAbs*tile.cellWidth-180.0);
+      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
+                        minCoord.GetLon()+tile.cellWidth);
 
       areaData.boundingBox.Set(minCoord,maxCoord);
 
-      if (tile->coords.empty()) {
+      if (tile.coords.empty()) {
         points.resize(5);
 
         points[0].SetCoord(areaData.boundingBox.GetMinCoord());
@@ -573,14 +571,14 @@ namespace osmscout {
                                           ceil(transBuffer.transPolygon.points[s+4].y));
       }
       else {
-        points.resize(tile->coords.size());
+        points.resize(tile.coords.size());
 
-        for (size_t i=0; i<tile->coords.size(); i++) {
+        for (size_t i=0; i<tile.coords.size(); i++) {
           double lat;
           double lon;
 
-          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile->coords[i].y*tile->cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile->coords[i].x*tile->cellWidth/GroundTile::Coord::CELL_MAX;
+          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
 
           points[i].SetCoord(GeoCoord(lat,lon));
         }
@@ -593,20 +591,20 @@ namespace osmscout {
         for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
           double x,y;
 
-          if (tile->coords[i].x==0) {
+          if (tile.coords[i].x==0) {
             x=floor(transBuffer.transPolygon.points[i].x);
           }
-          else if (tile->coords[i].x==GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[i].x==GroundTile::Coord::CELL_MAX) {
             x=ceil(transBuffer.transPolygon.points[i].x);
           }
           else {
             x=transBuffer.transPolygon.points[i].x;
           }
 
-          if (tile->coords[i].y==0) {
+          if (tile.coords[i].y==0) {
             y=ceil(transBuffer.transPolygon.points[i].y);
           }
-          else if (tile->coords[i].y==GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[i].y==GroundTile::Coord::CELL_MAX) {
             y=floor(transBuffer.transPolygon.points[i].y);
           }
           else {
@@ -627,20 +625,20 @@ namespace osmscout {
           size_t lineStart=0;
           size_t lineEnd;
 
-          while (lineStart<tile->coords.size()) {
-            while (lineStart<tile->coords.size() &&
-                   !tile->coords[lineStart].coast) {
+          while (lineStart<tile.coords.size()) {
+            while (lineStart<tile.coords.size() &&
+                   !tile.coords[lineStart].coast) {
               lineStart++;
             }
 
-            if (lineStart>=tile->coords.size()) {
+            if (lineStart>=tile.coords.size()) {
               continue;
             }
 
             lineEnd=lineStart;
 
-            while (lineEnd<tile->coords.size() &&
-                   tile->coords[lineEnd].coast) {
+            while (lineEnd<tile.coords.size() &&
+                   tile.coords[lineEnd].coast) {
               lineEnd++;
             }
 
@@ -673,19 +671,18 @@ namespace osmscout {
       DrawArea(projection,parameter,areaData);
 
 #if defined(DEBUG_GROUNDTILES)
+      size_t   labelId=nextLabelId++;
       GeoCoord cc=areaData.boundingBox.GetCenter();
 
       std::string label;
 
-      size_t x=(cc.GetLon()+180)/tile->cellWidth;
-      size_t y=(cc.GetLat()+90)/tile->cellHeight;
+      size_t x=(cc.GetLon()+180)/tile.cellWidth;
+      size_t y=(cc.GetLat()+90)/tile.cellHeight;
 
-      label=NumberToString(tile->xRel);
-      label+=",";
-      label+=NumberToString(tile->yRel);
+      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
 
-      double lon=(x*tile->cellWidth+tile->cellWidth/2)-180.0;
-      double lat=(y*tile->cellHeight+tile->cellHeight/2)-90.0;
+      double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
+      double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
 
       double px;
       double py;
@@ -693,23 +690,35 @@ namespace osmscout {
       projection.GeoToPixel(GeoCoord(lat,lon),
                             px,py);
 
-
       if (drawnLabels.find(GeoCoord(x,y))!=drawnLabels.end()) {
         continue;
       }
 
-      LabelData labelData;
+      LabelLayoutData labelData;
 
-      labelData.id=nextLabelId++;
-      labelData.x=px;
-      labelData.y=py;
-      labelData.alpha=0.5;
-      labelData.fontSize=1.2;
-      labelData.style=debugLabel;
-      labelData.text=label;
+      labelData.fontSize=debugLabel->GetSize();
 
-      LabelDataRef ref;
-      labels.Placelabel(labelData, ref);
+      GetTextDimension(projection,
+                       parameter,
+                       -1,
+                       labelData.fontSize,
+                       label,
+                       labelData.xOff,
+                       labelData.yOff,
+                       labelData.width,
+                       labelData.height);
+
+      labelData.alpha=debugLabel->GetAlpha();
+      labelData.position=0;
+      labelData.label=label;
+      labelData.textStyle=debugLabel;
+      labelData.icon=false;
+
+      RegisterPointLabel(projection,
+                         parameter,
+                         labelData,
+                         px,py,
+                         labelId);
 
       drawnLabels.insert(GeoCoord(x,y));
 #endif
