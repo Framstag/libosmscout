@@ -36,7 +36,10 @@ namespace osmscout {
 
   DatabaseParameter::DatabaseParameter()
   : areaAreaIndexCacheSize(5000),
-    areaNodeIndexCacheSize(1000)
+    areaNodeIndexCacheSize(1000),
+    nodeDataCacheSize(5000),
+    wayDataCacheSize(10000),
+    areaDataCacheSize(5000)
   {
     // no code
   }
@@ -51,6 +54,21 @@ namespace osmscout {
     this->areaNodeIndexCacheSize=areaNodeIndexCacheSize;
   }
 
+  void DatabaseParameter::SetNodeDataCacheSize(unsigned long size)
+  {
+    this->nodeDataCacheSize=size;
+  }
+
+  void DatabaseParameter::SetWayDataCacheSize(unsigned long  size)
+  {
+    this->wayDataCacheSize=size;
+  }
+
+  void DatabaseParameter::SetAreaDataCacheSize(unsigned long  size)
+  {
+    this->areaDataCacheSize=size;
+  }
+
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
@@ -59,6 +77,21 @@ namespace osmscout {
   unsigned long DatabaseParameter::GetAreaNodeIndexCacheSize() const
   {
     return areaNodeIndexCacheSize;
+  }
+
+  unsigned long DatabaseParameter::GetNodeDataCacheSize() const
+  {
+    return nodeDataCacheSize;
+  }
+
+  unsigned long DatabaseParameter::GetWayDataCacheSize() const
+  {
+    return wayDataCacheSize;
+  }
+
+  unsigned long DatabaseParameter::GetAreaDataCacheSize() const
+  {
+    return areaDataCacheSize;
   }
 
   Database::Database(const DatabaseParameter& parameter)
@@ -206,7 +239,7 @@ namespace osmscout {
     }
 
     if (!nodeDataFile) {
-      nodeDataFile=std::make_shared<NodeDataFile>();
+      nodeDataFile=std::make_shared<NodeDataFile>(parameter.GetNodeDataCacheSize());
     }
 
     if (!nodeDataFile->IsOpen()) {
@@ -236,7 +269,7 @@ namespace osmscout {
     }
 
     if (!areaDataFile) {
-      areaDataFile=std::make_shared<AreaDataFile>();
+      areaDataFile=std::make_shared<AreaDataFile>(parameter.GetAreaDataCacheSize());
     }
 
     if (!areaDataFile->IsOpen()) {
@@ -266,7 +299,7 @@ namespace osmscout {
     }
 
     if (!wayDataFile) {
-      wayDataFile=std::make_shared<WayDataFile>();
+      wayDataFile=std::make_shared<WayDataFile>(parameter.GetWayDataCacheSize());
     }
 
     if (!wayDataFile->IsOpen()) {

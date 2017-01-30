@@ -100,7 +100,7 @@ namespace osmscout {
                   N& data) const;
 
   public:
-    DataFile(const std::string& datafile, size_t cacheSize=10000);
+    DataFile(const std::string& datafile, size_t cacheSize);
 
     virtual ~DataFile();
 
@@ -602,7 +602,8 @@ namespace osmscout {
   public:
     IndexedDataFile(const std::string& datafile,
                     const std::string& indexfile,
-                    unsigned long indexCacheSize);
+                    unsigned long indexCacheSize,
+                    unsigned long dataCacheSize);
 
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path,
@@ -635,8 +636,9 @@ namespace osmscout {
   template <class I, class N>
   IndexedDataFile<I,N>::IndexedDataFile(const std::string& datafile,
                                         const std::string& indexfile,
-                                        unsigned long indexCacheSize)
-  : DataFile<N>(datafile),
+                                        unsigned long indexCacheSize,
+                                        unsigned long dataCacheSize)
+  : DataFile<N>(datafile,dataCacheSize),
     index(indexfile,indexCacheSize)
   {
     // no code
