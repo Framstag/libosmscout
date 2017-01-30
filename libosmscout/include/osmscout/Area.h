@@ -177,13 +177,14 @@ namespace osmscout {
 
   private:
     FileOffset        fileOffset;
+    FileOffset        nextFileOffset;
 
   public:
     std::vector<Ring> rings;
 
   public:
     inline Area()
-    : fileOffset(0)
+    : fileOffset(0),nextFileOffset(0)
     {
       // no code
     }
@@ -191,6 +192,11 @@ namespace osmscout {
     inline FileOffset GetFileOffset() const
     {
       return fileOffset;
+    }
+
+    inline FileOffset GetNextFileOffset() const
+    {
+      return nextFileOffset;
     }
 
     inline ObjectFileRef GetObjectFileRef() const

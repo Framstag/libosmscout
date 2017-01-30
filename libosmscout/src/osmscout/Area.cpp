@@ -227,6 +227,7 @@ namespace osmscout {
                    rings[i].GetType()->GetAreaId()!=typeIgnore &&
                    rings[i].GetType()->CanRoute());
     }
+    nextFileOffset=scanner.GetPos();
   }
 
   /**
@@ -293,6 +294,7 @@ namespace osmscout {
                    rings[i].GetType()->GetAreaId()!=typeIgnore ||
                    rings[i].ring==outerRingId);
     }
+    nextFileOffset=scanner.GetPos();
   }
 
   /**
@@ -358,6 +360,7 @@ namespace osmscout {
       scanner.Read(rings[i].nodes,
                    false);
     }
+    nextFileOffset=scanner.GetPos();
   }
 
   /**

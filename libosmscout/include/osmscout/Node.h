@@ -41,12 +41,13 @@ namespace osmscout {
     FeatureValueBuffer featureValueBuffer; //!< List of features
 
     FileOffset         fileOffset;         //!< File offset in the data file, use as unique id
+    FileOffset         nextFileOffset;     //!< Offset after this node
 
     GeoCoord           coords;             //!< Coordinates of node
 
   public:
     inline Node()
-    : fileOffset(0)
+    : fileOffset(0), nextFileOffset(0)
     {
       // no code
     }
@@ -54,6 +55,11 @@ namespace osmscout {
     inline FileOffset GetFileOffset() const
     {
       return fileOffset;
+    }
+
+    inline FileOffset GetNextFileOffset() const
+    {
+      return nextFileOffset;
     }
 
     inline ObjectFileRef GetObjectFileRef() const
