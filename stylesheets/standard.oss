@@ -129,6 +129,7 @@ CONST
     COLOR landColor                = #333333;
     COLOR unknownColor             = #000000;
   }
+  COLOR coastColor                 = lighten(@waterColor,0.5);
 
   // Borders
   COLOR countryBorderColor         = #ff0000;
@@ -424,7 +425,7 @@ STYLE
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
 
     [TYPE _tile_sea] AREA {color: @waterColor;}
-    [TYPE _tile_coast] AREA {color: @waterColor;}
+    [TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
     //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
     [TYPE _tile_land] AREA {color: @landColor;}
     [TYPE _tile_unknown] AREA {color: @unknownColor;}
