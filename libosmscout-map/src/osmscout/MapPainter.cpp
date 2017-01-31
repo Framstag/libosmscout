@@ -512,21 +512,34 @@ namespace osmscout {
     for (const auto& tile : data.groundTiles) {
       AreaData areaData;
 
-      if (tile.type==GroundTile::unknown && !parameter.GetRenderUnknowns()){
+      if (tile.type==GroundTile::unknown &&
+          !parameter.GetRenderUnknowns()) {
         continue;
       }
 
       switch (tile.type) {
       case GroundTile::land:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=landFill;
         break;
       case GroundTile::water:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=seaFill;
         break;
       case GroundTile::coast:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=coastFill;
         break;
       case GroundTile::unknown:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=unknownFill;
         break;
       }
@@ -539,12 +552,18 @@ namespace osmscout {
       areaData.boundingBox.Set(minCoord,maxCoord);
 
       if (tile.coords.empty()) {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= fill" << std::endl;
+#endif
+        // Fill the cell completely with the fill for the given cell type
         points.resize(5);
 
         points[0].SetCoord(areaData.boundingBox.GetMinCoord());
-        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),areaData.boundingBox.GetMaxCoord().GetLon()));
+        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),
+                                    areaData.boundingBox.GetMaxCoord().GetLon()));
         points[2].SetCoord(areaData.boundingBox.GetMaxCoord());
-        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),areaData.boundingBox.GetMinCoord().GetLon()));
+        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),
+                                    areaData.boundingBox.GetMinCoord().GetLon()));
         points[4]=points[0];
 
         transBuffer.transPolygon.TransformArea(projection,
@@ -571,6 +590,9 @@ namespace osmscout {
                                           ceil(transBuffer.transPolygon.points[s+4].y));
       }
       else {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= sub" << std::endl;
+#endif
         points.resize(tile.coords.size());
 
         for (size_t i=0; i<tile.coords.size(); i++) {
