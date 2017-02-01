@@ -150,7 +150,7 @@ namespace osmscout {
   /**
    * Read one data value from the given file offset.
    *
-   * Method is thread-safe.
+   * Method is NOT thread-safe.
    */
   template <class N>
   bool DataFile<N>::ReadData(const TypeConfig& typeConfig,
@@ -158,8 +158,6 @@ namespace osmscout {
                              FileOffset offset,
                              N& data) const
   {
-    std::lock_guard<std::mutex> lock(accessMutex);
-
     try {
       scanner.SetPos(offset);
 
@@ -177,7 +175,7 @@ namespace osmscout {
   /**
    * Read one data value from the current position of the stream
    *
-   * Method is not thread-safe.
+   * Method is NOT thread-safe.
    */
   template <class N>
   bool DataFile<N>::ReadData(const TypeConfig& typeConfig,
