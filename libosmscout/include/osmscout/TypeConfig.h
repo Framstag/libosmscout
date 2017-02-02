@@ -795,7 +795,7 @@ namespace osmscout {
 
   typedef std::shared_ptr<TypeInfo> TypeInfoRef;
 
-  class OSMSCOUT_API TypeInfoSetConstIterator : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
+  class OSMSCOUT_API TypeInfoSetConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
   {
   private:
     std::vector<TypeInfoRef>::const_iterator iterCurrent;
@@ -831,14 +831,15 @@ namespace osmscout {
 
       return *this;
     }
+
     TypeInfoSetConstIterator operator++(int)
-     {
+    {
       TypeInfoSetConstIterator tmp(*this);
 
       operator++();
 
       return tmp;
-     }
+    }
 
     bool operator==(const TypeInfoSetConstIterator& other)
     {
@@ -1071,7 +1072,7 @@ namespace osmscout {
 
   typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
 
-  static const uint32_t FILE_FORMAT_VERSION=10;
+  static const uint32_t FILE_FORMAT_VERSION=11;
 
   /**
    * \ingroup type
@@ -1079,7 +1080,7 @@ namespace osmscout {
    * The TypeConfig class holds information about object types
    * defined by a database instance.
    */
-  class OSMSCOUT_API TypeConfig
+  class OSMSCOUT_API TypeConfig CLASS_FINAL
   {
   public:
     static const char* FILE_TYPES_DAT;

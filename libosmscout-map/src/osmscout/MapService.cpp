@@ -121,6 +121,13 @@ namespace osmscout {
     cache.SetSize(cacheSize);
   }
 
+  size_t MapService::GetCacheSize() const
+  {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
+    return cache.GetSize();
+  }
+
   /**
    * Evict tiles from cache until tile count <= cacheSize
    */
@@ -845,7 +852,7 @@ namespace osmscout {
         StopClock     tileLoadingTime;
         Magnification magnification;
 
-        //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;
+        //std::cout << "Loading tile: " << tile->GetId().DisplayText() << std::endl;
 
         magnification.SetLevel(tile->GetId().GetLevel());
 
@@ -915,7 +922,7 @@ namespace osmscout {
 
       }
       else {
-        //std::cout << "Using cached tile: " << (std::string)tile->GetId() << std::endl;
+        //std::cout << "Using cached tile: " << tile->GetId().DisplayText() << std::endl;
       }
     }
 
@@ -1079,7 +1086,6 @@ namespace osmscout {
                            true);
 
     return result.get();
-    //return LoadMissingTileData(parameter,styleConfig,tiles,true);
   }
 
   bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,

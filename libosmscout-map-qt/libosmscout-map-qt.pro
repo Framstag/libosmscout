@@ -1,14 +1,20 @@
 QT       += quick opengl
 
-TARGET = libosmscout-map-qt
+TARGET = osmscout-map-qt
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += include ../libosmscout-map/include ../libosmscout/include
 
 SOURCES += \
-    src/osmscout/MapPainterQt.cpp
+    src/osmscout/MapPainterQt.cpp \
+    src/osmscout/SimplifiedPath.cpp
 
-HEADERS +=
+HEADERS += \
+    include/osmscout/MapPainterQt.h \
+    include/osmscout/MapQtFeatures.h \
+    include/osmscout/SimplifiedPath.h \
+    include/osmscout/private/Config.h \
+    include/osmscout/private/MapQtImportExport.h
 
 macx {
     QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=gnu0x -stdlib=libc++

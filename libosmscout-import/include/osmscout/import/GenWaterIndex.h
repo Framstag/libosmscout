@@ -37,6 +37,11 @@
 
 namespace osmscout {
 
+  /**
+   * Generator that calculates land, water and coast tiles based on costline data
+   * and the assumption that land is always left of the coast (in line direction)
+   * and water is always right.
+   */
   class WaterIndexGenerator CLASS_FINAL : public ImportModule
   {
   private:
@@ -58,7 +63,7 @@ namespace osmscout {
       GeoCoord      point;              //! The intersection point
       double        distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
       char          direction;          //! 1 in, 0 touch, -1 out
-      unsigned char borderIndex;        //! The index of the border that gets intersected
+      unsigned char borderIndex;        //! The index of the border that gets intersected [0..3]
     };
 
     typedef Intersection *IntersectionPtr;
@@ -158,33 +163,24 @@ namespace osmscout {
 
     typedef std::shared_ptr<Coast> CoastRef;
 
-    struct GeoBoundingBox
-    {
-      double minLon;
-      double maxLon;
-      double minLat;
-      double maxLat;
-    };
-
     /**
      * Holds all generated, calculated and extracted information about an
      * individual coastline
      */
     struct CoastlineData
     {
-      bool                                       isArea;             //! true,if the boundary forms an area
-      bool                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
-      Pixel                                      cell;               //! The cell that completely contains the coastline
-      double                                     pixelWidth;         //! Size of coastline in pixel
-      double                                     pixelHeight;        //! Size of coastline in pixel
-      std::vector<GeoCoord>                      points;             //! The points of the coastline
-      std::map<Pixel, std::list<Intersection> >  cellIntersections;  //! All intersections for each cell
+      Id                                        id;                 //! The id of the coastline
+      bool                                      isArea;             //! true,if the boundary forms an area
+      bool                                      isCompletelyInCell; //! true, if the complete coastline is within one cell
+      Pixel                                     cell;               //! The cell that completely contains the coastline
+      std::vector<GeoCoord>                     points;             //! The points of the coastline
+      std::map<Pixel,std::list<Intersection> >  cellIntersections;  //! All intersections for each cell
     };
 
     struct Data
     {
-      std::vector<CoastlineData>          coastlines;         //! data for each coastline
-      std::map<Pixel, std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
+      std::vector<CoastlineData>         coastlines;         //! data for each coastline
+      std::map<Pixel,std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
     };
 
   private:
@@ -204,16 +200,20 @@ namespace osmscout {
                          std::list<CoastRef>& coastlines);
 
     void MarkCoastlineCells(Progress& progress,
-                            const std::list<CoastRef>& coastlines,
-                            Level& level);
-
-    void CalculateLandCells(Progress& progress,
                             Level& level,
-                            const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
+                            const Data& data);
+
+    void CalculateCoastEnvironment(Progress& progress,
+                                   Level& level,
+                                   const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
     void GetCells(const Level& level,
                   const GeoCoord& a,
                   const GeoCoord& b,
+                  std::set<Pixel>& cellIntersections);
+
+    void GetCells(const Level& level,
+                  const std::vector<GeoCoord>& points,
                   std::set<Pixel>& cellIntersections);
 
     void GetCells(const Level& level,

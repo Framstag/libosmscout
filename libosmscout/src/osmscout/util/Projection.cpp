@@ -565,41 +565,36 @@ namespace osmscout {
     return true;
 }
 
-  bool TileProjection::Set(size_t tileX, size_t tileY,
+  bool TileProjection::Set(const OSMTileId& tile,
                            const Magnification& magnification,
                            double dpi,
                            size_t width, size_t height)
   {
-    double latMin=TileYToLat(tileY+1,
-                      magnification);
-    double latMax=TileYToLat(tileY,
-                      magnification);
+    GeoBox boundingBox(tile.GetBoundingBox(magnification));
 
-    double lonMin=TileXToLon(tileX,
-                      magnification);
-    double lonMax=TileXToLon(tileX+1,
-                      magnification);
-
-    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
+    return SetInternal(boundingBox.GetMinLon(),
+                       boundingBox.GetMinLat(),
+                       boundingBox.GetMaxLon(),
+                       boundingBox.GetMaxLat(),
+                       magnification,
+                       dpi,
+                       width,height);
   }
 
-  bool TileProjection::Set(size_t tileAX, size_t tileAY,
-                           size_t tileBX, size_t tileBY,
+  bool TileProjection::Set(const OSMTileIdBox& tileBox,
                            const Magnification& magnification,
                            double dpi,
                            size_t width,size_t height)
   {
-    double latMin=TileYToLat(std::max(tileAY,tileBY)+1,
-                             magnification);
-    double latMax=TileYToLat(std::min(tileAY,tileBY),
-                             magnification);
+    GeoBox boundingBox(tileBox.GetBoundingBox(magnification));
 
-    double lonMin=TileXToLon(std::min(tileAX,tileBX),
-                             magnification);
-    double lonMax=TileXToLon(std::max(tileAX,tileBX)+1,
-                             magnification);
-
-    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
+    return SetInternal(boundingBox.GetMinLon(),
+                       boundingBox.GetMinLat(),
+                       boundingBox.GetMaxLon(),
+                       boundingBox.GetMaxLat(),
+                       magnification,
+                       dpi,
+                       width,height);
   }
 
   bool TileProjection::PixelToGeo(double x, double y,

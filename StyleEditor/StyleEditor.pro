@@ -6,10 +6,19 @@ CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
 
 QT += core gui widgets qml quick
 
-PKGCONFIG += libosmscout-map-qt libosmscout-client-qt
-
 !macx {
+  PKGCONFIG += libosmscout-map-qt libosmscout-client-qt
   gcc:QMAKE_CXXFLAGS += -fopenmp
+} else {
+  INCLUDEPATH+=../../libosmscout/include
+  INCLUDEPATH+=../../libosmscout-client-qt/include
+  INCLUDEPATH+=../../libosmscout-map/include
+  INCLUDEPATH+=../../libosmscout-map-qt/include
+
+  LIBS+=-L../../libosmscout-client-qt/build -losmscout-client-qt
+  LIBS+=-L../../libosmscout-map-qt/build -losmscout-map-qt
+  LIBS+=-L../../libosmscout-map/src/.libs -losmscoutmap
+  LIBS+=-L../../libosmscout/src/.libs -losmscout
 }
 
 release: DESTDIR = release

@@ -32,20 +32,20 @@
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Simple class for recognizing some basic gestures: tap, double tap, long-tap and tap-and-hold.
- * 
- * Widget should send own \ref QTouchEvent to this object, when some tap gesture 
- * is recognized it emits one of its signals. 
- * 
+ *
+ * Widget should send own \ref QTouchEvent to this object, when some tap gesture
+ * is recognized it emits one of its signals.
+ *
  *  - **Tap**: touch shorter than holdInterval (1000 ms) followed with pause longer than tapInterval (200 ms)
  *  - **Long tap**: touch longer than holdInterval (1000 ms)
  *  - **Double tap**: tap followed by second one within tapInterval (200 ms)
  *  - **Tap, long tap**: tap followed by long tap within tapInterval (200 ms)
- * 
- * Physical DPI of display should be setup before first use. TapRecognizer use some small move 
- * tolerance (~ 2.5 mm), it means that events are emited even that touch point is moving within 
- * this tolerance. For double tap, when second tap is farther than this tolerance, 
+ *
+ * Physical DPI of display should be setup before first use. TapRecognizer use some small move
+ * tolerance (~ 2.5 mm), it means that events are emited even that touch point is moving within
+ * this tolerance. For double tap, when second tap is farther than this tolerance,
  * double-tap event is not emited.
  */
 class TapRecognizer : public QObject{
@@ -58,7 +58,7 @@ private:
     RELEASED = 2, // timer started with tap interval, if expired - tap is emited
     PRESSED2 = 3, // timer started with hold interval, if expired - tap-long-tap
   };
-  
+
   int startFingerId;
   int startX;
   int startY;
@@ -69,33 +69,33 @@ private:
   int hold2IntervalMs;
   int tapIntervalMs;
   int moveTolerance;
-  
+
 private slots:
   void onTimeout();
-  
+
 public:
-  inline TapRecognizer(): 
-          state(INACTIVE), 
-          holdIntervalMs(1000), 
-          hold2IntervalMs(500), 
-          tapIntervalMs(200), 
+  inline TapRecognizer():
+          state(INACTIVE),
+          holdIntervalMs(1000),
+          hold2IntervalMs(500),
+          tapIntervalMs(200),
           moveTolerance(15)
   {
     timer.setSingleShot(true);
     connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
   }
-  
+
   virtual inline ~TapRecognizer()
   {
   }
-  
+
   void touch(QTouchEvent *event);
-  
+
   inline void setPhysicalDpi(double physicalDpi)
   {
     moveTolerance = physicalDpi / 10.0; // ~ 2.5 mm
   }
-  
+
 signals:
   void tap(const QPoint p);
   void doubleTap(const QPoint p);
@@ -115,9 +115,9 @@ Q_DECLARE_METATYPE(AccumulatorEvent)
 
 /**
  * \ingroup QtAPI
- * 
- * Helper class that accumulates move (touch events) within some time period 
- * (time defined FIFO queue). It helps to \ref MoveHandler determine of move 
+ *
+ * Helper class that accumulates move (touch events) within some time period
+ * (time defined FIFO queue). It helps to \ref MoveHandler determine of move
  * vector when drag gesture ends. It is used for animate move momentum.
  */
 class MoveAccumulator : public QObject{
@@ -128,11 +128,11 @@ private:
   QQueue<AccumulatorEvent> events;
   double factor;
   double vectorLengthTreshold;
-  
+
 public:
-    
+
   /**
-   * 
+   *
    * @param memory - in milliseconds for finger position points
    * @param factor - momentum movement length (vector returned from collect method) will be equal to recorded length * factor
    * @param vectorLengthTreshold - movement (between two points) have to be longer than treshold (in pixels) for change move vector
@@ -142,14 +142,14 @@ public:
   {
   }
   virtual inline ~MoveAccumulator(){}
-  
+
   MoveAccumulator& operator+=(const QPointF p);
   QVector2D collect();
 };
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Object thats carry information about view center, angle and magnification.
  */
 class MapView: public QObject
@@ -164,31 +164,36 @@ class MapView: public QObject
 
 public:
   inline MapView(){}
-  
+
   inline MapView(QObject *parent, osmscout::GeoCoord center, double angle, osmscout::Magnification magnification):
     QObject(parent), center(center), angle(angle), magnification(magnification) {}
 
   inline MapView(osmscout::GeoCoord center, double angle, osmscout::Magnification magnification):
     center(center), angle(angle), magnification(magnification) {}
 
+  /**
+   * This copy constructor don't transfer ownership
+   * in Qt hierarchy - it may cause troubles.
+   * @param mv
+   */
   inline MapView(const MapView &mv):
-    QObject(mv.parent()), center(mv.center), angle(mv.angle), magnification(mv.magnification) {}
-  
-  inline ~MapView(){}
-  
-  inline double GetLat(){ return center.lat; }
-  inline double GetLon(){ return center.lon; }
+    QObject(), center(mv.center), angle(mv.angle), magnification(mv.magnification) {}
+
+  virtual inline ~MapView(){}
+
+  inline double GetLat(){ return center.GetLat(); }
+  inline double GetLon(){ return center.GetLon(); }
   inline double GetAngle(){ return angle; }
   inline double GetMag(){ return magnification.GetMagnification(); }
   inline double GetMagLevel(){ return magnification.GetLevel(); }
-  
+
   void inline operator=(const MapView &mv)
-  { 
+  {
     center = mv.center;
     angle = mv.angle;
     magnification = mv.magnification;
   }
-  
+
   osmscout::GeoCoord           center;
   double                       angle;
   osmscout::Magnification      magnification;
@@ -207,19 +212,19 @@ inline bool operator!=(const MapView& a, const MapView& b)
 
 /**
  * \ingroup QtAPI
- * 
- * Input handler retrieve all inputs from user and may change MapView (emits viewChange signal). 
- * If handler don't accept specific action, returns false. In such case, 
+ *
+ * Input handler retrieve all inputs from user and may change MapView (emits viewChange signal).
+ * If handler don't accept specific action, returns false. In such case,
  * default handler for this action should be activated.
- * 
- * Input handlers is application of behaviour pattern. It solves problems like: 
- * 
+ *
+ * Input handlers is application of behaviour pattern. It solves problems like:
+ *
  *  - what should happen when finger is on the screen and plus button is pressed
  *  - recognising multitouch gestures
- * 
- * Qt provides api for register custom gesture recognizers, but it is not 
+ *
+ * Qt provides api for register custom gesture recognizers, but it is not
  * available in QML world and its api don't fit to Map application requierements.
- * 
+ *
  * Handler also controls map animations.
  */
 class InputHandler : public QObject{
@@ -230,7 +235,7 @@ public:
 
     virtual void painted();
     virtual bool animationInProgress();
-    
+
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
@@ -249,13 +254,13 @@ protected:
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Handler with support of simple moves and zoom.
  * View changes are animated, so one action may emits many of viewChange signals.
  */
 class MoveHandler : public InputHandler {
     Q_OBJECT
-    
+
 private:
     QTime animationStart;
     QTimer timer;
@@ -263,25 +268,25 @@ private:
     QVector2D _move;
     osmscout::Magnification targetMagnification;
     int animationDuration;
-  
+
     const int MOVE_ANIMATION_DURATION = 1000; // ms
     const int ZOOM_ANIMATION_DURATION = 500; // ms
     const int ANIMATION_TICK = 16;
-    
+
 private slots:
     void onTimeout();
 
-public: 
+public:
     MoveHandler(MapView view, double dpi);
     virtual ~MoveHandler();
-    
+
     virtual bool animationInProgress();
-    
+
     /**
      * Called from DragHandler or MultitouchHandler when gesture moves with map
-     * 
+     *
      * @param vector
-     * @return 
+     * @return
      */
     bool moveNow(QVector2D vector); // move vector in pixels, without animation
 
@@ -289,47 +294,47 @@ public:
     virtual bool move(QVector2D vector); // move vector in pixels
     virtual bool rotateBy(double angleStep, double angleChange);
     virtual bool touch(QTouchEvent *event);
-    
+
 private:
     double dpi;
 };
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Input handler that animates jumps to target map view.
  */
 class JumpHandler : public InputHandler {
     Q_OBJECT
-    
+
 private:
     QTime animationStart;
     QTimer timer;
     MapView startMapView;
     MapView targetMapView;
-  
+
     const int ANIMATION_DURATION = 1000; // ms
     const int ANIMATION_TICK = 16;
-    
+
 private slots:
     void onTimeout();
 
-public: 
+public:
     JumpHandler(MapView view);
     virtual ~JumpHandler();
-    
+
     virtual bool animationInProgress();
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
 };
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * InputHandler with support of dragg gesture.
  */
 class DragHandler : public MoveHandler {
     Q_OBJECT
-public: 
+public:
     DragHandler(MapView view, double dpi);
     virtual ~DragHandler();
 
@@ -338,7 +343,7 @@ public:
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
     virtual bool rotateBy(double angleStep, double angleChange);
-    
+
     virtual bool touch(QTouchEvent *event);
 
 private:
@@ -353,13 +358,13 @@ private:
 
 /**
  * \ingroup QtAPI
- * 
- * InputHandler with support of multitouch input. It use just first two 
+ *
+ * InputHandler with support of multitouch input. It use just first two
  * touch points from touch events.
  */
 class MultitouchHandler : public MoveHandler {
     Q_OBJECT
-public: 
+public:
     MultitouchHandler(MapView view, double dpi);
     virtual ~MultitouchHandler();
 
@@ -368,7 +373,7 @@ public:
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
     virtual bool rotateBy(double angleStep, double angleChange);
-    
+
     virtual bool touch(QTouchEvent *event);
 private:
     bool moving;
@@ -376,7 +381,7 @@ private:
     bool initialized;
     bool ended;
     MoveAccumulator moveAccumulator;
-    
+
     // we take only first two touch points into account
     QTouchEvent::TouchPoint startPointA;
     QTouchEvent::TouchPoint startPointB;
@@ -384,7 +389,7 @@ private:
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Input handler that locks map view to current position.
  */
 class LockHandler : public JumpHandler {
@@ -392,11 +397,11 @@ class LockHandler : public JumpHandler {
 protected:
     double dpi;
     double moveTolerance;
-public: 
-    inline LockHandler(MapView view, double dpi, double moveTolerance): 
+public:
+    inline LockHandler(MapView view, double dpi, double moveTolerance):
       JumpHandler(view), dpi(dpi), moveTolerance(moveTolerance)
     {};
-  
+
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool isLockedToPosition();

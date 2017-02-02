@@ -78,7 +78,8 @@ private:
   QSettings settings;
   double    physicalDpi;
   MapView   *view;
-  QMap<QString, OnlineTileProvider> onlineProviders;
+  QMap<QString, OnlineTileProvider> onlineProviderMap;
+  QList<OnlineTileProvider> onlineProviders;
   QList<MapProvider> mapProviders;
 
 public:

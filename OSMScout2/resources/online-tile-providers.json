@@ -9,7 +9,7 @@
     ],
     "maximumZoomLevel": 19, 
     "copyright": "© OpenStreetMap contributors"
-  },
+  }, 
   {
     "id": "hikebikemap",
     "name": "Hike & Bike Map",
@@ -20,5 +20,32 @@
     ],
     "maximumZoomLevel": 19,
     "copyright": "© Leaflet, OSM, NASA"
+  },
+  {
+    "id": "watercolor",
+    "name": "Watercolor",
+    "servers": [
+      "https://stamen-tiles.a.ssl.fastly.net/watercolor/%1/%2/%3.jpg"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Stamen Design, OSM"
+  },
+  {
+    "id": "toner",
+    "name": "Toner",
+    "servers": [
+      "https://stamen-tiles.a.ssl.fastly.net/toner/%1/%2/%3.png"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Stamen Design, OSM"
+  },
+  {
+    "id": "terrain",
+    "name": "Terrain",
+    "servers": [
+      "https://stamen-tiles.a.ssl.fastly.net/terrain/%1/%2/%3.png"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Stamen Design, OSM"
   }
 ]

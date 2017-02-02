@@ -87,7 +87,7 @@ namespace osmscout {
       }
     };
 
-    Type               type;          //!< The typ eof the cell
+    Type               type;          //!< The type of the cell
     size_t             xAbs;          //!< Absolute x coordinate of the cell in relation to level and cell size
     size_t             yAbs;          //!< Absolute y coordinate of the cell in relation to level and cell size
     size_t             xRel;          //!< X coordinate of cell in relation to cell index of this level

@@ -42,6 +42,7 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
                              QString stylesheetFilename,
                              QString iconDirectory)
  : DBThread(databaseLookupDirs, stylesheetFilename, iconDirectory),
+   canvasOverrun(1.5),
    pendingRenderingTimer(this),
    currentImage(NULL),
    currentCoord(0.0,0.0),
@@ -192,8 +193,8 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   painter.drawImage(QRectF(x1,y1,x2-x1,y2-y1),*finishedImage);
 
   RenderMapRequest extendedRequest=request;
-  extendedRequest.width*=1.5;
-  extendedRequest.height*=1.5;
+  extendedRequest.width*=canvasOverrun;
+  extendedRequest.height*=canvasOverrun;
   bool needsNoRepaint=finishedImage->width()==(int) extendedRequest.width &&
                       finishedImage->height()==(int) extendedRequest.height &&
                       finishedCoord==request.coord &&
@@ -259,6 +260,12 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
         std::list<osmscout::TileRef> tiles;
 
         db->mapService->LookupTiles(projection,tiles);
+        if (tiles.size()>db->mapService->GetCacheSize()){
+          osmscout::log.Debug() << "Increase tile cache size to " << tiles.size();
+          db->mapService->SetCacheSize(tiles.size());
+          // lookup tiles again
+          db->mapService->LookupTiles(projection,tiles);
+        }
         if (!db->mapService->LoadMissingTileDataAsync(searchParameter,*(db->styleConfig),tiles)) {
           osmscout::log.Error() << "*** Loading of data has error or was interrupted";
           continue;
@@ -351,6 +358,10 @@ void PlaneDBThread::DrawMap()
   osmscout::log.Debug() << "DrawMap()";  
   {
     QMutexLocker locker(&mutex);
+    if (databases.isEmpty()){
+      osmscout::log.Warn() << " No databases!";
+      return;
+    }
     osmscout::FillStyleRef unknownFillStyle;
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
@@ -363,6 +374,7 @@ void PlaneDBThread::DrawMap()
     }
     if (!unknownFillStyle){
       osmscout::log.Warn() << " Can't retrieve UnknownFillStyle";
+      return;
     }
 
     if (currentImage==NULL ||
@@ -389,6 +401,11 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetRenderBackground(false); // we draw background before MapPainter
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
+
+    drawParameter.SetLabelLineMinCharCount(15);
+    drawParameter.SetLabelLineMaxCharCount(30);
+    drawParameter.SetLabelLineFitToArea(true);
+    drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight())/canvasOverrun);
 
     // create copy of projection
     osmscout::MercatorProjection renderProjection;

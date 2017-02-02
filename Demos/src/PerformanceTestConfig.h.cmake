@@ -13,9 +13,7 @@
 /* cairo detected */
 #cmakedefine HAVE_LIB_CAIRO 1
 
-#ifdef HAVE_LIB_CAIRO
-#define HAVE_LIB_OSMSCOUTMAPCAIRO 1
-#endif
+#cmakedefine HAVE_LIB_OSMSCOUTMAPCAIRO 1
 
 /* Gperftools detected */
 #cmakedefine HAVE_LIB_GPERFTOOLS 1
@@ -26,9 +24,7 @@
 /* qt detected */
 #cmakedefine HAVE_LIB_QT5_GUI 1
 
-#ifdef HAVE_LIB_QT5_GUI
-#define HAVE_LIB_OSMSCOUTMAPQT 1
-#endif
+#cmakedefine HAVE_LIB_OSMSCOUTMAPQT 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H 1

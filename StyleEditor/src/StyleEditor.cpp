@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     stylesheetFilename = cmdLineArgs.at(2);
   }else{
     if (cmdLineArgs.size() > 1){
-      stylesheetFilename = cmdLineArgs.at(1) + "standard.oss";
+      stylesheetFilename = cmdLineArgs.at(1) + QDir::separator() + "standard.oss";
     }else{
       stylesheetFilename = QString("stylesheets") + QDir::separator() + "standard.oss";
     }

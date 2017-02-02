@@ -156,13 +156,15 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterCanvas::GetTextDimension(const MapParameter& parameter,
-                          double fontSize,
-                          const std::string& text,
-                          double& xOff,
-                          double& yOff,
-                          double& width,
-                          double& height)
+  void MapPainterCanvas::GetTextDimension(const Projection& projection,
+                                          const MapParameter& parameter,
+                                          double objectWidth,
+                                          double fontSize,
+                                          const std::string& text,
+                                          double& xOff,
+                                          double& yOff,
+                                          double& width,
+                                          double& height)
   {
     jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "getTextDimension",
                                "(Ljava/lang/String;F)Landroid/graphics/Rect;");

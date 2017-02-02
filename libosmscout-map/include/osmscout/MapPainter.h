@@ -237,7 +237,7 @@ namespace osmscout {
     //@{
     FillStyleRef                 landFill;
     FillStyleRef                 seaFill;
-    LabelStyleRef                debugLabel;
+    TextStyleRef                 debugLabel;
     FeatureValueBuffer           coastlineSegmentAttributes;
     //@}
 
@@ -340,7 +340,8 @@ namespace osmscout {
                            const IconStyleRef iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            double x, double y,
-                           double objectHeight);
+                           double objectWidth=0,
+                           double objectHeight=0);
 
     void DrawWayDecorations(const StyleConfig& styleConfig,
                             const Projection& projection,
@@ -496,6 +497,7 @@ namespace osmscout {
       */
     virtual void GetTextDimension(const Projection& projection,
                                   const MapParameter& parameter,
+                                  double objectWidth,
                                   double fontSize,
                                   const std::string& text,
                                   double& xOff,
@@ -575,6 +577,15 @@ namespace osmscout {
                           const MapParameter& parameter,
                           const AreaData& area) = 0;
     //@}
+
+    /**
+      Compute suggested label width for given parameters.
+      It may be used by backend for layout labels with wrapping words.
+     */
+    virtual double proposedLabelWidth(const MapParameter& parameter,
+                                      double averageCharWidth,
+                                      double objectWidth,
+                                      size_t stringLength);
 
     /**
       Med level drawing routines that are already implemented by the base class, but which can be overwritten

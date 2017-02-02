@@ -69,7 +69,15 @@ namespace osmscout {
         return x<other.x;
       }
 
-      return label->id<other.label->id;
+      if (label->id!=other.label->id){
+        return label->id<other.label->id;
+      }
+
+      if (label->y!=other.label->y){
+        return label->y<other.label->y;
+      }
+
+      return label->x<other.label->x;
     }
   };
 

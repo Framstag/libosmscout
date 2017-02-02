@@ -26,6 +26,7 @@
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/Tiling.h>
 
 #include <osmscout/system/SSEMathPublic.h>
 
@@ -547,10 +548,10 @@ namespace osmscout {
 
   protected:
     virtual bool SetInternal(double lonMin,double latMin,
-                     double lonMax,double latMax,
-                     const Magnification& magnification,
-                     double dpi,
-                     size_t width,size_t height);
+                             double lonMax,double latMax,
+                             const Magnification& magnification,
+                             double dpi,
+                             size_t width,size_t height);
 
   public:
     TileProjection();
@@ -565,20 +566,19 @@ namespace osmscout {
       return valid;
     }
 
-    inline bool Set(size_t tileX, size_t tileY,
+    inline bool Set(const OSMTileId& tile,
                     const Magnification& magnification,
                     size_t width, size_t height)
     {
-      return Set(tileX,tileY,magnification,GetDPI(),width,height);
+      return Set(tile,magnification,GetDPI(),width,height);
     }
 
-    bool Set(size_t tileX, size_t tileY,
+    bool Set(const OSMTileId& tile,
              const Magnification& magnification,
              double dpi,
              size_t width, size_t height);
 
-    bool Set(size_t tileAX, size_t tileAY,
-             size_t tileBX, size_t tileBY,
+    bool Set(const OSMTileIdBox& tileBox,
              const Magnification& magnification,
              double dpi,
              size_t width, size_t height);

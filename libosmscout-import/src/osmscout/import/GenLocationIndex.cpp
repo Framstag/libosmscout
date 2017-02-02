@@ -334,6 +334,10 @@ namespace osmscout {
       }
       out << " + " << childRegion->name << " " << childRegion->reference.GetTypeName() << " " << childRegion->reference.GetFileOffset();
 
+      if (!childRegion->isIn.empty()) {
+        out << " (in " << childRegion->isIn << ")";
+      }
+
       if (childRegion->areas.size()>1) {
         out << " " << childRegion->areas.size() << " areas";
       }
@@ -483,6 +487,11 @@ namespace osmscout {
       }
     }
 
+    if (!region->isIn.empty() &&
+      parent.name!=region->isIn) {
+      errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
+    }
+
     parent.regions.push_back(region);
   }
 
@@ -493,14 +502,15 @@ namespace osmscout {
                                                 Progress& progress,
                                                 const TypeConfigRef& typeConfig,
                                                 const TypeInfoSet& boundaryTypes,
-                                                std::list<Boundary>& boundaryAreas)
+                                                std::vector<std::list<RegionRef>>& boundaryAreas)
   {
     FileScanner                  scanner;
-    uint32_t                     areaCount;
     NameFeatureValueReader       nameReader(*typeConfig);
     AdminLevelFeatureValueReader adminLevelReader(*typeConfig);
 
     try {
+      uint32_t areaCount;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
@@ -529,30 +539,40 @@ namespace osmscout {
 
         AdminLevelFeatureValue *adminLevelValue=adminLevelReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-        if (adminLevelValue!=NULL) {
-          Boundary boundary;
-
-          boundary.reference.Set(area.GetFileOffset(),refArea);
-          boundary.name=nameValue->GetName();
-          boundary.level=adminLevelValue->GetAdminLevel();
-
-          for (const auto& ring : area.rings) {
-            if (ring.IsOuterRing()) {
-              std::vector<GeoCoord> coords;
-
-              for (const auto& node : ring.nodes) {
-                coords.push_back(node.GetCoord());
-              }
-
-              boundary.areas.push_back(coords);
-            }
-          }
-
-          boundaryAreas.push_back(boundary);
-        }
-        else {
+        if (adminLevelValue==NULL) {
           errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No tag 'admin_level'");
+          continue;
         }
+
+        RegionRef region=std::make_shared<Region>();
+        size_t   level=adminLevelValue->GetAdminLevel();
+
+        region->reference=area.GetObjectFileRef();
+        region->name=nameValue->GetName();
+
+        if (!adminLevelValue->GetIsIn().empty()) {
+          region->isIn=GetFirstInStringList(adminLevelValue->GetIsIn(),",;");
+        }
+
+        for (const auto& ring : area.rings) {
+          if (ring.IsOuterRing()) {
+            std::vector<GeoCoord> coords;
+
+            for (const auto& node : ring.nodes) {
+              coords.push_back(node.GetCoord());
+            }
+
+            region->areas.push_back(coords);
+          }
+        }
+
+        region->CalculateMinMax();
+
+        if (level>=boundaryAreas.size()) {
+          boundaryAreas.resize(level+1);
+        }
+
+        boundaryAreas[level].push_back(region);
       }
 
       scanner.Close();
@@ -567,29 +587,16 @@ namespace osmscout {
 
   void LocationIndexGenerator::SortInBoundaries(Progress& progress,
                                                 Region& rootRegion,
-                                                const std::list<Boundary>& boundaryAreas,
-                                                size_t level)
+                                                const std::list<RegionRef>& boundaryAreas)
   {
     size_t currentBoundary=0;
     size_t maxBoundary=boundaryAreas.size();
 
-    for (const auto&  boundary : boundaryAreas) {
+    for (const auto&  region : boundaryAreas) {
       currentBoundary++;
 
       progress.SetProgress(currentBoundary,
                            maxBoundary);
-
-      if (boundary.level!=level) {
-        continue;
-      }
-
-      RegionRef region(new Region());
-
-      region->reference=boundary.reference;
-      region->name=boundary.name;
-      region->areas=boundary.areas;
-
-      region->CalculateMinMax();
 
       AddRegion(rootRegion,
                 region);
@@ -608,6 +615,7 @@ namespace osmscout {
     uint32_t               areaCount;
     size_t                 areasFound=0;
     NameFeatureValueReader nameReader(typeConfig);
+    IsInFeatureValueReader isInReader(typeConfig);
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -636,11 +644,16 @@ namespace osmscout {
           continue;
         }
 
-
         RegionRef region=std::make_shared<Region>();
 
         region->reference.Set(area.GetFileOffset(),refArea);
         region->name=nameValue->GetName();
+
+        IsInFeatureValue *isInValue=isInReader.GetValue(area.rings.front().GetFeatureValueBuffer());
+
+        if (isInValue!=NULL) {
+          region->isIn=GetFirstInStringList(isInValue->GetIsIn(),",;");
+        }
 
         for (const auto& ring : area.rings) {
           if (ring.IsOuterRing()) {
@@ -1906,17 +1919,18 @@ namespace osmscout {
   {
     FileWriter                         writer;
     RegionRef                          rootRegion;
-    std::vector<std::list<RegionRef> > regionTree;
+    std::vector<std::list<RegionRef>>  regionTree;
     RegionIndex                        regionIndex;
     TypeInfoRef                        boundaryType;
     TypeInfoSet                        boundaryTypes(*typeConfig);
-    std::list<Boundary>                boundaryAreas;
+    std::vector<std::list<RegionRef>>  boundaryAreas;
     std::list<std::string>             regionIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
 
-    progress.SetAction("Setup");
-
     errorReporter=parameter.GetErrorReporter();
+
+    // just from local experience, if it is not enough, GetBoundaryAreas will increase it ;-)
+    boundaryAreas.resize(13);
 
     try {
       bytesForNodeFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1961,15 +1975,12 @@ namespace osmscout {
         return false;
       }
 
-      progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
-
-      for (size_t level=1; level<=10; level++) {
-        progress.SetAction("Sorting in administrative boundaries of level "+NumberToString(level));
+      for (size_t level=0; level<boundaryAreas.size(); level++) {
+        progress.SetAction("Sorting in "+NumberToString(boundaryAreas[level].size())+" administrative boundaries of level "+NumberToString(level));
 
         SortInBoundaries(progress,
                          *rootRegion,
-                         boundaryAreas,
-                         level);
+                         boundaryAreas[level]);
       }
 
       boundaryAreas.clear();

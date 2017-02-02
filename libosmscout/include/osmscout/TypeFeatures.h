@@ -999,17 +999,20 @@ namespace osmscout {
   class OSMSCOUT_API AdminLevelFeatureValue : public FeatureValue
   {
   private:
-    uint8_t adminLevel;
+    uint8_t     adminLevel;
+    std::string isIn;
 
   public:
     inline AdminLevelFeatureValue()
     : adminLevel(0)
     {
-
+      // no code
     }
 
-    inline AdminLevelFeatureValue(uint8_t adminLevel)
-    : adminLevel(adminLevel)
+    inline AdminLevelFeatureValue(uint8_t adminLevel,
+                                 const std::string& isIn)
+    : adminLevel(adminLevel),
+      isIn(isIn)
     {
       // no code
     }
@@ -1019,9 +1022,19 @@ namespace osmscout {
       this->adminLevel=adminLevel;
     }
 
+    inline void SetIsIn(const std::string& isIn)
+    {
+      this->isIn=isIn;
+    }
+
     inline uint8_t GetAdminLevel() const
     {
       return adminLevel;
+    }
+
+    inline std::string GetIsIn() const
+    {
+      return isIn;
     }
 
     void Read(FileScanner& scanner);
@@ -1035,6 +1048,7 @@ namespace osmscout {
   {
   private:
     TagId tagAdminLevel;
+    TagId tagIsIn;
 
   public:
     /** Name of this feature */
@@ -1422,7 +1436,7 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
-  
+
 
   class OSMSCOUT_API PhoneFeatureValue : public FeatureValue
   {
@@ -1488,8 +1502,66 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const;
   };
-  
-  
+
+  class OSMSCOUT_API IsInFeatureValue : public FeatureValue
+  {
+  private:
+    std::string isIn;
+
+  public:
+    inline IsInFeatureValue()
+    {
+      // no code
+    }
+
+    inline IsInFeatureValue(const std::string& isIn)
+      : isIn(isIn)
+    {
+      // no code
+    }
+
+    inline void SetIsIn(const std::string& isIn)
+    {
+      this->isIn=isIn;
+    }
+
+    inline std::string GetIsIn() const
+    {
+      return isIn;
+    }
+
+    void Read(FileScanner& scanner);
+    void Write(FileWriter& writer);
+
+    FeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const;
+  };
+
+  class OSMSCOUT_API IsInFeature : public Feature
+  {
+  private:
+    TagId tagIsIn;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TypeConfig& typeConfig);
+
+    std::string GetName() const;
+
+    size_t GetValueSize() const;
+    FeatureValue* AllocateValue(void* buffer);
+
+    void Parse(Progress& progress,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const;
+  };
+
   /**
    * Helper template class for easy access to flag-like Features.
    *
@@ -1670,6 +1742,7 @@ namespace osmscout {
   typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
   typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
   typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
+  typedef FeatureValueReader<IsInFeature,IsInFeatureValue>                         IsInFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader

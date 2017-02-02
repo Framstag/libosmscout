@@ -370,13 +370,13 @@ namespace osmscout
 		else
 		{
 			double x, y, w, h;
-			GetTextDimension(projection, parameter, fontSize, "App", x, y, w, h);
+			GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App", x, y, w, h);
 			fontHeightMap[fontSize] = h;
 			height = h;
 		}
 	}
 
-	void MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double fontSize, const std::string& text, double& xOff, double& yOff, double& width, double& height)
+	void MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double objectWidth, double fontSize, const std::string& text, double& xOff, double& yOff, double& width, double& height)
 	{
 #ifdef MBUC
 		std::wstring sample = s2w(text);

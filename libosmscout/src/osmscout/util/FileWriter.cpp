@@ -37,7 +37,7 @@
 
 namespace osmscout {
 
-  const uint64_t FileWriter::MAX_NODES=0x07FFF; // 19 bits
+  const uint64_t FileWriter::MAX_NODES=0x03FFFFFF; // 26 bits
 
   FileWriter::FileWriter()
    : file(NULL),
@@ -894,7 +894,7 @@ namespace osmscout {
 
         Write((char*)size,2);
       }
-      else {
+      else if(nodesSize<1048576){
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80; // Further 7 bits + continuation bit
@@ -905,6 +905,20 @@ namespace osmscout {
         size[2]=nodeSize3;
 
         Write((char*)size,3);
+      }
+      else {
+          uint8_t size[4];
+          uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80;  // The initial 4 bits + continuation bit
+          uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80;  // Further 7 bits + continuation bit
+          uint8_t nodeSize3=((nodesSize >> 11) & 0x7f) | 0x80; // further 7 bits + continuation bit
+          uint8_t nodeSize4=nodesSize >> 18;                    // The final bits
+          
+          size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
+          size[1]=nodeSize2;
+          size[2]=nodeSize3;
+          size[3]=nodeSize4;
+          
+          Write((char*)size,4);
       }
     }
     else {
@@ -924,7 +938,7 @@ namespace osmscout {
 
         Write((char*)size,2);
       }
-      else {
+      else if (nodesSize<2097152){
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
@@ -935,6 +949,19 @@ namespace osmscout {
         size[2]=nodeSize3;
 
         Write((char*)size,3);
+      } else {
+          uint8_t size[4];
+          uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+          uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+          uint8_t nodeSize3=((nodesSize >> 12) & 0x7f) | 0x80; // further 7 bits + continuation bit
+          uint8_t nodeSize4=nodesSize >> 19; // The final bits
+          
+          size[0]=coordSizeFlags | nodeSize1;
+          size[1]=nodeSize2;
+          size[2]=nodeSize3;
+          size[3]=nodeSize4;
+          
+          Write((char*)size,4);
       }
     }
 

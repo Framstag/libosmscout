@@ -62,6 +62,7 @@ public slots:
   void onStylesheetFilenameChanged();
 
 private:
+  double                        canvasOverrun; // scale of rendered canvas, relative to screen dimensions
   osmscout::MercatorProjection  projection;
 
   mutable QMutex                lastRequestMutex;

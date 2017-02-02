@@ -109,8 +109,9 @@ namespace osmscout {
 
       ObjectFileRef                        reference;     //!< Reference to the object this area is based on
       std::string                          name;          //!< The name of this area
-
+      std::string                          isIn;          //!< Name of the parent region as stated in OSM (is_in tag)
       std::list<RegionAlias>               aliases;       //!< Location that are represented by this region
+
       std::vector<std::vector<GeoCoord> >  areas;         //!< the geometric area of this region
       std::list<RegionPOI>                 pois;          //!< A list of POIs in this region
       std::map<std::string,RegionLocation> locations;     //!< list of indexed objects in this region
@@ -131,14 +132,6 @@ namespace osmscout {
       {
         return boundingBoxes;
       }
-    };
-
-    struct Boundary
-    {
-      ObjectFileRef                       reference;
-      std::string                         name;
-      size_t                              level;
-      std::vector<std::vector<GeoCoord> > areas;
     };
 
     class RegionIndex
@@ -219,12 +212,11 @@ namespace osmscout {
                           Progress& progress,
                           const TypeConfigRef& typeConfig,
                           const TypeInfoSet& boundaryTypes,
-                          std::list<Boundary>& boundaryAreas);
+                          std::vector<std::list<RegionRef>>& boundaryAreas);
 
     void SortInBoundaries(Progress& progress,
                           Region& rootRegion,
-                          const std::list<Boundary>& boundaryAreas,
-                          size_t level);
+                          const std::list<RegionRef>& boundaryAreas);
 
     bool IndexRegionAreas(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,

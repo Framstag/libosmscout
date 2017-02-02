@@ -31,6 +31,9 @@
 #include <QDebug>
 #include <QDir>
 
+#include <QScreen>
+#include <QGuiApplication>
+
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
@@ -48,6 +51,11 @@ TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
    tileDownloader(NULL) // it will be created in different thread
 {
   osmscout::log.Debug() << "TiledDBThread::TiledDBThread()";
+
+  QScreen *srn=QGuiApplication::primaryScreen();
+  screenWidth=srn->availableSize().width();
+  screenHeight=srn->availableSize().height();
+
 
   onlineTilesEnabled = Settings::GetInstance()->GetOnlineTilesEnabled();
   offlineTilesEnabled = Settings::GetInstance()->GetOfflineMap();
@@ -167,6 +175,11 @@ void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32
     drawParameter.SetRenderBackground(false);
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple sources
     drawParameter.SetRenderSeaLand(renderSea);
+
+    drawParameter.SetLabelLineMinCharCount(15);
+    drawParameter.SetLabelLineMaxCharCount(30);
+    drawParameter.SetLabelLineFitToArea(true);
+    drawParameter.SetLabelLineFitToWidth(std::min(screenWidth, screenHeight));
 
     // see Tiler.cpp example...
 
