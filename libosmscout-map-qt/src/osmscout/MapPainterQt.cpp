@@ -540,8 +540,8 @@ namespace osmscout {
           QPointF point=p.PointAtLength(glyphOffset);
           // check if current glyph can be visible
           qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
-          if (!painter->viewport().intersects(QRect(point.x()-diagonal, point.y()-diagonal,
-                                                    point.x()+diagonal, point.y()+diagonal))){
+          if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
+                                                    QPoint(point.x()+diagonal, point.y()+diagonal)))){
             continue;
           }
           qreal angle=p.AngleAtLengthDeg(glyphOffset);

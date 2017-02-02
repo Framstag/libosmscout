@@ -56,6 +56,9 @@ protected:
   int                       sinCount;
   int                       cnt;
   QTime                     timer;
+  QTime                     animTimer;
+  int                       startOffset;
+  double                    moveOffset;
 };
 
 #endif /* TEST_DRAWWINDOW_H */
