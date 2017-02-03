@@ -323,7 +323,7 @@ namespace osmscout {
     }
   }
 
-  double GeoCoord::GetDistance(GeoCoord target)
+  double GeoCoord::GetDistance(GeoCoord target) const
   {
       return GetEllipsoidalDistance(*this, target);
   }
