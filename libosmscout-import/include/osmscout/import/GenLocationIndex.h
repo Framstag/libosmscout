@@ -123,7 +123,7 @@ namespace osmscout {
     public:
       void CalculateMinMax();
       bool CouldContain(const GeoBox& boundingBox) const;
-      bool CouldContain(const Region& region) const;
+      bool CouldContain(const Region& region, bool strict) const;
 
       bool Contains(Region& child) const;                 //! Checks whether child is within this
 
@@ -214,8 +214,9 @@ namespace osmscout {
                           const Region& rootRegion,
                           const std::string& filename);
 
-    void AddRegion(Region& parent,
-                   RegionRef& region);
+    bool AddRegion(Region& parent,
+                   RegionRef& region,
+                   bool assume_contains=true);
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,

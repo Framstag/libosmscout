@@ -95,8 +95,26 @@ namespace osmscout {
     return false;
   }
 
-  bool LocationIndexGenerator::Region::CouldContain(const Region& region) const
+  bool LocationIndexGenerator::Region::CouldContain(const Region& region, bool strict) const
   {
+    if (strict) {
+      // test if the region can be fit into *this when the boundingBox
+      // is taken into account
+      double area_region = region.boundingBox.GetSize(); // reference area
+
+      GeoCoord cornerMin( std::max( region.boundingBox.GetMinLat(), this->boundingBox.GetMinLat() ),
+			  std::max( region.boundingBox.GetMinLon(), this->boundingBox.GetMinLon() ) );
+      
+      GeoCoord cornerMax( std::min( region.boundingBox.GetMaxLat(), this->boundingBox.GetMaxLat() ),
+			  std::min( region.boundingBox.GetMaxLon(), this->boundingBox.GetMaxLon() ) );
+
+      GeoBox bx(cornerMin, cornerMax);
+      
+      // 95% of the bounding box has to be covered
+      if ( area_region * 0.95 > bx.GetSize() )
+	return false;
+    }
+      
     for (const auto& bb : boundingBoxes) {
       for (const auto& rbb : region.boundingBoxes) {
         if (bb.Intersects(rbb)) {
@@ -592,28 +610,58 @@ namespace osmscout {
     return true;
   }
 
-  void LocationIndexGenerator::AddRegion(Region& parent,
-                                         RegionRef& region)
+  bool LocationIndexGenerator::AddRegion(Region& parent,
+                                         RegionRef& region,
+					 bool assume_contains)
   {
+    bool added = false;
     for (const auto& childRegion : parent.regions) {
-      if ( childRegion->CouldContain(*region) &&
-	   childRegion->Contains(*region) ) {
-	// If we already have the same name and are a "minor" reference, we skip...
-	if (!(region->name==childRegion->name &&
-	      region->reference.type<childRegion->reference.type)) {
-	  AddRegion(*childRegion,region);
-	}
+      if ( childRegion->CouldContain(*region, true) ) {
+	added = AddRegion(*childRegion,region,false);
+	if (added) return true;
+      }
+    }
+    
+    if ( !added && (assume_contains || parent.Contains(*region)) ) {
+      added = true;
+      
+      if (!region->isIn.empty() &&
+	  parent.name!=region->isIn) {
+	errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
+      }
 
-	return;
+      // If we already have the same name and are a "minor" reference, we skip...
+      if (!(region->name==parent.name &&
+	    region->reference.type<parent.reference.type)) {
+	parent.regions.push_back(region);
       }
     }
 
-    if (!region->isIn.empty() &&
-      parent.name!=region->isIn) {
-      errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
-    }
-    parent.regions.push_back(region);
+    return added;
   }
+
+  // void LocationIndexGenerator::AddRegion(Region& parent,
+  //                                        RegionRef& region)
+  // {
+  //   for (const auto& childRegion : parent.regions) {
+  //     if ( childRegion->CouldContain(*region, true) &&
+  // 	   childRegion->Contains(*region) ) {
+  // 	// If we already have the same name and are a "minor" reference, we skip...
+  // 	if (!(region->name==childRegion->name &&
+  // 	      region->reference.type<childRegion->reference.type)) {
+  // 	  AddRegion(*childRegion,region);
+  // 	}
+
+  // 	return;
+  //     }
+  //   }
+
+  //   if (!region->isIn.empty() &&
+  //     parent.name!=region->isIn) {
+  //     errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
+  //   }
+  //   parent.regions.push_back(region);
+  // }
 
   /**
     Return the list of ways of type administrative boundary.
