@@ -102,6 +102,7 @@ namespace osmscout {
     private:
       std::vector<GeoBox>                  boundingBoxes; //!< bounding box of each area building the region
       GeoBox                               boundingBox;   //!< Overall bounding box of all areas
+      std::vector<GeoCoord>                probePoints;   //!< Points within the region that can be used to check region containment
 
     public:
       FileOffset                           indexOffset;   //!< Offset into the index file
@@ -111,6 +112,7 @@ namespace osmscout {
       std::string                          name;          //!< The name of this area
       std::string                          isIn;          //!< Name of the parent region as stated in OSM (is_in tag)
       std::list<RegionAlias>               aliases;       //!< Location that are represented by this region
+      int                                  level{-1};     //!< Admin level or -1 if not set
 
       std::vector<std::vector<GeoCoord> >  areas;         //!< the geometric area of this region
       std::list<RegionPOI>                 pois;          //!< A list of POIs in this region
@@ -123,6 +125,8 @@ namespace osmscout {
       bool CouldContain(const GeoBox& boundingBox) const;
       bool CouldContain(const Region& region) const;
 
+      bool Contains(Region& child) const;                 //! Checks whether child is within this
+
       inline GeoBox GetBoundingBox() const
       {
         return boundingBox;
@@ -132,6 +136,11 @@ namespace osmscout {
       {
         return boundingBoxes;
       }
+
+    protected:
+      void CalculateProbePoints();                           //! Finds probe points for this to be used for containment test
+      void CalculateProbePointsForArea(size_t areaIndex,     //! Finds probe points for an area
+                                       size_t refinement=0);
     };
 
     class RegionIndex
@@ -206,7 +215,7 @@ namespace osmscout {
                           const std::string& filename);
 
     void AddRegion(Region& parent,
-                   const RegionRef& region);
+                   RegionRef& region);
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,
@@ -216,7 +225,7 @@ namespace osmscout {
 
     void SortInBoundaries(Progress& progress,
                           Region& rootRegion,
-                          const std::list<RegionRef>& boundaryAreas);
+                          std::list<RegionRef>& boundaryAreas);
 
     bool IndexRegionAreas(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,
