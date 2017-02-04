@@ -103,18 +103,18 @@ namespace osmscout {
       double area_region = region.boundingBox.GetSize(); // reference area
 
       GeoCoord cornerMin( std::max( region.boundingBox.GetMinLat(), this->boundingBox.GetMinLat() ),
-			  std::max( region.boundingBox.GetMinLon(), this->boundingBox.GetMinLon() ) );
-      
+                          std::max( region.boundingBox.GetMinLon(), this->boundingBox.GetMinLon() ) );
+
       GeoCoord cornerMax( std::min( region.boundingBox.GetMaxLat(), this->boundingBox.GetMaxLat() ),
-			  std::min( region.boundingBox.GetMaxLon(), this->boundingBox.GetMaxLon() ) );
+                          std::min( region.boundingBox.GetMaxLon(), this->boundingBox.GetMaxLon() ) );
 
       GeoBox bx(cornerMin, cornerMax);
-      
+
       // 95% of the bounding box has to be covered
       if ( area_region * 0.95 > bx.GetSize() )
-	return false;
+        return false;
     }
-      
+
     for (const auto& bb : boundingBoxes) {
       for (const auto& rbb : region.boundingBoxes) {
         if (bb.Intersects(rbb)) {
@@ -131,51 +131,51 @@ namespace osmscout {
     probePoints.clear();
     if ( boundingBoxes.size() != areas.size() )
       CalculateMinMax();
-    
+
     for (size_t i=0; i < areas.size(); ++i)
       CalculateProbePointsForArea(i, 0);
   }
-  
+
   void LocationIndexGenerator::Region::CalculateProbePointsForArea(size_t areaIndex, size_t refinement)
   {
     const size_t targetprobes = 30; // target number of points
-				    // representing an area in region
+                                    // representing an area in region
 
     const size_t minprobes = 3;     // minimal number of required
-				    // points. If there are less
-				    // points than this minimum, the
-				    // probe points are supplemented
-				    // with the area border points
+                                    // points. If there are less
+                                    // points than this minimum, the
+                                    // probe points are supplemented
+                                    // with the area border points
 
     const std::vector<GeoCoord> &area = areas[areaIndex];
     const GeoBox &box = boundingBoxes[areaIndex];
 
     const double split_base = 10;
     double nsplit = split_base * (1 << refinement);
-    
+
     double delta_lat = (box.GetMaxCoord().GetLat() - box.GetMinCoord().GetLat()) / nsplit;
     double delta_lon = (box.GetMaxCoord().GetLon() - box.GetMinCoord().GetLon()) / nsplit;
 
     // checking if the selected step is already too small
     const GeoCoord bbox_max_lat(box.GetMaxCoord().GetLat(), box.GetMinCoord().GetLon());
     const GeoCoord bbox_max_lon(box.GetMinCoord().GetLat(), box.GetMaxCoord().GetLon());
-	
+
     const double distance_lat =
       bbox_max_lon.GetDistance( box.GetMaxCoord() ) /
       (box.GetMaxCoord().GetLat() - box.GetMinCoord().GetLat()); // distance along latitude per degree
     const double distance_lon =
       bbox_max_lat.GetDistance( box.GetMaxCoord() ) /
       (box.GetMaxCoord().GetLon() - box.GetMinCoord().GetLon()); // distance along longitude per degree
-	
+
     // 100 meters is taken as a smallest step
-    const double min_delta_lat = 0.1 / distance_lat; 
+    const double min_delta_lat = 0.1 / distance_lat;
     const double min_delta_lon = 0.1 / distance_lon;
-    
+
     if ( refinement > 0 ) {
       if (delta_lat < min_delta_lat && delta_lon < min_delta_lon )
-	return; // the refinement is considered to be too fine
-    
-      delta_lat = std::max(min_delta_lat, delta_lat); 
+        return; // the refinement is considered to be too fine
+
+      delta_lat = std::max(min_delta_lat, delta_lat);
       delta_lon = std::max(min_delta_lon, delta_lon);
     }
     else {
@@ -192,12 +192,12 @@ namespace osmscout {
 
     // check for probe points on composed raster
     for (double lat = box.GetMinCoord().GetLat() + delta_lat*0.5;
-    	 lat < box.GetMaxCoord().GetLat(); lat += delta_lat ) {
+         lat < box.GetMaxCoord().GetLat(); lat += delta_lat ) {
       for (double lon = box.GetMinCoord().GetLon() + delta_lon*0.5;
-    	   lon < box.GetMaxCoord().GetLon(); lon += delta_lon ) {
-	GeoCoord p(lat, lon);
-	if (osmscout::GetRelationOfPointToArea(p,area) > 0)
-	  probePoints.push_back(p);
+           lon < box.GetMaxCoord().GetLon(); lon += delta_lon ) {
+        GeoCoord p(lat, lon);
+        if (osmscout::GetRelationOfPointToArea(p,area) > 0)
+          probePoints.push_back(p);
       }
     }
 
@@ -214,10 +214,10 @@ namespace osmscout {
   {
     // test whether admin levels allow this to contain child
     if (this->level >= 0 /* check if we have admin level defined for this */ &&
-	( child.level >= 0 && this->level >= child.level ) )
+        ( child.level >= 0 && this->level >= child.level ) )
       return false;
-    
-    if (child.probePoints.size() == 0) // calculate probe points if they are missing
+
+    if (child.probePoints.empty()) // calculate probe points if they are missing
       child.CalculateProbePoints();
 
     size_t in = 0;
@@ -230,27 +230,26 @@ namespace osmscout {
 
     for (const GeoCoord& p: child.probePoints)
       {
-	bool isin = false;
-	for (size_t i=0; !isin && i < nareas; ++i)
-	  {
-	    const auto& area = areas[curr_subarea];
-	    
-	    if ( osmscout::GetRelationOfPointToArea(p,area) >= 0 )
-	      isin = true;
-	    else
-	      curr_subarea = ( curr_subarea + 1 ) % nareas;
-	  }
-	
-	if (isin) in++;
-	else out++;
-	  
-	if (out > quorum_isout) return false;
-	if (in > quorum_isin) return true;
+        bool isin = false;
+        for (size_t i=0; !isin && i < nareas; ++i)
+          {
+            const auto& area = areas[curr_subarea];
+            if ( osmscout::GetRelationOfPointToArea(p,area) >= 0 )
+              isin = true;
+            else
+              curr_subarea = ( curr_subarea + 1 ) % nareas;
+          }
+
+        if (isin) in++;
+        else out++;
+
+        if (out > quorum_isout) return false;
+        if (in > quorum_isin) return true;
       }
 
     return (in > quorum_isin);
   }
-  
+
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
                                                                                           const GeoCoord& coord) const
   {
@@ -612,56 +611,33 @@ namespace osmscout {
 
   bool LocationIndexGenerator::AddRegion(Region& parent,
                                          RegionRef& region,
-					 bool assume_contains)
+                                         bool assume_contains)
   {
     bool added = false;
     for (const auto& childRegion : parent.regions) {
       if ( childRegion->CouldContain(*region, true) ) {
-	added = AddRegion(*childRegion,region,false);
-	if (added) return true;
+        added = AddRegion(*childRegion,region,false);
+        if (added) return true;
       }
     }
-    
+
     if ( !added && (assume_contains || parent.Contains(*region)) ) {
       added = true;
-      
+
       if (!region->isIn.empty() &&
-	  parent.name!=region->isIn) {
-	errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
+          parent.name!=region->isIn) {
+        errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
       }
 
       // If we already have the same name and are a "minor" reference, we skip...
       if (!(region->name==parent.name &&
-	    region->reference.type<parent.reference.type)) {
-	parent.regions.push_back(region);
+            region->reference.type<parent.reference.type)) {
+        parent.regions.push_back(region);
       }
     }
 
     return added;
   }
-
-  // void LocationIndexGenerator::AddRegion(Region& parent,
-  //                                        RegionRef& region)
-  // {
-  //   for (const auto& childRegion : parent.regions) {
-  //     if ( childRegion->CouldContain(*region, true) &&
-  // 	   childRegion->Contains(*region) ) {
-  // 	// If we already have the same name and are a "minor" reference, we skip...
-  // 	if (!(region->name==childRegion->name &&
-  // 	      region->reference.type<childRegion->reference.type)) {
-  // 	  AddRegion(*childRegion,region);
-  // 	}
-
-  // 	return;
-  //     }
-  //   }
-
-  //   if (!region->isIn.empty() &&
-  //     parent.name!=region->isIn) {
-  //     errorReporter->ReportLocation(region->reference,"'" + region->name + "' parent should be '"+region->isIn+"' but is '"+parent.name+"'");
-  //   }
-  //   parent.regions.push_back(region);
-  // }
 
   /**
     Return the list of ways of type administrative boundary.
@@ -717,7 +693,7 @@ namespace osmscout {
 
         region->reference=area.GetObjectFileRef();
         region->name=nameValue->GetName();
-	region->level=level;
+        region->level=level;
 
         if (!adminLevelValue->GetIsIn().empty()) {
           region->isIn=GetFirstInStringList(adminLevelValue->GetIsIn(),",;");
@@ -2316,7 +2292,7 @@ namespace osmscout {
       writer.Close();
     }
     catch (IOException& e) {
-      progress.Error(e.GetDescription())                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ;
+      progress.Error(e.GetDescription());
 
       writer.CloseFailsafe();
 
