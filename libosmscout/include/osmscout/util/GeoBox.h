@@ -110,6 +110,25 @@ namespace osmscout {
     }
 
     /**
+     * Create new GeoBox from intersection of this with other
+     * If not Intersects, invalid GeoBox is returned
+     * @param other
+     */
+    GeoBox Intersection(const GeoBox& other) const
+    {
+      if (!valid || !other.valid || !Intersects(other))
+        return GeoBox();
+
+      GeoCoord cornerMin( std::max( other.GetMinLat(), GetMinLat()),
+                          std::max( other.GetMinLon(), GetMinLon()));
+
+      GeoCoord cornerMax( std::min( other.GetMaxLat(), GetMaxLat()),
+                          std::min( other.GetMaxLon(), GetMaxLon()));
+
+      return GeoBox(cornerMin, cornerMax);
+    }
+
+    /**
      * Returns true, if the GeoBox instance is valid. This means there were
      * values assigned to the box. While being valid, the rectangle spanned by
      * the coordinate might still be degraded.

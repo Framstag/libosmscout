@@ -101,17 +101,10 @@ namespace osmscout {
       // test if the region can be fit into *this when the boundingBox
       // is taken into account
       double area_region = region.boundingBox.GetSize(); // reference area
-
-      GeoCoord cornerMin( std::max( region.boundingBox.GetMinLat(), this->boundingBox.GetMinLat() ),
-                          std::max( region.boundingBox.GetMinLon(), this->boundingBox.GetMinLon() ) );
-
-      GeoCoord cornerMax( std::min( region.boundingBox.GetMaxLat(), this->boundingBox.GetMaxLat() ),
-                          std::min( region.boundingBox.GetMaxLon(), this->boundingBox.GetMaxLon() ) );
-
-      GeoBox bx(cornerMin, cornerMax);
+      GeoBox bx(this->boundingBox.Intersection(region.boundingBox));
 
       // 95% of the bounding box has to be covered
-      if ( area_region * 0.95 > bx.GetSize() )
+      if ( !bx.IsValid() || area_region * 0.95 > bx.GetSize() )
         return false;
     }
 
