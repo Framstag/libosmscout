@@ -328,18 +328,17 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const N& point,
                                       const std::vector<M>& nodes)
   {
-    const double tol = 1e-6;
     size_t i,j;
     bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if (fabs(point.GetLat()-nodes[i].GetLat())<tol &&
-          fabs(point.GetLon()-nodes[i].GetLon())<tol) {
+      if (point.GetLat()==nodes[i].GetLat() &&
+          point.GetLon()==nodes[i].GetLon()) {
         return 0;
       }
 
-      if ((((nodes[i].GetLat()<point.GetLat()+tol) && (point.GetLat()<nodes[j].GetLat())) ||
-           ((nodes[j].GetLat()<point.GetLat()+tol) && (point.GetLat()<nodes[i].GetLat()))) &&
+      if ((((nodes[i].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[j].GetLat())) ||
+           ((nodes[j].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[i].GetLat()))) &&
           (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat())/(nodes[j].GetLat()-nodes[i].GetLat())+
            nodes[i].GetLon())) {
         c=!c;

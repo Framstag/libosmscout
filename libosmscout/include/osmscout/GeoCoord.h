@@ -237,11 +237,11 @@ namespace osmscout {
      * @param target
      *    Target coordinate to measure distance
      * @return
-     *    Point to point distance to target coordinates in meters
+     *    Point to point distance to target coordinates in kilometers
      * @note
      *    The difference in height between the two points is neglected.
      */
-    double GetDistance(GeoCoord target);
+    double GetDistance(GeoCoord target) const;
 
     /**
     * Get coordinate of position + course and distance.
