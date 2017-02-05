@@ -26,8 +26,6 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include <algorithm>
-
 namespace osmscout {
 
   /**
@@ -116,19 +114,7 @@ namespace osmscout {
      * If not Intersects, invalid GeoBox is returned
      * @param other
      */
-    inline GeoBox Intersection(const GeoBox& other) const
-    {
-      if (!valid || !other.valid || !Intersects(other))
-        return GeoBox();
-
-      GeoCoord cornerMin( std::max( other.GetMinLat(), GetMinLat()),
-                          std::max( other.GetMinLon(), GetMinLon()));
-
-      GeoCoord cornerMax( std::min( other.GetMaxLat(), GetMaxLat()),
-                          std::min( other.GetMaxLon(), GetMaxLon()));
-
-      return GeoBox(cornerMin, cornerMax);
-    }
+    GeoBox Intersection(const GeoBox& other) const;
 
     /**
      * Returns true, if the GeoBox instance is valid. This means there were
