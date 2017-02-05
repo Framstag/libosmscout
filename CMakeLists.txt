@@ -122,9 +122,13 @@ if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COM
 endif()
 
 # postfix for debug builds
-if(NOT APPLE)
-  set(CMAKE_DEBUG_POSTFIX "d")
-endif ()
+if(NOT CMAKE_DEBUG_POSTFIX)
+    if(APPLE)
+        set(CMAKE_DEBUG_POSTFIX _debug)
+    else()
+        set(CMAKE_DEBUG_POSTFIX d)
+    endif()
+endif()
 
 # global variables
 set(OSMSCOUT_BASE_DIR_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
