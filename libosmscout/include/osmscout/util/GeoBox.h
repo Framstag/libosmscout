@@ -26,6 +26,8 @@
 
 #include <osmscout/system/Compiler.h>
 
+#include <algorithm>
+
 namespace osmscout {
 
   /**
@@ -114,7 +116,7 @@ namespace osmscout {
      * If not Intersects, invalid GeoBox is returned
      * @param other
      */
-    GeoBox Intersection(const GeoBox& other) const
+    inline GeoBox Intersection(const GeoBox& other) const
     {
       if (!valid || !other.valid || !Intersects(other))
         return GeoBox();
