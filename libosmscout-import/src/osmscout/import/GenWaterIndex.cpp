@@ -151,13 +151,34 @@ namespace osmscout {
                                            Progress& progress,
                                            std::list<CoastRef>& coastlines)
   {
+    progress.SetAction("Scanning for coastlines");
+    return LoadRawBoundaries(parameter,
+                             progress,
+                             coastlines,
+                             Preprocess::RAWCOASTLINE_DAT);
+  }
+
+  bool WaterIndexGenerator::LoadDataPolygon(const ImportParameter& parameter,
+                       Progress& progress,
+                       std::list<CoastRef>& coastlines)
+  {
+    progress.SetAction("Scanning data polygon");
+    return LoadRawBoundaries(parameter,
+                             progress,
+                             coastlines,
+                             Preprocess::RAWDATAPOLYGON_DAT);
+  }
+
+  bool WaterIndexGenerator::LoadRawBoundaries(const ImportParameter& parameter,
+                                              Progress& progress,
+                                              std::list<CoastRef>& coastlines,
+                                              const char* rawFile)
+  {
     // We must have coastline type defined
     FileScanner                scanner;
     std::list<RawCoastlineRef> rawCoastlines;
 
     coastlines.clear();
-
-    progress.SetAction("Scanning for coastlines");
 
     try {
       uint32_t coastlineCount=0;
@@ -165,7 +186,7 @@ namespace osmscout {
       size_t   areaCoastCount=0;
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   Preprocess::RAWCOASTLINE_DAT),
+                                   rawFile),
                    FileScanner::Sequential,
                    true);
 
@@ -1603,7 +1624,10 @@ namespace osmscout {
         intersectionsOuter.pop_front();
 
 #if defined(DEBUG_COASTLINE)
-        std::cout << "Outgoing: " << initialOutgoing->coastline << " " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << " " << isArea[initialOutgoing->coastline] << std::endl;
+        std::cout << "Outgoing: " << initialOutgoing->coastline << " "
+                  << initialOutgoing->prevWayPointIndex << " "
+                  << initialOutgoing->distanceSquare << " "
+                  << data.coastlines[initialOutgoing->coastline].isArea << std::endl;
 #endif
 
         groundTile.coords.push_back(Transform(initialOutgoing->point,level,latMin,lonMin,false));
@@ -1772,6 +1796,7 @@ namespace osmscout {
                                    Progress& progress)
   {
     std::list<CoastRef> coastlines;
+    std::list<CoastRef> dataPolygon;
 
     FileScanner         scanner;
 
@@ -1820,6 +1845,16 @@ namespace osmscout {
 
       cellWidth=cellWidth/2;
       cellHeight=cellHeight/2;
+    }
+
+    //
+    // Loat data polygon
+    //
+
+    if (!LoadDataPolygon(parameter,
+                         progress,
+                         dataPolygon)) {
+      return false;
     }
 
     //

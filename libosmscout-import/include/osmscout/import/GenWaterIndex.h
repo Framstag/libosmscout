@@ -192,9 +192,18 @@ namespace osmscout {
                                 double cellMinLon,
                                 bool coast);
 
+    bool LoadRawBoundaries(const ImportParameter& parameter,
+                           Progress& progress,
+                           std::list<CoastRef>& coastlines,
+                           const char* rawFile);
+
     bool LoadCoastlines(const ImportParameter& parameter,
                         Progress& progress,
                         std::list<CoastRef>& coastlines);
+
+    bool LoadDataPolygon(const ImportParameter& parameter,
+                         Progress& progress,
+                         std::list<CoastRef>& coastlines);
 
     void MergeCoastlines(Progress& progress,
                          std::list<CoastRef>& coastlines);
