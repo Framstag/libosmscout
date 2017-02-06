@@ -40,6 +40,13 @@ target_include_directories(ReaderScannerPerformance PRIVATE ${OSMSCOUT_BASE_DIR_
 target_link_libraries(ReaderScannerPerformance osmscout)
 install(TARGETS ReaderScannerPerformance RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
+#---- MultiDBRouting
+add_executable(MultiDBRouting src/MultiDBRouting.cpp)
+set_property(TARGET MultiDBRouting PROPERTY CXX_STANDARD 11)
+target_include_directories(MultiDBRouting PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(MultiDBRouting osmscout)
+install(TARGETS MultiDBRouting RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP})
 	add_executable(ThreadedDatabase src/ThreadedDatabase.cpp)
