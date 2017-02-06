@@ -68,7 +68,7 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=wayDataCount; current++) {
         uint8_t type;
-        Id      id;
+        OSMId   id;
         Area    data;
 
         progress.SetProgress(current,wayDataCount);
@@ -99,7 +99,7 @@ namespace osmscout {
 
       for (uint32_t current=1; current<=relDataCount; current++) {
         uint8_t type;
-        Id      id;
+        OSMId   id;
         Area    data;
 
         progress.SetProgress(current,relDataCount);
