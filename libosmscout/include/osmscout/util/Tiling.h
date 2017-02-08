@@ -24,6 +24,7 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/String.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -80,6 +81,84 @@ namespace osmscout {
 
     GeoCoord GetTopLeftCoord(const Magnification& magnification) const;
     GeoBox GetBoundingBox(const Magnification& magnification) const;
+
+    inline bool operator==(const OSMTileId& other) const
+    {
+      return x==other.x && y==other.y;
+    }
+
+    inline bool operator!=(const OSMTileId& other) const
+    {
+      return x!=other.x || y!=other.y;
+    }
+
+    inline std::string GetDisplayText() const
+    {
+      return NumberToString(x)+","+NumberToString(y);
+    }
+  };
+
+  class OSMSCOUT_API OSMTileIdBoxConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const OSMTileId>
+  {
+  private:
+    OSMTileId currentTile;
+    OSMTileId minTile;
+    OSMTileId maxTile;
+
+  public:
+    OSMTileIdBoxConstIterator(const OSMTileId& currentTile,
+                              const OSMTileId& minTile,
+                              const OSMTileId& maxTile)
+      : currentTile(currentTile),
+        minTile(minTile),
+        maxTile(maxTile)
+    {
+      // no code
+    }
+
+    OSMTileIdBoxConstIterator(const OSMTileIdBoxConstIterator& other)
+      : currentTile(other.currentTile),
+        minTile(other.minTile),
+        maxTile(other.maxTile)
+    {
+      // no code
+    }
+
+    OSMTileIdBoxConstIterator& operator++()
+    {
+      if (currentTile.GetX()>maxTile.GetX()) {
+        currentTile=OSMTileId(minTile.GetX(),currentTile.GetY()+1);
+      }
+      else {
+        currentTile=OSMTileId(currentTile.GetX()+1,currentTile.GetY());
+      }
+
+      return *this;
+    }
+
+    OSMTileIdBoxConstIterator operator++(int)
+    {
+      OSMTileIdBoxConstIterator tmp(*this);
+
+      operator++();
+
+      return tmp;
+    }
+
+    bool operator==(const OSMTileIdBoxConstIterator& other)
+    {
+      return currentTile==other.currentTile;
+    }
+
+    bool operator!=(const OSMTileIdBoxConstIterator& other)
+    {
+      return currentTile!=other.currentTile;
+    }
+
+    const OSMTileId& operator*()
+    {
+      return currentTile;
+    }
   };
 
   /**
@@ -138,7 +217,33 @@ namespace osmscout {
       return maxTile.GetY()-minTile.GetY()+1;
     }
 
+    inline uint32_t GetCount() const
+    {
+      return GetWidth()*GetHeight();
+    }
+
+    inline OSMTileIdBoxConstIterator begin() const
+    {
+      return OSMTileIdBoxConstIterator(minTile,
+                                       minTile,
+                                       maxTile);
+    }
+
+    inline OSMTileIdBoxConstIterator end() const
+    {
+      return OSMTileIdBoxConstIterator(OSMTileId(maxTile.GetX()+1,
+                                                 maxTile.GetY()),
+                                       minTile,
+                                       maxTile);
+    }
+
     GeoBox GetBoundingBox(const Magnification& magnification) const;
+
+    inline std::string GetDisplayText() const
+    {
+      return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
+    }
+
   };
 }
 
