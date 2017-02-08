@@ -57,6 +57,9 @@ LocationListModel::~LocationListModel()
 void LocationListModel::onSearchResult(const QString searchPattern, 
                                        const QList<LocationEntry> foundLocations)
 {
+  if (this->pattern.isEmpty()) {
+      return; //No search requested
+  }
   if (!searchPattern.contains(this->pattern, Qt::CaseInsensitive)){
     return; // result is not for us
   }
